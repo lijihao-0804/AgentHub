@@ -1,6 +1,6 @@
 # M0 verification record
 
-记录日期：2026-09-17  
+记录日期：2026-09-17
 基线提交：`5e66aa6 M0: scaffold engineering baseline`
 
 ## Passed
@@ -16,15 +16,16 @@
 | Alembic migration generation | PASS | `alembic upgrade head --sql` generated M0 SQL |
 | Checkpoint CLI entrypoint | PASS | `python scripts/bootstrap_checkpoint.py --help` |
 | Compose syntax | PASS | `docker compose config` |
+| Locked backend checks | PASS | `uv run --locked pytest`; `uv run --locked ruff check .` |
+| Dependency lock files | PASS | `uv.lock` and `apps/web/package-lock.json` generated |
+| Next.js production build | PASS | `npm run build` in `apps/web` |
 
 ## Environment-blocked
 
 | Check | State | Reason |
 |---|---|---|
-| Docker services + real migration | NOT RUN | Docker Desktop Linux engine is not running |
-| Real checkpoint bootstrap | NOT RUN | Requires PostgreSQL and installed LangGraph checkpoint package |
-| Next.js build | NOT RUN | npm registry SSL connection fails; `next` was not installed |
-| `uv.lock` generation | NOT RUN | Python 3.12 download did not complete; host default is Python 3.11 |
+| Docker services + real migration | NOT RUN | Docker intentionally deferred; Docker Desktop Linux engine is not running |
+| Real checkpoint bootstrap | NOT RUN | Requires PostgreSQL and Docker; intentionally deferred with Docker |
 
-These items are not marked as passed. Re-run them after the local environment is available;
-then update this record in a separate commit before accepting M0.
+These remaining infrastructure items are not marked as passed. Re-run them when Docker is
+enabled, then update this record in a separate commit before accepting M0.
