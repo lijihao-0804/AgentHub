@@ -506,6 +506,24 @@ async def test_health_failure_is_safe_and_normalized() -> None:
 
 
 @pytest.mark.asyncio
+async def test_invalid_capability_capacity_is_safe_across_gateway_entrypoints() -> None:
+    context, profiles, credential = setup_chain()
+    profiles[0].capabilities = {"max_context_tokens": 0}
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), FakeAdapter())
+
+    health = await gateway.health(context, profiles[0].id)
+
+    assert health.status.value == "unavailable"
+    assert health.failure_code == "MODEL_BAD_RESPONSE"
+    with pytest.raises(ModelGatewayError) as capabilities_error:
+        await gateway.capabilities(context, profiles[0].id)
+    assert capabilities_error.value.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE
+    with pytest.raises(ModelGatewayError) as generate_error:
+        await gateway.generate(context, profiles[0].id, request())
+    assert generate_error.value.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE
+
+
+@pytest.mark.asyncio
 async def test_model_generate_span_contains_only_safe_usage_and_cost_projection() -> None:
     context, profiles, credential = setup_chain()
     adapter = FakeAdapter()

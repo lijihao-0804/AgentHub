@@ -56,7 +56,7 @@ def migrated_database() -> None:
     get_settings.cache_clear()
     try:
         config = Config(str(Path("alembic.ini")))
-        command.upgrade(config, "0002_m1_auth_tenant_rbac")
+        command.upgrade(config, "head")
         yield
     finally:
         if previous is None:
@@ -177,8 +177,6 @@ async def test_m1_migration_creates_postgres_schema(
     engine, _ = db_resources
     async with engine.connect() as connection:
         assert connection.dialect.name == "postgresql"
-        version = await connection.scalar(text("SELECT version_num FROM alembic_version"))
-        assert version == "0002_m1_auth_tenant_rbac"
         tables = await connection.scalars(
             text(
                 """

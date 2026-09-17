@@ -8,6 +8,7 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -98,6 +99,16 @@ async def create_workspace(session: AsyncSession) -> Workspace:
     session.add(workspace)
     await session.flush()
     return workspace
+
+
+@pytest.mark.asyncio
+async def test_m2_migration_is_current_head(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    async with db_factory() as session:
+        version = await session.scalar(text("SELECT version_num FROM alembic_version"))
+
+    assert version == "0003_m2_model_gateway"
 
 
 @pytest.mark.asyncio

@@ -30,6 +30,18 @@ class ResolvedModelProfile:
 
 
 def _to_resolved(profile: ModelProfile) -> ResolvedModelProfile:
+    try:
+        if profile.max_tokens <= 0:
+            raise ValueError("max_tokens must be positive")
+        if profile.timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        if profile.temperature < 0:
+            raise ValueError("temperature must be non-negative")
+        capabilities = validate_capabilities(profile.capabilities, CapabilityRequirements())
+    except ModelGatewayError:
+        raise
+    except (ArithmeticError, TypeError, ValueError):
+        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE) from None
     return ResolvedModelProfile(
         id=profile.id,
         workspace_id=profile.workspace_id,
@@ -39,7 +51,7 @@ def _to_resolved(profile: ModelProfile) -> ResolvedModelProfile:
         max_tokens=profile.max_tokens,
         timeout_seconds=profile.timeout_seconds,
         fallback_profile_id=profile.fallback_profile_id,
-        capabilities=validate_capabilities(profile.capabilities, CapabilityRequirements()),
+        capabilities=capabilities,
     )
 
 

@@ -4,8 +4,8 @@ Revision ID: 0003_m2_model_gateway
 Revises: 0002_m1_auth_tenant_rbac
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 revision = "0003_m2_model_gateway"
@@ -44,13 +44,32 @@ def upgrade() -> None:
         sa.Column("workspace_id", uuid_type, nullable=False),
         sa.Column("provider_credential_id", uuid_type, nullable=False),
         sa.Column("model", sa.String(length=128), nullable=False),
-        sa.Column("temperature", sa.Numeric(precision=6, scale=3), nullable=False, server_default="0"),
+        sa.Column(
+            "temperature",
+            sa.Numeric(precision=6, scale=3),
+            nullable=False,
+            server_default="0",
+        ),
         sa.Column("max_tokens", sa.Integer(), nullable=False),
         sa.Column("timeout_seconds", sa.Numeric(precision=8, scale=3), nullable=False),
         sa.Column("fallback_profile_id", uuid_type),
-        sa.Column("capabilities", postgresql.JSONB(), nullable=False, server_default="{}"),
+        sa.Column(
+            "capabilities",
+            postgresql.JSONB(),
+            nullable=False,
+            server_default=sa.text("'{}'::jsonb"),
+        ),
         sa.Column("enabled", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=now),
+        sa.CheckConstraint(
+            "max_tokens > 0", name="ck_model_profiles_max_tokens_positive"
+        ),
+        sa.CheckConstraint(
+            "timeout_seconds > 0", name="ck_model_profiles_timeout_positive"
+        ),
+        sa.CheckConstraint(
+            "temperature >= 0", name="ck_model_profiles_temperature_nonnegative"
+        ),
         sa.ForeignKeyConstraint(
             ["workspace_id"], ["workspaces.id"],
             name="fk_model_profiles_workspace", ondelete="CASCADE"

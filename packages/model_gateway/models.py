@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     DateTime,
     ForeignKeyConstraint,
     Index,
@@ -45,7 +46,10 @@ class ProviderCredential(Base):
 
     __table_args__ = (
         ForeignKeyConstraint(
-            ["workspace_id"], ["workspaces.id"], name="fk_provider_credentials_workspace"
+            ["workspace_id"],
+            ["workspaces.id"],
+            name="fk_provider_credentials_workspace",
+            ondelete="CASCADE",
         ),
         UniqueConstraint("workspace_id", "id", name="uq_provider_credentials_workspace_id"),
         Index("ix_provider_credentials_workspace_id", "workspace_id"),
@@ -56,7 +60,10 @@ class ModelProfile(Base):
     __tablename__ = "model_profiles"
     __table_args__ = (
         ForeignKeyConstraint(
-            ["workspace_id"], ["workspaces.id"], name="fk_model_profiles_workspace"
+            ["workspace_id"],
+            ["workspaces.id"],
+            name="fk_model_profiles_workspace",
+            ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
             ["workspace_id", "provider_credential_id"],
@@ -70,6 +77,9 @@ class ModelProfile(Base):
             name="fk_model_profiles_fallback_workspace",
             ondelete="RESTRICT",
         ),
+        CheckConstraint("max_tokens > 0", name="ck_model_profiles_max_tokens_positive"),
+        CheckConstraint("timeout_seconds > 0", name="ck_model_profiles_timeout_positive"),
+        CheckConstraint("temperature >= 0", name="ck_model_profiles_temperature_nonnegative"),
         UniqueConstraint("workspace_id", "id", name="uq_model_profiles_workspace_id"),
         Index("ix_model_profiles_workspace_id", "workspace_id"),
     )

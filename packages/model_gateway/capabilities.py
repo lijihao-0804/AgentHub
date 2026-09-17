@@ -16,17 +16,21 @@ _BOOLEAN_CAPABILITIES = ("tool_calling", "streaming", "structured_output", "visi
 def capabilities_from_mapping(values: Mapping[str, Any]) -> ModelCapabilities:
     """Convert JSON profile capabilities to the stable internal type."""
 
+    if not isinstance(values, Mapping):
+        raise ValueError("capabilities must be a mapping")
+    max_context_tokens = values.get("max_context_tokens")
+    if max_context_tokens is not None and (
+        isinstance(max_context_tokens, bool)
+        or not isinstance(max_context_tokens, int)
+        or max_context_tokens <= 0
+    ):
+        raise ValueError("max_context_tokens must be positive")
     return ModelCapabilities(
         tool_calling=values.get("tool_calling") is True,
         streaming=values.get("streaming") is True,
         structured_output=values.get("structured_output") is True,
         vision=values.get("vision") is True,
-        max_context_tokens=(
-            values.get("max_context_tokens")
-            if isinstance(values.get("max_context_tokens"), int)
-            and not isinstance(values.get("max_context_tokens"), bool)
-            else None
-        ),
+        max_context_tokens=max_context_tokens,
     )
 
 
