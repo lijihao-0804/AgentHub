@@ -12,6 +12,7 @@ from redis import asyncio as redis_asyncio
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+from apps.api.routes.auth import router as auth_router
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.core.errors.handlers import install_error_handlers
@@ -56,6 +57,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.redis = None
     app.add_middleware(RequestIdMiddleware)
     install_error_handlers(app)
+    app.include_router(auth_router)
 
     @app.get("/api/v1/health", tags=["system"])
     async def health(request: Request) -> dict[str, str]:
