@@ -39,5 +39,5 @@ async def get_current_principal(
     return PrincipalContext(
         request_id=request.state.request_id,
         trace_id=getattr(request.state, "trace_id", request.state.request_id),
-        user_id=user.id,
+        user_id=str(user.id),
     )

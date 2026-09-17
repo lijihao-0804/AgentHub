@@ -418,7 +418,7 @@ async def test_tenant_rbac_and_owner_protection_use_database_state(
             principal=PrincipalContext(
                 request_id="m1-context",
                 trace_id="m1-context",
-                user_id=admin_id,
+                user_id=str(admin_id),
             ),
             workspace_id=workspace_id,
         )
@@ -468,7 +468,9 @@ async def test_tenant_rbac_and_owner_protection_use_database_state(
     )
     assert cross_tenant.status_code == 404
 
-    principal = PrincipalContext(request_id="m1-owner", trace_id="m1-owner", user_id=owner_id)
+    principal = PrincipalContext(
+        request_id="m1-owner", trace_id="m1-owner", user_id=str(owner_id)
+    )
     async with factory() as session:
         with pytest.raises(AgentHubError, match="last organization owner") as remove_error:
             await TenantService().remove_organization_member(
