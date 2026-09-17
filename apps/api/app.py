@@ -10,9 +10,10 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from redis import asyncio as redis_asyncio
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from packages.core.config.settings import Settings, get_settings
+from packages.core.database import create_database
 from packages.core.errors.handlers import install_error_handlers
 from packages.core.http.request_id import RequestIdMiddleware
 from packages.core.logging.json_logging import configure_logging
@@ -25,14 +26,11 @@ async def lifespan(app: FastAPI):
     settings: Settings = app.state.settings
     configure_logging(settings.log_level)
     app.state.db_engine = None
+    app.state.db_session_factory = None
     app.state.redis = None
 
     if not settings.testing:
-        app.state.db_engine = create_async_engine(
-            settings.database_url,
-            pool_pre_ping=True,
-            pool_timeout=3,
-        )
+        app.state.db_engine, app.state.db_session_factory = create_database(settings.database_url)
         app.state.redis = redis_asyncio.from_url(settings.redis_url, decode_responses=True)
 
     try:
@@ -54,6 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = app_settings
     app.state.db_engine = None
+    app.state.db_session_factory = None
     app.state.redis = None
     app.add_middleware(RequestIdMiddleware)
     install_error_handlers(app)

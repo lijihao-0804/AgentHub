@@ -24,7 +24,7 @@ class WorkspaceExecutionContext(BaseModel):
 
     organization: OrganizationContext
     workspace_id: str = Field(min_length=1)
-    workspace_role: str = Field(min_length=1)
+    workspace_role: str | None = None
     permissions: frozenset[str] = frozenset()
 
     @property
