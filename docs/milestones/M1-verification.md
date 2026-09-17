@@ -1,6 +1,6 @@
 # M1 Verification Record
 
-日期：2026-09-18  
+日期：2026-09-18
 分支：`m1/auth-tenant-rbac`
 
 ## 已执行检查
