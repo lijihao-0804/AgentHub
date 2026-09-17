@@ -36,7 +36,9 @@ class ProviderCredential(Base):
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     secret: Mapped[str] = mapped_column(Text, nullable=False)
     base_url: Mapped[str | None] = mapped_column(Text)
-    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -85,7 +87,9 @@ class ModelProfile(Base):
     capabilities: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
     )
-    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="true"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

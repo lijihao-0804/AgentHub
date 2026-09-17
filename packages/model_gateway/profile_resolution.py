@@ -64,7 +64,7 @@ class ModelProfileResolver:
                 raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
             visited.add(current_id)
             profile = await self.repository.get_model_profile(context, current_id)
-            if profile is None or not profile.enabled:
+            if profile is None or profile.enabled is False:
                 raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROFILE_DISABLED)
             resolved = _to_resolved(profile)
             validate_capabilities(resolved.capabilities, required)

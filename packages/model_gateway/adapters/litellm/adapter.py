@@ -287,6 +287,14 @@ class LiteLLMProviderAdapter:
             yield ModelStreamEvent(event_type=ModelStreamEventType.USAGE, usage=usage)
         yield ModelStreamEvent(event_type=ModelStreamEventType.COMPLETED, response=response)
 
+    async def health(
+        self,
+        profile: ModelProfile,
+        credential: ProviderCredential,
+    ) -> None:
+        request = ModelRequest(messages=(ModelMessage(role="user", content="ping"),))
+        await self.complete(profile, credential, request)
+
 
 def _stream_events(
     chunk: Any,
