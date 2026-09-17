@@ -4,16 +4,13 @@ AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the
 implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M0:
 engineering foundations and semantic contracts only.
 
-## Local quick start
+## Basic development setup
 
-Requirements: Python 3.12, `uv`, Node.js 20+, Docker Desktop and Git.
+Requirements: Python 3.12, `uv`, Node.js 20+ and Git.
 
 ```powershell
 Copy-Item .env.example .env
 uv sync
-docker compose up -d postgres redis qdrant
-uv run alembic upgrade head
-uv run python scripts/bootstrap_checkpoint.py
 uv run uvicorn apps.api.main:app --reload
 ```
 
@@ -28,6 +25,17 @@ npm run build
 ```
 
 The API exposes `/api/v1/health`, `/api/v1/ready` and `/api/v1/dependencies`.
+
+## Optional/local infrastructure setup
+
+When a milestone requires real infrastructure, PostgreSQL, Redis and Qdrant may be provided
+by local services or Docker Compose:
+
+```powershell
+docker compose up -d postgres redis qdrant
+```
+
+Docker remains supported for later migration, checkpoint and deployment verification.
 
 ## Delivery discipline
 

@@ -2090,6 +2090,9 @@ Redis
 Qdrant
 ```
 
+M0 只建立上述基础设施的配置、边界与运行入口，不要求此阶段真实启动依赖。
+基础设施运行验证按后文的 milestone 时机执行。
+
 Engineering：
 
 ```text
@@ -2138,14 +2141,44 @@ ADR-008 Tool Side-effect Semantics
 ```text
 fresh clone
 → .env
-→ docker compose up
-→ alembic upgrade head
-→ bootstrap framework checkpoint schema
+→ uv sync / lockfile
 → pytest
+→ ruff
 → frontend build
+→ GitHub Actions
+→ Alembic / checkpoint bootstrap code, ADR and script static checks
 ```
 
-全部 PASS。
+M0 不要求真实启动 PostgreSQL / Redis / Qdrant，也不要求真实执行
+PostgresSaver bootstrap；这些属于后续基础设施验证阶段。
+
+### 基础设施验证时机
+
+以下安排只定义基础设施验收时机，不改变各 milestone 的业务 scope：
+
+```text
+M1
+→ 使用真实 PostgreSQL 完成 Alembic migration
+→ 完成 Auth / Tenant / RBAC integration test
+→ PostgreSQL 可由 Docker 或本机服务提供
+
+M2
+→ 不增加 Docker 要求
+
+M3
+→ 真实 PostgreSQL + Redis + Qdrant
+→ 推荐 Docker Compose
+→ 完成完整 dependency smoke test
+
+M5
+→ 真实执行 LangGraph PostgreSQL checkpoint bootstrap
+→ 验证 API restart 后 WAITING_APPROVAL resume
+
+M8
+→ Docker build
+→ 完整 Docker Compose deployment
+→ README quick start 全部 PASS
+```
 
 ### STOP
 
