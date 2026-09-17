@@ -202,6 +202,39 @@ async def test_m1_migration_creates_postgres_schema(
             "workspace_memberships",
             "audit_logs",
         }
+        audit_columns = {
+            row.column_name: row.udt_name
+            for row in (
+                await connection.execute(
+                    text(
+                        """
+                        SELECT column_name, udt_name
+                        FROM information_schema.columns
+                        WHERE table_schema = 'public' AND table_name = 'audit_logs'
+                        """
+                    )
+                )
+            ).all()
+        }
+        assert audit_columns["safe_metadata"] == "jsonb"
+        assert all(audit_columns[column] == "uuid" for column in (
+            "actor_user_id", "organization_id", "workspace_id"
+        ))
+        foreign_keys = await connection.scalars(
+            text(
+                """
+                SELECT kcu.column_name
+                FROM information_schema.table_constraints AS tc
+                JOIN information_schema.key_column_usage AS kcu
+                  ON tc.constraint_name = kcu.constraint_name
+                 AND tc.table_schema = kcu.table_schema
+                WHERE tc.table_schema = 'public'
+                  AND tc.table_name = 'audit_logs'
+                  AND tc.constraint_type = 'FOREIGN KEY'
+                """
+            )
+        )
+        assert set(foreign_keys) == set()
 
 
 @pytest.mark.asyncio
@@ -323,14 +356,6 @@ async def test_auth_failures_are_uniform_and_expired_credentials_rejected(
     assert expired_access_response.status_code == 401
     assert error_code(expired_access_response) == "ACCESS_TOKEN_EXPIRED"
 
-    await set_user_active(factory, user_id, False)
-    inactive = await client.post(
-        "/api/v1/auth/login",
-        json={"email": email, "password": "correct horse battery staple"},
-    )
-    assert inactive.status_code == 401
-    assert error_code(inactive) == "INVALID_CREDENTIALS"
-
     async with factory() as session:
         await session.execute(
             update(AuthSession)
@@ -344,14 +369,47 @@ async def test_auth_failures_are_uniform_and_expired_credentials_rejected(
     assert expired_refresh_response.status_code == 401
     assert error_code(expired_refresh_response) == "REFRESH_TOKEN_EXPIRED"
 
+    inactive_user_id, _, inactive_refresh_token, inactive_email = await register(client)
+    await set_user_active(factory, inactive_user_id, False)
+    inactive = await client.post(
+        "/api/v1/auth/login",
+        json={"email": inactive_email, "password": "correct horse battery staple"},
+    )
+    assert inactive.status_code == 401
+    assert error_code(inactive) == "INVALID_CREDENTIALS"
+    inactive_refresh = await client.post(
+        "/api/v1/auth/refresh", cookies={COOKIE_NAME: inactive_refresh_token}
+    )
+    assert inactive_refresh.status_code == 401
+    assert error_code(inactive_refresh) == "INVALID_REFRESH_TOKEN"
+    async with factory() as session:
+        inactive_session = await session.scalar(
+            select(AuthSession).where(
+                AuthSession.token_hash == hash_refresh_token(inactive_refresh_token)
+            )
+        )
+    assert inactive_session is not None and inactive_session.revoked_at is not None
+
     async with factory() as session:
         logs = list(
             (await session.scalars(select(AuditLog).where(AuditLog.actor_user_id == user_id))).all()
+        )
+        failed_login_logs = list(
+            (
+                await session.scalars(
+                    select(AuditLog).where(
+                        AuditLog.action == "login_failure",
+                        AuditLog.resource_id == str(user_id),
+                    )
+                )
+            ).all()
         )
     metadata = json.dumps([log.safe_metadata for log in logs])
     assert "correct horse battery staple" not in metadata
     assert access_token not in metadata
     assert refresh_token not in metadata
+    assert failed_login_logs
+    assert all(log.actor_user_id is None for log in failed_login_logs)
 
 
 @pytest.mark.asyncio
@@ -501,3 +559,243 @@ async def test_tenant_rbac_and_owner_protection_use_database_state(
         )
     assert len(logs) == 2
     assert all(log.safe_metadata == {"outcome": "denied"} for log in logs)
+
+
+@pytest.mark.asyncio
+async def test_organization_membership_api_enforces_role_matrix_and_tenant_scope(
+    client: httpx.AsyncClient,
+) -> None:
+    owner_id, owner_token, _, _ = await register(client)
+    admin_id, admin_token, _, _ = await register(client)
+    member_id, member_token, _, _ = await register(client)
+    second_owner_id, _, _, _ = await register(client)
+    outsider_id, outsider_token, _, _ = await register(client)
+
+    organization_response = await client.post(
+        "/api/v1/organizations",
+        json={"name": f"Membership API {uuid4()}"},
+        headers=bearer(owner_token),
+    )
+    assert organization_response.status_code == 201
+    organization_id = UUID(organization_response.json()["id"])
+    members_url = f"/api/v1/organizations/{organization_id}/members"
+
+    listed = await client.get(members_url, headers=bearer(owner_token))
+    assert listed.status_code == 200
+    listed_payload = listed.json()
+    assert len(listed_payload) == 1
+    assert listed_payload[0]["user_id"] == str(owner_id)
+    assert listed_payload[0]["role"] == "OWNER"
+
+    for user_id, role in (
+        (admin_id, "ADMIN"),
+        (member_id, "MEMBER"),
+        (second_owner_id, "OWNER"),
+    ):
+        added = await client.post(
+            members_url,
+            json={"user_id": str(user_id), "role": role},
+            headers=bearer(owner_token),
+        )
+        assert added.status_code == 201, added.text
+        assert added.json()["role"] == role
+
+    member_denied = await client.get(members_url, headers=bearer(member_token))
+    assert member_denied.status_code == 403
+    member_mutation_denied = await client.post(
+        members_url,
+        json={"user_id": str(outsider_id), "role": "MEMBER"},
+        headers=bearer(member_token),
+    )
+    assert member_mutation_denied.status_code == 403
+
+    outsider_hidden = await client.get(members_url, headers=bearer(outsider_token))
+    assert outsider_hidden.status_code == 404
+    random_hidden = await client.get(
+        f"/api/v1/organizations/{uuid4()}/members", headers=bearer(owner_token)
+    )
+    assert random_hidden.status_code == 404
+    unknown_user = await client.post(
+        members_url,
+        json={"user_id": str(uuid4()), "role": "MEMBER"},
+        headers=bearer(owner_token),
+    )
+    assert unknown_user.status_code == 404
+
+    admin_owner_add = await client.post(
+        members_url,
+        json={"user_id": str(outsider_id), "role": "OWNER"},
+        headers=bearer(admin_token),
+    )
+    assert admin_owner_add.status_code == 403
+    admin_owner_update = await client.patch(
+        f"{members_url}/{second_owner_id}",
+        json={"role": "ADMIN"},
+        headers=bearer(admin_token),
+    )
+    assert admin_owner_update.status_code == 403
+    admin_owner_remove = await client.delete(
+        f"{members_url}/{second_owner_id}", headers=bearer(admin_token)
+    )
+    assert admin_owner_remove.status_code == 403
+
+    admin_member_update = await client.patch(
+        f"{members_url}/{member_id}",
+        json={"role": "ADMIN"},
+        headers=bearer(admin_token),
+    )
+    assert admin_member_update.status_code == 200
+    admin_member_remove = await client.delete(
+        f"{members_url}/{member_id}", headers=bearer(admin_token)
+    )
+    assert admin_member_remove.status_code == 204
+
+
+@pytest.mark.asyncio
+async def test_removing_org_membership_clears_workspace_access_in_same_transaction(
+    client: httpx.AsyncClient,
+) -> None:
+    _, owner_token, _, _ = await register(client)
+    user_id, user_token, _, _ = await register(client)
+    organization_response = await client.post(
+        "/api/v1/organizations",
+        json={"name": f"Membership lifecycle {uuid4()}"},
+        headers=bearer(owner_token),
+    )
+    organization_id = UUID(organization_response.json()["id"])
+    members_url = f"/api/v1/organizations/{organization_id}/members"
+    added_org = await client.post(
+        members_url,
+        json={"user_id": str(user_id), "role": "MEMBER"},
+        headers=bearer(owner_token),
+    )
+    assert added_org.status_code == 201
+    workspace_response = await client.post(
+        "/api/v1/workspaces",
+        json={"organization_id": str(organization_id), "name": f"Lifecycle {uuid4()}"},
+        headers=bearer(owner_token),
+    )
+    workspace_id = UUID(workspace_response.json()["id"])
+    added_workspace = await client.post(
+        f"/api/v1/workspaces/{workspace_id}/members",
+        json={"user_id": str(user_id), "role": "DEVELOPER"},
+        headers=bearer(owner_token),
+    )
+    assert added_workspace.status_code == 201
+    assert (
+        await client.get(f"/api/v1/workspaces/{workspace_id}", headers=bearer(user_token))
+    ).status_code == 200
+
+    removed = await client.delete(f"{members_url}/{user_id}", headers=bearer(owner_token))
+    assert removed.status_code == 204
+    readded = await client.post(
+        members_url,
+        json={"user_id": str(user_id), "role": "MEMBER"},
+        headers=bearer(owner_token),
+    )
+    assert readded.status_code == 201
+    access_after_rejoin = await client.get(
+        f"/api/v1/workspaces/{workspace_id}", headers=bearer(user_token)
+    )
+    assert access_after_rejoin.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_workspace_creation_denials_distinguish_member_and_outsider(
+    client: httpx.AsyncClient,
+) -> None:
+    _, owner_token, _, _ = await register(client)
+    member_id, member_token, _, _ = await register(client)
+    _, outsider_token, _, _ = await register(client)
+    organization_response = await client.post(
+        "/api/v1/organizations",
+        json={"name": f"Creation denial {uuid4()}"},
+        headers=bearer(owner_token),
+    )
+    organization_id = UUID(organization_response.json()["id"])
+    members_url = f"/api/v1/organizations/{organization_id}/members"
+    added = await client.post(
+        members_url,
+        json={"user_id": str(member_id), "role": "MEMBER"},
+        headers=bearer(owner_token),
+    )
+    assert added.status_code == 201
+
+    member_create = await client.post(
+        "/api/v1/workspaces",
+        json={"organization_id": str(organization_id), "name": "member cannot create"},
+        headers=bearer(member_token),
+    )
+    assert member_create.status_code == 403
+    outsider_create = await client.post(
+        "/api/v1/workspaces",
+        json={"organization_id": str(organization_id), "name": "outsider cannot create"},
+        headers=bearer(outsider_token),
+    )
+    assert outsider_create.status_code == 404
+    random_create = await client.post(
+        "/api/v1/workspaces",
+        json={"organization_id": str(uuid4()), "name": "unknown organization"},
+        headers=bearer(owner_token),
+    )
+    assert random_create.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_last_owner_protection_serializes_independent_postgres_transactions(
+    client: httpx.AsyncClient,
+    db_resources: tuple[AsyncEngine, async_sessionmaker[AsyncSession]],
+) -> None:
+    _, factory = db_resources
+    owner_one_id, owner_one_token, _, _ = await register(client)
+    owner_two_id, _, _, _ = await register(client)
+    organization_response = await client.post(
+        "/api/v1/organizations",
+        json={"name": f"Concurrent owners {uuid4()}"},
+        headers=bearer(owner_one_token),
+    )
+    organization_id = UUID(organization_response.json()["id"])
+    added = await client.post(
+        f"/api/v1/organizations/{organization_id}/members",
+        json={"user_id": str(owner_two_id), "role": "OWNER"},
+        headers=bearer(owner_one_token),
+    )
+    assert added.status_code == 201
+
+    async def remove_owner(
+        actor_user_id: UUID, target_user_id: UUID, request_id: str
+    ) -> str:
+        async with factory() as session:
+            try:
+                await TenantService().remove_organization_member(
+                    session,
+                    principal=PrincipalContext(
+                        request_id=request_id,
+                        trace_id=request_id,
+                        user_id=str(actor_user_id),
+                    ),
+                    organization_id=organization_id,
+                    target_user_id=target_user_id,
+                )
+            except AgentHubError as exc:
+                return exc.code
+        return "REMOVED"
+
+    results = await asyncio.gather(
+        remove_owner(owner_one_id, owner_one_id, "m1-owner-concurrent-a"),
+        remove_owner(owner_two_id, owner_two_id, "m1-owner-concurrent-b"),
+    )
+    assert sorted(results) == ["LAST_OWNER_PROTECTION", "REMOVED"]
+
+    async with factory() as session:
+        owners = list(
+            (
+                await session.scalars(
+                    select(OrganizationMembership).where(
+                        OrganizationMembership.organization_id == organization_id,
+                        OrganizationMembership.role == "OWNER",
+                    )
+                )
+            ).all()
+        )
+    assert len(owners) >= 1

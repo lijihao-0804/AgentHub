@@ -5,7 +5,6 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
-    JSON,
     Boolean,
     CheckConstraint,
     DateTime,
@@ -14,8 +13,10 @@ from sqlalchemy import (
     String,
     Text,
     func,
+    text,
 )
 from sqlalchemy import Uuid as SQLUuid
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from packages.core.database import Base
@@ -32,6 +33,13 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class SchemaMeta(Base):
+    __tablename__ = "agenthub_schema_meta"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(String(255), nullable=False)
 
 
 class AuthSession(Base):
@@ -124,20 +132,16 @@ class AuditLog(Base):
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
-    actor_user_id: Mapped[UUID | None] = mapped_column(
-        SQLUuid(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
-    )
-    organization_id: Mapped[UUID | None] = mapped_column(
-        SQLUuid(as_uuid=True), ForeignKey("organizations.id", ondelete="SET NULL")
-    )
-    workspace_id: Mapped[UUID | None] = mapped_column(
-        SQLUuid(as_uuid=True), ForeignKey("workspaces.id", ondelete="SET NULL")
-    )
+    actor_user_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    organization_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    workspace_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     action: Mapped[str] = mapped_column(String(64), nullable=False)
     resource_type: Mapped[str] = mapped_column(String(64), nullable=False)
     resource_id: Mapped[str | None] = mapped_column(String(128))
     request_id: Mapped[str | None] = mapped_column(String(128))
-    safe_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    safe_metadata: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

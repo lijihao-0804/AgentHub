@@ -4,8 +4,11 @@ from packages.control_plane.audit import UnsafeAuditMetadata, assert_safe_metada
 from packages.control_plane.enums import OrganizationRole, WorkspaceRole
 from packages.control_plane.rbac import (
     APPROVE_ACTION,
+    DEVELOPER_PERMISSIONS,
+    ORGANIZATION_ADMIN_PERMISSIONS,
     ORGANIZATION_MANAGE,
     RUN_ACTION,
+    VIEWER_PERMISSIONS,
     WORKSPACE_ADMIN,
     WORKSPACE_READ,
     ensure_not_last_owner,
@@ -22,21 +25,36 @@ from packages.core.execution_context.models import (
 def test_organization_admin_permissions_are_workspace_scoped_without_member_role() -> None:
     permissions = resolve_permissions(OrganizationRole.ADMIN, None)
 
-    assert {ORGANIZATION_MANAGE, WORKSPACE_ADMIN, WORKSPACE_READ, APPROVE_ACTION} <= permissions
-    assert RUN_ACTION not in permissions
+    assert permissions == ORGANIZATION_ADMIN_PERMISSIONS
+    assert {
+        ORGANIZATION_MANAGE,
+        WORKSPACE_ADMIN,
+        WORKSPACE_READ,
+        APPROVE_ACTION,
+        RUN_ACTION,
+        "agent_create",
+        "agent_edit",
+        "agent_run",
+        "knowledge_create",
+        "knowledge_edit",
+        "knowledge_run",
+        "tool_create",
+        "tool_edit",
+        "tool_run",
+    } <= permissions
 
 
 def test_developer_can_run_but_cannot_approve() -> None:
     permissions = resolve_permissions(OrganizationRole.MEMBER, WorkspaceRole.DEVELOPER)
 
+    assert permissions == DEVELOPER_PERMISSIONS
     assert {WORKSPACE_READ, RUN_ACTION, "agent_create", "tool_run"} <= permissions
+    assert WORKSPACE_ADMIN not in permissions
     assert APPROVE_ACTION not in permissions
 
 
 def test_viewer_is_read_only_and_member_without_workspace_access_has_no_permissions() -> None:
-    assert resolve_permissions(OrganizationRole.MEMBER, WorkspaceRole.VIEWER) == frozenset(
-        {WORKSPACE_READ}
-    )
+    assert resolve_permissions(OrganizationRole.MEMBER, WorkspaceRole.VIEWER) == VIEWER_PERMISSIONS
     assert resolve_permissions(OrganizationRole.MEMBER, None) == frozenset()
 
 

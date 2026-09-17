@@ -9,6 +9,9 @@ from apps.api.auth_dependencies import get_current_principal
 from apps.api.dependencies import get_db_session
 from apps.api.schemas.tenant import (
     OrganizationCreateRequest,
+    OrganizationMemberCreateRequest,
+    OrganizationMemberResponse,
+    OrganizationMemberUpdateRequest,
     OrganizationResponse,
     WorkspaceCreateRequest,
     WorkspaceMemberCreateRequest,
@@ -48,6 +51,87 @@ async def list_organizations(
 ) -> list[OrganizationResponse]:
     organizations = await TenantService().list_organizations(session, principal=principal)
     return [OrganizationResponse(id=item.id, name=item.name) for item in organizations]
+
+
+@router.get(
+    "/api/v1/organizations/{organization_id}/members",
+    response_model=list[OrganizationMemberResponse],
+)
+async def list_organization_members(
+    organization_id: UUID,
+    principal: PrincipalContext = principal_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> list[OrganizationMemberResponse]:
+    members = await TenantService().list_organization_members(
+        session, principal=principal, organization_id=organization_id
+    )
+    return [
+        OrganizationMemberResponse(user_id=user.id, email=user.email, role=membership.role)
+        for membership, user in members
+    ]
+
+
+@router.post(
+    "/api/v1/organizations/{organization_id}/members",
+    response_model=OrganizationMemberResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def add_organization_member(
+    organization_id: UUID,
+    payload: OrganizationMemberCreateRequest,
+    principal: PrincipalContext = principal_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> OrganizationMemberResponse:
+    membership = await TenantService().add_organization_member(
+        session,
+        principal=principal,
+        organization_id=organization_id,
+        user_id=payload.user_id,
+        role=payload.role,
+    )
+    user = await session.get(User, payload.user_id)
+    return OrganizationMemberResponse(
+        user_id=payload.user_id,
+        email=user.email,
+        role=membership.role,
+    )
+
+
+@router.patch(
+    "/api/v1/organizations/{organization_id}/members/{user_id}",
+    response_model=OrganizationMemberResponse,
+)
+async def update_organization_member(
+    organization_id: UUID,
+    user_id: UUID,
+    payload: OrganizationMemberUpdateRequest,
+    principal: PrincipalContext = principal_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> OrganizationMemberResponse:
+    membership = await TenantService().change_organization_member_role(
+        session,
+        principal=principal,
+        organization_id=organization_id,
+        target_user_id=user_id,
+        new_role=payload.role,
+    )
+    user = await session.get(User, user_id)
+    return OrganizationMemberResponse(user_id=user_id, email=user.email, role=membership.role)
+
+
+@router.delete("/api/v1/organizations/{organization_id}/members/{user_id}", status_code=204)
+async def remove_organization_member(
+    organization_id: UUID,
+    user_id: UUID,
+    principal: PrincipalContext = principal_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> None:
+    await TenantService().remove_organization_member(
+        session,
+        principal=principal,
+        organization_id=organization_id,
+        target_user_id=user_id,
+    )
 
 
 @router.post(

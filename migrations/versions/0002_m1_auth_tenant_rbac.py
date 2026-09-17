@@ -105,9 +105,6 @@ def upgrade() -> None:
         sa.Column("request_id", sa.String(length=128)),
         sa.Column("safe_metadata", postgresql.JSONB(), nullable=False, server_default="{}"),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=now),
-        sa.ForeignKeyConstraint(["actor_user_id"], ["users.id"], ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["organization_id"], ["organizations.id"], ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["workspace_id"], ["workspaces.id"], ondelete="SET NULL"),
     )
     op.create_index(
         "ix_audit_logs_organization_id_created_at",

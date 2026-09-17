@@ -1,8 +1,8 @@
 # AgentHub
 
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
-implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M0:
-engineering foundations and semantic contracts only.
+implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M1:
+engineering foundations plus the Auth / Tenant / RBAC boundary. M2 is not started.
 
 ## Basic development setup
 
@@ -10,17 +10,17 @@ Requirements: Python 3.12, `uv`, Node.js 20+ and Git.
 
 ```powershell
 Copy-Item .env.example .env
-uv sync
+uv sync --locked
 uv run uvicorn apps.api.main:app --reload
 ```
 
 In a second terminal:
 
 ```powershell
-uv run pytest
-uv run ruff check .
+uv run --locked pytest
+uv run --locked ruff check .
 cd apps/web
-npm install
+npm ci --no-audit --no-fund
 npm run build
 ```
 

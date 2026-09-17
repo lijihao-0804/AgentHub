@@ -3,8 +3,12 @@ from __future__ import annotations
 import json
 import logging
 import sys
+from contextvars import ContextVar
 from datetime import UTC, datetime
 from typing import Any
+
+request_id_var: ContextVar[str | None] = ContextVar("agenthub_request_id", default=None)
+trace_id_var: ContextVar[str | None] = ContextVar("agenthub_trace_id", default=None)
 
 
 class JsonFormatter(logging.Formatter):
@@ -20,8 +24,18 @@ class JsonFormatter(logging.Formatter):
             "logger": record.name,
             "message": record.getMessage(),
         }
+        request_id = request_id_var.get()
+        trace_id = trace_id_var.get()
+        if request_id is not None:
+            payload["request_id"] = request_id
+        if trace_id is not None:
+            payload["trace_id"] = trace_id
         for key, value in record.__dict__.items():
-            if key not in self.reserved and not key.startswith("_"):
+            if (
+                key not in self.reserved
+                and key not in {"request_id", "trace_id"}
+                and not key.startswith("_")
+            ):
                 payload[key] = value
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)

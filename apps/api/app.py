@@ -56,7 +56,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.db_engine = None
     app.state.db_session_factory = None
     app.state.redis = None
-    app.add_middleware(RequestIdMiddleware)
+    app.add_middleware(
+        RequestIdMiddleware,
+        request_id_header=app_settings.request_id_header,
+    )
     install_error_handlers(app)
     app.include_router(auth_router)
     app.include_router(tenancy_router)

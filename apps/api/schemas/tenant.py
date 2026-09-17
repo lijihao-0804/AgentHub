@@ -19,6 +19,27 @@ class OrganizationResponse(BaseModel):
     name: str
 
 
+class OrganizationMemberCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    user_id: UUID
+    role: Literal["OWNER", "ADMIN", "MEMBER"]
+
+
+class OrganizationMemberUpdateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    role: Literal["OWNER", "ADMIN", "MEMBER"]
+
+
+class OrganizationMemberResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    user_id: UUID
+    email: str
+    role: str
+
+
 class WorkspaceCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

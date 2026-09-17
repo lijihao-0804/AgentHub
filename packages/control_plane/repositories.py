@@ -140,6 +140,17 @@ class SqlAlchemyTenantRepository:
         )
         return list(result.all())
 
+    async def list_organization_members(
+        self, organization_id: UUID
+    ) -> list[tuple[OrganizationMembership, User]]:
+        result = await self.session.execute(
+            select(OrganizationMembership, User)
+            .join(User, User.id == OrganizationMembership.user_id)
+            .where(OrganizationMembership.organization_id == organization_id)
+            .order_by(User.normalized_email)
+        )
+        return list(result.all())
+
     async def get_organization_memberships_for_update(
         self, organization_id: UUID
     ) -> list[OrganizationMembership]:

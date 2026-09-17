@@ -13,6 +13,7 @@ from packages.control_plane.repositories import (
     SqlAlchemyAuthSessionRepository,
     SqlAlchemyUserRepository,
 )
+from packages.control_plane.repository_contracts import AuthSessionRepository, UserRepository
 from packages.core.auth.security import (
     PasswordService,
     hash_refresh_token,
@@ -47,7 +48,7 @@ class AuthService:
         password: str,
         request_id: str,
     ) -> AuthenticationResult:
-        users = SqlAlchemyUserRepository(session)
+        users: UserRepository = SqlAlchemyUserRepository(session)
         normalized_email = normalize_email(email)
         if await users.get_by_normalized_email(normalized_email) is not None:
             raise AgentHubError("EMAIL_ALREADY_REGISTERED", "Email is already registered.", 409)
@@ -80,7 +81,7 @@ class AuthService:
         password: str,
         request_id: str,
     ) -> AuthenticationResult:
-        users = SqlAlchemyUserRepository(session)
+        users: UserRepository = SqlAlchemyUserRepository(session)
         user = await users.get_by_normalized_email(normalize_email(email))
         valid_password = self.passwords.verify(user.password_hash if user else None, password)
         if user is None or not user.is_active or not valid_password:
@@ -90,7 +91,7 @@ class AuthService:
                 resource_type="user",
                 resource_id=str(user.id) if user else None,
                 request_id=request_id,
-                actor_user_id=user.id if user else None,
+                actor_user_id=None,
                 safe_metadata={"reason": "invalid_credentials"},
             )
             await session.commit()
@@ -109,12 +110,26 @@ class AuthService:
         refresh_token: str,
         request_id: str,
     ) -> AuthenticationResult:
-        sessions = SqlAlchemyAuthSessionRepository(session)
+        sessions: AuthSessionRepository = SqlAlchemyAuthSessionRepository(session)
         current = await sessions.get_for_refresh_update(hash_refresh_token(refresh_token))
         if current is None:
             raise AgentHubError("INVALID_REFRESH_TOKEN", "Refresh session is invalid.", 401)
 
         now = datetime.now(UTC)
+        user = await SqlAlchemyUserRepository(session).get_by_id(current.user_id)
+        if user is None or not user.is_active:
+            await sessions.revoke_family(current.family_id, now)
+            append_audit(
+                session,
+                action="refresh_invalid_user",
+                resource_type="auth_session",
+                resource_id=str(current.id),
+                request_id=request_id,
+                actor_user_id=current.user_id,
+                safe_metadata={"outcome": "family_revoked"},
+            )
+            await session.commit()
+            raise AgentHubError("INVALID_REFRESH_TOKEN", "Refresh session is invalid.", 401)
         if current.used_at is not None or current.rotated_at is not None:
             await sessions.revoke_family(current.family_id, now)
             append_audit(
@@ -171,7 +186,7 @@ class AuthService:
     ) -> None:
         if not refresh_token:
             return
-        sessions = SqlAlchemyAuthSessionRepository(session)
+        sessions: AuthSessionRepository = SqlAlchemyAuthSessionRepository(session)
         current = await sessions.get_for_refresh_update(hash_refresh_token(refresh_token))
         if current is None:
             return

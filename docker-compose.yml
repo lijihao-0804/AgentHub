@@ -42,6 +42,7 @@ services:
     environment:
       AGENTHUB_ENVIRONMENT: docker
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
+      AGENTHUB_AUTH_COOKIE_SECURE: "false"
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
     ports:

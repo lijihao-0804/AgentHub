@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,6 +23,7 @@ from packages.control_plane.rbac import (
     resolve_permissions,
 )
 from packages.control_plane.repositories import SqlAlchemyTenantRepository
+from packages.control_plane.repository_contracts import TenantRepository
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import (
     OrganizationContext,
@@ -77,9 +79,87 @@ class TenantService:
     async def list_organizations(
         self, session: AsyncSession, *, principal: PrincipalContext
     ) -> list[Organization]:
-        return await SqlAlchemyTenantRepository(session).list_organizations(
-            self._user_id(principal)
+        tenant: TenantRepository = SqlAlchemyTenantRepository(session)
+        return await tenant.list_organizations(self._user_id(principal))
+
+    async def list_organization_members(
+        self,
+        session: AsyncSession,
+        *,
+        principal: PrincipalContext,
+        organization_id: UUID,
+    ) -> list[tuple[OrganizationMembership, User]]:
+        await self._require_organization_admin(
+            session, principal, organization_id, "organization_member_list"
         )
+        tenant: TenantRepository = SqlAlchemyTenantRepository(session)
+        return await tenant.list_organization_members(organization_id)
+
+    async def add_organization_member(
+        self,
+        session: AsyncSession,
+        *,
+        principal: PrincipalContext,
+        organization_id: UUID,
+        user_id: UUID,
+        role: str,
+    ) -> OrganizationMembership:
+        if role not in set(OrganizationRole):
+            raise AgentHubError("INVALID_ORGANIZATION_ROLE", "Organization role is invalid.", 422)
+        memberships = await self._lock_organization_memberships(
+            session, organization_id, principal, operation="organization_member_add"
+        )
+        actor = self._find_membership(memberships, self._user_id(principal))
+        if actor.role == OrganizationRole.ADMIN and role == OrganizationRole.OWNER:
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="organization_membership",
+                resource_id=f"{organization_id}:{user_id}",
+                organization_id=organization_id,
+                operation="organization_member_add_owner",
+                status_code=403,
+            )
+        target_user = await session.get(User, user_id)
+        if target_user is None:
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="user",
+                resource_id=str(user_id),
+                organization_id=organization_id,
+                operation="organization_member_add",
+                status_code=404,
+            )
+        if self._find_membership(memberships, user_id, required=False) is not None:
+            raise AgentHubError(
+                "ORGANIZATION_MEMBER_EXISTS", "User is already an organization member.", 409
+            )
+        membership = OrganizationMembership(
+            organization_id=organization_id,
+            user_id=user_id,
+            role=role,
+        )
+        session.add(membership)
+        try:
+            await session.flush()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise AgentHubError(
+                "ORGANIZATION_MEMBER_EXISTS", "User is already an organization member.", 409
+            ) from exc
+        append_audit(
+            session,
+            action="organization_member_add",
+            resource_type="organization_membership",
+            resource_id=f"{organization_id}:{user_id}",
+            request_id=principal.request_id,
+            actor_user_id=self._user_id(principal),
+            organization_id=organization_id,
+            safe_metadata={"role": role},
+        )
+        await session.commit()
+        return membership
 
     async def create_workspace(
         self,
@@ -89,22 +169,20 @@ class TenantService:
         organization_id: UUID,
         name: str,
     ) -> Workspace:
-        user_id = self._user_id(principal)
-        tenant = SqlAlchemyTenantRepository(session)
-        membership = await tenant.get_organization_membership(organization_id, user_id)
-        if membership is None or membership.role not in {
-            OrganizationRole.OWNER,
-            OrganizationRole.ADMIN,
-        }:
+        organization, membership = await self._get_organization_access(
+            session, principal, organization_id, "workspace_create"
+        )
+        if membership.role not in {OrganizationRole.OWNER, OrganizationRole.ADMIN}:
             await self._deny(
                 session,
                 principal=principal,
                 resource_type="organization",
                 resource_id=str(organization_id),
-                organization_id=organization_id,
+                organization_id=organization.id,
                 operation="workspace_create",
-                status_code=404,
+                status_code=403,
             )
+        user_id = self._user_id(principal)
         workspace = Workspace(organization_id=organization_id, name=name.strip())
         session.add(workspace)
         await session.flush()
@@ -135,7 +213,7 @@ class TenantService:
         workspace_id: UUID,
     ) -> WorkspaceAccess:
         user_id = self._user_id(principal)
-        tenant = SqlAlchemyTenantRepository(session)
+        tenant: TenantRepository = SqlAlchemyTenantRepository(session)
         workspace = await tenant.get_workspace(workspace_id)
         if workspace is None:
             await self._deny(
@@ -214,7 +292,7 @@ class TenantService:
         )
         if role not in {WorkspaceRole.DEVELOPER, WorkspaceRole.VIEWER}:
             raise AgentHubError("INVALID_WORKSPACE_ROLE", "Workspace role is invalid.", 422)
-        tenant = SqlAlchemyTenantRepository(session)
+        tenant: TenantRepository = SqlAlchemyTenantRepository(session)
         target_user = await session.get(User, user_id)
         target_org_membership = await tenant.get_organization_membership(
             access.workspace.organization_id, user_id
@@ -319,8 +397,25 @@ class TenantService:
     ) -> OrganizationMembership:
         if new_role not in set(OrganizationRole):
             raise AgentHubError("INVALID_ORGANIZATION_ROLE", "Organization role is invalid.", 422)
-        memberships = await self._lock_organization_memberships(session, organization_id, principal)
+        memberships = await self._lock_organization_memberships(
+            session, organization_id, principal, operation="organization_member_mutation"
+        )
         target = next((item for item in memberships if item.user_id == target_user_id), None)
+        if target is None:
+            raise AgentHubError("RESOURCE_NOT_FOUND", "Resource was not found.", 404)
+        actor = self._find_membership(memberships, self._user_id(principal))
+        if actor.role == OrganizationRole.ADMIN and (
+            target.role == OrganizationRole.OWNER or new_role == OrganizationRole.OWNER
+        ):
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="organization_membership",
+                resource_id=f"{organization_id}:{target_user_id}",
+                organization_id=organization_id,
+                operation="organization_member_update_owner",
+                status_code=403,
+            )
         await self._check_last_owner(
             session,
             principal=principal,
@@ -330,8 +425,6 @@ class TenantService:
             current_role=target.role if target else "",
             new_role=new_role,
         )
-        if target is None:
-            raise AgentHubError("RESOURCE_NOT_FOUND", "Resource was not found.", 404)
         target.role = new_role
         append_audit(
             session,
@@ -354,8 +447,23 @@ class TenantService:
         organization_id: UUID,
         target_user_id: UUID,
     ) -> None:
-        memberships = await self._lock_organization_memberships(session, organization_id, principal)
+        memberships = await self._lock_organization_memberships(
+            session, organization_id, principal, operation="organization_member_mutation"
+        )
         target = next((item for item in memberships if item.user_id == target_user_id), None)
+        if target is None:
+            raise AgentHubError("RESOURCE_NOT_FOUND", "Resource was not found.", 404)
+        actor = self._find_membership(memberships, self._user_id(principal))
+        if actor.role == OrganizationRole.ADMIN and target.role == OrganizationRole.OWNER:
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="organization_membership",
+                resource_id=f"{organization_id}:{target_user_id}",
+                organization_id=organization_id,
+                operation="organization_member_remove_owner",
+                status_code=403,
+            )
         await self._check_last_owner(
             session,
             principal=principal,
@@ -365,8 +473,14 @@ class TenantService:
             current_role=target.role if target else "",
             new_role=None,
         )
-        if target is None:
-            raise AgentHubError("RESOURCE_NOT_FOUND", "Resource was not found.", 404)
+        await session.execute(
+            delete(WorkspaceMembership).where(
+                WorkspaceMembership.user_id == target_user_id,
+                WorkspaceMembership.workspace_id.in_(
+                    select(Workspace.id).where(Workspace.organization_id == organization_id)
+                ),
+            )
+        )
         await session.delete(target)
         append_audit(
             session,
@@ -403,30 +517,109 @@ class TenantService:
             )
         return access
 
-    async def _lock_organization_memberships(
+    async def _require_organization_admin(
         self,
         session: AsyncSession,
-        organization_id: UUID,
         principal: PrincipalContext,
-    ) -> list[OrganizationMembership]:
-        tenant = SqlAlchemyTenantRepository(session)
-        actor_membership = await tenant.get_organization_membership(
-            organization_id, self._user_id(principal)
+        organization_id: UUID,
+        operation: str,
+    ) -> OrganizationMembership:
+        _, membership = await self._get_organization_access(
+            session, principal, organization_id, operation
         )
-        if actor_membership is None or actor_membership.role not in {
-            OrganizationRole.OWNER,
-            OrganizationRole.ADMIN,
-        }:
+        if membership.role not in {OrganizationRole.OWNER, OrganizationRole.ADMIN}:
             await self._deny(
                 session,
                 principal=principal,
                 resource_type="organization",
                 resource_id=str(organization_id),
                 organization_id=organization_id,
-                operation="organization_member_mutation",
+                operation=operation,
+                status_code=403,
+            )
+        return membership
+
+    async def _get_organization_access(
+        self,
+        session: AsyncSession,
+        principal: PrincipalContext,
+        organization_id: UUID,
+        operation: str,
+    ) -> tuple[Organization, OrganizationMembership]:
+        organization = await session.get(Organization, organization_id)
+        if organization is None:
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="organization",
+                resource_id=str(organization_id),
+                organization_id=None,
+                operation=operation,
                 status_code=404,
             )
-        return await tenant.get_organization_memberships_for_update(organization_id)
+        membership = await SqlAlchemyTenantRepository(session).get_organization_membership(
+            organization_id, self._user_id(principal)
+        )
+        if membership is None:
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="organization",
+                resource_id=str(organization_id),
+                organization_id=organization_id,
+                operation=operation,
+                status_code=404,
+            )
+        return organization, membership
+
+    async def _lock_organization_memberships(
+        self,
+        session: AsyncSession,
+        organization_id: UUID,
+        principal: PrincipalContext,
+        *,
+        operation: str,
+    ) -> list[OrganizationMembership]:
+        await self._get_organization_access(session, principal, organization_id, operation)
+        memberships = await SqlAlchemyTenantRepository(
+            session
+        ).get_organization_memberships_for_update(organization_id)
+        actor_membership = self._find_membership(
+            memberships, self._user_id(principal), required=False
+        )
+        if actor_membership is None:
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="organization",
+                resource_id=str(organization_id),
+                organization_id=organization_id,
+                operation=operation,
+                status_code=404,
+            )
+        if actor_membership.role not in {OrganizationRole.OWNER, OrganizationRole.ADMIN}:
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="organization",
+                resource_id=str(organization_id),
+                organization_id=organization_id,
+                operation=operation,
+                status_code=403,
+            )
+        return memberships
+
+    @staticmethod
+    def _find_membership(
+        memberships: list[OrganizationMembership],
+        user_id: UUID,
+        *,
+        required: bool = True,
+    ) -> OrganizationMembership | None:
+        membership = next((item for item in memberships if item.user_id == user_id), None)
+        if membership is None and required:
+            raise AgentHubError("AUTHENTICATION_REQUIRED", "Authentication is required.", 401)
+        return membership
 
     async def _check_last_owner(
         self,

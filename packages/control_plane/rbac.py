@@ -10,6 +10,28 @@ WORKSPACE_READ = "workspace_read"
 APPROVE_ACTION = "approve_action"
 RUN_ACTION = "run_action"
 
+WORKSPACE_OPERATIONAL_PERMISSIONS = frozenset(
+    {
+        "agent_create",
+        "agent_edit",
+        "agent_run",
+        "knowledge_create",
+        "knowledge_edit",
+        "knowledge_run",
+        "tool_create",
+        "tool_edit",
+        "tool_run",
+        RUN_ACTION,
+    }
+)
+WORKSPACE_ADMIN_PERMISSIONS = frozenset({WORKSPACE_ADMIN}) | WORKSPACE_OPERATIONAL_PERMISSIONS
+ORGANIZATION_ADMIN_PERMISSIONS = (
+    frozenset({ORGANIZATION_MANAGE, WORKSPACE_READ, APPROVE_ACTION})
+    | WORKSPACE_ADMIN_PERMISSIONS
+)
+DEVELOPER_PERMISSIONS = frozenset({WORKSPACE_READ}) | WORKSPACE_OPERATIONAL_PERMISSIONS
+VIEWER_PERMISSIONS = frozenset({WORKSPACE_READ})
+
 
 def resolve_permissions(
     organization_role: str,
@@ -17,27 +39,13 @@ def resolve_permissions(
 ) -> frozenset[str]:
     """Resolve permissions from server-side membership roles only."""
     if organization_role in {OrganizationRole.OWNER, OrganizationRole.ADMIN}:
-        return frozenset({ORGANIZATION_MANAGE, WORKSPACE_ADMIN, WORKSPACE_READ, APPROVE_ACTION})
+        return ORGANIZATION_ADMIN_PERMISSIONS
     if organization_role != OrganizationRole.MEMBER or workspace_role is None:
         return frozenset()
     if workspace_role == WorkspaceRole.DEVELOPER:
-        return frozenset(
-            {
-                WORKSPACE_READ,
-                "agent_create",
-                "agent_edit",
-                "agent_run",
-                "knowledge_create",
-                "knowledge_edit",
-                "knowledge_run",
-                "tool_create",
-                "tool_edit",
-                "tool_run",
-                RUN_ACTION,
-            }
-        )
+        return DEVELOPER_PERMISSIONS
     if workspace_role == WorkspaceRole.VIEWER:
-        return frozenset({WORKSPACE_READ})
+        return VIEWER_PERMISSIONS
     return frozenset()
 
 

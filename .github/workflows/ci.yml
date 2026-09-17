@@ -7,6 +7,22 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    env:
+      AGENTHUB_TEST_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_test
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: agenthub_test
+          POSTGRES_USER: agenthub
+          POSTGRES_PASSWORD: agenthub
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agenthub -d agenthub_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -15,9 +31,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: uv sync
-      - run: uv run ruff check .
-      - run: uv run pytest
+      - run: uv sync --locked
+      - run: uv run --locked ruff check .
+      - run: uv run --locked pytest
 
   frontend:
     runs-on: ubuntu-latest
@@ -31,5 +47,5 @@ jobs:
           node-version: "20"
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npm run build
