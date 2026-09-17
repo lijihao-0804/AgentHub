@@ -11,6 +11,7 @@ from packages.core.execution_context.models import (
 )
 from packages.model_gateway.contracts import (
     CapabilityRequirements,
+    CostEstimate,
     ModelMessage,
     ModelRequest,
     ModelResponse,
@@ -117,6 +118,39 @@ class FakeAdapter:
                 model=profile.model,
             ),
         )
+
+
+class RecordingTraceSpan:
+    def __init__(self, attributes) -> None:
+        self.initial_attributes = dict(attributes or {})
+        self.end_calls: list[dict] = []
+
+    async def end(self, *, attributes=None, status="ok", failure_code=None) -> None:
+        self.end_calls.append(
+            {
+                "attributes": dict(attributes or {}),
+                "status": status,
+                "failure_code": failure_code,
+            }
+        )
+
+
+class RecordingTraceSink:
+    def __init__(self) -> None:
+        self.names: list[str] = []
+        self.spans: list[RecordingTraceSpan] = []
+
+    async def start_span(self, name, attributes=None) -> RecordingTraceSpan:
+        self.names.append(name)
+        span = RecordingTraceSpan(attributes)
+        self.spans.append(span)
+        return span
+
+
+class FailingTraceSink:
+    async def start_span(self, name, attributes=None):
+        del name, attributes
+        raise RuntimeError("trace backend contains not-for-logs")
 
 
 def context_for(workspace_id: UUID) -> WorkspaceExecutionContext:
@@ -309,3 +343,66 @@ async def test_health_failure_is_safe_and_normalized() -> None:
 
     assert result.status.value == "unavailable"
     assert result.failure_code == "MODEL_TIMEOUT"
+
+
+@pytest.mark.asyncio
+async def test_model_generate_span_contains_only_safe_usage_and_cost_projection() -> None:
+    context, profiles, credential = setup_chain()
+    adapter = FakeAdapter()
+    adapter.complete_outcomes = {
+        "primary": [
+            ModelResponse(
+                content="answer",
+                provider="deepseek",
+                model="primary",
+                usage=ModelUsage(input_tokens=2, output_tokens=3, total_tokens=5),
+                cost_estimate=CostEstimate(amount=Decimal("0.0012"), currency="usd"),
+            )
+        ],
+        "fallback": [],
+    }
+    sink = RecordingTraceSink()
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter, sink)
+
+    result = await gateway.generate(context, profiles[0].id, request())
+
+    assert result.content == "answer"
+    assert sink.names == ["model.generate"]
+    assert len(sink.spans) == 1
+    span = sink.spans[0]
+    assert span.initial_attributes["workspace_id"] == context.workspace_id
+    end = span.end_calls[0]
+    assert end["status"] == "ok"
+    attributes = end["attributes"]
+    assert attributes["provider"] == "deepseek"
+    assert attributes["model"] == "primary"
+    assert attributes["input_tokens"] == 2
+    assert attributes["output_tokens"] == 3
+    assert attributes["total_tokens"] == 5
+    assert attributes["estimated_cost"] == Decimal("0.0012")
+    assert attributes["currency"] == "USD"
+    assert attributes["attempt_count"] == 1
+    assert attributes["fallback_used"] is False
+    assert not {
+        "messages",
+        "prompt",
+        "tool_args",
+        "raw_response",
+        "secret",
+        "authorization",
+    }.intersection(attributes)
+    assert "not-for-logs" not in repr(attributes)
+
+
+@pytest.mark.asyncio
+async def test_trace_sink_failure_does_not_fail_model_request() -> None:
+    context, profiles, credential = setup_chain()
+    adapter = FakeAdapter()
+    adapter.complete_outcomes = {"primary": [response("primary")], "fallback": []}
+    gateway = ModelGatewayService(
+        FakeRepository(profiles, [credential]), adapter, FailingTraceSink()
+    )
+
+    result = await gateway.generate(context, profiles[0].id, request())
+
+    assert result.content == "primary"

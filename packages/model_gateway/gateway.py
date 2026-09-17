@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
-from typing import Protocol
+import time
+from collections.abc import AsyncIterator, Mapping
+from typing import Any, Protocol
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,6 +28,8 @@ from packages.model_gateway.profile_resolution import (
     ResolvedModelProfile,
 )
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
+from packages.observability.contracts import TraceSink, TraceSpan
+from packages.observability.noop import NoopTraceSink, NoopTraceSpan
 
 
 class ModelProviderAdapter(Protocol):
@@ -58,10 +61,12 @@ class ModelGatewayService(ModelGateway):
         self,
         repository: SqlAlchemyModelGatewayRepository,
         adapter: ModelProviderAdapter,
+        trace_sink: TraceSink | None = None,
     ) -> None:
         self.repository = repository
         self.resolver = ModelProfileResolver(repository)
         self.adapter = adapter
+        self.trace_sink = trace_sink or NoopTraceSink()
 
     async def generate(
         self,
@@ -69,24 +74,84 @@ class ModelGatewayService(ModelGateway):
         model_profile_id: UUID,
         request: ModelRequest,
     ) -> ModelResponse:
-        chain = await self.resolver.resolve_chain(
-            context,
-            model_profile_id,
-            required_capabilities=request.required_capabilities,
+        started = time.perf_counter()
+        span = await _start_trace_span(
+            self.trace_sink,
+            "model.generate",
+            _initial_trace_attributes(context, model_profile_id),
         )
-        last_error: ModelGatewayError | None = None
-        for profile in chain:
-            credential = await self._enabled_credential(context, profile.provider_credential_id)
-            for attempt in range(request.retry_policy.max_attempts):
-                try:
-                    return await self.adapter.complete(profile, credential, request)
-                except ModelGatewayError as error:
-                    last_error = error
-                    if not error.retryable or attempt + 1 >= request.retry_policy.max_attempts:
-                        break
-        if last_error is not None:
-            raise last_error
-        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+        attempt_count = 0
+        fallback_used = False
+        provider: str | None = None
+        model: str | None = None
+        try:
+            chain = await self.resolver.resolve_chain(
+                context,
+                model_profile_id,
+                required_capabilities=request.required_capabilities,
+            )
+            last_error: ModelGatewayError | None = None
+            for profile_index, profile in enumerate(chain):
+                fallback_used = profile_index > 0
+                model = profile.model
+                credential = await self._enabled_credential(context, profile.provider_credential_id)
+                provider = credential.provider
+                for attempt in range(request.retry_policy.max_attempts):
+                    attempt_count += 1
+                    try:
+                        response = await self.adapter.complete(profile, credential, request)
+                        await _end_trace_span(
+                            span,
+                            attributes=_response_trace_attributes(
+                                context,
+                                model_profile_id,
+                                started=started,
+                                attempt_count=attempt_count,
+                                fallback_used=fallback_used,
+                                response=response,
+                            ),
+                        )
+                        return response
+                    except ModelGatewayError as error:
+                        last_error = error
+                        if not error.retryable or attempt + 1 >= request.retry_policy.max_attempts:
+                            break
+            if last_error is not None:
+                raise last_error
+            raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+        except ModelGatewayError as error:
+            await _end_trace_span(
+                span,
+                attributes=_failure_trace_attributes(
+                    context,
+                    model_profile_id,
+                    started=started,
+                    attempt_count=attempt_count,
+                    fallback_used=fallback_used,
+                    provider=provider,
+                    model=model,
+                ),
+                status="error",
+                failure_code=error.code.value,
+            )
+            raise
+        except Exception as error:
+            normalized = ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
+            await _end_trace_span(
+                span,
+                attributes=_failure_trace_attributes(
+                    context,
+                    model_profile_id,
+                    started=started,
+                    attempt_count=attempt_count,
+                    fallback_used=fallback_used,
+                    provider=provider,
+                    model=model,
+                ),
+                status="error",
+                failure_code=normalized.code.value,
+            )
+            raise normalized from error
 
     def stream(
         self,
@@ -102,46 +167,118 @@ class ModelGatewayService(ModelGateway):
         model_profile_id: UUID,
         request: ModelRequest,
     ) -> AsyncIterator[ModelStreamEvent]:
-        chain = await self.resolver.resolve_chain(
-            context,
-            model_profile_id,
-            required_capabilities=request.required_capabilities,
+        started = time.perf_counter()
+        span = await _start_trace_span(
+            self.trace_sink,
+            "model.generate",
+            _initial_trace_attributes(context, model_profile_id),
         )
-        last_error: ModelGatewayError | None = None
-        for profile in chain:
-            credential = await self._enabled_credential(context, profile.provider_credential_id)
-            for attempt in range(request.retry_policy.max_attempts):
-                buffered: list[ModelStreamEvent] = []
-                visible = False
-                try:
-                    async for event in self.adapter.stream(profile, credential, request):
-                        if event.event_type in {
-                            ModelStreamEventType.MESSAGE_DELTA,
-                            ModelStreamEventType.TOOL_CALL_DELTA,
-                        }:
-                            visible = True
-                            for buffered_event in buffered:
-                                yield buffered_event
-                            buffered.clear()
-                            yield event
-                        elif visible:
-                            yield event
-                        else:
-                            buffered.append(event)
+        attempt_count = 0
+        fallback_used = False
+        provider: str | None = None
+        model: str | None = None
+        try:
+            chain = await self.resolver.resolve_chain(
+                context,
+                model_profile_id,
+                required_capabilities=request.required_capabilities,
+            )
+            last_error: ModelGatewayError | None = None
+            for profile_index, profile in enumerate(chain):
+                fallback_used = profile_index > 0
+                model = profile.model
+                credential = await self._enabled_credential(context, profile.provider_credential_id)
+                provider = credential.provider
+                for attempt in range(request.retry_policy.max_attempts):
+                    attempt_count += 1
+                    buffered: list[ModelStreamEvent] = []
+                    visible = False
+                    final_response: ModelResponse | None = None
+                    try:
+                        async for event in self.adapter.stream(profile, credential, request):
+                            if event.response is not None:
+                                final_response = event.response
+                            if event.event_type in {
+                                ModelStreamEventType.MESSAGE_DELTA,
+                                ModelStreamEventType.TOOL_CALL_DELTA,
+                            }:
+                                visible = True
+                                for buffered_event in buffered:
+                                    yield buffered_event
+                                buffered.clear()
+                                yield event
+                            elif visible:
+                                yield event
+                            else:
+                                buffered.append(event)
+                    except ModelGatewayError as error:
+                        if visible:
+                            raise ModelGatewayError(
+                                ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
+                            ) from error
+                        last_error = error
+                        if not error.retryable or attempt + 1 >= request.retry_policy.max_attempts:
+                            break
+                        continue
+                    except Exception as error:
+                        if visible:
+                            raise ModelGatewayError(
+                                ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
+                            ) from error
+                        last_error = ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
+                        break
                     for buffered_event in buffered:
                         yield buffered_event
+                    await _end_trace_span(
+                        span,
+                        attributes=_response_trace_attributes(
+                            context,
+                            model_profile_id,
+                            started=started,
+                            attempt_count=attempt_count,
+                            fallback_used=fallback_used,
+                            response=final_response,
+                            provider=provider,
+                            model=model,
+                        ),
+                    )
                     return
-                except ModelGatewayError as error:
-                    if visible:
-                        raise ModelGatewayError(
-                            ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
-                        ) from error
-                    last_error = error
-                    if not error.retryable or attempt + 1 >= request.retry_policy.max_attempts:
-                        break
-        if last_error is not None:
-            raise last_error
-        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+            if last_error is not None:
+                raise last_error
+            raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+        except ModelGatewayError as error:
+            await _end_trace_span(
+                span,
+                attributes=_failure_trace_attributes(
+                    context,
+                    model_profile_id,
+                    started=started,
+                    attempt_count=attempt_count,
+                    fallback_used=fallback_used,
+                    provider=provider,
+                    model=model,
+                ),
+                status="error",
+                failure_code=error.code.value,
+            )
+            raise
+        except Exception as error:
+            normalized = ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
+            await _end_trace_span(
+                span,
+                attributes=_failure_trace_attributes(
+                    context,
+                    model_profile_id,
+                    started=started,
+                    attempt_count=attempt_count,
+                    fallback_used=fallback_used,
+                    provider=provider,
+                    model=model,
+                ),
+                status="error",
+                failure_code=normalized.code.value,
+            )
+            raise normalized from error
 
     async def health(
         self,
@@ -185,11 +322,111 @@ class SqlAlchemyModelGateway(ModelGatewayService):
         self,
         session: AsyncSession,
         adapter: ModelProviderAdapter | None = None,
+        trace_sink: TraceSink | None = None,
     ) -> None:
         super().__init__(
             SqlAlchemyModelGatewayRepository(session),
             adapter or LiteLLMProviderAdapter(),
+            trace_sink=trace_sink,
         )
+
+
+def _initial_trace_attributes(
+    context: WorkspaceExecutionContext,
+    model_profile_id: UUID,
+) -> dict[str, Any]:
+    return {
+        "request_id": context.request_id,
+        "trace_id": context.organization.principal.trace_id,
+        "workspace_id": context.workspace_id,
+        "profile_id": str(model_profile_id),
+    }
+
+
+def _response_trace_attributes(
+    context: WorkspaceExecutionContext,
+    model_profile_id: UUID,
+    *,
+    started: float,
+    attempt_count: int,
+    fallback_used: bool,
+    response: ModelResponse | None,
+    provider: str | None = None,
+    model: str | None = None,
+) -> dict[str, Any]:
+    attributes = _initial_trace_attributes(context, model_profile_id)
+    attributes.update(
+        {
+            "provider": response.provider if response is not None else provider,
+            "model": response.model if response is not None else model,
+            "latency_ms": round((time.perf_counter() - started) * 1000, 3),
+            "attempt_count": attempt_count,
+            "fallback_used": fallback_used,
+        }
+    )
+    if response is not None and response.usage is not None:
+        attributes.update(
+            {
+                "input_tokens": response.usage.input_tokens,
+                "output_tokens": response.usage.output_tokens,
+                "total_tokens": response.usage.total_tokens,
+                "cached_tokens": response.usage.cached_tokens,
+            }
+        )
+    if response is not None and response.cost_estimate is not None:
+        attributes.update(
+            {
+                "estimated_cost": response.cost_estimate.amount,
+                "currency": response.cost_estimate.currency,
+            }
+        )
+    return attributes
+
+
+def _failure_trace_attributes(
+    context: WorkspaceExecutionContext,
+    model_profile_id: UUID,
+    *,
+    started: float,
+    attempt_count: int,
+    fallback_used: bool,
+    provider: str | None,
+    model: str | None,
+) -> dict[str, Any]:
+    return _response_trace_attributes(
+        context,
+        model_profile_id,
+        started=started,
+        attempt_count=attempt_count,
+        fallback_used=fallback_used,
+        response=None,
+        provider=provider,
+        model=model,
+    )
+
+
+async def _start_trace_span(
+    trace_sink: TraceSink,
+    name: str,
+    attributes: Mapping[str, Any],
+) -> TraceSpan:
+    try:
+        return await trace_sink.start_span(name, attributes=attributes)
+    except Exception:
+        return NoopTraceSpan()
+
+
+async def _end_trace_span(
+    span: TraceSpan,
+    *,
+    attributes: Mapping[str, Any],
+    status: str = "ok",
+    failure_code: str | None = None,
+) -> None:
+    try:
+        await span.end(attributes=attributes, status=status, failure_code=failure_code)
+    except Exception:
+        return
 
 
 __all__ = ["ModelGatewayService", "ModelProviderAdapter", "SqlAlchemyModelGateway"]
