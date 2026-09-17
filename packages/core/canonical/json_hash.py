@@ -1,0 +1,20 @@
+from __future__ import annotations
+
+import hashlib
+import json
+from typing import Any
+
+
+def canonical_json(value: Any) -> str:
+    """Serialize JSON-compatible values with the M0 canonicalization contract."""
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+
+
+def canonical_json_hash(value: Any) -> str:
+    return hashlib.sha256(canonical_json(value).encode("utf-8")).hexdigest()

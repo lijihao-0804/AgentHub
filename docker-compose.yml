@@ -1,0 +1,74 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: agenthub
+      POSTGRES_USER: agenthub
+      POSTGRES_PASSWORD: agenthub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agenthub -d agenthub"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.6
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.Dockerfile
+    environment:
+      AGENTHUB_ENVIRONMENT: docker
+      AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
+      AGENTHUB_REDIS_URL: redis://redis:6379/0
+      AGENTHUB_QDRANT_URL: http://qdrant:6333
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: infra/docker/api.Dockerfile
+    command: ["uv", "run", "python", "-m", "apps.worker.main"]
+    environment:
+      AGENTHUB_ENVIRONMENT: docker
+      AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
+      AGENTHUB_REDIS_URL: redis://redis:6379/0
+      AGENTHUB_QDRANT_URL: http://qdrant:6333
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:

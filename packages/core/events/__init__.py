@@ -1,0 +1,1 @@
+"""AgentHub event protocol primitives."""

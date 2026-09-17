@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+.uv-cache/
+.uv-python/
+.mypy_cache/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Frontend
+apps/web/node_modules/
+apps/web/.next/
+apps/web/out/
+apps/web/.npm-cache/
+npm-debug.log*
+
+# Local infrastructure data
+infra/data/
+docker-compose.override.yml
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+Desktop.ini

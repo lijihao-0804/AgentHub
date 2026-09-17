@@ -1,0 +1,11 @@
+.git
+.venv
+.uv-cache
+.uv-python
+.pytest_cache
+.ruff_cache
+apps/web/node_modules
+apps/web/.next
+apps/web/.npm-cache
+infra/data
+*.pyc

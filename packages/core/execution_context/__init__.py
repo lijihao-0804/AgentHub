@@ -1,0 +1,1 @@
+"""Typed request execution scopes."""
