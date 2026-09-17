@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import logging
 import time
 from collections.abc import AsyncIterator, Mapping
 from typing import Any, Protocol
@@ -31,6 +33,8 @@ from packages.model_gateway.profile_resolution import (
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
 from packages.observability.contracts import TraceSink, TraceSpan
 from packages.observability.noop import NoopTraceSink, NoopTraceSpan
+
+logger = logging.getLogger(__name__)
 
 
 class ModelProviderAdapter(Protocol):
@@ -100,7 +104,8 @@ class ModelGatewayService(ModelGateway):
                 for attempt in range(request.retry_policy.max_attempts):
                     attempt_count += 1
                     try:
-                        response = await self.adapter.complete(profile, credential, request)
+                        async with asyncio.timeout(float(profile.timeout_seconds)):
+                            response = await self.adapter.complete(profile, credential, request)
                         await _end_trace_span(
                             span,
                             attributes=_response_trace_attributes(
@@ -113,6 +118,13 @@ class ModelGatewayService(ModelGateway):
                             ),
                         )
                         return response
+                    except TimeoutError:
+                        last_error = ModelGatewayError(
+                            ModelGatewayErrorCode.MODEL_TIMEOUT,
+                            retryable=True,
+                        )
+                        if attempt + 1 >= request.retry_policy.max_attempts:
+                            break
                     except ModelGatewayError as error:
                         last_error = error
                         if not error.retryable or attempt + 1 >= request.retry_policy.max_attempts:
@@ -136,7 +148,7 @@ class ModelGatewayService(ModelGateway):
                 failure_code=error.code.value,
             )
             raise
-        except Exception as error:
+        except Exception:
             normalized = ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
             await _end_trace_span(
                 span,
@@ -152,7 +164,7 @@ class ModelGatewayService(ModelGateway):
                 status="error",
                 failure_code=normalized.code.value,
             )
-            raise normalized from error
+            raise normalized from None
 
     def stream(
         self,
@@ -196,36 +208,49 @@ class ModelGatewayService(ModelGateway):
                     visible = False
                     final_response: ModelResponse | None = None
                     try:
-                        async for event in self.adapter.stream(profile, credential, request):
-                            if event.response is not None:
-                                final_response = event.response
-                            if event.event_type in {
-                                ModelStreamEventType.MESSAGE_DELTA,
-                                ModelStreamEventType.TOOL_CALL_DELTA,
-                            }:
-                                visible = True
-                                for buffered_event in buffered:
-                                    yield buffered_event
-                                buffered.clear()
-                                yield event
-                            elif visible:
-                                yield event
-                            else:
-                                buffered.append(event)
+                        async with asyncio.timeout(float(profile.timeout_seconds)):
+                            async for event in self.adapter.stream(profile, credential, request):
+                                if event.response is not None:
+                                    final_response = event.response
+                                if event.event_type in {
+                                    ModelStreamEventType.MESSAGE_DELTA,
+                                    ModelStreamEventType.TOOL_CALL_DELTA,
+                                }:
+                                    visible = True
+                                    for buffered_event in buffered:
+                                        yield buffered_event
+                                    buffered.clear()
+                                    yield event
+                                elif visible:
+                                    yield event
+                                else:
+                                    buffered.append(event)
+                    except TimeoutError:
+                        if visible:
+                            raise ModelGatewayError(
+                                ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
+                            ) from None
+                        last_error = ModelGatewayError(
+                            ModelGatewayErrorCode.MODEL_TIMEOUT,
+                            retryable=True,
+                        )
+                        if attempt + 1 >= request.retry_policy.max_attempts:
+                            break
+                        continue
                     except ModelGatewayError as error:
                         if visible:
                             raise ModelGatewayError(
                                 ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
-                            ) from error
+                            ) from None
                         last_error = error
                         if not error.retryable or attempt + 1 >= request.retry_policy.max_attempts:
                             break
                         continue
-                    except Exception as error:
+                    except Exception:
                         if visible:
                             raise ModelGatewayError(
                                 ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
-                            ) from error
+                            ) from None
                         last_error = ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
                         break
                     for buffered_event in buffered:
@@ -263,7 +288,7 @@ class ModelGatewayService(ModelGateway):
                 failure_code=error.code.value,
             )
             raise
-        except Exception as error:
+        except Exception:
             normalized = ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
             await _end_trace_span(
                 span,
@@ -279,7 +304,7 @@ class ModelGatewayService(ModelGateway):
                 status="error",
                 failure_code=normalized.code.value,
             )
-            raise normalized from error
+            raise normalized from None
 
     async def health(
         self,
@@ -413,7 +438,8 @@ async def _start_trace_span(
 ) -> TraceSpan:
     try:
         return await trace_sink.start_span(name, attributes=attributes)
-    except Exception:
+    except Exception as error:
+        logger.warning("trace start failed: %s", type(error).__name__)
         return NoopTraceSpan()
 
 
@@ -426,8 +452,8 @@ async def _end_trace_span(
 ) -> None:
     try:
         await span.end(attributes=attributes, status=status, failure_code=failure_code)
-    except Exception:
-        return
+    except Exception as error:
+        logger.warning("trace end failed: %s", type(error).__name__)
 
 
 __all__ = ["ModelGatewayService", "ModelProviderAdapter", "SqlAlchemyModelGateway"]

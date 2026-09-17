@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from collections.abc import AsyncIterator
 from decimal import Decimal
 from uuid import UUID, uuid4
@@ -70,12 +72,17 @@ class FakeAdapter:
         self.complete_calls: list[str] = []
         self.stream_calls: list[str] = []
         self.complete_outcomes: dict[str, list[ModelResponse | ModelGatewayError]] = {}
+        self.complete_delays: dict[str, float] = {}
         self.health_outcomes: dict[str, ModelGatewayError] = {}
         self.stream_outcomes: dict[str, str] = {}
+        self.stream_delays: dict[str, float] = {}
 
     async def complete(self, profile, credential, request) -> ModelResponse:
         del credential, request
         self.complete_calls.append(profile.model)
+        delay = self.complete_delays.get(profile.model)
+        if delay is not None:
+            await asyncio.sleep(delay)
         outcome = self.complete_outcomes[profile.model].pop(0)
         if isinstance(outcome, ModelGatewayError):
             raise outcome
@@ -108,6 +115,16 @@ class FakeAdapter:
                 tool_call_delta=ModelToolCallDelta(index=0, name="lookup"),
             )
             raise ModelGatewayError(ModelGatewayErrorCode.MODEL_TIMEOUT, retryable=True)
+        if mode == "pre-visible-timeout":
+            await asyncio.sleep(self.stream_delays[profile.model])
+            return
+        if mode == "post-visible-timeout":
+            yield ModelStreamEvent(
+                event_type=ModelStreamEventType.MESSAGE_DELTA,
+                message_delta="partial",
+            )
+            await asyncio.sleep(self.stream_delays[profile.model])
+            return
         yield ModelStreamEvent(
             event_type=ModelStreamEventType.MESSAGE_DELTA,
             message_delta="fallback",
@@ -243,6 +260,24 @@ async def test_retryable_primary_is_retried_once_then_falls_back() -> None:
 
 
 @pytest.mark.asyncio
+async def test_generate_timeout_retries_then_falls_back() -> None:
+    context, profiles, credential = setup_chain()
+    profiles[0].timeout_seconds = Decimal("0.01")
+    adapter = FakeAdapter()
+    adapter.complete_delays["primary"] = 0.05
+    adapter.complete_outcomes = {
+        "primary": [response("late"), response("late")],
+        "fallback": [response("fallback")],
+    }
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter)
+
+    result = await gateway.generate(context, profiles[0].id, request(retry_attempts=2))
+
+    assert result.content == "fallback"
+    assert adapter.complete_calls == ["primary", "primary", "fallback"]
+
+
+@pytest.mark.asyncio
 async def test_non_retryable_primary_error_does_not_retry_before_fallback() -> None:
     context, profiles, credential = setup_chain()
     adapter = FakeAdapter()
@@ -349,6 +384,45 @@ async def test_stream_error_before_first_visible_delta_can_fallback() -> None:
         ModelStreamEventType.COMPLETED,
     ]
     assert adapter.stream_calls == ["primary", "fallback"]
+
+
+@pytest.mark.asyncio
+async def test_stream_timeout_before_visible_delta_can_fallback() -> None:
+    context, profiles, credential = setup_chain()
+    profiles[0].timeout_seconds = Decimal("0.01")
+    adapter = FakeAdapter()
+    adapter.stream_outcomes = {"primary": "pre-visible-timeout", "fallback": "success"}
+    adapter.stream_delays["primary"] = 0.05
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter)
+
+    events = [
+        event
+        async for event in gateway.stream(
+            context, profiles[0].id, request(retry_attempts=1)
+        )
+    ]
+
+    assert events[-1].event_type == ModelStreamEventType.COMPLETED
+    assert adapter.stream_calls == ["primary", "fallback"]
+
+
+@pytest.mark.asyncio
+async def test_stream_timeout_after_visible_delta_never_falls_back() -> None:
+    context, profiles, credential = setup_chain()
+    profiles[0].timeout_seconds = Decimal("0.01")
+    adapter = FakeAdapter()
+    adapter.stream_outcomes = {"primary": "post-visible-timeout", "fallback": "success"}
+    adapter.stream_delays["primary"] = 0.05
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter)
+    received: list[ModelStreamEvent] = []
+
+    with pytest.raises(ModelGatewayError) as raised:
+        async for event in gateway.stream(context, profiles[0].id, request(retry_attempts=3)):
+            received.append(event)
+
+    assert raised.value.code == ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
+    assert len(adapter.stream_calls) == 1
+    assert received[0].message_delta == "partial"
 
 
 @pytest.mark.asyncio
@@ -481,7 +555,8 @@ async def test_model_generate_span_contains_only_safe_usage_and_cost_projection(
 
 
 @pytest.mark.asyncio
-async def test_trace_sink_failure_does_not_fail_model_request() -> None:
+async def test_trace_sink_failure_does_not_fail_model_request(caplog) -> None:
+    caplog.set_level(logging.WARNING)
     context, profiles, credential = setup_chain()
     adapter = FakeAdapter()
     adapter.complete_outcomes = {"primary": [response("primary")], "fallback": []}
@@ -492,3 +567,5 @@ async def test_trace_sink_failure_does_not_fail_model_request() -> None:
     result = await gateway.generate(context, profiles[0].id, request())
 
     assert result.content == "primary"
+    assert "RuntimeError" in caplog.text
+    assert "not-for-logs" not in caplog.text

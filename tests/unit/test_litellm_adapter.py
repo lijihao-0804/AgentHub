@@ -1,3 +1,5 @@
+import asyncio
+import traceback
 from collections.abc import AsyncIterator
 from decimal import Decimal
 from uuid import uuid4
@@ -37,7 +39,7 @@ def profile(provider: str = "deepseek") -> tuple[ModelProfile, ProviderCredentia
 
 
 class FakeCompletionClient:
-    def __init__(self, response=None, error: BaseException | None = None) -> None:
+    def __init__(self, response=None, error: Exception | None = None) -> None:
         self.response = response
         self.error = error
         self.calls: list[dict] = []
@@ -94,6 +96,7 @@ async def test_deepseek_request_is_mapped_and_response_is_normalized() -> None:
     assert response.usage is not None and response.usage.total_tokens == 5
     assert client.calls[0]["model"] == "deepseek/deepseek-chat"
     assert client.calls[0]["api_key"] == "adapter-secret"
+    assert client.calls[0]["num_retries"] == 0
     assert client.calls[0]["tools"][0]["function"]["name"] == "lookup"
 
 
@@ -169,6 +172,61 @@ async def test_openai_compatible_stream_is_typed_and_single_attempt() -> None:
     assert client.calls[0]["model"] == "openai/compatible-model"
     assert client.calls[0]["api_base"] == "https://provider.invalid/v1"
     assert len(client.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_stream_cost_is_attached_to_completed_response() -> None:
+    client = FakeStreamClient(
+        [
+            {"choices": [{"delta": {"content": "done"}}]},
+            {
+                "choices": [{"delta": {}, "finish_reason": "stop"}],
+                "response_cost": "0.0042",
+            },
+        ]
+    )
+    model_profile, credential = profile()
+
+    events = [
+        event
+        async for event in LiteLLMProviderAdapter(client).stream(
+            model_profile,
+            credential,
+            ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+        )
+    ]
+
+    assert events[-1].response is not None
+    assert events[-1].response.cost_estimate is not None
+    assert events[-1].response.cost_estimate.amount == Decimal("0.0042")
+
+
+@pytest.mark.asyncio
+async def test_provider_exception_traceback_does_not_expose_raw_secret() -> None:
+    client = FakeCompletionClient(error=RuntimeError("provider body super-secret-key"))
+    model_profile, credential = profile()
+
+    with pytest.raises(ModelGatewayError) as raised:
+        await LiteLLMProviderAdapter(client).complete(
+            model_profile,
+            credential,
+            ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+        )
+
+    assert "super-secret-key" not in "".join(traceback.format_exception(raised.value))
+
+
+@pytest.mark.asyncio
+async def test_provider_cancellation_is_not_normalized() -> None:
+    client = FakeCompletionClient(error=asyncio.CancelledError("super-secret-key"))
+    model_profile, credential = profile()
+
+    with pytest.raises(asyncio.CancelledError):
+        await LiteLLMProviderAdapter(client).complete(
+            model_profile,
+            credential,
+            ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+        )
 
 
 @pytest.mark.asyncio

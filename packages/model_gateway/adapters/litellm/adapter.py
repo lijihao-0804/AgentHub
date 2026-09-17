@@ -86,6 +86,7 @@ def _request_payload(
         "temperature": float(profile.temperature),
         "max_tokens": profile.max_tokens,
         "timeout": float(profile.timeout_seconds),
+        "num_retries": 0,
         "api_key": credential.secret,
         "stream": stream,
     }
@@ -116,16 +117,20 @@ def _request_payload(
     return payload
 
 
-def _normalize_error(error: BaseException) -> ModelGatewayError:
+def _normalize_error(error: Exception) -> ModelGatewayError:
     error_name = type(error).__name__.lower()
     status_code = _value(error, "status_code")
+    try:
+        status_number = int(status_code) if status_code is not None else None
+    except (TypeError, ValueError):
+        status_number = None
     if "timeout" in error_name:
         return ModelGatewayError(ModelGatewayErrorCode.MODEL_TIMEOUT, retryable=True)
-    if status_code == 429 or "ratelimit" in error_name or "rate_limit" in error_name:
+    if status_number == 429 or "ratelimit" in error_name or "rate_limit" in error_name:
         return ModelGatewayError(ModelGatewayErrorCode.MODEL_RATE_LIMITED, retryable=True)
-    if status_code in {401, 403} or "auth" in error_name:
+    if status_number in {401, 403} or "auth" in error_name:
         return ModelGatewayError(ModelGatewayErrorCode.MODEL_AUTH_FAILED)
-    if status_code is not None and int(status_code) >= 500:
+    if status_number is not None and status_number >= 500:
         return ModelGatewayError(
             ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE,
             retryable=True,
@@ -178,8 +183,8 @@ def _normalize_tool_call(tool_call: Any) -> ModelToolCall:
     if isinstance(arguments, str):
         try:
             arguments = json.loads(arguments)
-        except json.JSONDecodeError as error:
-            raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE) from error
+        except json.JSONDecodeError:
+            raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE) from None
     if not isinstance(arguments, Mapping):
         raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
     return ModelToolCall(
@@ -240,8 +245,8 @@ class LiteLLMProviderAdapter:
             )
         except ModelGatewayError:
             raise
-        except BaseException as error:
-            raise _normalize_error(error) from error
+        except Exception as error:
+            raise _normalize_error(error) from None
 
     async def stream(
         self,
@@ -254,6 +259,7 @@ class LiteLLMProviderAdapter:
         tool_parts: dict[int, dict[str, Any]] = {}
         finish_reason: str | None = None
         usage: ModelUsage | None = None
+        cost_estimate: CostEstimate | None = None
         try:
             raw_stream = await _await_if_needed(self.client.acompletion(**payload))
             if hasattr(raw_stream, "__aiter__"):
@@ -263,6 +269,7 @@ class LiteLLMProviderAdapter:
                     ):
                         yield event
                     usage = _normalize_usage(_value(chunk, "usage")) or usage
+                    cost_estimate = _normalize_cost(chunk) or cost_estimate
                     finish_reason = _stream_finish_reason(chunk) or finish_reason
             else:
                 for chunk in raw_stream:
@@ -271,11 +278,12 @@ class LiteLLMProviderAdapter:
                     ):
                         yield event
                     usage = _normalize_usage(_value(chunk, "usage")) or usage
+                    cost_estimate = _normalize_cost(chunk) or cost_estimate
                     finish_reason = _stream_finish_reason(chunk) or finish_reason
         except ModelGatewayError:
             raise
-        except BaseException as error:
-            raise _normalize_error(error) from error
+        except Exception as error:
+            raise _normalize_error(error) from None
         tool_calls = tuple(_complete_tool_call(parts) for parts in tool_parts.values())
         response = ModelResponse(
             content="".join(content_parts),
@@ -284,6 +292,7 @@ class LiteLLMProviderAdapter:
             tool_calls=tool_calls,
             finish_reason=finish_reason,
             usage=usage,
+            cost_estimate=cost_estimate,
         )
         if usage is not None:
             yield ModelStreamEvent(event_type=ModelStreamEventType.USAGE, usage=usage)
@@ -352,8 +361,8 @@ def _complete_tool_call(parts: dict[str, Any]) -> ModelToolCall:
     raw_arguments = "".join(parts["arguments"])
     try:
         arguments = json.loads(raw_arguments) if raw_arguments else {}
-    except json.JSONDecodeError as error:
-        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE) from error
+    except json.JSONDecodeError:
+        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE) from None
     if not isinstance(arguments, Mapping):
         raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
     return ModelToolCall(
