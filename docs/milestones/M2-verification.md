@@ -2,19 +2,23 @@
 
 日期：2026-09-18
 分支：`m2/model-gateway`
-状态：最终 GitHub Actions 验收待完成
+状态：`PASS`
+验收基线提交：`2c3fee2`
 
 ## 已执行检查
 
 | 检查 | 结果 | 说明 |
 |---|---|---|
-| M2 相关单元/合约/适配器测试 | PASS | 26 passed |
+| M2 相关单元/合约/适配器/持久化测试 | PASS | 43 passed |
+| `uv sync --locked` | PASS | 锁定依赖已同步 |
 | `uv run --locked ruff check .` | PASS | 全仓静态检查通过 |
-| `uv run --locked pytest -rs` | PASS | 45 passed，11 个本地未配置数据库的 integration 用例 skipped |
-| `uv run --locked alembic upgrade head --sql` | PASS | M0→M2 静态迁移 SQL 可生成 |
-| `apps/web npm run build` | PASS | Next.js production build 通过 |
-| `git diff --check` | 待最终确认 | 提交前验收 |
-| GitHub Actions backend/frontend | 待最终提交 CI | backend 使用 CI PostgreSQL service |
+| `uv run --locked pytest -rs` | PASS | 64 passed，12 个本地未配置数据库的 integration 用例 skipped |
+| GitHub Actions PostgreSQL migration | PASS | `alembic upgrade head` + `alembic check` |
+| GitHub Actions M1/M2 integration | PASS | 使用真实 PostgreSQL service，未发生 accidental skip |
+| GitHub Actions non-integration pytest | PASS | 分阶段执行 |
+| `apps/web npm ci` + `npm run build` | PASS | Next.js production build 通过 |
+| `git diff --check` | PASS | 代码验收基线通过；文档提交后再次确认 |
+| M2 acceptance | PASS | 以 `2c3fee2` 为验收基线 |
 
 ## M2 行为与安全检查
 
@@ -30,12 +34,12 @@
 ## 有意延后的真实基础设施验证
 
 - M2 不要求本地 Docker、Redis 或 Qdrant；完整 dependency smoke test 延后到 M3；
-- M2 的真实 PostgreSQL migration/integration 由 GitHub Actions PostgreSQL service 验收，本地无可用
-  PostgreSQL 时不以 SQLite 替代；
+- M2 的真实 PostgreSQL migration/integration 已由 GitHub Actions PostgreSQL service 验收；本地无可用
+  PostgreSQL 时不以 SQLite 替代，故本地 integration 保持明确 skipped；
 - LangGraph PostgreSQL checkpoint bootstrap 与 API restart 后 `WAITING_APPROVAL` resume 延后到 M5；
 - Docker build、完整 Docker Compose deployment 和 README quick start 延后到 M8。
 
 ## 停止条件
 
-只有在最终提交的 GitHub Actions backend/frontend 均通过、全仓测试与 frontend build 通过、
-`git diff --check` 通过且工作树干净后，才正式标记 M2 `PASS`。M2 通过后停止施工，不进入 M3。
+GitHub Actions 的 migration、M1/M2 PostgreSQL integration、non-integration pytest 和 frontend
+均已通过，代码验收基线 `2c3fee2` 正式标记 M2 `PASS`。M2 通过后停止施工，不进入 M3。
