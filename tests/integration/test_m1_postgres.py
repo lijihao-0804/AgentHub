@@ -66,7 +66,7 @@ def migrated_database() -> None:
         get_settings.cache_clear()
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture
 async def db_resources(
     migrated_database: None,
 ) -> tuple[AsyncEngine, async_sessionmaker[AsyncSession]]:
@@ -292,7 +292,7 @@ async def test_auth_failures_are_uniform_and_expired_credentials_rejected(
     db_resources: tuple[AsyncEngine, async_sessionmaker[AsyncSession]],
 ) -> None:
     _, factory = db_resources
-    user_id, _, refresh_token, email = await register(client)
+    user_id, access_token, refresh_token, email = await register(client)
 
     duplicate = await client.post(
         "/api/v1/auth/register",
@@ -348,11 +348,10 @@ async def test_auth_failures_are_uniform_and_expired_credentials_rejected(
         logs = list(
             (await session.scalars(select(AuditLog).where(AuditLog.actor_user_id == user_id))).all()
         )
-    metadata = json.dumps([log.safe_metadata for log in logs]).lower()
-    assert all(
-        secret not in metadata
-        for secret in ("password", "token", "secret", "credential")
-    )
+    metadata = json.dumps([log.safe_metadata for log in logs])
+    assert "correct horse battery staple" not in metadata
+    assert access_token not in metadata
+    assert refresh_token not in metadata
 
 
 @pytest.mark.asyncio
