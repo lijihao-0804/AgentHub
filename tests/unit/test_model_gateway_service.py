@@ -18,8 +18,10 @@ from packages.model_gateway.contracts import (
     ModelStreamEvent,
     ModelStreamEventType,
     ModelToolCallDelta,
+    ModelToolDefinition,
     ModelUsage,
     RetryPolicy,
+    StructuredOutputSchema,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.gateway import ModelGatewayService
@@ -271,6 +273,61 @@ async def test_capability_mismatch_is_validated_across_full_fallback_chain() -> 
 
     assert raised.value.code == ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH
     assert adapter.complete_calls == []
+
+
+@pytest.mark.asyncio
+async def test_tools_automatically_require_tool_calling_before_provider_call() -> None:
+    context, profiles, credential = setup_chain()
+    adapter = FakeAdapter()
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter)
+    model_request = ModelRequest(
+        messages=(ModelMessage(role="user", content="hello"),),
+        tools=(
+            ModelToolDefinition(name="lookup", parameters={"type": "object"}),
+        ),
+    )
+
+    with pytest.raises(ModelGatewayError) as raised:
+        await gateway.generate(context, profiles[0].id, model_request)
+
+    assert raised.value.code == ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH
+    assert adapter.complete_calls == []
+
+
+@pytest.mark.asyncio
+async def test_structured_output_automatically_requires_capability() -> None:
+    context, profiles, credential = setup_chain()
+    adapter = FakeAdapter()
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter)
+    model_request = ModelRequest(
+        messages=(ModelMessage(role="user", content="hello"),),
+        response_schema=StructuredOutputSchema(
+            name="answer",
+            json_schema={"type": "object"},
+        ),
+    )
+
+    with pytest.raises(ModelGatewayError) as raised:
+        await gateway.generate(context, profiles[0].id, model_request)
+
+    assert raised.value.code == ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH
+    assert adapter.complete_calls == []
+
+
+@pytest.mark.asyncio
+async def test_stream_automatically_requires_streaming_capability() -> None:
+    context, profiles, credential = setup_chain()
+    profiles[0].capabilities = {"streaming": False}
+    profiles[1].capabilities = {"streaming": False}
+    adapter = FakeAdapter()
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter)
+
+    with pytest.raises(ModelGatewayError) as raised:
+        async for _ in gateway.stream(context, profiles[0].id, request()):
+            pass
+
+    assert raised.value.code == ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH
+    assert adapter.stream_calls == []
 
 
 @pytest.mark.asyncio

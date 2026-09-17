@@ -19,9 +19,14 @@ class ModelMessage:
     role: MessageRole
     content: str | None = None
     name: str | None = None
+    tool_call_id: str | None = None
     tool_calls: tuple["ModelToolCall", ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
+        if self.role == "tool" and not self.tool_call_id:
+            raise ValueError("tool messages require tool_call_id")
+        if self.role != "tool" and self.tool_call_id is not None:
+            raise ValueError("tool_call_id is only valid for tool messages")
         calls = tuple(self.tool_calls)
         if any(not isinstance(call, ModelToolCall) for call in calls):
             raise TypeError("tool_calls must contain ModelToolCall values")
@@ -183,6 +188,24 @@ class ModelStreamEvent:
     tool_call_delta: ModelToolCallDelta | None = None
     usage: ModelUsage | None = None
     response: ModelResponse | None = None
+
+    def __post_init__(self) -> None:
+        payloads = (
+            self.message_delta is not None,
+            self.tool_call_delta is not None,
+            self.usage is not None,
+            self.response is not None,
+        )
+        if sum(payloads) != 1:
+            raise ValueError("stream events must contain exactly one payload")
+        expected = {
+            ModelStreamEventType.MESSAGE_DELTA: self.message_delta is not None,
+            ModelStreamEventType.TOOL_CALL_DELTA: self.tool_call_delta is not None,
+            ModelStreamEventType.USAGE: self.usage is not None,
+            ModelStreamEventType.COMPLETED: self.response is not None,
+        }
+        if not expected[self.event_type]:
+            raise ValueError("stream event payload does not match event_type")
 
 
 @dataclass(frozen=True, slots=True)

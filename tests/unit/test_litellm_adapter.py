@@ -9,6 +9,7 @@ from packages.model_gateway.contracts import (
     ModelMessage,
     ModelRequest,
     ModelStreamEventType,
+    ModelToolCall,
     ModelToolDefinition,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
@@ -94,6 +95,41 @@ async def test_deepseek_request_is_mapped_and_response_is_normalized() -> None:
     assert client.calls[0]["model"] == "deepseek/deepseek-chat"
     assert client.calls[0]["api_key"] == "adapter-secret"
     assert client.calls[0]["tools"][0]["function"]["name"] == "lookup"
+
+
+@pytest.mark.asyncio
+async def test_tool_result_message_preserves_provider_tool_call_id() -> None:
+    client = FakeCompletionClient(
+        response={
+            "choices": [{"message": {"content": "done"}, "finish_reason": "stop"}],
+        }
+    )
+    model_profile, credential = profile()
+    request = ModelRequest(
+        messages=(
+            ModelMessage(
+                role="assistant",
+                tool_calls=(
+                    ModelToolCall(
+                        name="lookup",
+                        arguments={"q": "x"},
+                        provider_tool_call_id="call-1",
+                    ),
+                ),
+            ),
+            ModelMessage(role="tool", content='{"result": "ok"}', tool_call_id="call-1"),
+        )
+    )
+
+    await LiteLLMProviderAdapter(client).complete(model_profile, credential, request)
+
+    messages = client.calls[0]["messages"]
+    assert messages[0]["tool_calls"][0]["id"] == "call-1"
+    assert messages[1] == {
+        "role": "tool",
+        "content": '{"result": "ok"}',
+        "tool_call_id": "call-1",
+    }
 
 
 @pytest.mark.asyncio

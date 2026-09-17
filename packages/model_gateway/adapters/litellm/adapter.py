@@ -52,6 +52,8 @@ def _message_payload(message: ModelMessage) -> dict[str, Any]:
     payload: dict[str, Any] = {"role": message.role, "content": message.content}
     if message.name is not None:
         payload["name"] = message.name
+    if message.role == "tool":
+        payload["tool_call_id"] = message.tool_call_id
     if message.tool_calls:
         payload["tool_calls"] = [
             {

@@ -6,6 +6,7 @@ from typing import Any
 from packages.model_gateway.contracts import (
     CapabilityRequirements,
     ModelCapabilities,
+    ModelRequest,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 
@@ -48,4 +49,29 @@ def validate_capabilities(
     return capabilities
 
 
-__all__ = ["capabilities_from_mapping", "validate_capabilities"]
+def effective_capability_requirements(
+    request: ModelRequest,
+    mode: str,
+) -> CapabilityRequirements:
+    """Combine caller requirements with requirements implied by the gateway mode."""
+
+    required = set(request.required_capabilities.required)
+    if request.tools:
+        required.add("tool_calling")
+    if request.response_schema is not None:
+        required.add("structured_output")
+    if mode == "stream":
+        required.add("streaming")
+    elif mode != "generate":
+        raise ValueError("unsupported model gateway mode")
+    return CapabilityRequirements(
+        required=frozenset(required),
+        max_context_tokens=request.required_capabilities.max_context_tokens,
+    )
+
+
+__all__ = [
+    "capabilities_from_mapping",
+    "effective_capability_requirements",
+    "validate_capabilities",
+]

@@ -56,6 +56,16 @@ def test_model_request_is_provider_neutral_and_supports_future_requirements() ->
     )
 
 
+def test_tool_result_message_requires_tool_call_id() -> None:
+    message = ModelMessage(role="tool", content="{}", tool_call_id="call-1")
+
+    assert message.tool_call_id == "call-1"
+    with pytest.raises(ValueError):
+        ModelMessage(role="tool", content="{}")
+    with pytest.raises(ValueError):
+        ModelMessage(role="user", content="hello", tool_call_id="call-1")
+
+
 def test_model_response_stream_events_and_decimal_cost_are_typed() -> None:
     usage = ModelUsage(input_tokens=2, output_tokens=3, total_tokens=5, cached_tokens=1)
     response = ModelResponse(
@@ -84,6 +94,26 @@ def test_model_response_stream_events_and_decimal_cost_are_typed() -> None:
     assert response.cost_estimate is not None
     assert response.cost_estimate.amount == Decimal("0.0012")
     assert response.cost_estimate.currency == "USD"
+
+
+def test_stream_event_rejects_conflicting_or_missing_payloads() -> None:
+    usage = ModelUsage(input_tokens=1, output_tokens=1, total_tokens=2)
+    response = ModelResponse(content="done", provider="deepseek", model="deepseek-chat")
+
+    with pytest.raises(ValueError):
+        ModelStreamEvent(
+            event_type=ModelStreamEventType.MESSAGE_DELTA,
+            message_delta="d",
+            usage=usage,
+        )
+    with pytest.raises(ValueError):
+        ModelStreamEvent(event_type=ModelStreamEventType.COMPLETED)
+    with pytest.raises(ValueError):
+        ModelStreamEvent(
+            event_type=ModelStreamEventType.USAGE,
+            usage=usage,
+            response=response,
+        )
 
 
 def test_gateway_entrypoints_require_context_and_profile_id() -> None:

@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
+from packages.model_gateway.capabilities import effective_capability_requirements
 from packages.model_gateway.contracts import (
     ModelCapabilities,
     ModelGateway,
@@ -88,7 +89,7 @@ class ModelGatewayService(ModelGateway):
             chain = await self.resolver.resolve_chain(
                 context,
                 model_profile_id,
-                required_capabilities=request.required_capabilities,
+                required_capabilities=effective_capability_requirements(request, "generate"),
             )
             last_error: ModelGatewayError | None = None
             for profile_index, profile in enumerate(chain):
@@ -181,7 +182,7 @@ class ModelGatewayService(ModelGateway):
             chain = await self.resolver.resolve_chain(
                 context,
                 model_profile_id,
-                required_capabilities=request.required_capabilities,
+                required_capabilities=effective_capability_requirements(request, "stream"),
             )
             last_error: ModelGatewayError | None = None
             for profile_index, profile in enumerate(chain):
