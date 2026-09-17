@@ -30,14 +30,26 @@ class AuthSessionRepository(Protocol):
 
 class TenantRepository(Protocol):
     async def get_organization_membership(
-        self, organization_id: UUID, user_id: UUID
+        self, organization_id: UUID, user_id: UUID, *, for_update: bool = False
     ) -> OrganizationMembership | None: ...
 
     async def get_workspace(self, workspace_id: UUID) -> Workspace | None: ...
 
     async def get_workspace_membership(
-        self, workspace_id: UUID, user_id: UUID
+        self, workspace_id: UUID, user_id: UUID, *, for_update: bool = False
     ) -> WorkspaceMembership | None: ...
+
+    async def list_organizations(self, user_id: UUID) -> list[Organization]: ...
+
+    async def list_workspaces(self, user_id: UUID) -> list[Workspace]: ...
+
+    async def list_workspace_members(
+        self, workspace_id: UUID
+    ) -> list[tuple[WorkspaceMembership, User]]: ...
+
+    async def get_organization_memberships_for_update(
+        self, organization_id: UUID
+    ) -> list[OrganizationMembership]: ...
 
     async def create_organization(self, name: str, created_by: UUID) -> Organization: ...
 

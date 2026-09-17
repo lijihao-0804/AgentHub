@@ -105,18 +105,26 @@ class SqlAlchemyTenantRepository:
         return list(result.scalars().all())
 
     async def list_workspaces(self, user_id: UUID) -> list[Workspace]:
-        org_admin_access = select(OrganizationMembership.organization_id).where(
-            OrganizationMembership.organization_id == Workspace.organization_id,
-            OrganizationMembership.user_id == user_id,
-            OrganizationMembership.role.in_([OrganizationRole.OWNER, OrganizationRole.ADMIN]),
-        )
-        direct_access = select(WorkspaceMembership.workspace_id).where(
+        workspace_membership = select(WorkspaceMembership.workspace_id).where(
             WorkspaceMembership.workspace_id == Workspace.id,
             WorkspaceMembership.user_id == user_id,
         )
         result = await self.session.execute(
             select(Workspace)
-            .where(or_(org_admin_access.exists(), direct_access.exists()))
+            .join(
+                OrganizationMembership,
+                OrganizationMembership.organization_id == Workspace.organization_id,
+            )
+            .where(
+                OrganizationMembership.user_id == user_id,
+                or_(
+                    OrganizationMembership.role.in_([
+                        OrganizationRole.OWNER,
+                        OrganizationRole.ADMIN,
+                    ]),
+                    workspace_membership.exists(),
+                ),
+            )
             .order_by(Workspace.created_at, Workspace.id)
         )
         return list(result.scalars().all())

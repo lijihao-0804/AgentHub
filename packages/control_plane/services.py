@@ -138,7 +138,15 @@ class TenantService:
         tenant = SqlAlchemyTenantRepository(session)
         workspace = await tenant.get_workspace(workspace_id)
         if workspace is None:
-            raise AgentHubError("RESOURCE_NOT_FOUND", "Resource was not found.", 404)
+            await self._deny(
+                session,
+                principal=principal,
+                resource_type="workspace",
+                resource_id=str(workspace_id),
+                organization_id=None,
+                operation="workspace_access",
+                status_code=404,
+            )
         org_membership = await tenant.get_organization_membership(
             workspace.organization_id, user_id
         )
@@ -313,10 +321,14 @@ class TenantService:
             raise AgentHubError("INVALID_ORGANIZATION_ROLE", "Organization role is invalid.", 422)
         memberships = await self._lock_organization_memberships(session, organization_id, principal)
         target = next((item for item in memberships if item.user_id == target_user_id), None)
-        ensure_not_last_owner(
-            sum(item.role == OrganizationRole.OWNER for item in memberships),
-            target.role if target else "",
-            new_role,
+        await self._check_last_owner(
+            session,
+            principal=principal,
+            organization_id=organization_id,
+            target_user_id=target_user_id,
+            owner_count=sum(item.role == OrganizationRole.OWNER for item in memberships),
+            current_role=target.role if target else "",
+            new_role=new_role,
         )
         if target is None:
             raise AgentHubError("RESOURCE_NOT_FOUND", "Resource was not found.", 404)
@@ -344,10 +356,14 @@ class TenantService:
     ) -> None:
         memberships = await self._lock_organization_memberships(session, organization_id, principal)
         target = next((item for item in memberships if item.user_id == target_user_id), None)
-        ensure_not_last_owner(
-            sum(item.role == OrganizationRole.OWNER for item in memberships),
-            target.role if target else "",
-            None,
+        await self._check_last_owner(
+            session,
+            principal=principal,
+            organization_id=organization_id,
+            target_user_id=target_user_id,
+            owner_count=sum(item.role == OrganizationRole.OWNER for item in memberships),
+            current_role=target.role if target else "",
+            new_role=None,
         )
         if target is None:
             raise AgentHubError("RESOURCE_NOT_FOUND", "Resource was not found.", 404)
@@ -411,6 +427,33 @@ class TenantService:
                 status_code=404,
             )
         return await tenant.get_organization_memberships_for_update(organization_id)
+
+    async def _check_last_owner(
+        self,
+        session: AsyncSession,
+        *,
+        principal: PrincipalContext,
+        organization_id: UUID,
+        target_user_id: UUID,
+        owner_count: int,
+        current_role: str,
+        new_role: str | None,
+    ) -> None:
+        try:
+            ensure_not_last_owner(owner_count, current_role, new_role)
+        except AgentHubError:
+            append_audit(
+                session,
+                action="last_owner_protection",
+                resource_type="organization_membership",
+                resource_id=f"{organization_id}:{target_user_id}",
+                request_id=principal.request_id,
+                actor_user_id=self._user_id(principal),
+                organization_id=organization_id,
+                safe_metadata={"outcome": "denied"},
+            )
+            await session.commit()
+            raise
 
     async def _deny(
         self,
