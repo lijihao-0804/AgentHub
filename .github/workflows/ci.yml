@@ -36,7 +36,9 @@ jobs:
       - run: uv run --locked alembic upgrade head
       - run: uv run --locked alembic check
       - run: uv run --locked ruff check .
-      - run: uv run --locked pytest
+      - run: uv run --locked pytest tests/integration/test_m1_postgres.py -vv -rs
+      - run: uv run --locked pytest tests/integration/test_m2_postgres.py -vv -rs
+      - run: uv run --locked pytest -m "not integration"
 
   frontend:
     runs-on: ubuntu-latest
