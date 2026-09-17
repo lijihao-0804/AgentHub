@@ -56,7 +56,7 @@ def migrated_database() -> None:
     get_settings.cache_clear()
     try:
         config = Config(str(Path("alembic.ini")))
-        command.upgrade(config, "head")
+        command.upgrade(config, "0002_m1_auth_tenant_rbac")
         yield
     finally:
         if previous is None:
