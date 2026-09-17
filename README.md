@@ -1,8 +1,9 @@
 # AgentHub
 
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
-implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M1:
-engineering foundations plus the Auth / Tenant / RBAC boundary. M2 is not started.
+implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M2:
+engineering foundations, Auth / Tenant / RBAC, and the ModelGateway + Capability Contract.
+M3 is not started.
 
 ## Basic development setup
 
@@ -42,4 +43,4 @@ Docker remains supported for later migration, checkpoint and deployment verifica
 - Work is delivered one milestone at a time; an unfinished milestone blocks the next one.
 - Every behavior-changing milestone gets a focused commit and a verification record.
 - Secrets never enter source control, snapshots, revisions, logs or traces.
-- M0 deliberately contains no Agent, RAG or Tool product implementation.
+- M2 deliberately contains no Agent, RAG or Tool product implementation.

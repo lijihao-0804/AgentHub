@@ -93,6 +93,7 @@ def test_profile_resolution_does_not_copy_credential_secret() -> None:
 
     assert not hasattr(resolved, "secret")
     assert "must-not-cross-profile-boundary" not in repr(resolved)
+    assert "must-not-cross-profile-boundary" not in repr(credential)
 
 
 def test_context_is_workspace_specific() -> None:

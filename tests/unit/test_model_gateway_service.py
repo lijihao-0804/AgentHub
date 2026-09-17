@@ -330,6 +330,35 @@ async def test_disabled_profile_is_never_called() -> None:
 
 
 @pytest.mark.asyncio
+async def test_disabled_credential_is_never_called() -> None:
+    context, profiles, credential = setup_chain()
+    credential.enabled = False
+    adapter = FakeAdapter()
+    adapter.complete_outcomes = {"primary": [response("primary")], "fallback": []}
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter)
+
+    with pytest.raises(ModelGatewayError) as raised:
+        await gateway.generate(context, profiles[0].id, request())
+
+    assert raised.value.code == ModelGatewayErrorCode.MODEL_PROFILE_DISABLED
+    assert adapter.complete_calls == []
+
+
+@pytest.mark.asyncio
+async def test_fallback_cycle_is_rejected_before_provider_call() -> None:
+    context, profiles, credential = setup_chain()
+    profiles[0].fallback_profile_id = profiles[0].id
+    adapter = FakeAdapter()
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter)
+
+    with pytest.raises(ModelGatewayError) as raised:
+        await gateway.generate(context, profiles[0].id, request())
+
+    assert raised.value.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE
+    assert adapter.complete_calls == []
+
+
+@pytest.mark.asyncio
 async def test_health_failure_is_safe_and_normalized() -> None:
     context, profiles, credential = setup_chain()
     adapter = FakeAdapter()
