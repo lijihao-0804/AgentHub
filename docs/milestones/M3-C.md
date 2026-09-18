@@ -36,7 +36,7 @@
 | Ruff | PASS |
 | Alembic upgrade/check | PASS |
 | Frontend build | PASS（Next.js production build） |
-| GitHub Actions | PASS（closure CI #33，backend/frontend） |
+| GitHub Actions | PASS（closure CI #34，backend/frontend） |
 | Platform-specific PyTorch lock resolution | PASS（Windows cu130 / Linux CPU artifacts） |
 | Windows cu130 runtime sync | PENDING（本机 `uv sync --locked` 仍在后台安装） |
 | REAL MODEL SMOKE | NOT RUN |

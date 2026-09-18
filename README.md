@@ -52,8 +52,8 @@ CI injects deterministic fake models and never downloads BGE checkpoints. Real m
 is a manual host smoke only:
 
 ```powershell
-uv run --locked python scripts/knowledge_model_smoke.py
-uv run --locked python scripts/knowledge_retrieval_smoke.py
+uv run --locked python -m scripts.knowledge_model_smoke
+uv run --locked python -m scripts.knowledge_retrieval_smoke
 ```
 
 Docker remains supported for later deployment verification; full Docker deployment acceptance is

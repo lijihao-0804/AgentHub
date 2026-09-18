@@ -5,7 +5,7 @@ import math
 import pytest
 from qdrant_client import QdrantClient
 
-from apps.worker.tasks.knowledge import _indexing_components, _production_indexing_components
+from apps.worker.tasks.knowledge import _indexing_components
 from packages.core.config.settings import Settings
 from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
 from packages.knowledge.adapters.fakes import (
@@ -47,7 +47,7 @@ def test_real_dense_adapter_is_lazy() -> None:
 
 def test_testing_setting_does_not_select_fake_production_components() -> None:
     settings = Settings(testing=True, knowledge_dense_vector_size=8)
-    components = _indexing_components(settings, factory=_production_indexing_components)
+    components = _indexing_components(settings)
     assert isinstance(components.dense, BgeM3DenseEmbedder)
     assert components.dense._model is None
 
