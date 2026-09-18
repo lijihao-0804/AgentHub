@@ -1,6 +1,6 @@
 # M4-B — READ Tool Runtime
 
-Status: IMPLEMENTED — acceptance pending the dedicated GitHub Actions run.
+Status: PASS — closure verified in GitHub Actions run #57.
 
 M4-B adds a bounded, provider-neutral READ Tool Runtime. It does not start LangGraph, create
 AgentRun/RunStep persistence, stream model output, or implement Approval Runtime.
@@ -48,5 +48,7 @@ duration, error code and argument keys. Tool trace failure is non-fatal.
   and snapshot-bound retriever injection.
 - CI runs real PostgreSQL, Redis, Qdrant and Celery setup, then the dedicated
   `tests/integration/test_m4b_tool_runtime.py` step. No public tool execution endpoint is added.
+- Final closure: commit `b305a58`; GitHub Actions run #57 passed backend, frontend, and the
+  dedicated M4-B integration step.
 
 M4-C Agent Run / LangGraph remains outside this milestone.
