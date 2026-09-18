@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from dataclasses import replace
+import time
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, replace
 from uuid import UUID
 
 from sqlalchemy import select
@@ -12,11 +14,6 @@ from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.knowledge.adapters.celery_queue import CeleryIngestionQueue
 from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
-from packages.knowledge.adapters.fakes import (
-    DeterministicFakeDenseEmbedder,
-    DeterministicFakeReranker,
-    DeterministicFakeSparseEncoder,
-)
 from packages.knowledge.adapters.qdrant import QdrantVectorIndex
 from packages.knowledge.adapters.reranker import BgeReranker
 from packages.knowledge.adapters.sparse import BgeM3SparseEncoder
@@ -29,6 +26,7 @@ from packages.knowledge.contracts import (
     SparseEncoder,
     VectorIndex,
     VectorRecord,
+    provider_error_is_retryable,
 )
 from packages.knowledge.ingestion import (
     ClaimedIngestionJob,
@@ -44,8 +42,57 @@ from packages.knowledge.ingestion import (
 from packages.knowledge.models import DocumentChunk, IngestionStage
 from packages.knowledge.parser import DocumentParseError, ProcessDocumentParser
 from packages.knowledge.point_ids import deterministic_point_id
+from packages.observability import NoopTraceSink
+from packages.observability.contracts import TraceSink, TraceSpan
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class IndexingComponents:
+    dense: DenseEmbedder
+    sparse: SparseEncoder
+    reranker: Reranker
+    index: VectorIndex
+
+
+IndexingComponentsFactory = Callable[[Settings], IndexingComponents]
+
+
+@dataclass(frozen=True)
+class _IndexingOutcome:
+    terminal_error: tuple[str, str] | None
+    retryable_error: tuple[str, str] | None
+    stale: bool
+    chunk_count: int
+    point_count: int
+
+
+async def _safe_trace_start(
+    sink: TraceSink,
+    name: str,
+    attributes: Mapping[str, object],
+) -> TraceSpan | None:
+    try:
+        return await sink.start_span(name, attributes)
+    except Exception:
+        logger.warning("knowledge_trace_start_failed", extra={"span": name})
+        return None
+
+
+async def _safe_trace_end(
+    span: TraceSpan | None,
+    *,
+    attributes: Mapping[str, object],
+    status: str,
+    failure_code: str | None,
+) -> None:
+    if span is None:
+        return
+    try:
+        await span.end(attributes=attributes, status=status, failure_code=failure_code)
+    except Exception:
+        logger.warning("knowledge_trace_end_failed")
 
 
 async def _read_blob(store: LocalBlobStore, blob_key: str) -> bytes:
@@ -84,62 +131,67 @@ async def _finalize_claim(
     terminal_error: tuple[str, str] | None = None,
     retryable_error: tuple[str, str] | None = None,
     settings: Settings,
-) -> None:
+) -> str:
     async with factory() as session:
         if terminal_error is not None:
-            await fail_ingestion_job(
+            finalized = await fail_ingestion_job(
                 session,
                 claim=claim,
                 error_code=terminal_error[0],
                 safe_message=terminal_error[1],
             )
+            return "failed" if finalized else "stale"
         elif retryable_error is not None:
             if claim.attempt_count >= settings.knowledge_ingestion_max_attempts:
-                await fail_ingestion_job(
+                finalized = await fail_ingestion_job(
                     session,
                     claim=claim,
                     error_code="MAX_ATTEMPTS_EXCEEDED",
                     safe_message="The ingestion job exceeded its retry limit.",
                 )
+                return "failed" if finalized else "stale"
             else:
-                await release_ingestion_for_retry(
+                released = await release_ingestion_for_retry(
                     session,
                     claim=claim,
                     error_code=retryable_error[0],
                     safe_message=retryable_error[1],
                     retry_base_seconds=settings.knowledge_ingestion_retry_base_seconds,
                 )
+                return "retrying" if released else "stale"
+    return "succeeded"
 
 
-def _indexing_components(
-    settings: Settings,
-) -> tuple[DenseEmbedder, SparseEncoder, Reranker, VectorIndex]:
-    if settings.testing:
-        dense: DenseEmbedder = DeterministicFakeDenseEmbedder(
-            dimension=settings.knowledge_dense_vector_size
-        )
-        sparse: SparseEncoder = DeterministicFakeSparseEncoder()
-        reranker: Reranker = DeterministicFakeReranker()
-    else:
-        dense = BgeM3DenseEmbedder(
+def _production_indexing_components(settings: Settings) -> IndexingComponents:
+    return IndexingComponents(
+        dense=BgeM3DenseEmbedder(
             model_name=settings.knowledge_embedding_model,
             device=settings.knowledge_embedding_device,
             batch_size=settings.knowledge_embedding_batch_size,
             expected_dimension=settings.knowledge_dense_vector_size,
-        )
-        sparse = BgeM3SparseEncoder(model_name=settings.knowledge_embedding_model)
-        reranker = BgeReranker(
+        ),
+        sparse=BgeM3SparseEncoder(model_name=settings.knowledge_embedding_model),
+        reranker=BgeReranker(
             model_name=settings.knowledge_reranker_model,
             device=settings.knowledge_reranker_device,
             batch_size=settings.knowledge_reranker_batch_size,
-        )
-    index: VectorIndex = QdrantVectorIndex(
-        url=settings.qdrant_url,
-        collection_name=settings.knowledge_qdrant_collection,
-        dense_vector_size=settings.knowledge_dense_vector_size,
-        timeout_seconds=settings.knowledge_qdrant_timeout_seconds,
+        ),
+        index=QdrantVectorIndex(
+            url=settings.qdrant_url,
+            collection_name=settings.knowledge_qdrant_collection,
+            dense_vector_size=settings.knowledge_dense_vector_size,
+            timeout_seconds=settings.knowledge_qdrant_timeout_seconds,
+        ),
     )
-    return dense, sparse, reranker, index
+
+
+def _indexing_components(
+    settings: Settings,
+    *,
+    factory: IndexingComponentsFactory | None = None,
+) -> IndexingComponents:
+    selected_factory = factory or _production_indexing_components
+    return selected_factory(settings)
 
 
 async def _load_chunks(factory, revision_id: UUID) -> list[DocumentChunk]:
@@ -192,10 +244,16 @@ async def _index_claim(
     dense: DenseEmbedder,
     sparse: SparseEncoder,
     index: VectorIndex,
-) -> tuple[tuple[str, str] | None, tuple[str, str] | None, bool]:
+) -> _IndexingOutcome:
     chunks = await _load_chunks(factory, claim.document_revision_id)
     if not chunks:
-        return ("EMPTY_CHUNKS", "The document contains no indexed chunks."), None, False
+        return _IndexingOutcome(
+            ("EMPTY_CHUNKS", "The document contains no indexed chunks."),
+            None,
+            False,
+            0,
+            0,
+        )
 
     # Embeddings are intentionally recomputed for both EMBEDDING and INDEXING.
     # PostgreSQL remains the durable textual source; deterministic Qdrant upsert
@@ -211,7 +269,7 @@ async def _index_claim(
                 next_stage=IngestionStage.INDEXING,
             )
         if not transitioned:
-            return None, None, True
+            return _IndexingOutcome(None, None, True, len(chunks), len(records))
 
     await asyncio.to_thread(index.ensure_collection)
     await asyncio.to_thread(index.upsert, records)
@@ -221,10 +279,16 @@ async def _index_claim(
             job_id=claim.id,
             lease_token=claim.lease_token,
         )
-    return None, None, not finalized
+    return _IndexingOutcome(None, None, not finalized, len(chunks), len(records))
 
 
-async def _process_knowledge_ingestion(job_id: UUID, settings: Settings) -> None:
+async def _process_knowledge_ingestion(
+    job_id: UUID,
+    settings: Settings,
+    *,
+    indexing_factory: IndexingComponentsFactory | None = None,
+    trace_sink: TraceSink | None = None,
+) -> None:
     engine, factory = create_database(settings.database_url)
     try:
         async with factory() as session:
@@ -236,6 +300,23 @@ async def _process_knowledge_ingestion(job_id: UUID, settings: Settings) -> None
         if claim is None:
             return
 
+        trace_span = await _safe_trace_start(
+            trace_sink or NoopTraceSink(),
+            "knowledge.ingest",
+            {
+                "workspace_id": str(claim.workspace_id),
+                "knowledge_base_id": str(claim.knowledge_base_id),
+                "document_revision_id": str(claim.document_revision_id),
+                "job_id": str(claim.id),
+                "stage": claim.stage,
+                "attempt_count": claim.attempt_count,
+            },
+        )
+        started = time.perf_counter()
+        chunk_count = 0
+        point_count = 0
+        final_status = "succeeded"
+        failure_code: str | None = None
         renewal_task = asyncio.create_task(_renew_lease_loop(factory, claim, settings))
         terminal_error: tuple[str, str] | None = None
         retryable_error: tuple[str, str] | None = None
@@ -289,20 +370,26 @@ async def _process_knowledge_ingestion(job_id: UUID, settings: Settings) -> None
                             if not persisted:
                                 stale = True
                             else:
+                                chunk_count = len(chunks)
                                 claim = replace(claim, stage=IngestionStage.EMBEDDING)
 
                 if not stale and terminal_error is None:
-                    dense, sparse, _reranker, index = _indexing_components(settings)
+                    components = _indexing_components(settings, factory=indexing_factory)
                     try:
-                        terminal_error, retryable_error, stale = await _index_claim(
+                        outcome = await _index_claim(
                             factory,
                             claim,
-                            dense=dense,
-                            sparse=sparse,
-                            index=index,
+                            dense=components.dense,
+                            sparse=components.sparse,
+                            index=components.index,
                         )
+                        terminal_error = outcome.terminal_error
+                        retryable_error = outcome.retryable_error
+                        stale = outcome.stale
+                        chunk_count = max(chunk_count, outcome.chunk_count)
+                        point_count = outcome.point_count
                     except KnowledgeProviderError as exc:
-                        if exc.code == "QDRANT_UNAVAILABLE":
+                        if provider_error_is_retryable(exc.code):
                             retryable_error = (exc.code, exc.message)
                         else:
                             terminal_error = (exc.code, exc.message)
@@ -321,15 +408,45 @@ async def _process_knowledge_ingestion(job_id: UUID, settings: Settings) -> None
             )
         finally:
             await _cancel_renewal(renewal_task)
-
-        if not stale:
-            await _finalize_claim(
-                factory,
-                claim,
-                terminal_error=terminal_error,
-                retryable_error=retryable_error,
-                settings=settings,
-            )
+            if terminal_error is not None:
+                failure_code = terminal_error[0]
+            elif retryable_error is not None:
+                failure_code = retryable_error[0]
+            try:
+                if stale:
+                    final_status = "stale"
+                    failure_code = failure_code or "INGESTION_LEASE_LOST"
+                else:
+                    final_status = await _finalize_claim(
+                        factory,
+                        claim,
+                        terminal_error=terminal_error,
+                        retryable_error=retryable_error,
+                        settings=settings,
+                    )
+            except Exception:
+                final_status = "retrying"
+                failure_code = failure_code or "DATABASE_TEMPORARY_FAILURE"
+                raise
+            finally:
+                await _safe_trace_end(
+                    trace_span,
+                    attributes={
+                        "workspace_id": str(claim.workspace_id),
+                        "knowledge_base_id": str(claim.knowledge_base_id),
+                        "document_revision_id": str(claim.document_revision_id),
+                        "job_id": str(claim.id),
+                        "stage": claim.stage,
+                        "attempt_count": claim.attempt_count,
+                        "chunk_count": chunk_count,
+                        "point_count": point_count,
+                        "latency_ms": round((time.perf_counter() - started) * 1000, 3),
+                        "status": final_status,
+                        "failure_code": failure_code,
+                    },
+                    status="error" if final_status == "failed" else final_status,
+                    failure_code=failure_code,
+                )
     finally:
         await engine.dispose()
 
@@ -346,7 +463,14 @@ def process_knowledge_ingestion(_task, job_id: str) -> None:
         parsed_job_id = UUID(job_id)
     except ValueError:
         return
-    asyncio.run(_process_knowledge_ingestion(parsed_job_id, get_settings()))
+    settings = get_settings()
+    asyncio.run(
+        _process_knowledge_ingestion(
+            parsed_job_id,
+            settings,
+            indexing_factory=_production_indexing_components,
+        )
+    )
 
 
 @celery_app.task(

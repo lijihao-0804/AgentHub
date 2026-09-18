@@ -106,6 +106,12 @@ class RecordingTraceSink:
         return Span()
 
 
+class FailingReranker:
+    def rerank(self, query, candidates):
+        del query, candidates
+        raise RuntimeError("provider secret must not escape")
+
+
 async def _seed_retrieval_fixture(
     factory: async_sessionmaker[AsyncSession],
     *,
@@ -260,7 +266,7 @@ async def test_snapshot_scoped_hybrid_retrieval_and_trace(
             vector_index=index,
             trace_sink=trace,
         )
-        evidence = await retriever.retrieve(
+        result = await retriever.retrieve_with_trace(
             context,
             RetrievalQuery(
                 text="alpha",
@@ -268,12 +274,19 @@ async def test_snapshot_scoped_hybrid_retrieval_and_trace(
                 knowledge_snapshot_id=str(snapshot_id),
             ),
         )
+    evidence = list(result.evidence)
     assert len(evidence) == 1
     assert evidence[0].chunk_id == chunk.chunk_id
     assert evidence[0].text == chunk.text
     assert evidence[0].source.startswith("document:")
     assert {name for name, _ in trace.started} == {"knowledge.retrieve", "knowledge.rerank"}
     assert all("alpha" not in str(attributes) for _, attributes in trace.started)
+    assert result.trace.snapshot_id == str(snapshot_id)
+    assert result.trace.dense.results[0].chunk_id == chunk.chunk_id
+    assert result.trace.sparse.results[0].chunk_id == chunk.chunk_id
+    assert result.trace.fusion.results[0].chunk_id == chunk.chunk_id
+    assert result.trace.rerank.results[0].chunk_id == chunk.chunk_id
+    assert "alpha 中文 knowledge" not in str(result.trace)
 
 
 @pytest.mark.asyncio
@@ -310,3 +323,39 @@ async def test_qdrant_unavailable_is_safe_503(
     assert error.value.code == "KNOWLEDGE_INDEX_UNAVAILABLE"
     assert error.value.status_code == 503
     assert "65530" not in error.value.message
+
+
+@pytest.mark.asyncio
+async def test_reranker_failure_closes_rerank_span_safely(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    context, knowledge_base_id, snapshot_id, chunk = await _seed_retrieval_fixture(
+        db_factory, workspace_name=f"workspace-{uuid4()}"
+    )
+    settings = _settings(f"agenthub_m3c_rerank_failure_{uuid4().hex}")
+    index = _index(settings, chunk)
+    trace = RecordingTraceSink()
+    async with db_factory() as session:
+        retriever = HybridKnowledgeRetriever(
+            session=session,
+            dense_embedder=DeterministicFakeDenseEmbedder(dimension=16),
+            sparse_encoder=DeterministicFakeSparseEncoder(),
+            reranker=FailingReranker(),
+            vector_index=index,
+            trace_sink=trace,
+        )
+        with pytest.raises(AgentHubError) as error:
+            await retriever.retrieve(
+                context,
+                RetrievalQuery(
+                    text="alpha",
+                    knowledge_base_id=str(knowledge_base_id),
+                    knowledge_snapshot_id=str(snapshot_id),
+                ),
+            )
+    assert error.value.code == "KNOWLEDGE_INDEX_UNAVAILABLE"
+    rerank_end = [attributes for name, attributes in trace.ended if name == "knowledge.rerank"]
+    assert len(rerank_end) == 1
+    assert rerank_end[0]["status"] == "error"
+    assert rerank_end[0]["failure_code"] == "RERANKER_INFERENCE_FAILED"
+    assert "provider secret" not in str(rerank_end)

@@ -24,6 +24,7 @@ dependencies = [
   "redis>=5.2,<6",
   "sentence-transformers>=3.4,<6",
   "sqlalchemy[asyncio]>=2.0.36,<3",
+  "torch>=2.14,<2.15",
   "transformers>=4.49,<5",
   "uvicorn[standard]>=0.34,<1",
 ]
@@ -44,6 +45,22 @@ testpaths = ["tests"]
 markers = [
   "integration: requires a real PostgreSQL database configured with AGENTHUB_TEST_DATABASE_URL",
 ]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu130", marker = "sys_platform == 'win32'" },
+  { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.ruff]
 target-version = "py312"

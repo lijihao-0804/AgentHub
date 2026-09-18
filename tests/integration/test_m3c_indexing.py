@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -8,14 +9,25 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from apps.worker.tasks.knowledge import _process_knowledge_ingestion
 from packages.control_plane.models import Organization, User, Workspace
 from packages.core.config.settings import Settings
 from packages.core.database import create_database
+from packages.knowledge.adapters.fakes import (
+    DeterministicFakeDenseEmbedder,
+    DeterministicFakeSparseEncoder,
+)
+from packages.knowledge.adapters.qdrant import QdrantVectorIndex
 from packages.knowledge.blob_store import LocalBlobStore
-from packages.knowledge.ingestion import claim_ingestion_job, finalize_ingestion_ready
+from packages.knowledge.contracts import VectorRecord, VectorScope
+from packages.knowledge.ingestion import (
+    claim_ingestion_job,
+    finalize_ingestion_ready,
+    reconcile_ingestion_jobs,
+)
 from packages.knowledge.models import (
     Document,
     DocumentChunk,
@@ -27,6 +39,8 @@ from packages.knowledge.models import (
     RevisionIngestionStatus,
     RevisionLifecycleStatus,
 )
+from packages.knowledge.point_ids import deterministic_point_id
+from tests.support.knowledge import fake_indexing_components
 
 TEST_DATABASE_URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "").strip()
 TEST_QDRANT_URL = os.environ.get("AGENTHUB_TEST_QDRANT_URL", "http://127.0.0.1:6333").strip()
@@ -43,6 +57,51 @@ def async_database_url(database_url: str) -> str:
     if database_url.startswith("postgresql://"):
         return database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
     return database_url
+
+
+class RecordingQueue:
+    def __init__(self) -> None:
+        self.job_ids: list[UUID] = []
+
+    async def enqueue(self, job_id: UUID) -> None:
+        self.job_ids.append(job_id)
+
+
+class RecordingTraceSink:
+    def __init__(self) -> None:
+        self.started: list[tuple[str, dict[str, object]]] = []
+        self.ended: list[tuple[str, dict[str, object]]] = []
+
+    async def start_span(self, name: str, attributes=None):
+        self.started.append((name, dict(attributes or {})))
+        sink = self
+
+        class Span:
+            async def end(self, *, attributes=None, status="ok", failure_code=None):
+                sink.ended.append(
+                    (
+                        name,
+                        {
+                            **dict(attributes or {}),
+                            "status": status,
+                            "failure_code": failure_code,
+                        },
+                    )
+                )
+
+        return Span()
+
+
+class FailingTraceSink:
+    async def start_span(self, name: str, attributes=None):
+        del name, attributes
+
+        class Span:
+            async def end(self, **kwargs):
+                del kwargs
+                raise RuntimeError("trace backend unavailable")
+
+        return Span()
 
 
 @pytest.fixture(scope="session")
@@ -177,13 +236,27 @@ async def test_real_postgres_qdrant_indexing_is_ready_and_retryable(
     collection = f"agenthub_m3c_{uuid4().hex}"
     settings = _settings(collection, blob_root)
     job_id, revision_id, _ = await _seed_revision(db_factory, blob_root=blob_root)
+    trace = RecordingTraceSink()
 
-    await _process_knowledge_ingestion(job_id, settings)
+    await _process_knowledge_ingestion(
+        job_id,
+        settings,
+        indexing_factory=fake_indexing_components,
+        trace_sink=trace,
+    )
     async with db_factory() as session:
         revision = await session.get(DocumentRevision, revision_id)
         job = await session.get(IngestionJob, job_id)
     assert revision is not None and revision.ingestion_status == RevisionIngestionStatus.READY
     assert job is not None and job.status == IngestionJobStatus.SUCCEEDED
+    assert [name for name, _ in trace.started] == ["knowledge.ingest"]
+    assert [name for name, _ in trace.ended] == ["knowledge.ingest"]
+    trace_projection = trace.ended[0][1]
+    assert trace_projection["status"] == "succeeded"
+    assert trace_projection["chunk_count"] == 1
+    assert trace_projection["point_count"] == 1
+    assert "中文 knowledge and English retrieval" not in str(trace_projection)
+    assert str(blob_root) not in str(trace_projection)
 
     # A pending INDEXING job models a crash after Qdrant acknowledged the upsert
     # but before PostgreSQL READY finalization. Recompute + deterministic upsert is safe.
@@ -193,7 +266,11 @@ async def test_real_postgres_qdrant_indexing_is_ready_and_retryable(
         stage=IngestionStage.INDEXING,
         with_chunk=True,
     )
-    await _process_knowledge_ingestion(retry_job, settings)
+    await _process_knowledge_ingestion(
+        retry_job,
+        settings,
+        indexing_factory=fake_indexing_components,
+    )
     async with db_factory() as session:
         retry_revision_record = await session.get(DocumentRevision, retry_revision)
         retry_job_record = await session.get(IngestionJob, retry_job)
@@ -201,6 +278,168 @@ async def test_real_postgres_qdrant_indexing_is_ready_and_retryable(
     assert retry_revision_record.ingestion_status == RevisionIngestionStatus.READY
     assert retry_job_record is not None
     assert retry_job_record.status == IngestionJobStatus.SUCCEEDED
+
+
+@pytest.mark.asyncio
+async def test_qdrant_unavailable_keeps_indexing_retryable_then_recovers(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    blob_root = Path("data/blobs/m3c-integration") / uuid4().hex
+    collection = f"agenthub_m3c_recovery_{uuid4().hex}"
+    settings = _settings(collection, blob_root)
+    settings.qdrant_url = "http://127.0.0.1:65530"
+    settings.knowledge_qdrant_timeout_seconds = 1
+    settings.knowledge_ingestion_retry_base_seconds = 1
+    job_id, revision_id, _ = await _seed_revision(
+        db_factory,
+        blob_root=blob_root,
+        stage=IngestionStage.INDEXING,
+        with_chunk=True,
+    )
+
+    await _process_knowledge_ingestion(
+        job_id,
+        settings,
+        indexing_factory=fake_indexing_components,
+    )
+    async with db_factory() as session:
+        revision = await session.get(DocumentRevision, revision_id)
+        job = await session.get(IngestionJob, job_id)
+    assert revision is not None and revision.ingestion_status != RevisionIngestionStatus.READY
+    assert job is not None
+    assert job.status == IngestionJobStatus.PENDING
+    assert job.stage == IngestionStage.INDEXING
+    assert job.last_error_code == "QDRANT_UNAVAILABLE"
+
+    settings.qdrant_url = TEST_QDRANT_URL
+    queue = RecordingQueue()
+    async with db_factory() as session:
+        await session.execute(
+            update(IngestionJob)
+            .where(IngestionJob.id == job_id)
+            .values(
+                created_at=datetime.now(UTC) - timedelta(minutes=1),
+                next_attempt_at=datetime.now(UTC) - timedelta(seconds=1),
+            )
+        )
+        await session.commit()
+        result = await reconcile_ingestion_jobs(session, queue=queue, settings=settings)
+    assert job_id in result.requeued_job_ids
+    assert queue.job_ids == [job_id]
+
+    await _process_knowledge_ingestion(
+        job_id,
+        settings,
+        indexing_factory=fake_indexing_components,
+    )
+    async with db_factory() as session:
+        revision = await session.get(DocumentRevision, revision_id)
+        job = await session.get(IngestionJob, job_id)
+    assert revision is not None and revision.ingestion_status == RevisionIngestionStatus.READY
+    assert job is not None and job.status == IngestionJobStatus.SUCCEEDED
+
+
+@pytest.mark.asyncio
+async def test_ingestion_trace_failure_does_not_affect_ready_transition(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    blob_root = Path("data/blobs/m3c-integration") / uuid4().hex
+    settings = _settings(f"agenthub_m3c_trace_failure_{uuid4().hex}", blob_root)
+    job_id, revision_id, _ = await _seed_revision(
+        db_factory,
+        blob_root=blob_root,
+        stage=IngestionStage.INDEXING,
+        with_chunk=True,
+    )
+    await _process_knowledge_ingestion(
+        job_id,
+        settings,
+        indexing_factory=fake_indexing_components,
+        trace_sink=FailingTraceSink(),
+    )
+    async with db_factory() as session:
+        revision = await session.get(DocumentRevision, revision_id)
+        job = await session.get(IngestionJob, job_id)
+    assert revision is not None and revision.ingestion_status == RevisionIngestionStatus.READY
+    assert job is not None and job.status == IngestionJobStatus.SUCCEEDED
+
+
+@pytest.mark.asyncio
+async def test_taken_over_worker_cannot_finalize_ready(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    blob_root = Path("data/blobs/m3c-integration") / uuid4().hex
+    job_id, revision_id, _ = await _seed_revision(
+        db_factory,
+        blob_root=blob_root,
+        stage=IngestionStage.INDEXING,
+        with_chunk=True,
+    )
+    async with db_factory() as session:
+        old_claim = await claim_ingestion_job(session, job_id=job_id, lease_seconds=5)
+    assert old_claim is not None
+
+    async with db_factory() as session:
+        await session.execute(
+            update(IngestionJob)
+            .where(IngestionJob.id == job_id)
+            .values(lease_expires_at=datetime.now(UTC) - timedelta(seconds=1))
+        )
+        await session.commit()
+        new_claim = await claim_ingestion_job(session, job_id=job_id, lease_seconds=60)
+    assert new_claim is not None and new_claim.lease_token != old_claim.lease_token
+
+    async with db_factory() as session:
+        finalized = await finalize_ingestion_ready(
+            session,
+            job_id=job_id,
+            lease_token=old_claim.lease_token,
+        )
+    assert finalized is False
+    async with db_factory() as session:
+        revision = await session.get(DocumentRevision, revision_id)
+        job = await session.get(IngestionJob, job_id)
+    assert revision is not None and revision.ingestion_status != RevisionIngestionStatus.READY
+    assert job is not None
+    assert job.status == IngestionJobStatus.PROCESSING
+    assert job.stage == IngestionStage.INDEXING
+    assert job.lease_token == new_claim.lease_token
+
+
+@pytest.mark.asyncio
+async def test_real_qdrant_repeated_upsert_keeps_one_deterministic_point() -> None:
+    collection = f"agenthub_m3c_point_{uuid4().hex}"
+    index = QdrantVectorIndex(
+        url=TEST_QDRANT_URL,
+        collection_name=collection,
+        dense_vector_size=16,
+    )
+    dense = DeterministicFakeDenseEmbedder(dimension=16).embed_query("same point")
+    sparse = DeterministicFakeSparseEncoder().encode_query("same point")
+    point_id = deterministic_point_id("m3c-real-point")
+    record = VectorRecord(
+        point_id=point_id,
+        chunk_id="m3c-real-point",
+        dense=dense,
+        sparse=sparse,
+        payload={
+            "workspace_id": "m3c-workspace",
+            "knowledge_base_id": "m3c-kb",
+            "document_id": "m3c-document",
+            "document_revision_id": "m3c-revision",
+            "chunk_id": "m3c-real-point",
+            "locator": {"type": "text_range", "char_start": 0, "char_end": 10},
+        },
+    )
+    index.ensure_collection()
+    index.upsert((record,))
+    index.upsert((record,))
+    hits = index.dense_search(
+        dense,
+        scope=VectorScope("m3c-workspace", "m3c-kb", ("m3c-revision",)),
+        limit=30,
+    )
+    assert [hit.point_id for hit in hits] == [point_id]
 
 
 @pytest.mark.asyncio

@@ -32,6 +32,39 @@ class RetrievedEvidence:
 
 
 @dataclass(frozen=True)
+class RetrievalTraceResult:
+    """Provider-neutral result projection for one retrieval stage."""
+
+    chunk_id: str
+    rank: int
+    score: float
+
+
+@dataclass(frozen=True)
+class RetrievalTraceStage:
+    latency_ms: float
+    results: tuple[RetrievalTraceResult, ...]
+
+
+@dataclass(frozen=True)
+class RetrievalTrace:
+    """Safe retrieval trace data; document and chunk text are intentionally absent."""
+
+    snapshot_id: str
+    dense: RetrievalTraceStage
+    sparse: RetrievalTraceStage
+    fusion: RetrievalTraceStage
+    rerank: RetrievalTraceStage
+    total_latency_ms: float
+
+
+@dataclass(frozen=True)
+class RetrievalResult:
+    evidence: tuple[RetrievedEvidence, ...]
+    trace: RetrievalTrace
+
+
+@dataclass(frozen=True)
 class SparseEncoding:
     """Provider-neutral sparse vector with deterministic, sorted coordinates."""
 
@@ -75,6 +108,41 @@ class KnowledgeProviderError(Exception):
         super().__init__(message)
         self.code = code
         self.message = message
+
+
+RETRYABLE_PROVIDER_ERROR_CODES = frozenset(
+    {
+        "QDRANT_UNAVAILABLE",
+        "EMBEDDER_LOAD_FAILED",
+        "EMBEDDER_INFERENCE_FAILED",
+        "SPARSE_TOKENIZER_LOAD_FAILED",
+        "SPARSE_ENCODING_FAILED",
+        "RERANKER_LOAD_FAILED",
+        "RERANKER_INFERENCE_FAILED",
+    }
+)
+
+TERMINAL_PROVIDER_ERROR_CODES = frozenset(
+    {
+        "CUDA_UNAVAILABLE",
+        "EMBEDDER_DIMENSION_MISMATCH",
+        "EMBEDDER_INVALID_VECTOR",
+        "INVALID_DENSE_VECTOR",
+        "INVALID_SPARSE_VECTOR",
+        "QDRANT_SCHEMA_MISMATCH",
+        "INVALID_PROVIDER_RESULT",
+        "EMBEDDER_UNAVAILABLE",
+        "SPARSE_ENCODER_UNAVAILABLE",
+        "RERANKER_UNAVAILABLE",
+        "INVALID_RERANK_RESULT",
+    }
+)
+
+
+def provider_error_is_retryable(code: str) -> bool:
+    """Unknown provider codes are terminal until explicitly classified."""
+
+    return code in RETRYABLE_PROVIDER_ERROR_CODES
 
 
 class DenseEmbedder(Protocol):
@@ -124,3 +192,9 @@ class KnowledgeRetriever(Protocol):
         context: WorkspaceExecutionContext,
         query: RetrievalQuery,
     ) -> list[RetrievedEvidence]: ...
+
+    async def retrieve_with_trace(
+        self,
+        context: WorkspaceExecutionContext,
+        query: RetrievalQuery,
+    ) -> RetrievalResult: ...

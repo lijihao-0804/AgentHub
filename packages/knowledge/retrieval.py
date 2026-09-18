@@ -23,6 +23,10 @@ from packages.knowledge.contracts import (
     RerankCandidate,
     Reranker,
     RetrievalQuery,
+    RetrievalResult,
+    RetrievalTrace,
+    RetrievalTraceResult,
+    RetrievalTraceStage,
     RetrievedEvidence,
     SparseEncoder,
     VectorIndex,
@@ -96,6 +100,16 @@ def _ranked_hits(hits: tuple[VectorSearchHit, ...]) -> dict[str, tuple[int, floa
             continue
         ranked.setdefault(chunk_id, (rank, hit.score))
     return ranked
+
+
+def _trace_hits(hits: tuple[VectorSearchHit, ...]) -> tuple[RetrievalTraceResult, ...]:
+    return tuple(
+        RetrievalTraceResult(chunk_id, rank, score)
+        for rank, hit in enumerate(hits, start=1)
+        for chunk_id in (_payload_chunk_id(hit),)
+        if chunk_id is not None and math.isfinite(hit.score)
+        for score in (float(hit.score),)
+    )
 
 
 def fuse_reciprocal_rank(
@@ -206,11 +220,11 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         )
         return {chunk.chunk_id: (chunk, document, revision) for chunk, document, revision in result}
 
-    async def retrieve(
+    async def retrieve_with_trace(
         self,
         context: WorkspaceExecutionContext,
         query: RetrievalQuery,
-    ) -> list[RetrievedEvidence]:
+    ) -> RetrievalResult:
         if "knowledge_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
         if min(
@@ -244,7 +258,18 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     "total_latency_ms": 0,
                 },
             )
-            return []
+            empty_stage = RetrievalTraceStage(latency_ms=0, results=())
+            return RetrievalResult(
+                evidence=(),
+                trace=RetrievalTrace(
+                    snapshot_id=query.knowledge_snapshot_id,
+                    dense=empty_stage,
+                    sparse=empty_stage,
+                    fusion=empty_stage,
+                    rerank=empty_stage,
+                    total_latency_ms=0,
+                ),
+            )
 
         scope = VectorScope(
             workspace_id=str(workspace_id),
@@ -252,6 +277,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             document_revision_ids=revision_ids,
         )
         started = time.perf_counter()
+        rerank_span: TraceSpan | None = None
         try:
             dense_started = time.perf_counter()
             dense_query = await asyncio.to_thread(self.dense_embedder.embed_query, query.text)
@@ -281,6 +307,10 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 candidate_top_k=query.candidate_top_k,
             )
             fusion_latency_ms = (time.perf_counter() - fusion_started) * 1000
+            fusion_trace_results = tuple(
+                RetrievalTraceResult(item.chunk_id, rank, item.retrieval_score)
+                for rank, item in enumerate(fused, start=1)
+            )
             chunk_map = await self._load_chunks(
                 workspace_id=workspace_id,
                 knowledge_base_id=knowledge_base_id,
@@ -323,6 +353,10 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     item[0].chunk_id,
                 ),
             )[: query.final_top_k]
+            rerank_trace_results = tuple(
+                RetrievalTraceResult(candidate.chunk_id, rank, float(rerank_score))
+                for rank, (candidate, rerank_score) in enumerate(ranked, start=1)
+            )
             evidence: list[RetrievedEvidence] = []
             for candidate, rerank_score in ranked:
                 chunk, document, revision = chunk_map[candidate.chunk_id]
@@ -351,6 +385,8 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     "latency_ms": round(rerank_latency_ms, 3),
                 },
             )
+            rerank_span = None
+            total_latency_ms = (time.perf_counter() - started) * 1000
             await _safe_span_end(
                 snapshot_span,
                 attributes={
@@ -364,11 +400,40 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     "rerank_latency_ms": round(rerank_latency_ms, 3),
                     "rerank_input_count": len(candidates),
                     "rerank_output_count": len(evidence),
-                    "total_latency_ms": round((time.perf_counter() - started) * 1000, 3),
+                    "total_latency_ms": round(total_latency_ms, 3),
                 },
             )
-            return evidence
+            return RetrievalResult(
+                evidence=tuple(evidence),
+                trace=RetrievalTrace(
+                    snapshot_id=query.knowledge_snapshot_id,
+                    dense=RetrievalTraceStage(
+                        latency_ms=round(dense_latency_ms, 3),
+                        results=_trace_hits(dense_hits),
+                    ),
+                    sparse=RetrievalTraceStage(
+                        latency_ms=round(sparse_latency_ms, 3),
+                        results=_trace_hits(sparse_hits),
+                    ),
+                    fusion=RetrievalTraceStage(
+                        latency_ms=round(fusion_latency_ms, 3),
+                        results=fusion_trace_results,
+                    ),
+                    rerank=RetrievalTraceStage(
+                        latency_ms=round(rerank_latency_ms, 3),
+                        results=rerank_trace_results,
+                    ),
+                    total_latency_ms=round(total_latency_ms, 3),
+                ),
+            )
         except KnowledgeProviderError as exc:
+            await _safe_span_end(
+                rerank_span,
+                attributes={"snapshot_id": query.knowledge_snapshot_id},
+                status="error",
+                failure_code=exc.code,
+            )
+            rerank_span = None
             await _safe_span_end(
                 snapshot_span,
                 attributes={"snapshot_id": query.knowledge_snapshot_id},
@@ -382,6 +447,13 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             ) from None
         except Exception:
             await _safe_span_end(
+                rerank_span,
+                attributes={"snapshot_id": query.knowledge_snapshot_id},
+                status="error",
+                failure_code="RERANKER_INFERENCE_FAILED",
+            )
+            rerank_span = None
+            await _safe_span_end(
                 snapshot_span,
                 attributes={"snapshot_id": query.knowledge_snapshot_id},
                 status="error",
@@ -392,6 +464,14 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 "The knowledge index is unavailable.",
                 503,
             ) from None
+
+    async def retrieve(
+        self,
+        context: WorkspaceExecutionContext,
+        query: RetrievalQuery,
+    ) -> list[RetrievedEvidence]:
+        result = await self.retrieve_with_trace(context, query)
+        return list(result.evidence)
 
 
 __all__ = ["HybridKnowledgeRetriever", "fuse_reciprocal_rank"]

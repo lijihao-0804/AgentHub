@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from qdrant_client import QdrantClient, models
@@ -52,9 +52,20 @@ class QdrantVectorIndex:
     def _sparse_params_match(actual: Any) -> bool:
         if not isinstance(actual, dict) or set(actual) != {"sparse"}:
             return False
-        # Qdrant versions may omit the modifier in their response; the named sparse
-        # vector is the compatibility boundary, while IDF is requested at creation.
-        return actual["sparse"] is not None
+        sparse = actual["sparse"]
+        if sparse is None:
+            return False
+        if isinstance(sparse, Mapping):
+            if "modifier" not in sparse:
+                return True
+            modifier = sparse["modifier"]
+        else:
+            # Qdrant versions before sparse modifier exposure may omit the field.
+            if not hasattr(sparse, "modifier"):
+                return True
+            modifier = sparse.modifier
+        value = getattr(modifier, "value", modifier)
+        return str(value).lower() == models.Modifier.IDF.value
 
     def _validate_schema(self, info: Any) -> None:
         params = info.config.params

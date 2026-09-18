@@ -78,7 +78,7 @@ jobs:
       - run: uv run --locked pytest tests/integration/test_m2_postgres.py -vv -rs
       - name: Start Celery worker
         run: |
-          uv run --locked celery -A apps.worker.celery_app worker --loglevel=WARNING --pool=solo --concurrency=1 > celery-worker.log 2>&1 &
+          uv run --locked python -m tests.support.celery_worker > celery-worker.log 2>&1 &
           echo $! > celery-worker.pid
           sleep 3
       - run: uv run --locked pytest tests/integration/test_m3b_worker.py -vv -rs

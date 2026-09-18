@@ -29,6 +29,16 @@ npm run build
 
 The API exposes `/api/v1/health`, `/api/v1/ready` and `/api/v1/dependencies`.
 
+### Platform-specific PyTorch
+
+`uv sync --locked` selects the official PyTorch wheel for the host platform: Windows uses
+the CUDA 13.0 wheel, while Linux (including GitHub Actions) uses the CPU wheel. Do not edit
+`.venv` or reuse wheels from another Python environment. On the RTX development host, verify:
+
+```powershell
+uv run --locked python -c "import torch; print(torch.__version__); print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
+```
+
 ## Optional/local infrastructure setup
 
 For the current M3-C worker and retrieval milestone, PostgreSQL, Redis and Qdrant are required
