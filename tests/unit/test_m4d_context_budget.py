@@ -76,9 +76,35 @@ def _policy(
 def test_utf8_estimator_is_deterministic_and_offline() -> None:
     estimator = Utf8ByteTokenEstimator()
 
-    assert estimator.estimate("hello") == 2
-    assert estimator.estimate("你好") == 2
+    assert estimator.estimate("hello") == len(b"hello")
+    assert estimator.estimate("你好世界") == len("你好世界".encode())
+    assert estimator.estimate("🙂") == len("🙂".encode())
     assert estimator.estimate("") == 0
+
+
+def test_utf8_estimator_rejects_mandatory_non_ascii_context_when_bytes_exceed_budget() -> None:
+    mandatory_text = "你好世界"
+    profile = _profile(
+        context=len(mandatory_text.encode("utf-8")),
+        max_tokens=1,
+    )
+    policy = ContextBudgetPolicy(
+        ResolvedModelExecutionPlan(primary=profile),
+        ContextBudgetConfig(reserved_output_tokens=1),
+        estimator=Utf8ByteTokenEstimator(),
+    )
+
+    with pytest.raises(AgentHubError) as raised:
+        policy.admit(
+            (
+                ContextMessage(
+                    ModelMessage(role="user", content=mandatory_text),
+                    ContextCategory.CURRENT_USER_TASK,
+                ),
+            )
+        )
+
+    assert raised.value.code == "AGENT_CONTEXT_BUDGET_EXCEEDED"
 
 
 def test_effective_limit_uses_every_frozen_profile_and_reserves_max_output() -> None:

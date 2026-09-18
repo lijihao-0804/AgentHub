@@ -6,10 +6,10 @@ provider tokenizes text, how tools are implemented, or how conversation
 messages were produced.  Callers therefore have to provide the category and
 exchange-group metadata explicitly.
 
-The default estimator is intentionally conservative and offline.  It uses a
-four UTF-8-byte-per-token approximation; the policy accepts an injected
-estimator so tests and future adapters can use a provider-specific estimate
-without changing admission semantics.
+The default estimator is intentionally conservative and offline.  It counts
+each UTF-8 byte as one token unit; the policy accepts an injected estimator so
+tests and future adapters can use a provider-specific estimate without
+changing admission semantics.
 """
 
 from __future__ import annotations
@@ -86,28 +86,17 @@ class TokenEstimator(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class Utf8ByteTokenEstimator:
-    """Offline token estimator based only on UTF-8 byte length.
+    """Deterministic offline conservative UTF-8-byte token-unit estimator.
 
-    Four UTF-8 bytes per estimated token is a useful conservative-enough
-    approximation for budget admission while remaining deterministic and
-    independent of a tokenizer, model provider, or network access.
+    This is intentionally not an exact provider tokenizer count.  Treating
+    each UTF-8 byte as one token unit avoids underestimating non-ASCII text
+    without downloading or depending on a provider-specific tokenizer.
     """
-
-    bytes_per_token: int = 4
-
-    def __post_init__(self) -> None:
-        if isinstance(self.bytes_per_token, bool) or not isinstance(self.bytes_per_token, int):
-            raise ValueError("bytes_per_token must be a positive integer")
-        if self.bytes_per_token <= 0:
-            raise ValueError("bytes_per_token must be a positive integer")
 
     def estimate(self, text: str) -> int:
         if not isinstance(text, str):
             raise TypeError("TokenEstimator.estimate expects text")
-        byte_count = len(text.encode("utf-8"))
-        if byte_count == 0:
-            return 0
-        return math.ceil(byte_count / self.bytes_per_token)
+        return len(text.encode("utf-8"))
 
 
 @dataclass(frozen=True, slots=True)
