@@ -1,0 +1,894 @@
+{
+  "benchmark": "m3-retrieval-baseline",
+  "dataset_version": "m3-retrieval-v1",
+  "dataset_hash": "8ff0df86a26822725b01540b493671a801a74d15eec07522bea8311f7817ef9a",
+  "git_commit": "1bff1fa2f843fae3b13fad9aeddba4cedc261b88",
+  "snapshot_id": "9f672935-1984-4bfd-b78f-e3a06e46d293",
+  "snapshot_hash": "5caf6b4d51aed255ae08076dd326a1ecd08fff59fe4aed9e8f3f149828ac4dbc",
+  "retrieval_config": {
+    "dense_top_k": 30,
+    "sparse_top_k": 30,
+    "candidate_top_k": 20,
+    "final_top_k": 6,
+    "rrf_k": 60
+  },
+  "embedding_model": "BAAI/bge-m3",
+  "reranker_model": "BAAI/bge-reranker-v2-m3",
+  "sparse_encoder": "BAAI/bge-m3",
+  "device": {
+    "embedding": {
+      "requested": "auto",
+      "torch_version": "2.14.0+cu130",
+      "cuda_available": true,
+      "resolved": "cuda",
+      "cuda_device": "NVIDIA GeForce RTX 3060 Laptop GPU"
+    },
+    "reranker": {
+      "requested": "auto",
+      "torch_version": "2.14.0+cu130",
+      "cuda_available": true,
+      "resolved": "cuda",
+      "cuda_device": "NVIDIA GeForce RTX 3060 Laptop GPU"
+    },
+    "HF_HUB_OFFLINE": "1"
+  },
+  "timestamp": "2026-09-18T10:07:10.931544+00:00",
+  "metrics": {
+    "dev": {
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 0.975
+    },
+    "holdout": {
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0
+    },
+    "overall": {
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 0.983333
+    }
+  },
+  "failure_analysis": {
+    "dev": [
+      {
+        "case_id": "ret-014",
+        "split": "dev",
+        "query": "Who can approve a refund outside the normal customer policy?",
+        "ground_truth": [
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "exceptions"
+            },
+            "relevant_text": "A policy exception requires a written business reason"
+          }
+        ],
+        "failure_category": "FINAL_RANK_LOW",
+        "candidate_top20": [
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "exceptions"
+            },
+            "score": 0.032522,
+            "chunk_id": "30436fa3e0a73da6cdae3f8f9c0af23316d87598ffab30d62e60493057355b9b",
+            "rank": 1
+          },
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "eligibility"
+            },
+            "score": 0.031778,
+            "chunk_id": "a62171527ad300ee2619708976b6741eea6c048ce18369e2c91fe3f8c0081922",
+            "rank": 2
+          },
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "approval-path"
+            },
+            "score": 0.031746,
+            "chunk_id": "d3e248d7f030a1630fc8562ef664e9b4c2cbda47dbcb1fa5109a8d9db0ddb707",
+            "rank": 3
+          },
+          {
+            "document_key": "bilingual-faq",
+            "revision_key": "bilingual-faq-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "service-language"
+            },
+            "score": 0.029631,
+            "chunk_id": "fcbda1b8336735251966be9c58ac6fe2d23eaa70588672fc81c510e8080cf723",
+            "rank": 4
+          },
+          {
+            "document_key": "sla-support",
+            "revision_key": "sla-support-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "priority-levels"
+            },
+            "score": 0.029514,
+            "chunk_id": "1f65f923ef3e1b3d34bccf5c29a36eba8d506ac61d4e776a8c55d9558555c5ff",
+            "rank": 5
+          },
+          {
+            "document_key": "travel-expense",
+            "revision_key": "travel-expense-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "claim-deadline"
+            },
+            "score": 0.029274,
+            "chunk_id": "78bc5c4de4714acaf776f5f2c1445123771ab34deb2e8e5561511a774f383956",
+            "rank": 6
+          },
+          {
+            "document_key": "information-security",
+            "revision_key": "information-security-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "password-mfa"
+            },
+            "score": 0.028629,
+            "chunk_id": "f5a431969ed0d7f2bc15983344f09296ed92978f7148d3baeed5999bcc61665a",
+            "rank": 7
+          },
+          {
+            "document_key": "leave-policy",
+            "revision_key": "leave-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "leave-request"
+            },
+            "score": 0.028624,
+            "chunk_id": "e0aa3e8886b082a1567d383ae61989c02edac9c6c5042c28fb1984446670f025",
+            "rank": 8
+          },
+          {
+            "document_key": "vendor-onboarding",
+            "revision_key": "vendor-onboarding-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "due-diligence"
+            },
+            "score": 0.027972,
+            "chunk_id": "8833d7b8c2d8cf4ff9a54c5d7890dc86d8c60a0b444f5fb4fee77b1fdbe6dc2b",
+            "rank": 9
+          },
+          {
+            "document_key": "vendor-onboarding",
+            "revision_key": "vendor-onboarding-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "renewal-review"
+            },
+            "score": 0.02781,
+            "chunk_id": "dc9b9adb1c82c2eb983c46601c53c79455e8f9f352657f793f855dd162028556",
+            "rank": 10
+          },
+          {
+            "document_key": "vendor-onboarding",
+            "revision_key": "vendor-onboarding-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "purchase-order"
+            },
+            "score": 0.02753,
+            "chunk_id": "394402d7b87b70b351eed1543b9d1c50314c2328b64fc64b5edf5b21810df4b8",
+            "rank": 11
+          },
+          {
+            "document_key": "information-security",
+            "revision_key": "information-security-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "device-storage"
+            },
+            "score": 0.026838,
+            "chunk_id": "6016caa3410159021a649ffd725b5a880a6b4c6ba3c401a93d71f5695ee072fd",
+            "rank": 12
+          },
+          {
+            "document_key": "data-access",
+            "revision_key": "data-access-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "audit-review"
+            },
+            "score": 0.026786,
+            "chunk_id": "48fdb0ae5d67974c39e76fabe658c5235106459f29627e240874bd642d42c501",
+            "rank": 13
+          },
+          {
+            "document_key": "data-access",
+            "revision_key": "data-access-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "access-request"
+            },
+            "score": 0.026743,
+            "chunk_id": "e8cf604bcff05a54228e695fcc24c42fc974a6c79c341b594fa26aa75e35d5d2",
+            "rank": 14
+          },
+          {
+            "document_key": "sla-support",
+            "revision_key": "sla-support-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "escalation"
+            },
+            "score": 0.026501,
+            "chunk_id": "3949f0d3b2b9ab1656099e4dcecc1e91ba3cb68f7f768b4af60b787b44a5530d",
+            "rank": 15
+          },
+          {
+            "document_key": "information-security",
+            "revision_key": "information-security-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "incident-reporting"
+            },
+            "score": 0.026501,
+            "chunk_id": "cdd4b817bbb8c499da286b1553ef6e6925619eb297bd072fdc2dbe01f25bcbd9",
+            "rank": 16
+          },
+          {
+            "document_key": "travel-expense",
+            "revision_key": "travel-expense-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "booking"
+            },
+            "score": 0.026491,
+            "chunk_id": "201b14b327dea9cc6328411d032faa198f787c73d1997ced5b08c32e20e6fc02",
+            "rank": 17
+          },
+          {
+            "document_key": "travel-expense",
+            "revision_key": "travel-expense-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "reimbursable-costs"
+            },
+            "score": 0.026121,
+            "chunk_id": "6e932b1376a726a4e3e3a7192122c0a8f2e5642c272de3705a3a6c4cbdc2ed4b",
+            "rank": 18
+          },
+          {
+            "document_key": "bilingual-faq",
+            "revision_key": "bilingual-faq-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "invoice-questions"
+            },
+            "score": 0.02607,
+            "chunk_id": "f82b82b45268645a0c4723cfe633f576360f26f63e367c709144263d503e0b57",
+            "rank": 19
+          },
+          {
+            "document_key": "bilingual-faq",
+            "revision_key": "bilingual-faq-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "account-recovery"
+            },
+            "score": 0.025849,
+            "chunk_id": "d122c1831c487133f631b97a6161a4cb9e5e8f04ccc5538279394db217191344",
+            "rank": 20
+          }
+        ],
+        "final_top5": [
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "eligibility"
+            },
+            "score": -3.675781,
+            "chunk_id": "a62171527ad300ee2619708976b6741eea6c048ce18369e2c91fe3f8c0081922",
+            "rank": 1
+          },
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "exceptions"
+            },
+            "score": -4.050781,
+            "chunk_id": "30436fa3e0a73da6cdae3f8f9c0af23316d87598ffab30d62e60493057355b9b",
+            "rank": 2
+          },
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "approval-path"
+            },
+            "score": -5.691406,
+            "chunk_id": "d3e248d7f030a1630fc8562ef664e9b4c2cbda47dbcb1fa5109a8d9db0ddb707",
+            "rank": 3
+          },
+          {
+            "document_key": "sla-support",
+            "revision_key": "sla-support-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "priority-levels"
+            },
+            "score": -6.457031,
+            "chunk_id": "1f65f923ef3e1b3d34bccf5c29a36eba8d506ac61d4e776a8c55d9558555c5ff",
+            "rank": 4
+          },
+          {
+            "document_key": "data-access",
+            "revision_key": "data-access-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "access-request"
+            },
+            "score": -7.585938,
+            "chunk_id": "e8cf604bcff05a54228e695fcc24c42fc974a6c79c341b594fa26aa75e35d5d2",
+            "rank": 5
+          }
+        ]
+      }
+    ],
+    "holdout": [],
+    "overall": [
+      {
+        "case_id": "ret-014",
+        "split": "dev",
+        "query": "Who can approve a refund outside the normal customer policy?",
+        "ground_truth": [
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "exceptions"
+            },
+            "relevant_text": "A policy exception requires a written business reason"
+          }
+        ],
+        "failure_category": "FINAL_RANK_LOW",
+        "candidate_top20": [
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "exceptions"
+            },
+            "score": 0.032522,
+            "chunk_id": "30436fa3e0a73da6cdae3f8f9c0af23316d87598ffab30d62e60493057355b9b",
+            "rank": 1
+          },
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "eligibility"
+            },
+            "score": 0.031778,
+            "chunk_id": "a62171527ad300ee2619708976b6741eea6c048ce18369e2c91fe3f8c0081922",
+            "rank": 2
+          },
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "approval-path"
+            },
+            "score": 0.031746,
+            "chunk_id": "d3e248d7f030a1630fc8562ef664e9b4c2cbda47dbcb1fa5109a8d9db0ddb707",
+            "rank": 3
+          },
+          {
+            "document_key": "bilingual-faq",
+            "revision_key": "bilingual-faq-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "service-language"
+            },
+            "score": 0.029631,
+            "chunk_id": "fcbda1b8336735251966be9c58ac6fe2d23eaa70588672fc81c510e8080cf723",
+            "rank": 4
+          },
+          {
+            "document_key": "sla-support",
+            "revision_key": "sla-support-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "priority-levels"
+            },
+            "score": 0.029514,
+            "chunk_id": "1f65f923ef3e1b3d34bccf5c29a36eba8d506ac61d4e776a8c55d9558555c5ff",
+            "rank": 5
+          },
+          {
+            "document_key": "travel-expense",
+            "revision_key": "travel-expense-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "claim-deadline"
+            },
+            "score": 0.029274,
+            "chunk_id": "78bc5c4de4714acaf776f5f2c1445123771ab34deb2e8e5561511a774f383956",
+            "rank": 6
+          },
+          {
+            "document_key": "information-security",
+            "revision_key": "information-security-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "password-mfa"
+            },
+            "score": 0.028629,
+            "chunk_id": "f5a431969ed0d7f2bc15983344f09296ed92978f7148d3baeed5999bcc61665a",
+            "rank": 7
+          },
+          {
+            "document_key": "leave-policy",
+            "revision_key": "leave-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "leave-request"
+            },
+            "score": 0.028624,
+            "chunk_id": "e0aa3e8886b082a1567d383ae61989c02edac9c6c5042c28fb1984446670f025",
+            "rank": 8
+          },
+          {
+            "document_key": "vendor-onboarding",
+            "revision_key": "vendor-onboarding-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "due-diligence"
+            },
+            "score": 0.027972,
+            "chunk_id": "8833d7b8c2d8cf4ff9a54c5d7890dc86d8c60a0b444f5fb4fee77b1fdbe6dc2b",
+            "rank": 9
+          },
+          {
+            "document_key": "vendor-onboarding",
+            "revision_key": "vendor-onboarding-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "renewal-review"
+            },
+            "score": 0.02781,
+            "chunk_id": "dc9b9adb1c82c2eb983c46601c53c79455e8f9f352657f793f855dd162028556",
+            "rank": 10
+          },
+          {
+            "document_key": "vendor-onboarding",
+            "revision_key": "vendor-onboarding-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "purchase-order"
+            },
+            "score": 0.02753,
+            "chunk_id": "394402d7b87b70b351eed1543b9d1c50314c2328b64fc64b5edf5b21810df4b8",
+            "rank": 11
+          },
+          {
+            "document_key": "information-security",
+            "revision_key": "information-security-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "device-storage"
+            },
+            "score": 0.026838,
+            "chunk_id": "6016caa3410159021a649ffd725b5a880a6b4c6ba3c401a93d71f5695ee072fd",
+            "rank": 12
+          },
+          {
+            "document_key": "data-access",
+            "revision_key": "data-access-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "audit-review"
+            },
+            "score": 0.026786,
+            "chunk_id": "48fdb0ae5d67974c39e76fabe658c5235106459f29627e240874bd642d42c501",
+            "rank": 13
+          },
+          {
+            "document_key": "data-access",
+            "revision_key": "data-access-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "access-request"
+            },
+            "score": 0.026743,
+            "chunk_id": "e8cf604bcff05a54228e695fcc24c42fc974a6c79c341b594fa26aa75e35d5d2",
+            "rank": 14
+          },
+          {
+            "document_key": "sla-support",
+            "revision_key": "sla-support-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "escalation"
+            },
+            "score": 0.026501,
+            "chunk_id": "3949f0d3b2b9ab1656099e4dcecc1e91ba3cb68f7f768b4af60b787b44a5530d",
+            "rank": 15
+          },
+          {
+            "document_key": "information-security",
+            "revision_key": "information-security-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "incident-reporting"
+            },
+            "score": 0.026501,
+            "chunk_id": "cdd4b817bbb8c499da286b1553ef6e6925619eb297bd072fdc2dbe01f25bcbd9",
+            "rank": 16
+          },
+          {
+            "document_key": "travel-expense",
+            "revision_key": "travel-expense-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "booking"
+            },
+            "score": 0.026491,
+            "chunk_id": "201b14b327dea9cc6328411d032faa198f787c73d1997ced5b08c32e20e6fc02",
+            "rank": 17
+          },
+          {
+            "document_key": "travel-expense",
+            "revision_key": "travel-expense-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "reimbursable-costs"
+            },
+            "score": 0.026121,
+            "chunk_id": "6e932b1376a726a4e3e3a7192122c0a8f2e5642c272de3705a3a6c4cbdc2ed4b",
+            "rank": 18
+          },
+          {
+            "document_key": "bilingual-faq",
+            "revision_key": "bilingual-faq-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "invoice-questions"
+            },
+            "score": 0.02607,
+            "chunk_id": "f82b82b45268645a0c4723cfe633f576360f26f63e367c709144263d503e0b57",
+            "rank": 19
+          },
+          {
+            "document_key": "bilingual-faq",
+            "revision_key": "bilingual-faq-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "account-recovery"
+            },
+            "score": 0.025849,
+            "chunk_id": "d122c1831c487133f631b97a6161a4cb9e5e8f04ccc5538279394db217191344",
+            "rank": 20
+          }
+        ],
+        "final_top5": [
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "eligibility"
+            },
+            "score": -3.675781,
+            "chunk_id": "a62171527ad300ee2619708976b6741eea6c048ce18369e2c91fe3f8c0081922",
+            "rank": 1
+          },
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "exceptions"
+            },
+            "score": -4.050781,
+            "chunk_id": "30436fa3e0a73da6cdae3f8f9c0af23316d87598ffab30d62e60493057355b9b",
+            "rank": 2
+          },
+          {
+            "document_key": "refund-policy",
+            "revision_key": "refund-policy-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "approval-path"
+            },
+            "score": -5.691406,
+            "chunk_id": "d3e248d7f030a1630fc8562ef664e9b4c2cbda47dbcb1fa5109a8d9db0ddb707",
+            "rank": 3
+          },
+          {
+            "document_key": "sla-support",
+            "revision_key": "sla-support-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "priority-levels"
+            },
+            "score": -6.457031,
+            "chunk_id": "1f65f923ef3e1b3d34bccf5c29a36eba8d506ac61d4e776a8c55d9558555c5ff",
+            "rank": 4
+          },
+          {
+            "document_key": "data-access",
+            "revision_key": "data-access-r1",
+            "locator": {
+              "type": "section",
+              "section_key": "access-request"
+            },
+            "score": -7.585938,
+            "chunk_id": "e8cf604bcff05a54228e695fcc24c42fc974a6c79c341b594fa26aa75e35d5d2",
+            "rank": 5
+          }
+        ]
+      }
+    ]
+  },
+  "case_metrics": [
+    {
+      "case_id": "ret-001",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-002",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-003",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-004",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-005",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-006",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-007",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-008",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-009",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-010",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-011",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-012",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-013",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-014",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 0.5,
+      "failure_category": "FINAL_RANK_LOW"
+    },
+    {
+      "case_id": "ret-015",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-016",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-017",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-018",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-019",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-020",
+      "split": "dev",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-021",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-022",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-023",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-024",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-025",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-026",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-027",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-028",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-029",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    },
+    {
+      "case_id": "ret-030",
+      "split": "holdout",
+      "candidate_recall_at_20": 1.0,
+      "final_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "failure_category": null
+    }
+  ]
+}

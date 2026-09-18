@@ -1,9 +1,8 @@
 # AgentHub
 
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
-implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M2:
-engineering foundations, Auth / Tenant / RBAC, and the ModelGateway + Capability Contract.
-M3 is not started.
+implementation plan in [`plan/plan.md`](plan/plan.md). M3-F Snapshot and the M3 retrieval
+evaluation baseline are accepted; M3 overall is PASS. M4 Agent Runtime remains deferred.
 
 ## Basic development setup
 
@@ -27,16 +26,56 @@ npm run build
 
 The API exposes `/api/v1/health`, `/api/v1/ready` and `/api/v1/dependencies`.
 
+### Local Playground proxy
+
+When running the web app locally, the default `/api/...` requests use the Next.js same-origin
+proxy and forward to `http://127.0.0.1:8000`. Override the server-only target when needed:
+
+```powershell
+$env:AGENTHUB_API_PROXY_TARGET = "http://127.0.0.1:8000"
+cd apps/web
+npm run dev
+```
+
+The developer Playground requires an explicit Bearer access token. It is held only in page state
+for the current session and is not persisted. This is not a replacement for a complete Auth UI.
+
+### Platform-specific PyTorch
+
+`uv sync --locked` selects the official PyTorch wheel for the host platform: Windows uses
+the CUDA 13.0 wheel, while Linux (including GitHub Actions) uses the CPU wheel. Do not edit
+`.venv` or reuse wheels from another Python environment. On the RTX development host, verify:
+
+```powershell
+uv run --locked python -c "import torch; print(torch.__version__); print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
+```
+
 ## Optional/local infrastructure setup
 
-When a milestone requires real infrastructure, PostgreSQL, Redis and Qdrant may be provided
-by local services or Docker Compose:
+For M3 infrastructure verification, PostgreSQL, Redis and Qdrant are required
+for real infrastructure verification and may be provided by local services or Docker Compose:
 
 ```powershell
 docker compose up -d postgres redis qdrant
 ```
 
-Docker remains supported for later migration, checkpoint and deployment verification.
+CI injects deterministic fake models and never downloads BGE checkpoints. The verified local real
+model smoke facts are:
+
+- Windows CUDA runtime: PASS (`torch 2.14.0+cu130`, CUDA `True`, RTX 3060 Laptop GPU)
+- BGE-M3 local model smoke: PASS (`dense_dimension = 1024`, `document_count = 2`)
+- BGE reranker local model smoke: PASS (`rerank_scores = (2.396484375, 3.650390625)`)
+- Both model smokes succeeded with `HF_HUB_OFFLINE=1`.
+
+To reproduce the host-only smoke checks:
+
+```powershell
+uv run --locked python -m scripts.knowledge_model_smoke
+uv run --locked python -m scripts.knowledge_retrieval_smoke
+```
+
+Docker remains supported for later deployment verification; full Docker deployment acceptance is
+deferred to M8.
 
 ## Delivery discipline
 
@@ -44,3 +83,4 @@ Docker remains supported for later migration, checkpoint and deployment verifica
 - Every behavior-changing milestone gets a focused commit and a verification record.
 - Secrets never enter source control, snapshots, revisions, logs or traces.
 - M2 deliberately contains no Agent, RAG or Tool product implementation.
+- M3 overall is PASS after the real retrieval evaluation baseline and CI verification. M4 remains deferred.

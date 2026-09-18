@@ -1,0 +1,227 @@
+{
+  "dataset_version": "m3-retrieval-v1",
+  "corpus": [
+    {
+      "document_key": "employee-handbook",
+      "revision_key": "employee-handbook-r1",
+      "title": "Employee Handbook",
+      "sections": [
+        {
+          "section_key": "working-hours",
+          "text": "The standard collaboration window is 09:30 to 17:30 local time on business days. Teams may arrange earlier or later focus blocks, but each employee should publish availability in the shared calendar. Meetings should include an agenda and avoid the protected lunch period unless an incident is active. Managers review recurring schedule exceptions with the team rather than treating quiet hours as absence."
+        },
+        {
+          "section_key": "remote-collaboration",
+          "text": "Remote employees keep the same delivery expectations as office-based employees and must remain reachable during the agreed collaboration window. The team channel is the default place for status updates, while urgent issues use the on-call route. A home workspace should protect confidential material from visitors, and screen sharing must use the approved meeting account."
+        },
+        {
+          "section_key": "onboarding",
+          "text": "During the first two weeks, a new colleague completes access orientation, meets the assigned buddy, and confirms the emergency contact process. The manager records role goals in the onboarding checklist and schedules a short review at the end of week two. Training completion does not replace the separate approval required for restricted systems."
+        }
+      ]
+    },
+    {
+      "document_key": "leave-policy",
+      "revision_key": "leave-policy-r1",
+      "title": "Leave and Attendance Policy",
+      "sections": [
+        {
+          "section_key": "annual-leave",
+          "text": "Annual leave is accrued monthly and the available balance is shown in the people portal. Planned time off should be requested early enough for the manager to arrange coverage. Public holidays are handled by the regional calendar and are not deducted from the annual balance. A balance display is informational until the request receives its recorded approval."
+        },
+        {
+          "section_key": "sick-leave",
+          "text": "When illness prevents work, notify the manager or the designated absence channel before the normal start time whenever practical. The employee should keep the absence record current and provide supporting documentation only when the local rule or HR request requires it. Sick leave is not converted into annual leave automatically."
+        },
+        {
+          "section_key": "leave-request",
+          "text": "A leave request identifies the dates, a contact for urgent matters, and any handover note needed by the team. The manager checks coverage before approving the request in the people portal. Changing dates requires a new approval record, and an informal message alone does not change the official absence calendar."
+        }
+      ]
+    },
+    {
+      "document_key": "travel-expense",
+      "revision_key": "travel-expense-r1",
+      "title": "Business Travel and Expense Guide",
+      "sections": [
+        {
+          "section_key": "booking",
+          "text": "Business travel is booked through the approved travel channel after the trip purpose, dates, cost center, and approver are recorded. Employees should choose a reasonable route and the lowest practical fare that meets the schedule. Personal extensions must be separated from the business itinerary and cannot be charged to the company."
+        },
+        {
+          "section_key": "reimbursable-costs",
+          "text": "Receipts are required for reimbursable transport, lodging, and meals unless a documented local exception applies. A claim should identify the business purpose and currency, and shared meals should list the attendees. Daily allowances follow the regional rate table; an allowance does not make unrelated personal spending reimbursable."
+        },
+        {
+          "section_key": "claim-deadline",
+          "text": "Submit the expense claim within thirty calendar days after returning from the trip. The manager reviews business purpose and budget, then Finance checks receipts and tax fields. A rejected claim can be corrected and resubmitted, but the original record remains part of the audit history."
+        }
+      ]
+    },
+    {
+      "document_key": "information-security",
+      "revision_key": "information-security-r1",
+      "title": "Information Security Standard",
+      "sections": [
+        {
+          "section_key": "password-mfa",
+          "text": "Use a unique passphrase for each company service and protect the account with the approved multi-factor method. Never approve an unexpected authentication prompt or share a one-time code with a caller. Password managers supplied by the company may store credentials, but a personal notes app is not an approved vault."
+        },
+        {
+          "section_key": "incident-reporting",
+          "text": "Report suspected phishing, lost credentials, accidental disclosure, or unusual device behavior through the security incident channel as soon as possible. Include what happened and when, but do not forward a secret or copy sensitive customer data into the ticket. Security may ask the employee to preserve evidence and stop using the affected account."
+        },
+        {
+          "section_key": "device-storage",
+          "text": "Company data must remain on approved encrypted storage and managed collaboration systems. Local copies should be minimized, removable media requires explicit approval, and a work laptop must lock automatically when unattended. Personal cloud drives and consumer messaging apps are not permitted locations for customer exports."
+        }
+      ]
+    },
+    {
+      "document_key": "refund-policy",
+      "revision_key": "refund-policy-r1",
+      "title": "Customer Refund Policy",
+      "sections": [
+        {
+          "section_key": "eligibility",
+          "text": "A customer may request a refund for an eligible purchase when the service was not delivered, was charged twice, or was cancelled within the stated trial period. The request must identify the order and the account owner. Promotional credits and completed usage are considered before an amount is approved."
+        },
+        {
+          "section_key": "approval-path",
+          "text": "Support verifies the order, records the reason, and routes the case to the billing queue. Billing confirms the payment method and the permitted amount before the refund is issued. The customer receives a status update when the decision is made; a support agent should not promise a bank settlement date."
+        },
+        {
+          "section_key": "exceptions",
+          "text": "A policy exception requires a written business reason and approval from the designated service owner. The exception record must state the amount, customer impact, and expiration of the approval. Repeated goodwill credits are reviewed for a pattern instead of being granted automatically by the front-line queue."
+        }
+      ]
+    },
+    {
+      "document_key": "sla-support",
+      "revision_key": "sla-support-r1",
+      "title": "Support Service Levels",
+      "sections": [
+        {
+          "section_key": "priority-levels",
+          "text": "Priority is based on customer impact and urgency, not on the seniority of the requester. P1 means a broad outage or a critical business function is unavailable; P2 means a material degradation with a workaround; P3 covers a normal issue or information request. The support lead may revise priority when evidence changes."
+        },
+        {
+          "section_key": "response-targets",
+          "text": "The first response target is fifteen minutes for P1, one business hour for P2, and one business day for P3. These targets measure acknowledgement and ownership rather than a guaranteed resolution. The case record should show the next update time when investigation continues beyond the first response."
+        },
+        {
+          "section_key": "escalation",
+          "text": "Escalate when the response target is at risk, the impact expands, or the assigned team lacks the required authority. An escalation includes a concise timeline, customer impact, current workaround, and the decision needed from the receiving team. Reassigning a ticket without this context does not count as an escalation."
+        }
+      ]
+    },
+    {
+      "document_key": "ticket-workflow",
+      "revision_key": "ticket-workflow-r1",
+      "title": "Service Ticket Workflow",
+      "sections": [
+        {
+          "section_key": "intake",
+          "text": "Every service ticket records the requester, affected service, observed behavior, time of occurrence, and a safe contact route. Attachments must exclude passwords and unrelated personal data. If the report is incomplete, the intake owner asks a focused clarification question while preserving the original report."
+        },
+        {
+          "section_key": "triage",
+          "text": "Triage confirms scope, checks for a related incident, assigns an initial priority, and routes the ticket to an owning queue. The owner records the next action and a target update time. Similar symptoms may share an incident, but each customer ticket keeps its own communication and resolution history."
+        },
+        {
+          "section_key": "closure",
+          "text": "Close a ticket only after the requested outcome or an agreed workaround is recorded and the requester has had a reasonable chance to respond. The closure note states the cause when known, the action taken, and any follow-up owner. A reopened ticket keeps its history and receives a new next-action timestamp."
+        }
+      ]
+    },
+    {
+      "document_key": "data-access",
+      "revision_key": "data-access-r1",
+      "title": "Data Access and Review Standard",
+      "sections": [
+        {
+          "section_key": "access-request",
+          "text": "An access request names the dataset or system, business purpose, requested role, duration, and manager who accepts the responsibility. The data owner checks the purpose before granting access. Emergency access is time limited and must be documented even when the normal queue is unavailable."
+        },
+        {
+          "section_key": "least-privilege",
+          "text": "Access follows least privilege: a person receives only the actions and records needed for the approved task. Read access is not automatically safe, and export, delete, and sharing effects require separate consideration. A role change triggers a review rather than silently preserving every previous entitlement."
+        },
+        {
+          "section_key": "audit-review",
+          "text": "System owners review access logs and privileged memberships on the scheduled review date. The review records the reviewer, evidence checked, exceptions, and remediation owner. Evidence should be sufficient to reproduce the decision without copying the underlying customer dataset into the review note."
+        }
+      ]
+    },
+    {
+      "document_key": "bilingual-faq",
+      "revision_key": "bilingual-faq-r1",
+      "title": "Bilingual Service FAQ",
+      "sections": [
+        {
+          "section_key": "account-recovery",
+          "text": "For account recovery, use the official reset page and verify the recovery address before submitting. 如果无法访问验证邮箱，请通过支持工单说明账号标识和可联系时间，客服会先完成身份核验。Support will never ask for the existing password or a one-time code in chat."
+        },
+        {
+          "section_key": "invoice-questions",
+          "text": "Invoice questions should include the invoice number, billing entity, and the field that appears incorrect. 发票抬头或税务信息需要在付款记录中核对，不能只凭截图修改。The billing team replies in the language selected for the account when the request is submitted."
+        },
+        {
+          "section_key": "service-language",
+          "text": "Support can handle English and Chinese requests, and the requester may state a preferred language in the first message. 语言偏好只影响沟通，不会改变优先级、服务级别或审批责任。If translation is needed for a technical term, keep the original product name in the case record."
+        }
+      ]
+    },
+    {
+      "document_key": "vendor-onboarding",
+      "revision_key": "vendor-onboarding-r1",
+      "title": "Vendor Onboarding and Purchasing",
+      "sections": [
+        {
+          "section_key": "due-diligence",
+          "text": "Before a new vendor is used, the sponsor records the service scope, data handled, ownership contact, and required security review. Procurement checks the legal entity and payment details. A small purchase does not bypass due diligence when the vendor can access company or customer information."
+        },
+        {
+          "section_key": "purchase-order",
+          "text": "A purchase order is issued before committing to a recurring service or material spend. The request includes the approved budget, billing currency, term, and cost center. Invoices without a matching purchase order are held for exception review rather than paid informally."
+        },
+        {
+          "section_key": "renewal-review",
+          "text": "At renewal, the sponsor confirms that the service is still needed, checks usage and incidents, and records any price or scope change. Security and legal reviews are repeated when the risk profile changes. Renewal approval is not implied by an auto-renewal notice from the vendor."
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {"id":"ret-001","split":"dev","query":"How should a remote teammate stay reachable without exposing work at home?","ground_truth":[{"document_key":"employee-handbook","revision_key":"employee-handbook-r1","locator":{"type":"section","section_key":"remote-collaboration"},"relevant_text":"Remote employees keep the same delivery expectations"}]},
+    {"id":"ret-002","split":"dev","query":"How is planned annual time off counted and approved?","ground_truth":[{"document_key":"leave-policy","revision_key":"leave-policy-r1","locator":{"type":"section","section_key":"annual-leave"},"relevant_text":"Annual leave is accrued monthly"}]},
+    {"id":"ret-003","split":"dev","query":"What proof is needed when claiming a meal or taxi during a business trip?","ground_truth":[{"document_key":"travel-expense","revision_key":"travel-expense-r1","locator":{"type":"section","section_key":"reimbursable-costs"},"relevant_text":"Receipts are required for reimbursable transport"}]},
+    {"id":"ret-004","split":"dev","query":"What should I do with an unexpected MFA prompt?","ground_truth":[{"document_key":"information-security","revision_key":"information-security-r1","locator":{"type":"section","section_key":"password-mfa"},"relevant_text":"Never approve an unexpected authentication prompt"}]},
+    {"id":"ret-005","split":"dev","query":"Can a customer get money back when a trial was cancelled in time?","ground_truth":[{"document_key":"refund-policy","revision_key":"refund-policy-r1","locator":{"type":"section","section_key":"eligibility"},"relevant_text":"A customer may request a refund for an eligible purchase"}]},
+    {"id":"ret-006","split":"dev","query":"What acknowledgement time applies to a critical outage?","ground_truth":[{"document_key":"sla-support","revision_key":"sla-support-r1","locator":{"type":"section","section_key":"response-targets"},"relevant_text":"The first response target is fifteen minutes for P1"}]},
+    {"id":"ret-007","split":"dev","query":"Which details belong in a new service ticket before triage?","ground_truth":[{"document_key":"ticket-workflow","revision_key":"ticket-workflow-r1","locator":{"type":"section","section_key":"intake"},"relevant_text":"Every service ticket records the requester"}]},
+    {"id":"ret-008","split":"dev","query":"申请数据权限时需要写哪些内容？","ground_truth":[{"document_key":"data-access","revision_key":"data-access-r1","locator":{"type":"section","section_key":"access-request"},"relevant_text":"An access request names the dataset or system"}]},
+    {"id":"ret-009","split":"dev","query":"Which identifiers should be included in an invoice question?","ground_truth":[{"document_key":"bilingual-faq","revision_key":"bilingual-faq-r1","locator":{"type":"section","section_key":"invoice-questions"},"relevant_text":"Invoice questions should include the invoice number"}]},
+    {"id":"ret-010","split":"dev","query":"What has to be checked before renewing a supplier service?","ground_truth":[{"document_key":"vendor-onboarding","revision_key":"vendor-onboarding-r1","locator":{"type":"section","section_key":"renewal-review"},"relevant_text":"At renewal, the sponsor confirms that the service is still needed"}]},
+    {"id":"ret-011","split":"dev","query":"What information does a leave handover request need?","ground_truth":[{"document_key":"leave-policy","revision_key":"leave-policy-r1","locator":{"type":"section","section_key":"leave-request"},"relevant_text":"A leave request identifies the dates"}]},
+    {"id":"ret-012","split":"dev","query":"Can a traveller extend a company trip for personal reasons on the same booking?","ground_truth":[{"document_key":"travel-expense","revision_key":"travel-expense-r1","locator":{"type":"section","section_key":"booking"},"relevant_text":"Personal extensions must be separated from the business itinerary"}]},
+    {"id":"ret-013","split":"dev","query":"A suspicious link may have exposed credentials; where should it be reported?","ground_truth":[{"document_key":"information-security","revision_key":"information-security-r1","locator":{"type":"section","section_key":"incident-reporting"},"relevant_text":"Report suspected phishing"}]},
+    {"id":"ret-014","split":"dev","query":"Who can approve a refund outside the normal customer policy?","ground_truth":[{"document_key":"refund-policy","revision_key":"refund-policy-r1","locator":{"type":"section","section_key":"exceptions"},"relevant_text":"A policy exception requires a written business reason"}]},
+    {"id":"ret-015","split":"dev","query":"When the assigned team lacks authority, what makes a useful escalation?","ground_truth":[{"document_key":"sla-support","revision_key":"sla-support-r1","locator":{"type":"section","section_key":"escalation"},"relevant_text":"An escalation includes a concise timeline"}]},
+    {"id":"ret-016","split":"dev","query":"During triage, how are similar customer reports related without losing history?","ground_truth":[{"document_key":"ticket-workflow","revision_key":"ticket-workflow-r1","locator":{"type":"section","section_key":"triage"},"relevant_text":"Similar symptoms may share an incident"}]},
+    {"id":"ret-017","split":"dev","query":"What evidence belongs in a periodic privileged-access review?","ground_truth":[{"document_key":"data-access","revision_key":"data-access-r1","locator":{"type":"section","section_key":"audit-review"},"relevant_text":"The review records the reviewer"}]},
+    {"id":"ret-018","split":"dev","query":"账号无法收回时，客服可以索要旧密码吗？","ground_truth":[{"document_key":"bilingual-faq","revision_key":"bilingual-faq-r1","locator":{"type":"section","section_key":"account-recovery"},"relevant_text":"Support will never ask for the existing password"}]},
+    {"id":"ret-019","split":"dev","query":"Why might an invoice wait when the vendor has not received a purchase order?","ground_truth":[{"document_key":"vendor-onboarding","revision_key":"vendor-onboarding-r1","locator":{"type":"section","section_key":"purchase-order"},"relevant_text":"Invoices without a matching purchase order are held"}]},
+    {"id":"ret-020","split":"dev","query":"What is the expected collaboration window for a normal workday?","ground_truth":[{"document_key":"employee-handbook","revision_key":"employee-handbook-r1","locator":{"type":"section","section_key":"working-hours"},"relevant_text":"The standard collaboration window is 09:30 to 17:30"}]},
+    {"id":"ret-021","split":"holdout","query":"If illness prevents attendance, what is the first notification step?","ground_truth":[{"document_key":"leave-policy","revision_key":"leave-policy-r1","locator":{"type":"section","section_key":"sick-leave"},"relevant_text":"When illness prevents work, notify the manager"}]},
+    {"id":"ret-022","split":"holdout","query":"A refund request is valid but payment processing is delayed; which team confirms the amount and status?","ground_truth":[{"document_key":"refund-policy","revision_key":"refund-policy-r1","locator":{"type":"section","section_key":"approval-path"},"relevant_text":"Billing confirms the payment method and the permitted amount"}]},
+    {"id":"ret-023","split":"holdout","query":"出差每天的补贴和餐费发票应该如何区分？","ground_truth":[{"document_key":"travel-expense","revision_key":"travel-expense-r1","locator":{"type":"section","section_key":"reimbursable-costs"},"relevant_text":"Daily allowances follow the regional rate table"}]},
+    {"id":"ret-024","split":"holdout","query":"Does read access automatically mean that exporting records is safe?","ground_truth":[{"document_key":"data-access","revision_key":"data-access-r1","locator":{"type":"section","section_key":"least-privilege"},"relevant_text":"Read access is not automatically safe"}]},
+    {"id":"ret-025","split":"holdout","query":"I cannot use the verification mailbox, what bilingual recovery route is allowed?","ground_truth":[{"document_key":"bilingual-faq","revision_key":"bilingual-faq-r1","locator":{"type":"section","section_key":"account-recovery"},"relevant_text":"If you cannot access the verification mailbox"}]},
+    {"id":"ret-026","split":"holdout","query":"How can a requester choose English or Chinese without changing service priority?","ground_truth":[{"document_key":"bilingual-faq","revision_key":"bilingual-faq-r1","locator":{"type":"section","section_key":"service-language"},"relevant_text":"Support can handle English and Chinese requests"}]},
+    {"id":"ret-027","split":"holdout","query":"Which steps describe ticket ownership from initial report through completion?","ground_truth":[{"document_key":"ticket-workflow","revision_key":"ticket-workflow-r1","locator":{"type":"section","section_key":"intake"},"relevant_text":"Every service ticket records the requester"},{"document_key":"ticket-workflow","revision_key":"ticket-workflow-r1","locator":{"type":"section","section_key":"closure"},"relevant_text":"Close a ticket only after the requested outcome"}]},
+    {"id":"ret-028","split":"holdout","query":"Where should a local copy of customer data not be stored?","ground_truth":[{"document_key":"information-security","revision_key":"information-security-r1","locator":{"type":"section","section_key":"device-storage"},"relevant_text":"Personal cloud drives and consumer messaging apps are not permitted"}]},
+    {"id":"ret-029","split":"holdout","query":"How is an urgent support case classified before its response clock starts?","ground_truth":[{"document_key":"sla-support","revision_key":"sla-support-r1","locator":{"type":"section","section_key":"priority-levels"},"relevant_text":"Priority is based on customer impact and urgency"}]},
+    {"id":"ret-030","split":"holdout","query":"Does a small purchase still need supplier security checks when data is involved?","ground_truth":[{"document_key":"vendor-onboarding","revision_key":"vendor-onboarding-r1","locator":{"type":"section","section_key":"due-diligence"},"relevant_text":"A small purchase does not bypass due diligence"}]}
+  ]
+}
