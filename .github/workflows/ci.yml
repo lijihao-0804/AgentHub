@@ -92,6 +92,7 @@ jobs:
       - run: uv run --locked pytest tests/integration/test_m4a_publish.py -vv -rs
       - run: uv run --locked pytest tests/integration/test_m4b_tool_runtime.py -vv -rs
       - run: uv run --locked pytest tests/integration/test_m4c_agent_runtime.py -vv -rs
+      - run: uv run --locked pytest tests/integration/test_m4d_streaming_budget.py -vv -rs
       - name: Stop Celery worker
         if: always()
         run: |

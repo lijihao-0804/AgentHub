@@ -1,4 +1,4 @@
-"""M4-C non-streaming AgentRun execution over a real LangGraph StateGraph."""
+"""M4-D AgentRun execution over one LangGraph StateGraph in sync or stream mode."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import asyncio
 import json
 import logging
 import time
-from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from collections.abc import AsyncIterator, Callable, Mapping
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Any, TypedDict
 from uuid import UUID
@@ -16,6 +16,13 @@ from langgraph.graph import END, START, StateGraph
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from packages.agent_runtime.context_budget import (
+    ContextBudgetConfig,
+    ContextBudgetPolicy,
+    ContextCategory,
+    ContextMessage,
+)
+from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -26,10 +33,13 @@ from packages.model_gateway.contracts import (
     ModelMessage,
     ModelRequest,
     ModelResponse,
+    ModelStreamEvent,
+    ModelStreamEventType,
     ModelToolCall,
+    ModelToolCallDelta,
     ModelToolDefinition,
 )
-from packages.model_gateway.errors import ModelGatewayError
+from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.observability import NoopTraceSink
 from packages.observability.contracts import TraceSink, TraceSpan
@@ -122,21 +132,7 @@ class AgentRunService:
                 "run_id": str(run.id),
             },
         )
-        state: AgentRunState = {
-            "run_id": str(run.id),
-            "agent_version_id": str(agent_version_id),
-            "messages": [],
-            "pending_tool_calls": [],
-            "proposed_tool_calls": [],
-            "pre_observations": {},
-            "tool_observations": [],
-            "executed_observations": {},
-            "model_round_count": 0,
-            "tool_call_count": 0,
-            "identical_call_counts": {},
-            "final_output": None,
-            "failure_code": None,
-        }
+        state = self._initial_state(run, agent_version_id)
         try:
             graph = _AgentRunGraph(self, context, run)
             final_state = await graph.invoke(state)
@@ -182,6 +178,152 @@ class AgentRunService:
             failure_code=result.failure_code,
         )
         return result
+
+    async def stream(
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        agent_version_id: UUID,
+        input_text: str,
+    ) -> AsyncIterator[AgentEvent]:
+        """Run the same LangGraph execution path while publishing AgentHub events."""
+
+        self._require_permission(context)
+        await self.preflight_stream(context, agent_version_id=agent_version_id)
+        run = await self._create_run(context, agent_version_id, input_text)
+        queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue(maxsize=256)
+        emitter = AgentEventEmitter(
+            run_id=str(run.id), agent_version_id=str(agent_version_id)
+        )
+        graph_holder: dict[str, _AgentRunGraph] = {}
+        producer = asyncio.create_task(
+            self._produce_stream(
+                context,
+                run,
+                agent_version_id,
+                queue,
+                emitter,
+                graph_holder,
+            )
+        )
+
+        async def abort_if_active() -> None:
+            if producer.done():
+                return
+            producer.cancel()
+            await asyncio.gather(producer, return_exceptions=True)
+            graph = graph_holder.get("graph")
+            await asyncio.shield(
+                self._complete_run(
+                    context,
+                    run.id,
+                    status="FAILED",
+                    final_output=None,
+                    failure_code="AGENT_STREAM_CANCELLED",
+                    model_step_count=graph.model_round_count if graph else 0,
+                    tool_call_count=graph.tool_call_count if graph else 0,
+                )
+            )
+
+        try:
+            while True:
+                event = await queue.get()
+                if event is None:
+                    break
+                yield event
+        except (asyncio.CancelledError, GeneratorExit):
+            await abort_if_active()
+            raise
+        finally:
+            if not producer.done():
+                await abort_if_active()
+
+    @staticmethod
+    def _initial_state(run: AgentRun, agent_version_id: UUID) -> AgentRunState:
+        return {
+            "run_id": str(run.id),
+            "agent_version_id": str(agent_version_id),
+            "messages": [],
+            "pending_tool_calls": [],
+            "proposed_tool_calls": [],
+            "pre_observations": {},
+            "tool_observations": [],
+            "executed_observations": {},
+            "model_round_count": 0,
+            "tool_call_count": 0,
+            "identical_call_counts": {},
+            "final_output": None,
+            "failure_code": None,
+        }
+
+    async def _produce_stream(
+        self,
+        context: WorkspaceExecutionContext,
+        run: AgentRun,
+        agent_version_id: UUID,
+        queue: asyncio.Queue[AgentEvent | None],
+        emitter: AgentEventEmitter,
+        graph_holder: dict[str, _AgentRunGraph],
+    ) -> None:
+        graph = _AgentRunGraph(
+            self,
+            context,
+            run,
+            mode="stream",
+            emitter=emitter,
+            event_queue=queue,
+        )
+        graph_holder["graph"] = graph
+        state = self._initial_state(run, agent_version_id)
+        try:
+            await _queue_event(
+                queue,
+                await emitter.emit(
+                    AgentEventType.RUN_STARTED,
+                    {"status": "RUNNING", "model_step_count": 0, "tool_call_count": 0},
+                ),
+            )
+            final_state = await graph.invoke(state)
+            failure_code = final_state.get("failure_code")
+            status = "FAILED" if failure_code else "SUCCEEDED"
+            final_output = final_state.get("final_output") if not failure_code else None
+        except asyncio.CancelledError:
+            await graph.close_active_model_stream()
+            raise
+        except AgentHubError as error:
+            failure_code = error.code
+            status = "FAILED"
+            final_output = None
+        except ModelGatewayError as error:
+            failure_code = error.code.value
+            status = "FAILED"
+            final_output = None
+        except Exception:
+            logger.warning("agent_stream_failed", exc_info=True)
+            failure_code = "AGENT_RUN_FAILED"
+            status = "FAILED"
+            final_output = None
+        result = await self._complete_run(
+            context,
+            run.id,
+            status=status,
+            final_output=final_output,
+            failure_code=failure_code,
+            model_step_count=graph.model_round_count,
+            tool_call_count=graph.tool_call_count,
+        )
+        event_type = AgentEventType.RUN_FAILED if failure_code else AgentEventType.RUN_COMPLETED
+        data: dict[str, Any] = {
+            "status": result.status,
+            "model_step_count": result.model_step_count,
+            "tool_call_count": result.tool_call_count,
+        }
+        if failure_code:
+            data["failure_code"] = failure_code
+        else:
+            data["output"] = result.final_output or ""
+        await _queue_event(queue, await emitter.emit(event_type, data))
+        await queue.put(None)
 
     async def get_run(self, context: WorkspaceExecutionContext, run_id: UUID) -> AgentRun:
         self._require_permission(context)
@@ -331,12 +473,25 @@ class AgentRunService:
 
 class _AgentRunGraph:
     def __init__(
-        self, service: AgentRunService, context: WorkspaceExecutionContext, run: AgentRun
+        self,
+        service: AgentRunService,
+        context: WorkspaceExecutionContext,
+        run: AgentRun,
+        *,
+        mode: str = "sync",
+        emitter: AgentEventEmitter | None = None,
+        event_queue: asyncio.Queue[AgentEvent | None] | None = None,
     ) -> None:
         self.service = service
         self.context = context
         self.run = run
         self.sequence = 0
+        self.mode = mode
+        self.emitter = emitter
+        self.event_queue = event_queue
+        self.active_model_stream: AsyncIterator[ModelStreamEvent] | None = None
+        self.model_round_count = 0
+        self.tool_call_count = 0
 
     async def invoke(self, initial: AgentRunState) -> AgentRunState:
         graph = StateGraph(AgentRunState)
@@ -405,6 +560,23 @@ class _AgentRunGraph:
             await self.step("PREPARE", "FAILED", {"error_code": "AGENT_VERSION_INTEGRITY_ERROR"})
             return {"failure_code": "AGENT_VERSION_INTEGRITY_ERROR"}
 
+    async def _emit(self, event_type: AgentEventType, data: Mapping[str, Any]) -> None:
+        if self.emitter is None or self.event_queue is None:
+            return
+        await _queue_event(self.event_queue, await self.emitter.emit(event_type, data))
+
+    async def close_active_model_stream(self) -> None:
+        stream = self.active_model_stream
+        self.active_model_stream = None
+        if stream is None:
+            return
+        close = getattr(stream, "aclose", None)
+        if close is not None:
+            try:
+                await close()
+            except Exception:
+                logger.warning("agent_model_stream_close_failed", exc_info=True)
+
     async def model(self, state: AgentRunState) -> dict[str, Any]:
         runtime = state["runtime"]
         rounds = state.get("model_round_count", 0)
@@ -412,23 +584,60 @@ class _AgentRunGraph:
             await self.step("GUARD", "FAILED", {"error_code": "AGENT_MAX_STEPS_EXCEEDED"})
             return {"failure_code": "AGENT_MAX_STEPS_EXCEEDED"}
         next_round = rounds + 1
-        request = ModelRequest(
-            messages=tuple(state["messages"]),
-            tools=tuple(
-                ModelToolDefinition(
-                    name=definition.identity,
-                    description=definition.description,
-                    parameters=definition.input_schema,
-                )
-                for definition in state["tool_definitions"].values()
-            ),
+        try:
+            admission = self._admit_context(state)
+        except AgentHubError as error:
+            await self.step(
+                "MODEL",
+                "FAILED",
+                {"model_round": next_round, "error_code": error.code},
+            )
+            return {"model_round_count": next_round, "failure_code": error.code}
+
+        state["messages"] = list(admission.messages)
+        state["tool_definitions"] = {
+            definition.name: definition for definition in admission.tool_definitions
+        }
+        usage = admission.usage
+        budget_data = {
+            "model_round": next_round,
+            "context_limit": usage.context_limit,
+            "reserved_output": usage.reserved_output,
+            "estimated_input_before": usage.estimated_input_before,
+            "estimated_input_after": usage.estimated_input_after,
+            "truncated": usage.truncated,
+            "dropped_exchange_count": usage.dropped_exchange_count,
+        }
+        await self._emit(AgentEventType.CONTEXT_BUDGET, budget_data)
+        trace_data = {
+            "run_id": str(self.run.id),
+            "agent_version_id": str(self.run.agent_version_id),
+            "model_round": next_round,
+            "context_limit": usage.context_limit,
+            "reserved_output": usage.reserved_output,
+            "estimated_before": usage.estimated_input_before,
+            "estimated_after": usage.estimated_input_after,
+            "truncated": usage.truncated,
+            "dropped_exchange_count": usage.dropped_exchange_count,
+        }
+        budget_span = await _safe_start_span(
+            self.service.trace_sink, "agent.context_budget", trace_data
         )
+        await _safe_end_span(budget_span, trace_data, status="ok", failure_code=None)
+        request = ModelRequest(
+            messages=admission.messages,
+            tools=admission.tool_definitions,
+        )
+        self.model_round_count = next_round
         try:
             async with self.service.session_factory() as session:
                 gateway = self.service.model_gateway_factory(session)
-                response = await gateway.generate_resolved(
-                    self.context, state["spec"].model_plan, request
-                )
+                if self.mode == "stream":
+                    response = await self._stream_model(gateway, state, request)
+                else:
+                    response = await gateway.generate_resolved(
+                        self.context, state["spec"].model_plan, request
+                    )
         except ModelGatewayError as error:
             await self.step(
                 "MODEL", "FAILED", {"model_round": next_round, "error_code": error.code.value}
@@ -445,8 +654,15 @@ class _AgentRunGraph:
             )
             return {"model_round_count": next_round, "failure_code": "MODEL_BAD_RESPONSE"}
         messages = list(state["messages"])
+        normalized_tool_calls = tuple(
+            replace(
+                call,
+                provider_tool_call_id=call.provider_tool_call_id or f"call-{next_round}-{index}",
+            )
+            for index, call in enumerate(response.tool_calls)
+        )
         assistant = ModelMessage(
-            role="assistant", content=response.content, tool_calls=tuple(response.tool_calls)
+            role="assistant", content=response.content, tool_calls=normalized_tool_calls
         )
         messages.append(assistant)
         if not response.tool_calls and not response.content.strip():
@@ -463,7 +679,15 @@ class _AgentRunGraph:
         await self.step(
             "MODEL",
             "SUCCEEDED",
-            {"model_round": next_round, "tool_count": len(response.tool_calls)},
+            {
+                "model_round": next_round,
+                "tool_count": len(response.tool_calls),
+                "context_limit": usage.context_limit,
+                "estimated_input_before": usage.estimated_input_before,
+                "estimated_input_after": usage.estimated_input_after,
+                "truncated": usage.truncated,
+                "dropped_exchange_count": usage.dropped_exchange_count,
+            },
         )
         return {
             "messages": messages,
@@ -471,6 +695,67 @@ class _AgentRunGraph:
             "model_response": response,
             "final_output": response.content if not response.tool_calls else None,
         }
+
+    def _admit_context(self, state: AgentRunState):
+        budget = ContextBudgetConfig(**state["runtime"]["context_budget"])
+        policy = ContextBudgetPolicy(state["spec"], budget)
+        categorized = _categorize_messages(state["messages"])
+        definitions = tuple(
+            ModelToolDefinition(
+                name=definition.identity,
+                description=definition.description,
+                parameters=definition.input_schema,
+            )
+            for definition in state["tool_definitions"].values()
+        )
+        return policy.admit(categorized, tool_definitions=definitions)
+
+    async def _stream_model(
+        self, gateway: ModelGateway, state: AgentRunState, request: ModelRequest
+    ):
+        stream = gateway.stream_resolved(self.context, state["spec"].model_plan, request)
+        self.active_model_stream = stream
+        content_parts: list[str] = []
+        tool_parts: dict[int, dict[str, Any]] = {}
+        usage = None
+        response: ModelResponse | None = None
+        try:
+            async for event in stream:
+                if event.event_type is ModelStreamEventType.MESSAGE_DELTA:
+                    delta = event.message_delta or ""
+                    content_parts.append(delta)
+                    if delta:
+                        await self._emit(AgentEventType.MESSAGE_DELTA, {"delta": delta})
+                elif event.event_type is ModelStreamEventType.TOOL_CALL_DELTA:
+                    delta = event.tool_call_delta
+                    if delta is not None:
+                        _append_tool_call_delta(tool_parts, delta)
+                elif event.event_type is ModelStreamEventType.USAGE:
+                    usage = event.usage
+                    if usage is not None:
+                        usage_data: dict[str, Any] = {
+                            "input_tokens": usage.input_tokens,
+                            "output_tokens": usage.output_tokens,
+                            "total_tokens": usage.total_tokens,
+                        }
+                        if usage.cached_tokens is not None:
+                            usage_data["cached_tokens"] = usage.cached_tokens
+                        await self._emit(AgentEventType.USAGE, usage_data)
+                elif event.event_type is ModelStreamEventType.COMPLETED:
+                    response = event.response
+            if response is None:
+                raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
+            if usage is not None and response.usage is None:
+                response = replace(response, usage=usage)
+            return response
+        finally:
+            self.active_model_stream = None
+            close = getattr(stream, "aclose", None)
+            if close is not None:
+                try:
+                    await close()
+                except Exception:
+                    logger.warning("agent_model_stream_close_failed", exc_info=True)
 
     async def tool_proposal(self, state: AgentRunState) -> dict[str, Any]:
         response = state.get("model_response")
@@ -514,6 +799,7 @@ class _AgentRunGraph:
                 "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
                 "tool_call_count": total_calls + len(calls),
             }
+        self.tool_call_count = total_calls + len(calls)
         await self.step(
             "TOOL_PROPOSAL",
             "SUCCEEDED",
@@ -578,6 +864,14 @@ class _AgentRunGraph:
 
         async def execute_one(call: dict[str, Any]) -> tuple[str, ToolResult]:
             async with semaphore:
+                started = time.perf_counter()
+                await self._emit(
+                    AgentEventType.TOOL_STARTED,
+                    {
+                        "tool_call_id": call["tool_call_id"],
+                        "tool_identity": call["name"],
+                    },
+                )
                 try:
                     result = await self.service.tool_runtime.execute(
                         context=self.context,
@@ -592,6 +886,16 @@ class _AgentRunGraph:
                     result = ToolResult.failure(
                         "TOOL_EXECUTION_FAILED", "The tool execution failed."
                     )
+                await self._emit(
+                    AgentEventType.TOOL_COMPLETED,
+                    {
+                        "tool_call_id": call["tool_call_id"],
+                        "tool_identity": call["name"],
+                        "status": result.status.value,
+                        "error_code": result.error_code,
+                        "duration_ms": round((time.perf_counter() - started) * 1000, 3),
+                    },
+                )
                 return call["tool_call_id"], result
 
         pairs = await asyncio.gather(*(execute_one(call) for call in calls))
@@ -690,6 +994,62 @@ class _AgentRunGraph:
         )
 
 
+async def _queue_event(queue: asyncio.Queue[AgentEvent | None], event: AgentEvent) -> None:
+    await queue.put(event)
+
+
+def _categorize_messages(messages: list[ModelMessage]) -> tuple[ContextMessage, ...]:
+    """Attach explicit budget categories without inspecting business content."""
+
+    categorized: list[ContextMessage] = []
+    tool_groups: dict[str, tuple[str, int]] = {}
+    for index, message in enumerate(messages):
+        if index == 0 and message.role == "system":
+            category = ContextCategory.RUNTIME_POLICY
+            group = None
+        elif message.role == "system":
+            category = ContextCategory.SYSTEM_PROMPT
+            group = None
+        elif message.role == "user":
+            category = ContextCategory.CURRENT_USER_TASK
+            group = ("user", index)
+        elif message.role == "tool":
+            category = (
+                ContextCategory.RAG_EVIDENCE
+                if message.name == "search_knowledge"
+                else ContextCategory.TOOL_RESULT
+            )
+            group = tool_groups.get(message.tool_call_id or "", ("tool", index))
+        else:
+            category = ContextCategory.CONVERSATION
+            if message.tool_calls:
+                ids = tuple(
+                    call.provider_tool_call_id or f"assistant-{index}-{call_index}"
+                    for call_index, call in enumerate(message.tool_calls)
+                )
+                group = ("tool_exchange", index, *ids)
+                for call_id in ids:
+                    tool_groups[call_id] = group
+            else:
+                group = ("conversation", index)
+        categorized.append(ContextMessage(message, category, group))
+    return tuple(categorized)
+
+
+def _append_tool_call_delta(
+    tool_parts: dict[int, dict[str, Any]], delta: ModelToolCallDelta
+) -> None:
+    entry = tool_parts.setdefault(
+        delta.index,
+        {"name": None, "arguments": [], "provider_tool_call_id": None},
+    )
+    if delta.name:
+        entry["name"] = delta.name
+    entry["arguments"].append(delta.arguments_delta)
+    if delta.provider_tool_call_id:
+        entry["provider_tool_call_id"] = delta.provider_tool_call_id
+
+
 def _bounded_tool_result(result: ToolResult) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "status": result.status.value,
@@ -715,6 +1075,12 @@ def _bounded_tool_result(result: ToolResult) -> dict[str, Any]:
 def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
     allowed = {
         "model_round",
+        "context_limit",
+        "reserved_output",
+        "estimated_input_before",
+        "estimated_input_after",
+        "truncated",
+        "dropped_exchange_count",
         "tool_count",
         "step_count",
         "tool_identities",
