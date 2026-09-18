@@ -6,6 +6,7 @@ import asyncio
 import logging
 import time
 from collections.abc import AsyncIterator, Mapping
+from dataclasses import replace
 from typing import Any, Protocol
 from uuid import UUID
 
@@ -23,6 +24,8 @@ from packages.model_gateway.contracts import (
     ModelResponse,
     ModelStreamEvent,
     ModelStreamEventType,
+    ResolvedModelExecutionPlan,
+    ResolvedModelExecutionProfile,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.models import ProviderCredential
@@ -79,6 +82,75 @@ class ModelGatewayService(ModelGateway):
         model_profile_id: UUID,
         request: ModelRequest,
     ) -> ModelResponse:
+        chain = await self.resolver.resolve_chain(
+            context,
+            model_profile_id,
+            required_capabilities=effective_capability_requirements(request, "generate"),
+        )
+        return await self._generate_chain(context, model_profile_id, chain, request)
+
+    async def generate_resolved(
+        self,
+        context: WorkspaceExecutionContext,
+        plan: ResolvedModelExecutionPlan,
+        request: ModelRequest,
+    ) -> ModelResponse:
+        """Execute the non-secret identities frozen in a published AgentVersion."""
+
+        from packages.model_gateway.capabilities import validate_capabilities
+
+        required = effective_capability_requirements(request, "generate")
+        adapter_profiles: list[ResolvedModelProfile] = []
+        credentials: dict[UUID, ProviderCredential] = {}
+        try:
+            workspace_id = UUID(context.workspace_id)
+        except ValueError:
+            raise ModelGatewayError(
+                ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID
+            ) from None
+        for frozen in plan.chain:
+            if frozen.workspace_id != workspace_id:
+                raise ModelGatewayError(ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID)
+            try:
+                validate_capabilities(frozen.capabilities, required)
+                credential = await self._enabled_frozen_credential(context, frozen)
+            except ModelGatewayError as error:
+                if error.code is ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH:
+                    raise
+                raise ModelGatewayError(
+                    ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID
+                ) from None
+            adapter_profiles.append(
+                ResolvedModelProfile(
+                    id=frozen.id,
+                    workspace_id=frozen.workspace_id,
+                    provider_credential_id=frozen.provider_credential_id,
+                    model=frozen.model,
+                    temperature=frozen.temperature,
+                    max_tokens=frozen.max_tokens,
+                    timeout_seconds=frozen.timeout_seconds,
+                    fallback_profile_id=None,
+                    capabilities=frozen.capabilities,
+                )
+            )
+            credentials[frozen.id] = credential
+        return await self._generate_chain(
+            context,
+            plan.primary.id,
+            tuple(adapter_profiles),
+            replace(request, retry_policy=plan.retry_policy),
+            credentials=credentials,
+        )
+
+    async def _generate_chain(
+        self,
+        context: WorkspaceExecutionContext,
+        model_profile_id: UUID,
+        chain: tuple[ResolvedModelProfile, ...],
+        request: ModelRequest,
+        *,
+        credentials: Mapping[UUID, ProviderCredential] | None = None,
+    ) -> ModelResponse:
         started = time.perf_counter()
         span = await _start_trace_span(
             self.trace_sink,
@@ -90,16 +162,15 @@ class ModelGatewayService(ModelGateway):
         provider: str | None = None
         model: str | None = None
         try:
-            chain = await self.resolver.resolve_chain(
-                context,
-                model_profile_id,
-                required_capabilities=effective_capability_requirements(request, "generate"),
-            )
             last_error: ModelGatewayError | None = None
             for profile_index, profile in enumerate(chain):
                 fallback_used = profile_index > 0
                 model = profile.model
-                credential = await self._enabled_credential(context, profile.provider_credential_id)
+                credential = (
+                    credentials[profile.id]
+                    if credentials is not None
+                    else await self._enabled_credential(context, profile.provider_credential_id)
+                )
                 provider = credential.provider
                 for attempt in range(request.retry_policy.max_attempts):
                     attempt_count += 1
@@ -120,8 +191,7 @@ class ModelGatewayService(ModelGateway):
                         return response
                     except TimeoutError:
                         last_error = ModelGatewayError(
-                            ModelGatewayErrorCode.MODEL_TIMEOUT,
-                            retryable=True,
+                            ModelGatewayErrorCode.MODEL_TIMEOUT, retryable=True
                         )
                         if attempt + 1 >= request.retry_policy.max_attempts:
                             break
@@ -342,6 +412,24 @@ class ModelGatewayService(ModelGateway):
         if credential is None or credential.enabled is False:
             raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROFILE_DISABLED)
         return credential
+
+    async def _enabled_frozen_credential(
+        self,
+        context: WorkspaceExecutionContext,
+        profile: ResolvedModelExecutionProfile,
+    ) -> ProviderCredential:
+        credential = await self.repository.get_provider_credential(
+            context, profile.provider_credential_id
+        )
+        if (
+            credential is None
+            or credential.enabled is False
+            or credential.workspace_id != profile.workspace_id
+            or credential.provider != profile.provider
+        ):
+            raise ModelGatewayError(ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID)
+        return credential
+
 
 class SqlAlchemyModelGateway(ModelGatewayService):
     def __init__(

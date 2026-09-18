@@ -139,6 +139,71 @@ class PublishedToolResolver:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+    async def list_definitions(
+        self,
+        *,
+        workspace_id: UUID,
+        agent_version_id: UUID,
+    ) -> tuple[ToolDefinition, ...]:
+        """List the exact hash-verified tool revisions published in a version."""
+
+        version = await self.session.scalar(
+            select(AgentVersion).where(
+                AgentVersion.workspace_id == workspace_id,
+                AgentVersion.id == agent_version_id,
+            )
+        )
+        if version is None:
+            raise AgentHubError(
+                "AGENT_VERSION_NOT_FOUND", "The published agent version was not found.", 404
+            )
+        if canonical_json_hash(version.resolved_spec) != version.resolved_spec_hash:
+            raise AgentHubError(
+                "AGENT_VERSION_INTEGRITY_ERROR",
+                "The published agent version is invalid.",
+                422,
+            )
+        entries = version.resolved_spec.get("tools", [])
+        if not isinstance(entries, list):
+            raise AgentHubError(
+                "TOOL_REVISION_INTEGRITY_ERROR", "The published tool binding is invalid.", 422
+            )
+        identities: list[str] = []
+        for entry in entries:
+            if not isinstance(entry, Mapping):
+                raise AgentHubError(
+                    "TOOL_REVISION_INTEGRITY_ERROR", "The published tool binding is invalid.", 422
+                )
+            try:
+                revision_id = UUID(str(entry["tool_revision_id"]))
+                revision = await self.session.scalar(
+                    select(ToolRevision).where(
+                        ToolRevision.workspace_id == workspace_id,
+                        ToolRevision.id == revision_id,
+                    )
+                )
+            except (KeyError, ValueError):
+                revision = None
+            if revision is None or revision.spec_hash != entry.get("tool_spec_hash"):
+                raise AgentHubError(
+                    "TOOL_REVISION_INTEGRITY_ERROR", "The published tool binding is invalid.", 422
+                )
+            if canonical_json_hash(revision.spec) != revision.spec_hash:
+                raise AgentHubError(
+                    "TOOL_REVISION_INTEGRITY_ERROR", "The tool revision is invalid.", 422
+                )
+            identities.append(validate_executable_tool_spec(revision.spec)["identity"])
+        definitions = []
+        for identity in dict.fromkeys(identities):
+            definitions.append(
+                await self.resolve(
+                    workspace_id=workspace_id,
+                    agent_version_id=agent_version_id,
+                    tool_identity=identity,
+                )
+            )
+        return tuple(definitions)
+
     async def resolve(
         self,
         *,
@@ -229,6 +294,21 @@ class PublishedToolResolver:
                 retrieval_config=dict(retrieval),
             )
         raise AgentHubError("UNKNOWN_TOOL", "The published tool was not found.", 404)
+
+
+class PublishedToolCatalog(PublishedToolResolver):
+    """Provider-neutral catalog facade for published tool definitions."""
+
+    async def list(
+        self,
+        *,
+        workspace_id: UUID,
+        agent_version_id: UUID,
+    ) -> tuple[ToolDefinition, ...]:
+        return await self.list_definitions(
+            workspace_id=workspace_id,
+            agent_version_id=agent_version_id,
+        )
 
 
 class ToolRuntime:
@@ -387,6 +467,7 @@ class ToolRuntime:
 
 
 __all__ = [
+    "PublishedToolCatalog",
     "PublishedToolResolver",
     "ToolRuntime",
     "validate_executable_tool_spec",

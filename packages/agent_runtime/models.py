@@ -61,9 +61,10 @@ class Agent(Base):
         String(16), nullable=False, server_default="PINNED"
     )
     model_retry_policy: Mapped[dict[str, Any]] = mapped_column(
-        JSONB, nullable=False, default=lambda: {"max_attempts": 1}, server_default=text(
-            "'{\"max_attempts\": 1}'::jsonb"
-        )
+        JSONB,
+        nullable=False,
+        default=lambda: {"max_attempts": 1},
+        server_default=text("'{\"max_attempts\": 1}'::jsonb"),
     )
     retrieval_config: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
@@ -249,11 +250,86 @@ class AgentTool(Base):
     tool_revision_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
 
 
+class AgentRun(Base):
+    __tablename__ = "agent_runs"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_version_id"],
+            ["agent_versions.workspace_id", "agent_versions.id"],
+            name="fk_agent_runs_agent_version_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"], ["users.id"], name="fk_agent_runs_created_by", ondelete="RESTRICT"
+        ),
+        CheckConstraint(
+            "status IN ('RUNNING', 'SUCCEEDED', 'FAILED')", name="ck_agent_runs_status"
+        ),
+        UniqueConstraint("workspace_id", "id", name="uq_agent_runs_workspace_id"),
+        Index("ix_agent_runs_workspace_status", "workspace_id", "status"),
+        Index("ix_agent_runs_workspace_created_at", "workspace_id", "created_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    agent_version_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="RUNNING")
+    input_text: Mapped[str] = mapped_column(Text, nullable=False)
+    final_output: Mapped[str | None] = mapped_column(Text)
+    failure_code: Mapped[str | None] = mapped_column(String(96))
+    model_step_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    tool_call_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class RunStep(Base):
+    __tablename__ = "run_steps"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_run_id"],
+            ["agent_runs.workspace_id", "agent_runs.id"],
+            name="fk_run_steps_agent_run_workspace",
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "kind IN ('PREPARE', 'MODEL', 'TOOL_PROPOSAL', 'POLICY', 'TOOL_EXECUTE', "
+            "'OBSERVATION', 'GUARD', 'FINISH')",
+            name="ck_run_steps_kind",
+        ),
+        UniqueConstraint(
+            "workspace_id", "agent_run_id", "sequence_number", name="uq_run_steps_sequence"
+        ),
+        Index("ix_run_steps_workspace_run", "workspace_id", "agent_run_id", "sequence_number"),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    agent_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    sequence_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    kind: Mapped[str] = mapped_column(String(24), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    safe_metadata: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 __all__ = [
     "Agent",
     "AgentKnowledgeBinding",
     "AgentTool",
     "AgentVersion",
+    "AgentRun",
+    "RunStep",
     "Tool",
     "ToolRevision",
 ]

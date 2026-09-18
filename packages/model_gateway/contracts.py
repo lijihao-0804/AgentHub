@@ -94,9 +94,7 @@ class ModelRequest:
     messages: tuple[ModelMessage, ...]
     tools: tuple[ModelToolDefinition, ...] = field(default_factory=tuple)
     response_schema: StructuredOutputSchema | None = None
-    required_capabilities: CapabilityRequirements = field(
-        default_factory=CapabilityRequirements
-    )
+    required_capabilities: CapabilityRequirements = field(default_factory=CapabilityRequirements)
     retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
 
     def __post_init__(self) -> None:
@@ -221,6 +219,34 @@ class ModelCapabilities:
             raise ValueError("max_context_tokens must be positive")
 
 
+@dataclass(frozen=True, slots=True)
+class ResolvedModelExecutionProfile:
+    """The non-secret model identity frozen into an immutable AgentVersion."""
+
+    id: UUID
+    workspace_id: UUID
+    provider_credential_id: UUID
+    provider: str
+    model: str
+    temperature: Decimal
+    max_tokens: int
+    timeout_seconds: Decimal
+    capabilities: ModelCapabilities
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedModelExecutionPlan:
+    """A published model chain plus the retry policy frozen with that chain."""
+
+    primary: ResolvedModelExecutionProfile
+    fallbacks: tuple[ResolvedModelExecutionProfile, ...] = field(default_factory=tuple)
+    retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
+
+    @property
+    def chain(self) -> tuple[ResolvedModelExecutionProfile, ...]:
+        return (self.primary, *self.fallbacks)
+
+
 class ModelHealthStatus(StrEnum):
     HEALTHY = "healthy"
     DEGRADED = "degraded"
@@ -238,6 +264,13 @@ class ModelGateway(Protocol):
         self,
         context: WorkspaceExecutionContext,
         model_profile_id: UUID,
+        request: ModelRequest,
+    ) -> ModelResponse: ...
+
+    async def generate_resolved(
+        self,
+        context: WorkspaceExecutionContext,
+        plan: ResolvedModelExecutionPlan,
         request: ModelRequest,
     ) -> ModelResponse: ...
 
@@ -272,6 +305,8 @@ __all__ = [
     "ModelMessage",
     "ModelRequest",
     "ModelResponse",
+    "ResolvedModelExecutionPlan",
+    "ResolvedModelExecutionProfile",
     "ModelStreamEvent",
     "ModelStreamEventType",
     "ModelToolCall",

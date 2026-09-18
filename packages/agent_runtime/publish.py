@@ -509,7 +509,12 @@ def _resolved_spec(
             "retry_policy": retry_policy,
             "fallback_chain": [str(profile.id) for profile in chain[1:]],
             "fallback_profiles": [
-                _profile_projection(profile, providers[profile.id]) for profile in chain[1:]
+                {
+                    **_profile_projection(profile, providers[profile.id]),
+                    "profile_id": str(profile.id),
+                    "credential_ref": str(profile.provider_credential_id),
+                }
+                for profile in chain[1:]
             ],
         }
     )

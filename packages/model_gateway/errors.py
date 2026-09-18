@@ -12,6 +12,7 @@ class ModelGatewayErrorCode(StrEnum):
     MODEL_CAPABILITY_MISMATCH = "MODEL_CAPABILITY_MISMATCH"
     MODEL_PROFILE_DISABLED = "MODEL_PROFILE_DISABLED"
     MODEL_STREAM_INTERRUPTED = "MODEL_STREAM_INTERRUPTED"
+    AGENT_VERSION_MODEL_BINDING_INVALID = "AGENT_VERSION_MODEL_BINDING_INVALID"
 
 
 _SAFE_MESSAGES = {
@@ -25,6 +26,9 @@ _SAFE_MESSAGES = {
     ),
     ModelGatewayErrorCode.MODEL_PROFILE_DISABLED: "The model profile is disabled.",
     ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED: "The model stream was interrupted.",
+    ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID: (
+        "The published model binding is invalid."
+    ),
 }
 
 
