@@ -48,7 +48,7 @@ duration, error code and argument keys. Tool trace failure is non-fatal.
   and snapshot-bound retriever injection.
 - CI runs real PostgreSQL, Redis, Qdrant and Celery setup, then the dedicated
   `tests/integration/test_m4b_tool_runtime.py` step. No public tool execution endpoint is added.
-- Final closure: commit `b305a58`; GitHub Actions run #57 passed backend, frontend, and the
-  dedicated M4-B integration step.
+- Implementation commit: `b305a58`; final documentation closure commit: `f1a9aff`. GitHub
+  Actions run #58 passed backend, frontend, and the dedicated M4-B integration step.
 
 M4-C Agent Run / LangGraph remains outside this milestone.
