@@ -10,6 +10,7 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from apps.api.app import create_app
@@ -38,6 +39,8 @@ from packages.knowledge.models import (
 )
 from packages.knowledge.point_ids import deterministic_point_id
 from packages.model_gateway.contracts import ModelRequest, ModelResponse
+from packages.model_gateway.gateway import SqlAlchemyModelGateway
+from packages.model_gateway.models import ModelProfile, ProviderCredential
 
 TEST_DATABASE_URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "").strip()
 TEST_QDRANT_URL = os.environ.get("AGENTHUB_TEST_QDRANT_URL", "http://127.0.0.1:6333").strip()
@@ -48,6 +51,7 @@ pytestmark = [
         reason="Set AGENTHUB_TEST_DATABASE_URL and AGENTHUB_TEST_QDRANT_URL for M3-E integration.",
     ),
 ]
+db_session_dependency = Depends(get_db_session)
 
 
 def async_database_url(database_url: str) -> str:
@@ -96,6 +100,24 @@ class _FakeModelGateway:
             provider="integration-fake",
             model="deterministic-fake",
         )
+
+
+class _FailIfCalledAdapter:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def complete(self, _profile, _credential, _request):
+        self.calls += 1
+        raise AssertionError("cross-workspace profile reached provider adapter")
+
+    async def health(self, _profile, _credential):
+        self.calls += 1
+        raise AssertionError("cross-workspace profile reached provider adapter")
+
+    async def stream(self, _profile, _credential, _request):
+        self.calls += 1
+        raise AssertionError("cross-workspace profile reached provider adapter")
+        yield
 
 
 async def _seed(
@@ -176,6 +198,39 @@ async def _seed(
         )
         await session.commit()
         return user.id, workspace.id, knowledge_base.id, snapshot.id, chunk
+
+
+async def _seed_model_profile_in_other_workspace(
+    factory: async_sessionmaker[AsyncSession],
+    *,
+    user_id: UUID,
+) -> UUID:
+    async with factory() as session:
+        organization = Organization(name=f"m3e-other-{uuid4()}", created_by=user_id)
+        session.add(organization)
+        await session.flush()
+        workspace = Workspace(organization_id=organization.id, name=f"other-{uuid4()}")
+        session.add(workspace)
+        await session.flush()
+        credential = ProviderCredential(
+            workspace_id=workspace.id,
+            provider="workspace-b-private-provider",
+            name="workspace-b-private-credential",
+            secret="workspace-b-secret-must-not-leak",
+        )
+        session.add(credential)
+        await session.flush()
+        profile = ModelProfile(
+            workspace_id=workspace.id,
+            provider_credential_id=credential.id,
+            model="workspace-b-private-model",
+            max_tokens=256,
+            timeout_seconds=5,
+            capabilities={"structured_output": True},
+        )
+        session.add(profile)
+        await session.commit()
+        return profile.id
 
 
 def _index(settings: Settings, chunk: DocumentChunk) -> QdrantVectorIndex:
@@ -267,3 +322,66 @@ async def test_citation_qa_uses_real_tenant_postgres_and_qdrant(
     assert body["retrieval_trace"]["snapshot_id"] == str(snapshot_id)
     assert gateway.calls == 1
     assert "integration-fake" not in response.text
+
+
+@pytest.mark.asyncio
+async def test_citation_qa_rejects_cross_workspace_model_profile_before_adapter(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    user_id, workspace_id, knowledge_base_id, snapshot_id, chunk = await _seed(db_factory)
+    foreign_profile_id = await _seed_model_profile_in_other_workspace(
+        db_factory,
+        user_id=user_id,
+    )
+    settings = Settings(
+        testing=True,
+        database_url=async_database_url(TEST_DATABASE_URL),
+        qdrant_url=TEST_QDRANT_URL,
+        knowledge_qdrant_collection=f"agenthub_m3e_cross_profile_{uuid4().hex}",
+        knowledge_dense_vector_size=16,
+    )
+    index = _index(settings, chunk)
+    components = RetrievalComponents(
+        dense=DeterministicFakeDenseEmbedder(dimension=16),
+        sparse=DeterministicFakeSparseEncoder(),
+        reranker=DeterministicFakeReranker(),
+        index=index,
+    )
+    adapter = _FailIfCalledAdapter()
+    app = create_app(settings)
+
+    async def override_db() -> AsyncIterator[AsyncSession]:
+        async with db_factory() as session:
+            yield session
+
+    async def override_components() -> RetrievalComponents:
+        return components
+
+    async def override_gateway(session: AsyncSession = db_session_dependency):
+        return SqlAlchemyModelGateway(session, adapter=adapter)
+
+    app.dependency_overrides[get_db_session] = override_db
+    app.dependency_overrides[get_retrieval_components] = override_components
+    app.dependency_overrides[get_model_gateway] = override_gateway
+    token = issue_access_token(user_id, settings)
+    payload = {
+        "workspace_id": str(workspace_id),
+        "knowledge_base_id": str(knowledge_base_id),
+        "knowledge_snapshot_id": str(snapshot_id),
+        "model_profile_id": str(foreign_profile_id),
+        "query": "What is in the source?",
+    }
+
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/v1/knowledge/query",
+            json=payload,
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "MODEL_PROFILE_DISABLED"
+    assert adapter.calls == 0
+    assert "workspace-b-private" not in response.text
+    assert "workspace-b-secret" not in response.text

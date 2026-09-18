@@ -66,5 +66,9 @@ explicit fake model gateway.
 - GitHub Actions continues to use PostgreSQL, Redis, Qdrant, and Celery without downloading BGE
   weights or calling a public LLM.
 
+Closure verification is recorded after the dedicated M3-E integration step completes. M3-E
+acceptance closure must include the workflow run, backend PASS, frontend PASS, and both real
+PostgreSQL/Qdrant integration cases, including cross-workspace model-profile rejection.
+
 M3-F Snapshot lifecycle / `LATEST` resolution and M4 are not started. M3 overall is not marked
 PASS until the complete M3 acceptance record is finalized.

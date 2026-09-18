@@ -3,8 +3,8 @@
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
 implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M3-C:
 engineering foundations, Auth / Tenant / RBAC, ModelGateway + Capability Contract, and the
-Reliable Worker ingestion boundary. M3-D Playground is complete; M3-E Citation QA is the
-current milestone. M3-F full Snapshot lifecycle remains deferred.
+Reliable Worker ingestion boundary. M3-D is PASS; M3-E Citation QA is implemented and in
+acceptance closure. M3-F full Snapshot lifecycle remains deferred.
 
 ## Basic development setup
 
