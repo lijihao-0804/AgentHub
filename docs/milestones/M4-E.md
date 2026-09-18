@@ -1,6 +1,6 @@
 # M4-E — Agent Runtime Evaluation
 
-Status: IN PROGRESS — implementation and deterministic baseline are being built.
+Status: PASS — acceptance verified in GitHub Actions run #69.
 
 ## Scope
 
@@ -21,3 +21,15 @@ execute WRITE tools.
 
 Acceptance requires 20/20 cases, all category and split metrics at 1.0000, the existing M4-A/B/C/D
 regressions, backend/frontend CI success, and a clean worktree. M5 remains outside this milestone.
+
+## Final verification
+
+- Implementation commit: `79d9d0f`
+- Baseline commit: `6b4796e`
+- Final closure commit: `c6b3d58`
+- Dataset: `m4-agent-runtime-v1`, hash `e4bfda27c20e757f01dbf091fa1965a9712cefc7aa0c26bed234505348258aa3`
+- Results: 20/20 PASS; dev 14/14; holdout 6/6; every category 1.0000
+- GitHub Actions #69 (`35373471916`): backend PASS, frontend PASS, M4-E integration PASS
+
+M4 overall is PASS. M5 is the next milestone; Approval Runtime, checkpoint/resume, and WRITE
+execution were not added in M4-E.

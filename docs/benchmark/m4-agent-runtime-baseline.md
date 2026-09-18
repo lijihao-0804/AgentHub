@@ -9,6 +9,10 @@ Dataset version: `m4-agent-runtime-v1`
 Dataset hash: `e4bfda27c20e757f01dbf091fa1965a9712cefc7aa0c26bed234505348258aa3`
 Git commit: `79d9d0fda7ccabf5641c239ea74ef1150911a929`
 
+Implementation commit: `79d9d0f`; baseline commit: `6b4796e`; final closure commit: `c6b3d58`.
+GitHub Actions run #69 (`35373471916`) passed backend, frontend, and the dedicated M4-E
+evaluation step.
+
 Cases: 20
 Dev: 14 / 14 PASS
 Holdout: 6 / 6 PASS
