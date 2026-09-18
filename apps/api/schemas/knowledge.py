@@ -74,6 +74,18 @@ class DocumentRevisionStatusResponse(BaseModel):
     ingestion_job: IngestionJobResponse
 
 
+class KnowledgeSnapshotResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: UUID
+    workspace_id: UUID
+    knowledge_base_id: UUID
+    content_hash: str = Field(min_length=64, max_length=64)
+    snapshot_schema_version: int = Field(ge=1)
+    item_count: int = Field(ge=0)
+    created_at: datetime
+
+
 class RetrievalPlaygroundRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

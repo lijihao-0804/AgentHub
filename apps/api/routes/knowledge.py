@@ -22,6 +22,7 @@ from apps.api.schemas.knowledge import (
     IngestionJobResponse,
     KnowledgeBaseCreateRequest,
     KnowledgeBaseResponse,
+    KnowledgeSnapshotResponse,
     RetrievalPlaygroundEvidence,
     RetrievalPlaygroundRequest,
     RetrievalPlaygroundResponse,
@@ -35,6 +36,7 @@ from packages.knowledge.models import DocumentChunk, DocumentRevision, Knowledge
 from packages.knowledge.queue import IngestionQueue
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.knowledge.services import KnowledgeService
+from packages.knowledge.snapshots import KnowledgeSnapshotService
 from packages.knowledge.upload_security import (
     UploadSecurityError,
     UploadSecurityPolicy,
@@ -209,6 +211,34 @@ async def list_knowledge_bases(
         KnowledgeBaseResponse.model_validate(item, from_attributes=True)
         for item in knowledge_bases
     ]
+
+
+@router.post(
+    "/api/v1/workspaces/{workspace_id}/knowledge-bases/{knowledge_base_id}/snapshots",
+    response_model=KnowledgeSnapshotResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_knowledge_snapshot(
+    workspace_id: UUID,
+    knowledge_base_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> KnowledgeSnapshotResponse:
+    del workspace_id
+    snapshot = await KnowledgeSnapshotService().create_current_snapshot(
+        session,
+        context,
+        knowledge_base_id,
+    )
+    return KnowledgeSnapshotResponse(
+        id=snapshot.snapshot_id,
+        workspace_id=snapshot.workspace_id,
+        knowledge_base_id=snapshot.knowledge_base_id,
+        content_hash=snapshot.content_hash,
+        snapshot_schema_version=snapshot.snapshot_schema_version,
+        item_count=snapshot.item_count,
+        created_at=snapshot.created_at,
+    )
 
 
 async def _guarded_chunks(

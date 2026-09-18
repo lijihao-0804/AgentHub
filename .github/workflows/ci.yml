@@ -84,6 +84,7 @@ jobs:
       - run: uv run --locked pytest tests/integration/test_m3b_worker.py -vv -rs
       - run: uv run --locked pytest tests/integration/test_m3c_indexing.py tests/integration/test_m3c_retrieval.py -vv -rs
       - run: uv run --locked pytest tests/integration/test_m3e_citation_qa.py -vv -rs
+      - run: uv run --locked pytest tests/integration/test_m3f_snapshot.py -vv -rs
       - name: Stop Celery worker
         if: always()
         run: |

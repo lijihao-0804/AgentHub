@@ -68,7 +68,7 @@ explicit fake model gateway.
 
 Final closure verification:
 
-- GitHub Actions run `35319858669` — [CI run](https://github.com/lijihao-0804/AgentHub/actions/runs/35319858669)
+- GitHub Actions run `35320397111` — [CI run](https://github.com/lijihao-0804/AgentHub/actions/runs/35320397111)
 - backend job: PASS
 - frontend job: PASS
 - dedicated `tests/integration/test_m3e_citation_qa.py` step: PASS

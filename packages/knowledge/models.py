@@ -115,6 +115,13 @@ class DocumentRevision(Base):
             "id",
             name="uq_document_revisions_workspace_kb_id",
         ),
+        UniqueConstraint(
+            "workspace_id",
+            "knowledge_base_id",
+            "document_id",
+            "id",
+            name="uq_document_revisions_workspace_kb_document_id",
+        ),
         UniqueConstraint("document_id", "revision_number", name="uq_document_revisions_number"),
         CheckConstraint(
             "lifecycle_status IN ('ACTIVE', 'RETIRED', 'DELETED')",
@@ -253,6 +260,12 @@ class KnowledgeSnapshot(Base):
         UniqueConstraint(
             "workspace_id",
             "knowledge_base_id",
+            "id",
+            name="uq_knowledge_snapshots_workspace_kb_id",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "knowledge_base_id",
             "content_hash",
             name="uq_knowledge_snapshots_content_hash",
         ),
@@ -275,9 +288,13 @@ class KnowledgeSnapshotItem(Base):
     __tablename__ = "knowledge_snapshot_items"
     __table_args__ = (
         ForeignKeyConstraint(
-            ["workspace_id", "snapshot_id"],
-            ["knowledge_snapshots.workspace_id", "knowledge_snapshots.id"],
-            name="fk_snapshot_items_snapshot_workspace",
+            ["workspace_id", "knowledge_base_id", "snapshot_id"],
+            [
+                "knowledge_snapshots.workspace_id",
+                "knowledge_snapshots.knowledge_base_id",
+                "knowledge_snapshots.id",
+            ],
+            name="fk_snapshot_items_snapshot_workspace_kb",
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
@@ -287,13 +304,14 @@ class KnowledgeSnapshotItem(Base):
             ondelete="RESTRICT",
         ),
         ForeignKeyConstraint(
-            ["workspace_id", "knowledge_base_id", "document_revision_id"],
+            ["workspace_id", "knowledge_base_id", "document_id", "document_revision_id"],
             [
                 "document_revisions.workspace_id",
                 "document_revisions.knowledge_base_id",
+                "document_revisions.document_id",
                 "document_revisions.id",
             ],
-            name="fk_snapshot_items_revision_workspace",
+            name="fk_snapshot_items_revision_document_workspace",
             ondelete="RESTRICT",
         ),
         UniqueConstraint(
