@@ -1,6 +1,6 @@
 # M4-A — Agent Draft / AgentVersion / Publish
 
-Status: PASS — accepted in GitHub Actions run #52.
+Status: PASS — closure verified in GitHub Actions run #55.
 
 M4-A establishes the immutable publication boundary only. It does not execute an Agent, call a
 model provider, execute a Tool, start LangGraph, stream output, or implement Approval.
@@ -62,6 +62,6 @@ and `agent_create` / `agent_edit` permissions remain authoritative.
   in immutable specs.
 - CI uses real PostgreSQL and runs `tests/integration/test_m4a_publish.py`; no provider adapter or
   public LLM is called.
-- Final acceptance: GitHub Actions run #54 passed backend, frontend, and the M4-A integration step.
+- Final acceptance: GitHub Actions run #55 passed backend, frontend, and the M4-A integration step.
 
 M4-B, Tool Runtime, LangGraph, Agent Run, streaming and Approval remain outside this milestone.
