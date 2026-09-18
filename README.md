@@ -1,9 +1,11 @@
 # AgentHub
 
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
-implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M3-B:
+implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M3-C:
 engineering foundations, Auth / Tenant / RBAC, ModelGateway + Capability Contract, and the
-Reliable Worker ingestion boundary. M3-C retrieval is not started.
+Reliable Worker ingestion boundary. The current implementation baseline is M3-C: deterministic
+knowledge indexing and snapshot-scoped hybrid retrieval. M3-D Playground, M3-E Citation QA and
+M3-F full Snapshot lifecycle remain deferred.
 
 ## Basic development setup
 
@@ -29,14 +31,23 @@ The API exposes `/api/v1/health`, `/api/v1/ready` and `/api/v1/dependencies`.
 
 ## Optional/local infrastructure setup
 
-For the current M3-B worker milestone, PostgreSQL and Redis are required and may be provided
-by local services or Docker Compose:
+For the current M3-C worker and retrieval milestone, PostgreSQL, Redis and Qdrant are required
+for real infrastructure verification and may be provided by local services or Docker Compose:
 
 ```powershell
-docker compose up -d postgres redis
+docker compose up -d postgres redis qdrant
 ```
 
-Qdrant remains deferred to M3-C. Docker remains supported for later deployment verification.
+CI injects deterministic fake models and never downloads BGE checkpoints. Real model verification
+is a manual host smoke only:
+
+```powershell
+uv run --locked python scripts/knowledge_model_smoke.py
+uv run --locked python scripts/knowledge_retrieval_smoke.py
+```
+
+Docker remains supported for later deployment verification; full Docker deployment acceptance is
+deferred to M8.
 
 ## Delivery discipline
 

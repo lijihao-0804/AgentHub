@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     knowledge_reranker_device: str = "auto"
     knowledge_reranker_batch_size: int = Field(default=8, ge=1, le=64)
     knowledge_qdrant_timeout_seconds: float = Field(default=10, gt=0, le=120)
+    knowledge_rrf_k: int = Field(default=60, ge=1, le=10_000)
     blob_root: str = "data/blobs"
     knowledge_max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1)
     knowledge_ingestion_lease_seconds: int = Field(default=300, ge=5, le=86_400)

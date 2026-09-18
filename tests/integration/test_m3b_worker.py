@@ -197,23 +197,27 @@ async def _create_knowledge_context(
     return context, knowledge_base.id
 
 
-async def _wait_for_embedding(
+async def _wait_for_indexed(
     factory: async_sessionmaker[AsyncSession], job_id: UUID, timeout: float = 20
 ) -> IngestionJob:
     deadline = asyncio.get_running_loop().time() + timeout
     while asyncio.get_running_loop().time() < deadline:
         async with factory() as session:
             job = await session.get(IngestionJob, job_id)
-            if job is not None and job.stage == IngestionStage.EMBEDDING:
+            if (
+                job is not None
+                and job.status == IngestionJobStatus.SUCCEEDED
+                and job.stage == IngestionStage.INDEXING
+            ):
                 return job
             if job is not None and job.status == IngestionJobStatus.FAILED:
                 pytest.fail(f"worker failed: {job.last_error_code} {job.safe_error_message}")
         await asyncio.sleep(0.25)
-    pytest.fail("Celery worker did not finish M3-B parsing/chunking in time")
+    pytest.fail("Celery worker did not finish stage-aware parsing/indexing in time")
 
 
 @pytest.mark.asyncio
-async def test_real_celery_worker_is_idempotent_and_stops_at_embedding(
+async def test_real_celery_worker_is_idempotent_through_ready(
     db_factory: async_sessionmaker[AsyncSession],
 ) -> None:
     blob_root = Path(os.environ.get("AGENTHUB_BLOB_ROOT", "data/blobs")).resolve()
@@ -228,7 +232,7 @@ async def test_real_celery_worker_is_idempotent_and_stops_at_embedding(
     queue = CeleryIngestionQueue(create_celery_app(settings))
 
     await queue.enqueue(job_id)
-    await _wait_for_embedding(db_factory, job_id)
+    await _wait_for_indexed(db_factory, job_id)
     await queue.enqueue(job_id)
     await asyncio.sleep(1)
 
@@ -242,8 +246,8 @@ async def test_real_celery_worker_is_idempotent_and_stops_at_embedding(
             ).all()
         )
     assert job is not None
-    assert job.status == IngestionJobStatus.PROCESSING
-    assert job.stage == IngestionStage.EMBEDDING
+    assert job.status == IngestionJobStatus.SUCCEEDED
+    assert job.stage == IngestionStage.INDEXING
     assert len(chunks) == 1
 
 
@@ -324,7 +328,7 @@ async def test_enqueue_loss_keeps_pending_and_reconciliation_requeues_real_job(
             settings=settings,
         )
     assert job.id in result.requeued_job_ids
-    await _wait_for_embedding(db_factory, job.id)
+    await _wait_for_indexed(db_factory, job.id)
 
     async with db_factory() as session:
         chunks = list(

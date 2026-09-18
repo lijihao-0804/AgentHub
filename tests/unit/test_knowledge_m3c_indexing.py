@@ -82,6 +82,11 @@ def test_qdrant_collection_is_idempotent_and_duplicate_upsert_is_safe() -> None:
         scope=VectorScope("workspace-b", "kb-a", ("revision-a",)),
         limit=30,
     ) == ()
+    assert index.dense_search(
+        dense,
+        scope=VectorScope("workspace-a", "kb-other", ("revision-a",)),
+        limit=30,
+    ) == ()
 
 
 def test_qdrant_schema_mismatch_does_not_recreate_collection() -> None:
