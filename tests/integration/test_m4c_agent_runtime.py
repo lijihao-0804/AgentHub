@@ -219,7 +219,7 @@ async def _seed(
             "temperature": 0.1,
             "max_tokens": 256,
             "timeout_seconds": 5,
-            "capabilities": {"tool_calling": True},
+            "capabilities": {"tool_calling": True, "max_context_tokens": 8_192},
             "retry_policy": {"max_attempts": 2},
             "fallback_chain": [],
             "fallback_profiles": [],
@@ -363,7 +363,7 @@ async def test_m4c_frozen_fallback_uses_published_b_after_primary_failure(db_fac
                 "temperature": 0.2,
                 "max_tokens": 128,
                 "timeout_seconds": 5,
-                "capabilities": {"tool_calling": True},
+                "capabilities": {"tool_calling": True, "max_context_tokens": 8_192},
             }
             ],
         }

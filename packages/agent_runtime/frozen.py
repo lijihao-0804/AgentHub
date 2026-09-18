@@ -22,6 +22,11 @@ _DEFAULT_RUNTIME = {
     "max_identical_calls": 2,
     "max_parallel_reads": 3,
 }
+_DEFAULT_CONTEXT_BUDGET = {
+    "reserved_output_tokens": 2_000,
+    "max_retrieval_tokens": 5_000,
+    "max_tool_result_tokens": 4_000,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,7 +34,7 @@ class FrozenAgentSpec:
     model_plan: ResolvedModelExecutionPlan
     system_prompt: str
     prompt_version: int
-    runtime: dict[str, int]
+    runtime: dict[str, Any]
 
 
 def parse_frozen_agent_spec(
@@ -66,12 +71,24 @@ def parse_frozen_agent_spec(
     runtime_value = resolved_spec.get("runtime", {})
     if not isinstance(runtime_value, Mapping):
         raise _invalid_binding()
-    runtime: dict[str, int] = {}
+    runtime: dict[str, Any] = {}
     for key, default in _DEFAULT_RUNTIME.items():
         value = runtime_value.get(key, default)
         if isinstance(value, bool) or not isinstance(value, int) or value < 1:
             raise _invalid_binding()
         runtime[key] = value
+    context_budget_value = runtime_value.get("context_budget", _DEFAULT_CONTEXT_BUDGET)
+    if not isinstance(context_budget_value, Mapping):
+        raise _invalid_binding()
+    if not set(context_budget_value).issubset(_DEFAULT_CONTEXT_BUDGET):
+        raise _invalid_binding()
+    context_budget: dict[str, int] = {}
+    for key, default in _DEFAULT_CONTEXT_BUDGET.items():
+        value = context_budget_value.get(key, default)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise _invalid_binding()
+        context_budget[key] = value
+    runtime["context_budget"] = context_budget
     return FrozenAgentSpec(
         model_plan=ResolvedModelExecutionPlan(
             primary=primary,

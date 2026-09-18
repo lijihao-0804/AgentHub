@@ -195,6 +195,29 @@ class AgentRunService:
                 raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
             return run
 
+    async def preflight_stream(
+        self, context: WorkspaceExecutionContext, *, agent_version_id: UUID
+    ) -> None:
+        """Validate stream authorization and workspace scope before returning HTTP 200."""
+        self._require_permission(context)
+        try:
+            workspace_id = UUID(context.workspace_id)
+        except (TypeError, ValueError):
+            raise AgentHubError(
+                "AUTHENTICATION_REQUIRED", "Authentication is required.", 401
+            ) from None
+        async with self.session_factory() as session:
+            version = await session.scalar(
+                select(AgentVersion).where(
+                    AgentVersion.workspace_id == workspace_id,
+                    AgentVersion.id == agent_version_id,
+                )
+            )
+            if version is None:
+                raise AgentHubError(
+                    "AGENT_VERSION_NOT_FOUND", "The published agent version was not found.", 404
+                )
+
     async def list_steps(self, context: WorkspaceExecutionContext, run_id: UUID) -> list[RunStep]:
         await self.get_run(context, run_id)
         async with self.session_factory() as session:
