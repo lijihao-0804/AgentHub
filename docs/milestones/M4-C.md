@@ -1,6 +1,6 @@
 # M4-C — Agent Run + LangGraph Runtime
 
-Status: IMPLEMENTED — acceptance pending final GitHub Actions verification.
+Status: PASS — closure verified in GitHub Actions run #61.
 
 ## Scope
 
@@ -47,5 +47,11 @@ limits, and workspace scoping. GitHub Actions runs this step after the existing 
 step with the same PostgreSQL, Redis, Qdrant and Celery services; no BGE download or public LLM
 call is used.
 
-M4-C is not accepted until backend, frontend, dedicated integration and non-integration CI are
-all PASS. M4-D remains the next milestone.
+## Final verification
+
+Implementation/closure commit: `0ae2ecb`
+
+GitHub Actions run [#61](https://github.com/lijihao-0804/AgentHub/actions/runs/35354820388)
+passed backend, frontend, the dedicated M4-C integration step, and non-integration tests.
+The local M4-C integration suite passed 9 tests against real PostgreSQL; local non-integration
+regression passed 147 tests. M4-C is accepted. M4-D remains the next milestone.
