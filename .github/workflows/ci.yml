@@ -89,6 +89,7 @@ jobs:
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
           uv run --locked pytest tests/unit/test_retrieval_benchmark.py -vv
+      - run: uv run --locked pytest tests/integration/test_m4a_publish.py -vv -rs
       - name: Stop Celery worker
         if: always()
         run: |
