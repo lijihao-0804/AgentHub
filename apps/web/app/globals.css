@@ -31,6 +31,20 @@ h2 { font-size: 1.5rem; margin: 0.5rem 0 0; }
 .milestone.active { color: var(--ink); }
 .milestone-id { color: var(--accent); font-weight: 800; }
 .milestone-status { font-size: 0.8rem; }
+.approval-card { margin-top: 2rem; }
+.approval-form { align-items: end; display: grid; gap: 1rem; grid-template-columns: 1fr 1fr auto; }
+.approval-form label { color: var(--muted); display: grid; font-size: 0.85rem; gap: 0.45rem; }
+.approval-form input { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: inherit; padding: 0.75rem; }
+.approval-form button, .approval-actions button { background: var(--accent); border: 0; border-radius: 10px; color: var(--accent-ink); cursor: pointer; font-weight: 800; padding: 0.75rem 1rem; }
+.approval-form button:disabled, .approval-actions button:disabled { cursor: wait; opacity: 0.6; }
+.approval-list { display: grid; gap: 1rem; margin-top: 1.5rem; }
+.approval-item { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; }
+.approval-item-header { align-items: start; display: flex; justify-content: space-between; gap: 1rem; }
+.approval-item-header strong { font-size: 1.1rem; }
+.approval-status { color: var(--accent); font-size: 0.8rem; }
+.approval-item pre { background: rgba(0, 0, 0, 0.2); border-radius: 8px; color: var(--muted); overflow-x: auto; padding: 0.75rem; }
+.approval-actions { display: flex; gap: 0.75rem; }
+.needs-attention { color: #ffb0aa; font-weight: 700; }
 
 @media (max-width: 640px) {
   .shell { padding: 5rem 1.25rem 3rem; }
@@ -97,6 +111,7 @@ h2 { font-size: 1.5rem; margin: 0.5rem 0 0; }
   .playground-header h1 { font-size: 3.5rem; }
   .form-grid, .playground-overview, .stage-grid, .top-k-grid { grid-template-columns: 1fr; }
   .query-field { grid-column: auto; }
+  .approval-form { grid-template-columns: 1fr; }
   .form-actions { justify-content: stretch; }
   .form-actions button { width: 100%; }
 }
