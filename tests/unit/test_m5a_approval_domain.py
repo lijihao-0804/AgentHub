@@ -36,6 +36,8 @@ def test_canonical_arguments_reject_internal_fields_and_schema_errors() -> None:
     schema = {"type": "object", "properties": {"subject": {"type": "string"}}}
     with pytest.raises(ValueError, match="reserved"):
         canonicalize_arguments({"workspace_id": "other", "subject": "x"}, schema)
+    with pytest.raises(ValueError, match="reserved"):
+        canonicalize_arguments({"subject": {"user_id": "other"}}, schema)
     with pytest.raises(ValueError):
         canonicalize_arguments({"subject": 42}, schema)
 

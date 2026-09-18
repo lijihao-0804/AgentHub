@@ -93,6 +93,8 @@ class ApprovalService:
     async def get(
         self, context: WorkspaceExecutionContext, approval_id: UUID, *, for_update: bool = False
     ) -> Approval:
+        if "workspace_read" not in context.permissions:
+            raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
         statement = select(Approval).where(
             Approval.workspace_id == _workspace_uuid(context), Approval.id == approval_id
         )
@@ -105,6 +107,8 @@ class ApprovalService:
             return approval
 
     async def list(self, context: WorkspaceExecutionContext) -> list[Approval]:
+        if "workspace_read" not in context.permissions:
+            raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
         async with self.session_factory() as session:
             result = await session.scalars(
                 select(Approval)

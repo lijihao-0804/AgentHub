@@ -15,6 +15,7 @@ class AgentEventType(StrEnum):
     MESSAGE_DELTA = "message.delta"
     TOOL_STARTED = "tool.started"
     TOOL_COMPLETED = "tool.completed"
+    APPROVAL_REQUIRED = "approval.required"
     USAGE = "usage"
     RUN_COMPLETED = "run.completed"
     RUN_FAILED = "run.failed"
@@ -37,6 +38,16 @@ _ALLOWED_FIELDS: dict[AgentEventType, frozenset[str]] = {
     AgentEventType.TOOL_STARTED: frozenset({"tool_call_id", "tool_identity"}),
     AgentEventType.TOOL_COMPLETED: frozenset(
         {"tool_call_id", "tool_identity", "status", "error_code", "duration_ms"}
+    ),
+    AgentEventType.APPROVAL_REQUIRED: frozenset(
+        {
+            "approval_id",
+            "logical_action_id",
+            "tool_identity",
+            "risk_level",
+            "decision_status",
+            "execution_status",
+        }
     ),
     AgentEventType.USAGE: frozenset(
         {"input_tokens", "output_tokens", "total_tokens", "cached_tokens"}

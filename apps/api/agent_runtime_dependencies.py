@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from fastapi import FastAPI, Request
 
+from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
 from packages.agent_runtime.runtime import AgentRunService
+from packages.approvals import ApprovalService
 from packages.core.errors.exceptions import AgentHubError
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.model_gateway.credentials import ProviderCredentialCipher
+from packages.tools.actions import ActionRuntime
 from packages.tools.audit import SqlAlchemyToolAuditSink
 from packages.tools.registry import ToolRegistry
 from packages.tools.runtime import ToolRuntime
@@ -36,6 +39,9 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
                 registry=ToolRegistry(retriever=retriever),
                 audit_sink=SqlAlchemyToolAuditSink(factory),
             ),
+            approval_service=ApprovalService(factory),
+            action_runtime=ActionRuntime(session_factory=factory),
+            checkpoint_adapter=LangGraphCheckpointAdapter(settings.database_url),
         )
         app.state.agent_run_service = service
     return service

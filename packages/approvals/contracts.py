@@ -57,8 +57,7 @@ def canonicalize_arguments(
 
     if not isinstance(arguments, Mapping):
         raise ValueError("tool arguments must be an object")
-    if any(key in _RESERVED_ARGUMENT_KEYS for key in arguments):
-        raise ValueError("tool arguments contain reserved internal fields")
+    _reject_reserved_keys(arguments)
     try:
         Draft202012Validator.check_schema(dict(input_schema))
         validator = Draft202012Validator(dict(input_schema))
@@ -77,6 +76,17 @@ def canonicalize_arguments(
     if not isinstance(normalized, dict):
         raise ValueError("tool arguments must be an object")
     return normalized, canonical_json_hash(normalized)
+
+
+def _reject_reserved_keys(value: Any) -> None:
+    if isinstance(value, Mapping):
+        if any(str(key) in _RESERVED_ARGUMENT_KEYS for key in value):
+            raise ValueError("tool arguments contain reserved internal fields")
+        for child in value.values():
+            _reject_reserved_keys(child)
+    elif isinstance(value, list):
+        for child in value:
+            _reject_reserved_keys(child)
 
 
 def compute_logical_action_id(

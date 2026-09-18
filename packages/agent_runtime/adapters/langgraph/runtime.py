@@ -14,6 +14,7 @@ def compile_agent_graph(
     nodes: Mapping[str, Callable[..., Any]],
     edges: Sequence[tuple[str, str]],
     conditional_edges: Mapping[str, Callable[..., Any]],
+    checkpointer: Any | None = None,
 ) -> Any:
     graph = StateGraph(state_type)
     for name, handler in nodes.items():
@@ -25,7 +26,7 @@ def compile_agent_graph(
         )
     for source, router in conditional_edges.items():
         graph.add_conditional_edges(source, router)
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)
 
 
 __all__ = ["compile_agent_graph"]

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+import sys
 from collections.abc import AsyncIterator, Mapping
 from contextlib import asynccontextmanager
 from typing import Any
@@ -9,6 +11,11 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from uuid import UUID
 
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+
+if sys.platform == "win32" and hasattr(asyncio, "WindowsSelectorEventLoopPolicy"):
+    # psycopg's async connection layer does not support the Windows Proactor loop.
+    # Set this before the application/test loop is created; Linux is unaffected.
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def checkpoint_thread_id(workspace_id: UUID | str, run_id: UUID | str) -> str:
@@ -21,7 +28,9 @@ def checkpoint_config(workspace_id: UUID | str, run_id: UUID | str) -> dict[str,
     return {
         "configurable": {
             "thread_id": checkpoint_thread_id(workspace_id, run_id),
-            "checkpoint_ns": "agenthub",
+            # LangGraph's default graph namespace is the empty namespace; the
+            # tenant/run-scoped thread_id is the durable identity we own.
+            "checkpoint_ns": "",
         }
     }
 
