@@ -11,6 +11,7 @@ from packages.core.config.settings import get_settings
 from packages.core.database import Base
 from packages.knowledge import models as _knowledge_models  # noqa: F401
 from packages.model_gateway import models as _model_gateway_models  # noqa: F401
+from packages.tools import models as _tool_models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:
