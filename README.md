@@ -1,9 +1,8 @@
 # AgentHub
 
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
-implementation plan in [`plan/plan.md`](plan/plan.md). M3-F Snapshot is accepted. The next
-milestone is the M3 retrieval evaluation baseline; M3 overall is not yet PASS. M4 Agent Runtime
-remains deferred.
+implementation plan in [`plan/plan.md`](plan/plan.md). M3-F Snapshot and the M3 retrieval
+evaluation baseline are accepted; M3 overall is PASS. M4 Agent Runtime remains deferred.
 
 ## Basic development setup
 
@@ -84,4 +83,4 @@ deferred to M8.
 - Every behavior-changing milestone gets a focused commit and a verification record.
 - Secrets never enter source control, snapshots, revisions, logs or traces.
 - M2 deliberately contains no Agent, RAG or Tool product implementation.
-- M3-F is accepted; the M3 retrieval evaluation baseline is next. M3 overall remains open.
+- M3 overall is PASS after the real retrieval evaluation baseline and CI verification. M4 remains deferred.
