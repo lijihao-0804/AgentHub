@@ -9,6 +9,7 @@ import {
   type PlaygroundStage,
   type RetrievalPlaygroundResponse,
 } from "../../../lib/api";
+import { formatLocator } from "../../../lib/locator";
 
 type PageState = "initial" | "loading" | "success" | "empty" | "error";
 
@@ -21,18 +22,6 @@ const stageLabels: Array<[keyof RetrievalPlaygroundResponse["stages"], string]> 
 
 function shortId(value: string | null): string {
   return value ? `${value.slice(0, 8)}…` : "—";
-}
-
-function formatLocator(locator: Record<string, unknown> | null): string {
-  if (!locator) return "—";
-  if (locator.type === "page") return `Page ${String(locator.page)}`;
-  if (locator.type === "page_range") {
-    return `Pages ${String(locator.page_start)}–${String(locator.page_end)}`;
-  }
-  if (locator.type === "text_range") {
-    return `Characters ${String(locator.char_start)}–${String(locator.char_end)}`;
-  }
-  return JSON.stringify(locator);
 }
 
 function StageCard({ label, stage }: { label: string; stage: PlaygroundStage }) {
@@ -72,6 +61,7 @@ export default function RetrievalPlaygroundPage() {
   const [workspaceId, setWorkspaceId] = useState("");
   const [knowledgeBaseId, setKnowledgeBaseId] = useState("");
   const [snapshotId, setSnapshotId] = useState("");
+  const [accessToken, setAccessToken] = useState("");
   const [query, setQuery] = useState("");
   const [denseTopK, setDenseTopK] = useState("30");
   const [sparseTopK, setSparseTopK] = useState("30");
@@ -83,13 +73,27 @@ export default function RetrievalPlaygroundPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPageState("loading");
     setResult(null);
     setError(null);
+    if (!accessToken.trim()) {
+      setError({
+        code: "AUTHENTICATION_REQUIRED",
+        message: "Enter an access token to run the playground.",
+      });
+      setPageState("error");
+      return;
+    }
+    if (!workspaceId.trim() || !knowledgeBaseId.trim() || !snapshotId.trim() || !query.trim()) {
+      setError({ code: "INVALID_REQUEST", message: "Complete the required fields first." });
+      setPageState("error");
+      return;
+    }
+    setPageState("loading");
     try {
       const nextResult = await runRetrievalPlayground({
         workspaceId,
         knowledgeBaseId,
+        accessToken,
         query,
         snapshotId,
         denseTopK: Number(denseTopK),
@@ -124,7 +128,7 @@ export default function RetrievalPlaygroundPage() {
         </a>
       </header>
 
-      <form className="playground-panel query-panel" onSubmit={handleSubmit}>
+      <form className="playground-panel query-panel" onSubmit={handleSubmit} noValidate>
         <div className="panel-heading">
           <div>
             <p className="eyebrow">QUERY PANEL</p>
@@ -151,6 +155,17 @@ export default function RetrievalPlaygroundPage() {
           <label>
             Snapshot ID
             <input required value={snapshotId} onChange={(event) => setSnapshotId(event.target.value)} />
+          </label>
+          <label>
+            Access Token
+            <input
+              required
+              type="password"
+              autoComplete="off"
+              value={accessToken}
+              onChange={(event) => setAccessToken(event.target.value)}
+              placeholder="Bearer access token"
+            />
           </label>
           <label className="query-field">
             Query

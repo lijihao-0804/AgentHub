@@ -39,9 +39,15 @@ concrete snapshot, query, and bounded top-k inputs, followed by:
 - bounded final evidence snippets;
 - initial, loading, empty, and safe error states.
 
-The API base is configurable through `NEXT_PUBLIC_API_BASE_URL` and defaults to
-`http://localhost:8000` for local development. The page does not implement a new login flow;
-the backend remains responsible for real authentication and workspace permission checks.
+The developer Playground requires an explicit Bearer access token in a password input. The token
+is held only in current React state, is not persisted to localStorage or cookies, and never enters
+the URL or retrieval request body. The page does not implement a complete Auth UI; the backend
+remains responsible for real authentication and workspace permission checks.
+
+By default, browser requests use the relative `/api/...` path and Next.js same-origin proxy.
+The server-only `AGENTHUB_API_PROXY_TARGET` controls the FastAPI destination and defaults to
+`http://127.0.0.1:8000`. An explicit `NEXT_PUBLIC_API_BASE_URL` remains available for environments
+that intentionally use a directly configured API base.
 
 ## Verification
 

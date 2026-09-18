@@ -29,6 +29,20 @@ npm run build
 
 The API exposes `/api/v1/health`, `/api/v1/ready` and `/api/v1/dependencies`.
 
+### Local Playground proxy
+
+When running the web app locally, the default `/api/...` requests use the Next.js same-origin
+proxy and forward to `http://127.0.0.1:8000`. Override the server-only target when needed:
+
+```powershell
+$env:AGENTHUB_API_PROXY_TARGET = "http://127.0.0.1:8000"
+cd apps/web
+npm run dev
+```
+
+The developer Playground requires an explicit Bearer access token. It is held only in page state
+for the current session and is not persisted. This is not a replacement for a complete Auth UI.
+
 ### Platform-specific PyTorch
 
 `uv sync --locked` selects the official PyTorch wheel for the host platform: Windows uses

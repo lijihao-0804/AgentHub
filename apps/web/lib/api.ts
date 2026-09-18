@@ -42,10 +42,7 @@ export class RetrievalPlaygroundError extends Error {
   }
 }
 
-const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000").replace(
-  /\/$/,
-  "",
-);
+const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ?? "").replace(/\/$/, "");
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -54,6 +51,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export async function runRetrievalPlayground(input: {
   workspaceId: string;
   knowledgeBaseId: string;
+  accessToken: string;
   query: string;
   snapshotId: string;
   denseTopK: number;
@@ -61,11 +59,21 @@ export async function runRetrievalPlayground(input: {
   candidateTopK: number;
   finalTopK: number;
 }): Promise<RetrievalPlaygroundResponse> {
+  const accessToken = input.accessToken.trim();
+  if (!accessToken) {
+    throw new RetrievalPlaygroundError(
+      "AUTHENTICATION_REQUIRED",
+      "An access token is required to run the playground.",
+    );
+  }
   const response = await fetch(
     `${apiBaseUrl}/api/v1/workspaces/${encodeURIComponent(input.workspaceId)}/knowledge-bases/${encodeURIComponent(input.knowledgeBaseId)}/retrieval/playground`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
       credentials: "include",
       body: JSON.stringify({
         query: input.query,
