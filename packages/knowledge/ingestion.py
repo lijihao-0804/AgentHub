@@ -21,6 +21,7 @@ from packages.knowledge.models import (
     IngestionJobStatus,
     IngestionStage,
     RevisionIngestionStatus,
+    RevisionLifecycleStatus,
 )
 from packages.knowledge.queue import IngestionQueue
 
@@ -73,12 +74,12 @@ async def claim_ingestion_job(
     claimable = or_(
         and_(
             IngestionJob.status == IngestionJobStatus.PENDING,
-            IngestionJob.stage.in_((IngestionStage.PARSING, IngestionStage.CHUNKING)),
+            IngestionJob.stage.in_(tuple(IngestionStage)),
             due,
         ),
         and_(
             IngestionJob.status == IngestionJobStatus.PROCESSING,
-            IngestionJob.stage.in_((IngestionStage.PARSING, IngestionStage.CHUNKING)),
+            IngestionJob.stage.in_(tuple(IngestionStage)),
             IngestionJob.lease_expires_at.is_not(None),
             IngestionJob.lease_expires_at <= now,
         ),
@@ -230,8 +231,65 @@ async def persist_chunks_and_advance(
                 )
             )
         job.stage = IngestionStage.EMBEDDING
+        job.updated_at = now
+    return True
+
+
+async def finalize_ingestion_ready(
+    session: AsyncSession,
+    *,
+    job_id: UUID,
+    lease_token: str,
+) -> bool:
+    """Finalize only after the external index has acknowledged the upsert."""
+
+    async with session.begin():
+        now = _now()
+        job = await session.scalar(
+            select(IngestionJob).where(IngestionJob.id == job_id).with_for_update()
+        )
+        if job is None or not _lease_is_valid(job, lease_token, now):
+            return False
+        if job.stage != IngestionStage.INDEXING:
+            return False
+
+        revision = await session.scalar(
+            select(DocumentRevision)
+            .where(DocumentRevision.id == job.document_revision_id)
+            .with_for_update()
+        )
+        if revision is None:
+            return False
+        revision.ingestion_status = RevisionIngestionStatus.READY
+
+        revisions = list(
+            (
+                await session.scalars(
+                    select(DocumentRevision)
+                    .where(DocumentRevision.document_id == revision.document_id)
+                    .order_by(DocumentRevision.revision_number.desc())
+                    .with_for_update()
+                )
+            ).all()
+        )
+        ready_revisions = [
+            item for item in revisions if item.ingestion_status == RevisionIngestionStatus.READY
+        ]
+        if ready_revisions:
+            active_revision = ready_revisions[0]
+            for item in ready_revisions:
+                item.lifecycle_status = (
+                    RevisionLifecycleStatus.ACTIVE
+                    if item.id == active_revision.id
+                    else RevisionLifecycleStatus.RETIRED
+                )
+
+        job.status = IngestionJobStatus.SUCCEEDED
         job.lease_token = None
         job.lease_expires_at = None
+        job.next_attempt_at = None
+        job.last_error_code = None
+        job.safe_error_message = None
         job.updated_at = now
     return True
 
@@ -324,13 +382,13 @@ async def reconcile_ingestion_jobs(
     grace_cutoff = now - timedelta(seconds=settings.knowledge_ingestion_enqueue_grace_seconds)
     due_pending = and_(
         IngestionJob.status == IngestionJobStatus.PENDING,
-        IngestionJob.stage.in_((IngestionStage.PARSING, IngestionStage.CHUNKING)),
+        IngestionJob.stage.in_(tuple(IngestionStage)),
         IngestionJob.created_at <= grace_cutoff,
         or_(IngestionJob.next_attempt_at.is_(None), IngestionJob.next_attempt_at <= now),
     )
     stale_processing = and_(
         IngestionJob.status == IngestionJobStatus.PROCESSING,
-        IngestionJob.stage.in_((IngestionStage.PARSING, IngestionStage.CHUNKING)),
+        IngestionJob.stage.in_(tuple(IngestionStage)),
         IngestionJob.lease_expires_at <= now,
     )
     result = await session.scalars(
@@ -385,6 +443,7 @@ __all__ = [
     "advance_ingestion_stage",
     "claim_ingestion_job",
     "fail_ingestion_job",
+    "finalize_ingestion_ready",
     "persist_chunks_and_advance",
     "reconcile_ingestion_jobs",
     "release_ingestion_for_retry",

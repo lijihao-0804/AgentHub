@@ -2,26 +2,48 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from dataclasses import replace
 from uuid import UUID
+
+from sqlalchemy import select
 
 from apps.worker.celery_app import celery_app
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.knowledge.adapters.celery_queue import CeleryIngestionQueue
+from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
+from packages.knowledge.adapters.fakes import (
+    DeterministicFakeDenseEmbedder,
+    DeterministicFakeReranker,
+    DeterministicFakeSparseEncoder,
+)
+from packages.knowledge.adapters.qdrant import QdrantVectorIndex
+from packages.knowledge.adapters.reranker import BgeReranker
+from packages.knowledge.adapters.sparse import BgeM3SparseEncoder
 from packages.knowledge.blob_store import BlobStoreError, LocalBlobStore
 from packages.knowledge.chunking import build_deterministic_chunks
+from packages.knowledge.contracts import (
+    DenseEmbedder,
+    KnowledgeProviderError,
+    Reranker,
+    SparseEncoder,
+    VectorIndex,
+    VectorRecord,
+)
 from packages.knowledge.ingestion import (
     ClaimedIngestionJob,
     advance_ingestion_stage,
     claim_ingestion_job,
     fail_ingestion_job,
+    finalize_ingestion_ready,
     persist_chunks_and_advance,
     reconcile_ingestion_jobs,
     release_ingestion_for_retry,
     renew_ingestion_lease,
 )
-from packages.knowledge.models import IngestionStage
+from packages.knowledge.models import DocumentChunk, IngestionStage
 from packages.knowledge.parser import DocumentParseError, ProcessDocumentParser
+from packages.knowledge.point_ids import deterministic_point_id
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +55,7 @@ async def _read_blob(store: LocalBlobStore, blob_key: str) -> bytes:
     return bytes(content)
 
 
-async def _renew_lease_loop(
-    factory,
-    claim: ClaimedIngestionJob,
-    settings: Settings,
-) -> None:
+async def _renew_lease_loop(factory, claim: ClaimedIngestionJob, settings: Settings) -> None:
     while True:
         await asyncio.sleep(settings.knowledge_ingestion_lease_renewal_seconds)
         async with factory() as session:
@@ -93,6 +111,119 @@ async def _finalize_claim(
                 )
 
 
+def _indexing_components(
+    settings: Settings,
+) -> tuple[DenseEmbedder, SparseEncoder, Reranker, VectorIndex]:
+    if settings.testing:
+        dense: DenseEmbedder = DeterministicFakeDenseEmbedder(
+            dimension=settings.knowledge_dense_vector_size
+        )
+        sparse: SparseEncoder = DeterministicFakeSparseEncoder()
+        reranker: Reranker = DeterministicFakeReranker()
+    else:
+        dense = BgeM3DenseEmbedder(
+            model_name=settings.knowledge_embedding_model,
+            device=settings.knowledge_embedding_device,
+            batch_size=settings.knowledge_embedding_batch_size,
+            expected_dimension=settings.knowledge_dense_vector_size,
+        )
+        sparse = BgeM3SparseEncoder(model_name=settings.knowledge_embedding_model)
+        reranker = BgeReranker(
+            model_name=settings.knowledge_reranker_model,
+            device=settings.knowledge_reranker_device,
+            batch_size=settings.knowledge_reranker_batch_size,
+        )
+    index: VectorIndex = QdrantVectorIndex(
+        url=settings.qdrant_url,
+        collection_name=settings.knowledge_qdrant_collection,
+        dense_vector_size=settings.knowledge_dense_vector_size,
+        timeout_seconds=settings.knowledge_qdrant_timeout_seconds,
+    )
+    return dense, sparse, reranker, index
+
+
+async def _load_chunks(factory, revision_id: UUID) -> list[DocumentChunk]:
+    async with factory() as session:
+        result = await session.scalars(
+            select(DocumentChunk)
+            .where(DocumentChunk.document_revision_id == revision_id)
+            .order_by(DocumentChunk.ordinal, DocumentChunk.chunk_id)
+        )
+        return list(result)
+
+
+def _vector_records(
+    claim: ClaimedIngestionJob,
+    chunks: list[DocumentChunk],
+    dense: DenseEmbedder,
+    sparse: SparseEncoder,
+) -> tuple[VectorRecord, ...]:
+    texts = [chunk.text for chunk in chunks]
+    dense_vectors = dense.embed_documents(texts)
+    sparse_vectors = sparse.encode_documents(texts)
+    if len(dense_vectors) != len(chunks) or len(sparse_vectors) != len(chunks):
+        raise KnowledgeProviderError(
+            "INVALID_PROVIDER_RESULT",
+            "The embedding provider returned an invalid result.",
+        )
+    return tuple(
+        VectorRecord(
+            point_id=deterministic_point_id(chunk.chunk_id),
+            chunk_id=chunk.chunk_id,
+            dense=tuple(dense_vectors[index]),
+            sparse=sparse_vectors[index],
+            payload={
+                "workspace_id": str(claim.workspace_id),
+                "knowledge_base_id": str(claim.knowledge_base_id),
+                "document_id": str(chunk.document_id),
+                "document_revision_id": str(chunk.document_revision_id),
+                "chunk_id": chunk.chunk_id,
+                "locator": chunk.locator,
+            },
+        )
+        for index, chunk in enumerate(chunks)
+    )
+
+
+async def _index_claim(
+    factory,
+    claim: ClaimedIngestionJob,
+    *,
+    dense: DenseEmbedder,
+    sparse: SparseEncoder,
+    index: VectorIndex,
+) -> tuple[tuple[str, str] | None, tuple[str, str] | None, bool]:
+    chunks = await _load_chunks(factory, claim.document_revision_id)
+    if not chunks:
+        return ("EMPTY_CHUNKS", "The document contains no indexed chunks."), None, False
+
+    # Embeddings are intentionally recomputed for both EMBEDDING and INDEXING.
+    # PostgreSQL remains the durable textual source; deterministic Qdrant upsert
+    # makes a retry after a worker crash safe and idempotent.
+    records = await asyncio.to_thread(_vector_records, claim, chunks, dense, sparse)
+    if claim.stage == IngestionStage.EMBEDDING:
+        async with factory() as session:
+            transitioned = await advance_ingestion_stage(
+                session,
+                job_id=claim.id,
+                lease_token=claim.lease_token,
+                expected_stage=IngestionStage.EMBEDDING,
+                next_stage=IngestionStage.INDEXING,
+            )
+        if not transitioned:
+            return None, None, True
+
+    await asyncio.to_thread(index.ensure_collection)
+    await asyncio.to_thread(index.upsert, records)
+    async with factory() as session:
+        finalized = await finalize_ingestion_ready(
+            session,
+            job_id=claim.id,
+            lease_token=claim.lease_token,
+        )
+    return None, None, not finalized
+
+
 async def _process_knowledge_ingestion(job_id: UUID, settings: Settings) -> None:
     engine, factory = create_database(settings.database_url)
     try:
@@ -108,33 +239,28 @@ async def _process_knowledge_ingestion(job_id: UUID, settings: Settings) -> None
         renewal_task = asyncio.create_task(_renew_lease_loop(factory, claim, settings))
         terminal_error: tuple[str, str] | None = None
         retryable_error: tuple[str, str] | None = None
+        stale = False
         try:
             try:
-                content = await _read_blob(LocalBlobStore(settings.blob_root), claim.blob_key)
-            except BlobStoreError:
-                retryable_error = (
-                    "BLOB_TEMPORARY_FAILURE",
-                    "The source blob could not be read temporarily.",
-                )
-            else:
-                try:
+                if claim.stage in (IngestionStage.PARSING, IngestionStage.CHUNKING):
+                    content = await _read_blob(LocalBlobStore(settings.blob_root), claim.blob_key)
                     parsed = await ProcessDocumentParser(
                         timeout_seconds=settings.knowledge_parser_timeout_seconds,
                         max_pdf_pages=settings.knowledge_max_pdf_pages,
                         max_parsed_chars=settings.knowledge_max_parsed_chars,
                     ).parse(content, media_type=claim.media_type)
-                except DocumentParseError as exc:
-                    terminal_error = (exc.code, exc.message)
-                else:
-                    async with factory() as session:
-                        transitioned = await advance_ingestion_stage(
-                            session,
-                            job_id=claim.id,
-                            lease_token=claim.lease_token,
-                            expected_stage=IngestionStage.PARSING,
-                            next_stage=IngestionStage.CHUNKING,
-                        )
-                    if transitioned:
+                    if claim.stage == IngestionStage.PARSING:
+                        async with factory() as session:
+                            transitioned = await advance_ingestion_stage(
+                                session,
+                                job_id=claim.id,
+                                lease_token=claim.lease_token,
+                                expected_stage=IngestionStage.PARSING,
+                                next_stage=IngestionStage.CHUNKING,
+                            )
+                        if not transitioned:
+                            stale = True
+                    if not stale:
                         try:
                             chunks = build_deterministic_chunks(
                                 claim.document_revision_id,
@@ -161,11 +287,34 @@ async def _process_knowledge_ingestion(job_id: UUID, settings: Settings) -> None
                                     chunks=chunks,
                                 )
                             if not persisted:
-                                return
-                    else:
-                        return
+                                stale = True
+                            else:
+                                claim = replace(claim, stage=IngestionStage.EMBEDDING)
+
+                if not stale and terminal_error is None:
+                    dense, sparse, _reranker, index = _indexing_components(settings)
+                    try:
+                        terminal_error, retryable_error, stale = await _index_claim(
+                            factory,
+                            claim,
+                            dense=dense,
+                            sparse=sparse,
+                            index=index,
+                        )
+                    except KnowledgeProviderError as exc:
+                        if exc.code == "QDRANT_UNAVAILABLE":
+                            retryable_error = (exc.code, exc.message)
+                        else:
+                            terminal_error = (exc.code, exc.message)
+            except BlobStoreError:
+                retryable_error = (
+                    "BLOB_TEMPORARY_FAILURE",
+                    "The source blob could not be read temporarily.",
+                )
+            except DocumentParseError as exc:
+                terminal_error = (exc.code, exc.message)
         except Exception:
-            logger.exception("knowledge_ingestion_worker_error", extra={"job_id": str(job_id)})
+            logger.warning("knowledge_ingestion_worker_error", extra={"job_id": str(job_id)})
             retryable_error = (
                 "DATABASE_TEMPORARY_FAILURE",
                 "The ingestion worker encountered a temporary database failure.",
@@ -173,13 +322,14 @@ async def _process_knowledge_ingestion(job_id: UUID, settings: Settings) -> None
         finally:
             await _cancel_renewal(renewal_task)
 
-        await _finalize_claim(
-            factory,
-            claim,
-            terminal_error=terminal_error,
-            retryable_error=retryable_error,
-            settings=settings,
-        )
+        if not stale:
+            await _finalize_claim(
+                factory,
+                claim,
+                terminal_error=terminal_error,
+                retryable_error=retryable_error,
+                settings=settings,
+            )
     finally:
         await engine.dispose()
 

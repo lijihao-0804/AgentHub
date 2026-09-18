@@ -22,6 +22,15 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub"
     redis_url: str = "redis://localhost:6379/0"
     qdrant_url: str = "http://localhost:6333"
+    knowledge_qdrant_collection: str = "agenthub_knowledge"
+    knowledge_dense_vector_size: int = Field(default=1024, ge=1, le=4096)
+    knowledge_embedding_model: str = "BAAI/bge-m3"
+    knowledge_embedding_device: str = "auto"
+    knowledge_embedding_batch_size: int = Field(default=8, ge=1, le=128)
+    knowledge_reranker_model: str = "BAAI/bge-reranker-v2-m3"
+    knowledge_reranker_device: str = "auto"
+    knowledge_reranker_batch_size: int = Field(default=8, ge=1, le=64)
+    knowledge_qdrant_timeout_seconds: float = Field(default=10, gt=0, le=120)
     blob_root: str = "data/blobs"
     knowledge_max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1)
     knowledge_ingestion_lease_seconds: int = Field(default=300, ge=5, le=86_400)
@@ -52,6 +61,10 @@ class Settings(BaseSettings):
             raise ValueError("knowledge chunk overlap must be smaller than chunk size")
         if self.knowledge_ingestion_lease_renewal_seconds >= self.knowledge_ingestion_lease_seconds:
             raise ValueError("knowledge lease renewal must be shorter than lease duration")
+        if self.knowledge_embedding_device not in {"auto", "cpu", "cuda"}:
+            raise ValueError("knowledge embedding device must be auto, cpu, or cuda")
+        if self.knowledge_reranker_device not in {"auto", "cpu", "cuda"}:
+            raise ValueError("knowledge reranker device must be auto, cpu, or cuda")
         return self
 
     @property
