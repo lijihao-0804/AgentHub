@@ -31,7 +31,9 @@ def checkpoint_dsn(database_url: str) -> str:
 
 
 def bootstrap(database_url: str) -> None:
-    with psycopg.connect(database_url) as connection:
+    sync_database_url = database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+    sync_database_url = sync_database_url.replace("postgresql+psycopg://", "postgresql://", 1)
+    with psycopg.connect(sync_database_url) as connection:
         with connection.cursor() as cursor:
             cursor.execute("CREATE SCHEMA IF NOT EXISTS langgraph_checkpoint")
         connection.commit()
