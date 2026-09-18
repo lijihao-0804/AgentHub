@@ -20,7 +20,7 @@ Evaluation Dataset, M4-E, or M5.
 
 Implementation commit: `1980640`.
 
-Final closure commit: pending in this document update.
+Final closure record commit: `520cd2f`.
 
 GitHub Actions run #64 passed backend and frontend. The backend job explicitly passed the
 dedicated `tests/integration/test_m4d_streaming_budget.py` step, as well as the M4-A/B/C
