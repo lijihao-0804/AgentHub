@@ -51,6 +51,15 @@ def test_logical_action_id_ignores_provider_call_id() -> None:
         "proposal_ordinal": 0,
     }
     assert compute_logical_action_id(**kwargs) == compute_logical_action_id(**kwargs)
+    assert compute_logical_action_id(**{**kwargs, "canonical_args_hash": "b" * 64}) != (
+        compute_logical_action_id(**kwargs)
+    )
+    assert compute_logical_action_id(
+        **{**kwargs, "tool_revision_id": UUID("44444444-4444-4444-4444-444444444444")}
+    ) != compute_logical_action_id(**kwargs)
+    assert compute_logical_action_id(**{**kwargs, "proposal_ordinal": 1}) != (
+        compute_logical_action_id(**kwargs)
+    )
 
 
 def test_decision_and_execution_state_transitions_fail_closed() -> None:

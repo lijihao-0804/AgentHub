@@ -73,6 +73,10 @@ jobs:
           PY
       - run: uv run --locked alembic upgrade head
       - run: uv run --locked alembic check
+      - name: Bootstrap LangGraph checkpoint schema
+        run: >-
+          uv run --locked python -m scripts.bootstrap_langgraph_checkpoint
+          --database-url "$AGENTHUB_TEST_DATABASE_URL"
       - run: uv run --locked ruff check .
       - name: Start Celery worker
         run: |
@@ -93,6 +97,10 @@ jobs:
           --database-url "$AGENTHUB_TEST_DATABASE_URL"
           --output "$RUNNER_TEMP/m4-agent-runtime-result.json"
           --summary "$RUNNER_TEMP/m4-agent-runtime-summary.md"
+      - name: Run M5 approval runtime evaluation
+        run: >-
+          uv run --locked python -m benchmarks.approval_runtime.runner
+          --output "$RUNNER_TEMP/m5-approval-runtime-result.json"
       - name: Stop Celery worker
         if: always()
         run: |

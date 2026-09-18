@@ -1,0 +1,305 @@
+{
+  "dataset_version": "m5-approval-runtime-v1",
+  "cases": [
+    {
+      "case_id": "approval-required-dev-01",
+      "split": "dev",
+      "category": "approval_required",
+      "actions": ["request"],
+      "expected": {
+        "decision_status": "PENDING",
+        "execution_status": "NOT_STARTED",
+        "run_status": "WAITING_APPROVAL",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "approval-required-holdout-01",
+      "split": "holdout",
+      "category": "approval_required",
+      "actions": ["request"],
+      "expected": {
+        "decision_status": "PENDING",
+        "execution_status": "NOT_STARTED",
+        "run_status": "WAITING_APPROVAL",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "approval-denied-dev-01",
+      "split": "dev",
+      "category": "approval_denied",
+      "actions": ["request", "deny", "resume"],
+      "expected": {
+        "decision_status": "DENIED",
+        "execution_status": "NOT_STARTED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "approval-denied-holdout-01",
+      "split": "holdout",
+      "category": "approval_denied",
+      "actions": ["request", "deny", "resume"],
+      "expected": {
+        "decision_status": "DENIED",
+        "execution_status": "NOT_STARTED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "approval-approved-dev-01",
+      "split": "dev",
+      "category": "approval_approved",
+      "actions": ["request", "approve", "resume"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "approval-approved-holdout-01",
+      "split": "holdout",
+      "category": "approval_approved",
+      "actions": ["request", "approve", "resume"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "duplicate-approve-dev-01",
+      "split": "dev",
+      "category": "duplicate_approve",
+      "actions": ["request", "approve", "approve_again", "resume"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "multi-step-action-dev-01",
+      "split": "dev",
+      "category": "multi_step_action",
+      "actions": ["request", "approve", "resume", "resume_again"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "multi-step-action-holdout-01",
+      "split": "holdout",
+      "category": "multi_step_action",
+      "actions": ["request", "approve", "resume", "resume_again"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "self-approval-denied-dev-01",
+      "split": "dev",
+      "category": "self_approval_denied",
+      "actions": ["request", "approve", "resume"],
+      "expected": {
+        "decision_status": "PENDING",
+        "execution_status": "NOT_STARTED",
+        "run_status": "WAITING_APPROVAL",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": false,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "self-approval-denied-dev-02",
+      "split": "dev",
+      "category": "self_approval_denied",
+      "actions": ["request", "approve", "resume"],
+      "expected": {
+        "decision_status": "PENDING",
+        "execution_status": "NOT_STARTED",
+        "run_status": "WAITING_APPROVAL",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": false,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "restart-resume-dev-01",
+      "split": "dev",
+      "category": "restart_resume",
+      "actions": ["request", "restart", "approve", "restart", "resume"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "restart-resume-holdout-01",
+      "split": "holdout",
+      "category": "restart_resume",
+      "actions": ["request", "restart", "approve", "restart", "resume"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "idempotent-action-dev-01",
+      "split": "dev",
+      "category": "idempotent_action",
+      "actions": ["request", "approve", "resume", "execute_again", "resume_again"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "idempotent-action-dev-02",
+      "split": "dev",
+      "category": "idempotent_action",
+      "actions": ["request", "approve", "resume", "execute_again", "resume_again"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "unknown-outcome-dev-01",
+      "split": "dev",
+      "category": "unknown_outcome",
+      "actions": ["request", "approve", "resume", "resume_again"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "UNKNOWN_OUTCOME",
+        "run_status": "NEEDS_ATTENTION",
+        "ticket_count": 0,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "unknown-outcome-holdout-01",
+      "split": "holdout",
+      "category": "unknown_outcome",
+      "actions": ["request", "approve", "resume", "resume_again"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "UNKNOWN_OUTCOME",
+        "run_status": "NEEDS_ATTENTION",
+        "ticket_count": 0,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "cancel-race-dev-01",
+      "split": "dev",
+      "category": "cancel_race",
+      "actions": ["request", "cancel", "approve", "resume"],
+      "expected": {
+        "decision_status": "CANCELLED",
+        "execution_status": "NOT_STARTED",
+        "run_status": "CANCELLED",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "crash-recovery-dev-01",
+      "split": "dev",
+      "category": "crash_recovery",
+      "actions": ["request", "approve", "resume", "resume_again"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    },
+    {
+      "case_id": "crash-recovery-holdout-01",
+      "split": "dev",
+      "category": "crash_recovery",
+      "actions": ["request", "approve", "resume", "resume_again"],
+      "expected": {
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
+      }
+    }
+  ]
+}

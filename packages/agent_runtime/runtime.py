@@ -1241,6 +1241,37 @@ class _AgentRunGraph:
                         "execution_status": approval.execution_status,
                     },
                 )
+                approval_wait_started = time.perf_counter()
+                approval_wait_span = await _safe_start_span(
+                    self.service.trace_sink,
+                    "approval.wait",
+                    {
+                        "workspace_id": self.context.workspace_id,
+                        "run_id": str(self.run.id),
+                        "approval_id": str(approval.id),
+                        "logical_action_id": approval.logical_action_id,
+                        "tool_identity": approval.tool_identity,
+                        "decision_status": str(approval.decision_status),
+                        "execution_status": str(approval.execution_status),
+                    },
+                )
+                await _safe_end_span(
+                    approval_wait_span,
+                    {
+                        "workspace_id": self.context.workspace_id,
+                        "run_id": str(self.run.id),
+                        "approval_id": str(approval.id),
+                        "logical_action_id": approval.logical_action_id,
+                        "tool_identity": approval.tool_identity,
+                        "decision_status": str(approval.decision_status),
+                        "execution_status": str(approval.execution_status),
+                        "latency_ms": round(
+                            (time.perf_counter() - approval_wait_started) * 1000, 3
+                        ),
+                    },
+                    status="ok",
+                    failure_code=None,
+                )
                 resume = interrupt(
                     {
                         "approval_id": str(approval.id),
@@ -1289,79 +1320,133 @@ class _AgentRunGraph:
         if self.service.action_runtime is None or self.service.approval_service is None:
             return {"failure_code": "ACTION_RUNTIME_NOT_CONFIGURED"}
         executed: dict[str, ToolResult] = {}
+        logical_action_ids: list[str] = []
         for item in state.get("action_calls", []):
             call = item["call"]
             approval_id = UUID(item["approval_id"])
             approval = await self.service.approval_service.get(self.context, approval_id)
-            if approval.execution_status in {
-                ApprovalExecutionStatus.SUCCEEDED,
-                ApprovalExecutionStatus.FAILED,
-                ApprovalExecutionStatus.UNKNOWN_OUTCOME,
-            }:
-                result = _approval_tool_result(approval)
-                executed[call["tool_call_id"]] = result
-                if approval.execution_status == ApprovalExecutionStatus.UNKNOWN_OUTCOME:
-                    return {
-                        "executed_observations": executed,
-                        "run_status": "NEEDS_ATTENTION",
-                        "failure_code": approval.failure_code or "UNKNOWN_OUTCOME",
-                    }
-                continue
-            claimed = await self.service.approval_service.claim_execution(self.context, approval_id)
-            if claimed is None:
-                current = await self.service.approval_service.get(self.context, approval_id)
-                if current.execution_status in {
+            logical_action_ids.append(approval.logical_action_id)
+            execution_span_started = time.perf_counter()
+            execution_span = await _safe_start_span(
+                self.service.trace_sink,
+                "approval.execute",
+                {
+                    "workspace_id": self.context.workspace_id,
+                    "run_id": str(self.run.id),
+                    "approval_id": str(approval.id),
+                    "logical_action_id": approval.logical_action_id,
+                    "tool_identity": approval.tool_identity,
+                    "decision_status": str(approval.decision_status),
+                    "execution_status": str(approval.execution_status),
+                },
+            )
+            span_status = "ok"
+            span_failure_code: str | None = None
+            span_execution_status = str(approval.execution_status)
+            try:
+                if approval.execution_status in {
                     ApprovalExecutionStatus.SUCCEEDED,
                     ApprovalExecutionStatus.FAILED,
                     ApprovalExecutionStatus.UNKNOWN_OUTCOME,
                 }:
-                    executed[call["tool_call_id"]] = _approval_tool_result(current)
+                    result = _approval_tool_result(approval)
+                    executed[call["tool_call_id"]] = result
+                    span_execution_status = str(approval.execution_status)
+                    if approval.execution_status == ApprovalExecutionStatus.UNKNOWN_OUTCOME:
+                        span_status = "error"
+                        span_failure_code = approval.failure_code or "UNKNOWN_OUTCOME"
+                        return {
+                            "executed_observations": executed,
+                            "run_status": "NEEDS_ATTENTION",
+                            "failure_code": span_failure_code,
+                        }
                     continue
-                return {
-                    "failure_code": "ACTION_CLAIM_LOST",
-                    "run_status": "NEEDS_ATTENTION",
-                }
-            definition = state["tool_definitions"][call["name"]]
-            result = await self.service.action_runtime.execute(
-                self.context,
-                definition,
-                dict(claimed.canonical_arguments),
-                idempotency_key=claimed.idempotency_key,
-            )
-            if result.status is ActionExecutionStatus.UNKNOWN_OUTCOME:
+                claimed = await self.service.approval_service.claim_execution(
+                    self.context, approval_id
+                )
+                if claimed is None:
+                    current = await self.service.approval_service.get(self.context, approval_id)
+                    span_execution_status = str(current.execution_status)
+                    if current.execution_status in {
+                        ApprovalExecutionStatus.SUCCEEDED,
+                        ApprovalExecutionStatus.FAILED,
+                        ApprovalExecutionStatus.UNKNOWN_OUTCOME,
+                    }:
+                        executed[call["tool_call_id"]] = _approval_tool_result(current)
+                        continue
+                    span_status = "error"
+                    span_failure_code = "ACTION_CLAIM_LOST"
+                    return {
+                        "failure_code": span_failure_code,
+                        "run_status": "NEEDS_ATTENTION",
+                    }
+                definition = state["tool_definitions"][call["name"]]
+                result = await self.service.action_runtime.execute(
+                    self.context,
+                    definition,
+                    dict(claimed.canonical_arguments),
+                    idempotency_key=claimed.idempotency_key,
+                )
+                if result.status is ActionExecutionStatus.UNKNOWN_OUTCOME:
+                    await self.service.approval_service.complete_execution(
+                        self.context,
+                        approval_id,
+                        status=ApprovalExecutionStatus.UNKNOWN_OUTCOME,
+                        failure_code=result.failure_code,
+                        safe_failure_message=result.safe_message,
+                    )
+                    span_execution_status = ApprovalExecutionStatus.UNKNOWN_OUTCOME.value
+                    span_status = "error"
+                    span_failure_code = result.failure_code or "UNKNOWN_OUTCOME"
+                    return {
+                        "executed_observations": executed,
+                        "run_status": "NEEDS_ATTENTION",
+                        "failure_code": span_failure_code,
+                    }
+                execution_status = (
+                    ApprovalExecutionStatus.SUCCEEDED
+                    if result.status is ActionExecutionStatus.SUCCEEDED
+                    else ApprovalExecutionStatus.FAILED
+                )
                 await self.service.approval_service.complete_execution(
                     self.context,
                     approval_id,
-                    status=ApprovalExecutionStatus.UNKNOWN_OUTCOME,
+                    status=execution_status,
+                    safe_result=result.data,
                     failure_code=result.failure_code,
                     safe_failure_message=result.safe_message,
                 )
-                return {
-                    "executed_observations": executed,
-                    "run_status": "NEEDS_ATTENTION",
-                    "failure_code": result.failure_code or "UNKNOWN_OUTCOME",
-                }
-            execution_status = (
-                ApprovalExecutionStatus.SUCCEEDED
-                if result.status is ActionExecutionStatus.SUCCEEDED
-                else ApprovalExecutionStatus.FAILED
-            )
-            await self.service.approval_service.complete_execution(
-                self.context,
-                approval_id,
-                status=execution_status,
-                safe_result=result.data,
-                failure_code=result.failure_code,
-                safe_failure_message=result.safe_message,
-            )
-            executed[call["tool_call_id"]] = (
-                ToolResult.success(result.data)
-                if result.status is ActionExecutionStatus.SUCCEEDED
-                else ToolResult.failure(
-                    result.failure_code or "ACTION_FAILED",
-                    result.safe_message or "The action failed.",
+                span_execution_status = execution_status.value
+                if result.status is ActionExecutionStatus.FAILED:
+                    span_status = "error"
+                    span_failure_code = result.failure_code or "ACTION_FAILED"
+                executed[call["tool_call_id"]] = (
+                    ToolResult.success(result.data)
+                    if result.status is ActionExecutionStatus.SUCCEEDED
+                    else ToolResult.failure(
+                        result.failure_code or "ACTION_FAILED",
+                        result.safe_message or "The action failed.",
+                    )
                 )
-            )
+            finally:
+                await _safe_end_span(
+                    execution_span,
+                    {
+                        "workspace_id": self.context.workspace_id,
+                        "run_id": str(self.run.id),
+                        "approval_id": str(approval.id),
+                        "logical_action_id": approval.logical_action_id,
+                        "tool_identity": approval.tool_identity,
+                        "decision_status": str(approval.decision_status),
+                        "execution_status": span_execution_status,
+                        "latency_ms": round(
+                            (time.perf_counter() - execution_span_started) * 1000, 3
+                        ),
+                        "failure_code": span_failure_code,
+                    },
+                    status=span_status,
+                    failure_code=span_failure_code,
+                )
         await self.step(
             "ACTION",
             "SUCCEEDED",
@@ -1370,6 +1455,7 @@ class _AgentRunGraph:
                 "tool_identities": [
                     item["call"]["name"] for item in state.get("action_calls", [])
                 ],
+                "logical_action_ids": logical_action_ids,
             },
         )
         return {"executed_observations": executed, "action_calls": []}
@@ -1645,6 +1731,7 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "step_count",
         "tool_identities",
         "tool_call_ids",
+        "logical_action_ids",
         "policy_decision",
         "error_code",
         "status",

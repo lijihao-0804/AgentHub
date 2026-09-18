@@ -18,6 +18,7 @@ from packages.approvals.contracts import (
     compute_logical_action_id,
 )
 from packages.approvals.models import Approval
+from packages.control_plane.audit import append_audit
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 
@@ -142,6 +143,13 @@ class ApprovalService:
                 raise AgentHubError("APPROVAL_NOT_FOUND", "The approval was not found.", 404)
             if approval.decision_status != ApprovalDecisionStatus.PENDING:
                 return approval
+            now = datetime.now(UTC)
+            if approval.expires_at is not None and approval.expires_at <= now:
+                approval.decision_status = ApprovalDecisionStatus.EXPIRED.value
+                approval.decided_at = now
+                await session.commit()
+                await session.refresh(approval)
+                return approval
             if (
                 decision is ApprovalDecisionStatus.APPROVED
                 and approval.requested_by == user_id
@@ -152,7 +160,23 @@ class ApprovalService:
                 )
             approval.decision_status = decision.value
             approval.decided_by = user_id
-            approval.decided_at = datetime.now(UTC)
+            approval.decided_at = now
+            append_audit(
+                session,
+                action="approval.decide",
+                resource_type="approval",
+                resource_id=str(approval.id),
+                request_id=context.request_id,
+                actor_user_id=user_id,
+                organization_id=_organization_uuid(context),
+                workspace_id=workspace_id,
+                safe_metadata={
+                    "approval_id": str(approval.id),
+                    "logical_action_id": approval.logical_action_id,
+                    "tool_identity": approval.tool_identity,
+                    "decision": decision.value,
+                },
+            )
             await session.commit()
             await session.refresh(approval)
             return approval
@@ -259,6 +283,13 @@ def _workspace_uuid(context: WorkspaceExecutionContext) -> UUID:
 def _user_uuid(context: WorkspaceExecutionContext) -> UUID:
     try:
         return UUID(str(context.user_id))
+    except (TypeError, ValueError) as exc:
+        raise AgentHubError("AUTHENTICATION_REQUIRED", "Authentication is required.", 401) from exc
+
+
+def _organization_uuid(context: WorkspaceExecutionContext) -> UUID:
+    try:
+        return UUID(context.organization.organization_id)
     except (TypeError, ValueError) as exc:
         raise AgentHubError("AUTHENTICATION_REQUIRED", "Authentication is required.", 401) from exc
 
