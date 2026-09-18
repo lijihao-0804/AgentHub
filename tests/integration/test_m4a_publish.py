@@ -15,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import (
+    Agent,
     AgentKnowledgeBinding,
     AgentTool,
     AgentVersion,
@@ -129,6 +130,7 @@ async def create_base(
     label: str,
     *,
     capabilities: dict[str, object] | None = None,
+    materialize_snapshot: bool = True,
 ) -> dict[str, object]:
     user = User(
         email=f"m4a-{label}-{uuid4()}@example.test",
@@ -188,9 +190,11 @@ async def create_base(
     session.add(revision)
     await session.commit()
     context = context_for(user.id, workspace.id, organization.id)
-    snapshot = await KnowledgeSnapshotService().create_current_snapshot(
-        session, context, knowledge_base.id
-    )
+    snapshot = None
+    if materialize_snapshot:
+        snapshot = await KnowledgeSnapshotService().create_current_snapshot(
+            session, context, knowledge_base.id
+        )
     return {
         "user": user,
         "user_id": user.id,
@@ -205,7 +209,7 @@ async def create_base(
         "knowledge_base": knowledge_base,
         "knowledge_base_id": knowledge_base.id,
         "snapshot": snapshot,
-        "snapshot_id": snapshot.snapshot_id,
+        "snapshot_id": snapshot.snapshot_id if snapshot is not None else None,
     }
 
 
@@ -331,6 +335,136 @@ async def test_m4a_concurrent_publish_allocates_serial_versions(
             ).all()
         )
         assert sorted(item.version_number for item in stored) == [1, 2]
+
+
+@pytest.mark.asyncio
+async def test_m4a_concurrent_latest_publish_materializes_before_serial_versions(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    async with db_factory() as session:
+        base = await create_base(
+            session,
+            f"concurrent-latest-{uuid4()}",
+            materialize_snapshot=False,
+        )
+        agent = await AgentPublishService().create_draft(
+            session,
+            base["context"],
+            name="Concurrent Latest Agent",
+            system_prompt="Stable prompt.",
+            model_profile_id=base["profile_id"],
+        )
+        session.add(
+            AgentKnowledgeBinding(
+                workspace_id=base["workspace_id"],
+                agent_id=agent.id,
+                knowledge_base_id=base["knowledge_base_id"],
+                binding_mode="LATEST",
+            )
+        )
+        await session.commit()
+        agent_id = agent.id
+
+    async def publish_once() -> int:
+        async with db_factory() as session:
+            result = await AgentPublishService().publish(session, base["context"], agent_id)
+            return result.version_number
+
+    versions = await asyncio.gather(publish_once(), publish_once())
+    assert sorted(versions) == [1, 2]
+
+    async with db_factory() as session:
+        stored = list(
+            (
+                await session.scalars(
+                    select(AgentVersion)
+                    .where(AgentVersion.agent_id == agent_id)
+                    .order_by(AgentVersion.version_number)
+                )
+            ).all()
+        )
+
+    assert [item.version_number for item in stored] == [1, 2]
+    snapshot_ids = {
+        item.resolved_spec["retrieval"]["knowledge_snapshot_ids"][0] for item in stored
+    }
+    assert len(snapshot_ids) == 1
+    for item in stored:
+        assert item.resolved_spec_hash == canonical_json_hash(item.resolved_spec)
+        assert "LATEST" not in json.dumps(item.resolved_spec)
+        assert item.resolved_spec["retrieval"]["knowledge_snapshots"][0]["snapshot_id"] in (
+            snapshot_ids
+        )
+
+
+@pytest.mark.asyncio
+async def test_m4a_latest_publish_rereads_authoritative_draft_after_materialization(
+    db_factory: async_sessionmaker[AsyncSession],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async with db_factory() as session:
+        base = await create_base(
+            session,
+            f"latest-reread-{uuid4()}",
+            materialize_snapshot=False,
+        )
+        agent = await AgentPublishService().create_draft(
+            session,
+            base["context"],
+            name="Latest Reread Agent",
+            system_prompt="stale prompt",
+            model_profile_id=base["profile_id"],
+        )
+        session.add(
+            AgentKnowledgeBinding(
+                workspace_id=base["workspace_id"],
+                agent_id=agent.id,
+                knowledge_base_id=base["knowledge_base_id"],
+                binding_mode="LATEST",
+            )
+        )
+        await session.commit()
+        agent_id = agent.id
+
+    original = KnowledgeSnapshotService.create_current_snapshot
+
+    async def materialize_then_change_draft(
+        service: KnowledgeSnapshotService,
+        snapshot_session: AsyncSession,
+        snapshot_context: WorkspaceExecutionContext,
+        knowledge_base_id: UUID,
+    ):
+        snapshot = await original(
+            service,
+            snapshot_session,
+            snapshot_context,
+            knowledge_base_id,
+        )
+        async with db_factory() as update_session:
+            draft = await update_session.get(Agent, agent_id)
+            assert draft is not None
+            draft.system_prompt = "authoritative prompt"
+            draft.prompt_version = 2
+            await update_session.commit()
+        return snapshot
+
+    monkeypatch.setattr(
+        KnowledgeSnapshotService,
+        "create_current_snapshot",
+        materialize_then_change_draft,
+    )
+
+    async with db_factory() as session:
+        published = await AgentPublishService().publish(session, base["context"], agent_id)
+        version = await session.get(AgentVersion, published.id)
+
+    assert version is not None
+    assert version.resolved_spec["prompt"] == {
+        "system_prompt": "authoritative prompt",
+        "prompt_version": 2,
+    }
+    assert version.resolved_spec_hash == canonical_json_hash(version.resolved_spec)
+    assert "LATEST" not in json.dumps(version.resolved_spec)
 
 
 @pytest.mark.asyncio

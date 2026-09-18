@@ -32,6 +32,14 @@ Published versions use a concrete `PINNED` snapshot projection. Draft `LATEST` s
 used, are resolved before the immutable spec is written; `LATEST` is never persisted in the
 published retrieval projection.
 
+LATEST publication has an explicit transaction boundary: required LATEST selectors are first
+materialized through the existing Knowledge Snapshot service, whose commit is allowed to finish
+that materialization transaction. Publish then re-enters a fresh transaction, re-selects the
+authoritative Agent with `FOR UPDATE`, re-reads its bindings, and only then resolves model/tool
+state and allocates the next version number. If the authoritative draft gained a new LATEST
+binding during the boundary, materialization is repeated before the Agent is locked again; no
+pre-commit Agent or binding state is used for the immutable spec.
+
 `resolved_spec_hash` is `canonical_json_hash(resolved_spec)`, including the schema version. The
 Agent row is locked during version allocation, so concurrent publishes produce serial version
 numbers rather than duplicate version numbers.
@@ -49,6 +57,9 @@ and `agent_create` / `agent_edit` permissions remain authoritative.
   ToolRevision hash, secret exclusion and capability mismatch.
 - PostgreSQL integration: publish freeze, version 1/2 concurrency, cross-workspace ModelProfile,
   Snapshot and Tool foreign-key isolation, ToolRevision v2 immutability, and capability failure.
+- PostgreSQL integration also covers concurrent LATEST materialization/publish and a deterministic
+  draft change after materialization; both verify concrete snapshot IDs/hashes and no LATEST value
+  in immutable specs.
 - CI uses real PostgreSQL and runs `tests/integration/test_m4a_publish.py`; no provider adapter or
   public LLM is called.
 - Final acceptance: GitHub Actions run #52 passed backend, frontend, and the M4-A integration step.
