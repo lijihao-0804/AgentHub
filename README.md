@@ -1,8 +1,9 @@
 # AgentHub
 
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
-implementation plan in [`plan/plan.md`](plan/plan.md). M3-E Citation QA is accepted; M3-F
-Snapshot is the current milestone. M4 Agent Runtime remains deferred.
+implementation plan in [`plan/plan.md`](plan/plan.md). M3-F Snapshot is accepted. The next
+milestone is the M3 retrieval evaluation baseline; M3 overall is not yet PASS. M4 Agent Runtime
+remains deferred.
 
 ## Basic development setup
 
@@ -52,15 +53,22 @@ uv run --locked python -c "import torch; print(torch.__version__); print(torch.c
 
 ## Optional/local infrastructure setup
 
-For the current M3-E Citation QA milestone, PostgreSQL, Redis and Qdrant are required
+For M3 infrastructure verification, PostgreSQL, Redis and Qdrant are required
 for real infrastructure verification and may be provided by local services or Docker Compose:
 
 ```powershell
 docker compose up -d postgres redis qdrant
 ```
 
-CI injects deterministic fake models and never downloads BGE checkpoints. Real model verification
-is a manual host smoke only:
+CI injects deterministic fake models and never downloads BGE checkpoints. The verified local real
+model smoke facts are:
+
+- Windows CUDA runtime: PASS (`torch 2.14.0+cu130`, CUDA `True`, RTX 3060 Laptop GPU)
+- BGE-M3 local model smoke: PASS (`dense_dimension = 1024`, `document_count = 2`)
+- BGE reranker local model smoke: PASS (`rerank_scores = (2.396484375, 3.650390625)`)
+- Both model smokes succeeded with `HF_HUB_OFFLINE=1`.
+
+To reproduce the host-only smoke checks:
 
 ```powershell
 uv run --locked python -m scripts.knowledge_model_smoke
@@ -76,3 +84,4 @@ deferred to M8.
 - Every behavior-changing milestone gets a focused commit and a verification record.
 - Secrets never enter source control, snapshots, revisions, logs or traces.
 - M2 deliberately contains no Agent, RAG or Tool product implementation.
+- M3-F is accepted; the M3 retrieval evaluation baseline is next. M3 overall remains open.

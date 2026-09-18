@@ -38,13 +38,11 @@
 | Frontend build | PASS（Next.js production build） |
 | GitHub Actions | PASS（closure CI #34，backend/frontend） |
 | Platform-specific PyTorch lock resolution | PASS（Windows cu130 / Linux CPU artifacts） |
-| Windows cu130 runtime sync | PENDING（本机 `uv sync --locked` 仍在后台安装） |
-| REAL MODEL SMOKE | NOT RUN |
+| Windows cu130 runtime sync | PASS（`torch 2.14.0+cu130`，CUDA `True`，RTX 3060 Laptop GPU） |
+| BGE-M3 local model smoke | PASS（`dense_dimension = 1024`，`document_count = 2`，`HF_HUB_OFFLINE=1`） |
+| BGE reranker local model smoke | PASS（`rerank_scores = (2.396484375, 3.650390625)`，`HF_HUB_OFFLINE=1`） |
 
 ## 明确未完成
 
-- M3-D Playground；
-- M3-E Citation QA；
-- M3-F full Snapshot lifecycle / LATEST resolution；
 - M3 overall PASS；
 - M8 Docker build / full Compose deployment。

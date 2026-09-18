@@ -541,3 +541,91 @@ async def test_composite_foreign_keys_reject_cross_kb_and_document_revision_mism
         )
         with pytest.raises(IntegrityError):
             await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_snapshot_rejects_two_revisions_for_one_document(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    bundle = await _seed_bundle(db_factory)
+    service = KnowledgeSnapshotService()
+    async with db_factory() as session:
+        snapshot = await service.create_current_snapshot(
+            session,
+            _context(bundle),
+            bundle.knowledge_base_id,
+        )
+    _document_id, second_revision_id = await _add_revision(
+        db_factory,
+        bundle,
+        status=RevisionIngestionStatus.PENDING,
+        lifecycle=RevisionLifecycleStatus.ACTIVE,
+        same_document=True,
+    )
+
+    async with db_factory() as session:
+        session.add(
+            KnowledgeSnapshotItem(
+                workspace_id=bundle.workspace_id,
+                snapshot_id=snapshot.snapshot_id,
+                knowledge_base_id=bundle.knowledge_base_id,
+                document_id=bundle.document_id,
+                document_revision_id=second_revision_id,
+            )
+        )
+        with pytest.raises(IntegrityError):
+            await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_snapshot_item_rejects_cross_knowledge_base_reference(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    bundle = await _seed_bundle(db_factory)
+    service = KnowledgeSnapshotService()
+    async with db_factory() as session:
+        snapshot = await service.create_current_snapshot(
+            session,
+            _context(bundle),
+            bundle.knowledge_base_id,
+        )
+
+    async with db_factory() as session:
+        other_knowledge_base = KnowledgeBase(
+            workspace_id=bundle.workspace_id,
+            name=f"other-kb-{uuid4()}",
+        )
+        session.add(other_knowledge_base)
+        await session.flush()
+        other_document = Document(
+            workspace_id=bundle.workspace_id,
+            knowledge_base_id=other_knowledge_base.id,
+            name="other.txt",
+        )
+        session.add(other_document)
+        await session.flush()
+        other_revision = DocumentRevision(
+            workspace_id=bundle.workspace_id,
+            knowledge_base_id=other_knowledge_base.id,
+            document_id=other_document.id,
+            revision_number=1,
+            original_filename="other.txt",
+            blob_key=f"m3f/{uuid4().hex}",
+            media_type="text/plain",
+            file_size=10,
+            ingestion_status=RevisionIngestionStatus.READY,
+            lifecycle_status=RevisionLifecycleStatus.ACTIVE,
+        )
+        session.add(other_revision)
+        await session.flush()
+        session.add(
+            KnowledgeSnapshotItem(
+                workspace_id=bundle.workspace_id,
+                snapshot_id=snapshot.snapshot_id,
+                knowledge_base_id=other_knowledge_base.id,
+                document_id=other_document.id,
+                document_revision_id=other_revision.id,
+            )
+        )
+        with pytest.raises(IntegrityError):
+            await session.commit()

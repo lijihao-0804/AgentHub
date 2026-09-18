@@ -320,6 +320,12 @@ class KnowledgeSnapshotItem(Base):
             "document_revision_id",
             name="uq_snapshot_items_revision",
         ),
+        UniqueConstraint(
+            "workspace_id",
+            "snapshot_id",
+            "document_id",
+            name="uq_snapshot_items_document",
+        ),
         Index("ix_snapshot_items_snapshot", "workspace_id", "snapshot_id"),
     )
 

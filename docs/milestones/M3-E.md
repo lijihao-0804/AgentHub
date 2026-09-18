@@ -75,7 +75,7 @@ Final closure verification:
 - real PostgreSQL/Qdrant integration cases: PASS, including cross-workspace model-profile
   rejection before provider adapter invocation
 
-M3-E acceptance closure is complete. M3 overall is not marked PASS; M3-F Snapshot lifecycle /
-`LATEST` resolution has not started.
+M3-E acceptance closure is complete. M3-F Snapshot lifecycle / `LATEST` resolution is accepted.
+M3 overall is not marked PASS; the next milestone is the M3 retrieval evaluation baseline.
 
-M3-F Snapshot lifecycle / `LATEST` resolution and M4 are not started.
+M4 remains deferred.
