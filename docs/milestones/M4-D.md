@@ -1,6 +1,6 @@
 # M4-D — Context Budget, Streaming and AgentHub Event Protocol
 
-Status: IN PROGRESS
+Status: PASS — closure verified in GitHub Actions run #64.
 
 ## Scope
 
@@ -20,14 +20,17 @@ Evaluation Dataset, M4-E, or M5.
 
 Implementation commit: `1980640`.
 
-Local verification currently passes the dedicated M4-D PostgreSQL integration suite (8 tests),
-the M4-A/B/C integration regressions (37 tests), Ruff, Alembic upgrade/check, and the frontend
-production build. The dedicated CI integration step is still pending.
+Final closure commit: pending in this document update.
+
+GitHub Actions run #64 passed backend and frontend. The backend job explicitly passed the
+dedicated `tests/integration/test_m4d_streaming_budget.py` step, as well as the M4-A/B/C
+regressions, Alembic checks, Ruff, non-integration tests, and existing infrastructure services.
+The local M4-D PostgreSQL integration suite also passed 8 tests and the frontend production
+build passed.
 
 The dedicated integration suite uses deterministic fake model adapters and is intended to run
 against the existing real PostgreSQL, Redis, Qdrant and Celery CI services; it does not call
 public LLMs or download BGE/HuggingFace models.
 
-The final record will include the context budget, frozen streaming, Event Protocol/SSE,
-cancellation, M4-A/B/C regressions, non-integration tests, Alembic checks, frontend build,
-and the final GitHub Actions run.
+M4-D is accepted. M4-E and M5 remain outside this milestone; no durable checkpoint or Approval
+Runtime was added.

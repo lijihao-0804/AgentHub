@@ -3,8 +3,8 @@
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
 implementation plan in [`plan/plan.md`](plan/plan.md). M3-F Snapshot and the M3 retrieval
 evaluation baseline are accepted; M3 overall is PASS. M4-A Agent Draft / AgentVersion publish,
-M4-B READ Tool Runtime and M4-C Agent Run + LangGraph execution are accepted; M4-D Context
-Budget, Streaming and AgentHub Event Protocol is in progress. M4 overall remains open.
+M4-B READ Tool Runtime, M4-C Agent Run + LangGraph execution, and M4-D Context Budget,
+Streaming and AgentHub Event Protocol are accepted. M4 overall remains open; M4-E is next.
 
 ## Basic development setup
 
@@ -86,4 +86,4 @@ deferred to M8.
 - Secrets never enter source control, snapshots, revisions, logs or traces.
 - M2 deliberately contains no Agent, RAG or Tool product implementation.
 - M3 overall is PASS after the real retrieval evaluation baseline and CI verification. M4-A,
-  M4-B and M4-C are accepted in sequence; M4-D is in progress and M4 overall is not yet PASS.
+  M4-B, M4-C and M4-D are accepted in sequence; M4 overall is not yet PASS. M4-E is next.
