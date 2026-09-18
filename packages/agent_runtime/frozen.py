@@ -23,6 +23,15 @@ from packages.model_gateway.contracts import (
 
 _DEFAULT_RUNTIME = DEFAULT_RUNTIME_LIMITS
 _DEFAULT_CONTEXT_BUDGET = DEFAULT_CONTEXT_BUDGET
+SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2})
+
+
+@dataclass(frozen=True, slots=True)
+class FrozenKnowledgeBinding:
+    knowledge_base_id: UUID | None
+    binding_mode: str
+    snapshot_id: UUID | None = None
+    snapshot_hash: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,12 +40,20 @@ class FrozenAgentSpec:
     system_prompt: str
     prompt_version: int
     runtime: dict[str, Any]
+    knowledge_bindings: tuple[FrozenKnowledgeBinding, ...] = ()
 
 
 def parse_frozen_agent_spec(
     resolved_spec: Mapping[str, Any], *, workspace_id: UUID
 ) -> FrozenAgentSpec:
     if not isinstance(resolved_spec, Mapping):
+        raise _invalid_binding()
+    schema_version = resolved_spec.get("spec_schema_version")
+    if (
+        isinstance(schema_version, bool)
+        or not isinstance(schema_version, int)
+        or schema_version not in SUPPORTED_SPEC_SCHEMA_VERSIONS
+    ):
         raise _invalid_binding()
     model = resolved_spec.get("model")
     prompt = resolved_spec.get("prompt")
@@ -64,6 +81,10 @@ def parse_frozen_agent_spec(
         or not isinstance(prompt_version, int)
     ):
         raise _invalid_binding()
+    retrieval = resolved_spec.get("retrieval", {})
+    if not isinstance(retrieval, Mapping):
+        raise _invalid_binding()
+    knowledge_bindings = _parse_knowledge_bindings(retrieval, schema_version)
     runtime_value = resolved_spec.get("runtime", {})
     if not isinstance(runtime_value, Mapping):
         raise _invalid_binding()
@@ -98,7 +119,69 @@ def parse_frozen_agent_spec(
         system_prompt=system_prompt,
         prompt_version=prompt_version,
         runtime=runtime,
+        knowledge_bindings=knowledge_bindings,
     )
+
+
+def _parse_knowledge_bindings(
+    retrieval: Mapping[str, Any], schema_version: int
+) -> tuple[FrozenKnowledgeBinding, ...]:
+    if schema_version == 1:
+        values = retrieval.get("knowledge_snapshots", [])
+        if not isinstance(values, list):
+            raise _invalid_binding()
+        bindings: list[FrozenKnowledgeBinding] = []
+        for value in values:
+            if not isinstance(value, Mapping) or not value.get("snapshot_hash"):
+                raise _invalid_binding()
+            try:
+                snapshot_id = UUID(str(value["snapshot_id"]))
+            except (KeyError, TypeError, ValueError):
+                raise _invalid_binding() from None
+            bindings.append(
+                FrozenKnowledgeBinding(
+                    knowledge_base_id=None,
+                    binding_mode="PINNED",
+                    snapshot_id=snapshot_id,
+                    snapshot_hash=str(value["snapshot_hash"]),
+                )
+            )
+        return tuple(bindings)
+
+    values = retrieval.get("knowledge_bindings")
+    if not isinstance(values, list):
+        raise _invalid_binding()
+    bindings: list[FrozenKnowledgeBinding] = []
+    for value in values:
+        if not isinstance(value, Mapping):
+            raise _invalid_binding()
+        try:
+            knowledge_base_id = UUID(str(value["knowledge_base_id"]))
+            binding_mode = str(value["binding_mode"])
+        except (KeyError, TypeError, ValueError):
+            raise _invalid_binding() from None
+        if binding_mode == "LATEST":
+            if value.get("snapshot_id") is not None or value.get("snapshot_hash") is not None:
+                raise _invalid_binding()
+            bindings.append(FrozenKnowledgeBinding(knowledge_base_id, binding_mode))
+            continue
+        if binding_mode != "PINNED" or not value.get("snapshot_id") or not value.get(
+            "snapshot_hash"
+        ):
+            raise _invalid_binding()
+        try:
+            snapshot_id = UUID(str(value["snapshot_id"]))
+        except (TypeError, ValueError):
+            raise _invalid_binding() from None
+        bindings.append(
+            FrozenKnowledgeBinding(
+                knowledge_base_id,
+                binding_mode,
+                snapshot_id,
+                str(value["snapshot_hash"]),
+            )
+        )
+    return tuple(bindings)
 
 
 def _parse_profile(
@@ -162,4 +245,9 @@ def _invalid_binding() -> AgentHubError:
     )
 
 
-__all__ = ["FrozenAgentSpec", "parse_frozen_agent_spec"]
+__all__ = [
+    "FrozenAgentSpec",
+    "FrozenKnowledgeBinding",
+    "SUPPORTED_SPEC_SCHEMA_VERSIONS",
+    "parse_frozen_agent_spec",
+]

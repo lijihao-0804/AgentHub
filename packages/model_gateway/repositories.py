@@ -7,8 +7,12 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.attributes import set_committed_value
 
+from packages.core.config.settings import get_settings
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.model_gateway.credentials import CredentialEncryptionError, ProviderCredentialCipher
+from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 
 
@@ -39,7 +43,19 @@ class SqlAlchemyModelGatewayRepository:
                 ProviderCredential.workspace_id == workspace_id,
             )
         )
-        return result.scalar_one_or_none()
+        credential = result.scalar_one_or_none()
+        if credential is not None and credential.secret_ciphertext is not None:
+            try:
+                secret = ProviderCredentialCipher.from_settings().decrypt(
+                    credential.secret_ciphertext
+                )
+            except CredentialEncryptionError as exc:
+                raise ModelGatewayError(ModelGatewayErrorCode.MODEL_AUTH_FAILED) from exc
+            set_committed_value(credential, "secret", secret)
+        elif credential is not None and credential.secret is not None:
+            if not get_settings().credential_allow_legacy_plaintext:
+                raise ModelGatewayError(ModelGatewayErrorCode.MODEL_AUTH_FAILED)
+        return credential
 
     async def get_model_profile(
         self,

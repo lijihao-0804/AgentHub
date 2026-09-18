@@ -8,9 +8,18 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from packages.agent_runtime.models import Agent, AgentRun, AgentVersion, Tool, ToolRevision
+from packages.agent_runtime.models import (
+    Agent,
+    AgentKnowledgeBinding,
+    AgentRun,
+    AgentVersion,
+    Tool,
+    ToolRevision,
+)
+from packages.agent_runtime.publish import AgentPublishService
 from packages.agent_runtime.runtime import AgentRunService
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -21,6 +30,13 @@ from packages.core.execution_context.models import (
     OrganizationContext,
     PrincipalContext,
     WorkspaceExecutionContext,
+)
+from packages.knowledge.models import (
+    Document,
+    DocumentRevision,
+    KnowledgeBase,
+    RevisionIngestionStatus,
+    RevisionLifecycleStatus,
 )
 from packages.model_gateway.contracts import (
     ModelResponse,
@@ -250,6 +266,123 @@ async def _seed(
         "version": version,
         "revision": revision,
     }
+
+
+@pytest.mark.asyncio
+async def test_h2_latest_run_persists_effective_snapshot_and_history(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=uuid4().hex)
+        knowledge_base = KnowledgeBase(workspace_id=base["workspace_id"], name="Runtime KB")
+        session.add(knowledge_base)
+        await session.flush()
+        document = Document(
+            workspace_id=base["workspace_id"],
+            knowledge_base_id=knowledge_base.id,
+            name="runtime.txt",
+        )
+        session.add(document)
+        await session.flush()
+        revision = DocumentRevision(
+            workspace_id=base["workspace_id"],
+            knowledge_base_id=knowledge_base.id,
+            document_id=document.id,
+            revision_number=1,
+            original_filename="runtime.txt",
+            blob_key=f"m4h2/{uuid4().hex}",
+            media_type="text/plain",
+            file_size=10,
+            ingestion_status=RevisionIngestionStatus.READY,
+            lifecycle_status=RevisionLifecycleStatus.ACTIVE,
+        )
+        session.add(revision)
+        agent = await session.get(Agent, base["version"].agent_id)
+        assert agent is not None
+        base["profile"].capabilities = {"tool_calling": True, "max_context_tokens": 8192}
+        agent.knowledge_binding_mode = "LATEST"
+        session.add(
+            AgentKnowledgeBinding(
+                workspace_id=base["workspace_id"],
+                agent_id=agent.id,
+                knowledge_base_id=knowledge_base.id,
+                binding_mode="LATEST",
+            )
+        )
+        await session.commit()
+
+    publish_context = base["context"].model_copy(
+        update={
+            "permissions": frozenset(
+                {"agent_edit", "agent_run", "tool_run", "knowledge_run", "workspace_read"}
+            )
+        }
+    )
+    async with db_factory() as session:
+        published = await AgentPublishService().publish(
+            session, publish_context, base["version"].agent_id
+        )
+
+    adapter = RecordingAdapter()
+    service = AgentRunService(
+        db_factory,
+        model_gateway_factory=lambda session: SqlAlchemyModelGateway(session, adapter=adapter),
+    )
+    run_context = publish_context
+    first = await service.run(run_context, agent_version_id=published.id, input_text="first")
+
+    async with db_factory() as session:
+        document_two = Document(
+            workspace_id=base["workspace_id"],
+            knowledge_base_id=knowledge_base.id,
+            name="runtime-two.txt",
+        )
+        session.add(document_two)
+        await session.flush()
+        session.add(
+            DocumentRevision(
+                workspace_id=base["workspace_id"],
+                knowledge_base_id=knowledge_base.id,
+                document_id=document_two.id,
+                revision_number=1,
+                original_filename="runtime-two.txt",
+                blob_key=f"m4h2/{uuid4().hex}",
+                media_type="text/plain",
+                file_size=10,
+                ingestion_status=RevisionIngestionStatus.READY,
+                lifecycle_status=RevisionLifecycleStatus.ACTIVE,
+            )
+        )
+        await session.commit()
+
+    second = await service.run(run_context, agent_version_id=published.id, input_text="second")
+    async with db_factory() as session:
+        stored = list(
+            (
+                await session.scalars(
+                    select(AgentRun)
+                    .where(AgentRun.id.in_((first.run_id, second.run_id)))
+                    .order_by(AgentRun.created_at)
+                )
+            ).all()
+        )
+
+    assert [run.status for run in stored] == ["SUCCEEDED", "SUCCEEDED"]
+    assert all(run.resolved_spec_hash == published.resolved_spec_hash for run in stored)
+    assert stored[0].effective_knowledge_snapshots != stored[1].effective_knowledge_snapshots
+    assert all(
+        item["snapshot_id"] and item["snapshot_hash"]
+        for run in stored
+        for item in run.effective_knowledge_snapshots
+    )
+    viewer_context = run_context.model_copy(update={"permissions": frozenset({"workspace_read"})})
+    viewer_run = await service.get_run(viewer_context, first.run_id)
+    viewer_steps = await service.list_steps(viewer_context, first.run_id)
+    assert viewer_run.id == first.run_id
+    assert viewer_steps
+    with pytest.raises(AgentHubError) as denied:
+        await service.run(viewer_context, agent_version_id=published.id, input_text="denied")
+    assert denied.value.code == "FORBIDDEN"
 
 
 def _calculator_spec(*, approval_policy: str = "NEVER") -> dict[str, object]:

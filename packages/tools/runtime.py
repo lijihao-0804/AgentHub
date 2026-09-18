@@ -177,6 +177,7 @@ class PublishedToolResolver:
         workspace_id: UUID,
         agent_version_id: UUID,
         tool_identity: str,
+        effective_snapshot_refs: tuple[Mapping[str, Any], ...] | None = None,
     ) -> ToolDefinition:
         version = await self.session.scalar(
             select(AgentVersion).where(
@@ -234,7 +235,11 @@ class PublishedToolResolver:
             spec = validate_executable_tool_spec(revision.spec)
             if spec["identity"] != tool_identity:
                 continue
-            snapshots = retrieval.get("knowledge_snapshots", [])
+            snapshots = (
+                list(effective_snapshot_refs)
+                if effective_snapshot_refs is not None
+                else retrieval.get("knowledge_snapshots", [])
+            )
             if not isinstance(snapshots, list):
                 snapshots = []
             snapshot_refs = tuple(
@@ -247,6 +252,15 @@ class PublishedToolResolver:
                 and item.get("snapshot_id")
                 and item.get("snapshot_hash")
             )
+            retrieval_config = dict(retrieval)
+            if effective_snapshot_refs is not None:
+                retrieval_config.update(
+                    {
+                        "knowledge_binding_mode": "PINNED",
+                        "knowledge_snapshot_ids": [item["snapshot_id"] for item in snapshot_refs],
+                        "knowledge_snapshots": list(snapshot_refs),
+                    }
+                )
             return ToolDefinition(
                 identity=spec["identity"],
                 revision_id=revision.id,
@@ -258,7 +272,7 @@ class PublishedToolResolver:
                 approval_policy=ToolApprovalPolicy(spec["approval_policy"]),
                 timeout_seconds=spec["timeout_seconds"],
                 snapshot_refs=snapshot_refs,
-                retrieval_config=dict(retrieval),
+                retrieval_config=retrieval_config,
             )
         raise AgentHubError("UNKNOWN_TOOL", "The published tool was not found.", 404)
 
@@ -300,6 +314,7 @@ class ToolRuntime:
         tool_identity: str,
         arguments: Mapping[str, Any],
         tool_call_id: str,
+        effective_snapshot_refs: tuple[Mapping[str, Any], ...] | None = None,
     ) -> ToolResult:
         if "tool_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
@@ -331,6 +346,7 @@ class ToolRuntime:
                             workspace_id=_uuid(context.workspace_id, field="workspace_id"),
                             agent_version_id=version_uuid,
                             tool_identity=tool_identity,
+                            effective_snapshot_refs=effective_snapshot_refs,
                         )
                         _reject_injected_keys(arguments)
                         validator = Draft202012Validator(

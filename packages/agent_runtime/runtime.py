@@ -9,13 +9,15 @@ import time
 from collections.abc import AsyncIterator, Callable, Mapping
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Any, TypedDict
 from uuid import UUID
 
-from langgraph.graph import END, START, StateGraph
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from packages.agent_runtime.adapters.langgraph import compile_agent_graph
 from packages.agent_runtime.context_budget import (
     ContextBudgetConfig,
     ContextBudgetPolicy,
@@ -28,6 +30,7 @@ from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.knowledge.snapshots import KnowledgeSnapshotService
 from packages.model_gateway.contracts import (
     ModelGateway,
     ModelMessage,
@@ -120,7 +123,7 @@ class AgentRunService:
         agent_version_id: UUID,
         input_text: str,
     ) -> AgentRunResult:
-        self._require_permission(context)
+        self._require_permission(context, "agent_run")
         run = await self._create_run(context, agent_version_id, input_text)
         started = time.perf_counter()
         span = await _safe_start_span(
@@ -161,6 +164,7 @@ class AgentRunService:
             failure_code=failure_code,
             model_step_count=int(state.get("model_round_count", 0)),
             tool_call_count=int(state.get("tool_call_count", 0)),
+            usage_records=state.get("usage_records", []),
         )
         await _safe_end_span(
             span,
@@ -188,7 +192,7 @@ class AgentRunService:
     ) -> AsyncIterator[AgentEvent]:
         """Run the same LangGraph execution path while publishing AgentHub events."""
 
-        self._require_permission(context)
+        self._require_permission(context, "agent_run")
         await self.preflight_stream(context, agent_version_id=agent_version_id)
         run = await self._create_run(context, agent_version_id, input_text)
         queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue(maxsize=256)
@@ -222,6 +226,7 @@ class AgentRunService:
                     failure_code="AGENT_STREAM_CANCELLED",
                     model_step_count=graph.model_round_count if graph else 0,
                     tool_call_count=graph.tool_call_count if graph else 0,
+                    usage_records=graph.usage_records if graph else [],
                 )
             )
 
@@ -254,6 +259,8 @@ class AgentRunService:
             "identical_call_counts": {},
             "final_output": None,
             "failure_code": None,
+            "effective_knowledge_snapshots": list(run.effective_knowledge_snapshots or []),
+            "usage_records": [],
         }
 
     async def _produce_stream(
@@ -311,6 +318,7 @@ class AgentRunService:
             failure_code=failure_code,
             model_step_count=graph.model_round_count,
             tool_call_count=graph.tool_call_count,
+            usage_records=graph.usage_records,
         )
         event_type = AgentEventType.RUN_FAILED if failure_code else AgentEventType.RUN_COMPLETED
         data: dict[str, Any] = {
@@ -326,7 +334,7 @@ class AgentRunService:
         await queue.put(None)
 
     async def get_run(self, context: WorkspaceExecutionContext, run_id: UUID) -> AgentRun:
-        self._require_permission(context)
+        self._require_permission(context, "workspace_read")
         async with self.session_factory() as session:
             run = await session.scalar(
                 select(AgentRun).where(
@@ -341,7 +349,7 @@ class AgentRunService:
         self, context: WorkspaceExecutionContext, *, agent_version_id: UUID
     ) -> None:
         """Validate stream authorization and workspace scope before returning HTTP 200."""
-        self._require_permission(context)
+        self._require_permission(context, "agent_run")
         try:
             workspace_id = UUID(context.workspace_id)
         except (TypeError, ValueError):
@@ -394,16 +402,113 @@ class AgentRunService:
                 raise AgentHubError(
                     "AGENT_VERSION_NOT_FOUND", "The published agent version was not found.", 404
                 )
+            if canonical_json_hash(version.resolved_spec) != version.resolved_spec_hash:
+                raise AgentHubError(
+                    "AGENT_VERSION_INTEGRITY_ERROR",
+                    "The published agent version is invalid.",
+                    422,
+                )
+            published_hash = version.resolved_spec_hash
+            try:
+                spec = parse_frozen_agent_spec(version.resolved_spec, workspace_id=workspace_id)
+                if version.spec_schema_version != version.resolved_spec.get("spec_schema_version"):
+                    raise AgentHubError(
+                        "AGENT_VERSION_INTEGRITY_ERROR",
+                        "The published agent version schema is inconsistent.",
+                        422,
+                    )
+            except AgentHubError as error:
+                if error.code != "AGENT_VERSION_MODEL_BINDING_INVALID":
+                    raise
+                # Preserve durable failed-run history for malformed historical specs; the
+                # prepare phase will return the same safe binding error without executing.
+                effective_snapshots = []
+            else:
+                effective_snapshots = await self._resolve_effective_snapshots(
+                    session, context, spec
+                )
             run = AgentRun(
                 workspace_id=workspace_id,
                 agent_version_id=agent_version_id,
                 input_text=input_text,
                 created_by=created_by,
+                resolved_spec_hash=published_hash,
+                effective_knowledge_snapshots=effective_snapshots,
             )
             session.add(run)
             await session.commit()
             await session.refresh(run)
             return run
+
+    @staticmethod
+    async def _resolve_effective_snapshots(
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        spec: FrozenAgentSpec,
+    ) -> list[dict[str, str]]:
+        if not spec.knowledge_bindings:
+            return []
+        run_context = context.model_copy(
+            update={"permissions": context.permissions | frozenset({"knowledge_run"})}
+        )
+        service = KnowledgeSnapshotService()
+        effective: list[dict[str, str]] = []
+        for binding in spec.knowledge_bindings:
+            if binding.binding_mode == "LATEST":
+                if binding.knowledge_base_id is None:
+                    raise AgentHubError(
+                        "AGENT_VERSION_INTEGRITY_ERROR",
+                        "The published knowledge binding is invalid.",
+                        422,
+                    )
+                resolved = await service.resolve_snapshot(
+                    session,
+                    run_context,
+                    binding.knowledge_base_id,
+                    "LATEST",
+                )
+                effective.append(
+                    {
+                        "knowledge_base_id": str(binding.knowledge_base_id),
+                        "snapshot_id": str(resolved.snapshot_id),
+                        "snapshot_hash": resolved.content_hash,
+                    }
+                )
+                continue
+            if binding.snapshot_id is None or binding.snapshot_hash is None:
+                raise AgentHubError(
+                    "AGENT_VERSION_INTEGRITY_ERROR",
+                    "The published knowledge binding is invalid.",
+                    422,
+                )
+            if binding.knowledge_base_id is None:
+                effective.append(
+                    {
+                        "snapshot_id": str(binding.snapshot_id),
+                        "snapshot_hash": binding.snapshot_hash,
+                    }
+                )
+                continue
+            resolved = await service.resolve_snapshot(
+                session,
+                run_context,
+                binding.knowledge_base_id,
+                binding.snapshot_id,
+            )
+            if resolved.content_hash != binding.snapshot_hash:
+                raise AgentHubError(
+                    "AGENT_VERSION_INTEGRITY_ERROR",
+                    "The published knowledge binding is invalid.",
+                    422,
+                )
+            effective.append(
+                {
+                    "knowledge_base_id": str(binding.knowledge_base_id),
+                    "snapshot_id": str(binding.snapshot_id),
+                    "snapshot_hash": binding.snapshot_hash,
+                }
+            )
+        return effective
 
     async def _append_step(
         self,
@@ -438,6 +543,7 @@ class AgentRunService:
         failure_code: str | None,
         model_step_count: int,
         tool_call_count: int,
+        usage_records: list[dict[str, Any]],
     ) -> AgentRunResult:
         async with self.session_factory() as session:
             run = await session.scalar(
@@ -452,6 +558,8 @@ class AgentRunService:
             run.failure_code = failure_code
             run.model_step_count = model_step_count
             run.tool_call_count = tool_call_count
+            for key, value in _aggregate_usage(usage_records).items():
+                setattr(run, key, value)
             run.completed_at = datetime.now(UTC)
             await session.commit()
             await session.refresh(run)
@@ -466,8 +574,8 @@ class AgentRunService:
             )
 
     @staticmethod
-    def _require_permission(context: WorkspaceExecutionContext) -> None:
-        if "agent_run" not in context.permissions:
+    def _require_permission(context: WorkspaceExecutionContext, permission: str) -> None:
+        if permission not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
 
 
@@ -492,25 +600,34 @@ class _AgentRunGraph:
         self.active_model_stream: AsyncIterator[ModelStreamEvent] | None = None
         self.model_round_count = 0
         self.tool_call_count = 0
+        self.usage_records: list[dict[str, Any]] = []
 
     async def invoke(self, initial: AgentRunState) -> AgentRunState:
-        graph = StateGraph(AgentRunState)
-        graph.add_node("prepare", self.prepare)
-        graph.add_node("model", self.model)
-        graph.add_node("tool_proposal", self.tool_proposal)
-        graph.add_node("policy", self.policy)
-        graph.add_node("read_execute", self.read_execute)
-        graph.add_node("observation", self.observation)
-        graph.add_node("finish", self.finish)
-        graph.add_edge(START, "prepare")
-        graph.add_conditional_edges("prepare", self.after_prepare)
-        graph.add_conditional_edges("model", self.after_model)
-        graph.add_conditional_edges("tool_proposal", self.after_proposal)
-        graph.add_conditional_edges("policy", self.after_policy)
-        graph.add_edge("read_execute", "observation")
-        graph.add_conditional_edges("observation", self.after_observation)
-        graph.add_edge("finish", END)
-        return await graph.compile().ainvoke(initial)
+        graph = compile_agent_graph(
+            AgentRunState,
+            nodes={
+                "prepare": self.prepare,
+                "model": self.model,
+                "tool_proposal": self.tool_proposal,
+                "policy": self.policy,
+                "read_execute": self.read_execute,
+                "observation": self.observation,
+                "finish": self.finish,
+            },
+            edges=(
+                ("__START__", "prepare"),
+                ("read_execute", "observation"),
+                ("finish", "__END__"),
+            ),
+            conditional_edges={
+                "prepare": self.after_prepare,
+                "model": self.after_model,
+                "tool_proposal": self.after_proposal,
+                "policy": self.after_policy,
+                "observation": self.after_observation,
+            },
+        )
+        return await graph.ainvoke(initial)
 
     async def prepare(self, state: AgentRunState) -> dict[str, Any]:
         try:
@@ -532,7 +649,22 @@ class _AgentRunGraph:
                         "The published agent version is invalid.",
                         422,
                     )
+                if (
+                    self.run.resolved_spec_hash is not None
+                    and self.run.resolved_spec_hash != version.resolved_spec_hash
+                ):
+                    raise AgentHubError(
+                        "AGENT_VERSION_INTEGRITY_ERROR",
+                        "The run does not match its published agent version.",
+                        422,
+                    )
                 spec = parse_frozen_agent_spec(version.resolved_spec, workspace_id=workspace_id)
+                if version.spec_schema_version != version.resolved_spec.get("spec_schema_version"):
+                    raise AgentHubError(
+                        "AGENT_VERSION_INTEGRITY_ERROR",
+                        "The published agent version schema is inconsistent.",
+                        422,
+                    )
                 definitions = await PublishedToolCatalog(session).list(
                     workspace_id=workspace_id, agent_version_id=version.id
                 )
@@ -556,9 +688,16 @@ class _AgentRunGraph:
         except AgentHubError as error:
             await self.step("PREPARE", "FAILED", {"error_code": error.code})
             return {"failure_code": error.code}
+        except SQLAlchemyError:
+            logger.warning("agent_prepare_database_failed", exc_info=True)
+            await self.step(
+                "PREPARE", "FAILED", {"error_code": "AGENT_PREPARE_DATABASE_FAILURE"}
+            )
+            return {"failure_code": "AGENT_PREPARE_DATABASE_FAILURE"}
         except Exception:
-            await self.step("PREPARE", "FAILED", {"error_code": "AGENT_VERSION_INTEGRITY_ERROR"})
-            return {"failure_code": "AGENT_VERSION_INTEGRITY_ERROR"}
+            logger.warning("agent_prepare_failed", exc_info=True)
+            await self.step("PREPARE", "FAILED", {"error_code": "AGENT_PREPARE_FAILED"})
+            return {"failure_code": "AGENT_PREPARE_FAILED"}
 
     async def _emit(self, event_type: AgentEventType, data: Mapping[str, Any]) -> None:
         if self.emitter is None or self.event_queue is None:
@@ -653,6 +792,10 @@ class _AgentRunGraph:
                 "MODEL", "FAILED", {"model_round": next_round, "error_code": "MODEL_BAD_RESPONSE"}
             )
             return {"model_round_count": next_round, "failure_code": "MODEL_BAD_RESPONSE"}
+        usage_record = _usage_record(response)
+        if usage_record is not None:
+            self.usage_records.append(usage_record)
+            state["usage_records"] = list(self.usage_records)
         messages = list(state["messages"])
         normalized_tool_calls = tuple(
             replace(
@@ -674,6 +817,7 @@ class _AgentRunGraph:
             return {
                 "messages": messages,
                 "model_round_count": next_round,
+                "usage_records": list(self.usage_records),
                 "failure_code": "AGENT_MODEL_EMPTY_RESPONSE",
             }
         await self.step(
@@ -687,6 +831,7 @@ class _AgentRunGraph:
                 "estimated_input_after": usage.estimated_input_after,
                 "truncated": usage.truncated,
                 "dropped_exchange_count": usage.dropped_exchange_count,
+                **_usage_step_metadata(response),
             },
         )
         return {
@@ -694,6 +839,7 @@ class _AgentRunGraph:
             "model_round_count": next_round,
             "model_response": response,
             "final_output": response.content if not response.tool_calls else None,
+            "usage_records": list(self.usage_records),
         }
 
     def _admit_context(self, state: AgentRunState):
@@ -879,6 +1025,9 @@ class _AgentRunGraph:
                         tool_identity=call["name"],
                         arguments=call["arguments"],
                         tool_call_id=call["tool_call_id"],
+                        effective_snapshot_refs=tuple(
+                            state.get("effective_knowledge_snapshots", [])
+                        ),
                     )
                 except AgentHubError as error:
                     result = ToolResult.failure(error.code, error.message)
@@ -1089,6 +1238,13 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "error_code",
         "status",
         "observations",
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "cached_tokens",
+        "cost_amount",
+        "cost_currency",
+        "cost_is_estimate",
     }
     result: dict[str, Any] = {}
     for key, value in metadata.items():
@@ -1098,6 +1254,91 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
             result[key] = value
         elif isinstance(value, list):
             result[key] = [str(item) for item in value[:32]]
+    return result
+
+
+def _usage_record(response: ModelResponse) -> dict[str, Any] | None:
+    usage = response.usage
+    cost = response.cost_estimate
+    if usage is None and cost is None:
+        return None
+    return {
+        "usage": (
+            {
+                "input_tokens": usage.input_tokens,
+                "output_tokens": usage.output_tokens,
+                "total_tokens": usage.total_tokens,
+                "cached_tokens": usage.cached_tokens,
+            }
+            if usage is not None
+            else None
+        ),
+        "cost": (
+            {
+                "amount": Decimal(str(cost.amount)),
+                "currency": cost.currency,
+                "is_estimate": cost.is_estimate,
+            }
+            if cost is not None
+            else None
+        ),
+    }
+
+
+def _usage_step_metadata(response: ModelResponse) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    if response.usage is not None:
+        result.update(
+            {
+                "input_tokens": response.usage.input_tokens,
+                "output_tokens": response.usage.output_tokens,
+                "total_tokens": response.usage.total_tokens,
+                "cached_tokens": response.usage.cached_tokens,
+            }
+        )
+    if response.cost_estimate is not None:
+        result.update(
+            {
+                "cost_amount": float(response.cost_estimate.amount),
+                "cost_currency": response.cost_estimate.currency,
+                "cost_is_estimate": response.cost_estimate.is_estimate,
+            }
+        )
+    return result
+
+
+def _aggregate_usage(records: list[dict[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "total_input_tokens": None,
+        "total_output_tokens": None,
+        "total_tokens": None,
+        "total_cached_tokens": None,
+        "total_cost_amount": None,
+        "cost_currency": None,
+        "cost_is_estimate": None,
+    }
+    usage_values = [record.get("usage") for record in records]
+    if records and all(isinstance(value, Mapping) for value in usage_values):
+        result.update(
+            {
+                "total_input_tokens": sum(value["input_tokens"] for value in usage_values),
+                "total_output_tokens": sum(value["output_tokens"] for value in usage_values),
+                "total_tokens": sum(value["total_tokens"] for value in usage_values),
+            }
+        )
+        cached = [value.get("cached_tokens") for value in usage_values]
+        if all(item is not None for item in cached):
+            result["total_cached_tokens"] = sum(cached)
+
+    costs = [record.get("cost") for record in records]
+    if costs and all(isinstance(value, Mapping) for value in costs):
+        currencies = {str(value["currency"]).upper() for value in costs}
+        if len(currencies) == 1:
+            result["total_cost_amount"] = sum(
+                (Decimal(str(value["amount"])) for value in costs), Decimal("0")
+            )
+            result["cost_currency"] = next(iter(currencies))
+            result["cost_is_estimate"] = all(bool(value["is_estimate"]) for value in costs)
     return result
 
 

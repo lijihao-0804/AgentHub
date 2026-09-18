@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
@@ -27,8 +28,17 @@ class AgentRunResponse(BaseModel):
     input_text: str
     final_output: str | None
     failure_code: str | None
+    resolved_spec_hash: str | None
+    effective_knowledge_snapshots: list[dict[str, Any]]
     model_step_count: int
     tool_call_count: int
+    total_input_tokens: int | None
+    total_output_tokens: int | None
+    total_tokens: int | None
+    total_cached_tokens: int | None
+    total_cost_amount: Decimal | None
+    cost_currency: str | None
+    cost_is_estimate: bool | None
     created_by: UUID
     created_at: datetime
     started_at: datetime

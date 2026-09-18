@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 
+import pytest
 from fastapi import FastAPI
 from starlette.requests import Request
 
@@ -55,3 +56,19 @@ def test_production_agent_run_composition_reuses_real_component_graph(monkeypatc
     search_handler = first.tool_runtime.registry._handlers["search_knowledge"]
     assert isinstance(search_handler, partial)
     assert search_handler.keywords["retriever"].components is components
+
+
+def test_worker_and_beat_do_not_require_api_jwt_secret() -> None:
+    for role in ("worker", "beat"):
+        settings = Settings(environment="docker", process_role=role)
+        assert settings.auth_jwt_secret
+
+    with pytest.raises(ValueError, match="AUTH_JWT_SECRET"):
+        Settings(environment="docker", process_role="api")
+
+
+def test_development_environment_aliases_share_cookie_semantics() -> None:
+    assert all(
+        Settings(environment=name).refresh_cookie_secure is False
+        for name in {"local", "test", "testing", "development", "dev"}
+    )

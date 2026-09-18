@@ -95,7 +95,7 @@ def _context(user_id: UUID, organization_id: UUID, workspace_id: UUID) -> Worksp
         ),
         workspace_id=str(workspace_id),
         workspace_role="DEVELOPER",
-        permissions=frozenset({"agent_run", "tool_run", "knowledge_run"}),
+        permissions=frozenset({"agent_run", "tool_run", "knowledge_run", "workspace_read"}),
     )
 
 

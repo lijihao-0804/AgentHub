@@ -18,6 +18,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
     func,
     text,
 )
@@ -35,7 +36,11 @@ class ProviderCredential(Base):
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     provider: Mapped[str] = mapped_column(String(64), nullable=False)
     name: Mapped[str] = mapped_column(String(128), nullable=False)
-    secret: Mapped[str] = mapped_column(Text, nullable=False)
+    # ``secret`` remains nullable only for controlled legacy migration. New
+    # credentials are written to ``secret_ciphertext`` by the credential service.
+    secret: Mapped[str | None] = mapped_column(Text)
+    secret_ciphertext: Mapped[str | None] = mapped_column(Text)
+    secret_version: Mapped[int | None] = mapped_column(Integer)
     base_url: Mapped[str | None] = mapped_column(Text)
     enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default="true"
@@ -53,7 +58,25 @@ class ProviderCredential(Base):
         ),
         UniqueConstraint("workspace_id", "id", name="uq_provider_credentials_workspace_id"),
         Index("ix_provider_credentials_workspace_id", "workspace_id"),
+        CheckConstraint(
+            "secret IS NOT NULL OR secret_ciphertext IS NOT NULL",
+            name="ck_provider_credentials_secret_present",
+        ),
     )
+
+
+@event.listens_for(ProviderCredential, "before_insert")
+def _encrypt_provider_credential(_mapper, _connection, target: ProviderCredential) -> None:
+    if target.secret is None or target.secret_ciphertext is not None:
+        return
+    from packages.model_gateway.credentials import (
+        CREDENTIAL_CIPHERTEXT_VERSION,
+        ProviderCredentialCipher,
+    )
+
+    target.secret_ciphertext = ProviderCredentialCipher.from_settings().encrypt(target.secret)
+    target.secret_version = CREDENTIAL_CIPHERTEXT_VERSION
+    target.secret = None
 
 
 class ModelProfile(Base):

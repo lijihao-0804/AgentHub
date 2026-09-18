@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
@@ -57,7 +58,7 @@ class AuthService:
             User(
                 email=email.strip(),
                 normalized_email=normalized_email,
-                password_hash=self.passwords.hash(password),
+                password_hash=await asyncio.to_thread(self.passwords.hash, password),
             )
         )
         try:
@@ -83,7 +84,9 @@ class AuthService:
     ) -> AuthenticationResult:
         users: UserRepository = SqlAlchemyUserRepository(session)
         user = await users.get_by_normalized_email(normalize_email(email))
-        valid_password = self.passwords.verify(user.password_hash if user else None, password)
+        valid_password = await asyncio.to_thread(
+            self.passwords.verify, user.password_hash if user else None, password
+        )
         if user is None or not user.is_active or not valid_password:
             append_audit(
                 session,

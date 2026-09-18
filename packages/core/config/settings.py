@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     testing: bool = False
     process_role: Literal["api", "worker", "beat"] = "api"
+    credential_master_key: str | None = None
+    credential_allow_legacy_plaintext: bool = False
     database_url: str = "postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub"
     redis_url: str = "redis://localhost:6379/0"
     qdrant_url: str = "http://localhost:6333"

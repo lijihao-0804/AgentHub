@@ -10,6 +10,28 @@ from typing import Any
 request_id_var: ContextVar[str | None] = ContextVar("agenthub_request_id", default=None)
 trace_id_var: ContextVar[str | None] = ContextVar("agenthub_trace_id", default=None)
 
+_SENSITIVE_KEY_PARTS = frozenset(
+    {"password", "secret", "token", "authorization", "cookie", "api_key", "credential"}
+)
+
+
+def _is_sensitive_key(key: object) -> bool:
+    normalized = str(key).casefold().replace("-", "_")
+    return any(part in normalized for part in _SENSITIVE_KEY_PARTS)
+
+
+def _redact(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: "***REDACTED***" if _is_sensitive_key(key) else _redact(child)
+            for key, child in value.items()
+        }
+    if isinstance(value, list):
+        return [_redact(child) for child in value]
+    if isinstance(value, tuple):
+        return tuple(_redact(child) for child in value)
+    return value
+
 
 class JsonFormatter(logging.Formatter):
     reserved = set(logging.LogRecord(None, 0, "", 0, "", (), None).__dict__) | {
@@ -36,7 +58,7 @@ class JsonFormatter(logging.Formatter):
                 and key not in {"request_id", "trace_id"}
                 and not key.startswith("_")
             ):
-                payload[key] = value
+                payload[key] = "***REDACTED***" if _is_sensitive_key(key) else _redact(value)
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)
         return json.dumps(payload, ensure_ascii=False, default=str)

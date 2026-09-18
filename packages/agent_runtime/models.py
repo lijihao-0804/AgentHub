@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -13,6 +14,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Integer,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -277,8 +279,19 @@ class AgentRun(Base):
     input_text: Mapped[str] = mapped_column(Text, nullable=False)
     final_output: Mapped[str | None] = mapped_column(Text)
     failure_code: Mapped[str | None] = mapped_column(String(96))
+    resolved_spec_hash: Mapped[str | None] = mapped_column(String(64))
+    effective_knowledge_snapshots: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
     model_step_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     tool_call_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    total_input_tokens: Mapped[int | None] = mapped_column(Integer)
+    total_output_tokens: Mapped[int | None] = mapped_column(Integer)
+    total_tokens: Mapped[int | None] = mapped_column(Integer)
+    total_cached_tokens: Mapped[int | None] = mapped_column(Integer)
+    total_cost_amount: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))
+    cost_currency: Mapped[str | None] = mapped_column(String(3))
+    cost_is_estimate: Mapped[bool | None] = mapped_column(Boolean)
     created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

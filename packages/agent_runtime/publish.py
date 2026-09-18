@@ -38,7 +38,7 @@ from packages.model_gateway.profile_resolution import (
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
 from packages.tools.validation import validate_executable_tool_spec
 
-SPEC_SCHEMA_VERSION = 1
+SPEC_SCHEMA_VERSION = 2
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
     "reranker_model": "BAAI/bge-reranker-v2-m3",
@@ -64,10 +64,6 @@ class PublishedAgentVersion:
     version_number: int
     resolved_spec_hash: str
     created_at: Any
-
-
-class _LatestSnapshotMaterializationRequired(Exception):
-    """The authoritative draft gained a LATEST binding during the publish boundary."""
 
 
 class AgentPublishService:
@@ -193,83 +189,58 @@ class AgentPublishService:
     ) -> PublishedAgentVersion:
         self._require_permission(context, "agent_edit")
         workspace_id = _workspace_id(context)
-        for _ in range(3):
-            # LATEST materialization is intentionally outside the publish lock. The existing
-            # Snapshot service owns its commit boundary and must not be made M4-aware.
-            materialized_snapshots = await self._materialize_latest_snapshots(
-                session, context, agent_id
+        agent = await self._load_agent(session, context, agent_id, for_update=True)
+        if agent is None:
+            raise AgentHubError("AGENT_NOT_FOUND", "The agent was not found.", 404)
+        self._validate_draft_fields(
+            name=agent.name,
+            system_prompt=agent.system_prompt,
+            prompt_version=agent.prompt_version,
+            knowledge_binding_mode=agent.knowledge_binding_mode,
+        )
+        resolved_model = await self._resolve_model(session, context, agent)
+        bindings = await self._resolve_knowledge(session, context, agent)
+        tools = await self._resolve_tools(session, context, agent)
+        resolved_spec = _resolved_spec(
+            agent=agent,
+            model=resolved_model,
+            bindings=bindings,
+            tools=tools,
+        )
+        resolved_spec_hash = canonical_json_hash(resolved_spec)
+        version_number = (
+            await session.scalar(
+                select(func.max(AgentVersion.version_number)).where(
+                    AgentVersion.agent_id == agent.id,
+                    AgentVersion.workspace_id == workspace_id,
+                )
             )
-            # Materialization may have committed and therefore ended the transaction that
-            # existed before this call. Start the authoritative publish transaction afresh.
+            or 0
+        ) + 1
+        version = AgentVersion(
+            workspace_id=workspace_id,
+            agent_id=agent.id,
+            version_number=version_number,
+            spec_schema_version=SPEC_SCHEMA_VERSION,
+            resolved_spec=resolved_spec,
+            resolved_spec_hash=resolved_spec_hash,
+            created_by=_principal_id(context),
+        )
+        session.add(version)
+        try:
+            await session.commit()
+        except IntegrityError as exc:
             await session.rollback()
-            agent = await self._load_agent(session, context, agent_id, for_update=True)
-            if agent is None:
-                raise AgentHubError("AGENT_NOT_FOUND", "The agent was not found.", 404)
-            self._validate_draft_fields(
-                name=agent.name,
-                system_prompt=agent.system_prompt,
-                prompt_version=agent.prompt_version,
-                knowledge_binding_mode=agent.knowledge_binding_mode,
-            )
-            resolved_model = await self._resolve_model(session, context, agent)
-            try:
-                snapshots = await self._resolve_knowledge(
-                    session,
-                    context,
-                    agent,
-                    materialized_snapshots=materialized_snapshots,
-                )
-            except _LatestSnapshotMaterializationRequired:
-                # The authoritative draft changed between phases. Release this transaction and
-                # materialize the newly observed LATEST selectors before locking again.
-                await session.rollback()
-                continue
-            tools = await self._resolve_tools(session, context, agent)
-            resolved_spec = _resolved_spec(
-                agent=agent,
-                model=resolved_model,
-                snapshots=snapshots,
-                tools=tools,
-            )
-            resolved_spec_hash = canonical_json_hash(resolved_spec)
-            version_number = (
-                await session.scalar(
-                    select(func.max(AgentVersion.version_number)).where(
-                        AgentVersion.agent_id == agent.id,
-                        AgentVersion.workspace_id == workspace_id,
-                    )
-                )
-                or 0
-            ) + 1
-            version = AgentVersion(
-                workspace_id=workspace_id,
-                agent_id=agent.id,
-                version_number=version_number,
-                spec_schema_version=SPEC_SCHEMA_VERSION,
-                resolved_spec=resolved_spec,
-                resolved_spec_hash=resolved_spec_hash,
-                created_by=_principal_id(context),
-            )
-            session.add(version)
-            try:
-                await session.commit()
-            except IntegrityError as exc:
-                await session.rollback()
-                raise AgentHubError(
-                    "AGENT_VERSION_CONFLICT", "The agent version could not be published.", 409
-                ) from exc
-            return PublishedAgentVersion(
-                id=version.id,
-                agent_id=version.agent_id,
-                workspace_id=version.workspace_id,
-                version_number=version.version_number,
-                resolved_spec_hash=version.resolved_spec_hash,
-                created_at=version.created_at,
-            )
-        raise AgentHubError(
-            "AGENT_PUBLISH_CONFLICT",
-            "The agent draft changed while its knowledge selectors were being materialized.",
-            409,
+            raise AgentHubError(
+                "AGENT_VERSION_CONFLICT", "The agent version could not be published.", 409
+            ) from exc
+        return PublishedAgentVersion(
+            id=version.id,
+            agent_id=version.agent_id,
+            workspace_id=version.workspace_id,
+            version_number=version.version_number,
+            resolved_spec_hash=version.resolved_spec_hash,
+            created_at=version.created_at,
         )
 
     async def list_versions(
@@ -330,60 +301,38 @@ class AgentPublishService:
         session: AsyncSession,
         context: WorkspaceExecutionContext,
         agent: Agent,
-        *,
-        materialized_snapshots: Mapping[UUID, ResolvedKnowledgeSnapshot],
-    ) -> tuple[ResolvedKnowledgeSnapshot, ...]:
+    ) -> tuple[dict[str, Any], ...]:
         bindings = await self._load_knowledge_bindings(session, agent)
         service = KnowledgeSnapshotService()
-        resolved: list[ResolvedKnowledgeSnapshot] = []
+        resolved: list[dict[str, Any]] = []
         for binding in bindings:
-            selector: UUID | str
             if binding.binding_mode == "LATEST":
-                snapshot = materialized_snapshots.get(binding.knowledge_base_id)
-                if snapshot is None:
-                    raise _LatestSnapshotMaterializationRequired
-                resolved.append(snapshot)
+                resolved.append(
+                    {
+                        "knowledge_base_id": str(binding.knowledge_base_id),
+                        "binding_mode": "LATEST",
+                    }
+                )
                 continue
-            elif binding.snapshot_id is not None:
-                selector = binding.snapshot_id
-            else:
+            if binding.snapshot_id is None:
                 raise AgentHubError(
                     "INVALID_KNOWLEDGE_BINDING", "Pinned knowledge requires a snapshot.", 422
                 )
+            snapshot = await service.resolve_snapshot(
+                session,
+                context,
+                binding.knowledge_base_id,
+                binding.snapshot_id,
+            )
             resolved.append(
-                await service.resolve_snapshot(
-                    session,
-                    context,
-                    binding.knowledge_base_id,
-                    selector,
-                )
+                {
+                    "knowledge_base_id": str(binding.knowledge_base_id),
+                    "binding_mode": "PINNED",
+                    "snapshot_id": str(snapshot.snapshot_id),
+                    "snapshot_hash": snapshot.content_hash,
+                }
             )
         return tuple(resolved)
-
-    async def _materialize_latest_snapshots(
-        self,
-        session: AsyncSession,
-        context: WorkspaceExecutionContext,
-        agent_id: UUID,
-    ) -> dict[UUID, ResolvedKnowledgeSnapshot]:
-        agent = await self._load_agent(session, context, agent_id)
-        if agent is None:
-            raise AgentHubError("AGENT_NOT_FOUND", "The agent was not found.", 404)
-        bindings = await self._load_knowledge_bindings(session, agent)
-        service = KnowledgeSnapshotService()
-        resolved: dict[UUID, ResolvedKnowledgeSnapshot] = {}
-        binding_selectors = [
-            (binding.binding_mode, binding.knowledge_base_id) for binding in bindings
-        ]
-        for binding_mode, knowledge_base_id in binding_selectors:
-            if binding_mode == "LATEST":
-                resolved[knowledge_base_id] = await service.resolve_snapshot(
-                    session,
-                    context,
-                    knowledge_base_id,
-                    "LATEST",
-                )
-        return resolved
 
     @staticmethod
     async def _load_knowledge_bindings(
@@ -495,7 +444,8 @@ def _resolved_spec(
     *,
     agent: Agent,
     model: tuple[tuple[ResolvedModelProfile, ...], dict[UUID, str]],
-    snapshots: tuple[ResolvedKnowledgeSnapshot, ...],
+    bindings: tuple[dict[str, Any], ...] | None = None,
+    snapshots: tuple[ResolvedKnowledgeSnapshot, ...] | None = None,
     tools: tuple[dict[str, Any], ...],
 ) -> dict[str, Any]:
     chain, providers = model
@@ -518,16 +468,31 @@ def _resolved_spec(
             ],
         }
     )
+    if bindings is None:
+        bindings = tuple(
+            {
+                "knowledge_base_id": str(snapshot.knowledge_base_id),
+                "binding_mode": "PINNED",
+                "snapshot_id": str(snapshot.snapshot_id),
+                "snapshot_hash": snapshot.content_hash,
+            }
+            for snapshot in (snapshots or ())
+        )
     snapshot_refs = [
-        {"snapshot_id": str(snapshot.snapshot_id), "snapshot_hash": snapshot.content_hash}
-        for snapshot in snapshots
+        {
+            "snapshot_id": item["snapshot_id"],
+            "snapshot_hash": item["snapshot_hash"],
+        }
+        for item in bindings
+        if item["binding_mode"] == "PINNED"
     ]
     retrieval = _validate_retrieval_config(agent.retrieval_config)
     retrieval.update(
         {
-            "knowledge_binding_mode": "PINNED",
+            "knowledge_binding_mode": agent.knowledge_binding_mode,
             "knowledge_snapshot_ids": [item["snapshot_id"] for item in snapshot_refs],
             "knowledge_snapshots": snapshot_refs,
+            "knowledge_bindings": list(bindings),
         }
     )
     return {

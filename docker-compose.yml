@@ -44,6 +44,7 @@ services:
       AGENTHUB_PROCESS_ROLE: api
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
       AGENTHUB_AUTH_JWT_SECRET: ${AGENTHUB_AUTH_JWT_SECRET:?AGENTHUB_AUTH_JWT_SECRET is required}
+      AGENTHUB_CREDENTIAL_MASTER_KEY: ${AGENTHUB_CREDENTIAL_MASTER_KEY:?AGENTHUB_CREDENTIAL_MASTER_KEY is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
       AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs

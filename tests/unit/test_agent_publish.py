@@ -94,7 +94,7 @@ def test_resolved_spec_hash_is_canonical_and_schema_versioned() -> None:
     second = json.loads(json.dumps(first, sort_keys=True))
 
     assert canonical_json_hash(first) == canonical_json_hash(second)
-    assert first["spec_schema_version"] == 1
+    assert first["spec_schema_version"] == 2
     assert first["retrieval"]["knowledge_binding_mode"] == "PINNED"
     assert first["retrieval"]["knowledge_snapshot_ids"]
 
