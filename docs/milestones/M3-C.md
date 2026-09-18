@@ -26,7 +26,7 @@
 | Ruff | PASS |
 | Alembic upgrade/check | PASS |
 | Frontend build | PASS（Next.js production build） |
-| GitHub Actions | 待本轮推送后检查 |
+| GitHub Actions | PASS（CI #31，backend/frontend） |
 | REAL MODEL SMOKE | NOT RUN |
 
 ## 明确未完成
