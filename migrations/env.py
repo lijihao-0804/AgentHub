@@ -8,6 +8,7 @@ from sqlalchemy import engine_from_config, pool
 from packages.control_plane import models as _control_plane_models  # noqa: F401
 from packages.core.config.settings import get_settings
 from packages.core.database import Base
+from packages.knowledge import models as _knowledge_models  # noqa: F401
 from packages.model_gateway import models as _model_gateway_models  # noqa: F401
 
 config = context.config

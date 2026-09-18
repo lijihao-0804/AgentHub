@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub"
     redis_url: str = "redis://localhost:6379/0"
     qdrant_url: str = "http://localhost:6333"
+    blob_root: str = "data/blobs"
+    knowledge_max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1)
     langfuse_enabled: bool = False
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)

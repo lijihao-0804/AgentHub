@@ -45,8 +45,11 @@ services:
       AGENTHUB_AUTH_COOKIE_SECURE: "false"
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
+      AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs
     ports:
       - "8000:8000"
+    volumes:
+      - agenthub_blobs:/var/lib/agenthub/blobs
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,6 +66,9 @@ services:
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
+      AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs
+    volumes:
+      - agenthub_blobs:/var/lib/agenthub/blobs
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,3 +79,4 @@ volumes:
   postgres_data:
   redis_data:
   qdrant_data:
+  agenthub_blobs:
