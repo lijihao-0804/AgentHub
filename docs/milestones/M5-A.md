@@ -1,6 +1,9 @@
 # M5-A — Approval Runtime + Durable Approval Resume
 
-Status: implementation complete; final acceptance is pending the exact-head GitHub Actions run.
+Status: PASS — closure verified in GitHub Actions run #81.
+
+Code closure commit: `b54cb4fef7c68c4fdc4555d059a70421d57a62a0`.
+Run #81 passed backend, frontend, M5 integration, and M5 deterministic evaluation.
 
 M5-A is limited to Approval, durable approval resume, one internal WRITE action, crash recovery,
 and the minimum Approval UX. M5-B MCP and later milestones are not part of this record.
@@ -83,8 +86,11 @@ Local verification before final CI includes:
 - real PostgreSQL Alembic upgrade/check and explicit LangGraph checkpoint bootstrap;
 - M5 checkpoint round-trip integration;
 - M5 approval runtime integration: 8 passed;
+- fresh PostgreSQL integration matrix: 84 passed, 4 skipped;
 - M5 deterministic evaluation: 20 / 20 passed;
 - existing M4 benchmark remains 20 / 20;
-- Ruff, non-integration pytest, and frontend build are part of final acceptance.
+- Ruff, non-integration pytest, frontend build, and Docker Compose config passed;
+- bootstrap accepts the project `postgresql+asyncpg` configuration URL and routes framework
+  tables to `langgraph_checkpoint`.
 
-Final CI run and final commit are recorded here after the exact `m5/approval-runtime` HEAD passes.
+M5-B MCP, M6, and later milestones have not started.

@@ -5,8 +5,7 @@ implementation plan in [`plan/plan.md`](plan/plan.md). M3-F Snapshot and the M3 
 evaluation baseline are accepted; M3 overall is PASS. M4-A Agent Draft / AgentVersion publish,
 M4-B READ Tool Runtime, M4-C Agent Run + LangGraph execution, M4-D Context Budget,
 Streaming and AgentHub Event Protocol, and M4-E Agent Runtime Evaluation are accepted. M4 overall
-is PASS. M5-A Approval Runtime + Durable Approval Resume is implemented; M5-B MCP has not
-started.
+is PASS. M5-A Approval Runtime + Durable Approval Resume is accepted; M5-B MCP has not started.
 
 ## Basic development setup
 
