@@ -9,9 +9,8 @@ Dataset version: `m4-agent-runtime-v1`
 Dataset hash: `e4bfda27c20e757f01dbf091fa1965a9712cefc7aa0c26bed234505348258aa3`
 Git commit: `79d9d0fda7ccabf5641c239ea74ef1150911a929`
 
-Implementation commit: `79d9d0f`; baseline commit: `6b4796e`; H1 hardening commit: `baad451`.
-H1 hardening / closure commit: `baad451`.
-GitHub Actions run #72 passed backend, frontend, the marker-driven integration
+Implementation commit: `79d9d0f`; baseline commit: `6b4796e`; H1 hardening / closure commit: `baad451`.
+GitHub Actions run #73 passed backend, frontend, the marker-driven integration
 job including M4-E, and the M4 evaluation baseline.
 
 Cases: 20

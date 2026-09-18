@@ -1,6 +1,6 @@
 # M4-E — Agent Runtime Evaluation
 
-Status: PASS — H1 closure verified in GitHub Actions run #72.
+Status: PASS — H1 closure verified in GitHub Actions run #73.
 
 ## Scope
 
@@ -32,11 +32,10 @@ of the authoritative integration job.
 
 - Implementation commit: `79d9d0f`
 - Baseline commit: `6b4796e`
-- H1 hardening commit: `baad451`
 - H1 hardening / closure commit: `baad451`
 - Dataset: `m4-agent-runtime-v1`, hash `e4bfda27c20e757f01dbf091fa1965a9712cefc7aa0c26bed234505348258aa3`
 - Results: 20/20 PASS; dev 14/14; holdout 6/6; every category 1.0000
-- GitHub Actions #72: backend PASS, frontend PASS, marker-driven integration PASS,
+- GitHub Actions #73: backend PASS, frontend PASS, marker-driven integration PASS,
   M4-E integration PASS, and M4 evaluation baseline PASS
 
 M4 overall is PASS. M5 is the next milestone; Approval Runtime, checkpoint/resume, and WRITE
