@@ -177,8 +177,6 @@ async def test_m1_migration_creates_postgres_schema(
     engine, _ = db_resources
     async with engine.connect() as connection:
         assert connection.dialect.name == "postgresql"
-        version = await connection.scalar(text("SELECT version_num FROM alembic_version"))
-        assert version == "0002_m1_auth_tenant_rbac"
         tables = await connection.scalars(
             text(
                 """

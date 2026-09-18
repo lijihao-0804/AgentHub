@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AGENTHUB_TEST_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_test
+      AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_test
     services:
       postgres:
         image: postgres:16
@@ -32,8 +33,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --locked
+      - run: uv run --locked alembic upgrade head
+      - run: uv run --locked alembic check
       - run: uv run --locked ruff check .
-      - run: uv run --locked pytest
+      - run: uv run --locked pytest tests/integration/test_m1_postgres.py -vv -rs
+      - run: uv run --locked pytest tests/integration/test_m2_postgres.py -vv -rs
+      - run: uv run --locked pytest -m "not integration"
 
   frontend:
     runs-on: ubuntu-latest
