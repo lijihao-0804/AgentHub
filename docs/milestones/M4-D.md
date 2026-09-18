@@ -18,9 +18,15 @@ Evaluation Dataset, M4-E, or M5.
 
 ## Verification
 
-Final acceptance is pending. The dedicated integration suite will run against the existing
-real PostgreSQL, Redis, Qdrant and Celery CI services with deterministic fake model adapters;
-it will not call public LLMs or download BGE/HuggingFace models.
+Implementation commit: `1980640`.
+
+Local verification currently passes the dedicated M4-D PostgreSQL integration suite (8 tests),
+the M4-A/B/C integration regressions (37 tests), Ruff, Alembic upgrade/check, and the frontend
+production build. The dedicated CI integration step is still pending.
+
+The dedicated integration suite uses deterministic fake model adapters and is intended to run
+against the existing real PostgreSQL, Redis, Qdrant and Celery CI services; it does not call
+public LLMs or download BGE/HuggingFace models.
 
 The final record will include the context budget, frozen streaming, Event Protocol/SSE,
 cancellation, M4-A/B/C regressions, non-integration tests, Alembic checks, frontend build,
