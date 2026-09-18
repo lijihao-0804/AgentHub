@@ -99,4 +99,16 @@ async def list_agent_run_steps(
     return [RunStepResponse.model_validate(step) for step in steps]
 
 
+@router.post("/agent-runs/{run_id}/cancel", response_model=AgentRunResponse)
+async def cancel_agent_run(
+    workspace_id: UUID,
+    run_id: UUID,
+    request: Request,
+    context: WorkspaceExecutionContext = context_dependency,
+) -> AgentRunResponse:
+    del workspace_id
+    result = await _service(request).cancel(context, run_id=run_id)
+    return AgentRunResponse.model_validate(await _service(request).get_run(context, result.run_id))
+
+
 __all__ = ["router"]

@@ -18,7 +18,7 @@ from packages.approvals import ApprovalDecisionStatus, ApprovalExecutionStatus, 
 from packages.core.config.settings import get_settings
 from packages.core.database import create_database
 from packages.model_gateway.contracts import ModelResponse, ModelToolCall
-from packages.tools.actions import ActionRuntime
+from packages.tools.actions import ActionExecutionResult, ActionRegistry, ActionRuntime
 from packages.tools.contracts import (
     ToolApprovalPolicy,
     ToolDefinition,
@@ -199,7 +199,11 @@ async def test_concurrent_claim_has_one_winner_and_ticket_is_effectively_once(db
         "identity": "create_ticket",
         "input_schema": {
             "type": "object",
-            "properties": {"customer_ref": {"type": "string"}, "subject": {"type": "string"}},
+            "properties": {
+                "customer_ref": {"type": "string"},
+                "subject": {"type": "string"},
+                "priority": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+            },
             "required": ["customer_ref", "subject"],
             "additionalProperties": False,
         },
@@ -286,3 +290,145 @@ async def test_concurrent_claim_has_one_winner_and_ticket_is_effectively_once(db
             )
         )
     assert len(tickets) == 1
+
+
+class UnknownOutcomeExecutor:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def execute(self, context, definition, arguments, *, idempotency_key):
+        del context, definition, arguments, idempotency_key
+        self.calls += 1
+        return ActionExecutionResult.unknown_outcome("SYNTHETIC_EXTERNAL_UNCERTAIN")
+
+
+@pytest.mark.asyncio
+async def test_unknown_outcome_needs_attention_and_resume_does_not_retry(db_factory) -> None:
+    tool_spec = {
+        "kind": "builtin",
+        "identity": "create_ticket",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "customer_ref": {"type": "string"},
+                "subject": {"type": "string"},
+                "priority": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+            },
+            "required": ["customer_ref", "subject"],
+            "additionalProperties": False,
+        },
+        "effect": "WRITE",
+        "risk_level": "HIGH",
+        "approval_policy": "ALWAYS",
+    }
+    async with db_factory() as session:
+        base = await _seed(session, label=uuid4().hex, tool_spec=tool_spec)
+        session.add(
+            Customer(
+                workspace_id=base["workspace_id"], customer_ref="cust-unknown", name="Unknown"
+            )
+        )
+        await session.commit()
+    context = base["context"].model_copy(
+        update={"permissions": frozenset({"agent_run", "tool_run"})}
+    )
+    admin_context = context.model_copy(
+        update={
+            "permissions": frozenset(
+                {"agent_run", "tool_run", "workspace_read", "approve_action"}
+            )
+        }
+    )
+    gateway = ScriptedApprovalGateway()
+    adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
+    first = await AgentRunService(
+        db_factory,
+        model_gateway_factory=lambda session: gateway,
+        approval_service=ApprovalService(db_factory),
+        action_runtime=ActionRuntime(session_factory=db_factory),
+        checkpoint_adapter=adapter,
+    ).run(admin_context, agent_version_id=base["version"].id, input_text="uncertain")
+    assert first.status == "WAITING_APPROVAL"
+    approval = (await ApprovalService(db_factory).list(admin_context))[0]
+    await ApprovalService(db_factory).decide(
+        admin_context, approval.id, decision=ApprovalDecisionStatus.APPROVED
+    )
+    unknown = UnknownOutcomeExecutor()
+    action_runtime = ActionRuntime(
+        session_factory=db_factory,
+        registry=ActionRegistry(
+            session_factory=db_factory, overrides={"create_ticket": unknown}
+        ),
+    )
+    restarted = AgentRunService(
+        db_factory,
+        model_gateway_factory=lambda session: gateway,
+        approval_service=ApprovalService(db_factory),
+        action_runtime=action_runtime,
+        checkpoint_adapter=adapter,
+    )
+    result = await restarted.resume(admin_context, run_id=first.run_id, approval_id=approval.id)
+    assert result.status == "NEEDS_ATTENTION"
+    again = await restarted.resume(admin_context, run_id=first.run_id, approval_id=approval.id)
+    assert again.status == "NEEDS_ATTENTION"
+    assert unknown.calls == 1
+    async with db_factory() as session:
+        persisted = await session.get(type(approval), approval.id)
+        tickets = list(
+            await session.scalars(select(Ticket).where(Ticket.workspace_id == base["workspace_id"]))
+        )
+    assert persisted is not None
+    assert persisted.execution_status == ApprovalExecutionStatus.UNKNOWN_OUTCOME
+    assert len(tickets) == 0
+
+
+@pytest.mark.asyncio
+async def test_cancel_waiting_approval_is_terminal_and_not_executable(db_factory) -> None:
+    tool_spec = {
+        "kind": "builtin",
+        "identity": "create_ticket",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "customer_ref": {"type": "string"},
+                "subject": {"type": "string"},
+                "priority": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+            },
+            "required": ["customer_ref", "subject"],
+            "additionalProperties": False,
+        },
+        "effect": "WRITE",
+        "risk_level": "HIGH",
+        "approval_policy": "ALWAYS",
+    }
+    async with db_factory() as session:
+        base = await _seed(session, label=uuid4().hex, tool_spec=tool_spec)
+        session.add(
+            Customer(
+                workspace_id=base["workspace_id"], customer_ref="cust-cancel", name="Cancel"
+            )
+        )
+        await session.commit()
+    context = base["context"].model_copy(
+        update={"permissions": frozenset({"agent_run", "tool_run"})}
+    )
+    gateway = ScriptedApprovalGateway()
+    adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
+    service = AgentRunService(
+        db_factory,
+        model_gateway_factory=lambda session: gateway,
+        approval_service=ApprovalService(db_factory),
+        action_runtime=ActionRuntime(session_factory=db_factory),
+        checkpoint_adapter=adapter,
+    )
+    first = await service.run(context, agent_version_id=base["version"].id, input_text="cancel")
+    assert first.status == "WAITING_APPROVAL"
+    approval = (await ApprovalService(db_factory).list(context.model_copy(
+        update={"permissions": frozenset({"workspace_read"})}
+    )))[0]
+    cancelled = await service.cancel(context, run_id=first.run_id)
+    assert cancelled.status == "CANCELLED"
+    async with db_factory() as session:
+        persisted = await session.get(type(approval), approval.id)
+    assert persisted is not None
+    assert persisted.decision_status == ApprovalDecisionStatus.CANCELLED

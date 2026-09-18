@@ -295,6 +295,29 @@ class AgentRunService:
             usage_records=graph.usage_records,
         )
 
+    async def cancel(
+        self, context: WorkspaceExecutionContext, *, run_id: UUID
+    ) -> AgentRunResult:
+        self._require_permission(context, "agent_run")
+        async with self.session_factory() as session:
+            run = await session.scalar(
+                select(AgentRun)
+                .where(AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run_id)
+                .with_for_update()
+            )
+            if run is None:
+                raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
+            if run.status == "WAITING_APPROVAL":
+                run.status = "CANCELLED"
+                run.completed_at = datetime.now(UTC)
+            elif run.status == "RUNNING":
+                run.status = "CANCEL_REQUESTED"
+            await session.commit()
+            result = _run_result(run)
+        if result.status == "CANCELLED" and self.approval_service is not None:
+            await self.approval_service.cancel_pending_for_run(context, run_id)
+        return result
+
     async def _mark_waiting(self, context: WorkspaceExecutionContext, run_id: UUID) -> None:
         async with self.session_factory() as session:
             run = await session.scalar(

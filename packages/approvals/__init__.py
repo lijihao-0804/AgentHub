@@ -8,6 +8,7 @@ from packages.approvals.contracts import (
     compute_logical_action_id,
 )
 from packages.approvals.models import Approval
+from packages.approvals.reconciliation import ApprovalReconciliationService
 from packages.approvals.service import ApprovalService
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "ApprovalDecisionStatus",
     "ApprovalExecutionStatus",
     "ApprovalService",
+    "ApprovalReconciliationService",
     "ApprovalTransitionError",
     "canonicalize_arguments",
     "compute_logical_action_id",

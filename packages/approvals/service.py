@@ -225,6 +225,29 @@ class ApprovalService:
             await session.refresh(approval)
             return approval
 
+    async def cancel_pending_for_run(
+        self, context: WorkspaceExecutionContext, run_id: UUID
+    ) -> int:
+        """Cancel pending approvals without touching an already-approved execution."""
+
+        user_id = _user_uuid(context)
+        async with self.session_factory() as session:
+            result = await session.execute(
+                update(Approval)
+                .where(
+                    Approval.workspace_id == _workspace_uuid(context),
+                    Approval.run_id == run_id,
+                    Approval.decision_status == ApprovalDecisionStatus.PENDING,
+                )
+                .values(
+                    decision_status=ApprovalDecisionStatus.CANCELLED,
+                    decided_by=user_id,
+                    decided_at=datetime.now(UTC),
+                )
+            )
+            await session.commit()
+            return result.rowcount
+
 
 def _workspace_uuid(context: WorkspaceExecutionContext) -> UUID:
     try:
