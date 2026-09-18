@@ -49,6 +49,9 @@ class Ticket(Base):
         ),
         UniqueConstraint("workspace_id", "id", name="uq_tickets_workspace_id"),
         UniqueConstraint("workspace_id", "ticket_ref", name="uq_tickets_workspace_ref"),
+        UniqueConstraint(
+            "workspace_id", "idempotency_key", name="uq_tickets_workspace_idempotency"
+        ),
         Index("ix_tickets_customer", "workspace_id", "customer_id"),
     )
 
@@ -58,6 +61,7 @@ class Ticket(Base):
     ticket_ref: Mapped[str] = mapped_column(String(128), nullable=False)
     subject: Mapped[str] = mapped_column(String(500), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="OPEN")
+    idempotency_key: Mapped[str | None] = mapped_column(String(128))
     metadata_json: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default="{}"
     )

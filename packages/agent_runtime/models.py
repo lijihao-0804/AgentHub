@@ -265,7 +265,9 @@ class AgentRun(Base):
             ["created_by"], ["users.id"], name="fk_agent_runs_created_by", ondelete="RESTRICT"
         ),
         CheckConstraint(
-            "status IN ('RUNNING', 'SUCCEEDED', 'FAILED')", name="ck_agent_runs_status"
+            "status IN ('RUNNING', 'WAITING_APPROVAL', 'SUCCEEDED', 'FAILED', "
+            "'NEEDS_ATTENTION', 'CANCEL_REQUESTED', 'CANCELLED')",
+            name="ck_agent_runs_status",
         ),
         UniqueConstraint("workspace_id", "id", name="uq_agent_runs_workspace_id"),
         Index("ix_agent_runs_workspace_status", "workspace_id", "status"),
@@ -313,7 +315,7 @@ class RunStep(Base):
         ),
         CheckConstraint(
             "kind IN ('PREPARE', 'MODEL', 'TOOL_PROPOSAL', 'POLICY', 'TOOL_EXECUTE', "
-            "'OBSERVATION', 'GUARD', 'FINISH')",
+            "'OBSERVATION', 'APPROVAL_WAIT', 'ACTION', 'RECONCILIATION', 'GUARD', 'FINISH')",
             name="ck_run_steps_kind",
         ),
         UniqueConstraint(
