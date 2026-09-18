@@ -54,11 +54,16 @@ backend/frontend status, and commit are recorded here after push.
 
 ## Final acceptance
 
-- implementation/final closure commit: pending push
-- GitHub Actions: pending final closure run
-- backend: PASS in the final closure run
-- frontend: PASS in the final closure run
-- M3-F integration: PASS in the final closure run
+- implementation commit: `09ef846`
+- final migration-fix commit: `eeaf8a0`
+- GitHub Actions #45: [final closure run](https://github.com/lijihao-0804/AgentHub/actions/runs/35328604062)
+- backend: PASS
+- frontend: PASS
+- M3-F integration: PASS, 10 passed
+- local PostgreSQL Alembic upgrade/check: PASS on a fresh `agenthub_m3f_closure` database
+- local non-integration pytest: PASS, 125 passed / 37 deselected
+- local Ruff and diff check: PASS
+- local frontend install/build: PASS
 - Windows CUDA runtime and both local BGE model smokes: PASS; facts are recorded in M3-C.
 
 M3-F is PASS. M3 overall is not marked PASS; the next milestone is the M3 retrieval evaluation
