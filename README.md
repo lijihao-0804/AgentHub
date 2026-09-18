@@ -3,9 +3,8 @@
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
 implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M3-C:
 engineering foundations, Auth / Tenant / RBAC, ModelGateway + Capability Contract, and the
-Reliable Worker ingestion boundary. The current implementation baseline is M3-C: deterministic
-knowledge indexing and snapshot-scoped hybrid retrieval. M3-D Playground, M3-E Citation QA and
-M3-F full Snapshot lifecycle remain deferred.
+Reliable Worker ingestion boundary. M3-D Playground is complete; M3-E Citation QA is the
+current milestone. M3-F full Snapshot lifecycle remains deferred.
 
 ## Basic development setup
 
@@ -55,7 +54,7 @@ uv run --locked python -c "import torch; print(torch.__version__); print(torch.c
 
 ## Optional/local infrastructure setup
 
-For the current M3-C worker and retrieval milestone, PostgreSQL, Redis and Qdrant are required
+For the current M3-E Citation QA milestone, PostgreSQL, Redis and Qdrant are required
 for real infrastructure verification and may be provided by local services or Docker Compose:
 
 ```powershell

@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     knowledge_max_parsed_chars: int = Field(default=2_000_000, ge=1, le=50_000_000)
     knowledge_chunk_size_chars: int = Field(default=1_200, ge=1, le=100_000)
     knowledge_chunk_overlap_chars: int = Field(default=200, ge=0, le=99_999)
+    knowledge_qa_max_evidence_chars: int = Field(default=16_000, ge=1_000, le=100_000)
     knowledge_ingestion_max_attempts: int = Field(default=3, ge=1, le=100)
     knowledge_ingestion_retry_base_seconds: int = Field(default=30, ge=1, le=86_400)
     knowledge_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)

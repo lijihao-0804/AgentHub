@@ -55,6 +55,7 @@ that intentionally use a directly configured API base.
   validation, tenant/snapshot scoping, permission denial, safe provider errors, trace stages,
   locator/revision enrichment, and bounded snippets.
 - Frontend verification is `npm ci --no-audit --no-fund` and `npm run build`.
-- M3-E Citation QA has not started.
+- Final M3-D GitHub Actions CI #38 passed for backend and frontend.
+- M3-E Citation QA is the current milestone and has not started acceptance.
 - M3-F Snapshot lifecycle / `LATEST` resolution has not started.
 - M3 overall is not yet PASS until the milestone acceptance checks and CI are recorded.

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from dataclasses import dataclass
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
@@ -14,6 +13,7 @@ from apps.api.knowledge_dependencies import (
     get_retrieval_components,
     get_workspace_context,
 )
+from apps.api.retrieval_projection import RetrievalTraceMetadata, project_retrieval_trace
 from apps.api.schemas.knowledge import (
     DocumentResponse,
     DocumentRevisionResponse,
@@ -25,15 +25,12 @@ from apps.api.schemas.knowledge import (
     RetrievalPlaygroundEvidence,
     RetrievalPlaygroundRequest,
     RetrievalPlaygroundResponse,
-    RetrievalPlaygroundStage,
-    RetrievalPlaygroundStageResult,
-    RetrievalPlaygroundStages,
 )
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.blob_store import LocalBlobStore
 from packages.knowledge.composition import RetrievalComponents
-from packages.knowledge.contracts import RetrievalQuery, RetrievalResult, RetrievalTraceStage
+from packages.knowledge.contracts import RetrievalQuery, RetrievalResult
 from packages.knowledge.models import DocumentChunk, DocumentRevision, KnowledgeSnapshotItem
 from packages.knowledge.queue import IngestionQueue
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
@@ -55,12 +52,6 @@ retrieval_components_dependency = Depends(get_retrieval_components)
 upload_file_dependency = File(...)
 
 
-@dataclass(frozen=True)
-class _TraceMetadata:
-    document_revision_id: str
-    locator: dict[str, object]
-
-
 async def _load_trace_metadata(
     session: AsyncSession,
     *,
@@ -68,7 +59,7 @@ async def _load_trace_metadata(
     knowledge_base_id: UUID,
     snapshot_id: UUID,
     chunk_ids: set[str],
-) -> dict[str, _TraceMetadata]:
+) -> dict[str, RetrievalTraceMetadata]:
     if not chunk_ids:
         return {}
     revision_ids = tuple(
@@ -98,7 +89,7 @@ async def _load_trace_metadata(
         )
     )
     return {
-        chunk.chunk_id: _TraceMetadata(
+        chunk.chunk_id: RetrievalTraceMetadata(
             document_revision_id=str(revision.id),
             locator=dict(chunk.locator),
         )
@@ -106,33 +97,10 @@ async def _load_trace_metadata(
     }
 
 
-def _playground_stage(
-    stage: RetrievalTraceStage,
-    metadata: dict[str, _TraceMetadata],
-) -> RetrievalPlaygroundStage:
-    return RetrievalPlaygroundStage(
-        latency_ms=stage.latency_ms,
-        results=[
-            RetrievalPlaygroundStageResult(
-                chunk_id=item.chunk_id,
-                rank=item.rank,
-                score=item.score,
-                document_revision_id=(
-                    metadata[item.chunk_id].document_revision_id
-                    if item.chunk_id in metadata
-                    else None
-                ),
-                locator=metadata[item.chunk_id].locator if item.chunk_id in metadata else None,
-            )
-            for item in stage.results
-        ],
-    )
-
-
 def _playground_response(
     result: RetrievalResult,
     *,
-    metadata: dict[str, _TraceMetadata],
+    metadata: dict[str, RetrievalTraceMetadata],
 ) -> RetrievalPlaygroundResponse:
     trace = result.trace
     return RetrievalPlaygroundResponse(
@@ -150,12 +118,7 @@ def _playground_response(
             )
             for item in result.evidence
         ],
-        stages=RetrievalPlaygroundStages(
-            dense=_playground_stage(trace.dense, metadata),
-            sparse=_playground_stage(trace.sparse, metadata),
-            fused=_playground_stage(trace.fusion, metadata),
-            rerank=_playground_stage(trace.rerank, metadata),
-        ),
+        stages=project_retrieval_trace(trace, metadata),
         total_latency_ms=trace.total_latency_ms,
     )
 
