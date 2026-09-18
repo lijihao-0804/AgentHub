@@ -6,7 +6,6 @@ import asyncio
 import logging
 import time
 from collections.abc import Mapping
-from copy import deepcopy
 from typing import Any
 from uuid import UUID
 
@@ -34,11 +33,12 @@ from packages.tools.contracts import (
 from packages.tools.errors import ToolHandlerError
 from packages.tools.policy import ToolPolicy, ToolPolicyDecision
 from packages.tools.registry import ToolRegistry
+from packages.tools.validation import (
+    validate_executable_tool_spec as _validate_executable_tool_spec,
+)
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_TIMEOUT_SECONDS = 30
-_MAX_TIMEOUT_SECONDS = 120
 _FORBIDDEN_ARGUMENT_KEYS = frozenset(
     {"workspace_id", "organization_id", "user_id", "tool_revision_id"}
 )
@@ -52,44 +52,11 @@ def _uuid(value: UUID | str, *, field: str) -> UUID:
 
 
 def validate_executable_tool_spec(spec: Mapping[str, Any]) -> dict[str, Any]:
-    """Validate the minimum runtime schema while keeping old M4-A specs compatible."""
-
-    if not isinstance(spec, Mapping):
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    required = ("kind", "identity", "input_schema", "effect", "risk_level", "approval_policy")
-    if any(key not in spec for key in required):
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    if spec["kind"] != "builtin" or not isinstance(spec["identity"], str) or not spec["identity"]:
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    if not isinstance(spec["input_schema"], Mapping):
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    if spec["effect"] not in {item.value for item in ToolEffect}:
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    if spec["risk_level"] not in {item.value for item in ToolRisk}:
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    if spec["approval_policy"] not in {item.value for item in ToolApprovalPolicy}:
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    timeout = spec.get("timeout_seconds", _DEFAULT_TIMEOUT_SECONDS)
-    if (
-        isinstance(timeout, bool)
-        or not isinstance(timeout, int)
-        or not 1 <= timeout <= _MAX_TIMEOUT_SECONDS
-    ):
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    normalized = dict(spec)
-    normalized["description"] = spec.get("description", "")
-    normalized["timeout_seconds"] = timeout
-    if not isinstance(normalized["description"], str):
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
-    try:
-        Draft202012Validator.check_schema(dict(spec["input_schema"]))
-    except SchemaError:
-        raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422) from None
-    return normalized
+    return _validate_executable_tool_spec(spec)
 
 
 def _strict_input_schema(schema: Mapping[str, Any]) -> dict[str, Any]:
-    normalized = deepcopy(dict(schema))
+    normalized = dict(schema)
     if normalized.get("type") not in (None, "object"):
         raise AgentHubError("TOOL_REVISION_INVALID", "The tool input schema is invalid.", 422)
     normalized["type"] = "object"

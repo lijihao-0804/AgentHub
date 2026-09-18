@@ -148,6 +148,20 @@ def test_publish_config_validation_rejects_invalid_budget_and_retrieval_limits()
         _validate_retrieval_config({"candidate_top_k": 2, "final_top_k": 3})
 
 
+@pytest.mark.parametrize(
+    ("key", "value"),
+    [
+        ("max_steps", 33),
+        ("max_tool_calls", 65),
+        ("max_identical_calls", 5),
+        ("max_parallel_reads", 9),
+    ],
+)
+def test_publish_runtime_config_rejects_server_limit_overrides(key: str, value: int) -> None:
+    with pytest.raises(AgentHubError):
+        _validate_runtime_config({key: value})
+
+
 def test_tool_calling_capability_mismatch_is_terminal_for_publish() -> None:
     with pytest.raises(ModelGatewayError) as raised:
         validate_capabilities(

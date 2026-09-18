@@ -17,6 +17,7 @@ from packages.agent_runtime.models import Tool, ToolRevision
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.tools.validation import validate_executable_tool_spec
 
 _SECRET_KEYS = frozenset(
     {
@@ -115,4 +116,9 @@ def _principal_id(context: WorkspaceExecutionContext) -> UUID:
         raise AgentHubError("AUTHENTICATION_REQUIRED", "Authentication is required.", 401) from None
 
 
-__all__ = ["ToolRevisionService", "tool_spec_hash", "validate_tool_spec"]
+__all__ = [
+    "ToolRevisionService",
+    "tool_spec_hash",
+    "validate_executable_tool_spec",
+    "validate_tool_spec",
+]

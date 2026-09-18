@@ -14,7 +14,7 @@ from packages.core.auth.security import (
     new_refresh_token,
     normalize_email,
 )
-from packages.core.config.settings import Settings
+from packages.core.config.settings import DEFAULT_AUTH_JWT_SECRET, Settings
 
 
 def test_passwords_use_argon2id_and_verify() -> None:
@@ -75,3 +75,19 @@ def test_access_token_rejects_extra_claims_and_expired_tokens() -> None:
 
 def test_email_normalization_is_stable() -> None:
     assert normalize_email("  Alice@Example.COM ") == "alice@example.com"
+
+
+@pytest.mark.parametrize("environment", ["local", "test", "development"])
+def test_default_jwt_secret_is_allowed_only_for_dev_environments(environment: str) -> None:
+    assert Settings(environment=environment).auth_jwt_secret == DEFAULT_AUTH_JWT_SECRET
+
+
+@pytest.mark.parametrize("environment", ["docker", "staging", "production"])
+def test_default_jwt_secret_fails_fast_outside_dev_environments(environment: str) -> None:
+    with pytest.raises(ValueError, match="AUTH_JWT_SECRET"):
+        Settings(environment=environment)
+
+
+def test_custom_production_jwt_secret_is_accepted() -> None:
+    settings = Settings(environment="production", auth_jwt_secret="x" * 32)
+    assert settings.auth_jwt_secret == "x" * 32

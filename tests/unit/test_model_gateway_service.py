@@ -587,3 +587,53 @@ async def test_trace_sink_failure_does_not_fail_model_request(caplog) -> None:
     assert result.content == "primary"
     assert "RuntimeError" in caplog.text
     assert "not-for-logs" not in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_generate_cancellation_closes_trace_span_once() -> None:
+    context, profiles, credential = setup_chain()
+
+    class CancelAdapter(FakeAdapter):
+        async def complete(self, profile, credential, request):
+            del profile, credential, request
+            raise asyncio.CancelledError
+
+    sink = RecordingTraceSink()
+    gateway = ModelGatewayService(
+        FakeRepository(profiles, [credential]),
+        CancelAdapter(),
+        sink,
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        await gateway.generate(context, profiles[0].id, request())
+
+    assert len(sink.spans) == 1
+    assert len(sink.spans[0].end_calls) == 1
+    assert sink.spans[0].end_calls[0]["status"] == "cancelled"
+
+
+@pytest.mark.asyncio
+async def test_stream_cancellation_closes_trace_span_once() -> None:
+    context, profiles, credential = setup_chain()
+
+    class CancelAdapter(FakeAdapter):
+        async def stream(self, profile, credential, request):
+            del profile, credential, request
+            raise asyncio.CancelledError
+            yield
+
+    sink = RecordingTraceSink()
+    gateway = ModelGatewayService(
+        FakeRepository(profiles, [credential]),
+        CancelAdapter(),
+        sink,
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        async for _ in gateway.stream(context, profiles[0].id, request()):
+            pass
+
+    assert len(sink.spans) == 1
+    assert len(sink.spans[0].end_calls) == 1
+    assert sink.spans[0].end_calls[0]["status"] == "cancelled"

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+from threading import Lock
 from typing import Any
 
 from packages.knowledge.contracts import KnowledgeProviderError
@@ -32,6 +33,7 @@ class BgeM3DenseEmbedder:
         self.expected_dimension = expected_dimension
         self._model: Any | None = None
         self._device: str | None = None
+        self._load_lock = Lock()
 
     @property
     def dimension(self) -> int:
@@ -40,37 +42,40 @@ class BgeM3DenseEmbedder:
     def _load_model(self) -> Any:
         if self._model is not None:
             return self._model
-        try:
-            import torch
-            from sentence_transformers import SentenceTransformer
-        except ImportError as exc:
-            raise KnowledgeProviderError(
-                "EMBEDDER_UNAVAILABLE",
-                "The dense embedding runtime is not installed.",
-            ) from exc
-        self._device = _resolve_device(self.device_request, torch)
-        model_kwargs: dict[str, Any] = {}
-        if self._device == "cuda":
-            model_kwargs["torch_dtype"] = torch.float16
-        try:
-            model = SentenceTransformer(
-                self.model_name,
-                device=self._device,
-                model_kwargs=model_kwargs,
-            )
-        except Exception as exc:
-            raise KnowledgeProviderError(
-                "EMBEDDER_LOAD_FAILED",
-                "The dense embedding model could not be loaded.",
-            ) from exc
-        actual_dimension = model.get_sentence_embedding_dimension()
-        if actual_dimension != self.expected_dimension:
-            raise KnowledgeProviderError(
-                "EMBEDDER_DIMENSION_MISMATCH",
-                "The dense embedding model dimension is incompatible.",
-            )
-        self._model = model
-        return model
+        with self._load_lock:
+            if self._model is not None:
+                return self._model
+            try:
+                import torch
+                from sentence_transformers import SentenceTransformer
+            except ImportError as exc:
+                raise KnowledgeProviderError(
+                    "EMBEDDER_UNAVAILABLE",
+                    "The dense embedding runtime is not installed.",
+                ) from exc
+            self._device = _resolve_device(self.device_request, torch)
+            model_kwargs: dict[str, Any] = {}
+            if self._device == "cuda":
+                model_kwargs["torch_dtype"] = torch.float16
+            try:
+                model = SentenceTransformer(
+                    self.model_name,
+                    device=self._device,
+                    model_kwargs=model_kwargs,
+                )
+            except Exception as exc:
+                raise KnowledgeProviderError(
+                    "EMBEDDER_LOAD_FAILED",
+                    "The dense embedding model could not be loaded.",
+                ) from exc
+            actual_dimension = model.get_sentence_embedding_dimension()
+            if actual_dimension != self.expected_dimension:
+                raise KnowledgeProviderError(
+                    "EMBEDDER_DIMENSION_MISMATCH",
+                    "The dense embedding model dimension is incompatible.",
+                )
+            self._model = model
+            return model
 
     @staticmethod
     def _validate(vector: Any, expected_dimension: int) -> tuple[float, ...]:

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from apps.api.agent_runtime_dependencies import get_production_agent_run_service
 from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_workspace_context
 from apps.api.schemas.agent_runs import (
@@ -23,12 +24,7 @@ context_dependency = Depends(get_workspace_context)
 
 
 def _service(request: Request) -> AgentRunService:
-    factory = getattr(request.app.state, "db_session_factory", None)
-    if factory is None:
-        from packages.core.errors.exceptions import AgentHubError
-
-        raise AgentHubError("DATABASE_NOT_CONFIGURED", "Database access is not configured.", 503)
-    return AgentRunService(factory)
+    return get_production_agent_run_service(request)
 
 
 @router.post(

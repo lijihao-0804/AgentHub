@@ -12,7 +12,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
@@ -278,6 +278,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         )
         started = time.perf_counter()
         rerank_span: TraceSpan | None = None
+        stage = "dense"
         try:
             dense_started = time.perf_counter()
             dense_query = await asyncio.to_thread(self.dense_embedder.embed_query, query.text)
@@ -289,6 +290,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             )
             dense_latency_ms = (time.perf_counter() - dense_started) * 1000
 
+            stage = "sparse"
             sparse_started = time.perf_counter()
             sparse_query = await asyncio.to_thread(self.sparse_encoder.encode_query, query.text)
             sparse_hits = await asyncio.to_thread(
@@ -299,6 +301,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             )
             sparse_latency_ms = (time.perf_counter() - sparse_started) * 1000
 
+            stage = "fusion"
             fusion_started = time.perf_counter()
             fused = fuse_reciprocal_rank(
                 dense_hits,
@@ -322,6 +325,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 for item in fused
                 if item.chunk_id in chunk_map
             )
+            stage = "rerank"
             rerank_span = await _safe_span_start(
                 self.trace_sink,
                 "knowledge.rerank",
@@ -446,6 +450,13 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 503,
             ) from None
         except Exception:
+            logger.exception(
+                "knowledge_retrieval_failed",
+                extra={
+                    "snapshot_id": query.knowledge_snapshot_id,
+                    "stage": stage,
+                },
+            )
             await _safe_span_end(
                 rerank_span,
                 attributes={"snapshot_id": query.knowledge_snapshot_id},
@@ -474,4 +485,45 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         return list(result.evidence)
 
 
-__all__ = ["HybridKnowledgeRetriever", "fuse_reciprocal_rank"]
+class SessionScopedKnowledgeRetriever(KnowledgeRetriever):
+    """Stateless facade that creates a short-lived DB session per retrieval."""
+
+    def __init__(
+        self,
+        *,
+        session_factory: async_sessionmaker[AsyncSession],
+        components,
+        trace_sink: TraceSink | None = None,
+        rrf_k: int = 60,
+    ) -> None:
+        self.session_factory = session_factory
+        self.components = components
+        self.trace_sink = trace_sink
+        self.rrf_k = rrf_k
+
+    async def retrieve_with_trace(
+        self,
+        context: WorkspaceExecutionContext,
+        query: RetrievalQuery,
+    ) -> RetrievalResult:
+        async with self.session_factory() as session:
+            return await HybridKnowledgeRetriever(
+                session=session,
+                dense_embedder=self.components.dense,
+                sparse_encoder=self.components.sparse,
+                reranker=self.components.reranker,
+                vector_index=self.components.index,
+                trace_sink=self.trace_sink,
+                rrf_k=self.rrf_k,
+            ).retrieve_with_trace(context, query)
+
+    async def retrieve(
+        self,
+        context: WorkspaceExecutionContext,
+        query: RetrievalQuery,
+    ) -> list[RetrievedEvidence]:
+        result = await self.retrieve_with_trace(context, query)
+        return list(result.evidence)
+
+
+__all__ = ["HybridKnowledgeRetriever", "SessionScopedKnowledgeRetriever", "fuse_reciprocal_rank"]

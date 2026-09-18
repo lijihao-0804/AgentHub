@@ -74,25 +74,17 @@ jobs:
       - run: uv run --locked alembic upgrade head
       - run: uv run --locked alembic check
       - run: uv run --locked ruff check .
-      - run: uv run --locked pytest tests/integration/test_m1_postgres.py -vv -rs
-      - run: uv run --locked pytest tests/integration/test_m2_postgres.py -vv -rs
       - name: Start Celery worker
         run: |
           uv run --locked python -m tests.support.celery_worker > celery-worker.log 2>&1 &
           echo $! > celery-worker.pid
           sleep 3
-      - run: uv run --locked pytest tests/integration/test_m3b_worker.py -vv -rs
-      - run: uv run --locked pytest tests/integration/test_m3c_indexing.py tests/integration/test_m3c_retrieval.py -vv -rs
-      - run: uv run --locked pytest tests/integration/test_m3e_citation_qa.py -vv -rs
-      - run: uv run --locked pytest tests/integration/test_m3f_snapshot.py -vv -rs
+      - name: Run all integration tests
+        run: uv run --locked pytest -m integration -vv -rs
       - name: Validate M3 retrieval benchmark wiring
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
           uv run --locked pytest tests/unit/test_retrieval_benchmark.py -vv
-      - run: uv run --locked pytest tests/integration/test_m4a_publish.py -vv -rs
-      - run: uv run --locked pytest tests/integration/test_m4b_tool_runtime.py -vv -rs
-      - run: uv run --locked pytest tests/integration/test_m4c_agent_runtime.py -vv -rs
-      - run: uv run --locked pytest tests/integration/test_m4d_streaming_budget.py -vv -rs
       - name: Validate M4 agent evaluation dataset
         run: uv run --locked python -m benchmarks.agent_runtime.runner --validate-only
       - name: Run M4 agent runtime evaluation baseline

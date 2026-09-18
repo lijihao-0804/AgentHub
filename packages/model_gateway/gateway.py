@@ -203,6 +203,22 @@ class ModelGatewayService(ModelGateway):
             if last_error is not None:
                 raise last_error
             raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+        except (asyncio.CancelledError, GeneratorExit):
+            await _end_trace_span(
+                span,
+                attributes=_failure_trace_attributes(
+                    context,
+                    model_profile_id,
+                    started=started,
+                    attempt_count=attempt_count,
+                    fallback_used=fallback_used,
+                    provider=provider,
+                    model=model,
+                ),
+                status="cancelled",
+                failure_code="CANCELLED",
+            )
+            raise
         except ModelGatewayError as error:
             await _end_trace_span(
                 span,
@@ -414,6 +430,22 @@ class ModelGatewayService(ModelGateway):
             if last_error is not None:
                 raise last_error
             raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+        except (asyncio.CancelledError, GeneratorExit):
+            await _end_trace_span(
+                span,
+                attributes=_failure_trace_attributes(
+                    context,
+                    model_profile_id,
+                    started=started,
+                    attempt_count=attempt_count,
+                    fallback_used=fallback_used,
+                    provider=provider,
+                    model=model,
+                ),
+                status="cancelled",
+                failure_code="CANCELLED",
+            )
+            raise
         except ModelGatewayError as error:
             await _end_trace_span(
                 span,

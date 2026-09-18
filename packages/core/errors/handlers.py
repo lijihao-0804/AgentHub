@@ -5,6 +5,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.errors.models import ErrorBody, ErrorEnvelope
@@ -31,6 +32,22 @@ def install_error_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         del exc
         return error_response(request, "VALIDATION_ERROR", "Request validation failed.", 422)
+
+    @app.exception_handler(StarletteHTTPException)
+    async def handle_http_error(
+        request: Request, exc: StarletteHTTPException
+    ) -> JSONResponse:
+        messages = {
+            404: "The requested resource was not found.",
+            405: "The requested method is not allowed.",
+        }
+        codes = {404: "NOT_FOUND", 405: "METHOD_NOT_ALLOWED"}
+        return error_response(
+            request,
+            codes.get(exc.status_code, "HTTP_ERROR"),
+            messages.get(exc.status_code, "The request could not be completed."),
+            exc.status_code,
+        )
 
     @app.exception_handler(Exception)
     async def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:

@@ -621,3 +621,46 @@ async def test_m4a_tool_publish_requires_tool_calling_capability(
             )
             is None
         )
+
+
+@pytest.mark.asyncio
+async def test_m4a_publish_rejects_non_executable_tool_revision(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    async with db_factory() as session:
+        base = await create_base(
+            session,
+            f"invalid-tool-{uuid4()}",
+            capabilities={"tool_calling": True},
+        )
+        tool, revision = await add_tool(session, base, suffix="invalid")
+        agent = await AgentPublishService().create_draft(
+            session,
+            base["context"],
+            name="Invalid Tool Agent",
+            system_prompt="Reject incomplete executable tool specs.",
+            model_profile_id=base["profile_id"],
+        )
+        session.add(
+            AgentTool(
+                workspace_id=base["workspace_id"],
+                agent_id=agent.id,
+                tool_id=tool.id,
+                tool_revision_id=revision.id,
+            )
+        )
+        await session.commit()
+        revision.spec = {
+            "kind": "builtin",
+            "input_schema": {"type": "object"},
+            "effect": "READ",
+            "risk_level": "LOW",
+            "approval_policy": "NEVER",
+        }
+        revision.spec_hash = canonical_json_hash(revision.spec)
+        await session.commit()
+
+        with pytest.raises(AgentHubError) as raised:
+            await AgentPublishService().publish(session, base["context"], agent.id)
+
+        assert raised.value.code == "TOOL_REVISION_INVALID"

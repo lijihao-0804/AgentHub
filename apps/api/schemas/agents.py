@@ -35,10 +35,10 @@ class ContextBudgetRequest(BaseModel):
 class RuntimeConfigRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    max_steps: int | None = Field(default=None, ge=1)
-    max_tool_calls: int | None = Field(default=None, ge=1)
-    max_identical_calls: int | None = Field(default=None, ge=1)
-    max_parallel_reads: int | None = Field(default=None, ge=1)
+    max_steps: int | None = Field(default=None, ge=1, le=32)
+    max_tool_calls: int | None = Field(default=None, ge=1, le=64)
+    max_identical_calls: int | None = Field(default=None, ge=1, le=4)
+    max_parallel_reads: int | None = Field(default=None, ge=1, le=8)
     context_budget: ContextBudgetRequest | None = None
 
 

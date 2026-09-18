@@ -1,0 +1,42 @@
+"""Production composition for AgentRun execution dependencies."""
+
+from __future__ import annotations
+
+from fastapi import FastAPI, Request
+
+from packages.agent_runtime.runtime import AgentRunService
+from packages.core.errors.exceptions import AgentHubError
+from packages.knowledge.composition import production_retrieval_components
+from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
+from packages.tools.audit import SqlAlchemyToolAuditSink
+from packages.tools.registry import ToolRegistry
+from packages.tools.runtime import ToolRuntime
+
+
+def get_production_agent_run_service(request: Request) -> AgentRunService:
+    app: FastAPI = request.app
+    factory = getattr(app.state, "db_session_factory", None)
+    if factory is None:
+        raise AgentHubError("DATABASE_NOT_CONFIGURED", "Database access is not configured.", 503)
+    service = getattr(app.state, "agent_run_service", None)
+    if service is None:
+        settings = app.state.settings
+        components = production_retrieval_components(settings)
+        retriever = SessionScopedKnowledgeRetriever(
+            session_factory=factory,
+            components=components,
+            rrf_k=settings.knowledge_rrf_k,
+        )
+        service = AgentRunService(
+            factory,
+            tool_runtime=ToolRuntime(
+                session_factory=factory,
+                registry=ToolRegistry(retriever=retriever),
+                audit_sink=SqlAlchemyToolAuditSink(factory),
+            ),
+        )
+        app.state.agent_run_service = service
+    return service
+
+
+__all__ = ["get_production_agent_run_service"]

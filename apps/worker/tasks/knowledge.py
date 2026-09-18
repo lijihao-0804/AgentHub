@@ -375,7 +375,11 @@ async def _process_knowledge_ingestion(
             except DocumentParseError as exc:
                 terminal_error = (exc.code, exc.message)
         except Exception:
-            logger.warning("knowledge_ingestion_worker_error", extra={"job_id": str(job_id)})
+            logger.warning(
+                "knowledge_ingestion_worker_error",
+                extra={"job_id": str(job_id)},
+                exc_info=True,
+            )
             retryable_error = (
                 "DATABASE_TEMPORARY_FAILURE",
                 "The ingestion worker encountered a temporary database failure.",

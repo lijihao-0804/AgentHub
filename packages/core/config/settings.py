@@ -6,6 +6,8 @@ from typing import Literal
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+DEFAULT_AUTH_JWT_SECRET = "local-dev-only-change-me-32-characters"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -49,7 +51,7 @@ class Settings(BaseSettings):
     langfuse_enabled: bool = False
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)
-    auth_jwt_secret: str = Field(default="local-dev-only-change-me-32-characters", min_length=32)
+    auth_jwt_secret: str = Field(default=DEFAULT_AUTH_JWT_SECRET, min_length=32)
     auth_access_token_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     auth_refresh_token_ttl_seconds: int = Field(default=2_592_000, ge=300, le=31_536_000)
     auth_refresh_cookie_name: str = "agenthub_refresh"
@@ -67,6 +69,14 @@ class Settings(BaseSettings):
             raise ValueError("knowledge embedding device must be auto, cpu, or cuda")
         if self.knowledge_reranker_device not in {"auto", "cpu", "cuda"}:
             raise ValueError("knowledge reranker device must be auto, cpu, or cuda")
+        if (
+            self.environment.lower() not in {"local", "test", "testing", "development", "dev"}
+            and self.auth_jwt_secret == DEFAULT_AUTH_JWT_SECRET
+        ):
+            raise ValueError(
+                "AGENTHUB_AUTH_JWT_SECRET must be explicitly configured outside "
+                "local/test/development"
+            )
         return self
 
     @property

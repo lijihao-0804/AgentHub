@@ -19,6 +19,11 @@ from packages.agent_runtime.models import (
     Tool,
     ToolRevision,
 )
+from packages.agent_runtime.runtime_config import (
+    DEFAULT_CONTEXT_BUDGET,
+    DEFAULT_RUNTIME_LIMITS,
+    MAX_RUNTIME_LIMITS,
+)
 from packages.agent_runtime.tool_revisions import validate_tool_spec
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
@@ -31,6 +36,7 @@ from packages.model_gateway.profile_resolution import (
     ResolvedModelProfile,
 )
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
+from packages.tools.validation import validate_executable_tool_spec
 
 SPEC_SCHEMA_VERSION = 1
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
@@ -42,15 +48,8 @@ DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "final_top_k": 6,
 }
 DEFAULT_RUNTIME_CONFIG: dict[str, Any] = {
-    "max_steps": 8,
-    "max_tool_calls": 12,
-    "max_identical_calls": 2,
-    "max_parallel_reads": 3,
-    "context_budget": {
-        "reserved_output_tokens": 2_000,
-        "max_retrieval_tokens": 5_000,
-        "max_tool_result_tokens": 4_000,
-    },
+    **DEFAULT_RUNTIME_LIMITS,
+    "context_budget": DEFAULT_CONTEXT_BUDGET.copy(),
 }
 _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG)
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
@@ -437,13 +436,14 @@ class AgentPublishService:
             safe_spec = validate_tool_spec(revision.spec)
             if canonical_json_hash(safe_spec) != revision.spec_hash:
                 raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
+            executable_spec = validate_executable_tool_spec(safe_spec)
             projections.append(
                 {
                     "tool_revision_id": str(revision.id),
                     "tool_spec_hash": revision.spec_hash,
-                    "effect": safe_spec.get("effect", "READ"),
-                    "risk_level": safe_spec.get("risk_level", "LOW"),
-                    "approval_policy": safe_spec.get("approval_policy", "NEVER"),
+                    "effect": executable_spec["effect"],
+                    "risk_level": executable_spec["risk_level"],
+                    "approval_policy": executable_spec["approval_policy"],
                 }
             )
         return tuple(projections)
@@ -600,7 +600,11 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
     }
     for key in _RUNTIME_KEYS - {"context_budget"}:
         item = result[key]
-        if isinstance(item, bool) or not isinstance(item, int) or item < 1:
+        if (
+            isinstance(item, bool)
+            or not isinstance(item, int)
+            or not 1 <= item <= MAX_RUNTIME_LIMITS[key]
+        ):
             raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
     for item in result["context_budget"].values():
         if isinstance(item, bool) or not isinstance(item, int) or item < 1:

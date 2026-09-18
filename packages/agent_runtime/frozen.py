@@ -8,6 +8,11 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
+from packages.agent_runtime.runtime_config import (
+    DEFAULT_CONTEXT_BUDGET,
+    DEFAULT_RUNTIME_LIMITS,
+    MAX_RUNTIME_LIMITS,
+)
 from packages.core.errors.exceptions import AgentHubError
 from packages.model_gateway.capabilities import capabilities_from_mapping
 from packages.model_gateway.contracts import (
@@ -16,17 +21,8 @@ from packages.model_gateway.contracts import (
     RetryPolicy,
 )
 
-_DEFAULT_RUNTIME = {
-    "max_steps": 8,
-    "max_tool_calls": 12,
-    "max_identical_calls": 2,
-    "max_parallel_reads": 3,
-}
-_DEFAULT_CONTEXT_BUDGET = {
-    "reserved_output_tokens": 2_000,
-    "max_retrieval_tokens": 5_000,
-    "max_tool_result_tokens": 4_000,
-}
+_DEFAULT_RUNTIME = DEFAULT_RUNTIME_LIMITS
+_DEFAULT_CONTEXT_BUDGET = DEFAULT_CONTEXT_BUDGET
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,7 +70,11 @@ def parse_frozen_agent_spec(
     runtime: dict[str, Any] = {}
     for key, default in _DEFAULT_RUNTIME.items():
         value = runtime_value.get(key, default)
-        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, int)
+            or not 1 <= value <= MAX_RUNTIME_LIMITS[key]
+        ):
             raise _invalid_binding()
         runtime[key] = value
     context_budget_value = runtime_value.get("context_budget", _DEFAULT_CONTEXT_BUDGET)
