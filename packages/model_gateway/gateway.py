@@ -14,7 +14,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
-from packages.model_gateway.capabilities import effective_capability_requirements
+from packages.model_gateway.capabilities import (
+    effective_capability_requirements,
+    validate_capabilities,
+)
 from packages.model_gateway.contracts import (
     ModelCapabilities,
     ModelGateway,
@@ -96,8 +99,6 @@ class ModelGatewayService(ModelGateway):
         request: ModelRequest,
     ) -> ModelResponse:
         """Execute the non-secret identities frozen in a published AgentVersion."""
-
-        from packages.model_gateway.capabilities import validate_capabilities
 
         required = effective_capability_requirements(request, "generate")
         adapter_profiles: list[ResolvedModelProfile] = []
@@ -244,11 +245,72 @@ class ModelGatewayService(ModelGateway):
     ) -> AsyncIterator[ModelStreamEvent]:
         return self._stream(context, model_profile_id, request)
 
+    def stream_resolved(
+        self,
+        context: WorkspaceExecutionContext,
+        plan: ResolvedModelExecutionPlan,
+        request: ModelRequest,
+    ) -> AsyncIterator[ModelStreamEvent]:
+        """Stream using the immutable model chain from a published version."""
+
+        return self._stream(
+            context,
+            plan.primary.id,
+            replace(request, retry_policy=plan.retry_policy),
+            frozen_plan=plan,
+        )
+
+    async def _prepare_frozen_stream(
+        self,
+        context: WorkspaceExecutionContext,
+        plan: ResolvedModelExecutionPlan,
+        request: ModelRequest,
+    ) -> tuple[tuple[ResolvedModelProfile, ...], dict[UUID, ProviderCredential]]:
+        required = effective_capability_requirements(request, "stream")
+        try:
+            workspace_id = UUID(context.workspace_id)
+        except (TypeError, ValueError):
+            raise ModelGatewayError(
+                ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID
+            ) from None
+
+        adapter_profiles: list[ResolvedModelProfile] = []
+        credentials: dict[UUID, ProviderCredential] = {}
+        for frozen in plan.chain:
+            if frozen.workspace_id != workspace_id:
+                raise ModelGatewayError(ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID)
+            try:
+                validate_capabilities(frozen.capabilities, required)
+                credential = await self._enabled_frozen_credential(context, frozen)
+            except ModelGatewayError as error:
+                if error.code is ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH:
+                    raise
+                raise ModelGatewayError(
+                    ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID
+                ) from None
+            adapter_profiles.append(
+                ResolvedModelProfile(
+                    id=frozen.id,
+                    workspace_id=frozen.workspace_id,
+                    provider_credential_id=frozen.provider_credential_id,
+                    model=frozen.model,
+                    temperature=frozen.temperature,
+                    max_tokens=frozen.max_tokens,
+                    timeout_seconds=frozen.timeout_seconds,
+                    fallback_profile_id=None,
+                    capabilities=frozen.capabilities,
+                )
+            )
+            credentials[frozen.id] = credential
+        return tuple(adapter_profiles), credentials
+
     async def _stream(
         self,
         context: WorkspaceExecutionContext,
         model_profile_id: UUID,
         request: ModelRequest,
+        *,
+        frozen_plan: ResolvedModelExecutionPlan | None = None,
     ) -> AsyncIterator[ModelStreamEvent]:
         started = time.perf_counter()
         span = await _start_trace_span(
@@ -261,16 +323,26 @@ class ModelGatewayService(ModelGateway):
         provider: str | None = None
         model: str | None = None
         try:
-            chain = await self.resolver.resolve_chain(
-                context,
-                model_profile_id,
-                required_capabilities=effective_capability_requirements(request, "stream"),
-            )
+            if frozen_plan is None:
+                chain = await self.resolver.resolve_chain(
+                    context,
+                    model_profile_id,
+                    required_capabilities=effective_capability_requirements(request, "stream"),
+                )
+                credentials: Mapping[UUID, ProviderCredential] | None = None
+            else:
+                chain, credentials = await self._prepare_frozen_stream(
+                    context, frozen_plan, request
+                )
             last_error: ModelGatewayError | None = None
             for profile_index, profile in enumerate(chain):
                 fallback_used = profile_index > 0
                 model = profile.model
-                credential = await self._enabled_credential(context, profile.provider_credential_id)
+                credential = (
+                    credentials[profile.id]
+                    if credentials is not None
+                    else await self._enabled_credential(context, profile.provider_credential_id)
+                )
                 provider = credential.provider
                 for attempt in range(request.retry_policy.max_attempts):
                     attempt_count += 1
