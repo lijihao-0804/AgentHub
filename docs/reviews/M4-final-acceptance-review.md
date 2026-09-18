@@ -52,7 +52,10 @@ WRITE safety, REST/MCP, SSRF, Memory and Multi-Agent remain deferred by plan.
 ## Persistence and dependency review
 
 - Single Alembic head: `0011_h2_agent_run_backfill`.
-- Historical migrations were not modified.
+- `0010_h2_semantic_closure.py` was restored to its originally committed form from
+  `140e280430e6835f977b35a11dccb21a3927b7fe`.
+- Current-head downgrade safety is enforced by the irreversible `0011_h2_agent_run_backfill`
+  migration; `0010` is not represented as a safe downgrade for encrypted-only credentials.
 - `ProviderCredential` model, encryption columns, check constraint and migration behavior are
   covered by PostgreSQL integration tests.
 - `cryptography` is the H2 encryption dependency. No H2 change upgraded Torch, CUDA, BGE or
