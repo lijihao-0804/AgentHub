@@ -281,6 +281,13 @@ class ModelGateway(Protocol):
         request: ModelRequest,
     ) -> AsyncIterator[ModelStreamEvent]: ...
 
+    def stream_resolved(
+        self,
+        context: WorkspaceExecutionContext,
+        plan: ResolvedModelExecutionPlan,
+        request: ModelRequest,
+    ) -> AsyncIterator[ModelStreamEvent]: ...
+
     async def health(
         self,
         context: WorkspaceExecutionContext,
