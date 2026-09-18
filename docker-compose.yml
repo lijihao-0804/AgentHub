@@ -60,7 +60,7 @@ services:
     build:
       context: .
       dockerfile: infra/docker/api.Dockerfile
-    command: ["uv", "run", "python", "-m", "apps.worker.main"]
+    command: ["uv", "run", "celery", "-A", "apps.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
     environment:
       AGENTHUB_ENVIRONMENT: docker
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub

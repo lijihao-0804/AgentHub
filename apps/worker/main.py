@@ -1,18 +1,8 @@
-import logging
-import time
-
-from packages.core.config.settings import get_settings
-from packages.core.logging.json_logging import configure_logging
+from apps.worker.celery_app import celery_app
 
 
 def main() -> None:
-    settings = get_settings()
-    configure_logging(settings.log_level)
-    logger = logging.getLogger(__name__)
-    logger.info("worker_started", extra={"environment": settings.environment})
-    # M0 establishes the worker process boundary. Durable ingestion work starts in M3.
-    while True:
-        time.sleep(60)
+    celery_app.worker_main(["worker", "--loglevel=INFO", "--concurrency=1"])
 
 
 if __name__ == "__main__":

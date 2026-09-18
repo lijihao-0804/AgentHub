@@ -1,9 +1,9 @@
 # AgentHub
 
 AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
-implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M2:
-engineering foundations, Auth / Tenant / RBAC, and the ModelGateway + Capability Contract.
-M3 is not started.
+implementation plan in [`plan/plan.md`](plan/plan.md). The current repository baseline is M3-B:
+engineering foundations, Auth / Tenant / RBAC, ModelGateway + Capability Contract, and the
+Reliable Worker ingestion boundary. M3-C retrieval is not started.
 
 ## Basic development setup
 
@@ -29,14 +29,14 @@ The API exposes `/api/v1/health`, `/api/v1/ready` and `/api/v1/dependencies`.
 
 ## Optional/local infrastructure setup
 
-When a milestone requires real infrastructure, PostgreSQL, Redis and Qdrant may be provided
+For the current M3-B worker milestone, PostgreSQL and Redis are required and may be provided
 by local services or Docker Compose:
 
 ```powershell
-docker compose up -d postgres redis qdrant
+docker compose up -d postgres redis
 ```
 
-Docker remains supported for later migration, checkpoint and deployment verification.
+Qdrant remains deferred to M3-C. Docker remains supported for later deployment verification.
 
 ## Delivery discipline
 

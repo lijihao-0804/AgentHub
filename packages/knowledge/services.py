@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterable
 from typing import NoReturn
 from uuid import UUID, uuid4
@@ -18,7 +19,10 @@ from packages.knowledge.models import (
     IngestionJob,
     KnowledgeBase,
 )
+from packages.knowledge.queue import IngestionQueue
 from packages.knowledge.upload_security import UploadSecurityError
+
+logger = logging.getLogger(__name__)
 
 
 class KnowledgeService:
@@ -73,6 +77,7 @@ class KnowledgeService:
         chunks: AsyncIterable[bytes],
         document_id: UUID | None = None,
         blob_store: BlobStore,
+        queue: IngestionQueue,
     ) -> tuple[Document, DocumentRevision, IngestionJob]:
         self._require_permission(
             context, "knowledge_edit" if document_id is not None else "knowledge_create"
@@ -165,6 +170,13 @@ class KnowledgeService:
             raise AgentHubError(
                 "DOCUMENT_UPLOAD_FAILED", "The document could not be recorded.", 409
             ) from exc
+        try:
+            await queue.enqueue(job.id)
+        except Exception:
+            logger.warning(
+                "knowledge_ingestion_enqueue_failed",
+                extra={"job_id": str(job.id), "adapter": type(queue).__name__},
+            )
         return document, revision, job
 
     async def list_revisions(

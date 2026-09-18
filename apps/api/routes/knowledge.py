@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
-from apps.api.knowledge_dependencies import get_workspace_context
+from apps.api.knowledge_dependencies import get_ingestion_queue, get_workspace_context
 from apps.api.schemas.knowledge import (
     DocumentResponse,
     DocumentRevisionResponse,
@@ -20,6 +20,7 @@ from apps.api.schemas.knowledge import (
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.blob_store import LocalBlobStore
+from packages.knowledge.queue import IngestionQueue
 from packages.knowledge.services import KnowledgeService
 from packages.knowledge.upload_security import (
     UploadSecurityError,
@@ -33,6 +34,7 @@ from packages.knowledge.upload_security import (
 router = APIRouter(tags=["knowledge"])
 db_session_dependency = Depends(get_db_session)
 context_dependency = Depends(get_workspace_context)
+queue_dependency = Depends(get_ingestion_queue)
 upload_file_dependency = File(...)
 
 
@@ -101,6 +103,7 @@ async def upload_document(
     file: UploadFile = upload_file_dependency,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
+    queue: IngestionQueue = queue_dependency,
 ) -> DocumentUploadResponse:
     del workspace_id
     settings = request.app.state.settings
@@ -121,6 +124,7 @@ async def upload_document(
         media_type=media_type,
         chunks=_guarded_chunks(file, first_chunk, policy),
         blob_store=LocalBlobStore(settings.blob_root),
+        queue=queue,
     )
     return _upload_response(document, revision, job)
 
@@ -138,6 +142,7 @@ async def upload_revision(
     file: UploadFile = upload_file_dependency,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
+    queue: IngestionQueue = queue_dependency,
 ) -> DocumentUploadResponse:
     del workspace_id
     settings = request.app.state.settings
@@ -159,6 +164,7 @@ async def upload_revision(
         chunks=_guarded_chunks(file, first_chunk, policy),
         document_id=document_id,
         blob_store=LocalBlobStore(settings.blob_root),
+        queue=queue,
     )
     return _upload_response(document, revision, job)
 

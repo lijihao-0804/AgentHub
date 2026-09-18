@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.auth_dependencies import get_current_principal
 from apps.api.dependencies import get_db_session
 from packages.control_plane.services import TenantService
 from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
+from packages.knowledge.adapters.celery_queue import CeleryIngestionQueue
+from packages.knowledge.queue import IngestionQueue
 
 db_session_dependency = Depends(get_db_session)
 principal_dependency = Depends(get_current_principal)
@@ -23,4 +25,14 @@ async def get_workspace_context(
         await TenantService().get_workspace_access(
             session, principal=principal, workspace_id=workspace_id
         )
-    ).context
+        ).context
+
+
+async def get_ingestion_queue(request: Request) -> IngestionQueue:
+    queue = getattr(request.app.state, "ingestion_queue", None)
+    if queue is None:
+        from apps.worker.celery_app import create_celery_app
+
+        queue = CeleryIngestionQueue(create_celery_app(request.app.state.settings))
+        request.app.state.ingestion_queue = queue
+    return queue

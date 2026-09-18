@@ -10,6 +10,9 @@ jobs:
     env:
       AGENTHUB_TEST_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_test
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_test
+      AGENTHUB_TEST_REDIS_URL: redis://localhost:6379/0
+      AGENTHUB_REDIS_URL: redis://localhost:6379/0
+      AGENTHUB_BLOB_ROOT: data/blobs
     services:
       postgres:
         image: postgres:16
@@ -21,6 +24,15 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U agenthub -d agenthub_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 5s
           --health-timeout 3s
           --health-retries 20
@@ -38,6 +50,17 @@ jobs:
       - run: uv run --locked ruff check .
       - run: uv run --locked pytest tests/integration/test_m1_postgres.py -vv -rs
       - run: uv run --locked pytest tests/integration/test_m2_postgres.py -vv -rs
+      - name: Start Celery worker
+        run: |
+          uv run --locked celery -A apps.worker.celery_app worker --loglevel=WARNING --pool=solo --concurrency=1 > celery-worker.log 2>&1 &
+          echo $! > celery-worker.pid
+          sleep 3
+      - run: uv run --locked pytest tests/integration/test_m3b_worker.py -vv -rs
+      - name: Stop Celery worker
+        if: always()
+        run: |
+          if [ -f celery-worker.pid ]; then kill "$(cat celery-worker.pid)" || true; fi
+          if [ -f celery-worker.log ]; then cat celery-worker.log; fi
       - run: uv run --locked pytest -m "not integration"
 
   frontend:

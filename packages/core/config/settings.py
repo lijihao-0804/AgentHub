@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,6 +24,17 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     blob_root: str = "data/blobs"
     knowledge_max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1)
+    knowledge_ingestion_lease_seconds: int = Field(default=300, ge=5, le=86_400)
+    knowledge_ingestion_lease_renewal_seconds: int = Field(default=30, ge=1, le=3_600)
+    knowledge_ingestion_enqueue_grace_seconds: int = Field(default=30, ge=0, le=86_400)
+    knowledge_parser_timeout_seconds: float = Field(default=60, gt=0, le=3_600)
+    knowledge_max_pdf_pages: int = Field(default=500, ge=1, le=100_000)
+    knowledge_max_parsed_chars: int = Field(default=2_000_000, ge=1, le=50_000_000)
+    knowledge_chunk_size_chars: int = Field(default=1_200, ge=1, le=100_000)
+    knowledge_chunk_overlap_chars: int = Field(default=200, ge=0, le=99_999)
+    knowledge_ingestion_max_attempts: int = Field(default=3, ge=1, le=100)
+    knowledge_ingestion_retry_base_seconds: int = Field(default=30, ge=1, le=86_400)
+    knowledge_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
     langfuse_enabled: bool = False
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)
@@ -34,6 +45,14 @@ class Settings(BaseSettings):
     auth_refresh_cookie_path: str = "/api/v1/auth"
     auth_refresh_cookie_samesite: Literal["lax", "strict"] = "lax"
     auth_cookie_secure: bool | None = None
+
+    @model_validator(mode="after")
+    def validate_knowledge_ingestion_settings(self) -> Settings:
+        if self.knowledge_chunk_overlap_chars >= self.knowledge_chunk_size_chars:
+            raise ValueError("knowledge chunk overlap must be smaller than chunk size")
+        if self.knowledge_ingestion_lease_renewal_seconds >= self.knowledge_ingestion_lease_seconds:
+            raise ValueError("knowledge lease renewal must be shorter than lease duration")
+        return self
 
     @property
     def database_sync_url(self) -> str:
