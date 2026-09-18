@@ -71,7 +71,7 @@ class AgentRunState(TypedDict, total=False):
     model_response: ModelResponse | None
     spec: FrozenAgentSpec
     tool_definitions: dict[str, ToolDefinition]
-    runtime: dict[str, int]
+    runtime: dict[str, Any]
 
 
 @dataclass(frozen=True, slots=True)
