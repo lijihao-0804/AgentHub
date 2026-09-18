@@ -2,12 +2,19 @@
 
 from __future__ import annotations
 
+from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any
+from typing import Any, Protocol
 from uuid import UUID
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
+
+
+class ToolSessionFactory(Protocol):
+    """Minimal dependency contract for a builtin's short-lived DB scope."""
+
+    def __call__(self) -> AbstractAsyncContextManager[Any]: ...
 
 
 class ToolEffect(StrEnum):
@@ -118,4 +125,5 @@ __all__ = [
     "ToolResult",
     "ToolResultStatus",
     "ToolRisk",
+    "ToolSessionFactory",
 ]

@@ -333,7 +333,7 @@ class ToolRuntime:
         )
         definition: ToolDefinition | None = None
         decision: ToolPolicyDecision | None = None
-        result: ToolResult
+        result: ToolResult | None = None
         try:
             if not isinstance(arguments, Mapping):
                 result = ToolResult.failure(
@@ -359,46 +359,53 @@ class ToolRuntime:
                         )
                     except AgentHubError as exc:
                         result = ToolResult.failure(exc.code, exc.message)
+
+                if result is None and definition is not None:
+                    decision = ToolPolicy.decide(definition)
+                    if decision is ToolPolicyDecision.REQUIRE_APPROVAL:
+                        result = ToolResult.failure(
+                            "TOOL_APPROVAL_NOT_AVAILABLE",
+                            "This tool requires approval before execution.",
+                        )
                     else:
-                        decision = ToolPolicy.decide(definition)
-                        if decision is ToolPolicyDecision.REQUIRE_APPROVAL:
+                        handler = self.registry.resolve(definition.identity)
+                        if handler is None:
                             result = ToolResult.failure(
-                                "TOOL_APPROVAL_NOT_AVAILABLE",
-                                "This tool requires approval before execution.",
+                                "UNKNOWN_TOOL", "The requested tool is not registered."
                             )
                         else:
-                            handler = self.registry.resolve(definition.identity)
-                            if handler is None:
+                            execution_context = ToolExecutionContext(
+                                workspace_context=context,
+                                agent_version_id=version_uuid,
+                                tool_call_id=tool_call_id,
+                            )
+                            try:
+                                async with asyncio.timeout(definition.timeout_seconds):
+                                    data = await handler(
+                                        execution_context,
+                                        definition,
+                                        arguments,
+                                        self.session_factory,
+                                    )
+                                result = ToolResult.success(data)
+                            except TimeoutError:
                                 result = ToolResult.failure(
-                                    "UNKNOWN_TOOL", "The requested tool is not registered."
+                                    "TOOL_TIMEOUT", "The tool execution timed out."
                                 )
-                            else:
-                                execution_context = ToolExecutionContext(
-                                    workspace_context=context,
-                                    agent_version_id=version_uuid,
-                                    tool_call_id=tool_call_id,
+                            except ToolHandlerError as exc:
+                                result = ToolResult.failure(exc.code, exc.message)
+                            except Exception:
+                                logger.warning("tool_handler_failed", exc_info=True)
+                                result = ToolResult.failure(
+                                    "TOOL_EXECUTION_FAILED", "The tool execution failed."
                                 )
-                                try:
-                                    async with asyncio.timeout(definition.timeout_seconds):
-                                        data = await handler(
-                                            execution_context, definition, arguments, session
-                                        )
-                                    result = ToolResult.success(data)
-                                except TimeoutError:
-                                    result = ToolResult.failure(
-                                        "TOOL_TIMEOUT", "The tool execution timed out."
-                                    )
-                                except ToolHandlerError as exc:
-                                    result = ToolResult.failure(exc.code, exc.message)
-                                except Exception:
-                                    logger.warning("tool_handler_failed", exc_info=True)
-                                    result = ToolResult.failure(
-                                        "TOOL_EXECUTION_FAILED", "The tool execution failed."
-                                    )
         except AgentHubError as exc:
             result = ToolResult.failure(exc.code, exc.message)
         except Exception:
             logger.warning("tool_runtime_failed", exc_info=True)
+            result = ToolResult.failure("TOOL_EXECUTION_FAILED", "The tool execution failed.")
+
+        if result is None:
             result = ToolResult.failure("TOOL_EXECUTION_FAILED", "The tool execution failed.")
 
         duration_ms = round((time.perf_counter() - started) * 1000, 3)

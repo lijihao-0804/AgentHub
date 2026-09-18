@@ -42,6 +42,22 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    bind = op.get_bind()
+    encrypted_only = bind.execute(
+        sa.text(
+            """
+            SELECT 1
+            FROM provider_credentials
+            WHERE secret IS NULL AND secret_ciphertext IS NOT NULL
+            LIMIT 1
+            """
+        )
+    ).first()
+    if encrypted_only is not None:
+        raise RuntimeError(
+            "0010 downgrade is blocked while encrypted-only provider credentials exist; "
+            "decrypt and rewrite those rows as legacy plaintext before retrying."
+        )
     op.drop_constraint(
         "ck_provider_credentials_secret_present", "provider_credentials", type_="check"
     )

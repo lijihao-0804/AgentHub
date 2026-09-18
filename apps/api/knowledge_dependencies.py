@@ -18,6 +18,7 @@ from packages.knowledge.composition import (
 )
 from packages.knowledge.queue import IngestionQueue
 from packages.model_gateway.contracts import ModelGateway
+from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 
 db_session_dependency = Depends(get_db_session)
@@ -94,5 +95,11 @@ async def get_agent_run_workspace_context(
         ).context
 
 
-async def get_model_gateway(session: AsyncSession = db_session_dependency) -> ModelGateway:
-    return SqlAlchemyModelGateway(session)
+async def get_model_gateway(
+    request: Request,
+    session: AsyncSession = db_session_dependency,
+) -> ModelGateway:
+    return SqlAlchemyModelGateway(
+        session,
+        credential_cipher=ProviderCredentialCipher.from_settings(request.app.state.settings),
+    )

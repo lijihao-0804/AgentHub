@@ -13,6 +13,7 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.logging.json_logging import JsonFormatter
 from packages.model_gateway.contracts import CostEstimate, ModelResponse, ModelUsage
 from packages.model_gateway.credentials import CredentialEncryptionError, ProviderCredentialCipher
+from scripts.migrate_provider_credentials import migrate
 
 
 def test_provider_credential_cipher_is_versioned_and_round_trips() -> None:
@@ -38,6 +39,13 @@ def test_provider_credential_cipher_requires_key_in_production() -> None:
         ProviderCredentialCipher.from_settings(
             Settings(environment="production", auth_jwt_secret="x" * 32)
         )
+
+
+@pytest.mark.asyncio
+async def test_credential_migration_requires_explicit_master_key(monkeypatch) -> None:
+    monkeypatch.delenv("AGENTHUB_CREDENTIAL_MASTER_KEY", raising=False)
+
+    assert await migrate(verify_only=True) == 2
 
 
 def test_usage_aggregation_is_numeric_and_currency_safe() -> None:
@@ -68,6 +76,38 @@ def test_usage_aggregation_is_numeric_and_currency_safe() -> None:
     assert aggregate["cost_currency"] == "USD"
     assert aggregate["cost_is_estimate"] is True
     assert _aggregate_usage([])["total_tokens"] is None
+
+
+@pytest.mark.parametrize(
+    ("flags", "expected"),
+    [
+        ([False, False], False),
+        ([True, True], True),
+        ([False, True], True),
+    ],
+)
+def test_usage_aggregation_marks_any_estimated_cost(
+    flags: list[bool], expected: bool
+) -> None:
+    records = [
+        {"cost": {"amount": "0.10", "currency": "USD", "is_estimate": flag}}
+        for flag in flags
+    ]
+
+    assert _aggregate_usage(records)["cost_is_estimate"] is expected
+
+
+def test_usage_aggregation_does_not_sum_mixed_currencies() -> None:
+    records = [
+        {"cost": {"amount": "0.10", "currency": "USD", "is_estimate": False}},
+        {"cost": {"amount": "0.20", "currency": "EUR", "is_estimate": True}},
+    ]
+
+    aggregate = _aggregate_usage(records)
+
+    assert aggregate["total_cost_amount"] is None
+    assert aggregate["cost_currency"] is None
+    assert aggregate["cost_is_estimate"] is None
 
 
 def test_json_formatter_redacts_nested_sensitive_keys_only() -> None:

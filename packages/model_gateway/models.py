@@ -23,6 +23,7 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy import Uuid as SQLUuid
+from sqlalchemy import inspect as sqlalchemy_inspect
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -70,13 +71,27 @@ def _encrypt_provider_credential(_mapper, _connection, target: ProviderCredentia
     if target.secret is None or target.secret_ciphertext is not None:
         return
     from packages.model_gateway.credentials import (
-        CREDENTIAL_CIPHERTEXT_VERSION,
         ProviderCredentialCipher,
+        encrypt_provider_credential_secret,
     )
 
-    target.secret_ciphertext = ProviderCredentialCipher.from_settings().encrypt(target.secret)
-    target.secret_version = CREDENTIAL_CIPHERTEXT_VERSION
-    target.secret = None
+    encrypt_provider_credential_secret(
+        target, target.secret, cipher=ProviderCredentialCipher.from_settings()
+    )
+
+
+@event.listens_for(ProviderCredential, "before_update")
+def _encrypt_rotated_provider_credential(_mapper, _connection, target: ProviderCredential) -> None:
+    if target.secret is None or not sqlalchemy_inspect(target).attrs.secret.history.has_changes():
+        return
+    from packages.model_gateway.credentials import (
+        ProviderCredentialCipher,
+        encrypt_provider_credential_secret,
+    )
+
+    encrypt_provider_credential_secret(
+        target, target.secret, cipher=ProviderCredentialCipher.from_settings()
+    )
 
 
 class ModelProfile(Base):

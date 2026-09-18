@@ -62,6 +62,19 @@ class ProviderCredentialCipher:
             ) from exc
 
 
+def encrypt_provider_credential_secret(
+    credential: ProviderCredential,
+    secret: str,
+    *,
+    cipher: ProviderCredentialCipher,
+) -> None:
+    """Apply an explicit encrypted-at-rest write for create or secret rotation."""
+
+    credential.secret_ciphertext = cipher.encrypt(secret)
+    credential.secret_version = CREDENTIAL_CIPHERTEXT_VERSION
+    credential.secret = None
+
+
 def _derived_key(value: str) -> bytes:
     return base64.urlsafe_b64encode(hashlib.sha256(value.encode("utf-8")).digest())
 
@@ -77,9 +90,7 @@ async def encrypt_legacy_provider_credential(
     credential = await session.get(ProviderCredential, credential_id)
     if credential is None or credential.secret is None or credential.secret_ciphertext is not None:
         raise CredentialEncryptionError("Legacy provider credential is unavailable.")
-    credential.secret_ciphertext = cipher.encrypt(credential.secret)
-    credential.secret_version = CREDENTIAL_CIPHERTEXT_VERSION
-    credential.secret = None
+    encrypt_provider_credential_secret(credential, credential.secret, cipher=cipher)
     await session.commit()
 
 
@@ -87,5 +98,6 @@ __all__ = [
     "CREDENTIAL_CIPHERTEXT_VERSION",
     "CredentialEncryptionError",
     "ProviderCredentialCipher",
+    "encrypt_provider_credential_secret",
     "encrypt_legacy_provider_credential",
 ]

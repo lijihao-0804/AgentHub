@@ -42,6 +42,7 @@ from packages.model_gateway.contracts import (
     ModelToolCallDelta,
     ModelToolDefinition,
 )
+from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.observability import NoopTraceSink
@@ -108,10 +109,13 @@ class AgentRunService:
         model_gateway_factory: Callable[[AsyncSession], ModelGateway] | None = None,
         tool_runtime: ToolRuntime | None = None,
         trace_sink: TraceSink | None = None,
+        credential_cipher: ProviderCredentialCipher | None = None,
     ) -> None:
         self.session_factory = session_factory
         self.model_gateway_factory = model_gateway_factory or (
-            lambda session: SqlAlchemyModelGateway(session)
+            lambda session: SqlAlchemyModelGateway(
+                session, credential_cipher=credential_cipher
+            )
         )
         self.tool_runtime = tool_runtime or ToolRuntime(session_factory=session_factory)
         self.trace_sink = trace_sink or NoopTraceSink()
@@ -771,12 +775,25 @@ class _AgentRunGraph:
         try:
             async with self.service.session_factory() as session:
                 gateway = self.service.model_gateway_factory(session)
-                if self.mode == "stream":
-                    response = await self._stream_model(gateway, state, request)
-                else:
-                    response = await gateway.generate_resolved(
-                        self.context, state["spec"].model_plan, request
+                prepared_gateway = gateway
+                prepare_resolved = getattr(gateway, "prepare_resolved", None)
+                if prepare_resolved is not None:
+                    prepared_gateway = await prepare_resolved(
+                        self.context,
+                        state["spec"].model_plan,
+                        request,
+                        operation="stream" if self.mode == "stream" else "generate",
                     )
+            # Provider completion/streaming must not retain the credential-resolution
+            # session.  The prepared production facade contains only frozen identities
+            # and decrypted credentials; test gateways are likewise invoked here, after
+            # their factory session has exited.
+            if self.mode == "stream":
+                response = await self._stream_model(prepared_gateway, state, request)
+            else:
+                response = await prepared_gateway.generate_resolved(
+                    self.context, state["spec"].model_plan, request
+                )
         except ModelGatewayError as error:
             await self.step(
                 "MODEL", "FAILED", {"model_round": next_round, "error_code": error.code.value}
@@ -1338,7 +1355,7 @@ def _aggregate_usage(records: list[dict[str, Any]]) -> dict[str, Any]:
                 (Decimal(str(value["amount"])) for value in costs), Decimal("0")
             )
             result["cost_currency"] = next(iter(currencies))
-            result["cost_is_estimate"] = all(bool(value["is_estimate"]) for value in costs)
+            result["cost_is_estimate"] = any(bool(value["is_estimate"]) for value in costs)
     return result
 
 

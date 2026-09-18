@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery, RetrievalResult
 from packages.knowledge.models import KnowledgeSnapshot
-from packages.tools.contracts import ToolDefinition, ToolExecutionContext
+from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 from packages.tools.errors import ToolHandlerError
 
 _MAX_QUERY_LENGTH = 4_000
@@ -91,11 +91,11 @@ async def search_knowledge(
     context: ToolExecutionContext,
     definition: ToolDefinition,
     arguments: Mapping[str, Any],
-    session: AsyncSession | None,
+    session_factory: ToolSessionFactory | None,
     *,
     retriever: KnowledgeRetriever | None,
 ) -> dict[str, Any]:
-    if session is None or retriever is None:
+    if session_factory is None or retriever is None:
         raise ToolHandlerError("TOOL_EXECUTION_FAILED", "The knowledge search is unavailable.")
     text = arguments.get("query")
     if not isinstance(text, str) or not text.strip() or len(text) > _MAX_QUERY_LENGTH:
@@ -104,8 +104,11 @@ async def search_knowledge(
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= _MAX_RESULTS:
         raise ToolHandlerError("SEARCH_INVALID_ARGUMENT", "The result limit is invalid.")
 
+    async with session_factory() as session:
+        queries = await _snapshot_queries(session, context, definition, text=text, limit=limit)
+
     evidence = []
-    for query in await _snapshot_queries(session, context, definition, text=text, limit=limit):
+    for query in queries:
         result = await retriever.retrieve_with_trace(_retrieval_context(context), query)
         if not isinstance(result, RetrievalResult):
             raise ToolHandlerError(

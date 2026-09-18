@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import set_committed_value
 
-from packages.core.config.settings import get_settings
+from packages.core.config.settings import Settings, get_settings
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.credentials import CredentialEncryptionError, ProviderCredentialCipher
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
@@ -26,8 +26,16 @@ def _workspace_id(context: WorkspaceExecutionContext) -> UUID | None:
 class SqlAlchemyModelGatewayRepository:
     """Repository methods intentionally require execution context for every lookup."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        *,
+        credential_cipher: ProviderCredentialCipher | None = None,
+        settings: Settings | None = None,
+    ) -> None:
         self.session = session
+        self.credential_cipher = credential_cipher
+        self.settings = settings
 
     async def get_provider_credential(
         self,
@@ -46,15 +54,22 @@ class SqlAlchemyModelGatewayRepository:
         credential = result.scalar_one_or_none()
         if credential is not None and credential.secret_ciphertext is not None:
             try:
-                secret = ProviderCredentialCipher.from_settings().decrypt(
+                cipher = self.credential_cipher or ProviderCredentialCipher.from_settings(
+                    self.settings
+                )
+                secret = cipher.decrypt(
                     credential.secret_ciphertext
                 )
             except CredentialEncryptionError as exc:
                 raise ModelGatewayError(ModelGatewayErrorCode.MODEL_AUTH_FAILED) from exc
             set_committed_value(credential, "secret", secret)
         elif credential is not None and credential.secret is not None:
-            if not get_settings().credential_allow_legacy_plaintext:
-                raise ModelGatewayError(ModelGatewayErrorCode.MODEL_AUTH_FAILED)
+            settings = self.settings or get_settings()
+            if not settings.credential_allow_legacy_plaintext:
+                raise ModelGatewayError(
+                    ModelGatewayErrorCode.MODEL_AUTH_FAILED,
+                    message="Provider credential migration is required before model execution.",
+                )
         return credential
 
     async def get_model_profile(

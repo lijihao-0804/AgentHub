@@ -6,14 +6,12 @@ from collections.abc import Awaitable, Callable, Mapping
 from functools import partial
 from typing import Any
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from packages.knowledge.contracts import KnowledgeRetriever
 from packages.tools.builtins import calculate, query_customer, search_knowledge
-from packages.tools.contracts import ToolDefinition, ToolExecutionContext
+from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 
 ToolHandler = Callable[
-    [ToolExecutionContext, ToolDefinition, Mapping[str, Any], AsyncSession | None],
+    [ToolExecutionContext, ToolDefinition, Mapping[str, Any], ToolSessionFactory | None],
     Awaitable[dict[str, Any]],
 ]
 

@@ -8,6 +8,7 @@ from packages.agent_runtime.runtime import AgentRunService
 from packages.core.errors.exceptions import AgentHubError
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
+from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.tools.audit import SqlAlchemyToolAuditSink
 from packages.tools.registry import ToolRegistry
 from packages.tools.runtime import ToolRuntime
@@ -29,6 +30,7 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
         )
         service = AgentRunService(
             factory,
+            credential_cipher=ProviderCredentialCipher.from_settings(settings),
             tool_runtime=ToolRuntime(
                 session_factory=factory,
                 registry=ToolRegistry(retriever=retriever),

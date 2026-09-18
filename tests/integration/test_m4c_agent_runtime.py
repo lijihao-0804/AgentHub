@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from importlib import import_module
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -679,3 +680,45 @@ async def test_m4c_cross_workspace_version_is_not_executable(db_factory) -> None
         ).run(first["context"], agent_version_id=second["version"].id, input_text="cross")
     assert raised.value.code == "AGENT_VERSION_NOT_FOUND"
     assert gateway.requests == []
+
+
+@pytest.mark.asyncio
+async def test_h2_agent_run_backfill_restores_historical_version_identity(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=uuid4().hex)
+        version = base["version"]
+        snapshot_id = str(uuid4())
+        snapshot_hash = "a" * 64
+        version.resolved_spec = {
+            **version.resolved_spec,
+            "retrieval": {
+                "knowledge_binding_mode": "PINNED",
+                "knowledge_snapshots": [
+                    {"snapshot_id": snapshot_id, "snapshot_hash": snapshot_hash}
+                ],
+            },
+        }
+        version.resolved_spec_hash = canonical_json_hash(version.resolved_spec)
+        await session.commit()
+        run = AgentRun(
+            workspace_id=base["workspace_id"],
+            agent_version_id=version.id,
+            input_text="historical",
+            created_by=base["user"].id,
+            resolved_spec_hash=None,
+            effective_knowledge_snapshots=[],
+        )
+        session.add(run)
+        await session.commit()
+
+        migration = import_module("migrations.versions.0011_h2_agent_run_backfill")
+        await session.run_sync(
+            lambda sync_session: migration.backfill_agent_runs(sync_session.connection())
+        )
+        await session.refresh(run)
+
+        assert run.resolved_spec_hash == version.resolved_spec_hash
+        assert run.resolved_spec_hash is not None
+        assert run.effective_knowledge_snapshots == [
+            {"snapshot_id": snapshot_id, "snapshot_hash": snapshot_hash}
+        ]

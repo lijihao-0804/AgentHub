@@ -7,9 +7,7 @@ import math
 from collections.abc import Mapping
 from typing import Any
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from packages.tools.contracts import ToolDefinition, ToolExecutionContext
+from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 from packages.tools.errors import ToolHandlerError
 
 _MAX_EXPRESSION_LENGTH = 256
@@ -86,9 +84,9 @@ async def calculate(
     context: ToolExecutionContext,
     definition: ToolDefinition,
     arguments: Mapping[str, Any],
-    session: AsyncSession | None,
+    session_factory: ToolSessionFactory | None,
 ) -> dict[str, int | float | str]:
-    del context, definition, session
+    del context, definition, session_factory
     expression = arguments.get("expression")
     if not isinstance(expression, str) or not expression.strip():
         raise ToolHandlerError(

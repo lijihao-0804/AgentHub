@@ -14,13 +14,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.control_plane.models import Organization, User, Workspace
-from packages.core.config.settings import get_settings
+from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.core.execution_context.models import (
     OrganizationContext,
     PrincipalContext,
     WorkspaceExecutionContext,
 )
+from packages.model_gateway.credentials import ProviderCredentialCipher
+from packages.model_gateway.errors import ModelGatewayError
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
 
@@ -199,3 +201,67 @@ async def test_database_rejects_cross_workspace_profile_references(
 
         with pytest.raises(IntegrityError):
             await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_provider_credentials_are_encrypted_and_decrypt_with_injected_cipher(
+    db_factory: async_sessionmaker[AsyncSession], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("AGENTHUB_CREDENTIAL_MASTER_KEY", "h2-integration-master-key")
+    get_settings.cache_clear()
+    cipher = ProviderCredentialCipher.from_settings(
+        Settings(testing=True, credential_master_key="h2-integration-master-key")
+    )
+    sentinel = "integration-secret-sentinel"
+    async with db_factory() as session:
+        workspace = await create_workspace(session)
+        credential = ProviderCredential(
+            workspace_id=workspace.id,
+            provider="deepseek",
+            name="encrypted",
+            secret=sentinel,
+        )
+        session.add(credential)
+        await session.commit()
+        raw_secret, ciphertext, version = (
+            await session.execute(
+                text(
+                    "SELECT secret, secret_ciphertext, secret_version "
+                    "FROM provider_credentials WHERE id = :id"
+                ),
+                {"id": credential.id},
+            )
+        ).one()
+        assert raw_secret is None
+        assert ciphertext is not None
+        assert sentinel not in ciphertext
+        assert version == 1
+
+        repository = SqlAlchemyModelGatewayRepository(session, credential_cipher=cipher)
+        loaded = await repository.get_provider_credential(context_for(workspace.id), credential.id)
+        assert loaded is not None
+        assert loaded.secret == sentinel
+
+        credential.secret = "rotated-secret-sentinel"
+        await session.commit()
+        rotated_raw = (
+            await session.execute(
+                text("SELECT secret, secret_ciphertext FROM provider_credentials WHERE id = :id"),
+                {"id": credential.id},
+            )
+        ).one()
+        assert rotated_raw[0] is None
+        assert "rotated-secret-sentinel" not in rotated_raw[1]
+
+        wrong = SqlAlchemyModelGatewayRepository(
+            session,
+            credential_cipher=ProviderCredentialCipher.from_settings(
+                Settings(testing=True, credential_master_key="wrong-master-key")
+            ),
+        )
+        with pytest.raises(ModelGatewayError) as raised:
+            await wrong.get_provider_credential(context_for(workspace.id), credential.id)
+        assert raised.value.code.value == "MODEL_AUTH_FAILED"
+        assert sentinel not in str(raised.value)
+        assert "rotated-secret-sentinel" not in str(raised.value)
+    get_settings.cache_clear()
