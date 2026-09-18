@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from uuid import uuid4
 
@@ -18,6 +19,12 @@ from packages.core.config.settings import get_settings
 from packages.core.database import create_database
 from packages.model_gateway.contracts import ModelResponse, ModelToolCall
 from packages.tools.actions import ActionRuntime
+from packages.tools.contracts import (
+    ToolApprovalPolicy,
+    ToolDefinition,
+    ToolEffect,
+    ToolRisk,
+)
 from packages.tools.models import Customer, Ticket
 from tests.integration.test_m4c_agent_runtime import _seed
 
@@ -183,3 +190,99 @@ async def test_approval_waits_then_resumes_same_run_and_creates_one_ticket(db_fa
     assert len(tickets) == 1
     assert refreshed is not None
     assert refreshed.execution_status == ApprovalExecutionStatus.SUCCEEDED
+
+
+@pytest.mark.asyncio
+async def test_concurrent_claim_has_one_winner_and_ticket_is_effectively_once(db_factory) -> None:
+    tool_spec = {
+        "kind": "builtin",
+        "identity": "create_ticket",
+        "input_schema": {
+            "type": "object",
+            "properties": {"customer_ref": {"type": "string"}, "subject": {"type": "string"}},
+            "required": ["customer_ref", "subject"],
+            "additionalProperties": False,
+        },
+        "effect": "WRITE",
+        "risk_level": "HIGH",
+        "approval_policy": "ALWAYS",
+    }
+    async with db_factory() as session:
+        base = await _seed(session, label=uuid4().hex, tool_spec=tool_spec)
+        session.add(
+            Customer(
+                workspace_id=base["workspace_id"], customer_ref="cust-claim", name="Claim Customer"
+            )
+        )
+        await session.commit()
+    context = base["context"].model_copy(
+        update={
+            "permissions": frozenset(
+                {"agent_run", "tool_run", "workspace_read", "approve_action"}
+            )
+        }
+    )
+    async with db_factory() as session:
+        run = AgentRun(
+            workspace_id=base["workspace_id"],
+            agent_version_id=base["version"].id,
+            input_text="claim",
+            created_by=base["user"].id,
+        )
+        session.add(run)
+        await session.commit()
+    approvals = ApprovalService(db_factory)
+    approval = await approvals.create_or_get(
+        context,
+        run_id=run.id,
+        agent_version_id=base["version"].id,
+        tool_revision_id=base["revision"].id,
+        tool_identity="create_ticket",
+        arguments={"customer_ref": "cust-claim", "subject": "Claim me"},
+        input_schema=tool_spec["input_schema"],
+        proposal_ordinal=0,
+    )
+    await approvals.decide(context, approval.id, decision=ApprovalDecisionStatus.APPROVED)
+    claimed = await asyncio.gather(
+        approvals.claim_execution(context, approval.id),
+        approvals.claim_execution(context, approval.id),
+    )
+    assert sum(item is not None for item in claimed) == 1
+
+    definition = ToolDefinition(
+        identity="create_ticket",
+        revision_id=base["revision"].id,
+        spec_hash=base["revision"].spec_hash,
+        description="Create a ticket",
+        input_schema=tool_spec["input_schema"],
+        effect=ToolEffect.WRITE,
+        risk_level=ToolRisk.HIGH,
+        approval_policy=ToolApprovalPolicy.ALWAYS,
+        timeout_seconds=30,
+    )
+    action_runtime = ActionRuntime(session_factory=db_factory)
+    results = await asyncio.gather(
+        action_runtime.execute(
+            context,
+            definition,
+            {"customer_ref": "cust-claim", "subject": "Idempotent"},
+            idempotency_key="logical-action-ticket-1",
+        ),
+        action_runtime.execute(
+            context,
+            definition,
+            {"customer_ref": "cust-claim", "subject": "Idempotent"},
+            idempotency_key="logical-action-ticket-1",
+        ),
+    )
+    assert all(result.status.value == "SUCCEEDED" for result in results)
+    async with db_factory() as session:
+        tickets = list(
+            await session.scalars(
+                select(Ticket).where(
+                    Ticket.workspace_id == base["workspace_id"],
+                    Ticket.idempotency_key == "logical-action-ticket-1",
+                )
+            )
+        )
+    assert len(tickets) == 1
