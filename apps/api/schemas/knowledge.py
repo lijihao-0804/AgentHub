@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class KnowledgeBaseCreateRequest(BaseModel):
@@ -72,3 +72,68 @@ class DocumentRevisionStatusResponse(BaseModel):
 
     revision: DocumentRevisionResponse
     ingestion_job: IngestionJobResponse
+
+
+class RetrievalPlaygroundRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, max_length=4_000)
+    knowledge_snapshot_id: UUID
+    dense_top_k: int = Field(default=30, ge=1, le=100)
+    sparse_top_k: int = Field(default=30, ge=1, le=100)
+    candidate_top_k: int = Field(default=20, ge=1, le=100)
+    final_top_k: int = Field(default=6, ge=1, le=20)
+
+    @model_validator(mode="after")
+    def validate_final_limit(self) -> RetrievalPlaygroundRequest:
+        if self.final_top_k > self.candidate_top_k:
+            raise ValueError("final_top_k must be less than or equal to candidate_top_k")
+        return self
+
+
+class RetrievalPlaygroundStageResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    chunk_id: str
+    rank: int
+    score: float
+    document_revision_id: str | None = None
+    locator: dict[str, object] | None = None
+
+
+class RetrievalPlaygroundStage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    latency_ms: float
+    results: list[RetrievalPlaygroundStageResult]
+
+
+class RetrievalPlaygroundStages(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    dense: RetrievalPlaygroundStage
+    sparse: RetrievalPlaygroundStage
+    fused: RetrievalPlaygroundStage
+    rerank: RetrievalPlaygroundStage
+
+
+class RetrievalPlaygroundEvidence(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    chunk_id: str
+    document_id: str
+    document_revision_id: str
+    source: str
+    locator: dict[str, object]
+    retrieval_score: float
+    rerank_score: float | None
+    snippet: str
+
+
+class RetrievalPlaygroundResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    snapshot_id: str
+    evidence: list[RetrievalPlaygroundEvidence]
+    stages: RetrievalPlaygroundStages
+    total_latency_ms: float

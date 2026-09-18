@@ -10,6 +10,10 @@ from apps.api.dependencies import get_db_session
 from packages.control_plane.services import TenantService
 from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
 from packages.knowledge.adapters.celery_queue import CeleryIngestionQueue
+from packages.knowledge.composition import (
+    RetrievalComponents,
+    production_retrieval_components,
+)
 from packages.knowledge.queue import IngestionQueue
 
 db_session_dependency = Depends(get_db_session)
@@ -36,3 +40,9 @@ async def get_ingestion_queue(request: Request) -> IngestionQueue:
         queue = CeleryIngestionQueue(create_celery_app(request.app.state.settings))
         request.app.state.ingestion_queue = queue
     return queue
+
+
+async def get_retrieval_components(request: Request) -> RetrievalComponents:
+    """Use real adapters in production; tests override this dependency explicitly."""
+
+    return production_retrieval_components(request.app.state.settings)

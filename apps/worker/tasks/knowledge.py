@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import Callable, Mapping
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from uuid import UUID
 
@@ -13,16 +13,16 @@ from apps.worker.celery_app import celery_app
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.knowledge.adapters.celery_queue import CeleryIngestionQueue
-from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
-from packages.knowledge.adapters.qdrant import QdrantVectorIndex
-from packages.knowledge.adapters.reranker import BgeReranker
-from packages.knowledge.adapters.sparse import BgeM3SparseEncoder
 from packages.knowledge.blob_store import BlobStoreError, LocalBlobStore
 from packages.knowledge.chunking import build_deterministic_chunks
+from packages.knowledge.composition import (
+    RetrievalComponents,
+    RetrievalComponentsFactory,
+    production_retrieval_components,
+)
 from packages.knowledge.contracts import (
     DenseEmbedder,
     KnowledgeProviderError,
-    Reranker,
     SparseEncoder,
     VectorIndex,
     VectorRecord,
@@ -48,15 +48,8 @@ from packages.observability.contracts import TraceSink, TraceSpan
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True)
-class IndexingComponents:
-    dense: DenseEmbedder
-    sparse: SparseEncoder
-    reranker: Reranker
-    index: VectorIndex
-
-
-IndexingComponentsFactory = Callable[[Settings], IndexingComponents]
+IndexingComponents = RetrievalComponents
+IndexingComponentsFactory = RetrievalComponentsFactory
 
 
 @dataclass(frozen=True)
@@ -163,26 +156,7 @@ async def _finalize_claim(
 
 
 def _production_indexing_components(settings: Settings) -> IndexingComponents:
-    return IndexingComponents(
-        dense=BgeM3DenseEmbedder(
-            model_name=settings.knowledge_embedding_model,
-            device=settings.knowledge_embedding_device,
-            batch_size=settings.knowledge_embedding_batch_size,
-            expected_dimension=settings.knowledge_dense_vector_size,
-        ),
-        sparse=BgeM3SparseEncoder(model_name=settings.knowledge_embedding_model),
-        reranker=BgeReranker(
-            model_name=settings.knowledge_reranker_model,
-            device=settings.knowledge_reranker_device,
-            batch_size=settings.knowledge_reranker_batch_size,
-        ),
-        index=QdrantVectorIndex(
-            url=settings.qdrant_url,
-            collection_name=settings.knowledge_qdrant_collection,
-            dense_vector_size=settings.knowledge_dense_vector_size,
-            timeout_seconds=settings.knowledge_qdrant_timeout_seconds,
-        ),
-    )
+    return production_retrieval_components(settings)
 
 
 def _indexing_components(

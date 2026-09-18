@@ -1,13 +1,19 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from dataclasses import dataclass
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
-from apps.api.knowledge_dependencies import get_ingestion_queue, get_workspace_context
+from apps.api.knowledge_dependencies import (
+    get_ingestion_queue,
+    get_retrieval_components,
+    get_workspace_context,
+)
 from apps.api.schemas.knowledge import (
     DocumentResponse,
     DocumentRevisionResponse,
@@ -16,11 +22,21 @@ from apps.api.schemas.knowledge import (
     IngestionJobResponse,
     KnowledgeBaseCreateRequest,
     KnowledgeBaseResponse,
+    RetrievalPlaygroundEvidence,
+    RetrievalPlaygroundRequest,
+    RetrievalPlaygroundResponse,
+    RetrievalPlaygroundStage,
+    RetrievalPlaygroundStageResult,
+    RetrievalPlaygroundStages,
 )
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.blob_store import LocalBlobStore
+from packages.knowledge.composition import RetrievalComponents
+from packages.knowledge.contracts import RetrievalQuery, RetrievalResult, RetrievalTraceStage
+from packages.knowledge.models import DocumentChunk, DocumentRevision, KnowledgeSnapshotItem
 from packages.knowledge.queue import IngestionQueue
+from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.knowledge.services import KnowledgeService
 from packages.knowledge.upload_security import (
     UploadSecurityError,
@@ -35,7 +51,166 @@ router = APIRouter(tags=["knowledge"])
 db_session_dependency = Depends(get_db_session)
 context_dependency = Depends(get_workspace_context)
 queue_dependency = Depends(get_ingestion_queue)
+retrieval_components_dependency = Depends(get_retrieval_components)
 upload_file_dependency = File(...)
+
+
+@dataclass(frozen=True)
+class _TraceMetadata:
+    document_revision_id: str
+    locator: dict[str, object]
+
+
+async def _load_trace_metadata(
+    session: AsyncSession,
+    *,
+    workspace_id: UUID,
+    knowledge_base_id: UUID,
+    snapshot_id: UUID,
+    chunk_ids: set[str],
+) -> dict[str, _TraceMetadata]:
+    if not chunk_ids:
+        return {}
+    revision_ids = tuple(
+        await session.scalars(
+            select(KnowledgeSnapshotItem.document_revision_id).where(
+                KnowledgeSnapshotItem.workspace_id == workspace_id,
+                KnowledgeSnapshotItem.knowledge_base_id == knowledge_base_id,
+                KnowledgeSnapshotItem.snapshot_id == snapshot_id,
+            )
+        )
+    )
+    if not revision_ids:
+        return {}
+    result = await session.execute(
+        select(DocumentChunk, DocumentRevision)
+        .join(
+            DocumentRevision,
+            (DocumentRevision.id == DocumentChunk.document_revision_id)
+            & (DocumentRevision.workspace_id == DocumentChunk.workspace_id)
+            & (DocumentRevision.knowledge_base_id == DocumentChunk.knowledge_base_id),
+        )
+        .where(
+            DocumentChunk.workspace_id == workspace_id,
+            DocumentChunk.knowledge_base_id == knowledge_base_id,
+            DocumentChunk.document_revision_id.in_(revision_ids),
+            DocumentChunk.chunk_id.in_(chunk_ids),
+        )
+    )
+    return {
+        chunk.chunk_id: _TraceMetadata(
+            document_revision_id=str(revision.id),
+            locator=dict(chunk.locator),
+        )
+        for chunk, revision in result
+    }
+
+
+def _playground_stage(
+    stage: RetrievalTraceStage,
+    metadata: dict[str, _TraceMetadata],
+) -> RetrievalPlaygroundStage:
+    return RetrievalPlaygroundStage(
+        latency_ms=stage.latency_ms,
+        results=[
+            RetrievalPlaygroundStageResult(
+                chunk_id=item.chunk_id,
+                rank=item.rank,
+                score=item.score,
+                document_revision_id=(
+                    metadata[item.chunk_id].document_revision_id
+                    if item.chunk_id in metadata
+                    else None
+                ),
+                locator=metadata[item.chunk_id].locator if item.chunk_id in metadata else None,
+            )
+            for item in stage.results
+        ],
+    )
+
+
+def _playground_response(
+    result: RetrievalResult,
+    *,
+    metadata: dict[str, _TraceMetadata],
+) -> RetrievalPlaygroundResponse:
+    trace = result.trace
+    return RetrievalPlaygroundResponse(
+        snapshot_id=trace.snapshot_id,
+        evidence=[
+            RetrievalPlaygroundEvidence(
+                chunk_id=item.chunk_id,
+                document_id=item.document_id,
+                document_revision_id=item.document_revision_id,
+                source=item.source,
+                locator=item.locator,
+                retrieval_score=item.retrieval_score,
+                rerank_score=item.rerank_score,
+                snippet=item.text[:1_000],
+            )
+            for item in result.evidence
+        ],
+        stages=RetrievalPlaygroundStages(
+            dense=_playground_stage(trace.dense, metadata),
+            sparse=_playground_stage(trace.sparse, metadata),
+            fused=_playground_stage(trace.fusion, metadata),
+            rerank=_playground_stage(trace.rerank, metadata),
+        ),
+        total_latency_ms=trace.total_latency_ms,
+    )
+
+
+@router.post(
+    "/api/v1/workspaces/{workspace_id}/knowledge-bases/{knowledge_base_id}/retrieval/playground",
+    response_model=RetrievalPlaygroundResponse,
+)
+async def retrieval_playground(
+    workspace_id: UUID,
+    knowledge_base_id: UUID,
+    payload: RetrievalPlaygroundRequest,
+    request: Request,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+    components: RetrievalComponents = retrieval_components_dependency,
+) -> RetrievalPlaygroundResponse:
+    if not payload.query.strip():
+        raise AgentHubError("INVALID_RETRIEVAL_QUERY", "The query must not be blank.", 400)
+    result = await HybridKnowledgeRetriever(
+        session=session,
+        dense_embedder=components.dense,
+        sparse_encoder=components.sparse,
+        reranker=components.reranker,
+        vector_index=components.index,
+        rrf_k=request.app.state.settings.knowledge_rrf_k,
+    ).retrieve_with_trace(
+        context,
+        RetrievalQuery(
+            text=payload.query,
+            knowledge_base_id=str(knowledge_base_id),
+            knowledge_snapshot_id=str(payload.knowledge_snapshot_id),
+            dense_top_k=payload.dense_top_k,
+            sparse_top_k=payload.sparse_top_k,
+            candidate_top_k=payload.candidate_top_k,
+            final_top_k=payload.final_top_k,
+        ),
+    )
+    metadata = await _load_trace_metadata(
+        session,
+        workspace_id=workspace_id,
+        knowledge_base_id=knowledge_base_id,
+        snapshot_id=payload.knowledge_snapshot_id,
+        chunk_ids={
+            item.chunk_id
+            for stage in (
+                result.trace.dense,
+                result.trace.sparse,
+                result.trace.fusion,
+                result.trace.rerank,
+            )
+            for item in stage.results
+        },
+    )
+    return _playground_response(result, metadata=metadata)
 
 
 @router.post(
