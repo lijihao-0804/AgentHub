@@ -7,6 +7,7 @@ from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_AUTH_JWT_SECRET = "local-dev-only-change-me-32-characters"
+DEVELOPMENT_ENVIRONMENTS = frozenset({"local", "test", "testing", "development", "dev"})
 
 
 class Settings(BaseSettings):
@@ -21,6 +22,7 @@ class Settings(BaseSettings):
     environment: str = "local"
     log_level: str = "INFO"
     testing: bool = False
+    process_role: Literal["api", "worker", "beat"] = "api"
     database_url: str = "postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub"
     redis_url: str = "redis://localhost:6379/0"
     qdrant_url: str = "http://localhost:6333"
@@ -70,7 +72,8 @@ class Settings(BaseSettings):
         if self.knowledge_reranker_device not in {"auto", "cpu", "cuda"}:
             raise ValueError("knowledge reranker device must be auto, cpu, or cuda")
         if (
-            self.environment.lower() not in {"local", "test", "testing", "development", "dev"}
+            self.environment.lower() not in DEVELOPMENT_ENVIRONMENTS
+            and self.process_role == "api"
             and self.auth_jwt_secret == DEFAULT_AUTH_JWT_SECRET
         ):
             raise ValueError(
@@ -89,7 +92,7 @@ class Settings(BaseSettings):
     def refresh_cookie_secure(self) -> bool:
         if self.auth_cookie_secure is not None:
             return self.auth_cookie_secure
-        return self.environment.lower() not in {"local", "test", "development"}
+        return self.environment.lower() not in DEVELOPMENT_ENVIRONMENTS
 
 
 @lru_cache(maxsize=1)

@@ -41,6 +41,7 @@ services:
       dockerfile: infra/docker/api.Dockerfile
     environment:
       AGENTHUB_ENVIRONMENT: docker
+      AGENTHUB_PROCESS_ROLE: api
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
       AGENTHUB_AUTH_JWT_SECRET: ${AGENTHUB_AUTH_JWT_SECRET:?AGENTHUB_AUTH_JWT_SECRET is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
@@ -63,8 +64,8 @@ services:
     command: ["uv", "run", "celery", "-A", "apps.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=1"]
     environment:
       AGENTHUB_ENVIRONMENT: docker
+      AGENTHUB_PROCESS_ROLE: worker
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
-      AGENTHUB_AUTH_JWT_SECRET: ${AGENTHUB_AUTH_JWT_SECRET:?AGENTHUB_AUTH_JWT_SECRET is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
       AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs
@@ -83,8 +84,8 @@ services:
     command: ["uv", "run", "celery", "-A", "apps.worker.celery_app", "beat", "--loglevel=INFO"]
     environment:
       AGENTHUB_ENVIRONMENT: docker
+      AGENTHUB_PROCESS_ROLE: beat
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
-      AGENTHUB_AUTH_JWT_SECRET: ${AGENTHUB_AUTH_JWT_SECRET:?AGENTHUB_AUTH_JWT_SECRET is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
       AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs

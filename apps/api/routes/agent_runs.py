@@ -4,11 +4,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.agent_runtime_dependencies import get_production_agent_run_service
-from apps.api.dependencies import get_db_session
-from apps.api.knowledge_dependencies import get_workspace_context
+from apps.api.knowledge_dependencies import get_agent_run_workspace_context
 from apps.api.schemas.agent_runs import (
     AgentRunCreateRequest,
     AgentRunResponse,
@@ -19,8 +17,7 @@ from packages.agent_runtime.sse import event_to_sse
 from packages.core.execution_context.models import WorkspaceExecutionContext
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}", tags=["agent-runs"])
-db_session_dependency = Depends(get_db_session)
-context_dependency = Depends(get_workspace_context)
+context_dependency = Depends(get_agent_run_workspace_context)
 
 
 def _service(request: Request) -> AgentRunService:
@@ -38,9 +35,8 @@ async def create_agent_run(
     payload: AgentRunCreateRequest,
     request: Request,
     context: WorkspaceExecutionContext = context_dependency,
-    session: AsyncSession = db_session_dependency,
 ) -> AgentRunResponse:
-    del workspace_id, session
+    del workspace_id
     service = _service(request)
     run = await service.run(
         context,
@@ -60,9 +56,8 @@ async def stream_agent_run(
     payload: AgentRunCreateRequest,
     request: Request,
     context: WorkspaceExecutionContext = context_dependency,
-    session: AsyncSession = db_session_dependency,
 ) -> StreamingResponse:
-    del workspace_id, session
+    del workspace_id
     service = _service(request)
     await service.preflight_stream(context, agent_version_id=agent_version_id)
 
@@ -87,9 +82,8 @@ async def get_agent_run(
     run_id: UUID,
     request: Request,
     context: WorkspaceExecutionContext = context_dependency,
-    session: AsyncSession = db_session_dependency,
 ) -> AgentRunResponse:
-    del workspace_id, session
+    del workspace_id
     return AgentRunResponse.model_validate(await _service(request).get_run(context, run_id))
 
 
@@ -99,9 +93,8 @@ async def list_agent_run_steps(
     run_id: UUID,
     request: Request,
     context: WorkspaceExecutionContext = context_dependency,
-    session: AsyncSession = db_session_dependency,
 ) -> list[RunStepResponse]:
-    del workspace_id, session
+    del workspace_id
     steps = await _service(request).list_steps(context, run_id)
     return [RunStepResponse.model_validate(step) for step in steps]
 

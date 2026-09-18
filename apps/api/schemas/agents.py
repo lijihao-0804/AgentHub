@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from packages.agent_runtime.runtime_config import MAX_RUNTIME_LIMITS
+
 
 class ModelRetryPolicyRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -35,10 +37,16 @@ class ContextBudgetRequest(BaseModel):
 class RuntimeConfigRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    max_steps: int | None = Field(default=None, ge=1, le=32)
-    max_tool_calls: int | None = Field(default=None, ge=1, le=64)
-    max_identical_calls: int | None = Field(default=None, ge=1, le=4)
-    max_parallel_reads: int | None = Field(default=None, ge=1, le=8)
+    max_steps: int | None = Field(default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_steps"])
+    max_tool_calls: int | None = Field(
+        default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_tool_calls"]
+    )
+    max_identical_calls: int | None = Field(
+        default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_identical_calls"]
+    )
+    max_parallel_reads: int | None = Field(
+        default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_parallel_reads"]
+    )
     context_budget: ContextBudgetRequest | None = None
 
 

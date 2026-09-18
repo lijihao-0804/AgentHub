@@ -8,6 +8,7 @@ from dataclasses import dataclass, replace
 from uuid import UUID
 
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 
 from apps.worker.celery_app import celery_app
 from packages.core.config.settings import Settings, get_settings
@@ -374,15 +375,25 @@ async def _process_knowledge_ingestion(
                 )
             except DocumentParseError as exc:
                 terminal_error = (exc.code, exc.message)
-        except Exception:
+        except SQLAlchemyError:
             logger.warning(
-                "knowledge_ingestion_worker_error",
+                "knowledge_ingestion_database_failure",
                 extra={"job_id": str(job_id)},
                 exc_info=True,
             )
             retryable_error = (
                 "DATABASE_TEMPORARY_FAILURE",
                 "The ingestion worker encountered a temporary database failure.",
+            )
+        except Exception:
+            logger.warning(
+                "knowledge_ingestion_worker_error",
+                extra={"job_id": str(job_id)},
+                exc_info=True,
+            )
+            terminal_error = (
+                "INGESTION_INTERNAL_ERROR",
+                "The ingestion worker failed.",
             )
         finally:
             await _cancel_renewal(renewal_task)

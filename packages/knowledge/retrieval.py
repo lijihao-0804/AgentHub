@@ -7,6 +7,7 @@ import logging
 import math
 import time
 from collections.abc import Mapping
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
@@ -140,7 +141,8 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
     def __init__(
         self,
         *,
-        session: AsyncSession,
+        session: AsyncSession | None = None,
+        session_factory: async_sessionmaker[AsyncSession] | None = None,
         dense_embedder: DenseEmbedder,
         sparse_encoder: SparseEncoder,
         reranker: Reranker,
@@ -148,7 +150,10 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         trace_sink: TraceSink | None = None,
         rrf_k: int = 60,
     ) -> None:
+        if (session is None) == (session_factory is None):
+            raise ValueError("provide exactly one of session or session_factory")
         self.session = session
+        self.session_factory = session_factory
         self.dense_embedder = dense_embedder
         self.sparse_encoder = sparse_encoder
         self.reranker = reranker
@@ -156,15 +161,25 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         self.trace_sink = trace_sink or NoopTraceSink()
         self.rrf_k = rrf_k
 
+    @asynccontextmanager
+    async def _db_session(self):
+        if self.session is not None:
+            yield self.session
+            return
+        assert self.session_factory is not None
+        async with self.session_factory() as session:
+            yield session
+
     async def _snapshot_scope(
         self,
+        session: AsyncSession,
         context: WorkspaceExecutionContext,
         query: RetrievalQuery,
     ) -> tuple[UUID, UUID, tuple[str, ...]]:
         workspace_id = _uuid(context.workspace_id, field="workspace_id")
         knowledge_base_id = _uuid(query.knowledge_base_id, field="knowledge_base_id")
         snapshot_id = _uuid(query.knowledge_snapshot_id, field="knowledge_snapshot_id")
-        snapshot = await self.session.scalar(
+        snapshot = await session.scalar(
             select(KnowledgeSnapshot).where(
                 KnowledgeSnapshot.id == snapshot_id,
                 KnowledgeSnapshot.workspace_id == workspace_id,
@@ -175,7 +190,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             raise AgentHubError("SNAPSHOT_NOT_FOUND", "The knowledge snapshot was not found.", 404)
         revision_ids = tuple(
             str(item)
-            for item in await self.session.scalars(
+            for item in await session.scalars(
                 select(KnowledgeSnapshotItem.document_revision_id)
                 .where(
                     KnowledgeSnapshotItem.workspace_id == workspace_id,
@@ -189,6 +204,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
 
     async def _load_chunks(
         self,
+        session: AsyncSession,
         *,
         workspace_id: UUID,
         knowledge_base_id: UUID,
@@ -197,7 +213,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
     ) -> dict[str, tuple[DocumentChunk, Document, DocumentRevision]]:
         if not revision_ids or not chunk_ids:
             return {}
-        result = await self.session.execute(
+        result = await session.execute(
             select(DocumentChunk, Document, DocumentRevision)
             .join(
                 Document,
@@ -239,7 +255,10 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 400,
             )
 
-        workspace_id, knowledge_base_id, revision_ids = await self._snapshot_scope(context, query)
+        async with self._db_session() as session:
+            workspace_id, knowledge_base_id, revision_ids = await self._snapshot_scope(
+                session, context, query
+            )
         snapshot_span = await _safe_span_start(
             self.trace_sink,
             "knowledge.retrieve",
@@ -314,12 +333,14 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 RetrievalTraceResult(item.chunk_id, rank, item.retrieval_score)
                 for rank, item in enumerate(fused, start=1)
             )
-            chunk_map = await self._load_chunks(
-                workspace_id=workspace_id,
-                knowledge_base_id=knowledge_base_id,
-                revision_ids=revision_ids,
-                chunk_ids={item.chunk_id for item in fused},
-            )
+            async with self._db_session() as session:
+                chunk_map = await self._load_chunks(
+                    session,
+                    workspace_id=workspace_id,
+                    knowledge_base_id=knowledge_base_id,
+                    revision_ids=revision_ids,
+                    chunk_ids={item.chunk_id for item in fused},
+                )
             candidates = tuple(
                 RerankCandidate(item.chunk_id, chunk_map[item.chunk_id][0].text)
                 for item in fused
@@ -506,16 +527,15 @@ class SessionScopedKnowledgeRetriever(KnowledgeRetriever):
         context: WorkspaceExecutionContext,
         query: RetrievalQuery,
     ) -> RetrievalResult:
-        async with self.session_factory() as session:
-            return await HybridKnowledgeRetriever(
-                session=session,
-                dense_embedder=self.components.dense,
-                sparse_encoder=self.components.sparse,
-                reranker=self.components.reranker,
-                vector_index=self.components.index,
-                trace_sink=self.trace_sink,
-                rrf_k=self.rrf_k,
-            ).retrieve_with_trace(context, query)
+        return await HybridKnowledgeRetriever(
+            session_factory=self.session_factory,
+            dense_embedder=self.components.dense,
+            sparse_encoder=self.components.sparse,
+            reranker=self.components.reranker,
+            vector_index=self.components.index,
+            trace_sink=self.trace_sink,
+            rrf_k=self.rrf_k,
+        ).retrieve_with_trace(context, query)
 
     async def retrieve(
         self,
