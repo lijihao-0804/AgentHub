@@ -1,0 +1,396 @@
+{
+  "dataset_version": "m4-agent-runtime-v1",
+  "cases": [
+    {
+      "case_id": "tool-calculator-001",
+      "split": "dev",
+      "category": "tool_selection",
+      "input": "Calculate 17 * 23",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "17 * 23"}},
+        {"type": "FINAL", "content": "391"}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["calculator"],
+        "model_steps": 2,
+        "tool_calls": 1,
+        "final_output": "391",
+        "handler_calls": 1
+      }
+    },
+    {
+      "case_id": "tool-calculator-002",
+      "split": "dev",
+      "category": "tool_selection",
+      "input": "Calculate 144 / 12",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "144 / 12"}},
+        {"type": "FINAL", "content": "12"}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["calculator"],
+        "model_steps": 2,
+        "tool_calls": 1,
+        "final_output": "12",
+        "handler_calls": 1
+      }
+    },
+    {
+      "case_id": "tool-customer-001",
+      "split": "dev",
+      "category": "tool_selection",
+      "input": "Look up customer C-ACME",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "query_customer", "arguments": {"customer_ref": "C-ACME", "include_open_tickets": true}},
+        {"type": "FINAL", "content": "Customer lookup complete."}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["query_customer"],
+        "model_steps": 2,
+        "tool_calls": 1,
+        "final_output": "Customer lookup complete.",
+        "handler_calls": 1
+      }
+    },
+    {
+      "case_id": "tool-customer-002",
+      "split": "dev",
+      "category": "tool_selection",
+      "input": "Look up customer C-NORTH",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "query_customer", "arguments": {"customer_ref": "C-NORTH", "include_open_tickets": false}},
+        {"type": "FINAL", "content": "Customer lookup complete."}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["query_customer"],
+        "model_steps": 2,
+        "tool_calls": 1,
+        "final_output": "Customer lookup complete.",
+        "handler_calls": 1
+      }
+    },
+    {
+      "case_id": "tool-search-001",
+      "split": "holdout",
+      "category": "tool_selection",
+      "input": "Search the knowledge base for launch readiness",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "search_knowledge", "arguments": {"query": "launch readiness", "limit": 1}},
+        {"type": "FINAL", "content": "Knowledge lookup complete."}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["search_knowledge"],
+        "model_steps": 2,
+        "tool_calls": 1,
+        "final_output": "Knowledge lookup complete.",
+        "handler_calls": 1
+      }
+    },
+    {
+      "case_id": "tool-search-002",
+      "split": "holdout",
+      "category": "tool_selection",
+      "input": "Find the deployment checklist",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "search_knowledge", "arguments": {"query": "deployment checklist", "limit": 1}},
+        {"type": "FINAL", "content": "Knowledge lookup complete."}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["search_knowledge"],
+        "model_steps": 2,
+        "tool_calls": 1,
+        "final_output": "Knowledge lookup complete.",
+        "handler_calls": 1
+      }
+    },
+    {
+      "case_id": "no-tool-001",
+      "split": "dev",
+      "category": "no_tool",
+      "input": "What is the purpose of this agent?",
+      "model_script": [{"type": "FINAL", "content": "It follows the published runtime policy."}],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": [],
+        "model_steps": 1,
+        "tool_calls": 0,
+        "final_output": "It follows the published runtime policy.",
+        "handler_calls": 0
+      }
+    },
+    {
+      "case_id": "no-tool-002",
+      "split": "dev",
+      "category": "no_tool",
+      "input": "Explain what a published version means.",
+      "model_script": [{"type": "FINAL", "content": "A published version is immutable."}],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": [],
+        "model_steps": 1,
+        "tool_calls": 0,
+        "final_output": "A published version is immutable."
+        ,"handler_calls": 0
+      }
+    },
+    {
+      "case_id": "no-tool-003",
+      "split": "dev",
+      "category": "no_tool",
+      "input": "Do not look up a customer; just say hello.",
+      "model_script": [{"type": "FINAL", "content": "Hello from the runtime."}],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": [],
+        "model_steps": 1,
+        "tool_calls": 0,
+        "final_output": "Hello from the runtime.",
+        "handler_calls": 0
+      }
+    },
+    {
+      "case_id": "no-tool-004",
+      "split": "holdout",
+      "category": "no_tool",
+      "input": "Give a short answer without retrieval.",
+      "model_script": [{"type": "FINAL", "content": "No retrieval was needed."}],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": [],
+        "model_steps": 1,
+        "tool_calls": 0,
+        "final_output": "No retrieval was needed.",
+        "handler_calls": 0
+      }
+    },
+    {
+      "case_id": "multi-read-001",
+      "split": "dev",
+      "category": "multi_step_read",
+      "input": "Look up C-ACME and calculate 6 * 7.",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "query_customer", "arguments": {"customer_ref": "C-ACME", "include_open_tickets": true}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "6 * 7"}},
+        {"type": "FINAL", "content": "Customer found and the result is 42."}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["query_customer", "calculator"],
+        "model_steps": 3,
+        "tool_calls": 2,
+        "final_output": "Customer found and the result is 42.",
+        "handler_calls": 2
+      }
+    },
+    {
+      "case_id": "multi-read-002",
+      "split": "dev",
+      "category": "multi_step_read",
+      "input": "Search launch notes and calculate 8 + 9.",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "search_knowledge", "arguments": {"query": "launch notes", "limit": 1}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "8 + 9"}},
+        {"type": "FINAL", "content": "The launch note was found and the result is 17."}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["search_knowledge", "calculator"],
+        "model_steps": 3,
+        "tool_calls": 2,
+        "final_output": "The launch note was found and the result is 17.",
+        "handler_calls": 2
+      }
+    },
+    {
+      "case_id": "multi-read-003",
+      "split": "dev",
+      "category": "multi_step_read",
+      "input": "Find C-NORTH and then search its launch context.",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "query_customer", "arguments": {"customer_ref": "C-NORTH", "include_open_tickets": false}},
+        {"type": "TOOL_CALL", "name": "search_knowledge", "arguments": {"query": "C-NORTH launch context", "limit": 1}},
+        {"type": "FINAL", "content": "Customer and knowledge results are available."}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["query_customer", "search_knowledge"],
+        "model_steps": 3,
+        "tool_calls": 2,
+        "final_output": "Customer and knowledge results are available.",
+        "handler_calls": 2
+      }
+    },
+    {
+      "case_id": "multi-read-004",
+      "split": "holdout",
+      "category": "multi_step_read",
+      "input": "Read C-ACME and calculate 2 + 3 in one read turn.",
+      "model_script": [
+        {
+          "type": "MULTI_TOOL_CALL",
+          "calls": [
+            {"name": "query_customer", "arguments": {"customer_ref": "C-ACME", "include_open_tickets": false}},
+            {"name": "calculator", "arguments": {"expression": "2 + 3"}}
+          ]
+        },
+        {"type": "FINAL", "content": "The customer was read and the result is 5."}
+      ],
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": null,
+        "tool_sequence": ["query_customer", "calculator"],
+        "model_steps": 2,
+        "tool_calls": 2,
+        "final_output": "The customer was read and the result is 5.",
+        "handler_calls": 2
+      }
+    },
+    {
+      "case_id": "loop-identical-001",
+      "split": "dev",
+      "category": "loop_guard",
+      "input": "Repeat the same calculation until stopped.",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "1"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "1"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "1"}}
+      ],
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "AGENT_IDENTICAL_TOOL_CALL_LIMIT",
+        "tool_sequence": ["calculator", "calculator"],
+        "model_steps": 3,
+        "tool_calls": 3,
+        "final_output": null,
+        "handler_calls": 2
+      }
+    },
+    {
+      "case_id": "loop-max-calls-001",
+      "split": "dev",
+      "category": "loop_guard",
+      "input": "Run a bounded sequence of calculations.",
+      "model_script": [
+        {
+          "type": "MULTI_TOOL_CALL",
+          "calls": [
+            {"name": "calculator", "arguments": {"expression": "1"}},
+            {"name": "calculator", "arguments": {"expression": "2"}},
+            {"name": "calculator", "arguments": {"expression": "3"}},
+            {"name": "calculator", "arguments": {"expression": "4"}},
+            {"name": "calculator", "arguments": {"expression": "5"}},
+            {"name": "calculator", "arguments": {"expression": "6"}},
+            {"name": "calculator", "arguments": {"expression": "7"}},
+            {"name": "calculator", "arguments": {"expression": "8"}},
+            {"name": "calculator", "arguments": {"expression": "9"}},
+            {"name": "calculator", "arguments": {"expression": "10"}},
+            {"name": "calculator", "arguments": {"expression": "11"}},
+            {"name": "calculator", "arguments": {"expression": "12"}}
+          ]
+        },
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "13"}}
+      ],
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+        "tool_sequence": ["calculator", "calculator", "calculator", "calculator", "calculator", "calculator", "calculator", "calculator", "calculator", "calculator", "calculator", "calculator"],
+        "model_steps": 2,
+        "tool_calls": 13,
+        "final_output": null,
+        "handler_calls": 12
+      }
+    },
+    {
+      "case_id": "loop-max-steps-001",
+      "split": "holdout",
+      "category": "loop_guard",
+      "input": "Continue the distinct calculation sequence.",
+      "model_script": [
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "1"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "2"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "3"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "4"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "5"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "6"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "7"}},
+        {"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "8"}}
+      ],
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "AGENT_MAX_STEPS_EXCEEDED",
+        "tool_sequence": ["calculator", "calculator", "calculator", "calculator", "calculator", "calculator", "calculator", "calculator"],
+        "model_steps": 8,
+        "tool_calls": 8,
+        "final_output": null,
+        "handler_calls": 8
+      }
+    },
+    {
+      "case_id": "approval-calculator-001",
+      "split": "dev",
+      "category": "approval_unavailable",
+      "input": "Read a calculation that requires approval.",
+      "model_script": [{"type": "TOOL_CALL", "name": "calculator", "arguments": {"expression": "4 * 4"}}],
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE",
+        "tool_sequence": [],
+        "model_steps": 1,
+        "tool_calls": 1,
+        "final_output": null,
+        "handler_calls": 0
+      }
+    },
+    {
+      "case_id": "approval-customer-001",
+      "split": "dev",
+      "category": "approval_unavailable",
+      "input": "Read a customer record that requires approval.",
+      "model_script": [{"type": "TOOL_CALL", "name": "query_customer", "arguments": {"customer_ref": "C-ACME", "include_open_tickets": false}}],
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE",
+        "tool_sequence": [],
+        "model_steps": 1,
+        "tool_calls": 1,
+        "final_output": null,
+        "handler_calls": 0
+      }
+    },
+    {
+      "case_id": "approval-search-001",
+      "split": "holdout",
+      "category": "approval_unavailable",
+      "input": "Search the knowledge base with approval required.",
+      "model_script": [{"type": "TOOL_CALL", "name": "search_knowledge", "arguments": {"query": "approval search", "limit": 1}}],
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE",
+        "tool_sequence": [],
+        "model_steps": 1,
+        "tool_calls": 1,
+        "final_output": null,
+        "handler_calls": 0
+      }
+    }
+  ]
+}

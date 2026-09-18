@@ -1,6 +1,6 @@
 # M4-D — Context Budget, Streaming and AgentHub Event Protocol
 
-Status: PASS — final review closure verified in GitHub Actions run #66.
+Status: PASS — final review closure verified in GitHub Actions run #67.
 
 ## Scope
 
@@ -22,7 +22,7 @@ Implementation commit: `1980640`.
 
 Final review correction commit: `5aef5c5`.
 
-GitHub Actions run #66 (`35369916535`) passed backend and frontend. The backend job explicitly
+GitHub Actions run #67 (`35370216514`) passed backend and frontend. The backend job explicitly
 passed the
 dedicated `tests/integration/test_m4d_streaming_budget.py` step, as well as the M4-A/B/C
 regressions, Alembic checks, Ruff, non-integration tests, and existing infrastructure services.
