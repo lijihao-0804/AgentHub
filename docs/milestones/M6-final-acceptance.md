@@ -33,7 +33,9 @@ Status: PASS — M6-A and M6-B accepted on `m6/observability`.
 - M5 benchmark: 20/20 PASS; duplicate side-effect rate `0.0`.
 - Frontend production build: PASS.
 - `docker compose config`: PASS; configuration parsed without starting containers.
-- GitHub Actions exact-head closure run is recorded after the runtime-backed dataset step passes.
+- GitHub Actions run #90 (`35425673479`) passed the exact M6-B closure HEAD
+  `a8b2e057089bef4ce348f670be2e1d82b4836ef4`, including the runtime-backed dataset step and
+  backend/frontend jobs.
 
 M6 overall is PASS. M7, M8, MCP, REST Tool, Memory, Multi-Agent and GraphRAG remain NOT
 STARTED.

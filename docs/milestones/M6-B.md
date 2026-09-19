@@ -1,7 +1,7 @@
 # M6-B — Metrics, Dashboard and Failure Analytics
 
-Status: PASS — metrics, dashboard and runtime-backed failure analytics are verified by the
-exact-head CI run for this branch.
+Status: PASS — metrics, dashboard and runtime-backed failure analytics are verified by
+GitHub Actions run #90 at exact HEAD `a8b2e05`.
 
 M6-B productizes the M6-A safe Run projections into workspace-scoped operational metrics. It
 does not change M4 Agent Runtime, M5 Approval Runtime, checkpoint identity, or tool execution
