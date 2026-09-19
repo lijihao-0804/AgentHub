@@ -1,7 +1,6 @@
 # M7-C — Durable Experiment Runner
 
-Status: PASS — implementation verified in GitHub Actions run #105; final docs-only
-closure CI is being rerun after a transient integration-suite failure.
+Status: PASS — closure verified in GitHub Actions run #107.
 
 M7-C executes the frozen M7-B experiment definition as a durable database-backed case
 matrix. Celery transports only the `experiment_run_id`; workers rebuild the deterministic
@@ -38,9 +37,11 @@ M7-D metrics, evaluators, ablation, and release gates remain out of scope.
 - Migration `0017_m7_experiment_execution` adds durable leases and case-result persistence;
   migration history before 0017 remains unchanged.
 - PostgreSQL targeted integration: 2 passed locally.
-- GitHub Actions #105 passed backend and frontend, including Alembic upgrade/check, the
+- GitHub Actions #105 passed the implementation backend and frontend, including Alembic
+  upgrade/check, the
   deterministic execution and atomic-claim M7-C integration gates, the full integration
   regression, non-integration regression, M4/M5 evaluation checks, and frontend build.
+- GitHub Actions #107 passed the final docs closure on backend and frontend.
 - Local static verification: Ruff passed; Alembic check passed; frontend production build
   passed.
 
