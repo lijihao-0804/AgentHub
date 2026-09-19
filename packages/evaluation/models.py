@@ -694,9 +694,7 @@ class EvaluationMetricSnapshot(Base):
         UniqueConstraint(
             "workspace_id", "experiment_run_id", name="uq_evaluation_metric_snapshots_run"
         ),
-        UniqueConstraint(
-            "workspace_id", "id", name="uq_evaluation_metric_snapshots_workspace_id"
-        ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_metric_snapshots_workspace_id"),
         Index(
             "ix_evaluation_metric_snapshots_workspace_created",
             "workspace_id",
@@ -763,6 +761,7 @@ class EvaluationExperimentComparison(Base):
             "candidate_variant_id",
             name="uq_evaluation_comparisons_pair",
         ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_comparisons_workspace_id"),
         Index(
             "ix_evaluation_comparisons_run",
             "workspace_id",
@@ -796,6 +795,174 @@ class EvaluationExperimentComparison(Base):
     )
 
 
+class EvaluationAblationFactor(StrEnum):
+    RETRIEVAL = "RETRIEVAL"
+    PROMPT = "PROMPT"
+    MODEL = "MODEL"
+    MULTI_FACTOR_CHANGE = "MULTI_FACTOR_CHANGE"
+    NO_CHANGE = "NO_CHANGE"
+
+
+class EvaluationAblationResult(Base):
+    __tablename__ = "evaluation_ablation_results"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "comparison_id"],
+            [
+                "evaluation_experiment_comparisons.workspace_id",
+                "evaluation_experiment_comparisons.id",
+            ],
+            name="fk_evaluation_ablation_comparison_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_run_id"],
+            ["evaluation_experiment_runs.workspace_id", "evaluation_experiment_runs.id"],
+            name="fk_evaluation_ablation_run_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "baseline_variant_id"],
+            ["evaluation_experiment_variants.workspace_id", "evaluation_experiment_variants.id"],
+            name="fk_evaluation_ablation_baseline_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "candidate_variant_id"],
+            ["evaluation_experiment_variants.workspace_id", "evaluation_experiment_variants.id"],
+            name="fk_evaluation_ablation_candidate_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"],
+            ["users.id"],
+            name="fk_evaluation_ablation_created_by",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "factor IN ('RETRIEVAL', 'PROMPT', 'MODEL', 'MULTI_FACTOR_CHANGE', 'NO_CHANGE')",
+            name="ck_evaluation_ablation_factor",
+        ),
+        UniqueConstraint("workspace_id", "comparison_id", name="uq_evaluation_ablation_comparison"),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_ablation_workspace_id"),
+        Index("ix_evaluation_ablation_run", "workspace_id", "experiment_run_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    comparison_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    baseline_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    candidate_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    factor: Mapped[str] = mapped_column(String(32), nullable=False)
+    changed_paths: Mapped[list[str]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=sql_text("'[]'::jsonb")
+    )
+    baseline_factor_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    candidate_factor_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    analysis_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EvaluationReleaseGateDecisionStatus(StrEnum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
+class EvaluationReleaseGatePolicy(Base):
+    __tablename__ = "evaluation_release_gate_policies"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id"],
+            ["workspaces.id"],
+            name="fk_evaluation_gate_policies_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"],
+            ["users.id"],
+            name="fk_evaluation_gate_policies_created_by",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_gate_policies_workspace_id"),
+        UniqueConstraint("workspace_id", "name", name="uq_evaluation_gate_policies_name"),
+        Index("ix_evaluation_gate_policies_workspace_created", "workspace_id", "created_at"),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    policy_json: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    policy_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EvaluationReleaseGateDecision(Base):
+    __tablename__ = "evaluation_release_gate_decisions"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "comparison_id"],
+            [
+                "evaluation_experiment_comparisons.workspace_id",
+                "evaluation_experiment_comparisons.id",
+            ],
+            name="fk_evaluation_gate_decisions_comparison_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "policy_id"],
+            [
+                "evaluation_release_gate_policies.workspace_id",
+                "evaluation_release_gate_policies.id",
+            ],
+            name="fk_evaluation_gate_decisions_policy_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"],
+            ["users.id"],
+            name="fk_evaluation_gate_decisions_created_by",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "status IN ('PASS', 'FAIL', 'INCONCLUSIVE')", name="ck_evaluation_gate_decisions_status"
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "comparison_id",
+            "policy_id",
+            name="uq_evaluation_gate_decisions_identity",
+        ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_gate_decisions_workspace_id"),
+        Index("ix_evaluation_gate_decisions_comparison", "workspace_id", "comparison_id"),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    comparison_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    policy_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    rule_results: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)
+    reasons: Mapped[list[str]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=sql_text("'[]'::jsonb")
+    )
+    comparison_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    policy_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    decision_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 __all__ = [
     "EvaluationDataset",
     "EvaluationDatasetCategory",
@@ -815,5 +982,10 @@ __all__ = [
     "EvaluationMetricResult",
     "EvaluationMetricSnapshot",
     "EvaluationExperimentComparison",
+    "EvaluationAblationFactor",
+    "EvaluationAblationResult",
+    "EvaluationReleaseGateDecisionStatus",
+    "EvaluationReleaseGatePolicy",
+    "EvaluationReleaseGateDecision",
     "PricingSnapshot",
 ]

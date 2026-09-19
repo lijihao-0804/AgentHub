@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_experiment_run_queue, get_workspace_context
 from apps.api.schemas.evaluation import (
+    EvaluationAblationResponse,
     EvaluationComparisonCreateRequest,
     EvaluationComparisonResponse,
     EvaluationDatasetCreateRequest,
@@ -28,6 +29,7 @@ from apps.api.schemas.evaluation import (
     PricingSnapshotResponse,
 )
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.queue import ExperimentRunQueue
@@ -519,6 +521,43 @@ async def get_experiment_comparison(
         comparison_id=comparison_id,
     )
     return EvaluationComparisonResponse.model_validate(comparison, from_attributes=True)
+
+
+@router.post(
+    "/experiment-runs/{run_id}/comparisons/{comparison_id}/ablation",
+    response_model=EvaluationAblationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_experiment_ablation(
+    workspace_id: UUID,
+    run_id: UUID,
+    comparison_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationAblationResponse:
+    del workspace_id
+    result = await EvaluationAblationService().create_ablation(
+        session, context=context, run_id=run_id, comparison_id=comparison_id
+    )
+    return EvaluationAblationResponse.model_validate(result, from_attributes=True)
+
+
+@router.get(
+    "/experiment-runs/{run_id}/comparisons/{comparison_id}/ablation",
+    response_model=EvaluationAblationResponse,
+)
+async def get_experiment_ablation(
+    workspace_id: UUID,
+    run_id: UUID,
+    comparison_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationAblationResponse:
+    del workspace_id
+    result = await EvaluationAblationService().get_ablation(
+        session, context=context, run_id=run_id, comparison_id=comparison_id
+    )
+    return EvaluationAblationResponse.model_validate(result, from_attributes=True)
 
 
 __all__ = ["router"]

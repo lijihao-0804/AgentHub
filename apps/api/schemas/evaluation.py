@@ -239,6 +239,24 @@ class EvaluationComparisonResponse(BaseModel):
     created_at: datetime
 
 
+class EvaluationAblationResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    comparison_id: UUID
+    experiment_run_id: UUID
+    baseline_variant_id: UUID
+    candidate_variant_id: UUID
+    factor: str
+    changed_paths: list[str]
+    baseline_factor_hash: str = Field(min_length=64, max_length=64)
+    candidate_factor_hash: str = Field(min_length=64, max_length=64)
+    analysis_hash: str = Field(min_length=64, max_length=64)
+    created_by: UUID
+    created_at: datetime
+
+
 __all__ = [
     "EvaluationDatasetCreateRequest",
     "EvaluationDatasetItemRequest",
@@ -254,6 +272,7 @@ __all__ = [
     "EvaluationExperimentRunProgressResponse",
     "EvaluationComparisonCreateRequest",
     "EvaluationComparisonResponse",
+    "EvaluationAblationResponse",
     "EvaluationExperimentVariantCreateRequest",
     "EvaluationExperimentVariantResponse",
     "PricingSnapshotCreateRequest",
