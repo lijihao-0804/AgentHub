@@ -1,3 +1,7 @@
+"use client";
+
+import { useI18n } from "../i18n/provider";
+
 function renderValue(value: unknown): string {
   if (value === null || value === undefined) return "null";
   if (typeof value === "string") return value;
@@ -31,12 +35,13 @@ export function KeyValues({ entries }: { entries: Array<[string, unknown]> }) {
  * default so safe summaries stay the primary presentation.
  */
 export default function TechnicalDetails({
-  summary = "Technical details",
+  summary,
   value,
 }: {
   summary?: string;
   value: unknown;
 }) {
+  const { t } = useI18n();
   if (value === null || value === undefined) return null;
   let text: string;
   try {
@@ -46,7 +51,7 @@ export default function TechnicalDetails({
   }
   return (
     <details className="technical-details">
-      <summary>{summary}</summary>
+      <summary>{summary ?? t("common.technicalDetails")}</summary>
       <pre>{text}</pre>
     </details>
   );

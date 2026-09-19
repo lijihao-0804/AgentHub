@@ -36,7 +36,8 @@
   --radius-lg: 16px;
   --shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
 
-  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
 
   --space-1: 0.25rem;
@@ -209,6 +210,31 @@ a { color: var(--accent); }
 }
 
 /* ---------- 4. Session control ---------- */
+.topbar-spacer { flex: 1; }
+
+.lang-switch {
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  display: flex;
+  overflow: hidden;
+}
+.lang-option {
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.28rem 0.7rem;
+  white-space: nowrap;
+}
+.lang-option[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.lang-option:hover:not([aria-pressed="true"]) { color: var(--text); }
+
 .session-control { align-items: center; display: flex; gap: var(--space-2); position: relative; }
 .session-status {
   align-items: center;

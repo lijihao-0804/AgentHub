@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 
+import { useI18n } from "../i18n/provider";
 import { useFrontendSession } from "./session-provider";
 
 function shortWorkspaceId(value: string): string {
@@ -14,6 +15,7 @@ function shortWorkspaceId(value: string): string {
  * provider on submit and never rendered, logged, or persisted.
  */
 export default function SessionControl() {
+  const { t } = useI18n();
   const { workspaceId, accessToken, connected, setSession, clearSession, panelOpen, openPanel, closePanel } =
     useFrontendSession();
   const [draftWorkspaceId, setDraftWorkspaceId] = useState("");
@@ -42,7 +44,7 @@ export default function SessionControl() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!draftWorkspaceId.trim() || !draftAccessToken.trim()) {
-      setError("Workspace ID and access token are both required.");
+      setError(t("session.requiredFields"));
       return;
     }
     setSession(draftWorkspaceId, draftAccessToken);
@@ -50,52 +52,55 @@ export default function SessionControl() {
     setError(null);
   }
 
+  const panel = (
+    <div className="session-panel" ref={panelRef} role="group" aria-label={t("session.panelSession")}>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor={workspaceInputId}>{t("session.workspaceId")}</label>
+        <input
+          id={workspaceInputId}
+          value={draftWorkspaceId}
+          onChange={(event) => setDraftWorkspaceId(event.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <label htmlFor={tokenInputId}>{t("session.accessToken")}</label>
+        <input
+          id={tokenInputId}
+          type="password"
+          autoComplete="off"
+          value={draftAccessToken}
+          onChange={(event) => setDraftAccessToken(event.target.value)}
+          placeholder={connected ? t("session.replaceTokenPlaceholder") : t("session.tokenPlaceholder")}
+        />
+        {error && <p className="session-error" role="alert">{error}</p>}
+        <div className="session-panel-actions">
+          <button type="submit" className="button button-primary">
+            {t("session.use")}
+          </button>
+          <button type="button" className="button button-ghost" onClick={closePanel}>
+            {t("session.cancel")}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+
   if (connected) {
     return (
       <div className="session-control session-control-connected">
         <span className="session-status" data-state="active">
           <span className="session-dot" aria-hidden="true" />
-          Workspace <code>{shortWorkspaceId(workspaceId)}</code>
-          <span className="sr-only">Session active</span>
+          <span className="session-status-label">{t("session.workspaceLabel")}</span>{" "}
+          <code>{shortWorkspaceId(workspaceId)}</code>
+          <span className="sr-only">{t("session.active")}</span>
         </span>
         <button type="button" className="button button-ghost" onClick={openWithDraft}>
-          Change
+          {t("session.change")}
         </button>
         <button type="button" className="button button-ghost" onClick={clearSession}>
-          Clear session
+          {t("session.clear")}
         </button>
-        {panelOpen && (
-          <div className="session-panel" ref={panelRef} role="group" aria-label="Workspace session">
-            <form onSubmit={handleSubmit}>
-              <label htmlFor={workspaceInputId}>Workspace ID</label>
-              <input
-                id={workspaceInputId}
-                value={draftWorkspaceId}
-                onChange={(event) => setDraftWorkspaceId(event.target.value)}
-                autoComplete="off"
-                spellCheck={false}
-              />
-              <label htmlFor={tokenInputId}>Access token</label>
-              <input
-                id={tokenInputId}
-                type="password"
-                autoComplete="off"
-                value={draftAccessToken}
-                onChange={(event) => setDraftAccessToken(event.target.value)}
-                placeholder="Enter a new token to replace the current session"
-              />
-              {error && <p className="session-error" role="alert">{error}</p>}
-              <div className="session-panel-actions">
-                <button type="submit" className="button button-primary">
-                  Use session
-                </button>
-                <button type="button" className="button button-ghost" onClick={closePanel}>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+        {panelOpen && panel}
       </div>
     );
   }
@@ -110,12 +115,12 @@ export default function SessionControl() {
         onClick={openWithDraft}
       >
         <span className="session-dot" aria-hidden="true" />
-        Connect workspace
+        {t("session.connect")}
       </button>
       {panelOpen && (
-        <div className="session-panel" ref={panelRef} role="dialog" aria-label="Connect workspace">
+        <div className="session-panel" ref={panelRef} role="dialog" aria-label={t("session.panelConnect")}>
           <form onSubmit={handleSubmit}>
-            <label htmlFor={workspaceInputId}>Workspace ID</label>
+            <label htmlFor={workspaceInputId}>{t("session.workspaceId")}</label>
             <input
               id={workspaceInputId}
               autoFocus
@@ -124,22 +129,22 @@ export default function SessionControl() {
               autoComplete="off"
               spellCheck={false}
             />
-            <label htmlFor={tokenInputId}>Access token</label>
+            <label htmlFor={tokenInputId}>{t("session.accessToken")}</label>
             <input
               id={tokenInputId}
               type="password"
               autoComplete="off"
               value={draftAccessToken}
               onChange={(event) => setDraftAccessToken(event.target.value)}
-              placeholder="Bearer access token"
+              placeholder={t("session.tokenPlaceholder")}
             />
             {error && <p className="session-error" role="alert">{error}</p>}
             <div className="session-panel-actions">
               <button type="submit" className="button button-primary">
-                Use session
+                {t("session.use")}
               </button>
               <button type="button" className="button button-ghost" onClick={closePanel}>
-                Cancel
+                {t("session.cancel")}
               </button>
             </div>
           </form>

@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 
+import { useI18n } from "../i18n/provider";
+import type { MessageKey } from "../i18n/messages";
 import { useFrontendSession } from "./session-provider";
 
 /** Quiet, structural placeholder for "nothing here yet". */
@@ -29,6 +31,7 @@ export function ErrorState({
   hint?: string;
   onRetry?: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="state-block state-error" role="alert">
       <p className="state-title">
@@ -37,7 +40,7 @@ export function ErrorState({
       {hint && <p className="state-hint">{hint}</p>}
       {onRetry && (
         <button type="button" className="button button-ghost" onClick={onRetry}>
-          Retry
+          {t("common.retry")}
         </button>
       )}
     </div>
@@ -45,11 +48,12 @@ export function ErrorState({
 }
 
 /** Structured section-level loading placeholder (no full-page blocking). */
-export function LoadingState({ label = "Loading…" }: { label?: string }) {
+export function LoadingState({ label }: { label?: string }) {
+  const { t } = useI18n();
   return (
     <div className="state-block state-loading" role="status" aria-live="polite">
       <span className="loading-bar" aria-hidden="true" />
-      <span>{label}</span>
+      <span>{label ?? t("common.loading")}</span>
     </div>
   );
 }
@@ -58,17 +62,18 @@ export function LoadingState({ label = "Loading…" }: { label?: string }) {
  * Rendered on deep links after a refresh, when the in-memory session is
  * gone. Configuring the session loads the current page in place.
  */
-export function SessionRequired({ context }: { context?: string }) {
+export function SessionRequired({ contextKey }: { contextKey?: MessageKey }) {
+  const { t } = useI18n();
   const { openPanel } = useFrontendSession();
+  const context = contextKey ? t(contextKey) : undefined;
   return (
     <div className="state-block state-session">
-      <p className="state-title">Session required</p>
+      <p className="state-title">{t("session.requiredTitle")}</p>
       <p className="state-hint">
-        Configure a workspace session{context ? ` to view ${context}` : " to view this page"}.
-        The session lives in memory only and is cleared on refresh.
+        {t("session.requiredHint", { context: context ?? "" })}
       </p>
       <button type="button" className="button button-primary" onClick={openPanel}>
-        Configure session
+        {t("session.configure")}
       </button>
     </div>
   );

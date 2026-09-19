@@ -51,18 +51,21 @@ export async function apiRequest<T>(
   return body as T;
 }
 
-/** Human hint for common API failures; safe, no stack details. */
-export function errorHint(error: ApiError): string | undefined {
-  if (error.status === 401) {
-    return "The workspace session may be missing or the access token is no longer valid. Reconnect the session from the top bar.";
-  }
-  if (error.status === 403) {
-    return "The current token does not have permission for this workspace resource.";
-  }
-  if (error.status === 404) {
-    return "The resource was not found in this workspace.";
-  }
-  return undefined;
+/**
+ * Dictionary keys for localized hints of common API failures. The hint
+ * text itself lives in the i18n dictionaries; raw server messages are
+ * never translated here.
+ */
+export type ErrorHintKey =
+  | "errors.hint.sessionInvalid"
+  | "errors.hint.forbidden"
+  | "errors.hint.notFound";
+
+export function errorHintKey(error: ApiError): ErrorHintKey | null {
+  if (error.status === 401) return "errors.hint.sessionInvalid";
+  if (error.status === 403) return "errors.hint.forbidden";
+  if (error.status === 404) return "errors.hint.notFound";
+  return null;
 }
 
 export function toApiError(error: unknown, fallbackMessage: string): ApiError {

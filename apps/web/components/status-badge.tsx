@@ -1,43 +1,21 @@
+"use client";
+
+import { useI18n } from "../i18n/provider";
+import { statusTone, type StatusTone } from "./badge-tones";
+
 /**
- * Shared status badge. The status text is always visible, so color is
- * never the only signal; tones only reinforce the state.
+ * Shared status badge. The displayed label is a localized presentation of
+ * the raw status value, which remains the underlying contract. Unknown
+ * statuses fall back to the raw value, so color and text both stay honest.
  */
-export type StatusTone = "neutral" | "info" | "success" | "warning" | "danger" | "attention";
-
-const TONE_BY_STATUS: Record<string, StatusTone> = {
-  // Run statuses
-  RUNNING: "info",
-  WAITING_APPROVAL: "warning",
-  SUCCEEDED: "success",
-  FAILED: "danger",
-  NEEDS_ATTENTION: "attention",
-  CANCEL_REQUESTED: "warning",
-  CANCELLED: "neutral",
-  // Approval decision statuses
-  PENDING: "warning",
-  APPROVED: "success",
-  DENIED: "danger",
-  EXPIRED: "neutral",
-  // Approval execution statuses
-  NOT_STARTED: "neutral",
-  CLAIMED: "info",
-  UNKNOWN_OUTCOME: "attention",
-  // Timeline step statuses
-  COMPLETED: "success",
+const TONE_ARIA_KEY: Record<StatusTone, `status.tone.${StatusTone}`> = {
+  neutral: "status.tone.neutral",
+  info: "status.tone.info",
+  success: "status.tone.success",
+  warning: "status.tone.warning",
+  danger: "status.tone.danger",
+  attention: "status.tone.attention",
 };
-
-const TONE_LABEL: Record<StatusTone, string> = {
-  neutral: "Status",
-  info: "Status: active",
-  success: "Status: ok",
-  warning: "Status: waiting",
-  danger: "Status: failed",
-  attention: "Status: needs attention",
-};
-
-export function statusTone(status: string): StatusTone {
-  return TONE_BY_STATUS[status.toUpperCase()] ?? "neutral";
-}
 
 export default function StatusBadge({
   status,
@@ -48,11 +26,12 @@ export default function StatusBadge({
   label?: string;
   tone?: StatusTone;
 }) {
+  const { statusLabel, t } = useI18n();
   const resolvedTone = tone ?? statusTone(status);
   return (
-    <span className={`status-badge tone-${resolvedTone}`} aria-label={TONE_LABEL[resolvedTone]}>
+    <span className={`status-badge tone-${resolvedTone}`} aria-label={t(TONE_ARIA_KEY[resolvedTone])}>
       <span className="status-dot" aria-hidden="true" />
-      {label ?? status}
+      {label ?? statusLabel(status)}
     </span>
   );
 }
