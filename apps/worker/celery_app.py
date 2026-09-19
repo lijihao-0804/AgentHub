@@ -14,7 +14,11 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
     app = Celery(
         "agenthub",
         broker=app_settings.redis_url,
-        include=["apps.worker.tasks.knowledge", "apps.worker.tasks.approvals"],
+        include=[
+            "apps.worker.tasks.knowledge",
+            "apps.worker.tasks.approvals",
+            "apps.worker.tasks.evaluation",
+        ],
     )
     app.conf.update(
         task_ignore_result=True,
@@ -32,6 +36,10 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
             "reconcile-approval-runs": {
                 "task": "agenthub.reconcile_approval_runs",
                 "schedule": 30.0,
+            },
+            "reconcile-evaluation-runs": {
+                "task": "agenthub.reconcile_evaluation_runs",
+                "schedule": 60.0,
             },
         },
     )

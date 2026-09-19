@@ -197,6 +197,18 @@ class EvaluationExperimentRunResponse(BaseModel):
     created_at: datetime
 
 
+class EvaluationExperimentRunProgressResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    total: int
+    pending: int
+    running: int
+    completed: int
+    failed: int
+    cancelled: int
+    progress: float
+
+
 __all__ = [
     "EvaluationDatasetCreateRequest",
     "EvaluationDatasetItemRequest",
@@ -209,6 +221,7 @@ __all__ = [
     "EvaluationExperimentDetailResponse",
     "EvaluationExperimentResponse",
     "EvaluationExperimentRunResponse",
+    "EvaluationExperimentRunProgressResponse",
     "EvaluationExperimentVariantCreateRequest",
     "EvaluationExperimentVariantResponse",
     "PricingSnapshotCreateRequest",

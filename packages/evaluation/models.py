@@ -244,6 +244,14 @@ class EvaluationExperimentRunStatus(StrEnum):
     CANCELLED = "CANCELLED"
 
 
+class EvaluationCaseResultStatus(StrEnum):
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+
+
 class EvaluationExperiment(Base):
     __tablename__ = "evaluation_experiments"
     __table_args__ = (
@@ -447,11 +455,104 @@ class EvaluationExperimentRun(Base):
     split: Mapped[str] = mapped_column(String(16), nullable=False)
     purpose: Mapped[str] = mapped_column(String(32), nullable=False)
     repetitions: Mapped[int] = mapped_column(Integer, nullable=False)
+    lease_owner: Mapped[str | None] = mapped_column(String(128))
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     failure_code: Mapped[str | None] = mapped_column(String(96))
     safe_failure_message: Mapped[str | None] = mapped_column(Text)
     created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EvaluationExperimentCaseResult(Base):
+    __tablename__ = "evaluation_experiment_case_results"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_run_id"],
+            ["evaluation_experiment_runs.workspace_id", "evaluation_experiment_runs.id"],
+            name="fk_evaluation_case_results_run_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_variant_id"],
+            ["evaluation_experiment_variants.workspace_id", "evaluation_experiment_variants.id"],
+            name="fk_evaluation_case_results_variant_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "dataset_item_id"],
+            ["evaluation_dataset_items.workspace_id", "evaluation_dataset_items.id"],
+            name="fk_evaluation_case_results_dataset_item_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_run_id"],
+            ["agent_runs.workspace_id", "agent_runs.id"],
+            name="fk_evaluation_case_results_agent_run_workspace",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "status IN ('PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED', 'CANCELLED')",
+            name="ck_evaluation_case_results_status",
+        ),
+        CheckConstraint("repetition_index >= 0", name="ck_evaluation_case_results_repetition"),
+        UniqueConstraint(
+            "workspace_id",
+            "experiment_run_id",
+            "experiment_variant_id",
+            "dataset_item_id",
+            "repetition_index",
+            name="uq_evaluation_case_results_execution_key",
+        ),
+        UniqueConstraint(
+            "workspace_id", "id", name="uq_evaluation_case_results_workspace_id"
+        ),
+        Index(
+            "ix_evaluation_case_results_run_status",
+            "workspace_id",
+            "experiment_run_id",
+            "status",
+        ),
+        Index(
+            "ix_evaluation_case_results_run_order",
+            "workspace_id",
+            "experiment_run_id",
+            "dataset_item_id",
+            "experiment_variant_id",
+            "repetition_index",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    dataset_item_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    repetition_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    case_execution_key: Mapped[str] = mapped_column(String(160), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, server_default=EvaluationCaseResultStatus.PENDING
+    )
+    agent_run_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    input_tokens: Mapped[int | None] = mapped_column(Integer)
+    output_tokens: Mapped[int | None] = mapped_column(Integer)
+    total_tokens: Mapped[int | None] = mapped_column(Integer)
+    cached_tokens: Mapped[int | None] = mapped_column(Integer)
+    cost_amount: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))
+    cost_currency: Mapped[str | None] = mapped_column(String(3))
+    failure_code: Mapped[str | None] = mapped_column(String(96))
+    safe_failure_message: Mapped[str | None] = mapped_column(Text)
+    observation: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
+    )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -523,6 +624,8 @@ __all__ = [
     "EvaluationDatasetVersion",
     "EvaluationDatasetVersionStatus",
     "EvaluationExperiment",
+    "EvaluationCaseResultStatus",
+    "EvaluationExperimentCaseResult",
     "EvaluationExperimentHoldoutExposure",
     "EvaluationExperimentPurpose",
     "EvaluationExperimentRun",

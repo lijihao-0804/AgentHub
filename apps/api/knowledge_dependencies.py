@@ -11,6 +11,7 @@ from apps.api.schemas.citation_qa import CitationQaRequest
 from packages.control_plane.services import TenantService
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
+from packages.evaluation.queue import CeleryExperimentRunQueue, ExperimentRunQueue
 from packages.knowledge.adapters.celery_queue import CeleryIngestionQueue
 from packages.knowledge.composition import (
     RetrievalComponents,
@@ -35,7 +36,7 @@ async def get_workspace_context(
         await TenantService().get_workspace_access(
             session, principal=principal, workspace_id=workspace_id
         )
-        ).context
+    ).context
 
 
 async def get_ingestion_queue(request: Request) -> IngestionQueue:
@@ -45,6 +46,16 @@ async def get_ingestion_queue(request: Request) -> IngestionQueue:
 
         queue = CeleryIngestionQueue(create_celery_app(request.app.state.settings))
         request.app.state.ingestion_queue = queue
+    return queue
+
+
+async def get_experiment_run_queue(request: Request) -> ExperimentRunQueue:
+    queue = getattr(request.app.state, "experiment_run_queue", None)
+    if queue is None:
+        from apps.worker.celery_app import create_celery_app
+
+        queue = CeleryExperimentRunQueue(create_celery_app(request.app.state.settings))
+        request.app.state.experiment_run_queue = queue
     return queue
 
 

@@ -20,6 +20,14 @@ def test_m7b_experiment_routes_are_registered() -> None:
     )
     assert "/api/v1/workspaces/{workspace_id}/evaluation/experiments/{experiment_id}/runs" in paths
     assert "/api/v1/workspaces/{workspace_id}/evaluation/experiment-runs/{run_id}" in paths
+    assert (
+        "/api/v1/workspaces/{workspace_id}/evaluation/experiment-runs/{run_id}/cancel"
+        in paths
+    )
+    assert (
+        "/api/v1/workspaces/{workspace_id}/evaluation/experiment-runs/{run_id}/progress"
+        in paths
+    )
 
     assert "post" in paths[
         "/api/v1/workspaces/{workspace_id}/evaluation/experiments/{experiment_id}/runs"

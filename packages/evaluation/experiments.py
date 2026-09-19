@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import UTC, datetime
 from typing import Any, NoReturn
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +26,7 @@ from packages.evaluation.models import (
     EvaluationDatasetVersion,
     EvaluationDatasetVersionStatus,
     EvaluationExperiment,
+    EvaluationExperimentCaseResult,
     EvaluationExperimentHoldoutExposure,
     EvaluationExperimentPurpose,
     EvaluationExperimentRun,
@@ -202,9 +204,7 @@ class ExperimentService:
             session, context=context, experiment_id=experiment_id, for_update=True
         )
         self._require_draft(experiment)
-        normalized_label = self._required_text(
-            label, "label", code="EVALUATION_VARIANT_INVALID"
-        )
+        normalized_label = self._required_text(label, "label", code="EVALUATION_VARIANT_INVALID")
         if ordinal < 0 or ordinal >= 5:
             raise AgentHubError(
                 "EVALUATION_VARIANT_INVALID", "ordinal must be between 0 and 4.", 422
@@ -483,6 +483,75 @@ class ExperimentService:
         )
         return run, exposure_index
 
+    async def request_run_cancel(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        run_id: UUID,
+    ) -> EvaluationExperimentRun:
+        self._require_permission(context, EVALUATION_RUN)
+        run = await session.scalar(
+            select(EvaluationExperimentRun)
+            .where(
+                EvaluationExperimentRun.workspace_id == self._workspace_id(context),
+                EvaluationExperimentRun.id == run_id,
+            )
+            .with_for_update()
+        )
+        if run is None:
+            self._not_found(
+                "EVALUATION_EXPERIMENT_RUN_NOT_FOUND", "The experiment run was not found."
+            )
+        if run.status == EvaluationExperimentRunStatus.QUEUED:
+            run.status = EvaluationExperimentRunStatus.CANCELLED
+            run.completed_at = datetime.now(UTC)
+            await session.execute(
+                update(EvaluationExperimentCaseResult)
+                .where(
+                    EvaluationExperimentCaseResult.workspace_id == run.workspace_id,
+                    EvaluationExperimentCaseResult.experiment_run_id == run.id,
+                    EvaluationExperimentCaseResult.status == "PENDING",
+                )
+                .values(status="CANCELLED", completed_at=datetime.now(UTC))
+            )
+        elif run.status == EvaluationExperimentRunStatus.RUNNING:
+            run.status = EvaluationExperimentRunStatus.CANCEL_REQUESTED
+        await session.commit()
+        return run
+
+    async def run_progress(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        run_id: UUID,
+    ) -> dict[str, int | float]:
+        run, _ = await self.get_run(session, context=context, run_id=run_id)
+        del run
+        rows = await session.execute(
+            select(EvaluationExperimentCaseResult.status, func.count())
+            .where(
+                EvaluationExperimentCaseResult.workspace_id == self._workspace_id(context),
+                EvaluationExperimentCaseResult.experiment_run_id == run_id,
+            )
+            .group_by(EvaluationExperimentCaseResult.status)
+        )
+        counts = {str(status): int(count) for status, count in rows}
+        total = sum(counts.values())
+        completed = counts.get("SUCCEEDED", 0)
+        failed = counts.get("FAILED", 0)
+        cancelled = counts.get("CANCELLED", 0)
+        return {
+            "total": total,
+            "pending": counts.get("PENDING", 0),
+            "running": counts.get("RUNNING", 0),
+            "completed": completed,
+            "failed": failed,
+            "cancelled": cancelled,
+            "progress": 1.0 if total == 0 else (completed + failed + cancelled) / total,
+        }
+
     async def holdout_exposure_count(
         self,
         session: AsyncSession,
@@ -689,7 +758,8 @@ class ExperimentService:
                 "EVALUATION_EXPERIMENT_INVALID", "The experiment definition is invalid.", 422
             )
         if (purpose == EvaluationExperimentPurpose.DEVELOPMENT and split != "DEV") or (
-            purpose in {
+            purpose
+            in {
                 EvaluationExperimentPurpose.HOLDOUT_VALIDATION,
                 EvaluationExperimentPurpose.RELEASE_GATE,
             }

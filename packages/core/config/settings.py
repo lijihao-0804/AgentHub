@@ -55,6 +55,9 @@ class Settings(BaseSettings):
     approval_ttl_seconds: int = Field(default=3_600, ge=60, le=31_536_000)
     approval_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
     approval_reconciliation_stale_seconds: int = Field(default=300, ge=30, le=86_400)
+    evaluation_runner_lease_seconds: int = Field(default=300, ge=5, le=86_400)
+    evaluation_enqueue_grace_seconds: int = Field(default=30, ge=0, le=86_400)
+    evaluation_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
     langfuse_enabled: bool = False
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)

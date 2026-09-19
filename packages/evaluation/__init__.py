@@ -7,6 +7,7 @@ from packages.evaluation.build_identity import (
 )
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.models import (
+    EvaluationCaseResultStatus,
     EvaluationDataset,
     EvaluationDatasetCategory,
     EvaluationDatasetItem,
@@ -14,6 +15,7 @@ from packages.evaluation.models import (
     EvaluationDatasetVersion,
     EvaluationDatasetVersionStatus,
     EvaluationExperiment,
+    EvaluationExperimentCaseResult,
     EvaluationExperimentHoldoutExposure,
     EvaluationExperimentPurpose,
     EvaluationExperimentRun,
@@ -37,6 +39,8 @@ __all__ = [
     "EnvironmentBuildIdentityProvider",
     "StaticBuildIdentityProvider",
     "EvaluationExperiment",
+    "EvaluationCaseResultStatus",
+    "EvaluationExperimentCaseResult",
     "EvaluationExperimentHoldoutExposure",
     "EvaluationExperimentPurpose",
     "EvaluationExperimentRun",

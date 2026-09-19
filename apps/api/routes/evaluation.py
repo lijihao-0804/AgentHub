@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
-from apps.api.knowledge_dependencies import get_workspace_context
+from apps.api.knowledge_dependencies import get_experiment_run_queue, get_workspace_context
 from apps.api.schemas.evaluation import (
     EvaluationDatasetCreateRequest,
     EvaluationDatasetItemResponse,
@@ -17,6 +17,7 @@ from apps.api.schemas.evaluation import (
     EvaluationExperimentCreateRequest,
     EvaluationExperimentDetailResponse,
     EvaluationExperimentResponse,
+    EvaluationExperimentRunProgressResponse,
     EvaluationExperimentRunResponse,
     EvaluationExperimentVariantCreateRequest,
     EvaluationExperimentVariantResponse,
@@ -25,11 +26,13 @@ from apps.api.schemas.evaluation import (
 )
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.experiments import ExperimentService
+from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.service import EvaluationDatasetService
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}/evaluation", tags=["evaluation"])
 context_dependency = Depends(get_workspace_context)
 db_session_dependency = Depends(get_db_session)
+run_queue_dependency = Depends(get_experiment_run_queue)
 
 
 @router.post(
@@ -201,9 +204,7 @@ async def list_pricing_snapshots(
     session: AsyncSession = db_session_dependency,
 ) -> list[PricingSnapshotResponse]:
     del workspace_id
-    snapshots = await EvaluationDatasetService().list_pricing_snapshots(
-        session, context=context
-    )
+    snapshots = await EvaluationDatasetService().list_pricing_snapshots(session, context=context)
     return [
         PricingSnapshotResponse.model_validate(snapshot, from_attributes=True)
         for snapshot in snapshots
@@ -261,12 +262,8 @@ async def get_experiment(
 ) -> EvaluationExperimentDetailResponse:
     del workspace_id
     service = ExperimentService()
-    experiment = await service.get_experiment(
-        session, context=context, experiment_id=experiment_id
-    )
-    variants = await service.list_variants(
-        session, context=context, experiment_id=experiment_id
-    )
+    experiment = await service.get_experiment(session, context=context, experiment_id=experiment_id)
+    variants = await service.list_variants(session, context=context, experiment_id=experiment_id)
     count = await service.holdout_exposure_count(
         session, context=context, experiment_id=experiment_id
     )
@@ -342,9 +339,7 @@ async def finalize_experiment(
     experiment = await service.finalize_experiment(
         session, context=context, experiment_id=experiment_id
     )
-    variants = await service.list_variants(
-        session, context=context, experiment_id=experiment_id
-    )
+    variants = await service.list_variants(session, context=context, experiment_id=experiment_id)
     count = await service.holdout_exposure_count(
         session, context=context, experiment_id=experiment_id
     )
@@ -365,15 +360,23 @@ async def finalize_experiment(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_experiment_run(
+    request: Request,
     workspace_id: UUID,
     experiment_id: UUID,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
+    queue: ExperimentRunQueue = run_queue_dependency,
 ) -> EvaluationExperimentRunResponse:
     del workspace_id
     run, exposure_index = await ExperimentService().create_run(
         session, context=context, experiment_id=experiment_id
     )
+    try:
+        await queue.enqueue(run.id)
+    except Exception:
+        request.app.state.evaluation_enqueue_failures = (
+            getattr(request.app.state, "evaluation_enqueue_failures", 0) + 1
+        )
     response = EvaluationExperimentRunResponse.model_validate(run, from_attributes=True)
     return response.model_copy(update={"holdout_exposure_index": exposure_index})
 
@@ -389,11 +392,39 @@ async def get_experiment_run(
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationExperimentRunResponse:
     del workspace_id
-    run, exposure_index = await ExperimentService().get_run(
-        session, context=context, run_id=run_id
-    )
+    run, exposure_index = await ExperimentService().get_run(session, context=context, run_id=run_id)
     response = EvaluationExperimentRunResponse.model_validate(run, from_attributes=True)
     return response.model_copy(update={"holdout_exposure_index": exposure_index})
+
+
+@router.post(
+    "/experiment-runs/{run_id}/cancel",
+    response_model=EvaluationExperimentRunResponse,
+)
+async def cancel_experiment_run(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationExperimentRunResponse:
+    del workspace_id
+    run = await ExperimentService().request_run_cancel(session, context=context, run_id=run_id)
+    return EvaluationExperimentRunResponse.model_validate(run, from_attributes=True)
+
+
+@router.get(
+    "/experiment-runs/{run_id}/progress",
+    response_model=EvaluationExperimentRunProgressResponse,
+)
+async def get_experiment_run_progress(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationExperimentRunProgressResponse:
+    del workspace_id
+    progress = await ExperimentService().run_progress(session, context=context, run_id=run_id)
+    return EvaluationExperimentRunProgressResponse.model_validate(progress)
 
 
 __all__ = ["router"]

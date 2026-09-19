@@ -1,0 +1,36 @@
+# M7-C — Durable Experiment Runner
+
+Status: IMPLEMENTED — acceptance verification pending.
+
+M7-C executes the frozen M7-B experiment definition as a durable database-backed case
+matrix. Celery transports only the `experiment_run_id`; workers rebuild the deterministic
+dataset-item × variant × repetition plan from PostgreSQL.
+
+## Durable execution contract
+
+`EvaluationExperimentCaseResult` is unique by workspace, run, variant, dataset item, and
+repetition index. Runs use an atomic lease claim, bounded reconciliation, heartbeat, and
+database-derived progress. Duplicate delivery can therefore produce at most one active
+worker for a run, while stale leases can be reclaimed without losing the execution plan.
+
+Terminal case results are skipped on resume. A RUNNING case without a durable AgentRun is
+returned to PENDING after stale-run reclaim; a linked terminal AgentRun is projected into the
+existing case result rather than creating a second AgentRun.
+
+Cancellation is durable: RUNNING becomes `CANCEL_REQUESTED`, no new cases are claimed, and
+remaining PENDING cases become `CANCELLED`. Queue failures leave the persisted run QUEUED for
+reconciliation.
+
+Case observations are safe projections. Raw prompts, customer data, RAG text, tool results,
+credentials, and checkpoint payloads are not persisted by the runner. Cost is calculated from
+the variant's frozen PricingSnapshot when usage is available; missing usage leaves cost null.
+
+Production worker composition delegates TOOL, APPROVAL, KNOWLEDGE_QA, NO_ANSWER, MULTI_STEP,
+and FAILURE cases to AgentRunService and uses the formal retrieval contract for RETRIEVAL cases.
+The deterministic driver is injected only by the explicit testing composition.
+
+M7-D metrics, evaluators, ablation, and release gates remain out of scope.
+
+## Verification
+
+Acceptance verification is pending the implementation commit's exact-head GitHub Actions run.
