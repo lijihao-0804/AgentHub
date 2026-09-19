@@ -9,6 +9,7 @@ WORKSPACE_ADMIN = "workspace_administration"
 WORKSPACE_READ = "workspace_read"
 APPROVE_ACTION = "approve_action"
 RUN_ACTION = "run_action"
+EVALUATION_MANAGE = "evaluation_manage"
 
 WORKSPACE_OPERATIONAL_PERMISSIONS = frozenset(
     {
@@ -22,6 +23,7 @@ WORKSPACE_OPERATIONAL_PERMISSIONS = frozenset(
         "tool_edit",
         "tool_run",
         RUN_ACTION,
+        EVALUATION_MANAGE,
     }
 )
 WORKSPACE_ADMIN_PERMISSIONS = frozenset({WORKSPACE_ADMIN}) | WORKSPACE_OPERATIONAL_PERMISSIONS

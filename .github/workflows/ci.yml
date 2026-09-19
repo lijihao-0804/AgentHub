@@ -85,6 +85,8 @@ jobs:
           sleep 3
       - name: Run all integration tests
         run: uv run --locked pytest -m integration -vv -rs
+      - name: Run M7-A evaluation dataset integration
+        run: uv run --locked pytest tests/integration/test_m7a_evaluation_datasets.py -vv -rs
       - name: Validate M3 retrieval benchmark wiring
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
@@ -111,6 +113,8 @@ jobs:
           if [ -f celery-worker.pid ]; then kill "$(cat celery-worker.pid)" || true; fi
           if [ -f celery-worker.log ]; then cat celery-worker.log; fi
       - run: uv run --locked pytest -m "not integration"
+      - name: Validate M7-A dataset contract
+        run: uv run --locked pytest tests/unit/test_m7a_dataset_validation.py -vv
 
   frontend:
     runs-on: ubuntu-latest
