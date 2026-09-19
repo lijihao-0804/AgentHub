@@ -1371,6 +1371,11 @@ EXPIRED
 
 `UNKNOWN_OUTCOME` 是 Action execution 状态，不是 Run 状态。
 
+M5-A 的 `DENIED` / `EXPIRED` 是 Approval decision-only outcomes，不是额外的
+`AgentRun.status`。Run 根据图执行结果结束；只有无法确认的外部动作才映射到
+`NEEDS_ATTENTION / ACTION_RECONCILIATION_REQUIRED`。M6 的查询层必须把 approval decision
+failure 与 action execution failure 分开呈现。
+
 映射：
 
 ```text

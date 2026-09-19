@@ -3,8 +3,10 @@
 AgentHub uses a modular monolith plus worker: one repository, one API process, one worker
 process and one web application. PostgreSQL is the business source of truth; Redis is used
 for queue/cache concerns; Qdrant is the vector retrieval adapter; Langfuse is optional.
-The current M4 TraceSink is intentionally no-op; `langfuse_enabled` is reserved for the M6
-observability integration and does not claim an active Langfuse connection.
+The M6-A production composition uses a provider-neutral redacted structured trace sink. It
+does not export business content or credentials and remains fail-open; an external Langfuse or
+OpenTelemetry exporter can be added behind the same contract later. `langfuse_enabled` does not
+claim that an external Langfuse connection is active.
 
 The dependency direction is:
 
@@ -12,5 +14,6 @@ The dependency direction is:
 Transport/API -> Application -> Domain/Contract -> Infrastructure Adapter
 ```
 
-The current M0 code contains only the boundaries and system endpoints. Agent runtime,
-knowledge and tool behavior are intentionally deferred to their milestones.
+M6-A provides read-only Run query/detail/timeline projections over the existing Agent Runtime,
+Tool and Approval records. LangGraph and Qdrant remain behind adapter boundaries; raw checkpoint
+payloads and provider SDK types do not cross the application contract.

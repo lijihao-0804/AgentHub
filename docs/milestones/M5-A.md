@@ -37,6 +37,10 @@ credentials, provider exceptions, and action payloads are excluded.
 The runtime emits provider-neutral `approval.wait` and `approval.execute` spans with only safe
 workspace/Run/Approval/action identity, status, latency, and failure-code attributes.
 
+`DENIED` and `EXPIRED` remain Approval decision-only outcomes; they are not AgentRun statuses.
+The Run may complete according to the graph after a denied/expired action observation, while
+`UNKNOWN_OUTCOME` continues to map to `NEEDS_ATTENTION`.
+
 ## Checkpoint ownership and durability boundary
 
 AgentHub business tables are owned by Alembic migration `0012_m5_approval_runtime`. LangGraph

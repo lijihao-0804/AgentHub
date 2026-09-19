@@ -6,6 +6,9 @@ evaluation baseline are accepted; M3 overall is PASS. M4-A Agent Draft / AgentVe
 M4-B READ Tool Runtime, M4-C Agent Run + LangGraph execution, M4-D Context Budget,
 Streaming and AgentHub Event Protocol, and M4-E Agent Runtime Evaluation are accepted. M4 overall
 is PASS. M5-A Approval Runtime + Durable Approval Resume is accepted; M5-B MCP has not started.
+M6-A Run Query, Run Detail and Timeline is accepted on the observability branch; M6-B and
+later milestones have not started. Post-M5 review hardening is recorded separately and does
+not change the frozen M5-A state machine.
 
 ## Basic development setup
 
@@ -26,6 +29,10 @@ cd apps/web
 npm ci --no-audit --no-fund
 npm run build
 ```
+
+Integration tests require a real PostgreSQL URL in `AGENTHUB_TEST_DATABASE_URL`; M5 durable
+resume tests also require the explicit LangGraph checkpoint bootstrap. Use
+`uv run --locked pytest -m "not integration"` for the dependency-light local suite.
 
 The API exposes `/api/v1/health`, `/api/v1/ready` and `/api/v1/dependencies`.
 
@@ -88,4 +95,5 @@ deferred to M8.
 - M2 deliberately contains no Agent, RAG or Tool product implementation.
 - M3 overall is PASS after the real retrieval evaluation baseline and CI verification. M4-A
   through M4-E are accepted in sequence; M4 overall is PASS. M5-A covers durable approval
-  resume and M5-B MCP has not started.
+  resume and M5-B MCP has not started. M6-A covers read-only run observability; M6-B has not
+  started.

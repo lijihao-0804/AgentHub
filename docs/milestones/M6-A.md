@@ -1,6 +1,6 @@
 # M6-A — Run Query, Run Detail and Timeline
 
-Status: IN PROGRESS — implementation is on `m6/observability`, branched from the frozen M5-A
+Status: PASS — post-M5 review closure is verified on `m6/observability`, branched from the frozen M5-A
 acceptance SHA `1e712dff4a8991eaa60fb39933ed7e00fc69bda6`.
 
 M5-A remains a frozen contract during this milestone. M6-A adds a read-only observability query
@@ -50,3 +50,20 @@ Acceptance requires targeted M6-A integration coverage for workspace/RBAC isolat
 pagination, safe projection, timeline ordering, approval-vs-action distinction, WAITING_APPROVAL,
 NEEDS_ATTENTION, usage/cost, and a one-query run list. Existing M4 and M5 contracts and their
 benchmarks remain unchanged and must continue to pass.
+
+## Final verification
+
+Implementation commit: `27086f7` (`feat: add M6-A run observability`).
+
+Post-M5/M6 runtime closure commit: `2eb9b1f` (`fix: close M6 runtime review gaps`).
+
+GitHub Actions run [#85](https://github.com/lijihao-0804/AgentHub/actions/runs/35422911503)
+passed the backend and frontend jobs for the closure commit. Fresh PostgreSQL verification
+upgraded through migration `0013_m6_operational_indexes`; Alembic drift checking and the
+LangGraph checkpoint bootstrap passed. The final local verification recorded 88 integration
+tests passed with 4 intentionally skipped Redis-only M3-B cases, and 226 non-integration tests
+passed. M4 and M5 benchmark suites both passed 20/20. The retrieval dataset validation, frontend
+build, and `docker compose config` also passed.
+
+M5-A remains frozen at `1e712dff4a8991eaa60fb39933ed7e00fc69bda6`; no M5 state-machine or
+historical migration was rewritten. M6-B and later milestones remain outside this acceptance.

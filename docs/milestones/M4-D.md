@@ -36,5 +36,9 @@ public LLMs or download BGE/HuggingFace models.
 Context budget uses a deliberately conservative offline UTF-8-byte estimator; provider-specific
 tokenizers remain a future optimization.
 
+The AgentHub event envelope is canonicalized as `event_id`, `type`, `request_id`, `run_id`,
+`step_id`, `timestamp`, and `payload`. Local `sequence` and `agent_version_id` are documented
+extensions only; M4-D does not claim SSE replay semantics.
+
 M4-D is accepted. M4-E and M5 remain outside this milestone; no durable checkpoint or Approval
 Runtime was added.
