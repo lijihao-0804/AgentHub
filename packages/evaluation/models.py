@@ -154,6 +154,7 @@ class EvaluationDatasetItem(Base):
             "ordinal",
             name="uq_evaluation_dataset_items_ordinal",
         ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_dataset_items_workspace_id"),
         CheckConstraint(
             "split IN ('DEV', 'HOLDOUT')",
             name="ck_evaluation_dataset_items_split",

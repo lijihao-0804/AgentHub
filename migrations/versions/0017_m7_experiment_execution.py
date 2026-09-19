@@ -38,6 +38,11 @@ def upgrade() -> None:
         "evaluation_experiment_runs",
         ["status", "lease_expires_at", "id"],
     )
+    op.create_unique_constraint(
+        "uq_evaluation_dataset_items_workspace_id",
+        "evaluation_dataset_items",
+        ["workspace_id", "id"],
+    )
 
     op.create_table(
         "evaluation_experiment_case_results",
@@ -130,6 +135,11 @@ def downgrade() -> None:
         table_name="evaluation_experiment_case_results",
     )
     op.drop_table("evaluation_experiment_case_results")
+    op.drop_constraint(
+        "uq_evaluation_dataset_items_workspace_id",
+        "evaluation_dataset_items",
+        type_="unique",
+    )
     op.drop_index("ix_evaluation_experiment_runs_lease", table_name="evaluation_experiment_runs")
     op.drop_column("evaluation_experiment_runs", "attempt_count")
     op.drop_column("evaluation_experiment_runs", "heartbeat_at")
