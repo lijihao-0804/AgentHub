@@ -1,6 +1,7 @@
 # M7-D — Evaluators, Metrics, and Paired Comparison
 
-Status: Independent review closure pending exact-head CI verification.
+Status: PASS — code closure verified in GitHub Actions run #121; final docs sync is covered by
+the exact-head CI for this documentation commit.
 
 M7-D consumes the immutable M7-B experiment definition and persisted M7-C CaseResults. It does
 not re-run Agents, reinterpret AgentRun state, or change M5 approval/checkpoint semantics.
@@ -89,7 +90,8 @@ checkpoint payloads, and raw tool arguments/results are not introduced by M7-D.
   item-level pairing, currency isolation, and comparison idempotency.
 - M3 retrieval compatibility remains intact. M4 benchmark: 20/20. M5 benchmark: 20/20.
 - M6 validation and the existing frontend production build remain required for exact-head CI.
-- The final closure status and exact-head GitHub Actions run are recorded after the pushed closure
-  commit passes backend, frontend, migration, integration, non-integration, and M7-D checks.
+- GitHub Actions run #121 passed the pushed closure commit's backend, frontend, migration,
+  integration, non-integration, and M7-D checks; the final documentation-only commit is verified
+  by its own exact-head run.
 
 M7-E and later release-gate work remain out of scope.
