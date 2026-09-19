@@ -18,7 +18,13 @@ import {
   formatPercent,
   formatUTCBucketDate,
 } from "./format";
-import { failureCategoryLabel, resolveMessage, statusLabel, timelineKindLabel } from "./messages";
+import {
+  evaluationPurposeLabel,
+  failureCategoryLabel,
+  resolveMessage,
+  statusLabel,
+  timelineKindLabel,
+} from "./messages";
 import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, type Locale } from "./types";
 import type { MessageKey } from "./messages";
 
@@ -28,6 +34,7 @@ type I18nContextValue = {
   t: (key: MessageKey, values?: Record<string, string | number>) => string;
   statusLabel: (status: string) => string;
   failureCategoryLabel: (category: string) => string;
+  purposeLabel: (purpose: string) => string;
   timelineKindLabel: (kind: string) => string;
   formatDateTime: (value: string | Date) => string;
   formatUTCBucketDate: (value: string | Date) => string;
@@ -104,6 +111,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       t: (key, values) => resolveMessage(locale, key, values),
       statusLabel: (status) => statusLabel(status, locale),
       failureCategoryLabel: (category) => failureCategoryLabel(category, locale),
+      purposeLabel: (purpose) => evaluationPurposeLabel(purpose, locale),
       timelineKindLabel: (kind) => timelineKindLabel(kind, locale),
       formatDateTime: (value) => formatDateTime(value, locale),
       formatUTCBucketDate: (value) => formatUTCBucketDate(value, locale),
