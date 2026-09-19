@@ -12,6 +12,7 @@ import {
 } from "../../../lib/api";
 import { formatLocator } from "../../../lib/locator";
 import { useFrontendSession } from "../../../components/session-provider";
+import { useI18n } from "../../../i18n/provider";
 
 type PageState = "initial" | "loading" | "success" | "empty" | "error";
 
@@ -27,19 +28,22 @@ function shortId(value: string | null): string {
 }
 
 function StageCard({ label, stage }: { label: string; stage: PlaygroundStage }) {
+  const { t, formatNumber } = useI18n();
   return (
     <section className="playground-stage" aria-labelledby={`${label}-stage`}>
       <div className="playground-stage-header">
         <div>
-          <p className="eyebrow">STAGE</p>
+          <p className="eyebrow">{t("playground.stage.eyebrow")}</p>
           <h3 id={`${label}-stage`}>{label}</h3>
         </div>
+        {/* Stage latency and scores stay in a neutral dot-decimal format for
+            developer comparison across locales. */}
         <span className="stage-latency">{stage.latency_ms.toFixed(1)} ms</span>
       </div>
-      <p className="stage-count">{stage.results.length} results</p>
+      <p className="stage-count">{t("playground.stage.results", { count: formatNumber(stage.results.length) })}</p>
       <div className="stage-results">
         {stage.results.length === 0 ? (
-          <p className="muted">No results</p>
+          <p className="muted">{t("playground.stage.noResults")}</p>
         ) : (
           stage.results.map((item) => (
             <div className="stage-result" key={`${item.chunk_id}-${item.rank}`}>
@@ -60,6 +64,7 @@ function StageCard({ label, stage }: { label: string; stage: PlaygroundStage }) 
 }
 
 export default function RetrievalPlaygroundPage() {
+  const { t, formatNumber } = useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [knowledgeBaseId, setKnowledgeBaseId] = useState("");
   const [snapshotId, setSnapshotId] = useState("");
@@ -77,15 +82,12 @@ export default function RetrievalPlaygroundPage() {
     setResult(null);
     setError(null);
     if (!connected) {
-      setError({
-        code: "SESSION_REQUIRED",
-        message: "Configure a workspace session to run the playground.",
-      });
+      setError({ code: "SESSION_REQUIRED", message: t("playground.sessionRequired") });
       setPageState("error");
       return;
     }
     if (!knowledgeBaseId.trim() || !snapshotId.trim() || !query.trim()) {
-      setError({ code: "INVALID_REQUEST", message: "Complete the required fields first." });
+      setError({ code: "INVALID_REQUEST", message: t("playground.invalidRequest") });
       setPageState("error");
       return;
     }
@@ -108,7 +110,7 @@ export default function RetrievalPlaygroundPage() {
       const nextError =
         caught instanceof RetrievalPlaygroundError
           ? caught
-          : new RetrievalPlaygroundError("REQUEST_FAILED", "Retrieval failed.");
+          : new RetrievalPlaygroundError("REQUEST_FAILED", t("errors.retrieval"));
       setError({ code: nextError.code, message: nextError.message });
       setPageState("error");
     }
@@ -118,13 +120,11 @@ export default function RetrievalPlaygroundPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">KNOWLEDGE</p>
-          <h1>Retrieval Playground</h1>
-          <p className="page-lede">
-            Inspect dense, sparse, fused and reranked evidence for one concrete knowledge snapshot.
-          </p>
+          <p className="eyebrow">{t("playground.eyebrow")}</p>
+          <h1>{t("playground.title")}</h1>
+          <p className="page-lede">{t("playground.lede")}</p>
         </header>
-        <SessionRequired context="the retrieval playground" />
+        <SessionRequired contextKey="session.context.playground" />
       </div>
     );
   }
@@ -132,24 +132,21 @@ export default function RetrievalPlaygroundPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">KNOWLEDGE</p>
-        <h1>Retrieval Playground</h1>
-        <p className="page-lede">
-          Inspect dense, sparse, fused and reranked evidence for one concrete knowledge snapshot.
-          Retrieval runs against the workspace from the active session.
-        </p>
+        <p className="eyebrow">{t("playground.eyebrow")}</p>
+        <h1>{t("playground.title")}</h1>
+        <p className="page-lede">{t("playground.lede")}</p>
       </header>
 
       <form className="panel query-panel" onSubmit={handleSubmit} noValidate>
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">QUERY</p>
-            <h2>Run snapshot-scoped retrieval</h2>
+            <p className="eyebrow">{t("playground.queryEyebrow")}</p>
+            <h2>{t("playground.queryTitle")}</h2>
           </div>
         </div>
         <div className="form-grid">
           <label>
-            Knowledge Base ID
+            {t("playground.knowledgeBaseId")}
             <input
               required
               value={knowledgeBaseId}
@@ -158,22 +155,27 @@ export default function RetrievalPlaygroundPage() {
             />
           </label>
           <label>
-            Snapshot ID
-            <input required value={snapshotId} onChange={(event) => setSnapshotId(event.target.value)} spellCheck={false} />
+            {t("playground.snapshotId")}
+            <input
+              required
+              value={snapshotId}
+              onChange={(event) => setSnapshotId(event.target.value)}
+              spellCheck={false}
+            />
           </label>
           <label className="query-field">
-            Query
+            {t("playground.query")}
             <textarea
               required
               rows={4}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search the selected snapshot…"
+              placeholder={t("playground.queryPlaceholder")}
             />
           </label>
         </div>
         <details className="advanced-options">
-          <summary>Advanced retrieval config</summary>
+          <summary>{t("playground.advancedConfig")}</summary>
           <div className="form-grid top-k-grid">
             <label>
               Dense Top K
@@ -195,42 +197,44 @@ export default function RetrievalPlaygroundPage() {
         </details>
         <div className="form-actions">
           <button type="submit" className="button button-primary" disabled={pageState === "loading"}>
-            {pageState === "loading" ? "Retrieving…" : "Run retrieval"}
+            {pageState === "loading" ? t("playground.running") : t("playground.run")}
           </button>
         </div>
       </form>
 
-      {pageState === "initial" && <EmptyState title="Enter a query and snapshot to begin." />}
-      {pageState === "loading" && <LoadingState label="Retrieving…" />}
-      {pageState === "error" && error && (
-        <ErrorState code={error.code} message={error.message} />
-      )}
+      {pageState === "initial" && <EmptyState title={t("playground.initial")} />}
+      {pageState === "loading" && <LoadingState label={t("playground.running")} />}
+      {pageState === "error" && error && <ErrorState code={error.code} message={error.message} />}
       {pageState === "empty" && (
-        <EmptyState title="No evidence found for this snapshot." hint="The retrieval stages ran but returned no chunks." />
+        <EmptyState title={t("playground.empty")} hint={t("playground.emptyHint")} />
       )}
 
       {result && (
         <>
-          <section className="playground-overview" aria-label="Retrieval summary">
+          <section className="playground-overview" aria-label={t("playground.overview.finalEvidence")}>
             <div>
-              <span>Snapshot</span>
+              <span>{t("playground.overview.snapshot")}</span>
               <strong>{shortId(result.snapshot_id)}</strong>
             </div>
             <div>
-              <span>Total latency</span>
+              <span>{t("playground.overview.totalLatency")}</span>
               <strong>{result.total_latency_ms.toFixed(1)} ms</strong>
             </div>
             <div>
-              <span>Final evidence</span>
-              <strong>{result.evidence.length} chunks</strong>
+              <span>{t("playground.overview.finalEvidence")}</span>
+              <strong>{formatNumber(result.evidence.length)}</strong>
             </div>
           </section>
-          <section className="stage-grid" aria-label="Retrieval trace stages">
+          <section className="stage-grid" aria-label={t("playground.title")}>
             {stageLabels.map(([key, label]) => (
               <StageCard key={key} label={label} stage={result.stages[key]} />
             ))}
           </section>
-          <Panel title="Reranked evidence" eyebrow="FINAL EVIDENCE" actions={<span className="state-hint">{result.evidence.length} chunks</span>}>
+          <Panel
+            title={t("playground.evidence.title")}
+            eyebrow={t("playground.evidence.eyebrow")}
+            actions={<span className="state-hint">{t("playground.evidence.chunks", { count: formatNumber(result.evidence.length) })}</span>}
+          >
             <div className="evidence-list">
               {result.evidence.map((item, index) => (
                 <article className="evidence-item" key={item.chunk_id}>

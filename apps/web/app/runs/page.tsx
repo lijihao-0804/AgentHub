@@ -5,9 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 
 import StatusBadge from "../../components/status-badge";
 import { EmptyState, ErrorState, LoadingState, SessionRequired } from "../../components/states";
-import { ApiError, errorHint, toApiError } from "../../lib/api-client";
+import { ApiError, errorHintKey, toApiError } from "../../lib/api-client";
 import { listRuns, RunListItem } from "../../lib/runs";
 import { useFrontendSession } from "../../components/session-provider";
+import { useI18n } from "../../i18n/provider";
 
 const RUN_STATUS_OPTIONS = [
   "RUNNING",
@@ -19,20 +20,12 @@ const RUN_STATUS_OPTIONS = [
   "CANCELLED",
 ];
 
-function formatCost(run: RunListItem): string {
-  if (run.total_cost_amount === null) return "—";
-  return `${run.total_cost_amount} ${run.cost_currency ?? ""}`.trim();
-}
-
-function formatStarted(run: RunListItem): string {
-  return new Date(run.started_at).toLocaleString();
-}
-
 function shortId(id: string): string {
   return `${id.slice(0, 8)}…`;
 }
 
 export default function RunsPage() {
+  const { t, statusLabel, failureCategoryLabel, formatDateTime, formatNumber, formatCurrencyAmount } = useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [status, setStatus] = useState("");
   const [agentVersionId, setAgentVersionId] = useState("");
@@ -61,7 +54,7 @@ export default function RunsPage() {
         setRuns((current) => (cursor ? [...current, ...result.items] : result.items));
         setNextCursor(result.next_cursor);
       } catch (caught) {
-        setError(toApiError(caught, "Could not load runs."));
+        setError(toApiError(caught, ""));
       } finally {
         setLoading(false);
       }
@@ -113,105 +106,115 @@ export default function RunsPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">RUNS</p>
-          <h1>Runs</h1>
-          <p className="page-lede">
-            Workspace-scoped runtime history with safe status, usage, cost and approval projections.
-          </p>
+          <p className="eyebrow">{t("runs.eyebrow")}</p>
+          <h1>{t("runs.title")}</h1>
+          <p className="page-lede">{t("runs.lede")}</p>
         </header>
-        <SessionRequired context="the run history" />
+        <SessionRequired contextKey="session.context.runs" />
       </div>
     );
   }
 
+  const hint = error ? errorHintKey(error) : null;
+  const hasFilters = Boolean(status || agentVersionId);
+
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">RUNS</p>
-        <h1>Runs</h1>
-        <p className="page-lede">
-          Workspace-scoped runtime history with safe status, usage, cost and approval projections.
-        </p>
+        <p className="eyebrow">{t("runs.eyebrow")}</p>
+        <h1>{t("runs.title")}</h1>
+        <p className="page-lede">{t("runs.lede")}</p>
       </header>
 
-      <section className="panel" aria-label="Run filters">
+      <section className="panel" aria-label={t("runs.filters.status")}>
         <div className="runs-toolbar">
           <label>
-            Status
+            {t("runs.filters.status")}
             <select value={status} onChange={(event) => setStatus(event.target.value)}>
-              <option value="">All statuses</option>
+              <option value="">{t("runs.filters.allStatuses")}</option>
               {RUN_STATUS_OPTIONS.map((option) => (
                 <option value={option} key={option}>
-                  {option}
+                  {statusLabel(option)}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            Agent Version ID
+            {t("runs.filters.agentVersionId")}
             <input
               value={agentVersionId}
               onChange={(event) => setAgentVersionId(event.target.value)}
-              placeholder="Leave empty for all versions"
+              placeholder={t("runs.filters.agentVersionPlaceholder")}
               spellCheck={false}
             />
           </label>
           <div className="runs-toolbar-actions">
             <button type="button" className="button button-primary" onClick={applyFilters} disabled={loading}>
-              Apply
+              {t("runs.filters.apply")}
             </button>
             <button type="button" className="button button-ghost" onClick={clearFilters} disabled={loading}>
-              Clear
+              {t("runs.filters.clear")}
             </button>
           </div>
         </div>
       </section>
 
-      {error && <ErrorState code={error.code} message={error.message} hint={errorHint(error)} onRetry={() => void refresh()} />}
-      {loading && runs.length === 0 && !error && <LoadingState label="Loading runs…" />}
+      {error && (
+        <ErrorState
+          code={error.code}
+          message={error.message || t("errors.loadRuns")}
+          hint={hint ? t(hint) : undefined}
+          onRetry={() => void refresh()}
+        />
+      )}
+      {loading && runs.length === 0 && !error && <LoadingState />}
       {!loading && runs.length === 0 && !error && (
         <EmptyState
-          title="No runs found."
-          hint={status || agentVersionId ? "No runs match the current filters. Clear them to see everything." : "Runs appear here once agents execute in this workspace."}
+          title={t("runs.empty")}
+          hint={hasFilters ? t("runs.emptyFilteredHint") : t("runs.emptyHint")}
         />
       )}
 
       {runs.length > 0 && (
-        <section className="panel" aria-label="Run list">
+        <section className="panel" aria-label={t("runs.title")}>
           <div className="data-table">
             <table>
               <thead>
                 <tr>
-                  <th scope="col">Run</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Version</th>
-                  <th scope="col">Started</th>
-                  <th scope="col">Duration</th>
-                  <th scope="col">Tokens</th>
-                  <th scope="col">Cost</th>
-                  <th scope="col">Tools</th>
-                  <th scope="col">Failure</th>
+                  <th scope="col">{t("runs.columns.run")}</th>
+                  <th scope="col">{t("runs.columns.status")}</th>
+                  <th scope="col">{t("runs.columns.version")}</th>
+                  <th scope="col">{t("runs.columns.started")}</th>
+                  <th scope="col">{t("runs.columns.duration")}</th>
+                  <th scope="col">{t("runs.columns.tokens")}</th>
+                  <th scope="col">{t("runs.columns.cost")}</th>
+                  <th scope="col">{t("runs.columns.tools")}</th>
+                  <th scope="col">{t("runs.columns.failure")}</th>
                 </tr>
               </thead>
               <tbody>
                 {runs.map((run) => (
                   <tr key={run.id}>
-                    <td data-label="Run">
+                    <td data-label={t("runs.columns.run")}>
                       <Link href={`/runs/${encodeURIComponent(run.id)}`} title={run.id}>
                         <code>{shortId(run.id)}</code>
                       </Link>
                     </td>
-                    <td data-label="Status"><StatusBadge status={run.status} /></td>
-                    <td data-label="Version">v{run.agent_version_number}</td>
-                    <td data-label="Started">{formatStarted(run)}</td>
-                    <td data-label="Duration">{run.duration_ms === null ? "—" : `${run.duration_ms} ms`}</td>
-                    <td data-label="Tokens">{run.total_tokens ?? "—"}</td>
-                    <td data-label="Cost">{formatCost(run)}</td>
-                    <td data-label="Tools">{run.tool_call_count}</td>
-                    <td data-label="Failure">
+                    <td data-label={t("runs.columns.status")}><StatusBadge status={run.status} /></td>
+                    <td data-label={t("runs.columns.version")}>v{run.agent_version_number}</td>
+                    <td data-label={t("runs.columns.started")}>{formatDateTime(run.started_at)}</td>
+                    <td data-label={t("runs.columns.duration")}>
+                      {run.duration_ms === null ? "—" : `${formatNumber(run.duration_ms)} ms`}
+                    </td>
+                    <td data-label={t("runs.columns.tokens")}>{run.total_tokens ?? "—"}</td>
+                    <td data-label={t("runs.columns.cost")}>
+                      {run.total_cost_amount === null ? "—" : formatCurrencyAmount(run.total_cost_amount, run.cost_currency)}
+                    </td>
+                    <td data-label={t("runs.columns.tools")}>{run.tool_call_count}</td>
+                    <td data-label={t("runs.columns.failure")}>
                       {run.failure_code ? (
                         <span>
-                          {run.failure_category ?? "UNKNOWN"}: <code>{run.failure_code}</code>
+                          {failureCategoryLabel(run.failure_category ?? "")}: <code>{run.failure_code}</code>
                         </span>
                       ) : (
                         "—"
@@ -225,7 +228,7 @@ export default function RunsPage() {
           {nextCursor && (
             <div className="form-actions">
               <button type="button" className="button button-ghost" onClick={() => void refresh(nextCursor)} disabled={loading}>
-                {loading ? "Loading…" : "Load more"}
+                {loading ? t("common.loading") : t("runs.loadMore")}
               </button>
             </div>
           )}

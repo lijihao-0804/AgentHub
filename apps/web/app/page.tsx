@@ -2,77 +2,78 @@
 
 import Link from "next/link";
 
+import { useI18n } from "../i18n/provider";
 import { useFrontendSession } from "../components/session-provider";
 
 const QUICK_LINKS = [
   {
     href: "/dashboard",
-    title: "Dashboard",
-    description: "Success rate, latency, usage, cost and failure analytics for this workspace.",
+    titleKey: "home.cards.dashboard.title",
+    descriptionKey: "home.cards.dashboard.description",
   },
   {
     href: "/runs",
-    title: "Runs",
-    description: "Workspace-scoped run history with safe status, usage and cost projections.",
+    titleKey: "home.cards.runs.title",
+    descriptionKey: "home.cards.runs.description",
   },
   {
     href: "/approvals",
-    title: "Approvals",
-    description: "Review pending tool approvals and reconcile actions that need attention.",
+    titleKey: "home.cards.approvals.title",
+    descriptionKey: "home.cards.approvals.description",
   },
   {
     href: "/knowledge/playground",
-    title: "Retrieval Playground",
-    description: "Inspect dense, sparse, fused and reranked evidence for one knowledge snapshot.",
+    titleKey: "home.cards.playground.title",
+    descriptionKey: "home.cards.playground.description",
   },
-];
+] as const;
+
+function shortWorkspaceId(value: string): string {
+  if (value.length <= 8) return value;
+  return `${value.slice(0, 4)}…${value.slice(-3)}`;
+}
 
 export default function Home() {
+  const { t } = useI18n();
   const { connected, workspaceId, openPanel } = useFrontendSession();
 
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">OVERVIEW</p>
-        <h1>Workspace overview</h1>
-        <p className="page-lede">
-          Operational control plane for running, approving and observing enterprise agents.
-        </p>
+        <p className="eyebrow">{t("home.eyebrow")}</p>
+        <h1>{t("home.title")}</h1>
+        <p className="page-lede">{t("home.lede")}</p>
       </header>
 
       <section className="panel" aria-labelledby="session-overview-title">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">SESSION</p>
-            <h2 id="session-overview-title">Workspace connection</h2>
+            <p className="eyebrow">{t("home.sessionEyebrow")}</p>
+            <h2 id="session-overview-title">{t("home.sessionTitle")}</h2>
           </div>
         </div>
         {connected ? (
           <p className="state-hint">
-            Session active for workspace <code>{workspaceId.slice(0, 4)}…{workspaceId.slice(-3)}</code>.
-            The token stays in memory and is cleared when you refresh.
+            {t("session.connectedNote", { id: shortWorkspaceId(workspaceId) })}
           </p>
         ) : (
           <div className="state-block state-inline">
-            <p className="state-title">Not connected</p>
-            <p className="state-hint">
-              Connect a workspace session to load dashboards, runs and approvals. Credentials stay
-              in memory only — nothing is persisted.
-            </p>
+            <p className="state-title">{t("session.notConnected")}</p>
+            <p className="state-hint">{t("session.notConnectedNote")}</p>
             <button type="button" className="button button-primary" onClick={openPanel}>
-              Connect workspace
+              {t("session.connect")}
             </button>
           </div>
         )}
       </section>
 
-      <section className="overview-grid" aria-label="Quick navigation">
+      <section className="overview-grid" aria-label={t("home.quickLinks")}>
         {QUICK_LINKS.map((item) => (
           <Link className="overview-card" href={item.href} key={item.href}>
-            <span className="overview-card-title">{item.title}</span>
-            <span className="overview-card-description">{item.description}</span>
+            <span className="overview-card-title">{t(item.titleKey)}</span>
+            <span className="overview-card-description">{t(item.descriptionKey)}</span>
             <span className="overview-card-cta" aria-hidden="true">
-              Open →
+              {t("home.cardCta")} →
             </span>
           </Link>
         ))}

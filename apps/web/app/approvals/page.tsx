@@ -7,15 +7,12 @@ import StatusBadge from "../../components/status-badge";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
 import { KeyValues } from "../../components/technical-details";
 import TechnicalDetails from "../../components/technical-details";
-import { ApiError, errorHint, toApiError } from "../../lib/api-client";
+import { ApiError, errorHintKey, toApiError } from "../../lib/api-client";
 import { Approval, decideApproval, listApprovals } from "../../lib/approvals";
 import { useFrontendSession } from "../../components/session-provider";
+import { useI18n } from "../../i18n/provider";
 
 type DecisionState = { approvalId: string; decision: "approve" | "deny" } | null;
-
-function formatTimestamp(value: string | null): string {
-  return value ? new Date(value).toLocaleString() : "—";
-}
 
 /** Client-side counts over the currently loaded list; no aggregate API exists. */
 function countSummary(approvals: Approval[]) {
@@ -28,7 +25,13 @@ function countSummary(approvals: Approval[]) {
 
 function argumentEntries(approval: Approval): Array<[string, unknown]> {
   return Object.entries(approval.canonical_arguments ?? {}).map(([key, value]) => {
-    if (value === null || value === undefined || typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    if (
+      value === null ||
+      value === undefined ||
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ) {
       return [key, value] as [string, unknown];
     }
     return [key, JSON.stringify(value)] as [string, unknown];
@@ -36,6 +39,7 @@ function argumentEntries(approval: Approval): Array<[string, unknown]> {
 }
 
 export default function ApprovalsPage() {
+  const { t, formatDateTime } = useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
@@ -52,7 +56,7 @@ export default function ApprovalsPage() {
       setApprovals(await listApprovals(workspaceId, accessToken));
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, "Could not load approvals."));
+      setError(toApiError(caught, ""));
     } finally {
       setLoading(false);
     }
@@ -75,8 +79,8 @@ export default function ApprovalsPage() {
         current.map((approval) => (approval.id === approvalId ? result.approval : approval)),
       );
     } catch (caught) {
-      const apiError = toApiError(caught, "Could not record the approval decision.");
-      setDecisionError({ approvalId, message: `${apiError.code}: ${apiError.message}` });
+      const apiError = toApiError(caught, "");
+      setDecisionError({ approvalId, message: apiError.message || t("errors.decideApproval") });
     } finally {
       setDecisionState(null);
     }
@@ -86,111 +90,124 @@ export default function ApprovalsPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">APPROVALS</p>
-          <h1>Approvals</h1>
-          <p className="page-lede">
-            Durable human-in-the-loop decisions for tool actions. Decision and execution states are
-            tracked separately.
-          </p>
+          <p className="eyebrow">{t("approvals.eyebrow")}</p>
+          <h1>{t("approvals.title")}</h1>
+          <p className="page-lede">{t("approvals.lede")}</p>
         </header>
-        <SessionRequired context="the approval inbox" />
+        <SessionRequired contextKey="session.context.approvals" />
       </div>
     );
   }
 
   const counts = countSummary(approvals);
+  const hint = error ? errorHintKey(error) : null;
 
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">APPROVALS</p>
-        <h1>Approvals</h1>
-        <p className="page-lede">
-          Durable human-in-the-loop decisions for tool actions. Decision and execution states are
-          tracked separately — an approved action can still fail, and an unknown outcome needs
-          attention rather than a retry.
-        </p>
+        <p className="eyebrow">{t("approvals.eyebrow")}</p>
+        <h1>{t("approvals.title")}</h1>
+        <p className="page-lede">{t("approvals.lede")}</p>
       </header>
 
       <Panel
-        ariaLabel="Approval inbox"
-        title="Approval inbox"
-        eyebrow="HUMAN-IN-THE-LOOP"
+        ariaLabel={t("approvals.inboxTitle")}
+        title={t("approvals.inboxTitle")}
+        eyebrow={t("approvals.inboxEyebrow")}
         actions={
           <>
             <span className="state-hint" aria-live="polite">
-              {loading ? "Loading…" : `${approvals.length} loaded`}
+              {loading ? t("common.loading") : t("approvals.loaded", { count: approvals.length })}
             </span>
             <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>
-              Refresh
+              {t("common.refresh")}
             </button>
           </>
         }
       >
         <div className="approval-counts">
-          <StatusBadge status="PENDING" label={`Pending ${counts.pending}`} />
-          <StatusBadge status="APPROVED" label={`Approved ${counts.approved}`} />
-          <StatusBadge status="DENIED" label={`Denied ${counts.denied}`} />
-          <StatusBadge status="UNKNOWN_OUTCOME" label={`Needs attention ${counts.needsAttention}`} />
+          <StatusBadge status="PENDING" label={t("approvals.counts.pending", { count: counts.pending })} />
+          <StatusBadge status="APPROVED" label={t("approvals.counts.approved", { count: counts.approved })} />
+          <StatusBadge status="DENIED" label={t("approvals.counts.denied", { count: counts.denied })} />
+          <StatusBadge
+            status="UNKNOWN_OUTCOME"
+            label={t("approvals.counts.needsAttention", { count: counts.needsAttention })}
+          />
         </div>
-        <p className="state-hint">Counts reflect the currently loaded list.</p>
+        <p className="state-hint">{t("approvals.countsReflect")}</p>
 
         {error && (
-          <ErrorState code={error.code} message={error.message} hint={errorHint(error)} onRetry={() => void refresh()} />
-        )}
-        {loading && approvals.length === 0 && !error && <LoadingState label="Loading approvals…" />}
-        {loaded && approvals.length === 0 && !error && (
-          <EmptyState
-            title="No approvals in this workspace."
-            hint="Pending approval requests appear here when an agent requests a risky tool action."
+          <ErrorState
+            code={error.code}
+            message={error.message || t("errors.loadApprovals")}
+            hint={hint ? t(hint) : undefined}
+            onRetry={() => void refresh()}
           />
+        )}
+        {loading && approvals.length === 0 && !error && <LoadingState />}
+        {loaded && approvals.length === 0 && !error && (
+          <EmptyState title={t("approvals.empty")} hint={t("approvals.emptyHint")} />
         )}
 
         <div className="approval-list">
           {approvals.map((approval) => {
             const deciding = decisionState?.approvalId === approval.id ? decisionState.decision : null;
             const cardError = decisionError?.approvalId === approval.id ? decisionError.message : null;
+            const decidedAt = approval.decided_at ? formatDateTime(approval.decided_at) : "—";
             return (
               <article className="approval-card" key={approval.id}>
                 <div className="approval-header">
                   <div>
-                    <p className="eyebrow">TOOL IDENTITY</p>
+                    <p className="eyebrow">{t("approvals.card.toolIdentity")}</p>
                     <code>{approval.tool_identity}</code>
                   </div>
                   <Link href={`/runs/${encodeURIComponent(approval.run_id)}`}>
-                    Run {approval.run_id.slice(0, 8)}… →
+                    {t("approvals.card.runLink", { id: approval.run_id.slice(0, 8) + "…" })}
                   </Link>
                 </div>
 
                 <div className="approval-split">
                   <div className="approval-state-block">
-                    <span className="approval-state-label">Decision</span>
+                    <span className="approval-state-label">{t("approvals.card.decision")}</span>
                     <StatusBadge status={approval.decision_status} />
                     <span className="approval-state-meta">
-                      Decided {formatTimestamp(approval.decided_at)}
-                      {approval.decided_by ? ` by ${approval.decided_by}` : ""}
+                      {approval.decided_by
+                        ? t("approvals.card.decidedBy", { time: decidedAt, user: approval.decided_by })
+                        : t("approvals.card.decidedAt", { time: decidedAt })}
                     </span>
-                    <span className="approval-state-meta">Requested {formatTimestamp(approval.created_at)}</span>
+                    <span className="approval-state-meta">
+                      {t("approvals.card.requested", {
+                        time: approval.created_at ? formatDateTime(approval.created_at) : "—",
+                      })}
+                    </span>
                   </div>
                   <div className="approval-state-block">
-                    <span className="approval-state-label">Execution</span>
+                    <span className="approval-state-label">{t("approvals.card.execution")}</span>
                     <StatusBadge status={approval.execution_status} />
                     {approval.execution_status === "UNKNOWN_OUTCOME" && (
-                      <span className="approval-state-meta">
-                        Needs attention: the action ran but its outcome could not be confirmed. Do not retry blindly.
-                      </span>
+                      <span className="approval-state-meta">{t("approvals.card.unknownWarning")}</span>
                     )}
-                    <span className="approval-state-meta">Executed {formatTimestamp(approval.executed_at)}</span>
+                    <span className="approval-state-meta">
+                      {t("approvals.card.executed", {
+                        time: approval.executed_at ? formatDateTime(approval.executed_at) : "—",
+                      })}
+                    </span>
                     {approval.execution_attempt_count > 0 && (
-                      <span className="approval-state-meta">Attempts: {approval.execution_attempt_count}</span>
+                      <span className="approval-state-meta">
+                        {t("approvals.card.attempts", { count: approval.execution_attempt_count })}
+                      </span>
                     )}
                   </div>
                 </div>
 
                 {approval.failure_code && (
                   <p className="state-hint">
-                    Failure <code>{approval.failure_code}</code>
-                    {approval.safe_failure_message ? ` — ${approval.safe_failure_message}` : ""}
+                    {approval.safe_failure_message
+                      ? t("approvals.card.failure", {
+                          code: approval.failure_code,
+                          message: approval.safe_failure_message,
+                        })
+                      : t("approvals.card.failureCodeOnly", { code: approval.failure_code })}
                   </p>
                 )}
 
@@ -198,7 +215,7 @@ export default function ApprovalsPage() {
                   <>
                     <KeyValues entries={argumentEntries(approval)} />
                     <TechnicalDetails
-                      summary="Technical arguments"
+                      summary={t("approvals.card.technicalArguments")}
                       value={approval.canonical_arguments}
                     />
                   </>
@@ -212,7 +229,7 @@ export default function ApprovalsPage() {
                       onClick={() => void decide(approval.id, "deny")}
                       disabled={deciding !== null}
                     >
-                      {deciding === "deny" ? "Denying…" : "Deny"}
+                      {deciding === "deny" ? t("approvals.card.denying") : t("approvals.card.deny")}
                     </button>
                     <button
                       type="button"
@@ -220,7 +237,7 @@ export default function ApprovalsPage() {
                       onClick={() => void decide(approval.id, "approve")}
                       disabled={deciding !== null}
                     >
-                      {deciding === "approve" ? "Approving…" : "Approve"}
+                      {deciding === "approve" ? t("approvals.card.approving") : t("approvals.card.approve")}
                     </button>
                     {cardError && <p className="state-hint" role="alert">{cardError}</p>}
                   </div>
