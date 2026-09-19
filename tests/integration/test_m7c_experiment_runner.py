@@ -103,7 +103,7 @@ async def _ready_run(session: AsyncSession, base: dict[str, object]):
         ],
     )
     pricing = await _pricing(session, base)
-    service = ExperimentService(StaticBuildIdentityProvider("m" * 40))
+    service = ExperimentService(StaticBuildIdentityProvider("1" * 40))
     experiment = await service.create_experiment(
         session,
         context=context,
