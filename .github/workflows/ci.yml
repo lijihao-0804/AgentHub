@@ -101,6 +101,8 @@ jobs:
         run: >-
           uv run --locked pytest tests/integration/test_m7c_experiment_runner.py
           -k m7d_metrics_and_comparison_use_persisted_m7c_cases -vv -rs
+      - name: Run M7-E/F persisted ablation and release gate integration
+        run: uv run --locked pytest tests/integration/test_m7ef_ablation_release_gate.py -vv -rs
       - name: Validate M3 retrieval benchmark wiring
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
@@ -135,6 +137,10 @@ jobs:
           tests/unit/test_m7b_evaluation_api.py -vv
       - name: Validate M7-C runner contract
         run: uv run --locked pytest tests/unit/test_m7c_runner.py -vv
+      - name: Validate M7-E/F strategy, ablation, and release gate contracts
+        run: >-
+          uv run --locked pytest tests/unit/test_knowledge_m7e_strategy.py
+          tests/unit/test_m7e_ablation.py tests/unit/test_m7f_release_gate.py -vv
 
   frontend:
     runs-on: ubuntu-latest
