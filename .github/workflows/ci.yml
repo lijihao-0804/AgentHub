@@ -97,6 +97,10 @@ jobs:
         run: uv run --locked pytest tests/integration/test_m7a_evaluation_datasets.py -vv -rs
       - name: Run M7-B experiment persistence integration
         run: uv run --locked pytest tests/integration/test_m7b_experiments.py -vv -rs
+      - name: Run M7-D metrics and paired comparison integration
+        run: >-
+          uv run --locked pytest tests/integration/test_m7c_experiment_runner.py
+          -k m7d_metrics_and_comparison_use_persisted_m7c_cases -vv -rs
       - name: Validate M3 retrieval benchmark wiring
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
