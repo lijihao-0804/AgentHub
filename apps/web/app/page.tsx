@@ -1,181 +1,83 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 
-import {
-  Approval,
-  ApprovalApiError,
-  decideApproval,
-  listApprovals,
-} from "../lib/approvals";
+import { useI18n } from "../i18n/provider";
+import { useFrontendSession } from "../components/session-provider";
 
-const milestones = [
-  ["M0", "Engineering baseline", "next"],
-  ["M1", "Auth / Tenant / RBAC", "next"],
-  ["M2", "Model Gateway", "next"],
-  ["M3", "Reliable Knowledge Hub", "next"],
-  ["M5-A", "Approval Runtime", "complete"],
-  ["M6-A", "Run Observability", "complete"],
-  ["M6-B", "Metrics Dashboard", "complete"],
-];
+const QUICK_LINKS = [
+  {
+    href: "/dashboard",
+    titleKey: "home.cards.dashboard.title",
+    descriptionKey: "home.cards.dashboard.description",
+  },
+  {
+    href: "/runs",
+    titleKey: "home.cards.runs.title",
+    descriptionKey: "home.cards.runs.description",
+  },
+  {
+    href: "/approvals",
+    titleKey: "home.cards.approvals.title",
+    descriptionKey: "home.cards.approvals.description",
+  },
+  {
+    href: "/knowledge/playground",
+    titleKey: "home.cards.playground.title",
+    descriptionKey: "home.cards.playground.description",
+  },
+] as const;
+
+function shortWorkspaceId(value: string): string {
+  if (value.length <= 8) return value;
+  return `${value.slice(0, 4)}…${value.slice(-3)}`;
+}
 
 export default function Home() {
-  const [workspaceId, setWorkspaceId] = useState("");
-  const [accessToken, setAccessToken] = useState("");
-  const [approvals, setApprovals] = useState<Approval[]>([]);
-  const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  async function refreshApprovals() {
-    setMessage(null);
-    if (!workspaceId.trim() || !accessToken.trim()) {
-      setMessage("Workspace ID and access token are required.");
-      return;
-    }
-    setLoading(true);
-    try {
-      setApprovals(await listApprovals(workspaceId, accessToken));
-    } catch (error) {
-      setMessage(error instanceof ApprovalApiError ? error.message : "Could not load approvals.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function decide(approvalId: string, decision: "approve" | "deny") {
-    setMessage(null);
-    setLoading(true);
-    try {
-      const result = await decideApproval(workspaceId, approvalId, decision, accessToken);
-      setApprovals((current) =>
-        current.map((approval) => (approval.id === approvalId ? result.approval : approval)),
-      );
-    } catch (error) {
-      setMessage(error instanceof ApprovalApiError ? error.message : "Could not decide approval.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { t } = useI18n();
+  const { connected, workspaceId, openPanel } = useFrontendSession();
 
   return (
-    <main className="shell">
-      <section className="hero">
-        <p className="eyebrow">ENTERPRISE AGENT RUNTIME &amp; CONTROL PLANE</p>
-        <h1>AgentHub</h1>
-        <p className="lede">
-          A staged foundation for explainable, durable and evaluable enterprise agents.
-        </p>
-      </section>
-      <section className="card" aria-labelledby="status-title">
-        <div className="card-header">
+    <div className="page">
+      <header className="page-header">
+        <p className="eyebrow">{t("home.eyebrow")}</p>
+        <h1>{t("home.title")}</h1>
+        <p className="page-lede">{t("home.lede")}</p>
+      </header>
+
+      <section className="panel" aria-labelledby="session-overview-title">
+        <div className="panel-heading">
           <div>
-            <p className="eyebrow">DELIVERY STATUS</p>
-            <h2 id="status-title">Milestone roadmap</h2>
+            <p className="eyebrow">{t("home.sessionEyebrow")}</p>
+            <h2 id="session-overview-title">{t("home.sessionTitle")}</h2>
           </div>
-          <span className="badge">M6 OVERALL PASS</span>
         </div>
-        <div className="milestones">
-          {milestones.map(([id, label, status]) => (
-            <div className={`milestone ${status}`} key={id}>
-              <span className="milestone-id">{id}</span>
-              <span>{label}</span>
-              <span className="milestone-status">
-                {status === "active" ? "Active" : status === "complete" ? "Accepted" : "Queued"}
-              </span>
-            </div>
-          ))}
-        </div>
+        {connected ? (
+          <p className="state-hint">
+            {t("session.connectedNote", { id: shortWorkspaceId(workspaceId) })}
+          </p>
+        ) : (
+          <div className="state-block state-inline">
+            <p className="state-title">{t("session.notConnected")}</p>
+            <p className="state-hint">{t("session.notConnectedNote")}</p>
+            <button type="button" className="button button-primary" onClick={openPanel}>
+              {t("session.connect")}
+            </button>
+          </div>
+        )}
       </section>
-      <section className="card approval-card" aria-labelledby="approval-title">
-        <div className="card-header">
-          <div>
-            <p className="eyebrow">DURABLE HUMAN-IN-THE-LOOP</p>
-            <h2 id="approval-title">Approval inbox</h2>
-          </div>
-          <span className="badge">NO TOKEN STORAGE</span>
-        </div>
-        <p className="playground-note">
-          Developer-facing MVP surface. The token stays in this React state only and disappears on refresh.
-        </p>
-        <div className="approval-form">
-          <label>
-            Workspace ID
-            <input value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)} />
-          </label>
-          <label>
-            Access token
-            <input
-              type="password"
-              value={accessToken}
-              onChange={(event) => setAccessToken(event.target.value)}
-            />
-          </label>
-          <button type="button" onClick={refreshApprovals} disabled={loading}>
-            {loading ? "Loading…" : "Refresh approvals"}
-          </button>
-        </div>
-        {message && <p className="state-message">{message}</p>}
-        <div className="approval-list">
-          {approvals.length === 0 && !message && (
-            <p className="muted">No approvals loaded.</p>
-          )}
-          {approvals.map((approval) => (
-            <article className="approval-item" key={approval.id}>
-              <div className="approval-item-header">
-                <div>
-                  <p className="eyebrow">{approval.tool_identity}</p>
-                  <strong>{approval.decision_status}</strong>
-                </div>
-                <span className="approval-status">{approval.execution_status}</span>
-              </div>
-              <p className="muted">Run {approval.run_id}</p>
-              <pre>{JSON.stringify(approval.canonical_arguments, null, 2)}</pre>
-              {approval.execution_status === "UNKNOWN_OUTCOME" && (
-                <p className="needs-attention">Needs Attention: reconciliation required.</p>
-              )}
-              {approval.decision_status === "PENDING" && (
-                <div className="approval-actions">
-                  <button type="button" onClick={() => decide(approval.id, "approve")} disabled={loading}>
-                    Approve
-                  </button>
-                  <button type="button" onClick={() => decide(approval.id, "deny")} disabled={loading}>
-                    Deny
-                  </button>
-                </div>
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="card" aria-labelledby="runs-title">
-        <div className="card-header">
-          <div>
-            <p className="eyebrow">M6-A OBSERVABILITY</p>
-            <h2 id="runs-title">Run query and timeline</h2>
-          </div>
-          <Link className="run-detail-link" href="/runs">
-            Open Runs →
+
+      <section className="overview-grid" aria-label={t("home.quickLinks")}>
+        {QUICK_LINKS.map((item) => (
+          <Link className="overview-card" href={item.href} key={item.href}>
+            <span className="overview-card-title">{t(item.titleKey)}</span>
+            <span className="overview-card-description">{t(item.descriptionKey)}</span>
+            <span className="overview-card-cta" aria-hidden="true">
+              {t("home.cardCta")} →
+            </span>
           </Link>
-        </div>
-        <p className="playground-note">
-          Explore workspace-scoped runtime status, usage, cost, approvals and safe timeline events.
-        </p>
+        ))}
       </section>
-      <section className="card" aria-labelledby="dashboard-title">
-        <div className="card-header">
-          <div>
-            <p className="eyebrow">M6-B METRICS</p>
-            <h2 id="dashboard-title">Workspace dashboard</h2>
-          </div>
-          <Link className="run-detail-link" href="/dashboard">
-            Open Dashboard →
-          </Link>
-        </div>
-        <p className="playground-note">
-          Explore bounded success, latency, usage, cost, approval and failure analytics from PostgreSQL.
-        </p>
-      </section>
-    </main>
+    </div>
   );
 }

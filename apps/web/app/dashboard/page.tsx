@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import MetricCard from "../../components/metric-card";
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
+import { ApiError, errorHintKey, toApiError } from "../../lib/api-client";
 import {
   AgentVersionBreakdown,
   FailureAnalytics,
@@ -10,25 +13,13 @@ import {
   getObservabilityFailures,
   getObservabilitySummary,
   getObservabilityTimeseries,
-  ObservabilityApiError,
   ObservabilitySummary,
   TimeseriesResponse,
 } from "../../lib/observability";
+import { useFrontendSession } from "../../components/session-provider";
+import { useI18n } from "../../i18n/provider";
 
 type QueryState = { from?: string; to?: string };
-
-function metric(value: number | null, suffix = ""): string {
-  return value === null || !Number.isFinite(value) ? "—" : `${value}${suffix}`;
-}
-
-function rate(value: { rate: number | null }): string {
-  return value.rate === null ? "—" : `${(value.rate * 100).toFixed(1)}%`;
-}
-
-function cost(value: number | string | null, currency?: string | null): string {
-  if (value === null || value === undefined) return "Unknown";
-  return `${value} ${currency ?? ""}`.trim();
-}
 
 function queryForDays(days: number): QueryState {
   const to = new Date();
@@ -36,170 +27,398 @@ function queryForDays(days: number): QueryState {
   return { from: from.toISOString(), to: to.toISOString() };
 }
 
+const WINDOW_OPTIONS = [
+  { value: "1", labelKey: "dashboard.windows.d1" },
+  { value: "7", labelKey: "dashboard.windows.d7" },
+  { value: "30", labelKey: "dashboard.windows.d30" },
+  { value: "90", labelKey: "dashboard.windows.d90" },
+] as const;
+
 export default function DashboardPage() {
-  const [workspaceId, setWorkspaceId] = useState("");
-  const [accessToken, setAccessToken] = useState("");
+  const { t, statusLabel, failureCategoryLabel, formatNumber, formatPercent, formatUTCBucketDate, formatCurrencyAmount } = useI18n();
+  const { workspaceId, accessToken, connected } = useFrontendSession();
   const [days, setDays] = useState("7");
   const [summary, setSummary] = useState<ObservabilitySummary | null>(null);
   const [failures, setFailures] = useState<FailureAnalytics | null>(null);
   const [timeseries, setTimeseries] = useState<TimeseriesResponse | null>(null);
   const [versions, setVersions] = useState<AgentVersionBreakdown | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function load(category?: string) {
-    setMessage(null);
-    if (!workspaceId.trim() || !accessToken.trim()) {
-      setMessage("Workspace ID and access token are required.");
-      return;
-    }
-    const window = queryForDays(Number(days));
-    setLoading(true);
-    try {
-      const input = { workspaceId, accessToken, ...window };
-      const [nextSummary, nextTimeseries, nextFailures, nextVersions] = await Promise.all([
-        getObservabilitySummary(input),
-        getObservabilityTimeseries({ ...input, bucket: Number(days) <= 1 ? "hour" : "day" }),
-        getObservabilityFailures({ ...input, category }),
-        getAgentVersionBreakdown(input),
-      ]);
-      setSummary(nextSummary);
-      setTimeseries(nextTimeseries);
-      setFailures(nextFailures);
-      setVersions(nextVersions);
-      setSelectedCategory(category ?? null);
-    } catch (error) {
-      setMessage(
-        error instanceof ObservabilityApiError ? error.message : "Could not load observability data.",
-      );
-    } finally {
-      setLoading(false);
-    }
+  const load = useCallback(
+    async (category?: string, dayOverride?: string) => {
+      setError(null);
+      if (!connected) return;
+      const window = queryForDays(Number(dayOverride ?? days));
+      setLoading(true);
+      try {
+        const input = { workspaceId, accessToken, ...window };
+        const [nextSummary, nextTimeseries, nextFailures, nextVersions] = await Promise.all([
+          getObservabilitySummary(input),
+          getObservabilityTimeseries({ ...input, bucket: Number(dayOverride ?? days) <= 1 ? "hour" : "day" }),
+          getObservabilityFailures({ ...input, category }),
+          getAgentVersionBreakdown(input),
+        ]);
+        setSummary(nextSummary);
+        setTimeseries(nextTimeseries);
+        setFailures(nextFailures);
+        setVersions(nextVersions);
+        setSelectedCategory(category ?? null);
+      } catch (caught) {
+        setError(toApiError(caught, ""));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [connected, workspaceId, accessToken, days],
+  );
+
+  useEffect(() => {
+    if (connected) void load();
+  }, [connected, load]);
+
+  const hint = error ? errorHintKey(error) : null;
+
+  if (!connected) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <p className="eyebrow">{t("dashboard.eyebrow")}</p>
+          <h1>{t("dashboard.title")}</h1>
+        </header>
+        <SessionRequired contextKey="session.context.dashboard" />
+      </div>
+    );
   }
 
   return (
-    <main className="dashboard-shell">
-      <header className="observability-header">
-        <div>
-          <p className="eyebrow">M6-B · METRICS / FAILURE ANALYTICS</p>
-          <h1>Workspace dashboard</h1>
-          <p className="observability-lede">
-            Read-only operational metrics from AgentHub PostgreSQL. Percentages always show their
-            sample denominator; raw prompts, tool payloads and checkpoint data never enter this view.
-          </p>
-        </div>
-        <Link className="back-link" href="/">
-          Back to AgentHub
-        </Link>
+    <div className="page">
+      <header className="page-header">
+        <p className="eyebrow">{t("dashboard.eyebrow")}</p>
+        <h1>{t("dashboard.title")}</h1>
+        <p className="page-lede">{t("dashboard.lede")}</p>
       </header>
 
-      <section className="observability-panel" aria-labelledby="dashboard-query-title">
-        <div className="panel-heading">
-          <div>
-            <p className="eyebrow">WORKSPACE-SCOPED QUERY</p>
-            <h2 id="dashboard-query-title">Load metrics</h2>
-          </div>
-          <span className="badge">NO TOKEN STORAGE</span>
-        </div>
-        <p className="observability-note">
-          The access token remains in React state only and disappears on refresh. The default window is seven days.
-        </p>
-        <div className="observability-form">
-          <label>
-            Workspace ID
-            <input value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)} />
-          </label>
-          <label>
-            Access token
-            <input
-              type="password"
-              value={accessToken}
-              onChange={(event) => setAccessToken(event.target.value)}
-            />
-          </label>
-          <label>
-            Window
-            <select value={days} onChange={(event) => setDays(event.target.value)}>
-              <option value="1">24 hours</option>
-              <option value="7">7 days</option>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
-            </select>
-          </label>
-          <button type="button" onClick={() => load()} disabled={loading}>
-            {loading ? "Loading…" : "Load dashboard"}
+      <section className="runs-toolbar" aria-label={t("dashboard.window")}>
+        <label>
+          {t("dashboard.window")}
+          <select value={days} onChange={(event) => setDays(event.target.value)}>
+            {WINDOW_OPTIONS.map((option) => (
+              <option value={option.value} key={option.value}>
+                {t(option.labelKey)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="runs-toolbar-actions">
+          <button type="button" className="button button-primary" onClick={() => void load()} disabled={loading}>
+            {loading ? t("common.loading") : t("common.refresh")}
           </button>
         </div>
-        {message && <p className="state-message">{message}</p>}
       </section>
+
+      {error && (
+        <ErrorState
+          code={error.code}
+          message={error.message || t("errors.loadDashboard")}
+          hint={hint ? t(hint) : undefined}
+          onRetry={() => void load()}
+        />
+      )}
+      {loading && !summary && <LoadingState />}
 
       {summary && (
         <>
-          <section className="dashboard-grid" aria-label="Summary metrics">
-            <article className="dashboard-card"><span>Success rate</span><strong>{rate(summary.success_rate)}</strong><small>{summary.success_rate.numerator} / {summary.success_rate.denominator} finished</small></article>
-            <article className="dashboard-card"><span>Failure rate</span><strong>{rate(summary.failure_rate)}</strong><small>{summary.failure_rate.numerator} / {summary.failure_rate.denominator} finished</small></article>
-            <article className="dashboard-card"><span>p50 / p95 latency</span><strong>{metric(summary.latency.p50_ms, " ms")}</strong><small>p95 {metric(summary.latency.p95_ms, " ms")} · {summary.latency.sample_count} samples</small></article>
-            <article className="dashboard-card"><span>Tokens / run</span><strong>{metric(summary.usage.avg_tokens_per_run)}</strong><small>{summary.usage.known_usage_count} known · {summary.usage.unknown_usage_count} unknown</small></article>
-            <article className="dashboard-card"><span>Cost / successful run</span><strong>{summary.cost.mixed_currency ? "Mixed" : cost(summary.cost.cost_per_successful_run, summary.cost.currency)}</strong><small>{summary.cost.successful_cost_denominator} successful cost samples</small></article>
-            <article className="dashboard-card"><span>Needs attention</span><strong>{summary.current.needs_attention_count}</strong><small>{summary.current.unknown_outcome_action_count} unknown action outcomes</small></article>
+          <section className="kpi-grid" aria-label={t("dashboard.title")}>
+            <MetricCard
+              label={t("dashboard.kpi.successRate")}
+              value={summary.success_rate.rate === null ? "—" : formatPercent(summary.success_rate.rate)}
+              hint={t("dashboard.kpi.successHint", {
+                numerator: summary.success_rate.numerator,
+                denominator: summary.success_rate.denominator,
+              })}
+            />
+            <MetricCard
+              label={t("dashboard.kpi.p95Latency")}
+              value={summary.latency.p95_ms === null ? "—" : `${formatNumber(summary.latency.p95_ms)} ms`}
+              hint={t("dashboard.kpi.p95Hint", {
+                p50: summary.latency.p50_ms === null ? "—" : `${formatNumber(summary.latency.p50_ms)} ms`,
+                count: summary.latency.sample_count,
+              })}
+            />
+            <MetricCard
+              label={t("dashboard.kpi.tokensPerRun")}
+              value={summary.usage.avg_tokens_per_run === null ? "—" : summary.usage.avg_tokens_per_run}
+              hint={t("dashboard.kpi.tokensHint", {
+                known: summary.usage.known_usage_count,
+                unknown: summary.usage.unknown_usage_count,
+              })}
+            />
+            <MetricCard
+              label={t("dashboard.kpi.costPerSuccess")}
+              value={
+                summary.cost.mixed_currency
+                  ? t("dashboard.cost.mixed")
+                  : summary.cost.cost_per_successful_run === null
+                    ? t("common.unknown")
+                    : formatCurrencyAmount(summary.cost.cost_per_successful_run, summary.cost.currency)
+              }
+              hint={t("dashboard.kpi.costHint", { count: summary.cost.successful_cost_denominator })}
+            />
           </section>
 
-          <section className="dashboard-panel" aria-labelledby="operational-title">
-            <div className="panel-heading"><h2 id="operational-title">Current operational state</h2><Link href="/">Open approval inbox →</Link></div>
-            <div className="dashboard-stat-row">
-              <span>Running <strong>{summary.current.running_count}</strong></span>
-              <span>Waiting approval <strong>{summary.current.waiting_approval_count}</strong></span>
-              <span>Cancel requested <strong>{summary.current.cancel_requested_count}</strong></span>
-              <span>Needs attention <strong>{summary.current.needs_attention_count}</strong></span>
-              <span>Unknown outcome <strong>{summary.current.unknown_outcome_action_count}</strong></span>
-            </div>
+          <section className="op-grid" aria-label={t("dashboard.title")}>
+            <MetricCard label={t("dashboard.ops.running")} value={summary.current.running_count} href="/runs?status=RUNNING" />
+            <MetricCard
+              label={t("dashboard.ops.waitingApproval")}
+              value={summary.current.waiting_approval_count}
+              href="/approvals"
+              emphasis={summary.current.waiting_approval_count > 0}
+            />
+            <MetricCard
+              label={t("dashboard.ops.needsAttention")}
+              value={summary.current.needs_attention_count}
+              href="/runs?status=NEEDS_ATTENTION"
+              emphasis={summary.current.needs_attention_count > 0}
+            />
+            <MetricCard
+              label={t("dashboard.ops.unknownOutcome")}
+              value={summary.current.unknown_outcome_action_count}
+              hint={t("dashboard.ops.unknownOutcomeHint")}
+              href="/runs?status=NEEDS_ATTENTION"
+              emphasis={summary.current.unknown_outcome_action_count > 0}
+            />
           </section>
 
-          <section className="dashboard-two-column">
-            <div className="dashboard-panel">
-              <div className="panel-heading"><h2>Failure categories</h2><span>{failures?.total_failure_runs ?? 0} runs</span></div>
-              {!failures || failures.categories.length === 0 ? <p className="muted">No failures in this window.</p> : (
-                <div className="dashboard-table">
+          <div className="dashboard-columns">
+            <Panel title={t("dashboard.failures.title")} eyebrow={t("dashboard.failures.eyebrow")}>
+              {!failures || failures.categories.length === 0 ? (
+                <EmptyState title={t("dashboard.failures.empty")} hint={t("dashboard.failures.emptyHint")} />
+              ) : (
+                <div className="failure-bars">
                   {failures.categories.map((item) => (
-                    <button className={`dashboard-table-row ${selectedCategory === item.failure_category ? "selected" : ""}`} key={item.failure_category} type="button" onClick={() => load(item.failure_category)}>
-                      <span>{item.failure_category}</span><strong>{item.count}</strong><small>{item.percentage === null ? "—" : `${(item.percentage * 100).toFixed(1)}%`}</small>
+                    <button
+                      className="bar-row"
+                      type="button"
+                      key={item.failure_category}
+                      aria-pressed={selectedCategory === item.failure_category}
+                      onClick={() =>
+                        void load(selectedCategory === item.failure_category ? undefined : item.failure_category)
+                      }
+                    >
+                      <span className="bar-row-name">{failureCategoryLabel(item.failure_category)}</span>
+                      <span className="bar-track">
+                        <span
+                          className="bar-fill"
+                          style={{
+                            width: `${item.percentage === null ? 0 : Math.max(item.percentage * 100, 1)}%`,
+                            background: "var(--danger)",
+                          }}
+                        />
+                      </span>
+                      <span className="bar-row-value">
+                        {formatNumber(item.count)} · {item.percentage === null ? "—" : formatPercent(item.percentage)}
+                      </span>
                     </button>
                   ))}
                 </div>
               )}
-            </div>
-            <div className="dashboard-panel">
-              <div className="panel-heading"><h2>Cost by currency</h2><span>{summary.cost.mixed_currency ? "Grouped" : summary.cost.currency ?? "Unknown"}</span></div>
-              {summary.cost.currencies.length === 0 ? <p className="muted">No known cost in this window.</p> : (
-                <div className="dashboard-table">
-                  {summary.cost.currencies.map((item) => <div className="dashboard-table-row" key={item.currency}><span>{item.currency}</span><strong>{cost(item.total_cost, item.currency)}</strong><small>{item.estimated_count} estimated · {item.exact_count} exact</small></div>)}
+            </Panel>
+
+            <Panel title={t("dashboard.cost.title")} eyebrow={t("dashboard.cost.eyebrow")}>
+              {summary.cost.mixed_currency && <p className="state-hint">{t("dashboard.cost.mixedNote")}</p>}
+              {summary.cost.currencies.length === 0 ? (
+                <EmptyState title={t("dashboard.cost.empty")} hint={t("dashboard.cost.emptyHint")} />
+              ) : (
+                <div className="split-list">
+                  {summary.cost.currencies.map((item) => (
+                    <div className="split-row" key={item.currency}>
+                      <span>{item.currency}</span>
+                      <span>{item.total_cost === null ? t("common.unknown") : formatCurrencyAmount(item.total_cost, null)}</span>
+                      <span className="muted">
+                        {t("dashboard.cost.samples", { estimated: item.estimated_count, exact: item.exact_count })}
+                      </span>
+                      <span className="muted">
+                        {t("dashboard.cost.perSuccess", {
+                          value: item.cost_per_successful_run === null ? t("common.unknown") : item.cost_per_successful_run,
+                        })}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
-            </div>
-          </section>
+            </Panel>
+          </div>
 
-          <section className="dashboard-panel">
-            <div className="panel-heading"><h2>Runs over time</h2><span>UTC · {timeseries?.bucket ?? "day"}</span></div>
-            {!timeseries || timeseries.items.length === 0 ? <p className="muted">No runs in this window.</p> : (
-              <div className="dashboard-table">
-                {timeseries.items.map((item) => <div className="dashboard-table-row" key={item.bucket}><span>{new Date(item.bucket).toLocaleString()}</span><strong>{item.runs} runs</strong><small>{item.succeeded} succeeded · {item.failed} failed · {item.needs_attention} attention · {item.tokens ?? "—"} tokens</small></div>)}
-              </div>
+          <Panel
+            title={t("dashboard.trend.title")}
+            eyebrow={t("dashboard.trend.eyebrow")}
+            actions={<span className="state-hint">{t("common.utcBucket", { bucket: timeseries?.bucket ?? "day" })}</span>}
+          >
+            {!timeseries || timeseries.items.length === 0 ? (
+              <EmptyState title={t("dashboard.failures.empty")} />
+            ) : (
+              <TimeseriesChart items={timeseries.items} />
             )}
-          </section>
+          </Panel>
 
-          <section className="dashboard-two-column">
-            <div className="dashboard-panel">
-              <div className="panel-heading"><h2>AgentVersion breakdown</h2><span>No winner ranking</span></div>
-              {!versions || versions.items.length === 0 ? <p className="muted">No AgentVersion activity.</p> : <div className="dashboard-table">{versions.items.map((item) => <Link className="dashboard-table-row" href={`/runs?agent_version_id=${encodeURIComponent(item.agent_version_id)}`} key={item.agent_version_id}><span>v{item.version_number}</span><strong>{item.run_count} runs</strong><small>{item.success_count} success · {item.failed_count} failed · p95 {metric(item.p95_latency_ms, " ms")}</small></Link>)}</div>}
-            </div>
-            <div className="dashboard-panel">
-              <div className="panel-heading"><h2>Failure runs</h2><span>{selectedCategory ?? "All categories"}</span></div>
-              {!failures || failures.items.length === 0 ? <p className="muted">No failure runs in this window.</p> : <div className="dashboard-table">{failures.items.map((item) => <Link className="dashboard-table-row" href={`/runs/${encodeURIComponent(item.run_id)}`} key={item.run_id}><span>{item.failure_category}</span><strong>{item.failure_code}</strong><small>v{item.agent_version_number} · {item.status}{item.action_failure_code ? ` · action ${item.action_failure_code}` : ""}</small></Link>)}</div>}
-            </div>
-          </section>
+          <div className="dashboard-columns">
+            <Panel
+              title={t("dashboard.versions.title")}
+              eyebrow={t("dashboard.versions.eyebrow")}
+              actions={<span className="state-hint">{t("dashboard.versions.noRanking")}</span>}
+            >
+              {!versions || versions.items.length === 0 ? (
+                <EmptyState title={t("dashboard.versions.empty")} />
+              ) : (
+                <div className="split-list">
+                  {versions.items.map((item) => (
+                    <Link
+                      className="split-row"
+                      href={`/runs?agent_version_id=${encodeURIComponent(item.agent_version_id)}`}
+                      key={item.agent_version_id}
+                    >
+                      <span>v{item.version_number}</span>
+                      <span>
+                        {t(item.run_count === 1 ? "dashboard.versions.runCountOne" : "dashboard.versions.runCountOther", {
+                          count: item.run_count,
+                        })}
+                      </span>
+                      <span className="muted">
+                        {item.success_count} ✓ · {item.failed_count} ✕ · {item.needs_attention_count} ⚠
+                      </span>
+                      <span className="muted">
+                        {item.p95_latency_ms === null ? "p95 —" : `p95 ${formatNumber(item.p95_latency_ms)} ms`}
+                      </span>
+                      <span className="muted">
+                        {item.cost_by_currency.length === 0
+                          ? t("dashboard.versions.costUnknown")
+                          : item.cost_by_currency
+                              .map((c) => (c.total_cost === null ? t("common.unknown") : `${c.total_cost} ${c.currency}`))
+                              .join(" · ")}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Panel>
+
+            <Panel
+              title={t("dashboard.failureRuns.title")}
+              eyebrow={t("dashboard.failureRuns.eyebrow")}
+              actions={
+                <span className="state-hint">
+                  {selectedCategory
+                    ? failureCategoryLabel(selectedCategory)
+                    : t("dashboard.failureRuns.allCategories")}
+                </span>
+              }
+            >
+              {!failures || failures.items.length === 0 ? (
+                <EmptyState title={t("dashboard.failureRuns.empty")} hint={t("dashboard.failureRuns.emptyHint")} />
+              ) : (
+                <div className="split-list">
+                  {failures.items.map((item) => (
+                    <Link className="split-row" href={`/runs/${encodeURIComponent(item.run_id)}`} key={item.run_id}>
+                      <span>{failureCategoryLabel(item.failure_category)}</span>
+                      <span>
+                        <code>{item.failure_code}</code>
+                      </span>
+                      <span className="muted">
+                        v{item.agent_version_number} · {statusLabel(item.status)}
+                      </span>
+                      <span className="muted">
+                        {item.action_failure_code
+                          ? t("dashboard.failureRuns.actionPrefix", { code: item.action_failure_code })
+                          : ""}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Panel>
+          </div>
         </>
       )}
-    </main>
+    </div>
+  );
+}
+
+function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
+  const { t, formatNumber, formatUTCBucketDate } = useI18n();
+  const maxRuns = Math.max(...items.map((item) => item.runs), 1);
+  const width = Math.max(items.length * 34, 120);
+  const chartHeight = 130;
+  const segmentColors: Array<[keyof Pick<TimeseriesResponse["items"][number], "succeeded" | "failed" | "needs_attention">, string]> = [
+    ["succeeded", "var(--success)"],
+    ["failed", "var(--danger)"],
+    ["needs_attention", "var(--attention)"],
+  ];
+  const ariaEntries = items
+    .map((item) =>
+      t("dashboard.trend.ariaEntry", {
+        date: formatUTCBucketDate(item.bucket),
+        succeeded: item.succeeded,
+        failed: item.failed,
+        needsAttention: item.needs_attention,
+      }),
+    )
+    .join("; ");
+
+  return (
+    <div>
+      <svg
+        className="trend-chart"
+        viewBox={`0 0 ${width} ${chartHeight + 18}`}
+        role="img"
+        aria-label={`${t("dashboard.trend.ariaPrefix")} ${ariaEntries}`}
+      >
+        {items.map((item, index) => {
+          const x = index * 34 + 6;
+          const barWidth = 22;
+          const scale = chartHeight / maxRuns;
+          let yOffset = chartHeight;
+          return (
+            <g key={item.bucket}>
+              <title>
+                {t("dashboard.trend.barTitle", {
+                  date: formatUTCBucketDate(item.bucket),
+                  runs: item.runs,
+                  succeeded: item.succeeded,
+                  failed: item.failed,
+                  needsAttention: item.needs_attention,
+                  tokens: item.tokens ?? t("common.unknown"),
+                })}
+              </title>
+              {segmentColors.map(([key, color]) => {
+                const value = item[key];
+                if (value <= 0) return null;
+                const height = Math.max(value * scale, 1.5);
+                yOffset -= height;
+                return <rect key={key} x={x} y={yOffset} width={barWidth} height={height} fill={color} rx="2" />;
+              })}
+              {item.runs === 0 && (
+                <rect x={x} y={chartHeight - 1} width={barWidth} height={1} fill="var(--border-strong)" />
+              )}
+              <text x={x + barWidth / 2} y={chartHeight + 12} textAnchor="middle" fontSize="8" fill="var(--text-muted)">
+                {formatUTCBucketDate(item.bucket)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <div className="trend-legend" aria-hidden="true">
+        <span><span className="legend-swatch" style={{ background: "var(--success)" }} /> {t("dashboard.trend.legendSucceeded")}</span>
+        <span><span className="legend-swatch" style={{ background: "var(--danger)" }} /> {t("dashboard.trend.legendFailed")}</span>
+        <span><span className="legend-swatch" style={{ background: "var(--attention)" }} /> {t("dashboard.trend.legendNeedsAttention")}</span>
+      </div>
+      <p className="trend-note">
+        {t("dashboard.trend.note", {
+          peak: formatNumber(maxRuns),
+          values: items.map((item) => `${formatUTCBucketDate(item.bucket)} (${formatNumber(item.runs)})`).join(", "),
+        })}
+      </p>
+    </div>
   );
 }

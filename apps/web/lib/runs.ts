@@ -65,41 +65,9 @@ export type RunTimelineResponse = {
   items: RunTimelineEntry[];
 };
 
-export class RunsApiError extends Error {
-  code: string;
+import { apiRequest, ApiError } from "./api-client";
 
-  constructor(code: string, message: string) {
-    super(message);
-    this.name = "RunsApiError";
-    this.code = code;
-  }
-}
-
-const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ?? "").replace(/\/$/, "");
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-async function request<T>(path: string, accessToken: string): Promise<T> {
-  const token = accessToken.trim();
-  if (!token) {
-    throw new RunsApiError("AUTHENTICATION_REQUIRED", "An access token is required.");
-  }
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    credentials: "include",
-  });
-  const body = (await response.json().catch(() => null)) as unknown;
-  if (!response.ok) {
-    const error = isRecord(body) && isRecord(body.error) ? body.error : {};
-    throw new RunsApiError(
-      typeof error.code === "string" ? error.code : "REQUEST_FAILED",
-      typeof error.message === "string" ? error.message : "Run request failed.",
-    );
-  }
-  return body as T;
-}
+export { ApiError as RunsApiError };
 
 export function listRuns(input: {
   workspaceId: string;
@@ -115,7 +83,7 @@ export function listRuns(input: {
   if (input.limit) query.set("limit", String(input.limit));
   if (input.cursor) query.set("cursor", input.cursor);
   const suffix = query.toString() ? `?${query.toString()}` : "";
-  return request<RunListResponse>(
+  return apiRequest<RunListResponse>(
     `/api/v1/workspaces/${encodeURIComponent(input.workspaceId)}/runs${suffix}`,
     input.accessToken,
   );
@@ -126,7 +94,7 @@ export function getRunDetail(
   runId: string,
   accessToken: string,
 ): Promise<RunDetail> {
-  return request<RunDetail>(
+  return apiRequest<RunDetail>(
     `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/runs/${encodeURIComponent(runId)}`,
     accessToken,
   );
@@ -137,7 +105,7 @@ export function getRunTimeline(
   runId: string,
   accessToken: string,
 ): Promise<RunTimelineResponse> {
-  return request<RunTimelineResponse>(
+  return apiRequest<RunTimelineResponse>(
     `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/runs/${encodeURIComponent(runId)}/steps`,
     accessToken,
   );
