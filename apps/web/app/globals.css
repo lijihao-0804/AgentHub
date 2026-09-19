@@ -77,6 +77,24 @@ h2 { font-size: 1.5rem; margin: 0.5rem 0 0; }
 .timeline-entry-header { display: flex; gap: 1rem; justify-content: space-between; }
 .timeline-entry-header span { color: var(--muted); font-size: 0.8rem; }
 .timeline-entry pre { background: rgba(0, 0, 0, 0.2); border-radius: 8px; color: var(--muted); overflow-x: auto; padding: 0.75rem; }
+.dashboard-shell { margin: 0 auto; max-width: 1280px; padding: 4rem 2rem 6rem; }
+.dashboard-grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 2rem; }
+.dashboard-card, .dashboard-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 1.25rem; }
+.dashboard-card { display: grid; gap: 0.55rem; min-height: 118px; }
+.dashboard-card span, .dashboard-card small, .dashboard-panel > .panel-heading span { color: var(--muted); }
+.dashboard-card strong { font-size: 2rem; font-variant-numeric: tabular-nums; }
+.dashboard-card small { line-height: 1.4; }
+.dashboard-panel { margin-top: 1rem; }
+.dashboard-panel h2 { margin-top: 0; }
+.dashboard-stat-row { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-top: 1.5rem; }
+.dashboard-stat-row span { color: var(--muted); }
+.dashboard-stat-row strong { color: var(--ink); margin-left: 0.3rem; }
+.dashboard-two-column { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 1rem; }
+.dashboard-table { display: grid; gap: 0.5rem; margin-top: 1rem; }
+.dashboard-table-row { align-items: center; background: rgba(0, 0, 0, 0.14); border: 1px solid transparent; color: var(--ink); display: grid; gap: 0.75rem; grid-template-columns: minmax(0, 1fr) auto minmax(120px, 1fr); padding: 0.8rem; text-align: left; text-decoration: none; }
+.dashboard-table-row:hover, .dashboard-table-row.selected { border-color: var(--accent); }
+.dashboard-table-row button { color: inherit; }
+.dashboard-table-row small { color: var(--muted); }
 
 @media (max-width: 640px) {
   .shell { padding: 5rem 1.25rem 3rem; }
@@ -149,4 +167,8 @@ h2 { font-size: 1.5rem; margin: 0.5rem 0 0; }
   .observability-shell { padding: 2.5rem 1rem 4rem; }
   .observability-header { flex-direction: column; }
   .observability-form { grid-template-columns: 1fr; }
+  .dashboard-shell { padding: 2.5rem 1rem 4rem; }
+  .dashboard-grid, .dashboard-two-column { grid-template-columns: 1fr; }
+  .dashboard-table-row { grid-template-columns: 1fr auto; }
+  .dashboard-table-row small { grid-column: 1 / -1; }
 }

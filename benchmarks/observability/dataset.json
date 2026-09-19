@@ -1,0 +1,85 @@
+{
+  "dataset_version": "m6-observability-failure-v1",
+  "cases": [
+    {
+      "case_id": "model-failure-before-token",
+      "scenario": "Model provider fails before the first visible token",
+      "expected_run_status": "FAILED",
+      "expected_failure_category": "MODEL",
+      "expected_failure_code": "MODEL_PROVIDER_FAILED",
+      "runtime_path": "AgentRunService.model_boundary"
+    },
+    {
+      "case_id": "stream-interrupted-after-visible-token",
+      "scenario": "The streaming producer is interrupted after a visible token",
+      "expected_run_status": "FAILED",
+      "expected_failure_category": "RUNTIME",
+      "expected_failure_code": "STREAM_INTERRUPTED",
+      "runtime_path": "AgentRunService.stream_producer"
+    },
+    {
+      "case_id": "tool-execution-failure",
+      "scenario": "A deterministic tool handler returns a safe execution failure",
+      "expected_run_status": "FAILED",
+      "expected_failure_category": "TOOL",
+      "expected_failure_code": "TOOL_EXECUTION_FAILED",
+      "runtime_path": "AgentRunService.tool_boundary"
+    },
+    {
+      "case_id": "knowledge-unavailable",
+      "scenario": "The knowledge provider is unavailable during retrieval",
+      "expected_run_status": "FAILED",
+      "expected_failure_category": "KNOWLEDGE",
+      "expected_failure_code": "KNOWLEDGE_UNAVAILABLE",
+      "runtime_path": "AgentRunService.retrieval_boundary"
+    },
+    {
+      "case_id": "loop-guard",
+      "scenario": "The runtime loop guard stops repeated model/tool rounds",
+      "expected_run_status": "FAILED",
+      "expected_failure_category": "RUNTIME",
+      "expected_failure_code": "LOOP_GUARD_TRIGGERED",
+      "runtime_path": "AgentRunService.loop_guard"
+    },
+    {
+      "case_id": "approval-denied",
+      "scenario": "An approval decision is denied without executing the action",
+      "expected_run_status": "SUCCEEDED",
+      "expected_failure_category": "APPROVAL",
+      "expected_failure_code": "APPROVAL_DENIED",
+      "runtime_path": "AgentRunService.approval_resume"
+    },
+    {
+      "case_id": "action-execution-failed",
+      "scenario": "An approved internal action fails before completion",
+      "expected_run_status": "FAILED",
+      "expected_failure_category": "ACTION",
+      "expected_failure_code": "ACTION_EXECUTION_FAILED",
+      "runtime_path": "AgentRunService.action_boundary"
+    },
+    {
+      "case_id": "unknown-outcome",
+      "scenario": "An external action outcome cannot be confirmed",
+      "expected_run_status": "NEEDS_ATTENTION",
+      "expected_failure_category": "ACTION",
+      "expected_failure_code": "ACTION_RECONCILIATION_REQUIRED",
+      "runtime_path": "AgentRunService.unknown_outcome"
+    },
+    {
+      "case_id": "checkpoint-missing",
+      "scenario": "Approval resume cannot find its durable checkpoint",
+      "expected_run_status": "NEEDS_ATTENTION",
+      "expected_failure_category": "APPROVAL",
+      "expected_failure_code": "APPROVAL_CHECKPOINT_MISSING",
+      "runtime_path": "AgentRunService.checkpoint_resume"
+    },
+    {
+      "case_id": "cancelled-run",
+      "scenario": "A durable cancel request stops scheduling the next step",
+      "expected_run_status": "CANCELLED",
+      "expected_failure_category": "RUNTIME",
+      "expected_failure_code": null,
+      "runtime_path": "AgentRunService.cancel_boundary"
+    }
+  ]
+}

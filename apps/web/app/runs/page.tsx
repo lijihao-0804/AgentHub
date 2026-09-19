@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { listRuns, RunListItem, RunsApiError } from "../../lib/runs";
 
@@ -21,10 +21,17 @@ export default function RunsPage() {
   const [workspaceId, setWorkspaceId] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [status, setStatus] = useState("");
+  const [agentVersionId, setAgentVersionId] = useState("");
   const [runs, setRuns] = useState<RunListItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setStatus(params.get("status") ?? "");
+    setAgentVersionId(params.get("agent_version_id") ?? "");
+  }, []);
 
   async function refresh(cursor: string | null = null) {
     setMessage(null);
@@ -38,6 +45,7 @@ export default function RunsPage() {
         workspaceId,
         accessToken,
         status,
+        agentVersionId,
         cursor,
         limit: 25,
       });
@@ -97,6 +105,7 @@ export default function RunsPage() {
               <option value="SUCCEEDED">SUCCEEDED</option>
               <option value="FAILED">FAILED</option>
               <option value="NEEDS_ATTENTION">NEEDS_ATTENTION</option>
+              <option value="CANCEL_REQUESTED">CANCEL_REQUESTED</option>
               <option value="CANCELLED">CANCELLED</option>
             </select>
           </label>

@@ -14,6 +14,7 @@ export type ApprovalSummary = {
 
 export type RunListItem = {
   id: string;
+  trace_id: string;
   workspace_id: string;
   agent_version_id: string;
   agent_version_number: number;
@@ -39,6 +40,7 @@ export type RunListItem = {
 
 export type RunDetail = RunListItem & {
   effective_knowledge_snapshots: Array<Record<string, unknown>>;
+  trace_url?: string | null;
 };
 
 export type RunTimelineEntry = {

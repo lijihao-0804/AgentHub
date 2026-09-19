@@ -16,7 +16,8 @@ const milestones = [
   ["M2", "Model Gateway", "next"],
   ["M3", "Reliable Knowledge Hub", "next"],
   ["M5-A", "Approval Runtime", "complete"],
-  ["M6-A", "Run Observability", "active"],
+  ["M6-A", "Run Observability", "complete"],
+  ["M6-B", "Metrics Dashboard", "active"],
 ];
 
 export default function Home() {
@@ -72,7 +73,7 @@ export default function Home() {
             <p className="eyebrow">DELIVERY STATUS</p>
             <h2 id="status-title">Milestone roadmap</h2>
           </div>
-          <span className="badge">M6-A IN PROGRESS</span>
+          <span className="badge">M6-B IN PROGRESS</span>
         </div>
         <div className="milestones">
           {milestones.map(([id, label, status]) => (
@@ -159,6 +160,20 @@ export default function Home() {
         </div>
         <p className="playground-note">
           Explore workspace-scoped runtime status, usage, cost, approvals and safe timeline events.
+        </p>
+      </section>
+      <section className="card" aria-labelledby="dashboard-title">
+        <div className="card-header">
+          <div>
+            <p className="eyebrow">M6-B METRICS</p>
+            <h2 id="dashboard-title">Workspace dashboard</h2>
+          </div>
+          <Link className="run-detail-link" href="/dashboard">
+            Open Dashboard →
+          </Link>
+        </div>
+        <p className="playground-note">
+          Explore bounded success, latency, usage, cost, approval and failure analytics from PostgreSQL.
         </p>
       </section>
     </main>
