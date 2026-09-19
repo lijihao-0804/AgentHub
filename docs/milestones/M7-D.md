@@ -1,7 +1,6 @@
 # M7-D — Evaluators, Metrics, and Paired Comparison
 
-Status: IN PROGRESS — implementation and targeted verification are complete; exact-head CI is
-the remaining acceptance gate.
+Status: PASS — closure verified in GitHub Actions run #115.
 
 M7-D consumes the immutable M7-B experiment definition and persisted M7-C CaseResults. It does
 not re-run Agents, reinterpret AgentRun state, or change M5 approval/checkpoint semantics.
@@ -45,14 +44,18 @@ checkpoint payloads, and raw tool arguments/results are not introduced by M7-D.
 
 ## Verification
 
+- Implementation commit: `d54f066`.
+- Final CI closure commit: `e88d917`.
+- GitHub Actions run #115 passed backend and frontend, including Alembic upgrade/check, Ruff,
+  all integration tests, non-integration tests, and the explicit M7-D integration step.
 - Unit evaluator tests cover explicit availability states, retrieval/citation zero denominators,
   accepted answers, canonical arguments, percentile semantics, paired direction, and frozen
-  evaluator manifest validation.
+  evaluator manifest validation: 8 passed locally.
 - PostgreSQL integration executes persisted M7-C results for 10 cases across 2 variants and
-  verifies metric persistence and complete pairing.
+  verifies metric persistence and complete pairing: 5 targeted M7-C/M7-D tests passed locally.
 - Migration `0019_m7d_metrics_comparison` adds metric and paired-comparison persistence; prior
   migrations remain unchanged.
-- Full backend regression, frontend build, M4/M5 benchmark gates, and exact-head GitHub Actions
-  verification are required before marking M7-D PASS.
+- M4 benchmark: 20/20. M5 benchmark: 20/20.
+- Frontend production build passed. Local PostgreSQL migration upgrade/check passed.
 
 M7-E and later release-gate work remain out of scope.
