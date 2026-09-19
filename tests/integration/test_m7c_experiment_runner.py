@@ -153,14 +153,6 @@ async def test_m7c_deterministic_plan_execution_and_cost_freeze(db_factory) -> N
             )
         )
         stored_run = await verification_session.get(type(run), run.id)
-        print(
-            "::error title=M7-C observed::"
-            f"run_status={stored_run.status if stored_run else None}; "
-            f"result_count={len(results)}; "
-            f"result_statuses={[row.status for row in results]}; "
-            f"costs={[str(row.cost_amount) for row in results]}; "
-            f"driver_calls={len(driver.calls)}"
-        )
         assert len(results) == 4
         assert all(row.status == EvaluationCaseResultStatus.SUCCEEDED for row in results)
         assert all(row.total_tokens == 150 for row in results)

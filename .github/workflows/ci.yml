@@ -84,7 +84,7 @@ jobs:
           echo $! > celery-worker.pid
           sleep 3
       - name: Run M7-C durable experiment runner integration
-        run: uv run --locked pytest tests/integration/test_m7c_experiment_runner.py -vv -rs -s
+        run: uv run --locked pytest tests/integration/test_m7c_experiment_runner.py -vv -rs
       - name: Run all integration tests
         run: uv run --locked pytest -m integration -vv -rs
       - name: Run M7-A evaluation dataset integration
