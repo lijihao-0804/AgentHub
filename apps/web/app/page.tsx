@@ -17,7 +17,7 @@ const milestones = [
   ["M3", "Reliable Knowledge Hub", "next"],
   ["M5-A", "Approval Runtime", "complete"],
   ["M6-A", "Run Observability", "complete"],
-  ["M6-B", "Metrics Dashboard", "active"],
+  ["M6-B", "Metrics Dashboard", "complete"],
 ];
 
 export default function Home() {
@@ -73,7 +73,7 @@ export default function Home() {
             <p className="eyebrow">DELIVERY STATUS</p>
             <h2 id="status-title">Milestone roadmap</h2>
           </div>
-          <span className="badge">M6-B IN PROGRESS</span>
+          <span className="badge">M6 OVERALL PASS</span>
         </div>
         <div className="milestones">
           {milestones.map(([id, label, status]) => (

@@ -6,9 +6,9 @@ evaluation baseline are accepted; M3 overall is PASS. M4-A Agent Draft / AgentVe
 M4-B READ Tool Runtime, M4-C Agent Run + LangGraph execution, M4-D Context Budget,
 Streaming and AgentHub Event Protocol, and M4-E Agent Runtime Evaluation are accepted. M4 overall
 is PASS. M5-A Approval Runtime + Durable Approval Resume is accepted; M5-B MCP has not started.
-M6-A Run Query, Run Detail and Timeline is accepted on the observability branch; M6-B and
-later milestones have not started. Post-M5 review hardening is recorded separately and does
-not change the frozen M5-A state machine.
+M6-A Run Query, Run Detail and Timeline and M6-B Metrics / Dashboard / Failure Analytics are
+accepted on the observability branch. M6 overall is PASS; M7 is next and has not started.
+Post-M5 review hardening is recorded separately and does not change the frozen M5-A state machine.
 
 ## Basic development setup
 
@@ -95,5 +95,5 @@ deferred to M8.
 - M2 deliberately contains no Agent, RAG or Tool product implementation.
 - M3 overall is PASS after the real retrieval evaluation baseline and CI verification. M4-A
   through M4-E are accepted in sequence; M4 overall is PASS. M5-A covers durable approval
-  resume and M5-B MCP has not started. M6-A covers read-only run observability; M6-B has not
-  started.
+  resume and M5-B MCP has not started. M6-A and M6-B cover read-only run observability and
+  workspace metrics; M6 overall is PASS and M7 is next.
