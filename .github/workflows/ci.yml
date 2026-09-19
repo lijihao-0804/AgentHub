@@ -83,8 +83,14 @@ jobs:
           uv run --locked python -m tests.support.celery_worker > celery-worker.log 2>&1 &
           echo $! > celery-worker.pid
           sleep 3
-      - name: Run M7-C durable experiment runner integration
-        run: uv run --locked pytest tests/integration/test_m7c_experiment_runner.py -vv -rs
+      - name: Run M7-C deterministic execution integration
+        run: >-
+          uv run --locked pytest tests/integration/test_m7c_experiment_runner.py
+          -k deterministic_plan_execution_and_cost_freeze -vv -rs
+      - name: Run M7-C atomic claim integration
+        run: >-
+          uv run --locked pytest tests/integration/test_m7c_experiment_runner.py
+          -k duplicate_delivery_has_one_atomic_run_claim -vv -rs
       - name: Run all integration tests
         run: uv run --locked pytest -m integration -vv -rs
       - name: Run M7-A evaluation dataset integration
