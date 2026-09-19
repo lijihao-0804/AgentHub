@@ -142,8 +142,12 @@ class DeterministicEvaluationDriver:
             if "terminal_status" in item.expected:
                 observation["terminal_status"] = item.expected["terminal_status"]
         elif category == "FAILURE":
-            observation["observed_agent_status"] = item.expected.get("status")
-            observation["observed_agent_failure_code"] = item.expected.get("failure_code")
+            expected_status = item.expected.get("status")
+            expected_failure_code = item.expected.get("failure_code")
+            observation["expected_status"] = expected_status
+            observation["expected_failure_code"] = expected_failure_code
+            observation["observed_agent_status"] = expected_status
+            observation["observed_agent_failure_code"] = expected_failure_code
         return CaseExecutionObservation(
             observation=observation,
             latency_ms=max(0, round((time.perf_counter() - started) * 1000)),
