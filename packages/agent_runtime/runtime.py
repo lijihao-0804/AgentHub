@@ -876,6 +876,12 @@ class AgentRunService:
                     "Frozen knowledge workspace binding is inconsistent.",
                     409,
                 )
+            if str(frozen.get("binding_mode", "")) != binding.binding_mode:
+                raise AgentHubError(
+                    "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                    "Frozen knowledge binding mode is inconsistent.",
+                    409,
+                )
             snapshot = await session.scalar(
                 select(KnowledgeSnapshot).where(
                     KnowledgeSnapshot.workspace_id == workspace_id,
@@ -893,6 +899,12 @@ class AgentRunService:
                 raise AgentHubError(
                     "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
                     "The pinned knowledge snapshot changed.",
+                    409,
+                )
+            if binding.binding_mode == "PINNED" and binding.snapshot_hash != snapshot_hash:
+                raise AgentHubError(
+                    "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                    "The pinned knowledge snapshot hash changed.",
                     409,
                 )
             validated.append(

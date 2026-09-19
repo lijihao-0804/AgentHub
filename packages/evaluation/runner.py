@@ -632,10 +632,12 @@ class ExperimentRunner:
         owner: str | None = None,
         generation: int | None = None,
     ) -> bool:
-        cost_amount = observation.cost_amount
-        cost_currency = observation.cost_currency
-        if cost_amount is None and (
-            observation.input_tokens is not None and observation.output_tokens is not None
+        cost_amount = None
+        cost_currency = None
+        if (
+            observation.input_tokens is not None
+            and observation.output_tokens is not None
+            and observation.cached_tokens is not None
         ):
             variant_id = await session.scalar(
                 select(EvaluationExperimentCaseResult.experiment_variant_id).where(
@@ -659,8 +661,7 @@ class ExperimentRunner:
             )
             if pricing is not None:
                 cached_tokens = observation.cached_tokens
-                if cached_tokens is None:
-                    cached_tokens = 0
+                assert cached_tokens is not None
                 normal_input_tokens = max(0, observation.input_tokens - cached_tokens)
                 input_cost = Decimal(normal_input_tokens) / Decimal(1_000_000)
                 cached_cost = Decimal(cached_tokens) / Decimal(1_000_000)

@@ -89,6 +89,7 @@ class _CountingDriver:
             input_tokens=100,
             output_tokens=50,
             total_tokens=150,
+            cached_tokens=0,
         )
 
 
