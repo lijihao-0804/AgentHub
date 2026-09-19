@@ -31,14 +31,26 @@ _SECRET_KEYS = frozenset(
 # The category schemas intentionally stay small in M7-A.  Later importers normalize legacy
 # benchmark formats into these explicit shapes; accepting arbitrary dictionaries here would make
 # dataset hashes and evaluator semantics ambiguous.
-_CATEGORY_SHAPES: dict[str, tuple[frozenset[str], frozenset[str]]] = {
-    "RETRIEVAL": (frozenset({"query"}), frozenset({"relevant_chunk_ids"})),
-    "KNOWLEDGE_QA": (frozenset({"question"}), frozenset({"answer", "citations"})),
-    "TOOL": (frozenset({"request"}), frozenset({"tool_identity", "arguments"})),
-    "NO_ANSWER": (frozenset({"question"}), frozenset({"answer"})),
-    "APPROVAL": (frozenset({"action"}), frozenset({"decision"})),
-    "MULTI_STEP": (frozenset({"task"}), frozenset({"steps"})),
-    "FAILURE": (frozenset({"scenario"}), frozenset({"status", "failure_code"})),
+_CATEGORY_SHAPES: dict[str, tuple[frozenset[str], frozenset[str], frozenset[str]]] = {
+    "RETRIEVAL": (frozenset({"query"}), frozenset({"relevant_chunk_ids"}), frozenset()),
+    "KNOWLEDGE_QA": (frozenset({"question"}), frozenset({"answer", "citations"}), frozenset()),
+    "TOOL": (
+        frozenset({"request"}),
+        frozenset({"tool_identity", "arguments"}),
+        frozenset({"tool_sequence"}),
+    ),
+    "NO_ANSWER": (frozenset({"question"}), frozenset({"answer"}), frozenset()),
+    "APPROVAL": (
+        frozenset({"action"}),
+        frozenset({"decision"}),
+        frozenset({"approval_required"}),
+    ),
+    "MULTI_STEP": (
+        frozenset({"task"}),
+        frozenset({"steps"}),
+        frozenset({"terminal_status"}),
+    ),
+    "FAILURE": (frozenset({"scenario"}), frozenset({"status", "failure_code"}), frozenset()),
 }
 
 
@@ -70,8 +82,10 @@ def validate_dataset_item(raw: Mapping[str, Any]) -> dict[str, Any]:
     input_value = _object(raw["input"], "input")
     expected_value = _object(raw["expected"], "expected")
     tags = raw["tags"]
-    if not isinstance(tags, Sequence) or isinstance(tags, (str, bytes)) or any(
-        not isinstance(tag, str) or not tag.strip() for tag in tags
+    if (
+        not isinstance(tags, Sequence)
+        or isinstance(tags, (str, bytes))
+        or any(not isinstance(tag, str) or not tag.strip() for tag in tags)
     ):
         raise AgentHubError("EVALUATION_DATASET_INVALID", "tags must be a list of strings.", 422)
     source = _object(raw["source_provenance"], "source_provenance")
@@ -88,8 +102,12 @@ def validate_dataset_item(raw: Mapping[str, Any]) -> dict[str, Any]:
         raise AgentHubError("EVALUATION_DATASET_INVALID", "ordinal must be non-negative.", 422)
     _reject_secret_keys({"input": input_value, "expected": expected_value, "source": source})
 
-    required_input, required_expected = _CATEGORY_SHAPES[category]
-    if set(input_value) != required_input or set(expected_value) != required_expected:
+    required_input, required_expected, optional_expected = _CATEGORY_SHAPES[category]
+    if (
+        set(input_value) != required_input
+        or not required_expected.issubset(expected_value)
+        or not set(expected_value).issubset(required_expected | optional_expected)
+    ):
         raise AgentHubError(
             "EVALUATION_DATASET_INVALID",
             f"{category} input/expected fields do not match the category schema.",
@@ -128,12 +146,9 @@ def validate_dataset_items(items: Sequence[Mapping[str, Any]]) -> list[dict[str,
         )
 
     input_hashes: set[str] = set()
-    expected_hashes: set[str] = set()
     provenance_hashes: set[str] = set()
     for item in normalized:
-        input_identity = canonical_json_hash(
-            {"category": item["category"], "input": item["input"]}
-        )
+        input_identity = canonical_json_hash({"category": item["category"], "input": item["input"]})
         if input_identity in input_hashes:
             raise AgentHubError(
                 "EVALUATION_DATASET_DUPLICATE_INPUT",
@@ -141,16 +156,6 @@ def validate_dataset_items(items: Sequence[Mapping[str, Any]]) -> list[dict[str,
                 422,
             )
         input_hashes.add(input_identity)
-        expected_identity = canonical_json_hash(
-            {"category": item["category"], "expected": item["expected"]}
-        )
-        if expected_identity in expected_hashes:
-            raise AgentHubError(
-                "EVALUATION_DATASET_DUPLICATE_EXPECTED",
-                "Dataset items must not repeat a category/expected identity.",
-                422,
-            )
-        expected_hashes.add(expected_identity)
         provenance_identity = canonical_json_hash(item["source_provenance"])
         if provenance_identity in provenance_hashes:
             raise AgentHubError(
@@ -237,20 +242,32 @@ def _validate_category_types(
         if not isinstance(expected_value["tool_identity"], str) or not isinstance(
             expected_value["arguments"], Mapping
         ):
-            raise AgentHubError(
-                "EVALUATION_DATASET_INVALID", "Tool expected data is invalid.", 422
-            )
+            raise AgentHubError("EVALUATION_DATASET_INVALID", "Tool expected data is invalid.", 422)
+        if "tool_sequence" in expected_value and not _string_list(expected_value["tool_sequence"]):
+            raise AgentHubError("EVALUATION_DATASET_INVALID", "Tool sequence is invalid.", 422)
     if category == "NO_ANSWER" and not isinstance(expected_value["answer"], str):
         raise AgentHubError(
             "EVALUATION_DATASET_INVALID", "No-answer expected data is invalid.", 422
         )
     if category == "APPROVAL" and not isinstance(expected_value["decision"], str):
-        raise AgentHubError(
-            "EVALUATION_DATASET_INVALID", "Approval expected data is invalid.", 422
-        )
+        raise AgentHubError("EVALUATION_DATASET_INVALID", "Approval expected data is invalid.", 422)
+    if (
+        category == "APPROVAL"
+        and "approval_required" in expected_value
+        and not isinstance(expected_value["approval_required"], bool)
+    ):
+        raise AgentHubError("EVALUATION_DATASET_INVALID", "Approval requirement is invalid.", 422)
     if category == "MULTI_STEP" and not _string_list(expected_value["steps"]):
         raise AgentHubError(
             "EVALUATION_DATASET_INVALID", "Multi-step expected data is invalid.", 422
+        )
+    if (
+        category == "MULTI_STEP"
+        and "terminal_status" in expected_value
+        and not isinstance(expected_value["terminal_status"], str)
+    ):
+        raise AgentHubError(
+            "EVALUATION_DATASET_INVALID", "Multi-step terminal status is invalid.", 422
         )
     if category == "FAILURE":
         if not isinstance(expected_value["status"], str) or not (

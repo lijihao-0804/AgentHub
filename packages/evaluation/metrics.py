@@ -690,6 +690,12 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
             True,
         ),
         (
+            "answer_correctness",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
             "unknown_outcome_semantics_accuracy",
             MetricDirection.HIGHER_IS_BETTER,
             MetricAggregationKind.BINARY,

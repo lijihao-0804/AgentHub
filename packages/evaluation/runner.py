@@ -115,22 +115,35 @@ class DeterministicEvaluationDriver:
             "variant_hash": variant.variant_hash,
         }
         if category == "RETRIEVAL":
-            observation["citation_ids"] = list(item.expected.get("relevant_chunk_ids", []))
+            relevant = list(item.expected.get("relevant_chunk_ids", []))
+            observation["candidate_chunk_ids"] = [*relevant, f"noise-{item.case_key}"]
+            observation["final_chunk_ids"] = relevant
+            observation["citation_ids"] = relevant
         elif category == "KNOWLEDGE_QA":
             observation["citation_ids"] = list(item.expected.get("citations", []))
             observation["answer_hash"] = canonical_json_hash(item.expected.get("answer", ""))
         elif category == "TOOL":
             observation["tool_identity"] = item.expected.get("tool_identity")
             observation["arguments_hash"] = canonical_json_hash(item.expected.get("arguments", {}))
+            observation["tool_sequence"] = list(
+                item.expected.get("tool_sequence", [item.expected.get("tool_identity")])
+            )
         elif category == "NO_ANSWER":
-            observation["answer_hash"] = canonical_json_hash(item.expected.get("answer", ""))
+            observation["answerable"] = False
         elif category == "APPROVAL":
-            observation["decision"] = item.expected.get("decision")
+            observation["approval_required"] = item.expected.get("approval_required", True)
+            observation["approval_decision"] = item.expected.get("decision")
+            observation["action_executed"] = False
+            observation["unauthorized_execution"] = False
+            observation["duplicate_side_effect"] = False
+            observation["unknown_outcome_semantics_ok"] = True
         elif category == "MULTI_STEP":
-            observation["step_count"] = len(item.expected.get("steps", []))
+            observation["steps"] = list(item.expected.get("steps", []))
+            if "terminal_status" in item.expected:
+                observation["terminal_status"] = item.expected["terminal_status"]
         elif category == "FAILURE":
-            observation["expected_status"] = item.expected.get("status")
-            observation["expected_failure_code"] = item.expected.get("failure_code")
+            observation["observed_agent_status"] = item.expected.get("status")
+            observation["observed_agent_failure_code"] = item.expected.get("failure_code")
         return CaseExecutionObservation(
             observation=observation,
             latency_ms=max(0, round((time.perf_counter() - started) * 1000)),
@@ -163,9 +176,7 @@ class AgentRuntimeEvaluationDriver:
         context_factory: Callable[[EvaluationExperimentRun], Awaitable[Any]],
         *,
         retriever: KnowledgeRetriever | None = None,
-        approval_context_factory: Callable[
-            [EvaluationExperimentRun], Awaitable[Any]
-        ] | None = None,
+        approval_context_factory: Callable[[EvaluationExperimentRun], Awaitable[Any]] | None = None,
     ) -> None:
         self.agent_run_service = agent_run_service
         self.context_factory = context_factory
@@ -185,6 +196,7 @@ class AgentRuntimeEvaluationDriver:
             if self.retriever is None or not variant.effective_knowledge_snapshots:
                 raise RuntimeError("EVALUATION_RETRIEVAL_NOT_CONFIGURED")
             binding = variant.effective_knowledge_snapshots[0]
+
             async def execute_retrieval() -> CaseExecutionObservation:
                 result = await self.retriever.retrieve_with_trace(
                     context,
@@ -588,8 +600,7 @@ class ExperimentRunner:
                 and_(
                     EvaluationExperimentRun.workspace_id
                     == EvaluationExperimentCaseResult.workspace_id,
-                    EvaluationExperimentRun.id
-                    == EvaluationExperimentCaseResult.experiment_run_id,
+                    EvaluationExperimentRun.id == EvaluationExperimentCaseResult.experiment_run_id,
                 ),
             )
             .join(
@@ -965,9 +976,7 @@ class ExperimentRunner:
                             run_id=run_id,
                             owner=owner,
                             generation=generation,
-                            failure_code=(
-                                getattr(exc, "code", None) or "EVALUATION_CASE_FAILED"
-                            ),
+                            failure_code=(getattr(exc, "code", None) or "EVALUATION_CASE_FAILED"),
                             safe_message="The evaluation case failed.",
                         )
         finally:
@@ -1204,16 +1213,14 @@ class ExperimentRunner:
             .values(
                 status=sql_case(
                     (
-                        EvaluationExperimentRun.status
-                        == EvaluationExperimentRunStatus.QUEUED,
+                        EvaluationExperimentRun.status == EvaluationExperimentRunStatus.QUEUED,
                         EvaluationExperimentRunStatus.CANCELLED,
                     ),
                     else_=EvaluationExperimentRunStatus.CANCEL_REQUESTED,
                 ),
                 completed_at=sql_case(
                     (
-                        EvaluationExperimentRun.status
-                        == EvaluationExperimentRunStatus.QUEUED,
+                        EvaluationExperimentRun.status == EvaluationExperimentRunStatus.QUEUED,
                         _now(),
                     ),
                     else_=EvaluationExperimentRun.completed_at,
@@ -1247,9 +1254,7 @@ class ExperimentRunner:
         if generation is not None:
             predicates.append(EvaluationExperimentRun.lease_generation == generation)
         run = await session.scalar(
-            select(EvaluationExperimentRun)
-            .where(*predicates)
-            .with_for_update()
+            select(EvaluationExperimentRun).where(*predicates).with_for_update()
         )
         if run is None:
             return
@@ -1294,8 +1299,7 @@ async def reconcile_experiment_runs(
                 .where(
                     or_(
                         and_(
-                            EvaluationExperimentRun.status
-                            == EvaluationExperimentRunStatus.QUEUED,
+                            EvaluationExperimentRun.status == EvaluationExperimentRunStatus.QUEUED,
                             EvaluationExperimentRun.created_at <= grace_cutoff,
                         ),
                         and_(
@@ -1318,14 +1322,11 @@ async def reconcile_experiment_runs(
                     select(func.count(EvaluationExperimentCaseResult.id)).where(
                         EvaluationExperimentCaseResult.workspace_id == run.workspace_id,
                         EvaluationExperimentCaseResult.experiment_run_id == run.id,
-                        EvaluationExperimentCaseResult.status
-                        == EvaluationCaseResultStatus.RUNNING,
+                        EvaluationExperimentCaseResult.status == EvaluationCaseResultStatus.RUNNING,
                     )
                 )
                 if running_cases:
-                    lease_is_stale = (
-                        run.lease_expires_at is None or run.lease_expires_at <= now
-                    )
+                    lease_is_stale = run.lease_expires_at is None or run.lease_expires_at <= now
                     if not lease_is_stale:
                         continue
                     inflight = list(
@@ -1377,8 +1378,7 @@ async def reconcile_experiment_runs(
                     .where(
                         EvaluationExperimentCaseResult.workspace_id == run.workspace_id,
                         EvaluationExperimentCaseResult.experiment_run_id == run.id,
-                        EvaluationExperimentCaseResult.status
-                        == EvaluationCaseResultStatus.PENDING,
+                        EvaluationExperimentCaseResult.status == EvaluationCaseResultStatus.PENDING,
                     )
                     .values(
                         status=EvaluationCaseResultStatus.CANCELLED,
