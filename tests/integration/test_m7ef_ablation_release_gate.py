@@ -19,6 +19,7 @@ from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.build_identity import StaticBuildIdentityProvider
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.metrics_service import EvaluationMetricsService
+from packages.evaluation.models import EvaluationExperimentRun
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.runner import CaseExecutionObservation, ExperimentRunner
 from packages.evaluation.service import EvaluationDatasetService
@@ -232,8 +233,10 @@ async def test_m7ef_persisted_ablation_to_release_gate_chain_and_scope(db_factor
             )
         assert denied.value.status_code == 403
 
-        run.purpose = "DEVELOPMENT"
-        run.split = "DEV"
+        persisted_run = await session.get(EvaluationExperimentRun, run.id)
+        assert persisted_run is not None
+        persisted_run.purpose = "DEVELOPMENT"
+        persisted_run.split = "DEV"
         await session.commit()
         with pytest.raises(AgentHubError) as dev_gate:
             await policy_service.create_decision(
