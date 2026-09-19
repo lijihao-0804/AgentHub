@@ -151,6 +151,7 @@ async def test_m7c_deterministic_plan_execution_and_cost_freeze(db_factory) -> N
                 )
             )
         )
+        await session.refresh(run)
         stored_run = await session.get(type(run), run.id)
         assert len(results) == 4
         assert all(row.status == EvaluationCaseResultStatus.SUCCEEDED for row in results)
