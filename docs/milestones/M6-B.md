@@ -1,7 +1,7 @@
 # M6-B — Metrics, Dashboard and Failure Analytics
 
-Status: PASS — implementation verified by GitHub Actions run #88; final docs closure is
-included in the exact-head run for this branch.
+Status: PASS — metrics, dashboard and runtime-backed failure analytics are verified by the
+exact-head CI run for this branch.
 
 M6-B productizes the M6-A safe Run projections into workspace-scoped operational metrics. It
 does not change M4 Agent Runtime, M5 Approval Runtime, checkpoint identity, or tool execution
@@ -80,10 +80,11 @@ sessionStorage, cookies, URLs, API bodies, or logs.
 
 `benchmarks/observability/dataset.json` contains 10 bounded synthetic failure scenarios covering
 model, stream/runtime, tool, knowledge, loop guard, approval decision, action failure,
-unknown-outcome, missing checkpoint and cancellation paths. It is a scenario manifest, not a
-hand-written database fixture: every case names the real `AgentRunService` runtime path that must
-produce the durable Run/RunStep evidence under controlled failure injection. The CI validation
-step checks the version, count, categories, safe fields and runtime-path constraint.
+unknown-outcome, missing checkpoint and cancellation paths. The integration test
+`tests/integration/test_m6b_failure_dataset_runtime.py` executes every case through the real
+`AgentRunService`, `ToolRuntime`, Approval Runtime and PostgreSQL, then reads the resulting
+safe `AgentRun`/`RunStep` evidence. It does not insert hand-written Run rows. The CI validation
+step checks the manifest envelope, and the runtime step checks the generated durable evidence.
 
 No prompt, credential, customer record, raw tool payload, or checkpoint body is committed.
 

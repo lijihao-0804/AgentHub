@@ -103,6 +103,8 @@ jobs:
           --output "$RUNNER_TEMP/m5-approval-runtime-result.json"
       - name: Validate M6 observability failure dataset
         run: uv run --locked python -m benchmarks.observability.runner --validate-only
+      - name: Generate M6 observability failure dataset through runtime
+        run: uv run --locked pytest tests/integration/test_m6b_failure_dataset_runtime.py -vv -rs
       - name: Stop Celery worker
         if: always()
         run: |

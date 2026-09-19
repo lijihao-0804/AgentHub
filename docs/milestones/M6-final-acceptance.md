@@ -21,7 +21,9 @@ Status: PASS — M6-A and M6-B accepted on `m6/observability`.
   current operational counters, failure drill-down and AgentVersion descriptive breakdown.
 - Safe projections do not expose prompt, output, RAG text, customer data, credentials, raw tool
   arguments/results or checkpoint payloads.
-- M6 failure scenario manifest: 10 cases; validation PASS.
+- M6 failure scenario dataset: 10 cases; manifest validation PASS and runtime-backed PostgreSQL
+  generation PASS through `AgentRunService`/`ToolRuntime`/Approval Runtime, with safe
+  `AgentRun`/`RunStep` evidence.
 - Fresh PostgreSQL upgraded through `0014`; `alembic check` and checkpoint bootstrap PASS.
 - Non-integration suite: 227 passed.
 - M6-B targeted PostgreSQL integration: 3 passed.
@@ -31,7 +33,7 @@ Status: PASS — M6-A and M6-B accepted on `m6/observability`.
 - M5 benchmark: 20/20 PASS; duplicate side-effect rate `0.0`.
 - Frontend production build: PASS.
 - `docker compose config`: PASS; configuration parsed without starting containers.
-- GitHub Actions run #88 passed backend and frontend for M6-B code.
+- GitHub Actions exact-head closure run is recorded after the runtime-backed dataset step passes.
 
 M6 overall is PASS. M7, M8, MCP, REST Tool, Memory, Multi-Agent and GraphRAG remain NOT
 STARTED.
