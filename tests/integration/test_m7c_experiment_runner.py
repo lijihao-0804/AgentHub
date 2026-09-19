@@ -9,7 +9,7 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.config.settings import Settings, get_settings
@@ -89,6 +89,19 @@ class _CountingDriver:
             input_tokens=100,
             output_tokens=50,
             total_tokens=150,
+        )
+
+
+class _ObservedFailureDriver:
+    async def execute(self, session, *, run, variant, item) -> CaseExecutionObservation:
+        del session, run, variant, item
+        return CaseExecutionObservation(
+            observation={
+                "category": "FAILURE",
+                "observed_agent_status": "FAILED",
+                "observed_agent_failure_code": "MODEL_TIMEOUT",
+            },
+            failure_code="MODEL_TIMEOUT",
         )
 
 
@@ -192,3 +205,53 @@ async def test_m7c_duplicate_delivery_has_one_atomic_run_claim(db_factory) -> No
     finally:
         await first_engine.dispose()
         await second_engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_m7c_expected_agent_failure_is_not_runner_failure(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7c-observed-{uuid4().hex}")
+        run = await _ready_run(session, base)
+    runner = ExperimentRunner(db_factory, driver=_ObservedFailureDriver())
+    await runner.execute(
+        run_id=run.id, owner="m7c-observed-worker", settings=Settings(testing=True)
+    )
+
+    async with db_factory() as session:
+        rows = list(
+            await session.scalars(
+                select(EvaluationExperimentCaseResult).where(
+                    EvaluationExperimentCaseResult.experiment_run_id == run.id
+                )
+            )
+        )
+        stored_run = await session.get(type(run), run.id)
+    assert stored_run is not None
+    assert stored_run.status == EvaluationExperimentRunStatus.SUCCEEDED
+    assert rows
+    assert all(row.status == EvaluationCaseResultStatus.SUCCEEDED for row in rows)
+    assert all(row.failure_code is None for row in rows)
+    assert all(row.observed_agent_failure_code == "MODEL_TIMEOUT" for row in rows)
+
+
+@pytest.mark.asyncio
+async def test_m7c_cancelled_queued_run_does_not_materialize_cases(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7c-cancel-{uuid4().hex}")
+        run = await _ready_run(session, base)
+        runner = ExperimentRunner(db_factory)
+        assert await runner.cancel(session, run_id=run.id)
+    await runner.execute(
+        run_id=run.id, owner="m7c-cancel-worker", settings=Settings(testing=True)
+    )
+
+    async with db_factory() as session:
+        stored_run = await session.get(type(run), run.id)
+        case_count = await session.scalar(
+            select(func.count(EvaluationExperimentCaseResult.id)).where(
+                EvaluationExperimentCaseResult.experiment_run_id == run.id
+            )
+        )
+    assert stored_run is not None
+    assert stored_run.status == EvaluationExperimentRunStatus.CANCELLED
+    assert case_count == 0

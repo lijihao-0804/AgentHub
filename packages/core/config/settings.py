@@ -56,6 +56,7 @@ class Settings(BaseSettings):
     approval_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
     approval_reconciliation_stale_seconds: int = Field(default=300, ge=30, le=86_400)
     evaluation_runner_lease_seconds: int = Field(default=300, ge=5, le=86_400)
+    evaluation_runner_heartbeat_seconds: int = Field(default=30, ge=1, le=86_400)
     evaluation_enqueue_grace_seconds: int = Field(default=30, ge=0, le=86_400)
     evaluation_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
     langfuse_enabled: bool = False
@@ -80,6 +81,8 @@ class Settings(BaseSettings):
             raise ValueError("knowledge embedding device must be auto, cpu, or cuda")
         if self.knowledge_reranker_device not in {"auto", "cpu", "cuda"}:
             raise ValueError("knowledge reranker device must be auto, cpu, or cuda")
+        if self.evaluation_runner_heartbeat_seconds >= self.evaluation_runner_lease_seconds:
+            raise ValueError("evaluation runner heartbeat must be shorter than lease duration")
         if (
             self.environment.lower() not in DEVELOPMENT_ENVIRONMENTS
             and self.process_role == "api"

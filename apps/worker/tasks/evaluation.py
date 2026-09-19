@@ -14,10 +14,10 @@ from packages.control_plane.services import TenantService
 from packages.core.config.settings import get_settings
 from packages.core.database import create_database
 from packages.core.execution_context.models import PrincipalContext
+from packages.evaluation.approval import EvaluationApprovalActorProvider
 from packages.evaluation.queue import CeleryExperimentRunQueue
 from packages.evaluation.runner import (
     AgentRuntimeEvaluationDriver,
-    DeterministicEvaluationDriver,
     ExperimentRunner,
     reconcile_experiment_runs,
 )
@@ -61,8 +61,6 @@ async def _execute_experiment_run(run_id: UUID) -> None:
 
 
 async def _build_driver(settings, factory):
-    if settings.testing:
-        return DeterministicEvaluationDriver()
     trace_sink = ProductionTraceSink()
     components = production_retrieval_components(settings)
     retriever = SessionScopedKnowledgeRetriever(
@@ -72,6 +70,7 @@ async def _build_driver(settings, factory):
         trace_sink=trace_sink,
     )
     approval_service = ApprovalService(factory, ttl_seconds=settings.approval_ttl_seconds)
+    approval_actor_provider = EvaluationApprovalActorProvider(factory)
     service = AgentRunService(
         factory,
         credential_cipher=ProviderCredentialCipher.from_settings(settings),
@@ -102,7 +101,12 @@ async def _build_driver(settings, factory):
                 )
             ).context
 
-    return AgentRuntimeEvaluationDriver(service, context_factory, retriever=retriever)
+    return AgentRuntimeEvaluationDriver(
+        service,
+        context_factory,
+        retriever=retriever,
+        approval_context_factory=approval_actor_provider.context_for,
+    )
 
 
 @celery_app.task(

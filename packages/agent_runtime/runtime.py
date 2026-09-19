@@ -40,6 +40,7 @@ from packages.control_plane.services import TenantService
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
+from packages.knowledge.models import KnowledgeSnapshot
 from packages.knowledge.snapshots import KnowledgeSnapshotService
 from packages.model_gateway.contracts import (
     ModelGateway,
@@ -112,6 +113,30 @@ class AgentRunResult:
     failure_code: str | None
     model_step_count: int
     tool_call_count: int
+    total_input_tokens: int | None = None
+    total_output_tokens: int | None = None
+    total_tokens: int | None = None
+    total_cached_tokens: int | None = None
+    total_cost_amount: Decimal | None = None
+    cost_currency: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AgentRunExecutionOverrides:
+    """Trusted runtime-only inputs used by reproducible internal evaluation workers.
+
+    This type is intentionally not part of any transport/API schema.  The factory is
+    named for the only supported caller so ordinary API clients cannot construct it via
+    request data or a public route.
+    """
+
+    effective_knowledge_snapshots: tuple[dict[str, str], ...]
+
+    @classmethod
+    def for_evaluation(
+        cls, snapshots: list[dict[str, str]] | tuple[dict[str, str], ...]
+    ) -> AgentRunExecutionOverrides:
+        return cls(effective_knowledge_snapshots=tuple(dict(item) for item in snapshots))
 
 
 class AgentRunService:
@@ -151,7 +176,43 @@ class AgentRunService:
         input_text: str,
     ) -> AgentRunResult:
         self._require_permission(context, "agent_run")
-        run = await self._create_run(context, agent_version_id, input_text)
+        run = await self.prepare_run(
+            context, agent_version_id=agent_version_id, input_text=input_text
+        )
+        return await self.execute_prepared_run(context, run_id=run.id)
+
+    async def prepare_run(
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        agent_version_id: UUID,
+        input_text: str,
+        execution_overrides: AgentRunExecutionOverrides | None = None,
+    ) -> AgentRun:
+        """Persist a durable AgentRun before any external model/tool work begins."""
+
+        self._require_permission(context, "agent_run")
+        return await self._create_run(
+            context, agent_version_id, input_text, execution_overrides=execution_overrides
+        )
+
+    async def execute_prepared_run(
+        self, context: WorkspaceExecutionContext, *, run_id: UUID
+    ) -> AgentRunResult:
+        """Execute an already persisted run; terminal runs are never duplicated."""
+
+        self._require_permission(context, "agent_run")
+        async with self.session_factory() as session:
+            run = await session.scalar(
+                select(AgentRun).where(
+                    AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run_id
+                )
+            )
+        if run is None:
+            raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
+        if run.status != "RUNNING":
+            return _run_result(run)
+        agent_version_id = run.agent_version_id
         started = time.perf_counter()
         span = await _safe_start_span(
             self.trace_sink,
@@ -420,6 +481,12 @@ class AgentRunService:
                 failure_code=None,
                 model_step_count=persisted.model_step_count,
                 tool_call_count=persisted.tool_call_count,
+                total_input_tokens=persisted.total_input_tokens,
+                total_output_tokens=persisted.total_output_tokens,
+                total_tokens=persisted.total_tokens,
+                total_cached_tokens=persisted.total_cached_tokens,
+                total_cost_amount=persisted.total_cost_amount,
+                cost_currency=persisted.cost_currency,
             )
 
     async def stream(
@@ -707,7 +774,12 @@ class AgentRunService:
             return list(result)
 
     async def _create_run(
-        self, context: WorkspaceExecutionContext, agent_version_id: UUID, input_text: str
+        self,
+        context: WorkspaceExecutionContext,
+        agent_version_id: UUID,
+        input_text: str,
+        *,
+        execution_overrides: AgentRunExecutionOverrides | None = None,
     ) -> AgentRun:
         try:
             workspace_id = UUID(context.workspace_id)
@@ -749,9 +821,14 @@ class AgentRunService:
                 # prepare phase will return the same safe binding error without executing.
                 effective_snapshots = []
             else:
-                effective_snapshots = await self._resolve_effective_snapshots(
-                    session, context, spec
-                )
+                if execution_overrides is None:
+                    effective_snapshots = await self._resolve_effective_snapshots(
+                        session, context, spec
+                    )
+                else:
+                    effective_snapshots = await self._validate_frozen_execution_snapshots(
+                        session, context, spec, execution_overrides
+                    )
             run = AgentRun(
                 workspace_id=workspace_id,
                 agent_version_id=agent_version_id,
@@ -764,6 +841,68 @@ class AgentRunService:
             await session.commit()
             await session.refresh(run)
             return run
+
+    async def _validate_frozen_execution_snapshots(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        spec: FrozenAgentSpec,
+        overrides: AgentRunExecutionOverrides,
+    ) -> list[dict[str, str]]:
+        bindings = list(spec.knowledge_bindings)
+        snapshots = [dict(item) for item in overrides.effective_knowledge_snapshots]
+        if len(bindings) != len(snapshots):
+            raise AgentHubError(
+                "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                "Frozen knowledge bindings do not match the published agent version.",
+                409,
+            )
+        workspace_id = UUID(context.workspace_id)
+        validated: list[dict[str, str]] = []
+        for binding, frozen in zip(bindings, snapshots, strict=True):
+            try:
+                knowledge_base_id = UUID(str(frozen["knowledge_base_id"]))
+                snapshot_id = UUID(str(frozen["snapshot_id"]))
+                snapshot_hash = str(frozen.get("snapshot_hash") or frozen["snapshot_content_hash"])
+            except (KeyError, TypeError, ValueError):
+                raise AgentHubError(
+                    "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                    "Frozen knowledge snapshot identity is invalid.",
+                    409,
+                ) from None
+            if binding.knowledge_base_id != knowledge_base_id:
+                raise AgentHubError(
+                    "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                    "Frozen knowledge workspace binding is inconsistent.",
+                    409,
+                )
+            snapshot = await session.scalar(
+                select(KnowledgeSnapshot).where(
+                    KnowledgeSnapshot.workspace_id == workspace_id,
+                    KnowledgeSnapshot.knowledge_base_id == knowledge_base_id,
+                    KnowledgeSnapshot.id == snapshot_id,
+                )
+            )
+            if snapshot is None or snapshot.content_hash != snapshot_hash:
+                raise AgentHubError(
+                    "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                    "The frozen knowledge snapshot is no longer valid.",
+                    409,
+                )
+            if binding.binding_mode == "PINNED" and binding.snapshot_id != snapshot_id:
+                raise AgentHubError(
+                    "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                    "The pinned knowledge snapshot changed.",
+                    409,
+                )
+            validated.append(
+                {
+                    "knowledge_base_id": str(knowledge_base_id),
+                    "snapshot_id": str(snapshot_id),
+                    "snapshot_hash": snapshot_hash,
+                }
+            )
+        return validated
 
     @staticmethod
     async def _resolve_effective_snapshots(
@@ -912,6 +1051,12 @@ class AgentRunService:
                 failure_code=run.failure_code,
                 model_step_count=run.model_step_count,
                 tool_call_count=run.tool_call_count,
+                total_input_tokens=run.total_input_tokens,
+                total_output_tokens=run.total_output_tokens,
+                total_tokens=run.total_tokens,
+                total_cached_tokens=run.total_cached_tokens,
+                total_cost_amount=run.total_cost_amount,
+                cost_currency=run.cost_currency,
             )
 
     @staticmethod
@@ -1891,6 +2036,12 @@ def _run_result(run: AgentRun) -> AgentRunResult:
         failure_code=run.failure_code,
         model_step_count=run.model_step_count,
         tool_call_count=run.tool_call_count,
+        total_input_tokens=run.total_input_tokens,
+        total_output_tokens=run.total_output_tokens,
+        total_tokens=run.total_tokens,
+        total_cached_tokens=run.total_cached_tokens,
+        total_cost_amount=run.total_cost_amount,
+        cost_currency=run.cost_currency,
     )
 
 

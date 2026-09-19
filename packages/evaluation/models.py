@@ -463,6 +463,7 @@ class EvaluationExperimentRun(Base):
     purpose: Mapped[str] = mapped_column(String(32), nullable=False)
     repetitions: Mapped[int] = mapped_column(Integer, nullable=False)
     lease_owner: Mapped[str | None] = mapped_column(String(128))
+    lease_generation: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     attempt_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
@@ -546,6 +547,8 @@ class EvaluationExperimentCaseResult(Base):
         String(16), nullable=False, server_default=EvaluationCaseResultStatus.PENDING
     )
     agent_run_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    lease_owner: Mapped[str | None] = mapped_column(String(128))
+    lease_generation: Mapped[int | None] = mapped_column(Integer)
     latency_ms: Mapped[int | None] = mapped_column(Integer)
     input_tokens: Mapped[int | None] = mapped_column(Integer)
     output_tokens: Mapped[int | None] = mapped_column(Integer)
@@ -554,6 +557,8 @@ class EvaluationExperimentCaseResult(Base):
     cost_amount: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))
     cost_currency: Mapped[str | None] = mapped_column(String(3))
     failure_code: Mapped[str | None] = mapped_column(String(96))
+    observed_agent_status: Mapped[str | None] = mapped_column(String(32))
+    observed_agent_failure_code: Mapped[str | None] = mapped_column(String(96))
     safe_failure_message: Mapped[str | None] = mapped_column(Text)
     observation: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
