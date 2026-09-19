@@ -1,6 +1,6 @@
 # M7 Integration Closure
 
-Status: implementation complete; final acceptance is pending exact-head CI for this closure.
+Status: PASS — exact-head GitHub Actions run `35445378601` passed.
 
 ## Baseline and frontend history
 
@@ -28,5 +28,7 @@ Status: implementation complete; final acceptance is pending exact-head CI for t
 
 - Migration head remains `0020_m7d_review_closure`; no new migration was added.
 - Frontend TypeScript validation and production build pass.
+- GitHub Actions run `35445378601` passed the backend and frontend jobs for commit
+  `6ea0baa733fd078777471b62450488456f65c95e`.
 - The real browser visual check was not run in this non-browser validation pass:
   `VISUAL_BROWSER_CHECK=NOT_RUN`.
