@@ -18,6 +18,7 @@ from apps.api.routes.approvals import router as approvals_router
 from apps.api.routes.auth import router as auth_router
 from apps.api.routes.citation_qa import router as citation_qa_router
 from apps.api.routes.knowledge import router as knowledge_router
+from apps.api.routes.runs import router as runs_router
 from apps.api.routes.tenancy import router as tenancy_router
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
@@ -72,6 +73,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(approvals_router)
     app.include_router(citation_qa_router)
     app.include_router(knowledge_router)
+    app.include_router(runs_router)
     app.include_router(tenancy_router)
 
     @app.get("/api/v1/health", tags=["system"])

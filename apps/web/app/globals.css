@@ -45,6 +45,38 @@ h2 { font-size: 1.5rem; margin: 0.5rem 0 0; }
 .approval-item pre { background: rgba(0, 0, 0, 0.2); border-radius: 8px; color: var(--muted); overflow-x: auto; padding: 0.75rem; }
 .approval-actions { display: flex; gap: 0.75rem; }
 .needs-attention { color: #ffb0aa; font-weight: 700; }
+.run-detail-link { color: var(--accent); font-weight: 700; text-decoration: none; }
+
+.observability-shell { margin: 0 auto; max-width: 1120px; padding: 4rem 2rem 6rem; }
+.observability-header { align-items: flex-start; display: flex; gap: 2rem; justify-content: space-between; }
+.observability-header h1 { font-size: clamp(3rem, 7vw, 6rem); margin: 0.75rem 0 1rem; }
+.observability-lede { color: var(--muted); line-height: 1.6; max-width: 650px; }
+.observability-panel, .run-detail-summary, .timeline-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; margin-top: 2rem; padding: 1.5rem; }
+.observability-note { border-left: 2px solid var(--accent); color: var(--muted); line-height: 1.5; padding-left: 0.85rem; }
+.observability-form { align-items: end; display: grid; gap: 1rem; grid-template-columns: 1fr 1fr 1fr auto; }
+.observability-form label { color: var(--muted); display: grid; font-size: 0.85rem; gap: 0.45rem; }
+.observability-form input, .observability-form select { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: inherit; padding: 0.75rem; }
+.observability-form button, .load-more { background: var(--accent); border: 0; border-radius: 10px; color: var(--accent-ink); cursor: pointer; font-weight: 800; padding: 0.75rem 1rem; }
+.observability-form button:disabled, .load-more:disabled { cursor: wait; opacity: 0.6; }
+.run-list { display: grid; gap: 1rem; margin-top: 2rem; }
+.run-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 1.25rem; }
+.run-card-header { align-items: flex-start; display: flex; gap: 1rem; justify-content: space-between; }
+.run-card-header h2 { margin-top: 0.25rem; }
+.run-status { border: 1px solid var(--line); border-radius: 999px; color: var(--accent); font-size: 0.75rem; font-weight: 800; padding: 0.45rem 0.65rem; }
+.run-status.waiting { border-color: #d9b86c; color: #f4d98c; }
+.run-status.attention, .run-status.failed { border-color: #ff8c84; color: #ffb0aa; }
+.run-metrics { color: var(--muted); display: flex; flex-wrap: wrap; gap: 1rem; margin: 1.25rem 0; }
+.run-metrics span { font-size: 0.85rem; }
+.load-more { justify-self: center; }
+.waiting-callout { color: #f4d98c; font-weight: 700; }
+.approval-summary { border-top: 1px solid var(--line); color: var(--muted); display: flex; flex-wrap: wrap; gap: 1rem; padding-top: 1rem; }
+.approval-summary strong { color: var(--ink); width: 100%; }
+.timeline-list { display: grid; gap: 0.75rem; margin-top: 1.5rem; }
+.timeline-entry { border-top: 1px solid var(--line); display: grid; gap: 1rem; grid-template-columns: 2rem 1fr; padding-top: 1rem; }
+.timeline-sequence { color: var(--accent); font-weight: 800; }
+.timeline-entry-header { display: flex; gap: 1rem; justify-content: space-between; }
+.timeline-entry-header span { color: var(--muted); font-size: 0.8rem; }
+.timeline-entry pre { background: rgba(0, 0, 0, 0.2); border-radius: 8px; color: var(--muted); overflow-x: auto; padding: 0.75rem; }
 
 @media (max-width: 640px) {
   .shell { padding: 5rem 1.25rem 3rem; }
@@ -114,4 +146,7 @@ h2 { font-size: 1.5rem; margin: 0.5rem 0 0; }
   .approval-form { grid-template-columns: 1fr; }
   .form-actions { justify-content: stretch; }
   .form-actions button { width: 100%; }
+  .observability-shell { padding: 2.5rem 1rem 4rem; }
+  .observability-header { flex-direction: column; }
+  .observability-form { grid-template-columns: 1fr; }
 }

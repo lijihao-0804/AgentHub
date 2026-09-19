@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import {
   Approval,
@@ -14,7 +15,8 @@ const milestones = [
   ["M1", "Auth / Tenant / RBAC", "next"],
   ["M2", "Model Gateway", "next"],
   ["M3", "Reliable Knowledge Hub", "next"],
-  ["M5-A", "Approval Runtime", "active"],
+  ["M5-A", "Approval Runtime", "complete"],
+  ["M6-A", "Run Observability", "active"],
 ];
 
 export default function Home() {
@@ -70,14 +72,16 @@ export default function Home() {
             <p className="eyebrow">DELIVERY STATUS</p>
             <h2 id="status-title">Milestone roadmap</h2>
           </div>
-          <span className="badge">M5-A IN PROGRESS</span>
+          <span className="badge">M6-A IN PROGRESS</span>
         </div>
         <div className="milestones">
           {milestones.map(([id, label, status]) => (
             <div className={`milestone ${status}`} key={id}>
               <span className="milestone-id">{id}</span>
               <span>{label}</span>
-              <span className="milestone-status">{status === "active" ? "Active" : "Queued"}</span>
+              <span className="milestone-status">
+                {status === "active" ? "Active" : status === "complete" ? "Accepted" : "Queued"}
+              </span>
             </div>
           ))}
         </div>
@@ -142,6 +146,20 @@ export default function Home() {
             </article>
           ))}
         </div>
+      </section>
+      <section className="card" aria-labelledby="runs-title">
+        <div className="card-header">
+          <div>
+            <p className="eyebrow">M6-A OBSERVABILITY</p>
+            <h2 id="runs-title">Run query and timeline</h2>
+          </div>
+          <Link className="run-detail-link" href="/runs">
+            Open Runs →
+          </Link>
+        </div>
+        <p className="playground-note">
+          Explore workspace-scoped runtime status, usage, cost, approvals and safe timeline events.
+        </p>
       </section>
     </main>
   );
