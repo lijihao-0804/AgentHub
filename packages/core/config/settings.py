@@ -52,9 +52,13 @@ class Settings(BaseSettings):
     knowledge_ingestion_max_attempts: int = Field(default=3, ge=1, le=100)
     knowledge_ingestion_retry_base_seconds: int = Field(default=30, ge=1, le=86_400)
     knowledge_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
+    approval_ttl_seconds: int = Field(default=3_600, ge=60, le=31_536_000)
+    approval_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
+    approval_reconciliation_stale_seconds: int = Field(default=300, ge=30, le=86_400)
     langfuse_enabled: bool = False
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)
+    sse_heartbeat_seconds: float = Field(default=15, gt=0, le=120)
     auth_jwt_secret: str = Field(default=DEFAULT_AUTH_JWT_SECRET, min_length=32)
     auth_access_token_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     auth_refresh_token_ttl_seconds: int = Field(default=2_592_000, ge=300, le=31_536_000)

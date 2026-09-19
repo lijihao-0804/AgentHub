@@ -68,6 +68,13 @@ class Approval(Base):
         ),
         Index("ix_approvals_workspace_decision", "workspace_id", "decision_status"),
         Index("ix_approvals_workspace_run", "workspace_id", "run_id"),
+        Index("ix_approvals_workspace_execution", "workspace_id", "execution_status"),
+        Index(
+            "ix_approvals_workspace_pending_expiry",
+            "workspace_id",
+            "decision_status",
+            "expires_at",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)

@@ -1,3 +1,6 @@
+from decimal import Decimal
+from math import inf, nan
+
 import pytest
 from pydantic import ValidationError
 
@@ -15,6 +18,15 @@ def test_canonical_json_is_order_independent_and_hashable() -> None:
 
     assert canonical_json(left) == canonical_json(right)
     assert canonical_json_hash(left) == canonical_json_hash(right)
+
+
+def test_canonical_json_rejects_non_json_numeric_edges() -> None:
+    with pytest.raises(TypeError):
+        canonical_json({"value": Decimal("0.1")})
+    with pytest.raises(ValueError):
+        canonical_json({"value": nan})
+    with pytest.raises(ValueError):
+        canonical_json({"value": inf})
 
 
 def test_workspace_context_requires_explicit_scopes() -> None:

@@ -6,6 +6,29 @@ from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command, interrupt
+
+
+def resume_command(payload: Mapping[str, Any]) -> Any:
+    return Command(resume=dict(payload))
+
+
+def approval_interrupt(payload: Mapping[str, Any]) -> Any:
+    return interrupt(dict(payload))
+
+
+def interrupt_payloads(state: Mapping[str, Any]) -> tuple[dict[str, Any], ...]:
+    interrupts = state.get("__interrupt__")
+    if not interrupts:
+        return ()
+    if not isinstance(interrupts, (list, tuple)):
+        interrupts = (interrupts,)
+    payloads: list[dict[str, Any]] = []
+    for item in interrupts:
+        value = getattr(item, "value", item)
+        if isinstance(value, Mapping):
+            payloads.append(dict(value))
+    return tuple(payloads)
 
 
 def compile_agent_graph(
@@ -29,4 +52,9 @@ def compile_agent_graph(
     return graph.compile(checkpointer=checkpointer)
 
 
-__all__ = ["compile_agent_graph"]
+__all__ = [
+    "approval_interrupt",
+    "compile_agent_graph",
+    "interrupt_payloads",
+    "resume_command",
+]

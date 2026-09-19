@@ -23,13 +23,15 @@ from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCo
 from packages.model_gateway.profile_resolution import ResolvedModelProfile
 
 
-def _profile(*, profile_id: UUID, workspace_id: UUID) -> ResolvedModelProfile:
+def _profile(
+    *, profile_id: UUID, workspace_id: UUID, temperature: Decimal = Decimal("0.1")
+) -> ResolvedModelProfile:
     return ResolvedModelProfile(
         id=profile_id,
         workspace_id=workspace_id,
         provider_credential_id=UUID("00000000-0000-0000-0000-000000000001"),
         model="deepseek-chat",
-        temperature=Decimal("0.1"),
+        temperature=temperature,
         max_tokens=2_000,
         timeout_seconds=Decimal("30"),
         fallback_profile_id=None,
@@ -71,8 +73,12 @@ def _snapshot() -> ResolvedKnowledgeSnapshot:
     )
 
 
-def _spec(agent: Agent) -> dict:
-    profile = _profile(profile_id=agent.model_profile_id, workspace_id=agent.workspace_id)
+def _spec(agent: Agent, *, temperature: Decimal = Decimal("0.1")) -> dict:
+    profile = _profile(
+        profile_id=agent.model_profile_id,
+        workspace_id=agent.workspace_id,
+        temperature=temperature,
+    )
     return _resolved_spec(
         agent=agent,
         model=((profile,), {profile.id: "deepseek"}),
@@ -97,6 +103,13 @@ def test_resolved_spec_hash_is_canonical_and_schema_versioned() -> None:
     assert first["spec_schema_version"] == 2
     assert first["retrieval"]["knowledge_binding_mode"] == "PINNED"
     assert first["retrieval"]["knowledge_snapshot_ids"]
+
+
+def test_resolved_spec_normalizes_negative_zero_numeric_projection() -> None:
+    resolved = _spec(_agent(), temperature=Decimal("-0"))
+
+    assert resolved["model"]["temperature"] == 0.0
+    assert not str(resolved["model"]["temperature"]).startswith("-")
 
 
 @pytest.mark.parametrize("field", ["system_prompt", "prompt_version", "model_profile_id"])
@@ -146,6 +159,8 @@ def test_publish_config_validation_rejects_invalid_budget_and_retrieval_limits()
         _validate_runtime_config({"context_budget": {"max_retrieval_tokens": 0}})
     with pytest.raises(AgentHubError):
         _validate_retrieval_config({"candidate_top_k": 2, "final_top_k": 3})
+    with pytest.raises(AgentHubError):
+        _validate_runtime_config({"context_budget": {"max_tool_result_tokens": 128_001}})
 
 
 @pytest.mark.parametrize(

@@ -20,6 +20,7 @@ from packages.knowledge.queue import IngestionQueue
 from packages.model_gateway.contracts import ModelGateway
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
+from packages.observability import ProductionTraceSink
 
 db_session_dependency = Depends(get_db_session)
 principal_dependency = Depends(get_current_principal)
@@ -102,4 +103,5 @@ async def get_model_gateway(
     return SqlAlchemyModelGateway(
         session,
         credential_cipher=ProviderCredentialCipher.from_settings(request.app.state.settings),
+        trace_sink=ProductionTraceSink(),
     )

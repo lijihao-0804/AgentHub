@@ -22,4 +22,15 @@ DEFAULT_CONTEXT_BUDGET: dict[str, int] = {
     "max_tool_result_tokens": 4_000,
 }
 
-__all__ = ["DEFAULT_CONTEXT_BUDGET", "DEFAULT_RUNTIME_LIMITS", "MAX_RUNTIME_LIMITS"]
+MAX_CONTEXT_BUDGET: dict[str, int] = {
+    "reserved_output_tokens": 128_000,
+    "max_retrieval_tokens": 128_000,
+    "max_tool_result_tokens": 128_000,
+}
+
+__all__ = [
+    "DEFAULT_CONTEXT_BUDGET",
+    "DEFAULT_RUNTIME_LIMITS",
+    "MAX_CONTEXT_BUDGET",
+    "MAX_RUNTIME_LIMITS",
+]

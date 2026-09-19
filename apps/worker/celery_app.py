@@ -1,16 +1,20 @@
 from __future__ import annotations
 
 from celery import Celery
+from celery.signals import worker_process_shutdown
 
+from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
 from packages.core.config.settings import Settings, get_settings
+from packages.knowledge.composition import close_production_retrieval_components
 
 
 def create_celery_app(settings: Settings | None = None) -> Celery:
+    configure_windows_asyncio_policy()
     app_settings = settings or get_settings()
     app = Celery(
         "agenthub",
         broker=app_settings.redis_url,
-        include=["apps.worker.tasks.knowledge"],
+        include=["apps.worker.tasks.knowledge", "apps.worker.tasks.approvals"],
     )
     app.conf.update(
         task_ignore_result=True,
@@ -24,13 +28,22 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
             "reconcile-knowledge-ingestion": {
                 "task": "agenthub.reconcile_knowledge_ingestion",
                 "schedule": 60.0,
-            }
+            },
+            "reconcile-approval-runs": {
+                "task": "agenthub.reconcile_approval_runs",
+                "schedule": 30.0,
+            },
         },
     )
     return app
 
 
 celery_app = create_celery_app()
+
+
+@worker_process_shutdown.connect
+def _close_worker_retrieval_components(**_kwargs) -> None:
+    close_production_retrieval_components()
 
 
 __all__ = ["celery_app", "create_celery_app"]

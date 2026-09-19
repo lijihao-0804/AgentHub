@@ -13,28 +13,33 @@ from decimal import Decimal
 from typing import Any, TypedDict
 from uuid import UUID
 
-from langgraph.types import Command, interrupt
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.adapters.langgraph import (
     LangGraphCheckpointAdapter,
+    PostgresCheckpointProbe,
+    approval_interrupt,
     compile_agent_graph,
+    interrupt_payloads,
+    resume_command,
 )
 from packages.agent_runtime.context_budget import (
     ContextBudgetConfig,
     ContextBudgetPolicy,
     ContextCategory,
     ContextMessage,
+    Utf8ByteTokenEstimator,
 )
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.approvals import ApprovalDecisionStatus, ApprovalExecutionStatus, ApprovalService
+from packages.control_plane.services import TenantService
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
-from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
 from packages.knowledge.snapshots import KnowledgeSnapshotService
 from packages.model_gateway.contracts import (
     ModelGateway,
@@ -125,13 +130,15 @@ class AgentRunService:
         checkpoint_adapter: LangGraphCheckpointAdapter | None = None,
     ) -> None:
         self.session_factory = session_factory
+        self.trace_sink = trace_sink or NoopTraceSink()
         self.model_gateway_factory = model_gateway_factory or (
             lambda session: SqlAlchemyModelGateway(
-                session, credential_cipher=credential_cipher
+                session,
+                credential_cipher=credential_cipher,
+                trace_sink=self.trace_sink,
             )
         )
         self.tool_runtime = tool_runtime or ToolRuntime(session_factory=session_factory)
-        self.trace_sink = trace_sink or NoopTraceSink()
         self.approval_service = approval_service
         self.action_runtime = action_runtime
         self.checkpoint_adapter = checkpoint_adapter
@@ -228,7 +235,7 @@ class AgentRunService:
         return result
 
     async def _invoke_graph(
-        self, graph: _AgentRunGraph, state: AgentRunState | Command, run: AgentRun
+        self, graph: _AgentRunGraph, state: AgentRunState | Any, run: AgentRun
     ) -> AgentRunState:
         if self.approval_service is None or self.checkpoint_adapter is None:
             return await graph.invoke(state)
@@ -255,29 +262,62 @@ class AgentRunService:
             run = await session.scalar(
                 select(AgentRun).where(
                     AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run_id
-                )
+                ).with_for_update()
             )
             if run is None:
                 raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
             if run.status != "WAITING_APPROVAL":
                 return _run_result(run)
+        runtime_context = await self._authoritative_run_context(context, run)
         if self.approval_service is None or self.checkpoint_adapter is None:
             raise AgentHubError(
                 "CHECKPOINT_NOT_CONFIGURED", "Durable approval resume is not configured.", 503
             )
-        approval = await self.approval_service.get(context, approval_id)
-        if approval.run_id != run_id:
-            raise AgentHubError("APPROVAL_NOT_FOUND", "The approval was not found.", 404)
-        graph = _AgentRunGraph(self, context, run)
+        try:
+            approval = await self.approval_service.get(runtime_context, approval_id)
+        except AgentHubError as error:
+            if error.code == "APPROVAL_NOT_FOUND":
+                raise AgentHubError(
+                    "APPROVAL_RESUME_MISMATCH",
+                    "The approval does not match the durable run.",
+                    409,
+                ) from error
+            raise
+        if approval.run_id != run_id or approval.agent_version_id != run.agent_version_id:
+            raise AgentHubError(
+                "APPROVAL_RESUME_MISMATCH",
+                "The approval does not belong to this durable run.",
+                409,
+            )
+        checkpoint_exists = await PostgresCheckpointProbe(
+            self.checkpoint_adapter
+        ).has_checkpoint(run.workspace_id, run.id)
+        if not checkpoint_exists:
+            await self._complete_run(
+                runtime_context,
+                run.id,
+                status="NEEDS_ATTENTION",
+                final_output=None,
+                failure_code="APPROVAL_CHECKPOINT_MISSING",
+                model_step_count=run.model_step_count,
+                tool_call_count=run.tool_call_count,
+                usage_records=[],
+            )
+            raise AgentHubError(
+                "APPROVAL_CHECKPOINT_MISSING",
+                "The durable approval checkpoint is missing.",
+                409,
+            )
+        graph = _AgentRunGraph(self, runtime_context, run)
         async with self.checkpoint_adapter.checkpointer() as checkpointer:
             final_state = await graph.invoke(
-                Command(resume={"approval_id": str(approval_id)}),
+                resume_command({"approval_id": str(approval_id)}),
                 checkpointer=checkpointer,
                 config=self.checkpoint_adapter.config_for_run(run.workspace_id, run.id),
             )
         if _approval_interrupt_payload(final_state) is not None:
             return await self._waiting_result(
-                context,
+                runtime_context,
                 run,
                 model_step_count=int(final_state.get("model_round_count", 0)),
                 tool_call_count=int(final_state.get("tool_call_count", 0)),
@@ -285,7 +325,7 @@ class AgentRunService:
         failure_code = final_state.get("failure_code")
         status = final_state.get("run_status") or ("FAILED" if failure_code else "SUCCEEDED")
         return await self._complete_run(
-            context,
+            runtime_context,
             run.id,
             status=status,
             final_output=final_state.get("final_output") if not failure_code else None,
@@ -294,6 +334,30 @@ class AgentRunService:
             tool_call_count=graph.tool_call_count,
             usage_records=graph.usage_records,
         )
+
+    async def _authoritative_run_context(
+        self, request_context: WorkspaceExecutionContext, run: AgentRun
+    ) -> WorkspaceExecutionContext:
+        """Re-resolve the original run actor before graph resume.
+
+        The approver remains the audit actor for the decision endpoint; the
+        resumed graph executes under the run creator's current membership and
+        permissions, never under elevated approver privileges.
+        """
+
+        principal = PrincipalContext(
+            request_id=request_context.request_id,
+            trace_id=request_context.organization.principal.trace_id,
+            user_id=str(run.created_by),
+        )
+        async with self.session_factory() as session:
+            return (
+                await TenantService().get_workspace_access(
+                    session,
+                    principal=principal,
+                    workspace_id=run.workspace_id,
+                )
+            ).context
 
     async def cancel(
         self, context: WorkspaceExecutionContext, *, run_id: UUID
@@ -323,7 +387,7 @@ class AgentRunService:
             run = await session.scalar(
                 select(AgentRun).where(
                     AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run_id
-                )
+                ).with_for_update()
             )
             if run is not None and run.status == "RUNNING":
                 run.status = "WAITING_APPROVAL"
@@ -364,15 +428,21 @@ class AgentRunService:
         *,
         agent_version_id: UUID,
         input_text: str,
+        prepared_run: AgentRun | None = None,
     ) -> AsyncIterator[AgentEvent]:
         """Run the same LangGraph execution path while publishing AgentHub events."""
 
         self._require_permission(context, "agent_run")
-        await self.preflight_stream(context, agent_version_id=agent_version_id)
-        run = await self._create_run(context, agent_version_id, input_text)
+        if prepared_run is None:
+            await self.preflight_stream(context, agent_version_id=agent_version_id)
+            run = await self._create_run(context, agent_version_id, input_text)
+        else:
+            run = prepared_run
         queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue(maxsize=256)
         emitter = AgentEventEmitter(
-            run_id=str(run.id), agent_version_id=str(agent_version_id)
+            run_id=str(run.id),
+            agent_version_id=str(agent_version_id),
+            request_id=context.request_id,
         )
         graph_holder: dict[str, _AgentRunGraph] = {}
         producer = asyncio.create_task(
@@ -388,6 +458,11 @@ class AgentRunService:
 
         async def abort_if_active() -> None:
             if producer.done():
+                if not producer.cancelled():
+                    try:
+                        producer.exception()
+                    except Exception:
+                        logger.warning("agent_stream_producer_failed", exc_info=True)
                 return
             producer.cancel()
             await asyncio.gather(producer, return_exceptions=True)
@@ -447,6 +522,63 @@ class AgentRunService:
         emitter: AgentEventEmitter,
         graph_holder: dict[str, _AgentRunGraph],
     ) -> None:
+        """Run a producer and always close the consumer queue.
+
+        A producer can fail before it has emitted a terminal event (including
+        while serializing that event).  The queue close is deliberately
+        non-blocking so a disconnected SSE client cannot leave the consumer
+        waiting forever.
+        """
+
+        try:
+            await self._produce_stream_body(
+                context, run, agent_version_id, queue, emitter, graph_holder
+            )
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.warning("agent_stream_producer_failed", exc_info=True)
+            graph = graph_holder.get("graph")
+            try:
+                await asyncio.shield(
+                    self._complete_run(
+                        context,
+                        run.id,
+                        status="FAILED",
+                        final_output=None,
+                        failure_code="AGENT_STREAM_PRODUCER_FAILED",
+                        model_step_count=graph.model_round_count if graph else 0,
+                        tool_call_count=graph.tool_call_count if graph else 0,
+                        usage_records=graph.usage_records if graph else [],
+                    )
+                )
+            except Exception:
+                logger.warning("agent_stream_terminal_persistence_failed", exc_info=True)
+            try:
+                event = await emitter.emit(
+                    AgentEventType.RUN_FAILED,
+                    {
+                        "status": "FAILED",
+                        "failure_code": "AGENT_STREAM_PRODUCER_FAILED",
+                        "model_step_count": graph.model_round_count if graph else 0,
+                        "tool_call_count": graph.tool_call_count if graph else 0,
+                    },
+                )
+                queue.put_nowait(event)
+            except (Exception, asyncio.QueueFull):
+                logger.warning("agent_stream_failure_event_failed", exc_info=True)
+        finally:
+            _close_event_queue(queue)
+
+    async def _produce_stream_body(
+        self,
+        context: WorkspaceExecutionContext,
+        run: AgentRun,
+        agent_version_id: UUID,
+        queue: asyncio.Queue[AgentEvent | None],
+        emitter: AgentEventEmitter,
+        graph_holder: dict[str, _AgentRunGraph],
+    ) -> None:
         graph = _AgentRunGraph(
             self,
             context,
@@ -469,7 +601,6 @@ class AgentRunService:
             approval_payload = _approval_interrupt_payload(final_state)
             if approval_payload is not None:
                 await self._mark_waiting(context, run.id)
-                await queue.put(None)
                 return
             failure_code = final_state.get("failure_code")
             status = final_state.get("run_status") or ("FAILED" if failure_code else "SUCCEEDED")
@@ -500,7 +631,10 @@ class AgentRunService:
             tool_call_count=graph.tool_call_count,
             usage_records=graph.usage_records,
         )
-        event_type = AgentEventType.RUN_FAILED if failure_code else AgentEventType.RUN_COMPLETED
+        if result.status == "CANCELLED":
+            event_type = AgentEventType.RUN_CANCELLED
+        else:
+            event_type = AgentEventType.RUN_FAILED if failure_code else AgentEventType.RUN_COMPLETED
         data: dict[str, Any] = {
             "status": result.status,
             "model_step_count": result.model_step_count,
@@ -511,7 +645,6 @@ class AgentRunService:
         else:
             data["output"] = result.final_output or ""
         await _queue_event(queue, await emitter.emit(event_type, data))
-        await queue.put(None)
 
     async def get_run(self, context: WorkspaceExecutionContext, run_id: UUID) -> AgentRun:
         self._require_permission(context, "workspace_read")
@@ -519,7 +652,7 @@ class AgentRunService:
             run = await session.scalar(
                 select(AgentRun).where(
                     AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run_id
-                )
+                ).with_for_update()
             )
             if run is None:
                 raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
@@ -547,6 +680,18 @@ class AgentRunService:
                 raise AgentHubError(
                     "AGENT_VERSION_NOT_FOUND", "The published agent version was not found.", 404
                 )
+
+    async def prepare_stream(
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        agent_version_id: UUID,
+        input_text: str,
+    ) -> AgentRun:
+        """Validate and persist the Run before the HTTP streaming response starts."""
+
+        await self.preflight_stream(context, agent_version_id=agent_version_id)
+        return await self._create_run(context, agent_version_id, input_text)
 
     async def list_steps(self, context: WorkspaceExecutionContext, run_id: UUID) -> list[RunStep]:
         await self.get_run(context, run_id)
@@ -729,13 +874,29 @@ class AgentRunService:
             run = await session.scalar(
                 select(AgentRun).where(
                     AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run_id
-                )
+                ).with_for_update()
             )
             if run is None:
                 raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
-            run.status = status
-            run.final_output = final_output
-            run.failure_code = failure_code
+            effective_status = status
+            effective_output = final_output
+            effective_failure = failure_code
+            if run.status in {"CANCELLED", "NEEDS_ATTENTION"}:
+                effective_status = run.status
+                effective_output = run.final_output
+                effective_failure = run.failure_code
+            elif run.status == "CANCEL_REQUESTED":
+                if status == "NEEDS_ATTENTION" or _is_uncertain_action_failure(failure_code):
+                    effective_status = "NEEDS_ATTENTION"
+                    effective_output = None
+                    effective_failure = failure_code or "ACTION_RECONCILIATION_REQUIRED"
+                else:
+                    effective_status = "CANCELLED"
+                    effective_output = None
+                    effective_failure = None
+            run.status = effective_status
+            run.final_output = effective_output
+            run.failure_code = effective_failure
             run.model_step_count = model_step_count
             run.tool_call_count = tool_call_count
             for key, value in _aggregate_usage(usage_records).items():
@@ -778,13 +939,14 @@ class _AgentRunGraph:
         self.emitter = emitter
         self.event_queue = event_queue
         self.active_model_stream: AsyncIterator[ModelStreamEvent] | None = None
+        self._cancel_requested_emitted = False
         self.model_round_count = 0
         self.tool_call_count = 0
         self.usage_records: list[dict[str, Any]] = []
 
     async def invoke(
         self,
-        initial: AgentRunState | Command,
+        initial: AgentRunState | Any,
         *,
         checkpointer: Any | None = None,
         config: Mapping[str, Any] | None = None,
@@ -917,6 +1079,9 @@ class _AgentRunGraph:
                 logger.warning("agent_model_stream_close_failed", exc_info=True)
 
     async def model(self, state: AgentRunState) -> dict[str, Any]:
+        stopped = await self._stop_if_requested()
+        if stopped is not None:
+            return stopped
         runtime = state["runtime"]
         rounds = state.get("model_round_count", 0)
         if rounds >= runtime["max_steps"]:
@@ -968,6 +1133,7 @@ class _AgentRunGraph:
             tools=admission.tool_definitions,
         )
         self.model_round_count = next_round
+        await self._emit(AgentEventType.MESSAGE_STARTED, {"model_round": next_round})
         try:
             async with self.service.session_factory() as session:
                 gateway = self.service.model_gateway_factory(session)
@@ -1033,6 +1199,10 @@ class _AgentRunGraph:
                 "usage_records": list(self.usage_records),
                 "failure_code": "AGENT_MODEL_EMPTY_RESPONSE",
             }
+        await self._emit(
+            AgentEventType.MESSAGE_COMPLETED,
+            {"model_round": next_round, "status": "SUCCEEDED"},
+        )
         await self.step(
             "MODEL",
             "SUCCEEDED",
@@ -1117,6 +1287,9 @@ class _AgentRunGraph:
                     logger.warning("agent_model_stream_close_failed", exc_info=True)
 
     async def tool_proposal(self, state: AgentRunState) -> dict[str, Any]:
+        stopped = await self._stop_if_requested()
+        if stopped is not None:
+            return stopped
         response = state.get("model_response")
         if response is None:
             return {"failure_code": "AGENT_MODEL_EMPTY_RESPONSE"}
@@ -1141,6 +1314,10 @@ class _AgentRunGraph:
                 "invalid_code": None if valid else "TOOL_ARGUMENT_INVALID",
             }
             calls.append(item)
+            await self._emit(
+                AgentEventType.TOOL_REQUESTED,
+                {"tool_call_id": stable_id, "tool_identity": name},
+            )
             if valid:
                 signature = canonical_json_hash({"tool": name, "arguments": normalized_arguments})
                 counts[signature] = counts.get(signature, 0) + 1
@@ -1176,6 +1353,9 @@ class _AgentRunGraph:
         }
 
     async def policy(self, state: AgentRunState) -> dict[str, Any]:
+        stopped = await self._stop_if_requested()
+        if stopped is not None:
+            return stopped
         definitions = state["tool_definitions"]
         allowed: list[dict[str, Any]] = []
         action_calls: list[dict[str, Any]] = []
@@ -1272,7 +1452,7 @@ class _AgentRunGraph:
                     status="ok",
                     failure_code=None,
                 )
-                resume = interrupt(
+                resume = approval_interrupt(
                     {
                         "approval_id": str(approval.id),
                         "logical_action_id": approval.logical_action_id,
@@ -1287,8 +1467,50 @@ class _AgentRunGraph:
                         "approval_id": str(approval.id),
                         "logical_action_id": approval.logical_action_id,
                     }}
-                approval_id = UUID(str(resume.get("approval_id", approval.id)))
+                try:
+                    approval_id = UUID(str(resume.get("approval_id")))
+                except (TypeError, ValueError) as exc:
+                    raise AgentHubError(
+                        "APPROVAL_RESUME_MISMATCH",
+                        "The approval resume identity is invalid.",
+                        409,
+                    ) from exc
+                if approval_id != approval.id:
+                    raise AgentHubError(
+                        "APPROVAL_RESUME_MISMATCH",
+                        "The approval resume identity does not match the durable interrupt.",
+                        409,
+                    )
+                if resume.get("logical_action_id") not in {
+                    None,
+                    approval.logical_action_id,
+                }:
+                    raise AgentHubError(
+                        "APPROVAL_RESUME_MISMATCH",
+                        "The approval logical action does not match the durable interrupt.",
+                        409,
+                    )
                 current = await self.service.approval_service.get(self.context, approval_id)
+                if (
+                    current.run_id != self.run.id
+                    or current.agent_version_id != self.run.agent_version_id
+                    or current.tool_identity != definition.identity
+                    or current.tool_revision_id != definition.revision_id
+                ):
+                    raise AgentHubError(
+                        "APPROVAL_RESUME_MISMATCH",
+                        "The approval binding does not match the durable tool request.",
+                        409,
+                    )
+                await self._emit(
+                    AgentEventType.APPROVAL_RESOLVED,
+                    {
+                        "approval_id": str(current.id),
+                        "decision_status": current.decision_status,
+                        "execution_status": current.execution_status,
+                        "failure_code": current.failure_code,
+                    },
+                )
                 if current.decision_status == ApprovalDecisionStatus.PENDING:
                     return {"approval_required": {
                         "approval_id": str(current.id),
@@ -1317,11 +1539,18 @@ class _AgentRunGraph:
         }
 
     async def action_execute(self, state: AgentRunState) -> dict[str, Any]:
+        stopped = await self._stop_if_requested()
+        if stopped is not None:
+            return stopped
         if self.service.action_runtime is None or self.service.approval_service is None:
             return {"failure_code": "ACTION_RUNTIME_NOT_CONFIGURED"}
         executed: dict[str, ToolResult] = {}
         logical_action_ids: list[str] = []
         for item in state.get("action_calls", []):
+            stopped = await self._stop_if_requested()
+            if stopped is not None:
+                stopped["executed_observations"] = executed
+                return stopped
             call = item["call"]
             approval_id = UUID(item["approval_id"])
             approval = await self.service.approval_service.get(self.context, approval_id)
@@ -1358,7 +1587,7 @@ class _AgentRunGraph:
                         return {
                             "executed_observations": executed,
                             "run_status": "NEEDS_ATTENTION",
-                            "failure_code": span_failure_code,
+                            "failure_code": "ACTION_RECONCILIATION_REQUIRED",
                         }
                     continue
                 claimed = await self.service.approval_service.claim_execution(
@@ -1401,7 +1630,7 @@ class _AgentRunGraph:
                     return {
                         "executed_observations": executed,
                         "run_status": "NEEDS_ATTENTION",
-                        "failure_code": span_failure_code,
+                        "failure_code": "ACTION_RECONCILIATION_REQUIRED",
                     }
                 execution_status = (
                     ApprovalExecutionStatus.SUCCEEDED
@@ -1461,11 +1690,18 @@ class _AgentRunGraph:
         return {"executed_observations": executed, "action_calls": []}
 
     async def read_execute(self, state: AgentRunState) -> dict[str, Any]:
+        stopped = await self._stop_if_requested()
+        if stopped is not None:
+            return stopped
         calls = state.get("pending_tool_calls", [])
         semaphore = asyncio.Semaphore(state["runtime"]["max_parallel_reads"])
 
         async def execute_one(call: dict[str, Any]) -> tuple[str, ToolResult]:
             async with semaphore:
+                if await self._stop_if_requested() is not None:
+                    return call["tool_call_id"], ToolResult.failure(
+                        "RUN_CANCELLED", "The run was cancelled before tool execution."
+                    )
                 started = time.perf_counter()
                 await self._emit(
                     AgentEventType.TOOL_STARTED,
@@ -1501,6 +1737,18 @@ class _AgentRunGraph:
                         "duration_ms": round((time.perf_counter() - started) * 1000, 3),
                     },
                 )
+                if result.status is ToolResultStatus.ERROR:
+                    await self._emit(
+                        AgentEventType.TOOL_FAILED,
+                        {
+                            "tool_call_id": call["tool_call_id"],
+                            "tool_identity": call["name"],
+                            "error_code": result.error_code,
+                            "duration_ms": round(
+                                (time.perf_counter() - started) * 1000, 3
+                            ),
+                        },
+                    )
                 return call["tool_call_id"], result
 
         pairs = await asyncio.gather(*(execute_one(call) for call in calls))
@@ -1523,7 +1771,10 @@ class _AgentRunGraph:
                 result = ToolResult.failure("TOOL_EXECUTION_FAILED", "The tool execution failed.")
             if result.error_code in _TERMINAL_TOOL_ERRORS:
                 terminal_code = result.error_code
-            payload = _bounded_tool_result(result)
+            budget = ContextBudgetConfig(**state["runtime"]["context_budget"])
+            payload = _bounded_tool_result(
+                result, max_tool_result_tokens=budget.max_tool_result_tokens
+            )
             observations.append(
                 {"tool_call_id": call["tool_call_id"], "status": result.status.value}
             )
@@ -1556,17 +1807,45 @@ class _AgentRunGraph:
 
     async def finish(self, state: AgentRunState) -> dict[str, Any]:
         failure_code = state.get("failure_code")
+        status = state.get("run_status") or ("FAILED" if failure_code else "SUCCEEDED")
         await self.step(
             "FINISH",
-            "FAILED" if failure_code else "SUCCEEDED",
+            status,
             {
-                "status": "FAILED" if failure_code else "SUCCEEDED",
+                "status": status,
                 "error_code": failure_code,
                 "model_round": state.get("model_round_count", 0),
                 "tool_count": state.get("tool_call_count", 0),
             },
         )
         return {}
+
+    async def _stop_if_requested(self) -> dict[str, Any] | None:
+        async with self.service.session_factory() as session:
+            status = await session.scalar(
+                select(AgentRun.status).where(
+                    AgentRun.workspace_id == UUID(self.context.workspace_id),
+                    AgentRun.id == self.run.id,
+                )
+            )
+        if status in {"CANCEL_REQUESTED", "CANCELLED"}:
+            if status == "CANCEL_REQUESTED" and self.mode == "stream":
+                if not self._cancel_requested_emitted:
+                    self._cancel_requested_emitted = True
+                    try:
+                        await self._emit(
+                            AgentEventType.RUN_CANCEL_REQUESTED,
+                            {"status": "CANCEL_REQUESTED"},
+                        )
+                    except Exception:
+                        logger.warning("agent_cancel_event_failed", exc_info=True)
+            return {"run_status": "CANCELLED"}
+        if status == "NEEDS_ATTENTION":
+            return {
+                "run_status": "NEEDS_ATTENTION",
+                "failure_code": "ACTION_RECONCILIATION_REQUIRED",
+            }
+        return None
 
     def after_prepare(self, state: AgentRunState) -> str:
         return "finish" if state.get("failure_code") else "model"
@@ -1615,19 +1894,23 @@ def _run_result(run: AgentRun) -> AgentRunResult:
     )
 
 
+def _is_uncertain_action_failure(failure_code: str | None) -> bool:
+    return bool(
+        failure_code
+        and (
+            failure_code in {"UNKNOWN_OUTCOME", "ACTION_OUTCOME_UNKNOWN"}
+            or failure_code == "ACTION_RECONCILIATION_REQUIRED"
+        )
+    )
+
+
 def _approval_interrupt_payload(state: Mapping[str, Any]) -> dict[str, Any] | None:
     approval = state.get("approval_required")
     if isinstance(approval, Mapping):
         return dict(approval)
-    interrupts = state.get("__interrupt__")
-    if not interrupts:
-        return None
-    if not isinstance(interrupts, (list, tuple)):
-        interrupts = (interrupts,)
-    for item in interrupts:
-        value = getattr(item, "value", item)
-        if isinstance(value, Mapping) and "approval_id" in value:
-            return dict(value)
+    for value in interrupt_payloads(state):
+        if "approval_id" in value:
+            return value
     return None
 
 
@@ -1642,6 +1925,20 @@ def _approval_tool_result(approval: Any) -> ToolResult:
 
 async def _queue_event(queue: asyncio.Queue[AgentEvent | None], event: AgentEvent) -> None:
     await queue.put(event)
+
+
+def _close_event_queue(queue: asyncio.Queue[AgentEvent | None]) -> None:
+    """Best-effort, non-blocking queue close for normal and failed producers."""
+
+    while True:
+        try:
+            queue.put_nowait(None)
+            return
+        except asyncio.QueueFull:
+            try:
+                queue.get_nowait()
+            except asyncio.QueueEmpty:
+                return
 
 
 def _categorize_messages(messages: list[ModelMessage]) -> tuple[ContextMessage, ...]:
@@ -1696,7 +1993,13 @@ def _append_tool_call_delta(
         entry["provider_tool_call_id"] = delta.provider_tool_call_id
 
 
-def _bounded_tool_result(result: ToolResult) -> dict[str, Any]:
+def _bounded_tool_result(
+    result: ToolResult, *, max_tool_result_tokens: int = 4_000
+) -> dict[str, Any]:
+    """Return a successful, bounded observation without logging raw failures."""
+
+    if isinstance(max_tool_result_tokens, bool) or max_tool_result_tokens < 0:
+        raise ValueError("max_tool_result_tokens must be a non-negative integer")
     payload: dict[str, Any] = {
         "status": result.status.value,
         "trust": "UNTRUSTED",
@@ -1706,16 +2009,59 @@ def _bounded_tool_result(result: ToolResult) -> dict[str, Any]:
         payload["message"] = result.safe_message
     else:
         try:
-            json.dumps(result.data, allow_nan=False)
+            encoded_data = json.dumps(
+                result.data,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            )
             payload["data"] = result.data
         except (TypeError, ValueError):
             payload["status"] = "ERROR"
             payload["error_code"] = "TOOL_RESULT_NOT_SERIALIZABLE"
             payload["message"] = "The tool returned unsupported data."
+            return payload
+    estimator = Utf8ByteTokenEstimator()
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    if len(encoded) > 4_000:
-        return {"status": "ERROR", "trust": "UNTRUSTED", "error_code": "TOOL_RESULT_TOO_LARGE"}
-    return payload
+    if estimator.estimate(encoded) <= max_tool_result_tokens:
+        return payload
+    if result.status is ToolResultStatus.ERROR:
+        return {
+            "status": "ERROR",
+            "trust": "UNTRUSTED",
+            "error_code": result.error_code,
+            "truncated": True,
+        }
+
+    projection: dict[str, Any] = {
+        "status": "SUCCESS",
+        "trust": "UNTRUSTED",
+        "truncated": True,
+        "data": {"truncated": True, "preview": ""},
+    }
+    # Keep a deterministic JSON preview of the result.  It is explicitly a
+    # projection, not an attempt to preserve the original business shape.
+    low, high = 0, len(encoded_data)
+    best = ""
+    while low <= high:
+        middle = (low + high) // 2
+        candidate = dict(projection)
+        candidate["data"] = {"truncated": True, "preview": encoded_data[:middle]}
+        candidate_json = json.dumps(
+            candidate, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        )
+        if estimator.estimate(candidate_json) <= max_tool_result_tokens:
+            best = encoded_data[:middle]
+            low = middle + 1
+        else:
+            high = middle - 1
+    projection["data"] = {"truncated": True, "preview": best}
+    if estimator.estimate(
+        json.dumps(projection, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    ) > max_tool_result_tokens:
+        return {"status": "SUCCESS", "trust": "UNTRUSTED", "truncated": True}
+    return projection
 
 
 def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:

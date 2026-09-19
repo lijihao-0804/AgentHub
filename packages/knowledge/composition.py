@@ -71,8 +71,25 @@ def production_retrieval_components(settings: Settings) -> RetrievalComponents:
         return components
 
 
+def close_production_retrieval_components() -> None:
+    """Close and clear cached production adapters during process shutdown."""
+
+    with _components_lock:
+        components = tuple(_components_cache.values())
+        _components_cache.clear()
+    for item in components:
+        close = getattr(item.index, "close", None)
+        if close is not None:
+            try:
+                close()
+            except Exception:
+                # Shutdown is best effort; never mask the owning process exit.
+                pass
+
+
 __all__ = [
     "RetrievalComponents",
     "RetrievalComponentsFactory",
     "production_retrieval_components",
+    "close_production_retrieval_components",
 ]

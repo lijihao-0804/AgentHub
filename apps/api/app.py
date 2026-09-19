@@ -20,11 +20,13 @@ from apps.api.routes.citation_qa import router as citation_qa_router
 from apps.api.routes.knowledge import router as knowledge_router
 from apps.api.routes.runs import router as runs_router
 from apps.api.routes.tenancy import router as tenancy_router
+from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.core.errors.handlers import install_error_handlers
 from packages.core.http.request_id import RequestIdMiddleware
 from packages.core.logging.json_logging import configure_logging
+from packages.knowledge.composition import close_production_retrieval_components
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,7 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
+        close_production_retrieval_components()
         if app.state.db_engine is not None:
             await app.state.db_engine.dispose()
         if app.state.redis is not None:
@@ -51,6 +54,7 @@ async def lifespan(app: FastAPI):
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
+    configure_windows_asyncio_policy()
     app_settings = settings or get_settings()
     app = FastAPI(
         title="AgentHub API",
@@ -103,8 +107,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 async def probe_postgres(app: FastAPI, settings: Settings) -> str:
     engine: AsyncEngine | None = app.state.db_engine
     if engine is None:
-        if settings.testing:
-            return "degraded"
         return "degraded"
     try:
         async with asyncio.timeout(settings.ready_timeout_ms / 1000):

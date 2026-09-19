@@ -343,7 +343,9 @@ async def test_stream_no_tool_emits_protocol_events_and_completed_output(db_fact
     assert [event.type.value for event in events] == [
         "run.started",
         "context.budget",
+        "message.started",
         "message.delta",
+        "message.completed",
         "run.completed",
     ]
     assert events[-1].data["output"] == "hello"
@@ -387,7 +389,7 @@ async def test_stream_calculator_preserves_tool_event_and_budget_order(db_factor
     assert types[0:2] == ["run.started", "context.budget"]
     assert "tool.started" in types and "tool.completed" in types
     assert types.count("context.budget") == 2
-    assert types[-2:] == ["message.delta", "run.completed"]
+    assert types[-2:] == ["message.completed", "run.completed"]
     assert all("arguments" not in event.data and "data" not in event.data for event in events)
 
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request, status
@@ -59,15 +60,38 @@ async def stream_agent_run(
 ) -> StreamingResponse:
     del workspace_id
     service = _service(request)
-    await service.preflight_stream(context, agent_version_id=agent_version_id)
+    prepared_run = await service.prepare_stream(
+        context, agent_version_id=agent_version_id, input_text=payload.input_text
+    )
 
     async def frames():
-        async for event in service.stream(
+        stream = service.stream(
             context,
             agent_version_id=agent_version_id,
             input_text=payload.input_text,
-        ):
-            yield event_to_sse(event)
+            prepared_run=prepared_run,
+        )
+        iterator = stream.__aiter__()
+        pending = asyncio.create_task(iterator.__anext__())
+        try:
+            while True:
+                done, _ = await asyncio.wait(
+                    {pending}, timeout=request.app.state.settings.sse_heartbeat_seconds
+                )
+                if not done:
+                    yield ": heartbeat\n\n"
+                    continue
+                try:
+                    event = pending.result()
+                except StopAsyncIteration:
+                    break
+                yield event_to_sse(event)
+                pending = asyncio.create_task(iterator.__anext__())
+        finally:
+            if not pending.done():
+                pending.cancel()
+                await asyncio.gather(pending, return_exceptions=True)
+            await stream.aclose()
 
     return StreamingResponse(
         frames(),

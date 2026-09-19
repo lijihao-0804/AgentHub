@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -26,8 +26,14 @@ from packages.core.execution_context.models import WorkspaceExecutionContext
 class ApprovalService:
     """Owns approval business state; routes and graph nodes call this service."""
 
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        *,
+        ttl_seconds: int = 3_600,
+    ) -> None:
         self.session_factory = session_factory
+        self.ttl_seconds = ttl_seconds
 
     async def create_or_get(
         self,
@@ -52,6 +58,8 @@ class ApprovalService:
             canonical_args_hash=args_hash,
             proposal_ordinal=proposal_ordinal,
         )
+        if expires_at is None:
+            expires_at = datetime.now(UTC) + timedelta(seconds=self.ttl_seconds)
         async with self.session_factory() as session:
             existing = await session.scalar(
                 select(Approval).where(

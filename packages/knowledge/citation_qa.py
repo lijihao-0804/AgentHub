@@ -28,6 +28,7 @@ from packages.model_gateway.contracts import (
     StructuredOutputSchema,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
+from packages.observability.contracts import TraceSink
 
 _INSUFFICIENT_EVIDENCE = "Insufficient evidence to answer from the selected knowledge snapshot."
 _CITATION_MARKER = re.compile(r"\[(-?\d+)\]")
@@ -206,11 +207,13 @@ class CitationQaService:
         retrieval_components: RetrievalComponents,
         model_gateway: ModelGateway,
         max_evidence_chars: int,
+        trace_sink: TraceSink | None = None,
     ) -> None:
         self.session = session
         self.retrieval_components = retrieval_components
         self.model_gateway = model_gateway
         self.max_evidence_chars = max_evidence_chars
+        self.trace_sink = trace_sink
 
     async def answer(
         self,
@@ -231,6 +234,7 @@ class CitationQaService:
             sparse_encoder=self.retrieval_components.sparse,
             reranker=self.retrieval_components.reranker,
             vector_index=self.retrieval_components.index,
+            trace_sink=self.trace_sink,
         ).retrieve_with_trace(
             context,
             RetrievalQuery(

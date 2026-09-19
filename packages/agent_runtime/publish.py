@@ -22,6 +22,7 @@ from packages.agent_runtime.models import (
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
     DEFAULT_RUNTIME_LIMITS,
+    MAX_CONTEXT_BUDGET,
     MAX_RUNTIME_LIMITS,
 )
 from packages.agent_runtime.tool_revisions import validate_tool_spec
@@ -199,6 +200,9 @@ class AgentPublishService:
             knowledge_binding_mode=agent.knowledge_binding_mode,
         )
         resolved_model = await self._resolve_model(session, context, agent)
+        _validate_published_context_budget(
+            _validate_runtime_config(agent.runtime_config), resolved_model
+        )
         bindings = await self._resolve_knowledge(session, context, agent)
         tools = await self._resolve_tools(session, context, agent)
         resolved_spec = _resolved_spec(
@@ -512,9 +516,9 @@ def _profile_projection(profile: ResolvedModelProfile, provider: str) -> dict[st
     return {
         "provider": provider,
         "model": profile.model,
-        "temperature": float(profile.temperature),
+        "temperature": _canonical_float(profile.temperature),
         "max_tokens": profile.max_tokens,
-        "timeout_seconds": float(profile.timeout_seconds),
+        "timeout_seconds": _canonical_float(profile.timeout_seconds),
         "capabilities": {
             "tool_calling": profile.capabilities.tool_calling,
             "streaming": profile.capabilities.streaming,
@@ -523,6 +527,11 @@ def _profile_projection(profile: ResolvedModelProfile, provider: str) -> dict[st
             "max_context_tokens": profile.capabilities.max_context_tokens,
         },
     }
+
+
+def _canonical_float(value: Any) -> float:
+    numeric = float(value)
+    return 0.0 if numeric == 0 else numeric
 
 
 def _validate_retry_policy(value: Mapping[str, Any]) -> dict[str, Any]:
@@ -574,7 +583,34 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
     for item in result["context_budget"].values():
         if isinstance(item, bool) or not isinstance(item, int) or item < 1:
             raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    for key, maximum in MAX_CONTEXT_BUDGET.items():
+        if result["context_budget"][key] > maximum:
+            raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
     return result
+
+
+def _validate_published_context_budget(
+    runtime_config: Mapping[str, Any],
+    resolved_model: tuple[tuple[ResolvedModelProfile, ...], dict[UUID, str]],
+) -> None:
+    budget = runtime_config.get("context_budget")
+    if not isinstance(budget, Mapping):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The context budget is invalid.", 422)
+    for profile in resolved_model[0]:
+        max_context = profile.capabilities.max_context_tokens
+        if not isinstance(max_context, int):
+            continue
+        if any(
+            isinstance(value, bool)
+            or not isinstance(value, int)
+            or value >= max_context
+            for value in budget.values()
+        ):
+            raise AgentHubError(
+                "INVALID_AGENT_CONFIG",
+                "Each context budget must remain below the model context limit.",
+                422,
+            )
 
 
 def _model_profile_unavailable() -> AgentHubError:

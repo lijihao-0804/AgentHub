@@ -43,6 +43,7 @@ _SAFE_METADATA_KEYS = frozenset(
         "estimated_input_before",
         "execution_status",
         "failure_code",
+        "safe_failure_message",
         "logical_action_id",
         "model_round",
         "policy_decision",
@@ -499,7 +500,11 @@ class RunQueryService:
                             "approval_id": str(approval.id),
                             "decision_status": str(approval.decision_status),
                         },
-                        failure_code=None,
+                        failure_code=(
+                            f"APPROVAL_{approval.decision_status}"
+                            if str(approval.decision_status) in {"DENIED", "EXPIRED"}
+                            else None
+                        ),
                     )
                 )
             if approval.executed_at is not None or str(approval.execution_status) != "NOT_STARTED":
@@ -522,6 +527,7 @@ class RunQueryService:
                         metadata={
                             "approval_id": str(approval.id),
                             "execution_status": str(approval.execution_status),
+                            "safe_failure_message": approval.safe_failure_message,
                         },
                         failure_code=approval.failure_code,
                     )

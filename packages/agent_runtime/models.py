@@ -272,6 +272,7 @@ class AgentRun(Base):
         UniqueConstraint("workspace_id", "id", name="uq_agent_runs_workspace_id"),
         Index("ix_agent_runs_workspace_status", "workspace_id", "status"),
         Index("ix_agent_runs_workspace_created_at", "workspace_id", "created_at"),
+        Index("ix_agent_runs_reconciliation", "status", "started_at", "id"),
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)

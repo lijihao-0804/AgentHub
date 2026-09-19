@@ -3,19 +3,29 @@
 from __future__ import annotations
 
 import asyncio
-import sys
 from collections.abc import AsyncIterator, Mapping
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, Protocol
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from uuid import UUID
 
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
-if sys.platform == "win32" and hasattr(asyncio, "WindowsSelectorEventLoopPolicy"):
-    # psycopg's async connection layer does not support the Windows Proactor loop.
-    # Set this before the application/test loop is created; Linux is unaffected.
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+def configure_windows_asyncio_policy() -> None:
+    """Configure psycopg's selector policy at an explicit runtime boundary."""
+
+    policy_type = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
+    if policy_type is None or isinstance(asyncio.get_event_loop_policy(), policy_type):
+        return
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        asyncio.set_event_loop_policy(policy_type())
+
+
+class CheckpointProbe(Protocol):
+    async def has_checkpoint(self, workspace_id: UUID | str, run_id: UUID | str) -> bool: ...
 
 
 def checkpoint_thread_id(workspace_id: UUID | str, run_id: UUID | str) -> str:
@@ -50,6 +60,7 @@ class LangGraphCheckpointAdapter:
     """Opens short-lived framework checkpointer scopes; never bootstraps on startup."""
 
     def __init__(self, database_url: str) -> None:
+        configure_windows_asyncio_policy()
         self.database_url = database_url
 
     @asynccontextmanager
@@ -73,6 +84,20 @@ class LangGraphCheckpointAdapter:
         return result
 
 
+class PostgresCheckpointProbe:
+    """Provider-neutral checkpoint existence probe for reconciliation."""
+
+    def __init__(self, adapter: LangGraphCheckpointAdapter) -> None:
+        self.adapter = adapter
+
+    async def has_checkpoint(self, workspace_id: UUID | str, run_id: UUID | str) -> bool:
+        async with self.adapter.checkpointer() as checkpointer:
+            checkpoint = await checkpointer.aget_tuple(
+                self.adapter.config_for_run(workspace_id, run_id)
+            )
+            return checkpoint is not None
+
+
 def _safe_value(value: Any) -> Any:
     if value is None or isinstance(value, (str, int, float, bool)):
         return value
@@ -86,7 +111,10 @@ def _safe_value(value: Any) -> Any:
 
 
 __all__ = [
+    "CheckpointProbe",
     "LangGraphCheckpointAdapter",
+    "PostgresCheckpointProbe",
+    "configure_windows_asyncio_policy",
     "checkpoint_config",
     "checkpoint_dsn",
     "checkpoint_thread_id",

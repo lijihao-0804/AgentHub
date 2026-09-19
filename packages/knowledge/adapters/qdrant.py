@@ -31,6 +31,13 @@ class QdrantVectorIndex:
         self.dense_vector_size = dense_vector_size
         self._client = client or QdrantClient(url=url, timeout=int(timeout_seconds))
 
+    def close(self) -> None:
+        """Release the process-owned SDK client."""
+
+        close = getattr(self._client, "close", None)
+        if close is not None:
+            close()
+
     @staticmethod
     def _expected_vectors(
         size: int,

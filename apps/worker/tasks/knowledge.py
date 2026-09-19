@@ -43,7 +43,7 @@ from packages.knowledge.ingestion import (
 from packages.knowledge.models import DocumentChunk, IngestionStage
 from packages.knowledge.parser import DocumentParseError, ProcessDocumentParser
 from packages.knowledge.point_ids import deterministic_point_id
-from packages.observability import NoopTraceSink
+from packages.observability import NoopTraceSink, ProductionTraceSink
 from packages.observability.contracts import TraceSink, TraceSpan
 
 logger = logging.getLogger(__name__)
@@ -458,6 +458,7 @@ def process_knowledge_ingestion(_task, job_id: str) -> None:
             parsed_job_id,
             settings,
             indexing_factory=_production_indexing_components,
+            trace_sink=ProductionTraceSink(),
         )
     )
 

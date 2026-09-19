@@ -136,8 +136,15 @@ export default function RunDetailClient({ runId }: { runId: string }) {
                     <p className="muted">{new Date(entry.occurred_at).toLocaleString()}</p>
                     {entry.failure_code && (
                       <p className="needs-attention">
-                        {entry.failure_category ?? "UNKNOWN"}: {entry.failure_code}
+                        {entry.kind === "APPROVAL_DECISION"
+                          ? "Approval decision"
+                          : entry.kind === "ACTION_EXECUTION"
+                            ? "Action execution"
+                            : entry.failure_category ?? "UNKNOWN"}: {entry.failure_code}
                       </p>
+                    )}
+                    {typeof entry.metadata.safe_failure_message === "string" && (
+                      <p className="muted">{entry.metadata.safe_failure_message}</p>
                     )}
                     {Object.keys(entry.metadata).length > 0 && (
                       <pre>{JSON.stringify(entry.metadata, null, 2)}</pre>

@@ -20,6 +20,7 @@ from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.citation_qa import CitationQaResult, CitationQaService
 from packages.knowledge.composition import RetrievalComponents
 from packages.model_gateway.contracts import ModelGateway
+from packages.observability import ProductionTraceSink
 
 router = APIRouter(tags=["knowledge"])
 db_session_dependency = Depends(get_db_session)
@@ -42,6 +43,7 @@ async def citation_qa(
         retrieval_components=components,
         model_gateway=model_gateway,
         max_evidence_chars=request.app.state.settings.knowledge_qa_max_evidence_chars,
+        trace_sink=ProductionTraceSink(),
     ).answer(
         context=context,
         knowledge_base_id=payload.knowledge_base_id,

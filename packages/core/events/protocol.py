@@ -5,19 +5,32 @@ from typing import Any, Literal, Protocol
 
 EventType = Literal[
     "run.started",
+    "message.started",
+    "context.budget",
     "message.delta",
-    "tool.proposed",
+    "message.completed",
+    "retrieval.started",
+    "retrieval.completed",
+    "rerank.completed",
+    "tool.requested",
+    "tool.started",
     "tool.completed",
-    "run.waiting_approval",
+    "tool.failed",
+    "approval.required",
+    "approval.resolved",
+    "run.cancel_requested",
     "run.completed",
     "run.failed",
+    "run.cancelled",
+    "usage",
 ]
 
 
 class AgentHubEvent(Protocol):
     event_type: EventType
+    event_id: str
     request_id: str
-    run_id: str | None
-    sequence: int
-    created_at: datetime
-    data: dict[str, Any]
+    run_id: str
+    step_id: str | None
+    timestamp: datetime
+    payload: dict[str, Any]
