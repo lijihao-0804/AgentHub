@@ -206,6 +206,9 @@ def _run_projection(
 ) -> dict[str, Any]:
     return {
         "id": run.id,
+        # A durable, provider-neutral correlation identifier.  It is intentionally not
+        # presented as an external Langfuse/OTel URL.
+        "trace_id": str(run.id),
         "workspace_id": run.workspace_id,
         "agent_version_id": run.agent_version_id,
         "agent_version_number": agent_version_number,
@@ -358,9 +361,9 @@ class RunQueryService:
                     and_(AgentRun.created_at == decoded.created_at, AgentRun.id < decoded.run_id),
                 )
             )
-        statement = statement.order_by(
-            AgentRun.created_at.desc(), AgentRun.id.desc()
-        ).limit(limit + 1)
+        statement = statement.order_by(AgentRun.created_at.desc(), AgentRun.id.desc()).limit(
+            limit + 1
+        )
 
         async with self.session_factory() as session:
             rows = (await session.execute(statement)).all()
@@ -380,9 +383,7 @@ class RunQueryService:
             next_cursor = encode_run_cursor(last_run.created_at, last_run.id)
         return projections, next_cursor
 
-    async def get_detail(
-        self, context: WorkspaceExecutionContext, run_id: UUID
-    ) -> dict[str, Any]:
+    async def get_detail(self, context: WorkspaceExecutionContext, run_id: UUID) -> dict[str, Any]:
         workspace_id = _require_read(context)
         aggregate = _approval_aggregate()
         statement = (
@@ -416,6 +417,7 @@ class RunQueryService:
             detail["effective_knowledge_snapshots"] = _safe_snapshots(
                 run.effective_knowledge_snapshots
             )
+            detail["trace_url"] = None
             return detail
 
     async def get_timeline(

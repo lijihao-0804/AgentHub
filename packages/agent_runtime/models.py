@@ -272,6 +272,19 @@ class AgentRun(Base):
         UniqueConstraint("workspace_id", "id", name="uq_agent_runs_workspace_id"),
         Index("ix_agent_runs_workspace_status", "workspace_id", "status"),
         Index("ix_agent_runs_workspace_created_at", "workspace_id", "created_at"),
+        Index("ix_agent_runs_workspace_started_at", "workspace_id", "started_at", "id"),
+        Index(
+            "ix_agent_runs_workspace_status_started",
+            "workspace_id",
+            "status",
+            "started_at",
+        ),
+        Index(
+            "ix_agent_runs_workspace_version_started",
+            "workspace_id",
+            "agent_version_id",
+            "started_at",
+        ),
         Index("ix_agent_runs_reconciliation", "status", "started_at", "id"),
     )
 

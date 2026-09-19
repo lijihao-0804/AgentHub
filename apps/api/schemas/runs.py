@@ -28,6 +28,7 @@ class RunListItem(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     id: UUID
+    trace_id: str
     workspace_id: UUID
     agent_version_id: UUID
     agent_version_number: int
@@ -60,6 +61,7 @@ class RunListResponse(BaseModel):
 
 class RunDetail(RunListItem):
     effective_knowledge_snapshots: list[dict[str, Any]]
+    trace_url: str | None = None
 
 
 class TimelineEntry(BaseModel):
