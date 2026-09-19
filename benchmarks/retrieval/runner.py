@@ -15,7 +15,7 @@ from types import SimpleNamespace
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy.exc import DBAPIError, OperationalError
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from apps.worker.tasks.knowledge import _vector_records
@@ -89,7 +89,7 @@ def _raise_environment_blocker(exc: Exception, *, stage: str) -> None:
                 exc.message,
             ) from None
         raise exc
-    if isinstance(exc, (OperationalError, DBAPIError)):
+    if isinstance(exc, OperationalError):
         raise RealRetrievalEnvironmentError(
             "POSTGRES_UNAVAILABLE",
             stage,
@@ -173,6 +173,7 @@ async def _seed_corpus(
         await session.flush()
 
         seeded_chunks: list[SeededChunk] = []
+        blob_namespace = uuid4().hex
         for document_spec in dataset.corpus:
             document = Document(
                 workspace_id=workspace.id,
@@ -188,7 +189,9 @@ async def _seed_corpus(
                 document_id=document.id,
                 revision_number=1,
                 original_filename=f"{document_spec.document_key}.md",
-                blob_key=f"benchmarks/m3-retrieval/{document_spec.revision_key}",
+                blob_key=(
+                    f"benchmarks/m3-retrieval/{blob_namespace}/{document_spec.revision_key}"
+                ),
                 media_type="text/markdown",
                 file_size=len(document_text.encode("utf-8")),
                 ingestion_status=RevisionIngestionStatus.READY,
@@ -352,7 +355,7 @@ async def _evaluate_real_models(
                 )
             except KnowledgeProviderError as exc:
                 _raise_environment_blocker(exc, stage=f"{strategy.value.lower()}_retrieval")
-            except (OperationalError, DBAPIError) as exc:
+            except OperationalError as exc:
                 _raise_environment_blocker(exc, stage=f"{strategy.value.lower()}_retrieval")
             latencies[case.split].append((time.perf_counter() - started) * 1000)
             stage_results = (
@@ -712,7 +715,7 @@ def main() -> None:
         output.write_text(json.dumps(blocked, indent=2) + "\n", encoding="utf-8")
         print("REAL_RETRIEVAL_ABLATION=BLOCKED_ENVIRONMENT")
         return
-    except (OperationalError, DBAPIError):
+    except OperationalError:
         if not args.ablation:
             raise
         blocked = {

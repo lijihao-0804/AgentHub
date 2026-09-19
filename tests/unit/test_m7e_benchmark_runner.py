@@ -28,7 +28,16 @@ def test_terminal_provider_error_is_not_hidden_as_environment_blocker() -> None:
     assert raised.value is error
 
 
-@pytest.mark.parametrize("error", [KeyError("unexpected"), AssertionError("unexpected")])
+@pytest.mark.parametrize(
+    "error",
+    [
+        KeyError("unexpected"),
+        AssertionError("unexpected"),
+        TypeError("unexpected"),
+        ValueError("unexpected"),
+        RuntimeError("unexpected"),
+    ],
+)
 def test_unexpected_benchmark_errors_are_reraised(error: Exception) -> None:
     with pytest.raises(type(error)) as raised:
         _raise_environment_blocker(error, stage="smoke")
