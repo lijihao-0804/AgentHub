@@ -1,153 +1,236 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { listRuns, RunListItem, RunsApiError } from "../../lib/runs";
+import StatusBadge from "../../components/status-badge";
+import { EmptyState, ErrorState, LoadingState, SessionRequired } from "../../components/states";
+import { ApiError, errorHint, toApiError } from "../../lib/api-client";
+import { listRuns, RunListItem } from "../../lib/runs";
+import { useFrontendSession } from "../../components/session-provider";
 
-function statusClass(status: string): string {
-  if (status === "WAITING_APPROVAL") return "run-status waiting";
-  if (status === "NEEDS_ATTENTION") return "run-status attention";
-  if (status === "FAILED") return "run-status failed";
-  return "run-status";
-}
+const RUN_STATUS_OPTIONS = [
+  "RUNNING",
+  "WAITING_APPROVAL",
+  "SUCCEEDED",
+  "FAILED",
+  "NEEDS_ATTENTION",
+  "CANCEL_REQUESTED",
+  "CANCELLED",
+];
 
 function formatCost(run: RunListItem): string {
   if (run.total_cost_amount === null) return "—";
   return `${run.total_cost_amount} ${run.cost_currency ?? ""}`.trim();
 }
 
+function formatStarted(run: RunListItem): string {
+  return new Date(run.started_at).toLocaleString();
+}
+
+function shortId(id: string): string {
+  return `${id.slice(0, 8)}…`;
+}
+
 export default function RunsPage() {
-  const [workspaceId, setWorkspaceId] = useState("");
-  const [accessToken, setAccessToken] = useState("");
+  const { workspaceId, accessToken, connected } = useFrontendSession();
   const [status, setStatus] = useState("");
   const [agentVersionId, setAgentVersionId] = useState("");
   const [runs, setRuns] = useState<RunListItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initialLoaded, setInitialLoaded] = useState(false);
 
+  const refresh = useCallback(
+    async (cursor: string | null = null, overrides?: { status?: string; agentVersionId?: string }) => {
+      setError(null);
+      if (!connected) return;
+      const effectiveStatus = overrides?.status ?? status;
+      const effectiveVersion = overrides?.agentVersionId ?? agentVersionId;
+      setLoading(true);
+      try {
+        const result = await listRuns({
+          workspaceId,
+          accessToken,
+          status: effectiveStatus,
+          agentVersionId: effectiveVersion,
+          cursor,
+          limit: 25,
+        });
+        setRuns((current) => (cursor ? [...current, ...result.items] : result.items));
+        setNextCursor(result.next_cursor);
+      } catch (caught) {
+        setError(toApiError(caught, "Could not load runs."));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [connected, workspaceId, accessToken, status, agentVersionId],
+  );
+
+  // Deep links such as /runs?status=NEEDS_ATTENTION must preload the filters.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setStatus(params.get("status") ?? "");
-    setAgentVersionId(params.get("agent_version_id") ?? "");
+    const urlStatus = params.get("status") ?? "";
+    const urlVersion = params.get("agent_version_id") ?? "";
+    if (urlStatus || urlVersion) {
+      setStatus(urlStatus);
+      setAgentVersionId(urlVersion);
+    }
   }, []);
 
-  async function refresh(cursor: string | null = null) {
-    setMessage(null);
-    if (!workspaceId.trim() || !accessToken.trim()) {
-      setMessage("Workspace ID and access token are required.");
-      return;
+  useEffect(() => {
+    if (connected && !initialLoaded) {
+      setInitialLoaded(true);
+      void refresh();
     }
-    setLoading(true);
-    try {
-      const result = await listRuns({
-        workspaceId,
-        accessToken,
-        status,
-        agentVersionId,
-        cursor,
-        limit: 25,
-      });
-      setRuns((current) => (cursor ? [...current, ...result.items] : result.items));
-      setNextCursor(result.next_cursor);
-    } catch (error) {
-      setMessage(error instanceof RunsApiError ? error.message : "Could not load runs.");
-    } finally {
-      setLoading(false);
-    }
+  }, [connected, initialLoaded, refresh]);
+
+  useEffect(() => {
+    if (!connected) setInitialLoaded(false);
+  }, [connected]);
+
+  function applyFilters() {
+    const params = new URLSearchParams();
+    if (status.trim()) params.set("status", status.trim());
+    if (agentVersionId.trim()) params.set("agent_version_id", agentVersionId.trim());
+    const query = params.toString();
+    window.history.replaceState(null, "", query ? `/runs?${query}` : "/runs");
+    setInitialLoaded(true);
+    void refresh();
+  }
+
+  function clearFilters() {
+    setStatus("");
+    setAgentVersionId("");
+    window.history.replaceState(null, "", "/runs");
+    setInitialLoaded(true);
+    void refresh(null, { status: "", agentVersionId: "" });
+  }
+
+  if (!connected) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <p className="eyebrow">RUNS</p>
+          <h1>Runs</h1>
+          <p className="page-lede">
+            Workspace-scoped runtime history with safe status, usage, cost and approval projections.
+          </p>
+        </header>
+        <SessionRequired context="the run history" />
+      </div>
+    );
   }
 
   return (
-    <main className="observability-shell">
-      <header className="observability-header">
-        <div>
-          <p className="eyebrow">M6-A · OBSERVABILITY</p>
-          <h1>Runs</h1>
-          <p className="observability-lede">
-            Workspace-scoped runtime history with safe status, usage, cost and approval projections.
-          </p>
-        </div>
-        <Link className="back-link" href="/">
-          Back to AgentHub
-        </Link>
-      </header>
-      <section className="observability-panel" aria-labelledby="runs-query-title">
-        <div className="panel-heading">
-          <div>
-            <p className="eyebrow">READ-ONLY QUERY</p>
-            <h2 id="runs-query-title">Find runs</h2>
-          </div>
-          <span className="badge">NO TOKEN STORAGE</span>
-        </div>
-        <p className="observability-note">
-          The access token remains in this page&apos;s React state and disappears on refresh.
+    <div className="page">
+      <header className="page-header">
+        <p className="eyebrow">RUNS</p>
+        <h1>Runs</h1>
+        <p className="page-lede">
+          Workspace-scoped runtime history with safe status, usage, cost and approval projections.
         </p>
-        <div className="observability-form">
-          <label>
-            Workspace ID
-            <input value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)} />
-          </label>
-          <label>
-            Access token
-            <input
-              type="password"
-              value={accessToken}
-              onChange={(event) => setAccessToken(event.target.value)}
-            />
-          </label>
+      </header>
+
+      <section className="panel" aria-label="Run filters">
+        <div className="runs-toolbar">
           <label>
             Status
             <select value={status} onChange={(event) => setStatus(event.target.value)}>
               <option value="">All statuses</option>
-              <option value="RUNNING">RUNNING</option>
-              <option value="WAITING_APPROVAL">WAITING_APPROVAL</option>
-              <option value="SUCCEEDED">SUCCEEDED</option>
-              <option value="FAILED">FAILED</option>
-              <option value="NEEDS_ATTENTION">NEEDS_ATTENTION</option>
-              <option value="CANCEL_REQUESTED">CANCEL_REQUESTED</option>
-              <option value="CANCELLED">CANCELLED</option>
+              {RUN_STATUS_OPTIONS.map((option) => (
+                <option value={option} key={option}>
+                  {option}
+                </option>
+              ))}
             </select>
           </label>
-          <button type="button" onClick={() => refresh()} disabled={loading}>
-            {loading ? "Loading…" : "Load runs"}
-          </button>
+          <label>
+            Agent Version ID
+            <input
+              value={agentVersionId}
+              onChange={(event) => setAgentVersionId(event.target.value)}
+              placeholder="Leave empty for all versions"
+              spellCheck={false}
+            />
+          </label>
+          <div className="runs-toolbar-actions">
+            <button type="button" className="button button-primary" onClick={applyFilters} disabled={loading}>
+              Apply
+            </button>
+            <button type="button" className="button button-ghost" onClick={clearFilters} disabled={loading}>
+              Clear
+            </button>
+          </div>
         </div>
-        {message && <p className="state-message">{message}</p>}
       </section>
-      <section className="run-list" aria-live="polite">
-        {runs.length === 0 && !message && <p className="muted">No runs loaded.</p>}
-        {runs.map((run) => (
-          <article className="run-card" key={run.id}>
-            <div className="run-card-header">
-              <div>
-                <p className="eyebrow">RUN {run.id}</p>
-                <h2>AgentVersion v{run.agent_version_number}</h2>
-              </div>
-              <span className={statusClass(run.status)}>{run.status}</span>
+
+      {error && <ErrorState code={error.code} message={error.message} hint={errorHint(error)} onRetry={() => void refresh()} />}
+      {loading && runs.length === 0 && !error && <LoadingState label="Loading runs…" />}
+      {!loading && runs.length === 0 && !error && (
+        <EmptyState
+          title="No runs found."
+          hint={status || agentVersionId ? "No runs match the current filters. Clear them to see everything." : "Runs appear here once agents execute in this workspace."}
+        />
+      )}
+
+      {runs.length > 0 && (
+        <section className="panel" aria-label="Run list">
+          <div className="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Run</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Version</th>
+                  <th scope="col">Started</th>
+                  <th scope="col">Duration</th>
+                  <th scope="col">Tokens</th>
+                  <th scope="col">Cost</th>
+                  <th scope="col">Tools</th>
+                  <th scope="col">Failure</th>
+                </tr>
+              </thead>
+              <tbody>
+                {runs.map((run) => (
+                  <tr key={run.id}>
+                    <td data-label="Run">
+                      <Link href={`/runs/${encodeURIComponent(run.id)}`} title={run.id}>
+                        <code>{shortId(run.id)}</code>
+                      </Link>
+                    </td>
+                    <td data-label="Status"><StatusBadge status={run.status} /></td>
+                    <td data-label="Version">v{run.agent_version_number}</td>
+                    <td data-label="Started">{formatStarted(run)}</td>
+                    <td data-label="Duration">{run.duration_ms === null ? "—" : `${run.duration_ms} ms`}</td>
+                    <td data-label="Tokens">{run.total_tokens ?? "—"}</td>
+                    <td data-label="Cost">{formatCost(run)}</td>
+                    <td data-label="Tools">{run.tool_call_count}</td>
+                    <td data-label="Failure">
+                      {run.failure_code ? (
+                        <span>
+                          {run.failure_category ?? "UNKNOWN"}: <code>{run.failure_code}</code>
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {nextCursor && (
+            <div className="form-actions">
+              <button type="button" className="button button-ghost" onClick={() => void refresh(nextCursor)} disabled={loading}>
+                {loading ? "Loading…" : "Load more"}
+              </button>
             </div>
-            <div className="run-metrics">
-              <span>Duration {run.duration_ms === null ? "—" : `${run.duration_ms} ms`}</span>
-              <span>Tokens {run.total_tokens ?? "—"}</span>
-              <span>Cost {formatCost(run)}</span>
-              <span>Tools {run.tool_call_count}</span>
-            </div>
-            {run.failure_code && (
-              <p className={run.status === "NEEDS_ATTENTION" ? "needs-attention" : "state-message"}>
-                {run.failure_category ?? "UNKNOWN"}: {run.failure_code}
-              </p>
-            )}
-            <Link className="run-detail-link" href={`/runs/${encodeURIComponent(run.id)}`}>
-              Open run detail →
-            </Link>
-          </article>
-        ))}
-        {nextCursor && (
-          <button type="button" className="load-more" onClick={() => refresh(nextCursor)} disabled={loading}>
-            Load more
-          </button>
-        )}
-      </section>
-    </main>
+          )}
+        </section>
+      )}
+    </div>
   );
 }
