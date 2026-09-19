@@ -1,6 +1,6 @@
 # M7-F — Release Gate Policies and Decisions
 
-Status: IMPLEMENTED — exact-head GitHub Actions acceptance is pending.
+Status: PASS — closure verified in GitHub Actions run #132.
 
 M7-F adds explicit, immutable release-gate policies and decisions over persisted M7-D comparisons.
 It does not introduce global thresholds or change Agent Runtime, approval, checkpoint, or
@@ -34,13 +34,15 @@ workspace and resource identity.
 ## Verification
 
 - Migration: `0021_m7ef_ablation_release_gate`; migrations `0020` and earlier were not modified.
+- Implementation commits: `f855dce`, `61ac740`; integration regression closure commit: `234a628`.
 - Pure policy, safety-priority, tradeoff, incomplete, and integrity regressions pass locally.
 - The PostgreSQL integration fixture persists the M7-E comparison → ablation → HOLDOUT release
   gate chain, checks idempotency and VIEWER read-only access, and rejects a DEV gate.
-- Exact-head GitHub Actions: pending.
+- Exact-head GitHub Actions run #132 passed backend and frontend, including the explicit M7-E/F
+  integration and contract checks.
 
 `M7G_FRONTEND_REQUIREMENT`: frontend pages for policy authoring and gate decision review remain
 future productization work; `apps/web/**` is intentionally unchanged.
 
-M7 overall is not marked complete until the exact-head CI and the remaining release checks pass.
+M7 overall is not marked complete; M7-G, M7-H, and M8 remain out of scope.
 M7-G, M7-H, and M8 remain out of scope.

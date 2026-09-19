@@ -1,6 +1,6 @@
 # M7-E — Ablation and Retrieval Strategy Evaluation
 
-Status: IMPLEMENTED — exact-head GitHub Actions acceptance is pending.
+Status: PASS — closure verified in GitHub Actions run #132.
 
 M7-E adds the explicit retrieval strategy contract and immutable ablation analysis without
 changing M5 approval/checkpoint semantics, M6 read-only observability semantics, or the web
@@ -23,6 +23,7 @@ application.
 ## Verification
 
 - Implementation commits: `fa6e397`, `b5369ea`, `0a95524`.
+- Integration regression closure commit: `234a628`.
 - Retrieval strategy, ablation classification, publish compatibility, and release-gate unit
   regressions pass locally.
 - Dataset validation passes for `m3-retrieval-v1` (30 cases: 20 DEV, 10 HOLDOUT).
@@ -30,7 +31,8 @@ application.
   `REAL_RETRIEVAL_ABLATION=BLOCKED_ENVIRONMENT`; no fake result was substituted.
 - M7-E PostgreSQL integration is present in `tests/integration/test_m7ef_ablation_release_gate.py`
   and requires `AGENTHUB_TEST_DATABASE_URL`.
-- Exact-head GitHub Actions: pending.
+- Exact-head GitHub Actions run #132 passed backend and frontend, including the explicit M7-E/F
+  integration and contract checks.
 
 `M7G_FRONTEND_REQUIREMENT`: M7-G will need frontend productization for ablation and release-gate
 views. `apps/web/**` is intentionally unchanged in M7-E/F.
