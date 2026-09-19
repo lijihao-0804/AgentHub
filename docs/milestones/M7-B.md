@@ -1,6 +1,6 @@
 # M7-B — Experiment Persistence and Reproducibility Freeze
 
-Status: IMPLEMENTED — acceptance verification pending.
+Status: PASS
 
 M7-B persists formal evaluation definitions and queued run identities. It does not execute
 dataset cases, start Celery work, calculate metrics, or implement ablation/release gates.
@@ -40,7 +40,20 @@ and run responses expose the current exposure index/count.
 - Build identity is supplied by `AGENTHUB_BUILD_SHA` or the infrastructure Git adapter; formal
   experiments reject an unknown identity.
 - Evaluator versions are recorded in a canonical manifest for later M7 evaluator implementations.
-- M7-B acceptance requires the targeted unit/API and PostgreSQL integration tests, the existing
-  M7-A and non-integration regressions, Alembic checks, frontend build, and exact-head CI.
+- Implementation SHA: `8fa153aebbecf6c4dde42ae4a828028d987f4ac8`.
+- Migration `0016_m7_experiment_persistence`: Alembic upgrade and drift check passed.
+- Targeted M7-B PostgreSQL and unit/API verification passed (`27 passed`, 2 warnings), including
+  duplicate-definition rejection, run-only permission scope, and frozen `LATEST` knowledge.
+- M7-A regression passed as part of the targeted verification.
+- Non-integration regression passed (`245 passed`, `105 deselected`).
+- Ruff passed.
+- Frontend build passed in GitHub Actions.
+- GitHub Actions CI `#94` passed the implementation commit with backend and frontend jobs green.
+- The full local infrastructure matrix was not run because local PostgreSQL/Qdrant services were
+  unavailable; this was an infrastructure availability limitation, not a code failure.
+
+The M7-B contract is complete: `Experiment`, `ExperimentVariant`, `ExperimentRun`, canonical
+`spec_json`/`spec_hash`, `variant_hash`, one-time `LATEST` knowledge freeze, PricingSnapshot
+binding, build SHA, evaluator manifest, append-only HOLDOUT exposure, and `READY` immutability.
 
 M7-C worker execution, metrics, release gates, and M7 frontend work remain out of scope.
