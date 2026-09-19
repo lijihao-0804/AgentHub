@@ -441,6 +441,12 @@ class EvaluationExperimentRun(Base):
             "workspace_id",
             "status",
         ),
+        Index(
+            "ix_evaluation_experiment_runs_lease",
+            "status",
+            "lease_expires_at",
+            "id",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
