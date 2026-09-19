@@ -628,6 +628,122 @@ class EvaluationExperimentHoldoutExposure(Base):
     )
 
 
+class EvaluationMetricResult(Base):
+    __tablename__ = "evaluation_metric_results"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_run_id"],
+            ["evaluation_experiment_runs.workspace_id", "evaluation_experiment_runs.id"],
+            name="fk_evaluation_metrics_run_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_variant_id"],
+            ["evaluation_experiment_variants.workspace_id", "evaluation_experiment_variants.id"],
+            name="fk_evaluation_metrics_variant_workspace",
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "status IN ('AVAILABLE', 'NOT_APPLICABLE', 'NOT_AVAILABLE')",
+            name="ck_evaluation_metrics_status",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "experiment_run_id",
+            "experiment_variant_id",
+            "dimension",
+            "category",
+            "metric_name",
+            name="uq_evaluation_metrics_identity",
+        ),
+        Index(
+            "ix_evaluation_metrics_run_variant",
+            "workspace_id",
+            "experiment_run_id",
+            "experiment_variant_id",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    dimension: Mapped[str] = mapped_column(String(16), nullable=False)
+    category: Mapped[str] = mapped_column(String(32), nullable=False)
+    metric_name: Mapped[str] = mapped_column(String(96), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    value: Mapped[Decimal | None] = mapped_column(Numeric(28, 12))
+    sample_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    numerator: Mapped[Decimal | None] = mapped_column(Numeric(28, 12))
+    denominator: Mapped[Decimal | None] = mapped_column(Numeric(28, 12))
+    reason: Mapped[str | None] = mapped_column(String(160))
+    evaluator_version: Mapped[str] = mapped_column(String(32), nullable=False)
+    direction: Mapped[str] = mapped_column(String(32), nullable=False)
+    details: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EvaluationExperimentComparison(Base):
+    __tablename__ = "evaluation_experiment_comparisons"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_run_id"],
+            ["evaluation_experiment_runs.workspace_id", "evaluation_experiment_runs.id"],
+            name="fk_evaluation_comparisons_run_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "baseline_variant_id"],
+            ["evaluation_experiment_variants.workspace_id", "evaluation_experiment_variants.id"],
+            name="fk_evaluation_comparisons_baseline_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "candidate_variant_id"],
+            ["evaluation_experiment_variants.workspace_id", "evaluation_experiment_variants.id"],
+            name="fk_evaluation_comparisons_candidate_workspace",
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "status IN ('COMPLETE', 'INCOMPLETE', 'NOT_COMPARABLE')",
+            name="ck_evaluation_comparisons_status",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "experiment_run_id",
+            "baseline_variant_id",
+            "candidate_variant_id",
+            name="uq_evaluation_comparisons_pair",
+        ),
+        Index(
+            "ix_evaluation_comparisons_run",
+            "workspace_id",
+            "experiment_run_id",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    baseline_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    candidate_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    evaluator_versions: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
+    )
+    metrics: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
+    )
+    missing_pairs: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 __all__ = [
     "EvaluationDataset",
     "EvaluationDatasetCategory",
@@ -644,5 +760,7 @@ __all__ = [
     "EvaluationExperimentRunStatus",
     "EvaluationExperimentStatus",
     "EvaluationExperimentVariant",
+    "EvaluationMetricResult",
+    "EvaluationExperimentComparison",
     "PricingSnapshot",
 ]

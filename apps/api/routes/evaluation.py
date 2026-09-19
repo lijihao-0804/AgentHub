@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request, status
@@ -8,6 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_experiment_run_queue, get_workspace_context
 from apps.api.schemas.evaluation import (
+    EvaluationComparisonCreateRequest,
+    EvaluationComparisonResponse,
     EvaluationDatasetCreateRequest,
     EvaluationDatasetItemResponse,
     EvaluationDatasetResponse,
@@ -26,6 +29,7 @@ from apps.api.schemas.evaluation import (
 )
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.experiments import ExperimentService
+from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.service import EvaluationDatasetService
 
@@ -425,6 +429,42 @@ async def get_experiment_run_progress(
     del workspace_id
     progress = await ExperimentService().run_progress(session, context=context, run_id=run_id)
     return EvaluationExperimentRunProgressResponse.model_validate(progress)
+
+
+@router.get("/experiment-runs/{run_id}/metrics", response_model=dict[str, Any])
+async def get_experiment_run_metrics(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> dict[str, Any]:
+    del workspace_id
+    return await EvaluationMetricsService().compute_run_metrics(
+        session, context=context, run_id=run_id
+    )
+
+
+@router.post(
+    "/experiment-runs/{run_id}/comparisons",
+    response_model=EvaluationComparisonResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_experiment_comparison(
+    workspace_id: UUID,
+    run_id: UUID,
+    payload: EvaluationComparisonCreateRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationComparisonResponse:
+    del workspace_id
+    comparison = await EvaluationMetricsService().create_comparison(
+        session,
+        context=context,
+        run_id=run_id,
+        baseline_variant_id=payload.baseline_variant_id,
+        candidate_variant_id=payload.candidate_variant_id,
+    )
+    return EvaluationComparisonResponse.model_validate(comparison, from_attributes=True)
 
 
 __all__ = ["router"]

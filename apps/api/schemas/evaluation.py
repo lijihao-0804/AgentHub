@@ -209,6 +209,28 @@ class EvaluationExperimentRunProgressResponse(BaseModel):
     progress: float
 
 
+class EvaluationComparisonCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    baseline_variant_id: UUID
+    candidate_variant_id: UUID
+
+
+class EvaluationComparisonResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    experiment_run_id: UUID
+    baseline_variant_id: UUID
+    candidate_variant_id: UUID
+    status: str
+    evaluator_versions: dict[str, Any]
+    metrics: dict[str, Any]
+    missing_pairs: int
+    created_at: datetime
+
+
 __all__ = [
     "EvaluationDatasetCreateRequest",
     "EvaluationDatasetItemRequest",
@@ -222,6 +244,8 @@ __all__ = [
     "EvaluationExperimentResponse",
     "EvaluationExperimentRunResponse",
     "EvaluationExperimentRunProgressResponse",
+    "EvaluationComparisonCreateRequest",
+    "EvaluationComparisonResponse",
     "EvaluationExperimentVariantCreateRequest",
     "EvaluationExperimentVariantResponse",
     "PricingSnapshotCreateRequest",

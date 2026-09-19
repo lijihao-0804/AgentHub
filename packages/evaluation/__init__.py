@@ -16,12 +16,14 @@ from packages.evaluation.models import (
     EvaluationDatasetVersionStatus,
     EvaluationExperiment,
     EvaluationExperimentCaseResult,
+    EvaluationExperimentComparison,
     EvaluationExperimentHoldoutExposure,
     EvaluationExperimentPurpose,
     EvaluationExperimentRun,
     EvaluationExperimentRunStatus,
     EvaluationExperimentStatus,
     EvaluationExperimentVariant,
+    EvaluationMetricResult,
     PricingSnapshot,
 )
 from packages.evaluation.service import EvaluationDatasetService
@@ -47,5 +49,7 @@ __all__ = [
     "EvaluationExperimentRunStatus",
     "EvaluationExperimentStatus",
     "EvaluationExperimentVariant",
+    "EvaluationExperimentComparison",
+    "EvaluationMetricResult",
     "PricingSnapshot",
 ]

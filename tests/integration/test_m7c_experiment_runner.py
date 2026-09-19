@@ -16,10 +16,12 @@ from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.evaluation.build_identity import StaticBuildIdentityProvider
 from packages.evaluation.experiments import ExperimentService
+from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.models import (
     EvaluationCaseResultStatus,
     EvaluationExperimentCaseResult,
     EvaluationExperimentRunStatus,
+    EvaluationExperimentVariant,
 )
 from packages.evaluation.runner import (
     CaseExecutionObservation,
@@ -106,14 +108,16 @@ class _ObservedFailureDriver:
         )
 
 
-async def _ready_run(session: AsyncSession, base: dict[str, object]):
+async def _ready_run(
+    session: AsyncSession, base: dict[str, object], *, case_count: int = 2
+):
     context = _manager_context(base)
     _, dataset_version = await _published_version(
         session,
         base,
         items=[
-            _item("case-0", split="DEV", ordinal=0),
-            _item("case-1", split="DEV", ordinal=1),
+            _item(f"case-{ordinal}", split="DEV", ordinal=ordinal)
+            for ordinal in range(case_count)
         ],
     )
     pricing = await _pricing(session, base)
@@ -256,3 +260,39 @@ async def test_m7c_cancelled_queued_run_does_not_materialize_cases(db_factory) -
     assert stored_run is not None
     assert stored_run.status == EvaluationExperimentRunStatus.CANCELLED
     assert case_count == 0
+
+
+@pytest.mark.asyncio
+async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7d-metrics-{uuid4().hex}")
+        run = await _ready_run(session, base, case_count=5)
+        context = _manager_context(base)
+    runner = ExperimentRunner(db_factory, driver=_CountingDriver())
+    await runner.execute(run_id=run.id, owner="m7d-metrics-worker", settings=Settings(testing=True))
+
+    async with db_factory() as session:
+        variants = list(
+            await session.scalars(
+                select(EvaluationExperimentVariant).where(
+                    EvaluationExperimentVariant.experiment_id == run.experiment_id
+                )
+            )
+        )
+        service = EvaluationMetricsService()
+        metrics = await service.compute_run_metrics(session, context=context, run_id=run.id)
+        comparison = await service.create_comparison(
+            session,
+            context=context,
+            run_id=run.id,
+            baseline_variant_id=variants[0].id,
+            candidate_variant_id=variants[1].id,
+        )
+    assert set(metrics["variants"]) == {str(variant.id) for variant in variants}
+    assert all(len(metrics["variants"][str(variant.id)]["categories"]) == 1 for variant in variants)
+    assert all(
+        metrics["variants"][str(variant.id)]["total_tokens"]["value"] == 750
+        for variant in variants
+    )
+    assert comparison.status == "COMPLETE"
+    assert comparison.missing_pairs == 0
