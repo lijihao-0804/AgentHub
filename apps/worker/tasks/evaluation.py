@@ -51,7 +51,8 @@ async def _execute_experiment_run(run_id: UUID) -> None:
     engine, factory = create_database(settings.database_url)
     try:
         driver = await _build_driver(settings, factory)
-        await ExperimentRunner(factory, driver=driver).execute(
+        trace_sink = ProductionTraceSink()
+        await ExperimentRunner(factory, driver=driver, trace_sink=trace_sink).execute(
             run_id=run_id,
             owner=secrets.token_urlsafe(24),
             settings=settings,

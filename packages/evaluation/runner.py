@@ -53,6 +53,8 @@ from packages.evaluation.reproducibility import (
 )
 from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery
 from packages.knowledge.models import KnowledgeSnapshot
+from packages.observability import NoopTraceSink
+from packages.observability.contracts import TraceSink, TraceSpan
 
 logger = logging.getLogger(__name__)
 
@@ -338,9 +340,11 @@ class ExperimentRunner:
         session_factory: async_sessionmaker[AsyncSession],
         *,
         driver: CaseExecutionDriver | None = None,
+        trace_sink: TraceSink | None = None,
     ) -> None:
         self.session_factory = session_factory
         self.driver = driver or DeterministicEvaluationDriver()
+        self.trace_sink = trace_sink or NoopTraceSink()
 
     async def prepare_run(self, session: AsyncSession, *, run_id: UUID) -> int:
         run = await session.scalar(
@@ -818,6 +822,16 @@ class ExperimentRunner:
                     safe_message="The frozen evaluation plan failed reproducibility validation.",
                 )
             return
+        run_span = await _safe_start_span(
+            self.trace_sink,
+            "evaluation.experiment.run",
+            {
+                "workspace_id": str(claimed_run.workspace_id),
+                "experiment_id": str(claimed_run.experiment_id),
+                "run_id": str(run_id),
+                "attempt_count": claimed_run.attempt_count,
+            },
+        )
         heartbeat_task = asyncio.create_task(
             self._heartbeat_loop(
                 run_id=run_id,
@@ -894,7 +908,43 @@ class ExperimentRunner:
                             )
                         if not linked:
                             return
-                    result = await prepared.execute()
+                    case_span = await _safe_start_span(
+                        self.trace_sink,
+                        "evaluation.case",
+                        {
+                            "workspace_id": str(run.workspace_id),
+                            "run_id": str(run.id),
+                            "case_id": str(case.id),
+                            "variant_id": str(variant.id),
+                            "dataset_item_id": str(item.id),
+                            "category": str(item.category),
+                        },
+                    )
+                    try:
+                        result = await prepared.execute()
+                    except Exception:
+                        await _safe_end_span(
+                            case_span,
+                            {"status": "FAILED", "failure_code": "EVALUATION_CASE_FAILED"},
+                            status="error",
+                            failure_code="EVALUATION_CASE_FAILED",
+                        )
+                        raise
+                    await _safe_end_span(
+                        case_span,
+                        {
+                            "status": "SUCCEEDED",
+                            "latency_ms": result.latency_ms,
+                            "observed_agent_status": result.observation.get(
+                                "observed_agent_status"
+                            ),
+                            "observed_agent_failure_code": result.observation.get(
+                                "observed_agent_failure_code"
+                            ),
+                        },
+                        status="ok",
+                        failure_code=None,
+                    )
                     async with self.session_factory() as session:
                         await self.complete_case(
                             session,
@@ -923,6 +973,12 @@ class ExperimentRunner:
         finally:
             heartbeat_task.cancel()
             await asyncio.gather(heartbeat_task, return_exceptions=True)
+            await _safe_end_span(
+                run_span,
+                {"status": "completed"},
+                status="ok",
+                failure_code=None,
+            )
 
     async def _prepare_driver(
         self,
@@ -1360,3 +1416,28 @@ __all__ = [
     "RunProgress",
     "reconcile_experiment_runs",
 ]
+
+
+async def _safe_start_span(
+    sink: TraceSink, name: str, attributes: dict[str, Any]
+) -> TraceSpan | None:
+    try:
+        return await sink.start_span(name, attributes)
+    except Exception:
+        logger.warning("evaluation_trace_start_failed", exc_info=True)
+        return None
+
+
+async def _safe_end_span(
+    span: TraceSpan | None,
+    attributes: dict[str, Any],
+    *,
+    status: str,
+    failure_code: str | None,
+) -> None:
+    if span is None:
+        return
+    try:
+        await span.end(attributes=attributes, status=status, failure_code=failure_code)
+    except Exception:
+        logger.warning("evaluation_trace_end_failed", exc_info=True)
