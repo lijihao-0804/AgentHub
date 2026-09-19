@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
+import MetricCard from "../../components/metric-card";
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
+import { ApiError, errorHint, toApiError } from "../../lib/api-client";
 import {
   AgentVersionBreakdown,
   FailureAnalytics,
@@ -10,10 +13,10 @@ import {
   getObservabilityFailures,
   getObservabilitySummary,
   getObservabilityTimeseries,
-  ObservabilityApiError,
   ObservabilitySummary,
   TimeseriesResponse,
 } from "../../lib/observability";
+import { useFrontendSession } from "../../components/session-provider";
 
 type QueryState = { from?: string; to?: string };
 
@@ -37,169 +40,271 @@ function queryForDays(days: number): QueryState {
 }
 
 export default function DashboardPage() {
-  const [workspaceId, setWorkspaceId] = useState("");
-  const [accessToken, setAccessToken] = useState("");
+  const { workspaceId, accessToken, connected } = useFrontendSession();
   const [days, setDays] = useState("7");
   const [summary, setSummary] = useState<ObservabilitySummary | null>(null);
   const [failures, setFailures] = useState<FailureAnalytics | null>(null);
   const [timeseries, setTimeseries] = useState<TimeseriesResponse | null>(null);
   const [versions, setVersions] = useState<AgentVersionBreakdown | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function load(category?: string) {
-    setMessage(null);
-    if (!workspaceId.trim() || !accessToken.trim()) {
-      setMessage("Workspace ID and access token are required.");
-      return;
-    }
-    const window = queryForDays(Number(days));
-    setLoading(true);
-    try {
-      const input = { workspaceId, accessToken, ...window };
-      const [nextSummary, nextTimeseries, nextFailures, nextVersions] = await Promise.all([
-        getObservabilitySummary(input),
-        getObservabilityTimeseries({ ...input, bucket: Number(days) <= 1 ? "hour" : "day" }),
-        getObservabilityFailures({ ...input, category }),
-        getAgentVersionBreakdown(input),
-      ]);
-      setSummary(nextSummary);
-      setTimeseries(nextTimeseries);
-      setFailures(nextFailures);
-      setVersions(nextVersions);
-      setSelectedCategory(category ?? null);
-    } catch (error) {
-      setMessage(
-        error instanceof ObservabilityApiError ? error.message : "Could not load observability data.",
-      );
-    } finally {
-      setLoading(false);
-    }
+  const load = useCallback(
+    async (category?: string, dayOverride?: string) => {
+      setError(null);
+      if (!connected) return;
+      const window = queryForDays(Number(dayOverride ?? days));
+      setLoading(true);
+      try {
+        const input = { workspaceId, accessToken, ...window };
+        const [nextSummary, nextTimeseries, nextFailures, nextVersions] = await Promise.all([
+          getObservabilitySummary(input),
+          getObservabilityTimeseries({ ...input, bucket: Number(dayOverride ?? days) <= 1 ? "hour" : "day" }),
+          getObservabilityFailures({ ...input, category }),
+          getAgentVersionBreakdown(input),
+        ]);
+        setSummary(nextSummary);
+        setTimeseries(nextTimeseries);
+        setFailures(nextFailures);
+        setVersions(nextVersions);
+        setSelectedCategory(category ?? null);
+      } catch (caught) {
+        setError(toApiError(caught, "Could not load observability data."));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [connected, workspaceId, accessToken, days],
+  );
+
+  useEffect(() => {
+    if (connected) void load();
+  }, [connected, load]);
+
+  if (!connected) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <p className="eyebrow">OBSERVABILITY</p>
+          <h1>Workspace dashboard</h1>
+        </header>
+        <SessionRequired context="the workspace dashboard" />
+      </div>
+    );
   }
 
   return (
-    <main className="dashboard-shell">
-      <header className="observability-header">
-        <div>
-          <p className="eyebrow">M6-B · METRICS / FAILURE ANALYTICS</p>
-          <h1>Workspace dashboard</h1>
-          <p className="observability-lede">
-            Read-only operational metrics from AgentHub PostgreSQL. Percentages always show their
-            sample denominator; raw prompts, tool payloads and checkpoint data never enter this view.
-          </p>
-        </div>
-        <Link className="back-link" href="/">
-          Back to AgentHub
-        </Link>
+    <div className="page">
+      <header className="page-header">
+        <p className="eyebrow">OBSERVABILITY</p>
+        <h1>Workspace dashboard</h1>
+        <p className="page-lede">
+          Bounded success, latency, usage, cost and failure analytics. Percentages always show
+          their sample denominator; raw prompts and tool payloads never enter this view.
+        </p>
       </header>
 
-      <section className="observability-panel" aria-labelledby="dashboard-query-title">
-        <div className="panel-heading">
-          <div>
-            <p className="eyebrow">WORKSPACE-SCOPED QUERY</p>
-            <h2 id="dashboard-query-title">Load metrics</h2>
-          </div>
-          <span className="badge">NO TOKEN STORAGE</span>
-        </div>
-        <p className="observability-note">
-          The access token remains in React state only and disappears on refresh. The default window is seven days.
-        </p>
-        <div className="observability-form">
+      <section className="runs-toolbar" aria-label="Dashboard window">
           <label>
-            Workspace ID
-            <input value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)} />
-          </label>
-          <label>
-            Access token
-            <input
-              type="password"
-              value={accessToken}
-              onChange={(event) => setAccessToken(event.target.value)}
-            />
-          </label>
-          <label>
-            Window
-            <select value={days} onChange={(event) => setDays(event.target.value)}>
-              <option value="1">24 hours</option>
-              <option value="7">7 days</option>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
-            </select>
-          </label>
-          <button type="button" onClick={() => load()} disabled={loading}>
-            {loading ? "Loading…" : "Load dashboard"}
+          Window
+          <select value={days} onChange={(event) => setDays(event.target.value)}>
+            <option value="1">24 hours</option>
+            <option value="7">7 days</option>
+            <option value="30">30 days</option>
+            <option value="90">90 days</option>
+          </select>
+        </label>
+        <div className="runs-toolbar-actions">
+          <button type="button" className="button button-primary" onClick={() => void load()} disabled={loading}>
+            {loading ? "Loading…" : "Refresh"}
           </button>
         </div>
-        {message && <p className="state-message">{message}</p>}
       </section>
+
+      {error && <ErrorState code={error.code} message={error.message} hint={errorHint(error)} onRetry={() => void load()} />}
+      {loading && !summary && <LoadingState label="Loading dashboard…" />}
 
       {summary && (
         <>
-          <section className="dashboard-grid" aria-label="Summary metrics">
-            <article className="dashboard-card"><span>Success rate</span><strong>{rate(summary.success_rate)}</strong><small>{summary.success_rate.numerator} / {summary.success_rate.denominator} finished</small></article>
-            <article className="dashboard-card"><span>Failure rate</span><strong>{rate(summary.failure_rate)}</strong><small>{summary.failure_rate.numerator} / {summary.failure_rate.denominator} finished</small></article>
-            <article className="dashboard-card"><span>p50 / p95 latency</span><strong>{metric(summary.latency.p50_ms, " ms")}</strong><small>p95 {metric(summary.latency.p95_ms, " ms")} · {summary.latency.sample_count} samples</small></article>
-            <article className="dashboard-card"><span>Tokens / run</span><strong>{metric(summary.usage.avg_tokens_per_run)}</strong><small>{summary.usage.known_usage_count} known · {summary.usage.unknown_usage_count} unknown</small></article>
-            <article className="dashboard-card"><span>Cost / successful run</span><strong>{summary.cost.mixed_currency ? "Mixed" : cost(summary.cost.cost_per_successful_run, summary.cost.currency)}</strong><small>{summary.cost.successful_cost_denominator} successful cost samples</small></article>
-            <article className="dashboard-card"><span>Needs attention</span><strong>{summary.current.needs_attention_count}</strong><small>{summary.current.unknown_outcome_action_count} unknown action outcomes</small></article>
+          <section className="kpi-grid" aria-label="Summary metrics">
+            <MetricCard label="Success rate" value={rate(summary.success_rate)} hint={`${summary.success_rate.numerator} / ${summary.success_rate.denominator} finished`} />
+            <MetricCard label="p95 latency" value={metric(summary.latency.p95_ms, " ms")} hint={`p50 ${metric(summary.latency.p50_ms, " ms")} · ${summary.latency.sample_count} samples`} />
+            <MetricCard label="Tokens / run" value={metric(summary.usage.avg_tokens_per_run)} hint={`${summary.usage.known_usage_count} known · ${summary.usage.unknown_usage_count} unknown`} />
+            <MetricCard label="Cost / successful run" value={summary.cost.mixed_currency ? "Mixed" : cost(summary.cost.cost_per_successful_run, summary.cost.currency)} hint={`${summary.cost.successful_cost_denominator} successful cost samples`} />
           </section>
 
-          <section className="dashboard-panel" aria-labelledby="operational-title">
-            <div className="panel-heading"><h2 id="operational-title">Current operational state</h2><Link href="/">Open approval inbox →</Link></div>
-            <div className="dashboard-stat-row">
-              <span>Running <strong>{summary.current.running_count}</strong></span>
-              <span>Waiting approval <strong>{summary.current.waiting_approval_count}</strong></span>
-              <span>Cancel requested <strong>{summary.current.cancel_requested_count}</strong></span>
-              <span>Needs attention <strong>{summary.current.needs_attention_count}</strong></span>
-              <span>Unknown outcome <strong>{summary.current.unknown_outcome_action_count}</strong></span>
-            </div>
+          <section className="op-grid" aria-label="Current operational state">
+            <MetricCard label="Running" value={summary.current.running_count} href="/runs?status=RUNNING" />
+            <MetricCard label="Waiting approval" value={summary.current.waiting_approval_count} href="/approvals" emphasis={summary.current.waiting_approval_count > 0} />
+            <MetricCard label="Needs attention" value={summary.current.needs_attention_count} href="/runs?status=NEEDS_ATTENTION" emphasis={summary.current.needs_attention_count > 0} />
+            <MetricCard label="Unknown outcome" value={summary.current.unknown_outcome_action_count} hint="Actions whose result could not be confirmed" href="/runs?status=NEEDS_ATTENTION" emphasis={summary.current.unknown_outcome_action_count > 0} />
           </section>
 
-          <section className="dashboard-two-column">
-            <div className="dashboard-panel">
-              <div className="panel-heading"><h2>Failure categories</h2><span>{failures?.total_failure_runs ?? 0} runs</span></div>
-              {!failures || failures.categories.length === 0 ? <p className="muted">No failures in this window.</p> : (
-                <div className="dashboard-table">
+          <div className="dashboard-columns">
+            <Panel title="Failure categories" eyebrow="FAILURE DISTRIBUTION">
+              {!failures || failures.categories.length === 0 ? (
+                <EmptyState title="No failures in this window." hint="Failed runs and their categories will appear here." />
+              ) : (
+                <div className="failure-bars">
                   {failures.categories.map((item) => (
-                    <button className={`dashboard-table-row ${selectedCategory === item.failure_category ? "selected" : ""}`} key={item.failure_category} type="button" onClick={() => load(item.failure_category)}>
-                      <span>{item.failure_category}</span><strong>{item.count}</strong><small>{item.percentage === null ? "—" : `${(item.percentage * 100).toFixed(1)}%`}</small>
+                    <button
+                      className="bar-row"
+                      type="button"
+                      key={item.failure_category}
+                      aria-pressed={selectedCategory === item.failure_category}
+                      onClick={() => void load(selectedCategory === item.failure_category ? undefined : item.failure_category)}
+                    >
+                      <span className="bar-row-name">{item.failure_category}</span>
+                      <span className="bar-track">
+                        <span
+                          className="bar-fill"
+                          style={{
+                            width: `${item.percentage === null ? 0 : Math.max(item.percentage * 100, 1)}%`,
+                            background: "var(--danger)",
+                          }}
+                        />
+                      </span>
+                      <span className="bar-row-value">
+                        {item.count} · {item.percentage === null ? "—" : `${(item.percentage * 100).toFixed(1)}%`}
+                      </span>
                     </button>
                   ))}
                 </div>
               )}
-            </div>
-            <div className="dashboard-panel">
-              <div className="panel-heading"><h2>Cost by currency</h2><span>{summary.cost.mixed_currency ? "Grouped" : summary.cost.currency ?? "Unknown"}</span></div>
-              {summary.cost.currencies.length === 0 ? <p className="muted">No known cost in this window.</p> : (
-                <div className="dashboard-table">
-                  {summary.cost.currencies.map((item) => <div className="dashboard-table-row" key={item.currency}><span>{item.currency}</span><strong>{cost(item.total_cost, item.currency)}</strong><small>{item.estimated_count} estimated · {item.exact_count} exact</small></div>)}
+            </Panel>
+
+            <Panel title="Cost by currency" eyebrow="USAGE COST">
+              {summary.cost.mixed_currency && <p className="state-hint">Mixed currencies detected — values are grouped per currency and never summed.</p>}
+              {summary.cost.currencies.length === 0 ? (
+                <EmptyState title="No cost data in this window." hint="Unknown cost is shown as Unknown, never as zero." />
+              ) : (
+                <div className="split-list">
+                  {summary.cost.currencies.map((item) => (
+                    <div className="split-row" key={item.currency}>
+                      <span>{item.currency}</span>
+                      <span>{cost(item.total_cost, null)}</span>
+                      <span className="muted">{item.estimated_count} estimated · {item.exact_count} exact</span>
+                      <span className="muted">/ success {cost(item.cost_per_successful_run, null)}</span>
+                    </div>
+                  ))}
                 </div>
               )}
-            </div>
-          </section>
+            </Panel>
+          </div>
 
-          <section className="dashboard-panel">
-            <div className="panel-heading"><h2>Runs over time</h2><span>UTC · {timeseries?.bucket ?? "day"}</span></div>
-            {!timeseries || timeseries.items.length === 0 ? <p className="muted">No runs in this window.</p> : (
-              <div className="dashboard-table">
-                {timeseries.items.map((item) => <div className="dashboard-table-row" key={item.bucket}><span>{new Date(item.bucket).toLocaleString()}</span><strong>{item.runs} runs</strong><small>{item.succeeded} succeeded · {item.failed} failed · {item.needs_attention} attention · {item.tokens ?? "—"} tokens</small></div>)}
-              </div>
+          <Panel title="Runs over time" eyebrow="TREND" actions={<span className="state-hint">UTC · {timeseries?.bucket ?? "day"}</span>}>
+            {!timeseries || timeseries.items.length === 0 ? (
+              <EmptyState title="No runs in this window." />
+            ) : (
+              <TimeseriesChart items={timeseries.items} />
             )}
-          </section>
+          </Panel>
 
-          <section className="dashboard-two-column">
-            <div className="dashboard-panel">
-              <div className="panel-heading"><h2>AgentVersion breakdown</h2><span>No winner ranking</span></div>
-              {!versions || versions.items.length === 0 ? <p className="muted">No AgentVersion activity.</p> : <div className="dashboard-table">{versions.items.map((item) => <Link className="dashboard-table-row" href={`/runs?agent_version_id=${encodeURIComponent(item.agent_version_id)}`} key={item.agent_version_id}><span>v{item.version_number}</span><strong>{item.run_count} runs</strong><small>{item.success_count} success · {item.failed_count} failed · p95 {metric(item.p95_latency_ms, " ms")}</small></Link>)}</div>}
-            </div>
-            <div className="dashboard-panel">
-              <div className="panel-heading"><h2>Failure runs</h2><span>{selectedCategory ?? "All categories"}</span></div>
-              {!failures || failures.items.length === 0 ? <p className="muted">No failure runs in this window.</p> : <div className="dashboard-table">{failures.items.map((item) => <Link className="dashboard-table-row" href={`/runs/${encodeURIComponent(item.run_id)}`} key={item.run_id}><span>{item.failure_category}</span><strong>{item.failure_code}</strong><small>v{item.agent_version_number} · {item.status}{item.action_failure_code ? ` · action ${item.action_failure_code}` : ""}</small></Link>)}</div>}
-            </div>
-          </section>
+          <div className="dashboard-columns">
+            <Panel title="AgentVersion breakdown" eyebrow="TRAFFIC BY VERSION" actions={<span className="state-hint">No winner ranking</span>}>
+              {!versions || versions.items.length === 0 ? (
+                <EmptyState title="No AgentVersion activity." />
+              ) : (
+                <div className="split-list">
+                  {versions.items.map((item) => (
+                    <Link className="split-row" href={`/runs?agent_version_id=${encodeURIComponent(item.agent_version_id)}`} key={item.agent_version_id}>
+                      <span>v{item.version_number}</span>
+                      <span>{item.run_count} runs</span>
+                      <span className="muted">{item.success_count} ✓ · {item.failed_count} ✕ · {item.needs_attention_count} ⚠</span>
+                      <span className="muted">p95 {metric(item.p95_latency_ms, " ms")}</span>
+                      <span className="muted">
+                        {item.cost_by_currency.length === 0
+                          ? "cost unknown"
+                          : item.cost_by_currency.map((c) => `${c.total_cost ?? "Unknown"} ${c.currency}`).join(" · ")}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Panel>
+
+            <Panel title="Failure runs" eyebrow="RUN LIST" actions={<span className="state-hint">{selectedCategory ?? "All categories"}</span>}>
+              {!failures || failures.items.length === 0 ? (
+                <EmptyState title="No failure runs in this window." hint="Select a category above to filter." />
+              ) : (
+                <div className="split-list">
+                  {failures.items.map((item) => (
+                    <Link className="split-row" href={`/runs/${encodeURIComponent(item.run_id)}`} key={item.run_id}>
+                      <span>{item.failure_category}</span>
+                      <span><code>{item.failure_code}</code></span>
+                      <span className="muted">v{item.agent_version_number} · {item.status}</span>
+                      <span className="muted">
+                        {item.action_failure_code ? `action ${item.action_failure_code}` : ""}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </Panel>
+          </div>
         </>
       )}
-    </main>
+    </div>
+  );
+}
+
+function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
+  const maxRuns = Math.max(...items.map((item) => item.runs), 1);
+  const width = Math.max(items.length * 34, 120);
+  const chartHeight = 130;
+  const segmentColors: Array<[keyof Pick<TimeseriesResponse["items"][number], "succeeded" | "failed" | "needs_attention">, string]> = [
+    ["succeeded", "var(--success)"],
+    ["failed", "var(--danger)"],
+    ["needs_attention", "var(--attention)"],
+  ];
+
+  return (
+    <div>
+      <svg
+        className="trend-chart"
+        viewBox={`0 0 ${width} ${chartHeight + 18}`}
+        role="img"
+        aria-label={`Runs per ${items.length > 0 ? "bucket" : "period"}: ${items
+          .map((item) => `${new Date(item.bucket).toLocaleDateString()} ${item.succeeded} succeeded, ${item.failed} failed, ${item.needs_attention} needs attention`)
+          .join("; ")}`}
+      >
+        {items.map((item, index) => {
+          const x = index * 34 + 6;
+          const barWidth = 22;
+          const scale = chartHeight / maxRuns;
+          let yOffset = chartHeight;
+          return (
+            <g key={item.bucket}>
+              <title>
+                {`${new Date(item.bucket).toLocaleString()} — ${item.runs} runs: ${item.succeeded} succeeded, ${item.failed} failed, ${item.needs_attention} needs attention, ${item.tokens ?? "unknown"} tokens`}
+              </title>
+              {segmentColors.map(([key, color]) => {
+                const value = item[key];
+                if (value <= 0) return null;
+                const height = Math.max(value * scale, 1.5);
+                yOffset -= height;
+                return <rect key={key} x={x} y={yOffset} width={barWidth} height={height} fill={color} rx="2" />;
+              })}
+              {item.runs === 0 && (
+                <rect x={x} y={chartHeight - 1} width={barWidth} height={1} fill="var(--border-strong)" />
+              )}
+              <text x={x + barWidth / 2} y={chartHeight + 12} textAnchor="middle" fontSize="8" fill="var(--text-muted)">
+                {new Date(item.bucket).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <div className="trend-legend" aria-hidden="true">
+        <span><span className="legend-swatch" style={{ background: "var(--success)" }} /> Succeeded</span>
+        <span><span className="legend-swatch" style={{ background: "var(--danger)" }} /> Failed</span>
+        <span><span className="legend-swatch" style={{ background: "var(--attention)" }} /> Needs attention</span>
+      </div>
+      <p className="trend-note">
+        Peak {maxRuns} runs per bucket. Exact values:{" "}
+        {items.map((item) => `${new Date(item.bucket).toLocaleDateString()} (${item.runs})`).join(", ")}.
+      </p>
+    </div>
   );
 }
