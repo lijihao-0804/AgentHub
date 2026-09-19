@@ -9,7 +9,7 @@ not re-run Agents, reinterpret AgentRun state, or change M5 approval/checkpoint 
 ## Review closure
 
 The review baseline is `24499b1` (full SHA:
-`24499b181691738d9aae4bce793ddfde4304c4`). The original implementation remains recorded as
+`24499b181691738d9aae4bce79360ddfde4304c4`). The original implementation remains recorded as
 `d54f066`; historical CI runs #115 and #117 remain part of the acceptance history. Closure code
 was delivered in `77e6ae4` and `6faba79`, with migration `0020_m7d_review_closure`. No
 `apps/web/**` files are changed by this closure.

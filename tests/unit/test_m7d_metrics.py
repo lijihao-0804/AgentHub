@@ -1,3 +1,7 @@
+from decimal import Decimal
+from types import SimpleNamespace
+from uuid import uuid4
+
 import pytest
 
 from packages.evaluation.metrics import (
@@ -12,6 +16,7 @@ from packages.evaluation.metrics import (
     metric_direction,
     percentile,
 )
+from packages.evaluation.metrics_service import EvaluationMetricsService
 
 
 def test_metric_value_has_explicit_availability_states() -> None:
@@ -185,3 +190,78 @@ def test_registry_rejects_missing_frozen_evaluator_version() -> None:
     registry = EvaluatorRegistry()
     with pytest.raises(ValueError, match="EXPERIMENT_EVALUATOR_VERSION_MISMATCH"):
         registry.validate_manifest({"evaluator_versions": {"tool-evaluator": "v1"}})
+
+
+def test_cost_metrics_distinguish_successful_executions_and_dataset_items() -> None:
+    service = EvaluationMetricsService()
+    variant = SimpleNamespace(id=uuid4())
+    successful_item = SimpleNamespace(
+        id=uuid4(),
+        category="FAILURE",
+        expected={"status": "SUCCEEDED", "failure_code": "OK"},
+    )
+    mixed_item = SimpleNamespace(
+        id=uuid4(),
+        category="FAILURE",
+        expected={"status": "SUCCEEDED", "failure_code": "OK"},
+    )
+    euro_item = SimpleNamespace(
+        id=uuid4(),
+        category="FAILURE",
+        expected={"status": "SUCCEEDED", "failure_code": "OK"},
+    )
+
+    def row(item, *, success: bool, amount: str | None, currency: str):
+        observation = (
+            {"observed_agent_status": "SUCCEEDED", "observed_agent_failure_code": "OK"}
+            if success
+            else {"observed_agent_status": "FAILED", "observed_agent_failure_code": "OTHER"}
+        )
+        return (
+            SimpleNamespace(
+                observation=observation,
+                latency_ms=None,
+                input_tokens=None,
+                output_tokens=None,
+                total_tokens=None,
+                cached_tokens=None,
+                cost_amount=Decimal(amount) if amount is not None else None,
+                cost_currency=currency,
+                status="SUCCEEDED",
+            ),
+            item,
+            variant,
+        )
+
+    rows = [
+        *(row(successful_item, success=True, amount="1", currency="USD") for _ in range(3)),
+        row(mixed_item, success=True, amount="2", currency="USD"),
+        row(mixed_item, success=False, amount="2", currency="USD"),
+        row(mixed_item, success=True, amount=None, currency="USD"),
+        *(row(euro_item, success=True, amount="4", currency="EUR") for _ in range(3)),
+    ]
+
+    metrics = service._metrics_for_rows(rows, include_categories=False, scope_by_variant=False)
+
+    usd_item = metrics["cost_per_successful_dataset_item_USD"]
+    eur_item = metrics["cost_per_successful_dataset_item_EUR"]
+    assert usd_item["value"] == "1"
+    assert usd_item["sample_count"] == 1
+    assert usd_item["details"]["denominator"] == 1
+    assert eur_item["value"] == "4"
+    assert eur_item["sample_count"] == 1
+    assert metrics["cost_per_successful_dataset_item"]["status"] == "NOT_AVAILABLE"
+    assert metrics["cost_per_successful_dataset_item"]["reason"] == "mixed_currency"
+    assert Decimal(metrics["cost_per_successful_execution_USD"]["value"]) == Decimal("1.25")
+    assert metrics["cost_per_successful_case_USD"]["details"]["deprecated"] is True
+    assert (
+        metrics["cost_per_successful_case_USD"]["details"]["alias_of"]
+        == "cost_per_successful_execution_USD"
+    )
+    single_currency = service._metrics_for_rows(
+        rows[:6], include_categories=False, scope_by_variant=False
+    )
+    assert single_currency["cost_per_successful_case"]["details"]["deprecated"] is True
+    assert single_currency["cost_per_successful_case"]["details"]["alias_of"] == (
+        "cost_per_successful_execution"
+    )

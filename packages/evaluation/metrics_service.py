@@ -90,6 +90,7 @@ class EvaluationMetricsService:
             await session.commit()
         except IntegrityError:
             await session.rollback()
+            await session.refresh(snapshot)
             existing = await session.scalar(
                 select(EvaluationMetricSnapshot).where(
                     EvaluationMetricSnapshot.workspace_id == workspace_id,
@@ -173,6 +174,7 @@ class EvaluationMetricsService:
         if existing is not None:
             self._verify_comparison_hash(existing)
             self._verify_comparison_binding(existing, snapshot)
+            self._verify_comparison_variants(existing, baseline, candidate, snapshot)
             return existing
 
         metric_rows = list(
@@ -268,7 +270,27 @@ class EvaluationMetricsService:
             )
         )
         session.add(comparison)
-        await session.commit()
+        try:
+            await session.commit()
+        except IntegrityError:
+            await session.rollback()
+            await session.refresh(snapshot)
+            await session.refresh(baseline)
+            await session.refresh(candidate)
+            existing = await session.scalar(
+                select(EvaluationExperimentComparison).where(
+                    EvaluationExperimentComparison.workspace_id == workspace_id,
+                    EvaluationExperimentComparison.experiment_run_id == run_id,
+                    EvaluationExperimentComparison.baseline_variant_id == baseline_variant_id,
+                    EvaluationExperimentComparison.candidate_variant_id == candidate_variant_id,
+                )
+            )
+            if existing is None:
+                raise
+            self._verify_comparison_hash(existing)
+            self._verify_comparison_binding(existing, snapshot)
+            self._verify_comparison_variants(existing, baseline, candidate, snapshot)
+            return existing
         return comparison
 
     async def get_comparisons(
@@ -566,6 +588,7 @@ class EvaluationMetricsService:
         usage = {"input_tokens": [], "output_tokens": [], "total_tokens": [], "cached_tokens": []}
         costs: dict[str, list[Decimal]] = defaultdict(list)
         successful_costs: dict[str, list[Decimal]] = defaultdict(list)
+        item_costs: dict[tuple[Any, str], list[Decimal]] = defaultdict(list)
         unexpected_failures = 0
         loop_guard_observations: list[bool] = []
         for case, item, variant in rows:
@@ -584,6 +607,7 @@ class EvaluationMetricsService:
             if case.cost_amount is not None and case.cost_currency:
                 amount = Decimal(case.cost_amount)
                 costs[case.cost_currency].append(amount)
+                item_costs[(item_key, case.cost_currency)].append(amount)
                 task = evaluated.get("task_success")
                 if task is not None and task.status == MetricStatus.AVAILABLE and task.value == 1:
                     successful_costs[case.cost_currency].append(amount)
@@ -668,12 +692,25 @@ class EvaluationMetricsService:
             len(item_latency),
             self.registry.version_for_metric("repetition_latency_stddev_ms"),
         )
+        successful_dataset_item_costs: dict[str, list[Decimal]] = defaultdict(list)
+        for (item_key, currency), amounts in item_costs.items():
+            item_task_success = _aggregate_repetitions(
+                "task_success", by_item_metric.get((item_key, "task_success"), [])
+            )
+            if (
+                item_task_success.status == MetricStatus.AVAILABLE
+                and item_task_success.value == 1
+            ):
+                successful_dataset_item_costs[currency].append(
+                    sum(amounts, Decimal("0")) / len(amounts)
+                )
         cost_groups: dict[str, dict[str, Any]] = {}
         for currency, amounts in sorted(costs.items()):
             for name in (
                 f"total_cost_{currency}",
                 f"cost_per_successful_case_{currency}",
                 f"cost_per_successful_execution_{currency}",
+                f"cost_per_successful_dataset_item_{currency}",
             ):
                 self.registry.register_metric_definition(
                     name, MetricDirection.LOWER_IS_BETTER, MetricAggregationKind.COST
@@ -681,6 +718,8 @@ class EvaluationMetricsService:
             total = sum(amounts, Decimal("0"))
             success_amounts = successful_costs[currency]
             success_total = sum(success_amounts, Decimal("0"))
+            successful_item_costs = successful_dataset_item_costs[currency]
+            successful_item_total = sum(successful_item_costs, Decimal("0"))
             details = {
                 "currency": currency,
                 "execution_count": len(amounts),
@@ -699,6 +738,8 @@ class EvaluationMetricsService:
                     **details,
                     "numerator": str(success_total),
                     "denominator": len(success_amounts),
+                    "deprecated": True,
+                    "alias_of": f"cost_per_successful_execution_{currency}",
                 },
             )
             output[f"cost_per_successful_execution_{currency}"] = _scalar_metric(
@@ -712,25 +753,50 @@ class EvaluationMetricsService:
                     "denominator": len(success_amounts),
                 },
             )
+            output[f"cost_per_successful_dataset_item_{currency}"] = _scalar_metric(
+                f"cost_per_successful_dataset_item_{currency}",
+                successful_item_total / len(successful_item_costs)
+                if successful_item_costs
+                else None,
+                len(successful_item_costs),
+                "v1",
+                details={
+                    "currency": currency,
+                    "unit": "successful dataset item",
+                    "numerator": str(successful_item_total),
+                    "denominator": len(successful_item_costs),
+                    "repetition_aggregation": "mean_known_repetition_costs",
+                },
+            )
         if len(costs) == 1:
             currency = next(iter(costs))
-            for generic_name in (
-                "cost_per_successful_case",
-                "cost_per_successful_execution",
-            ):
+            for generic_name in ("cost_per_successful_case", "cost_per_successful_execution"):
                 currency_metric = output[f"{generic_name}_{currency}"]
+                generic_details = {
+                    **currency_metric.get("details", {}),
+                    "currency": currency,
+                }
+                if generic_name == "cost_per_successful_case":
+                    generic_details["alias_of"] = "cost_per_successful_execution"
                 output[generic_name] = {
                     **currency_metric,
                     "name": generic_name,
-                    "details": {
-                        **currency_metric.get("details", {}),
-                        "currency": currency,
-                    },
+                    "details": generic_details,
                 }
+            currency_metric = output[f"cost_per_successful_dataset_item_{currency}"]
+            output["cost_per_successful_dataset_item"] = {
+                **currency_metric,
+                "name": "cost_per_successful_dataset_item",
+                "details": {
+                    **currency_metric.get("details", {}),
+                    "currency": currency,
+                },
+            }
         elif len(costs) > 1:
             for generic_name in (
                 "cost_per_successful_case",
                 "cost_per_successful_execution",
+                "cost_per_successful_dataset_item",
             ):
                 output[generic_name] = {
                     "name": generic_name,
@@ -1035,6 +1101,24 @@ class EvaluationMetricsService:
             raise AgentHubError(
                 "EVALUATION_COMPARISON_INTEGRITY_ERROR",
                 "The comparison is not bound to the run metric snapshot.",
+                409,
+            )
+
+    @staticmethod
+    def _verify_comparison_variants(
+        comparison: EvaluationExperimentComparison,
+        baseline: EvaluationExperimentVariant,
+        candidate: EvaluationExperimentVariant,
+        snapshot: EvaluationMetricSnapshot,
+    ) -> None:
+        if (
+            comparison.baseline_variant_hash != baseline.variant_hash
+            or comparison.candidate_variant_hash != candidate.variant_hash
+            or comparison.evaluator_manifest_hash != snapshot.evaluator_manifest_hash
+        ):
+            raise AgentHubError(
+                "EVALUATION_COMPARISON_INTEGRITY_ERROR",
+                "The comparison variant or evaluator binding is invalid.",
                 409,
             )
 

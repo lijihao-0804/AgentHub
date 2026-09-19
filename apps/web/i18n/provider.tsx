@@ -43,6 +43,20 @@ function isLocale(value: string | null): value is Locale {
   return value === "en-US" || value === "zh-CN";
 }
 
+export function resolveBrowserLocale(language: string | null | undefined): Locale {
+  const normalized = (language ?? "").trim().toLowerCase();
+  if (
+    normalized === "zh" ||
+    normalized === "zh-cn" ||
+    normalized === "zh-sg" ||
+    normalized === "zh-hans" ||
+    normalized.startsWith("zh-hans-")
+  ) {
+    return "zh-CN";
+  }
+  return "en-US";
+}
+
 /**
  * Locale state is intentionally separate from FrontendSessionProvider:
  * switching language re-renders UI text only and never touches the
@@ -65,10 +79,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     }
     if (!preferred) {
       const language = typeof navigator !== "undefined" ? navigator.language : "";
-      // Only Simplified Chinese locales map to zh-CN; zh-TW/zh-HK stay en-US.
-      if (language === "zh-CN" || language === "zh-SG" || language === "zh-Hans") {
-        preferred = "zh-CN";
-      }
+      preferred = resolveBrowserLocale(language);
     }
     if (preferred) setLocaleState(preferred);
   }, []);
