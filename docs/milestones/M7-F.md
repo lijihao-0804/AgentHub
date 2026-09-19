@@ -1,6 +1,6 @@
 # M7-F — Release Gate Policies and Decisions
 
-Status: PASS — closure verified in GitHub Actions run #132.
+Status: PASS — semantic closure verified in GitHub Actions run #136.
 
 M7-F adds explicit, immutable release-gate policies and decisions over persisted M7-D comparisons.
 It does not introduce global thresholds or change Agent Runtime, approval, checkpoint, or
@@ -12,7 +12,9 @@ experiment-run semantics.
 - Supported rules are `NO_REGRESSION`, `MAX_ABSOLUTE_REGRESSION`,
   `MAX_RELATIVE_REGRESSION`, `MIN_VALUE`, `MAX_VALUE`, and `TRADEOFF`.
 - Rule validation rejects unknown metrics/rules, negative or non-finite tolerances, malformed
-  tradeoffs, same-metric guards, and extra policy fields.
+  compensation tradeoffs, safety tradeoffs, legacy `guard_*` fields, and extra policy fields.
+- `TRADEOFF` uses a direction-aware compensation metric and minimum gain; zero-baseline relative
+  regression is `INCONCLUSIVE` unless both values are zero.
 - Required missing, unavailable, not-applicable, not-comparable, evaluator-mismatch, currency-
   mismatch, incomplete, and not-comparable inputs fail closed as `INCONCLUSIVE`.
 - Safety failures have hard-fail priority and cannot be overridden by a `TRADEOFF` rule.
@@ -38,7 +40,7 @@ workspace and resource identity.
 - Pure policy, safety-priority, tradeoff, incomplete, and integrity regressions pass locally.
 - The PostgreSQL integration fixture persists the M7-E comparison → ablation → HOLDOUT release
   gate chain, checks idempotency and VIEWER read-only access, and rejects a DEV gate.
-- Exact-head GitHub Actions run #132 passed backend and frontend, including the explicit M7-E/F
+- Exact-head GitHub Actions run #136 passed backend and frontend, including the explicit M7-E/F
   integration and contract checks.
 
 `M7G_FRONTEND_REQUIREMENT`: frontend pages for policy authoring and gate decision review remain

@@ -1,6 +1,6 @@
 # M7-E — Ablation and Retrieval Strategy Evaluation
 
-Status: PASS — closure verified in GitHub Actions run #132.
+Status: PASS — semantic closure verified in GitHub Actions run #136.
 
 M7-E adds the explicit retrieval strategy contract and immutable ablation analysis without
 changing M5 approval/checkpoint semantics, M6 read-only observability semantics, or the web
@@ -16,22 +16,27 @@ application.
   migrations `0020` and earlier were not modified.
 - Ablation classification compares canonical persisted AgentVersion specs, never
   `variant_metadata`, and records `PROMPT`, `MODEL`, `RETRIEVAL`, `MULTI_FACTOR_CHANGE`, or
-  `NO_CHANGE`.
+  `NO_CHANGE`. Variant `effective_knowledge_snapshots` are normalized and treated as a frozen
+  factor identity; changed snapshots add the stable `effective_knowledge_snapshots` path and
+  cannot be classified as a clean retrieval-only change.
 - The real benchmark runner supports `--strategy` and `--ablation` with fixed k values and a
-  shared corpus/snapshot/index. The previous `m3-retrieval-v1.json` artifact is preserved.
+  shared corpus/snapshot/index. DENSE Candidate Recall@20 is measured from the dense candidate
+  pool, independently from final top-5/6 evidence. The previous `m3-retrieval-v1.json` artifact
+  is preserved.
 
 ## Verification
 
 - Implementation commits: `fa6e397`, `b5369ea`, `0a95524`.
-- Integration regression closure commit: `234a628`.
-- Retrieval strategy, ablation classification, publish compatibility, and release-gate unit
-  regressions pass locally.
+- Semantic closure commits: `835d83b` and `76286b7`; real artifact record: `8d3dbb0`.
+- The M7-E/F targeted suite passed: 21 unit tests plus the PostgreSQL integration regression.
 - Dataset validation passes for `m3-retrieval-v1` (30 cases: 20 DEV, 10 HOLDOUT).
-- Real retrieval ablation was attempted with `HF_HUB_OFFLINE=1` and is recorded as
-  `REAL_RETRIEVAL_ABLATION=BLOCKED_ENVIRONMENT`; no fake result was substituted.
+- Real retrieval ablation completed with `HF_HUB_OFFLINE=1`, official local BGE-M3 and BGE
+  reranker adapters on CUDA. DENSE, HYBRID, and HYBRID_RERANK each reached Candidate Recall@20
+  of `1.0`; the full result is recorded in
+  `benchmarks/retrieval/results/m7e-retrieval-ablation-76286b751ed7bc4dd397885c6ad65eb0951b6280.json`.
 - M7-E PostgreSQL integration is present in `tests/integration/test_m7ef_ablation_release_gate.py`
   and requires `AGENTHUB_TEST_DATABASE_URL`.
-- Exact-head GitHub Actions run #132 passed backend and frontend, including the explicit M7-E/F
+- Exact-head GitHub Actions run #136 passed backend and frontend, including the explicit M7-E/F
   integration and contract checks.
 
 `M7G_FRONTEND_REQUIREMENT`: M7-G will need frontend productization for ablation and release-gate
