@@ -23,6 +23,7 @@ from packages.evaluation.models import (
     EvaluationExperimentRun,
     EvaluationExperimentVariant,
 )
+from packages.evaluation.reproducibility import normalize_knowledge_snapshots
 
 
 class EvaluationAblationService:
@@ -49,10 +50,20 @@ class EvaluationAblationService:
             self._verify(existing, comparison)
             return existing
 
-        baseline_spec, candidate_spec = await self._load_specs(
+        (
+            baseline_spec,
+            candidate_spec,
+            baseline_snapshots,
+            candidate_snapshots,
+        ) = await self._load_specs(
             session, workspace_id, baseline, candidate
         )
-        analysis = _analyze_specs(baseline_spec, candidate_spec)
+        analysis = _analyze_specs(
+            baseline_spec,
+            candidate_spec,
+            baseline_snapshots,
+            candidate_snapshots,
+        )
         result = EvaluationAblationResult(
             workspace_id=workspace_id,
             comparison_id=comparison_id,
@@ -168,7 +179,7 @@ class EvaluationAblationService:
         workspace_id: UUID,
         baseline: EvaluationExperimentVariant,
         candidate: EvaluationExperimentVariant,
-    ) -> tuple[dict[str, Any], dict[str, Any]]:
+    ) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, str]], list[dict[str, str]]]:
         versions = list(
             await session.scalars(
                 select(AgentVersion).where(
@@ -195,7 +206,20 @@ class EvaluationAblationService:
                 "The ablation AgentVersion binding is invalid.",
                 409,
             )
-        return before.resolved_spec, after.resolved_spec
+        try:
+            baseline_snapshots = normalize_knowledge_snapshots(
+                baseline.effective_knowledge_snapshots
+            )
+            candidate_snapshots = normalize_knowledge_snapshots(
+                candidate.effective_knowledge_snapshots
+            )
+        except AgentHubError as exc:
+            raise AgentHubError(
+                "EVALUATION_ABLATION_INTEGRITY_ERROR",
+                "The ablation effective knowledge snapshot binding is invalid.",
+                409,
+            ) from exc
+        return before.resolved_spec, after.resolved_spec, baseline_snapshots, candidate_snapshots
 
     @staticmethod
     def _verify(
@@ -263,35 +287,51 @@ def _diff_paths(before: Any, after: Any, prefix: str = "") -> list[str]:
     return []
 
 
-def _section_hash(spec: Mapping[str, Any], section: str) -> str:
-    return canonical_json_hash(spec.get(section, {}))
+def _factor_hash(
+    spec: Mapping[str, Any],
+    section: str | None,
+    snapshots: list[dict[str, str]],
+) -> str:
+    value: Any = spec if section is None else spec.get(section, {})
+    return canonical_json_hash(
+        {"value": value, "effective_knowledge_snapshots": snapshots}
+    )
 
 
-def _analyze_specs(before: Mapping[str, Any], after: Mapping[str, Any]) -> dict[str, Any]:
+def _analyze_specs(
+    before: Mapping[str, Any],
+    after: Mapping[str, Any],
+    baseline_effective_snapshots: list[dict[str, str]] | None = None,
+    candidate_effective_snapshots: list[dict[str, str]] | None = None,
+) -> dict[str, Any]:
     changed_paths = _diff_paths(before, after)
+    if baseline_effective_snapshots is None:
+        baseline_effective_snapshots = _knowledge_snapshots(before)
+    if candidate_effective_snapshots is None:
+        candidate_effective_snapshots = _knowledge_snapshots(after)
+    snapshots_changed = baseline_effective_snapshots != candidate_effective_snapshots
+    if snapshots_changed:
+        changed_paths = [*changed_paths, "effective_knowledge_snapshots"]
     if not changed_paths:
         factor = EvaluationAblationFactor.NO_CHANGE.value
     else:
         roots = {path.split(".", 1)[0] for path in changed_paths}
-        if roots == {"prompt"}:
+        if roots == {"prompt"} and not snapshots_changed:
             factor = EvaluationAblationFactor.PROMPT.value
-        elif roots == {"model"}:
+        elif roots == {"model"} and not snapshots_changed:
             factor = EvaluationAblationFactor.MODEL.value
-        elif roots == {"retrieval"} and _knowledge_snapshots(before) == _knowledge_snapshots(after):
+        elif roots == {"retrieval"} and not snapshots_changed:
             factor = EvaluationAblationFactor.RETRIEVAL.value
         else:
             factor = EvaluationAblationFactor.MULTI_FACTOR_CHANGE.value
+    changed_paths = sorted(set(changed_paths))
     section = {
         EvaluationAblationFactor.PROMPT.value: "prompt",
         EvaluationAblationFactor.MODEL.value: "model",
         EvaluationAblationFactor.RETRIEVAL.value: "retrieval",
     }.get(factor)
-    if section is None:
-        baseline_factor_hash = canonical_json_hash(before)
-        candidate_factor_hash = canonical_json_hash(after)
-    else:
-        baseline_factor_hash = _section_hash(before, section)
-        candidate_factor_hash = _section_hash(after, section)
+    baseline_factor_hash = _factor_hash(before, section, baseline_effective_snapshots)
+    candidate_factor_hash = _factor_hash(after, section, candidate_effective_snapshots)
     return {
         "factor": factor,
         "changed_paths": changed_paths,

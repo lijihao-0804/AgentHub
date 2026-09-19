@@ -247,3 +247,31 @@ async def test_m7ef_persisted_ablation_to_release_gate_chain_and_scope(db_factor
                 policy_id=policy.id,
             )
         assert dev_gate.value.code == "RELEASE_GATE_REQUIRES_HOLDOUT"
+
+        tampered_metrics = dict(comparison.metrics)
+        tampered_task_success = dict(tampered_metrics["task_success"])
+        tampered_candidate = dict(tampered_task_success["candidate"])
+        tampered_candidate["value"] = 0
+        tampered_task_success["candidate"] = tampered_candidate
+        tampered_metrics["task_success"] = tampered_task_success
+        comparison.metrics = tampered_metrics
+        await session.commit()
+
+        with pytest.raises(AgentHubError) as create_integrity:
+            await policy_service.create_decision(
+                session,
+                context=context,
+                run_id=run.id,
+                comparison_id=comparison.id,
+                policy_id=policy.id,
+            )
+        assert create_integrity.value.code == "EVALUATION_COMPARISON_INTEGRITY_ERROR"
+        with pytest.raises(AgentHubError) as read_integrity:
+            await policy_service.get_decision(
+                session,
+                context=context,
+                run_id=run.id,
+                comparison_id=comparison.id,
+                policy_id=policy.id,
+            )
+        assert read_integrity.value.code == "EVALUATION_COMPARISON_INTEGRITY_ERROR"

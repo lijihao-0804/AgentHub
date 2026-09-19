@@ -16,6 +16,7 @@ from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.metrics import EvaluatorRegistry, MetricDirection
+from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.models import (
     EvaluationExperimentComparison,
     EvaluationExperimentRun,
@@ -33,7 +34,6 @@ _RULES = frozenset(
         "TRADEOFF",
     }
 )
-_GUARD_RULES = frozenset({"NO_REGRESSION", "MIN_VALUE", "MAX_VALUE"})
 _BASE_RULE_KEYS = frozenset({"metric", "rule", "required", "safety"})
 _TOLERANCE_RULES = frozenset({"MAX_ABSOLUTE_REGRESSION", "MAX_RELATIVE_REGRESSION", "TRADEOFF"})
 
@@ -291,7 +291,7 @@ class EvaluationReleaseGateService:
             if rule in {"MIN_VALUE", "MAX_VALUE"}:
                 allowed.add("threshold")
             if rule == "TRADEOFF":
-                allowed |= {"guard_metric", "guard_rule", "guard_threshold"}
+                allowed |= {"compensation_metric", "min_compensation_gain"}
             if not set(raw).issubset(allowed):
                 self._invalid_policy()
             try:
@@ -307,7 +307,7 @@ class EvaluationReleaseGateService:
             }
             if not isinstance(item["required"], bool) or not isinstance(item["safety"], bool):
                 self._invalid_policy()
-            for key in ("tolerance", "threshold", "guard_threshold"):
+            for key in ("tolerance", "threshold", "min_compensation_gain"):
                 if key in raw:
                     value = raw[key]
                     if (
@@ -324,20 +324,26 @@ class EvaluationReleaseGateService:
             if rule in {"MIN_VALUE", "MAX_VALUE"} and "threshold" not in item:
                 self._invalid_policy()
             if rule == "TRADEOFF":
-                guard_metric = raw.get("guard_metric")
-                guard_rule = raw.get("guard_rule")
+                if item["safety"]:
+                    self._invalid_policy()
+                compensation_metric = raw.get("compensation_metric")
                 if (
-                    guard_metric == metric
-                    or not isinstance(guard_metric, str)
-                    or guard_rule not in _GUARD_RULES
+                    not isinstance(compensation_metric, str)
+                    or compensation_metric == metric
+                    or "min_compensation_gain" not in item
                 ):
                     self._invalid_policy()
                 try:
-                    self.registry.definition_for(guard_metric)
+                    self.registry.definition_for(compensation_metric)
                 except ValueError:
                     self._invalid_policy()
-                item.update({"guard_metric": guard_metric, "guard_rule": guard_rule})
-                if guard_rule in {"MIN_VALUE", "MAX_VALUE"} and "guard_threshold" not in item:
+                item["compensation_metric"] = compensation_metric
+                if (
+                    isinstance(item["min_compensation_gain"], bool)
+                    or not isinstance(item["min_compensation_gain"], (int, float))
+                    or not math.isfinite(float(item["min_compensation_gain"]))
+                    or item["min_compensation_gain"] < 0
+                ):
                     self._invalid_policy()
             normalized.append(item)
         return {"rules": normalized}
@@ -353,20 +359,12 @@ class EvaluationReleaseGateService:
         inconclusive = False
         for rule in policy["rules"]:
             metric = comparison.metrics.get(rule["metric"])
-            result = self._evaluate_rule(rule, metric)
-            if rule["rule"] == "TRADEOFF" and result["status"] == "PASS":
-                guard_rule = {
-                    "metric": rule["guard_metric"],
-                    "rule": rule["guard_rule"],
-                    "threshold": rule.get("guard_threshold"),
-                }
-                guard_result = self._evaluate_rule(
-                    guard_rule, comparison.metrics.get(rule["guard_metric"])
+            if rule["rule"] == "TRADEOFF":
+                result = self._evaluate_tradeoff(
+                    rule, metric, comparison.metrics.get(rule["compensation_metric"])
                 )
-                result["guard"] = guard_result
-                if guard_result["status"] != "PASS":
-                    result["status"] = guard_result["status"]
-                    result["reason"] = "guard_metric_not_satisfied"
+            else:
+                result = self._evaluate_rule(rule, metric)
             rule_results.append(result)
             if result["status"] == "FAIL":
                 if rule.get("safety", False):
@@ -446,21 +444,113 @@ class EvaluationReleaseGateService:
         elif rule["rule"] == "MAX_ABSOLUTE_REGRESSION":
             passed = regression <= float(rule["tolerance"])
         elif rule["rule"] == "MAX_RELATIVE_REGRESSION":
-            passed = _relative_regression(before, after, direction) <= float(rule["tolerance"])
+            relative_regression = _relative_regression(before, after, direction)
+            if relative_regression is None:
+                return {
+                    "metric": rule["metric"],
+                    "rule": rule["rule"],
+                    "status": "INCONCLUSIVE",
+                    "reason": "relative_regression_baseline_zero",
+                }
+            passed = relative_regression <= float(rule["tolerance"])
+        elif rule["rule"] == "TRADEOFF":
+            relative_regression = _relative_regression(before, after, direction)
+            if relative_regression is None:
+                return {
+                    "metric": rule["metric"],
+                    "rule": rule["rule"],
+                    "status": "INCONCLUSIVE",
+                    "reason": "relative_regression_baseline_zero",
+                }
+            passed = relative_regression <= float(rule["tolerance"])
         elif rule["rule"] == "MIN_VALUE":
             passed = after >= float(rule["threshold"])
         elif rule["rule"] == "MAX_VALUE":
             passed = after <= float(rule["threshold"])
         else:
             passed = None
-        if rule["rule"] == "TRADEOFF":
-            passed = regression <= float(rule["tolerance"])
         return {
             "metric": rule["metric"],
             "rule": rule["rule"],
             "status": "PASS" if passed else "FAIL",
             "baseline": before,
             "candidate": after,
+        }
+
+    def _evaluate_tradeoff(
+        self, rule: Mapping[str, Any], primary_metric: Any, compensation_metric: Any
+    ) -> dict[str, Any]:
+        primary = self._evaluate_rule(rule, primary_metric)
+        if primary["status"] != "FAIL":
+            return primary
+
+        compensation = self._evaluate_compensation(rule, compensation_metric)
+        primary["compensation"] = compensation
+        if compensation["status"] == "PASS":
+            primary["status"] = "PASS"
+            primary["reason"] = "compensated_tradeoff"
+        elif compensation["status"] == "INCONCLUSIVE":
+            primary["status"] = "INCONCLUSIVE"
+            primary["reason"] = "compensation_not_comparable"
+        else:
+            primary["reason"] = "insufficient_compensation_gain"
+        return primary
+
+    @staticmethod
+    def _evaluate_compensation(rule: Mapping[str, Any], metric: Any) -> dict[str, Any]:
+        if not isinstance(metric, Mapping):
+            return {
+                "metric": rule["compensation_metric"],
+                "status": "INCONCLUSIVE",
+                "reason": "missing_metric",
+            }
+        baseline = metric.get("baseline", {})
+        candidate = metric.get("candidate", {})
+        if (
+            metric.get("status") not in {None, "COMPLETE"}
+            or baseline.get("status") != "AVAILABLE"
+            or candidate.get("status") != "AVAILABLE"
+            or metric.get("reason")
+            in {
+                "currency_mismatch",
+                "evaluator_version_mismatch",
+                "not_comparable",
+                "not_applicable",
+            }
+        ):
+            return {
+                "metric": rule["compensation_metric"],
+                "status": "INCONCLUSIVE",
+                "reason": metric.get("reason", "metric_unavailable"),
+            }
+        before = _number(baseline.get("value"))
+        after = _number(candidate.get("value"))
+        direction = metric.get("direction")
+        if (
+            before is None
+            or after is None
+            or direction
+            not in {
+                MetricDirection.HIGHER_IS_BETTER.value,
+                MetricDirection.LOWER_IS_BETTER.value,
+            }
+        ):
+            return {
+                "metric": rule["compensation_metric"],
+                "status": "INCONCLUSIVE",
+                "reason": "metric_unavailable",
+            }
+        gain = (
+            after - before
+            if direction == MetricDirection.HIGHER_IS_BETTER.value
+            else before - after
+        )
+        return {
+            "metric": rule["compensation_metric"],
+            "status": "PASS" if gain >= float(rule["min_compensation_gain"]) else "FAIL",
+            "baseline": before,
+            "candidate": after,
+            "gain": gain,
         }
 
     @staticmethod
@@ -515,10 +605,7 @@ class EvaluationReleaseGateService:
 
     @staticmethod
     def _verify_comparison(comparison: EvaluationExperimentComparison) -> None:
-        if not comparison.comparison_hash:
-            raise AgentHubError(
-                "EVALUATION_COMPARISON_INTEGRITY_ERROR", "The comparison is incomplete.", 409
-            )
+        EvaluationMetricsService._verify_comparison_hash(comparison)
 
     @staticmethod
     def _verify_decision(decision, comparison, policy) -> None:
@@ -593,9 +680,9 @@ def _number(value: Any) -> float | None:
     return float(value)
 
 
-def _relative_regression(before: float, after: float, direction: str) -> float:
+def _relative_regression(before: float, after: float, direction: str) -> float | None:
     if before == 0:
-        return 0.0 if after >= before else math.inf
+        return 0.0 if after == before else None
     improvement = (
         after - before if direction == MetricDirection.HIGHER_IS_BETTER.value else before - after
     )

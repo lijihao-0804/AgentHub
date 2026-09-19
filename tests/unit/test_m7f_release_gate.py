@@ -45,8 +45,23 @@ def test_release_gate_policy_validation_rejects_unknown_extra_negative_and_bad_t
                         "metric": "task_success",
                         "rule": "TRADEOFF",
                         "tolerance": 1,
-                        "guard_metric": "task_success",
+                        "guard_metric": "latency_p95_ms",
                         "guard_rule": "NO_REGRESSION",
+                    }
+                ]
+            }
+        )
+    with pytest.raises(AgentHubError):
+        service._validate_policy(
+            {
+                "rules": [
+                    {
+                        "metric": "latency_p95_ms",
+                        "rule": "TRADEOFF",
+                        "tolerance": 1,
+                        "compensation_metric": "task_success",
+                        "min_compensation_gain": 0.1,
+                        "safety": True,
                     }
                 ]
             }
@@ -102,8 +117,8 @@ def test_safety_failure_cannot_be_overridden_by_tradeoff() -> None:
                         "metric": "latency_p95_ms",
                         "rule": "TRADEOFF",
                         "tolerance": 100,
-                        "guard_metric": "task_success",
-                        "guard_rule": "NO_REGRESSION",
+                        "compensation_metric": "task_success",
+                        "min_compensation_gain": 0.01,
                     },
                 ]
             }
@@ -112,6 +127,91 @@ def test_safety_failure_cannot_be_overridden_by_tradeoff() -> None:
 
     assert status == "FAIL"
     assert "task_success:FAIL" in reasons
+
+
+@pytest.mark.parametrize(
+    ("before", "after", "expected"),
+    [(0, 0, "PASS"), (0, 1, "INCONCLUSIVE")],
+)
+def test_relative_regression_zero_baseline_is_not_auto_pass(
+    before: float, after: float, expected: str
+) -> None:
+    service = EvaluationReleaseGateService()
+    status, results, _reasons = service._evaluate(
+        SimpleNamespace(
+            status="COMPLETE",
+            metrics={"task_success": _metric(before, after)},
+        ),
+        service._validate_policy(
+            {
+                "rules": [
+                    {
+                        "metric": "task_success",
+                        "rule": "MAX_RELATIVE_REGRESSION",
+                        "tolerance": 0.1,
+                    }
+                ]
+            }
+        ),
+    )
+    assert status == expected
+    if expected == "INCONCLUSIVE":
+        assert results[0]["reason"] == "relative_regression_baseline_zero"
+
+
+def test_tradeoff_uses_direction_aware_compensation() -> None:
+    service = EvaluationReleaseGateService()
+    policy = service._validate_policy(
+        {
+            "rules": [
+                {
+                    "metric": "latency_p95_ms",
+                    "rule": "TRADEOFF",
+                    "tolerance": 0.10,
+                    "compensation_metric": "task_success",
+                    "min_compensation_gain": 0.03,
+                    "required": True,
+                    "safety": False,
+                }
+            ]
+        }
+    )
+
+    def evaluate(latency_after: float, success_after: float) -> tuple[str, dict]:
+        status, results, _reasons = service._evaluate(
+            SimpleNamespace(
+                status="COMPLETE",
+                metrics={
+                    "latency_p95_ms": _metric(
+                        100, latency_after, direction="LOWER_IS_BETTER"
+                    ),
+                    "task_success": _metric(0.80, success_after),
+                },
+            ),
+            policy,
+        )
+        return status, results[0]
+
+    assert evaluate(105, 0.80)[0] == "PASS"
+    status, result = evaluate(120, 0.85)
+    assert status == "PASS"
+    assert result["reason"] == "compensated_tradeoff"
+    assert evaluate(120, 0.81)[0] == "FAIL"
+    assert evaluate(120, 0.85)[1]["compensation"]["status"] == "PASS"
+
+    unavailable = SimpleNamespace(
+        status="COMPLETE",
+        metrics={
+            "latency_p95_ms": _metric(100, 120, direction="LOWER_IS_BETTER"),
+            "task_success": {
+                **_metric(0.80, 0.85),
+                "candidate": {"status": "NOT_AVAILABLE", "reason": "missing"},
+            },
+        },
+    )
+    status, result, _reasons = service._evaluate(unavailable, policy)
+    assert status == "INCONCLUSIVE"
+    assert result[0]["reason"] == "compensation_not_comparable"
 
 
 def test_incomplete_or_not_comparable_is_inconclusive() -> None:

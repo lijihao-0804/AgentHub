@@ -15,6 +15,7 @@ from types import SimpleNamespace
 from typing import Any
 from uuid import UUID, uuid4
 
+from sqlalchemy.exc import DBAPIError, OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from apps.worker.tasks.knowledge import _vector_records
@@ -36,7 +37,11 @@ from packages.core.execution_context.models import (
 from packages.knowledge.adapters.qdrant import QdrantVectorIndex
 from packages.knowledge.chunking import build_deterministic_chunks
 from packages.knowledge.composition import production_retrieval_components
-from packages.knowledge.contracts import RetrievalQuery, RetrievalStrategy
+from packages.knowledge.contracts import (
+    KnowledgeProviderError,
+    RetrievalQuery,
+    RetrievalStrategy,
+)
 from packages.knowledge.models import (
     Document,
     DocumentChunk,
@@ -53,6 +58,44 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATASET = PROJECT_ROOT / "benchmarks" / "retrieval" / "dataset.json"
 DEFAULT_RESULTS = PROJECT_ROOT / "benchmarks" / "retrieval" / "results"
 DEFAULT_SUMMARY = PROJECT_ROOT / "docs" / "benchmark" / "m3-retrieval-baseline.md"
+_ENVIRONMENT_BLOCKER_CODES = frozenset(
+    {
+        "QDRANT_UNAVAILABLE",
+        "EMBEDDER_LOAD_FAILED",
+        "EMBEDDER_INFERENCE_FAILED",
+        "SPARSE_TOKENIZER_LOAD_FAILED",
+        "SPARSE_ENCODING_FAILED",
+        "RERANKER_LOAD_FAILED",
+        "RERANKER_INFERENCE_FAILED",
+        "CUDA_UNAVAILABLE",
+    }
+)
+
+
+class RealRetrievalEnvironmentError(RuntimeError):
+    def __init__(self, reason_code: str, stage: str, safe_message: str) -> None:
+        super().__init__(safe_message)
+        self.reason_code = reason_code
+        self.stage = stage
+        self.safe_message = safe_message
+
+
+def _raise_environment_blocker(exc: Exception, *, stage: str) -> None:
+    if isinstance(exc, KnowledgeProviderError):
+        if exc.code in _ENVIRONMENT_BLOCKER_CODES:
+            raise RealRetrievalEnvironmentError(
+                exc.code,
+                stage,
+                exc.message,
+            ) from None
+        raise exc
+    if isinstance(exc, (OperationalError, DBAPIError)):
+        raise RealRetrievalEnvironmentError(
+            "POSTGRES_UNAVAILABLE",
+            stage,
+            "PostgreSQL is unavailable for the real retrieval benchmark.",
+        ) from None
+    raise exc
 
 
 @dataclass(frozen=True, slots=True)
@@ -217,7 +260,10 @@ def _index_corpus(
     settings: Settings,
     seeded_chunks: tuple[SeededChunk, ...],
 ) -> tuple[object, object, object, object]:
-    components = production_retrieval_components(settings)
+    try:
+        components = production_retrieval_components(settings)
+    except KnowledgeProviderError as exc:
+        _raise_environment_blocker(exc, stage="model_load")
     index = QdrantVectorIndex(
         url=settings.qdrant_url,
         collection_name=settings.knowledge_qdrant_collection,
@@ -234,8 +280,11 @@ def _index_corpus(
         components.dense,
         components.sparse,
     )
-    index.ensure_collection()
-    index.upsert(records)
+    try:
+        index.ensure_collection()
+        index.upsert(records)
+    except KnowledgeProviderError as exc:
+        _raise_environment_blocker(exc, stage="qdrant_index")
     return components.dense, components.sparse, components.reranker, index
 
 
@@ -287,19 +336,24 @@ async def _evaluate_real_models(
 
         async def retrieve_case(case):
             started = time.perf_counter()
-            result = await retriever.retrieve_with_trace(
-                seeded.context,
-                RetrievalQuery(
-                    text=case.query,
-                    knowledge_base_id=str(seeded.knowledge_base_id),
-                    knowledge_snapshot_id=str(seeded.snapshot.snapshot_id),
-                    strategy=strategy,
-                    dense_top_k=30,
-                    sparse_top_k=30,
-                    candidate_top_k=20,
-                    final_top_k=6,
-                ),
-            )
+            try:
+                result = await retriever.retrieve_with_trace(
+                    seeded.context,
+                    RetrievalQuery(
+                        text=case.query,
+                        knowledge_base_id=str(seeded.knowledge_base_id),
+                        knowledge_snapshot_id=str(seeded.snapshot.snapshot_id),
+                        strategy=strategy,
+                        dense_top_k=30,
+                        sparse_top_k=30,
+                        candidate_top_k=20,
+                        final_top_k=6,
+                    ),
+                )
+            except KnowledgeProviderError as exc:
+                _raise_environment_blocker(exc, stage=f"{strategy.value.lower()}_retrieval")
+            except (OperationalError, DBAPIError) as exc:
+                _raise_environment_blocker(exc, stage=f"{strategy.value.lower()}_retrieval")
             latencies[case.split].append((time.perf_counter() - started) * 1000)
             stage_results = (
                 result.trace.dense.results
@@ -643,14 +697,31 @@ def main() -> None:
                 strategies=strategies,
             )
         )
-    except Exception as exc:
+    except RealRetrievalEnvironmentError as exc:
         if not args.ablation:
             raise
         blocked = {
             "benchmark": "m7e-retrieval-ablation",
             "status": "BLOCKED_ENVIRONMENT",
             "git_commit": _git_commit(),
-            "reason_type": type(exc).__name__,
+            "reason_code": exc.reason_code,
+            "stage": exc.stage,
+            "safe_message": exc.safe_message,
+        }
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(blocked, indent=2) + "\n", encoding="utf-8")
+        print("REAL_RETRIEVAL_ABLATION=BLOCKED_ENVIRONMENT")
+        return
+    except (OperationalError, DBAPIError):
+        if not args.ablation:
+            raise
+        blocked = {
+            "benchmark": "m7e-retrieval-ablation",
+            "status": "BLOCKED_ENVIRONMENT",
+            "git_commit": _git_commit(),
+            "reason_code": "POSTGRES_UNAVAILABLE",
+            "stage": "postgres_seed",
+            "safe_message": "PostgreSQL is unavailable for the real retrieval benchmark.",
         }
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(blocked, indent=2) + "\n", encoding="utf-8")
@@ -670,4 +741,9 @@ if __name__ == "__main__":
     main()
 
 
-__all__ = ["main", "run_real_benchmark"]
+__all__ = [
+    "RealRetrievalEnvironmentError",
+    "_raise_environment_blocker",
+    "main",
+    "run_real_benchmark",
+]

@@ -340,7 +340,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     for rank, hit in enumerate(dense_hits, start=1)
                     for chunk_id in (_payload_chunk_id(hit),)
                     if chunk_id is not None and math.isfinite(hit.score)
-                )[: query.final_top_k]
+                )[: query.candidate_top_k]
             else:
                 stage = "fusion"
                 fusion_started = time.perf_counter()
