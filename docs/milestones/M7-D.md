@@ -48,6 +48,7 @@ checkpoint payloads, and raw tool arguments/results are not introduced by M7-D.
 - Final CI closure commit: `e88d917`.
 - GitHub Actions run #115 passed backend and frontend, including Alembic upgrade/check, Ruff,
   all integration tests, non-integration tests, and the explicit M7-D integration step.
+- The acceptance record is re-verified on the final documentation-only exact-head CI run.
 - Unit evaluator tests cover explicit availability states, retrieval/citation zero denominators,
   accepted answers, canonical arguments, percentile semantics, paired direction, and frozen
   evaluator manifest validation: 8 passed locally.
