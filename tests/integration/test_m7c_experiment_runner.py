@@ -141,8 +141,9 @@ async def test_m7c_deterministic_plan_execution_and_cost_freeze(db_factory) -> N
             settings=Settings(testing=True),
         )
 
+    async with db_factory() as verification_session:
         results = list(
-            await session.scalars(
+            await verification_session.scalars(
                 select(EvaluationExperimentCaseResult)
                 .where(EvaluationExperimentCaseResult.experiment_run_id == run.id)
                 .order_by(
@@ -151,8 +152,7 @@ async def test_m7c_deterministic_plan_execution_and_cost_freeze(db_factory) -> N
                 )
             )
         )
-        await session.refresh(run)
-        stored_run = await session.get(type(run), run.id)
+        stored_run = await verification_session.get(type(run), run.id)
         assert len(results) == 4
         assert all(row.status == EvaluationCaseResultStatus.SUCCEEDED for row in results)
         assert all(row.total_tokens == 150 for row in results)
