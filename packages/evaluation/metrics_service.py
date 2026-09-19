@@ -701,9 +701,49 @@ class EvaluationMetricsService:
                     "denominator": len(success_amounts),
                 },
             )
-            output[f"cost_per_successful_execution_{currency}"] = output[
-                f"cost_per_successful_case_{currency}"
-            ]
+            output[f"cost_per_successful_execution_{currency}"] = _scalar_metric(
+                f"cost_per_successful_execution_{currency}",
+                success_total / len(success_amounts) if success_amounts else None,
+                len(success_amounts),
+                "v1",
+                details={
+                    **details,
+                    "numerator": str(success_total),
+                    "denominator": len(success_amounts),
+                },
+            )
+        if len(costs) == 1:
+            currency = next(iter(costs))
+            for generic_name in (
+                "cost_per_successful_case",
+                "cost_per_successful_execution",
+            ):
+                currency_metric = output[f"{generic_name}_{currency}"]
+                output[generic_name] = {
+                    **currency_metric,
+                    "name": generic_name,
+                    "details": {
+                        **currency_metric.get("details", {}),
+                        "currency": currency,
+                    },
+                }
+        elif len(costs) > 1:
+            for generic_name in (
+                "cost_per_successful_case",
+                "cost_per_successful_execution",
+            ):
+                output[generic_name] = {
+                    "name": generic_name,
+                    "status": MetricStatus.NOT_AVAILABLE.value,
+                    "value": None,
+                    "sample_count": 0,
+                    "reason": "mixed_currency",
+                    "evaluator_version": self.registry.version_for_metric(generic_name),
+                    "details": {
+                        "currencies": sorted(costs),
+                        "unit": "successful case execution",
+                    },
+                }
         output["cost_by_currency"] = cost_groups
         if include_categories:
             output["categories"] = {
@@ -1204,6 +1244,8 @@ def _float_metric(metric: MetricValue) -> float | None:
 def _currency(row: EvaluationMetricResult) -> str | None:
     details = row.details if isinstance(row.details, dict) else {}
     value = details.get("currency")
+    if value is None and isinstance(details.get("details"), dict):
+        value = details["details"].get("currency")
     return str(value) if value is not None else None
 
 

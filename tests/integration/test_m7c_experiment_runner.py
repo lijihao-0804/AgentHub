@@ -9,7 +9,7 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.config.settings import Settings, get_settings
@@ -287,6 +287,15 @@ async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) ->
                 )
             )
         )
+        await session.execute(
+            update(EvaluationExperimentCaseResult)
+            .where(
+                EvaluationExperimentCaseResult.experiment_run_id == run.id,
+                EvaluationExperimentCaseResult.experiment_variant_id == variants[1].id,
+            )
+            .values(cost_currency="EUR")
+        )
+        await session.commit()
         service = EvaluationMetricsService()
         metrics = await service.materialize_metrics(session, context=context, run_id=run.id)
         repeated = await service.materialize_metrics(session, context=context, run_id=run.id)
@@ -368,6 +377,8 @@ async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) ->
     assert comparison.status == "COMPLETE"
     assert comparison.paired_pairs == 10
     assert comparison.missing_pairs == 0
+    assert comparison.metrics["cost_per_successful_case"]["status"] == "NOT_COMPARABLE"
+    assert comparison.metrics["cost_per_successful_case"]["reason"] == "currency_mismatch"
     assert comparison_again.id == comparison.id
     assert comparison_again.comparison_hash == comparison.comparison_hash
     assert len(viewer_comparisons) == 1

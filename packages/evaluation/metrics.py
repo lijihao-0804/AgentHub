@@ -758,6 +758,18 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
             True,
         ),
         (
+            "cost_per_successful_case",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.COST,
+            False,
+        ),
+        (
+            "cost_per_successful_execution",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.COST,
+            False,
+        ),
+        (
             "unknown_usage_count",
             MetricDirection.LOWER_IS_BETTER,
             MetricAggregationKind.SCALAR,
