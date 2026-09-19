@@ -83,14 +83,14 @@ jobs:
           uv run --locked python -m tests.support.celery_worker > celery-worker.log 2>&1 &
           echo $! > celery-worker.pid
           sleep 3
+      - name: Run M7-C durable experiment runner integration
+        run: uv run --locked pytest tests/integration/test_m7c_experiment_runner.py -vv -rs
       - name: Run all integration tests
         run: uv run --locked pytest -m integration -vv -rs
       - name: Run M7-A evaluation dataset integration
         run: uv run --locked pytest tests/integration/test_m7a_evaluation_datasets.py -vv -rs
       - name: Run M7-B experiment persistence integration
         run: uv run --locked pytest tests/integration/test_m7b_experiments.py -vv -rs
-      - name: Run M7-C durable experiment runner integration
-        run: uv run --locked pytest tests/integration/test_m7c_experiment_runner.py -vv -rs
       - name: Validate M3 retrieval benchmark wiring
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
