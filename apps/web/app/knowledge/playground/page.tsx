@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
 import {
   RetrievalPlaygroundError,
   runRetrievalPlayground,
@@ -10,6 +11,7 @@ import {
   type RetrievalPlaygroundResponse,
 } from "../../../lib/api";
 import { formatLocator } from "../../../lib/locator";
+import { useFrontendSession } from "../../../components/session-provider";
 
 type PageState = "initial" | "loading" | "success" | "empty" | "error";
 
@@ -29,8 +31,8 @@ function StageCard({ label, stage }: { label: string; stage: PlaygroundStage }) 
     <section className="playground-stage" aria-labelledby={`${label}-stage`}>
       <div className="playground-stage-header">
         <div>
-          <p className="eyebrow">RETRIEVAL STAGE</p>
-          <h2 id={`${label}-stage`}>{label}</h2>
+          <p className="eyebrow">STAGE</p>
+          <h3 id={`${label}-stage`}>{label}</h3>
         </div>
         <span className="stage-latency">{stage.latency_ms.toFixed(1)} ms</span>
       </div>
@@ -58,10 +60,9 @@ function StageCard({ label, stage }: { label: string; stage: PlaygroundStage }) 
 }
 
 export default function RetrievalPlaygroundPage() {
-  const [workspaceId, setWorkspaceId] = useState("");
+  const { workspaceId, accessToken, connected } = useFrontendSession();
   const [knowledgeBaseId, setKnowledgeBaseId] = useState("");
   const [snapshotId, setSnapshotId] = useState("");
-  const [accessToken, setAccessToken] = useState("");
   const [query, setQuery] = useState("");
   const [denseTopK, setDenseTopK] = useState("30");
   const [sparseTopK, setSparseTopK] = useState("30");
@@ -75,15 +76,15 @@ export default function RetrievalPlaygroundPage() {
     event.preventDefault();
     setResult(null);
     setError(null);
-    if (!accessToken.trim()) {
+    if (!connected) {
       setError({
-        code: "AUTHENTICATION_REQUIRED",
-        message: "Enter an access token to run the playground.",
+        code: "SESSION_REQUIRED",
+        message: "Configure a workspace session to run the playground.",
       });
       setPageState("error");
       return;
     }
-    if (!workspaceId.trim() || !knowledgeBaseId.trim() || !snapshotId.trim() || !query.trim()) {
+    if (!knowledgeBaseId.trim() || !snapshotId.trim() || !query.trim()) {
       setError({ code: "INVALID_REQUEST", message: "Complete the required fields first." });
       setPageState("error");
       return;
@@ -113,59 +114,52 @@ export default function RetrievalPlaygroundPage() {
     }
   }
 
-  return (
-    <main className="playground-shell">
-      <header className="playground-header">
-        <div>
-          <p className="eyebrow">AGENTHUB · M3-D</p>
+  if (!connected) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <p className="eyebrow">KNOWLEDGE</p>
           <h1>Retrieval Playground</h1>
-          <p className="playground-lede">
-            Inspect Dense, Sparse, Fused and Rerank evidence for one concrete knowledge snapshot.
+          <p className="page-lede">
+            Inspect dense, sparse, fused and reranked evidence for one concrete knowledge snapshot.
           </p>
-        </div>
-        <a className="back-link" href="/">
-          Back to AgentHub
-        </a>
+        </header>
+        <SessionRequired context="the retrieval playground" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <p className="eyebrow">KNOWLEDGE</p>
+        <h1>Retrieval Playground</h1>
+        <p className="page-lede">
+          Inspect dense, sparse, fused and reranked evidence for one concrete knowledge snapshot.
+          Retrieval runs against the workspace from the active session.
+        </p>
       </header>
 
-      <form className="playground-panel query-panel" onSubmit={handleSubmit} noValidate>
+      <form className="panel query-panel" onSubmit={handleSubmit} noValidate>
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">QUERY PANEL</p>
+            <p className="eyebrow">QUERY</p>
             <h2>Run snapshot-scoped retrieval</h2>
           </div>
-          <span className="badge">Developer tool</span>
         </div>
-        <p className="playground-note">
-          M3-D requires a concrete Snapshot ID. LATEST and snapshot lifecycle arrive in M3-F.
-        </p>
         <div className="form-grid">
-          <label>
-            Workspace ID
-            <input required value={workspaceId} onChange={(event) => setWorkspaceId(event.target.value)} />
-          </label>
           <label>
             Knowledge Base ID
             <input
               required
               value={knowledgeBaseId}
               onChange={(event) => setKnowledgeBaseId(event.target.value)}
+              spellCheck={false}
             />
           </label>
           <label>
             Snapshot ID
-            <input required value={snapshotId} onChange={(event) => setSnapshotId(event.target.value)} />
-          </label>
-          <label>
-            Access Token
-            <input
-              required
-              type="password"
-              autoComplete="off"
-              value={accessToken}
-              onChange={(event) => setAccessToken(event.target.value)}
-              placeholder="Bearer access token"
-            />
+            <input required value={snapshotId} onChange={(event) => setSnapshotId(event.target.value)} spellCheck={false} />
           </label>
           <label className="query-field">
             Query
@@ -179,7 +173,7 @@ export default function RetrievalPlaygroundPage() {
           </label>
         </div>
         <details className="advanced-options">
-          <summary>Advanced top-k limits</summary>
+          <summary>Advanced retrieval config</summary>
           <div className="form-grid top-k-grid">
             <label>
               Dense Top K
@@ -200,21 +194,20 @@ export default function RetrievalPlaygroundPage() {
           </div>
         </details>
         <div className="form-actions">
-          <button type="submit" disabled={pageState === "loading"}>
-            {pageState === "loading" ? "Retrieving…" : "Run Retrieval"}
+          <button type="submit" className="button button-primary" disabled={pageState === "loading"}>
+            {pageState === "loading" ? "Retrieving…" : "Run retrieval"}
           </button>
         </div>
       </form>
 
-      {pageState === "initial" && <p className="state-message">Enter a query and snapshot to begin.</p>}
-      {pageState === "loading" && <p className="state-message">Retrieving…</p>}
+      {pageState === "initial" && <EmptyState title="Enter a query and snapshot to begin." />}
+      {pageState === "loading" && <LoadingState label="Retrieving…" />}
       {pageState === "error" && error && (
-        <section className="error-panel" role="alert">
-          <strong>{error.code}</strong>
-          <span>{error.message}</span>
-        </section>
+        <ErrorState code={error.code} message={error.message} />
       )}
-      {pageState === "empty" && <p className="state-message">No evidence found for this snapshot.</p>}
+      {pageState === "empty" && (
+        <EmptyState title="No evidence found for this snapshot." hint="The retrieval stages ran but returned no chunks." />
+      )}
 
       {result && (
         <>
@@ -224,11 +217,11 @@ export default function RetrievalPlaygroundPage() {
               <strong>{shortId(result.snapshot_id)}</strong>
             </div>
             <div>
-              <span>Total</span>
+              <span>Total latency</span>
               <strong>{result.total_latency_ms.toFixed(1)} ms</strong>
             </div>
             <div>
-              <span>Final</span>
+              <span>Final evidence</span>
               <strong>{result.evidence.length} chunks</strong>
             </div>
           </section>
@@ -237,14 +230,7 @@ export default function RetrievalPlaygroundPage() {
               <StageCard key={key} label={label} stage={result.stages[key]} />
             ))}
           </section>
-          <section className="playground-panel evidence-panel">
-            <div className="panel-heading">
-              <div>
-                <p className="eyebrow">FINAL EVIDENCE</p>
-                <h2>Reranked chunks</h2>
-              </div>
-              <span className="stage-count">{result.evidence.length} chunks</span>
-            </div>
+          <Panel title="Reranked evidence" eyebrow="FINAL EVIDENCE" actions={<span className="state-hint">{result.evidence.length} chunks</span>}>
             <div className="evidence-list">
               {result.evidence.map((item, index) => (
                 <article className="evidence-item" key={item.chunk_id}>
@@ -261,9 +247,9 @@ export default function RetrievalPlaygroundPage() {
                 </article>
               ))}
             </div>
-          </section>
+          </Panel>
         </>
       )}
-    </main>
+    </div>
   );
 }
