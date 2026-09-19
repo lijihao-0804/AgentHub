@@ -1,0 +1,6 @@
+{
+  "benchmark": "m7e-retrieval-ablation",
+  "status": "BLOCKED_ENVIRONMENT",
+  "git_commit": "0a95524eabae5d6c33b380d104ff8369544bd9b2",
+  "reason_type": "KnowledgeProviderError"
+}
