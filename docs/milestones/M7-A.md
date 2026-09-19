@@ -1,6 +1,7 @@
 # M7-A — Evaluation Dataset and Pricing Snapshot
 
-Status: IMPLEMENTED — local acceptance complete; GitHub Actions closure is pending.
+Status: PASS — closure verified by GitHub Actions run #92 at exact HEAD
+`0d4fdc6d06c7156c583cae67bad5d61a20bf0153`.
 
 M7-A establishes the immutable inputs needed for reproducible evaluation. It does not run
 experiments, invoke providers, expose holdout results, or implement release gates.
@@ -39,6 +40,9 @@ and is not yet bound to an experiment until the later experiment persistence mil
 - M7-A unit validation: 7 passed.
 - M7-A PostgreSQL integration: 3 passed.
 - Alembic upgraded to `0015_m7_evaluation_platform`; `alembic check` passed.
+- GitHub Actions run #92 passed backend, frontend, M7-A integration, and the existing
+  non-integration checks.
 - No BGE weights, public LLM, or real provider calls are required.
 
-M7-B persistence/reproducibility is the next milestone. M7 overall is not accepted.
+M7-A is accepted. M7-B persistence/reproducibility is the next milestone; M7 overall is not
+accepted.
