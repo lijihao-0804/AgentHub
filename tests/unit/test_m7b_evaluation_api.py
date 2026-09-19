@@ -28,6 +28,18 @@ def test_m7b_experiment_routes_are_registered() -> None:
         "/api/v1/workspaces/{workspace_id}/evaluation/experiment-runs/{run_id}/progress"
         in paths
     )
+    metrics_path = "/api/v1/workspaces/{workspace_id}/evaluation/experiment-runs/{run_id}/metrics"
+    comparisons_path = (
+        "/api/v1/workspaces/{workspace_id}/evaluation/experiment-runs/{run_id}/comparisons"
+    )
+    assert "get" in paths[metrics_path]
+    assert "post" in paths[metrics_path]
+    assert "get" in paths[comparisons_path]
+    assert "post" in paths[comparisons_path]
+    assert (
+        "/api/v1/workspaces/{workspace_id}/evaluation/experiment-runs/{run_id}/comparisons/{comparison_id}"
+        in paths
+    )
 
     assert "post" in paths[
         "/api/v1/workspaces/{workspace_id}/evaluation/experiments/{experiment_id}/runs"

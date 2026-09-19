@@ -224,10 +224,18 @@ class EvaluationComparisonResponse(BaseModel):
     experiment_run_id: UUID
     baseline_variant_id: UUID
     candidate_variant_id: UUID
+    metric_snapshot_id: UUID | None
+    metric_snapshot_hash: str | None
+    baseline_variant_hash: str | None
+    candidate_variant_hash: str | None
+    evaluator_manifest_hash: str | None
+    comparison_hash: str | None
     status: str
     evaluator_versions: dict[str, Any]
     metrics: dict[str, Any]
     missing_pairs: int
+    paired_pairs: int
+    created_by: UUID | None
     created_at: datetime
 
 

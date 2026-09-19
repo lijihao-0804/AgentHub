@@ -431,6 +431,19 @@ async def get_experiment_run_progress(
     return EvaluationExperimentRunProgressResponse.model_validate(progress)
 
 
+@router.post("/experiment-runs/{run_id}/metrics", response_model=dict[str, Any])
+async def materialize_experiment_run_metrics(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> dict[str, Any]:
+    del workspace_id
+    return await EvaluationMetricsService().materialize_metrics(
+        session, context=context, run_id=run_id
+    )
+
+
 @router.get("/experiment-runs/{run_id}/metrics", response_model=dict[str, Any])
 async def get_experiment_run_metrics(
     workspace_id: UUID,
@@ -439,7 +452,7 @@ async def get_experiment_run_metrics(
     session: AsyncSession = db_session_dependency,
 ) -> dict[str, Any]:
     del workspace_id
-    return await EvaluationMetricsService().compute_run_metrics(
+    return await EvaluationMetricsService().get_persisted_metrics(
         session, context=context, run_id=run_id
     )
 
@@ -463,6 +476,47 @@ async def create_experiment_comparison(
         run_id=run_id,
         baseline_variant_id=payload.baseline_variant_id,
         candidate_variant_id=payload.candidate_variant_id,
+    )
+    return EvaluationComparisonResponse.model_validate(comparison, from_attributes=True)
+
+
+@router.get(
+    "/experiment-runs/{run_id}/comparisons",
+    response_model=list[EvaluationComparisonResponse],
+)
+async def list_experiment_comparisons(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> list[EvaluationComparisonResponse]:
+    del workspace_id
+    comparisons = await EvaluationMetricsService().get_comparisons(
+        session, context=context, run_id=run_id
+    )
+    return [
+        EvaluationComparisonResponse.model_validate(item, from_attributes=True)
+        for item in comparisons
+    ]
+
+
+@router.get(
+    "/experiment-runs/{run_id}/comparisons/{comparison_id}",
+    response_model=EvaluationComparisonResponse,
+)
+async def get_experiment_comparison(
+    workspace_id: UUID,
+    run_id: UUID,
+    comparison_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationComparisonResponse:
+    del workspace_id
+    comparison = await EvaluationMetricsService().get_comparison(
+        session,
+        context=context,
+        run_id=run_id,
+        comparison_id=comparison_id,
     )
     return EvaluationComparisonResponse.model_validate(comparison, from_attributes=True)
 

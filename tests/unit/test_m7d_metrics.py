@@ -77,6 +77,12 @@ def test_no_answer_and_faithfulness_without_structured_signals_are_unavailable()
     faithfulness = evaluate_faithfulness({}, {})
     assert no_answer["task_success"].status == MetricStatus.NOT_AVAILABLE
     assert faithfulness.status == MetricStatus.NOT_AVAILABLE
+    qa = evaluate_case(
+        "KNOWLEDGE_QA",
+        {"answer": "ok", "citations": []},
+        {"answer": "ok", "evidence_support": True},
+    )
+    assert qa["faithfulness"].value == 1
 
 
 def test_percentiles_and_paired_direction_are_deterministic() -> None:
@@ -118,6 +124,61 @@ def test_registry_manifest_and_aggregate_semantics() -> None:
         ],
     )
     assert aggregate.value == 0.5
+
+
+def test_aggregate_preserves_not_applicable_and_tracks_availability_counts() -> None:
+    not_applicable = aggregate_metric_values(
+        "citation_coverage",
+        [MetricValue("citation_coverage", MetricStatus.NOT_APPLICABLE, None, 1)],
+    )
+    assert not_applicable.status == MetricStatus.NOT_APPLICABLE
+    mixed = aggregate_metric_values(
+        "citation_coverage",
+        [
+            MetricValue("citation_coverage", MetricStatus.AVAILABLE, 1, 1, 1, 1),
+            MetricValue("citation_coverage", MetricStatus.NOT_APPLICABLE, None, 1),
+        ],
+    )
+    assert mixed.status == MetricStatus.AVAILABLE
+    assert mixed.sample_count == 1
+    assert mixed.details["not_applicable_count"] == 1
+
+
+def test_category_success_requires_full_semantic_contract() -> None:
+    approval = evaluate_case(
+        "APPROVAL",
+        {"approval_required": True, "decision": "APPROVED"},
+        {
+            "approval_required": True,
+            "approval_decision": "APPROVED",
+            "duplicate_side_effect": True,
+            "unknown_outcome_semantics_ok": True,
+        },
+    )
+    multi_step = evaluate_case(
+        "MULTI_STEP",
+        {"steps": ["a", "b"], "terminal_status": "SUCCEEDED"},
+        {"steps": ["a"], "terminal_status": "SUCCEEDED"},
+    )
+    assert approval["task_success"].value == 0
+    assert multi_step["required_steps_covered"].value == 0.5
+    assert multi_step["task_success"].value == 0
+
+
+def test_safety_direction_and_unknown_direction_are_explicit() -> None:
+    baseline = MetricValue("duplicate_side_effect_rate", MetricStatus.AVAILABLE, 0, 1)
+    candidate = MetricValue("duplicate_side_effect_rate", MetricStatus.AVAILABLE, 1, 1)
+    compared = compare_metric_values(
+        baseline,
+        candidate,
+        direction=MetricDirection.LOWER_IS_BETTER,
+        paired=[(0, 1)],
+    )
+    assert compared.paired_loss == 1
+    assert compared.paired_win == 0
+    assert metric_direction("duplicate_side_effect_rate") == MetricDirection.LOWER_IS_BETTER
+    with pytest.raises(ValueError, match="UNKNOWN_METRIC_DEFINITION"):
+        metric_direction("made_up_metric")
 
 
 def test_registry_rejects_missing_frozen_evaluator_version() -> None:

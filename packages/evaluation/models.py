@@ -274,9 +274,7 @@ class EvaluationExperiment(Base):
             name="fk_evaluation_experiments_created_by",
             ondelete="RESTRICT",
         ),
-        CheckConstraint(
-            "split IN ('DEV', 'HOLDOUT')", name="ck_evaluation_experiments_split"
-        ),
+        CheckConstraint("split IN ('DEV', 'HOLDOUT')", name="ck_evaluation_experiments_split"),
         CheckConstraint(
             "purpose IN ('DEVELOPMENT', 'HOLDOUT_VALIDATION', 'RELEASE_GATE')",
             name="ck_evaluation_experiments_purpose",
@@ -289,9 +287,7 @@ class EvaluationExperiment(Base):
         CheckConstraint(
             "repetitions BETWEEN 1 AND 5", name="ck_evaluation_experiments_repetitions"
         ),
-        CheckConstraint(
-            "status IN ('DRAFT', 'READY')", name="ck_evaluation_experiments_status"
-        ),
+        CheckConstraint("status IN ('DRAFT', 'READY')", name="ck_evaluation_experiments_status"),
         UniqueConstraint("workspace_id", "id", name="uq_evaluation_experiments_workspace_id"),
         Index("ix_evaluation_experiments_workspace_created", "workspace_id", "created_at"),
         Index(
@@ -517,9 +513,7 @@ class EvaluationExperimentCaseResult(Base):
             "repetition_index",
             name="uq_evaluation_case_results_execution_key",
         ),
-        UniqueConstraint(
-            "workspace_id", "id", name="uq_evaluation_case_results_workspace_id"
-        ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_case_results_workspace_id"),
         Index(
             "ix_evaluation_case_results_run_status",
             "workspace_id",
@@ -598,9 +592,7 @@ class EvaluationExperimentHoldoutExposure(Base):
             ondelete="RESTRICT",
         ),
         CheckConstraint("exposure_index > 0", name="ck_evaluation_holdout_exposures_index"),
-        UniqueConstraint(
-            "workspace_id", "id", name="uq_evaluation_holdout_exposures_workspace_id"
-        ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_holdout_exposures_workspace_id"),
         UniqueConstraint(
             "workspace_id",
             "dataset_version_id",
@@ -667,7 +659,7 @@ class EvaluationMetricResult(Base):
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     experiment_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
-    experiment_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_variant_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     dimension: Mapped[str] = mapped_column(String(16), nullable=False)
     category: Mapped[str] = mapped_column(String(32), nullable=False)
     metric_name: Mapped[str] = mapped_column(String(96), nullable=False)
@@ -682,6 +674,46 @@ class EvaluationMetricResult(Base):
     details: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
     )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EvaluationMetricSnapshot(Base):
+    __tablename__ = "evaluation_metric_snapshots"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_run_id"],
+            ["evaluation_experiment_runs.workspace_id", "evaluation_experiment_runs.id"],
+            name="fk_evaluation_metric_snapshots_run_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"], ["users.id"], name="fk_evaluation_metric_snapshots_created_by"
+        ),
+        UniqueConstraint(
+            "workspace_id", "experiment_run_id", name="uq_evaluation_metric_snapshots_run"
+        ),
+        UniqueConstraint(
+            "workspace_id", "id", name="uq_evaluation_metric_snapshots_workspace_id"
+        ),
+        Index(
+            "ix_evaluation_metric_snapshots_workspace_created",
+            "workspace_id",
+            "created_at",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    evaluator_manifest: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
+    )
+    evaluator_manifest_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    case_result_set_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    metrics_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -708,6 +740,18 @@ class EvaluationExperimentComparison(Base):
             name="fk_evaluation_comparisons_candidate_workspace",
             ondelete="CASCADE",
         ),
+        ForeignKeyConstraint(
+            ["workspace_id", "metric_snapshot_id"],
+            ["evaluation_metric_snapshots.workspace_id", "evaluation_metric_snapshots.id"],
+            name="fk_evaluation_comparisons_metric_snapshot_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"],
+            ["users.id"],
+            name="fk_evaluation_comparisons_created_by",
+            ondelete="RESTRICT",
+        ),
         CheckConstraint(
             "status IN ('COMPLETE', 'INCOMPLETE', 'NOT_COMPARABLE')",
             name="ck_evaluation_comparisons_status",
@@ -731,6 +775,12 @@ class EvaluationExperimentComparison(Base):
     experiment_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     baseline_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     candidate_variant_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    metric_snapshot_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    metric_snapshot_hash: Mapped[str | None] = mapped_column(String(64))
+    baseline_variant_hash: Mapped[str | None] = mapped_column(String(64))
+    candidate_variant_hash: Mapped[str | None] = mapped_column(String(64))
+    evaluator_manifest_hash: Mapped[str | None] = mapped_column(String(64))
+    comparison_hash: Mapped[str | None] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(24), nullable=False)
     evaluator_versions: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
@@ -739,6 +789,8 @@ class EvaluationExperimentComparison(Base):
         JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
     )
     missing_pairs: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    paired_pairs: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    created_by: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -761,6 +813,7 @@ __all__ = [
     "EvaluationExperimentStatus",
     "EvaluationExperimentVariant",
     "EvaluationMetricResult",
+    "EvaluationMetricSnapshot",
     "EvaluationExperimentComparison",
     "PricingSnapshot",
 ]

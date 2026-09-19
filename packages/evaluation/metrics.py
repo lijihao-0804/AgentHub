@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import StrEnum
 from statistics import mean
@@ -21,6 +21,23 @@ class MetricStatus(StrEnum):
 class MetricDirection(StrEnum):
     HIGHER_IS_BETTER = "HIGHER_IS_BETTER"
     LOWER_IS_BETTER = "LOWER_IS_BETTER"
+    UNKNOWN = "UNKNOWN"
+
+
+class MetricAggregationKind(StrEnum):
+    BINARY = "BINARY"
+    RATE = "RATE"
+    SCALAR = "SCALAR"
+    COST = "COST"
+
+
+@dataclass(frozen=True)
+class MetricDefinition:
+    name: str
+    direction: MetricDirection
+    aggregation_kind: MetricAggregationKind
+    task_success_relevant: bool = False
+    version: str = "v1"
 
 
 @dataclass(frozen=True)
@@ -33,6 +50,7 @@ class MetricValue:
     denominator: Decimal | float | int | None = None
     reason: str | None = None
     evaluator_version: str = "v1"
+    details: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -44,6 +62,7 @@ class MetricValue:
             "denominator": _json_number(self.denominator),
             "reason": self.reason,
             "evaluator_version": self.evaluator_version,
+            "details": self.details,
         }
 
 
@@ -59,6 +78,8 @@ class PairedMetric:
     applicable_pairs: int
     missing_pairs: int
     direction: MetricDirection
+    status: str = "COMPLETE"
+    reason: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -72,6 +93,8 @@ class PairedMetric:
             "applicable_pairs": self.applicable_pairs,
             "missing_pairs": self.missing_pairs,
             "direction": str(self.direction),
+            "status": self.status,
+            "reason": self.reason,
         }
 
 
@@ -83,6 +106,7 @@ class EvaluatorRegistry:
 
     def __init__(self) -> None:
         self._evaluators: dict[str, tuple[str, Evaluator]] = {}
+        self._definitions: dict[str, MetricDefinition] = dict(METRIC_DEFINITIONS)
         self.register("RETRIEVAL", "v1", evaluate_retrieval)
         self.register("KNOWLEDGE_QA", "v1", evaluate_knowledge_qa)
         self.register("TOOL", "v1", evaluate_tool)
@@ -96,6 +120,35 @@ class EvaluatorRegistry:
 
     def version_for(self, category: str) -> str:
         return self._evaluators[category][0]
+
+    def register_metric_definition(
+        self,
+        name: str,
+        direction: MetricDirection,
+        aggregation_kind: MetricAggregationKind,
+        *,
+        task_success_relevant: bool = False,
+        version: str = "v1",
+    ) -> None:
+        self._definitions[name] = MetricDefinition(
+            name=name,
+            direction=direction,
+            aggregation_kind=aggregation_kind,
+            task_success_relevant=task_success_relevant,
+            version=version,
+        )
+
+    def definition_for(self, name: str) -> MetricDefinition:
+        try:
+            return self._definitions[name]
+        except KeyError as exc:
+            raise ValueError(f"UNKNOWN_METRIC_DEFINITION:{name}") from exc
+
+    def direction_for(self, name: str) -> MetricDirection:
+        return self.definition_for(name).direction
+
+    def version_for_metric(self, name: str) -> str:
+        return self.definition_for(name).version
 
     def validate_manifest(self, manifest: Mapping[str, Any]) -> None:
         versions = manifest.get("evaluator_versions")
@@ -210,7 +263,14 @@ def evaluate_approval(
         "unauthorized_execution_rate": unauthorized,
         "duplicate_side_effect_rate": duplicate,
         "unknown_outcome_semantics_accuracy": unknown,
-        "task_success": _task_success([required, decision, unknown]),
+        "task_success": _task_success(
+            [required, decision, denied_execution, unauthorized, duplicate, unknown],
+            zero_is_success={
+                "denied_action_execution_rate",
+                "unauthorized_execution_rate",
+                "duplicate_side_effect_rate",
+            },
+        ),
     }
 
 
@@ -277,9 +337,8 @@ def evaluate_knowledge_qa(
         "citation_precision": _precision(
             "citation_precision", expected_citations, observed_citations
         ),
-        "citation_coverage": _recall(
-            "citation_coverage", expected_citations, observed_citations
-        ),
+        "citation_coverage": _recall("citation_coverage", expected_citations, observed_citations),
+        "faithfulness": evaluate_faithfulness(expected, observation),
         "task_success": answer,
     }
 
@@ -337,6 +396,9 @@ def aggregate_metric_values(
 ) -> MetricValue:
     available = [metric for metric in values if metric.status == MetricStatus.AVAILABLE]
     if not available:
+        statuses = {metric.status for metric in values}
+        if statuses and statuses <= {MetricStatus.NOT_APPLICABLE}:
+            return _not_applicable(name, "not_applicable", version=version)
         return _not_available(name, "no_available_samples", version=version)
     numeric = [float(metric.value) for metric in available if metric.value is not None]
     numerator = sum(float(metric.numerator) for metric in available if metric.numerator is not None)
@@ -349,6 +411,15 @@ def aggregate_metric_values(
         value = mean(numeric)
     else:
         return _not_available(name, "metric_value_missing", version=version)
+    counts = {
+        "available_count": len(available),
+        "not_available_count": sum(
+            metric.status == MetricStatus.NOT_AVAILABLE for metric in values
+        ),
+        "not_applicable_count": sum(
+            metric.status == MetricStatus.NOT_APPLICABLE for metric in values
+        ),
+    }
     return MetricValue(
         name=name,
         status=MetricStatus.AVAILABLE,
@@ -357,6 +428,7 @@ def aggregate_metric_values(
         numerator=numerator if denominator else None,
         denominator=denominator if denominator else None,
         evaluator_version=version,
+        details=counts,
     )
 
 
@@ -403,6 +475,23 @@ def compare_metric_values(
             wins += 1
         else:
             losses += 1
+    status = "COMPLETE"
+    reason = None
+    if direction == MetricDirection.UNKNOWN:
+        status = "NOT_COMPARABLE"
+        reason = "unknown_metric_direction"
+    elif baseline.status != MetricStatus.AVAILABLE or candidate.status != MetricStatus.AVAILABLE:
+        status = "NOT_COMPARABLE"
+        reason = "metric_not_available"
+    elif not paired or wins + ties + losses == 0:
+        status = "NOT_COMPARABLE"
+        reason = "no_applicable_pairs"
+    elif missing:
+        status = "INCOMPLETE"
+        reason = "missing_metric_observations"
+    if status == "NOT_COMPARABLE":
+        absolute = None
+        relative = None
     return PairedMetric(
         baseline=baseline,
         candidate=candidate,
@@ -414,15 +503,16 @@ def compare_metric_values(
         applicable_pairs=wins + ties + losses,
         missing_pairs=missing,
         direction=direction,
+        status=status,
+        reason=reason,
     )
 
 
 def metric_direction(name: str) -> MetricDirection:
-    if any(
-        token in name for token in ("latency", "cost", "failure_rate", "loop_rate", "unexpected")
-    ):
-        return MetricDirection.LOWER_IS_BETTER
-    return MetricDirection.HIGHER_IS_BETTER
+    try:
+        return METRIC_DEFINITIONS[name].direction
+    except KeyError as exc:
+        raise ValueError(f"UNKNOWN_METRIC_DEFINITION:{name}") from exc
 
 
 def _binary_metric(name: str, value: bool, *, applicable: bool = True) -> MetricValue:
@@ -462,11 +552,17 @@ def _mrr(name: str, relevant: Sequence[str], found: Sequence[str]) -> MetricValu
     return MetricValue(name, MetricStatus.AVAILABLE, 0, 1)
 
 
-def _task_success(values: Iterable[MetricValue]) -> MetricValue:
+def _task_success(
+    values: Iterable[MetricValue], *, zero_is_success: set[str] | None = None
+) -> MetricValue:
     applicable = [value for value in values if value.status == MetricStatus.AVAILABLE]
     if not applicable:
         return _not_available("task_success", "no_deterministic_observation")
-    return _binary_metric("task_success", all(bool(value.value) for value in applicable))
+    zero_is_success = zero_is_success or set()
+    return _binary_metric(
+        "task_success",
+        all(value.value == (0 if value.name in zero_is_success else 1) for value in applicable),
+    )
 
 
 def _not_available(name: str, reason: str, *, version: str = "v1") -> MetricValue:
@@ -475,8 +571,10 @@ def _not_available(name: str, reason: str, *, version: str = "v1") -> MetricValu
     )
 
 
-def _not_applicable(name: str, reason: str) -> MetricValue:
-    return MetricValue(name, MetricStatus.NOT_APPLICABLE, None, 0, reason=reason)
+def _not_applicable(name: str, reason: str, *, version: str = "v1") -> MetricValue:
+    return MetricValue(
+        name, MetricStatus.NOT_APPLICABLE, None, 0, reason=reason, evaluator_version=version
+    )
 
 
 def _with_version(metric: MetricValue, version: str) -> MetricValue:
@@ -489,6 +587,7 @@ def _with_version(metric: MetricValue, version: str) -> MetricValue:
         metric.denominator,
         metric.reason,
         version,
+        metric.details,
     )
 
 
@@ -526,6 +625,8 @@ def _json_number(value: Any) -> Any:
 
 __all__ = [
     "EvaluatorRegistry",
+    "MetricAggregationKind",
+    "MetricDefinition",
     "MetricDirection",
     "MetricStatus",
     "MetricValue",
@@ -537,3 +638,134 @@ __all__ = [
     "metric_direction",
     "percentile",
 ]
+
+
+def _definition(
+    name: str,
+    direction: MetricDirection,
+    aggregation_kind: MetricAggregationKind,
+    *,
+    task_success_relevant: bool = False,
+) -> MetricDefinition:
+    return MetricDefinition(
+        name=name,
+        direction=direction,
+        aggregation_kind=aggregation_kind,
+        task_success_relevant=task_success_relevant,
+    )
+
+
+METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
+    name: _definition(name, direction, kind, task_success_relevant=task_success)
+    for name, direction, kind, task_success in [
+        ("task_success", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.BINARY, True),
+        (
+            "tool_selection_accuracy",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "tool_argument_accuracy",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "tool_sequence_accuracy",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "approval_required_accuracy",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "approval_decision_accuracy",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "unknown_outcome_semantics_accuracy",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "candidate_recall_at_20",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            False,
+        ),
+        ("final_recall_at_5", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        ("mrr_at_5", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        ("citation_precision", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        ("citation_coverage", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        ("faithfulness", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.BINARY, False),
+        (
+            "required_steps_covered",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            True,
+        ),
+        (
+            "terminal_task_success",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        ("latency_p50_ms", MetricDirection.LOWER_IS_BETTER, MetricAggregationKind.SCALAR, False),
+        ("latency_p95_ms", MetricDirection.LOWER_IS_BETTER, MetricAggregationKind.SCALAR, False),
+        (
+            "repetition_latency_mean_ms",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.SCALAR,
+            False,
+        ),
+        (
+            "repetition_latency_stddev_ms",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.SCALAR,
+            False,
+        ),
+        (
+            "unexpected_failure_rate",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            False,
+        ),
+        ("loop_rate", MetricDirection.LOWER_IS_BETTER, MetricAggregationKind.RATE, False),
+        (
+            "denied_action_execution_rate",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            True,
+        ),
+        (
+            "unauthorized_execution_rate",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            True,
+        ),
+        (
+            "duplicate_side_effect_rate",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            True,
+        ),
+        (
+            "unknown_usage_count",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.SCALAR,
+            False,
+        ),
+        ("input_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
+        ("output_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
+        ("total_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
+        ("cached_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
+    ]
+}

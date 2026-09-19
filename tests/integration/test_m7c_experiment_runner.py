@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
+from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.build_identity import StaticBuildIdentityProvider
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.metrics_service import EvaluationMetricsService
@@ -22,6 +23,8 @@ from packages.evaluation.models import (
     EvaluationExperimentCaseResult,
     EvaluationExperimentRunStatus,
     EvaluationExperimentVariant,
+    EvaluationMetricResult,
+    EvaluationMetricSnapshot,
 )
 from packages.evaluation.runner import (
     CaseExecutionObservation,
@@ -109,7 +112,11 @@ class _ObservedFailureDriver:
 
 
 async def _ready_run(
-    session: AsyncSession, base: dict[str, object], *, case_count: int = 2
+    session: AsyncSession,
+    base: dict[str, object],
+    *,
+    case_count: int = 2,
+    repetitions: int = 1,
 ):
     context = _manager_context(base)
     _, dataset_version = await _published_version(
@@ -130,6 +137,7 @@ async def _ready_run(
         dataset_version_id=dataset_version.id,
         split="DEV",
         purpose="DEVELOPMENT",
+        repetitions=repetitions,
     )
     for ordinal in range(2):
         await service.add_variant(
@@ -266,7 +274,7 @@ async def test_m7c_cancelled_queued_run_does_not_materialize_cases(db_factory) -
 async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) -> None:
     async with db_factory() as session:
         base = await _seed(session, label=f"m7d-metrics-{uuid4().hex}")
-        run = await _ready_run(session, base, case_count=5)
+        run = await _ready_run(session, base, case_count=10, repetitions=3)
         context = _manager_context(base)
     runner = ExperimentRunner(db_factory, driver=_CountingDriver())
     await runner.execute(run_id=run.id, owner="m7d-metrics-worker", settings=Settings(testing=True))
@@ -280,7 +288,45 @@ async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) ->
             )
         )
         service = EvaluationMetricsService()
-        metrics = await service.compute_run_metrics(session, context=context, run_id=run.id)
+        metrics = await service.materialize_metrics(session, context=context, run_id=run.id)
+        repeated = await service.materialize_metrics(session, context=context, run_id=run.id)
+        persisted = await service.get_persisted_metrics(session, context=context, run_id=run.id)
+        viewer = context.model_copy(
+            update={"workspace_role": "VIEWER", "permissions": frozenset({"evaluation_read"})}
+        )
+        snapshot_count_before = await session.scalar(
+            select(func.count(EvaluationMetricSnapshot.id)).where(
+                EvaluationMetricSnapshot.experiment_run_id == run.id
+            )
+        )
+        metric_count_before = await session.scalar(
+            select(func.count(EvaluationMetricResult.id)).where(
+                EvaluationMetricResult.experiment_run_id == run.id
+            )
+        )
+        viewer_metrics = await service.get_persisted_metrics(
+            session, context=viewer, run_id=run.id
+        )
+        with pytest.raises(AgentHubError) as viewer_materialize:
+            await service.materialize_metrics(session, context=viewer, run_id=run.id)
+        assert viewer_materialize.value.status_code == 403
+        assert viewer_metrics["metrics_hash"] == metrics["metrics_hash"]
+        assert (
+            await session.scalar(
+                select(func.count(EvaluationMetricSnapshot.id)).where(
+                    EvaluationMetricSnapshot.experiment_run_id == run.id
+                )
+            )
+            == snapshot_count_before
+        )
+        assert (
+            await session.scalar(
+                select(func.count(EvaluationMetricResult.id)).where(
+                    EvaluationMetricResult.experiment_run_id == run.id
+                )
+            )
+            == metric_count_before
+        )
         comparison = await service.create_comparison(
             session,
             context=context,
@@ -288,11 +334,41 @@ async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) ->
             baseline_variant_id=variants[0].id,
             candidate_variant_id=variants[1].id,
         )
+        comparison_again = await service.create_comparison(
+            session,
+            context=context,
+            run_id=run.id,
+            baseline_variant_id=variants[0].id,
+            candidate_variant_id=variants[1].id,
+        )
+        viewer_comparisons = await service.get_comparisons(
+            session, context=viewer, run_id=run.id
+        )
+        with pytest.raises(AgentHubError) as viewer_comparison:
+            await service.create_comparison(
+                session,
+                context=viewer,
+                run_id=run.id,
+                baseline_variant_id=variants[0].id,
+                candidate_variant_id=variants[1].id,
+            )
     assert set(metrics["variants"]) == {str(variant.id) for variant in variants}
     assert all(len(metrics["variants"][str(variant.id)]["categories"]) == 1 for variant in variants)
     assert all(
-        metrics["variants"][str(variant.id)]["total_tokens"]["value"] == 750
+        metrics["variants"][str(variant.id)]["total_tokens"]["value"] == 4500
         for variant in variants
     )
+    assert all(
+        metrics["variants"][str(variant.id)]["task_success"]["sample_count"] == 10
+        for variant in variants
+    )
+    assert repeated["snapshot_id"] == metrics["snapshot_id"]
+    assert repeated["metrics_hash"] == metrics["metrics_hash"]
+    assert persisted["metrics_hash"] == metrics["metrics_hash"]
     assert comparison.status == "COMPLETE"
+    assert comparison.paired_pairs == 10
     assert comparison.missing_pairs == 0
+    assert comparison_again.id == comparison.id
+    assert comparison_again.comparison_hash == comparison.comparison_hash
+    assert len(viewer_comparisons) == 1
+    assert viewer_comparison.value.status_code == 403
