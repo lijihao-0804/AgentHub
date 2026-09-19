@@ -103,6 +103,12 @@ jobs:
           -k m7d_metrics_and_comparison_use_persisted_m7c_cases -vv -rs
       - name: Run M7-E/F persisted ablation and release gate integration
         run: uv run --locked pytest tests/integration/test_m7ef_ablation_release_gate.py -vv -rs
+      - name: Validate M7-H unified dataset reproducibility
+        run: |
+          uv run --locked python -m benchmarks.evaluation.dataset_builder --check
+          uv run --locked python -m benchmarks.evaluation.runner --validate-only
+      - name: Run M7-H full unified evaluation integration
+        run: uv run --locked pytest tests/integration/test_m7h_unified_evaluation.py -vv -rs
       - name: Validate M3 retrieval benchmark wiring
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
