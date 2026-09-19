@@ -257,6 +257,50 @@ class EvaluationAblationResponse(BaseModel):
     created_at: datetime
 
 
+class EvaluationReleaseGatePolicyCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=4_000)
+    policy_json: dict[str, Any]
+
+
+class EvaluationReleaseGatePolicyResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    name: str
+    description: str | None
+    policy_json: dict[str, Any]
+    policy_hash: str = Field(min_length=64, max_length=64)
+    created_by: UUID
+    created_at: datetime
+
+
+class EvaluationReleaseGateCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    policy_id: UUID
+
+
+class EvaluationReleaseGateDecisionResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    comparison_id: UUID
+    policy_id: UUID
+    status: str
+    rule_results: list[dict[str, Any]]
+    reasons: list[str]
+    comparison_hash: str = Field(min_length=64, max_length=64)
+    policy_hash: str = Field(min_length=64, max_length=64)
+    decision_hash: str = Field(min_length=64, max_length=64)
+    created_by: UUID
+    created_at: datetime
+
+
 __all__ = [
     "EvaluationDatasetCreateRequest",
     "EvaluationDatasetItemRequest",
@@ -273,6 +317,10 @@ __all__ = [
     "EvaluationComparisonCreateRequest",
     "EvaluationComparisonResponse",
     "EvaluationAblationResponse",
+    "EvaluationReleaseGatePolicyCreateRequest",
+    "EvaluationReleaseGatePolicyResponse",
+    "EvaluationReleaseGateCreateRequest",
+    "EvaluationReleaseGateDecisionResponse",
     "EvaluationExperimentVariantCreateRequest",
     "EvaluationExperimentVariantResponse",
     "PricingSnapshotCreateRequest",

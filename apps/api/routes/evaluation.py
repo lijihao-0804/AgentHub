@@ -25,6 +25,10 @@ from apps.api.schemas.evaluation import (
     EvaluationExperimentRunResponse,
     EvaluationExperimentVariantCreateRequest,
     EvaluationExperimentVariantResponse,
+    EvaluationReleaseGateCreateRequest,
+    EvaluationReleaseGateDecisionResponse,
+    EvaluationReleaseGatePolicyCreateRequest,
+    EvaluationReleaseGatePolicyResponse,
     PricingSnapshotCreateRequest,
     PricingSnapshotResponse,
 )
@@ -33,6 +37,7 @@ from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.queue import ExperimentRunQueue
+from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}/evaluation", tags=["evaluation"])
@@ -558,6 +563,130 @@ async def get_experiment_ablation(
         session, context=context, run_id=run_id, comparison_id=comparison_id
     )
     return EvaluationAblationResponse.model_validate(result, from_attributes=True)
+
+
+@router.post(
+    "/release-gate-policies",
+    response_model=EvaluationReleaseGatePolicyResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_release_gate_policy(
+    workspace_id: UUID,
+    payload: EvaluationReleaseGatePolicyCreateRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationReleaseGatePolicyResponse:
+    del workspace_id
+    policy = await EvaluationReleaseGateService().create_policy(
+        session,
+        context=context,
+        name=payload.name,
+        description=payload.description,
+        policy_json=payload.policy_json,
+    )
+    return EvaluationReleaseGatePolicyResponse.model_validate(policy, from_attributes=True)
+
+
+@router.get(
+    "/release-gate-policies",
+    response_model=list[EvaluationReleaseGatePolicyResponse],
+)
+async def list_release_gate_policies(
+    workspace_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> list[EvaluationReleaseGatePolicyResponse]:
+    del workspace_id
+    policies = await EvaluationReleaseGateService().list_policies(session, context=context)
+    return [
+        EvaluationReleaseGatePolicyResponse.model_validate(policy, from_attributes=True)
+        for policy in policies
+    ]
+
+
+@router.get(
+    "/release-gate-policies/{policy_id}",
+    response_model=EvaluationReleaseGatePolicyResponse,
+)
+async def get_release_gate_policy(
+    workspace_id: UUID,
+    policy_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationReleaseGatePolicyResponse:
+    del workspace_id
+    policy = await EvaluationReleaseGateService().get_policy(
+        session, context=context, policy_id=policy_id
+    )
+    return EvaluationReleaseGatePolicyResponse.model_validate(policy, from_attributes=True)
+
+
+@router.post(
+    "/experiment-runs/{run_id}/comparisons/{comparison_id}/release-gates",
+    response_model=EvaluationReleaseGateDecisionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_release_gate_decision(
+    workspace_id: UUID,
+    run_id: UUID,
+    comparison_id: UUID,
+    payload: EvaluationReleaseGateCreateRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationReleaseGateDecisionResponse:
+    del workspace_id
+    decision = await EvaluationReleaseGateService().create_decision(
+        session,
+        context=context,
+        run_id=run_id,
+        comparison_id=comparison_id,
+        policy_id=payload.policy_id,
+    )
+    return EvaluationReleaseGateDecisionResponse.model_validate(decision, from_attributes=True)
+
+
+@router.get(
+    "/experiment-runs/{run_id}/comparisons/{comparison_id}/release-gates",
+    response_model=list[EvaluationReleaseGateDecisionResponse],
+)
+async def list_release_gate_decisions(
+    workspace_id: UUID,
+    run_id: UUID,
+    comparison_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> list[EvaluationReleaseGateDecisionResponse]:
+    del workspace_id
+    decisions = await EvaluationReleaseGateService().list_decisions(
+        session, context=context, run_id=run_id, comparison_id=comparison_id
+    )
+    return [
+        EvaluationReleaseGateDecisionResponse.model_validate(decision, from_attributes=True)
+        for decision in decisions
+    ]
+
+
+@router.get(
+    "/experiment-runs/{run_id}/comparisons/{comparison_id}/release-gates/{policy_id}",
+    response_model=EvaluationReleaseGateDecisionResponse,
+)
+async def get_release_gate_decision(
+    workspace_id: UUID,
+    run_id: UUID,
+    comparison_id: UUID,
+    policy_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationReleaseGateDecisionResponse:
+    del workspace_id
+    decision = await EvaluationReleaseGateService().get_decision(
+        session,
+        context=context,
+        run_id=run_id,
+        comparison_id=comparison_id,
+        policy_id=policy_id,
+    )
+    return EvaluationReleaseGateDecisionResponse.model_validate(decision, from_attributes=True)
 
 
 __all__ = ["router"]
