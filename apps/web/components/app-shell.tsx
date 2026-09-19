@@ -96,6 +96,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
     return () => document.body.classList.remove("nav-open");
   }, [navOpen]);
 
+  useEffect(() => {
+    if (!navOpen) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setNavOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [navOpen]);
+
   return (
     <FrontendSessionProvider>
       <div className="app-shell">

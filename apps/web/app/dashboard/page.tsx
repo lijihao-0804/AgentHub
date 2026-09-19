@@ -258,6 +258,9 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
     ["failed", "var(--danger)"],
     ["needs_attention", "var(--attention)"],
   ];
+  // Chart labels stay English/UTC regardless of browser locale.
+  const bucketLabel = (bucket: string) =>
+    new Date(bucket).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
   return (
     <div>
@@ -265,8 +268,8 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
         className="trend-chart"
         viewBox={`0 0 ${width} ${chartHeight + 18}`}
         role="img"
-        aria-label={`Runs per ${items.length > 0 ? "bucket" : "period"}: ${items
-          .map((item) => `${new Date(item.bucket).toLocaleDateString()} ${item.succeeded} succeeded, ${item.failed} failed, ${item.needs_attention} needs attention`)
+        aria-label={`Runs per bucket: ${items
+          .map((item) => `${bucketLabel(item.bucket)} ${item.succeeded} succeeded, ${item.failed} failed, ${item.needs_attention} needs attention`)
           .join("; ")}`}
       >
         {items.map((item, index) => {
@@ -277,7 +280,7 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
           return (
             <g key={item.bucket}>
               <title>
-                {`${new Date(item.bucket).toLocaleString()} — ${item.runs} runs: ${item.succeeded} succeeded, ${item.failed} failed, ${item.needs_attention} needs attention, ${item.tokens ?? "unknown"} tokens`}
+                {`${bucketLabel(item.bucket)} — ${item.runs} runs: ${item.succeeded} succeeded, ${item.failed} failed, ${item.needs_attention} needs attention, ${item.tokens ?? "unknown"} tokens`}
               </title>
               {segmentColors.map(([key, color]) => {
                 const value = item[key];
@@ -290,7 +293,7 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
                 <rect x={x} y={chartHeight - 1} width={barWidth} height={1} fill="var(--border-strong)" />
               )}
               <text x={x + barWidth / 2} y={chartHeight + 12} textAnchor="middle" fontSize="8" fill="var(--text-muted)">
-                {new Date(item.bucket).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                {bucketLabel(item.bucket)}
               </text>
             </g>
           );
@@ -303,7 +306,7 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
       </div>
       <p className="trend-note">
         Peak {maxRuns} runs per bucket. Exact values:{" "}
-        {items.map((item) => `${new Date(item.bucket).toLocaleDateString()} (${item.runs})`).join(", ")}.
+        {items.map((item) => `${bucketLabel(item.bucket)} (${item.runs})`).join(", ")}.
       </p>
     </div>
   );
