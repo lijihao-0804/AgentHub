@@ -1,6 +1,7 @@
 # M7-C — Durable Experiment Runner
 
-Status: PASS — closure verified in GitHub Actions run #105.
+Status: PASS — implementation verified in GitHub Actions run #105; final docs-only
+closure CI is being rerun after a transient integration-suite failure.
 
 M7-C executes the frozen M7-B experiment definition as a durable database-backed case
 matrix. Celery transports only the `experiment_run_id`; workers rebuild the deterministic
