@@ -26,3 +26,10 @@ This repository follows `plan/plan.md` as the product and semantic source of tru
 22. Durable claims are limited to guarantees actually covered by tests.
 23. All crash windows across Approval and Checkpoint persistence receive failure-injection tests.
 24. No automatic schema setup in the API process; deployment steps own framework checkpoint setup.
+25. Formal Experiments bind dataset content/schema, resolved AgentVersion spec, knowledge snapshot
+    hashes, pricing snapshot, build SHA, and evaluator versions.
+26. Published DatasetVersions are immutable; a formal Experiment may bind only a published version.
+27. A `LATEST` knowledge binding is resolved once for the Experiment variant and never re-resolved
+    when historical experiment data is read.
+28. Holdout exposure is an auditable persisted event; development runs must not consume holdout
+    exposure.

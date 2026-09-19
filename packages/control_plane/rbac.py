@@ -9,7 +9,9 @@ WORKSPACE_ADMIN = "workspace_administration"
 WORKSPACE_READ = "workspace_read"
 APPROVE_ACTION = "approve_action"
 RUN_ACTION = "run_action"
+EVALUATION_READ = "evaluation_read"
 EVALUATION_MANAGE = "evaluation_manage"
+EVALUATION_RUN = "evaluation_run"
 
 WORKSPACE_OPERATIONAL_PERMISSIONS = frozenset(
     {
@@ -23,7 +25,9 @@ WORKSPACE_OPERATIONAL_PERMISSIONS = frozenset(
         "tool_edit",
         "tool_run",
         RUN_ACTION,
+        EVALUATION_READ,
         EVALUATION_MANAGE,
+        EVALUATION_RUN,
     }
 )
 WORKSPACE_ADMIN_PERMISSIONS = frozenset({WORKSPACE_ADMIN}) | WORKSPACE_OPERATIONAL_PERMISSIONS
@@ -32,7 +36,7 @@ ORGANIZATION_ADMIN_PERMISSIONS = (
     | WORKSPACE_ADMIN_PERMISSIONS
 )
 DEVELOPER_PERMISSIONS = frozenset({WORKSPACE_READ}) | WORKSPACE_OPERATIONAL_PERMISSIONS
-VIEWER_PERMISSIONS = frozenset({WORKSPACE_READ})
+VIEWER_PERMISSIONS = frozenset({WORKSPACE_READ, EVALUATION_READ})
 
 
 def resolve_permissions(

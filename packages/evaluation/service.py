@@ -12,7 +12,6 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.models import (
@@ -22,6 +21,7 @@ from packages.evaluation.models import (
     EvaluationDatasetVersionStatus,
     PricingSnapshot,
 )
+from packages.evaluation.reproducibility import pricing_snapshot_content_hash
 from packages.evaluation.validation import dataset_content_hash, validate_dataset_items
 
 
@@ -316,19 +316,6 @@ class EvaluationDatasetService:
             if cached_input_price_per_1m is not None
             else None
         )
-        hash_payload = {
-            "name": normalized_name,
-            "provider": normalized_provider,
-            "model": normalized_model,
-            "currency": normalized_currency,
-            "input_price_per_1m": self._money_text(input_price),
-            "output_price_per_1m": self._money_text(output_price),
-            "cached_input_price_per_1m": (
-                self._money_text(cached_price) if cached_price is not None else None
-            ),
-            "effective_at": effective_at.isoformat(),
-            "source_note": normalized_note,
-        }
         snapshot = PricingSnapshot(
             workspace_id=workspace_id,
             name=normalized_name,
@@ -340,9 +327,9 @@ class EvaluationDatasetService:
             cached_input_price_per_1m=cached_price,
             effective_at=effective_at,
             source_note=normalized_note,
-            content_hash=canonical_json_hash(hash_payload),
             created_by=self._user_id(context),
         )
+        snapshot.content_hash = pricing_snapshot_content_hash(snapshot)
         session.add(snapshot)
         try:
             await session.commit()
@@ -402,10 +389,6 @@ class EvaluationDatasetService:
                 "EVALUATION_PRICING_INVALID", f"{field} supports at most 8 decimals.", 422
             )
         return quantized
-
-    @staticmethod
-    def _money_text(value: Decimal) -> str:
-        return format(value, "f")
 
     @staticmethod
     def _required_text(value: str, field: str) -> str:

@@ -224,6 +224,297 @@ class PricingSnapshot(Base):
     created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
 
 
+class EvaluationExperimentStatus(StrEnum):
+    DRAFT = "DRAFT"
+    READY = "READY"
+
+
+class EvaluationExperimentPurpose(StrEnum):
+    DEVELOPMENT = "DEVELOPMENT"
+    HOLDOUT_VALIDATION = "HOLDOUT_VALIDATION"
+    RELEASE_GATE = "RELEASE_GATE"
+
+
+class EvaluationExperimentRunStatus(StrEnum):
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+    CANCEL_REQUESTED = "CANCEL_REQUESTED"
+    CANCELLED = "CANCELLED"
+
+
+class EvaluationExperiment(Base):
+    __tablename__ = "evaluation_experiments"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id"],
+            ["workspaces.id"],
+            name="fk_evaluation_experiments_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "dataset_version_id"],
+            ["evaluation_dataset_versions.workspace_id", "evaluation_dataset_versions.id"],
+            name="fk_evaluation_experiments_dataset_version_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"],
+            ["users.id"],
+            name="fk_evaluation_experiments_created_by",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "split IN ('DEV', 'HOLDOUT')", name="ck_evaluation_experiments_split"
+        ),
+        CheckConstraint(
+            "purpose IN ('DEVELOPMENT', 'HOLDOUT_VALIDATION', 'RELEASE_GATE')",
+            name="ck_evaluation_experiments_purpose",
+        ),
+        CheckConstraint(
+            "(purpose = 'DEVELOPMENT' AND split = 'DEV') OR "
+            "(purpose IN ('HOLDOUT_VALIDATION', 'RELEASE_GATE') AND split = 'HOLDOUT')",
+            name="ck_evaluation_experiments_purpose_split",
+        ),
+        CheckConstraint(
+            "repetitions BETWEEN 1 AND 5", name="ck_evaluation_experiments_repetitions"
+        ),
+        CheckConstraint(
+            "status IN ('DRAFT', 'READY')", name="ck_evaluation_experiments_status"
+        ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_experiments_workspace_id"),
+        Index("ix_evaluation_experiments_workspace_created", "workspace_id", "created_at"),
+        Index(
+            "ix_evaluation_experiments_workspace_dataset",
+            "workspace_id",
+            "dataset_version_id",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    dataset_version_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    dataset_content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    dataset_schema_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    split: Mapped[str] = mapped_column(String(16), nullable=False)
+    purpose: Mapped[str] = mapped_column(String(32), nullable=False)
+    repetitions: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, server_default=EvaluationExperimentStatus.DRAFT
+    )
+    build_sha: Mapped[str] = mapped_column(String(64), nullable=False)
+    evaluator_manifest: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
+    )
+    spec_json: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    spec_hash: Mapped[str | None] = mapped_column(String(64))
+    holdout_exposure_index: Mapped[int | None] = mapped_column(Integer)
+    created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EvaluationExperimentVariant(Base):
+    __tablename__ = "evaluation_experiment_variants"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_id"],
+            ["evaluation_experiments.workspace_id", "evaluation_experiments.id"],
+            name="fk_evaluation_experiment_variants_experiment_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_version_id"],
+            ["agent_versions.workspace_id", "agent_versions.id"],
+            name="fk_evaluation_experiment_variants_agent_version_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "pricing_snapshot_id"],
+            ["pricing_snapshots.workspace_id", "pricing_snapshots.id"],
+            name="fk_evaluation_experiment_variants_pricing_workspace",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "ordinal >= 0 AND ordinal < 5", name="ck_evaluation_experiment_variants_ordinal"
+        ),
+        UniqueConstraint(
+            "workspace_id", "id", name="uq_evaluation_experiment_variants_workspace_id"
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "experiment_id",
+            "label",
+            name="uq_evaluation_experiment_variants_label",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "experiment_id",
+            "ordinal",
+            name="uq_evaluation_experiment_variants_ordinal",
+        ),
+        Index(
+            "ix_evaluation_experiment_variants_experiment_ordinal",
+            "workspace_id",
+            "experiment_id",
+            "ordinal",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    label: Mapped[str] = mapped_column(String(128), nullable=False)
+    agent_version_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    resolved_spec_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    pricing_snapshot_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    pricing_snapshot_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    effective_knowledge_snapshots: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=sql_text("'[]'::jsonb")
+    )
+    variant_metadata: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
+    )
+    variant_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EvaluationExperimentRun(Base):
+    __tablename__ = "evaluation_experiment_runs"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_id"],
+            ["evaluation_experiments.workspace_id", "evaluation_experiments.id"],
+            name="fk_evaluation_experiment_runs_experiment_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "dataset_version_id"],
+            ["evaluation_dataset_versions.workspace_id", "evaluation_dataset_versions.id"],
+            name="fk_evaluation_experiment_runs_dataset_version_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"],
+            ["users.id"],
+            name="fk_evaluation_experiment_runs_created_by",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "status IN ('QUEUED', 'RUNNING', 'SUCCEEDED', 'FAILED', 'CANCEL_REQUESTED', "
+            "'CANCELLED')",
+            name="ck_evaluation_experiment_runs_status",
+        ),
+        CheckConstraint("split IN ('DEV', 'HOLDOUT')", name="ck_evaluation_experiment_runs_split"),
+        CheckConstraint(
+            "purpose IN ('DEVELOPMENT', 'HOLDOUT_VALIDATION', 'RELEASE_GATE')",
+            name="ck_evaluation_experiment_runs_purpose",
+        ),
+        CheckConstraint(
+            "repetitions BETWEEN 1 AND 5", name="ck_evaluation_experiment_runs_repetitions"
+        ),
+        UniqueConstraint("workspace_id", "id", name="uq_evaluation_experiment_runs_workspace_id"),
+        Index(
+            "ix_evaluation_experiment_runs_experiment_created",
+            "workspace_id",
+            "experiment_id",
+            "created_at",
+        ),
+        Index(
+            "ix_evaluation_experiment_runs_workspace_status",
+            "workspace_id",
+            "status",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(24), nullable=False, server_default=EvaluationExperimentRunStatus.QUEUED
+    )
+    git_commit: Mapped[str] = mapped_column(String(64), nullable=False)
+    dataset_version_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    dataset_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    experiment_spec_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    split: Mapped[str] = mapped_column(String(16), nullable=False)
+    purpose: Mapped[str] = mapped_column(String(32), nullable=False)
+    repetitions: Mapped[int] = mapped_column(Integer, nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    failure_code: Mapped[str | None] = mapped_column(String(96))
+    safe_failure_message: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EvaluationExperimentHoldoutExposure(Base):
+    __tablename__ = "evaluation_experiment_holdout_exposures"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "dataset_version_id"],
+            ["evaluation_dataset_versions.workspace_id", "evaluation_dataset_versions.id"],
+            name="fk_evaluation_holdout_exposures_dataset_version_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_id"],
+            ["evaluation_experiments.workspace_id", "evaluation_experiments.id"],
+            name="fk_evaluation_holdout_exposures_experiment_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "experiment_run_id"],
+            ["evaluation_experiment_runs.workspace_id", "evaluation_experiment_runs.id"],
+            name="fk_evaluation_holdout_exposures_run_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["created_by"],
+            ["users.id"],
+            name="fk_evaluation_holdout_exposures_created_by",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("exposure_index > 0", name="ck_evaluation_holdout_exposures_index"),
+        UniqueConstraint(
+            "workspace_id", "id", name="uq_evaluation_holdout_exposures_workspace_id"
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "dataset_version_id",
+            "exposure_index",
+            name="uq_evaluation_holdout_exposures_dataset_index",
+        ),
+        Index(
+            "ix_evaluation_holdout_exposures_dataset_created",
+            "workspace_id",
+            "dataset_version_id",
+            "created_at",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    dataset_version_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    experiment_run_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    exposure_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    purpose: Mapped[str] = mapped_column(String(32), nullable=False)
+    created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 __all__ = [
     "EvaluationDataset",
     "EvaluationDatasetCategory",
@@ -231,5 +522,12 @@ __all__ = [
     "EvaluationDatasetSplit",
     "EvaluationDatasetVersion",
     "EvaluationDatasetVersionStatus",
+    "EvaluationExperiment",
+    "EvaluationExperimentHoldoutExposure",
+    "EvaluationExperimentPurpose",
+    "EvaluationExperimentRun",
+    "EvaluationExperimentRunStatus",
+    "EvaluationExperimentStatus",
+    "EvaluationExperimentVariant",
     "PricingSnapshot",
 ]

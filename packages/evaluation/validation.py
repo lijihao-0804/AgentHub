@@ -9,7 +9,24 @@ from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.models import EvaluationDatasetCategory, EvaluationDatasetSplit
 
-_SECRET_KEYS = frozenset({"api_key", "authorization", "credential", "password", "secret", "token"})
+_SECRET_KEYS = frozenset(
+    {
+        "access_token",
+        "api_key",
+        "authorization",
+        "checkpoint",
+        "credential",
+        "customer_record",
+        "encrypted_secret",
+        "password",
+        "raw_prompt",
+        "secret",
+        "system_prompt",
+        "token",
+        "tool_arguments",
+        "tool_results",
+    }
+)
 
 # The category schemas intentionally stay small in M7-A.  Later importers normalize legacy
 # benchmark formats into these explicit shapes; accepting arbitrary dictionaries here would make
@@ -150,6 +167,26 @@ def dataset_content_hash(items: Sequence[Mapping[str, Any]], *, schema_version: 
     return canonical_json_hash({"schema_version": schema_version, "items": normalized})
 
 
+def validate_variant_metadata(value: Mapping[str, Any]) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise AgentHubError(
+            "EVALUATION_VARIANT_METADATA_INVALID",
+            "Variant metadata must be an object.",
+            422,
+        )
+    _reject_secret_keys(value)
+    normalized = dict(value)
+    try:
+        canonical_json_hash(normalized)
+    except (TypeError, ValueError):
+        raise AgentHubError(
+            "EVALUATION_VARIANT_METADATA_INVALID",
+            "Variant metadata must be JSON-compatible.",
+            422,
+        ) from None
+    return normalized
+
+
 def _object(value: Any, field: str) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise AgentHubError("EVALUATION_DATASET_INVALID", f"{field} must be an object.", 422)
@@ -229,4 +266,9 @@ def _string_list(value: Any) -> bool:
     return isinstance(value, list) and all(isinstance(item, str) and item for item in value)
 
 
-__all__ = ["dataset_content_hash", "validate_dataset_item", "validate_dataset_items"]
+__all__ = [
+    "dataset_content_hash",
+    "validate_dataset_item",
+    "validate_dataset_items",
+    "validate_variant_metadata",
+]

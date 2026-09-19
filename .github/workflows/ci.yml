@@ -87,6 +87,8 @@ jobs:
         run: uv run --locked pytest -m integration -vv -rs
       - name: Run M7-A evaluation dataset integration
         run: uv run --locked pytest tests/integration/test_m7a_evaluation_datasets.py -vv -rs
+      - name: Run M7-B experiment persistence integration
+        run: uv run --locked pytest tests/integration/test_m7b_experiments.py -vv -rs
       - name: Validate M3 retrieval benchmark wiring
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
@@ -115,6 +117,10 @@ jobs:
       - run: uv run --locked pytest -m "not integration"
       - name: Validate M7-A dataset contract
         run: uv run --locked pytest tests/unit/test_m7a_dataset_validation.py -vv
+      - name: Validate M7-B reproducibility contract
+        run: >-
+          uv run --locked pytest tests/unit/test_m7b_reproducibility.py
+          tests/unit/test_m7b_evaluation_api.py -vv
 
   frontend:
     runs-on: ubuntu-latest

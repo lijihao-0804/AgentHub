@@ -107,6 +107,96 @@ class PricingSnapshotResponse(BaseModel):
     created_by: UUID
 
 
+class EvaluationExperimentCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=4_000)
+    dataset_version_id: UUID
+    split: str
+    purpose: str
+    repetitions: int = Field(default=1, ge=1, le=5)
+
+
+class EvaluationExperimentVariantCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    label: str = Field(min_length=1, max_length=128)
+    agent_version_id: UUID
+    pricing_snapshot_id: UUID
+    ordinal: int = Field(ge=0, lt=5)
+    variant_metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class EvaluationExperimentVariantResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    experiment_id: UUID
+    label: str
+    agent_version_id: UUID
+    resolved_spec_hash: str = Field(min_length=64, max_length=64)
+    pricing_snapshot_id: UUID
+    pricing_snapshot_hash: str = Field(min_length=64, max_length=64)
+    effective_knowledge_snapshots: list[dict[str, str]]
+    variant_metadata: dict[str, Any]
+    variant_hash: str = Field(min_length=64, max_length=64)
+    ordinal: int
+    created_at: datetime
+
+
+class EvaluationExperimentResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    name: str
+    description: str | None
+    dataset_version_id: UUID
+    dataset_content_hash: str = Field(min_length=64, max_length=64)
+    dataset_schema_version: int
+    split: str
+    purpose: str
+    repetitions: int
+    status: str
+    build_sha: str = Field(min_length=7, max_length=64)
+    evaluator_manifest: dict[str, Any]
+    spec_json: dict[str, Any] | None
+    spec_hash: str | None = Field(default=None, min_length=64, max_length=64)
+    holdout_exposure_index: int | None = None
+    holdout_exposure_count: int | None = Field(default=None, ge=0)
+    created_by: UUID
+    created_at: datetime
+
+
+class EvaluationExperimentDetailResponse(EvaluationExperimentResponse):
+    variants: list[EvaluationExperimentVariantResponse]
+
+
+class EvaluationExperimentRunResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    experiment_id: UUID
+    status: str
+    git_commit: str = Field(min_length=7, max_length=64)
+    dataset_version_id: UUID
+    dataset_hash: str = Field(min_length=64, max_length=64)
+    experiment_spec_hash: str = Field(min_length=64, max_length=64)
+    split: str
+    purpose: str
+    repetitions: int
+    started_at: datetime | None
+    completed_at: datetime | None
+    failure_code: str | None
+    safe_failure_message: str | None
+    holdout_exposure_index: int | None
+    created_by: UUID
+    created_at: datetime
+
+
 __all__ = [
     "EvaluationDatasetCreateRequest",
     "EvaluationDatasetItemRequest",
@@ -115,6 +205,12 @@ __all__ = [
     "EvaluationDatasetVersionCreateRequest",
     "EvaluationDatasetVersionDetailResponse",
     "EvaluationDatasetVersionResponse",
+    "EvaluationExperimentCreateRequest",
+    "EvaluationExperimentDetailResponse",
+    "EvaluationExperimentResponse",
+    "EvaluationExperimentRunResponse",
+    "EvaluationExperimentVariantCreateRequest",
+    "EvaluationExperimentVariantResponse",
     "PricingSnapshotCreateRequest",
     "PricingSnapshotResponse",
 ]

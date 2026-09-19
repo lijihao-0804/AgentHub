@@ -14,10 +14,17 @@ from apps.api.schemas.evaluation import (
     EvaluationDatasetVersionCreateRequest,
     EvaluationDatasetVersionDetailResponse,
     EvaluationDatasetVersionResponse,
+    EvaluationExperimentCreateRequest,
+    EvaluationExperimentDetailResponse,
+    EvaluationExperimentResponse,
+    EvaluationExperimentRunResponse,
+    EvaluationExperimentVariantCreateRequest,
+    EvaluationExperimentVariantResponse,
     PricingSnapshotCreateRequest,
     PricingSnapshotResponse,
 )
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.service import EvaluationDatasetService
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}/evaluation", tags=["evaluation"])
@@ -201,6 +208,192 @@ async def list_pricing_snapshots(
         PricingSnapshotResponse.model_validate(snapshot, from_attributes=True)
         for snapshot in snapshots
     ]
+
+
+@router.post(
+    "/experiments",
+    response_model=EvaluationExperimentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_experiment(
+    workspace_id: UUID,
+    payload: EvaluationExperimentCreateRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationExperimentResponse:
+    del workspace_id
+    experiment = await ExperimentService().create_experiment(
+        session,
+        context=context,
+        name=payload.name,
+        description=payload.description,
+        dataset_version_id=payload.dataset_version_id,
+        split=payload.split,
+        purpose=payload.purpose,
+        repetitions=payload.repetitions,
+    )
+    return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+
+
+@router.get("/experiments", response_model=list[EvaluationExperimentResponse])
+async def list_experiments(
+    workspace_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> list[EvaluationExperimentResponse]:
+    del workspace_id
+    experiments = await ExperimentService().list_experiments(session, context=context)
+    return [
+        EvaluationExperimentResponse.model_validate(item, from_attributes=True)
+        for item in experiments
+    ]
+
+
+@router.get(
+    "/experiments/{experiment_id}",
+    response_model=EvaluationExperimentDetailResponse,
+)
+async def get_experiment(
+    workspace_id: UUID,
+    experiment_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationExperimentDetailResponse:
+    del workspace_id
+    service = ExperimentService()
+    experiment = await service.get_experiment(
+        session, context=context, experiment_id=experiment_id
+    )
+    variants = await service.list_variants(
+        session, context=context, experiment_id=experiment_id
+    )
+    count = await service.holdout_exposure_count(
+        session, context=context, experiment_id=experiment_id
+    )
+    response = EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+    return EvaluationExperimentDetailResponse(
+        **response.model_dump(exclude={"holdout_exposure_count"}),
+        holdout_exposure_count=count,
+        variants=[
+            EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
+            for item in variants
+        ],
+    )
+
+
+@router.post(
+    "/experiments/{experiment_id}/variants",
+    response_model=EvaluationExperimentVariantResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def add_experiment_variant(
+    workspace_id: UUID,
+    experiment_id: UUID,
+    payload: EvaluationExperimentVariantCreateRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationExperimentVariantResponse:
+    del workspace_id
+    variant = await ExperimentService().add_variant(
+        session,
+        context=context,
+        experiment_id=experiment_id,
+        label=payload.label,
+        agent_version_id=payload.agent_version_id,
+        pricing_snapshot_id=payload.pricing_snapshot_id,
+        ordinal=payload.ordinal,
+        variant_metadata=payload.variant_metadata,
+    )
+    return EvaluationExperimentVariantResponse.model_validate(variant, from_attributes=True)
+
+
+@router.get(
+    "/experiments/{experiment_id}/variants",
+    response_model=list[EvaluationExperimentVariantResponse],
+)
+async def list_experiment_variants(
+    workspace_id: UUID,
+    experiment_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> list[EvaluationExperimentVariantResponse]:
+    del workspace_id
+    variants = await ExperimentService().list_variants(
+        session, context=context, experiment_id=experiment_id
+    )
+    return [
+        EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
+        for item in variants
+    ]
+
+
+@router.post(
+    "/experiments/{experiment_id}/finalize",
+    response_model=EvaluationExperimentDetailResponse,
+)
+async def finalize_experiment(
+    workspace_id: UUID,
+    experiment_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationExperimentDetailResponse:
+    del workspace_id
+    service = ExperimentService()
+    experiment = await service.finalize_experiment(
+        session, context=context, experiment_id=experiment_id
+    )
+    variants = await service.list_variants(
+        session, context=context, experiment_id=experiment_id
+    )
+    count = await service.holdout_exposure_count(
+        session, context=context, experiment_id=experiment_id
+    )
+    response = EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+    return EvaluationExperimentDetailResponse(
+        **response.model_dump(exclude={"holdout_exposure_count"}),
+        holdout_exposure_count=count,
+        variants=[
+            EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
+            for item in variants
+        ],
+    )
+
+
+@router.post(
+    "/experiments/{experiment_id}/runs",
+    response_model=EvaluationExperimentRunResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_experiment_run(
+    workspace_id: UUID,
+    experiment_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationExperimentRunResponse:
+    del workspace_id
+    run, exposure_index = await ExperimentService().create_run(
+        session, context=context, experiment_id=experiment_id
+    )
+    response = EvaluationExperimentRunResponse.model_validate(run, from_attributes=True)
+    return response.model_copy(update={"holdout_exposure_index": exposure_index})
+
+
+@router.get(
+    "/experiment-runs/{run_id}",
+    response_model=EvaluationExperimentRunResponse,
+)
+async def get_experiment_run(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationExperimentRunResponse:
+    del workspace_id
+    run, exposure_index = await ExperimentService().get_run(
+        session, context=context, run_id=run_id
+    )
+    response = EvaluationExperimentRunResponse.model_validate(run, from_attributes=True)
+    return response.model_copy(update={"holdout_exposure_index": exposure_index})
 
 
 __all__ = ["router"]
