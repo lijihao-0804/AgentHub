@@ -10,7 +10,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
-from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery, RetrievalResult
+from packages.knowledge.contracts import (
+    KnowledgeRetriever,
+    RetrievalQuery,
+    RetrievalResult,
+    RetrievalStrategy,
+)
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 from packages.tools.errors import ToolHandlerError
@@ -73,11 +78,20 @@ async def _snapshot_queries(
                 "The published knowledge snapshot is unavailable.",
             )
         config = definition.retrieval_config
+        try:
+            strategy = RetrievalStrategy(
+                config.get("retrieval_strategy", RetrievalStrategy.HYBRID_RERANK.value)
+            )
+        except ValueError:
+            raise ToolHandlerError(
+                "TOOL_REVISION_INVALID", "The published retrieval strategy is invalid."
+            ) from None
         queries.append(
             RetrievalQuery(
                 text=text,
                 knowledge_base_id=str(snapshot.knowledge_base_id),
                 knowledge_snapshot_id=str(snapshot.id),
+                strategy=strategy,
                 dense_top_k=min(int(config.get("dense_top_k", 30)), 100),
                 sparse_top_k=min(int(config.get("sparse_top_k", 30)), 100),
                 candidate_top_k=min(int(config.get("candidate_top_k", 20)), 100),

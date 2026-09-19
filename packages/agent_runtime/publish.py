@@ -29,6 +29,7 @@ from packages.agent_runtime.tool_revisions import validate_tool_spec
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.knowledge.contracts import RetrievalStrategy
 from packages.knowledge.snapshots import KnowledgeSnapshotService, ResolvedKnowledgeSnapshot
 from packages.model_gateway.capabilities import CapabilityRequirements
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
@@ -43,6 +44,7 @@ SPEC_SCHEMA_VERSION = 2
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
     "reranker_model": "BAAI/bge-reranker-v2-m3",
+    "retrieval_strategy": RetrievalStrategy.HYBRID_RERANK.value,
     "dense_top_k": 30,
     "sparse_top_k": 30,
     "candidate_top_k": 20,
@@ -550,6 +552,8 @@ def _validate_retrieval_config(value: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(value, Mapping) or not set(value).issubset(_RETRIEVAL_KEYS):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     result = {**DEFAULT_RETRIEVAL_CONFIG, **dict(value)}
+    if result["retrieval_strategy"] not in {item.value for item in RetrievalStrategy}:
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     for key in ("dense_top_k", "sparse_top_k", "candidate_top_k", "final_top_k"):
         item = result[key]
         if isinstance(item, bool) or not isinstance(item, int) or item < 1:
