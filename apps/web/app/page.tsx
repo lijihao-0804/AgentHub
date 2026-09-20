@@ -28,6 +28,41 @@ const QUICK_LINKS = [
   },
 ] as const;
 
+/**
+ * The four applications, in the order they were built.
+ *
+ * Each one is an `AgentVersion` with its own prompt and its own MCP tools,
+ * writing its own artifact types into the same threads. The `act` line is the
+ * one that carries the argument: the four differ in what they are allowed to
+ * do, and that difference lives in tool governance, not in four runtimes.
+ */
+const APPLICATIONS = [
+  {
+    href: "/research",
+    titleKey: "home.applications.research.title",
+    descriptionKey: "home.applications.research.description",
+    actKey: "home.applications.research.act",
+  },
+  {
+    href: "/incidents",
+    titleKey: "home.applications.incidents.title",
+    descriptionKey: "home.applications.incidents.description",
+    actKey: "home.applications.incidents.act",
+  },
+  {
+    href: "/analytics",
+    titleKey: "home.applications.analytics.title",
+    descriptionKey: "home.applications.analytics.description",
+    actKey: "home.applications.analytics.act",
+  },
+  {
+    href: "/support",
+    titleKey: "home.applications.support.title",
+    descriptionKey: "home.applications.support.description",
+    actKey: "home.applications.support.act",
+  },
+] as const;
+
 function shortWorkspaceId(value: string): string {
   if (value.length <= 8) return value;
   return `${value.slice(0, 4)}…${value.slice(-3)}`;
@@ -65,6 +100,29 @@ export default function Home() {
             </button>
           </div>
         )}
+      </section>
+
+      <section className="panel" aria-labelledby="applications-title">
+        <div className="panel-heading">
+          <div>
+            <p className="eyebrow">{t("home.applications.eyebrow")}</p>
+            <h2 id="applications-title">{t("home.applications.title")}</h2>
+            <p className="state-hint">{t("home.applications.lede")}</p>
+          </div>
+        </div>
+        <p className="application-stages">{t("home.applications.stages")}</p>
+        <div className="overview-grid">
+          {APPLICATIONS.map((item) => (
+            <Link className="overview-card" href={item.href} key={item.href}>
+              <span className="overview-card-title">{t(item.titleKey)}</span>
+              <span className="overview-card-description">{t(item.descriptionKey)}</span>
+              <span className="overview-card-description application-act">{t(item.actKey)}</span>
+              <span className="overview-card-cta" aria-hidden="true">
+                {t("home.cardCta")} →
+              </span>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="overview-grid" aria-label={t("home.quickLinks")}>

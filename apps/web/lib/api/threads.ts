@@ -13,11 +13,23 @@ function workspaceBase(workspaceId: string): string {
   return `/api/v1/workspaces/${encodeURIComponent(workspaceId)}`;
 }
 
+/**
+ * Which application page owns a thread.
+ *
+ * A routing label and nothing more — no runtime behaviour branches on it. It
+ * is stored on the thread rather than inferred from the agent because the
+ * agent can be renamed or replaced and the thread is the durable unit of work.
+ */
+export const THREAD_KINDS = ["general", "research", "incident", "analysis", "support"] as const;
+
+export type ThreadKind = (typeof THREAD_KINDS)[number];
+
 export type Thread = {
   id: string;
   workspace_id: string;
   agent_id: string;
   title: string;
+  kind: string;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -47,7 +59,7 @@ export type ThreadTurnSubmitResult = {
 export function createThread(
   input: AuthInput,
   agentId: string,
-  body: { title: string },
+  body: { title: string; kind?: ThreadKind },
 ): Promise<Thread> {
   return apiRequest<Thread>(
     `${workspaceBase(input.workspaceId)}/agents/${encodeURIComponent(agentId)}/threads`,
@@ -58,10 +70,11 @@ export function createThread(
 
 export async function listThreads(
   input: AuthInput,
-  query?: { agentId?: string; limit?: number; offset?: number },
+  query?: { agentId?: string; kind?: ThreadKind; limit?: number; offset?: number },
 ): Promise<Thread[]> {
   const params = new URLSearchParams();
   if (query?.agentId?.trim()) params.set("agent_id", query.agentId.trim());
+  if (query?.kind) params.set("kind", query.kind);
   if (query?.limit !== undefined) params.set("limit", String(query.limit));
   if (query?.offset !== undefined) params.set("offset", String(query.offset));
   const suffix = params.toString() ? `?${params.toString()}` : "";

@@ -25,6 +25,9 @@ PREFIX = "/api/v1/workspaces/{workspace_id}"
 router = APIRouter(prefix=PREFIX, tags=["threads"])
 context_dependency = Depends(get_agent_run_workspace_context)
 agent_id_query = Query(default=None)
+# How each application page finds its own threads. Omitted means every thread
+# in the workspace, which is what the plain Agents view wants.
+kind_query = Query(default=None, max_length=32)
 limit_query = Query(default=50, ge=1, le=200)
 offset_query = Query(default=0, ge=0)
 
@@ -47,7 +50,9 @@ async def create_thread(
     context: WorkspaceExecutionContext = context_dependency,
 ) -> ThreadResponse:
     del workspace_id
-    thread = await _service(request).create_thread(context, agent_id=agent_id, title=payload.title)
+    thread = await _service(request).create_thread(
+        context, agent_id=agent_id, title=payload.title, kind=payload.kind
+    )
     return ThreadResponse.model_validate(thread)
 
 
@@ -56,13 +61,14 @@ async def list_threads(
     workspace_id: UUID,
     request: Request,
     agent_id: UUID | None = agent_id_query,
+    kind: str | None = kind_query,
     limit: int = limit_query,
     offset: int = offset_query,
     context: WorkspaceExecutionContext = context_dependency,
 ) -> list[ThreadResponse]:
     del workspace_id
     threads = await _service(request).list_threads(
-        context, agent_id=agent_id, limit=limit, offset=offset
+        context, agent_id=agent_id, kind=kind, limit=limit, offset=offset
     )
     return [ThreadResponse.model_validate(thread) for thread in threads]
 

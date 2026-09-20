@@ -40,7 +40,7 @@ export default function ResearchPage() {
   const router = useRouter();
 
   const loadSummaries = useCallback(async (auth: AuthInput) => {
-    const threads = await listThreads(auth, { limit: THREAD_PAGE_SIZE });
+    const threads = await listThreads(auth, { kind: "research", limit: THREAD_PAGE_SIZE });
     return Promise.all(threads.map((thread) => summarize(auth, thread)));
   }, []);
   const loadAgentList = useCallback((auth: AuthInput) => listAgents(auth), []);
@@ -78,7 +78,9 @@ export default function ResearchPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const created = await mutation.run((auth) => createThread(auth, agentId, { title: title.trim() }));
+    const created = await mutation.run((auth) =>
+      createThread(auth, agentId, { title: title.trim(), kind: "research" }),
+    );
     if (created) {
       setShowForm(false);
       setTitle("");

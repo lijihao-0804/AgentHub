@@ -17,10 +17,28 @@ from packages.core.errors.exceptions import AgentHubError
 
 PAPER_SEARCH = "research.paper_search"
 PAPER_SHORTLIST = "research.paper_shortlist"
+INCIDENT_TIMELINE = "incident.timeline"
+INCIDENT_REPORT = "incident.report"
+ANALYSIS_QUERY_RESULT = "analysis.query_result"
+ANALYSIS_FINDING = "analysis.finding"
+SUPPORT_HANDOFF = "support.handoff"
 
-# v1 uses exactly these two. The base is general; the list is not, and it is
-# not meant to grow until something real needs it to.
-ARTIFACT_TYPES = frozenset({PAPER_SEARCH, PAPER_SHORTLIST})
+# The list splits along one line that matters more than the application each
+# type belongs to. ``paper_search``, ``timeline`` and ``query_result`` are
+# recorded from tool results and carry provenance per entry, so nothing in them
+# can have been written by the model. The other three are assembled by a person
+# out of what is already on the thread, which is why they may hold prose.
+ARTIFACT_TYPES = frozenset(
+    {
+        PAPER_SEARCH,
+        PAPER_SHORTLIST,
+        INCIDENT_TIMELINE,
+        INCIDENT_REPORT,
+        ANALYSIS_QUERY_RESULT,
+        ANALYSIS_FINDING,
+        SUPPORT_HANDOFF,
+    }
+)
 
 ARTIFACT_INVALID = "ARTIFACT_INVALID"
 ARTIFACT_TYPE_UNKNOWN = "ARTIFACT_TYPE_UNKNOWN"
@@ -28,6 +46,11 @@ ARTIFACT_TYPE_UNKNOWN = "ARTIFACT_TYPE_UNKNOWN"
 MAX_PAPERS = 200
 MAX_TEXT = 8_000
 MAX_AUTHORS = 200
+MAX_ENTRIES = 200
+MAX_ITEMS = 50
+MAX_ROWS = 500
+MAX_COLUMNS = 64
+MAX_CELL = 2_000
 
 
 def _invalid(message: str) -> None:
@@ -42,6 +65,25 @@ def _optional_text(value: Any, field: str) -> str | None:
     if len(value) > MAX_TEXT:
         _invalid(f"{field} is too long.")
     return value
+
+
+def _required_text(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        _invalid(f"{field} is required.")
+    return str(value)[:MAX_TEXT]
+
+
+def _text_list(value: Any, field: str) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list) or len(value) > MAX_ITEMS:
+        _invalid(f"{field} must be a list of strings.")
+    items: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            _invalid(f"{field} must be a list of strings.")
+        items.append(item[:MAX_TEXT])
+    return items
 
 
 def _optional_int(value: Any, field: str) -> int | None:
@@ -162,9 +204,165 @@ def _validate_paper_shortlist(content: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+TIMELINE_KINDS = frozenset({"METRIC", "LOG", "DEPLOYMENT", "COMMIT", "ACTION"})
+
+
+def validate_timeline_entry(value: Any, *, require_provenance: bool) -> dict[str, Any]:
+    """Check one line of an incident timeline.
+
+    ``at`` is kept as the string the tool returned rather than parsed into a
+    datetime. The observability sources disagree about precision and about
+    whether they say Z or +00:00, and normalizing here would mean this module
+    deciding what a timestamp from an unfamiliar server meant. An investigator
+    comparing 21:01 to 21:03 does not need that decision made for them.
+    """
+
+    if not isinstance(value, dict):
+        _invalid("a timeline entry must be an object.")
+    kind = value.get("kind")
+    if kind not in TIMELINE_KINDS:
+        _invalid("kind must be one of " + ", ".join(sorted(TIMELINE_KINDS)) + ".")
+    entry = {
+        "at": _required_text(value.get("at"), "at")[:64],
+        "kind": kind,
+        "summary": _required_text(value.get("summary"), "summary"),
+        "detail": _optional_text(value.get("detail"), "detail"),
+    }
+    provenance = value.get("provenance")
+    if provenance is not None:
+        entry["provenance"] = validate_provenance(provenance)
+    elif require_provenance:
+        # A recorded timeline is the record of tool calls. An entry with no
+        # traceable call is an event nobody observed.
+        _invalid("every recorded timeline entry must carry provenance.")
+    return entry
+
+
+def _validate_entries(value: Any, *, require_provenance: bool) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        _invalid("entries must be a list.")
+    if len(value) > MAX_ENTRIES:
+        _invalid("entries holds too many rows.")
+    return [validate_timeline_entry(item, require_provenance=require_provenance) for item in value]
+
+
+def _validate_incident_timeline(content: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "incident_ref": _optional_text(content.get("incident_ref"), "incident_ref"),
+        "service": _optional_text(content.get("service"), "service"),
+        "entries": _validate_entries(content.get("entries"), require_provenance=True),
+    }
+
+
+def _validate_incident_report(content: dict[str, Any]) -> dict[str, Any]:
+    # Assembled by a person at the end of an investigation, out of entries the
+    # thread already holds. Its timeline is a copy for the same reason the
+    # shortlist copies papers: the investigation continues and the report must
+    # keep saying what it said when it was written.
+    return {
+        "incident_ref": _optional_text(content.get("incident_ref"), "incident_ref"),
+        "severity": _optional_text(content.get("severity"), "severity"),
+        "summary": _required_text(content.get("summary"), "summary"),
+        "impact": _optional_text(content.get("impact"), "impact"),
+        "timeline": _validate_entries(content.get("timeline"), require_provenance=False),
+        "root_cause": _optional_text(content.get("root_cause"), "root_cause"),
+        "actions_taken": _text_list(content.get("actions_taken"), "actions_taken"),
+        "remaining_risks": _text_list(content.get("remaining_risks"), "remaining_risks"),
+    }
+
+
+def _validate_rows(value: Any) -> list[list[Any]]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        _invalid("rows must be a list.")
+    if len(value) > MAX_ROWS:
+        _invalid("rows holds too many rows.")
+    rows: list[list[Any]] = []
+    for row in value:
+        if not isinstance(row, list):
+            _invalid("each row must be a list.")
+        if len(row) > MAX_COLUMNS:
+            _invalid("a row has too many columns.")
+        cells: list[Any] = []
+        for cell in row:
+            if cell is None or isinstance(cell, bool | int | float):
+                cells.append(cell)
+            elif isinstance(cell, str):
+                cells.append(cell[:MAX_CELL])
+            else:
+                # A nested object in a cell means the tool returned something
+                # this is not a table of, and rendering it would be a guess.
+                _invalid("a cell must be a string, number, boolean or null.")
+        rows.append(cells)
+    return rows
+
+
+def _validate_analysis_query_result(content: dict[str, Any]) -> dict[str, Any]:
+    columns = _text_list(content.get("columns"), "columns")
+    rows = _validate_rows(content.get("rows"))
+    for row in rows:
+        if len(row) != len(columns):
+            _invalid("every row must have one cell per column.")
+    return {
+        "question": _optional_text(content.get("question"), "question"),
+        "sql": _required_text(content.get("sql"), "sql"),
+        "columns": columns,
+        "rows": rows,
+        "row_count": _optional_int(content.get("row_count"), "row_count"),
+        "truncated": bool(content.get("truncated")),
+        "provenance": validate_provenance(content.get("provenance")),
+    }
+
+
+def _validate_analysis_finding(content: dict[str, Any]) -> dict[str, Any]:
+    # The conclusion is prose because a person wrote it; the queries beneath it
+    # are not, and each carries the provenance of the call that produced it.
+    raw_queries = content.get("queries")
+    if raw_queries is None:
+        raw_queries = []
+    if not isinstance(raw_queries, list) or len(raw_queries) > MAX_ITEMS:
+        _invalid("queries must be a list.")
+    queries = []
+    for item in raw_queries:
+        if not isinstance(item, dict):
+            _invalid("each query must be an object.")
+        queries.append(_validate_analysis_query_result(item))
+    return {
+        "question": _required_text(content.get("question"), "question"),
+        "conclusion": _required_text(content.get("conclusion"), "conclusion"),
+        "evidence": _text_list(content.get("evidence"), "evidence"),
+        "queries": queries,
+    }
+
+
+def _validate_support_handoff(content: dict[str, Any]) -> dict[str, Any]:
+    # The point of the handoff is that the human does not start over, so the
+    # three list fields are what was actually done, not a restatement of the
+    # problem. ``recommended_action`` is required: a handoff that reaches a
+    # person with no suggested next step has moved the work without advancing
+    # it, which is the failure mode escalation is supposed to avoid.
+    return {
+        "customer_ref": _optional_text(content.get("customer_ref"), "customer_ref"),
+        "case_ref": _optional_text(content.get("case_ref"), "case_ref"),
+        "problem": _required_text(content.get("problem"), "problem"),
+        "checked": _text_list(content.get("checked"), "checked"),
+        "findings": _text_list(content.get("findings"), "findings"),
+        "recommended_action": _required_text(
+            content.get("recommended_action"), "recommended_action"
+        ),
+        "reason": _optional_text(content.get("reason"), "reason"),
+    }
+
+
 _VALIDATORS = {
     PAPER_SEARCH: _validate_paper_search,
     PAPER_SHORTLIST: _validate_paper_shortlist,
+    INCIDENT_TIMELINE: _validate_incident_timeline,
+    INCIDENT_REPORT: _validate_incident_report,
+    ANALYSIS_QUERY_RESULT: _validate_analysis_query_result,
+    ANALYSIS_FINDING: _validate_analysis_finding,
+    SUPPORT_HANDOFF: _validate_support_handoff,
 }
 
 
@@ -180,12 +378,19 @@ def validate_artifact_content(artifact_type: str, content: Any) -> dict[str, Any
 
 
 __all__ = [
+    "ANALYSIS_FINDING",
+    "ANALYSIS_QUERY_RESULT",
     "ARTIFACT_INVALID",
     "ARTIFACT_TYPES",
     "ARTIFACT_TYPE_UNKNOWN",
+    "INCIDENT_REPORT",
+    "INCIDENT_TIMELINE",
     "PAPER_SEARCH",
     "PAPER_SHORTLIST",
+    "SUPPORT_HANDOFF",
+    "TIMELINE_KINDS",
     "validate_artifact_content",
     "validate_paper",
     "validate_provenance",
+    "validate_timeline_entry",
 ]

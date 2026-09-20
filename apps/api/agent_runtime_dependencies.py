@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
 from packages.agent_runtime.runtime import AgentRunService
 from packages.approvals import ApprovalService
-from packages.artifacts.research import ResearchArtifactRecorder
+from packages.artifacts.recorder import ToolResultArtifactRecorder
 from packages.core.errors.exceptions import AgentHubError
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
@@ -61,7 +61,7 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
             # exactly as it did before threads existed, which is what keeps a
             # Playground run unchanged.
             thread_context_provider=SqlAlchemyThreadContextProvider(factory),
-            artifact_recorder=ResearchArtifactRecorder(factory),
+            artifact_recorder=ToolResultArtifactRecorder(factory),
         )
         app.state.agent_run_service = service
     return service

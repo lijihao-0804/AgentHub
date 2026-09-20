@@ -7,6 +7,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from packages.threads.kinds import GENERAL
+
 MAX_TITLE_LENGTH = 200
 MAX_INPUT_LENGTH = 32_000
 
@@ -15,6 +17,10 @@ class ThreadCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     title: str = Field(min_length=1, max_length=MAX_TITLE_LENGTH)
+    # Which application page owns this thread. Defaulted rather than required
+    # so that the plain Agents page, which has no application, keeps working
+    # unchanged. An unknown value is a 422 from packages.threads.kinds.
+    kind: str = Field(default=GENERAL, max_length=32)
 
 
 class ThreadPatchRequest(BaseModel):
@@ -37,6 +43,7 @@ class ThreadResponse(BaseModel):
     workspace_id: UUID
     agent_id: UUID
     title: str
+    kind: str
     created_by: UUID
     created_at: datetime
     updated_at: datetime

@@ -5,22 +5,18 @@ that land in the record are copied out of the tool result and stamped with the
 call they came from. A fabricated citation therefore has no path into an
 artifact at all — not because the prompt forbids it, but because there is no
 code that would write it.
+
+Writing them to the database is not this module's job. ``packages.artifacts
+.recorder`` does that for every application through one loop, and this is
+simply the literature projection it reaches for when a search comes back.
 """
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
 from packages.agent_runtime.work_layer import RecordedToolCall
-from packages.artifacts.models import Artifact
-from packages.artifacts.schemas import PAPER_SEARCH, validate_artifact_content
-from packages.core.errors.exceptions import AgentHubError
-
-logger = logging.getLogger(__name__)
 
 # Imported MCP tools keep a workspace-chosen identity, so the match is on the
 # trailing segment rather than on one hard-coded full name.
@@ -91,57 +87,4 @@ def build_search_content(
     return title, content
 
 
-class ResearchArtifactRecorder:
-    """The work-layer side of :class:`RunArtifactRecorder`."""
-
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
-        self.session_factory = session_factory
-
-    async def record(
-        self,
-        *,
-        workspace_id: UUID,
-        thread_id: UUID,
-        run_id: UUID,
-        created_by: UUID,
-        calls: tuple[RecordedToolCall, ...],
-    ) -> None:
-        pending: list[Artifact] = []
-        for call in calls:
-            if not is_search_tool(call.tool_identity):
-                continue
-            built = build_search_content(call, run_id=run_id)
-            if built is None:
-                continue
-            title, content = built
-            try:
-                validated = validate_artifact_content(PAPER_SEARCH, content)
-            except AgentHubError:
-                # A result that cannot be represented is dropped, with a log
-                # line. Refusing it here is better than storing a malformed
-                # record the UI would later have to defend against.
-                logger.warning(
-                    "dropping unrepresentable search result from %s in run %s",
-                    call.tool_identity,
-                    run_id,
-                )
-                continue
-            pending.append(
-                Artifact(
-                    workspace_id=workspace_id,
-                    thread_id=thread_id,
-                    run_id=run_id,
-                    type=PAPER_SEARCH,
-                    title=title,
-                    content=validated,
-                    created_by=created_by,
-                )
-            )
-        if not pending:
-            return
-        async with self.session_factory() as session:
-            session.add_all(pending)
-            await session.commit()
-
-
-__all__ = ["ResearchArtifactRecorder", "build_search_content", "is_search_tool"]
+__all__ = ["build_search_content", "is_search_tool"]

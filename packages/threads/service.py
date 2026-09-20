@@ -22,6 +22,7 @@ from packages.agent_runtime.runtime import AgentRunService
 from packages.control_plane.rbac import WORKSPACE_READ
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.threads import kinds
 from packages.threads.models import AgentThread, ThreadTurn
 
 AGENT_RUN = "agent_run"
@@ -101,11 +102,17 @@ class ThreadService:
     # -- threads ---------------------------------------------------------
 
     async def create_thread(
-        self, context: WorkspaceExecutionContext, *, agent_id: UUID, title: str
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        agent_id: UUID,
+        title: str,
+        kind: str = kinds.GENERAL,
     ) -> AgentThread:
         workspace_id = _require(context, AGENT_RUN)
         created_by = _principal_id(context)
         clean_title = _validated_title(title)
+        clean_kind = kinds.validate_kind(kind)
         async with self.session_factory() as session:
             agent = await session.scalar(
                 select(Agent).where(Agent.workspace_id == workspace_id, Agent.id == agent_id)
@@ -118,6 +125,7 @@ class ThreadService:
                 workspace_id=workspace_id,
                 agent_id=agent_id,
                 title=clean_title,
+                kind=clean_kind,
                 created_by=created_by,
             )
             session.add(thread)
@@ -130,6 +138,7 @@ class ThreadService:
         context: WorkspaceExecutionContext,
         *,
         agent_id: UUID | None = None,
+        kind: str | None = None,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> list[AgentThread]:
@@ -139,6 +148,8 @@ class ThreadService:
             query = select(AgentThread).where(AgentThread.workspace_id == workspace_id)
             if agent_id is not None:
                 query = query.where(AgentThread.agent_id == agent_id)
+            if kind is not None:
+                query = query.where(AgentThread.kind == kinds.validate_kind(kind))
             query = (
                 query.order_by(AgentThread.updated_at.desc(), AgentThread.id.desc())
                 .limit(bounded)

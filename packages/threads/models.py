@@ -20,6 +20,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy import Uuid as SQLUuid
 from sqlalchemy.orm import Mapped, mapped_column
@@ -51,12 +52,18 @@ class AgentThread(Base):
         UniqueConstraint("workspace_id", "id", name="uq_agent_threads_workspace_id"),
         Index("ix_agent_threads_workspace_updated_at", "workspace_id", "updated_at", "id"),
         Index("ix_agent_threads_workspace_agent", "workspace_id", "agent_id", "updated_at"),
+        Index("ix_agent_threads_workspace_kind", "workspace_id", "kind", "updated_at"),
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     agent_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     title: Mapped[str] = mapped_column(Text, nullable=False)
+    # Which application surface reads this thread. A routing label only: no
+    # runtime behaviour branches on it. See packages.threads.kinds.
+    kind: Mapped[str] = mapped_column(
+        String(32), nullable=False, server_default=text("'general'"), default="general"
+    )
     created_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

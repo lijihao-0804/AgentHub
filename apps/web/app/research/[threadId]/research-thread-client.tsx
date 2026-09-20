@@ -37,7 +37,7 @@ export default function ResearchThreadClient({ threadId }: { threadId: string })
   const scope = `${workspaceId}:${threadId}`;
 
   const loadThread = useCallback((auth: AuthInput) => getThread(auth, threadId), [threadId]);
-  const loadThreadList = useCallback((auth: AuthInput) => listThreads(auth, { limit: 50 }), []);
+  const loadThreadList = useCallback((auth: AuthInput) => listThreads(auth, { kind: "research", limit: 50 }), []);
   const loadTurns = useCallback((auth: AuthInput) => listThreadTurns(auth, threadId), [threadId]);
   const loadArtifacts = useCallback(
     (auth: AuthInput) => listThreadArtifacts(auth, threadId, { limit: 200 }),

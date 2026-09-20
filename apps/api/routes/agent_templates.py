@@ -1,9 +1,9 @@
 """Read-only agent templates.
 
-Deliberately not under a ``/research`` prefix and deliberately not creating
+Deliberately not under a per-application prefix and deliberately not creating
 anything: the frontend reads a template, prefills the normal create-agent form
-with it, and posts to the normal agents endpoint. Nothing here is
-research-specific except the contents of the template it happens to return.
+with it, and posts to the normal agents endpoint. Nothing here knows which
+application it is serving except the contents of the template it returns.
 """
 
 from __future__ import annotations
@@ -14,10 +14,10 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict
 
 from apps.api.knowledge_dependencies import get_workspace_context
+from packages.agent_templates import AgentTemplate, get_template, list_templates
 from packages.control_plane.rbac import WORKSPACE_READ
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
-from packages.research import AgentTemplate, get_template, list_templates
 
 router = APIRouter(
     prefix="/api/v1/workspaces/{workspace_id}/agent-templates", tags=["agent-templates"]
@@ -33,6 +33,10 @@ class AgentTemplateResponse(BaseModel):
     description: str
     system_prompt: str
     tool_hints: list[str]
+    # Which application surface a thread started from this template belongs to.
+    # The UI uses it to send a new thread to the right page; nothing in the
+    # runtime reads it.
+    thread_kind: str
 
 
 def _response(template: AgentTemplate) -> AgentTemplateResponse:
@@ -42,6 +46,7 @@ def _response(template: AgentTemplate) -> AgentTemplateResponse:
         description=template.description,
         system_prompt=template.system_prompt,
         tool_hints=list(template.tool_hints),
+        thread_kind=template.thread_kind,
     )
 
 
