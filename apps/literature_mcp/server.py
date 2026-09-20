@@ -166,8 +166,10 @@ def build_server(client: OpenAlexClient) -> Server[Any]:
         arguments = dict(params.arguments or {})
         try:
             if params.name == SEARCH_PAPERS:
+                _reject_unknown(arguments, SEARCH_INPUT_SCHEMA)
                 payload = await _search(client, arguments)
             elif params.name == GET_PAPER:
+                _reject_unknown(arguments, GET_PAPER_INPUT_SCHEMA)
                 payload = await _get_paper(client, arguments)
             else:
                 return _tool_error(f"Unknown tool: {params.name}")
@@ -197,6 +199,21 @@ def build_server(client: OpenAlexClient) -> Server[Any]:
         on_list_tools=on_list_tools,
         on_call_tool=on_call_tool,
     )
+
+
+def _reject_unknown(arguments: dict[str, Any], schema: dict[str, Any]) -> None:
+    """Hold the schema to its word.
+
+    Both input schemas declare ``additionalProperties: false``. Quietly
+    dropping an unknown argument would make that a lie, and the caller would
+    believe a filter had been applied that never was. AgentHub validates
+    arguments against the frozen schema before dispatch, so in the governed
+    path this never fires; a standalone client is not so supervised.
+    """
+
+    unknown = sorted(set(arguments) - set(schema.get("properties") or {}))
+    if unknown:
+        raise OpenAlexError(f"Unknown argument(s): {', '.join(unknown)}.")
 
 
 async def _search(client: OpenAlexClient, arguments: dict[str, Any]) -> dict[str, Any]:
@@ -255,11 +272,15 @@ def create_app(
     *,
     host: str | None = None,
     mailto: str | None = None,
+    api_key: str | None = None,
     path: str | None = None,
 ) -> Any:
     """Build the Starlette app serving this server over Streamable HTTP."""
 
-    client = OpenAlexClient(mailto=mailto if mailto is not None else _env_mailto())
+    client = OpenAlexClient(
+        mailto=mailto if mailto is not None else _env_mailto(),
+        api_key=api_key if api_key is not None else _env_api_key(),
+    )
     return build_server(client).streamable_http_app(
         streamable_http_path=path or DEFAULT_PATH,
         host=host or _env_host(),
@@ -286,6 +307,10 @@ def _env_mailto() -> str:
     return os.environ.get("LITERATURE_MCP_MAILTO", DEFAULT_MAILTO).strip()
 
 
+def _env_api_key() -> str:
+    return os.environ.get("LITERATURE_MCP_API_KEY", "").strip()
+
+
 def main() -> None:
     """Run the server over Streamable HTTP until interrupted."""
 
@@ -299,7 +324,17 @@ def main() -> None:
         logger.warning(
             "LITERATURE_MCP_MAILTO is unset; OpenAlex will throttle this server's anonymous pool"
         )
-    app = create_app(host=host, mailto=mailto, path=DEFAULT_PATH)
+    api_key = _env_api_key()
+    if api_key:
+        # OpenAlex takes the key as a query parameter, and httpx2 logs whole
+        # request URLs at INFO. Quieting that logger is cheaper than letting a
+        # credential land in a log file nobody expects to be sensitive.
+        logging.getLogger("httpx2").setLevel(logging.WARNING)
+    else:
+        logger.warning(
+            "LITERATURE_MCP_API_KEY is unset; requests draw on OpenAlex's shared keyless budget"
+        )
+    app = create_app(host=host, mailto=mailto, api_key=api_key, path=DEFAULT_PATH)
     logger.info("literature.serve host=%s port=%s path=%s", host, port, DEFAULT_PATH)
     uvicorn.run(app, host=host, port=port, log_level="info")
 

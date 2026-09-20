@@ -277,11 +277,16 @@ class OpenAlexClient:
         self,
         *,
         mailto: str,
+        api_key: str = "",
         base_url: str = OPENALEX_BASE_URL,
         user_agent: str = "agenthub-literature-mcp/0.1.0",
     ) -> None:
         self._base_url = base_url.rstrip("/")
         self._mailto = mailto.strip()
+        # Keyless requests draw on a daily budget shared by everyone without a
+        # key, which in practice is exhausted by strangers rather than by this
+        # server. A key moves the caller onto its own allowance.
+        self._api_key = api_key.strip()
         # OpenAlex's polite pool is opt-in via a contact address; without it a
         # caller shares the anonymous pool and gets throttled first.
         self._user_agent = f"{user_agent} (mailto:{self._mailto})" if self._mailto else user_agent
@@ -310,6 +315,8 @@ class OpenAlexClient:
         query = dict(params or {})
         if self._mailto:
             query.setdefault("mailto", self._mailto)
+        if self._api_key:
+            query.setdefault("api_key", self._api_key)
         timeout = httpx2.Timeout(
             connect=CONNECT_TIMEOUT_SECONDS,
             read=REQUEST_TIMEOUT_SECONDS,

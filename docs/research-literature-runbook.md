@@ -26,13 +26,24 @@ McpToolExecutor.execute_read      Enhancement 3C
 ## 1. Start the literature server
 
 ```bash
-LITERATURE_MCP_MAILTO=you@example.com python -m apps.literature_mcp
+LITERATURE_MCP_MAILTO=you@example.com LITERATURE_MCP_API_KEY=... python -m apps.literature_mcp
 ```
 
 It listens on `127.0.0.1:8931/mcp`. `LITERATURE_MCP_HOST` and
-`LITERATURE_MCP_PORT` override the address. The mailto goes into the OpenAlex
-polite-pool header; OpenAlex needs no API key, so the server holds no secret
-and the connection below uses `auth_type = NONE`.
+`LITERATURE_MCP_PORT` override the address. The mailto goes into the polite-pool
+contact header.
+
+The key is optional but in practice necessary: keyless requests draw on a daily
+budget OpenAlex shares among everyone without a key, and that budget is often
+already spent by strangers — a keyless run answers `429` with
+`Insufficient budget` and a `Retry-After` measured in hours. The server turns
+that into a plain "the literature source is rate limiting this server", which
+the agent reports rather than papering over.
+
+The key belongs to the literature server, not to AgentHub: it never reaches the
+connection below, which stays `auth_type = NONE`. Because OpenAlex takes it as
+a query parameter, the server quiets httpx2's request logging when a key is
+set, so it does not land in a log file.
 
 ## 2. Allow the private target
 

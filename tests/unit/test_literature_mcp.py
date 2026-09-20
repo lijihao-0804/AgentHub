@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import pytest
 
+from apps.literature_mcp import openalex, server
 from apps.literature_mcp.openalex import (
     DEFAULT_LIMIT,
     MAX_LIMIT,
@@ -231,3 +232,87 @@ def test_normalize_search_result_survives_an_unexpected_payload(payload: object)
     result = normalize_search_result(payload, query="meo")
     assert result["papers"] == []
     assert result["total"] == 0
+
+
+# -- credentials on the wire ----------------------------------------------
+
+
+class _Response:
+    status_code = 200
+    content = b"{}"
+
+    def json(self) -> dict[str, object]:
+        return {"results": []}
+
+
+class _RecordingClient:
+    """Stands in for httpx2.AsyncClient and keeps the query it was given."""
+
+    last_params: dict[str, str] = {}
+
+    def __init__(self, **_: object) -> None:
+        pass
+
+    async def __aenter__(self) -> _RecordingClient:
+        return self
+
+    async def __aexit__(self, *_: object) -> None:
+        return None
+
+    async def get(self, _url: str, *, params: dict[str, str]) -> _Response:
+        type(self).last_params = dict(params)
+        return _Response()
+
+
+@pytest.fixture
+def recorded(monkeypatch: pytest.MonkeyPatch) -> type[_RecordingClient]:
+    monkeypatch.setattr(openalex.httpx2, "AsyncClient", _RecordingClient)
+    _RecordingClient.last_params = {}
+    return _RecordingClient
+
+
+@pytest.mark.asyncio
+async def test_the_api_key_is_sent_when_one_is_configured(
+    recorded: type[_RecordingClient],
+) -> None:
+    client = openalex.OpenAlexClient(mailto="dev@example.com", api_key="secret-key")
+    await client.search_works("meo satellites")
+
+    assert recorded.last_params["api_key"] == "secret-key"
+    assert recorded.last_params["mailto"] == "dev@example.com"
+
+
+@pytest.mark.asyncio
+async def test_no_api_key_parameter_is_invented_when_none_is_configured(
+    recorded: type[_RecordingClient],
+) -> None:
+    # An empty key must not become `api_key=`, which OpenAlex would read as a
+    # malformed credential rather than as its absence.
+    client = openalex.OpenAlexClient(mailto="dev@example.com")
+    await client.search_works("meo satellites")
+
+    assert "api_key" not in recorded.last_params
+
+
+# -- the schema means what it says -----------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("schema", "arguments", "expected"),
+    [
+        (server.SEARCH_INPUT_SCHEMA, {"query": "meo", "limit": 5}, None),
+        (server.SEARCH_INPUT_SCHEMA, {"query": "meo", "venue": "IEEE"}, "venue"),
+        (server.GET_PAPER_INPUT_SCHEMA, {"paper_id": "openalex:W1"}, None),
+        (server.GET_PAPER_INPUT_SCHEMA, {"paper_id": "openalex:W1", "fields": "all"}, "fields"),
+    ],
+)
+def test_unknown_arguments_are_refused_not_dropped(
+    schema: dict, arguments: dict, expected: str | None
+) -> None:
+    # Dropping `venue` silently would tell the caller it filtered by venue.
+    if expected is None:
+        server._reject_unknown(dict(arguments), schema)
+        return
+    with pytest.raises(OpenAlexError) as error:
+        server._reject_unknown(dict(arguments), schema)
+    assert expected in str(error.value)
