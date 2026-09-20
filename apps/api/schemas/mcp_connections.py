@@ -58,6 +58,10 @@ class McpConnectionResponse(BaseModel):
     # Whether a token exists, never anything about what it is.
     secret_configured: bool
     enabled: bool
+    # Who pointed this workspace at that server. Every other resource in the
+    # product answers that question and a remote endpoint is the one most worth
+    # asking it about.
+    created_by: UUID
     created_at: datetime
     updated_at: datetime
 

@@ -48,7 +48,9 @@ export default function PaperCard({
       <dl className="paper-card-facts">
         <div>
           <dt>{t("research.artifacts.year")}</dt>
-          <dd>{paper.year === null ? t("common.none") : formatNumber(paper.year)}</dd>
+          {/* A year is a label, not a quantity: grouping separators turn 2023
+              into "2,023". Citation counts below are quantities and do want them. */}
+          <dd>{paper.year === null ? t("common.none") : String(paper.year)}</dd>
         </div>
         <div>
           <dt>{t("research.artifacts.venue")}</dt>

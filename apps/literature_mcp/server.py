@@ -25,6 +25,7 @@ from apps.literature_mcp.openalex import (
     MAX_LIMIT,
     MAX_QUERY_CHARS,
     MIN_LIMIT,
+    OPENALEX_BASE_URL,
     SOURCE,
     OpenAlexClient,
     OpenAlexError,
@@ -273,6 +274,7 @@ def create_app(
     host: str | None = None,
     mailto: str | None = None,
     api_key: str | None = None,
+    base_url: str | None = None,
     path: str | None = None,
 ) -> Any:
     """Build the Starlette app serving this server over Streamable HTTP."""
@@ -280,6 +282,7 @@ def create_app(
     client = OpenAlexClient(
         mailto=mailto if mailto is not None else _env_mailto(),
         api_key=api_key if api_key is not None else _env_api_key(),
+        base_url=base_url or _env_base_url(),
     )
     return build_server(client).streamable_http_app(
         streamable_http_path=path or DEFAULT_PATH,
@@ -311,6 +314,18 @@ def _env_api_key() -> str:
     return os.environ.get("LITERATURE_MCP_API_KEY", "").strip()
 
 
+def _env_base_url() -> str:
+    """Where OpenAlex lives.
+
+    Overridable so the server can be aimed at a mirror, a caching proxy, or a
+    local fixture during testing. It is not a credential and the normalization
+    below does not change with it -- the shape of the response is the contract,
+    not the hostname.
+    """
+
+    return os.environ.get("LITERATURE_MCP_BASE_URL", "").strip() or OPENALEX_BASE_URL
+
+
 def main() -> None:
     """Run the server over Streamable HTTP until interrupted."""
 
@@ -334,7 +349,12 @@ def main() -> None:
         logger.warning(
             "LITERATURE_MCP_API_KEY is unset; requests draw on OpenAlex's shared keyless budget"
         )
-    app = create_app(host=host, mailto=mailto, api_key=api_key, path=DEFAULT_PATH)
+    base_url = _env_base_url()
+    if base_url != OPENALEX_BASE_URL:
+        logger.warning("literature.source base_url=%s (not api.openalex.org)", base_url)
+    app = create_app(
+        host=host, mailto=mailto, api_key=api_key, base_url=base_url, path=DEFAULT_PATH
+    )
     logger.info("literature.serve host=%s port=%s path=%s", host, port, DEFAULT_PATH)
     uvicorn.run(app, host=host, port=port, log_level="info")
 

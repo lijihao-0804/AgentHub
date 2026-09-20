@@ -39,7 +39,7 @@ def test_the_template_fills_exactly_what_a_draft_needs() -> None:
     "clause",
     [
         "must come from a literature tool result",
-        "Never write a title, DOI, author list, venue or year from memory",
+        "never from an earlier turn's summary",
         "say plainly that nothing was found",
         "Do not fall back",
         "the list lives in the artifact",
@@ -48,6 +48,25 @@ def test_the_template_fills_exactly_what_a_draft_needs() -> None:
 def test_every_fabrication_route_is_closed_by_the_prompt(clause: str) -> None:
     assert clause in ANTI_FABRICATION_RULES
     assert clause in RESEARCH_TEMPLATE.system_prompt
+
+
+def test_the_prompt_describes_the_history_the_runtime_actually_supplies() -> None:
+    """The prompt may not promise the model data the context provider withholds.
+
+    ``SqlAlchemyThreadContextProvider`` passes earlier turns as prose plus a
+    one-line artifact reference; the paper records themselves are not carried
+    forward. A prompt telling the model to "filter what you already retrieved"
+    therefore invites it to reconstruct fields from nothing, which is what a
+    live follow-up turn was observed doing -- it reported citation counts of
+    412 and 7 for papers the artifact records as 512 and 47. The prompt now
+    describes the reference line as a pointer and sends the model back to the
+    tool, and that agreement is what this pins down.
+    """
+
+    prompt = RESEARCH_TEMPLATE.system_prompt
+    assert "It is not the papers." in prompt
+    assert "calling a tool again in this turn" in prompt
+    assert "filter what you already retrieved" not in prompt
 
 
 def test_the_tool_hints_name_only_the_two_tools_v1_has() -> None:
