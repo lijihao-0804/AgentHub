@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from apps.api.routes.agent_runs import router as agent_runs_router
+from apps.api.routes.agent_templates import router as agent_templates_router
 from apps.api.routes.agents import router as agents_router
 from apps.api.routes.approvals import router as approvals_router
 from apps.api.routes.artifacts import router as artifacts_router
@@ -79,6 +80,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     install_error_handlers(app)
     app.include_router(auth_router)
     app.include_router(agents_router)
+    app.include_router(agent_templates_router)
     app.include_router(agent_runs_router)
     app.include_router(approvals_router)
     app.include_router(artifacts_router)
