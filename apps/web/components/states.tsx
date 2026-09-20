@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { useI18n } from "../i18n/provider";
@@ -59,19 +60,33 @@ export function LoadingState({ label }: { label?: string }) {
 }
 
 /**
- * Rendered on deep links after a refresh, when the in-memory session is
- * gone. Configuring the session loads the current page in place.
+ * Rendered by workspace-scoped pages when the signed-in user has no
+ * active workspace selected. Opening the selector loads the page in
+ * place; if the account has no workspace yet, onboarding is offered.
  */
 export function SessionRequired({ contextKey }: { contextKey?: MessageKey }) {
   const { t } = useI18n();
-  const { openPanel } = useFrontendSession();
+  const { openPanel, workspaces, tenancyLoading } = useFrontendSession();
   const context = contextKey ? t(contextKey) : undefined;
+
+  if (tenancyLoading) return <LoadingState />;
+
+  if (workspaces.length === 0) {
+    return (
+      <div className="state-block state-session">
+        <p className="state-title">{t("workspace.noWorkspaces")}</p>
+        <p className="state-hint">{t("workspace.noWorkspacesHint")}</p>
+        <Link className="button button-primary" href="/settings">
+          {t("workspace.createWorkspace")}
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="state-block state-session">
       <p className="state-title">{t("session.requiredTitle")}</p>
-      <p className="state-hint">
-        {t("session.requiredHint", { context: context ?? "" })}
-      </p>
+      <p className="state-hint">{t("session.requiredHint", { context: context ?? "" })}</p>
       <button type="button" className="button button-primary" onClick={openPanel}>
         {t("session.configure")}
       </button>
