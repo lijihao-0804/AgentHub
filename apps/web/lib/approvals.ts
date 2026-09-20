@@ -41,6 +41,22 @@ export function listApprovals(workspaceId: string, accessToken: string): Promise
   );
 }
 
+/**
+ * Run-scoped approvals from the runtime API. The backend already orders
+ * them by (created_at, id), so the newest PENDING entry is the action the
+ * run is currently waiting on. Same Approval contract as the inbox.
+ */
+export function listRunApprovals(
+  workspaceId: string,
+  runId: string,
+  accessToken: string,
+): Promise<Approval[]> {
+  return apiRequest<Approval[]>(
+    `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/agent-runs/${encodeURIComponent(runId)}/approvals`,
+    accessToken,
+  );
+}
+
 export function decideApproval(
   workspaceId: string,
   approvalId: string,

@@ -399,6 +399,16 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
         <Link className="button button-ghost" href="/agents">
           {t("agents.backToAgents")}
         </Link>
+        {/* The Playground only runs published versions, never the draft. */}
+        {versionList.length > 0 ? (
+          <Link className="button button-ghost" href={`/agents/${agentId}/playground`}>
+            {t("agents.playground.open")}
+          </Link>
+        ) : (
+          <button type="button" className="button button-ghost" disabled>
+            {t("agents.playground.open")}
+          </button>
+        )}
         <button
           type="button"
           className="button button-primary"
@@ -903,6 +913,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                     <th scope="col">{t("agents.specHash")}</th>
                     <th scope="col">{t("agents.schemaVersion")}</th>
                     <th scope="col">{t("common.created")}</th>
+                    <th scope="col">{t("agents.playground.run")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -918,6 +929,11 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                       </td>
                       <td data-label={t("agents.schemaVersion")}>{version.spec_schema_version}</td>
                       <td data-label={t("common.created")}>{formatDateTime(version.created_at)}</td>
+                      <td data-label={t("agents.playground.run")}>
+                        <Link href={`/agents/${agentId}/playground?version=${encodeURIComponent(version.id)}`}>
+                          {t("agents.playground.run")}
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

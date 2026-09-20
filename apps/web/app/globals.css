@@ -626,6 +626,7 @@ a.split-row:hover { border-color: var(--accent); }
 .playground-overview div { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); display: grid; gap: 0.3rem; padding: var(--space-3) var(--space-4); }
 .playground-overview span { color: var(--text-muted); font-size: 0.75rem; }
 .playground-overview strong { font-size: 1.05rem; }
+.playground-output { color: var(--text); line-height: 1.6; margin: 0; min-height: 1.6rem; overflow-wrap: anywhere; white-space: pre-wrap; }
 .evidence-list { display: grid; gap: var(--space-3); margin-top: var(--space-3); }
 .evidence-item { border-top: 1px solid var(--border); display: grid; gap: var(--space-3); grid-template-columns: 2.6rem 1fr; padding-top: var(--space-3); }
 .evidence-rank { color: var(--accent); font-size: 1rem; font-weight: 800; }
