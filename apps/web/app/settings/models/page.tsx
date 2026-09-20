@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
 import StatusBadge from "../../../components/status-badge";
+import type { StatusTone } from "../../../components/badge-tones";
 import { useFrontendSession } from "../../../components/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
 import { errorHintKey, type AuthInput } from "../../../lib/api-client";
@@ -17,8 +18,10 @@ import {
   patchModelProfile,
   patchProviderCredential,
   rotateProviderCredentialSecret,
+  testModelProfile,
   type BooleanCapability,
   type ModelProfile,
+  type ModelProfileTestResult,
   type ProviderCredential,
 } from "../../../lib/models";
 import { useI18n } from "../../../i18n/provider";
@@ -44,6 +47,18 @@ const DEFAULT_PROFILE_FORM = {
 };
 
 const DEFAULT_CREDENTIAL_FORM = { provider: "", name: "", secret: "", base_url: "" };
+
+const TEST_STATUS_LABEL: Record<ModelProfileTestResult["status"], MessageKey> = {
+  healthy: "settings.models.healthy",
+  degraded: "settings.models.degraded",
+  unavailable: "settings.models.unavailable",
+};
+
+const TEST_STATUS_TONE: Record<ModelProfileTestResult["status"], StatusTone> = {
+  healthy: "success",
+  degraded: "warning",
+  unavailable: "danger",
+};
 
 const CAPABILITY_LABEL: Record<BooleanCapability, MessageKey> = {
   tool_calling: "settings.models.toolCalling",
@@ -76,6 +91,7 @@ export default function ModelSettingsPage() {
 
   const credentialMutation = useWorkspaceMutation(`credentials:${workspaceId}`);
   const profileMutation = useWorkspaceMutation(`profiles:${workspaceId}`);
+  const testMutation = useWorkspaceMutation(`model-profile-test:${workspaceId}`);
 
   const [credentialForm, setCredentialForm] = useState(DEFAULT_CREDENTIAL_FORM);
   const [showCredentialForm, setShowCredentialForm] = useState(false);
@@ -88,6 +104,14 @@ export default function ModelSettingsPage() {
   const [profileForm, setProfileForm] = useState(DEFAULT_PROFILE_FORM);
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
+
+  /**
+   * Live test outcomes belong to this page view only — never to storage,
+   * the URL or the server. A result also stops being trustworthy the
+   * moment its profile or its credential changes, so it is dropped then.
+   */
+  const [testResults, setTestResults] = useState<Record<string, ModelProfileTestResult>>({});
+  const [testingProfileId, setTestingProfileId] = useState<string | null>(null);
 
   // Every form, selection and confirmation resets when the session
   // generation changes (workspace switch, sign-in, sign-out).
@@ -102,6 +126,8 @@ export default function ModelSettingsPage() {
     setProfileForm(DEFAULT_PROFILE_FORM);
     setShowProfileForm(false);
     setEditingProfileId(null);
+    setTestResults({});
+    setTestingProfileId(null);
   }, [sessionId]);
 
   if (!connected) {
@@ -128,6 +154,47 @@ export default function ModelSettingsPage() {
     if (!profileId) return t("common.none");
     const profile = profileList.find((item) => item.id === profileId);
     return profile ? profile.model : t("common.unknown");
+  }
+
+  /** Drops one profile's result — it predates the change being saved. */
+  function forgetProfileTest(profileId: string) {
+    setTestResults((current) => {
+      if (!(profileId in current)) return current;
+      const next = { ...current };
+      delete next[profileId];
+      return next;
+    });
+  }
+
+  /** A credential edit or rotation invalidates every profile using it. */
+  function forgetCredentialTests(credentialId: string) {
+    const affected = new Set(
+      profileList
+        .filter((profile) => profile.provider_credential_id === credentialId)
+        .map((profile) => profile.id),
+    );
+    if (affected.size === 0) return;
+    setTestResults((current) => {
+      const next: Record<string, ModelProfileTestResult> = {};
+      for (const [profileId, result] of Object.entries(current)) {
+        if (!affected.has(profileId)) next[profileId] = result;
+      }
+      return next;
+    });
+  }
+
+  /**
+   * The server performs the check; the browser only renders what it
+   * returns. An HTTP failure stays an HTTP failure — it is never
+   * presented as an "unavailable" health verdict.
+   */
+  async function runProfileTest(profileId: string) {
+    setNotice(null);
+    forgetProfileTest(profileId);
+    setTestingProfileId(profileId);
+    const result = await testMutation.run((auth) => testModelProfile(auth, profileId));
+    setTestingProfileId(null);
+    if (result) setTestResults((current) => ({ ...current, [profileId]: result }));
   }
 
   async function submitCredential(event: FormEvent<HTMLFormElement>) {
@@ -164,6 +231,7 @@ export default function ModelSettingsPage() {
     if (result) {
       setEditingCredentialId(null);
       setNotice(t("settings.models.credentialUpdated"));
+      forgetCredentialTests(credentialId);
       credentials.reload();
     }
   }
@@ -173,7 +241,10 @@ export default function ModelSettingsPage() {
     const result = await credentialMutation.run((auth) =>
       patchProviderCredential(auth, credential.id, { enabled: !credential.enabled }),
     );
-    if (result) credentials.reload();
+    if (result) {
+      forgetCredentialTests(credential.id);
+      credentials.reload();
+    }
   }
 
   async function submitRotate(event: FormEvent<HTMLFormElement>) {
@@ -190,6 +261,7 @@ export default function ModelSettingsPage() {
     if (result) {
       setRotatingCredentialId(null);
       setNotice(t("settings.models.secretRotated"));
+      forgetCredentialTests(credentialId);
       credentials.reload();
     }
   }
@@ -229,6 +301,7 @@ export default function ModelSettingsPage() {
       setShowProfileForm(false);
       setEditingProfileId(null);
       setNotice(profileId ? t("settings.models.profileUpdated") : t("settings.models.profileCreated"));
+      if (profileId) forgetProfileTest(profileId);
       profiles.reload();
     }
   }
@@ -238,7 +311,10 @@ export default function ModelSettingsPage() {
     const result = await profileMutation.run((auth) =>
       patchModelProfile(auth, profile.id, { enabled: !profile.enabled }),
     );
-    if (result) profiles.reload();
+    if (result) {
+      forgetProfileTest(profile.id);
+      profiles.reload();
+    }
   }
 
   function startProfileEdit(profile: ModelProfile) {
@@ -723,6 +799,16 @@ export default function ModelSettingsPage() {
           <EmptyState title={t("settings.models.noProfiles")} hint={t("settings.models.noProfilesHint")} />
         )}
 
+        {profileList.length > 0 && <p className="state-hint">{t("settings.models.testHint")}</p>}
+        {/* A failed request stays a request failure; it is never rendered
+            as a health verdict, which only the backend may produce. */}
+        {testMutation.error && (
+          <p className="session-error" role="alert">
+            <code>{testMutation.error.code}</code>{" "}
+            {testMutation.error.message || t("errors.requestFailed")}
+          </p>
+        )}
+
         {profileList.length > 0 && (
           <div className="data-table">
             <table>
@@ -736,6 +822,7 @@ export default function ModelSettingsPage() {
                   <th scope="col">{t("settings.models.fallback")}</th>
                   <th scope="col">{t("settings.models.capabilities")}</th>
                   <th scope="col">{t("settings.models.status")}</th>
+                  <th scope="col">{t("settings.models.testResult")}</th>
                   <th scope="col">{t("settings.models.actions")}</th>
                 </tr>
               </thead>
@@ -766,6 +853,13 @@ export default function ModelSettingsPage() {
                         label={profile.enabled ? t("common.enabled") : t("common.disabled")}
                       />
                     </td>
+                    <td data-label={t("settings.models.testResult")}>
+                      {testingProfileId === profile.id ? (
+                        <span className="muted">{t("settings.models.testing")}</span>
+                      ) : (
+                        <TestResultCell result={testResults[profile.id]} />
+                      )}
+                    </td>
                     <td data-label={t("settings.models.actions")}>
                       <div className="approval-actions">
                         <button
@@ -783,6 +877,16 @@ export default function ModelSettingsPage() {
                         >
                           {profile.enabled ? t("common.disable") : t("common.enable")}
                         </button>
+                        <button
+                          type="button"
+                          className="button button-ghost"
+                          onClick={() => void runProfileTest(profile.id)}
+                          disabled={testMutation.pending}
+                        >
+                          {testingProfileId === profile.id
+                            ? t("settings.models.testing")
+                            : t("settings.models.test")}
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -793,6 +897,26 @@ export default function ModelSettingsPage() {
         )}
       </Panel>
     </div>
+  );
+}
+
+/**
+ * Renders one backend verdict verbatim: status badge, the failure code
+ * when the backend supplied one, and the measured latency.
+ */
+function TestResultCell({ result }: { result: ModelProfileTestResult | undefined }) {
+  const { t } = useI18n();
+  if (!result) return <span className="muted">{t("common.none")}</span>;
+  return (
+    <span className="approval-chips">
+      <StatusBadge
+        status={result.status.toUpperCase()}
+        tone={TEST_STATUS_TONE[result.status]}
+        label={t(TEST_STATUS_LABEL[result.status])}
+      />
+      {result.failure_code && <code>{result.failure_code}</code>}
+      <span className="muted">{t("settings.models.latencyMs", { ms: Math.round(result.latency_ms) })}</span>
+    </span>
   );
 }
 

@@ -119,12 +119,49 @@ export function publishAgent(input: AuthInput, agentId: string): Promise<AgentPu
   );
 }
 
+/**
+ * Server-resolved preview of the draft as it stands right now.
+ *
+ * A READY preflight is a readiness report, not a lock, a reservation or a
+ * promise about a later publish: publishing still goes through
+ * `publishAgent`, which re-validates and re-resolves from scratch.
+ */
+export type AgentPreflightResult = {
+  status: "READY";
+  agent_id: string;
+  workspace_id: string;
+  draft_updated_at: string;
+  spec_schema_version: number;
+  resolved_spec_hash: string;
+  resolved_spec: Record<string, unknown>;
+};
+
+export function preflightAgent(input: AuthInput, agentId: string): Promise<AgentPreflightResult> {
+  return apiRequest<AgentPreflightResult>(
+    `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/preflight`,
+    input.accessToken,
+    { method: "POST", body: {} },
+  );
+}
+
 export async function listAgentVersions(input: AuthInput, agentId: string): Promise<AgentVersion[]> {
   const payload = await apiRequest<unknown>(
     `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/versions`,
     input.accessToken,
   );
   return listItems<AgentVersion>(payload);
+}
+
+/** Reads one immutable version directly — never a list plus a client-side find. */
+export function getAgentVersion(
+  input: AuthInput,
+  agentId: string,
+  versionId: string,
+): Promise<AgentVersion> {
+  return apiRequest<AgentVersion>(
+    `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/versions/${encodeURIComponent(versionId)}`,
+    input.accessToken,
+  );
 }
 
 // ---------- Knowledge bindings ----------

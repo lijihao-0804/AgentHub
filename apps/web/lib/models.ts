@@ -133,6 +133,27 @@ export function buildModelCapabilities(
   return capabilities;
 }
 
+/**
+ * Outcome of a live profile check. The backend is the only authority on
+ * reachability: the browser never contacts a provider itself and never
+ * derives a status from the provider or model name.
+ */
+export type ModelProfileTestResult = {
+  model_profile_id: string;
+  status: "healthy" | "degraded" | "unavailable";
+  failure_code: string | null;
+  latency_ms: number;
+};
+
+/** Runs the server-side health check for one profile. */
+export function testModelProfile(input: AuthInput, profileId: string): Promise<ModelProfileTestResult> {
+  return apiRequest<ModelProfileTestResult>(
+    `${workspaceBase(input.workspaceId)}/model-profiles/${encodeURIComponent(profileId)}/test`,
+    input.accessToken,
+    { method: "POST", body: {} },
+  );
+}
+
 export type ModelProfile = {
   id: string;
   workspace_id: string;

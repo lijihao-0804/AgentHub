@@ -8,7 +8,7 @@ import TechnicalDetails from "../../../../../components/technical-details";
 import { useFrontendSession } from "../../../../../components/session-provider";
 import { useWorkspaceData } from "../../../../../components/use-workspace-data";
 import { errorHintKey, type AuthInput } from "../../../../../lib/api-client";
-import { listAgentVersions, type AgentVersion } from "../../../../../lib/agents";
+import { getAgentVersion, type AgentVersion } from "../../../../../lib/agents";
 import { useI18n } from "../../../../../i18n/provider";
 
 /**
@@ -25,8 +25,16 @@ export default function AgentVersionDetailClient({
   const { t, formatDateTime } = useI18n();
   const { connected, workspaceId } = useFrontendSession();
 
-  const load = useCallback((auth: AuthInput) => listAgentVersions(auth, agentId), [agentId]);
-  const versions = useWorkspaceData<AgentVersion[]>(load, `agent-versions:${workspaceId}:${agentId}`);
+  // One version is fetched by id: the page never downloads the whole
+  // version list only to search it in the browser.
+  const load = useCallback(
+    (auth: AuthInput) => getAgentVersion(auth, agentId, versionId),
+    [agentId, versionId],
+  );
+  const versions = useWorkspaceData<AgentVersion>(
+    load,
+    `agent-version:${workspaceId}:${agentId}:${versionId}`,
+  );
 
   if (!connected) {
     return (
@@ -40,7 +48,7 @@ export default function AgentVersionDetailClient({
     );
   }
 
-  const version = (versions.data ?? []).find((item) => item.id === versionId) ?? null;
+  const version = versions.data;
 
   return (
     <div className="page">
@@ -92,6 +100,10 @@ export default function AgentVersionDetailClient({
               <div className="key-value-row">
                 <dt>{t("common.created")}</dt>
                 <dd>{formatDateTime(version.created_at)}</dd>
+              </div>
+              <div className="key-value-row">
+                <dt>{t("agents.createdBy")}</dt>
+                <dd>{version.created_by ? <code>{version.created_by}</code> : t("common.none")}</dd>
               </div>
             </dl>
             <TechnicalDetails summary={t("agents.resolvedSpec")} value={version.resolved_spec} />

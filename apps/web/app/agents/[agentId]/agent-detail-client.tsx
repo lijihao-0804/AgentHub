@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
+import TechnicalDetails from "../../../components/technical-details";
 import { useFrontendSession } from "../../../components/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
 import { errorHintKey, type AuthInput } from "../../../lib/api-client";
@@ -13,10 +14,12 @@ import {
   getAgentToolBindings,
   listAgentVersions,
   patchAgent,
+  preflightAgent,
   publishAgent,
   putAgentKnowledgeBindings,
   putAgentToolBindings,
   type Agent,
+  type AgentPreflightResult,
   type AgentKnowledgeBinding,
   type AgentToolBinding,
   type AgentVersion,
@@ -64,6 +67,29 @@ function validRuntimeValue(value: string): boolean {
   return positiveIntegerOrUndefined(trimmed) !== undefined;
 }
 
+/** Shown wherever the resolved spec does not carry a field. */
+const MISSING = "—";
+
+/**
+ * The publish preview is read out of the server's resolved spec and
+ * nothing else — never out of the current drafts, selects or binding
+ * rows, which may already have moved on. Shapes are read defensively:
+ * an unexpected shape renders as missing rather than as a guess.
+ */
+function specObject(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function specText(value: unknown): string | null {
+  return typeof value === "string" && value.trim() !== "" ? value : null;
+}
+
+function specCount(value: unknown): number | null {
+  return Array.isArray(value) ? value.length : null;
+}
+
 export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const { t, formatDateTime } = useI18n();
   const { connected, sessionId, workspaceId } = useFrontendSession();
@@ -71,7 +97,14 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const scope = `${workspaceId}:${agentId}`;
   const [tab, setTab] = useState<Tab>("general");
   const [notice, setNotice] = useState<string | null>(null);
-  const [confirmPublish, setConfirmPublish] = useState(false);
+  /**
+   * A READY preflight, valid only for this session generation, this
+   * workspace, this agent and the draft as it stood when the check ran.
+   * It gates the confirmation panel; it is never a publish permit.
+   */
+  const [preflight, setPreflight] = useState<AgentPreflightResult | null>(null);
+  /** True once a draft write has dropped a preview the user had open. */
+  const [preflightStale, setPreflightStale] = useState(false);
   const [publishResult, setPublishResult] = useState<{ version: number; hash: string } | null>(null);
 
   const loadAgent = useCallback((auth: AuthInput) => getAgent(auth, agentId), [agentId]);
@@ -102,6 +135,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const agentMutation = useWorkspaceMutation(`agent:${scope}`);
   const knowledgeMutation = useWorkspaceMutation(`agent-knowledge-bindings:${scope}`);
   const toolMutation = useWorkspaceMutation(`agent-tool-bindings:${scope}`);
+  const preflightMutation = useWorkspaceMutation(`agent-preflight:${scope}`);
   const publishMutation = useWorkspaceMutation(`agent-publish:${scope}`);
 
   // ---- Editable drafts, hydrated from the server projection ----
@@ -124,7 +158,8 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   useEffect(() => {
     setTab("general");
     setNotice(null);
-    setConfirmPublish(false);
+    setPreflight(null);
+    setPreflightStale(false);
     setPublishResult(null);
     setGeneral({ name: "", description: "", system_prompt: "" });
     setModel({ model_profile_id: "", max_attempts: "" });
@@ -202,13 +237,34 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const toolList = tools.data ?? [];
   const versionList = versions.data ?? [];
   const runtimeValuesValid = Object.values(runtime).every((value) => validRuntimeValue(value));
+
+  // Preview figures come from the server's resolved spec, never from the
+  // drafts above; a field the spec does not carry is shown as missing.
+  const preflightSpec = preflight ? specObject(preflight.resolved_spec) : null;
+  const preflightModel = specObject(preflightSpec?.model);
+  const preflightProvider = specText(preflightModel?.provider);
+  const preflightModelName = specText(preflightModel?.model);
+  const preflightKnowledgeCount = specCount(specObject(preflightSpec?.retrieval)?.knowledge_bindings);
+  const preflightToolCount = specCount(preflightSpec?.tools);
   // Only an explicit declaration counts; the profile is read as-is.
   const selectedProfileSupportsTools =
     profileList.find((profile) => profile.id === model.model_profile_id)?.capabilities?.tool_calling === true;
 
+  /**
+   * Any draft write makes an earlier readiness check describe a draft
+   * that no longer exists, so the preview and its confirmation go away.
+   * The next publish attempt re-runs the check; nothing re-runs silently.
+   */
+  function invalidatePreflight() {
+    setPreflightStale((stale) => stale || preflight !== null);
+    setPreflight(null);
+    preflightMutation.clearError();
+  }
+
   async function saveGeneral(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice(null);
+    invalidatePreflight();
     const result = await agentMutation.run((auth) =>
       patchAgent(auth, agentId, {
         name: general.name.trim(),
@@ -225,6 +281,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   async function saveModel(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice(null);
+    invalidatePreflight();
     const result = await agentMutation.run((auth) =>
       patchAgent(auth, agentId, {
         model_profile_id: model.model_profile_id,
@@ -240,6 +297,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   async function saveRuntime(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice(null);
+    invalidatePreflight();
     const runtimeConfig: RuntimeConfig = {};
     const maxSteps = positiveIntegerOrUndefined(runtime.max_steps);
     const maxToolCalls = positiveIntegerOrUndefined(runtime.max_tool_calls);
@@ -273,6 +331,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
   async function saveKnowledgeBindings() {
     setNotice(null);
+    invalidatePreflight();
     const draft = knowledgeDraft.filter((binding) => binding.knowledge_base_id);
     // The agent-level default mode travels with the agent, the per-base
     // modes travel with the collection; both are replaced wholesale.
@@ -290,6 +349,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
   async function saveToolBindings() {
     setNotice(null);
+    invalidatePreflight();
     const draft = toolDraft.filter((binding) => binding.tool_id);
     const result = await toolMutation.run((auth) => putAgentToolBindings(auth, agentId, draft));
     if (result) {
@@ -298,11 +358,28 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     }
   }
 
+  /**
+   * Publishing starts with a server-side readiness check. Nothing is
+   * written and no confirmation panel opens until it comes back READY;
+   * a failed check reports the backend's error code and stops here.
+   */
+  async function startPreflight() {
+    setNotice(null);
+    setPublishResult(null);
+    setPreflight(null);
+    setPreflightStale(false);
+    publishMutation.clearError();
+    const result = await preflightMutation.run((auth) => preflightAgent(auth, agentId));
+    if (result) setPreflight(result);
+  }
+
   async function runPublish() {
     setNotice(null);
+    // Publish goes through the publish endpoint, always. The preflight
+    // spec is a preview: it is never turned into a version client-side.
     const result = await publishMutation.run((auth) => publishAgent(auth, agentId));
-    setConfirmPublish(false);
     if (result) {
+      setPreflight(null);
       setPublishResult({ version: result.version_number, hash: result.resolved_spec_hash });
       versions.reload();
     }
@@ -325,10 +402,10 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
         <button
           type="button"
           className="button button-primary"
-          onClick={() => setConfirmPublish(true)}
-          disabled={publishMutation.pending || !loadedAgent}
+          onClick={() => void startPreflight()}
+          disabled={preflightMutation.pending || publishMutation.pending || !loadedAgent}
         >
-          {t("agents.publish")}
+          {preflightMutation.pending ? t("agents.checkingReadiness") : t("agents.publish")}
         </button>
       </div>
 
@@ -346,8 +423,68 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
         </p>
       )}
 
-      {confirmPublish && (
-        <Panel ariaLabel={t("agents.publish")} title={t("agents.publish")}>
+      {preflightStale && !preflight && !preflightMutation.pending && (
+        <p className="state-hint">{t("agents.preflightStale")}</p>
+      )}
+      {preflightMutation.pending && <p className="state-hint">{t("agents.checkingReadiness")}</p>}
+      {preflightMutation.error && (
+        <p className="session-error" role="alert">
+          <code>{preflightMutation.error.code}</code>{" "}
+          {preflightMutation.error.message || t("errors.requestFailed")}
+        </p>
+      )}
+
+      {preflight && (
+        <Panel
+          ariaLabel={t("agents.publishPreview")}
+          eyebrow={t("agents.readinessCheck")}
+          title={t("agents.publishPreview")}
+        >
+          <p className="inline-notice">{t("agents.readyToPublish")}</p>
+          <dl className="key-values">
+            <div className="key-value-row">
+              <dt>{t("agents.schemaVersion")}</dt>
+              <dd>{preflight.spec_schema_version}</dd>
+            </div>
+            <div className="key-value-row">
+              <dt>{t("agents.specHash")}</dt>
+              <dd>
+                <code className="hash-value">{preflight.resolved_spec_hash}</code>
+              </dd>
+            </div>
+            <div className="key-value-row">
+              <dt>{t("agents.draftCheckedAt")}</dt>
+              <dd>{formatDateTime(preflight.draft_updated_at)}</dd>
+            </div>
+            <div className="key-value-row">
+              <dt>{t("agents.tab.model")}</dt>
+              <dd>
+                {preflightProvider || preflightModelName ? (
+                  <code>{`${preflightProvider ?? MISSING} / ${preflightModelName ?? MISSING}`}</code>
+                ) : (
+                  MISSING
+                )}
+              </dd>
+            </div>
+            <div className="key-value-row">
+              <dt>{t("agents.tab.knowledge")}</dt>
+              <dd>
+                {preflightKnowledgeCount === null
+                  ? MISSING
+                  : t("agents.knowledgeBindingCount", { count: preflightKnowledgeCount })}
+              </dd>
+            </div>
+            <div className="key-value-row">
+              <dt>{t("agents.tab.tools")}</dt>
+              <dd>
+                {preflightToolCount === null
+                  ? MISSING
+                  : t("agents.toolBindingCount", { count: preflightToolCount })}
+              </dd>
+            </div>
+          </dl>
+          <TechnicalDetails summary={t("agents.resolvedSpec")} value={preflight.resolved_spec} />
+          <p className="state-hint">{t("agents.preflightNotGuarantee")}</p>
           <p className="state-hint">{t("agents.publishConfirm")}</p>
           <div className="form-actions">
             <button
@@ -358,7 +495,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
             >
               {t("agents.publishNow")}
             </button>
-            <button type="button" className="button button-ghost" onClick={() => setConfirmPublish(false)}>
+            <button type="button" className="button button-ghost" onClick={() => setPreflight(null)}>
               {t("session.cancel")}
             </button>
           </div>
