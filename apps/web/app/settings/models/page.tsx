@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import StatusBadge from "../../../components/status-badge";
-import type { StatusTone } from "../../../components/badge-tones";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../../lib/api-client";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import StatusBadge from "@/components/ui/status-badge";
+import type { StatusTone } from "@/components/ui/badge-tones";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import {
   BOOLEAN_CAPABILITIES,
   buildModelCapabilities,
@@ -23,9 +23,9 @@ import {
   type ModelProfile,
   type ModelProfileTestResult,
   type ProviderCredential,
-} from "../../../lib/models";
-import { useI18n } from "../../../i18n/provider";
-import type { MessageKey } from "../../../i18n/messages";
+} from "@/lib/api/models";
+import { useI18n } from "@/i18n/provider";
+import type { MessageKey } from "@/i18n/messages";
 
 /**
  * Backend defaults for a new profile; semantics stay server-owned.
@@ -47,6 +47,38 @@ const DEFAULT_PROFILE_FORM = {
 };
 
 const DEFAULT_CREDENTIAL_FORM = { provider: "", name: "", secret: "", base_url: "" };
+
+/**
+ * The providers the backend accepts. This is a closed set server-side —
+ * anything else is rejected with INVALID_PROVIDER (422) — so the field is
+ * a select, not free text.
+ *
+ * `defaultBaseUrl` is the endpoint prefilled on selection. An empty
+ * string means the provider has no canonical endpoint and the operator
+ * must supply one (`openai-compatible`), or that the SDK default is
+ * correct and the field may stay empty.
+ */
+const PROVIDER_OPTIONS: Array<{ value: string; labelKey: MessageKey; defaultBaseUrl: string }> = [
+  { value: "openai", labelKey: "settings.models.providerOpenai", defaultBaseUrl: "https://api.openai.com/v1" },
+  { value: "deepseek", labelKey: "settings.models.providerDeepseek", defaultBaseUrl: "https://api.deepseek.com/v1" },
+  { value: "openai-compatible", labelKey: "settings.models.providerCompatible", defaultBaseUrl: "" },
+];
+
+const PROVIDER_DEFAULT_BASE_URLS = PROVIDER_OPTIONS.map((option) => option.defaultBaseUrl).filter(
+  (url) => url !== "",
+);
+
+/**
+ * Selecting a provider fills in its endpoint, but never discards an
+ * endpoint the operator typed: the previous value is only replaced when
+ * it is empty or is another provider's prefilled default.
+ */
+function nextBaseUrl(currentBaseUrl: string, provider: string): string {
+  const trimmed = currentBaseUrl.trim();
+  const replaceable = trimmed === "" || PROVIDER_DEFAULT_BASE_URLS.includes(trimmed);
+  if (!replaceable) return currentBaseUrl;
+  return PROVIDER_OPTIONS.find((option) => option.value === provider)?.defaultBaseUrl ?? "";
+}
 
 const TEST_STATUS_LABEL: Record<ModelProfileTestResult["status"], MessageKey> = {
   healthy: "settings.models.healthy",
@@ -375,14 +407,24 @@ export default function ModelSettingsPage() {
             <div className="form-grid">
               <label>
                 {t("settings.models.provider")}
-                <input
+                <select
                   value={credentialForm.provider}
-                  onChange={(event) =>
-                    setCredentialForm((form) => ({ ...form, provider: event.target.value }))
-                  }
-                  placeholder={t("settings.models.providerPlaceholder")}
-                  spellCheck={false}
-                />
+                  onChange={(event) => {
+                    const provider = event.target.value;
+                    setCredentialForm((form) => ({
+                      ...form,
+                      provider,
+                      base_url: nextBaseUrl(form.base_url, provider),
+                    }));
+                  }}
+                >
+                  <option value="">{t("settings.models.providerPlaceholder")}</option>
+                  {PROVIDER_OPTIONS.map((option) => (
+                    <option value={option.value} key={option.value}>
+                      {t(option.labelKey)}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label>
                 {t("settings.models.name")}
@@ -401,6 +443,11 @@ export default function ModelSettingsPage() {
                   placeholder={t("settings.models.baseUrlPlaceholder")}
                   spellCheck={false}
                 />
+                <span className="state-hint">
+                  {credentialForm.provider === "openai-compatible"
+                    ? t("settings.models.baseUrlRequiredHint")
+                    : t("settings.models.baseUrlAutoHint")}
+                </span>
               </label>
               <label>
                 {t("settings.models.apiKey")}
@@ -412,12 +459,7 @@ export default function ModelSettingsPage() {
                 />
               </label>
             </div>
-            {credentialMutation.error && (
-              <p className="session-error" role="alert">
-                <code>{credentialMutation.error.code}</code>{" "}
-                {credentialMutation.error.message || t("errors.requestFailed")}
-              </p>
-            )}
+            <InlineError error={credentialMutation.error} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button
                 type="submit"
@@ -752,12 +794,7 @@ export default function ModelSettingsPage() {
             {!validMaxContextTokens(profileForm.max_context_tokens) && (
               <p className="state-hint">{t("settings.models.maxContextTokensInvalid")}</p>
             )}
-            {profileMutation.error && (
-              <p className="session-error" role="alert">
-                <code>{profileMutation.error.code}</code>{" "}
-                {profileMutation.error.message || t("errors.requestFailed")}
-              </p>
-            )}
+            <InlineError error={profileMutation.error} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button
                 type="submit"
@@ -802,12 +839,7 @@ export default function ModelSettingsPage() {
         {profileList.length > 0 && <p className="state-hint">{t("settings.models.testHint")}</p>}
         {/* A failed request stays a request failure; it is never rendered
             as a health verdict, which only the backend may produce. */}
-        {testMutation.error && (
-          <p className="session-error" role="alert">
-            <code>{testMutation.error.code}</code>{" "}
-            {testMutation.error.message || t("errors.requestFailed")}
-          </p>
-        )}
+        <InlineError error={testMutation.error} fallback={t("errors.requestFailed")} />
 
         {profileList.length > 0 && (
           <div className="data-table">

@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useCallback } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../../../components/states";
-import TechnicalDetails from "../../../../../components/technical-details";
-import { useFrontendSession } from "../../../../../components/session-provider";
-import { useWorkspaceData } from "../../../../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../../../../lib/api-client";
-import { getAgentVersion, type AgentVersion } from "../../../../../lib/agents";
-import { useI18n } from "../../../../../i18n/provider";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { getAgentVersion, type AgentVersion } from "@/lib/api/agents";
+import { useI18n } from "@/i18n/provider";
 
 /**
  * Read-only view of one published agent version. Everything shown here
@@ -52,6 +53,13 @@ export default function AgentVersionDetailClient({
 
   return (
     <div className="page">
+      <Breadcrumbs
+        items={[
+          { label: t("nav.agents"), href: "/agents" },
+          { label: t("agents.detail"), href: `/agents/${agentId}` },
+          { label: version ? `v${version.version_number}` : t("agents.versionDetail") },
+        ]}
+      />
       <header className="page-header">
         <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{version ? `v${version.version_number}` : t("agents.versionDetail")}</h1>
@@ -61,8 +69,11 @@ export default function AgentVersionDetailClient({
       </header>
 
       <div className="page-toolbar">
-        <Link className="button button-ghost" href={`/agents/${agentId}`}>
-          {t("agents.backToAgent")}
+        <Link
+          className="button button-ghost"
+          href={`/agents/${agentId}/versions/compare?left=${encodeURIComponent(versionId)}`}
+        >
+          {t("agents.versionDiff.entry")}
         </Link>
       </div>
 

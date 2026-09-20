@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import MetricCard from "../../components/metric-card";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
-import { ApiError, errorHintKey, toApiError } from "../../lib/api-client";
+import MetricCard from "@/components/ui/metric-card";
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
 import {
   AgentVersionBreakdown,
   FailureAnalytics,
@@ -15,9 +15,9 @@ import {
   getObservabilityTimeseries,
   ObservabilitySummary,
   TimeseriesResponse,
-} from "../../lib/observability";
-import { useFrontendSession } from "../../components/session-provider";
-import { useI18n } from "../../i18n/provider";
+} from "@/lib/api/observability";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 type QueryState = { from?: string; to?: string };
 

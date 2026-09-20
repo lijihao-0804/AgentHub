@@ -1,4 +1,4 @@
-import VersionDetailClient from "./version-detail-client";
+import VersionDetailClient from "@/app/evaluations/datasets/[datasetId]/versions/[versionId]/version-detail-client";
 
 export default async function DatasetVersionPage({
   params,

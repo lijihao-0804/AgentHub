@@ -1,4 +1,4 @@
-import KnowledgeBaseDetailClient from "./knowledge-detail-client";
+import KnowledgeBaseDetailClient from "@/app/knowledge/[knowledgeBaseId]/knowledge-detail-client";
 
 export default async function KnowledgeBaseDetailPage({
   params,

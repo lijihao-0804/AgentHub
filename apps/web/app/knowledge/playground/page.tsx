@@ -3,16 +3,16 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import {
   RetrievalPlaygroundError,
   runRetrievalPlayground,
   type PlaygroundStage,
   type RetrievalPlaygroundResponse,
-} from "../../../lib/api";
-import { formatLocator } from "../../../lib/locator";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useI18n } from "../../../i18n/provider";
+} from "@/lib/api/retrieval-playground";
+import { formatLocator } from "@/lib/format/locator";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 type PageState = "initial" | "loading" | "success" | "empty" | "error";
 
@@ -53,7 +53,8 @@ function StageCard({ label, stage }: { label: string; stage: PlaygroundStage }) 
               </div>
               <code>{shortId(item.chunk_id)}</code>
               <span className="stage-result-meta">
-                rev {shortId(item.document_revision_id)} · {formatLocator(item.locator)}
+                {t("playground.stage.revision", { id: shortId(item.document_revision_id) })} ·{" "}
+                {formatLocator(item.locator, t)}
               </span>
             </div>
           ))
@@ -242,9 +243,13 @@ export default function RetrievalPlaygroundPage() {
                   <div className="evidence-body">
                     <div className="evidence-meta">
                       <strong>{item.source}</strong>
-                      <span>{formatLocator(item.locator)}</span>
-                      <span>retrieval {item.retrieval_score.toFixed(4)}</span>
-                      <span>rerank {item.rerank_score?.toFixed(4) ?? "—"}</span>
+                      <span>{formatLocator(item.locator, t)}</span>
+                      <span>
+                        {t("playground.evidence.retrievalScore", { score: item.retrieval_score.toFixed(4) })}
+                      </span>
+                      <span>
+                        {t("playground.evidence.rerankScore", { score: item.rerank_score?.toFixed(4) ?? "—" })}
+                      </span>
                     </div>
                     <p>{item.snippet}</p>
                   </div>

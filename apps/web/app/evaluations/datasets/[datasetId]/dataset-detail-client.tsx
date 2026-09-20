@@ -3,19 +3,19 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import HashValue from "../../../../components/evaluation/hash-value";
-import StatusBadge from "../../../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../../components/states";
-import { ApiError, toApiError } from "../../../../lib/api-client";
+import HashValue from "@/components/evaluation/hash-value";
+import StatusBadge from "@/components/ui/status-badge";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { ApiError, toApiError } from "@/lib/api/client";
 import {
   EvaluationDataset,
   EvaluationDatasetItemInput,
   EvaluationDatasetVersion,
   createDatasetVersion,
   listDatasetVersions,
-} from "../../../../lib/evaluation";
-import { useFrontendSession } from "../../../../components/session-provider";
-import { useI18n } from "../../../../i18n/provider";
+} from "@/lib/api/evaluation";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 type ParsedImport = {
   items: EvaluationDatasetItemInput[];
@@ -90,7 +90,7 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
   const [jsonText, setJsonText] = useState("");
   const [schemaVersion, setSchemaVersion] = useState("1");
   const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<ApiError | null>(null);
   const [createdNotice, setCreatedNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const activeSessionRef = useRef(sessionId);
@@ -158,7 +158,7 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
       await refresh();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setCreateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCreateError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
@@ -249,7 +249,7 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
               {t("evaluation.datasets.versions.schemaVersion")}
               <input type="number" min={1} value={schemaVersion} onChange={(e) => setSchemaVersion(e.target.value)} />
             </label>
-            {createError && <p className="session-error" role="alert">{createError}</p>}
+            <InlineError error={createError} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button
                 type="submit"

@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
-import { useFrontendSession } from "../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../lib/api-client";
-import { createKnowledgeBase, listKnowledgeBases, type KnowledgeBase } from "../../lib/knowledge";
-import { useI18n } from "../../i18n/provider";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { createKnowledgeBase, listKnowledgeBases, type KnowledgeBase } from "@/lib/api/knowledge";
+import { useI18n } from "@/i18n/provider";
 
 export default function KnowledgeBasesPage() {
   const { t, formatDateTime } = useI18n();
@@ -80,6 +80,9 @@ export default function KnowledgeBasesPage() {
           </button>
         }
       >
+        {/* Documents live inside a knowledge base; say so where the list is. */}
+        <p className="state-hint">{t("knowledge.uploadLocationHint")}</p>
+
         {showForm && (
           <form className="eval-form" onSubmit={submit} noValidate>
             <p className="eval-form-title">{t("knowledge.createBase")}</p>
@@ -87,11 +90,7 @@ export default function KnowledgeBasesPage() {
               {t("knowledge.baseName")}
               <input value={name} onChange={(event) => setName(event.target.value)} maxLength={200} />
             </label>
-            {mutation.error && (
-              <p className="session-error" role="alert">
-                <code>{mutation.error.code}</code> {mutation.error.message || t("errors.requestFailed")}
-              </p>
-            )}
+            <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button
                 type="submit"
@@ -128,6 +127,7 @@ export default function KnowledgeBasesPage() {
                   <th scope="col">{t("knowledge.baseName")}</th>
                   <th scope="col">{t("common.id")}</th>
                   <th scope="col">{t("common.created")}</th>
+                  <th scope="col">{t("common.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,6 +141,11 @@ export default function KnowledgeBasesPage() {
                     </td>
                     <td data-label={t("common.created")}>
                       {base.created_at ? formatDateTime(base.created_at) : t("common.none")}
+                    </td>
+                    <td data-label={t("common.actions")}>
+                      <Link className="button button-ghost" href={`/knowledge/${base.id}`}>
+                        {t("knowledge.manageDocuments")}
+                      </Link>
                     </td>
                   </tr>
                 ))}

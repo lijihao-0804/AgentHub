@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import MetricCard from "../../components/metric-card";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
-import { ApiError, toApiError } from "../../lib/api-client";
+import MetricCard from "@/components/ui/metric-card";
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { ApiError, toApiError } from "@/lib/api/client";
 import {
   EvaluationDataset,
   PricingSnapshot,
@@ -15,9 +15,9 @@ import {
   listExperiments,
   listPricingSnapshots,
   listReleaseGatePolicies,
-} from "../../lib/evaluation";
-import { useFrontendSession } from "../../components/session-provider";
-import { useI18n } from "../../i18n/provider";
+} from "@/lib/api/evaluation";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 export default function EvaluationOverviewPage() {
   const { t } = useI18n();

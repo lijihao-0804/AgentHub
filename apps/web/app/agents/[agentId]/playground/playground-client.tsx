@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import StatusBadge from "../../../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../../components/states";
-import TechnicalDetails, { KeyValues } from "../../../../components/technical-details";
-import { useFrontendSession } from "../../../../components/session-provider";
-import { useWorkspaceData } from "../../../../components/use-workspace-data";
-import { ApiError, errorHintKey, toApiError, type AuthInput } from "../../../../lib/api-client";
-import { getAgentVersion, listAgentVersions, type AgentVersion } from "../../../../lib/agents";
+import StatusBadge from "@/components/ui/status-badge";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import TechnicalDetails, { KeyValues } from "@/components/ui/technical-details";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData } from "@/hooks/use-workspace-data";
+import { ApiError, errorHintKey, toApiError, type AuthInput } from "@/lib/api/client";
+import { getAgentVersion, listAgentVersions, type AgentVersion } from "@/lib/api/agents";
 import {
   cancelAgentRun,
   getAgentRun,
@@ -18,9 +19,9 @@ import {
   streamAgentRun,
   type AgentEvent,
   type AgentRun,
-} from "../../../../lib/agent-runtime";
-import { decideApproval, listRunApprovals, type Approval } from "../../../../lib/approvals";
-import { useI18n } from "../../../../i18n/provider";
+} from "@/lib/api/agent-runtime";
+import { decideApproval, listRunApprovals, type Approval } from "@/lib/api/approvals";
+import { useI18n } from "@/i18n/provider";
 
 /**
  * Agent Playground.
@@ -548,6 +549,13 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
 
   return (
     <div className="page">
+      <Breadcrumbs
+        items={[
+          { label: t("nav.agents"), href: "/agents" },
+          { label: t("agents.detail"), href: `/agents/${agentId}` },
+          { label: t("agents.playground.title") },
+        ]}
+      />
       <header className="page-header">
         <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{t("agents.playground.title")}</h1>
@@ -555,9 +563,6 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
       </header>
 
       <div className="page-toolbar">
-        <Link className="button button-ghost" href={`/agents/${agentId}`}>
-          {t("agents.backToAgent")}
-        </Link>
         {runId && (
           <Link className="button button-ghost" href={`/runs/${encodeURIComponent(runId)}`}>
             {t("agents.playground.openRunDetail")}

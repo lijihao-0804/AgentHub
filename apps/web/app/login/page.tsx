@@ -3,23 +3,28 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
-import { useFrontendSession } from "../../components/session-provider";
-import { toApiError } from "../../lib/api-client";
-import { useI18n } from "../../i18n/provider";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { ApiError, toApiError } from "@/lib/api/client";
+import { InlineError } from "@/components/ui/states";
+import { useI18n } from "@/i18n/provider";
 
 export default function LoginPage() {
   const { t } = useI18n();
   const { signIn } = useFrontendSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<{ code: string; message: string } | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+  // Held apart from `error`: an empty field is caught here, before anything is
+  // sent, so there is no error code behind it and none should be shown.
+  const [invalid, setInvalid] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setInvalid(null);
     if (!email.trim() || !password) {
-      setError({ code: "VALIDATION_ERROR", message: t("auth.requiredFields") });
+      setInvalid(t("auth.requiredFields"));
       return;
     }
     setSubmitting(true);
@@ -29,7 +34,7 @@ export default function LoginPage() {
       setPassword("");
     } catch (caught) {
       const apiError = toApiError(caught, t("auth.loginFailed"));
-      setError({ code: apiError.code, message: apiError.message || t("auth.loginFailed") });
+      setError(apiError);
       setPassword("");
     } finally {
       setSubmitting(false);
@@ -64,11 +69,12 @@ export default function LoginPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
-        {error && (
-          <p className="session-error" role="alert">
-            <code>{error.code}</code> {error.message}
+        {invalid && (
+          <p className="inline-error" role="alert">
+            {invalid}
           </p>
         )}
+        <InlineError error={error} fallback={t("auth.loginFailed")} />
         <button type="submit" className="button button-primary" disabled={submitting}>
           {submitting ? t("common.loading") : t("auth.login")}
         </button>

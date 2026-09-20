@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import HashValue from "../../../../components/evaluation/hash-value";
-import StatusBadge from "../../../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../../components/states";
-import { ApiError, toApiError } from "../../../../lib/api-client";
+import HashValue from "@/components/evaluation/hash-value";
+import StatusBadge from "@/components/ui/status-badge";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { ApiError, toApiError } from "@/lib/api/client";
 import {
   CANCELLABLE_RUN_STATUSES,
   EvaluationExperimentDetail,
@@ -17,10 +17,10 @@ import {
   getExperiment,
   getExperimentRun,
   getExperimentRunProgress,
-} from "../../../../lib/evaluation";
-import { useFrontendSession } from "../../../../components/session-provider";
-import { useI18n } from "../../../../i18n/provider";
-import RunWorkflow from "./workflow-sections";
+} from "@/lib/api/evaluation";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
+import RunWorkflow from "@/app/evaluations/runs/[runId]/workflow-sections";
 
 const POLL_INTERVAL_MS = 2500;
 
@@ -40,7 +40,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   const [loaded, setLoaded] = useState(false);
   const [experimentError, setExperimentError] = useState<ApiError | null>(null);
   const [cancelling, setCancelling] = useState(false);
-  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<ApiError | null>(null);
 
   useEffect(() => {
     setRun(null);
@@ -142,7 +142,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
       setRun(nextRun);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setCancelError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCancelError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setCancelling(false);
     }
@@ -167,19 +167,25 @@ export default function RunDetailClient({ runId }: { runId: string }) {
 
   return (
     <div className="page">
+      <Breadcrumbs
+        items={[
+          { label: t("nav.evaluations"), href: "/evaluations" },
+          // The owning experiment is only linkable once the run has loaded.
+          {
+            label: t("evaluation.overview.experiments"),
+            href: run
+              ? `/evaluations/experiments/${encodeURIComponent(run.experiment_id)}`
+              : "/evaluations/experiments",
+          },
+          { label: `${runId.slice(0, 8)}…` },
+        ]}
+      />
       <header className="page-header">
         <p className="eyebrow">{t("evaluation.run.eyebrow")}</p>
         <h1>
           {t("evaluation.run.title")} <code title={runId}>{runId.slice(0, 8)}…</code>{" "}
           {run && <StatusBadge status={run.status} />}
         </h1>
-        <p className="page-lede">
-          <Link
-            href={`/evaluations/experiments/${encodeURIComponent(run?.experiment_id ?? "")}`}
-          >
-            {t("evaluation.run.backToExperiments")}
-          </Link>
-        </p>
       </header>
 
       {error && (
@@ -233,7 +239,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
               </div>
             )}
             {cancelRequested && <p className="inline-notice">{t("evaluation.run.cancelRequestedNotice")}</p>}
-            {cancelError && <p className="session-error" role="alert">{cancelError}</p>}
+            <InlineError error={cancelError} fallback={t("errors.requestFailed")} />
           </Panel>
 
           {progress && (

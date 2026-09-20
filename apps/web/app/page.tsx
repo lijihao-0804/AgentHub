@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 
-import { useI18n } from "../i18n/provider";
-import { useFrontendSession } from "../components/session-provider";
+import { useI18n } from "@/i18n/provider";
+import { useFrontendSession } from "@/components/providers/session-provider";
 
 const QUICK_LINKS = [
   {

@@ -1,4 +1,4 @@
-import AgentVersionDetailClient from "./agent-version-client";
+import AgentVersionDetailClient from "@/app/agents/[agentId]/versions/[versionId]/agent-version-client";
 
 export default async function AgentVersionPage({
   params,

@@ -1,0 +1,214 @@
+/* Breakpoints and reduced-motion, applied last so they win. */
+@media (max-width: 1024px) {
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .op-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-columns { grid-template-columns: 1fr; }
+  .stage-grid, .top-k-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .split-row { grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.2fr); }
+  .split-row > :nth-child(n+6) { display: none; }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    box-shadow: var(--shadow);
+    height: 100vh;
+    left: 0;
+    position: fixed;
+    top: 0;
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+    width: 264px;
+    z-index: 60;
+  }
+  body.nav-open .sidebar { transform: none; }
+  .topbar .nav-toggle { display: inline-flex; }
+  .app-content { padding: var(--space-5) var(--space-4); }
+  .topbar { justify-content: space-between; padding: 0 var(--space-4); }
+}
+
+@media (max-width: 640px) {
+  .topbar { gap: var(--space-2); padding: 0 var(--space-3); }
+  .nav-toggle-label { display: none; }
+  .session-control .button { padding: 0.35rem 0.55rem; font-size: 0.8rem; }
+  .lang-option { padding: 0.28rem 0.5rem; }
+  .app-content { padding: var(--space-4) var(--space-3) var(--space-5); }
+  .panel { padding: var(--space-4); }
+  .kpi-grid, .op-grid, .overview-grid, .form-grid, .stage-grid, .top-k-grid,
+  .dashboard-columns, .playground-overview { grid-template-columns: 1fr; }
+  .approval-split { grid-template-columns: 1fr; }
+  .query-field { grid-column: auto; }
+  .form-actions { justify-content: stretch; }
+  .form-actions .button { width: 100%; justify-content: center; }
+  .runs-toolbar { grid-template-columns: 1fr 1fr; }
+  .runs-toolbar .runs-toolbar-actions { grid-column: 1 / -1; display: flex; gap: var(--space-2); }
+  .split-row { grid-template-columns: 1fr auto; }
+  .split-row > :nth-child(n+3) { display: none; }
+  .evidence-item { grid-template-columns: 1fr; }
+  .session-panel { min-width: min(300px, calc(100vw - 2rem)); }
+}
+
+@media (max-width: 480px) {
+  .session-status { display: none; }
+}
+
+/* Runs table → cards on narrow screens */
+@media (max-width: 860px) {
+  .data-table thead { display: none; }
+  .data-table tr { border-bottom: 1px solid var(--border); display: block; padding: var(--space-2) 0; }
+  .data-table td { border: 0; display: block; padding: 0.3rem 0.8rem; }
+  .data-table td::before {
+    color: var(--text-muted);
+    content: attr(data-label);
+    display: block;
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+}
+
+
+/* Evaluation control plane */
+.eval-form {
+  /* Raised, so the inset form controls inside still read as recessed. */
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+}
+.eval-form-title { font-weight: 700; }
+/* Labels placed straight in the form, without a .form-grid wrapper. */
+.eval-form > label {
+  color: var(--text-muted);
+  display: grid;
+  font-size: 0.8rem;
+  gap: 0.35rem;
+  max-width: 30rem;
+}
+.eval-form .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.eval-form .form-grid textarea { min-height: 4.5rem; }
+.eval-form label > span.state-hint { display: block; }
+.mono-area { font-family: var(--font-mono); font-size: 0.8rem; }
+
+/* Declared model capabilities */
+.capability-fieldset { border: 1px solid var(--border); border-radius: var(--radius-sm); display: grid; gap: var(--space-2); padding: var(--space-3); }
+.capability-fieldset legend { font-size: 0.8rem; font-weight: 700; padding: 0 0.35rem; }
+.capability-options { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.checkbox-label { align-items: center; color: var(--text-muted); display: flex; font-size: 0.8rem; gap: 0.4rem; }
+.checkbox-label input { accent-color: var(--accent); }
+.inline-notice {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  margin: var(--space-2) 0;
+  padding: 0.5rem 0.8rem;
+}
+.hash-value { align-items: center; display: inline-flex; gap: 0.35rem; }
+.hash-copy {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.66rem;
+  padding: 0.05rem 0.35rem;
+}
+.hash-copy:hover { color: var(--accent); }
+.inline-confirm {
+  background: var(--warning-soft);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+}
+.inline-confirm-actions { display: flex; gap: var(--space-2); }
+.immutable-tag {
+  background: var(--surface-inset);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.6rem;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.holdout-row td { background: var(--row-subtle); }
+.workflow-step-header { align-items: center; display: flex; gap: var(--space-3); margin-bottom: var(--space-4); }
+.workflow-step-number {
+  align-items: center;
+  background: var(--accent);
+  border-radius: 50%;
+  color: var(--accent-ink);
+  display: inline-flex;
+  font-weight: 800;
+  height: 1.8rem;
+  justify-content: center;
+  width: 1.8rem;
+}
+.comparison-picker { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0; }
+.comparison-option {
+  align-items: center;
+  background: var(--surface-inset);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.82rem;
+  gap: var(--space-2);
+  padding: 0.35rem 0.8rem;
+}
+.comparison-option.selected { border-color: var(--accent); }
+.comparison-variant-line { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
+.deprecated-row td { opacity: 0.6; }
+.deprecated-tag {
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.4rem;
+}
+.rule-builder { border: 1px solid var(--border); border-radius: var(--radius); margin: 0 0 var(--space-3); padding: var(--space-3); }
+.rule-builder legend { color: var(--text-muted); font-size: 0.8rem; font-weight: 700; padding: 0 0.4rem; }
+.rule-builder .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.form-grid label.rule-checkbox, .eval-form label.rule-checkbox { align-items: center; display: flex; flex-direction: row; gap: var(--space-2); }
+.form-grid label.rule-checkbox > input[type="checkbox"] { width: auto; }
+.rule-remove { margin-left: var(--space-2); }
+.gate-decision { border-top: 1px solid var(--border); margin-top: var(--space-4); padding-top: var(--space-4); }
+.gate-decision-header { align-items: center; display: flex; gap: var(--space-3); margin-bottom: var(--space-3); }
+.gate-status {
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.35rem 1rem;
+}
+.gate-pass { background: var(--success-soft); border: 1px solid var(--success); color: var(--success); }
+.gate-fail { background: var(--danger-soft); border: 1px solid var(--danger); color: var(--danger); }
+.gate-inconclusive { background: var(--surface-inset); border: 1px solid var(--border-strong); color: var(--text-muted); }
+.progress-track {
+  background: var(--surface-inset);
+  border-radius: 999px;
+  height: 0.6rem;
+  margin: var(--space-2) 0 var(--space-3);
+  overflow: hidden;
+}
+.progress-fill { background: var(--accent); border-radius: 999px; height: 100%; transition: width 400ms ease; }
+
+@media (max-width: 640px) {
+  .eval-form .form-grid, .rule-builder .form-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

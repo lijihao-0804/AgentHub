@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
-import StatusBadge from "../../../../components/status-badge";
-import { EmptyState, ErrorState, Panel } from "../../../../components/states";
-import TechnicalDetails from "../../../../components/technical-details";
-import { ApiError, toApiError } from "../../../../lib/api-client";
+import StatusBadge from "@/components/ui/status-badge";
+import { EmptyState, ErrorState, InlineError, Panel } from "@/components/ui/states";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { ApiError, toApiError } from "@/lib/api/client";
 import {
   EvaluationComparison,
   EvaluationExperimentRun,
@@ -29,8 +29,8 @@ import {
   narrowMetricGroup,
   uniqueById,
   upsertById,
-} from "../../../../lib/evaluation";
-import { useI18n } from "../../../../i18n/provider";
+} from "@/lib/api/evaluation";
+import { useI18n } from "@/i18n/provider";
 
 type AuthInput = { workspaceId: string; accessToken: string; sessionId: number };
 
@@ -77,7 +77,7 @@ export default function RunWorkflow({
   const { t, formatDateTime } = useI18n();
   const [metrics, setMetrics] = useState<MetricsState>({ kind: "loading" });
   const [materializing, setMaterializing] = useState(false);
-  const [metricsError, setMetricsError] = useState<string | null>(null);
+  const [metricsError, setMetricsError] = useState<ApiError | null>(null);
 
   const [comparisons, setComparisons] = useState<EvaluationComparison[] | null>(null);
   const [comparisonsError, setComparisonsError] = useState<ApiError | null>(null);
@@ -85,11 +85,11 @@ export default function RunWorkflow({
   const [baselineId, setBaselineId] = useState("");
   const [candidateId, setCandidateId] = useState("");
   const [creatingComparison, setCreatingComparison] = useState(false);
-  const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const [comparisonError, setComparisonError] = useState<ApiError | null>(null);
 
   const [ablation, setAblation] = useState<EvaluationAblation | null>(null);
   const [ablationState, setAblationState] = useState<"loading" | "absent" | "ready" | "error">("loading");
-  const [ablationError, setAblationError] = useState<string | null>(null);
+  const [ablationError, setAblationError] = useState<ApiError | null>(null);
   const [creatingAblation, setCreatingAblation] = useState(false);
 
   const [policies, setPolicies] = useState<ReleaseGatePolicy[] | null>(null);
@@ -99,7 +99,7 @@ export default function RunWorkflow({
   const [decisionsLoaded, setDecisionsLoaded] = useState(false);
   const [decisionsError, setDecisionsError] = useState<ApiError | null>(null);
   const [runningGate, setRunningGate] = useState(false);
-  const [gateError, setGateError] = useState<string | null>(null);
+  const [gateError, setGateError] = useState<ApiError | null>(null);
   const activeSessionRef = useRef(input.sessionId);
   const activeRunRef = useRef(run.id);
   const activeComparisonRef = useRef(selectedComparisonId);
@@ -180,7 +180,7 @@ export default function RunWorkflow({
       setMetrics({ kind: "ready", payload });
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setMetricsError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setMetricsError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setMaterializing(false);
     }
@@ -228,7 +228,7 @@ export default function RunWorkflow({
       setCandidateId("");
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setComparisonError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setComparisonError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setCreatingComparison(false);
     }
@@ -261,7 +261,7 @@ export default function RunWorkflow({
       if (apiError.code === "ABLATION_NOT_FOUND" || apiError.status === 404) {
         setAblationState("absent");
       } else {
-        setAblationError(apiError.message || apiError.code);
+        setAblationError(apiError);
         setAblationState("error");
       }
     }
@@ -297,7 +297,7 @@ export default function RunWorkflow({
     } catch (caught) {
       const apiError = toApiError(caught, "");
       if (isCurrentMutation()) {
-        setAblationError(apiError.message || apiError.code);
+        setAblationError(apiError);
       }
     } finally {
       if (isCurrentMutation()) {
@@ -378,7 +378,7 @@ export default function RunWorkflow({
     } catch (caught) {
       const apiError = toApiError(caught, "");
       if (isCurrentMutation()) {
-        setGateError(apiError.message || apiError.code);
+        setGateError(apiError);
       }
     } finally {
       if (isCurrentMutation()) {
@@ -402,7 +402,7 @@ export default function RunWorkflow({
             <button type="button" className="button button-primary" onClick={() => void materialize()} disabled={materializing}>
               {materializing ? t("evaluation.metrics.materializing") : t("evaluation.metrics.materialize")}
             </button>
-            {metricsError && <p className="session-error" role="alert">{metricsError}</p>}
+            <InlineError error={metricsError} fallback={t("errors.requestFailed")} />
           </div>
         )}
         {terminal && metrics.kind === "error" && (
@@ -452,7 +452,7 @@ export default function RunWorkflow({
                 {baselineId && candidateId && baselineId === candidateId && (
                   <p className="session-error" role="alert">{t("evaluation.comparison.sameVariantError")}</p>
                 )}
-                {comparisonError && <p className="session-error" role="alert">{comparisonError}</p>}
+                <InlineError error={comparisonError} fallback={t("errors.requestFailed")} />
                 <div className="form-actions">
                   <button
                     type="submit"
@@ -495,8 +495,8 @@ export default function RunWorkflow({
         {selectedComparison && ablationState === "loading" && <p className="state-hint">{t("common.loading")}</p>}
         {selectedComparison && ablationState === "error" && ablationError && (
           <ErrorState
-            code="ABLATION_LOAD_FAILED"
-            message={ablationError}
+            code={ablationError.code}
+            message={ablationError.message || t("errors.loadEvaluation")}
             onRetry={() => void loadAblation()}
           />
         )}
@@ -506,7 +506,7 @@ export default function RunWorkflow({
             <button type="button" className="button button-primary" onClick={() => void createAblation()} disabled={creatingAblation}>
               {creatingAblation ? t("evaluation.ablation.creating") : t("evaluation.ablation.create")}
             </button>
-            {ablationError && <p className="session-error" role="alert">{ablationError}</p>}
+            <InlineError error={ablationError} fallback={t("errors.requestFailed")} />
           </div>
         )}
         {selectedComparison && ablation && <AblationView ablation={ablation} variantLabel={variantLabel} />}
@@ -549,7 +549,7 @@ export default function RunWorkflow({
                     ))}
                   </select>
                 </label>
-                {gateError && <p className="session-error" role="alert">{gateError}</p>}
+                <InlineError error={gateError} fallback={t("errors.requestFailed")} />
                 <div className="form-actions">
                   <button type="submit" className="button button-primary" disabled={runningGate || !policyId}>
                     {runningGate ? t("evaluation.gate.running") : t("evaluation.gate.run")}

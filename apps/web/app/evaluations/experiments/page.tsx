@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
-import StatusBadge from "../../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import { ApiError, toApiError } from "../../../lib/api-client";
+import StatusBadge from "@/components/ui/status-badge";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { ApiError, toApiError } from "@/lib/api/client";
 import {
   EvaluationDataset,
   EvaluationDatasetVersion,
@@ -14,9 +14,9 @@ import {
   listDatasets,
   listDatasetVersions,
   listExperiments,
-} from "../../../lib/evaluation";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useI18n } from "../../../i18n/provider";
+} from "@/lib/api/evaluation";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 const PURPOSES = ["DEVELOPMENT", "HOLDOUT_VALIDATION", "RELEASE_GATE"] as const;
 
@@ -48,7 +48,7 @@ export default function EvaluationExperimentsPage() {
   const [purpose, setPurpose] = useState<(typeof PURPOSES)[number]>("DEVELOPMENT");
   const [repetitions, setRepetitions] = useState("1");
   const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<ApiError | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
   const activeSessionRef = useRef(sessionId);
   const versionsRequestGenerationRef = useRef(0);
@@ -175,7 +175,7 @@ export default function EvaluationExperimentsPage() {
       window.location.assign(`/evaluations/experiments/${encodeURIComponent(experiment.id)}`);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setCreateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCreateError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
@@ -295,7 +295,7 @@ export default function EvaluationExperimentsPage() {
               </label>
             </div>
             <p className="state-hint">{t("evaluation.experiments.purposeHint")}</p>
-            {createError && <p className="session-error" role="alert">{createError}</p>}
+            <InlineError error={createError} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button type="submit" className="button button-primary" disabled={creating || !name.trim() || !versionId}>
                 {creating ? t("evaluation.experiments.creating") : t("evaluation.experiments.create")}

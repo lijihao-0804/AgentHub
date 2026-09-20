@@ -3,11 +3,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
-import HashValue, { InlineConfirm } from "../../../../components/evaluation/hash-value";
-import StatusBadge from "../../../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../../components/states";
-import TechnicalDetails from "../../../../components/technical-details";
-import { ApiError, toApiError } from "../../../../lib/api-client";
+import HashValue, { InlineConfirm } from "@/components/evaluation/hash-value";
+import StatusBadge from "@/components/ui/status-badge";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { ApiError, toApiError } from "@/lib/api/client";
 import {
   AgentSummary,
   AgentVersionSummary,
@@ -20,9 +20,9 @@ import {
   listAgents,
   listPricingSnapshots,
   startExperimentRun,
-} from "../../../../lib/evaluation";
-import { useFrontendSession } from "../../../../components/session-provider";
-import { useI18n } from "../../../../i18n/provider";
+} from "@/lib/api/evaluation";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 export default function ExperimentDetailClient({ experimentId }: { experimentId: string }) {
   const { t, statusLabel, purposeLabel, formatDateTime, formatNumber } = useI18n();
@@ -49,15 +49,19 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
   const [pricingId, setPricingId] = useState("");
   const [ordinal, setOrdinal] = useState("0");
   const [metadataText, setMetadataText] = useState("");
-  const [variantError, setVariantError] = useState<string | null>(null);
+  const [variantError, setVariantError] = useState<ApiError | null>(null);
+  // Kept apart from variantError: "this form is not filled in right" is not
+  // the same thing as "the server rejected this", and only the latter
+  // carries an error code worth showing.
+  const [variantInvalid, setVariantInvalid] = useState<string | null>(null);
   const [addingVariant, setAddingVariant] = useState(false);
 
   const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
-  const [finalizeError, setFinalizeError] = useState<string | null>(null);
+  const [finalizeError, setFinalizeError] = useState<ApiError | null>(null);
 
   const [startingRun, setStartingRun] = useState(false);
-  const [startRunError, setStartRunError] = useState<string | null>(null);
+  const [startRunError, setStartRunError] = useState<ApiError | null>(null);
   const activeSessionRef = useRef(sessionId);
   const versionsRequestGenerationRef = useRef(0);
   activeSessionRef.current = sessionId;
@@ -188,6 +192,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
   async function submitVariant(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setVariantError(null);
+    setVariantInvalid(null);
     if (!label.trim() || !agentVersionId || !pricingId) return;
     const requestSessionId = sessionId;
     let metadata: Record<string, unknown> = {};
@@ -195,7 +200,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
       try {
         metadata = JSON.parse(metadataText) as Record<string, unknown>;
       } catch {
-        setVariantError(t("evaluation.experiment.variants.invalidMetadata"));
+        setVariantInvalid(t("evaluation.experiment.variants.invalidMetadata"));
         return;
       }
     }
@@ -215,7 +220,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
       await load();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setVariantError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setVariantError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setAddingVariant(false);
     }
@@ -232,7 +237,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
       setShowFinalizeConfirm(false);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setFinalizeError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setFinalizeError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setFinalizing(false);
     }
@@ -249,7 +254,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
     } catch (caught) {
       const apiError = toApiError(caught, "");
       if (activeSessionRef.current === requestSessionId) {
-        setStartRunError(apiError.message || apiError.code);
+        setStartRunError(apiError);
         setStartingRun(false);
       }
     }
@@ -346,8 +351,8 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                 pending={finalizing}
               />
             )}
-            {finalizeError && <p className="session-error" role="alert">{finalizeError}</p>}
-            {startRunError && <p className="session-error" role="alert">{startRunError}</p>}
+            <InlineError error={finalizeError} fallback={t("errors.requestFailed")} />
+            <InlineError error={startRunError} fallback={t("errors.requestFailed")} />
           </Panel>
 
           <Panel
@@ -450,7 +455,8 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                     <span className="state-hint">{t("evaluation.experiment.variants.metadataHint")}</span>
                   </label>
                 </div>
-                {variantError && <p className="session-error" role="alert">{variantError}</p>}
+                {variantInvalid && <p className="inline-error">{variantInvalid}</p>}
+                <InlineError error={variantError} fallback={t("errors.requestFailed")} />
                 <div className="form-actions">
                   <button
                     type="submit"

@@ -3,19 +3,19 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import HashValue, { InlineConfirm } from "../../../../../../components/evaluation/hash-value";
-import StatusBadge from "../../../../../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../../../../components/states";
-import TechnicalDetails from "../../../../../../components/technical-details";
-import { ApiError, toApiError } from "../../../../../../lib/api-client";
+import HashValue, { InlineConfirm } from "@/components/evaluation/hash-value";
+import StatusBadge from "@/components/ui/status-badge";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { ApiError, toApiError } from "@/lib/api/client";
 import {
   EvaluationDatasetItem,
   EvaluationDatasetVersionDetail,
   getDatasetVersion,
   publishDatasetVersion,
-} from "../../../../../../lib/evaluation";
-import { useFrontendSession } from "../../../../../../components/session-provider";
-import { useI18n } from "../../../../../../i18n/provider";
+} from "@/lib/api/evaluation";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 function inputSummary(item: EvaluationDatasetItem): string {
   const input = item.input ?? {};
@@ -42,7 +42,7 @@ export default function DatasetVersionDetailClient({
 
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishError, setPublishError] = useState<ApiError | null>(null);
   const [publishedNotice, setPublishedNotice] = useState(false);
   const activeSessionRef = useRef(sessionId);
   activeSessionRef.current = sessionId;
@@ -93,7 +93,7 @@ export default function DatasetVersionDetailClient({
       setPublishedNotice(true);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setPublishError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setPublishError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setPublishing(false);
     }
@@ -175,7 +175,7 @@ export default function DatasetVersionDetailClient({
                 pending={publishing}
               />
             )}
-            {publishError && <p className="session-error" role="alert">{publishError}</p>}
+            <InlineError error={publishError} fallback={t("errors.requestFailed")} />
             {publishedNotice && <p className="inline-notice">{t("evaluation.datasets.version.publishedNotice")}</p>}
           </Panel>
 

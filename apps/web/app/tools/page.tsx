@@ -3,19 +3,19 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
-import StatusBadge from "../../components/status-badge";
-import { useFrontendSession } from "../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../lib/api-client";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import StatusBadge from "@/components/ui/status-badge";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import {
   createTool,
   listToolCatalog,
   listTools,
   type Tool,
   type ToolCatalogItem,
-} from "../../lib/tools";
-import { useI18n } from "../../i18n/provider";
+} from "@/lib/api/tools";
+import { useI18n } from "@/i18n/provider";
 
 /** Effect and risk are server facts; the UI only colours what it is told. */
 function riskTone(risk: string | null | undefined): "neutral" | "info" | "warning" | "danger" {
@@ -259,11 +259,7 @@ export default function ToolsPage() {
                 />
               </label>
             </div>
-            {mutation.error && (
-              <p className="session-error" role="alert">
-                <code>{mutation.error.code}</code> {mutation.error.message || t("errors.requestFailed")}
-              </p>
-            )}
+            <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button
                 type="submit"
