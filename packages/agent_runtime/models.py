@@ -286,11 +286,17 @@ class AgentRun(Base):
             "started_at",
         ),
         Index("ix_agent_runs_reconciliation", "status", "started_at", "id"),
+        Index("ix_agent_runs_thread", "workspace_id", "thread_id", "started_at"),
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     agent_version_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    # A back-pointer to the thread this run answered a turn of, and nothing
+    # more. Nullable because a Playground run belongs to no thread, and read by
+    # nothing that decides how the run executes: replay, evaluation and
+    # reconciliation all ignore it.
+    thread_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="RUNNING")
     input_text: Mapped[str] = mapped_column(Text, nullable=False)
     final_output: Mapped[str | None] = mapped_column(Text)

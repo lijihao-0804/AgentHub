@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from apps.api.routes.agent_runs import router as agent_runs_router
 from apps.api.routes.agents import router as agents_router
 from apps.api.routes.approvals import router as approvals_router
+from apps.api.routes.artifacts import router as artifacts_router
 from apps.api.routes.auth import router as auth_router
 from apps.api.routes.citation_qa import router as citation_qa_router
 from apps.api.routes.evaluation import router as evaluation_router
@@ -24,6 +25,7 @@ from apps.api.routes.observability import router as observability_router
 from apps.api.routes.product_control_plane import router as product_control_plane_router
 from apps.api.routes.runs import router as runs_router
 from apps.api.routes.tenancy import router as tenancy_router
+from apps.api.routes.threads import router as threads_router
 from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
@@ -79,6 +81,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(agents_router)
     app.include_router(agent_runs_router)
     app.include_router(approvals_router)
+    app.include_router(artifacts_router)
     app.include_router(citation_qa_router)
     app.include_router(evaluation_router)
     app.include_router(knowledge_router)
@@ -87,6 +90,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(product_control_plane_router)
     app.include_router(runs_router)
     app.include_router(tenancy_router)
+    app.include_router(threads_router)
 
     @app.get("/api/v1/health", tags=["system"])
     async def health(request: Request) -> dict[str, str]:

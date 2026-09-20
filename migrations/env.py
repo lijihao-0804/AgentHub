@@ -7,6 +7,7 @@ from sqlalchemy import engine_from_config, pool
 
 from packages.agent_runtime import models as _agent_runtime_models  # noqa: F401
 from packages.approvals import models as _approval_models  # noqa: F401
+from packages.artifacts import models as _artifact_models  # noqa: F401
 from packages.control_plane import models as _control_plane_models  # noqa: F401
 from packages.core.config.settings import get_settings
 from packages.core.database import Base
@@ -14,6 +15,7 @@ from packages.evaluation import models as _evaluation_models  # noqa: F401
 from packages.knowledge import models as _knowledge_models  # noqa: F401
 from packages.mcp import models as _mcp_models  # noqa: F401
 from packages.model_gateway import models as _model_gateway_models  # noqa: F401
+from packages.threads import models as _thread_models  # noqa: F401
 from packages.tools import models as _tool_models  # noqa: F401
 
 config = context.config
