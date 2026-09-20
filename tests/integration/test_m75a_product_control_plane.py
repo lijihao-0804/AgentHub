@@ -237,7 +237,7 @@ async def test_invalid_binding_replace_preserves_existing_set(db_factory) -> Non
                     }
                 ],
             )
-        assert "INVALID_KNOWLEDGE_BINDING" in str(raised.value)
+        assert raised.value.code == "INVALID_KNOWLEDGE_BINDING"
         retained = await service.get_knowledge_bindings(session, context, agent.id)
         assert len(retained) == 1
         assert retained[0].snapshot_id is None
