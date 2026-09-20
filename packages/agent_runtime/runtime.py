@@ -115,6 +115,11 @@ class AgentRunState(TypedDict, total=False):
     action_calls: list[dict[str, Any]]
     run_status: str
     usage_records: list[dict[str, Any]]
+    # Seeded by ``_initial_state`` from the run row and read again at
+    # TOOL_EXECUTE.  It has to be declared here or the graph's schema drops it
+    # between the two, and ``search_knowledge`` then resolves against an empty
+    # binding and fails closed with TOOL_REVISION_INVALID.
+    effective_knowledge_snapshots: list[dict[str, str]]
 
 
 @dataclass(frozen=True, slots=True)
