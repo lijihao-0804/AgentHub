@@ -16,6 +16,7 @@ dependencies = [
   "langgraph>=0.3,<2",
   "langgraph-checkpoint-postgres>=2,<4",
   "litellm>=1.60,<2",
+  "mcp>=2,<3",
   "PyJWT>=2.10,<3",
   "psycopg[binary]>=3.2,<4",
   "pydantic>=2.10,<3",

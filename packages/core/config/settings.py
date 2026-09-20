@@ -59,6 +59,16 @@ class Settings(BaseSettings):
     evaluation_runner_heartbeat_seconds: int = Field(default=30, ge=1, le=86_400)
     evaluation_enqueue_grace_seconds: int = Field(default=30, ge=0, le=86_400)
     evaluation_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
+    # Remote MCP egress. The defaults are the safe ones: private targets are
+    # refused, and every remote call is bounded in time and in size. Loosening
+    # any of these is an explicit operator decision, never an inference from
+    # the environment name.
+    mcp_allow_private_targets: bool = False
+    mcp_connect_timeout_seconds: float = Field(default=5, gt=0, le=60)
+    mcp_request_timeout_seconds: float = Field(default=30, gt=0, le=300)
+    mcp_discovery_max_tools: int = Field(default=200, ge=1, le=10_000)
+    mcp_discovery_max_schema_bytes: int = Field(default=65_536, ge=1_024, le=8_388_608)
+    mcp_discovery_max_payload_bytes: int = Field(default=2_097_152, ge=4_096, le=33_554_432)
     langfuse_enabled: bool = False
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)
@@ -83,6 +93,10 @@ class Settings(BaseSettings):
             raise ValueError("knowledge reranker device must be auto, cpu, or cuda")
         if self.evaluation_runner_heartbeat_seconds >= self.evaluation_runner_lease_seconds:
             raise ValueError("evaluation runner heartbeat must be shorter than lease duration")
+        if self.mcp_connect_timeout_seconds > self.mcp_request_timeout_seconds:
+            raise ValueError("mcp connect timeout must not exceed the overall request timeout")
+        if self.mcp_discovery_max_schema_bytes > self.mcp_discovery_max_payload_bytes:
+            raise ValueError("mcp per-tool schema budget must fit inside the payload budget")
         if (
             self.environment.lower() not in DEVELOPMENT_ENVIRONMENTS
             and self.process_role == "api"

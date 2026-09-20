@@ -12,6 +12,7 @@ from packages.core.config.settings import get_settings
 from packages.core.database import Base
 from packages.evaluation import models as _evaluation_models  # noqa: F401
 from packages.knowledge import models as _knowledge_models  # noqa: F401
+from packages.mcp import models as _mcp_models  # noqa: F401
 from packages.model_gateway import models as _model_gateway_models  # noqa: F401
 from packages.tools import models as _tool_models  # noqa: F401
 
