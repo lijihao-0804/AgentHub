@@ -8,7 +8,12 @@ import pytest
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.blob_store import BlobStoreError, LocalBlobStore
-from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery, RetrievedEvidence
+from packages.knowledge.contracts import (
+    KnowledgeRetriever,
+    RetrievalQuery,
+    RetrievalStrategy,
+    RetrievedEvidence,
+)
 from packages.knowledge.upload_security import (
     UploadSecurityError,
     UploadSecurityPolicy,
@@ -30,6 +35,7 @@ def test_retrieval_contract_freezes_workspace_context_and_limits() -> None:
     )
 
     assert query.dense_top_k == 30
+    assert query.strategy is RetrievalStrategy.HYBRID_RERANK
     assert query.sparse_top_k == 30
     assert query.candidate_top_k == 20
     assert query.final_top_k == 6

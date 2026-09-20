@@ -122,41 +122,9 @@ export type AgentVersionBreakdown = {
   }>;
 };
 
-export class ObservabilityApiError extends Error {
-  code: string;
+import { apiRequest, ApiError } from "./api-client";
 
-  constructor(code: string, message: string) {
-    super(message);
-    this.name = "ObservabilityApiError";
-    this.code = code;
-  }
-}
-
-const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ?? "").replace(/\/$/, "");
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-async function request<T>(path: string, accessToken: string): Promise<T> {
-  const token = accessToken.trim();
-  if (!token) {
-    throw new ObservabilityApiError("AUTHENTICATION_REQUIRED", "An access token is required.");
-  }
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    credentials: "include",
-  });
-  const body = (await response.json().catch(() => null)) as unknown;
-  if (!response.ok) {
-    const error = isRecord(body) && isRecord(body.error) ? body.error : {};
-    throw new ObservabilityApiError(
-      typeof error.code === "string" ? error.code : "REQUEST_FAILED",
-      typeof error.message === "string" ? error.message : "Observability request failed.",
-    );
-  }
-  return body as T;
-}
+export { ApiError as ObservabilityApiError };
 
 function querySuffix(input: {
   from?: string;
@@ -178,7 +146,7 @@ function querySuffix(input: {
 type QueryInput = { workspaceId: string; accessToken: string; from?: string; to?: string; agentVersionId?: string };
 
 export function getObservabilitySummary(input: QueryInput): Promise<ObservabilitySummary> {
-  return request(
+  return apiRequest(
     `/api/v1/workspaces/${encodeURIComponent(input.workspaceId)}/observability/summary${querySuffix(input)}`,
     input.accessToken,
   );
@@ -187,7 +155,7 @@ export function getObservabilitySummary(input: QueryInput): Promise<Observabilit
 export function getObservabilityTimeseries(
   input: QueryInput & { bucket?: string },
 ): Promise<TimeseriesResponse> {
-  return request(
+  return apiRequest(
     `/api/v1/workspaces/${encodeURIComponent(input.workspaceId)}/observability/timeseries${querySuffix(input)}`,
     input.accessToken,
   );
@@ -196,14 +164,14 @@ export function getObservabilityTimeseries(
 export function getObservabilityFailures(
   input: QueryInput & { category?: string },
 ): Promise<FailureAnalytics> {
-  return request(
+  return apiRequest(
     `/api/v1/workspaces/${encodeURIComponent(input.workspaceId)}/observability/failures${querySuffix(input)}`,
     input.accessToken,
   );
 }
 
 export function getAgentVersionBreakdown(input: QueryInput): Promise<AgentVersionBreakdown> {
-  return request(
+  return apiRequest(
     `/api/v1/workspaces/${encodeURIComponent(input.workspaceId)}/observability/agent-versions${querySuffix(input)}`,
     input.accessToken,
   );

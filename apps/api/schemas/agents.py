@@ -110,6 +110,18 @@ class AgentVersionResponse(BaseModel):
     created_by: UUID
 
 
+class AgentPreflightResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["READY"]
+    agent_id: UUID
+    workspace_id: UUID
+    draft_updated_at: datetime
+    spec_schema_version: int = Field(ge=1)
+    resolved_spec_hash: str = Field(min_length=64, max_length=64)
+    resolved_spec: dict[str, Any]
+
+
 class AgentPublishResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

@@ -2,9 +2,16 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Any, Protocol
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
+
+
+class RetrievalStrategy(StrEnum):
+    DENSE = "DENSE"
+    HYBRID = "HYBRID"
+    HYBRID_RERANK = "HYBRID_RERANK"
 
 
 @dataclass(frozen=True)
@@ -12,6 +19,7 @@ class RetrievalQuery:
     text: str
     knowledge_base_id: str
     knowledge_snapshot_id: str
+    strategy: RetrievalStrategy = RetrievalStrategy.HYBRID_RERANK
     dense_top_k: int = 30
     sparse_top_k: int = 30
     candidate_top_k: int = 20

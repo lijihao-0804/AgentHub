@@ -97,6 +97,29 @@ jobs:
         run: uv run --locked pytest tests/integration/test_m7a_evaluation_datasets.py -vv -rs
       - name: Run M7-B experiment persistence integration
         run: uv run --locked pytest tests/integration/test_m7b_experiments.py -vv -rs
+      - name: Run M7-D metrics and paired comparison integration
+        run: >-
+          uv run --locked pytest tests/integration/test_m7c_experiment_runner.py
+          -k m7d_metrics_and_comparison_use_persisted_m7c_cases -vv -rs
+      - name: Run M7-E/F persisted ablation and release gate integration
+        run: uv run --locked pytest tests/integration/test_m7ef_ablation_release_gate.py -vv -rs
+      - name: Validate M7-H unified dataset reproducibility
+        run: |
+          uv run --locked python -m benchmarks.evaluation.dataset_builder --check
+          uv run --locked python -m benchmarks.evaluation.runner --validate-only
+      - name: Run M7-H full unified evaluation integration
+        run: uv run --locked pytest tests/integration/test_m7h_unified_evaluation.py -vv -rs
+      - name: Generate M7-H conformance artifact
+        run: >-
+          uv run --locked python -m benchmarks.evaluation.runner
+          --database-url "$AGENTHUB_TEST_DATABASE_URL"
+          --output "$RUNNER_TEMP/m7-unified-conformance-${GITHUB_SHA}.json"
+      - name: Upload M7-H conformance artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-unified-conformance-${{ github.sha }}
+          path: ${{ runner.temp }}/m7-unified-conformance-${{ github.sha }}.json
+          if-no-files-found: error
       - name: Validate M3 retrieval benchmark wiring
         run: |
           uv run --locked python -m benchmarks.retrieval.runner --validate-only
@@ -131,6 +154,10 @@ jobs:
           tests/unit/test_m7b_evaluation_api.py -vv
       - name: Validate M7-C runner contract
         run: uv run --locked pytest tests/unit/test_m7c_runner.py -vv
+      - name: Validate M7-E/F strategy, ablation, and release gate contracts
+        run: >-
+          uv run --locked pytest tests/unit/test_knowledge_m7e_strategy.py
+          tests/unit/test_m7e_ablation.py tests/unit/test_m7f_release_gate.py -vv
 
   frontend:
     runs-on: ubuntu-latest

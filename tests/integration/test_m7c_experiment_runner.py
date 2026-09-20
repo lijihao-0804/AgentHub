@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from decimal import Decimal
 from pathlib import Path
@@ -9,17 +10,23 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
+from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.build_identity import StaticBuildIdentityProvider
 from packages.evaluation.experiments import ExperimentService
+from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.models import (
     EvaluationCaseResultStatus,
     EvaluationExperimentCaseResult,
+    EvaluationExperimentComparison,
     EvaluationExperimentRunStatus,
+    EvaluationExperimentVariant,
+    EvaluationMetricResult,
+    EvaluationMetricSnapshot,
 )
 from packages.evaluation.runner import (
     CaseExecutionObservation,
@@ -85,7 +92,11 @@ class _CountingDriver:
         del session
         self.calls.append((variant.id, item.id, len(self.calls)))
         return CaseExecutionObservation(
-            observation={"category": item.category, "variant_hash": variant.variant_hash},
+            observation={
+                "category": item.category,
+                "variant_hash": variant.variant_hash,
+                "candidate_chunk_ids": list(item.expected.get("relevant_chunk_ids", [])),
+            },
             input_tokens=100,
             output_tokens=50,
             total_tokens=150,
@@ -106,14 +117,20 @@ class _ObservedFailureDriver:
         )
 
 
-async def _ready_run(session: AsyncSession, base: dict[str, object]):
+async def _ready_run(
+    session: AsyncSession,
+    base: dict[str, object],
+    *,
+    case_count: int = 2,
+    repetitions: int = 1,
+):
     context = _manager_context(base)
     _, dataset_version = await _published_version(
         session,
         base,
         items=[
-            _item("case-0", split="DEV", ordinal=0),
-            _item("case-1", split="DEV", ordinal=1),
+            _item(f"case-{ordinal}", split="DEV", ordinal=ordinal)
+            for ordinal in range(case_count)
         ],
     )
     pricing = await _pricing(session, base)
@@ -126,6 +143,7 @@ async def _ready_run(session: AsyncSession, base: dict[str, object]):
         dataset_version_id=dataset_version.id,
         split="DEV",
         purpose="DEVELOPMENT",
+        repetitions=repetitions,
     )
     for ordinal in range(2):
         await service.add_variant(
@@ -256,3 +274,189 @@ async def test_m7c_cancelled_queued_run_does_not_materialize_cases(db_factory) -
     assert stored_run is not None
     assert stored_run.status == EvaluationExperimentRunStatus.CANCELLED
     assert case_count == 0
+
+
+@pytest.mark.asyncio
+async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7d-metrics-{uuid4().hex}")
+        run = await _ready_run(session, base, case_count=10, repetitions=3)
+        context = _manager_context(base)
+    runner = ExperimentRunner(db_factory, driver=_CountingDriver())
+    await runner.execute(run_id=run.id, owner="m7d-metrics-worker", settings=Settings(testing=True))
+
+    async with db_factory() as session:
+        variants = list(
+            await session.scalars(
+                select(EvaluationExperimentVariant).where(
+                    EvaluationExperimentVariant.experiment_id == run.experiment_id
+                )
+            )
+        )
+        await session.execute(
+            update(EvaluationExperimentCaseResult)
+            .where(
+                EvaluationExperimentCaseResult.experiment_run_id == run.id,
+                EvaluationExperimentCaseResult.experiment_variant_id == variants[1].id,
+            )
+            .values(cost_currency="EUR")
+        )
+        await session.commit()
+        service = EvaluationMetricsService()
+        metrics = await service.materialize_metrics(session, context=context, run_id=run.id)
+        repeated = await service.materialize_metrics(session, context=context, run_id=run.id)
+        persisted = await service.get_persisted_metrics(session, context=context, run_id=run.id)
+        viewer = context.model_copy(
+            update={"workspace_role": "VIEWER", "permissions": frozenset({"evaluation_read"})}
+        )
+        snapshot_count_before = await session.scalar(
+            select(func.count(EvaluationMetricSnapshot.id)).where(
+                EvaluationMetricSnapshot.experiment_run_id == run.id
+            )
+        )
+        metric_count_before = await session.scalar(
+            select(func.count(EvaluationMetricResult.id)).where(
+                EvaluationMetricResult.experiment_run_id == run.id
+            )
+        )
+        viewer_metrics = await service.get_persisted_metrics(
+            session, context=viewer, run_id=run.id
+        )
+        with pytest.raises(AgentHubError) as viewer_materialize:
+            await service.materialize_metrics(session, context=viewer, run_id=run.id)
+        assert viewer_materialize.value.status_code == 403
+        assert viewer_metrics["metrics_hash"] == metrics["metrics_hash"]
+        assert (
+            await session.scalar(
+                select(func.count(EvaluationMetricSnapshot.id)).where(
+                    EvaluationMetricSnapshot.experiment_run_id == run.id
+                )
+            )
+            == snapshot_count_before
+        )
+        assert (
+            await session.scalar(
+                select(func.count(EvaluationMetricResult.id)).where(
+                    EvaluationMetricResult.experiment_run_id == run.id
+                )
+            )
+            == metric_count_before
+        )
+        comparison = await service.create_comparison(
+            session,
+            context=context,
+            run_id=run.id,
+            baseline_variant_id=variants[0].id,
+            candidate_variant_id=variants[1].id,
+        )
+        comparison_again = await service.create_comparison(
+            session,
+            context=context,
+            run_id=run.id,
+            baseline_variant_id=variants[0].id,
+            candidate_variant_id=variants[1].id,
+        )
+        viewer_comparisons = await service.get_comparisons(
+            session, context=viewer, run_id=run.id
+        )
+        with pytest.raises(AgentHubError) as viewer_comparison:
+            await service.create_comparison(
+                session,
+                context=viewer,
+                run_id=run.id,
+                baseline_variant_id=variants[0].id,
+                candidate_variant_id=variants[1].id,
+            )
+    assert set(metrics["variants"]) == {str(variant.id) for variant in variants}
+    assert all(len(metrics["variants"][str(variant.id)]["categories"]) == 1 for variant in variants)
+    assert all(
+        metrics["variants"][str(variant.id)]["total_tokens"]["value"] == 4500
+        for variant in variants
+    )
+    assert all(
+        metrics["variants"][str(variant.id)]["task_success"]["sample_count"] == 10
+        for variant in variants
+    )
+    assert all(
+        metrics["variants"][str(variant.id)]["cost_per_successful_dataset_item"][
+            "sample_count"
+        ]
+        == 10
+        for variant in variants
+    )
+    assert all(
+        Decimal(
+            str(
+                metrics["variants"][str(variant.id)]["cost_per_successful_dataset_item"][
+                    "value"
+                ]
+            )
+        )
+        == Decimal("0.00002")
+        for variant in variants
+    )
+    assert repeated["snapshot_id"] == metrics["snapshot_id"]
+    assert repeated["metrics_hash"] == metrics["metrics_hash"]
+    assert persisted["metrics_hash"] == metrics["metrics_hash"]
+    assert comparison.status == "COMPLETE"
+    assert comparison.paired_pairs == 10
+    assert comparison.missing_pairs == 0
+    assert comparison.metrics["cost_per_successful_case"]["status"] == "NOT_COMPARABLE"
+    assert comparison.metrics["cost_per_successful_case"]["reason"] == "currency_mismatch"
+    assert comparison_again.id == comparison.id
+    assert comparison_again.comparison_hash == comparison.comparison_hash
+    assert len(viewer_comparisons) == 1
+    assert viewer_comparison.value.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_m7d_comparison_creation_is_concurrently_idempotent(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7d-concurrent-{uuid4().hex}")
+        run = await _ready_run(session, base, case_count=10, repetitions=3)
+        context = _manager_context(base)
+    await ExperimentRunner(db_factory, driver=_CountingDriver()).execute(
+        run_id=run.id, owner="m7d-concurrent-worker", settings=Settings(testing=True)
+    )
+
+    async with db_factory() as session:
+        variants = list(
+            await session.scalars(
+                select(EvaluationExperimentVariant)
+                .where(EvaluationExperimentVariant.experiment_id == run.experiment_id)
+                .order_by(EvaluationExperimentVariant.ordinal)
+            )
+        )
+        await EvaluationMetricsService().materialize_metrics(
+            session, context=context, run_id=run.id
+        )
+    first_engine, first_factory = create_database(async_database_url(TEST_DATABASE_URL))
+    second_engine, second_factory = create_database(async_database_url(TEST_DATABASE_URL))
+
+    async def create(factory: async_sessionmaker[AsyncSession]):
+        async with factory() as session:
+            return await EvaluationMetricsService().create_comparison(
+                session,
+                context=context,
+                run_id=run.id,
+                baseline_variant_id=variants[0].id,
+                candidate_variant_id=variants[1].id,
+            )
+
+    try:
+        first, second = await asyncio.gather(create(first_factory), create(second_factory))
+    finally:
+        await first_engine.dispose()
+        await second_engine.dispose()
+
+    assert first.id == second.id
+    assert first.comparison_hash == second.comparison_hash
+    async with db_factory() as session:
+        assert (
+            await session.scalar(
+                select(func.count()).select_from(EvaluationExperimentComparison).where(
+                    EvaluationExperimentComparison.experiment_run_id == run.id
+                )
+            )
+            == 1
+        )

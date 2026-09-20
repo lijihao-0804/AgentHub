@@ -1,0 +1,2426 @@
+{
+  "dataset_version": "m7-unified-evaluation-v1",
+  "schema_version": 1,
+  "items": [
+    {
+      "case_key": "m3-ret-001",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "How should a remote teammate stay reachable without exposing work at home?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "27cbcb19cff69bf3f54dcfb2e404ce42714277fbbc5d778f81a5c9d73742642f"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-001",
+        "source_split": "DEV"
+      },
+      "ordinal": 0
+    },
+    {
+      "case_key": "m3-ret-002",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "How is planned annual time off counted and approved?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "eaa68357330543a2cd8540ebf103f8dc4086b9d4eebb3521a44d0ebdb1de2e2d"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-002",
+        "source_split": "DEV"
+      },
+      "ordinal": 1
+    },
+    {
+      "case_key": "m3-ret-003",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "What proof is needed when claiming a meal or taxi during a business trip?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-003",
+        "source_split": "DEV"
+      },
+      "ordinal": 2
+    },
+    {
+      "case_key": "m3-ret-004",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "What should I do with an unexpected MFA prompt?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "a18691077ffdb5da1a56a61576e344eb3c2fe95ba49fe8bcb1a0bd74f165c857"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-004",
+        "source_split": "DEV"
+      },
+      "ordinal": 3
+    },
+    {
+      "case_key": "m3-ret-005",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Can a customer get money back when a trial was cancelled in time?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "90adcbf84d5c4de137de003696fdb90df0475c254f664930a9b0e1a6f40d989f"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-005",
+        "source_split": "DEV"
+      },
+      "ordinal": 4
+    },
+    {
+      "case_key": "m3-ret-006",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "What acknowledgement time applies to a critical outage?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "e19b26e466b07c3a9b867c55ea45ec668ecf31436957351b76d985ad0ff64c13"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-006",
+        "source_split": "DEV"
+      },
+      "ordinal": 5
+    },
+    {
+      "case_key": "m3-ret-007",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Which details belong in a new service ticket before triage?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "e956fcdf7d261dd79d9bbb8b2d1c1a623b4c65e82f69e225672beb73c3fc2a31"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-007",
+        "source_split": "DEV"
+      },
+      "ordinal": 6
+    },
+    {
+      "case_key": "m3-ret-008",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "申请数据权限时需要写哪些内容？"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "4242c7a17f219da11118f8775e06e247bb661bf59f57e723094a9663b8472d4f"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-008",
+        "source_split": "DEV"
+      },
+      "ordinal": 7
+    },
+    {
+      "case_key": "m3-ret-009",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Which identifiers should be included in an invoice question?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "ee1acb8f637ac1e7017807c652cc8c98160bd49c7f447860f5952ce1e5d845e8"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-009",
+        "source_split": "DEV"
+      },
+      "ordinal": 8
+    },
+    {
+      "case_key": "m3-ret-010",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "What has to be checked before renewing a supplier service?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "7c4cefc6a59702d1c34fea008ae1896cbf26935ec72ee73e8002ae300c96449e"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-010",
+        "source_split": "DEV"
+      },
+      "ordinal": 9
+    },
+    {
+      "case_key": "m3-ret-011",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "What information does a leave handover request need?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "d335ed3c245f171c20d6f1d012baaeb51e9815b5c495ce329589a3473d062d36"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-011",
+        "source_split": "DEV"
+      },
+      "ordinal": 10
+    },
+    {
+      "case_key": "m3-ret-012",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Can a traveller extend a company trip for personal reasons on the same booking?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "507aeaf53f97b5091e90730756b4f93fd98ff55dfb4acfccda5b4a55073e260a"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-012",
+        "source_split": "DEV"
+      },
+      "ordinal": 11
+    },
+    {
+      "case_key": "m3-ret-013",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "A suspicious link may have exposed credentials; where should it be reported?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "a5ae426e4aa3e22be6b0925f97517a4e8f363849e2680c24fc2882c1fb29dc33"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-013",
+        "source_split": "DEV"
+      },
+      "ordinal": 12
+    },
+    {
+      "case_key": "m3-ret-014",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Who can approve a refund outside the normal customer policy?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "a67c6cdedb8b8f2c3c59ccfe65a582135a6f9a65ab951bb2f8e6d1f87788069d"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-014",
+        "source_split": "DEV"
+      },
+      "ordinal": 13
+    },
+    {
+      "case_key": "m3-ret-015",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "When the assigned team lacks authority, what makes a useful escalation?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "891b020448e98e81dda4f77926198575f1ed01a62938b70581492395aa5752b5"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-015",
+        "source_split": "DEV"
+      },
+      "ordinal": 14
+    },
+    {
+      "case_key": "m3-ret-016",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "During triage, how are similar customer reports related without losing history?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "8bfa294576ab8a8e575203b1f2fe953e6db585099cc3c897d0e99d649d26722e"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-016",
+        "source_split": "DEV"
+      },
+      "ordinal": 15
+    },
+    {
+      "case_key": "m3-ret-017",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "What evidence belongs in a periodic privileged-access review?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "50081d71f67d10d1fa1f8a0bc9a7971d09b3a4f981f94d0d29aeabbe8ac37d4b"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-017",
+        "source_split": "DEV"
+      },
+      "ordinal": 16
+    },
+    {
+      "case_key": "m3-ret-018",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "账号无法收回时，客服可以索要旧密码吗？"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "a505c441107e5fb4d5fef7e217e631db6eac2ade44e9f7347ec90c083b8df278"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-018",
+        "source_split": "DEV"
+      },
+      "ordinal": 17
+    },
+    {
+      "case_key": "m3-ret-019",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Why might an invoice wait when the vendor has not received a purchase order?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "d61d938317c129852c3d4a495a4ff13c674e245ca7993a381622843eb0fa9d8d"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-019",
+        "source_split": "DEV"
+      },
+      "ordinal": 18
+    },
+    {
+      "case_key": "m3-ret-020",
+      "split": "DEV",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "What is the expected collaboration window for a normal workday?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "250f059c4e4484f2e8c79ccd96dcb9231c72838f01387b32c17003c20bc72b9e"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-020",
+        "source_split": "DEV"
+      },
+      "ordinal": 19
+    },
+    {
+      "case_key": "m3-ret-021",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "If illness prevents attendance, what is the first notification step?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "573a2f31a1dba3e16e69bf1a4d19cb53a29a77f5e5bc5890d2b61de58c8dfdf2"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-021",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 20
+    },
+    {
+      "case_key": "m3-ret-022",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "A refund request is valid but payment processing is delayed; which team confirms the amount and status?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "b7fa19a920439903b044f784df3f5d21b4d0a4bcac236601266c86113eae75f5"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-022",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 21
+    },
+    {
+      "case_key": "m3-ret-023",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "出差每天的补贴和餐费发票应该如何区分？"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-023",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 22
+    },
+    {
+      "case_key": "m3-ret-024",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Does read access automatically mean that exporting records is safe?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "5f91fdb7e1aad89854a6accf0351027b3647c54fcdb96906a25b3a71e15c6fc0"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-024",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 23
+    },
+    {
+      "case_key": "m3-ret-025",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "I cannot use the verification mailbox, what bilingual recovery route is allowed?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "a505c441107e5fb4d5fef7e217e631db6eac2ade44e9f7347ec90c083b8df278"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-025",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 24
+    },
+    {
+      "case_key": "m3-ret-026",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "How can a requester choose English or Chinese without changing service priority?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "6f15a8f0539d1016dcc563d36c08221e52b581eb4acc9c0ca864a2b06ac3d8b1"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-026",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 25
+    },
+    {
+      "case_key": "m3-ret-027",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Which steps describe ticket ownership from initial report through completion?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "e956fcdf7d261dd79d9bbb8b2d1c1a623b4c65e82f69e225672beb73c3fc2a31",
+          "eac7b545e9cdda14b3e0f3d5c97c263929e797dc1c4ce098962da03bcda54737"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-027",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 26
+    },
+    {
+      "case_key": "m3-ret-028",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Where should a local copy of customer data not be stored?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "437adc03c53fbe3bc231f11008480ee42770cba007ceca53c9aeff83ac5a43c2"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-028",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 27
+    },
+    {
+      "case_key": "m3-ret-029",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "How is an urgent support case classified before its response clock starts?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "8c1f0de617973c117bee38957fb30a8147e860aac28647cad477a401b83a8dfa"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-029",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 28
+    },
+    {
+      "case_key": "m3-ret-030",
+      "split": "HOLDOUT",
+      "category": "RETRIEVAL",
+      "input": {
+        "query": "Does a small purchase still need supplier security checks when data is involved?"
+      },
+      "expected": {
+        "relevant_chunk_ids": [
+          "375424c9e4d3c67b599a811ad2250ccb4b4055b03227076001aded701b0925c6"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m3",
+        "retrieval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m3-retrieval-v1:ret-030",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 29
+    },
+    {
+      "case_key": "m4-tool-calculator-001",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate 17 * 23"
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "17 * 23"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:tool-calculator-001",
+        "source_split": "DEV"
+      },
+      "ordinal": 30
+    },
+    {
+      "case_key": "m4-tool-calculator-002",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate 144 / 12"
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "144 / 12"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:tool-calculator-002",
+        "source_split": "DEV"
+      },
+      "ordinal": 31
+    },
+    {
+      "case_key": "m4-tool-customer-001",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Look up customer C-ACME"
+      },
+      "expected": {
+        "tool_identity": "query_customer",
+        "arguments": {
+          "customer_ref": "C-ACME",
+          "include_open_tickets": true
+        },
+        "tool_sequence": [
+          "query_customer"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:tool-customer-001",
+        "source_split": "DEV"
+      },
+      "ordinal": 32
+    },
+    {
+      "case_key": "m4-tool-customer-002",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Look up customer C-NORTH"
+      },
+      "expected": {
+        "tool_identity": "query_customer",
+        "arguments": {
+          "customer_ref": "C-NORTH",
+          "include_open_tickets": false
+        },
+        "tool_sequence": [
+          "query_customer"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:tool-customer-002",
+        "source_split": "DEV"
+      },
+      "ordinal": 33
+    },
+    {
+      "case_key": "m4-tool-search-001",
+      "split": "HOLDOUT",
+      "category": "TOOL",
+      "input": {
+        "request": "Search the knowledge base for launch readiness"
+      },
+      "expected": {
+        "tool_identity": "search_knowledge",
+        "arguments": {
+          "query": "launch readiness",
+          "limit": 1
+        },
+        "tool_sequence": [
+          "search_knowledge"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:tool-search-001",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 34
+    },
+    {
+      "case_key": "m4-tool-search-002",
+      "split": "HOLDOUT",
+      "category": "TOOL",
+      "input": {
+        "request": "Find the deployment checklist"
+      },
+      "expected": {
+        "tool_identity": "search_knowledge",
+        "arguments": {
+          "query": "deployment checklist",
+          "limit": 1
+        },
+        "tool_sequence": [
+          "search_knowledge"
+        ]
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:tool-search-002",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 35
+    },
+    {
+      "case_key": "m4-multi-read-001",
+      "split": "DEV",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Look up C-ACME and calculate 6 * 7."
+      },
+      "expected": {
+        "steps": [
+          "query_customer",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "multi_step"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:multi-read-001",
+        "source_split": "DEV"
+      },
+      "ordinal": 36
+    },
+    {
+      "case_key": "m4-multi-read-002",
+      "split": "DEV",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Search launch notes and calculate 8 + 9."
+      },
+      "expected": {
+        "steps": [
+          "search_knowledge",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "multi_step"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:multi-read-002",
+        "source_split": "DEV"
+      },
+      "ordinal": 37
+    },
+    {
+      "case_key": "m4-multi-read-003",
+      "split": "DEV",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Find C-NORTH and then search its launch context."
+      },
+      "expected": {
+        "steps": [
+          "query_customer",
+          "search_knowledge"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "multi_step"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:multi-read-003",
+        "source_split": "DEV"
+      },
+      "ordinal": 38
+    },
+    {
+      "case_key": "m4-multi-read-004",
+      "split": "HOLDOUT",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Read C-ACME and calculate 2 + 3 in one read turn."
+      },
+      "expected": {
+        "steps": [
+          "query_customer",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "historical",
+        "m4",
+        "multi_step"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m4-agent-runtime-v1:multi-read-004",
+        "source_split": "HOLDOUT"
+      },
+      "ordinal": 39
+    },
+    {
+      "case_key": "m5-approval-denied-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence approval-denied-dev-01: request, deny, resume."
+      },
+      "expected": {
+        "decision": "DENIED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:approval-denied-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 40
+    },
+    {
+      "case_key": "m5-approval-denied-holdout-01",
+      "split": "HOLDOUT",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence approval-denied-holdout-01: request, deny, resume."
+      },
+      "expected": {
+        "decision": "DENIED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:approval-denied-holdout-01",
+        "source_split": "HOLDOUT",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 41
+    },
+    {
+      "case_key": "m5-approval-approved-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence approval-approved-dev-01: request, approve, resume."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:approval-approved-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 42
+    },
+    {
+      "case_key": "m5-approval-approved-holdout-01",
+      "split": "HOLDOUT",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence approval-approved-holdout-01: request, approve, resume."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:approval-approved-holdout-01",
+        "source_split": "HOLDOUT",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 43
+    },
+    {
+      "case_key": "m5-duplicate-approve-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence duplicate-approve-dev-01: request, approve, approve_again, resume."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:duplicate-approve-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 44
+    },
+    {
+      "case_key": "m5-multi-step-action-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence multi-step-action-dev-01: request, approve, resume, resume_again."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:multi-step-action-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 45
+    },
+    {
+      "case_key": "m5-multi-step-action-holdout-01",
+      "split": "HOLDOUT",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence multi-step-action-holdout-01: request, approve, resume, resume_again."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:multi-step-action-holdout-01",
+        "source_split": "HOLDOUT",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 46
+    },
+    {
+      "case_key": "m5-restart-resume-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence restart-resume-dev-01: request, restart, approve, restart, resume."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:restart-resume-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 47
+    },
+    {
+      "case_key": "m5-idempotent-action-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence idempotent-action-dev-01: request, approve, resume, execute_again, resume_again."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:idempotent-action-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 48
+    },
+    {
+      "case_key": "m5-unknown-outcome-holdout-01",
+      "split": "HOLDOUT",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence unknown-outcome-holdout-01: request, approve, resume, resume_again."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:unknown-outcome-holdout-01",
+        "source_split": "HOLDOUT",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 49
+    },
+    {
+      "case_key": "m6-model-failure-before-token",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "Model provider fails before the first visible token"
+      },
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "MODEL_PROVIDER_FAILED"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:model-failure-before-token",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 50
+    },
+    {
+      "case_key": "m6-stream-interrupted-after-visible-token",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "The streaming producer is interrupted after a visible token"
+      },
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "STREAM_INTERRUPTED"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:stream-interrupted-after-visible-token",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 51
+    },
+    {
+      "case_key": "m6-tool-execution-failure",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "A deterministic tool handler returns a safe execution failure"
+      },
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "TOOL_EXECUTION_FAILED"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:tool-execution-failure",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 52
+    },
+    {
+      "case_key": "m6-knowledge-unavailable",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "The knowledge provider is unavailable during retrieval"
+      },
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "KNOWLEDGE_UNAVAILABLE"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:knowledge-unavailable",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 53
+    },
+    {
+      "case_key": "m6-loop-guard",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "The runtime loop guard stops repeated model/tool rounds"
+      },
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "LOOP_GUARD_TRIGGERED"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:loop-guard",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 54
+    },
+    {
+      "case_key": "m6-approval-denied",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "An approval decision is denied without executing the action"
+      },
+      "expected": {
+        "status": "SUCCEEDED",
+        "failure_code": "APPROVAL_DENIED"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:approval-denied",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 55
+    },
+    {
+      "case_key": "m6-action-execution-failed",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "An approved internal action fails before completion"
+      },
+      "expected": {
+        "status": "FAILED",
+        "failure_code": "ACTION_EXECUTION_FAILED"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:action-execution-failed",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 56
+    },
+    {
+      "case_key": "m6-unknown-outcome",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "An external action outcome cannot be confirmed"
+      },
+      "expected": {
+        "status": "NEEDS_ATTENTION",
+        "failure_code": "ACTION_RECONCILIATION_REQUIRED"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:unknown-outcome",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 57
+    },
+    {
+      "case_key": "m6-checkpoint-missing",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "Approval resume cannot find its durable checkpoint"
+      },
+      "expected": {
+        "status": "NEEDS_ATTENTION",
+        "failure_code": "APPROVAL_CHECKPOINT_MISSING"
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:checkpoint-missing",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 58
+    },
+    {
+      "case_key": "m6-cancelled-run",
+      "split": "DEV",
+      "category": "FAILURE",
+      "input": {
+        "scenario": "A durable cancel request stops scheduling the next step"
+      },
+      "expected": {
+        "status": "CANCELLED",
+        "failure_code": null
+      },
+      "tags": [
+        "historical",
+        "m6",
+        "failure"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m6-observability-failure-v1:cancelled-run",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
+      },
+      "ordinal": 59
+    },
+    {
+      "case_key": "curated-qa-01",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "How should a remote teammate stay reachable without exposing work at home?"
+      },
+      "expected": {
+        "answer": "Stay reachable during the agreed collaboration window while protecting confidential material from visitors in the home workspace.",
+        "citations": [
+          "27cbcb19cff69bf3f54dcfb2e404ce42714277fbbc5d778f81a5c9d73742642f"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-01"
+      },
+      "ordinal": 60
+    },
+    {
+      "case_key": "curated-qa-02",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "How is planned annual time off counted and approved?"
+      },
+      "expected": {
+        "answer": "Annual leave is accrued monthly; the balance is only informational until the request receives recorded approval.",
+        "citations": [
+          "eaa68357330543a2cd8540ebf103f8dc4086b9d4eebb3521a44d0ebdb1de2e2d"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-02"
+      },
+      "ordinal": 61
+    },
+    {
+      "case_key": "curated-qa-03",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "What proof is needed when claiming a meal or taxi during a business trip?"
+      },
+      "expected": {
+        "answer": "Provide receipts for reimbursable meals or transport, plus the business purpose and currency.",
+        "citations": [
+          "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-03"
+      },
+      "ordinal": 62
+    },
+    {
+      "case_key": "curated-qa-04",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "What should I do with an unexpected MFA prompt?"
+      },
+      "expected": {
+        "answer": "Never approve an unexpected authentication prompt or share a one-time code with a caller.",
+        "citations": [
+          "a18691077ffdb5da1a56a61576e344eb3c2fe95ba49fe8bcb1a0bd74f165c857"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-04"
+      },
+      "ordinal": 63
+    },
+    {
+      "case_key": "curated-qa-05",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "Can a customer get money back when a trial was cancelled in time?"
+      },
+      "expected": {
+        "answer": "A customer may request a refund for a purchase cancelled within the stated trial period.",
+        "citations": [
+          "90adcbf84d5c4de137de003696fdb90df0475c254f664930a9b0e1a6f40d989f"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-05"
+      },
+      "ordinal": 64
+    },
+    {
+      "case_key": "curated-qa-06",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "What acknowledgement time applies to a critical outage?"
+      },
+      "expected": {
+        "answer": "A P1 outage has a fifteen-minute first-response target, which measures acknowledgement rather than guaranteed resolution.",
+        "citations": [
+          "e19b26e466b07c3a9b867c55ea45ec668ecf31436957351b76d985ad0ff64c13"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-06"
+      },
+      "ordinal": 65
+    },
+    {
+      "case_key": "curated-qa-07",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "Which details belong in a new service ticket before triage?"
+      },
+      "expected": {
+        "answer": "Include the requester, affected service, observed behavior, time of occurrence, and a safe contact route.",
+        "citations": [
+          "e956fcdf7d261dd79d9bbb8b2d1c1a623b4c65e82f69e225672beb73c3fc2a31"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-07"
+      },
+      "ordinal": 66
+    },
+    {
+      "case_key": "curated-qa-08",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "申请数据权限时需要写哪些内容？"
+      },
+      "expected": {
+        "answer": "An access request names the dataset or system, business purpose, requested role, duration, and manager who accepts the responsibility.",
+        "citations": [
+          "4242c7a17f219da11118f8775e06e247bb661bf59f57e723094a9663b8472d4f"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-08"
+      },
+      "ordinal": 67
+    },
+    {
+      "case_key": "curated-qa-09",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "Which identifiers should be included in an invoice question?"
+      },
+      "expected": {
+        "answer": "Include the invoice number, billing entity, and the field that appears incorrect.",
+        "citations": [
+          "ee1acb8f637ac1e7017807c652cc8c98160bd49c7f447860f5952ce1e5d845e8"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-09"
+      },
+      "ordinal": 68
+    },
+    {
+      "case_key": "curated-qa-10",
+      "split": "DEV",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "What has to be checked before renewing a supplier service?"
+      },
+      "expected": {
+        "answer": "At renewal, confirm the service is still needed, review usage and incidents, and record any price or scope change.",
+        "citations": [
+          "7c4cefc6a59702d1c34fea008ae1896cbf26935ec72ee73e8002ae300c96449e"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-10"
+      },
+      "ordinal": 69
+    },
+    {
+      "case_key": "curated-qa-11",
+      "split": "HOLDOUT",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "If illness prevents attendance, what is the first notification step?"
+      },
+      "expected": {
+        "answer": "Notify the manager or the designated absence channel before the normal start time whenever practical.",
+        "citations": [
+          "573a2f31a1dba3e16e69bf1a4d19cb53a29a77f5e5bc5890d2b61de58c8dfdf2"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-11"
+      },
+      "ordinal": 70
+    },
+    {
+      "case_key": "curated-qa-12",
+      "split": "HOLDOUT",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "A refund request is valid but payment processing is delayed; which team confirms the amount and status?"
+      },
+      "expected": {
+        "answer": "Billing confirms the payment method and permitted amount; the customer receives a status update when the decision is made.",
+        "citations": [
+          "b7fa19a920439903b044f784df3f5d21b4d0a4bcac236601266c86113eae75f5"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-12"
+      },
+      "ordinal": 71
+    },
+    {
+      "case_key": "curated-qa-13",
+      "split": "HOLDOUT",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "出差每天的补贴和餐费发票应该如何区分？"
+      },
+      "expected": {
+        "answer": "Receipts are required for reimbursable meals and transport, whereas daily allowances follow the regional rate table.",
+        "citations": [
+          "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-13"
+      },
+      "ordinal": 72
+    },
+    {
+      "case_key": "curated-qa-14",
+      "split": "HOLDOUT",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "Does read access automatically mean that exporting records is safe?"
+      },
+      "expected": {
+        "answer": "No. Read access is not automatically safe; export, delete, and sharing require separate consideration.",
+        "citations": [
+          "5f91fdb7e1aad89854a6accf0351027b3647c54fcdb96906a25b3a71e15c6fc0"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-14"
+      },
+      "ordinal": 73
+    },
+    {
+      "case_key": "curated-qa-15",
+      "split": "HOLDOUT",
+      "category": "KNOWLEDGE_QA",
+      "input": {
+        "question": "I cannot use the verification mailbox, what bilingual recovery route is allowed?"
+      },
+      "expected": {
+        "answer": "如果无法访问验证邮箱，请通过支持工单说明账号标识和可联系时间，客服会先完成身份核验。",
+        "citations": [
+          "a505c441107e5fb4d5fef7e217e631db6eac2ade44e9f7347ec90c083b8df278"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "knowledge-qa"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-qa-15"
+      },
+      "ordinal": 74
+    },
+    {
+      "case_key": "curated-no-answer-01",
+      "split": "DEV",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "What is the exact annual leave carryover limit after the calendar year ends?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-01"
+      },
+      "ordinal": 75
+    },
+    {
+      "case_key": "curated-no-answer-02",
+      "split": "DEV",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "On which payroll date are approved travel reimbursements deposited?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-02"
+      },
+      "ordinal": 76
+    },
+    {
+      "case_key": "curated-no-answer-03",
+      "split": "DEV",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "How many remote-work days may each employee use per month?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-03"
+      },
+      "ordinal": 77
+    },
+    {
+      "case_key": "curated-no-answer-04",
+      "split": "DEV",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "How often must an employee rotate a company service passphrase?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-04"
+      },
+      "ordinal": 78
+    },
+    {
+      "case_key": "curated-no-answer-05",
+      "split": "DEV",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "How many business days does Billing take to settle an approved refund?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-05"
+      },
+      "ordinal": 79
+    },
+    {
+      "case_key": "curated-no-answer-06",
+      "split": "DEV",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "What is the guaranteed resolution deadline for a P1 support case?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-06"
+      },
+      "ordinal": 80
+    },
+    {
+      "case_key": "curated-no-answer-07",
+      "split": "HOLDOUT",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "Which insurance certificate expiry date is required for every supplier renewal?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-07"
+      },
+      "ordinal": 81
+    },
+    {
+      "case_key": "curated-no-answer-08",
+      "split": "HOLDOUT",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "What is the maximum attachment size for a service ticket?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-08"
+      },
+      "ordinal": 82
+    },
+    {
+      "case_key": "curated-no-answer-09",
+      "split": "HOLDOUT",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "How many hours may emergency data access remain active?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-09"
+      },
+      "ordinal": 83
+    },
+    {
+      "case_key": "curated-no-answer-10",
+      "split": "HOLDOUT",
+      "category": "NO_ANSWER",
+      "input": {
+        "question": "What tax percentage applies to the bilingual invoice correction process?"
+      },
+      "expected": {
+        "answer": "The M3 corpus does not state this information."
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "no-answer"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-no-answer-10"
+      },
+      "ordinal": 84
+    },
+    {
+      "case_key": "curated-tool-01",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the business-day window from 09:30 to 17:30 in hours."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "8"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-01"
+      },
+      "ordinal": 85
+    },
+    {
+      "case_key": "curated-tool-02",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the annual leave balance after adding 12 monthly units."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "12 + 1"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-02"
+      },
+      "ordinal": 86
+    },
+    {
+      "case_key": "curated-tool-03",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the reimbursable meal total for 3 receipts of 25."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "3 * 25"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-03"
+      },
+      "ordinal": 87
+    },
+    {
+      "case_key": "curated-tool-04",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the P1 response target in seconds from fifteen minutes."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "15 * 60"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-04"
+      },
+      "ordinal": 88
+    },
+    {
+      "case_key": "curated-tool-05",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the number of days in the stated travel claim deadline."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "30"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-05"
+      },
+      "ordinal": 89
+    },
+    {
+      "case_key": "curated-tool-06",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the total of two approved expense amounts, 40 and 15."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "40 + 15"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-06"
+      },
+      "ordinal": 90
+    },
+    {
+      "case_key": "curated-tool-07",
+      "split": "DEV",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the priority score represented by three normal support cases."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "3 * 1"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-07"
+      },
+      "ordinal": 91
+    },
+    {
+      "case_key": "curated-tool-08",
+      "split": "HOLDOUT",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the handover review count for two leave dates and one contact."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "2 + 1"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-08"
+      },
+      "ordinal": 92
+    },
+    {
+      "case_key": "curated-tool-09",
+      "split": "HOLDOUT",
+      "category": "TOOL",
+      "input": {
+        "request": "Calculate the combined count of requester and owner fields in an intake record."
+      },
+      "expected": {
+        "tool_identity": "calculator",
+        "arguments": {
+          "expression": "2"
+        },
+        "tool_sequence": [
+          "calculator"
+        ]
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "tool"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-tool-09"
+      },
+      "ordinal": 93
+    },
+    {
+      "case_key": "curated-multi-step-01",
+      "split": "DEV",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Find the collaboration window and calculate its duration."
+      },
+      "expected": {
+        "steps": [
+          "search_knowledge",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "multi-step"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-multi-step-01"
+      },
+      "ordinal": 94
+    },
+    {
+      "case_key": "curated-multi-step-02",
+      "split": "DEV",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Find the annual-leave approval rule and calculate a two-month accrual."
+      },
+      "expected": {
+        "steps": [
+          "search_knowledge",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "multi-step"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-multi-step-02"
+      },
+      "ordinal": 95
+    },
+    {
+      "case_key": "curated-multi-step-03",
+      "split": "DEV",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Find the P1 response target and convert fifteen minutes to seconds."
+      },
+      "expected": {
+        "steps": [
+          "search_knowledge",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "multi-step"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-multi-step-03"
+      },
+      "ordinal": 96
+    },
+    {
+      "case_key": "curated-multi-step-04",
+      "split": "DEV",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Find the supplier renewal rule and calculate two review checkpoints."
+      },
+      "expected": {
+        "steps": [
+          "search_knowledge",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "multi-step"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-multi-step-04"
+      },
+      "ordinal": 97
+    },
+    {
+      "case_key": "curated-multi-step-05",
+      "split": "HOLDOUT",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Find the ticket closure rule and calculate three recorded follow-ups."
+      },
+      "expected": {
+        "steps": [
+          "search_knowledge",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "multi-step"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-multi-step-05"
+      },
+      "ordinal": 98
+    },
+    {
+      "case_key": "curated-multi-step-06",
+      "split": "HOLDOUT",
+      "category": "MULTI_STEP",
+      "input": {
+        "task": "Find the least-privilege rule and calculate two separately reviewed effects."
+      },
+      "expected": {
+        "steps": [
+          "search_knowledge",
+          "calculator"
+        ],
+        "terminal_status": "SUCCEEDED"
+      },
+      "tags": [
+        "curated",
+        "m7-h",
+        "multi-step"
+      ],
+      "source_provenance": {
+        "source_kind": "m7h_curated",
+        "source_id": "m7h-multi-step-06"
+      },
+      "ordinal": 99
+    }
+  ]
+}

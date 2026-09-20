@@ -1,3 +1,15 @@
+import { apiRequest, ApiError } from "./api-client";
+
+export class RetrievalPlaygroundError extends Error {
+  code: string;
+
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = "RetrievalPlaygroundError";
+    this.code = code;
+  }
+}
+
 export type PlaygroundStageResult = {
   chunk_id: string;
   rank: number;
@@ -32,22 +44,6 @@ export type RetrievalPlaygroundResponse = {
   total_latency_ms: number;
 };
 
-export class RetrievalPlaygroundError extends Error {
-  code: string;
-
-  constructor(code: string, message: string) {
-    super(message);
-    this.name = "RetrievalPlaygroundError";
-    this.code = code;
-  }
-}
-
-const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ?? "").replace(/\/$/, "");
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
 export async function runRetrievalPlayground(input: {
   workspaceId: string;
   knowledgeBaseId: string;
@@ -59,44 +55,26 @@ export async function runRetrievalPlayground(input: {
   candidateTopK: number;
   finalTopK: number;
 }): Promise<RetrievalPlaygroundResponse> {
-  const accessToken = input.accessToken.trim();
-  if (!accessToken) {
-    throw new RetrievalPlaygroundError(
-      "AUTHENTICATION_REQUIRED",
-      "An access token is required to run the playground.",
-    );
-  }
-  const response = await fetch(
-    `${apiBaseUrl}/api/v1/workspaces/${encodeURIComponent(input.workspaceId)}/knowledge-bases/${encodeURIComponent(input.knowledgeBaseId)}/retrieval/playground`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        query: input.query,
-        knowledge_snapshot_id: input.snapshotId,
-        dense_top_k: input.denseTopK,
-        sparse_top_k: input.sparseTopK,
-        candidate_top_k: input.candidateTopK,
-        final_top_k: input.finalTopK,
-      }),
-    },
-  );
-
-  let body: unknown = null;
   try {
-    body = await response.json();
-  } catch {
-    body = null;
+    return await apiRequest<RetrievalPlaygroundResponse>(
+      `/api/v1/workspaces/${encodeURIComponent(input.workspaceId)}/knowledge-bases/${encodeURIComponent(input.knowledgeBaseId)}/retrieval/playground`,
+      input.accessToken,
+      {
+        method: "POST",
+        body: {
+          query: input.query,
+          knowledge_snapshot_id: input.snapshotId,
+          dense_top_k: input.denseTopK,
+          sparse_top_k: input.sparseTopK,
+          candidate_top_k: input.candidateTopK,
+          final_top_k: input.finalTopK,
+        },
+      },
+    );
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw new RetrievalPlaygroundError(error.code, error.message);
+    }
+    throw new RetrievalPlaygroundError("REQUEST_FAILED", "Retrieval failed.");
   }
-  if (!response.ok) {
-    const error = isRecord(body) && isRecord(body.error) ? body.error : {};
-    const code = typeof error.code === "string" ? error.code : "REQUEST_FAILED";
-    const message = typeof error.message === "string" ? error.message : "Retrieval failed.";
-    throw new RetrievalPlaygroundError(code, message);
-  }
-  return body as RetrievalPlaygroundResponse;
 }

@@ -163,6 +163,12 @@ def test_publish_config_validation_rejects_invalid_budget_and_retrieval_limits()
         _validate_runtime_config({"context_budget": {"max_tool_result_tokens": 128_001}})
 
 
+def test_retrieval_config_defaults_to_hybrid_rerank_and_rejects_unknown_strategy() -> None:
+    assert _validate_retrieval_config({})["retrieval_strategy"] == "HYBRID_RERANK"
+    with pytest.raises(AgentHubError):
+        _validate_retrieval_config({"retrieval_strategy": "DENSE_SPARSE"})
+
+
 @pytest.mark.parametrize(
     ("key", "value"),
     [

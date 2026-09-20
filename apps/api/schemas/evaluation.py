@@ -209,6 +209,98 @@ class EvaluationExperimentRunProgressResponse(BaseModel):
     progress: float
 
 
+class EvaluationComparisonCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    baseline_variant_id: UUID
+    candidate_variant_id: UUID
+
+
+class EvaluationComparisonResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    experiment_run_id: UUID
+    baseline_variant_id: UUID
+    candidate_variant_id: UUID
+    metric_snapshot_id: UUID | None
+    metric_snapshot_hash: str | None
+    baseline_variant_hash: str | None
+    candidate_variant_hash: str | None
+    evaluator_manifest_hash: str | None
+    comparison_hash: str | None
+    status: str
+    evaluator_versions: dict[str, Any]
+    metrics: dict[str, Any]
+    missing_pairs: int
+    paired_pairs: int
+    created_by: UUID | None
+    created_at: datetime
+
+
+class EvaluationAblationResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    comparison_id: UUID
+    experiment_run_id: UUID
+    baseline_variant_id: UUID
+    candidate_variant_id: UUID
+    factor: str
+    changed_paths: list[str]
+    baseline_factor_hash: str = Field(min_length=64, max_length=64)
+    candidate_factor_hash: str = Field(min_length=64, max_length=64)
+    analysis_hash: str = Field(min_length=64, max_length=64)
+    created_by: UUID
+    created_at: datetime
+
+
+class EvaluationReleaseGatePolicyCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=4_000)
+    policy_json: dict[str, Any]
+
+
+class EvaluationReleaseGatePolicyResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    name: str
+    description: str | None
+    policy_json: dict[str, Any]
+    policy_hash: str = Field(min_length=64, max_length=64)
+    created_by: UUID
+    created_at: datetime
+
+
+class EvaluationReleaseGateCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    policy_id: UUID
+
+
+class EvaluationReleaseGateDecisionResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    comparison_id: UUID
+    policy_id: UUID
+    status: str
+    rule_results: list[dict[str, Any]]
+    reasons: list[str]
+    comparison_hash: str = Field(min_length=64, max_length=64)
+    policy_hash: str = Field(min_length=64, max_length=64)
+    decision_hash: str = Field(min_length=64, max_length=64)
+    created_by: UUID
+    created_at: datetime
+
+
 __all__ = [
     "EvaluationDatasetCreateRequest",
     "EvaluationDatasetItemRequest",
@@ -222,6 +314,13 @@ __all__ = [
     "EvaluationExperimentResponse",
     "EvaluationExperimentRunResponse",
     "EvaluationExperimentRunProgressResponse",
+    "EvaluationComparisonCreateRequest",
+    "EvaluationComparisonResponse",
+    "EvaluationAblationResponse",
+    "EvaluationReleaseGatePolicyCreateRequest",
+    "EvaluationReleaseGatePolicyResponse",
+    "EvaluationReleaseGateCreateRequest",
+    "EvaluationReleaseGateDecisionResponse",
     "EvaluationExperimentVariantCreateRequest",
     "EvaluationExperimentVariantResponse",
     "PricingSnapshotCreateRequest",

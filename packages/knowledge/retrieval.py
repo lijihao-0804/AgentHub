@@ -25,6 +25,7 @@ from packages.knowledge.contracts import (
     Reranker,
     RetrievalQuery,
     RetrievalResult,
+    RetrievalStrategy,
     RetrievalTrace,
     RetrievalTraceResult,
     RetrievalTraceStage,
@@ -299,6 +300,12 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         rerank_span: TraceSpan | None = None
         stage = "dense"
         try:
+            strategy = RetrievalStrategy(query.strategy)
+        except ValueError:
+            raise AgentHubError(
+                "INVALID_RETRIEVAL_QUERY", "The retrieval strategy is invalid.", 400
+            ) from None
+        try:
             dense_started = time.perf_counter()
             dense_query = await asyncio.to_thread(self.dense_embedder.embed_query, query.text)
             dense_hits = await asyncio.to_thread(
@@ -309,30 +316,45 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             )
             dense_latency_ms = (time.perf_counter() - dense_started) * 1000
 
-            stage = "sparse"
-            sparse_started = time.perf_counter()
-            sparse_query = await asyncio.to_thread(self.sparse_encoder.encode_query, query.text)
-            sparse_hits = await asyncio.to_thread(
-                self.vector_index.sparse_search,
-                sparse_query,
-                scope=scope,
-                limit=query.sparse_top_k,
-            )
-            sparse_latency_ms = (time.perf_counter() - sparse_started) * 1000
+            sparse_hits: tuple[VectorSearchHit, ...] = ()
+            sparse_latency_ms = 0.0
+            if strategy is not RetrievalStrategy.DENSE:
+                stage = "sparse"
+                sparse_started = time.perf_counter()
+                sparse_query = await asyncio.to_thread(
+                    self.sparse_encoder.encode_query, query.text
+                )
+                sparse_hits = await asyncio.to_thread(
+                    self.vector_index.sparse_search,
+                    sparse_query,
+                    scope=scope,
+                    limit=query.sparse_top_k,
+                )
+                sparse_latency_ms = (time.perf_counter() - sparse_started) * 1000
 
-            stage = "fusion"
-            fusion_started = time.perf_counter()
-            fused = fuse_reciprocal_rank(
-                dense_hits,
-                sparse_hits,
-                rrf_k=self.rrf_k,
-                candidate_top_k=query.candidate_top_k,
-            )
-            fusion_latency_ms = (time.perf_counter() - fusion_started) * 1000
-            fusion_trace_results = tuple(
-                RetrievalTraceResult(item.chunk_id, rank, item.retrieval_score)
-                for rank, item in enumerate(fused, start=1)
-            )
+            fusion_latency_ms = 0.0
+            fusion_trace_results: tuple[RetrievalTraceResult, ...] = ()
+            if strategy is RetrievalStrategy.DENSE:
+                fused = tuple(
+                    _FusedCandidate(chunk_id, float(hit.score), rank)
+                    for rank, hit in enumerate(dense_hits, start=1)
+                    for chunk_id in (_payload_chunk_id(hit),)
+                    if chunk_id is not None and math.isfinite(hit.score)
+                )[: query.candidate_top_k]
+            else:
+                stage = "fusion"
+                fusion_started = time.perf_counter()
+                fused = fuse_reciprocal_rank(
+                    dense_hits,
+                    sparse_hits,
+                    rrf_k=self.rrf_k,
+                    candidate_top_k=query.candidate_top_k,
+                )
+                fusion_latency_ms = (time.perf_counter() - fusion_started) * 1000
+                fusion_trace_results = tuple(
+                    RetrievalTraceResult(item.chunk_id, rank, item.retrieval_score)
+                    for rank, item in enumerate(fused, start=1)
+                )
             async with self._db_session() as session:
                 chunk_map = await self._load_chunks(
                     session,
@@ -346,42 +368,47 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 for item in fused
                 if item.chunk_id in chunk_map
             )
-            stage = "rerank"
-            rerank_span = await _safe_span_start(
-                self.trace_sink,
-                "knowledge.rerank",
-                {
-                    "snapshot_id": query.knowledge_snapshot_id,
-                    "candidate_count": len(candidates),
-                },
-            )
-            rerank_started = time.perf_counter()
-            rerank_scores = await asyncio.to_thread(
-                self.reranker.rerank,
-                query.text,
-                candidates,
-            )
-            if len(rerank_scores) != len(candidates) or not all(
-                math.isfinite(score) for score in rerank_scores
-            ):
-                raise KnowledgeProviderError(
-                    "INVALID_RERANK_RESULT",
-                    "The reranker returned an invalid result.",
-                )
-            rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
+            rerank_latency_ms = 0.0
+            rerank_trace_results: tuple[RetrievalTraceResult, ...] = ()
             fused_by_chunk = {item.chunk_id: item for item in fused}
-            ranked = sorted(
-                zip(candidates, rerank_scores, strict=True),
-                key=lambda item: (
-                    -item[1],
-                    -fused_by_chunk[item[0].chunk_id].retrieval_score,
-                    item[0].chunk_id,
-                ),
-            )[: query.final_top_k]
-            rerank_trace_results = tuple(
-                RetrievalTraceResult(candidate.chunk_id, rank, float(rerank_score))
-                for rank, (candidate, rerank_score) in enumerate(ranked, start=1)
-            )
+            if strategy is RetrievalStrategy.HYBRID_RERANK:
+                stage = "rerank"
+                rerank_span = await _safe_span_start(
+                    self.trace_sink,
+                    "knowledge.rerank",
+                    {
+                        "snapshot_id": query.knowledge_snapshot_id,
+                        "candidate_count": len(candidates),
+                    },
+                )
+                rerank_started = time.perf_counter()
+                rerank_scores = await asyncio.to_thread(
+                    self.reranker.rerank,
+                    query.text,
+                    candidates,
+                )
+                if len(rerank_scores) != len(candidates) or not all(
+                    math.isfinite(score) for score in rerank_scores
+                ):
+                    raise KnowledgeProviderError(
+                        "INVALID_RERANK_RESULT",
+                        "The reranker returned an invalid result.",
+                    )
+                rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
+                ranked = sorted(
+                    zip(candidates, rerank_scores, strict=True),
+                    key=lambda item: (
+                        -item[1],
+                        -fused_by_chunk[item[0].chunk_id].retrieval_score,
+                        item[0].chunk_id,
+                    ),
+                )[: query.final_top_k]
+                rerank_trace_results = tuple(
+                    RetrievalTraceResult(candidate.chunk_id, rank, float(rerank_score))
+                    for rank, (candidate, rerank_score) in enumerate(ranked, start=1)
+                )
+            else:
+                ranked = [(candidate, None) for candidate in candidates[: query.final_top_k]]
             evidence: list[RetrievedEvidence] = []
             for candidate, rerank_score in ranked:
                 chunk, document, revision = chunk_map[candidate.chunk_id]
@@ -401,16 +428,17 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         },
                     )
                 )
-            await _safe_span_end(
-                rerank_span,
-                attributes={
-                    "snapshot_id": query.knowledge_snapshot_id,
-                    "candidate_count": len(candidates),
-                    "final_count": len(evidence),
-                    "latency_ms": round(rerank_latency_ms, 3),
-                },
-            )
-            rerank_span = None
+            if rerank_span is not None:
+                await _safe_span_end(
+                    rerank_span,
+                    attributes={
+                        "snapshot_id": query.knowledge_snapshot_id,
+                        "candidate_count": len(candidates),
+                        "final_count": len(evidence),
+                        "latency_ms": round(rerank_latency_ms, 3),
+                    },
+                )
+                rerank_span = None
             total_latency_ms = (time.perf_counter() - started) * 1000
             await _safe_span_end(
                 snapshot_span,

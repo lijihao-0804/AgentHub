@@ -29,6 +29,7 @@ from packages.agent_runtime.tool_revisions import validate_tool_spec
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.knowledge.contracts import RetrievalStrategy
 from packages.knowledge.snapshots import KnowledgeSnapshotService, ResolvedKnowledgeSnapshot
 from packages.model_gateway.capabilities import CapabilityRequirements
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
@@ -43,6 +44,7 @@ SPEC_SCHEMA_VERSION = 2
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
     "reranker_model": "BAAI/bge-reranker-v2-m3",
+    "retrieval_strategy": RetrievalStrategy.HYBRID_RERANK.value,
     "dense_top_k": 30,
     "sparse_top_k": 30,
     "candidate_top_k": 20,
@@ -193,25 +195,9 @@ class AgentPublishService:
         agent = await self._load_agent(session, context, agent_id, for_update=True)
         if agent is None:
             raise AgentHubError("AGENT_NOT_FOUND", "The agent was not found.", 404)
-        self._validate_draft_fields(
-            name=agent.name,
-            system_prompt=agent.system_prompt,
-            prompt_version=agent.prompt_version,
-            knowledge_binding_mode=agent.knowledge_binding_mode,
+        resolved_spec, resolved_spec_hash = await self._resolve_draft_spec(
+            session, context, agent
         )
-        resolved_model = await self._resolve_model(session, context, agent)
-        _validate_published_context_budget(
-            _validate_runtime_config(agent.runtime_config), resolved_model
-        )
-        bindings = await self._resolve_knowledge(session, context, agent)
-        tools = await self._resolve_tools(session, context, agent)
-        resolved_spec = _resolved_spec(
-            agent=agent,
-            model=resolved_model,
-            bindings=bindings,
-            tools=tools,
-        )
-        resolved_spec_hash = canonical_json_hash(resolved_spec)
         version_number = (
             await session.scalar(
                 select(func.max(AgentVersion.version_number)).where(
@@ -247,6 +233,55 @@ class AgentPublishService:
             created_at=version.created_at,
         )
 
+    async def preflight(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        agent_id: UUID,
+    ) -> dict[str, Any]:
+        self._require_permission(context, "agent_edit")
+        agent = await self._load_agent(session, context, agent_id)
+        if agent is None:
+            raise AgentHubError("AGENT_NOT_FOUND", "The agent was not found.", 404)
+        resolved_spec, resolved_spec_hash = await self._resolve_draft_spec(
+            session, context, agent
+        )
+        return {
+            "status": "READY",
+            "agent_id": agent.id,
+            "workspace_id": agent.workspace_id,
+            "draft_updated_at": agent.updated_at,
+            "spec_schema_version": SPEC_SCHEMA_VERSION,
+            "resolved_spec_hash": resolved_spec_hash,
+            "resolved_spec": resolved_spec,
+        }
+
+    async def _resolve_draft_spec(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        agent: Agent,
+    ) -> tuple[dict[str, Any], str]:
+        self._validate_draft_fields(
+            name=agent.name,
+            system_prompt=agent.system_prompt,
+            prompt_version=agent.prompt_version,
+            knowledge_binding_mode=agent.knowledge_binding_mode,
+        )
+        resolved_model = await self._resolve_model(session, context, agent)
+        _validate_published_context_budget(
+            _validate_runtime_config(agent.runtime_config), resolved_model
+        )
+        bindings = await self._resolve_knowledge(session, context, agent)
+        tools = await self._resolve_tools(session, context, agent)
+        resolved_spec = _resolved_spec(
+            agent=agent,
+            model=resolved_model,
+            bindings=bindings,
+            tools=tools,
+        )
+        return resolved_spec, canonical_json_hash(resolved_spec)
+
     async def list_versions(
         self, session: AsyncSession, context: WorkspaceExecutionContext, agent_id: UUID
     ) -> list[AgentVersion]:
@@ -261,6 +296,26 @@ class AgentPublishService:
             .order_by(AgentVersion.version_number)
         )
         return list(result)
+
+    async def get_version(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        agent_id: UUID,
+        version_id: UUID,
+    ) -> AgentVersion:
+        self._require_permission(context, "workspace_read")
+        workspace_id = _workspace_id(context)
+        version = await session.scalar(
+            select(AgentVersion).where(
+                AgentVersion.id == version_id,
+                AgentVersion.workspace_id == workspace_id,
+                AgentVersion.agent_id == agent_id,
+            )
+        )
+        if version is None:
+            raise AgentHubError("AGENT_VERSION_NOT_FOUND", "The agent version was not found.", 404)
+        return version
 
     async def _resolve_model(
         self, session: AsyncSession, context: WorkspaceExecutionContext, agent: Agent
@@ -550,6 +605,8 @@ def _validate_retrieval_config(value: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(value, Mapping) or not set(value).issubset(_RETRIEVAL_KEYS):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     result = {**DEFAULT_RETRIEVAL_CONFIG, **dict(value)}
+    if result["retrieval_strategy"] not in {item.value for item in RetrievalStrategy}:
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     for key in ("dense_top_k", "sparse_top_k", "candidate_top_k", "final_top_k"):
         item = result[key]
         if isinstance(item, bool) or not isinstance(item, int) or item < 1:
