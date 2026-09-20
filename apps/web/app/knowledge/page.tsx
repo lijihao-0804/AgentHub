@@ -80,6 +80,9 @@ export default function KnowledgeBasesPage() {
           </button>
         }
       >
+        {/* Documents live inside a knowledge base; say so where the list is. */}
+        <p className="state-hint">{t("knowledge.uploadLocationHint")}</p>
+
         {showForm && (
           <form className="eval-form" onSubmit={submit} noValidate>
             <p className="eval-form-title">{t("knowledge.createBase")}</p>
@@ -128,6 +131,7 @@ export default function KnowledgeBasesPage() {
                   <th scope="col">{t("knowledge.baseName")}</th>
                   <th scope="col">{t("common.id")}</th>
                   <th scope="col">{t("common.created")}</th>
+                  <th scope="col">{t("common.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,6 +145,11 @@ export default function KnowledgeBasesPage() {
                     </td>
                     <td data-label={t("common.created")}>
                       {base.created_at ? formatDateTime(base.created_at) : t("common.none")}
+                    </td>
+                    <td data-label={t("common.actions")}>
+                      <Link className="button button-ghost" href={`/knowledge/${base.id}`}>
+                        {t("knowledge.manageDocuments")}
+                      </Link>
                     </td>
                   </tr>
                 ))}

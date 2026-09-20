@@ -9,6 +9,8 @@ import type { MessageKey } from "../i18n/messages";
 import { LocaleProvider } from "../i18n/provider";
 import { FrontendSessionProvider, useFrontendSession } from "./session-provider";
 import LanguageSwitcher from "./language-switcher";
+import ThemeSwitcher from "./theme-switcher";
+import { ThemeProvider } from "./theme-provider";
 import WorkspaceSelector from "./workspace-selector";
 import UserMenu from "./user-menu";
 
@@ -99,11 +101,13 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
 
 export default function AppShell({ children }: { children: ReactNode }) {
   return (
-    <LocaleProvider>
-      <FrontendSessionProvider>
-        <ShellGate>{children}</ShellGate>
-      </FrontendSessionProvider>
-    </LocaleProvider>
+    <ThemeProvider>
+      <LocaleProvider>
+        <FrontendSessionProvider>
+          <ShellGate>{children}</ShellGate>
+        </FrontendSessionProvider>
+      </LocaleProvider>
+    </ThemeProvider>
   );
 }
 
@@ -180,6 +184,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
             <span aria-hidden="true">☰</span> <span className="nav-toggle-label">{t("shell.menu")}</span>
           </button>
           <div className="topbar-spacer" />
+          <ThemeSwitcher />
           <LanguageSwitcher />
           <WorkspaceSelector />
           <UserMenu />

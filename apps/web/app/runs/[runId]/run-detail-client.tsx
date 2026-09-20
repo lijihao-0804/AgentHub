@@ -7,11 +7,11 @@ import StatusBadge from "../../../components/status-badge";
 import { statusTone, type StatusTone } from "../../../components/badge-tones";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
 import TechnicalDetails from "../../../components/technical-details";
-import { ApiError, errorHintKey, toApiError } from "../../../lib/api-client";
+import { errorHintKey, type AuthInput } from "../../../lib/api-client";
 import { createAgentRun, getAgentRun, type AgentRun } from "../../../lib/agent-runtime";
 import { getRunDetail, getRunTimeline, RunDetail, RunTimelineEntry } from "../../../lib/runs";
 import { useFrontendSession } from "../../../components/session-provider";
-import { useWorkspaceMutation } from "../../../components/use-workspace-data";
+import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
 import { useI18n } from "../../../i18n/provider";
 
 function timelineTone(entry: RunTimelineEntry): StatusTone {
@@ -23,43 +23,33 @@ function shortId(value: string): string {
   return `${value.slice(0, 8)}…`;
 }
 
+type RunView = { detail: RunDetail; timeline: RunTimelineEntry[] };
+
 export default function RunDetailClient({ runId }: { runId: string }) {
   const { t, statusLabel, failureCategoryLabel, timelineKindLabel, formatDateTime, formatNumber, formatCurrencyAmount } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
-  const [run, setRun] = useState<RunDetail | null>(null);
-  const [timeline, setTimeline] = useState<RunTimelineEntry[]>([]);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const { workspaceId, connected, sessionId } = useFrontendSession();
   const [replay, setReplay] = useState<AgentRun | null>(null);
   const replayMutation = useWorkspaceMutation(`run-replay:${workspaceId}:${runId}`);
 
-  const load = useCallback(async () => {
-    setError(null);
-    if (!connected) return;
-    setLoading(true);
-    try {
+  /**
+   * Detail and timeline load as one resource so they always belong to the
+   * same request generation: a detail from one workspace can never be
+   * shown beside a timeline from another.
+   */
+  const load = useCallback(
+    async (auth: AuthInput): Promise<RunView> => {
       const [detail, timelineResponse] = await Promise.all([
-        getRunDetail(workspaceId, runId, accessToken),
-        getRunTimeline(workspaceId, runId, accessToken),
+        getRunDetail(auth.workspaceId, runId, auth.accessToken),
+        getRunTimeline(auth.workspaceId, runId, auth.accessToken),
       ]);
-      setRun(detail);
-      setTimeline(timelineResponse.items);
-    } catch (caught) {
-      setError(toApiError(caught, ""));
-    } finally {
-      setLoading(false);
-      setLoaded(true);
-    }
-  }, [connected, workspaceId, accessToken, runId]);
-
-  useEffect(() => {
-    if (connected && !loaded) void load();
-  }, [connected, loaded, load]);
-
-  useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
+      return { detail, timeline: timelineResponse.items };
+    },
+    [runId],
+  );
+  const view = useWorkspaceData<RunView>(load, `run-detail:${workspaceId}:${runId}`);
+  const run = view.data?.detail ?? null;
+  const timeline = view.data?.timeline ?? [];
+  const error = view.error;
 
   // A replay belongs to the workspace session that created it; switching
   // workspaces or runs must not leave a stale replay pointer on screen.
@@ -85,6 +75,10 @@ export default function RunDetailClient({ runId }: { runId: string }) {
     );
   }, [replayMutation, runId]);
 
+  // A missing run is a normal outcome, not a failure to report as one.
+  // With a single guarded load, `loaded` implies data, so not-found can
+  // only arrive as the backend's 404.
+  const notFound = error?.status === 404;
   const hint = error ? errorHintKey(error) : null;
 
   if (!connected) {
@@ -159,18 +153,16 @@ export default function RunDetailClient({ runId }: { runId: string }) {
         </p>
       </header>
 
-      {error && (
+      {notFound && <EmptyState title={t("run.notFound")} hint={t("run.notFoundHint")} />}
+      {error && !notFound && (
         <ErrorState
           code={error.code}
           message={error.message || t("errors.loadRunDetail")}
           hint={hint ? t(hint) : undefined}
-          onRetry={() => void load()}
+          onRetry={view.reload}
         />
       )}
-      {loading && !run && !error && <LoadingState />}
-      {loaded && !run && !error && (
-        <EmptyState title={t("run.notFound")} hint={t("run.notFoundHint")} />
-      )}
+      {view.loading && !run && !error && <LoadingState />}
 
       {run && (
         <>
