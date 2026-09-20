@@ -1,0 +1,119 @@
+/* Element defaults and typography. */
+* { box-sizing: border-box; }
+
+html, body { margin: 0; min-height: 100%; }
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+h1 { font-size: 1.55rem; letter-spacing: -0.01em; line-height: 1.2; margin: 0.35rem 0 0.5rem; }
+h2 { font-size: 1.1rem; margin: 0; }
+h3 { font-size: 0.98rem; margin: 0; }
+p { margin: 0; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}
+
+a { color: var(--accent); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/*
+ * Form controls are styled at the element level, not per container.
+ * Container rules used to be the only styling, so any form outside a
+ * blessed wrapper rendered as a raw browser control.
+ */
+input, select, textarea {
+  background: var(--surface-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  transition: border-color 120ms ease, background 120ms ease;
+  width: 100%;
+}
+textarea { line-height: 1.5; min-height: 6.5rem; resize: vertical; }
+input:hover:not(:disabled), select:hover:not(:disabled), textarea:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  border-color: var(--border-focus);
+  outline-offset: 0;
+}
+input::placeholder, textarea::placeholder { color: var(--text-placeholder); }
+input:disabled, select:disabled, textarea:disabled { cursor: not-allowed; opacity: 0.55; }
+
+select {
+  /* Native arrow is drawn by the platform; keep room for it. */
+  cursor: pointer;
+  padding-right: 1.8rem;
+}
+
+/* Checkboxes and radios keep their intrinsic box. */
+input[type="checkbox"], input[type="radio"] {
+  accent-color: var(--accent);
+  border: 0;
+  padding: 0;
+  width: auto;
+}
+
+/* The file control's button half is drawn by the browser. */
+input[type="file"] { cursor: pointer; padding: 0.4rem 0.5rem; }
+input[type="file"]::file-selector-button {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-right: var(--space-3);
+  padding: 0.3rem 0.7rem;
+}
+input[type="file"]::file-selector-button:hover { background: var(--accent-soft); }
+
+.sr-only {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.skip-link {
+  background: var(--accent);
+  color: var(--accent-ink);
+  left: 1rem;
+  padding: 0.5rem 0.9rem;
+  position: absolute;
+  top: -3rem;
+  transition: top 120ms ease;
+  z-index: 100;
+}
+.skip-link:focus { top: 0.5rem; }
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.muted { color: var(--text-muted); }

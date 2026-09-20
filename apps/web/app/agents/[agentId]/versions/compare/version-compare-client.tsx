@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import StatusBadge from "../../../../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../../../components/states";
-import TechnicalDetails from "../../../../../components/technical-details";
-import { useFrontendSession } from "../../../../../components/session-provider";
-import { useWorkspaceData } from "../../../../../components/use-workspace-data";
-import { errorHintKey, type ApiError, type AuthInput } from "../../../../../lib/api-client";
-import { getAgentVersion, listAgentVersions, type AgentVersion } from "../../../../../lib/agents";
+import StatusBadge from "@/components/ui/status-badge";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData } from "@/hooks/use-workspace-data";
+import { errorHintKey, type ApiError, type AuthInput } from "@/lib/api/client";
+import { getAgentVersion, listAgentVersions, type AgentVersion } from "@/lib/api/agents";
 import {
   diffResolvedSpecs,
   formatScalar,
@@ -17,9 +17,9 @@ import {
   type ChangeType,
   type DiffEntry,
   type DiffGroupKey,
-} from "../../../../../lib/version-diff";
-import { useI18n } from "../../../../../i18n/provider";
-import type { MessageKey } from "../../../../../i18n/messages";
+} from "@/lib/version-diff";
+import { useI18n } from "@/i18n/provider";
+import type { MessageKey } from "@/i18n/messages";
 
 const CHANGE_LABEL: Record<ChangeType, MessageKey> = {
   ADDED: "agents.versionDiff.changeType.ADDED",
@@ -195,17 +195,18 @@ export default function VersionCompareClient({ agentId }: { agentId: string }) {
 
   return (
     <div className="page">
+      <Breadcrumbs
+        items={[
+          { label: t("nav.agents"), href: "/agents" },
+          { label: t("agents.detail"), href: `/agents/${agentId}` },
+          { label: t("agents.versionDiff.title") },
+        ]}
+      />
       <header className="page-header">
         <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{t("agents.versionDiff.title")}</h1>
         <p className="page-lede">{t("agents.versionDiff.lede")}</p>
       </header>
-
-      <div className="page-toolbar">
-        <Link className="button button-ghost" href={`/agents/${agentId}`}>
-          {t("agents.backToAgent")}
-        </Link>
-      </div>
 
       <Panel title={t("agents.versionDiff.title")} ariaLabel={t("agents.versionDiff.title")}>
         {versions.error && renderError(versions.error, versions.reload)}

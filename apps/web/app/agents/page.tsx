@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
-import { useFrontendSession } from "../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../lib/api-client";
-import { createAgent, listAgents, type Agent, type KnowledgeBindingMode } from "../../lib/agents";
-import { listModelProfiles, type ModelProfile } from "../../lib/models";
-import { useI18n } from "../../i18n/provider";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { createAgent, listAgents, type Agent, type KnowledgeBindingMode } from "@/lib/api/agents";
+import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
+import { useI18n } from "@/i18n/provider";
 
 const EMPTY_FORM = {
   name: "",
@@ -230,11 +230,7 @@ export default function AgentsPage() {
               </div>
             </details>
 
-            {mutation.error && (
-              <p className="session-error" role="alert">
-                <code>{mutation.error.code}</code> {mutation.error.message || t("errors.requestFailed")}
-              </p>
-            )}
+            <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button
                 type="submit"

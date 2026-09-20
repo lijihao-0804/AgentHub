@@ -1,0 +1,179 @@
+/* Buttons, panels, forms, badges, tables — reused everywhere. */
+.button {
+  align-items: center;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  gap: 0.45rem;
+  padding: 0.5rem 0.95rem;
+  text-decoration: none;
+  transition: opacity 120ms ease;
+}
+.button:disabled { cursor: wait; opacity: 0.55; }
+.button-primary { background: var(--accent); color: var(--accent-ink); }
+.button-primary:hover:not(:disabled) { filter: brightness(1.06); }
+.button-ghost {
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.button-ghost:hover:not(:disabled) { background: var(--accent-soft); }
+.button-danger { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+.button-danger:hover:not(:disabled) { background: var(--danger); color: var(--accent-ink); }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-4);
+  padding: var(--space-5);
+}
+.panel-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+.panel-heading h2 { margin-top: 0.2rem; }
+.panel-actions { align-items: center; display: flex; gap: var(--space-3); }
+
+.state-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-4) var(--space-5);
+}
+.state-block.state-inline { border-style: dashed; }
+.state-block.state-error {
+  background: var(--danger-soft);
+  border-color: var(--danger-border);
+}
+.state-block.state-loading { align-items: center; justify-items: start; }
+.state-title { font-weight: 700; }
+.state-hint { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
+.state-code {
+  background: var(--surface-inset);
+  border-radius: 4px;
+  color: var(--danger);
+  padding: 0.1rem 0.35rem;
+}
+/* The code is evidence for a bug report, not the explanation — keep it
+   legible but visibly subordinate to the sentence above it. */
+.error-code-line { font-size: 0.78rem; opacity: 0.85; }
+.inline-error {
+  align-items: center;
+  color: var(--danger);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  gap: 0.4rem;
+  line-height: 1.5;
+}
+.inline-error .state-code { font-size: 0.75rem; }
+
+.loading-bar {
+  animation: loading-pulse 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--border), var(--border-strong), var(--border));
+  border-radius: 999px;
+  height: 0.55rem;
+  width: 180px;
+}
+@keyframes loading-pulse { 50% { opacity: 0.45; } }
+
+.status-badge {
+  align-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 0.35rem;
+  letter-spacing: 0.02em;
+  padding: 0.22rem 0.6rem;
+  white-space: nowrap;
+}
+.status-dot { border-radius: 50%; height: 0.42rem; width: 0.42rem; }
+.tone-neutral { color: var(--text-muted); }
+.tone-neutral .status-dot { background: var(--text-muted); }
+.tone-info { color: var(--info); }
+.tone-info .status-dot { background: var(--info); }
+.tone-success { background: var(--success-soft); border-color: var(--success); color: var(--success); }
+.tone-success .status-dot { background: var(--success); }
+.tone-warning { background: var(--warning-soft); border-color: var(--warning); color: var(--warning); }
+.tone-warning .status-dot { background: var(--warning); }
+.tone-danger { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+.tone-danger .status-dot { background: var(--danger); }
+.tone-attention { background: var(--attention-soft); border-color: var(--attention); color: var(--attention); }
+.tone-attention .status-dot { background: var(--attention); }
+
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+}
+.metric-card-link { color: inherit; text-decoration: none; }
+.metric-card-link:hover { border-color: var(--accent); }
+.metric-card-emphasis { border-color: var(--accent); }
+.metric-label { color: var(--text-muted); font-size: 0.78rem; }
+.metric-value { font-size: 1.7rem; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.metric-hint { color: var(--text-muted); font-size: 0.78rem; line-height: 1.4; }
+
+.key-values { display: grid; gap: 0.4rem; margin: 0; }
+.key-value-row { display: grid; gap: 0.15rem; grid-template-columns: minmax(6rem, max-content) 1fr; }
+.key-value-row dt { color: var(--text-muted); font-size: 0.78rem; padding-top: 0.1rem; }
+.key-value-row dd { font-size: 0.85rem; margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+.technical-details summary {
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.technical-details summary:hover { color: var(--accent); }
+.technical-details pre {
+  background: var(--surface-inset);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin: var(--space-2) 0 0;
+  max-height: 20rem;
+  overflow: auto;
+  padding: var(--space-3);
+}
+
+.form-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.form-grid label { color: var(--text-muted); display: grid; font-size: 0.8rem; gap: 0.35rem; }
+
+.data-table { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; width: 100%; }
+.data-table table { border-collapse: collapse; font-size: 0.86rem; width: 100%; }
+.data-table th {
+  background: var(--surface-inset);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  text-transform: uppercase;
+}
+.data-table td { border-top: 1px solid var(--border); overflow-wrap: anywhere; padding: 0.65rem 0.8rem; vertical-align: top; }
+.data-table tbody tr:hover { background: var(--row-hover); }
+/*
+ * A hint inside a cell is a second line, not a continuation: inline it
+ * ran straight into the identity before it ("calculatorEvaluate …").
+ */
+.data-table td > .state-hint { display: block; margin-top: 0.2rem; }
+.data-table td > code + .state-hint { margin-top: 0.3rem; }
+/* Row actions are secondary to the row itself: smaller than page buttons. */
+.data-table td .button { font-size: 0.8rem; padding: 0.32rem 0.7rem; }
+.data-table td .row-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }

@@ -1,4 +1,4 @@
-import AgentPlaygroundClient from "./playground-client";
+import AgentPlaygroundClient from "@/app/agents/[agentId]/playground/playground-client";
 
 export default async function AgentPlaygroundPage({
   params,

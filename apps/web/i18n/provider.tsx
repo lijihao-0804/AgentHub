@@ -17,21 +17,24 @@ import {
   formatNumber,
   formatPercent,
   formatUTCBucketDate,
-} from "./format";
+} from "@/i18n/format";
 import {
+  apiErrorMessage,
   evaluationPurposeLabel,
   failureCategoryLabel,
   resolveMessage,
   statusLabel,
   timelineKindLabel,
-} from "./messages";
-import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, type Locale } from "./types";
-import type { MessageKey } from "./messages";
+} from "@/i18n/messages";
+import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, type Locale } from "@/i18n/types";
+import type { MessageKey } from "@/i18n/messages";
 
 type I18nContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: MessageKey, values?: Record<string, string | number>) => string;
+  /** Reader-facing text for a backend error code, with the server message as fallback. */
+  errorText: (code: string, fallback: string) => string;
   statusLabel: (status: string) => string;
   failureCategoryLabel: (category: string) => string;
   purposeLabel: (purpose: string) => string;
@@ -109,6 +112,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       locale,
       setLocale,
       t: (key, values) => resolveMessage(locale, key, values),
+      errorText: (code, fallback) => apiErrorMessage(code, locale, fallback),
       statusLabel: (status) => statusLabel(status, locale),
       failureCategoryLabel: (category) => failureCategoryLabel(category, locale),
       purposeLabel: (purpose) => evaluationPurposeLabel(purpose, locale),

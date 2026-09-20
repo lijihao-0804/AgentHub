@@ -1,4 +1,4 @@
-import { LOCALE_TAGS, type Locale } from "./types";
+import { LOCALE_TAGS, type Locale } from "@/i18n/types";
 
 /**
  * Centralized locale-aware formatting. Raw contract values (hashes, UUIDs,

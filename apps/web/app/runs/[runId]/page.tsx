@@ -1,4 +1,4 @@
-import RunDetailClient from "./run-detail-client";
+import RunDetailClient from "@/app/runs/[runId]/run-detail-client";
 
 export default async function RunDetailPage({
   params,

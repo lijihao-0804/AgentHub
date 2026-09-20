@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import StatusBadge from "../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
-import { KeyValues } from "../../components/technical-details";
-import TechnicalDetails from "../../components/technical-details";
-import { ApiError, errorHintKey, toApiError } from "../../lib/api-client";
-import { Approval, decideApproval, listApprovals } from "../../lib/approvals";
-import { useFrontendSession } from "../../components/session-provider";
-import { useI18n } from "../../i18n/provider";
+import StatusBadge from "@/components/ui/status-badge";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { KeyValues } from "@/components/ui/technical-details";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
+import { Approval, decideApproval, listApprovals } from "@/lib/api/approvals";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 type DecisionState = { approvalId: string; decision: "approve" | "deny" } | null;
 
@@ -43,7 +43,7 @@ export default function ApprovalsPage() {
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
-  const [decisionError, setDecisionError] = useState<{ approvalId: string; message: string } | null>(null);
+  const [decisionError, setDecisionError] = useState<{ approvalId: string; error: ApiError } | null>(null);
   const [decisionState, setDecisionState] = useState<DecisionState>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -80,7 +80,7 @@ export default function ApprovalsPage() {
       );
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setDecisionError({ approvalId, message: apiError.message || t("errors.decideApproval") });
+      setDecisionError({ approvalId, error: apiError });
     } finally {
       setDecisionState(null);
     }
@@ -152,7 +152,7 @@ export default function ApprovalsPage() {
         <div className="approval-list">
           {approvals.map((approval) => {
             const deciding = decisionState?.approvalId === approval.id ? decisionState.decision : null;
-            const cardError = decisionError?.approvalId === approval.id ? decisionError.message : null;
+            const cardError = decisionError?.approvalId === approval.id ? decisionError.error : null;
             const decidedAt = approval.decided_at ? formatDateTime(approval.decided_at) : "—";
             return (
               <article className="approval-card" key={approval.id}>
@@ -239,12 +239,12 @@ export default function ApprovalsPage() {
                     >
                       {deciding === "approve" ? t("approvals.card.approving") : t("approvals.card.approve")}
                     </button>
-                    {cardError && <p className="state-hint" role="alert">{cardError}</p>}
+                    <InlineError error={cardError} fallback={t("errors.decideApproval")} />
                   </div>
                 ) : (
                   decisionError?.approvalId === approval.id && (
                     <div className="approval-actions">
-                      <p className="state-hint" role="alert">{decisionError.message}</p>
+                      <InlineError error={decisionError.error} fallback={t("errors.decideApproval")} />
                     </div>
                   )
                 )}

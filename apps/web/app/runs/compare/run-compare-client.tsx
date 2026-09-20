@@ -3,19 +3,20 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import StatusBadge from "../../../components/status-badge";
-import { ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useWorkspaceData } from "../../../components/use-workspace-data";
-import { errorHintKey, type ApiError, type AuthInput } from "../../../lib/api-client";
-import { getAgentRun, type AgentRun } from "../../../lib/agent-runtime";
+import StatusBadge from "@/components/ui/status-badge";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData } from "@/hooks/use-workspace-data";
+import { errorHintKey, type ApiError, type AuthInput } from "@/lib/api/client";
+import { getAgentRun, type AgentRun } from "@/lib/api/agent-runtime";
 import {
   getRunDetail,
   getRunTimeline,
   type RunDetail,
   type RunTimelineEntry,
-} from "../../../lib/runs";
-import { useI18n } from "../../../i18n/provider";
+} from "@/lib/api/runs";
+import { useI18n } from "@/i18n/provider";
 
 /**
  * One run, read from both contracts it lives in: the runtime record
@@ -225,13 +226,11 @@ export default function RunCompareClient() {
 
   return (
     <div className="page">
+      <Breadcrumbs items={[{ label: t("nav.runs"), href: "/runs" }, { label: t("runCompare.title") }]} />
       <header className="page-header">
         <p className="eyebrow">{t("runCompare.eyebrow")}</p>
         <h1>{t("runCompare.title")}</h1>
         <p className="page-lede">{t("runCompare.lede")}</p>
-        <p className="page-lede">
-          <Link href="/runs">{t("runCompare.backToRuns")}</Link>
-        </p>
       </header>
 
       <Panel title={t("runCompare.title")} ariaLabel={t("runCompare.title")}>

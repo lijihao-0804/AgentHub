@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import StatusBadge from "../../../components/status-badge";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../../lib/api-client";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import StatusBadge from "@/components/ui/status-badge";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import {
   createSnapshot,
   listDocumentRevisions,
@@ -20,8 +21,8 @@ import {
   type KnowledgeBase,
   type KnowledgeDocument,
   type KnowledgeSnapshot,
-} from "../../../lib/knowledge";
-import { useI18n } from "../../../i18n/provider";
+} from "@/lib/api/knowledge";
+import { useI18n } from "@/i18n/provider";
 
 type Tab = "documents" | "snapshots";
 
@@ -131,6 +132,12 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
 
   return (
     <div className="page">
+      <Breadcrumbs
+        items={[
+          { label: t("nav.knowledge"), href: "/knowledge" },
+          { label: base?.name ?? t("knowledge.baseDetail") },
+        ]}
+      />
       <header className="page-header">
         <p className="eyebrow">{t("knowledge.eyebrow")}</p>
         <h1>{base?.name ?? t("knowledge.baseDetail")}</h1>
@@ -140,9 +147,6 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
       </header>
 
       <div className="page-toolbar">
-        <Link className="button button-ghost" href="/knowledge">
-          {t("knowledge.backToBases")}
-        </Link>
         <Link className="button button-ghost" href="/knowledge/playground">
           {t("knowledge.openPlayground")}
         </Link>
@@ -180,12 +184,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
                 {t("knowledge.file")}
                 <input type="file" ref={fileInputRef} />
               </label>
-              {documentMutation.error && (
-                <p className="session-error" role="alert">
-                  <code>{documentMutation.error.code}</code>{" "}
-                  {documentMutation.error.message || t("errors.requestFailed")}
-                </p>
-              )}
+              <InlineError error={documentMutation.error} fallback={t("errors.requestFailed")} />
               <div className="form-actions">
                 <button type="submit" className="button button-primary" disabled={documentMutation.pending}>
                   {t("knowledge.upload")}
@@ -340,12 +339,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
           }
         >
           <p className="state-hint">{t("knowledge.snapshotNote")}</p>
-          {snapshotMutation.error && (
-            <p className="session-error" role="alert">
-              <code>{snapshotMutation.error.code}</code>{" "}
-              {snapshotMutation.error.message || t("errors.requestFailed")}
-            </p>
-          )}
+          <InlineError error={snapshotMutation.error} fallback={t("errors.requestFailed")} />
 
           {snapshots.error && (
             <ErrorState

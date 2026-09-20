@@ -1,4 +1,4 @@
-import VersionCompareClient from "./version-compare-client";
+import VersionCompareClient from "@/app/agents/[agentId]/versions/compare/version-compare-client";
 
 export default async function AgentVersionComparePage({
   params,

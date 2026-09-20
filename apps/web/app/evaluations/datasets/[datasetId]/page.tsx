@@ -1,4 +1,4 @@
-import DatasetDetailClient from "./dataset-detail-client";
+import DatasetDetailClient from "@/app/evaluations/datasets/[datasetId]/dataset-detail-client";
 
 export default async function DatasetDetailPage({
   params,

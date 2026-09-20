@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import StatusBadge from "../../../components/status-badge";
-import type { StatusTone } from "../../../components/badge-tones";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../../lib/api-client";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import StatusBadge from "@/components/ui/status-badge";
+import type { StatusTone } from "@/components/ui/badge-tones";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import {
   BOOLEAN_CAPABILITIES,
   buildModelCapabilities,
@@ -23,9 +23,9 @@ import {
   type ModelProfile,
   type ModelProfileTestResult,
   type ProviderCredential,
-} from "../../../lib/models";
-import { useI18n } from "../../../i18n/provider";
-import type { MessageKey } from "../../../i18n/messages";
+} from "@/lib/api/models";
+import { useI18n } from "@/i18n/provider";
+import type { MessageKey } from "@/i18n/messages";
 
 /**
  * Backend defaults for a new profile; semantics stay server-owned.
@@ -459,12 +459,7 @@ export default function ModelSettingsPage() {
                 />
               </label>
             </div>
-            {credentialMutation.error && (
-              <p className="session-error" role="alert">
-                <code>{credentialMutation.error.code}</code>{" "}
-                {credentialMutation.error.message || t("errors.requestFailed")}
-              </p>
-            )}
+            <InlineError error={credentialMutation.error} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button
                 type="submit"
@@ -799,12 +794,7 @@ export default function ModelSettingsPage() {
             {!validMaxContextTokens(profileForm.max_context_tokens) && (
               <p className="state-hint">{t("settings.models.maxContextTokensInvalid")}</p>
             )}
-            {profileMutation.error && (
-              <p className="session-error" role="alert">
-                <code>{profileMutation.error.code}</code>{" "}
-                {profileMutation.error.message || t("errors.requestFailed")}
-              </p>
-            )}
+            <InlineError error={profileMutation.error} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button
                 type="submit"
@@ -849,12 +839,7 @@ export default function ModelSettingsPage() {
         {profileList.length > 0 && <p className="state-hint">{t("settings.models.testHint")}</p>}
         {/* A failed request stays a request failure; it is never rendered
             as a health verdict, which only the backend may produce. */}
-        {testMutation.error && (
-          <p className="session-error" role="alert">
-            <code>{testMutation.error.code}</code>{" "}
-            {testMutation.error.message || t("errors.requestFailed")}
-          </p>
-        )}
+        <InlineError error={testMutation.error} fallback={t("errors.requestFailed")} />
 
         {profileList.length > 0 && (
           <div className="data-table">

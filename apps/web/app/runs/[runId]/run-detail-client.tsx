@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import StatusBadge from "../../../components/status-badge";
-import { statusTone, type StatusTone } from "../../../components/badge-tones";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import TechnicalDetails from "../../../components/technical-details";
-import { errorHintKey, type AuthInput } from "../../../lib/api-client";
-import { createAgentRun, getAgentRun, type AgentRun } from "../../../lib/agent-runtime";
-import { getRunDetail, getRunTimeline, RunDetail, RunTimelineEntry } from "../../../lib/runs";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
-import { useI18n } from "../../../i18n/provider";
+import StatusBadge from "@/components/ui/status-badge";
+import { statusTone, type StatusTone } from "@/components/ui/badge-tones";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { createAgentRun, getAgentRun, type AgentRun } from "@/lib/api/agent-runtime";
+import { getRunDetail, getRunTimeline, RunDetail, RunTimelineEntry } from "@/lib/api/runs";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { useI18n } from "@/i18n/provider";
 
 function timelineTone(entry: RunTimelineEntry): StatusTone {
   if (entry.status === "UNKNOWN_OUTCOME") return "attention";
@@ -143,14 +144,12 @@ export default function RunDetailClient({ runId }: { runId: string }) {
 
   return (
     <div className="page">
+      <Breadcrumbs items={[{ label: t("nav.runs"), href: "/runs" }, { label: shortId(runId) }]} />
       <header className="page-header">
         <p className="eyebrow">{t("run.eyebrow")}</p>
         <h1>
           {t("run.title")} <code title={runId}>{shortId(runId)}</code>
         </h1>
-        <p className="page-lede">
-          <Link href="/runs">{t("run.backToRuns")}</Link>
-        </p>
       </header>
 
       {notFound && <EmptyState title={t("run.notFound")} hint={t("run.notFoundHint")} />}
@@ -198,11 +197,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
             {run.status === "NEEDS_ATTENTION" && <p className="state-hint">{t("run.attentionCallout")}</p>}
             {/* Stated before the click: a replay really does execute again. */}
             <p className="state-hint">{t("run.replay.warning")}</p>
-            {replayMutation.error && (
-              <p className="state-hint">
-                {replayMutation.error.message || t("run.replay.failed")}
-              </p>
-            )}
+            <InlineError error={replayMutation.error} fallback={t("run.replay.failed")} />
             {replay && (
               <div className="inline-notice replay-notice">
                 <p>

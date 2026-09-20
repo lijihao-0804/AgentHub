@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import TechnicalDetails from "../../../components/technical-details";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../../lib/api-client";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import {
   getAgent,
   getAgentKnowledgeBindings,
@@ -26,11 +27,11 @@ import {
   type ContextBudget,
   type KnowledgeBindingMode,
   type RuntimeConfig,
-} from "../../../lib/agents";
-import { listKnowledgeBases, listSnapshots, type KnowledgeBase, type KnowledgeSnapshot } from "../../../lib/knowledge";
-import { listModelProfiles, type ModelProfile } from "../../../lib/models";
-import { listToolRevisions, listTools, type Tool, type ToolRevision } from "../../../lib/tools";
-import { useI18n } from "../../../i18n/provider";
+} from "@/lib/api/agents";
+import { listKnowledgeBases, listSnapshots, type KnowledgeBase, type KnowledgeSnapshot } from "@/lib/api/knowledge";
+import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
+import { listToolRevisions, listTools, type Tool, type ToolRevision } from "@/lib/api/tools";
+import { useI18n } from "@/i18n/provider";
 
 type Tab = "general" | "model" | "knowledge" | "tools" | "runtime" | "versions";
 
@@ -387,6 +388,12 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
   return (
     <div className="page">
+      <Breadcrumbs
+        items={[
+          { label: t("nav.agents"), href: "/agents" },
+          { label: loadedAgent?.name ?? t("agents.detail") },
+        ]}
+      />
       <header className="page-header">
         <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{loadedAgent?.name ?? t("agents.detail")}</h1>
@@ -396,9 +403,6 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       </header>
 
       <div className="page-toolbar">
-        <Link className="button button-ghost" href="/agents">
-          {t("agents.backToAgents")}
-        </Link>
         {/* The Playground only runs published versions, never the draft. */}
         {versionList.length > 0 ? (
           <Link className="button button-ghost" href={`/agents/${agentId}/playground`}>
@@ -426,23 +430,13 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
           <code className="hash-value">{publishResult.hash}</code>
         </p>
       )}
-      {publishMutation.error && (
-        <p className="session-error" role="alert">
-          <code>{publishMutation.error.code}</code>{" "}
-          {publishMutation.error.message || t("errors.requestFailed")}
-        </p>
-      )}
+      <InlineError error={publishMutation.error} fallback={t("errors.requestFailed")} />
 
       {preflightStale && !preflight && !preflightMutation.pending && (
         <p className="state-hint">{t("agents.preflightStale")}</p>
       )}
       {preflightMutation.pending && <p className="state-hint">{t("agents.checkingReadiness")}</p>}
-      {preflightMutation.error && (
-        <p className="session-error" role="alert">
-          <code>{preflightMutation.error.code}</code>{" "}
-          {preflightMutation.error.message || t("errors.requestFailed")}
-        </p>
-      )}
+      <InlineError error={preflightMutation.error} fallback={t("errors.requestFailed")} />
 
       {preflight && (
         <Panel
@@ -537,12 +531,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
         ))}
       </div>
 
-      {agentMutation.error && (
-        <p className="session-error" role="alert">
-          <code>{agentMutation.error.code}</code>{" "}
-          {agentMutation.error.message || t("errors.requestFailed")}
-        </p>
-      )}
+      <InlineError error={agentMutation.error} fallback={t("errors.requestFailed")} />
 
       {tab === "general" && loadedAgent && (
         <Panel ariaLabel={t("agents.tab.general")} title={t("agents.tab.general")}>
@@ -690,12 +679,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
             <EmptyState title={t("agents.noKnowledgeBindings")} />
           )}
 
-          {knowledgeMutation.error && (
-            <p className="session-error" role="alert">
-              <code>{knowledgeMutation.error.code}</code>{" "}
-              {knowledgeMutation.error.message || t("errors.requestFailed")}
-            </p>
-          )}
+          <InlineError error={knowledgeMutation.error} fallback={t("errors.requestFailed")} />
 
           <div className="form-actions">
             <button
@@ -761,12 +745,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
           {toolBindings.loaded && toolDraft.length === 0 && <EmptyState title={t("agents.noToolBindings")} />}
 
-          {toolMutation.error && (
-            <p className="session-error" role="alert">
-              <code>{toolMutation.error.code}</code>{" "}
-              {toolMutation.error.message || t("errors.requestFailed")}
-            </p>
-          )}
+          <InlineError error={toolMutation.error} fallback={t("errors.requestFailed")} />
 
           <div className="form-actions">
             <button
@@ -1022,11 +1001,7 @@ function KnowledgeBindingRow({
               </option>
             ))}
           </select>
-          {snapshots.error && (
-            <span className="state-hint">
-              <code>{snapshots.error.code}</code> {snapshots.error.message}
-            </span>
-          )}
+          <InlineError error={snapshots.error} fallback={t("errors.loadSnapshots")} />
         </label>
       ) : (
         <span className="state-hint">{t("agents.latestResolves")}</span>

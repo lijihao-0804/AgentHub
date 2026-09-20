@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
-import { useFrontendSession } from "../../components/session-provider";
-import { toApiError } from "../../lib/api-client";
-import { useI18n } from "../../i18n/provider";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { ApiError, toApiError } from "@/lib/api/client";
+import { InlineError } from "@/components/ui/states";
+import { useI18n } from "@/i18n/provider";
 
 /** Backend contract: password is 8–128 characters. */
 const MIN_PASSWORD_LENGTH = 8;
@@ -15,18 +16,22 @@ export default function RegisterPage() {
   const { signUp } = useFrontendSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<{ code: string; message: string } | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+  // Held apart from `error`: these rules are checked here, before anything is
+  // sent, so there is no error code behind them and none should be shown.
+  const [invalid, setInvalid] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setInvalid(null);
     if (!email.trim() || !password) {
-      setError({ code: "VALIDATION_ERROR", message: t("auth.requiredFields") });
+      setInvalid(t("auth.requiredFields"));
       return;
     }
     if (password.length < MIN_PASSWORD_LENGTH) {
-      setError({ code: "VALIDATION_ERROR", message: t("auth.passwordTooShort") });
+      setInvalid(t("auth.passwordTooShort"));
       return;
     }
     setSubmitting(true);
@@ -35,7 +40,7 @@ export default function RegisterPage() {
       setPassword("");
     } catch (caught) {
       const apiError = toApiError(caught, t("auth.registerFailed"));
-      setError({ code: apiError.code, message: apiError.message || t("auth.registerFailed") });
+      setError(apiError);
       setPassword("");
     } finally {
       setSubmitting(false);
@@ -71,11 +76,12 @@ export default function RegisterPage() {
           />
           <span className="state-hint">{t("auth.passwordHint")}</span>
         </label>
-        {error && (
-          <p className="session-error" role="alert">
-            <code>{error.code}</code> {error.message}
+        {invalid && (
+          <p className="inline-error" role="alert">
+            {invalid}
           </p>
         )}
+        <InlineError error={error} fallback={t("auth.registerFailed")} />
         <button type="submit" className="button button-primary" disabled={submitting}>
           {submitting ? t("common.loading") : t("auth.createAccount")}
         </button>

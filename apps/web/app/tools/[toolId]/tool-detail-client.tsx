@@ -1,16 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import StatusBadge from "../../../components/status-badge";
-import TechnicalDetails from "../../../components/technical-details";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
-import { errorHintKey, type AuthInput } from "../../../lib/api-client";
-import { getTool, listToolRevisions, patchTool, type Tool, type ToolRevision } from "../../../lib/tools";
-import { useI18n } from "../../../i18n/provider";
+import Breadcrumbs from "@/components/layout/breadcrumbs";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import StatusBadge from "@/components/ui/status-badge";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
+import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { getTool, listToolRevisions, patchTool, type Tool, type ToolRevision } from "@/lib/api/tools";
+import { useI18n } from "@/i18n/provider";
 
 export default function ToolDetailClient({ toolId }: { toolId: string }) {
   const { t, formatDateTime } = useI18n();
@@ -77,6 +77,12 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
 
   return (
     <div className="page">
+      <Breadcrumbs
+        items={[
+          { label: t("nav.tools"), href: "/tools" },
+          { label: current?.name ?? t("tools.detail") },
+        ]}
+      />
       <header className="page-header">
         <p className="eyebrow">{t("tools.eyebrow")}</p>
         <h1>{current?.name ?? t("tools.detail")}</h1>
@@ -84,12 +90,6 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
           <code>{toolId}</code>
         </p>
       </header>
-
-      <div className="page-toolbar">
-        <Link className="button button-ghost" href="/tools">
-          {t("tools.backToTools")}
-        </Link>
-      </div>
 
       <Panel
         ariaLabel={t("tools.overview")}
@@ -191,11 +191,7 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
               </div>
             </dl>
 
-            {mutation.error && (
-              <p className="session-error" role="alert">
-                <code>{mutation.error.code}</code> {mutation.error.message || t("errors.requestFailed")}
-              </p>
-            )}
+            <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
 
             {editing && (
               <form className="eval-form" onSubmit={submitEdit} noValidate>

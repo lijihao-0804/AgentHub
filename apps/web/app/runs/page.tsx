@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import StatusBadge from "../../components/status-badge";
-import { EmptyState, ErrorState, LoadingState, SessionRequired } from "../../components/states";
-import { ApiError, errorHintKey, toApiError } from "../../lib/api-client";
-import { listRuns, RunListItem } from "../../lib/runs";
-import { useFrontendSession } from "../../components/session-provider";
-import { useI18n } from "../../i18n/provider";
+import StatusBadge from "@/components/ui/status-badge";
+import { EmptyState, ErrorState, LoadingState, SessionRequired } from "@/components/ui/states";
+import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
+import { listRuns, RunListItem } from "@/lib/api/runs";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 const RUN_STATUS_OPTIONS = [
   "RUNNING",

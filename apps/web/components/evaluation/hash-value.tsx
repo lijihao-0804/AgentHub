@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useI18n } from "../../i18n/provider";
+import { useI18n } from "@/i18n/provider";
 
 /** Short mono hash/id with copy-to-clipboard. Full value available as title. */
 export default function HashValue({ value, label }: { value: string | null | undefined; label?: string }) {

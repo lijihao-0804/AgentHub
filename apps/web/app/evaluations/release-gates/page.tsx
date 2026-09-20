@@ -2,18 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
-import HashValue from "../../../components/evaluation/hash-value";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import TechnicalDetails from "../../../components/technical-details";
-import { ApiError, toApiError } from "../../../lib/api-client";
+import HashValue from "@/components/evaluation/hash-value";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import TechnicalDetails from "@/components/ui/technical-details";
+import { ApiError, toApiError } from "@/lib/api/client";
 import {
   GateRule,
   ReleaseGatePolicy,
   createReleaseGatePolicy,
   listReleaseGatePolicies,
-} from "../../../lib/evaluation";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useI18n } from "../../../i18n/provider";
+} from "@/lib/api/evaluation";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 const RULE_TYPES = [
   "NO_REGRESSION",
@@ -112,7 +112,11 @@ export default function ReleaseGatePoliciesPage() {
   const [description, setDescription] = useState("");
   const [rules, setRules] = useState<DraftRule[]>([newRule()]);
   const [creating, setCreating] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<ApiError | null>(null);
+  // The rule builder rejects a policy before it is ever sent. That message
+  // is already specific and already localized, so it stays a plain string
+  // rather than being dressed up as a backend error code.
+  const [formInvalid, setFormInvalid] = useState<string | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
   const activeSessionRef = useRef(sessionId);
   activeSessionRef.current = sessionId;
@@ -161,9 +165,10 @@ export default function ReleaseGatePoliciesPage() {
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
+    setFormInvalid(null);
     const built = buildPolicyJson(rules, (key) => t(key as never));
     if ("error" in built) {
-      setFormError(built.error);
+      setFormInvalid(built.error);
       return;
     }
     const requestSessionId = sessionId;
@@ -183,7 +188,7 @@ export default function ReleaseGatePoliciesPage() {
       await refresh();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setFormError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setFormError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
@@ -352,7 +357,8 @@ export default function ReleaseGatePoliciesPage() {
               {t("evaluation.gates.builder.add")}
             </button>
 
-            {formError && <p className="session-error" role="alert">{formError}</p>}
+            {formInvalid && <p className="inline-error">{formInvalid}</p>}
+            <InlineError error={formError} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button type="submit" className="button button-primary" disabled={creating}>
                 {creating ? t("evaluation.gates.creating") : t("evaluation.gates.create")}

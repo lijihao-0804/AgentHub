@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
-import HashValue from "../../../components/evaluation/hash-value";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
-import { ApiError, toApiError } from "../../../lib/api-client";
-import { EvaluationDataset, createDataset, listDatasets } from "../../../lib/evaluation";
-import { useFrontendSession } from "../../../components/session-provider";
-import { useI18n } from "../../../i18n/provider";
+import HashValue from "@/components/evaluation/hash-value";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { ApiError, toApiError } from "@/lib/api/client";
+import { EvaluationDataset, createDataset, listDatasets } from "@/lib/api/evaluation";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { useI18n } from "@/i18n/provider";
 
 export default function EvaluationDatasetsPage() {
   const { t, formatDateTime } = useI18n();
@@ -22,7 +22,7 @@ export default function EvaluationDatasetsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<ApiError | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
   const activeSessionRef = useRef(sessionId);
   activeSessionRef.current = sessionId;
@@ -77,7 +77,7 @@ export default function EvaluationDatasetsPage() {
       await refresh();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setCreateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCreateError(apiError);
     } finally {
       if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
@@ -130,7 +130,7 @@ export default function EvaluationDatasetsPage() {
                 placeholder={t("evaluation.datasets.descriptionPlaceholder")}
               />
             </label>
-            {createError && <p className="session-error" role="alert">{createError}</p>}
+            <InlineError error={createError} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button type="submit" className="button button-primary" disabled={creating || !name.trim()}>
                 {creating ? t("evaluation.datasets.creating") : t("evaluation.datasets.create")}

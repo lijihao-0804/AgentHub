@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
-import { Panel } from "../../components/states";
-import { useFrontendSession } from "../../components/session-provider";
-import { ApiError, toApiError } from "../../lib/api-client";
-import { createOrganization, createWorkspace } from "../../lib/tenancy";
-import { useI18n } from "../../i18n/provider";
+import { InlineError, Panel } from "@/components/ui/states";
+import { useFrontendSession } from "@/components/providers/session-provider";
+import { ApiError, toApiError } from "@/lib/api/client";
+import { createOrganization, createWorkspace } from "@/lib/api/tenancy";
+import { useI18n } from "@/i18n/provider";
 
 /**
  * Workspace settings entry point, and the minimal onboarding path for an
@@ -113,11 +113,7 @@ export default function SettingsPage() {
 
       <Panel ariaLabel={t("settings.context")} title={t("settings.context")}>
         {tenancyLoading && <p className="state-hint">{t("common.loading")}</p>}
-        {tenancyError && (
-          <p className="session-error" role="alert">
-            <code>{tenancyError.code}</code> {tenancyError.message || t("errors.loadWorkspaces")}
-          </p>
-        )}
+        <InlineError error={tenancyError} fallback={t("errors.loadWorkspaces")} />
         <dl className="key-values">
           <div className="key-value-row">
             <dt>{t("settings.organization")}</dt>
@@ -146,11 +142,7 @@ export default function SettingsPage() {
 
       <Panel ariaLabel={t("settings.tenancy")} title={t("settings.tenancy")} eyebrow={t("settings.eyebrow")}>
         {notice && <p className="inline-notice">{notice}</p>}
-        {error && (
-          <p className="session-error" role="alert">
-            <code>{error.code}</code> {error.message || t("errors.requestFailed")}
-          </p>
-        )}
+        <InlineError error={error} fallback={t("errors.requestFailed")} />
 
         <form className="eval-form" onSubmit={submitOrganization} noValidate>
           <p className="eval-form-title">{t("settings.createOrganization")}</p>
