@@ -13,8 +13,10 @@ from apps.api.schemas.agent_runs import (
     AgentRunResponse,
     RunStepResponse,
 )
+from apps.api.schemas.approvals import ApprovalResponse
 from packages.agent_runtime.runtime import AgentRunService
 from packages.agent_runtime.sse import event_to_sse
+from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}", tags=["agent-runs"])
@@ -23,6 +25,15 @@ context_dependency = Depends(get_agent_run_workspace_context)
 
 def _service(request: Request) -> AgentRunService:
     return get_production_agent_run_service(request)
+
+
+def _approval_service(request: Request):
+    service = _service(request)
+    if service.approval_service is None:
+        raise AgentHubError(
+            "DATABASE_NOT_CONFIGURED", "Database access is not configured.", 503
+        )
+    return service.approval_service
 
 
 @router.post(
@@ -121,6 +132,18 @@ async def list_agent_run_steps(
     del workspace_id
     steps = await _service(request).list_steps(context, run_id)
     return [RunStepResponse.model_validate(step) for step in steps]
+
+
+@router.get("/agent-runs/{run_id}/approvals", response_model=list[ApprovalResponse])
+async def list_agent_run_approvals(
+    workspace_id: UUID,
+    run_id: UUID,
+    request: Request,
+    context: WorkspaceExecutionContext = context_dependency,
+) -> list[ApprovalResponse]:
+    del workspace_id
+    approvals = await _approval_service(request).list_for_run(context, run_id)
+    return [ApprovalResponse.model_validate(approval) for approval in approvals]
 
 
 @router.post("/agent-runs/{run_id}/cancel", response_model=AgentRunResponse)
