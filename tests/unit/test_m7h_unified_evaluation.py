@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from types import SimpleNamespace
+from uuid import UUID
 
 import pytest
 
@@ -11,7 +12,7 @@ from benchmarks.retrieval.corpus import chunk_ids_by_section
 from benchmarks.retrieval.schema import load_dataset
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.metrics import MetricStatus, evaluate_case
-from packages.evaluation.runner import DeterministicEvaluationDriver
+from packages.evaluation.runner import AgentRuntimeEvaluationDriver, DeterministicEvaluationDriver
 from packages.evaluation.validation import validate_dataset_items
 
 
@@ -109,6 +110,9 @@ def test_unified_dataset_has_frozen_distribution_and_all_splits() -> None:
         "MULTI_STEP",
         "FAILURE",
     }
+    approvals = [item for item in items if item["category"] == "APPROVAL"]
+    assert len(approvals) == 10
+    assert {item["expected"]["decision"] for item in approvals} <= {"APPROVED", "DENIED"}
 
 
 def test_unified_corpus_cases_use_formal_chunk_identity_and_no_placeholders() -> None:
@@ -120,16 +124,22 @@ def test_unified_corpus_cases_use_formal_chunk_identity_and_no_placeholders() ->
         for chunk_ids in chunk_ids_by_section(document).values()
         for chunk_id in chunk_ids
     }
+    chunk_to_text = {
+        chunk_id: section.text
+        for document in retrieval_dataset.corpus
+        for section in document.sections
+        for chunk_id in chunk_ids_by_section(document)[section.section_key]
+    }
     for item in items:
         if item["category"] == "RETRIEVAL":
             assert set(item["expected"]["relevant_chunk_ids"]).issubset(formal_chunk_ids)
         if item["category"] == "KNOWLEDGE_QA":
             assert set(item["expected"]["citations"]).issubset(formal_chunk_ids)
-            assert any(
-                item["expected"]["answer"] in section.text
-                for document in retrieval_dataset.corpus
-                for section in document.sections
-            )
+            cited_texts = [
+                chunk_to_text[chunk_id] for chunk_id in item["expected"]["citations"]
+            ]
+            assert any(item["expected"]["answer"] in text for text in cited_texts)
+            assert all(item["expected"]["answer"] != text for text in cited_texts)
 
     serialized = json.dumps(items, ensure_ascii=False)
     assert "curated-chunk-" not in serialized
@@ -155,7 +165,7 @@ def test_unified_corpus_cases_use_formal_chunk_identity_and_no_placeholders() ->
     }
     for item in items:
         if item["category"] == "NO_ANSWER":
-            assert item["expected"]["answerable"] is False
+            assert "answerable" not in item["expected"]
             assert absent_markers[item["case_key"]] not in corpus_text
 
     allowed_tools = {"query_customer", "search_knowledge", "calculator"}
@@ -176,17 +186,23 @@ def test_historical_semantics_and_splits_are_not_reassigned() -> None:
     m4 = json.loads(Path("benchmarks/agent_runtime/dataset.json").read_text(encoding="utf-8"))
     for case in m4["cases"]:
         if case["category"] == "approval_unavailable":
-            item = by_key[f"m4-{case['case_id']}"]
-            assert item["split"] == case["split"].upper()
-            assert item["expected"]["decision"] != "PENDING"
-            assert item["expected"]["failure_code"] == case["expected"]["failure_code"]
+            assert f"m4-{case['case_id']}" not in by_key
 
     m5 = json.loads(Path("benchmarks/approval_runtime/dataset.json").read_text(encoding="utf-8"))
-    for case in m5["cases"][:7]:
+    formal_m5_ids = {
+        item["source_provenance"]["source_id"].split(":", 1)[1]
+        for item in items
+        if item["category"] == "APPROVAL"
+    }
+    assert len(formal_m5_ids) == 10
+    for case in m5["cases"]:
+        if case["case_id"] not in formal_m5_ids:
+            continue
         item = by_key[f"m5-{case['case_id']}"]
         assert item["split"] == case["split"].upper()
-        assert item["expected"]["execution_status"] == case["expected"]["execution_status"]
-        assert item["expected"]["run_status"] == case["expected"]["run_status"]
+        assert item["expected"] == {"decision": case["expected"]["decision_status"]}
+        assert item["source_provenance"]["source_split"] == case["split"].upper()
+        assert item["expected"]["decision"] in {"APPROVED", "DENIED"}
 
     m6 = json.loads(Path("benchmarks/observability/dataset.json").read_text(encoding="utf-8"))
     assert all("split" not in case for case in m6["cases"])
@@ -194,4 +210,44 @@ def test_historical_semantics_and_splits_are_not_reassigned() -> None:
 
     for item in items:
         if item["category"] == "NO_ANSWER":
-            assert item["expected"]["answerable"] is False
+            assert "answerable" not in item["expected"]
+
+
+@pytest.mark.asyncio
+async def test_unified_approval_cases_pass_agent_runtime_decision_preflight() -> None:
+    calls: list[UUID] = []
+
+    class _PrepareOnlyRuntime:
+        async def prepare_run(self, context, **kwargs):
+            del context, kwargs
+            prepared = SimpleNamespace(id=UUID("00000000-0000-0000-0000-000000000001"))
+            calls.append(prepared.id)
+            return prepared
+
+    async def context_factory(run):
+        return SimpleNamespace(workspace_id=run.workspace_id)
+
+    driver = AgentRuntimeEvaluationDriver(
+        _PrepareOnlyRuntime(),
+        context_factory,
+    )
+    run = SimpleNamespace(workspace_id=UUID("00000000-0000-0000-0000-000000000002"))
+    variant = SimpleNamespace(
+        agent_version_id=UUID("00000000-0000-0000-0000-000000000003"),
+        effective_knowledge_snapshots=[],
+    )
+    approvals = [item for item in build_items() if item["category"] == "APPROVAL"]
+
+    for item in approvals:
+        prepared = await driver.prepare(
+            run=run,
+            variant=variant,
+            item=SimpleNamespace(
+                category=item["category"],
+                input=item["input"],
+                expected=item["expected"],
+            ),
+        )
+        assert prepared.agent_run_id == calls[-1]
+
+    assert len(calls) == 10

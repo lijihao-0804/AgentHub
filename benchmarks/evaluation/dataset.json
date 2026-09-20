@@ -1000,136 +1000,6 @@
       "ordinal": 39
     },
     {
-      "case_key": "m4-approval-calculator-001",
-      "split": "DEV",
-      "category": "APPROVAL",
-      "input": {
-        "action": "Read a calculation that requires approval."
-      },
-      "expected": {
-        "decision": "UNAVAILABLE",
-        "approval_required": true,
-        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE"
-      },
-      "tags": [
-        "historical",
-        "m4",
-        "approval"
-      ],
-      "source_provenance": {
-        "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:approval-calculator-001",
-        "source_split": "DEV"
-      },
-      "ordinal": 40
-    },
-    {
-      "case_key": "m4-approval-customer-001",
-      "split": "DEV",
-      "category": "APPROVAL",
-      "input": {
-        "action": "Read a customer record that requires approval."
-      },
-      "expected": {
-        "decision": "UNAVAILABLE",
-        "approval_required": true,
-        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE"
-      },
-      "tags": [
-        "historical",
-        "m4",
-        "approval"
-      ],
-      "source_provenance": {
-        "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:approval-customer-001",
-        "source_split": "DEV"
-      },
-      "ordinal": 41
-    },
-    {
-      "case_key": "m4-approval-search-001",
-      "split": "HOLDOUT",
-      "category": "APPROVAL",
-      "input": {
-        "action": "Search the knowledge base with approval required."
-      },
-      "expected": {
-        "decision": "UNAVAILABLE",
-        "approval_required": true,
-        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE"
-      },
-      "tags": [
-        "historical",
-        "m4",
-        "approval"
-      ],
-      "source_provenance": {
-        "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:approval-search-001",
-        "source_split": "HOLDOUT"
-      },
-      "ordinal": 42
-    },
-    {
-      "case_key": "m5-approval-required-dev-01",
-      "split": "DEV",
-      "category": "APPROVAL",
-      "input": {
-        "action": "Approval sequence approval-required-dev-01: request."
-      },
-      "expected": {
-        "decision": "PENDING",
-        "approval_required": true,
-        "execution_status": "NOT_STARTED",
-        "run_status": "WAITING_APPROVAL",
-        "ticket_count": 0,
-        "execution_calls": 0,
-        "authorization_ok": true,
-        "resume_success": true
-      },
-      "tags": [
-        "historical",
-        "m5",
-        "approval"
-      ],
-      "source_provenance": {
-        "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:approval-required-dev-01",
-        "source_split": "DEV"
-      },
-      "ordinal": 43
-    },
-    {
-      "case_key": "m5-approval-required-holdout-01",
-      "split": "HOLDOUT",
-      "category": "APPROVAL",
-      "input": {
-        "action": "Approval sequence approval-required-holdout-01: request."
-      },
-      "expected": {
-        "decision": "PENDING",
-        "approval_required": true,
-        "execution_status": "NOT_STARTED",
-        "run_status": "WAITING_APPROVAL",
-        "ticket_count": 0,
-        "execution_calls": 0,
-        "authorization_ok": true,
-        "resume_success": true
-      },
-      "tags": [
-        "historical",
-        "m5",
-        "approval"
-      ],
-      "source_provenance": {
-        "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:approval-required-holdout-01",
-        "source_split": "HOLDOUT"
-      },
-      "ordinal": 44
-    },
-    {
       "case_key": "m5-approval-denied-dev-01",
       "split": "DEV",
       "category": "APPROVAL",
@@ -1137,14 +1007,7 @@
         "action": "Approval sequence approval-denied-dev-01: request, deny, resume."
       },
       "expected": {
-        "decision": "DENIED",
-        "approval_required": true,
-        "execution_status": "NOT_STARTED",
-        "run_status": "SUCCEEDED",
-        "ticket_count": 0,
-        "execution_calls": 0,
-        "authorization_ok": true,
-        "resume_success": true
+        "decision": "DENIED"
       },
       "tags": [
         "historical",
@@ -1154,9 +1017,10 @@
       "source_provenance": {
         "source_kind": "historical_benchmark",
         "source_id": "m5-approval-runtime-v1:approval-denied-dev-01",
-        "source_split": "DEV"
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
       },
-      "ordinal": 45
+      "ordinal": 40
     },
     {
       "case_key": "m5-approval-denied-holdout-01",
@@ -1166,14 +1030,7 @@
         "action": "Approval sequence approval-denied-holdout-01: request, deny, resume."
       },
       "expected": {
-        "decision": "DENIED",
-        "approval_required": true,
-        "execution_status": "NOT_STARTED",
-        "run_status": "SUCCEEDED",
-        "ticket_count": 0,
-        "execution_calls": 0,
-        "authorization_ok": true,
-        "resume_success": true
+        "decision": "DENIED"
       },
       "tags": [
         "historical",
@@ -1183,9 +1040,10 @@
       "source_provenance": {
         "source_kind": "historical_benchmark",
         "source_id": "m5-approval-runtime-v1:approval-denied-holdout-01",
-        "source_split": "HOLDOUT"
+        "source_split": "HOLDOUT",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
       },
-      "ordinal": 46
+      "ordinal": 41
     },
     {
       "case_key": "m5-approval-approved-dev-01",
@@ -1195,14 +1053,7 @@
         "action": "Approval sequence approval-approved-dev-01: request, approve, resume."
       },
       "expected": {
-        "decision": "APPROVED",
-        "approval_required": true,
-        "execution_status": "SUCCEEDED",
-        "run_status": "SUCCEEDED",
-        "ticket_count": 1,
-        "execution_calls": 1,
-        "authorization_ok": true,
-        "resume_success": true
+        "decision": "APPROVED"
       },
       "tags": [
         "historical",
@@ -1212,9 +1063,10 @@
       "source_provenance": {
         "source_kind": "historical_benchmark",
         "source_id": "m5-approval-runtime-v1:approval-approved-dev-01",
-        "source_split": "DEV"
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
       },
-      "ordinal": 47
+      "ordinal": 42
     },
     {
       "case_key": "m5-approval-approved-holdout-01",
@@ -1224,14 +1076,7 @@
         "action": "Approval sequence approval-approved-holdout-01: request, approve, resume."
       },
       "expected": {
-        "decision": "APPROVED",
-        "approval_required": true,
-        "execution_status": "SUCCEEDED",
-        "run_status": "SUCCEEDED",
-        "ticket_count": 1,
-        "execution_calls": 1,
-        "authorization_ok": true,
-        "resume_success": true
+        "decision": "APPROVED"
       },
       "tags": [
         "historical",
@@ -1241,9 +1086,10 @@
       "source_provenance": {
         "source_kind": "historical_benchmark",
         "source_id": "m5-approval-runtime-v1:approval-approved-holdout-01",
-        "source_split": "HOLDOUT"
+        "source_split": "HOLDOUT",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
       },
-      "ordinal": 48
+      "ordinal": 43
     },
     {
       "case_key": "m5-duplicate-approve-dev-01",
@@ -1253,14 +1099,7 @@
         "action": "Approval sequence duplicate-approve-dev-01: request, approve, approve_again, resume."
       },
       "expected": {
-        "decision": "APPROVED",
-        "approval_required": true,
-        "execution_status": "SUCCEEDED",
-        "run_status": "SUCCEEDED",
-        "ticket_count": 1,
-        "execution_calls": 1,
-        "authorization_ok": true,
-        "resume_success": true
+        "decision": "APPROVED"
       },
       "tags": [
         "historical",
@@ -1270,7 +1109,123 @@
       "source_provenance": {
         "source_kind": "historical_benchmark",
         "source_id": "m5-approval-runtime-v1:duplicate-approve-dev-01",
-        "source_split": "DEV"
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 44
+    },
+    {
+      "case_key": "m5-multi-step-action-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence multi-step-action-dev-01: request, approve, resume, resume_again."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:multi-step-action-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 45
+    },
+    {
+      "case_key": "m5-multi-step-action-holdout-01",
+      "split": "HOLDOUT",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence multi-step-action-holdout-01: request, approve, resume, resume_again."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:multi-step-action-holdout-01",
+        "source_split": "HOLDOUT",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 46
+    },
+    {
+      "case_key": "m5-restart-resume-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence restart-resume-dev-01: request, restart, approve, restart, resume."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:restart-resume-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 47
+    },
+    {
+      "case_key": "m5-idempotent-action-dev-01",
+      "split": "DEV",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence idempotent-action-dev-01: request, approve, resume, execute_again, resume_again."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:idempotent-action-dev-01",
+        "source_split": "DEV",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
+      },
+      "ordinal": 48
+    },
+    {
+      "case_key": "m5-unknown-outcome-holdout-01",
+      "split": "HOLDOUT",
+      "category": "APPROVAL",
+      "input": {
+        "action": "Approval sequence unknown-outcome-holdout-01: request, approve, resume, resume_again."
+      },
+      "expected": {
+        "decision": "APPROVED"
+      },
+      "tags": [
+        "historical",
+        "m5",
+        "approval"
+      ],
+      "source_provenance": {
+        "source_kind": "historical_benchmark",
+        "source_id": "m5-approval-runtime-v1:unknown-outcome-holdout-01",
+        "source_split": "HOLDOUT",
+        "normalization_note": "Formal APPROVAL retains only the original APPROVED/DENIED decision; M5 execution metadata remains in the source benchmark."
       },
       "ordinal": 49
     },
@@ -1283,9 +1238,7 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "MODEL_PROVIDER_FAILED",
-        "failure_category": "MODEL",
-        "runtime_path": "AgentRunService.model_boundary"
+        "failure_code": "MODEL_PROVIDER_FAILED"
       },
       "tags": [
         "historical",
@@ -1294,7 +1247,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:model-failure-before-token"
+        "source_id": "m6-observability-failure-v1:model-failure-before-token",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 50
     },
@@ -1307,9 +1261,7 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "STREAM_INTERRUPTED",
-        "failure_category": "RUNTIME",
-        "runtime_path": "AgentRunService.stream_producer"
+        "failure_code": "STREAM_INTERRUPTED"
       },
       "tags": [
         "historical",
@@ -1318,7 +1270,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:stream-interrupted-after-visible-token"
+        "source_id": "m6-observability-failure-v1:stream-interrupted-after-visible-token",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 51
     },
@@ -1331,9 +1284,7 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "TOOL_EXECUTION_FAILED",
-        "failure_category": "TOOL",
-        "runtime_path": "AgentRunService.tool_boundary"
+        "failure_code": "TOOL_EXECUTION_FAILED"
       },
       "tags": [
         "historical",
@@ -1342,7 +1293,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:tool-execution-failure"
+        "source_id": "m6-observability-failure-v1:tool-execution-failure",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 52
     },
@@ -1355,9 +1307,7 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "KNOWLEDGE_UNAVAILABLE",
-        "failure_category": "KNOWLEDGE",
-        "runtime_path": "AgentRunService.retrieval_boundary"
+        "failure_code": "KNOWLEDGE_UNAVAILABLE"
       },
       "tags": [
         "historical",
@@ -1366,7 +1316,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:knowledge-unavailable"
+        "source_id": "m6-observability-failure-v1:knowledge-unavailable",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 53
     },
@@ -1379,9 +1330,7 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "LOOP_GUARD_TRIGGERED",
-        "failure_category": "RUNTIME",
-        "runtime_path": "AgentRunService.loop_guard"
+        "failure_code": "LOOP_GUARD_TRIGGERED"
       },
       "tags": [
         "historical",
@@ -1390,7 +1339,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:loop-guard"
+        "source_id": "m6-observability-failure-v1:loop-guard",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 54
     },
@@ -1403,9 +1353,7 @@
       },
       "expected": {
         "status": "SUCCEEDED",
-        "failure_code": "APPROVAL_DENIED",
-        "failure_category": "APPROVAL",
-        "runtime_path": "AgentRunService.approval_resume"
+        "failure_code": "APPROVAL_DENIED"
       },
       "tags": [
         "historical",
@@ -1414,7 +1362,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:approval-denied"
+        "source_id": "m6-observability-failure-v1:approval-denied",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 55
     },
@@ -1427,9 +1376,7 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "ACTION_EXECUTION_FAILED",
-        "failure_category": "ACTION",
-        "runtime_path": "AgentRunService.action_boundary"
+        "failure_code": "ACTION_EXECUTION_FAILED"
       },
       "tags": [
         "historical",
@@ -1438,7 +1385,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:action-execution-failed"
+        "source_id": "m6-observability-failure-v1:action-execution-failed",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 56
     },
@@ -1451,9 +1399,7 @@
       },
       "expected": {
         "status": "NEEDS_ATTENTION",
-        "failure_code": "ACTION_RECONCILIATION_REQUIRED",
-        "failure_category": "ACTION",
-        "runtime_path": "AgentRunService.unknown_outcome"
+        "failure_code": "ACTION_RECONCILIATION_REQUIRED"
       },
       "tags": [
         "historical",
@@ -1462,7 +1408,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:unknown-outcome"
+        "source_id": "m6-observability-failure-v1:unknown-outcome",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 57
     },
@@ -1475,9 +1422,7 @@
       },
       "expected": {
         "status": "NEEDS_ATTENTION",
-        "failure_code": "APPROVAL_CHECKPOINT_MISSING",
-        "failure_category": "APPROVAL",
-        "runtime_path": "AgentRunService.checkpoint_resume"
+        "failure_code": "APPROVAL_CHECKPOINT_MISSING"
       },
       "tags": [
         "historical",
@@ -1486,7 +1431,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:checkpoint-missing"
+        "source_id": "m6-observability-failure-v1:checkpoint-missing",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 58
     },
@@ -1499,9 +1445,7 @@
       },
       "expected": {
         "status": "CANCELLED",
-        "failure_code": null,
-        "failure_category": "RUNTIME",
-        "runtime_path": "AgentRunService.cancel_boundary"
+        "failure_code": null
       },
       "tags": [
         "historical",
@@ -1510,7 +1454,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m6-observability-failure-v1:cancelled-run"
+        "source_id": "m6-observability-failure-v1:cancelled-run",
+        "normalization_note": "Formal FAILURE retains status and failure_code; historical failure category and runtime path remain in the source benchmark."
       },
       "ordinal": 59
     },
@@ -1522,7 +1467,7 @@
         "question": "How should a remote teammate stay reachable without exposing work at home?"
       },
       "expected": {
-        "answer": "Remote employees keep the same delivery expectations as office-based employees and must remain reachable during the agreed collaboration window. The team channel is the default place for status updates, while urgent issues use the on-call route. A home workspace should protect confidential material from visitors, and screen sharing must use the approved meeting account.",
+        "answer": "Remote employees keep the same delivery expectations as office-based employees and must remain reachable during the agreed collaboration window.",
         "citations": [
           "27cbcb19cff69bf3f54dcfb2e404ce42714277fbbc5d778f81a5c9d73742642f"
         ]
@@ -1546,7 +1491,7 @@
         "question": "How is planned annual time off counted and approved?"
       },
       "expected": {
-        "answer": "Annual leave is accrued monthly and the available balance is shown in the people portal. Planned time off should be requested early enough for the manager to arrange coverage. Public holidays are handled by the regional calendar and are not deducted from the annual balance. A balance display is informational until the request receives its recorded approval.",
+        "answer": "Annual leave is accrued monthly",
         "citations": [
           "eaa68357330543a2cd8540ebf103f8dc4086b9d4eebb3521a44d0ebdb1de2e2d"
         ]
@@ -1570,7 +1515,7 @@
         "question": "What proof is needed when claiming a meal or taxi during a business trip?"
       },
       "expected": {
-        "answer": "Receipts are required for reimbursable transport, lodging, and meals unless a documented local exception applies. A claim should identify the business purpose and currency, and shared meals should list the attendees. Daily allowances follow the regional rate table; an allowance does not make unrelated personal spending reimbursable.",
+        "answer": "Receipts are required for reimbursable transport, lodging, and meals",
         "citations": [
           "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
         ]
@@ -1594,7 +1539,7 @@
         "question": "What should I do with an unexpected MFA prompt?"
       },
       "expected": {
-        "answer": "Use a unique passphrase for each company service and protect the account with the approved multi-factor method. Never approve an unexpected authentication prompt or share a one-time code with a caller. Password managers supplied by the company may store credentials, but a personal notes app is not an approved vault.",
+        "answer": "Never approve an unexpected authentication prompt",
         "citations": [
           "a18691077ffdb5da1a56a61576e344eb3c2fe95ba49fe8bcb1a0bd74f165c857"
         ]
@@ -1618,7 +1563,7 @@
         "question": "Can a customer get money back when a trial was cancelled in time?"
       },
       "expected": {
-        "answer": "A customer may request a refund for an eligible purchase when the service was not delivered, was charged twice, or was cancelled within the stated trial period. The request must identify the order and the account owner. Promotional credits and completed usage are considered before an amount is approved.",
+        "answer": "A customer may request a refund for an eligible purchase",
         "citations": [
           "90adcbf84d5c4de137de003696fdb90df0475c254f664930a9b0e1a6f40d989f"
         ]
@@ -1642,7 +1587,7 @@
         "question": "What acknowledgement time applies to a critical outage?"
       },
       "expected": {
-        "answer": "The first response target is fifteen minutes for P1, one business hour for P2, and one business day for P3. These targets measure acknowledgement and ownership rather than a guaranteed resolution. The case record should show the next update time when investigation continues beyond the first response.",
+        "answer": "The first response target is fifteen minutes for P1",
         "citations": [
           "e19b26e466b07c3a9b867c55ea45ec668ecf31436957351b76d985ad0ff64c13"
         ]
@@ -1666,7 +1611,7 @@
         "question": "Which details belong in a new service ticket before triage?"
       },
       "expected": {
-        "answer": "Every service ticket records the requester, affected service, observed behavior, time of occurrence, and a safe contact route. Attachments must exclude passwords and unrelated personal data. If the report is incomplete, the intake owner asks a focused clarification question while preserving the original report.",
+        "answer": "Every service ticket records the requester, affected service, observed behavior, time of occurrence, and a safe contact route.",
         "citations": [
           "e956fcdf7d261dd79d9bbb8b2d1c1a623b4c65e82f69e225672beb73c3fc2a31"
         ]
@@ -1690,7 +1635,7 @@
         "question": "申请数据权限时需要写哪些内容？"
       },
       "expected": {
-        "answer": "An access request names the dataset or system, business purpose, requested role, duration, and manager who accepts the responsibility. The data owner checks the purpose before granting access. Emergency access is time limited and must be documented even when the normal queue is unavailable.",
+        "answer": "An access request names the dataset or system, business purpose, requested role, duration, and manager who accepts the responsibility.",
         "citations": [
           "4242c7a17f219da11118f8775e06e247bb661bf59f57e723094a9663b8472d4f"
         ]
@@ -1714,7 +1659,7 @@
         "question": "Which identifiers should be included in an invoice question?"
       },
       "expected": {
-        "answer": "Invoice questions should include the invoice number, billing entity, and the field that appears incorrect. 发票抬头或税务信息需要在付款记录中核对，不能只凭截图修改。The billing team replies in the language selected for the account when the request is submitted.",
+        "answer": "Invoice questions should include the invoice number, billing entity, and the field that appears incorrect.",
         "citations": [
           "ee1acb8f637ac1e7017807c652cc8c98160bd49c7f447860f5952ce1e5d845e8"
         ]
@@ -1738,7 +1683,7 @@
         "question": "What has to be checked before renewing a supplier service?"
       },
       "expected": {
-        "answer": "At renewal, the sponsor confirms that the service is still needed, checks usage and incidents, and records any price or scope change. Security and legal reviews are repeated when the risk profile changes. Renewal approval is not implied by an auto-renewal notice from the vendor.",
+        "answer": "At renewal, the sponsor confirms that the service is still needed",
         "citations": [
           "7c4cefc6a59702d1c34fea008ae1896cbf26935ec72ee73e8002ae300c96449e"
         ]
@@ -1762,7 +1707,7 @@
         "question": "If illness prevents attendance, what is the first notification step?"
       },
       "expected": {
-        "answer": "When illness prevents work, notify the manager or the designated absence channel before the normal start time whenever practical. The employee should keep the absence record current and provide supporting documentation only when the local rule or HR request requires it. Sick leave is not converted into annual leave automatically.",
+        "answer": "When illness prevents work, notify the manager or the designated absence channel before the normal start time whenever practical.",
         "citations": [
           "573a2f31a1dba3e16e69bf1a4d19cb53a29a77f5e5bc5890d2b61de58c8dfdf2"
         ]
@@ -1786,7 +1731,7 @@
         "question": "A refund request is valid but payment processing is delayed; which team confirms the amount and status?"
       },
       "expected": {
-        "answer": "Support verifies the order, records the reason, and routes the case to the billing queue. Billing confirms the payment method and the permitted amount before the refund is issued. The customer receives a status update when the decision is made; a support agent should not promise a bank settlement date.",
+        "answer": "Billing confirms the payment method and the permitted amount before the refund is issued.",
         "citations": [
           "b7fa19a920439903b044f784df3f5d21b4d0a4bcac236601266c86113eae75f5"
         ]
@@ -1810,7 +1755,7 @@
         "question": "出差每天的补贴和餐费发票应该如何区分？"
       },
       "expected": {
-        "answer": "Receipts are required for reimbursable transport, lodging, and meals unless a documented local exception applies. A claim should identify the business purpose and currency, and shared meals should list the attendees. Daily allowances follow the regional rate table; an allowance does not make unrelated personal spending reimbursable.",
+        "answer": "Receipts are required for reimbursable transport, lodging, and meals",
         "citations": [
           "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
         ]
@@ -1834,7 +1779,7 @@
         "question": "Does read access automatically mean that exporting records is safe?"
       },
       "expected": {
-        "answer": "Access follows least privilege: a person receives only the actions and records needed for the approved task. Read access is not automatically safe, and export, delete, and sharing effects require separate consideration. A role change triggers a review rather than silently preserving every previous entitlement.",
+        "answer": "Access follows least privilege: a person receives only the actions and records needed for the approved task.",
         "citations": [
           "5f91fdb7e1aad89854a6accf0351027b3647c54fcdb96906a25b3a71e15c6fc0"
         ]
@@ -1858,7 +1803,7 @@
         "question": "I cannot use the verification mailbox, what bilingual recovery route is allowed?"
       },
       "expected": {
-        "answer": "For account recovery, use the official reset page and verify the recovery address before submitting. 如果无法访问验证邮箱，请通过支持工单说明账号标识和可联系时间，客服会先完成身份核验。Support will never ask for the existing password or a one-time code in chat.",
+        "answer": "Support will never ask for the existing password or a one-time code in chat.",
         "citations": [
           "a505c441107e5fb4d5fef7e217e631db6eac2ade44e9f7347ec90c083b8df278"
         ]
@@ -1882,8 +1827,7 @@
         "question": "What is the exact annual leave carryover limit after the calendar year ends?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -1904,8 +1848,7 @@
         "question": "On which payroll date are approved travel reimbursements deposited?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -1926,8 +1869,7 @@
         "question": "How many remote-work days may each employee use per month?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -1948,8 +1890,7 @@
         "question": "How often must an employee rotate a company service passphrase?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -1970,8 +1911,7 @@
         "question": "How many business days does Billing take to settle an approved refund?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -1992,8 +1932,7 @@
         "question": "What is the guaranteed resolution deadline for a P1 support case?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -2014,8 +1953,7 @@
         "question": "Which insurance certificate expiry date is required for every supplier renewal?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -2036,8 +1974,7 @@
         "question": "What is the maximum attachment size for a service ticket?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -2058,8 +1995,7 @@
         "question": "How many hours may emergency data access remain active?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",
@@ -2080,8 +2016,7 @@
         "question": "What tax percentage applies to the bilingual invoice correction process?"
       },
       "expected": {
-        "answer": "The M3 corpus does not state this information.",
-        "answerable": false
+        "answer": "The M3 corpus does not state this information."
       },
       "tags": [
         "curated",

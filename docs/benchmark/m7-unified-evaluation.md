@@ -9,7 +9,7 @@ benchmark and must not be reported as agent accuracy.
 | --- | --- |
 | Version | `m7-unified-evaluation-v1` |
 | Schema | `1` |
-| Hash | `7afdc764b3804296a2d244d492ab9065d6252746ed115dd719a22cfaa2d67b4f` |
+| Hash | `b00449d3e77d29d21681b72b9eaa577b65f644f79dfec03c5c92b80b09875897` |
 | Cases | `100` |
 | DEV / HOLDOUT | `70 / 30` |
 | Historical / curated | `60 / 40` |
@@ -26,10 +26,10 @@ benchmark and must not be reported as agent accuracy.
 | **Total** | **70** | **30** | **100** |
 
 Source provenance distribution: historical benchmark `60` (M3/M4/M5/M6 normalized cases),
-M7-H curated `40`. The original historical dataset files are not modified. M3/M4/M5 source
-splits and semantics are preserved; M6 has no source split and remains DEV without invented
-HOLDOUT assignments. M4 `approval_unavailable` remains `UNAVAILABLE` with its original failure
-code.
+M7-H curated `40`. The original historical dataset files are not modified. M3/M5 source
+splits and semantics are preserved; M4 `approval_unavailable` cases are excluded from formal
+APPROVAL because they are terminal failures rather than approval decisions. M6 has no source
+split and remains DEV without invented HOLDOUT assignments.
 
 ## Deterministic conformance result
 

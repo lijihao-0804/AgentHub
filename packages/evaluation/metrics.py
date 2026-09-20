@@ -229,6 +229,7 @@ def evaluate_approval(
     required = _binary_metric(
         "approval_required_accuracy",
         bool(expected.get("approval_required")) == bool(observation.get("approval_required")),
+        applicable="approval_required" in expected,
     )
     decision = _binary_metric(
         "approval_decision_accuracy",
@@ -346,11 +347,12 @@ def evaluate_knowledge_qa(
 def evaluate_no_answer(
     expected: Mapping[str, Any], observation: Mapping[str, Any]
 ) -> dict[str, MetricValue]:
+    del expected
     signal = observation.get("answerable")
     if signal is None:
         task = _not_available("task_success", "structured_answerability_signal_missing")
     else:
-        task = _binary_metric("task_success", bool(expected.get("answerable")) == bool(signal))
+        task = _binary_metric("task_success", signal is False)
     return {"task_success": task}
 
 

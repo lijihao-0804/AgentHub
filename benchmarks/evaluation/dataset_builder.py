@@ -37,12 +37,15 @@ def _item(
     source_kind: str,
     source_id: str,
     source_split: str | None = None,
+    normalization_note: str | None = None,
     tags: list[str],
     ordinal: int,
 ) -> dict[str, Any]:
     provenance = {"source_kind": source_kind, "source_id": source_id}
     if source_split is not None:
         provenance["source_split"] = source_split
+    if normalization_note is not None:
+        provenance["normalization_note"] = normalization_note
     return {
         "case_key": case_key,
         "split": split.upper(),
@@ -111,13 +114,6 @@ def _legacy_items(start_ordinal: int) -> list[dict[str, Any]]:
                 "terminal_status": "SUCCEEDED",
             }
             category = "MULTI_STEP"
-        elif case["category"] == "approval_unavailable":
-            expected = {
-                "decision": "UNAVAILABLE",
-                "approval_required": True,
-                "failure_code": case["expected"]["failure_code"],
-            }
-            category = "APPROVAL"
         else:
             continue
         items.append(
@@ -146,7 +142,26 @@ def _legacy_items(start_ordinal: int) -> list[dict[str, Any]]:
 
 def _approval_items(start_ordinal: int) -> list[dict[str, Any]]:
     raw = _read("benchmarks/approval_runtime/dataset.json")["cases"]
-    selected = raw[:7]
+    selected_ids = {
+        "approval-denied-dev-01",
+        "approval-denied-holdout-01",
+        "approval-approved-dev-01",
+        "approval-approved-holdout-01",
+        "duplicate-approve-dev-01",
+        "multi-step-action-dev-01",
+        "multi-step-action-holdout-01",
+        "restart-resume-dev-01",
+        "idempotent-action-dev-01",
+        "unknown-outcome-holdout-01",
+    }
+    selected = [
+        case
+        for case in raw
+        if case["case_id"] in selected_ids
+        and case["expected"]["decision_status"] in {"APPROVED", "DENIED"}
+    ]
+    if len(selected) != 10:
+        raise ValueError("M7-H approval normalization selection is incomplete")
     items: list[dict[str, Any]] = []
     for index, case in enumerate(selected):
         actions = ", ".join(case["actions"])
@@ -159,17 +174,14 @@ def _approval_items(start_ordinal: int) -> list[dict[str, Any]]:
                 input_value={"action": f"Approval sequence {case['case_id']}: {actions}."},
                 expected={
                     "decision": decision,
-                    "approval_required": True,
-                    "execution_status": case["expected"]["execution_status"],
-                    "run_status": case["expected"]["run_status"],
-                    "ticket_count": case["expected"]["ticket_count"],
-                    "execution_calls": case["expected"]["execution_calls"],
-                    "authorization_ok": case["expected"]["authorization_ok"],
-                    "resume_success": case["expected"]["resume_success"],
                 },
                 source_kind="historical_benchmark",
                 source_id=f"m5-approval-runtime-v1:{case['case_id']}",
                 source_split=case["split"].upper(),
+                normalization_note=(
+                    "Formal APPROVAL retains only the original APPROVED/DENIED decision; "
+                    "M5 execution metadata remains in the source benchmark."
+                ),
                 tags=["historical", "m5", "approval"],
                 ordinal=start_ordinal + index,
             )
@@ -192,11 +204,13 @@ def _failure_items(start_ordinal: int) -> list[dict[str, Any]]:
                 expected={
                     "status": case["expected_run_status"],
                     "failure_code": case["expected_failure_code"],
-                    "failure_category": case["expected_failure_category"],
-                    "runtime_path": case["runtime_path"],
                 },
                 source_kind="historical_benchmark",
                 source_id=f"m6-observability-failure-v1:{case['case_id']}",
+                normalization_note=(
+                    "Formal FAILURE retains status and failure_code; historical failure "
+                    "category and runtime path remain in the source benchmark."
+                ),
                 tags=["historical", "m6", "failure"],
                 ordinal=start_ordinal + index,
             )
@@ -206,15 +220,51 @@ def _failure_items(start_ordinal: int) -> list[dict[str, Any]]:
 
 def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
     retrieval_dataset = load_dataset(PROJECT_ROOT / "benchmarks" / "retrieval" / "dataset.json")
-    sections = {
-        (document.document_key, document.revision_key, section.section_key): section.text
-        for document in retrieval_dataset.corpus
-        for section in document.sections
-    }
     section_chunks = {
         (document.document_key, document.revision_key, section_key): chunk_ids
         for document in retrieval_dataset.corpus
         for section_key, chunk_ids in chunk_ids_by_section(document).items()
+    }
+    canonical_answers = {
+        "remote-collaboration": (
+            "Remote employees keep the same delivery expectations as office-based employees "
+            "and must remain reachable during the agreed collaboration window."
+        ),
+        "annual-leave": "Annual leave is accrued monthly",
+        "reimbursable-costs": (
+            "Receipts are required for reimbursable transport, lodging, and meals"
+        ),
+        "password-mfa": "Never approve an unexpected authentication prompt",
+        "eligibility": "A customer may request a refund for an eligible purchase",
+        "response-targets": "The first response target is fifteen minutes for P1",
+        "intake": (
+            "Every service ticket records the requester, affected service, observed behavior, "
+            "time of occurrence, and a safe contact route."
+        ),
+        "access-request": (
+            "An access request names the dataset or system, business purpose, requested role, "
+            "duration, and manager who accepts the responsibility."
+        ),
+        "invoice-questions": (
+            "Invoice questions should include the invoice number, billing entity, and the field "
+            "that appears incorrect."
+        ),
+        "renewal-review": "At renewal, the sponsor confirms that the service is still needed",
+        "sick-leave": (
+            "When illness prevents work, notify the manager or the designated absence channel "
+            "before the normal start time whenever practical."
+        ),
+        "approval-path": (
+            "Billing confirms the payment method and the permitted amount before the "
+            "refund is issued."
+        ),
+        "least-privilege": (
+            "Access follows least privilege: a person receives only the actions and records "
+            "needed for the approved task."
+        ),
+        "account-recovery": (
+            "Support will never ask for the existing password or a one-time code in chat."
+        ),
     }
     items: list[dict[str, Any]] = []
     ordinal = start_ordinal
@@ -230,7 +280,7 @@ def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
                 category="KNOWLEDGE_QA",
                 input_value={"question": case.query},
                 expected={
-                    "answer": sections[corpus_key],
+                    "answer": canonical_answers[section_key],
                     "citations": list(section_chunks[corpus_key]),
                 },
                 source_kind="m7h_curated",
@@ -261,7 +311,6 @@ def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
                 input_value={"question": question},
                 expected={
                     "answer": "The M3 corpus does not state this information.",
-                    "answerable": False,
                 },
                 source_kind="m7h_curated",
                 source_id=f"m7h-no-answer-{index + 1:02d}",

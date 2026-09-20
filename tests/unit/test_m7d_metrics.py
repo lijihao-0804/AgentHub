@@ -78,7 +78,7 @@ def test_accepted_answers_and_tool_arguments_use_canonical_observations() -> Non
 
 
 def test_no_answer_and_faithfulness_without_structured_signals_are_unavailable() -> None:
-    no_answer = evaluate_case("NO_ANSWER", {"answerable": False}, {})
+    no_answer = evaluate_case("NO_ANSWER", {}, {})
     faithfulness = evaluate_faithfulness({}, {})
     assert no_answer["task_success"].status == MetricStatus.NOT_AVAILABLE
     assert faithfulness.status == MetricStatus.NOT_AVAILABLE
