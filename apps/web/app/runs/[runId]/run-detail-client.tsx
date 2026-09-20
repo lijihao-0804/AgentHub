@@ -8,6 +8,7 @@ import { statusTone, type StatusTone } from "@/components/ui/badge-tones";
 import Breadcrumbs from "@/components/layout/breadcrumbs";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import TechnicalDetails from "@/components/ui/technical-details";
+import AddRunToDatasetPanel from "@/components/evaluation/add-run-to-dataset-panel";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import { createAgentRun, getAgentRun, type AgentRun } from "@/lib/api/agent-runtime";
 import { getRunDetail, getRunTimeline, RunDetail, RunTimelineEntry } from "@/lib/api/runs";
@@ -30,6 +31,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   const { t, statusLabel, failureCategoryLabel, timelineKindLabel, formatDateTime, formatNumber, formatCurrencyAmount } = useI18n();
   const { workspaceId, connected, sessionId } = useFrontendSession();
   const [replay, setReplay] = useState<AgentRun | null>(null);
+  const [addToEvaluationOpen, setAddToEvaluationOpen] = useState(false);
   const replayMutation = useWorkspaceMutation(`run-replay:${workspaceId}:${runId}`);
 
   /**
@@ -56,6 +58,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   // workspaces or runs must not leave a stale replay pointer on screen.
   useEffect(() => {
     setReplay(null);
+    setAddToEvaluationOpen(false);
   }, [sessionId, runId]);
 
   /**
@@ -184,6 +187,13 @@ export default function RunDetailClient({ runId }: { runId: string }) {
                   {t("run.compareEntry")}
                 </Link>
                 <button
+                  className="button button-ghost"
+                  type="button"
+                  onClick={() => setAddToEvaluationOpen((current) => !current)}
+                >
+                  {t("run.addToEvaluation.button")}
+                </button>
+                <button
                   className="button button-primary"
                   type="button"
                   disabled={replayMutation.pending}
@@ -250,6 +260,12 @@ export default function RunDetailClient({ runId }: { runId: string }) {
               <StatusBadge status="UNKNOWN_OUTCOME" label={t("run.chips.unknownOutcome", { count: run.approval_summary.unknown_outcome })} />
             </div>
           </Panel>
+
+          <AddRunToDatasetPanel
+            runId={runId}
+            open={addToEvaluationOpen}
+            onClose={() => setAddToEvaluationOpen(false)}
+          />
 
           <Panel title={t("timeline.title")} eyebrow={t("timeline.eyebrow")}>
             {timeline.length === 0 ? (
