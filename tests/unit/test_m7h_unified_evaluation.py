@@ -7,7 +7,7 @@ from uuid import UUID
 
 import pytest
 
-from benchmarks.evaluation.dataset_builder import build_items
+from benchmarks.evaluation.dataset_builder import KNOWLEDGE_QA_GROUND_TRUTH, build_items
 from benchmarks.retrieval.corpus import chunk_ids_by_section
 from benchmarks.retrieval.schema import load_dataset
 from packages.core.errors.exceptions import AgentHubError
@@ -130,6 +130,9 @@ def test_unified_corpus_cases_use_formal_chunk_identity_and_no_placeholders() ->
         for section in document.sections
         for chunk_id in chunk_ids_by_section(document)[section.section_key]
     }
+    qa_case_ids = [
+        case.case_id for case in [*retrieval_dataset.cases[:10], *retrieval_dataset.cases[20:25]]
+    ]
     for item in items:
         if item["category"] == "RETRIEVAL":
             assert set(item["expected"]["relevant_chunk_ids"]).issubset(formal_chunk_ids)
@@ -138,13 +141,24 @@ def test_unified_corpus_cases_use_formal_chunk_identity_and_no_placeholders() ->
             cited_texts = [
                 chunk_to_text[chunk_id] for chunk_id in item["expected"]["citations"]
             ]
-            assert any(item["expected"]["answer"] in text for text in cited_texts)
             assert all(item["expected"]["answer"] != text for text in cited_texts)
+
+            qa_index = int(item["case_key"].rsplit("-", 1)[1]) - 1
+            case_id = qa_case_ids[qa_index]
+            answer, evidence = KNOWLEDGE_QA_GROUND_TRUTH[case_id]
+            cited_text = "\n".join(cited_texts)
+            assert item["expected"]["answer"] == answer
+            assert all(phrase.lower() in cited_text.lower() for phrase in evidence)
 
     serialized = json.dumps(items, ensure_ascii=False)
     assert "curated-chunk-" not in serialized
     assert "lookup" not in serialized
     assert "placeholder" not in serialized.lower()
+
+    qa_items = [item for item in items if item["category"] == "KNOWLEDGE_QA"]
+    assert {item["case_key"] for item in qa_items} == {
+        f"curated-qa-{index:02d}" for index in range(1, 16)
+    }
 
     corpus_text = "\n".join(
         section.text.lower()

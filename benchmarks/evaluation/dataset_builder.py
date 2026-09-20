@@ -22,6 +22,119 @@ DATASET_VERSION = "m7-unified-evaluation-v1"
 SCHEMA_VERSION = 1
 DEFAULT_OUTPUT = PROJECT_ROOT / "benchmarks" / "evaluation" / "dataset.json"
 
+KNOWLEDGE_QA_GROUND_TRUTH: dict[str, tuple[str, tuple[str, ...]]] = {
+    "ret-001": (
+        "Stay reachable during the agreed collaboration window while protecting confidential "
+        "material from visitors in the home workspace.",
+        (
+            "remain reachable during the agreed collaboration window",
+            "home workspace should protect confidential material from visitors",
+        ),
+    ),
+    "ret-002": (
+        "Annual leave is accrued monthly; the balance is only informational until the request "
+        "receives recorded approval.",
+        (
+            "Annual leave is accrued monthly",
+            "A balance display is informational until the request receives its recorded approval",
+        ),
+    ),
+    "ret-003": (
+        "Provide receipts for reimbursable meals or transport, plus the business purpose and "
+        "currency.",
+        (
+            "Receipts are required for reimbursable transport, lodging, and meals",
+            "claim should identify the business purpose and currency",
+        ),
+    ),
+    "ret-004": (
+        "Never approve an unexpected authentication prompt or share a one-time code with a "
+        "caller.",
+        (
+            "Never approve an unexpected authentication prompt or share a one-time code "
+            "with a caller"
+        ),
+    ),
+    "ret-005": (
+        "A customer may request a refund for a purchase cancelled within the stated trial "
+        "period.",
+        ("cancelled within the stated trial period",),
+    ),
+    "ret-006": (
+        "A P1 outage has a fifteen-minute first-response target, which measures acknowledgement "
+        "rather than guaranteed resolution.",
+        (
+            "first response target is fifteen minutes for P1",
+            "targets measure acknowledgement and ownership rather than a guaranteed resolution",
+        ),
+    ),
+    "ret-007": (
+        "Include the requester, affected service, observed behavior, time of occurrence, and a "
+        "safe contact route.",
+        (
+            "requester, affected service, observed behavior, time of occurrence, and a safe "
+            "contact route"
+        ),
+    ),
+    "ret-008": (
+        "An access request names the dataset or system, business purpose, requested role, "
+        "duration, and manager who accepts the responsibility.",
+        (
+            "names the dataset or system, business purpose, requested role, duration, and manager "
+            "who accepts the responsibility",
+        ),
+    ),
+    "ret-009": (
+        "Include the invoice number, billing entity, and the field that appears incorrect.",
+        ("include the invoice number, billing entity, and the field that appears incorrect",),
+    ),
+    "ret-010": (
+        "At renewal, confirm the service is still needed, review usage and incidents, and record "
+        "any price or scope change.",
+        (
+            "service is still needed, checks usage and incidents, and records any price or "
+            "scope change",
+        ),
+    ),
+    "ret-021": (
+        "Notify the manager or the designated absence channel before the normal start time "
+        "whenever practical.",
+        (
+            "notify the manager or the designated absence channel before the normal start time "
+            "whenever practical"
+        ),
+    ),
+    "ret-022": (
+        "Billing confirms the payment method and permitted amount; the customer receives a status "
+        "update when the decision is made.",
+        (
+            "Billing confirms the payment method and the permitted amount before the refund is "
+            "issued",
+            "customer receives a status update when the decision is made",
+        ),
+    ),
+    "ret-023": (
+        "Receipts are required for reimbursable meals and transport, whereas daily allowances "
+        "follow the regional rate table.",
+        (
+            "Receipts are required for reimbursable transport, lodging, and meals",
+            "Daily allowances follow the regional rate table",
+        ),
+    ),
+    "ret-024": (
+        "No. Read access is not automatically safe; export, delete, and sharing require separate "
+        "consideration.",
+        (
+            "Read access is not automatically safe",
+            "export, delete, and sharing effects require separate consideration",
+        ),
+    ),
+    "ret-025": (
+        "如果无法访问验证邮箱，请通过支持工单说明账号标识和可联系时间，客服会先完成身份核验。",
+        ("如果无法访问验证邮箱，请通过支持工单说明账号标识和可联系时间，客服会先完成身份核验",),
+    ),
+}
+
 
 def _read(relative: str) -> dict[str, Any]:
     return json.loads((PROJECT_ROOT / relative).read_text(encoding="utf-8"))
@@ -225,47 +338,6 @@ def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
         for document in retrieval_dataset.corpus
         for section_key, chunk_ids in chunk_ids_by_section(document).items()
     }
-    canonical_answers = {
-        "remote-collaboration": (
-            "Remote employees keep the same delivery expectations as office-based employees "
-            "and must remain reachable during the agreed collaboration window."
-        ),
-        "annual-leave": "Annual leave is accrued monthly",
-        "reimbursable-costs": (
-            "Receipts are required for reimbursable transport, lodging, and meals"
-        ),
-        "password-mfa": "Never approve an unexpected authentication prompt",
-        "eligibility": "A customer may request a refund for an eligible purchase",
-        "response-targets": "The first response target is fifteen minutes for P1",
-        "intake": (
-            "Every service ticket records the requester, affected service, observed behavior, "
-            "time of occurrence, and a safe contact route."
-        ),
-        "access-request": (
-            "An access request names the dataset or system, business purpose, requested role, "
-            "duration, and manager who accepts the responsibility."
-        ),
-        "invoice-questions": (
-            "Invoice questions should include the invoice number, billing entity, and the field "
-            "that appears incorrect."
-        ),
-        "renewal-review": "At renewal, the sponsor confirms that the service is still needed",
-        "sick-leave": (
-            "When illness prevents work, notify the manager or the designated absence channel "
-            "before the normal start time whenever practical."
-        ),
-        "approval-path": (
-            "Billing confirms the payment method and the permitted amount before the "
-            "refund is issued."
-        ),
-        "least-privilege": (
-            "Access follows least privilege: a person receives only the actions and records "
-            "needed for the approved task."
-        ),
-        "account-recovery": (
-            "Support will never ask for the existing password or a one-time code in chat."
-        ),
-    }
     items: list[dict[str, Any]] = []
     ordinal = start_ordinal
     qa_cases = [*retrieval_dataset.cases[:10], *retrieval_dataset.cases[20:25]]
@@ -273,6 +345,7 @@ def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
         ground_truth = case.ground_truth[0]
         section_key = ground_truth.locator["section_key"]
         corpus_key = (ground_truth.document_key, ground_truth.revision_key, section_key)
+        answer, _evidence = KNOWLEDGE_QA_GROUND_TRUTH[case.case_id]
         items.append(
             _item(
                 case_key=f"curated-qa-{index + 1:02d}",
@@ -280,7 +353,7 @@ def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
                 category="KNOWLEDGE_QA",
                 input_value={"question": case.query},
                 expected={
-                    "answer": canonical_answers[section_key],
+                    "answer": answer,
                     "citations": list(section_chunks[corpus_key]),
                 },
                 source_kind="m7h_curated",

@@ -1467,7 +1467,7 @@
         "question": "How should a remote teammate stay reachable without exposing work at home?"
       },
       "expected": {
-        "answer": "Remote employees keep the same delivery expectations as office-based employees and must remain reachable during the agreed collaboration window.",
+        "answer": "Stay reachable during the agreed collaboration window while protecting confidential material from visitors in the home workspace.",
         "citations": [
           "27cbcb19cff69bf3f54dcfb2e404ce42714277fbbc5d778f81a5c9d73742642f"
         ]
@@ -1491,7 +1491,7 @@
         "question": "How is planned annual time off counted and approved?"
       },
       "expected": {
-        "answer": "Annual leave is accrued monthly",
+        "answer": "Annual leave is accrued monthly; the balance is only informational until the request receives recorded approval.",
         "citations": [
           "eaa68357330543a2cd8540ebf103f8dc4086b9d4eebb3521a44d0ebdb1de2e2d"
         ]
@@ -1515,7 +1515,7 @@
         "question": "What proof is needed when claiming a meal or taxi during a business trip?"
       },
       "expected": {
-        "answer": "Receipts are required for reimbursable transport, lodging, and meals",
+        "answer": "Provide receipts for reimbursable meals or transport, plus the business purpose and currency.",
         "citations": [
           "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
         ]
@@ -1539,7 +1539,7 @@
         "question": "What should I do with an unexpected MFA prompt?"
       },
       "expected": {
-        "answer": "Never approve an unexpected authentication prompt",
+        "answer": "Never approve an unexpected authentication prompt or share a one-time code with a caller.",
         "citations": [
           "a18691077ffdb5da1a56a61576e344eb3c2fe95ba49fe8bcb1a0bd74f165c857"
         ]
@@ -1563,7 +1563,7 @@
         "question": "Can a customer get money back when a trial was cancelled in time?"
       },
       "expected": {
-        "answer": "A customer may request a refund for an eligible purchase",
+        "answer": "A customer may request a refund for a purchase cancelled within the stated trial period.",
         "citations": [
           "90adcbf84d5c4de137de003696fdb90df0475c254f664930a9b0e1a6f40d989f"
         ]
@@ -1587,7 +1587,7 @@
         "question": "What acknowledgement time applies to a critical outage?"
       },
       "expected": {
-        "answer": "The first response target is fifteen minutes for P1",
+        "answer": "A P1 outage has a fifteen-minute first-response target, which measures acknowledgement rather than guaranteed resolution.",
         "citations": [
           "e19b26e466b07c3a9b867c55ea45ec668ecf31436957351b76d985ad0ff64c13"
         ]
@@ -1611,7 +1611,7 @@
         "question": "Which details belong in a new service ticket before triage?"
       },
       "expected": {
-        "answer": "Every service ticket records the requester, affected service, observed behavior, time of occurrence, and a safe contact route.",
+        "answer": "Include the requester, affected service, observed behavior, time of occurrence, and a safe contact route.",
         "citations": [
           "e956fcdf7d261dd79d9bbb8b2d1c1a623b4c65e82f69e225672beb73c3fc2a31"
         ]
@@ -1659,7 +1659,7 @@
         "question": "Which identifiers should be included in an invoice question?"
       },
       "expected": {
-        "answer": "Invoice questions should include the invoice number, billing entity, and the field that appears incorrect.",
+        "answer": "Include the invoice number, billing entity, and the field that appears incorrect.",
         "citations": [
           "ee1acb8f637ac1e7017807c652cc8c98160bd49c7f447860f5952ce1e5d845e8"
         ]
@@ -1683,7 +1683,7 @@
         "question": "What has to be checked before renewing a supplier service?"
       },
       "expected": {
-        "answer": "At renewal, the sponsor confirms that the service is still needed",
+        "answer": "At renewal, confirm the service is still needed, review usage and incidents, and record any price or scope change.",
         "citations": [
           "7c4cefc6a59702d1c34fea008ae1896cbf26935ec72ee73e8002ae300c96449e"
         ]
@@ -1707,7 +1707,7 @@
         "question": "If illness prevents attendance, what is the first notification step?"
       },
       "expected": {
-        "answer": "When illness prevents work, notify the manager or the designated absence channel before the normal start time whenever practical.",
+        "answer": "Notify the manager or the designated absence channel before the normal start time whenever practical.",
         "citations": [
           "573a2f31a1dba3e16e69bf1a4d19cb53a29a77f5e5bc5890d2b61de58c8dfdf2"
         ]
@@ -1731,7 +1731,7 @@
         "question": "A refund request is valid but payment processing is delayed; which team confirms the amount and status?"
       },
       "expected": {
-        "answer": "Billing confirms the payment method and the permitted amount before the refund is issued.",
+        "answer": "Billing confirms the payment method and permitted amount; the customer receives a status update when the decision is made.",
         "citations": [
           "b7fa19a920439903b044f784df3f5d21b4d0a4bcac236601266c86113eae75f5"
         ]
@@ -1755,7 +1755,7 @@
         "question": "出差每天的补贴和餐费发票应该如何区分？"
       },
       "expected": {
-        "answer": "Receipts are required for reimbursable transport, lodging, and meals",
+        "answer": "Receipts are required for reimbursable meals and transport, whereas daily allowances follow the regional rate table.",
         "citations": [
           "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
         ]
@@ -1779,7 +1779,7 @@
         "question": "Does read access automatically mean that exporting records is safe?"
       },
       "expected": {
-        "answer": "Access follows least privilege: a person receives only the actions and records needed for the approved task.",
+        "answer": "No. Read access is not automatically safe; export, delete, and sharing require separate consideration.",
         "citations": [
           "5f91fdb7e1aad89854a6accf0351027b3647c54fcdb96906a25b3a71e15c6fc0"
         ]
@@ -1803,7 +1803,7 @@
         "question": "I cannot use the verification mailbox, what bilingual recovery route is allowed?"
       },
       "expected": {
-        "answer": "Support will never ask for the existing password or a one-time code in chat.",
+        "answer": "如果无法访问验证邮箱，请通过支持工单说明账号标识和可联系时间，客服会先完成身份核验。",
         "citations": [
           "a505c441107e5fb4d5fef7e217e631db6eac2ade44e9f7347ec90c083b8df278"
         ]
