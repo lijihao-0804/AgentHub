@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -9,9 +10,13 @@ from apps.api.app import create_app
 from apps.api.schemas.product_control_plane import (
     ProviderCredentialCreateRequest,
     ToolCreateRequest,
+    ToolResponse,
 )
-from packages.control_plane.product_control_plane import BUILTIN_TOOL_CATALOG
+from packages.agent_runtime.models import Tool, ToolRevision
+from packages.control_plane.product_control_plane import BUILTIN_TOOL_CATALOG, BuiltinToolCatalog
+from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings
+from packages.core.errors.exceptions import AgentHubError
 
 
 def test_m75a_routes_are_registered_without_frontend_dependencies() -> None:
@@ -60,3 +65,59 @@ def test_builtin_catalog_is_server_owned_and_contains_only_runtime_identities() 
         assert "handler" not in entry
         assert "url" not in entry
         assert "command" not in entry
+
+
+def test_tool_projection_exposes_validated_governance_and_fails_closed() -> None:
+    from packages.control_plane.product_control_plane import ProductControlPlaneService
+
+    tool = Tool(
+        id=uuid4(),
+        workspace_id=uuid4(),
+        name="renamed-calculator",
+        description="Managed calculator",
+        enabled=True,
+        created_at=datetime.now(UTC),
+    )
+    spec = BuiltinToolCatalog.spec("calculator")
+    revision = ToolRevision(
+        id=uuid4(),
+        workspace_id=tool.workspace_id,
+        tool_id=tool.id,
+        revision_number=1,
+        spec=spec,
+        spec_hash=canonical_json_hash(spec),
+        created_at=datetime.now(UTC),
+        created_by=uuid4(),
+    )
+
+    response = ToolResponse.model_validate(
+        ProductControlPlaneService._tool_projection(tool, revision)
+    )
+    assert response.identity == "calculator"
+    assert response.effect == "READ"
+    assert response.risk_level == "LOW"
+    assert response.approval_policy == "NEVER"
+    assert response.execution_kind == "builtin"
+    assert response.current_revision_number == 1
+    assert response.current_spec_hash == revision.spec_hash
+
+    bad_revision = ToolRevision(
+        id=revision.id,
+        workspace_id=revision.workspace_id,
+        tool_id=revision.tool_id,
+        revision_number=revision.revision_number,
+        spec={**spec, "effect": "WRITE"},
+        spec_hash=revision.spec_hash,
+        created_at=revision.created_at,
+        created_by=revision.created_by,
+    )
+    with pytest.raises(AgentHubError) as raised:
+        ProductControlPlaneService._tool_projection(tool, bad_revision)
+    assert raised.value.code == "TOOL_REVISION_INVALID"
+
+    no_revision = ToolResponse.model_validate(
+        ProductControlPlaneService._tool_projection(tool, None)
+    )
+    assert no_revision.identity is None
+    assert no_revision.effect is None
+    assert no_revision.execution_kind is None

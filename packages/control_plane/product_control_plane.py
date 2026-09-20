@@ -964,22 +964,35 @@ class ProductControlPlaneService:
 
     @staticmethod
     def _tool_projection(tool: Tool, revision: ToolRevision | None) -> dict[str, Any]:
-        identity = tool.name
-        if revision is not None:
-            spec = _safe_spec(revision)
-            identity = spec["identity"]
-        return {
+        projection = {
             "id": tool.id,
             "workspace_id": tool.workspace_id,
             "name": tool.name,
             "description": tool.description,
             "enabled": tool.enabled,
             "created_at": tool.created_at,
-            "identity": identity,
+            "identity": None,
+            "effect": None,
+            "risk_level": None,
+            "approval_policy": None,
+            "execution_kind": None,
             "current_revision_id": revision.id if revision is not None else None,
             "current_revision_number": revision.revision_number if revision is not None else None,
             "current_spec_hash": revision.spec_hash if revision is not None else None,
         }
+        if revision is not None:
+            spec = _safe_spec(revision)
+            catalog = _catalog_entry(spec["identity"])
+            projection.update(
+                {
+                    "identity": spec["identity"],
+                    "effect": spec["effect"],
+                    "risk_level": spec["risk_level"],
+                    "approval_policy": spec["approval_policy"],
+                    "execution_kind": catalog["execution_kind"],
+                }
+            )
+        return projection
 
     @staticmethod
     async def _agent(

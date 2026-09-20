@@ -135,7 +135,11 @@ class ToolResponse(BaseModel):
     description: str | None
     enabled: bool
     created_at: datetime
-    identity: str
+    identity: str | None
+    effect: Literal["READ", "WRITE"] | None
+    risk_level: Literal["LOW", "MEDIUM", "HIGH"] | None
+    approval_policy: Literal["NEVER", "ALWAYS"] | None
+    execution_kind: Literal["builtin", "action"] | None
     current_revision_id: UUID | None
     current_revision_number: int | None
     current_spec_hash: str | None

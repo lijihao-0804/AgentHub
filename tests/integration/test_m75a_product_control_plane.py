@@ -148,9 +148,35 @@ async def test_product_control_plane_is_workspace_scoped_and_secret_safe(db_fact
 
         tool = await service.create_tool(session, context, "calculator")
         assert tool["identity"] == "calculator"
+        assert tool["effect"] == "READ"
+        assert tool["risk_level"] == "LOW"
+        assert tool["approval_policy"] == "NEVER"
+        assert tool["execution_kind"] == "builtin"
         revisions = await service.list_tool_revisions(session, context, tool["id"])
         assert len(revisions) == 1
         assert revisions[0].spec["identity"] == "calculator"
+
+        action_tool = await service.create_tool(session, context, "create_ticket")
+        assert action_tool["identity"] == "create_ticket"
+        assert action_tool["effect"] == "WRITE"
+        assert action_tool["risk_level"] == "HIGH"
+        assert action_tool["approval_policy"] == "ALWAYS"
+        assert action_tool["execution_kind"] == "action"
+
+        listed_tools = await service.list_tools(session, context)
+        listed_action = next(item for item in listed_tools if item["id"] == action_tool["id"])
+        assert listed_action["identity"] == "create_ticket"
+        assert listed_action["effect"] == "WRITE"
+        assert listed_action["risk_level"] == "HIGH"
+        assert listed_action["approval_policy"] == "ALWAYS"
+        assert listed_action["execution_kind"] == "action"
+
+        detail_action = await service.get_tool(session, context, action_tool["id"])
+        assert detail_action["identity"] == listed_action["identity"]
+        assert detail_action["effect"] == listed_action["effect"]
+        assert detail_action["risk_level"] == listed_action["risk_level"]
+        assert detail_action["approval_policy"] == listed_action["approval_policy"]
+        assert detail_action["execution_kind"] == listed_action["execution_kind"]
 
         agent = Agent(
             workspace_id=workspace.id,
