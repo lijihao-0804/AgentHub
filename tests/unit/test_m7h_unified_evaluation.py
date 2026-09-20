@@ -136,6 +136,28 @@ def test_unified_corpus_cases_use_formal_chunk_identity_and_no_placeholders() ->
     assert "lookup" not in serialized
     assert "placeholder" not in serialized.lower()
 
+    corpus_text = "\n".join(
+        section.text.lower()
+        for document in retrieval_dataset.corpus
+        for section in document.sections
+    )
+    absent_markers = {
+        "curated-no-answer-01": "carryover limit",
+        "curated-no-answer-02": "payroll date",
+        "curated-no-answer-03": "remote-work days",
+        "curated-no-answer-04": "rotate a company service passphrase",
+        "curated-no-answer-05": "settle an approved refund",
+        "curated-no-answer-06": "guaranteed resolution deadline",
+        "curated-no-answer-07": "insurance certificate expiry date",
+        "curated-no-answer-08": "maximum attachment size",
+        "curated-no-answer-09": "emergency data access",
+        "curated-no-answer-10": "tax percentage",
+    }
+    for item in items:
+        if item["category"] == "NO_ANSWER":
+            assert item["expected"]["answerable"] is False
+            assert absent_markers[item["case_key"]] not in corpus_text
+
     allowed_tools = {"query_customer", "search_knowledge", "calculator"}
     for item in items:
         if item["category"] == "TOOL":
