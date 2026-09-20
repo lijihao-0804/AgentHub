@@ -90,7 +90,12 @@ export function rotateProviderCredentialSecret(
 
 // ---------- Model profiles ----------
 
-/** Server-owned capability projection; the UI presents it read-only. */
+/**
+ * Capabilities the operator declares for a profile. The backend never
+ * infers them from the provider or the model name, and neither does the
+ * UI — publishing an agent with tools requires `tool_calling`, and the
+ * backend remains the authority that enforces it.
+ */
 export type ModelCapabilities = {
   tool_calling?: boolean;
   streaming?: boolean;
@@ -99,6 +104,34 @@ export type ModelCapabilities = {
   max_context_tokens?: number;
   [key: string]: unknown;
 };
+
+export const BOOLEAN_CAPABILITIES = [
+  "tool_calling",
+  "streaming",
+  "structured_output",
+  "vision",
+] as const;
+
+export type BooleanCapability = (typeof BOOLEAN_CAPABILITIES)[number];
+
+/**
+ * Builds the capability map for a request. `max_context_tokens` is
+ * omitted when blank rather than sent as null, and capability keys the
+ * server may already hold are carried through unchanged so editing an
+ * unrelated field never drops them.
+ */
+export function buildModelCapabilities(
+  flags: Record<BooleanCapability, boolean>,
+  maxContextTokens: string,
+  existing?: ModelCapabilities | null,
+): ModelCapabilities {
+  const capabilities: ModelCapabilities = { ...(existing ?? {}) };
+  for (const name of BOOLEAN_CAPABILITIES) capabilities[name] = flags[name];
+  const trimmed = maxContextTokens.trim();
+  if (trimmed === "") delete capabilities.max_context_tokens;
+  else capabilities.max_context_tokens = Number(trimmed);
+  return capabilities;
+}
 
 export type ModelProfile = {
   id: string;

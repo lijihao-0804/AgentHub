@@ -151,7 +151,7 @@ export default function ToolsPage() {
                       <code>{tool.approval_policy ?? "—"}</code>
                     </td>
                     <td data-label={t("tools.revision")}>
-                      {tool.latest_revision_number != null ? `#${tool.latest_revision_number}` : "—"}
+                      {tool.current_revision_number != null ? `#${tool.current_revision_number}` : "—"}
                     </td>
                     <td data-label={t("settings.models.status")}>
                       <StatusBadge
@@ -209,7 +209,7 @@ export default function ToolsPage() {
                       {item.description && <span className="state-hint">{item.description}</span>}
                     </td>
                     <td data-label={t("tools.kind")}>
-                      <code>{item.kind}</code>
+                      <code>{item.execution_kind}</code>
                     </td>
                     <td data-label={t("tools.effect")}>
                       <StatusBadge status={item.effect} />

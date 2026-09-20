@@ -20,7 +20,9 @@ import {
   type AgentKnowledgeBinding,
   type AgentToolBinding,
   type AgentVersion,
+  type ContextBudget,
   type KnowledgeBindingMode,
+  type RuntimeConfig,
 } from "../../../lib/agents";
 import { listKnowledgeBases, listSnapshots, type KnowledgeBase, type KnowledgeSnapshot } from "../../../lib/knowledge";
 import { listModelProfiles, type ModelProfile } from "../../../lib/models";
@@ -40,11 +42,23 @@ const TAB_LABEL: Record<Tab, "agents.tab.general" | "agents.tab.model" | "agents
   versions: "agents.tab.versions",
 };
 
-function numberOrNull(value: string): number | null {
+/**
+ * A blank runtime field is an absent field, never a null: the backend
+ * merges the submitted map over its defaults, so an explicit null would
+ * overwrite a default and then fail validation.
+ */
+function integerOrUndefined(value: string): number | undefined {
   const trimmed = value.trim();
-  if (!trimmed) return null;
+  if (!trimmed) return undefined;
   const parsed = Number(trimmed);
-  return Number.isFinite(parsed) ? parsed : null;
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
+/** Blank is valid; anything else must parse as a whole number. */
+function validRuntimeValue(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+  return integerOrUndefined(trimmed) !== undefined;
 }
 
 export default function AgentDetailClient({ agentId }: { agentId: string }) {
@@ -184,6 +198,10 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const baseList = bases.data ?? [];
   const toolList = tools.data ?? [];
   const versionList = versions.data ?? [];
+  const runtimeValuesValid = Object.values(runtime).every((value) => validRuntimeValue(value));
+  // Only an explicit declaration counts; the profile is read as-is.
+  const selectedProfileSupportsTools =
+    profileList.find((profile) => profile.id === model.model_profile_id)?.capabilities?.tool_calling === true;
 
   async function saveGeneral(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -219,21 +237,31 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   async function saveRuntime(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice(null);
-    const result = await agentMutation.run((auth) =>
-      patchAgent(auth, agentId, {
-        runtime_config: {
-          max_steps: numberOrNull(runtime.max_steps),
-          max_tool_calls: numberOrNull(runtime.max_tool_calls),
-          max_identical_calls: numberOrNull(runtime.max_identical_calls),
-          max_parallel_reads: numberOrNull(runtime.max_parallel_reads),
-          context_budget: {
-            reserved_output_tokens: numberOrNull(runtime.reserved_output_tokens),
-            max_retrieval_tokens: numberOrNull(runtime.max_retrieval_tokens),
-            max_tool_result_tokens: numberOrNull(runtime.max_tool_result_tokens),
-          },
-        },
-      }),
-    );
+    const runtimeConfig: RuntimeConfig = {};
+    const maxSteps = integerOrUndefined(runtime.max_steps);
+    const maxToolCalls = integerOrUndefined(runtime.max_tool_calls);
+    const maxIdenticalCalls = integerOrUndefined(runtime.max_identical_calls);
+    const maxParallelReads = integerOrUndefined(runtime.max_parallel_reads);
+    if (maxSteps !== undefined) runtimeConfig.max_steps = maxSteps;
+    if (maxToolCalls !== undefined) runtimeConfig.max_tool_calls = maxToolCalls;
+    if (maxIdenticalCalls !== undefined) runtimeConfig.max_identical_calls = maxIdenticalCalls;
+    if (maxParallelReads !== undefined) runtimeConfig.max_parallel_reads = maxParallelReads;
+
+    const budget: ContextBudget = {};
+    const reservedOutput = integerOrUndefined(runtime.reserved_output_tokens);
+    const maxRetrieval = integerOrUndefined(runtime.max_retrieval_tokens);
+    const maxToolResult = integerOrUndefined(runtime.max_tool_result_tokens);
+    if (reservedOutput !== undefined) budget.reserved_output_tokens = reservedOutput;
+    if (maxRetrieval !== undefined) budget.max_retrieval_tokens = maxRetrieval;
+    if (maxToolResult !== undefined) budget.max_tool_result_tokens = maxToolResult;
+    // An empty budget is not sent at all, and neither is an empty runtime.
+    if (Object.keys(budget).length > 0) runtimeConfig.context_budget = budget;
+    if (Object.keys(runtimeConfig).length === 0) {
+      setNotice(t("agents.runtimeEmpty"));
+      return;
+    }
+
+    const result = await agentMutation.run((auth) => patchAgent(auth, agentId, { runtime_config: runtimeConfig }));
     if (result) {
       setNotice(t("agents.saved"));
       agent.reload();
@@ -548,6 +576,10 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       {tab === "tools" && (
         <Panel ariaLabel={t("agents.tab.tools")} title={t("agents.tab.tools")}>
           <p className="state-hint">{t("agents.toolsHint")}</p>
+          {/* Advisory only — the backend stays the authority on publish. */}
+          {toolDraft.length > 0 && !selectedProfileSupportsTools && (
+            <p className="inline-notice">{t("agents.toolCallingWarning")}</p>
+          )}
 
           {toolBindings.error && (
             <ErrorState
@@ -690,8 +722,16 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                 />
               </label>
             </div>
+            <p className="state-hint">{t("agents.runtimeOmitHint")}</p>
+            {!runtimeValuesValid && (
+              <p className="state-hint">{t("agents.runtimeInvalid")}</p>
+            )}
             <div className="form-actions">
-              <button type="submit" className="button button-primary" disabled={agentMutation.pending}>
+              <button
+                type="submit"
+                className="button button-primary"
+                disabled={agentMutation.pending || !runtimeValuesValid}
+              >
                 {t("common.save")}
               </button>
             </div>

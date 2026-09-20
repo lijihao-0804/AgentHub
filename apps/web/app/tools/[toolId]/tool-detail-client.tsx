@@ -50,8 +50,13 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
 
   const current = tool.data;
   const revisionList = revisions.data ?? [];
+  // Revisions come back oldest first, so the default is the tool's
+  // current revision — falling back to the newest, never the first.
   const selectedRevision =
-    revisionList.find((revision) => revision.id === selectedRevisionId) ?? revisionList[0] ?? null;
+    revisionList.find((revision) => revision.id === selectedRevisionId) ??
+    revisionList.find((revision) => revision.id === current?.current_revision_id) ??
+    revisionList[revisionList.length - 1] ??
+    null;
 
   async function submitEdit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -150,6 +155,28 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
                 <dt>{t("tools.approval")}</dt>
                 <dd>
                   <code>{current.approval_policy ?? "—"}</code>
+                </dd>
+              </div>
+              <div className="key-value-row">
+                <dt>{t("tools.kind")}</dt>
+                <dd>
+                  <code>{current.execution_kind ?? "—"}</code>
+                </dd>
+              </div>
+              <div className="key-value-row">
+                <dt>{t("tools.currentRevision")}</dt>
+                <dd>
+                  {current.current_revision_number != null ? `#${current.current_revision_number}` : "—"}
+                </dd>
+              </div>
+              <div className="key-value-row">
+                <dt>{t("tools.specHash")}</dt>
+                <dd>
+                  {current.current_spec_hash ? (
+                    <code className="hash-value">{current.current_spec_hash}</code>
+                  ) : (
+                    "—"
+                  )}
                 </dd>
               </div>
               <div className="key-value-row">

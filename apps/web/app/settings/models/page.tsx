@@ -8,6 +8,8 @@ import { useFrontendSession } from "../../../components/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "../../../components/use-workspace-data";
 import { errorHintKey, type AuthInput } from "../../../lib/api-client";
 import {
+  BOOLEAN_CAPABILITIES,
+  buildModelCapabilities,
   createModelProfile,
   createProviderCredential,
   listModelProfiles,
@@ -15,12 +17,18 @@ import {
   patchModelProfile,
   patchProviderCredential,
   rotateProviderCredentialSecret,
+  type BooleanCapability,
   type ModelProfile,
   type ProviderCredential,
 } from "../../../lib/models";
 import { useI18n } from "../../../i18n/provider";
+import type { MessageKey } from "../../../i18n/messages";
 
-/** Backend defaults for a new profile; semantics stay server-owned. */
+/**
+ * Backend defaults for a new profile; semantics stay server-owned.
+ * Capabilities start off false — a capability is something the operator
+ * declares, never something the UI infers from provider or model name.
+ */
 const DEFAULT_PROFILE_FORM = {
   provider_credential_id: "",
   model: "",
@@ -28,12 +36,32 @@ const DEFAULT_PROFILE_FORM = {
   max_tokens: "2048",
   timeout_seconds: "60",
   fallback_profile_id: "",
+  tool_calling: false,
+  streaming: false,
+  structured_output: false,
+  vision: false,
+  max_context_tokens: "",
 };
 
 const DEFAULT_CREDENTIAL_FORM = { provider: "", name: "", secret: "", base_url: "" };
 
+const CAPABILITY_LABEL: Record<BooleanCapability, MessageKey> = {
+  tool_calling: "settings.models.toolCalling",
+  streaming: "settings.models.streaming",
+  structured_output: "settings.models.structuredOutput",
+  vision: "settings.models.vision",
+};
+
 function numberValue(value: number | string): number {
   return typeof value === "number" ? value : Number(value);
+}
+
+/** Blank is valid (the key is omitted); anything else must be a positive integer. */
+function validMaxContextTokens(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed === "") return true;
+  const parsed = Number(trimmed);
+  return Number.isInteger(parsed) && parsed > 0;
 }
 
 export default function ModelSettingsPage() {
@@ -169,6 +197,12 @@ export default function ModelSettingsPage() {
   async function submitProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice(null);
+    const profileId = editingProfileId;
+    // Capability keys the server already holds are carried through, so
+    // editing temperature never silently clears the rest of the map.
+    const existing = profileId
+      ? profileList.find((item) => item.id === profileId)?.capabilities
+      : null;
     const body = {
       provider_credential_id: profileForm.provider_credential_id,
       model: profileForm.model.trim(),
@@ -176,8 +210,17 @@ export default function ModelSettingsPage() {
       max_tokens: Number(profileForm.max_tokens),
       timeout_seconds: Number(profileForm.timeout_seconds),
       fallback_profile_id: profileForm.fallback_profile_id || null,
+      capabilities: buildModelCapabilities(
+        {
+          tool_calling: profileForm.tool_calling,
+          streaming: profileForm.streaming,
+          structured_output: profileForm.structured_output,
+          vision: profileForm.vision,
+        },
+        profileForm.max_context_tokens,
+        existing,
+      ),
     };
-    const profileId = editingProfileId;
     const result = await profileMutation.run((auth) =>
       profileId ? patchModelProfile(auth, profileId, body) : createModelProfile(auth, body),
     );
@@ -201,6 +244,8 @@ export default function ModelSettingsPage() {
   function startProfileEdit(profile: ModelProfile) {
     setEditingProfileId(profile.id);
     setShowProfileForm(true);
+    const capabilities = profile.capabilities ?? {};
+    const maxContext = capabilities.max_context_tokens;
     setProfileForm({
       provider_credential_id: profile.provider_credential_id,
       model: profile.model,
@@ -208,6 +253,13 @@ export default function ModelSettingsPage() {
       max_tokens: String(profile.max_tokens),
       timeout_seconds: String(numberValue(profile.timeout_seconds)),
       fallback_profile_id: profile.fallback_profile_id ?? "",
+      // Declared capabilities are read back verbatim: only an explicit
+      // `true` counts, matching how the backend reads the same map.
+      tool_calling: capabilities.tool_calling === true,
+      streaming: capabilities.streaming === true,
+      structured_output: capabilities.structured_output === true,
+      vision: capabilities.vision === true,
+      max_context_tokens: typeof maxContext === "number" ? String(maxContext) : "",
     });
   }
 
@@ -589,7 +641,41 @@ export default function ModelSettingsPage() {
                     ))}
                 </select>
               </label>
+              <label>
+                {t("settings.models.maxContextTokens")}
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={profileForm.max_context_tokens}
+                  onChange={(event) =>
+                    setProfileForm((form) => ({ ...form, max_context_tokens: event.target.value }))
+                  }
+                  placeholder={t("settings.models.maxContextTokensPlaceholder")}
+                />
+              </label>
             </div>
+            <fieldset className="capability-fieldset">
+              <legend>{t("settings.models.capabilities")}</legend>
+              <p className="state-hint">{t("settings.models.capabilityHint")}</p>
+              <div className="capability-options">
+                {BOOLEAN_CAPABILITIES.map((capability) => (
+                  <label className="checkbox-label" key={capability}>
+                    <input
+                      type="checkbox"
+                      checked={profileForm[capability]}
+                      onChange={(event) =>
+                        setProfileForm((form) => ({ ...form, [capability]: event.target.checked }))
+                      }
+                    />
+                    {t(CAPABILITY_LABEL[capability])}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            {!validMaxContextTokens(profileForm.max_context_tokens) && (
+              <p className="state-hint">{t("settings.models.maxContextTokensInvalid")}</p>
+            )}
             {profileMutation.error && (
               <p className="session-error" role="alert">
                 <code>{profileMutation.error.code}</code>{" "}
@@ -604,7 +690,8 @@ export default function ModelSettingsPage() {
                   profileMutation.pending ||
                   !profileForm.provider_credential_id ||
                   !profileForm.model.trim() ||
-                  !profileForm.max_tokens
+                  !profileForm.max_tokens ||
+                  !validMaxContextTokens(profileForm.max_context_tokens)
                 }
               >
                 {editingProfileId ? t("common.save") : t("settings.models.addProfile")}

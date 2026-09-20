@@ -17,17 +17,24 @@ function toolsBase(workspaceId: string): string {
   return `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/tools`;
 }
 
+export type ToolExecutionKind = "builtin" | "action";
+
 export type ToolCatalogItem = {
   identity: string;
-  kind: string;
   description?: string | null;
+  input_schema: Record<string, unknown>;
   effect: ToolEffect | string;
   risk_level: ToolRisk | string;
   approval_policy: ToolApprovalPolicy | string;
-  input_schema: Record<string, unknown>;
   timeout_seconds?: number | null;
+  execution_kind: ToolExecutionKind | string;
 };
 
+/**
+ * The governance projection is null for historic rows that have no
+ * revision yet; those fields are rendered as unset rather than filled in
+ * from builtin metadata.
+ */
 export type Tool = {
   id: string;
   workspace_id: string;
@@ -35,15 +42,14 @@ export type Tool = {
   description: string | null;
   enabled: boolean;
   created_at: string;
-  /** Present when the list response carries a revision projection. */
-  identity?: string | null;
-  kind?: string | null;
-  effect?: ToolEffect | string | null;
-  risk_level?: ToolRisk | string | null;
-  approval_policy?: ToolApprovalPolicy | string | null;
-  latest_revision_number?: number | null;
-  latest_revision_id?: string | null;
-  spec_hash?: string | null;
+  identity: string | null;
+  effect: ToolEffect | string | null;
+  risk_level: ToolRisk | string | null;
+  approval_policy: ToolApprovalPolicy | string | null;
+  execution_kind: ToolExecutionKind | string | null;
+  current_revision_id: string | null;
+  current_revision_number: number | null;
+  current_spec_hash: string | null;
 };
 
 export type ToolRevision = {

@@ -161,13 +161,12 @@ export async function putAgentKnowledgeBindings(
     input.accessToken,
     {
       method: "PUT",
-      body: {
-        bindings: bindings.map((binding) => ({
-          knowledge_base_id: binding.knowledge_base_id,
-          binding_mode: binding.binding_mode,
-          snapshot_id: binding.binding_mode === "PINNED" ? binding.snapshot_id : null,
-        })),
-      },
+      // The endpoint takes the collection itself, not an envelope object.
+      body: bindings.map((binding) => ({
+        knowledge_base_id: binding.knowledge_base_id,
+        binding_mode: binding.binding_mode,
+        snapshot_id: binding.binding_mode === "PINNED" ? binding.snapshot_id : null,
+      })),
     },
   );
   return listItems<AgentKnowledgeBinding>(payload);
@@ -199,12 +198,11 @@ export async function putAgentToolBindings(
     input.accessToken,
     {
       method: "PUT",
-      body: {
-        bindings: bindings.map((binding) => ({
-          tool_id: binding.tool_id,
-          tool_revision_id: binding.tool_revision_id,
-        })),
-      },
+      // The endpoint takes the collection itself, not an envelope object.
+      body: bindings.map((binding) => ({
+        tool_id: binding.tool_id,
+        tool_revision_id: binding.tool_revision_id,
+      })),
     },
   );
   return listItems<AgentToolBinding>(payload);
