@@ -19,7 +19,12 @@ from packages.approvals import ApprovalDecisionStatus, ApprovalService
 from packages.core.config.settings import get_settings
 from packages.core.database import create_database
 from packages.core.errors.exceptions import AgentHubError
-from packages.model_gateway.contracts import ModelResponse, ModelToolCall
+from packages.model_gateway.contracts import (
+    ModelResponse,
+    ModelStreamEvent,
+    ModelStreamEventType,
+    ModelToolCall,
+)
 from packages.tools.actions import ActionRuntime
 from packages.tools.models import Customer
 from tests.integration.test_m4c_agent_runtime import _seed
@@ -79,6 +84,16 @@ class ScriptedGateway:
         self.calls += 1
         return response
 
+    def stream_resolved(self, context, plan, request):
+        del context, plan, request
+        response = self.responses[min(self.calls, len(self.responses) - 1)]
+        self.calls += 1
+
+        async def events():
+            yield ModelStreamEvent(event_type=ModelStreamEventType.COMPLETED, response=response)
+
+        return events()
+
 
 def _create_ticket_spec() -> dict[str, object]:
     return {
@@ -126,7 +141,7 @@ async def test_normal_stream_emits_monotonic_events_and_completes(db_factory) ->
     assert events[0].type is AgentEventType.RUN_STARTED
     assert events[0].sequence == 1
     assert [event.sequence for event in events] == list(range(1, len(events) + 1))
-    assert events[-1].type is AgentEventType.RUN_COMPLETED
+    assert events[-1].type is AgentEventType.RUN_COMPLETED, [event.as_dict() for event in events]
     assert events[0].payload == {
         "status": "RUNNING",
         "model_step_count": 0,
@@ -196,7 +211,9 @@ async def test_approval_stream_lists_same_run_and_resumes_without_new_run(db_fac
         )
     ]
 
-    assert [event.type for event in events].count(AgentEventType.APPROVAL_REQUIRED) == 1
+    assert [event.type for event in events].count(AgentEventType.APPROVAL_REQUIRED) == 1, [
+        event.as_dict() for event in events
+    ]
     assert AgentEventType.RUN_COMPLETED not in {event.type for event in events}
     assert AgentEventType.RUN_FAILED not in {event.type for event in events}
     approval_event = next(
