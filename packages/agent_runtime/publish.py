@@ -183,6 +183,11 @@ class AgentPublishService:
         agent.retrieval_config = proposed["retrieval_config"]
         agent.runtime_config = proposed["runtime_config"]
         await session.commit()
+        # `updated_at` is filled in by the database on UPDATE, so the flush
+        # expires it no matter what `expire_on_commit` says.  Reload it here,
+        # inside the async context, rather than letting the response serializer
+        # touch an expired attribute where no greenlet is available.
+        await session.refresh(agent)
         return agent
 
     async def publish(
