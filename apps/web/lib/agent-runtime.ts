@@ -25,21 +25,23 @@ export type AgentRun = {
   input_text: string;
   final_output: string | null;
   failure_code: string | null;
-  resolved_spec_hash: string;
-  effective_knowledge_snapshots: Record<string, unknown>;
+  resolved_spec_hash: string | null;
+  /** One entry per resolved knowledge snapshot, not a keyed object. */
+  effective_knowledge_snapshots: Array<Record<string, unknown>>;
   model_step_count: number;
   tool_call_count: number;
-  total_input_tokens: number;
-  total_output_tokens: number;
-  total_tokens: number;
-  total_cached_tokens: number;
+  total_input_tokens: number | null;
+  total_output_tokens: number | null;
+  total_tokens: number | null;
+  total_cached_tokens: number | null;
   /** Decimal on the wire: it may arrive as a number or a string. */
   total_cost_amount: number | string | null;
   cost_currency: string | null;
-  cost_is_estimate: boolean;
-  created_by: string | null;
+  cost_is_estimate: boolean | null;
+  created_by: string;
   created_at: string;
-  started_at: string | null;
+  /** A persisted run has always started; only completion is optional. */
+  started_at: string;
   completed_at: string | null;
 };
 
