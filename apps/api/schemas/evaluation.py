@@ -54,6 +54,18 @@ class EvaluationDatasetVersionCreateRequest(BaseModel):
     items: list[EvaluationDatasetItemRequest] = Field(min_length=1)
 
 
+class EvaluationDatasetVersionFromRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: UUID
+    base_version_id: UUID
+    case_key: str = Field(min_length=1, max_length=200)
+    split: str
+    category: str
+    expected: dict[str, Any]
+    tags: list[str] = Field(default_factory=list)
+
+
 class EvaluationDatasetVersionResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 

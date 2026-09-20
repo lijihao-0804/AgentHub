@@ -17,6 +17,7 @@ from apps.api.schemas.evaluation import (
     EvaluationDatasetResponse,
     EvaluationDatasetVersionCreateRequest,
     EvaluationDatasetVersionDetailResponse,
+    EvaluationDatasetVersionFromRunRequest,
     EvaluationDatasetVersionResponse,
     EvaluationExperimentCreateRequest,
     EvaluationExperimentDetailResponse,
@@ -102,6 +103,39 @@ async def create_dataset_version(
     )
     response = EvaluationDatasetVersionResponse.model_validate(version, from_attributes=True)
     return response.model_copy(update={"item_count": len(payload.items)})
+
+
+@router.post(
+    "/datasets/{dataset_id}/versions/from-run",
+    response_model=EvaluationDatasetVersionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_dataset_version_from_run(
+    workspace_id: UUID,
+    dataset_id: UUID,
+    payload: EvaluationDatasetVersionFromRunRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationDatasetVersionResponse:
+    del workspace_id
+    service = EvaluationDatasetService()
+    version = await service.create_version_from_run(
+        session,
+        context=context,
+        dataset_id=dataset_id,
+        base_version_id=payload.base_version_id,
+        run_id=payload.run_id,
+        case_key=payload.case_key,
+        split=payload.split,
+        category=payload.category,
+        expected=payload.expected,
+        tags=payload.tags,
+    )
+    items = await service.list_version_items(
+        session, context=context, dataset_id=dataset_id, version_id=version.id
+    )
+    response = EvaluationDatasetVersionResponse.model_validate(version, from_attributes=True)
+    return response.model_copy(update={"item_count": len(items)})
 
 
 @router.get(
