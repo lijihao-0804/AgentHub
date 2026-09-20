@@ -1049,7 +1049,7 @@ export const enUS = {
     toolsHint: "Bindings are saved as a complete collection.",
     runtimeHint: "Leave a field blank to fall back to the server default.",
     runtimeOmitHint: "Blank fields are omitted from the request, not sent as empty values.",
-    runtimeInvalid: "Runtime limits must be whole numbers, or left blank.",
+    runtimeInvalid: "Runtime limits must be whole numbers of 1 or more, or left blank.",
     runtimeEmpty: "Nothing to save — set at least one runtime limit.",
     toolCallingWarning:
       "The selected model profile does not declare tool calling support. Publishing an agent with tools may fail.",
@@ -2134,7 +2134,7 @@ export const zhCN: MessageSchema = {
     toolsHint: "绑定以完整集合方式保存。",
     runtimeHint: "留空的字段将回退到服务端默认值。",
     runtimeOmitHint: "留空的字段不会出现在请求中，也不会以空值发送。",
-    runtimeInvalid: "运行时限制必须为整数，或留空。",
+    runtimeInvalid: "运行时限制必须为不小于 1 的整数，或留空。",
     runtimeEmpty: "没有可保存的内容——请至少设置一项运行时限制。",
     toolCallingWarning: "所选模型配置未声明支持工具调用，发布携带工具的智能体可能失败。",
     knowledgeBase: "知识库",

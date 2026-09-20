@@ -46,19 +46,22 @@ const TAB_LABEL: Record<Tab, "agents.tab.general" | "agents.tab.model" | "agents
  * A blank runtime field is an absent field, never a null: the backend
  * merges the submitted map over its defaults, so an explicit null would
  * overwrite a default and then fail validation.
+ *
+ * Every runtime limit and every context-budget value must be a positive
+ * integer — zero is rejected by the backend, so it is not sent.
  */
-function integerOrUndefined(value: string): number | undefined {
+function positiveIntegerOrUndefined(value: string): number | undefined {
   const trimmed = value.trim();
   if (!trimmed) return undefined;
   const parsed = Number(trimmed);
-  return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined;
+  return Number.isInteger(parsed) && parsed >= 1 ? parsed : undefined;
 }
 
-/** Blank is valid; anything else must parse as a whole number. */
+/** Blank is valid; anything else must parse as a positive integer. */
 function validRuntimeValue(value: string): boolean {
   const trimmed = value.trim();
   if (!trimmed) return true;
-  return integerOrUndefined(trimmed) !== undefined;
+  return positiveIntegerOrUndefined(trimmed) !== undefined;
 }
 
 export default function AgentDetailClient({ agentId }: { agentId: string }) {
@@ -238,19 +241,19 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     event.preventDefault();
     setNotice(null);
     const runtimeConfig: RuntimeConfig = {};
-    const maxSteps = integerOrUndefined(runtime.max_steps);
-    const maxToolCalls = integerOrUndefined(runtime.max_tool_calls);
-    const maxIdenticalCalls = integerOrUndefined(runtime.max_identical_calls);
-    const maxParallelReads = integerOrUndefined(runtime.max_parallel_reads);
+    const maxSteps = positiveIntegerOrUndefined(runtime.max_steps);
+    const maxToolCalls = positiveIntegerOrUndefined(runtime.max_tool_calls);
+    const maxIdenticalCalls = positiveIntegerOrUndefined(runtime.max_identical_calls);
+    const maxParallelReads = positiveIntegerOrUndefined(runtime.max_parallel_reads);
     if (maxSteps !== undefined) runtimeConfig.max_steps = maxSteps;
     if (maxToolCalls !== undefined) runtimeConfig.max_tool_calls = maxToolCalls;
     if (maxIdenticalCalls !== undefined) runtimeConfig.max_identical_calls = maxIdenticalCalls;
     if (maxParallelReads !== undefined) runtimeConfig.max_parallel_reads = maxParallelReads;
 
     const budget: ContextBudget = {};
-    const reservedOutput = integerOrUndefined(runtime.reserved_output_tokens);
-    const maxRetrieval = integerOrUndefined(runtime.max_retrieval_tokens);
-    const maxToolResult = integerOrUndefined(runtime.max_tool_result_tokens);
+    const reservedOutput = positiveIntegerOrUndefined(runtime.reserved_output_tokens);
+    const maxRetrieval = positiveIntegerOrUndefined(runtime.max_retrieval_tokens);
+    const maxToolResult = positiveIntegerOrUndefined(runtime.max_tool_result_tokens);
     if (reservedOutput !== undefined) budget.reserved_output_tokens = reservedOutput;
     if (maxRetrieval !== undefined) budget.max_retrieval_tokens = maxRetrieval;
     if (maxToolResult !== undefined) budget.max_tool_result_tokens = maxToolResult;
@@ -692,7 +695,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                 {t("agents.reservedOutputTokens")}
                 <input
                   type="number"
-                  min="0"
+                  min="1"
                   value={runtime.reserved_output_tokens}
                   onChange={(event) =>
                     setRuntime((current) => ({ ...current, reserved_output_tokens: event.target.value }))
@@ -703,7 +706,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                 {t("agents.maxRetrievalTokens")}
                 <input
                   type="number"
-                  min="0"
+                  min="1"
                   value={runtime.max_retrieval_tokens}
                   onChange={(event) =>
                     setRuntime((current) => ({ ...current, max_retrieval_tokens: event.target.value }))
@@ -714,7 +717,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                 {t("agents.maxToolResultTokens")}
                 <input
                   type="number"
-                  min="0"
+                  min="1"
                   value={runtime.max_tool_result_tokens}
                   onChange={(event) =>
                     setRuntime((current) => ({ ...current, max_tool_result_tokens: event.target.value }))
