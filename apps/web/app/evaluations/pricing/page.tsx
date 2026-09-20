@@ -16,16 +16,8 @@ function nowLocalIso(): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 
-export default function EvaluationPricingPage() {
-  const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
-  const [snapshots, setSnapshots] = useState<PricingSnapshot[]>([]);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
+function initialPricingForm() {
+  return {
     name: "",
     provider: "",
     model: "",
@@ -35,7 +27,19 @@ export default function EvaluationPricingPage() {
     cachedPrice: "",
     effectiveAt: nowLocalIso(),
     sourceNote: "",
-  });
+  };
+}
+
+export default function EvaluationPricingPage() {
+  const { t, formatDateTime } = useI18n();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const [snapshots, setSnapshots] = useState<PricingSnapshot[]>([]);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(initialPricingForm);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
@@ -48,6 +52,7 @@ export default function EvaluationPricingPage() {
     setLoading(false);
     setLoaded(false);
     setShowForm(false);
+    setForm(initialPricingForm());
     setCreating(false);
     setCreateError(null);
     setCreatedNotice(false);

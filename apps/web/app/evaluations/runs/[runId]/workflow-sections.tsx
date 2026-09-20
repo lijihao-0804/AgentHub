@@ -101,7 +101,11 @@ export default function RunWorkflow({
   const [runningGate, setRunningGate] = useState(false);
   const [gateError, setGateError] = useState<string | null>(null);
   const activeSessionRef = useRef(input.sessionId);
+  const activeComparisonRef = useRef(selectedComparisonId);
+  const ablationRequestGenerationRef = useRef(0);
+  const decisionsRequestGenerationRef = useRef(0);
   activeSessionRef.current = input.sessionId;
+  activeComparisonRef.current = selectedComparisonId;
 
   useEffect(() => {
     setMetrics({ kind: "loading" });
@@ -222,15 +226,22 @@ export default function RunWorkflow({
   const loadAblation = useCallback(async () => {
     if (!selectedComparisonId) return;
     const requestSessionId = input.sessionId;
+    const requestComparisonId = selectedComparisonId;
+    const requestGeneration = ablationRequestGenerationRef.current + 1;
+    ablationRequestGenerationRef.current = requestGeneration;
+    const isCurrentRequest = () =>
+      activeSessionRef.current === requestSessionId &&
+      activeComparisonRef.current === requestComparisonId &&
+      ablationRequestGenerationRef.current === requestGeneration;
     setAblationState("loading");
     setAblationError(null);
     try {
       const nextAblation = await getExperimentAblation(input, run.id, selectedComparisonId);
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (!isCurrentRequest()) return;
       setAblation(nextAblation);
       setAblationState("ready");
     } catch (caught) {
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (!isCurrentRequest()) return;
       const apiError = toApiError(caught, "");
       if (apiError.code === "ABLATION_NOT_FOUND" || apiError.status === 404) {
         setAblationState("absent");
@@ -250,18 +261,23 @@ export default function RunWorkflow({
   async function createAblation() {
     if (!selectedComparisonId) return;
     const requestSessionId = input.sessionId;
+    const requestComparisonId = selectedComparisonId;
     setCreatingAblation(true);
     setAblationError(null);
     try {
       const nextAblation = await createExperimentAblation(input, run.id, selectedComparisonId);
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (activeSessionRef.current !== requestSessionId || activeComparisonRef.current !== requestComparisonId) return;
       setAblation(nextAblation);
       setAblationState("ready");
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setAblationError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId && activeComparisonRef.current === requestComparisonId) {
+        setAblationError(apiError.message || apiError.code);
+      }
     } finally {
-      if (activeSessionRef.current === requestSessionId) setCreatingAblation(false);
+      if (activeSessionRef.current === requestSessionId && activeComparisonRef.current === requestComparisonId) {
+        setCreatingAblation(false);
+      }
     }
   }
 
@@ -280,14 +296,21 @@ export default function RunWorkflow({
   const loadDecisions = useCallback(async () => {
     if (!selectedComparisonId) return;
     const requestSessionId = input.sessionId;
+    const requestComparisonId = selectedComparisonId;
+    const requestGeneration = decisionsRequestGenerationRef.current + 1;
+    decisionsRequestGenerationRef.current = requestGeneration;
+    const isCurrentRequest = () =>
+      activeSessionRef.current === requestSessionId &&
+      activeComparisonRef.current === requestComparisonId &&
+      decisionsRequestGenerationRef.current === requestGeneration;
     setDecisionsError(null);
     try {
       const nextDecisions = await listReleaseGateDecisions(input, run.id, selectedComparisonId);
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (!isCurrentRequest()) return;
       setDecisions(uniqueById(nextDecisions));
       setDecisionsLoaded(true);
     } catch (caught) {
-      if (activeSessionRef.current === requestSessionId) setDecisionsError(toApiError(caught, ""));
+      if (isCurrentRequest()) setDecisionsError(toApiError(caught, ""));
     }
   }, [selectedComparisonId, run.id, input.sessionId, input.workspaceId, input.accessToken]);
 
@@ -305,18 +328,23 @@ export default function RunWorkflow({
   async function runGate() {
     if (!selectedComparisonId || !policyId) return;
     const requestSessionId = input.sessionId;
+    const requestComparisonId = selectedComparisonId;
     setRunningGate(true);
     setGateError(null);
     try {
       const decision = await createReleaseGateDecision(input, run.id, selectedComparisonId, { policy_id: policyId });
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (activeSessionRef.current !== requestSessionId || activeComparisonRef.current !== requestComparisonId) return;
       setDecisions((current) => upsertById(current, decision));
       setPolicyId("");
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId) setGateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId && activeComparisonRef.current === requestComparisonId) {
+        setGateError(apiError.message || apiError.code);
+      }
     } finally {
-      if (activeSessionRef.current === requestSessionId) setRunningGate(false);
+      if (activeSessionRef.current === requestSessionId && activeComparisonRef.current === requestComparisonId) {
+        setRunningGate(false);
+      }
     }
   }
 

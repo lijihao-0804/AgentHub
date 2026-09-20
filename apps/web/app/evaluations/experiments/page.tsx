@@ -51,6 +51,7 @@ export default function EvaluationExperimentsPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
   const activeSessionRef = useRef(sessionId);
+  const versionsRequestGenerationRef = useRef(0);
   activeSessionRef.current = sessionId;
 
   useEffect(() => {
@@ -70,6 +71,8 @@ export default function EvaluationExperimentsPage() {
     setVersionsLoading(false);
     setVersionsError(null);
     setVersionId("");
+    setPurpose("DEVELOPMENT");
+    setRepetitions("1");
     setCreating(false);
     setCreateError(null);
     setCreatedNotice(false);
@@ -120,23 +123,27 @@ export default function EvaluationExperimentsPage() {
   }, [connected, showForm, datasetsLoaded, loadDatasets]);
 
   const loadVersions = useCallback(async () => {
+    const requestGeneration = versionsRequestGenerationRef.current + 1;
+    versionsRequestGenerationRef.current = requestGeneration;
     if (!datasetId) {
       setVersions([]);
       setVersionId("");
       return;
     }
     const requestSessionId = sessionId;
+    const isCurrentRequest = () =>
+      activeSessionRef.current === requestSessionId && versionsRequestGenerationRef.current === requestGeneration;
     setVersionsLoading(true);
     setVersionsError(null);
     setVersionId("");
     try {
       const all = await listDatasetVersions(input, datasetId);
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (!isCurrentRequest()) return;
       setVersions(all.filter((v) => v.status === "PUBLISHED"));
     } catch (caught) {
-      if (activeSessionRef.current === requestSessionId) setVersionsError(toApiError(caught, ""));
+      if (isCurrentRequest()) setVersionsError(toApiError(caught, ""));
     } finally {
-      if (activeSessionRef.current === requestSessionId) setVersionsLoading(false);
+      if (isCurrentRequest()) setVersionsLoading(false);
     }
   }, [connected, workspaceId, accessToken, datasetId, sessionId]);
 

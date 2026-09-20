@@ -59,6 +59,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
   const [startingRun, setStartingRun] = useState(false);
   const [startRunError, setStartRunError] = useState<string | null>(null);
   const activeSessionRef = useRef(sessionId);
+  const versionsRequestGenerationRef = useRef(0);
   activeSessionRef.current = sessionId;
 
   useEffect(() => {
@@ -72,13 +73,19 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
     setPricingError(null);
     setAgentsLoading(false);
     setPricingLoading(false);
+    setShowVariantForm(false);
     setAgentId("");
     setAgentVersions([]);
     setVersionsLoading(false);
     setVersionsError(null);
     setAgentVersionId("");
+    setLabel("");
+    setPricingId("");
+    setOrdinal("0");
+    setMetadataText("");
     setVariantError(null);
     setAddingVariant(false);
+    setShowFinalizeConfirm(false);
     setFinalizeError(null);
     setFinalizing(false);
     setStartRunError(null);
@@ -146,6 +153,8 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
   }, [loadAgents, loadPricing]);
 
   const loadAgentVersions = useCallback(async () => {
+    const requestGeneration = versionsRequestGenerationRef.current + 1;
+    versionsRequestGenerationRef.current = requestGeneration;
     if (!agentId) {
       setAgentVersions([]);
       setAgentVersionId("");
@@ -154,17 +163,19 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
       return;
     }
     const requestSessionId = sessionId;
+    const isCurrentRequest = () =>
+      activeSessionRef.current === requestSessionId && versionsRequestGenerationRef.current === requestGeneration;
     setVersionsLoading(true);
     setVersionsError(null);
     setAgentVersionId("");
     try {
       const nextVersions = await listAgentVersions(input, agentId);
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (!isCurrentRequest()) return;
       setAgentVersions(nextVersions);
     } catch (caught) {
-      if (activeSessionRef.current === requestSessionId) setVersionsError(toApiError(caught, ""));
+      if (isCurrentRequest()) setVersionsError(toApiError(caught, ""));
     } finally {
-      if (activeSessionRef.current === requestSessionId) setVersionsLoading(false);
+      if (isCurrentRequest()) setVersionsLoading(false);
     }
   }, [connected, workspaceId, accessToken, agentId, sessionId]);
 
