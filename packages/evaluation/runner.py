@@ -129,7 +129,7 @@ class DeterministicEvaluationDriver:
                 item.expected.get("tool_sequence", [item.expected.get("tool_identity")])
             )
         elif category == "NO_ANSWER":
-            observation["answerable"] = False
+            observation["answerable"] = item.expected.get("answerable", False)
         elif category == "APPROVAL":
             observation["approval_required"] = item.expected.get("approval_required", True)
             observation["approval_decision"] = item.expected.get("decision")
@@ -137,6 +137,18 @@ class DeterministicEvaluationDriver:
             observation["unauthorized_execution"] = False
             observation["duplicate_side_effect"] = False
             observation["unknown_outcome_semantics_ok"] = True
+            if "failure_code" in item.expected:
+                observation["failure_code"] = item.expected["failure_code"]
+            for field in (
+                "execution_status",
+                "run_status",
+                "ticket_count",
+                "execution_calls",
+                "authorization_ok",
+                "resume_success",
+            ):
+                if field in item.expected:
+                    observation[field] = item.expected[field]
         elif category == "MULTI_STEP":
             observation["steps"] = list(item.expected.get("steps", []))
             if "terminal_status" in item.expected:
@@ -148,6 +160,9 @@ class DeterministicEvaluationDriver:
             observation["expected_failure_code"] = expected_failure_code
             observation["observed_agent_status"] = expected_status
             observation["observed_agent_failure_code"] = expected_failure_code
+            for field in ("failure_category", "runtime_path"):
+                if field in item.expected:
+                    observation[field] = item.expected[field]
         return CaseExecutionObservation(
             observation=observation,
             latency_ms=max(0, round((time.perf_counter() - started) * 1000)),

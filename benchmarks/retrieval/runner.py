@@ -19,6 +19,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from apps.worker.tasks.knowledge import _vector_records
+from benchmarks.retrieval.corpus import build_benchmark_chunks
 from benchmarks.retrieval.metrics import (
     BenchmarkHit,
     BenchmarkRetrieval,
@@ -35,7 +36,6 @@ from packages.core.execution_context.models import (
     WorkspaceExecutionContext,
 )
 from packages.knowledge.adapters.qdrant import QdrantVectorIndex
-from packages.knowledge.chunking import build_deterministic_chunks
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.contracts import (
     KnowledgeProviderError,
@@ -50,7 +50,6 @@ from packages.knowledge.models import (
     RevisionIngestionStatus,
     RevisionLifecycleStatus,
 )
-from packages.knowledge.parser import ParsedBlock, ParsedDocument
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.knowledge.snapshots import KnowledgeSnapshotService, ResolvedKnowledgeSnapshot
 
@@ -199,21 +198,7 @@ async def _seed_corpus(
             )
             session.add(revision)
             await session.flush()
-            parsed = ParsedDocument(
-                blocks=tuple(
-                    ParsedBlock(
-                        text=section.text,
-                        locator={"type": "section", "section_key": section.section_key},
-                    )
-                    for section in document_spec.sections
-                )
-            )
-            candidates = build_deterministic_chunks(
-                revision.id,
-                parsed,
-                chunk_size_chars=450,
-                chunk_overlap_chars=80,
-            )
+            candidates = build_benchmark_chunks(document_spec, revision_id=revision.id)
             rows = [
                 DocumentChunk(
                     chunk_id=candidate.chunk_id,

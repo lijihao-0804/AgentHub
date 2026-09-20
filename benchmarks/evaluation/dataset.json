@@ -11,7 +11,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-employee-handbook-remote-collaboration"
+          "27cbcb19cff69bf3f54dcfb2e404ce42714277fbbc5d778f81a5c9d73742642f"
         ]
       },
       "tags": [
@@ -21,7 +21,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-001"
+        "source_id": "m3-retrieval-v1:ret-001",
+        "source_split": "DEV"
       },
       "ordinal": 0
     },
@@ -34,7 +35,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-leave-policy-annual-leave"
+          "eaa68357330543a2cd8540ebf103f8dc4086b9d4eebb3521a44d0ebdb1de2e2d"
         ]
       },
       "tags": [
@@ -44,7 +45,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-002"
+        "source_id": "m3-retrieval-v1:ret-002",
+        "source_split": "DEV"
       },
       "ordinal": 1
     },
@@ -57,7 +59,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-travel-expense-reimbursable-costs"
+          "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
         ]
       },
       "tags": [
@@ -67,7 +69,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-003"
+        "source_id": "m3-retrieval-v1:ret-003",
+        "source_split": "DEV"
       },
       "ordinal": 2
     },
@@ -80,7 +83,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-information-security-password-mfa"
+          "a18691077ffdb5da1a56a61576e344eb3c2fe95ba49fe8bcb1a0bd74f165c857"
         ]
       },
       "tags": [
@@ -90,7 +93,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-004"
+        "source_id": "m3-retrieval-v1:ret-004",
+        "source_split": "DEV"
       },
       "ordinal": 3
     },
@@ -103,7 +107,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-refund-policy-eligibility"
+          "90adcbf84d5c4de137de003696fdb90df0475c254f664930a9b0e1a6f40d989f"
         ]
       },
       "tags": [
@@ -113,7 +117,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-005"
+        "source_id": "m3-retrieval-v1:ret-005",
+        "source_split": "DEV"
       },
       "ordinal": 4
     },
@@ -126,7 +131,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-sla-support-response-targets"
+          "e19b26e466b07c3a9b867c55ea45ec668ecf31436957351b76d985ad0ff64c13"
         ]
       },
       "tags": [
@@ -136,7 +141,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-006"
+        "source_id": "m3-retrieval-v1:ret-006",
+        "source_split": "DEV"
       },
       "ordinal": 5
     },
@@ -149,7 +155,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-ticket-workflow-intake"
+          "e956fcdf7d261dd79d9bbb8b2d1c1a623b4c65e82f69e225672beb73c3fc2a31"
         ]
       },
       "tags": [
@@ -159,7 +165,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-007"
+        "source_id": "m3-retrieval-v1:ret-007",
+        "source_split": "DEV"
       },
       "ordinal": 6
     },
@@ -172,7 +179,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-data-access-access-request"
+          "4242c7a17f219da11118f8775e06e247bb661bf59f57e723094a9663b8472d4f"
         ]
       },
       "tags": [
@@ -182,7 +189,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-008"
+        "source_id": "m3-retrieval-v1:ret-008",
+        "source_split": "DEV"
       },
       "ordinal": 7
     },
@@ -195,7 +203,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-bilingual-faq-invoice-questions"
+          "ee1acb8f637ac1e7017807c652cc8c98160bd49c7f447860f5952ce1e5d845e8"
         ]
       },
       "tags": [
@@ -205,7 +213,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-009"
+        "source_id": "m3-retrieval-v1:ret-009",
+        "source_split": "DEV"
       },
       "ordinal": 8
     },
@@ -218,7 +227,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-vendor-onboarding-renewal-review"
+          "7c4cefc6a59702d1c34fea008ae1896cbf26935ec72ee73e8002ae300c96449e"
         ]
       },
       "tags": [
@@ -228,7 +237,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-010"
+        "source_id": "m3-retrieval-v1:ret-010",
+        "source_split": "DEV"
       },
       "ordinal": 9
     },
@@ -241,7 +251,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-leave-policy-leave-request"
+          "d335ed3c245f171c20d6f1d012baaeb51e9815b5c495ce329589a3473d062d36"
         ]
       },
       "tags": [
@@ -251,7 +261,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-011"
+        "source_id": "m3-retrieval-v1:ret-011",
+        "source_split": "DEV"
       },
       "ordinal": 10
     },
@@ -264,7 +275,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-travel-expense-booking"
+          "507aeaf53f97b5091e90730756b4f93fd98ff55dfb4acfccda5b4a55073e260a"
         ]
       },
       "tags": [
@@ -274,7 +285,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-012"
+        "source_id": "m3-retrieval-v1:ret-012",
+        "source_split": "DEV"
       },
       "ordinal": 11
     },
@@ -287,7 +299,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-information-security-incident-reporting"
+          "a5ae426e4aa3e22be6b0925f97517a4e8f363849e2680c24fc2882c1fb29dc33"
         ]
       },
       "tags": [
@@ -297,7 +309,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-013"
+        "source_id": "m3-retrieval-v1:ret-013",
+        "source_split": "DEV"
       },
       "ordinal": 12
     },
@@ -310,7 +323,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-refund-policy-exceptions"
+          "a67c6cdedb8b8f2c3c59ccfe65a582135a6f9a65ab951bb2f8e6d1f87788069d"
         ]
       },
       "tags": [
@@ -320,7 +333,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-014"
+        "source_id": "m3-retrieval-v1:ret-014",
+        "source_split": "DEV"
       },
       "ordinal": 13
     },
@@ -333,7 +347,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-sla-support-escalation"
+          "891b020448e98e81dda4f77926198575f1ed01a62938b70581492395aa5752b5"
         ]
       },
       "tags": [
@@ -343,7 +357,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-015"
+        "source_id": "m3-retrieval-v1:ret-015",
+        "source_split": "DEV"
       },
       "ordinal": 14
     },
@@ -356,7 +371,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-ticket-workflow-triage"
+          "8bfa294576ab8a8e575203b1f2fe953e6db585099cc3c897d0e99d649d26722e"
         ]
       },
       "tags": [
@@ -366,7 +381,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-016"
+        "source_id": "m3-retrieval-v1:ret-016",
+        "source_split": "DEV"
       },
       "ordinal": 15
     },
@@ -379,7 +395,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-data-access-audit-review"
+          "50081d71f67d10d1fa1f8a0bc9a7971d09b3a4f981f94d0d29aeabbe8ac37d4b"
         ]
       },
       "tags": [
@@ -389,7 +405,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-017"
+        "source_id": "m3-retrieval-v1:ret-017",
+        "source_split": "DEV"
       },
       "ordinal": 16
     },
@@ -402,7 +419,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-bilingual-faq-account-recovery"
+          "a505c441107e5fb4d5fef7e217e631db6eac2ade44e9f7347ec90c083b8df278"
         ]
       },
       "tags": [
@@ -412,7 +429,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-018"
+        "source_id": "m3-retrieval-v1:ret-018",
+        "source_split": "DEV"
       },
       "ordinal": 17
     },
@@ -425,7 +443,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-vendor-onboarding-purchase-order"
+          "d61d938317c129852c3d4a495a4ff13c674e245ca7993a381622843eb0fa9d8d"
         ]
       },
       "tags": [
@@ -435,7 +453,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-019"
+        "source_id": "m3-retrieval-v1:ret-019",
+        "source_split": "DEV"
       },
       "ordinal": 18
     },
@@ -448,7 +467,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-employee-handbook-working-hours"
+          "250f059c4e4484f2e8c79ccd96dcb9231c72838f01387b32c17003c20bc72b9e"
         ]
       },
       "tags": [
@@ -458,7 +477,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-020"
+        "source_id": "m3-retrieval-v1:ret-020",
+        "source_split": "DEV"
       },
       "ordinal": 19
     },
@@ -471,7 +491,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-leave-policy-sick-leave"
+          "573a2f31a1dba3e16e69bf1a4d19cb53a29a77f5e5bc5890d2b61de58c8dfdf2"
         ]
       },
       "tags": [
@@ -481,7 +501,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-021"
+        "source_id": "m3-retrieval-v1:ret-021",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 20
     },
@@ -494,7 +515,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-refund-policy-approval-path"
+          "b7fa19a920439903b044f784df3f5d21b4d0a4bcac236601266c86113eae75f5"
         ]
       },
       "tags": [
@@ -504,7 +525,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-022"
+        "source_id": "m3-retrieval-v1:ret-022",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 21
     },
@@ -517,7 +539,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-travel-expense-reimbursable-costs"
+          "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
         ]
       },
       "tags": [
@@ -527,7 +549,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-023"
+        "source_id": "m3-retrieval-v1:ret-023",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 22
     },
@@ -540,7 +563,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-data-access-least-privilege"
+          "5f91fdb7e1aad89854a6accf0351027b3647c54fcdb96906a25b3a71e15c6fc0"
         ]
       },
       "tags": [
@@ -550,7 +573,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-024"
+        "source_id": "m3-retrieval-v1:ret-024",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 23
     },
@@ -563,7 +587,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-bilingual-faq-account-recovery"
+          "a505c441107e5fb4d5fef7e217e631db6eac2ade44e9f7347ec90c083b8df278"
         ]
       },
       "tags": [
@@ -573,7 +597,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-025"
+        "source_id": "m3-retrieval-v1:ret-025",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 24
     },
@@ -586,7 +611,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-bilingual-faq-service-language"
+          "6f15a8f0539d1016dcc563d36c08221e52b581eb4acc9c0ca864a2b06ac3d8b1"
         ]
       },
       "tags": [
@@ -596,7 +621,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-026"
+        "source_id": "m3-retrieval-v1:ret-026",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 25
     },
@@ -609,8 +635,8 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-ticket-workflow-intake",
-          "m3-ticket-workflow-closure"
+          "e956fcdf7d261dd79d9bbb8b2d1c1a623b4c65e82f69e225672beb73c3fc2a31",
+          "eac7b545e9cdda14b3e0f3d5c97c263929e797dc1c4ce098962da03bcda54737"
         ]
       },
       "tags": [
@@ -620,7 +646,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-027"
+        "source_id": "m3-retrieval-v1:ret-027",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 26
     },
@@ -633,7 +660,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-information-security-device-storage"
+          "437adc03c53fbe3bc231f11008480ee42770cba007ceca53c9aeff83ac5a43c2"
         ]
       },
       "tags": [
@@ -643,7 +670,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-028"
+        "source_id": "m3-retrieval-v1:ret-028",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 27
     },
@@ -656,7 +684,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-sla-support-priority-levels"
+          "8c1f0de617973c117bee38957fb30a8147e860aac28647cad477a401b83a8dfa"
         ]
       },
       "tags": [
@@ -666,7 +694,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-029"
+        "source_id": "m3-retrieval-v1:ret-029",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 28
     },
@@ -679,7 +708,7 @@
       },
       "expected": {
         "relevant_chunk_ids": [
-          "m3-vendor-onboarding-due-diligence"
+          "375424c9e4d3c67b599a811ad2250ccb4b4055b03227076001aded701b0925c6"
         ]
       },
       "tags": [
@@ -689,7 +718,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m3-retrieval-v1:ret-030"
+        "source_id": "m3-retrieval-v1:ret-030",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 29
     },
@@ -716,7 +746,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:tool-calculator-001"
+        "source_id": "m4-agent-runtime-v1:tool-calculator-001",
+        "source_split": "DEV"
       },
       "ordinal": 30
     },
@@ -743,7 +774,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:tool-calculator-002"
+        "source_id": "m4-agent-runtime-v1:tool-calculator-002",
+        "source_split": "DEV"
       },
       "ordinal": 31
     },
@@ -771,7 +803,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:tool-customer-001"
+        "source_id": "m4-agent-runtime-v1:tool-customer-001",
+        "source_split": "DEV"
       },
       "ordinal": 32
     },
@@ -799,7 +832,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:tool-customer-002"
+        "source_id": "m4-agent-runtime-v1:tool-customer-002",
+        "source_split": "DEV"
       },
       "ordinal": 33
     },
@@ -827,7 +861,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:tool-search-001"
+        "source_id": "m4-agent-runtime-v1:tool-search-001",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 34
     },
@@ -855,7 +890,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:tool-search-002"
+        "source_id": "m4-agent-runtime-v1:tool-search-002",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 35
     },
@@ -880,7 +916,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:multi-read-001"
+        "source_id": "m4-agent-runtime-v1:multi-read-001",
+        "source_split": "DEV"
       },
       "ordinal": 36
     },
@@ -905,7 +942,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:multi-read-002"
+        "source_id": "m4-agent-runtime-v1:multi-read-002",
+        "source_split": "DEV"
       },
       "ordinal": 37
     },
@@ -930,7 +968,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:multi-read-003"
+        "source_id": "m4-agent-runtime-v1:multi-read-003",
+        "source_split": "DEV"
       },
       "ordinal": 38
     },
@@ -955,7 +994,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:multi-read-004"
+        "source_id": "m4-agent-runtime-v1:multi-read-004",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 39
     },
@@ -967,8 +1007,9 @@
         "action": "Read a calculation that requires approval."
       },
       "expected": {
-        "decision": "PENDING",
-        "approval_required": true
+        "decision": "UNAVAILABLE",
+        "approval_required": true,
+        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE"
       },
       "tags": [
         "historical",
@@ -977,7 +1018,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:approval-calculator-001"
+        "source_id": "m4-agent-runtime-v1:approval-calculator-001",
+        "source_split": "DEV"
       },
       "ordinal": 40
     },
@@ -989,8 +1031,9 @@
         "action": "Read a customer record that requires approval."
       },
       "expected": {
-        "decision": "PENDING",
-        "approval_required": true
+        "decision": "UNAVAILABLE",
+        "approval_required": true,
+        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE"
       },
       "tags": [
         "historical",
@@ -999,7 +1042,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:approval-customer-001"
+        "source_id": "m4-agent-runtime-v1:approval-customer-001",
+        "source_split": "DEV"
       },
       "ordinal": 41
     },
@@ -1011,8 +1055,9 @@
         "action": "Search the knowledge base with approval required."
       },
       "expected": {
-        "decision": "PENDING",
-        "approval_required": true
+        "decision": "UNAVAILABLE",
+        "approval_required": true,
+        "failure_code": "TOOL_APPROVAL_NOT_AVAILABLE"
       },
       "tags": [
         "historical",
@@ -1021,7 +1066,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m4-agent-runtime-v1:approval-search-001"
+        "source_id": "m4-agent-runtime-v1:approval-search-001",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 42
     },
@@ -1034,7 +1080,13 @@
       },
       "expected": {
         "decision": "PENDING",
-        "approval_required": true
+        "approval_required": true,
+        "execution_status": "NOT_STARTED",
+        "run_status": "WAITING_APPROVAL",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
       },
       "tags": [
         "historical",
@@ -1043,20 +1095,27 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:approval-required-dev-01"
+        "source_id": "m5-approval-runtime-v1:approval-required-dev-01",
+        "source_split": "DEV"
       },
       "ordinal": 43
     },
     {
       "case_key": "m5-approval-required-holdout-01",
-      "split": "DEV",
+      "split": "HOLDOUT",
       "category": "APPROVAL",
       "input": {
         "action": "Approval sequence approval-required-holdout-01: request."
       },
       "expected": {
         "decision": "PENDING",
-        "approval_required": true
+        "approval_required": true,
+        "execution_status": "NOT_STARTED",
+        "run_status": "WAITING_APPROVAL",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
       },
       "tags": [
         "historical",
@@ -1065,7 +1124,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:approval-required-holdout-01"
+        "source_id": "m5-approval-runtime-v1:approval-required-holdout-01",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 44
     },
@@ -1078,7 +1138,13 @@
       },
       "expected": {
         "decision": "DENIED",
-        "approval_required": true
+        "approval_required": true,
+        "execution_status": "NOT_STARTED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
       },
       "tags": [
         "historical",
@@ -1087,20 +1153,27 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:approval-denied-dev-01"
+        "source_id": "m5-approval-runtime-v1:approval-denied-dev-01",
+        "source_split": "DEV"
       },
       "ordinal": 45
     },
     {
       "case_key": "m5-approval-denied-holdout-01",
-      "split": "DEV",
+      "split": "HOLDOUT",
       "category": "APPROVAL",
       "input": {
         "action": "Approval sequence approval-denied-holdout-01: request, deny, resume."
       },
       "expected": {
         "decision": "DENIED",
-        "approval_required": true
+        "approval_required": true,
+        "execution_status": "NOT_STARTED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 0,
+        "execution_calls": 0,
+        "authorization_ok": true,
+        "resume_success": true
       },
       "tags": [
         "historical",
@@ -1109,7 +1182,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:approval-denied-holdout-01"
+        "source_id": "m5-approval-runtime-v1:approval-denied-holdout-01",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 46
     },
@@ -1122,7 +1196,13 @@
       },
       "expected": {
         "decision": "APPROVED",
-        "approval_required": true
+        "approval_required": true,
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
       },
       "tags": [
         "historical",
@@ -1131,7 +1211,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:approval-approved-dev-01"
+        "source_id": "m5-approval-runtime-v1:approval-approved-dev-01",
+        "source_split": "DEV"
       },
       "ordinal": 47
     },
@@ -1144,7 +1225,13 @@
       },
       "expected": {
         "decision": "APPROVED",
-        "approval_required": true
+        "approval_required": true,
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
       },
       "tags": [
         "historical",
@@ -1153,20 +1240,27 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:approval-approved-holdout-01"
+        "source_id": "m5-approval-runtime-v1:approval-approved-holdout-01",
+        "source_split": "HOLDOUT"
       },
       "ordinal": 48
     },
     {
       "case_key": "m5-duplicate-approve-dev-01",
-      "split": "HOLDOUT",
+      "split": "DEV",
       "category": "APPROVAL",
       "input": {
         "action": "Approval sequence duplicate-approve-dev-01: request, approve, approve_again, resume."
       },
       "expected": {
         "decision": "APPROVED",
-        "approval_required": true
+        "approval_required": true,
+        "execution_status": "SUCCEEDED",
+        "run_status": "SUCCEEDED",
+        "ticket_count": 1,
+        "execution_calls": 1,
+        "authorization_ok": true,
+        "resume_success": true
       },
       "tags": [
         "historical",
@@ -1175,7 +1269,8 @@
       ],
       "source_provenance": {
         "source_kind": "historical_benchmark",
-        "source_id": "m5-approval-runtime-v1:duplicate-approve-dev-01"
+        "source_id": "m5-approval-runtime-v1:duplicate-approve-dev-01",
+        "source_split": "DEV"
       },
       "ordinal": 49
     },
@@ -1188,7 +1283,9 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "MODEL_PROVIDER_FAILED"
+        "failure_code": "MODEL_PROVIDER_FAILED",
+        "failure_category": "MODEL",
+        "runtime_path": "AgentRunService.model_boundary"
       },
       "tags": [
         "historical",
@@ -1210,7 +1307,9 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "STREAM_INTERRUPTED"
+        "failure_code": "STREAM_INTERRUPTED",
+        "failure_category": "RUNTIME",
+        "runtime_path": "AgentRunService.stream_producer"
       },
       "tags": [
         "historical",
@@ -1232,7 +1331,9 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "TOOL_EXECUTION_FAILED"
+        "failure_code": "TOOL_EXECUTION_FAILED",
+        "failure_category": "TOOL",
+        "runtime_path": "AgentRunService.tool_boundary"
       },
       "tags": [
         "historical",
@@ -1254,7 +1355,9 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "KNOWLEDGE_UNAVAILABLE"
+        "failure_code": "KNOWLEDGE_UNAVAILABLE",
+        "failure_category": "KNOWLEDGE",
+        "runtime_path": "AgentRunService.retrieval_boundary"
       },
       "tags": [
         "historical",
@@ -1276,7 +1379,9 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "LOOP_GUARD_TRIGGERED"
+        "failure_code": "LOOP_GUARD_TRIGGERED",
+        "failure_category": "RUNTIME",
+        "runtime_path": "AgentRunService.loop_guard"
       },
       "tags": [
         "historical",
@@ -1298,7 +1403,9 @@
       },
       "expected": {
         "status": "SUCCEEDED",
-        "failure_code": "APPROVAL_DENIED"
+        "failure_code": "APPROVAL_DENIED",
+        "failure_category": "APPROVAL",
+        "runtime_path": "AgentRunService.approval_resume"
       },
       "tags": [
         "historical",
@@ -1320,7 +1427,9 @@
       },
       "expected": {
         "status": "FAILED",
-        "failure_code": "ACTION_EXECUTION_FAILED"
+        "failure_code": "ACTION_EXECUTION_FAILED",
+        "failure_category": "ACTION",
+        "runtime_path": "AgentRunService.action_boundary"
       },
       "tags": [
         "historical",
@@ -1342,7 +1451,9 @@
       },
       "expected": {
         "status": "NEEDS_ATTENTION",
-        "failure_code": "ACTION_RECONCILIATION_REQUIRED"
+        "failure_code": "ACTION_RECONCILIATION_REQUIRED",
+        "failure_category": "ACTION",
+        "runtime_path": "AgentRunService.unknown_outcome"
       },
       "tags": [
         "historical",
@@ -1357,14 +1468,16 @@
     },
     {
       "case_key": "m6-checkpoint-missing",
-      "split": "HOLDOUT",
+      "split": "DEV",
       "category": "FAILURE",
       "input": {
         "scenario": "Approval resume cannot find its durable checkpoint"
       },
       "expected": {
         "status": "NEEDS_ATTENTION",
-        "failure_code": "APPROVAL_CHECKPOINT_MISSING"
+        "failure_code": "APPROVAL_CHECKPOINT_MISSING",
+        "failure_category": "APPROVAL",
+        "runtime_path": "AgentRunService.checkpoint_resume"
       },
       "tags": [
         "historical",
@@ -1379,14 +1492,16 @@
     },
     {
       "case_key": "m6-cancelled-run",
-      "split": "HOLDOUT",
+      "split": "DEV",
       "category": "FAILURE",
       "input": {
         "scenario": "A durable cancel request stops scheduling the next step"
       },
       "expected": {
         "status": "CANCELLED",
-        "failure_code": null
+        "failure_code": null,
+        "failure_category": "RUNTIME",
+        "runtime_path": "AgentRunService.cancel_boundary"
       },
       "tags": [
         "historical",
@@ -1404,12 +1519,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 1 ask about?"
+        "question": "How should a remote teammate stay reachable without exposing work at home?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 1.",
+        "answer": "Remote employees keep the same delivery expectations as office-based employees and must remain reachable during the agreed collaboration window. The team channel is the default place for status updates, while urgent issues use the on-call route. A home workspace should protect confidential material from visitors, and screen sharing must use the approved meeting account.",
         "citations": [
-          "curated-chunk-01"
+          "27cbcb19cff69bf3f54dcfb2e404ce42714277fbbc5d778f81a5c9d73742642f"
         ]
       },
       "tags": [
@@ -1428,12 +1543,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 2 ask about?"
+        "question": "How is planned annual time off counted and approved?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 2.",
+        "answer": "Annual leave is accrued monthly and the available balance is shown in the people portal. Planned time off should be requested early enough for the manager to arrange coverage. Public holidays are handled by the regional calendar and are not deducted from the annual balance. A balance display is informational until the request receives its recorded approval.",
         "citations": [
-          "curated-chunk-02"
+          "eaa68357330543a2cd8540ebf103f8dc4086b9d4eebb3521a44d0ebdb1de2e2d"
         ]
       },
       "tags": [
@@ -1452,12 +1567,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 3 ask about?"
+        "question": "What proof is needed when claiming a meal or taxi during a business trip?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 3.",
+        "answer": "Receipts are required for reimbursable transport, lodging, and meals unless a documented local exception applies. A claim should identify the business purpose and currency, and shared meals should list the attendees. Daily allowances follow the regional rate table; an allowance does not make unrelated personal spending reimbursable.",
         "citations": [
-          "curated-chunk-03"
+          "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
         ]
       },
       "tags": [
@@ -1476,12 +1591,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 4 ask about?"
+        "question": "What should I do with an unexpected MFA prompt?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 4.",
+        "answer": "Use a unique passphrase for each company service and protect the account with the approved multi-factor method. Never approve an unexpected authentication prompt or share a one-time code with a caller. Password managers supplied by the company may store credentials, but a personal notes app is not an approved vault.",
         "citations": [
-          "curated-chunk-04"
+          "a18691077ffdb5da1a56a61576e344eb3c2fe95ba49fe8bcb1a0bd74f165c857"
         ]
       },
       "tags": [
@@ -1500,12 +1615,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 5 ask about?"
+        "question": "Can a customer get money back when a trial was cancelled in time?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 5.",
+        "answer": "A customer may request a refund for an eligible purchase when the service was not delivered, was charged twice, or was cancelled within the stated trial period. The request must identify the order and the account owner. Promotional credits and completed usage are considered before an amount is approved.",
         "citations": [
-          "curated-chunk-05"
+          "90adcbf84d5c4de137de003696fdb90df0475c254f664930a9b0e1a6f40d989f"
         ]
       },
       "tags": [
@@ -1524,12 +1639,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 6 ask about?"
+        "question": "What acknowledgement time applies to a critical outage?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 6.",
+        "answer": "The first response target is fifteen minutes for P1, one business hour for P2, and one business day for P3. These targets measure acknowledgement and ownership rather than a guaranteed resolution. The case record should show the next update time when investigation continues beyond the first response.",
         "citations": [
-          "curated-chunk-06"
+          "e19b26e466b07c3a9b867c55ea45ec668ecf31436957351b76d985ad0ff64c13"
         ]
       },
       "tags": [
@@ -1548,12 +1663,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 7 ask about?"
+        "question": "Which details belong in a new service ticket before triage?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 7.",
+        "answer": "Every service ticket records the requester, affected service, observed behavior, time of occurrence, and a safe contact route. Attachments must exclude passwords and unrelated personal data. If the report is incomplete, the intake owner asks a focused clarification question while preserving the original report.",
         "citations": [
-          "curated-chunk-07"
+          "e956fcdf7d261dd79d9bbb8b2d1c1a623b4c65e82f69e225672beb73c3fc2a31"
         ]
       },
       "tags": [
@@ -1572,12 +1687,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 8 ask about?"
+        "question": "申请数据权限时需要写哪些内容？"
       },
       "expected": {
-        "answer": "Curated knowledge answer 8.",
+        "answer": "An access request names the dataset or system, business purpose, requested role, duration, and manager who accepts the responsibility. The data owner checks the purpose before granting access. Emergency access is time limited and must be documented even when the normal queue is unavailable.",
         "citations": [
-          "curated-chunk-08"
+          "4242c7a17f219da11118f8775e06e247bb661bf59f57e723094a9663b8472d4f"
         ]
       },
       "tags": [
@@ -1596,12 +1711,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 9 ask about?"
+        "question": "Which identifiers should be included in an invoice question?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 9.",
+        "answer": "Invoice questions should include the invoice number, billing entity, and the field that appears incorrect. 发票抬头或税务信息需要在付款记录中核对，不能只凭截图修改。The billing team replies in the language selected for the account when the request is submitted.",
         "citations": [
-          "curated-chunk-09"
+          "ee1acb8f637ac1e7017807c652cc8c98160bd49c7f447860f5952ce1e5d845e8"
         ]
       },
       "tags": [
@@ -1620,12 +1735,12 @@
       "split": "DEV",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 10 ask about?"
+        "question": "What has to be checked before renewing a supplier service?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 10.",
+        "answer": "At renewal, the sponsor confirms that the service is still needed, checks usage and incidents, and records any price or scope change. Security and legal reviews are repeated when the risk profile changes. Renewal approval is not implied by an auto-renewal notice from the vendor.",
         "citations": [
-          "curated-chunk-10"
+          "7c4cefc6a59702d1c34fea008ae1896cbf26935ec72ee73e8002ae300c96449e"
         ]
       },
       "tags": [
@@ -1644,12 +1759,12 @@
       "split": "HOLDOUT",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 11 ask about?"
+        "question": "If illness prevents attendance, what is the first notification step?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 11.",
+        "answer": "When illness prevents work, notify the manager or the designated absence channel before the normal start time whenever practical. The employee should keep the absence record current and provide supporting documentation only when the local rule or HR request requires it. Sick leave is not converted into annual leave automatically.",
         "citations": [
-          "curated-chunk-11"
+          "573a2f31a1dba3e16e69bf1a4d19cb53a29a77f5e5bc5890d2b61de58c8dfdf2"
         ]
       },
       "tags": [
@@ -1668,12 +1783,12 @@
       "split": "HOLDOUT",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 12 ask about?"
+        "question": "A refund request is valid but payment processing is delayed; which team confirms the amount and status?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 12.",
+        "answer": "Support verifies the order, records the reason, and routes the case to the billing queue. Billing confirms the payment method and the permitted amount before the refund is issued. The customer receives a status update when the decision is made; a support agent should not promise a bank settlement date.",
         "citations": [
-          "curated-chunk-12"
+          "b7fa19a920439903b044f784df3f5d21b4d0a4bcac236601266c86113eae75f5"
         ]
       },
       "tags": [
@@ -1692,12 +1807,12 @@
       "split": "HOLDOUT",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 13 ask about?"
+        "question": "出差每天的补贴和餐费发票应该如何区分？"
       },
       "expected": {
-        "answer": "Curated knowledge answer 13.",
+        "answer": "Receipts are required for reimbursable transport, lodging, and meals unless a documented local exception applies. A claim should identify the business purpose and currency, and shared meals should list the attendees. Daily allowances follow the regional rate table; an allowance does not make unrelated personal spending reimbursable.",
         "citations": [
-          "curated-chunk-13"
+          "4af92900a018f08378ee76ea12c39c8a5f1ac9659a60d00c1c8c8e902152ce94"
         ]
       },
       "tags": [
@@ -1716,12 +1831,12 @@
       "split": "HOLDOUT",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 14 ask about?"
+        "question": "Does read access automatically mean that exporting records is safe?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 14.",
+        "answer": "Access follows least privilege: a person receives only the actions and records needed for the approved task. Read access is not automatically safe, and export, delete, and sharing effects require separate consideration. A role change triggers a review rather than silently preserving every previous entitlement.",
         "citations": [
-          "curated-chunk-14"
+          "5f91fdb7e1aad89854a6accf0351027b3647c54fcdb96906a25b3a71e15c6fc0"
         ]
       },
       "tags": [
@@ -1740,12 +1855,12 @@
       "split": "HOLDOUT",
       "category": "KNOWLEDGE_QA",
       "input": {
-        "question": "Which approved knowledge fact does curated QA case 15 ask about?"
+        "question": "I cannot use the verification mailbox, what bilingual recovery route is allowed?"
       },
       "expected": {
-        "answer": "Curated knowledge answer 15.",
+        "answer": "For account recovery, use the official reset page and verify the recovery address before submitting. 如果无法访问验证邮箱，请通过支持工单说明账号标识和可联系时间，客服会先完成身份核验。Support will never ask for the existing password or a one-time code in chat.",
         "citations": [
-          "curated-chunk-15"
+          "a505c441107e5fb4d5fef7e217e631db6eac2ade44e9f7347ec90c083b8df278"
         ]
       },
       "tags": [
@@ -1764,10 +1879,11 @@
       "split": "DEV",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 1?"
+        "question": "What is the exact annual leave carryover limit after the calendar year ends?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1785,10 +1901,11 @@
       "split": "DEV",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 2?"
+        "question": "On which payroll date are approved travel reimbursements deposited?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1806,10 +1923,11 @@
       "split": "DEV",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 3?"
+        "question": "How many remote-work days may each employee use per month?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1827,10 +1945,11 @@
       "split": "DEV",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 4?"
+        "question": "How often must an employee rotate a company service passphrase?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1848,10 +1967,11 @@
       "split": "DEV",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 5?"
+        "question": "How many business days does Billing take to settle an approved refund?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1869,10 +1989,11 @@
       "split": "DEV",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 6?"
+        "question": "What is the guaranteed resolution deadline for a P1 support case?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1887,13 +2008,14 @@
     },
     {
       "case_key": "curated-no-answer-07",
-      "split": "DEV",
+      "split": "HOLDOUT",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 7?"
+        "question": "Which insurance certificate expiry date is required for every supplier renewal?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1911,10 +2033,11 @@
       "split": "HOLDOUT",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 8?"
+        "question": "What is the maximum attachment size for a service ticket?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1932,10 +2055,11 @@
       "split": "HOLDOUT",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 9?"
+        "question": "How many hours may emergency data access remain active?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1953,10 +2077,11 @@
       "split": "HOLDOUT",
       "category": "NO_ANSWER",
       "input": {
-        "question": "Which unpublished internal fact is absent from curated corpus case 10?"
+        "question": "What tax percentage applies to the bilingual invoice correction process?"
       },
       "expected": {
-        "answer": "The corpus does not contain enough information to answer this question."
+        "answer": "The M3 corpus does not state this information.",
+        "answerable": false
       },
       "tags": [
         "curated",
@@ -1974,12 +2099,12 @@
       "split": "DEV",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 1: 2 + 3."
+        "request": "Calculate the business-day window from 09:30 to 17:30 in hours."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "2 + 3"
+          "expression": "8"
         },
         "tool_sequence": [
           "calculator"
@@ -2001,12 +2126,12 @@
       "split": "DEV",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 2: 3 + 4."
+        "request": "Calculate the annual leave balance after adding 12 monthly units."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "3 + 4"
+          "expression": "12 + 1"
         },
         "tool_sequence": [
           "calculator"
@@ -2028,12 +2153,12 @@
       "split": "DEV",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 3: 4 + 5."
+        "request": "Calculate the reimbursable meal total for 3 receipts of 25."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "4 + 5"
+          "expression": "3 * 25"
         },
         "tool_sequence": [
           "calculator"
@@ -2055,12 +2180,12 @@
       "split": "DEV",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 4: 5 + 6."
+        "request": "Calculate the P1 response target in seconds from fifteen minutes."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "5 + 6"
+          "expression": "15 * 60"
         },
         "tool_sequence": [
           "calculator"
@@ -2082,12 +2207,12 @@
       "split": "DEV",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 5: 6 + 7."
+        "request": "Calculate the number of days in the stated travel claim deadline."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "6 + 7"
+          "expression": "30"
         },
         "tool_sequence": [
           "calculator"
@@ -2109,12 +2234,12 @@
       "split": "DEV",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 6: 7 + 8."
+        "request": "Calculate the total of two approved expense amounts, 40 and 15."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "7 + 8"
+          "expression": "40 + 15"
         },
         "tool_sequence": [
           "calculator"
@@ -2136,12 +2261,12 @@
       "split": "DEV",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 7: 8 + 9."
+        "request": "Calculate the priority score represented by three normal support cases."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "8 + 9"
+          "expression": "3 * 1"
         },
         "tool_sequence": [
           "calculator"
@@ -2163,12 +2288,12 @@
       "split": "HOLDOUT",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 8: 9 + 10."
+        "request": "Calculate the handover review count for two leave dates and one contact."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "9 + 10"
+          "expression": "2 + 1"
         },
         "tool_sequence": [
           "calculator"
@@ -2190,12 +2315,12 @@
       "split": "HOLDOUT",
       "category": "TOOL",
       "input": {
-        "request": "Use calculator for curated expression 9: 10 + 11."
+        "request": "Calculate the combined count of requester and owner fields in an intake record."
       },
       "expected": {
         "tool_identity": "calculator",
         "arguments": {
-          "expression": "10 + 11"
+          "expression": "2"
         },
         "tool_sequence": [
           "calculator"
@@ -2217,11 +2342,11 @@
       "split": "DEV",
       "category": "MULTI_STEP",
       "input": {
-        "task": "Complete curated workflow 1 using lookup then calculation."
+        "task": "Find the collaboration window and calculate its duration."
       },
       "expected": {
         "steps": [
-          "lookup",
+          "search_knowledge",
           "calculator"
         ],
         "terminal_status": "SUCCEEDED"
@@ -2242,11 +2367,11 @@
       "split": "DEV",
       "category": "MULTI_STEP",
       "input": {
-        "task": "Complete curated workflow 2 using lookup then calculation."
+        "task": "Find the annual-leave approval rule and calculate a two-month accrual."
       },
       "expected": {
         "steps": [
-          "lookup",
+          "search_knowledge",
           "calculator"
         ],
         "terminal_status": "SUCCEEDED"
@@ -2267,11 +2392,11 @@
       "split": "DEV",
       "category": "MULTI_STEP",
       "input": {
-        "task": "Complete curated workflow 3 using lookup then calculation."
+        "task": "Find the P1 response target and convert fifteen minutes to seconds."
       },
       "expected": {
         "steps": [
-          "lookup",
+          "search_knowledge",
           "calculator"
         ],
         "terminal_status": "SUCCEEDED"
@@ -2292,11 +2417,11 @@
       "split": "DEV",
       "category": "MULTI_STEP",
       "input": {
-        "task": "Complete curated workflow 4 using lookup then calculation."
+        "task": "Find the supplier renewal rule and calculate two review checkpoints."
       },
       "expected": {
         "steps": [
-          "lookup",
+          "search_knowledge",
           "calculator"
         ],
         "terminal_status": "SUCCEEDED"
@@ -2317,11 +2442,11 @@
       "split": "HOLDOUT",
       "category": "MULTI_STEP",
       "input": {
-        "task": "Complete curated workflow 5 using lookup then calculation."
+        "task": "Find the ticket closure rule and calculate three recorded follow-ups."
       },
       "expected": {
         "steps": [
-          "lookup",
+          "search_knowledge",
           "calculator"
         ],
         "terminal_status": "SUCCEEDED"
@@ -2342,11 +2467,11 @@
       "split": "HOLDOUT",
       "category": "MULTI_STEP",
       "input": {
-        "task": "Complete curated workflow 6 using lookup then calculation."
+        "task": "Find the least-privilege rule and calculate two separately reviewed effects."
       },
       "expected": {
         "steps": [
-          "lookup",
+          "search_knowledge",
           "calculator"
         ],
         "terminal_status": "SUCCEEDED"

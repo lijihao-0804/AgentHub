@@ -13,6 +13,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from benchmarks.retrieval.corpus import chunk_ids_by_section
+from benchmarks.retrieval.schema import load_dataset
 from packages.evaluation.validation import dataset_content_hash, validate_dataset_items
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -34,9 +36,13 @@ def _item(
     expected: dict[str, Any],
     source_kind: str,
     source_id: str,
+    source_split: str | None = None,
     tags: list[str],
     ordinal: int,
 ) -> dict[str, Any]:
+    provenance = {"source_kind": source_kind, "source_id": source_id}
+    if source_split is not None:
+        provenance["source_split"] = source_split
     return {
         "case_key": case_key,
         "split": split.upper(),
@@ -44,36 +50,41 @@ def _item(
         "input": input_value,
         "expected": expected,
         "tags": tags,
-        "source_provenance": {"source_kind": source_kind, "source_id": source_id},
+        "source_provenance": provenance,
         "ordinal": ordinal,
     }
 
 
 def _retrieval_items(start_ordinal: int) -> list[dict[str, Any]]:
-    raw = _read("benchmarks/retrieval/dataset.json")
+    dataset = load_dataset(PROJECT_ROOT / "benchmarks" / "retrieval" / "dataset.json")
     corpus = {
-        (
-            document["document_key"],
-            section["section_key"],
-        ): f"m3-{document['document_key']}-{section['section_key']}"
-        for document in raw["corpus"]
-        for section in document["sections"]
+        (document.document_key, document.revision_key, section_key): chunk_ids
+        for document in dataset.corpus
+        for section_key, chunk_ids in chunk_ids_by_section(document).items()
     }
     items: list[dict[str, Any]] = []
-    for index, case in enumerate(raw["cases"]):
+    for index, case in enumerate(dataset.cases):
         relevant = [
-            corpus[(ground_truth["document_key"], ground_truth["locator"]["section_key"])]
-            for ground_truth in case["ground_truth"]
+            chunk_id
+            for ground_truth in case.ground_truth
+            for chunk_id in corpus[
+                (
+                    ground_truth.document_key,
+                    ground_truth.revision_key,
+                    ground_truth.locator["section_key"],
+                )
+            ]
         ]
         items.append(
             _item(
-                case_key=f"m3-{case['id']}",
-                split=case["split"],
+                case_key=f"m3-{case.case_id}",
+                split=case.split,
                 category="RETRIEVAL",
-                input_value={"query": case["query"]},
+                input_value={"query": case.query},
                 expected={"relevant_chunk_ids": relevant},
                 source_kind="historical_benchmark",
-                source_id=f"m3-retrieval-v1:{case['id']}",
+                source_id=f"m3-retrieval-v1:{case.case_id}",
+                source_split=case.split.upper(),
                 tags=["historical", "m3", "retrieval"],
                 ordinal=start_ordinal + index,
             )
@@ -101,7 +112,11 @@ def _legacy_items(start_ordinal: int) -> list[dict[str, Any]]:
             }
             category = "MULTI_STEP"
         elif case["category"] == "approval_unavailable":
-            expected = {"decision": "PENDING", "approval_required": True}
+            expected = {
+                "decision": "UNAVAILABLE",
+                "approval_required": True,
+                "failure_code": case["expected"]["failure_code"],
+            }
             category = "APPROVAL"
         else:
             continue
@@ -120,6 +135,7 @@ def _legacy_items(start_ordinal: int) -> list[dict[str, Any]]:
                 expected=expected,
                 source_kind="historical_benchmark",
                 source_id=f"m4-agent-runtime-v1:{case['case_id']}",
+                source_split=case["split"].upper(),
                 tags=["historical", "m4", category.lower()],
                 ordinal=ordinal,
             )
@@ -138,12 +154,22 @@ def _approval_items(start_ordinal: int) -> list[dict[str, Any]]:
         items.append(
             _item(
                 case_key=f"m5-{case['case_id']}",
-                split="DEV" if index < 5 else "HOLDOUT",
+                split=case["split"],
                 category="APPROVAL",
                 input_value={"action": f"Approval sequence {case['case_id']}: {actions}."},
-                expected={"decision": decision, "approval_required": True},
+                expected={
+                    "decision": decision,
+                    "approval_required": True,
+                    "execution_status": case["expected"]["execution_status"],
+                    "run_status": case["expected"]["run_status"],
+                    "ticket_count": case["expected"]["ticket_count"],
+                    "execution_calls": case["expected"]["execution_calls"],
+                    "authorization_ok": case["expected"]["authorization_ok"],
+                    "resume_success": case["expected"]["resume_success"],
+                },
                 source_kind="historical_benchmark",
                 source_id=f"m5-approval-runtime-v1:{case['case_id']}",
+                source_split=case["split"].upper(),
                 tags=["historical", "m5", "approval"],
                 ordinal=start_ordinal + index,
             )
@@ -158,12 +184,16 @@ def _failure_items(start_ordinal: int) -> list[dict[str, Any]]:
         items.append(
             _item(
                 case_key=f"m6-{case['case_id']}",
-                split="DEV" if index < 8 else "HOLDOUT",
+                # The historical M6 file has no split field.  Keep all cases in DEV rather
+                # than inventing a HOLDOUT assignment to satisfy the unified ratio.
+                split="DEV",
                 category="FAILURE",
                 input_value={"scenario": case["scenario"]},
                 expected={
                     "status": case["expected_run_status"],
                     "failure_code": case["expected_failure_code"],
+                    "failure_category": case["expected_failure_category"],
+                    "runtime_path": case["runtime_path"],
                 },
                 source_kind="historical_benchmark",
                 source_id=f"m6-observability-failure-v1:{case['case_id']}",
@@ -175,22 +205,33 @@ def _failure_items(start_ordinal: int) -> list[dict[str, Any]]:
 
 
 def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
+    retrieval_dataset = load_dataset(PROJECT_ROOT / "benchmarks" / "retrieval" / "dataset.json")
+    sections = {
+        (document.document_key, document.revision_key, section.section_key): section.text
+        for document in retrieval_dataset.corpus
+        for section in document.sections
+    }
+    section_chunks = {
+        (document.document_key, document.revision_key, section_key): chunk_ids
+        for document in retrieval_dataset.corpus
+        for section_key, chunk_ids in chunk_ids_by_section(document).items()
+    }
     items: list[dict[str, Any]] = []
     ordinal = start_ordinal
-    for index in range(15):
+    qa_cases = [*retrieval_dataset.cases[:10], *retrieval_dataset.cases[20:25]]
+    for index, case in enumerate(qa_cases):
+        ground_truth = case.ground_truth[0]
+        section_key = ground_truth.locator["section_key"]
+        corpus_key = (ground_truth.document_key, ground_truth.revision_key, section_key)
         items.append(
             _item(
                 case_key=f"curated-qa-{index + 1:02d}",
-                split="DEV" if index < 10 else "HOLDOUT",
+                split=case.split,
                 category="KNOWLEDGE_QA",
-                input_value={
-                    "question": (
-                        f"Which approved knowledge fact does curated QA case {index + 1} ask about?"
-                    )
-                },
+                input_value={"question": case.query},
                 expected={
-                    "answer": f"Curated knowledge answer {index + 1}.",
-                    "citations": [f"curated-chunk-{index + 1:02d}"],
+                    "answer": sections[corpus_key],
+                    "citations": list(section_chunks[corpus_key]),
                 },
                 source_kind="m7h_curated",
                 source_id=f"m7h-qa-{index + 1:02d}",
@@ -199,22 +240,28 @@ def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
             )
         )
         ordinal += 1
-    for index in range(10):
+    no_answer_questions = [
+        "What is the exact annual leave carryover limit after the calendar year ends?",
+        "On which payroll date are approved travel reimbursements deposited?",
+        "How many remote-work days may each employee use per month?",
+        "How often must an employee rotate a company service passphrase?",
+        "How many business days does Billing take to settle an approved refund?",
+        "What is the guaranteed resolution deadline for a P1 support case?",
+        "Which insurance certificate expiry date is required for every supplier renewal?",
+        "What is the maximum attachment size for a service ticket?",
+        "How many hours may emergency data access remain active?",
+        "What tax percentage applies to the bilingual invoice correction process?",
+    ]
+    for index, question in enumerate(no_answer_questions):
         items.append(
             _item(
                 case_key=f"curated-no-answer-{index + 1:02d}",
-                split="DEV" if index < 7 else "HOLDOUT",
+                split="DEV" if index < 6 else "HOLDOUT",
                 category="NO_ANSWER",
-                input_value={
-                    "question": (
-                        "Which unpublished internal fact is absent from curated corpus "
-                        f"case {index + 1}?"
-                    )
-                },
+                input_value={"question": question},
                 expected={
-                    "answer": (
-                        "The corpus does not contain enough information to answer this question."
-                    )
+                    "answer": "The M3 corpus does not state this information.",
+                    "answerable": False,
                 },
                 source_kind="m7h_curated",
                 source_id=f"m7h-no-answer-{index + 1:02d}",
@@ -223,21 +270,27 @@ def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
             )
         )
         ordinal += 1
-    for index in range(9):
+    tool_tasks = [
+        ("Calculate the business-day window from 09:30 to 17:30 in hours.", "8"),
+        ("Calculate the annual leave balance after adding 12 monthly units.", "12 + 1"),
+        ("Calculate the reimbursable meal total for 3 receipts of 25.", "3 * 25"),
+        ("Calculate the P1 response target in seconds from fifteen minutes.", "15 * 60"),
+        ("Calculate the number of days in the stated travel claim deadline.", "30"),
+        ("Calculate the total of two approved expense amounts, 40 and 15.", "40 + 15"),
+        ("Calculate the priority score represented by three normal support cases.", "3 * 1"),
+        ("Calculate the handover review count for two leave dates and one contact.", "2 + 1"),
+        ("Calculate the combined count of requester and owner fields in an intake record.", "2"),
+    ]
+    for index, (request, expression) in enumerate(tool_tasks):
         items.append(
             _item(
                 case_key=f"curated-tool-{index + 1:02d}",
                 split="DEV" if index < 7 else "HOLDOUT",
                 category="TOOL",
-                input_value={
-                    "request": (
-                        f"Use calculator for curated expression {index + 1}: "
-                        f"{index + 2} + {index + 3}."
-                    )
-                },
+                input_value={"request": request},
                 expected={
                     "tool_identity": "calculator",
-                    "arguments": {"expression": f"{index + 2} + {index + 3}"},
+                    "arguments": {"expression": expression},
                     "tool_sequence": ["calculator"],
                 },
                 source_kind="m7h_curated",
@@ -247,16 +300,40 @@ def _curated_items(start_ordinal: int) -> list[dict[str, Any]]:
             )
         )
         ordinal += 1
-    for index in range(6):
+    multi_step_tasks = [
+        (
+            "Find the collaboration window and calculate its duration.",
+            ["search_knowledge", "calculator"],
+        ),
+        (
+            "Find the annual-leave approval rule and calculate a two-month accrual.",
+            ["search_knowledge", "calculator"],
+        ),
+        (
+            "Find the P1 response target and convert fifteen minutes to seconds.",
+            ["search_knowledge", "calculator"],
+        ),
+        (
+            "Find the supplier renewal rule and calculate two review checkpoints.",
+            ["search_knowledge", "calculator"],
+        ),
+        (
+            "Find the ticket closure rule and calculate three recorded follow-ups.",
+            ["search_knowledge", "calculator"],
+        ),
+        (
+            "Find the least-privilege rule and calculate two separately reviewed effects.",
+            ["search_knowledge", "calculator"],
+        ),
+    ]
+    for index, (task, steps) in enumerate(multi_step_tasks):
         items.append(
             _item(
                 case_key=f"curated-multi-step-{index + 1:02d}",
                 split="DEV" if index < 4 else "HOLDOUT",
                 category="MULTI_STEP",
-                input_value={
-                    "task": f"Complete curated workflow {index + 1} using lookup then calculation."
-                },
-                expected={"steps": ["lookup", "calculator"], "terminal_status": "SUCCEEDED"},
+                input_value={"task": task},
+                expected={"steps": steps, "terminal_status": "SUCCEEDED"},
                 source_kind="m7h_curated",
                 source_id=f"m7h-multi-step-{index + 1:02d}",
                 tags=["curated", "m7-h", "multi-step"],

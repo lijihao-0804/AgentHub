@@ -39,18 +39,33 @@ _CATEGORY_SHAPES: dict[str, tuple[frozenset[str], frozenset[str], frozenset[str]
         frozenset({"tool_identity", "arguments"}),
         frozenset({"tool_sequence"}),
     ),
-    "NO_ANSWER": (frozenset({"question"}), frozenset({"answer"}), frozenset()),
+    "NO_ANSWER": (frozenset({"question"}), frozenset({"answer"}), frozenset({"answerable"})),
     "APPROVAL": (
         frozenset({"action"}),
         frozenset({"decision"}),
-        frozenset({"approval_required"}),
+        frozenset(
+            {
+                "approval_required",
+                "execution_status",
+                "run_status",
+                "ticket_count",
+                "execution_calls",
+                "authorization_ok",
+                "resume_success",
+                "failure_code",
+            }
+        ),
     ),
     "MULTI_STEP": (
         frozenset({"task"}),
         frozenset({"steps"}),
         frozenset({"terminal_status"}),
     ),
-    "FAILURE": (frozenset({"scenario"}), frozenset({"status", "failure_code"}), frozenset()),
+    "FAILURE": (
+        frozenset({"scenario"}),
+        frozenset({"status", "failure_code"}),
+        frozenset({"failure_category", "runtime_path"}),
+    ),
 }
 
 
@@ -249,6 +264,12 @@ def _validate_category_types(
         raise AgentHubError(
             "EVALUATION_DATASET_INVALID", "No-answer expected data is invalid.", 422
         )
+    if category == "NO_ANSWER" and "answerable" in expected_value and not isinstance(
+        expected_value["answerable"], bool
+    ):
+        raise AgentHubError(
+            "EVALUATION_DATASET_INVALID", "No-answer answerability is invalid.", 422
+        )
     if category == "APPROVAL" and not isinstance(expected_value["decision"], str):
         raise AgentHubError("EVALUATION_DATASET_INVALID", "Approval expected data is invalid.", 422)
     if (
@@ -257,6 +278,26 @@ def _validate_category_types(
         and not isinstance(expected_value["approval_required"], bool)
     ):
         raise AgentHubError("EVALUATION_DATASET_INVALID", "Approval requirement is invalid.", 422)
+    if category == "APPROVAL":
+        for field in ("execution_status", "run_status"):
+            if field in expected_value and not isinstance(expected_value[field], str):
+                raise AgentHubError("EVALUATION_DATASET_INVALID", "Approval state is invalid.", 422)
+        for field in ("ticket_count", "execution_calls"):
+            if field in expected_value and (
+                isinstance(expected_value[field], bool)
+                or not isinstance(expected_value[field], int)
+            ):
+                raise AgentHubError("EVALUATION_DATASET_INVALID", "Approval count is invalid.", 422)
+        for field in ("authorization_ok", "resume_success"):
+            if field in expected_value and not isinstance(expected_value[field], bool):
+                raise AgentHubError("EVALUATION_DATASET_INVALID", "Approval flag is invalid.", 422)
+        if "failure_code" in expected_value and not (
+            expected_value["failure_code"] is None
+            or isinstance(expected_value["failure_code"], str)
+        ):
+            raise AgentHubError(
+                "EVALUATION_DATASET_INVALID", "Approval failure code is invalid.", 422
+            )
     if category == "MULTI_STEP" and not _string_list(expected_value["steps"]):
         raise AgentHubError(
             "EVALUATION_DATASET_INVALID", "Multi-step expected data is invalid.", 422
@@ -277,6 +318,11 @@ def _validate_category_types(
             raise AgentHubError(
                 "EVALUATION_DATASET_INVALID", "Failure expected data is invalid.", 422
             )
+        for field in ("failure_category", "runtime_path"):
+            if field in expected_value and not isinstance(expected_value[field], str):
+                raise AgentHubError(
+                    "EVALUATION_DATASET_INVALID", "Failure metadata is invalid.", 422
+                )
 
 
 def _string_list(value: Any) -> bool:

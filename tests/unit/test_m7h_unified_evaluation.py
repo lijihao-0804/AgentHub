@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from benchmarks.evaluation.dataset_builder import build_items
+from benchmarks.retrieval.corpus import chunk_ids_by_section
+from benchmarks.retrieval.schema import load_dataset
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.metrics import MetricStatus, evaluate_case
 from packages.evaluation.runner import DeterministicEvaluationDriver
@@ -105,3 +109,67 @@ def test_unified_dataset_has_frozen_distribution_and_all_splits() -> None:
         "MULTI_STEP",
         "FAILURE",
     }
+
+
+def test_unified_corpus_cases_use_formal_chunk_identity_and_no_placeholders() -> None:
+    items = build_items()
+    retrieval_dataset = load_dataset(Path("benchmarks/retrieval/dataset.json"))
+    formal_chunk_ids = {
+        chunk_id
+        for document in retrieval_dataset.corpus
+        for chunk_ids in chunk_ids_by_section(document).values()
+        for chunk_id in chunk_ids
+    }
+    for item in items:
+        if item["category"] == "RETRIEVAL":
+            assert set(item["expected"]["relevant_chunk_ids"]).issubset(formal_chunk_ids)
+        if item["category"] == "KNOWLEDGE_QA":
+            assert set(item["expected"]["citations"]).issubset(formal_chunk_ids)
+            assert any(
+                item["expected"]["answer"] in section.text
+                for document in retrieval_dataset.corpus
+                for section in document.sections
+            )
+
+    serialized = json.dumps(items, ensure_ascii=False)
+    assert "curated-chunk-" not in serialized
+    assert "lookup" not in serialized
+    assert "placeholder" not in serialized.lower()
+
+    allowed_tools = {"query_customer", "search_knowledge", "calculator"}
+    for item in items:
+        if item["category"] == "TOOL":
+            assert item["expected"]["tool_identity"] in allowed_tools
+        if item["category"] == "MULTI_STEP":
+            assert set(item["expected"]["steps"]).issubset(allowed_tools)
+
+
+def test_historical_semantics_and_splits_are_not_reassigned() -> None:
+    items = build_items()
+    by_key = {item["case_key"]: item for item in items}
+    m3 = json.loads(Path("benchmarks/retrieval/dataset.json").read_text(encoding="utf-8"))
+    for case in m3["cases"]:
+        assert by_key[f"m3-{case['id']}"]["split"] == case["split"].upper()
+
+    m4 = json.loads(Path("benchmarks/agent_runtime/dataset.json").read_text(encoding="utf-8"))
+    for case in m4["cases"]:
+        if case["category"] == "approval_unavailable":
+            item = by_key[f"m4-{case['case_id']}"]
+            assert item["split"] == case["split"].upper()
+            assert item["expected"]["decision"] != "PENDING"
+            assert item["expected"]["failure_code"] == case["expected"]["failure_code"]
+
+    m5 = json.loads(Path("benchmarks/approval_runtime/dataset.json").read_text(encoding="utf-8"))
+    for case in m5["cases"][:7]:
+        item = by_key[f"m5-{case['case_id']}"]
+        assert item["split"] == case["split"].upper()
+        assert item["expected"]["execution_status"] == case["expected"]["execution_status"]
+        assert item["expected"]["run_status"] == case["expected"]["run_status"]
+
+    m6 = json.loads(Path("benchmarks/observability/dataset.json").read_text(encoding="utf-8"))
+    assert all("split" not in case for case in m6["cases"])
+    assert all(by_key[f"m6-{case['case_id']}"]["split"] == "DEV" for case in m6["cases"])
+
+    for item in items:
+        if item["category"] == "NO_ANSWER":
+            assert item["expected"]["answerable"] is False
