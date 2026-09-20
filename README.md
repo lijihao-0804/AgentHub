@@ -9,7 +9,7 @@ is PASS. M5-A Approval Runtime + Durable Approval Resume is accepted; M5-B MCP h
 M6-A Run Query, Run Detail and Timeline and M6-B Metrics / Dashboard / Failure Analytics are
 accepted on the observability branch. M6 overall is PASS; M7-A through M7-F are accepted, and
 M7-H backend deterministic evaluation conformance is recorded. M7-E/F semantic closure and the
-real retrieval ablation were verified by exact-head GitHub Actions run #137. M7-G frontend
+real retrieval ablation were verified by exact-head GitHub Actions. M7-G frontend
 integration remains pending, so M7 overall is not marked complete.
 Post-M5 review hardening is recorded separately and does not change the frozen M5-A state machine.
 

@@ -9,7 +9,7 @@ benchmark and must not be reported as agent accuracy.
 | --- | --- |
 | Version | `m7-unified-evaluation-v1` |
 | Schema | `1` |
-| Hash | `d47653b9b9cda0317a2268e8228da81169b6f19279c75cb7d01935e8bdf10fc6` |
+| Hash | `7afdc764b3804296a2d244d492ab9065d6252746ed115dd719a22cfaa2d67b4f` |
 | Cases | `100` |
 | DEV / HOLDOUT | `70 / 30` |
 | Historical / curated | `60 / 40` |
@@ -19,14 +19,17 @@ benchmark and must not be reported as agent accuracy.
 | RETRIEVAL | 20 | 10 | 30 |
 | KNOWLEDGE_QA | 10 | 5 | 15 |
 | TOOL | 11 | 4 | 15 |
-| NO_ANSWER | 7 | 3 | 10 |
-| APPROVAL | 7 | 3 | 10 |
+| NO_ANSWER | 6 | 4 | 10 |
+| APPROVAL | 6 | 4 | 10 |
 | MULTI_STEP | 7 | 3 | 10 |
 | FAILURE | 8 | 2 | 10 |
 | **Total** | **70** | **30** | **100** |
 
 Source provenance distribution: historical benchmark `60` (M3/M4/M5/M6 normalized cases),
-M7-H curated `40`. The original historical dataset files are not modified.
+M7-H curated `40`. The original historical dataset files are not modified. M3/M4/M5 source
+splits and semantics are preserved; M6 has no source split and remains DEV without invented
+HOLDOUT assignments. M4 `approval_unavailable` remains `UNAVAILABLE` with its original failure
+code.
 
 ## Deterministic conformance result
 
@@ -39,8 +42,9 @@ The formal PostgreSQL run persists all `200` case executions across two variants
   approval decision accuracy, denied action execution, unauthorized execution, and duplicate
   side effects.
 
-The committed run artifact is:
-[`benchmarks/evaluation/results/m7-unified-conformance-74194f25c77a85e837e72b5a20ca4ffce0e89f88.json`](../../benchmarks/evaluation/results/m7-unified-conformance-74194f25c77a85e837e72b5a20ca4ffce0e89f88.json).
+The exact-head GitHub Actions backend job generates and uploads
+`m7-unified-conformance-<commit-sha>.json` from its real PostgreSQL service. The workflow does
+not hard-code an Actions run number.
 
 `DETERMINISTIC_CONFORMANCE_ONLY = true`. The driver produces typed observations to validate
 runner and evaluator semantics; it does not measure real LLM reasoning quality.
