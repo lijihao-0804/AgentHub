@@ -24,6 +24,20 @@ const TONE_BY_STATUS: Record<string, StatusTone> = {
   UNKNOWN_OUTCOME: "attention",
   // Timeline step statuses
   COMPLETED: "success",
+  // Evaluation artifact statuses
+  DRAFT: "warning",
+  PUBLISHED: "success",
+  READY: "success",
+  QUEUED: "info",
+  AVAILABLE: "success",
+  NOT_AVAILABLE: "neutral",
+  NOT_APPLICABLE: "neutral",
+  COMPLETE: "success",
+  INCOMPLETE: "warning",
+  NOT_COMPARABLE: "neutral",
+  PASS: "success",
+  FAIL: "danger",
+  INCONCLUSIVE: "neutral",
 };
 
 export function statusTone(status: string): StatusTone {

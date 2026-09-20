@@ -58,6 +58,7 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }
 
 function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
   const { t } = useI18n();
+  const pathname = usePathname() ?? "";
   return (
     <>
       <div className="sidebar-brand">
@@ -78,13 +79,17 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
           </div>
         ))}
         <div className="nav-group">
-          <p className="nav-group-heading">{t("nav.comingLater")}</p>
+          <p className="nav-group-heading">{t("evaluation.eyebrow")}</p>
           <ul>
             <li>
-              <span className="nav-link nav-link-disabled" aria-disabled="true">
+              <Link
+                href="/evaluations"
+                className={`nav-link${pathname.startsWith("/evaluations") ? " nav-link-active" : ""}`}
+                aria-current={pathname.startsWith("/evaluations") ? "page" : undefined}
+                onClick={onNavigate}
+              >
                 {t("nav.evaluations")}
-                <span className="nav-soon">{t("nav.planned")}</span>
-              </span>
+              </Link>
             </li>
           </ul>
         </div>
