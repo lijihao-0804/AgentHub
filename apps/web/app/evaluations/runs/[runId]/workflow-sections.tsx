@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import StatusBadge from "../../../../components/status-badge";
 import { EmptyState, ErrorState, Panel } from "../../../../components/states";
@@ -27,10 +27,12 @@ import {
   listReleaseGatePolicies,
   materializeExperimentRunMetrics,
   narrowMetricGroup,
+  uniqueById,
+  upsertById,
 } from "../../../../lib/evaluation";
 import { useI18n } from "../../../../i18n/provider";
 
-type AuthInput = { workspaceId: string; accessToken: string };
+type AuthInput = { workspaceId: string; accessToken: string; sessionId: number };
 
 type MetricsState =
   | { kind: "loading" }
@@ -86,26 +88,58 @@ export default function RunWorkflow({
   const [comparisonError, setComparisonError] = useState<string | null>(null);
 
   const [ablation, setAblation] = useState<EvaluationAblation | null>(null);
-  const [ablationState, setAblationState] = useState<"loading" | "absent" | "ready">("loading");
+  const [ablationState, setAblationState] = useState<"loading" | "absent" | "ready" | "error">("loading");
   const [ablationError, setAblationError] = useState<string | null>(null);
   const [creatingAblation, setCreatingAblation] = useState(false);
 
   const [policies, setPolicies] = useState<ReleaseGatePolicy[] | null>(null);
+  const [policiesError, setPoliciesError] = useState<ApiError | null>(null);
   const [policyId, setPolicyId] = useState("");
   const [decisions, setDecisions] = useState<ReleaseGateDecision[]>([]);
   const [decisionsLoaded, setDecisionsLoaded] = useState(false);
+  const [decisionsError, setDecisionsError] = useState<ApiError | null>(null);
   const [runningGate, setRunningGate] = useState(false);
   const [gateError, setGateError] = useState<string | null>(null);
+  const activeSessionRef = useRef(input.sessionId);
+  activeSessionRef.current = input.sessionId;
+
+  useEffect(() => {
+    setMetrics({ kind: "loading" });
+    setMetricsError(null);
+    setMaterializing(false);
+    setComparisons(null);
+    setComparisonsError(null);
+    setSelectedComparisonId(null);
+    setBaselineId("");
+    setCandidateId("");
+    setCreatingComparison(false);
+    setComparisonError(null);
+    setAblation(null);
+    setAblationState("loading");
+    setAblationError(null);
+    setCreatingAblation(false);
+    setPolicies(null);
+    setPoliciesError(null);
+    setPolicyId("");
+    setDecisions([]);
+    setDecisionsLoaded(false);
+    setDecisionsError(null);
+    setRunningGate(false);
+    setGateError(null);
+  }, [input.sessionId, run.id]);
 
   const gateEligible = run.purpose === "RELEASE_GATE" && run.split === "HOLDOUT";
 
   const loadMetrics = useCallback(async () => {
+    const requestSessionId = input.sessionId;
     setMetrics({ kind: "loading" });
     setMetricsError(null);
     try {
       const payload = await getExperimentRunMetrics(input, run.id);
+      if (activeSessionRef.current !== requestSessionId) return;
       setMetrics({ kind: "ready", payload });
     } catch (caught) {
+      if (activeSessionRef.current !== requestSessionId) return;
       const apiError = toApiError(caught, "");
       if (apiError.code === "EVALUATION_METRICS_NOT_MATERIALIZED") {
         setMetrics({ kind: "notMaterialized" });
@@ -113,40 +147,47 @@ export default function RunWorkflow({
         setMetrics({ kind: "error", error: apiError });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run.id, input.workspaceId, input.accessToken]);
+  }, [run.id, input.sessionId, input.workspaceId, input.accessToken]);
 
   useEffect(() => {
     if (terminal) void loadMetrics();
   }, [terminal, loadMetrics]);
 
   async function materialize() {
+    const requestSessionId = input.sessionId;
     setMaterializing(true);
     setMetricsError(null);
     try {
       const payload = await materializeExperimentRunMetrics(input, run.id);
+      if (activeSessionRef.current !== requestSessionId) return;
       setMetrics({ kind: "ready", payload });
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setMetricsError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setMetricsError(apiError.message || apiError.code);
     } finally {
-      setMaterializing(false);
+      if (activeSessionRef.current === requestSessionId) setMaterializing(false);
     }
   }
 
   const metricsReady = metrics.kind === "ready";
 
   const loadComparisons = useCallback(async () => {
+    const requestSessionId = input.sessionId;
     setComparisonsError(null);
     try {
       const list = await listExperimentComparisons(input, run.id);
-      setComparisons(list);
-      setSelectedComparisonId((current) => current ?? list[list.length - 1]?.id ?? null);
+      if (activeSessionRef.current !== requestSessionId) return;
+      const uniqueComparisons = uniqueById(list);
+      setComparisons(uniqueComparisons);
+      setSelectedComparisonId((current) =>
+        current && uniqueComparisons.some((comparison) => comparison.id === current)
+          ? current
+          : uniqueComparisons[uniqueComparisons.length - 1]?.id ?? null,
+      );
     } catch (caught) {
-      setComparisonsError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setComparisonsError(toApiError(caught, ""));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run.id, input.workspaceId, input.accessToken]);
+  }, [run.id, input.sessionId, input.workspaceId, input.accessToken]);
 
   useEffect(() => {
     if (metricsReady) void loadComparisons();
@@ -156,21 +197,23 @@ export default function RunWorkflow({
     event.preventDefault();
     setComparisonError(null);
     if (!baselineId || !candidateId || baselineId === candidateId) return;
+    const requestSessionId = input.sessionId;
     setCreatingComparison(true);
     try {
       const comparison = await createExperimentComparison(input, run.id, {
         baseline_variant_id: baselineId,
         candidate_variant_id: candidateId,
       });
-      setComparisons((current) => [...(current ?? []), comparison]);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setComparisons((current) => upsertById(current, comparison));
       setSelectedComparisonId(comparison.id);
       setBaselineId("");
       setCandidateId("");
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setComparisonError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setComparisonError(apiError.message || apiError.code);
     } finally {
-      setCreatingComparison(false);
+      if (activeSessionRef.current === requestSessionId) setCreatingComparison(false);
     }
   }
 
@@ -178,63 +221,75 @@ export default function RunWorkflow({
 
   const loadAblation = useCallback(async () => {
     if (!selectedComparisonId) return;
+    const requestSessionId = input.sessionId;
     setAblationState("loading");
     setAblationError(null);
     try {
-      setAblation(await getExperimentAblation(input, run.id, selectedComparisonId));
+      const nextAblation = await getExperimentAblation(input, run.id, selectedComparisonId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setAblation(nextAblation);
       setAblationState("ready");
     } catch (caught) {
+      if (activeSessionRef.current !== requestSessionId) return;
       const apiError = toApiError(caught, "");
       if (apiError.code === "ABLATION_NOT_FOUND" || apiError.status === 404) {
         setAblationState("absent");
       } else {
         setAblationError(apiError.message || apiError.code);
-        setAblationState("absent");
+        setAblationState("error");
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedComparisonId, run.id, input.workspaceId, input.accessToken]);
+  }, [selectedComparisonId, run.id, input.sessionId, input.workspaceId, input.accessToken]);
 
   useEffect(() => {
     setAblation(null);
+    setAblationError(null);
     if (selectedComparisonId) void loadAblation();
   }, [selectedComparisonId, loadAblation]);
 
   async function createAblation() {
     if (!selectedComparisonId) return;
+    const requestSessionId = input.sessionId;
     setCreatingAblation(true);
     setAblationError(null);
     try {
-      setAblation(await createExperimentAblation(input, run.id, selectedComparisonId));
+      const nextAblation = await createExperimentAblation(input, run.id, selectedComparisonId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setAblation(nextAblation);
       setAblationState("ready");
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setAblationError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setAblationError(apiError.message || apiError.code);
     } finally {
-      setCreatingAblation(false);
+      if (activeSessionRef.current === requestSessionId) setCreatingAblation(false);
     }
   }
 
   const loadPolicies = useCallback(async () => {
+    const requestSessionId = input.sessionId;
+    setPoliciesError(null);
     try {
-      setPolicies(await listReleaseGatePolicies(input));
-    } catch {
-      setPolicies([]);
+      const nextPolicies = await listReleaseGatePolicies(input);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setPolicies(uniqueById(nextPolicies));
+    } catch (caught) {
+      if (activeSessionRef.current === requestSessionId) setPoliciesError(toApiError(caught, ""));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input.workspaceId, input.accessToken]);
+  }, [input.sessionId, input.workspaceId, input.accessToken]);
 
   const loadDecisions = useCallback(async () => {
     if (!selectedComparisonId) return;
+    const requestSessionId = input.sessionId;
+    setDecisionsError(null);
     try {
-      setDecisions(await listReleaseGateDecisions(input, run.id, selectedComparisonId));
+      const nextDecisions = await listReleaseGateDecisions(input, run.id, selectedComparisonId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setDecisions(uniqueById(nextDecisions));
       setDecisionsLoaded(true);
-    } catch {
-      setDecisions([]);
-      setDecisionsLoaded(true);
+    } catch (caught) {
+      if (activeSessionRef.current === requestSessionId) setDecisionsError(toApiError(caught, ""));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedComparisonId, run.id, input.workspaceId, input.accessToken]);
+  }, [selectedComparisonId, run.id, input.sessionId, input.workspaceId, input.accessToken]);
 
   useEffect(() => {
     if (gateEligible) void loadPolicies();
@@ -243,22 +298,25 @@ export default function RunWorkflow({
   useEffect(() => {
     setDecisions([]);
     setDecisionsLoaded(false);
+    setDecisionsError(null);
     if (selectedComparisonId && gateEligible) void loadDecisions();
   }, [selectedComparisonId, gateEligible, loadDecisions]);
 
   async function runGate() {
     if (!selectedComparisonId || !policyId) return;
+    const requestSessionId = input.sessionId;
     setRunningGate(true);
     setGateError(null);
     try {
       const decision = await createReleaseGateDecision(input, run.id, selectedComparisonId, { policy_id: policyId });
-      setDecisions((current) => [...current, decision]);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setDecisions((current) => upsertById(current, decision));
       setPolicyId("");
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setGateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setGateError(apiError.message || apiError.code);
     } finally {
-      setRunningGate(false);
+      if (activeSessionRef.current === requestSessionId) setRunningGate(false);
     }
   }
 
@@ -368,6 +426,13 @@ export default function RunWorkflow({
         <StepHeader step={3} title={t("evaluation.ablation.stepTitle")} eyebrow={t("evaluation.ablation.stepTitle")} />
         {!selectedComparison && <p className="state-hint">{t("evaluation.ablation.needsComparison")}</p>}
         {selectedComparison && ablationState === "loading" && <p className="state-hint">{t("common.loading")}</p>}
+        {selectedComparison && ablationState === "error" && ablationError && (
+          <ErrorState
+            code="ABLATION_LOAD_FAILED"
+            message={ablationError}
+            onRetry={() => void loadAblation()}
+          />
+        )}
         {selectedComparison && ablationState === "absent" && (
           <div className="state-block state-inline">
             <p className="state-title">{t("evaluation.ablation.empty")}</p>
@@ -388,8 +453,16 @@ export default function RunWorkflow({
         {gateEligible && !selectedComparison && <p className="state-hint">{t("evaluation.gate.needsComparison")}</p>}
         {gateEligible && selectedComparison && (
           <>
-            {policies !== null && policies.length === 0 && <p className="state-hint">{t("evaluation.gate.noPolicies")}</p>}
-            {policies && policies.length > 0 && (
+            {policiesError && (
+              <ErrorState
+                code={policiesError.code}
+                message={policiesError.message || t("errors.loadEvaluation")}
+                onRetry={() => void loadPolicies()}
+              />
+            )}
+            {!policiesError && policies === null && <p className="state-hint">{t("common.loading")}</p>}
+            {!policiesError && policies !== null && policies.length === 0 && <p className="state-hint">{t("evaluation.gate.noPolicies")}</p>}
+            {!policiesError && policies && policies.length > 0 && (
               <form
                 className="eval-form"
                 onSubmit={(event) => {
@@ -417,8 +490,15 @@ export default function RunWorkflow({
                 </div>
               </form>
             )}
-            {decisionsLoaded && decisions.length === 0 && <EmptyState title={t("evaluation.gate.empty")} />}
-            {decisions.map((decision) => (
+            {decisionsError && (
+              <ErrorState
+                code={decisionsError.code}
+                message={decisionsError.message || t("errors.loadEvaluation")}
+                onRetry={() => void loadDecisions()}
+              />
+            )}
+            {!decisionsError && decisionsLoaded && decisions.length === 0 && <EmptyState title={t("evaluation.gate.empty")} />}
+            {!decisionsError && decisions.map((decision) => (
               <GateDecisionView key={decision.id} decision={decision} policy={policies?.find((p) => p.id === decision.policy_id) ?? null} />
             ))}
           </>

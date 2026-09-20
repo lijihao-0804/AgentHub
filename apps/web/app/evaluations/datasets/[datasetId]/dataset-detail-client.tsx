@@ -38,9 +38,26 @@ function parseItemsJson(text: string): ParsedImport | { error: string } {
   if (!Array.isArray(items) || items.length === 0) return { error: "__invalid_items__" };
   const normalized: EvaluationDatasetItemInput[] = [];
   for (let index = 0; index < items.length; index += 1) {
-    const raw = items[index] as Record<string, unknown>;
+    const item = items[index];
+    if (typeof item !== "object" || item === null || Array.isArray(item)) {
+      return { error: `__item__${index}` };
+    }
+    const raw = item as Record<string, unknown>;
     for (const field of ITEM_FIELDS) {
       if (raw[field] === undefined) return { error: `__field__${index}:${field}` };
+    }
+    if (
+      typeof raw.input !== "object" ||
+      raw.input === null ||
+      Array.isArray(raw.input) ||
+      typeof raw.expected !== "object" ||
+      raw.expected === null ||
+      Array.isArray(raw.expected) ||
+      typeof raw.source_provenance !== "object" ||
+      raw.source_provenance === null ||
+      Array.isArray(raw.source_provenance)
+    ) {
+      return { error: `__item__${index}` };
     }
     normalized.push({
       case_key: String(raw.case_key),
@@ -63,7 +80,7 @@ function parseItemsJson(text: string): ParsedImport | { error: string } {
 
 export default function DatasetDetailPage({ datasetId }: { datasetId: string }) {
   const { t, formatNumber, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [versions, setVersions] = useState<EvaluationDatasetVersion[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -76,31 +93,44 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
   const [createError, setCreateError] = useState<string | null>(null);
   const [createdNotice, setCreatedNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+
+  useEffect(() => {
+    setVersions([]);
+    setError(null);
+    setLoading(false);
+    setLoaded(false);
+    setShowForm(false);
+    setJsonText("");
+    setSchemaVersion("1");
+    setCreating(false);
+    setCreateError(null);
+    setCreatedNotice(null);
+  }, [sessionId]);
 
   const input = { workspaceId, accessToken };
 
   const refresh = useCallback(async () => {
     setError(null);
     if (!connected) return;
+    const requestSessionId = sessionId;
     setLoading(true);
     try {
-      setVersions(await listDatasetVersions(input, datasetId));
+      const nextVersions = await listDatasetVersions(input, datasetId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setVersions(nextVersions);
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (activeSessionRef.current === requestSessionId) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, workspaceId, accessToken, datasetId]);
+  }, [connected, workspaceId, accessToken, datasetId, sessionId]);
 
   useEffect(() => {
     if (connected && !loaded) void refresh();
   }, [connected, loaded, refresh]);
-
-  useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
 
   const parsed: ParsedImport | { error: string } | null =
     jsonText.trim() === "" ? null : parseItemsJson(jsonText);
@@ -114,21 +144,23 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
     event.preventDefault();
     setCreateError(null);
     if (!parsed || "error" in parsed) return;
+    const requestSessionId = sessionId;
     setCreating(true);
     try {
       const version = await createDatasetVersion(input, datasetId, {
         schema_version: Number(schemaVersion) || 1,
         items: parsed.items,
       });
+      if (activeSessionRef.current !== requestSessionId) return;
       setJsonText("");
       setShowForm(false);
       setCreatedNotice(t("evaluation.datasets.version.title", { number: version.version_number }));
       await refresh();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setCreateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCreateError(apiError.message || apiError.code);
     } finally {
-      setCreating(false);
+      if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
   }
 
@@ -206,6 +238,8 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
               <p className="session-error" role="alert">
                 {parsed.error === "__invalid_items__"
                   ? t("evaluation.datasets.versions.invalidItems")
+                  : parsed.error.startsWith("__item__")
+                    ? `${t("evaluation.datasets.versions.invalidItems")} (${parsed.error.slice(8)})`
                   : parsed.error.startsWith("__field__")
                     ? `${t("evaluation.datasets.versions.invalidItems")} (${parsed.error.slice(9)})`
                     : t("evaluation.datasets.versions.invalidJson", { message: parsed.error })}

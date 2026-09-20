@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import HashValue from "../../../components/evaluation/hash-value";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
@@ -18,7 +18,7 @@ function nowLocalIso(): string {
 
 export default function EvaluationPricingPage() {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [snapshots, setSnapshots] = useState<PricingSnapshot[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,31 +39,42 @@ export default function EvaluationPricingPage() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+
+  useEffect(() => {
+    setSnapshots([]);
+    setError(null);
+    setLoading(false);
+    setLoaded(false);
+    setShowForm(false);
+    setCreating(false);
+    setCreateError(null);
+    setCreatedNotice(false);
+  }, [sessionId]);
 
   const input = { workspaceId, accessToken };
 
   const refresh = useCallback(async () => {
     setError(null);
     if (!connected) return;
+    const requestSessionId = sessionId;
     setLoading(true);
     try {
-      setSnapshots(await listPricingSnapshots(input));
+      const nextSnapshots = await listPricingSnapshots(input);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setSnapshots(nextSnapshots);
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (activeSessionRef.current === requestSessionId) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, workspaceId, accessToken]);
+  }, [connected, workspaceId, accessToken, sessionId]);
 
   useEffect(() => {
     if (connected && !loaded) void refresh();
   }, [connected, loaded, refresh]);
-
-  useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -73,6 +84,7 @@ export default function EvaluationPricingPage() {
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setCreateError(null);
+    const requestSessionId = sessionId;
     setCreating(true);
     try {
       await createPricingSnapshot(input, {
@@ -86,15 +98,16 @@ export default function EvaluationPricingPage() {
         effective_at: new Date(form.effectiveAt).toISOString(),
         source_note: form.sourceNote.trim(),
       });
+      if (activeSessionRef.current !== requestSessionId) return;
       setForm((current) => ({ ...current, name: "", provider: "", model: "", inputPrice: "", outputPrice: "", cachedPrice: "", sourceNote: "" }));
       setShowForm(false);
       setCreatedNotice(true);
       await refresh();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setCreateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCreateError(apiError.message || apiError.code);
     } finally {
-      setCreating(false);
+      if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
   }
 

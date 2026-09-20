@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import HashValue from "../../../components/evaluation/hash-value";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
@@ -101,7 +101,7 @@ function buildPolicyJson(
 
 export default function ReleaseGatePoliciesPage() {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [policies, setPolicies] = useState<ReleaseGatePolicy[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -114,31 +114,45 @@ export default function ReleaseGatePoliciesPage() {
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+
+  useEffect(() => {
+    setPolicies([]);
+    setError(null);
+    setLoading(false);
+    setLoaded(false);
+    setShowForm(false);
+    setName("");
+    setDescription("");
+    setRules([newRule()]);
+    setCreating(false);
+    setFormError(null);
+    setCreatedNotice(false);
+  }, [sessionId]);
 
   const input = { workspaceId, accessToken };
 
   const refresh = useCallback(async () => {
     setError(null);
     if (!connected) return;
+    const requestSessionId = sessionId;
     setLoading(true);
     try {
-      setPolicies(await listReleaseGatePolicies(input));
+      const nextPolicies = await listReleaseGatePolicies(input);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setPolicies(nextPolicies);
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (activeSessionRef.current === requestSessionId) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, workspaceId, accessToken]);
+  }, [connected, workspaceId, accessToken, sessionId]);
 
   useEffect(() => {
     if (connected && !loaded) void refresh();
   }, [connected, loaded, refresh]);
-
-  useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
 
   function updateRule(index: number, patch: Partial<DraftRule>) {
     setRules((current) => current.map((rule, i) => (i === index ? { ...rule, ...patch } : rule)));
@@ -152,6 +166,7 @@ export default function ReleaseGatePoliciesPage() {
       setFormError(built.error);
       return;
     }
+    const requestSessionId = sessionId;
     setCreating(true);
     try {
       await createReleaseGatePolicy(input, {
@@ -159,6 +174,7 @@ export default function ReleaseGatePoliciesPage() {
         description: description.trim() || null,
         policy_json: built.policy_json,
       });
+      if (activeSessionRef.current !== requestSessionId) return;
       setName("");
       setDescription("");
       setRules([newRule()]);
@@ -167,9 +183,9 @@ export default function ReleaseGatePoliciesPage() {
       await refresh();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setFormError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setFormError(apiError.message || apiError.code);
     } finally {
-      setCreating(false);
+      if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
   }
 

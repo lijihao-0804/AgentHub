@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import StatusBadge from "../../../components/status-badge";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
@@ -27,7 +27,7 @@ function splitForPurpose(purpose: string): string {
 
 export default function EvaluationExperimentsPage() {
   const { t, statusLabel, purposeLabel, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [experiments, setExperiments] = useState<EvaluationExperiment[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,68 +37,118 @@ export default function EvaluationExperimentsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [datasets, setDatasets] = useState<EvaluationDataset[]>([]);
+  const [datasetsLoaded, setDatasetsLoaded] = useState(false);
+  const [datasetsLoading, setDatasetsLoading] = useState(false);
+  const [datasetsError, setDatasetsError] = useState<ApiError | null>(null);
   const [datasetId, setDatasetId] = useState("");
   const [versions, setVersions] = useState<EvaluationDatasetVersion[]>([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
+  const [versionsError, setVersionsError] = useState<ApiError | null>(null);
   const [versionId, setVersionId] = useState("");
   const [purpose, setPurpose] = useState<(typeof PURPOSES)[number]>("DEVELOPMENT");
   const [repetitions, setRepetitions] = useState("1");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+
+  useEffect(() => {
+    setExperiments([]);
+    setError(null);
+    setLoading(false);
+    setLoaded(false);
+    setShowForm(false);
+    setName("");
+    setDescription("");
+    setDatasets([]);
+    setDatasetsLoaded(false);
+    setDatasetsLoading(false);
+    setDatasetsError(null);
+    setDatasetId("");
+    setVersions([]);
+    setVersionsLoading(false);
+    setVersionsError(null);
+    setVersionId("");
+    setCreating(false);
+    setCreateError(null);
+    setCreatedNotice(false);
+  }, [sessionId]);
 
   const input = { workspaceId, accessToken };
 
   const refresh = useCallback(async () => {
     setError(null);
     if (!connected) return;
+    const requestSessionId = sessionId;
     setLoading(true);
     try {
-      setExperiments(await listExperiments(input));
+      const nextExperiments = await listExperiments(input);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setExperiments(nextExperiments);
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (activeSessionRef.current === requestSessionId) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, workspaceId, accessToken]);
+  }, [connected, workspaceId, accessToken, sessionId]);
 
   useEffect(() => {
     if (connected && !loaded) void refresh();
   }, [connected, loaded, refresh]);
 
-  useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
+  const loadDatasets = useCallback(async () => {
+    if (!connected) return;
+    const requestSessionId = sessionId;
+    setDatasetsLoading(true);
+    setDatasetsError(null);
+    try {
+      const nextDatasets = await listDatasets(input);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setDatasets(nextDatasets);
+      setDatasetsLoaded(true);
+    } catch (caught) {
+      if (activeSessionRef.current === requestSessionId) setDatasetsError(toApiError(caught, ""));
+    } finally {
+      if (activeSessionRef.current === requestSessionId) setDatasetsLoading(false);
+    }
+  }, [connected, workspaceId, accessToken, sessionId]);
 
   useEffect(() => {
-    if (!connected || !showForm || datasets.length > 0) return;
-    listDatasets(input)
-      .then(setDatasets)
-      .catch(() => setDatasets([]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, showForm]);
+    if (connected && showForm && !datasetsLoaded) void loadDatasets();
+  }, [connected, showForm, datasetsLoaded, loadDatasets]);
 
-  useEffect(() => {
+  const loadVersions = useCallback(async () => {
     if (!datasetId) {
       setVersions([]);
       setVersionId("");
       return;
     }
+    const requestSessionId = sessionId;
     setVersionsLoading(true);
+    setVersionsError(null);
     setVersionId("");
-    listDatasetVersions(input, datasetId)
-      .then((all) => setVersions(all.filter((v) => v.status === "PUBLISHED")))
-      .catch(() => setVersions([]))
-      .finally(() => setVersionsLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datasetId]);
+    try {
+      const all = await listDatasetVersions(input, datasetId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setVersions(all.filter((v) => v.status === "PUBLISHED"));
+    } catch (caught) {
+      if (activeSessionRef.current === requestSessionId) setVersionsError(toApiError(caught, ""));
+    } finally {
+      if (activeSessionRef.current === requestSessionId) setVersionsLoading(false);
+    }
+  }, [connected, workspaceId, accessToken, datasetId, sessionId]);
+
+  useEffect(() => {
+    void loadVersions();
+  }, [loadVersions]);
 
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setCreateError(null);
     if (!name.trim() || !versionId) return;
+    const requestSessionId = sessionId;
     setCreating(true);
     try {
       const experiment = await createExperiment(input, {
@@ -109,6 +159,7 @@ export default function EvaluationExperimentsPage() {
         purpose,
         repetitions: Number(repetitions) || 1,
       });
+      if (activeSessionRef.current !== requestSessionId) return;
       setName("");
       setDescription("");
       setShowForm(false);
@@ -117,9 +168,9 @@ export default function EvaluationExperimentsPage() {
       window.location.assign(`/evaluations/experiments/${encodeURIComponent(experiment.id)}`);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setCreateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCreateError(apiError.message || apiError.code);
     } finally {
-      setCreating(false);
+      if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
   }
 
@@ -157,6 +208,14 @@ export default function EvaluationExperimentsPage() {
         {showForm && (
           <form className="eval-form" onSubmit={submitCreate} noValidate>
             <div className="eval-form-title">{t("evaluation.experiments.formTitle")}</div>
+            {datasetsError && (
+              <ErrorState
+                code={datasetsError.code}
+                message={datasetsError.message || t("errors.loadEvaluation")}
+                onRetry={() => void loadDatasets()}
+              />
+            )}
+            {datasetsLoading && !datasetsError && <LoadingState label={t("common.loading")} />}
             <div className="form-grid">
               <label>
                 {t("evaluation.experiments.labels.name")}
@@ -175,12 +234,18 @@ export default function EvaluationExperimentsPage() {
               </label>
               <label>
                 {t("evaluation.experiments.datasetSelector.version")}
-                {versionsLoading ? (
+                {versionsError ? (
+                  <ErrorState
+                    code={versionsError.code}
+                    message={versionsError.message || t("errors.loadEvaluation")}
+                    onRetry={() => void loadVersions()}
+                  />
+                ) : versionsLoading ? (
                   <span className="state-hint">{t("evaluation.experiments.datasetSelector.loadingVersions")}</span>
                 ) : (
                   <select required value={versionId} onChange={(e) => setVersionId(e.target.value)} disabled={!datasetId}>
                     <option value="">—</option>
-                    {versions.length === 0 && datasetId ? (
+                    {versions.length === 0 && datasetId && !versionsError ? (
                       <option value="">{t("evaluation.experiments.datasetSelector.noPublished")}</option>
                     ) : (
                       versions.map((version) => (

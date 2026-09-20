@@ -593,3 +593,21 @@ export const CANCELLABLE_RUN_STATUSES = new Set(["QUEUED", "RUNNING"]);
 export function comparableMetricEntries(comparison: EvaluationComparison): Array<[string, PairedMetricView]> {
   return Object.entries(comparison.metrics ?? {}).sort(([a], [b]) => a.localeCompare(b));
 }
+
+/** Keep server-returned artifacts keyed by their durable identity. */
+export function uniqueById<T extends { id: string }>(items: T[]): T[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
+/** Idempotently add or replace an artifact returned by a create endpoint. */
+export function upsertById<T extends { id: string }>(items: T[] | null, item: T): T[] {
+  const current = uniqueById(items ?? []);
+  const index = current.findIndex((existing) => existing.id === item.id);
+  if (index < 0) return [...current, item];
+  return current.map((existing, currentIndex) => (currentIndex === index ? item : existing));
+}

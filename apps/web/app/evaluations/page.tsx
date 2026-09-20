@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import MetricCard from "../../components/metric-card";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../components/states";
@@ -21,7 +21,7 @@ import { useI18n } from "../../i18n/provider";
 
 export default function EvaluationOverviewPage() {
   const { t } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [datasets, setDatasets] = useState<EvaluationDataset[] | null>(null);
   const [experiments, setExperiments] = useState<EvaluationExperiment[] | null>(null);
   const [pricing, setPricing] = useState<PricingSnapshot[] | null>(null);
@@ -29,9 +29,22 @@ export default function EvaluationOverviewPage() {
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+
+  useEffect(() => {
+    setDatasets(null);
+    setExperiments(null);
+    setPricing(null);
+    setPolicies(null);
+    setError(null);
+    setLoading(false);
+    setLoaded(false);
+  }, [sessionId]);
 
   useEffect(() => {
     if (!connected || loaded) return;
+    const requestSessionId = sessionId;
     setLoaded(true);
     setLoading(true);
     setError(null);
@@ -43,14 +56,19 @@ export default function EvaluationOverviewPage() {
       listReleaseGatePolicies(input),
     ])
       .then(([d, e, p, g]) => {
+        if (activeSessionRef.current !== requestSessionId) return;
         setDatasets(d);
         setExperiments(e);
         setPricing(p);
         setPolicies(g);
       })
-      .catch((caught) => setError(toApiError(caught, "")))
-      .finally(() => setLoading(false));
-  }, [connected, loaded, workspaceId, accessToken]);
+      .catch((caught) => {
+        if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
+      })
+      .finally(() => {
+        if (activeSessionRef.current === requestSessionId) setLoading(false);
+      });
+  }, [connected, loaded, workspaceId, accessToken, sessionId]);
 
   if (!connected) {
     return (

@@ -26,9 +26,11 @@ const POLL_INTERVAL_MS = 2500;
 
 export default function RunDetailClient({ runId }: { runId: string }) {
   const { t, statusLabel, purposeLabel, formatDateTime, formatNumber } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const inputRef = useRef({ workspaceId, accessToken });
   inputRef.current = { workspaceId, accessToken };
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
 
   const [run, setRun] = useState<EvaluationExperimentRun | null>(null);
   const [progress, setProgress] = useState<EvaluationExperimentRunProgress | null>(null);
@@ -36,26 +38,45 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [experimentError, setExperimentError] = useState<ApiError | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRun(null);
+    setProgress(null);
+    setExperiment(null);
+    setError(null);
+    setExperimentError(null);
+    setLoading(false);
+    setLoaded(false);
+    setCancelling(false);
+    setCancelError(null);
+  }, [sessionId]);
 
   const load = useCallback(async () => {
     setError(null);
     if (!connected) return;
+    const requestSessionId = sessionId;
     setLoading(true);
     try {
       const nextRun = await getExperimentRun({ workspaceId, accessToken }, runId);
+      if (activeSessionRef.current !== requestSessionId) return;
       setRun(nextRun);
       if (CANCELLABLE_RUN_STATUSES.has(nextRun.status)) {
-        setProgress(await getExperimentRunProgress({ workspaceId, accessToken }, runId));
+        const nextProgress = await getExperimentRunProgress({ workspaceId, accessToken }, runId);
+        if (activeSessionRef.current !== requestSessionId) return;
+        setProgress(nextProgress);
+      } else {
+        setProgress(null);
       }
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (activeSessionRef.current === requestSessionId) setLoading(false);
     }
-  }, [connected, workspaceId, accessToken, runId]);
+  }, [connected, workspaceId, accessToken, runId, sessionId]);
 
   // Initial load + experiment metadata (variant labels for the workflow).
   useEffect(() => {
@@ -63,15 +84,17 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   }, [connected, loaded, load]);
 
   useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
-
-  useEffect(() => {
     if (!connected || !run) return;
+    const requestSessionId = sessionId;
+    setExperimentError(null);
     getExperiment({ workspaceId, accessToken }, run.experiment_id)
-      .then(setExperiment)
-      .catch(() => setExperiment(null));
-  }, [connected, run, workspaceId, accessToken]);
+      .then((nextExperiment) => {
+        if (activeSessionRef.current === requestSessionId) setExperiment(nextExperiment);
+      })
+      .catch((caught) => {
+        if (activeSessionRef.current === requestSessionId) setExperimentError(toApiError(caught, ""));
+      });
+  }, [connected, run, workspaceId, accessToken, sessionId]);
 
   const active = run !== null && !TERMINAL_RUN_STATUSES.has(run.status);
 
@@ -79,14 +102,19 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   useEffect(() => {
     if (!connected || !active) return;
     let stopped = false;
+    const requestSessionId = sessionId;
     const poll = async () => {
       if (document.hidden || stopped) return;
       try {
         const nextRun = await getExperimentRun(inputRef.current, runId);
-        if (stopped) return;
+        if (stopped || activeSessionRef.current !== requestSessionId) return;
         setRun(nextRun);
         if (CANCELLABLE_RUN_STATUSES.has(nextRun.status)) {
-          setProgress(await getExperimentRunProgress(inputRef.current, runId));
+          const nextProgress = await getExperimentRunProgress(inputRef.current, runId);
+          if (stopped || activeSessionRef.current !== requestSessionId) return;
+          setProgress(nextProgress);
+        } else {
+          setProgress(null);
         }
       } catch {
         // Transient polling errors are tolerated; the next tick retries.
@@ -102,18 +130,21 @@ export default function RunDetailClient({ runId }: { runId: string }) {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [connected, active, runId]);
+  }, [connected, active, runId, sessionId]);
 
   async function requestCancel() {
     setCancelError(null);
+    const requestSessionId = sessionId;
     setCancelling(true);
     try {
-      setRun(await cancelExperimentRun({ workspaceId, accessToken }, runId));
+      const nextRun = await cancelExperimentRun({ workspaceId, accessToken }, runId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setRun(nextRun);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setCancelError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCancelError(apiError.message || apiError.code);
     } finally {
-      setCancelling(false);
+      if (activeSessionRef.current === requestSessionId) setCancelling(false);
     }
   }
 
@@ -229,7 +260,30 @@ export default function RunDetailClient({ runId }: { runId: string }) {
             </Panel>
           )}
 
-          <RunWorkflow input={{ workspaceId, accessToken }} run={run} variants={experiment?.variants ?? []} terminal={terminal} />
+          {experimentError && (
+            <ErrorState
+              code={experimentError.code}
+              message={experimentError.message || t("errors.loadEvaluation")}
+              onRetry={() => {
+                if (activeSessionRef.current !== sessionId || !run) return;
+                setExperimentError(null);
+                getExperiment({ workspaceId, accessToken }, run.experiment_id)
+                  .then((nextExperiment) => {
+                    if (activeSessionRef.current === sessionId) setExperiment(nextExperiment);
+                  })
+                  .catch((caught) => {
+                    if (activeSessionRef.current === sessionId) setExperimentError(toApiError(caught, ""));
+                  });
+              }}
+            />
+          )}
+          <RunWorkflow
+            key={`${sessionId}:${run.id}`}
+            input={{ workspaceId, accessToken, sessionId }}
+            run={run}
+            variants={experiment?.variants ?? []}
+            terminal={terminal}
+          />
         </>
       )}
     </div>

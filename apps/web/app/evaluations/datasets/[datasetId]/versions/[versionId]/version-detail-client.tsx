@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import HashValue, { InlineConfirm } from "../../../../../../components/evaluation/hash-value";
 import StatusBadge from "../../../../../../components/status-badge";
@@ -34,7 +34,7 @@ export default function DatasetVersionDetailClient({
   versionId: string;
 }) {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [version, setVersion] = useState<EvaluationDatasetVersionDetail | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -44,45 +44,58 @@ export default function DatasetVersionDetailClient({
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishedNotice, setPublishedNotice] = useState(false);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+
+  useEffect(() => {
+    setVersion(null);
+    setError(null);
+    setLoading(false);
+    setLoaded(false);
+    setShowPublishConfirm(false);
+    setPublishing(false);
+    setPublishError(null);
+    setPublishedNotice(false);
+  }, [sessionId]);
 
   const input = { workspaceId, accessToken };
 
   const load = useCallback(async () => {
     setError(null);
     if (!connected) return;
+    const requestSessionId = sessionId;
     setLoading(true);
     try {
-      setVersion(await getDatasetVersion(input, datasetId, versionId));
+      const nextVersion = await getDatasetVersion(input, datasetId, versionId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setVersion(nextVersion);
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (activeSessionRef.current === requestSessionId) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, workspaceId, accessToken, datasetId, versionId]);
+  }, [connected, workspaceId, accessToken, datasetId, versionId, sessionId]);
 
   useEffect(() => {
     if (connected && !loaded) void load();
   }, [connected, loaded, load]);
 
-  useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
-
   async function publish() {
     setPublishError(null);
+    const requestSessionId = sessionId;
     setPublishing(true);
     try {
       const next = await publishDatasetVersion(input, datasetId, versionId);
+      if (activeSessionRef.current !== requestSessionId) return;
       setVersion((current) => (current ? { ...current, ...next } : current));
       setShowPublishConfirm(false);
       setPublishedNotice(true);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setPublishError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setPublishError(apiError.message || apiError.code);
     } finally {
-      setPublishing(false);
+      if (activeSessionRef.current === requestSessionId) setPublishing(false);
     }
   }
 

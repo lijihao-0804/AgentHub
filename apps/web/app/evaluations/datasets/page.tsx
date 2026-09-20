@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import HashValue from "../../../components/evaluation/hash-value";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
@@ -12,7 +12,7 @@ import { useI18n } from "../../../i18n/provider";
 
 export default function EvaluationDatasetsPage() {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [datasets, setDatasets] = useState<EvaluationDataset[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,36 +24,52 @@ export default function EvaluationDatasetsPage() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+
+  useEffect(() => {
+    setDatasets([]);
+    setError(null);
+    setLoading(false);
+    setLoaded(false);
+    setShowForm(false);
+    setName("");
+    setDescription("");
+    setCreating(false);
+    setCreateError(null);
+    setCreatedNotice(false);
+  }, [sessionId]);
 
   const refresh = useCallback(async () => {
     setError(null);
     if (!connected) return;
+    const requestSessionId = sessionId;
     setLoading(true);
     try {
-      setDatasets(await listDatasets({ workspaceId, accessToken }));
+      const nextDatasets = await listDatasets({ workspaceId, accessToken });
+      if (activeSessionRef.current !== requestSessionId) return;
+      setDatasets(nextDatasets);
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (activeSessionRef.current === requestSessionId) setLoading(false);
     }
-  }, [connected, workspaceId, accessToken]);
+  }, [connected, workspaceId, accessToken, sessionId]);
 
   useEffect(() => {
     if (connected && !loaded) void refresh();
   }, [connected, loaded, refresh]);
 
-  useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
-
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setCreateError(null);
     if (!name.trim()) return;
+    const requestSessionId = sessionId;
     setCreating(true);
     try {
       await createDataset({ workspaceId, accessToken }, { name: name.trim(), description: description.trim() || null });
+      if (activeSessionRef.current !== requestSessionId) return;
       setName("");
       setDescription("");
       setShowForm(false);
@@ -61,9 +77,9 @@ export default function EvaluationDatasetsPage() {
       await refresh();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setCreateError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setCreateError(apiError.message || apiError.code);
     } finally {
-      setCreating(false);
+      if (activeSessionRef.current === requestSessionId) setCreating(false);
     }
   }
 

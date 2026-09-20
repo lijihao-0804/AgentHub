@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import HashValue, { InlineConfirm } from "../../../../components/evaluation/hash-value";
 import StatusBadge from "../../../../components/status-badge";
@@ -27,18 +27,23 @@ import { useI18n } from "../../../../i18n/provider";
 export default function ExperimentDetailClient({ experimentId }: { experimentId: string }) {
   const { t, statusLabel, purposeLabel, formatDateTime, formatNumber } = useI18n();
   const router = useRouter();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [experiment, setExperiment] = useState<EvaluationExperimentDetail | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [pricing, setPricing] = useState<PricingSnapshot[]>([]);
+  const [agentsError, setAgentsError] = useState<ApiError | null>(null);
+  const [pricingError, setPricingError] = useState<ApiError | null>(null);
+  const [agentsLoading, setAgentsLoading] = useState(false);
+  const [pricingLoading, setPricingLoading] = useState(false);
 
   const [showVariantForm, setShowVariantForm] = useState(false);
   const [agents, setAgents] = useState<AgentSummary[]>([]);
   const [agentId, setAgentId] = useState("");
   const [agentVersions, setAgentVersions] = useState<AgentVersionSummary[]>([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
+  const [versionsError, setVersionsError] = useState<ApiError | null>(null);
   const [agentVersionId, setAgentVersionId] = useState("");
   const [label, setLabel] = useState("");
   const [pricingId, setPricingId] = useState("");
@@ -53,57 +58,119 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
 
   const [startingRun, setStartingRun] = useState(false);
   const [startRunError, setStartRunError] = useState<string | null>(null);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+
+  useEffect(() => {
+    setExperiment(null);
+    setError(null);
+    setLoading(false);
+    setLoaded(false);
+    setPricing([]);
+    setAgents([]);
+    setAgentsError(null);
+    setPricingError(null);
+    setAgentsLoading(false);
+    setPricingLoading(false);
+    setAgentId("");
+    setAgentVersions([]);
+    setVersionsLoading(false);
+    setVersionsError(null);
+    setAgentVersionId("");
+    setVariantError(null);
+    setAddingVariant(false);
+    setFinalizeError(null);
+    setFinalizing(false);
+    setStartRunError(null);
+    setStartingRun(false);
+  }, [sessionId]);
 
   const input = { workspaceId, accessToken };
 
   const load = useCallback(async () => {
     setError(null);
     if (!connected) return;
+    const requestSessionId = sessionId;
     setLoading(true);
     try {
-      setExperiment(await getExperiment(input, experimentId));
+      const nextExperiment = await getExperiment(input, experimentId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setExperiment(nextExperiment);
       setLoaded(true);
     } catch (caught) {
-      setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (activeSessionRef.current === requestSessionId) setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, workspaceId, accessToken, experimentId]);
+  }, [connected, workspaceId, accessToken, experimentId, sessionId]);
 
   useEffect(() => {
     if (connected && !loaded) void load();
   }, [connected, loaded, load]);
 
-  useEffect(() => {
-    if (!connected) setLoaded(false);
-  }, [connected]);
-
-  useEffect(() => {
+  const loadAgents = useCallback(async () => {
     if (!connected) return;
-    listAgents(input)
-      .then(setAgents)
-      .catch(() => setAgents([]));
-    listPricingSnapshots(input)
-      .then(setPricing)
-      .catch(() => setPricing([]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected]);
+    const requestSessionId = sessionId;
+    setAgentsLoading(true);
+    setAgentsError(null);
+    try {
+      const nextAgents = await listAgents(input);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setAgents(nextAgents);
+    } catch (caught) {
+      if (activeSessionRef.current === requestSessionId) setAgentsError(toApiError(caught, ""));
+    } finally {
+      if (activeSessionRef.current === requestSessionId) setAgentsLoading(false);
+    }
+  }, [connected, workspaceId, accessToken, sessionId]);
+
+  const loadPricing = useCallback(async () => {
+    if (!connected) return;
+    const requestSessionId = sessionId;
+    setPricingLoading(true);
+    setPricingError(null);
+    try {
+      const nextPricing = await listPricingSnapshots(input);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setPricing(nextPricing);
+    } catch (caught) {
+      if (activeSessionRef.current === requestSessionId) setPricingError(toApiError(caught, ""));
+    } finally {
+      if (activeSessionRef.current === requestSessionId) setPricingLoading(false);
+    }
+  }, [connected, workspaceId, accessToken, sessionId]);
 
   useEffect(() => {
+    void loadAgents();
+    void loadPricing();
+  }, [loadAgents, loadPricing]);
+
+  const loadAgentVersions = useCallback(async () => {
     if (!agentId) {
       setAgentVersions([]);
       setAgentVersionId("");
+      setVersionsError(null);
+      setVersionsLoading(false);
       return;
     }
+    const requestSessionId = sessionId;
     setVersionsLoading(true);
+    setVersionsError(null);
     setAgentVersionId("");
-    listAgentVersions(input, agentId)
-      .then(setAgentVersions)
-      .catch(() => setAgentVersions([]))
-      .finally(() => setVersionsLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentId]);
+    try {
+      const nextVersions = await listAgentVersions(input, agentId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setAgentVersions(nextVersions);
+    } catch (caught) {
+      if (activeSessionRef.current === requestSessionId) setVersionsError(toApiError(caught, ""));
+    } finally {
+      if (activeSessionRef.current === requestSessionId) setVersionsLoading(false);
+    }
+  }, [connected, workspaceId, accessToken, agentId, sessionId]);
+
+  useEffect(() => {
+    void loadAgentVersions();
+  }, [loadAgentVersions]);
 
   const pricingName = (id: string) => pricing.find((p) => p.id === id)?.name ?? null;
 
@@ -111,6 +178,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
     event.preventDefault();
     setVariantError(null);
     if (!label.trim() || !agentVersionId || !pricingId) return;
+    const requestSessionId = sessionId;
     let metadata: Record<string, unknown> = {};
     if (metadataText.trim()) {
       try {
@@ -129,42 +197,50 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
         ordinal: Number(ordinal) || 0,
         variant_metadata: metadata,
       });
+      if (activeSessionRef.current !== requestSessionId) return;
       setLabel("");
       setMetadataText("");
       setShowVariantForm(false);
       await load();
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setVariantError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setVariantError(apiError.message || apiError.code);
     } finally {
-      setAddingVariant(false);
+      if (activeSessionRef.current === requestSessionId) setAddingVariant(false);
     }
   }
 
   async function finalize() {
     setFinalizeError(null);
+    const requestSessionId = sessionId;
     setFinalizing(true);
     try {
-      setExperiment(await finalizeExperiment(input, experimentId));
+      const nextExperiment = await finalizeExperiment(input, experimentId);
+      if (activeSessionRef.current !== requestSessionId) return;
+      setExperiment(nextExperiment);
       setShowFinalizeConfirm(false);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setFinalizeError(apiError.message || apiError.code);
+      if (activeSessionRef.current === requestSessionId) setFinalizeError(apiError.message || apiError.code);
     } finally {
-      setFinalizing(false);
+      if (activeSessionRef.current === requestSessionId) setFinalizing(false);
     }
   }
 
   async function startRun() {
     setStartRunError(null);
+    const requestSessionId = sessionId;
     setStartingRun(true);
     try {
       const run = await startExperimentRun(input, experimentId);
+      if (activeSessionRef.current !== requestSessionId) return;
       router.push(`/evaluations/runs/${encodeURIComponent(run.id)}`);
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      setStartRunError(apiError.message || apiError.code);
-      setStartingRun(false);
+      if (activeSessionRef.current === requestSessionId) {
+        setStartRunError(apiError.message || apiError.code);
+        setStartingRun(false);
+      }
     }
   }
 
@@ -284,7 +360,15 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                   </label>
                   <label>
                     {t("evaluation.experiment.variants.labels.agent")}
-                    {agents.length === 0 ? (
+                    {agentsError ? (
+                      <ErrorState
+                        code={agentsError.code}
+                        message={agentsError.message || t("errors.loadEvaluation")}
+                        onRetry={() => void loadAgents()}
+                      />
+                    ) : agentsLoading ? (
+                      <span className="state-hint">{t("evaluation.experiment.variants.agentSelectorLoading")}</span>
+                    ) : agents.length === 0 ? (
                       <span className="state-hint">{t("evaluation.experiment.variants.noAgents")}</span>
                     ) : (
                       <select required value={agentId} onChange={(e) => setAgentId(e.target.value)}>
@@ -299,7 +383,13 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                   </label>
                   <label>
                     {t("evaluation.experiment.variants.labels.version")}
-                    {versionsLoading ? (
+                    {versionsError ? (
+                      <ErrorState
+                        code={versionsError.code}
+                        message={versionsError.message || t("errors.loadEvaluation")}
+                        onRetry={() => void loadAgentVersions()}
+                      />
+                    ) : versionsLoading ? (
                       <span className="state-hint">{t("evaluation.experiment.variants.versionSelectorLoading")}</span>
                     ) : (
                       <select required value={agentVersionId} onChange={(e) => setAgentVersionId(e.target.value)} disabled={!agentId}>
@@ -314,14 +404,24 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                   </label>
                   <label>
                     {t("evaluation.experiment.variants.labels.pricingSnapshot")}
-                    <select required value={pricingId} onChange={(e) => setPricingId(e.target.value)}>
-                      <option value="">{t("evaluation.experiment.variants.selectPricing")}</option>
-                      {pricing.map((snapshot) => (
-                        <option value={snapshot.id} key={snapshot.id}>
-                          {snapshot.name} · {snapshot.provider}/{snapshot.model} · {snapshot.currency}
-                        </option>
-                      ))}
-                    </select>
+                    {pricingError ? (
+                      <ErrorState
+                        code={pricingError.code}
+                        message={pricingError.message || t("errors.loadEvaluation")}
+                        onRetry={() => void loadPricing()}
+                      />
+                    ) : pricingLoading ? (
+                      <span className="state-hint">{t("common.loading")}</span>
+                    ) : (
+                      <select required value={pricingId} onChange={(e) => setPricingId(e.target.value)}>
+                        <option value="">{t("evaluation.experiment.variants.selectPricing")}</option>
+                        {pricing.map((snapshot) => (
+                          <option value={snapshot.id} key={snapshot.id}>
+                            {snapshot.name} · {snapshot.provider}/{snapshot.model} · {snapshot.currency}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </label>
                   <label>
                     {t("evaluation.experiment.variants.labels.ordinal")}
