@@ -101,11 +101,24 @@ export default function RunWorkflow({
   const [runningGate, setRunningGate] = useState(false);
   const [gateError, setGateError] = useState<string | null>(null);
   const activeSessionRef = useRef(input.sessionId);
+  const activeRunRef = useRef(run.id);
   const activeComparisonRef = useRef(selectedComparisonId);
+  const activePolicyRef = useRef(policyId);
+  const previousComparisonRef = useRef(selectedComparisonId);
   const ablationRequestGenerationRef = useRef(0);
   const decisionsRequestGenerationRef = useRef(0);
+  const ablationMutationGenerationRef = useRef(0);
+  const gateMutationGenerationRef = useRef(0);
   activeSessionRef.current = input.sessionId;
+  activeRunRef.current = run.id;
   activeComparisonRef.current = selectedComparisonId;
+  activePolicyRef.current = policyId;
+  // Invalidate both mutation streams synchronously so A→B→A cannot reuse A's generation.
+  if (previousComparisonRef.current !== selectedComparisonId) {
+    previousComparisonRef.current = selectedComparisonId;
+    ablationMutationGenerationRef.current += 1;
+    gateMutationGenerationRef.current += 1;
+  }
 
   useEffect(() => {
     setMetrics({ kind: "loading" });
@@ -226,11 +239,13 @@ export default function RunWorkflow({
   const loadAblation = useCallback(async () => {
     if (!selectedComparisonId) return;
     const requestSessionId = input.sessionId;
+    const requestRunId = run.id;
     const requestComparisonId = selectedComparisonId;
     const requestGeneration = ablationRequestGenerationRef.current + 1;
     ablationRequestGenerationRef.current = requestGeneration;
     const isCurrentRequest = () =>
       activeSessionRef.current === requestSessionId &&
+      activeRunRef.current === requestRunId &&
       activeComparisonRef.current === requestComparisonId &&
       ablationRequestGenerationRef.current === requestGeneration;
     setAblationState("loading");
@@ -254,28 +269,38 @@ export default function RunWorkflow({
 
   useEffect(() => {
     setAblation(null);
+    setAblationState("loading");
     setAblationError(null);
+    setCreatingAblation(false);
     if (selectedComparisonId) void loadAblation();
   }, [selectedComparisonId, loadAblation]);
 
   async function createAblation() {
     if (!selectedComparisonId) return;
     const requestSessionId = input.sessionId;
+    const requestRunId = run.id;
     const requestComparisonId = selectedComparisonId;
+    const requestGeneration = ablationMutationGenerationRef.current + 1;
+    ablationMutationGenerationRef.current = requestGeneration;
+    const isCurrentMutation = () =>
+      activeSessionRef.current === requestSessionId &&
+      activeRunRef.current === requestRunId &&
+      activeComparisonRef.current === requestComparisonId &&
+      ablationMutationGenerationRef.current === requestGeneration;
     setCreatingAblation(true);
     setAblationError(null);
     try {
       const nextAblation = await createExperimentAblation(input, run.id, selectedComparisonId);
-      if (activeSessionRef.current !== requestSessionId || activeComparisonRef.current !== requestComparisonId) return;
+      if (!isCurrentMutation()) return;
       setAblation(nextAblation);
       setAblationState("ready");
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId && activeComparisonRef.current === requestComparisonId) {
+      if (isCurrentMutation()) {
         setAblationError(apiError.message || apiError.code);
       }
     } finally {
-      if (activeSessionRef.current === requestSessionId && activeComparisonRef.current === requestComparisonId) {
+      if (isCurrentMutation()) {
         setCreatingAblation(false);
       }
     }
@@ -296,11 +321,13 @@ export default function RunWorkflow({
   const loadDecisions = useCallback(async () => {
     if (!selectedComparisonId) return;
     const requestSessionId = input.sessionId;
+    const requestRunId = run.id;
     const requestComparisonId = selectedComparisonId;
     const requestGeneration = decisionsRequestGenerationRef.current + 1;
     decisionsRequestGenerationRef.current = requestGeneration;
     const isCurrentRequest = () =>
       activeSessionRef.current === requestSessionId &&
+      activeRunRef.current === requestRunId &&
       activeComparisonRef.current === requestComparisonId &&
       decisionsRequestGenerationRef.current === requestGeneration;
     setDecisionsError(null);
@@ -322,27 +349,39 @@ export default function RunWorkflow({
     setDecisions([]);
     setDecisionsLoaded(false);
     setDecisionsError(null);
+    setPolicyId("");
+    setRunningGate(false);
+    setGateError(null);
     if (selectedComparisonId && gateEligible) void loadDecisions();
   }, [selectedComparisonId, gateEligible, loadDecisions]);
 
   async function runGate() {
     if (!selectedComparisonId || !policyId) return;
     const requestSessionId = input.sessionId;
+    const requestRunId = run.id;
     const requestComparisonId = selectedComparisonId;
+    const requestPolicyId = policyId;
+    const requestGeneration = gateMutationGenerationRef.current + 1;
+    gateMutationGenerationRef.current = requestGeneration;
+    const isCurrentMutation = () =>
+      activeSessionRef.current === requestSessionId &&
+      activeRunRef.current === requestRunId &&
+      activeComparisonRef.current === requestComparisonId &&
+      gateMutationGenerationRef.current === requestGeneration;
     setRunningGate(true);
     setGateError(null);
     try {
       const decision = await createReleaseGateDecision(input, run.id, selectedComparisonId, { policy_id: policyId });
-      if (activeSessionRef.current !== requestSessionId || activeComparisonRef.current !== requestComparisonId) return;
+      if (!isCurrentMutation()) return;
       setDecisions((current) => upsertById(current, decision));
-      setPolicyId("");
+      if (activePolicyRef.current === requestPolicyId) setPolicyId("");
     } catch (caught) {
       const apiError = toApiError(caught, "");
-      if (activeSessionRef.current === requestSessionId && activeComparisonRef.current === requestComparisonId) {
+      if (isCurrentMutation()) {
         setGateError(apiError.message || apiError.code);
       }
     } finally {
-      if (activeSessionRef.current === requestSessionId && activeComparisonRef.current === requestComparisonId) {
+      if (isCurrentMutation()) {
         setRunningGate(false);
       }
     }
