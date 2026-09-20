@@ -148,7 +148,8 @@ class ToolResponse(BaseModel):
     effect: Literal["READ", "WRITE"] | None
     risk_level: Literal["LOW", "MEDIUM", "HIGH"] | None
     approval_policy: Literal["NEVER", "ALWAYS"] | None
-    execution_kind: Literal["builtin", "action"] | None
+    execution_kind: Literal["builtin", "action", "mcp"] | None
+    source_kind: Literal["builtin", "mcp"] | None = None
     current_revision_id: UUID | None
     current_revision_number: int | None
     current_spec_hash: str | None

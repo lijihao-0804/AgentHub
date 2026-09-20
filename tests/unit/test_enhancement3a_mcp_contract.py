@@ -260,6 +260,7 @@ def test_connections_are_not_exposed_as_tools() -> None:
         PREFIX + "/{connection_id}/rotate-secret",
         PREFIX + "/{connection_id}/test",
         PREFIX + "/{connection_id}/discover-tools",
+        PREFIX + "/{connection_id}/import-tool",
     }
     assert not any("/tools" in path.removeprefix(PREFIX) for path in paths)
 

@@ -69,6 +69,9 @@ class Settings(BaseSettings):
     mcp_discovery_max_tools: int = Field(default=200, ge=1, le=10_000)
     mcp_discovery_max_schema_bytes: int = Field(default=65_536, ge=1_024, le=8_388_608)
     mcp_discovery_max_payload_bytes: int = Field(default=2_097_152, ge=4_096, le=33_554_432)
+    # A tool result goes straight into a model's context, so this bounds what a
+    # remote server can spend of a run's context budget in one answer.
+    mcp_tool_result_max_bytes: int = Field(default=1_048_576, ge=1_024, le=8_388_608)
     langfuse_enabled: bool = False
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)

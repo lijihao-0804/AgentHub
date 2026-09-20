@@ -38,6 +38,18 @@ class ToolResultStatus(StrEnum):
     ERROR = "ERROR"
 
 
+class ToolSourceKind(StrEnum):
+    """Where the executable body of a tool lives.
+
+    This is orthogonal to governance. A tool's effect, risk level and approval
+    policy are decided by the workspace operator and enforced by ToolPolicy
+    regardless of source; the source only decides who is asked to run it.
+    """
+
+    BUILTIN = "BUILTIN"
+    MCP = "MCP"
+
+
 @dataclass(frozen=True)
 class ToolDefinition:
     """The executable projection of one hash-verified published ToolRevision."""
@@ -53,6 +65,10 @@ class ToolDefinition:
     timeout_seconds: int
     snapshot_refs: tuple[dict[str, str], ...] = ()
     retrieval_config: dict[str, Any] = field(default_factory=dict)
+    source_kind: ToolSourceKind = ToolSourceKind.BUILTIN
+    mcp_connection_id: UUID | None = None
+    mcp_tool_name: str | None = None
+    mcp_output_schema: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -126,4 +142,5 @@ __all__ = [
     "ToolResultStatus",
     "ToolRisk",
     "ToolSessionFactory",
+    "ToolSourceKind",
 ]

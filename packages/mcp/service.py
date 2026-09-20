@@ -15,7 +15,10 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from packages.agent_runtime.models import Tool, ToolRevision
+from packages.agent_runtime.tool_revisions import validate_tool_spec
 from packages.control_plane.rbac import WORKSPACE_ADMIN, WORKSPACE_READ
+from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings, get_settings
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
@@ -23,6 +26,7 @@ from packages.mcp.client import (
     McpClientAdapter,
     McpConnectionTarget,
     McpRemoteError,
+    NormalizedMcpTool,
 )
 from packages.mcp.models import McpAuthType, McpConnection
 from packages.mcp.security import (
@@ -31,14 +35,19 @@ from packages.mcp.security import (
     McpTargetError,
     parse_endpoint_url,
 )
+from packages.tools.contracts import ToolApprovalPolicy, ToolEffect, ToolRisk
+from packages.tools.validation import is_valid_tool_identity, validate_executable_tool_spec
 
 # The existing workspace-operational permission. A developer who may edit tools
 # may verify and inspect a connection an administrator approved; only an
 # administrator may create one or touch its credential. No new permission is
 # introduced by 3A.
 TOOL_EDIT = "tool_edit"
+TOOL_CREATE = "tool_create"
 
 MAX_NAME_LENGTH = 128
+
+MCP_TOOL_NOT_FOUND = "MCP_TOOL_NOT_FOUND"
 
 NOT_FOUND = "MCP_CONNECTION_NOT_FOUND"
 NOT_FOUND_MESSAGE = "The MCP connection was not found."
@@ -97,6 +106,60 @@ def _validated_endpoint(value: str) -> str:
             "The endpoint must be an absolute http or https URL without credentials.",
             422,
         ) from None
+
+
+def _validated_governance(
+    *,
+    effect: str,
+    risk_level: str,
+    approval_policy: str,
+    timeout_seconds: int | None,
+) -> dict[str, Any]:
+    """Settle how a remote tool will be governed, from what the operator said.
+
+    Nothing here consults the server's annotations. ``readOnlyHint`` and its
+    siblings are the remote's own description of itself, which is exactly the
+    party whose claims cannot decide whether AgentHub will let a call through
+    unattended. Effect, risk and approval policy are always stated explicitly by
+    the workspace, and a write that could run without a human is refused.
+    """
+
+    if effect not in {item.value for item in ToolEffect}:
+        raise AgentHubError("MCP_TOOL_GOVERNANCE_INVALID", "The effect is invalid.", 422)
+    if risk_level not in {item.value for item in ToolRisk}:
+        raise AgentHubError("MCP_TOOL_GOVERNANCE_INVALID", "The risk level is invalid.", 422)
+    if approval_policy not in {item.value for item in ToolApprovalPolicy}:
+        raise AgentHubError("MCP_TOOL_GOVERNANCE_INVALID", "The approval policy is invalid.", 422)
+    always = ToolApprovalPolicy.ALWAYS.value
+    if effect == ToolEffect.WRITE.value and approval_policy != always:
+        raise AgentHubError(
+            "MCP_TOOL_GOVERNANCE_INVALID",
+            "A remote WRITE tool must always require approval.",
+            422,
+        )
+    if risk_level == ToolRisk.HIGH.value and approval_policy != always:
+        raise AgentHubError(
+            "MCP_TOOL_GOVERNANCE_INVALID",
+            "A high-risk remote tool must always require approval.",
+            422,
+        )
+    return {
+        "effect": effect,
+        "risk_level": risk_level,
+        "approval_policy": approval_policy,
+        "timeout_seconds": timeout_seconds if timeout_seconds is not None else 30,
+    }
+
+
+def _remote_tool(tools: tuple[NormalizedMcpTool, ...], remote_tool_name: str) -> NormalizedMcpTool:
+    for entry in tools:
+        if entry.name == remote_tool_name:
+            return entry
+    # Nothing is created for a tool the server is not currently offering: a Tool
+    # whose schema was invented locally would be a contract nobody agreed to.
+    raise AgentHubError(
+        MCP_TOOL_NOT_FOUND, "The remote MCP server does not offer that tool.", 422
+    )
 
 
 class McpConnectionService:
@@ -325,6 +388,101 @@ class McpConnectionService:
             ],
         }
 
+    async def import_tool(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        connection_id: UUID,
+        *,
+        remote_tool_name: str,
+        identity: str,
+        name: str | None,
+        effect: str,
+        risk_level: str,
+        approval_policy: str,
+        timeout_seconds: int | None,
+    ) -> tuple[Tool, ToolRevision]:
+        """Import one remote tool as a governed AgentHub Tool at revision 1.
+
+        The caller chooses the governance and the logical name it will be known
+        by; the contract itself — the remote name, the schemas, the description
+        — is read from the server as part of this call. A catalog the browser
+        happened to show a few minutes ago is not evidence of what the server
+        offers now, so the listing is taken again here and the named tool must
+        still be in it.
+        """
+
+        workspace_id = _require(context, TOOL_CREATE)
+        created_by = _principal_id(context)
+        governance = _validated_governance(
+            effect=effect,
+            risk_level=risk_level,
+            approval_policy=approval_policy,
+            timeout_seconds=timeout_seconds,
+        )
+        if not is_valid_tool_identity(identity):
+            raise AgentHubError(
+                "MCP_TOOL_IDENTITY_INVALID",
+                "The tool identity must be 1-64 characters of letters, digits, '_' or '-'.",
+                422,
+            )
+
+        target, secret = await self._outbound(session, workspace_id, connection_id)
+        try:
+            outcome = await self.adapter.discover_tools(target, secret)
+        except McpRemoteError as exc:
+            raise AgentHubError(
+                exc.failure_code, "Tool discovery against the remote MCP server failed.", 502
+            ) from None
+        remote = _remote_tool(outcome.tools, remote_tool_name)
+
+        spec = {
+            "kind": "mcp",
+            "identity": identity,
+            "description": remote.description or "",
+            "input_schema": remote.input_schema,
+            "effect": governance["effect"],
+            "risk_level": governance["risk_level"],
+            "approval_policy": governance["approval_policy"],
+            "timeout_seconds": governance["timeout_seconds"],
+            "mcp": {
+                "connection_id": str(connection_id),
+                "tool_name": remote.name,
+                "output_schema": remote.output_schema,
+            },
+        }
+        # The same two gates every revision passes: no credential-shaped key may
+        # reach the spec, and the spec must be executable as written.
+        spec = validate_executable_tool_spec(validate_tool_spec(spec))
+
+        tool = Tool(
+            workspace_id=workspace_id,
+            name=(name.strip() if name and name.strip() else identity),
+            description=spec["description"] or None,
+            enabled=True,
+        )
+        session.add(tool)
+        try:
+            # One transaction: a Tool without the revision that gives it a
+            # contract is not a state this workspace should ever be left in.
+            await session.flush()
+            revision = ToolRevision(
+                workspace_id=workspace_id,
+                tool_id=tool.id,
+                revision_number=1,
+                spec=spec,
+                spec_hash=canonical_json_hash(spec),
+                created_by=created_by,
+            )
+            session.add(revision)
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise AgentHubError(
+                "TOOL_CREATE_FAILED", "The tool could not be created.", 409
+            ) from exc
+        return tool, revision
+
     # -- internals ---------------------------------------------------------
 
     @staticmethod
@@ -470,4 +628,4 @@ class McpConnectionService:
             ) from exc
 
 
-__all__ = ["TOOL_EDIT", "McpConnectionService"]
+__all__ = ["MCP_TOOL_NOT_FOUND", "TOOL_CREATE", "TOOL_EDIT", "McpConnectionService"]

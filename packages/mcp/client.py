@@ -19,15 +19,18 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import AsyncIterator, Callable, Iterator
+from collections.abc import AsyncIterator, Callable, Iterator, Mapping
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from dataclasses import dataclass, field
+from enum import StrEnum
 from time import perf_counter
 from typing import Any, Literal
 from uuid import UUID
 
 import anyio
 import httpx2
+from jsonschema import Draft202012Validator, SchemaError
+from jsonschema import ValidationError as JsonSchemaValidationError
 from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
 from mcp.shared.exceptions import MCPError
@@ -58,6 +61,10 @@ MCP_DISCOVERY_LIMIT_EXCEEDED = "MCP_DISCOVERY_LIMIT_EXCEEDED"
 MCP_DISCOVERY_PAYLOAD_TOO_LARGE = "MCP_DISCOVERY_PAYLOAD_TOO_LARGE"
 MCP_TOOL_SCHEMA_TOO_LARGE = "MCP_TOOL_SCHEMA_TOO_LARGE"
 MCP_DISCOVERY_INVALID = "MCP_DISCOVERY_INVALID"
+MCP_TOOL_CALL_FAILED = "MCP_TOOL_CALL_FAILED"
+MCP_TOOL_RESULT_TOO_LARGE = "MCP_TOOL_RESULT_TOO_LARGE"
+MCP_TOOL_RESULT_UNSUPPORTED = "MCP_TOOL_RESULT_UNSUPPORTED"
+MCP_TOOL_OUTPUT_INVALID = "MCP_TOOL_OUTPUT_INVALID"
 
 FAILURE_CODES = frozenset(
     {
@@ -72,6 +79,10 @@ FAILURE_CODES = frozenset(
         MCP_DISCOVERY_PAYLOAD_TOO_LARGE,
         MCP_TOOL_SCHEMA_TOO_LARGE,
         MCP_DISCOVERY_INVALID,
+        MCP_TOOL_CALL_FAILED,
+        MCP_TOOL_RESULT_TOO_LARGE,
+        MCP_TOOL_RESULT_UNSUPPORTED,
+        MCP_TOOL_OUTPUT_INVALID,
     }
 )
 
@@ -136,6 +147,43 @@ class McpDiscoveryOutcome:
     server: NormalizedMcpServerInfo | None = None
 
 
+class DispatchState(StrEnum):
+    """How much is known about whether the remote was actually asked to act.
+
+    This is the whole basis of the WRITE safety story. A request that provably
+    never left this process can be failed outright, because nothing happened.
+    Once the bytes have been handed to the transport, a silence afterwards is
+    not evidence of anything: the server may well have done the work and lost
+    the answer on the way back. That case is never reported as a failure.
+    """
+
+    NOT_DISPATCHED = "NOT_DISPATCHED"
+    MAYBE_DISPATCHED = "MAYBE_DISPATCHED"
+    DEFINITE_RESPONSE = "DEFINITE_RESPONSE"
+
+
+class McpCallStatus(StrEnum):
+    OK = "OK"
+    TOOL_ERROR = "TOOL_ERROR"
+    FAILED = "FAILED"
+    INDETERMINATE = "INDETERMINATE"
+
+
+@dataclass(frozen=True)
+class McpCallOutcome:
+    """The only shape a tool call leaves this module in.
+
+    ``TOOL_ERROR`` and ``FAILED`` are both definite: the first is the server
+    saying the tool failed, the second is AgentHub knowing the call never went
+    out. ``INDETERMINATE`` is the honest answer to everything else.
+    """
+
+    status: McpCallStatus
+    dispatch: DispatchState
+    data: dict[str, Any] | None = None
+    failure_code: str | None = None
+
+
 @dataclass
 class _Observation:
     """What the transport saw, so the error mapper does not have to guess.
@@ -149,6 +197,20 @@ class _Observation:
 
     blocked_code: str | None = None
     last_http_status: int | None = None
+    in_call_phase: bool = False
+    call_dispatched: bool = False
+
+    def mark_dispatched(self) -> None:
+        """Record that a request is about to be handed to the network.
+
+        Called from the guard immediately before the inner transport takes the
+        request, which is the last moment at which "nothing has happened yet"
+        is still true. Only dispatches during the ``tools/call`` round count:
+        the handshake's own requests say nothing about whether the tool ran.
+        """
+
+        if self.in_call_phase:
+            self.call_dispatched = True
 
 
 ClientFactory = Callable[
@@ -185,6 +247,8 @@ class GuardedAsyncTransport(httpx2.AsyncBaseTransport):
         except McpTargetError:
             self._observation.blocked_code = MCP_TARGET_FORBIDDEN
             raise McpRemoteError(MCP_TARGET_FORBIDDEN) from None
+        # Past this line nothing can be assumed not to have happened.
+        self._observation.mark_dispatched()
         response = await self._inner.handle_async_request(request)
         self._observation.last_http_status = response.status_code
         try:
@@ -299,6 +363,93 @@ class McpClientAdapter:
         )
         return McpDiscoveryOutcome(tools=tools, server=server)
 
+    async def call_tool(
+        self,
+        target: McpConnectionTarget,
+        secret: str | None,
+        *,
+        tool_name: str,
+        arguments: Mapping[str, Any],
+        timeout_seconds: float,
+        max_result_bytes: int,
+        output_schema: Mapping[str, Any] | None = None,
+    ) -> McpCallOutcome:
+        """Run one remote tool exactly once and normalize whatever comes back.
+
+        The call is issued a single time. Nothing here retries — not on a
+        timeout, not on a reset, not on a protocol error — because a retry of a
+        request that may already have been carried out is how one approval
+        becomes two side effects. The catalog is not re-read either: the tool
+        name and schemas were frozen at publish and are used as frozen.
+        """
+
+        observation = _Observation()
+        try:
+            with anyio.fail_after(timeout_seconds):
+                async with self._open(target, secret, observation) as client:
+                    observation.in_call_phase = True
+                    result = await client.call_tool(tool_name, dict(arguments))
+                    observation.in_call_phase = False
+                    return self._decide(
+                        result, max_result_bytes=max_result_bytes, output_schema=output_schema
+                    )
+        except Exception as exc:  # noqa: BLE001 - every failure becomes a code
+            failure = _failure_code(exc, observation)
+            dispatch = (
+                DispatchState.MAYBE_DISPATCHED
+                if observation.call_dispatched
+                else DispatchState.NOT_DISPATCHED
+            )
+            logger.info(
+                "mcp.call connection_id=%s status=failed failure_code=%s dispatch=%s",
+                target.connection_id,
+                failure,
+                dispatch.value,
+            )
+            if dispatch is DispatchState.MAYBE_DISPATCHED:
+                return McpCallOutcome(
+                    McpCallStatus.INDETERMINATE, dispatch, failure_code=failure
+                )
+            return McpCallOutcome(McpCallStatus.FAILED, dispatch, failure_code=failure)
+
+    def _decide(
+        self,
+        result: Any,
+        *,
+        max_result_bytes: int,
+        output_schema: Mapping[str, Any] | None,
+    ) -> McpCallOutcome:
+        """Turn a definite server response into an outcome.
+
+        A response that arrived but cannot be handed on — too large, a payload
+        shape this version does not carry, or structured output that breaks the
+        contract frozen at import — is deliberately not reported as a failure.
+        The server answered, which means it may well have acted, and saying
+        "failed" about work that was done is the one lie this layer must not
+        tell. It is indeterminate instead, and a human is asked.
+        """
+
+        try:
+            data = _normalize_call_result(
+                result, max_result_bytes=max_result_bytes, output_schema=output_schema
+            )
+        except McpRemoteError as exc:
+            return McpCallOutcome(
+                McpCallStatus.INDETERMINATE,
+                DispatchState.DEFINITE_RESPONSE,
+                failure_code=exc.failure_code,
+            )
+        if getattr(result, "is_error", False):
+            # The server explicitly reported that the tool failed. That is an
+            # answer, not an absence of one.
+            return McpCallOutcome(
+                McpCallStatus.TOOL_ERROR,
+                DispatchState.DEFINITE_RESPONSE,
+                data=data,
+                failure_code=MCP_TOOL_CALL_FAILED,
+            )
+        return McpCallOutcome(McpCallStatus.OK, DispatchState.DEFINITE_RESPONSE, data=data)
+
     async def _collect_tools(self, client: Client) -> tuple[NormalizedMcpTool, ...]:
         max_tools = self.settings.mcp_discovery_max_tools
         max_payload = self.settings.mcp_discovery_max_payload_bytes
@@ -386,6 +537,55 @@ class McpClientAdapter:
                 cache=None,
             ) as client:
                 yield client
+
+
+def _normalize_call_result(
+    result: Any,
+    *,
+    max_result_bytes: int,
+    output_schema: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Reduce a ``CallToolResult`` to plain JSON an agent may safely be shown.
+
+    No SDK object survives this function. Text content is carried through as
+    text and structured content as ordinary JSON; anything else — an image, an
+    audio clip, an embedded resource — is refused rather than smuggled into a
+    model's context as a wall of base64 nobody asked for.
+    """
+
+    texts: list[str] = []
+    for block in getattr(result, "content", None) or ():
+        if getattr(block, "type", None) != "text" or not isinstance(
+            getattr(block, "text", None), str
+        ):
+            raise McpRemoteError(MCP_TOOL_RESULT_UNSUPPORTED)
+        texts.append(block.text)
+    structured = getattr(result, "structured_content", None)
+    if structured is not None:
+        structured = _plain_json(structured)
+        if output_schema is not None:
+            # The schema frozen at import is the contract. A server that has
+            # since changed its mind does not get to redefine it mid-run.
+            try:
+                Draft202012Validator(dict(output_schema)).validate(structured)
+            except (JsonSchemaValidationError, SchemaError):
+                raise McpRemoteError(MCP_TOOL_OUTPUT_INVALID) from None
+    payload = {"content": texts, "structured_content": structured}
+    if _json_size(payload) > max_result_bytes:
+        # Not truncated: half a result presented as a whole one is worse than
+        # no result, because nothing downstream can tell the difference.
+        raise McpRemoteError(MCP_TOOL_RESULT_TOO_LARGE)
+    return payload
+
+
+def _plain_json(value: Any) -> Any:
+    if isinstance(value, str | int | float | bool) or value is None:
+        return value
+    if isinstance(value, Mapping):
+        return {str(key): _plain_json(item) for key, item in value.items()}
+    if isinstance(value, list | tuple):
+        return [_plain_json(item) for item in value]
+    raise McpRemoteError(MCP_TOOL_RESULT_UNSUPPORTED)
 
 
 def _normalize_tool(tool: Tool, *, max_schema_bytes: int) -> tuple[NormalizedMcpTool, int]:
@@ -543,8 +743,15 @@ __all__ = [
     "MCP_PROTOCOL_ERROR",
     "MCP_SERVER_UNAVAILABLE",
     "MCP_TARGET_FORBIDDEN",
+    "MCP_TOOL_CALL_FAILED",
+    "MCP_TOOL_OUTPUT_INVALID",
+    "MCP_TOOL_RESULT_TOO_LARGE",
+    "MCP_TOOL_RESULT_UNSUPPORTED",
     "MCP_TOOL_SCHEMA_TOO_LARGE",
+    "DispatchState",
     "GuardedAsyncTransport",
+    "McpCallOutcome",
+    "McpCallStatus",
     "McpClientAdapter",
     "McpConnectionTarget",
     "McpDiscoveryOutcome",

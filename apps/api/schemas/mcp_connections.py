@@ -96,6 +96,27 @@ class McpConnectionDiscoveryResponse(BaseModel):
     tools: list[McpDiscoveredToolResponse]
 
 
+class McpToolImportRequest(BaseModel):
+    """Everything the operator decides when promoting a remote tool.
+
+    What the tool *is* is deliberately absent: the schemas, the description and
+    the remote name's existence are read from the server during the import, so
+    nothing here can be used to give a tool a contract the server never agreed
+    to. What remains is what only the workspace can answer — what to call it and
+    how it will be governed.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    remote_tool_name: str = Field(min_length=1, max_length=128)
+    identity: str = Field(min_length=1, max_length=64)
+    name: str | None = Field(default=None, min_length=1, max_length=128)
+    effect: Literal["READ", "WRITE"]
+    risk_level: Literal["LOW", "MEDIUM", "HIGH"]
+    approval_policy: Literal["NEVER", "ALWAYS"]
+    timeout_seconds: int | None = Field(default=None, ge=1, le=120)
+
+
 __all__ = [
     "McpConnectionCreateRequest",
     "McpConnectionDiscoveryResponse",
@@ -104,4 +125,5 @@ __all__ = [
     "McpConnectionRotateSecretRequest",
     "McpConnectionTestResponse",
     "McpDiscoveredToolResponse",
+    "McpToolImportRequest",
 ]

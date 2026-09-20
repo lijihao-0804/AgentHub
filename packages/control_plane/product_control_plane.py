@@ -194,10 +194,58 @@ def _safe_spec(revision: ToolRevision) -> dict[str, Any]:
         spec = validate_executable_tool_spec(raw_spec)
     except (AgentHubError, TypeError, ValueError) as exc:
         raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422) from exc
-    identity = spec.get("identity")
-    if identity not in BUILTIN_TOOL_CATALOG:
+    if spec["kind"] == "builtin" and spec.get("identity") not in BUILTIN_TOOL_CATALOG:
+        # A builtin spec names a body this server ships. A remote one names a
+        # contract frozen from a server, so the builtin catalog has nothing to
+        # say about whether it is valid.
         raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
     return spec
+
+
+def _execution_kind(spec: dict[str, Any]) -> str:
+    """How this tool will be run, as a label for the management UI.
+
+    A projection, not an input: runtime reads the spec's kind, effect and
+    approval policy, never this string. It exists so the existing Tools page
+    keeps showing something true.
+    """
+
+    if spec["effect"] == "WRITE":
+        return "action"
+    return "mcp" if spec["kind"] == "mcp" else "builtin"
+
+
+def tool_projection(tool: Tool, revision: ToolRevision | None) -> dict[str, Any]:
+    projection = {
+        "id": tool.id,
+        "workspace_id": tool.workspace_id,
+        "name": tool.name,
+        "description": tool.description,
+        "enabled": tool.enabled,
+        "created_at": tool.created_at,
+        "identity": None,
+        "effect": None,
+        "risk_level": None,
+        "approval_policy": None,
+        "execution_kind": None,
+        "source_kind": None,
+        "current_revision_id": revision.id if revision is not None else None,
+        "current_revision_number": revision.revision_number if revision is not None else None,
+        "current_spec_hash": revision.spec_hash if revision is not None else None,
+    }
+    if revision is not None:
+        spec = _safe_spec(revision)
+        projection.update(
+            {
+                "identity": spec["identity"],
+                "effect": spec["effect"],
+                "risk_level": spec["risk_level"],
+                "approval_policy": spec["approval_policy"],
+                "execution_kind": _execution_kind(spec),
+                "source_kind": spec["kind"],
+            }
+        )
+    return projection
 
 
 class ProductControlPlaneService:
@@ -989,37 +1037,7 @@ class ProductControlPlaneService:
             _not_found("TOOL_NOT_FOUND", "The tool was not found.")
         return tool
 
-    @staticmethod
-    def _tool_projection(tool: Tool, revision: ToolRevision | None) -> dict[str, Any]:
-        projection = {
-            "id": tool.id,
-            "workspace_id": tool.workspace_id,
-            "name": tool.name,
-            "description": tool.description,
-            "enabled": tool.enabled,
-            "created_at": tool.created_at,
-            "identity": None,
-            "effect": None,
-            "risk_level": None,
-            "approval_policy": None,
-            "execution_kind": None,
-            "current_revision_id": revision.id if revision is not None else None,
-            "current_revision_number": revision.revision_number if revision is not None else None,
-            "current_spec_hash": revision.spec_hash if revision is not None else None,
-        }
-        if revision is not None:
-            spec = _safe_spec(revision)
-            catalog = _catalog_entry(spec["identity"])
-            projection.update(
-                {
-                    "identity": spec["identity"],
-                    "effect": spec["effect"],
-                    "risk_level": spec["risk_level"],
-                    "approval_policy": spec["approval_policy"],
-                    "execution_kind": catalog["execution_kind"],
-                }
-            )
-        return projection
+    _tool_projection = staticmethod(tool_projection)
 
     @staticmethod
     async def _agent(
@@ -1079,4 +1097,9 @@ class ProductControlPlaneService:
         }
 
 
-__all__ = ["BUILTIN_TOOL_CATALOG", "BuiltinToolCatalog", "ProductControlPlaneService"]
+__all__ = [
+    "BUILTIN_TOOL_CATALOG",
+    "BuiltinToolCatalog",
+    "ProductControlPlaneService",
+    "tool_projection",
+]

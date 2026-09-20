@@ -10,6 +10,7 @@ from packages.approvals import ApprovalService
 from packages.core.errors.exceptions import AgentHubError
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
+from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.observability import ProductionTraceSink
 from packages.tools.actions import ActionRuntime
@@ -34,6 +35,10 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
             rrf_k=settings.knowledge_rrf_k,
             trace_sink=trace_sink,
         )
+        # One executor serves both sides of the approval boundary: the same
+        # connection lookup and the same single call, read one way for a READ
+        # and another for a WRITE.
+        mcp_executor = McpToolExecutor(factory, settings=settings)
         service = AgentRunService(
             factory,
             credential_cipher=ProviderCredentialCipher.from_settings(settings),
@@ -42,12 +47,15 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
                 registry=ToolRegistry(retriever=retriever),
                 audit_sink=SqlAlchemyToolAuditSink(factory),
                 trace_sink=trace_sink,
+                mcp_handler=mcp_executor.execute_read,
             ),
             trace_sink=trace_sink,
             approval_service=ApprovalService(
                 factory, ttl_seconds=settings.approval_ttl_seconds
             ),
-            action_runtime=ActionRuntime(session_factory=factory),
+            action_runtime=ActionRuntime(
+                session_factory=factory, mcp_executor=McpActionExecutor(mcp_executor)
+            ),
             checkpoint_adapter=LangGraphCheckpointAdapter(settings.database_url),
         )
         app.state.agent_run_service = service

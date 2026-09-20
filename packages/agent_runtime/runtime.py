@@ -1959,7 +1959,11 @@ class _AgentRunGraph:
             "proposed_tool_calls": [],
             "pre_observations": {},
             "executed_observations": {},
-            "failure_code": terminal_code,
+            # A code the execution node already set outranks this one. Reaching
+            # here with one set means the run is already over — an unconfirmed
+            # action, a lost claim — and blanking it would turn a run that needs
+            # a human into a run that quietly looks fine.
+            "failure_code": terminal_code or state.get("failure_code"),
         }
 
     async def finish(self, state: AgentRunState) -> dict[str, Any]:

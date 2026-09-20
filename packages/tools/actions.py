@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
-from packages.tools.contracts import ToolDefinition
+from packages.tools.contracts import ToolDefinition, ToolSourceKind
 from packages.tools.models import Customer, Ticket
 
 
@@ -127,15 +127,30 @@ class ActionRegistry:
         *,
         session_factory: async_sessionmaker[AsyncSession],
         overrides: dict[str, ActionExecutor] | None = None,
+        mcp_executor: ActionExecutor | None = None,
     ) -> None:
         self._executors: dict[str, ActionExecutor] = {
             "create_ticket": CreateTicketActionExecutor(session_factory)
         }
         if overrides:
             self._executors.update(overrides)
+        self._mcp_executor = mcp_executor
 
     def resolve(self, identity: str) -> ActionExecutor | None:
         return self._executors.get(identity)
+
+    def resolve_for(self, definition: ToolDefinition) -> ActionExecutor | None:
+        """Find who runs this action, by source first and identity second.
+
+        Remote tools do not each get an entry here. There is one executor for
+        all of them, because a remote tool is a row in a table rather than a
+        piece of code, and a registry that grew an entry per import would be a
+        registry a workspace could write into.
+        """
+
+        if definition.source_kind is ToolSourceKind.MCP:
+            return self._mcp_executor
+        return self.resolve(definition.identity)
 
 
 class ActionRuntime:
@@ -146,8 +161,11 @@ class ActionRuntime:
         *,
         session_factory: async_sessionmaker[AsyncSession],
         registry: ActionRegistry | None = None,
+        mcp_executor: ActionExecutor | None = None,
     ) -> None:
-        self.registry = registry or ActionRegistry(session_factory=session_factory)
+        self.registry = registry or ActionRegistry(
+            session_factory=session_factory, mcp_executor=mcp_executor
+        )
 
     async def execute(
         self,
@@ -161,9 +179,13 @@ class ActionRuntime:
             return ActionExecutionResult.failed(
                 "ACTION_NOT_WRITE", "Only WRITE tools can use the action runtime."
             )
-        executor = self.registry.resolve(definition.identity)
+        executor = self.registry.resolve_for(definition)
         if executor is None:
             return ActionExecutionResult.failed("UNKNOWN_ACTION", "The action is not registered.")
+        if definition.source_kind is ToolSourceKind.MCP:
+            return await self._execute_remote(
+                executor, context, definition, arguments, idempotency_key
+            )
         try:
             async with asyncio.timeout(definition.timeout_seconds):
                 return await executor.execute(
@@ -173,11 +195,38 @@ class ActionRuntime:
                     idempotency_key=idempotency_key,
                 )
         except TimeoutError:
+            # Safe for a local action: the work runs in this process, so
+            # cancelling it is the same as it not having happened.
             return ActionExecutionResult.failed("ACTION_TIMEOUT", "The action timed out.")
         except AgentHubError as exc:
             return ActionExecutionResult.failed(exc.code, exc.message)
         except Exception:
             return ActionExecutionResult.failed("ACTION_EXECUTION_FAILED", "The action failed.")
+
+    @staticmethod
+    async def _execute_remote(
+        executor: ActionExecutor,
+        context: WorkspaceExecutionContext,
+        definition: ToolDefinition,
+        arguments: dict[str, Any],
+        idempotency_key: str,
+    ) -> ActionExecutionResult:
+        """Run a remote action, without imposing a deadline from out here.
+
+        Cutting a remote call off from this layer would be a lie: the request
+        may already be with the other side, and cancelling our end tells us
+        nothing about theirs. Only the client that handed the bytes over knows
+        whether the attempt got that far, so it owns the deadline and reports
+        the doubt. Anything that still escapes is treated as doubt too — the
+        safe answer to "did it happen?" is "ask a human", never "no".
+        """
+
+        try:
+            return await executor.execute(
+                context, definition, arguments, idempotency_key=idempotency_key
+            )
+        except Exception:
+            return ActionExecutionResult.unknown_outcome("ACTION_OUTCOME_UNKNOWN")
 
 
 async def _find_ticket(

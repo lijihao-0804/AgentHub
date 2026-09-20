@@ -31,6 +31,7 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievalStrategy
 from packages.knowledge.snapshots import KnowledgeSnapshotService, ResolvedKnowledgeSnapshot
+from packages.mcp.models import McpConnection
 from packages.model_gateway.capabilities import CapabilityRequirements
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.profile_resolution import (
@@ -445,16 +446,50 @@ class AgentPublishService:
             if canonical_json_hash(safe_spec) != revision.spec_hash:
                 raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
             executable_spec = validate_executable_tool_spec(safe_spec)
-            projections.append(
-                {
-                    "tool_revision_id": str(revision.id),
-                    "tool_spec_hash": revision.spec_hash,
-                    "effect": executable_spec["effect"],
-                    "risk_level": executable_spec["risk_level"],
-                    "approval_policy": executable_spec["approval_policy"],
-                }
-            )
+            projection = {
+                "tool_revision_id": str(revision.id),
+                "tool_spec_hash": revision.spec_hash,
+                "effect": executable_spec["effect"],
+                "risk_level": executable_spec["risk_level"],
+                "approval_policy": executable_spec["approval_policy"],
+            }
+            if executable_spec["kind"] == "mcp":
+                # Only remote tools carry this. Builtin projections are left
+                # byte-identical to what every already-published version froze.
+                projection["source_kind"] = "mcp"
+                await self._validate_mcp_connection(
+                    session, agent.workspace_id, executable_spec["mcp"]["connection_id"]
+                )
+            projections.append(projection)
         return tuple(projections)
+
+    @staticmethod
+    async def _validate_mcp_connection(
+        session: AsyncSession, workspace_id: UUID, connection_id: str
+    ) -> None:
+        """Refuse to publish a remote tool that could not be called today.
+
+        Publishing is a promise that the frozen version is runnable. A tool
+        pointing at a connection that has been deleted, belongs to another
+        workspace, or has been deliberately switched off is not, and finding
+        that out at publish time is much cheaper than finding it out mid-run.
+        """
+
+        record = await session.execute(
+            select(McpConnection.enabled).where(
+                McpConnection.id == UUID(connection_id),
+                McpConnection.workspace_id == workspace_id,
+            )
+        )
+        row = record.first()
+        if row is None:
+            raise AgentHubError(
+                "MCP_CONNECTION_NOT_FOUND", "The MCP connection was not found.", 404
+            )
+        if not row.enabled:
+            raise AgentHubError(
+                "MCP_CONNECTION_DISABLED", "The MCP connection is disabled.", 409
+            )
 
     @staticmethod
     async def _load_agent(

@@ -23,6 +23,7 @@ from packages.evaluation.runner import (
 )
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
+from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.observability import ProductionTraceSink
 from packages.tools.actions import ActionRuntime
@@ -72,6 +73,9 @@ async def _build_driver(settings, factory):
     )
     approval_service = ApprovalService(factory, ttl_seconds=settings.approval_ttl_seconds)
     approval_actor_provider = EvaluationApprovalActorProvider(factory)
+    # An evaluation run executes the same published agent the API does, so it
+    # has to be able to reach the same remote tools, under the same governance.
+    mcp_executor = McpToolExecutor(factory, settings=settings)
     service = AgentRunService(
         factory,
         credential_cipher=ProviderCredentialCipher.from_settings(settings),
@@ -80,10 +84,13 @@ async def _build_driver(settings, factory):
             registry=ToolRegistry(retriever=retriever),
             audit_sink=SqlAlchemyToolAuditSink(factory),
             trace_sink=trace_sink,
+            mcp_handler=mcp_executor.execute_read,
         ),
         trace_sink=trace_sink,
         approval_service=approval_service,
-        action_runtime=ActionRuntime(session_factory=factory),
+        action_runtime=ActionRuntime(
+            session_factory=factory, mcp_executor=McpActionExecutor(mcp_executor)
+        ),
         checkpoint_adapter=LangGraphCheckpointAdapter(settings.database_url),
     )
 

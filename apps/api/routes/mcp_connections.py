@@ -21,7 +21,10 @@ from apps.api.schemas.mcp_connections import (
     McpConnectionResponse,
     McpConnectionRotateSecretRequest,
     McpConnectionTestResponse,
+    McpToolImportRequest,
 )
+from apps.api.schemas.product_control_plane import ToolResponse
+from packages.control_plane.product_control_plane import tool_projection
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.mcp.service import McpConnectionService
 
@@ -146,6 +149,41 @@ async def discover_mcp_connection_tools(
     return McpConnectionDiscoveryResponse.model_validate(
         await service.discover_tools(session, context, connection_id)
     )
+
+
+@router.post(
+    PREFIX + "/{connection_id}/import-tool",
+    response_model=ToolResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def import_mcp_tool(
+    workspace_id: UUID,
+    connection_id: UUID,
+    payload: McpToolImportRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> ToolResponse:
+    """Promote one remote tool into a governed AgentHub Tool at revision 1.
+
+    The result is an ordinary Tool. It binds to agents, publishes and is judged
+    by ToolPolicy exactly as a builtin does; only the body that eventually runs
+    lives somewhere else.
+    """
+
+    del workspace_id
+    tool, revision = await service.import_tool(
+        session,
+        context,
+        connection_id,
+        remote_tool_name=payload.remote_tool_name,
+        identity=payload.identity,
+        name=payload.name,
+        effect=payload.effect,
+        risk_level=payload.risk_level,
+        approval_policy=payload.approval_policy,
+        timeout_seconds=payload.timeout_seconds,
+    )
+    return ToolResponse.model_validate(tool_projection(tool, revision))
 
 
 __all__ = ["router"]
