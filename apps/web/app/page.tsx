@@ -58,10 +58,10 @@ export default function Home() {
           </p>
         ) : (
           <div className="state-block state-inline">
-            <p className="state-title">{t("session.notConnected")}</p>
-            <p className="state-hint">{t("session.notConnectedNote")}</p>
+            <p className="state-title">{t("workspace.noWorkspaces")}</p>
+            <p className="state-hint">{t("workspace.noWorkspacesHint")}</p>
             <button type="button" className="button button-primary" onClick={openPanel}>
-              {t("session.connect")}
+              {t("workspace.selectWorkspace")}
             </button>
           </div>
         )}

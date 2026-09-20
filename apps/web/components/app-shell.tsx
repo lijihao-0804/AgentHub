@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { useI18n } from "../i18n/provider";
 import type { MessageKey } from "../i18n/messages";
 import { LocaleProvider } from "../i18n/provider";
-import { FrontendSessionProvider } from "./session-provider";
+import { FrontendSessionProvider, useFrontendSession } from "./session-provider";
 import LanguageSwitcher from "./language-switcher";
-import SessionControl from "./session-control";
+import WorkspaceSelector from "./workspace-selector";
+import UserMenu from "./user-menu";
 
 type NavItem = { href: string; labelKey: MessageKey; match: (pathname: string) => boolean };
 
@@ -27,20 +28,33 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
     ],
   },
   {
-    headingKey: "nav.knowledge",
+    headingKey: "nav.build",
     items: [
-      {
-        href: "/knowledge/playground",
-        labelKey: "nav.retrievalPlayground",
-        match: prefixMatch("/knowledge"),
-      },
+      { href: "/agents", labelKey: "nav.agents", match: prefixMatch("/agents") },
+      { href: "/knowledge", labelKey: "nav.knowledge", match: prefixMatch("/knowledge") },
+      { href: "/tools", labelKey: "nav.tools", match: prefixMatch("/tools") },
     ],
+  },
+  {
+    headingKey: "nav.evaluate",
+    items: [{ href: "/evaluations", labelKey: "nav.evaluations", match: prefixMatch("/evaluations") }],
+  },
+  {
+    headingKey: "nav.workspace",
+    items: [{ href: "/settings", labelKey: "nav.settings", match: prefixMatch("/settings") }],
   },
 ];
 
+/** Routes rendered without the control-plane chrome. */
+const AUTH_ROUTES = ["/login", "/register"];
+
+function isAuthRoute(pathname: string): boolean {
+  return AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+}
+
 function NavLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
   const { t } = useI18n();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const active = item.match(pathname);
   return (
     <li>
@@ -58,11 +72,10 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }
 
 function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
   const { t } = useI18n();
-  const pathname = usePathname() ?? "";
   return (
     <>
       <div className="sidebar-brand">
-        <Link href="/" className="brand-link" onClick={onNavigate}>
+        <Link href="/dashboard" className="brand-link" onClick={onNavigate}>
           <span className="brand-name">AgentHub</span>
           <span className="brand-subtitle">{t("brand.subtitle")}</span>
         </Link>
@@ -78,21 +91,6 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
             </ul>
           </div>
         ))}
-        <div className="nav-group">
-          <p className="nav-group-heading">{t("evaluation.eyebrow")}</p>
-          <ul>
-            <li>
-              <Link
-                href="/evaluations"
-                className={`nav-link${pathname.startsWith("/evaluations") ? " nav-link-active" : ""}`}
-                aria-current={pathname.startsWith("/evaluations") ? "page" : undefined}
-                onClick={onNavigate}
-              >
-                {t("nav.evaluations")}
-              </Link>
-            </li>
-          </ul>
-        </div>
       </nav>
       <p className="sidebar-footnote">{t("shell.footnote")}</p>
     </>
@@ -103,9 +101,44 @@ export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <LocaleProvider>
       <FrontendSessionProvider>
-        <ShellChrome>{children}</ShellChrome>
+        <ShellGate>{children}</ShellGate>
       </FrontendSessionProvider>
     </LocaleProvider>
+  );
+}
+
+/**
+ * Routes traffic between the auth pages and the control-plane shell.
+ * A missing session is a normal signed-out state, never an error.
+ */
+function ShellGate({ children }: { children: ReactNode }) {
+  const { status } = useFrontendSession();
+  const pathname = usePathname() ?? "";
+  const router = useRouter();
+  const onAuthRoute = isAuthRoute(pathname);
+
+  useEffect(() => {
+    if (status === "UNAUTHENTICATED" && !onAuthRoute) router.replace("/login");
+    if (status === "AUTHENTICATED" && onAuthRoute) router.replace("/dashboard");
+  }, [status, onAuthRoute, router]);
+
+  if (status === "BOOTSTRAPPING") return <BootstrapScreen />;
+  if (onAuthRoute) {
+    return status === "AUTHENTICATED" ? <BootstrapScreen /> : <div className="auth-frame">{children}</div>;
+  }
+  if (status === "UNAUTHENTICATED") return <BootstrapScreen />;
+  return <ShellChrome>{children}</ShellChrome>;
+}
+
+function BootstrapScreen() {
+  const { t } = useI18n();
+  return (
+    <div className="auth-frame">
+      <div className="state-block state-loading" role="status" aria-live="polite">
+        <span className="loading-bar" aria-hidden="true" />
+        <span>{t("common.loading")}</span>
+      </div>
+    </div>
   );
 }
 
@@ -148,7 +181,8 @@ function ShellChrome({ children }: { children: ReactNode }) {
           </button>
           <div className="topbar-spacer" />
           <LanguageSwitcher />
-          <SessionControl />
+          <WorkspaceSelector />
+          <UserMenu />
         </header>
         <main className="app-content" id="app-content">
           {children}

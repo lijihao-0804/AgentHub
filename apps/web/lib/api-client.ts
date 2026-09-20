@@ -21,23 +21,33 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-export async function apiRequest<T>(
+/**
+ * Core transport for the documented /api/v1 envelope.
+ *
+ * `credentials: "include"` is always sent so the backend-owned HttpOnly
+ * refresh cookie travels with /auth/* calls. The refresh cookie is never
+ * read by JavaScript.
+ */
+async function transport<T>(
   path: string,
-  accessToken: string,
-  init?: { method?: string; body?: unknown },
+  init: { method?: string; body?: unknown; accessToken?: string; formData?: FormData },
 ): Promise<T> {
-  const token = accessToken.trim();
-  if (!token) {
-    throw new ApiError("SESSION_REQUIRED", "A workspace session with an access token is required.", 401);
-  }
+  const token = init.accessToken?.trim();
+  // The browser must set its own multipart boundary, so Content-Type is
+  // only declared for JSON bodies.
+  const hasJsonBody = init.formData === undefined && init.body !== undefined;
   const response = await fetch(`${apiBaseUrl}${path}`, {
-    method: init?.method ?? "GET",
+    method: init.method ?? "GET",
     headers: {
-      ...(init?.body !== undefined ? { "Content-Type": "application/json" } : {}),
-      Authorization: `Bearer ${token}`,
+      ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     credentials: "include",
-    ...(init?.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
+    ...(init.formData !== undefined
+      ? { body: init.formData }
+      : hasJsonBody
+        ? { body: JSON.stringify(init.body) }
+        : {}),
   });
   const body = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
@@ -50,6 +60,45 @@ export async function apiRequest<T>(
   }
   return body as T;
 }
+
+export async function apiRequest<T>(
+  path: string,
+  accessToken: string,
+  init?: { method?: string; body?: unknown },
+): Promise<T> {
+  const token = accessToken.trim();
+  if (!token) {
+    throw new ApiError("SESSION_REQUIRED", "A workspace session with an access token is required.", 401);
+  }
+  return transport<T>(path, { method: init?.method, body: init?.body, accessToken: token });
+}
+
+/** Multipart upload against the same envelope and error contract. */
+export async function apiUpload<T>(
+  path: string,
+  accessToken: string,
+  formData: FormData,
+): Promise<T> {
+  const token = accessToken.trim();
+  if (!token) {
+    throw new ApiError("SESSION_REQUIRED", "A workspace session with an access token is required.", 401);
+  }
+  return transport<T>(path, { method: "POST", formData, accessToken: token });
+}
+
+/**
+ * Unauthenticated request for the /auth/* surface. Used before an access
+ * token exists (login, register) and for cookie-only refresh/logout.
+ */
+export function publicApiRequest<T>(
+  path: string,
+  init?: { method?: string; body?: unknown },
+): Promise<T> {
+  return transport<T>(path, { method: init?.method, body: init?.body });
+}
+
+/** Shared shape for workspace-scoped client calls. */
+export type AuthInput = { workspaceId: string; accessToken: string };
 
 /**
  * Dictionary keys for localized hints of common API failures. The hint
