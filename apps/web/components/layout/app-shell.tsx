@@ -48,6 +48,10 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
     ],
   },
   {
+    headingKey: "nav.applications",
+    items: [{ href: "/research", labelKey: "nav.research", match: prefixMatch("/research") }],
+  },
+  {
     headingKey: "nav.build",
     items: [
       { href: "/agents", labelKey: "nav.agents", match: prefixMatch("/agents") },
