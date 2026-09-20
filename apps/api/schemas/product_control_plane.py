@@ -86,6 +86,15 @@ class ModelProfileResponse(BaseModel):
     created_at: datetime
 
 
+class ModelProfileTestResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    model_profile_id: UUID
+    status: Literal["healthy", "degraded", "unavailable"]
+    failure_code: str | None
+    latency_ms: float = Field(ge=0)
+
+
 class ToolCatalogEntryResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -245,6 +254,7 @@ __all__ = [
     "ModelProfileCreateRequest",
     "ModelProfilePatchRequest",
     "ModelProfileResponse",
+    "ModelProfileTestResponse",
     "ProviderCredentialCreateRequest",
     "ProviderCredentialPatchRequest",
     "ProviderCredentialResponse",

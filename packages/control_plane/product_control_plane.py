@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from decimal import Decimal
+from time import perf_counter
 from typing import Any, NoReturn
 from uuid import UUID
 
@@ -36,6 +37,7 @@ from packages.knowledge.models import (
     KnowledgeSnapshotItem,
 )
 from packages.model_gateway.capabilities import capabilities_from_mapping
+from packages.model_gateway.contracts import ModelGateway
 from packages.model_gateway.credentials import CredentialEncryptionError
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.tools.validation import validate_executable_tool_spec
@@ -415,6 +417,31 @@ class ProductControlPlaneService:
                 "MODEL_PROFILE_UPDATE_FAILED", "The model profile could not be updated.", 409
             ) from exc
         return profile
+
+    async def test_model_profile(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        profile_id: UUID,
+        gateway: ModelGateway,
+    ) -> dict[str, Any]:
+        workspace_id = _require(context, "agent_edit")
+        profile = await session.scalar(
+            select(ModelProfile).where(
+                ModelProfile.id == profile_id,
+                ModelProfile.workspace_id == workspace_id,
+            )
+        )
+        if profile is None:
+            _not_found("MODEL_PROFILE_NOT_FOUND", "The model profile was not found.")
+        started = perf_counter()
+        result = await gateway.health(context, profile_id)
+        return {
+            "model_profile_id": profile_id,
+            "status": result.status.value,
+            "failure_code": result.failure_code,
+            "latency_ms": max(0.0, round((perf_counter() - started) * 1000, 2)),
+        }
 
     async def _validate_profile_values(
         self,

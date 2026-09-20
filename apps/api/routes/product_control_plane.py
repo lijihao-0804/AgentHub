@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
-from apps.api.knowledge_dependencies import get_workspace_context
+from apps.api.knowledge_dependencies import get_model_gateway, get_workspace_context
 from apps.api.schemas.product_control_plane import (
     AgentKnowledgeBindingRequest,
     AgentKnowledgeBindingResponse,
@@ -18,6 +18,7 @@ from apps.api.schemas.product_control_plane import (
     ModelProfileCreateRequest,
     ModelProfilePatchRequest,
     ModelProfileResponse,
+    ModelProfileTestResponse,
     ProviderCredentialCreateRequest,
     ProviderCredentialPatchRequest,
     ProviderCredentialResponse,
@@ -30,10 +31,12 @@ from apps.api.schemas.product_control_plane import (
 )
 from packages.control_plane.product_control_plane import ProductControlPlaneService
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.model_gateway.contracts import ModelGateway
 
 router = APIRouter(tags=["product-control-plane"])
 db_session_dependency = Depends(get_db_session)
 context_dependency = Depends(get_workspace_context)
+model_gateway_dependency = Depends(get_model_gateway)
 service = ProductControlPlaneService()
 
 
@@ -194,6 +197,23 @@ async def patch_model_profile(
             session, context, profile_id, payload.model_dump(exclude_unset=True)
         ),
         from_attributes=True,
+    )
+
+
+@router.post(
+    "/api/v1/workspaces/{workspace_id}/model-profiles/{profile_id}/test",
+    response_model=ModelProfileTestResponse,
+)
+async def test_model_profile(
+    workspace_id: UUID,
+    profile_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+    gateway: ModelGateway = model_gateway_dependency,
+) -> ModelProfileTestResponse:
+    del workspace_id
+    return ModelProfileTestResponse.model_validate(
+        await service.test_model_profile(session, context, profile_id, gateway)
     )
 
 

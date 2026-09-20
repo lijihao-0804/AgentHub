@@ -10,6 +10,7 @@ from apps.api.knowledge_dependencies import get_workspace_context
 from apps.api.schemas.agents import (
     AgentCreateRequest,
     AgentPatchRequest,
+    AgentPreflightResponse,
     AgentPublishResponse,
     AgentResponse,
     AgentVersionResponse,
@@ -106,6 +107,19 @@ async def publish_agent(
     )
 
 
+@router.post("/{agent_id}/preflight", response_model=AgentPreflightResponse)
+async def preflight_agent(
+    workspace_id: UUID,
+    agent_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> AgentPreflightResponse:
+    del workspace_id
+    return AgentPreflightResponse.model_validate(
+        await AgentPublishService().preflight(session, context, agent_id)
+    )
+
+
 @router.get("/{agent_id}/versions", response_model=list[AgentVersionResponse])
 async def list_agent_versions(
     workspace_id: UUID,
@@ -119,6 +133,24 @@ async def list_agent_versions(
         AgentVersionResponse.model_validate(version, from_attributes=True)
         for version in versions
     ]
+
+
+@router.get(
+    "/{agent_id}/versions/{version_id}",
+    response_model=AgentVersionResponse,
+)
+async def get_agent_version(
+    workspace_id: UUID,
+    agent_id: UUID,
+    version_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> AgentVersionResponse:
+    del workspace_id
+    return AgentVersionResponse.model_validate(
+        await AgentPublishService().get_version(session, context, agent_id, version_id),
+        from_attributes=True,
+    )
 
 
 __all__ = ["router"]
