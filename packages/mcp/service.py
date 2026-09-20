@@ -143,6 +143,17 @@ def _validated_governance(
             "A high-risk remote tool must always require approval.",
             422,
         )
+    if effect == ToolEffect.READ.value and approval_policy != ToolApprovalPolicy.NEVER.value:
+        # An approved call is executed through the action runtime, which serves
+        # WRITEs only. Rather than build a second execution path for a case no
+        # one has asked for, this release states plainly that a remote READ is
+        # unattended or not importable at all. HIGH still demands approval, so
+        # this also means a HIGH remote READ cannot be imported.
+        raise AgentHubError(
+            "MCP_TOOL_GOVERNANCE_INVALID",
+            "A remote READ tool must run without approval.",
+            422,
+        )
     return {
         "effect": effect,
         "risk_level": risk_level,

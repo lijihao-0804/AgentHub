@@ -170,6 +170,42 @@ def test_high_risk_read_also_requires_approval() -> None:
         )
 
 
+def test_read_may_not_be_imported_behind_an_approval() -> None:
+    """An approved call runs through the action runtime, which serves WRITEs.
+
+    Rather than let an import create a tool that can be approved and then not
+    executed, this release says so at the point of import: a remote READ is
+    unattended or it is not importable.
+    """
+
+    with pytest.raises(AgentHubError) as excinfo:
+        _validated_governance(
+            effect="READ", risk_level="LOW", approval_policy="ALWAYS", timeout_seconds=None
+        )
+
+    assert excinfo.value.code == "MCP_TOOL_GOVERNANCE_INVALID"
+    assert excinfo.value.status_code == 422
+
+
+@pytest.mark.parametrize("approval_policy", ["NEVER", "ALWAYS"])
+def test_a_high_risk_read_cannot_be_imported_at_all(approval_policy: str) -> None:
+    """The two rules meet here and leave no policy that satisfies both.
+
+    HIGH demands approval; READ forbids it. That is deliberate rather than an
+    oversight: a high-risk read is a thing this release declines to govern.
+    """
+
+    with pytest.raises(AgentHubError) as excinfo:
+        _validated_governance(
+            effect="READ",
+            risk_level="HIGH",
+            approval_policy=approval_policy,
+            timeout_seconds=None,
+        )
+
+    assert excinfo.value.code == "MCP_TOOL_GOVERNANCE_INVALID"
+
+
 def test_read_may_be_imported_as_unattended() -> None:
     governance = _validated_governance(
         effect="READ", risk_level="LOW", approval_policy="NEVER", timeout_seconds=None

@@ -65,9 +65,14 @@ MCP_TOOL_CALL_FAILED = "MCP_TOOL_CALL_FAILED"
 MCP_TOOL_RESULT_TOO_LARGE = "MCP_TOOL_RESULT_TOO_LARGE"
 MCP_TOOL_RESULT_UNSUPPORTED = "MCP_TOOL_RESULT_UNSUPPORTED"
 MCP_TOOL_OUTPUT_INVALID = "MCP_TOOL_OUTPUT_INVALID"
+# Our own side stopped waiting — a shutdown, a cancelled task — while a request
+# was already with the server. Distinct from the server being unavailable,
+# because nothing here says the server failed to act.
+MCP_CALL_ABANDONED = "MCP_CALL_ABANDONED"
 
 FAILURE_CODES = frozenset(
     {
+        MCP_CALL_ABANDONED,
         MCP_DNS_FAILED,
         MCP_TARGET_FORBIDDEN,
         MCP_CONNECT_FAILED,
@@ -374,13 +379,16 @@ class McpClientAdapter:
         max_result_bytes: int,
         output_schema: Mapping[str, Any] | None = None,
     ) -> McpCallOutcome:
-        """Run one remote tool exactly once and normalize whatever comes back.
+        """Dispatch one remote tool call once and normalize whatever comes back.
 
         The call is issued a single time. Nothing here retries — not on a
         timeout, not on a reset, not on a protocol error — because a retry of a
         request that may already have been carried out is how one approval
-        becomes two side effects. The catalog is not re-read either: the tool
-        name and schemas were frozen at publish and are used as frozen.
+        becomes two side effects. AgentHub does not explicitly rediscover the
+        remote catalog: the tool name and schemas were frozen at publish and are
+        used as frozen. The MCP SDK may still issue a `tools/list` of its own to
+        validate the result it received; that is the SDK's business and happens
+        after the call, so it changes nothing about whether we dispatched.
         """
 
         observation = _Observation()
@@ -411,6 +419,30 @@ class McpClientAdapter:
                     McpCallStatus.INDETERMINATE, dispatch, failure_code=failure
                 )
             return McpCallOutcome(McpCallStatus.FAILED, dispatch, failure_code=failure)
+        except BaseException as exc:
+            # Reaching here means the failure was not an Exception at all, so
+            # the clause above never saw it. Cancellation arrives this way, and
+            # it would otherwise leave this method with no verdict — the caller
+            # would be told nothing about a request that may already be running
+            # on the far side. Only cancellation is answered here; a process
+            # interrupt is re-raised exactly as it came.
+            if not isinstance(exc, anyio.get_cancelled_exc_class()):
+                raise
+            if not observation.call_dispatched:
+                # Nothing was handed over, so a cancellation is just a
+                # cancellation and belongs to whoever asked for it.
+                raise
+            logger.info(
+                "mcp.call connection_id=%s status=indeterminate failure_code=%s dispatch=%s",
+                target.connection_id,
+                MCP_CALL_ABANDONED,
+                DispatchState.MAYBE_DISPATCHED.value,
+            )
+            return McpCallOutcome(
+                McpCallStatus.INDETERMINATE,
+                DispatchState.MAYBE_DISPATCHED,
+                failure_code=MCP_CALL_ABANDONED,
+            )
 
     def _decide(
         self,
@@ -734,6 +766,7 @@ def _failure_code(exc: BaseException, observation: _Observation) -> str:
 __all__ = [
     "FAILURE_CODES",
     "MCP_AUTH_FAILED",
+    "MCP_CALL_ABANDONED",
     "MCP_CONNECT_FAILED",
     "MCP_CONNECT_TIMEOUT",
     "MCP_DISCOVERY_INVALID",

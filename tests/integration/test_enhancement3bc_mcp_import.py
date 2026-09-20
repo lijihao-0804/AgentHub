@@ -538,6 +538,63 @@ async def test_publishing_fails_closed_when_the_connection_is_gone(db_factory) -
         )
 
 
+@pytest.mark.asyncio
+async def test_two_tools_answering_to_one_identity_cannot_be_published(db_factory) -> None:
+    """Identity is how the model asks and how the runtime dispatches.
+
+    Two bound tools sharing one identity leave the dispatcher to pick by row
+    order, which is not a decision a database should be making. Publish is the
+    last point at which a person can still be told, so it is told here.
+    """
+
+    async with db_factory() as session:
+        base = await create_base(session)
+        connection_id = await create_connection(session, base["context"])
+        service = remote_with_customer_lookup().service()
+        first_tool, first_revision = await service.import_tool(
+            session, base["context"], connection_id, **{**IMPORT_ARGS, "name": "CRM Lookup A"}
+        )
+        second_tool, second_revision = await service.import_tool(
+            session, base["context"], connection_id, **{**IMPORT_ARGS, "name": "CRM Lookup B"}
+        )
+        assert first_tool.id != second_tool.id
+        publish = AgentPublishService()
+        agent = await publish.create_draft(
+            session,
+            base["context"],
+            name="Support Agent",
+            system_prompt="Answer from the CRM.",
+            model_profile_id=base["profile_id"],
+        )
+        for tool, revision in ((first_tool, first_revision), (second_tool, second_revision)):
+            session.add(
+                AgentTool(
+                    workspace_id=base["workspace_id"],
+                    agent_id=agent.id,
+                    tool_id=tool.id,
+                    tool_revision_id=revision.id,
+                )
+            )
+        await session.commit()
+
+        with pytest.raises(AgentHubError) as excinfo:
+            await publish.publish(session, base["context"], agent.id)
+
+        assert (excinfo.value.code, excinfo.value.status_code) == (
+            "DUPLICATE_TOOL_IDENTITY",
+            422,
+        )
+        # Nothing was frozen: a refused publish leaves no version behind.
+        assert (
+            await session.scalar(
+                select(func.count())
+                .select_from(AgentVersion)
+                .where(AgentVersion.agent_id == agent.id)
+            )
+            == 0
+        )
+
+
 def test_the_import_request_will_not_accept_a_contract_from_its_caller() -> None:
     from pydantic import ValidationError
 

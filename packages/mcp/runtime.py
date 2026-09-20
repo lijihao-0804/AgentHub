@@ -108,7 +108,13 @@ class McpToolExecutor:
         definition: ToolDefinition,
         arguments: Mapping[str, Any],
     ) -> ActionExecutionResult:
-        """Run an approved WRITE tool, exactly once, and classify the answer."""
+        """Dispatch an approved WRITE tool once and classify the answer.
+
+        AgentHub intentionally dispatches the call a single time and never
+        retries an uncertain outcome. That is a statement about what this side
+        does, not a promise about the remote: no exactly-once guarantee is
+        claimed or available here.
+        """
 
         outcome = await self._call(context, definition, arguments)
         if outcome.status is McpCallStatus.OK:

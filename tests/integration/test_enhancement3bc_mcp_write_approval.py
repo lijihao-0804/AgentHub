@@ -18,6 +18,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 from uuid import uuid4
 
+import anyio
 import httpx2
 import mcp_types
 import pytest
@@ -39,7 +40,7 @@ from packages.approvals import (
 )
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
-from packages.mcp.client import McpClientAdapter
+from packages.mcp.client import McpClientAdapter, McpConnectionTarget
 from packages.mcp.models import McpAuthType, McpConnection
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.model_gateway.contracts import ModelResponse, ModelToolCall
@@ -125,8 +126,9 @@ def write_spec(connection_id: Any) -> dict[str, Any]:
 class Remote:
     """An in-process MCP server that records every act it was asked to perform."""
 
-    def __init__(self, *, lose_answer: bool = False) -> None:
+    def __init__(self, *, lose_answer: bool = False, cancel_after_dispatch: bool = False) -> None:
         self.lose_answer = lose_answer
+        self.cancel_after_dispatch = cancel_after_dispatch
         self.call_count = 0
         self.seen_arguments: list[dict[str, Any]] = []
 
@@ -152,11 +154,17 @@ class Remote:
             on_list_tools=self._on_list_tools,
         )
         lose_answer = self.lose_answer
+        cancel_after_dispatch = self.cancel_after_dispatch
 
         @asynccontextmanager
         async def client_factory(_target, _secret, observation):
             async with Client(server, cache=None) as client:
-                yield _LostAnswer(client, observation) if lose_answer else client
+                if cancel_after_dispatch:
+                    yield _CancelledAfterDispatch(client, observation)
+                elif lose_answer:
+                    yield _LostAnswer(client, observation)
+                else:
+                    yield client
 
         config = settings()
         return McpActionExecutor(
@@ -185,6 +193,25 @@ class _LostAnswer:
         self._observation.mark_dispatched()
         await self._inner.call_tool(name, arguments)
         raise httpx2.ReadError("the connection was reset before the response was read")
+
+
+class _CancelledAfterDispatch:
+    """A client whose task is cancelled once the request is already in flight.
+
+    Cancellation is not an ``Exception``, so it travels by a different route
+    than every other failure and can walk past a handler that only catches
+    Exception. The remote has still been asked to act, so the only honest
+    answer is the same one a lost reply gets.
+    """
+
+    def __init__(self, inner: Any, observation: Any) -> None:
+        self._inner = inner
+        self._observation = observation
+
+    async def call_tool(self, name: str, arguments: dict[str, Any]) -> Any:
+        self._observation.mark_dispatched()
+        await self._inner.call_tool(name, arguments)
+        raise anyio.get_cancelled_exc_class()()
 
 
 class ScriptedGateway:
@@ -373,6 +400,82 @@ async def test_lost_answer_is_unknown_and_resuming_never_calls_twice(db_factory)
     assert run.failure_code == "ACTION_RECONCILIATION_REQUIRED"
     assert persisted is not None
     assert persisted.execution_status == ApprovalExecutionStatus.UNKNOWN_OUTCOME
+
+
+@pytest.mark.asyncio
+async def test_cancellation_after_dispatch_is_unknown_and_never_calls_twice(db_factory) -> None:
+    """A cancelled task is not evidence the remote did nothing.
+
+    Cancellation arrives as a BaseException, so it is the one failure that can
+    slip past ordinary error handling and be read as "nothing happened". Once
+    the request has been handed over it must be classified exactly like a lost
+    reply: never an ordinary FAILED, and never grounds for asking again.
+    """
+
+    base = await published(db_factory)
+    remote = Remote(cancel_after_dispatch=True)
+    gateway = ScriptedGateway()
+    adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
+    context = base["context"]
+
+    first = await service(db_factory, gateway, remote, adapter).run(
+        context, agent_version_id=base["version"].id, input_text="Refund them"
+    )
+    assert first.status == "WAITING_APPROVAL"
+    approval = (await ApprovalService(db_factory).list(context))[0]
+    await ApprovalService(db_factory).decide(
+        context, approval.id, decision=ApprovalDecisionStatus.APPROVED
+    )
+
+    resumed = await service(db_factory, gateway, remote, adapter).resume(
+        context, run_id=first.run_id, approval_id=approval.id
+    )
+    assert resumed.status == "NEEDS_ATTENTION"
+    assert resumed.failure_code == "ACTION_RECONCILIATION_REQUIRED"
+    assert remote.call_count == 1
+
+    again = await service(db_factory, gateway, remote, adapter).resume(
+        context, run_id=first.run_id, approval_id=approval.id
+    )
+    assert again.status == "NEEDS_ATTENTION"
+    assert remote.call_count == 1
+
+    async with db_factory() as session:
+        run = await session.scalar(select(AgentRun).where(AgentRun.id == first.run_id))
+        persisted = await session.get(type(approval), approval.id)
+    assert run is not None and run.status == "NEEDS_ATTENTION"
+    assert run.failure_code == "ACTION_RECONCILIATION_REQUIRED"
+    assert persisted is not None
+    assert persisted.execution_status == ApprovalExecutionStatus.UNKNOWN_OUTCOME
+    assert persisted.execution_status != ApprovalExecutionStatus.FAILED
+
+
+@pytest.mark.asyncio
+async def test_cancellation_before_dispatch_stays_a_cancellation(db_factory) -> None:
+    """Nothing was handed over, so the cancellation belongs to whoever asked."""
+
+    del db_factory
+    cancelled = anyio.get_cancelled_exc_class()
+
+    @asynccontextmanager
+    async def never_reaches_the_wire(_target, _secret, _observation):
+        raise cancelled()
+        yield  # pragma: no cover - unreachable, keeps this a generator
+
+    adapter = McpClientAdapter(settings=settings(), client_factory=never_reaches_the_wire)
+    target = McpConnectionTarget(
+        connection_id=uuid4(), endpoint_url=ENDPOINT, auth_type=McpAuthType.NONE
+    )
+
+    with pytest.raises(cancelled):
+        await adapter.call_tool(
+            target,
+            None,
+            tool_name=REMOTE_TOOL,
+            arguments=ARGUMENTS,
+            timeout_seconds=5,
+            max_result_bytes=65536,
+        )
 
 
 @pytest.mark.asyncio

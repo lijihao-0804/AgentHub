@@ -420,6 +420,7 @@ class AgentPublishService:
             .order_by(AgentTool.tool_id)
         )
         projections: list[dict[str, Any]] = []
+        seen_identities: set[str] = set()
         for binding in bindings:
             tool = await session.scalar(
                 select(Tool).where(
@@ -446,6 +447,19 @@ class AgentPublishService:
             if canonical_json_hash(safe_spec) != revision.spec_hash:
                 raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
             executable_spec = validate_executable_tool_spec(safe_spec)
+            identity = executable_spec["identity"]
+            if identity in seen_identities:
+                # The model proposes a call by identity and the runtime
+                # dispatches by identity, so two bound tools answering to the
+                # same name have no defined winner. Refusing at publish is the
+                # only place that ambiguity can still be corrected by a human;
+                # after this it would be decided by row order.
+                raise AgentHubError(
+                    "DUPLICATE_TOOL_IDENTITY",
+                    "Two bound tools share the same identity.",
+                    422,
+                )
+            seen_identities.add(identity)
             projection = {
                 "tool_revision_id": str(revision.id),
                 "tool_spec_hash": revision.spec_hash,
