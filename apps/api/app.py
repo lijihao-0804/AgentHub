@@ -20,6 +20,7 @@ from apps.api.routes.citation_qa import router as citation_qa_router
 from apps.api.routes.evaluation import router as evaluation_router
 from apps.api.routes.knowledge import router as knowledge_router
 from apps.api.routes.observability import router as observability_router
+from apps.api.routes.product_control_plane import router as product_control_plane_router
 from apps.api.routes.runs import router as runs_router
 from apps.api.routes.tenancy import router as tenancy_router
 from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
@@ -81,6 +82,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(evaluation_router)
     app.include_router(knowledge_router)
     app.include_router(observability_router)
+    app.include_router(product_control_plane_router)
     app.include_router(runs_router)
     app.include_router(tenancy_router)
 
