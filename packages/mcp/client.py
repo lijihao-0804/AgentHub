@@ -392,12 +392,10 @@ def _normalize_tool(tool: Tool, *, max_schema_bytes: int) -> tuple[NormalizedMcp
     schema = tool.input_schema
     if not isinstance(schema, dict):
         raise McpRemoteError(MCP_DISCOVERY_INVALID)
-    schema_bytes = _json_size(schema)
-    if schema_bytes > max_schema_bytes:
+    if _json_size(schema) > max_schema_bytes:
         raise McpRemoteError(MCP_TOOL_SCHEMA_TOO_LARGE)
     output_schema = tool.output_schema if isinstance(tool.output_schema, dict) else None
-    output_bytes = _json_size(output_schema) if output_schema is not None else 0
-    if output_bytes > max_schema_bytes:
+    if output_schema is not None and _json_size(output_schema) > max_schema_bytes:
         raise McpRemoteError(MCP_TOOL_SCHEMA_TOO_LARGE)
     entry = NormalizedMcpTool(
         name=tool.name,
@@ -407,7 +405,30 @@ def _normalize_tool(tool: Tool, *, max_schema_bytes: int) -> tuple[NormalizedMcp
         output_schema=output_schema,
         remote_annotations=_remote_annotations(tool),
     )
-    return entry, schema_bytes + output_bytes
+    return entry, _payload_size(entry)
+
+
+def _payload_size(entry: NormalizedMcpTool) -> int:
+    """Measure everything discovery would hand back for one tool.
+
+    The per-schema bound is deliberately not what limits the listing: a server
+    can stay under it on every schema and still answer with megabytes of
+    descriptions or titles. What is counted here is the whole normalized
+    entry — name, title, description, both schemas and the remote annotations —
+    serialized exactly once, compactly and with sorted keys, so the number is
+    the same for the same tool on every run.
+    """
+
+    return _json_size(
+        {
+            "name": entry.name,
+            "title": entry.title,
+            "description": entry.description,
+            "input_schema": entry.input_schema,
+            "output_schema": entry.output_schema,
+            "remote_annotations": entry.remote_annotations,
+        }
+    )
 
 
 def _remote_annotations(tool: Tool) -> dict[str, bool] | None:
@@ -424,9 +445,12 @@ def _remote_annotations(tool: Tool) -> dict[str, bool] | None:
 
 def _json_size(value: Any) -> int:
     try:
-        return len(json.dumps(value, separators=(",", ":"), ensure_ascii=False).encode("utf-8"))
+        serialized = json.dumps(
+            value, separators=(",", ":"), ensure_ascii=False, sort_keys=True
+        )
     except (TypeError, ValueError):
         raise McpRemoteError(MCP_DISCOVERY_INVALID) from None
+    return len(serialized.encode("utf-8"))
 
 
 def _server_info(client: Client) -> NormalizedMcpServerInfo:

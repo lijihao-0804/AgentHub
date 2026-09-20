@@ -49,9 +49,15 @@ def settings(**overrides: object) -> Settings:
     return Settings(testing=True, environment="test", **overrides)
 
 
-def tool(name: str, *, schema: dict | None = None, annotations: ToolAnnotations | None = None):
-    return Tool(name=name, description=f"{name} tool", inputSchema=schema or SCHEMA,
-                annotations=annotations)
+def tool(
+    name: str,
+    *,
+    schema: dict | None = None,
+    annotations: ToolAnnotations | None = None,
+    description: str | None = None,
+):
+    return Tool(name=name, description=description or f"{name} tool",
+                inputSchema=schema or SCHEMA, annotations=annotations)
 
 
 def server_with(pages: list[tuple[list[Tool], str | None]]) -> Server:
@@ -185,6 +191,56 @@ async def test_discover_tools_rejects_an_oversized_total_payload() -> None:
         ).discover_tools(target(), None)
 
     assert excinfo.value.failure_code == MCP_DISCOVERY_PAYLOAD_TOO_LARGE
+
+
+async def test_the_payload_budget_covers_a_tool_beyond_its_schemas() -> None:
+    """A server cannot stay small in its schemas and huge everywhere else.
+
+    The schemas here are the ordinary tiny ones and pass the per-schema bound
+    with room to spare; the weight is entirely in the description, which is
+    just as much of the payload a caller has to receive.
+    """
+
+    windy = tool("windy", description="x" * 8192)
+
+    with pytest.raises(McpRemoteError) as excinfo:
+        await adapter_for(
+            server_with([([windy], None)]),
+            mcp_discovery_max_schema_bytes=2048,
+            mcp_discovery_max_payload_bytes=4096,
+        ).discover_tools(target(), None)
+
+    assert excinfo.value.failure_code == MCP_DISCOVERY_PAYLOAD_TOO_LARGE
+
+
+async def test_the_payload_budget_accumulates_across_pages() -> None:
+    # No single tool is over the budget; the listing as a whole is, and paging
+    # is not a way to deliver it in instalments.
+    pages = [
+        ([tool(f"a{index}", description="x" * 900) for index in range(3)], "1"),
+        ([tool(f"b{index}", description="x" * 900) for index in range(3)], None),
+    ]
+
+    with pytest.raises(McpRemoteError) as excinfo:
+        await adapter_for(
+            server_with(pages),
+            mcp_discovery_max_schema_bytes=2048,
+            mcp_discovery_max_payload_bytes=4096,
+        ).discover_tools(target(), None)
+
+    assert excinfo.value.failure_code == MCP_DISCOVERY_PAYLOAD_TOO_LARGE
+
+
+async def test_a_listing_within_the_payload_budget_still_comes_back_in_order() -> None:
+    pages = [([tool("zeta"), tool("alpha")], "1"), ([tool("mid")], None)]
+
+    outcome = await adapter_for(
+        server_with(pages),
+        mcp_discovery_max_schema_bytes=2048,
+        mcp_discovery_max_payload_bytes=4096,
+    ).discover_tools(target(), None)
+
+    assert [entry.name for entry in outcome.tools] == ["zeta", "alpha", "mid"]
 
 
 async def test_discover_tools_refuses_duplicate_tool_names_across_pages() -> None:
