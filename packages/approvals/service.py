@@ -11,6 +11,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from packages.agent_runtime.models import AgentRun
 from packages.approvals.contracts import (
     ApprovalDecisionStatus,
     ApprovalExecutionStatus,
@@ -122,6 +123,31 @@ class ApprovalService:
             result = await session.scalars(
                 select(Approval)
                 .where(Approval.workspace_id == _workspace_uuid(context))
+                .order_by(Approval.created_at, Approval.id)
+            )
+            return list(result)
+
+    async def list_for_run(
+        self, context: WorkspaceExecutionContext, run_id: UUID
+    ) -> list[Approval]:
+        if "workspace_read" not in context.permissions:
+            raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
+        workspace_id = _workspace_uuid(context)
+        async with self.session_factory() as session:
+            run_exists = await session.scalar(
+                select(AgentRun.id).where(
+                    AgentRun.workspace_id == workspace_id,
+                    AgentRun.id == run_id,
+                )
+            )
+            if run_exists is None:
+                raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
+            result = await session.scalars(
+                select(Approval)
+                .where(
+                    Approval.workspace_id == workspace_id,
+                    Approval.run_id == run_id,
+                )
                 .order_by(Approval.created_at, Approval.id)
             )
             return list(result)
