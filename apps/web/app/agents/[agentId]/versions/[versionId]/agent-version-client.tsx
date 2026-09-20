@@ -61,6 +61,12 @@ export default function AgentVersionDetailClient({
       </header>
 
       <div className="page-toolbar">
+        <Link
+          className="button button-ghost"
+          href={`/agents/${agentId}/versions/compare?left=${encodeURIComponent(versionId)}`}
+        >
+          {t("agents.versionDiff.entry")}
+        </Link>
         <Link className="button button-ghost" href={`/agents/${agentId}`}>
           {t("agents.backToAgent")}
         </Link>

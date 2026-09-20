@@ -53,6 +53,25 @@ export function getAgentRun(input: AuthInput, runId: string): Promise<AgentRun> 
 }
 
 /**
+ * Creates a new non-streaming run for a published agent version.
+ *
+ * Replay uses this: it is a brand new run with its own id, not a resume
+ * of an existing one. The backend decides everything else, including
+ * whether the new run pauses for approval.
+ */
+export function createAgentRun(
+  input: AuthInput,
+  options: { agentVersionId: string; inputText: string },
+): Promise<AgentRun> {
+  return apiRequest<AgentRun>(
+    `${runtimeBase(input.workspaceId)}/agent-versions/` +
+      `${encodeURIComponent(options.agentVersionId)}/runs`,
+    input.accessToken,
+    { method: "POST", body: { input_text: options.inputText } },
+  );
+}
+
+/**
  * Asks the backend to stop the run. The result may legitimately still be
  * CANCEL_REQUESTED — that is a request in flight, not a cancelled run.
  */

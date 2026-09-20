@@ -8,8 +8,10 @@ import { statusTone, type StatusTone } from "../../../components/badge-tones";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "../../../components/states";
 import TechnicalDetails from "../../../components/technical-details";
 import { ApiError, errorHintKey, toApiError } from "../../../lib/api-client";
+import { createAgentRun, getAgentRun, type AgentRun } from "../../../lib/agent-runtime";
 import { getRunDetail, getRunTimeline, RunDetail, RunTimelineEntry } from "../../../lib/runs";
 import { useFrontendSession } from "../../../components/session-provider";
+import { useWorkspaceMutation } from "../../../components/use-workspace-data";
 import { useI18n } from "../../../i18n/provider";
 
 function timelineTone(entry: RunTimelineEntry): StatusTone {
@@ -23,12 +25,14 @@ function shortId(value: string): string {
 
 export default function RunDetailClient({ runId }: { runId: string }) {
   const { t, statusLabel, failureCategoryLabel, timelineKindLabel, formatDateTime, formatNumber, formatCurrencyAmount } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [run, setRun] = useState<RunDetail | null>(null);
   const [timeline, setTimeline] = useState<RunTimelineEntry[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [replay, setReplay] = useState<AgentRun | null>(null);
+  const replayMutation = useWorkspaceMutation(`run-replay:${workspaceId}:${runId}`);
 
   const load = useCallback(async () => {
     setError(null);
@@ -56,6 +60,30 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   useEffect(() => {
     if (!connected) setLoaded(false);
   }, [connected]);
+
+  // A replay belongs to the workspace session that created it; switching
+  // workspaces or runs must not leave a stale replay pointer on screen.
+  useEffect(() => {
+    setReplay(null);
+  }, [sessionId, runId]);
+
+  /**
+   * Replay reads the authoritative runtime record first: the
+   * observability projection carries no input text, and the input must be
+   * the one the backend actually stored, not a reconstruction.
+   */
+  const handleReplay = useCallback(async () => {
+    await replayMutation.run(
+      async (auth) => {
+        const source = await getAgentRun(auth, runId);
+        return createAgentRun(auth, {
+          agentVersionId: source.agent_version_id,
+          inputText: source.input_text,
+        });
+      },
+      (created) => setReplay(created),
+    );
+  }, [replayMutation, runId]);
 
   const hint = error ? errorHintKey(error) : null;
 
@@ -152,14 +180,65 @@ export default function RunDetailClient({ runId }: { runId: string }) {
                 <p className="eyebrow">{t("run.agentVersionEyebrow", { version: run.agent_version_number })}</p>
                 <h2><StatusBadge status={run.status} /></h2>
               </div>
-              {run.status === "WAITING_APPROVAL" && (
-                <Link className="button button-ghost" href="/approvals">
-                  {t("run.openApprovals")}
+              <div className="approval-actions">
+                {run.status === "WAITING_APPROVAL" && (
+                  <Link className="button button-ghost" href="/approvals">
+                    {t("run.openApprovals")}
+                  </Link>
+                )}
+                <Link
+                  className="button button-ghost"
+                  href={`/runs/compare?left=${encodeURIComponent(runId)}`}
+                >
+                  {t("run.compareEntry")}
                 </Link>
-              )}
+                <button
+                  className="button button-primary"
+                  type="button"
+                  disabled={replayMutation.pending}
+                  onClick={() => void handleReplay()}
+                >
+                  {replayMutation.pending ? t("run.replay.running") : t("run.replay.button")}
+                </button>
+              </div>
             </div>
             {run.status === "WAITING_APPROVAL" && <p className="state-hint">{t("run.waitingCallout")}</p>}
             {run.status === "NEEDS_ATTENTION" && <p className="state-hint">{t("run.attentionCallout")}</p>}
+            {/* Stated before the click: a replay really does execute again. */}
+            <p className="state-hint">{t("run.replay.warning")}</p>
+            {replayMutation.error && (
+              <p className="state-hint">
+                {replayMutation.error.message || t("run.replay.failed")}
+              </p>
+            )}
+            {replay && (
+              <div className="inline-notice replay-notice">
+                <p>
+                  <strong>{t("run.replay.created")}</strong>
+                </p>
+                <p className="state-hint">
+                  {t("run.replay.original")}: <code title={runId}>{shortId(runId)}</code>
+                </p>
+                <p className="state-hint">
+                  {t("run.replay.replay")}: <code title={replay.id}>{shortId(replay.id)}</code>{" "}
+                  <StatusBadge status={replay.status} />
+                </p>
+                {replay.status === "WAITING_APPROVAL" && (
+                  <p className="state-hint">{t("run.replay.waitingApproval")}</p>
+                )}
+                <div className="approval-actions">
+                  <Link
+                    className="button button-ghost"
+                    href={`/runs/compare?left=${encodeURIComponent(runId)}&right=${encodeURIComponent(replay.id)}`}
+                  >
+                    {t("run.replay.compare")}
+                  </Link>
+                  <Link className="button button-ghost" href={`/runs/${replay.id}`}>
+                    {t("run.replay.open")}
+                  </Link>
+                </div>
+              </div>
+            )}
             <div className="run-facts">
               <span>{t("run.facts.duration")}<strong>{run.duration_ms === null ? "—" : `${formatNumber(run.duration_ms)} ms`}</strong></span>
               <span>{t("run.facts.tokens")}<strong>{run.total_tokens ?? "—"}</strong></span>
