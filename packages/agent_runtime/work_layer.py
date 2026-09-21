@@ -42,6 +42,35 @@ class ThreadContextProvider(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
+class ThreadHistoryHit:
+    """One earlier turn that matched a search, as the model should see it."""
+
+    sequence: int
+    user_input: str
+    final_output: str
+    matched_terms: tuple[str, ...] = ()
+
+
+class ThreadHistorySearcher(Protocol):
+    """Looks further back in the thread than the replay window reaches.
+
+    The window is a budget decision, not a statement about what matters. When
+    the model needs turn three of a forty-turn thread it has exactly two
+    options: make something up, or ask. This seam is the asking.
+    """
+
+    async def search(
+        self,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        before_run_id: UUID,
+        query: str,
+        limit: int,
+    ) -> tuple[ThreadHistoryHit, ...]: ...
+
+
+@dataclass(frozen=True, slots=True)
 class RecordedToolCall:
     """One completed tool call, offered to the work layer to keep or ignore."""
 
@@ -76,5 +105,7 @@ __all__ = [
     "RunArtifactRecorder",
     "ThreadContextProvider",
     "ThreadConversation",
+    "ThreadHistoryHit",
+    "ThreadHistorySearcher",
     "ThreadTurnContext",
 ]

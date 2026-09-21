@@ -32,12 +32,22 @@ export type ContextBudget = {
   max_tool_result_tokens?: number | null;
 };
 
+/**
+ * Per-agent memory switches. Both default off, and an agent that turns
+ * neither on publishes the same spec hash it published before memory existed.
+ */
+export type MemoryConfig = {
+  thread_history_search?: boolean;
+  long_term_memory?: boolean;
+};
+
 export type RuntimeConfig = {
   max_steps?: number | null;
   max_tool_calls?: number | null;
   max_identical_calls?: number | null;
   max_parallel_reads?: number | null;
   context_budget?: ContextBudget | null;
+  memory?: MemoryConfig | null;
 };
 
 export type Agent = {

@@ -35,6 +35,12 @@ from packages.agent_runtime.context_budget import (
 from packages.agent_runtime.event_store import RunEventReader, RunEventRecorder
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
+from packages.agent_runtime.memory_tools import (
+    MAX_SEARCH_RESULTS,
+    THREAD_HISTORY_SEARCH,
+    history_hint,
+    thread_history_search_definition,
+)
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.agent_runtime.stream_hub import RunStreamHub, RunStreamRegistry
 from packages.agent_runtime.work_layer import (
@@ -1363,6 +1369,75 @@ class _AgentRunGraph:
         }
         return messages, metadata
 
+    def _thread_history_search_enabled(self, spec: FrozenAgentSpec) -> bool:
+        """Three conditions, all of them necessary.
+
+        The published version must have asked for it, the run must belong to a
+        thread, and composition must have wired a searcher. Missing any one of
+        them means the tool is not offered at all rather than offered and then
+        failing: a tool the model can see but cannot use is worse than no tool,
+        because the model will spend a round finding that out.
+        """
+
+        if not spec.runtime.get("memory", {}).get("thread_history_search", False):
+            return False
+        if getattr(self.run, "thread_id", None) is None:
+            return False
+        return getattr(self.service.thread_context_provider, "search", None) is not None
+
+    async def _search_thread_history(
+        self, arguments: Mapping[str, Any], *, workspace_id: UUID
+    ) -> ToolResult:
+        thread_id = getattr(self.run, "thread_id", None)
+        searcher = getattr(self.service.thread_context_provider, "search", None)
+        if thread_id is None or searcher is None:
+            return ToolResult.failure(
+                "UNKNOWN_TOOL", "The requested tool is not published for this agent."
+            )
+        query = arguments.get("query")
+        limit = arguments.get("limit", MAX_SEARCH_RESULTS)
+        if not isinstance(query, str) or not query.strip():
+            return ToolResult.failure(
+                "TOOL_ARGUMENT_INVALID", "The tool arguments are invalid."
+            )
+        if isinstance(limit, bool) or not isinstance(limit, int):
+            return ToolResult.failure(
+                "TOOL_ARGUMENT_INVALID", "The tool arguments are invalid."
+            )
+        limit = max(1, min(limit, MAX_SEARCH_RESULTS))
+        started = time.perf_counter()
+        try:
+            hits = await searcher(
+                workspace_id=workspace_id,
+                thread_id=thread_id,
+                before_run_id=self.run.id,
+                query=query,
+                limit=limit,
+            )
+        except SQLAlchemyError:
+            logger.warning("thread_history_search_failed", exc_info=True)
+            return ToolResult.failure(
+                "TOOL_EXECUTION_FAILED", "The tool execution failed."
+            )
+        # An empty result is a success, not an error. "I looked and it is not
+        # there" is an answer the model can act on; a failure is one it retries.
+        return ToolResult.success(
+            {
+                "query": query,
+                "match_count": len(hits),
+                "turns": [
+                    {
+                        "sequence": hit.sequence,
+                        "user_input": hit.user_input,
+                        "final_output": hit.final_output,
+                        "matched_terms": list(hit.matched_terms),
+                    }
+                    for hit in hits
+                ],
+            },
+            duration_ms=round((time.perf_counter() - started) * 1000, 3),
+        )
+
     async def prepare(self, state: AgentRunState) -> dict[str, Any]:
         try:
             workspace_id = UUID(self.context.workspace_id)
@@ -1404,12 +1479,25 @@ class _AgentRunGraph:
                 )
             tool_definitions = {definition.identity: definition for definition in definitions}
             history, history_metadata = await self._thread_history(workspace_id)
+            runtime_policy = _RUNTIME_POLICY
+            if self._thread_history_search_enabled(spec):
+                tool_definitions[THREAD_HISTORY_SEARCH] = thread_history_search_definition()
+                dropped = 0
+                if history_metadata is not None:
+                    dropped = int(history_metadata.get("turns_dropped_by_window", 0))
+                # Appended to the policy message rather than added as a third
+                # system message: the budget categorizer reads position, and
+                # ``_SYSTEM_PREFIX_LENGTH`` is what tells it where replayed
+                # history starts.
+                runtime_policy = "\n\n".join(
+                    (_RUNTIME_POLICY, history_hint(turns_dropped_by_window=dropped))
+                )
             # The two system messages stay first and the current task stays
             # last. That ordering is not cosmetic: the budget categorizer reads
             # position, and history placed anywhere else would either become
             # unevictable or displace the question being asked.
             messages = [
-                ModelMessage(role="system", content=_RUNTIME_POLICY),
+                ModelMessage(role="system", content=runtime_policy),
                 ModelMessage(role="system", content=spec.system_prompt),
                 *history,
                 ModelMessage(role="user", content=self.run.input_text),
@@ -2111,16 +2199,22 @@ class _AgentRunGraph:
                     },
                 )
                 try:
-                    result = await self.service.tool_runtime.execute(
-                        context=self.context,
-                        agent_version_id=self.run.agent_version_id,
-                        tool_identity=call["name"],
-                        arguments=call["arguments"],
-                        tool_call_id=call["tool_call_id"],
-                        effective_snapshot_refs=tuple(
-                            state.get("effective_knowledge_snapshots", [])
-                        ),
-                    )
+                    if call["name"] == THREAD_HISTORY_SEARCH:
+                        result = await self._search_thread_history(
+                            call["arguments"],
+                            workspace_id=UUID(self.context.workspace_id),
+                        )
+                    else:
+                        result = await self.service.tool_runtime.execute(
+                            context=self.context,
+                            agent_version_id=self.run.agent_version_id,
+                            tool_identity=call["name"],
+                            arguments=call["arguments"],
+                            tool_call_id=call["tool_call_id"],
+                            effective_snapshot_refs=tuple(
+                                state.get("effective_knowledge_snapshots", [])
+                            ),
+                        )
                 except AgentHubError as error:
                     result = ToolResult.failure(error.code, error.message)
                 except Exception:
@@ -2178,6 +2272,10 @@ class _AgentRunGraph:
             return
         recorded: list[RecordedToolCall] = []
         for call in calls:
+            # Looking something up in the thread produced nothing new; the turn
+            # it found is already in the thread.
+            if call["name"] == THREAD_HISTORY_SEARCH:
+                continue
             result = observations.get(call["tool_call_id"])
             if result is None or result.status is not ToolResultStatus.SUCCESS:
                 continue

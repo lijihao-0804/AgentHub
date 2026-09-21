@@ -37,6 +37,20 @@ class ContextBudgetRequest(BaseModel):
     max_tool_result_tokens: int | None = Field(default=None, ge=1)
 
 
+class MemoryConfigRequest(BaseModel):
+    """Per-agent memory switches.
+
+    Both default off, and the whole block is dropped from the published spec
+    when neither is on, so an agent that never asks for memory publishes the
+    same bytes it published before this field existed.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    thread_history_search: bool = False
+    long_term_memory: bool = False
+
+
 class RuntimeConfigRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -57,6 +71,7 @@ class RuntimeConfigRequest(BaseModel):
         default=None, ge=1, le=MAX_RUN_COST_LIMIT_MICRO_USD
     )
     context_budget: ContextBudgetRequest | None = None
+    memory: MemoryConfigRequest | None = None
 
 
 class AgentCreateRequest(BaseModel):

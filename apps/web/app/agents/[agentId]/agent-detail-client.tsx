@@ -152,6 +152,9 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     max_retrieval_tokens: "",
     max_tool_result_tokens: "",
   });
+  // Booleans, so they live outside `runtime`: that state is all numeric
+  // strings and is validated as such.
+  const [memory, setMemory] = useState({ thread_history_search: false, long_term_memory: false });
   const [knowledgeDraft, setKnowledgeDraft] = useState<AgentKnowledgeBinding[]>([]);
   const [toolDraft, setToolDraft] = useState<AgentToolBinding[]>([]);
 
@@ -174,6 +177,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       max_retrieval_tokens: "",
       max_tool_result_tokens: "",
     });
+    setMemory({ thread_history_search: false, long_term_memory: false });
     setKnowledgeDraft([]);
     setToolDraft([]);
   }, [sessionId, agentId]);
@@ -208,6 +212,13 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       max_retrieval_tokens: budget.max_retrieval_tokens != null ? String(budget.max_retrieval_tokens) : "",
       max_tool_result_tokens:
         budget.max_tool_result_tokens != null ? String(budget.max_tool_result_tokens) : "",
+    });
+    // Absent means off, which is what every agent published before memory
+    // existed meant.
+    const storedMemory = runtimeConfig.memory ?? {};
+    setMemory({
+      thread_history_search: storedMemory.thread_history_search === true,
+      long_term_memory: storedMemory.long_term_memory === true,
     });
   }, [loadedAgent]);
 
@@ -318,10 +329,14 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     if (maxToolResult !== undefined) budget.max_tool_result_tokens = maxToolResult;
     // An empty budget is not sent at all, and neither is an empty runtime.
     if (Object.keys(budget).length > 0) runtimeConfig.context_budget = budget;
-    if (Object.keys(runtimeConfig).length === 0) {
+    const memoryRequested = memory.thread_history_search || memory.long_term_memory;
+    if (Object.keys(runtimeConfig).length === 0 && !memoryRequested) {
       setNotice(t("agents.runtimeEmpty"));
       return;
     }
+    // Always sent, never omitted: this form replaces the runtime config
+    // wholesale, so omitting the block is how a switch gets turned off.
+    runtimeConfig.memory = { ...memory };
 
     const result = await agentMutation.run((auth) => patchAgent(auth, agentId, { runtime_config: runtimeConfig }));
     if (result) {
@@ -852,6 +867,34 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               </label>
             </div>
             <p className="state-hint">{t("agents.runtimeOmitHint")}</p>
+            <h3>{t("agents.memoryTitle")}</h3>
+            <p className="state-hint">{t("agents.memoryHint")}</p>
+            <div className="form-grid">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={memory.thread_history_search}
+                  onChange={(event) =>
+                    setMemory((current) => ({
+                      ...current,
+                      thread_history_search: event.target.checked,
+                    }))
+                  }
+                />
+                {t("agents.memoryThreadSearch")}
+              </label>
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={memory.long_term_memory}
+                  onChange={(event) =>
+                    setMemory((current) => ({ ...current, long_term_memory: event.target.checked }))
+                  }
+                />
+                {t("agents.memoryLongTerm")}
+              </label>
+            </div>
+            <p className="state-hint">{t("agents.memoryThreadSearchHint")}</p>
             {!runtimeValuesValid && (
               <p className="state-hint">{t("agents.runtimeInvalid")}</p>
             )}

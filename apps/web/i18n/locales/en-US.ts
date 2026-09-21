@@ -1502,6 +1502,13 @@ export const enUS = {
     knowledgeHint: "Bindings are saved as a complete collection.",
     toolsHint: "Bindings are saved as a complete collection.",
     runtimeHint: "Leave a field blank to fall back to the server default.",
+    memoryTitle: "Memory",
+    memoryHint:
+      "Off for every agent until you turn it on here. Turning a switch on changes behaviour, so it changes the published spec hash; leaving both off publishes exactly what this agent published before memory existed.",
+    memoryThreadSearch: "Let the agent search earlier turns of the conversation",
+    memoryLongTerm: "Let the agent use long-term memory",
+    memoryThreadSearchHint:
+      "Only the most recent turns are replayed into each run. With conversation search on, the agent gets a tool that looks up the turns the window dropped instead of answering that it does not remember. It reads only this agent's own threads, and has no effect on single-shot Playground runs.",
     runtimeOmitHint: "Blank fields are omitted from the request, not sent as empty values.",
     runtimeInvalid: "Runtime limits must be whole numbers of 1 or more, or left blank.",
     runtimeEmpty: "Nothing to save — set at least one runtime limit.",

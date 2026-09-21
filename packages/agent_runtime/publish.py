@@ -21,6 +21,7 @@ from packages.agent_runtime.models import (
 )
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
+    DEFAULT_MEMORY_CONFIG,
     DEFAULT_RUN_COST_LIMIT_MICRO_USD,
     DEFAULT_RUNTIME_LIMITS,
     MAX_CONTEXT_BUDGET,
@@ -57,12 +58,15 @@ DEFAULT_RUNTIME_CONFIG: dict[str, Any] = {
     **DEFAULT_RUNTIME_LIMITS,
     "max_cost_micro_usd": DEFAULT_RUN_COST_LIMIT_MICRO_USD,
     "context_budget": DEFAULT_CONTEXT_BUDGET.copy(),
+    "memory": DEFAULT_MEMORY_CONFIG.copy(),
 }
 _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG)
-# Validated on its own terms: it is the one runtime key that may be ``None``,
-# and its ceiling is not a step count.
-_RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {"context_budget", "max_cost_micro_usd"}
+# Validated on their own terms: neither is a step count. ``max_cost_micro_usd``
+# is the one runtime key that may be ``None``; ``memory`` is a block of booleans
+# with a ceiling that means nothing.
+_RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {"context_budget", "max_cost_micro_usd", "memory"}
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
+_MEMORY_KEYS = frozenset(DEFAULT_MEMORY_CONFIG)
 _RETRIEVAL_KEYS = frozenset(DEFAULT_RETRIEVAL_CONFIG)
 
 
@@ -710,6 +714,20 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
     for key, maximum in MAX_CONTEXT_BUDGET.items():
         if result["context_budget"][key] > maximum:
             raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    memory = result.get("memory")
+    if not isinstance(memory, Mapping) or not set(memory).issubset(_MEMORY_KEYS):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    memory = {**DEFAULT_MEMORY_CONFIG, **dict(memory)}
+    if any(not isinstance(item, bool) for item in memory.values()):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    # All-false is the same decision as never having had the key, so it is
+    # written the same way: absent. Projecting a block of falses would change
+    # the canonical JSON of every republished draft and therefore its hash,
+    # which is the same reason ``source_kind`` is added conditionally above.
+    if any(memory.values()):
+        result["memory"] = memory
+    else:
+        result.pop("memory", None)
     return result
 
 

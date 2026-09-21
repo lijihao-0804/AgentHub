@@ -1489,6 +1489,13 @@ export const zhCN: MessageSchema = {
     knowledgeHint: "绑定以完整集合方式保存。",
     toolsHint: "绑定以完整集合方式保存。",
     runtimeHint: "留空的字段将回退到服务端默认值。",
+    memoryTitle: "记忆",
+    memoryHint:
+      "所有 agent 默认关闭，只有在这里打开才生效。打开开关会改变行为，因此也会改变发布后的 spec 哈希；两个都不开，发布结果与记忆功能存在之前完全一致。",
+    memoryThreadSearch: "允许 agent 检索本会话更早的轮次",
+    memoryLongTerm: "允许 agent 使用长期记忆",
+    memoryThreadSearchHint:
+      "每次运行只会回放最近几轮对话。打开会话检索后，agent 会拿到一个工具，用它去查被窗口丢掉的轮次，而不是回答“我不记得了”。它只读本 agent 自己的会话，对 Playground 单次调试运行没有任何影响。",
     runtimeOmitHint: "留空的字段不会出现在请求中，也不会以空值发送。",
     runtimeInvalid: "运行时限制必须为不小于 1 的整数，或留空。",
     runtimeEmpty: "没有可保存的内容——请至少设置一项运行时限制。",

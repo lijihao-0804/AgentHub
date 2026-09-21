@@ -10,6 +10,7 @@ from uuid import UUID
 
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
+    DEFAULT_MEMORY_CONFIG,
     DEFAULT_RUNTIME_LIMITS,
     MAX_RUN_COST_LIMIT_MICRO_USD,
     MAX_RUNTIME_LIMITS,
@@ -24,6 +25,7 @@ from packages.model_gateway.contracts import (
 
 _DEFAULT_RUNTIME = DEFAULT_RUNTIME_LIMITS
 _DEFAULT_CONTEXT_BUDGET = DEFAULT_CONTEXT_BUDGET
+_DEFAULT_MEMORY = DEFAULT_MEMORY_CONFIG
 SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2})
 
 
@@ -123,6 +125,23 @@ def parse_frozen_agent_spec(
             raise _invalid_binding()
         context_budget[key] = value
     runtime["context_budget"] = context_budget
+    # Absent means every flag is false, which is exactly what every version
+    # published before memory existed meant. Unknown keys are rejected rather
+    # than ignored: a flag this build does not understand is a flag it cannot
+    # honour, and silently running without it would be the wrong answer to give
+    # a spec that asked for it.
+    memory_value = runtime_value.get("memory", _DEFAULT_MEMORY)
+    if not isinstance(memory_value, Mapping):
+        raise _invalid_binding()
+    if not set(memory_value).issubset(_DEFAULT_MEMORY):
+        raise _invalid_binding()
+    memory: dict[str, bool] = {}
+    for key, default in _DEFAULT_MEMORY.items():
+        value = memory_value.get(key, default)
+        if not isinstance(value, bool):
+            raise _invalid_binding()
+        memory[key] = value
+    runtime["memory"] = memory
     return FrozenAgentSpec(
         model_plan=ResolvedModelExecutionPlan(
             primary=primary,
