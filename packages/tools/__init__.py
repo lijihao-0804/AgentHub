@@ -14,6 +14,7 @@ from packages.tools.contracts import (
     ToolResult,
     ToolResultStatus,
     ToolRisk,
+    ToolSourceKind,
 )
 from packages.tools.runtime import ToolRuntime
 
@@ -26,6 +27,7 @@ __all__ = [
     "ToolResultStatus",
     "ToolRisk",
     "ToolRuntime",
+    "ToolSourceKind",
     "ActionExecutionResult",
     "ActionExecutionStatus",
     "ActionRegistry",

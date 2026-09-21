@@ -25,7 +25,8 @@ function shortId(id: string): string {
 }
 
 export default function RunsPage() {
-  const { t, statusLabel, failureCategoryLabel, formatDateTime, formatNumber, formatCurrencyAmount } = useI18n();
+  const { t, statusLabel, failureCategoryLabel, formatDateTime, formatCount, formatDurationMs, formatCurrencyAmount } =
+    useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [status, setStatus] = useState("");
   const [agentVersionId, setAgentVersionId] = useState("");
@@ -185,32 +186,40 @@ export default function RunsPage() {
                   <th scope="col">{t("runs.columns.status")}</th>
                   <th scope="col">{t("runs.columns.version")}</th>
                   <th scope="col">{t("runs.columns.started")}</th>
-                  <th scope="col">{t("runs.columns.duration")}</th>
-                  <th scope="col">{t("runs.columns.tokens")}</th>
-                  <th scope="col">{t("runs.columns.cost")}</th>
-                  <th scope="col">{t("runs.columns.tools")}</th>
+                  <th className="numeric-cell" scope="col">{t("runs.columns.duration")}</th>
+                  <th className="numeric-cell" scope="col">{t("runs.columns.tokens")}</th>
+                  <th className="numeric-cell" scope="col">{t("runs.columns.cost")}</th>
+                  <th className="numeric-cell" scope="col">{t("runs.columns.tools")}</th>
                   <th scope="col">{t("runs.columns.failure")}</th>
                 </tr>
               </thead>
               <tbody>
                 {runs.map((run) => (
                   <tr key={run.id}>
-                    <td data-label={t("runs.columns.run")}>
+                    <td className="tight-cell" data-label={t("runs.columns.run")}>
                       <Link href={`/runs/${encodeURIComponent(run.id)}`} title={run.id}>
                         <code>{shortId(run.id)}</code>
                       </Link>
                     </td>
                     <td data-label={t("runs.columns.status")}><StatusBadge status={run.status} /></td>
-                    <td data-label={t("runs.columns.version")}>v{run.agent_version_number}</td>
-                    <td data-label={t("runs.columns.started")}>{formatDateTime(run.started_at)}</td>
-                    <td data-label={t("runs.columns.duration")}>
-                      {run.duration_ms === null ? "—" : `${formatNumber(run.duration_ms)} ms`}
+                    <td className="tight-cell" data-label={t("runs.columns.version")}>v{run.agent_version_number}</td>
+                    <td className="tight-cell" data-label={t("runs.columns.started")}>{formatDateTime(run.started_at)}</td>
+                    <td className="numeric-cell" data-label={t("runs.columns.duration")} title={
+                      run.duration_ms === null ? undefined : `${run.duration_ms} ms`
+                    }>
+                      {run.duration_ms === null ? "—" : formatDurationMs(run.duration_ms)}
                     </td>
-                    <td data-label={t("runs.columns.tokens")}>{run.total_tokens ?? "—"}</td>
-                    <td data-label={t("runs.columns.cost")}>
+                    <td className="numeric-cell" data-label={t("runs.columns.tokens")}>
+                      {run.total_tokens === null ? "—" : formatCount(run.total_tokens)}
+                    </td>
+                    <td className="numeric-cell" data-label={t("runs.columns.cost")} title={
+                      run.total_cost_amount === null
+                        ? undefined
+                        : `${run.total_cost_amount} ${run.cost_currency ?? ""}`.trim()
+                    }>
                       {run.total_cost_amount === null ? "—" : formatCurrencyAmount(run.total_cost_amount, run.cost_currency)}
                     </td>
-                    <td data-label={t("runs.columns.tools")}>{run.tool_call_count}</td>
+                    <td className="numeric-cell" data-label={t("runs.columns.tools")}>{run.tool_call_count}</td>
                     <td data-label={t("runs.columns.failure")}>
                       {run.failure_code ? (
                         <span>

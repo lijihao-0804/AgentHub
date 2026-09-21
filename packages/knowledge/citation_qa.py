@@ -208,12 +208,16 @@ class CitationQaService:
         model_gateway: ModelGateway,
         max_evidence_chars: int,
         trace_sink: TraceSink | None = None,
+        min_rerank_score: float | None = None,
+        superseded_rank_penalty: float = 0.0,
     ) -> None:
         self.session = session
         self.retrieval_components = retrieval_components
         self.model_gateway = model_gateway
         self.max_evidence_chars = max_evidence_chars
         self.trace_sink = trace_sink
+        self.min_rerank_score = min_rerank_score
+        self.superseded_rank_penalty = superseded_rank_penalty
 
     async def answer(
         self,
@@ -235,6 +239,8 @@ class CitationQaService:
             reranker=self.retrieval_components.reranker,
             vector_index=self.retrieval_components.index,
             trace_sink=self.trace_sink,
+            min_rerank_score=self.min_rerank_score,
+            superseded_rank_penalty=self.superseded_rank_penalty,
         ).retrieve_with_trace(
             context,
             RetrievalQuery(

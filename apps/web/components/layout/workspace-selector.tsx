@@ -55,9 +55,17 @@ export default function WorkspaceSelector() {
     (workspace) => !organizations.some((organization) => organization.id === workspace.organization_id),
   );
 
-  const label = activeWorkspace
-    ? `${activeOrganization ? `${activeOrganization.name} / ` : ""}${activeWorkspace.name}`
-    : t("workspace.selectWorkspace");
+  /*
+   * Organisation and workspace are rendered as two spans rather than one
+   * joined string so a narrow topbar can drop the organisation and keep the
+   * workspace. Truncating the joined string the other way round leaves
+   * "Verification O…", which names nothing the reader is standing in.
+   */
+  const orgPrefix = activeWorkspace && activeOrganization ? activeOrganization.name : "";
+  const workspaceLabel = activeWorkspace ? activeWorkspace.name : t("workspace.selectWorkspace");
+  const fullLabel = activeWorkspace
+    ? `${orgPrefix ? `${orgPrefix} / ` : ""}${activeWorkspace.name}`
+    : workspaceLabel;
 
   return (
     <div className="ws-selector" ref={containerRef}>
@@ -67,9 +75,11 @@ export default function WorkspaceSelector() {
         aria-expanded={panelOpen}
         aria-haspopup="menu"
         onClick={() => (panelOpen ? closePanel() : openPanel())}
+        title={fullLabel}
       >
         <span className="session-dot" aria-hidden="true" />
-        <span className="ws-path">{label}</span>
+        {orgPrefix && <span className="ws-org-prefix">{orgPrefix} /</span>}
+        <span className="ws-path">{workspaceLabel}</span>
         <span aria-hidden="true">▾</span>
       </button>
       {panelOpen && (

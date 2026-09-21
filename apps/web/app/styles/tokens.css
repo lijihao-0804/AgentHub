@@ -76,19 +76,29 @@
   --text-muted: #5b6169;
   --text-placeholder: rgba(21, 24, 27, 0.4);
 
-  --accent: #46772a;
+  /*
+   * The status family is a notch darker than its dark-theme counterpart, and
+   * deliberately darker than "looks right on white". These colours are almost
+   * never shown on white: a status badge paints its own tinted background from
+   * the matching `-soft` token, and often sits on an already-tinted block, so
+   * the real contrast is measured against that stack, not the page. Measured at
+   * the worst of those backgrounds the previous values landed at 4.1-4.5 --
+   * under or on the AA line for the 11.5px text badges actually use. These
+   * clear 5.0 there, which leaves room for one more tint layer above them.
+   */
+  --accent: #3d6824;
   --accent-ink: #ffffff;
-  --accent-soft: rgba(70, 119, 42, 0.12);
+  --accent-soft: rgba(61, 104, 36, 0.12);
 
-  --success: #2b7a3a;
-  --success-soft: rgba(43, 122, 58, 0.12);
-  --warning: #8a6200;
-  --warning-soft: rgba(138, 98, 0, 0.13);
-  --danger: #bc3126;
-  --danger-soft: rgba(188, 49, 38, 0.11);
-  --danger-border: rgba(188, 49, 38, 0.35);
-  --attention: #a65413;
-  --attention-soft: rgba(166, 84, 19, 0.13);
+  --success: #256b33;
+  --success-soft: rgba(37, 107, 51, 0.12);
+  --warning: #7c5800;
+  --warning-soft: rgba(124, 88, 0, 0.13);
+  --danger: #ab2b21;
+  --danger-soft: rgba(171, 43, 33, 0.11);
+  --danger-border: rgba(171, 43, 33, 0.35);
+  --attention: #954a10;
+  --attention-soft: rgba(149, 74, 16, 0.13);
   --info: #16607f;
   --info-soft: rgba(22, 96, 127, 0.12);
 

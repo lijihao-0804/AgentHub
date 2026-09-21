@@ -12,6 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from packages.agent_runtime.models import AgentRun
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.models import (
@@ -23,6 +24,16 @@ from packages.evaluation.models import (
 )
 from packages.evaluation.reproducibility import pricing_snapshot_content_hash
 from packages.evaluation.validation import dataset_content_hash, validate_dataset_items
+
+_RUN_INPUT_FIELDS = {
+    "RETRIEVAL": "query",
+    "KNOWLEDGE_QA": "question",
+    "TOOL": "request",
+    "NO_ANSWER": "question",
+    "APPROVAL": "action",
+    "MULTI_STEP": "task",
+    "FAILURE": "scenario",
+}
 
 
 class EvaluationDatasetService:
@@ -153,6 +164,116 @@ class EvaluationDatasetService:
                 409,
             ) from exc
         return version
+
+    async def create_version_from_run(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        dataset_id: UUID,
+        base_version_id: UUID,
+        run_id: UUID,
+        case_key: str,
+        split: str,
+        category: str,
+        expected: Mapping[str, Any],
+        tags: Sequence[str],
+    ) -> EvaluationDatasetVersion:
+        """Create a draft version by importing one observed AgentRun safely.
+
+        The run is evidence only.  The caller owns ``expected`` and the
+        server derives the input and provenance from the persisted run.
+        """
+
+        self._require_permission(context, "evaluation_manage")
+        workspace_id = self._workspace_id(context)
+        dataset = await session.scalar(
+            select(EvaluationDataset)
+            .where(
+                EvaluationDataset.workspace_id == workspace_id,
+                EvaluationDataset.id == dataset_id,
+            )
+            .with_for_update()
+        )
+        if dataset is None:
+            self._not_found()
+
+        run = await session.scalar(
+            select(AgentRun).where(
+                AgentRun.workspace_id == workspace_id,
+                AgentRun.id == run_id,
+            )
+        )
+        if run is None:
+            raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
+
+        base_version = await session.scalar(
+            select(EvaluationDatasetVersion).where(
+                EvaluationDatasetVersion.workspace_id == workspace_id,
+                EvaluationDatasetVersion.dataset_id == dataset_id,
+                EvaluationDatasetVersion.id == base_version_id,
+            )
+        )
+        if base_version is None:
+            self._not_found()
+
+        item_rows = await session.scalars(
+            select(EvaluationDatasetItem)
+            .where(
+                EvaluationDatasetItem.workspace_id == workspace_id,
+                EvaluationDatasetItem.dataset_version_id == base_version_id,
+            )
+            .order_by(EvaluationDatasetItem.ordinal, EvaluationDatasetItem.id)
+        )
+        base_items = [
+            {
+                "case_key": item.case_key,
+                "split": item.split,
+                "category": item.category,
+                "input": item.input,
+                "expected": item.expected,
+                "tags": item.tags,
+                "source_provenance": item.source_provenance,
+                "ordinal": item.ordinal,
+            }
+            for item in item_rows
+        ]
+        if any(
+            item["source_provenance"].get("source_kind") == "agent_run"
+            and item["source_provenance"].get("source_id") == str(run.id)
+            for item in base_items
+        ):
+            raise AgentHubError(
+                "EVALUATION_DATASET_SOURCE_DUPLICATE",
+                "This agent run is already imported into the base dataset version.",
+                409,
+            )
+
+        source_provenance = {
+            "source_kind": "agent_run",
+            "source_id": str(run.id),
+            "agent_version_id": str(run.agent_version_id),
+            "resolved_spec_hash": run.resolved_spec_hash,
+            "observed_status": run.status,
+            "observed_failure_code": run.failure_code,
+        }
+        imported_item = {
+            "case_key": case_key,
+            "split": split,
+            "category": category,
+            "input": derive_run_input(category, run.input_text),
+            "expected": dict(expected),
+            "tags": list(tags),
+            "source_provenance": source_provenance,
+            "ordinal": max((item["ordinal"] for item in base_items), default=-1) + 1,
+        }
+        return await self.create_version(
+            session,
+            context=context,
+            dataset_id=dataset_id,
+            items=[*base_items, imported_item],
+            schema_version=base_version.schema_version,
+        )
 
     async def list_versions(
         self,
@@ -426,3 +547,8 @@ class EvaluationDatasetService:
 
 
 __all__ = ["EvaluationDatasetService"]
+
+
+def derive_run_input(category: str, input_text: str) -> dict[str, str]:
+    field = _RUN_INPUT_FIELDS.get(category, "question")
+    return {field: input_text}

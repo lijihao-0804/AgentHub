@@ -21,6 +21,7 @@ from packages.evaluation.build_identity import (
     BuildIdentityProvider,
     EnvironmentBuildIdentityProvider,
 )
+from packages.evaluation.judge import FrozenJudgeProfile
 from packages.evaluation.models import (
     EvaluationDatasetItem,
     EvaluationDatasetVersion,
@@ -63,6 +64,7 @@ class ExperimentService:
         split: str,
         purpose: str,
         repetitions: int = 1,
+        judge_profile: FrozenJudgeProfile | None = None,
     ) -> EvaluationExperiment:
         self._require_permission(context, EVALUATION_MANAGE)
         normalized_name = self._required_text(name, "name", code="EVALUATION_EXPERIMENT_INVALID")
@@ -118,7 +120,9 @@ class ExperimentService:
             repetitions=repetitions,
             status=EvaluationExperimentStatus.DRAFT,
             build_sha=build_sha,
-            evaluator_manifest=default_evaluator_manifest(),
+            # The judge, when one is used, is frozen here with the deterministic
+            # evaluators so it cannot be swapped underneath historical scores.
+            evaluator_manifest=default_evaluator_manifest(judge_profile),
             created_by=self._user_id(context),
         )
         session.add(experiment)

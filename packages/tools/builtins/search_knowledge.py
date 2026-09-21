@@ -148,6 +148,14 @@ async def search_knowledge(
                 "snippet": item.text[:_MAX_EXCERPT_LENGTH],
                 "retrieval_score": item.retrieval_score,
                 "rerank_score": item.rerank_score,
+                # Until now a result was a UUID and a snippet, so the model had
+                # no way to tell a live policy from the one it replaced -- it
+                # could only answer from whatever ranked highest. ``.get`` with
+                # defaults because a retriever is an injected protocol: one that
+                # does not populate lifecycle metadata stays valid.
+                "document_name": item.metadata.get("document_name"),
+                "effective_date": item.metadata.get("effective_date"),
+                "superseded": bool(item.metadata.get("superseded", False)),
             }
             for item in evidence[:limit]
         ]

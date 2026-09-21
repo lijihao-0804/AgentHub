@@ -90,6 +90,13 @@ def _request_payload(
         "api_key": credential.secret,
         "stream": stream,
     }
+    if stream:
+        # OpenAI-compatible providers omit usage from a stream unless it is asked
+        # for, and both providers this adapter speaks to are OpenAI-compatible.
+        # Without it a streamed run reports no tokens and no cost, which leaves
+        # the per-run cost ceiling with nothing to measure -- it would pass every
+        # check while reading as a guarantee.
+        payload["stream_options"] = {"include_usage": True}
     if credential.base_url:
         payload["api_base"] = credential.base_url
     if request.tools:
@@ -174,6 +181,34 @@ def _normalize_cost(response: Any) -> CostEstimate | None:
     try:
         return CostEstimate(amount=Decimal(str(cost)), currency="USD")
     except (ArithmeticError, ValueError):
+        return None
+
+
+def _cost_from_usage(model: str, usage: ModelUsage | None) -> CostEstimate | None:
+    """Price a streamed response from its token counts, or leave it unpriced.
+
+    An unpriced response is a legitimate outcome -- a model the client has no
+    price for -- and callers that care (the cost ceiling) already treat it as
+    unmeasurable rather than free, so guessing here would be worse than
+    returning nothing.
+    """
+
+    if usage is None:
+        return None
+    try:
+        from litellm import cost_per_token
+
+        prompt_cost, completion_cost = cost_per_token(
+            model=model,
+            prompt_tokens=int(usage.input_tokens),
+            completion_tokens=int(usage.output_tokens),
+        )
+        return CostEstimate(
+            amount=Decimal(str(prompt_cost)) + Decimal(str(completion_cost)),
+            currency="USD",
+            is_estimate=True,
+        )
+    except Exception:
         return None
 
 
@@ -285,6 +320,12 @@ class LiteLLMProviderAdapter:
         except Exception as error:
             raise _normalize_error(error) from None
         tool_calls = tuple(_complete_tool_call(parts) for parts in tool_parts.values())
+        if cost_estimate is None:
+            # A streamed response carries no computed cost: the provider reports
+            # tokens, and the price lives in the client's model table. Without
+            # this the streaming path is permanently unpriced, which makes a
+            # per-run cost ceiling unusable on the only path that matters.
+            cost_estimate = _cost_from_usage(_provider_model(credential, profile.model), usage)
         response = ModelResponse(
             content="".join(content_parts),
             provider=credential.provider,

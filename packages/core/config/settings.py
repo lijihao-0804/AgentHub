@@ -38,6 +38,34 @@ class Settings(BaseSettings):
     knowledge_reranker_batch_size: int = Field(default=8, ge=1, le=64)
     knowledge_qdrant_timeout_seconds: float = Field(default=10, gt=0, le=120)
     knowledge_rrf_k: int = Field(default=60, ge=1, le=10_000)
+    # Evidence whose rerank score falls below this is dropped, so a question the
+    # corpus cannot answer yields an empty evidence set instead of the six
+    # least-bad chunks. Off by default on purpose: the usable value is a
+    # property of a corpus, not a constant, and the usable *window* is narrow.
+    # Measured on a 60-document enterprise corpus: the strongest unanswerable
+    # question scored +0.1038 and the weakest answerable one +0.1483, so the
+    # whole window is 0.04 wide. Calibrate against the weakest score of any
+    # document a real question needs -- not against top-1 scores, which are far
+    # higher and suggest a margin that is not there. At +0.13 this corpus
+    # rejected 10/10 unanswerable questions and lost no answerable one; at
+    # +1.0, still well under the weakest top-1, it silently lost three.
+    knowledge_min_rerank_score: float | None = Field(default=None, ge=-100, le=100)
+    # Subtracted from the rerank score of a chunk whose document has been
+    # superseded. A penalty rather than a filter: "what did the old policy
+    # say" is a legitimate question, and filtering would make it unanswerable.
+    #
+    # Off by default because measurement says a constant cannot do this job:
+    # on the corpus above, the score gaps of questions wanting the current
+    # version (1.07, 0.10) interleave with those wanting the retired one
+    # (0.87, 0.15, 1.83), so no value separates them -- 2.0 fixed two cases and
+    # broke three. Worse, it interacts with the floor: demoting a retired
+    # document pushes correct evidence below the unanswerable questions, which
+    # inverts the separation the floor depends on. Enable it only on a corpus
+    # where a retired document is never the answer, and not with a floor.
+    # Version *selection* belongs to the model, which sees the question: the
+    # ``superseded`` and ``effective_date`` fields on every search_knowledge
+    # row answered 4/4 of these cases that the ranking layer could not.
+    knowledge_superseded_rank_penalty: float = Field(default=0.0, ge=0, le=100)
     blob_root: str = "data/blobs"
     knowledge_max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1)
     knowledge_ingestion_lease_seconds: int = Field(default=300, ge=5, le=86_400)
@@ -59,10 +87,33 @@ class Settings(BaseSettings):
     evaluation_runner_heartbeat_seconds: int = Field(default=30, ge=1, le=86_400)
     evaluation_enqueue_grace_seconds: int = Field(default=30, ge=0, le=86_400)
     evaluation_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
+    # Remote MCP egress. The defaults are the safe ones: private targets are
+    # refused, and every remote call is bounded in time and in size. Loosening
+    # any of these is an explicit operator decision, never an inference from
+    # the environment name.
+    mcp_allow_private_targets: bool = False
+    mcp_connect_timeout_seconds: float = Field(default=5, gt=0, le=60)
+    mcp_request_timeout_seconds: float = Field(default=30, gt=0, le=300)
+    mcp_discovery_max_tools: int = Field(default=200, ge=1, le=10_000)
+    mcp_discovery_max_schema_bytes: int = Field(default=65_536, ge=1_024, le=8_388_608)
+    mcp_discovery_max_payload_bytes: int = Field(default=2_097_152, ge=4_096, le=33_554_432)
+    # A tool result goes straight into a model's context, so this bounds what a
+    # remote server can spend of a run's context budget in one answer.
+    mcp_tool_result_max_bytes: int = Field(default=1_048_576, ge=1_024, le=8_388_608)
     langfuse_enabled: bool = False
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)
     sse_heartbeat_seconds: float = Field(default=15, gt=0, le=120)
+    # How long a run may go unwatched before it is aborted. A run used to die
+    # the instant its SSE consumer disconnected; this is the window in which a
+    # client can reconnect (GET .../runs/{id}/stream?after_sequence=N) and take
+    # the stream back. Bounded above so "nobody is coming back" still ends the
+    # run rather than leaking an executor.
+    run_stream_grace_seconds: float = Field(default=60, ge=0, le=3_600)
+    # Execute runs in the Celery worker instead of inside the API process.
+    # Off by default: Playground runs are single-shot debugging and must keep
+    # their current in-process latency and behaviour exactly.
+    run_execution_in_worker: bool = False
     auth_jwt_secret: str = Field(default=DEFAULT_AUTH_JWT_SECRET, min_length=32)
     auth_access_token_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     auth_refresh_token_ttl_seconds: int = Field(default=2_592_000, ge=300, le=31_536_000)
@@ -83,6 +134,10 @@ class Settings(BaseSettings):
             raise ValueError("knowledge reranker device must be auto, cpu, or cuda")
         if self.evaluation_runner_heartbeat_seconds >= self.evaluation_runner_lease_seconds:
             raise ValueError("evaluation runner heartbeat must be shorter than lease duration")
+        if self.mcp_connect_timeout_seconds > self.mcp_request_timeout_seconds:
+            raise ValueError("mcp connect timeout must not exceed the overall request timeout")
+        if self.mcp_discovery_max_schema_bytes > self.mcp_discovery_max_payload_bytes:
+            raise ValueError("mcp per-tool schema budget must fit inside the payload budget")
         if (
             self.environment.lower() not in DEVELOPMENT_ENVIRONMENTS
             and self.process_role == "api"

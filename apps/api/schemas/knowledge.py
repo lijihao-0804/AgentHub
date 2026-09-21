@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -29,6 +29,27 @@ class DocumentResponse(BaseModel):
     knowledge_base_id: UUID
     name: str
     created_at: datetime
+    effective_date: date | None = None
+    superseded_by_document_id: UUID | None = None
+
+
+class DocumentLifecycleUpdateRequest(BaseModel):
+    """Both fields are omissible, and ``None`` means "clear", not "unchanged".
+
+    ``model_fields_set`` is what separates the two, so the route reads it
+    rather than testing the values.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    effective_date: date | None = None
+    superseded_by_document_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def validate_not_empty(self) -> DocumentLifecycleUpdateRequest:
+        if not self.model_fields_set:
+            raise ValueError("at least one lifecycle field must be provided")
+        return self
 
 
 class DocumentRevisionResponse(BaseModel):
@@ -95,6 +116,10 @@ class RetrievalPlaygroundRequest(BaseModel):
     sparse_top_k: int = Field(default=30, ge=1, le=100)
     candidate_top_k: int = Field(default=20, ge=1, le=100)
     final_top_k: int = Field(default=6, ge=1, le=20)
+    # The playground is where the floor gets calibrated, so it is the one
+    # caller allowed to override it. Omitting the field keeps the configured
+    # value; it does not mean "no floor".
+    min_rerank_score: float | None = Field(default=None, ge=-100, le=100)
 
     @model_validator(mode="after")
     def validate_final_limit(self) -> RetrievalPlaygroundRequest:
@@ -140,6 +165,15 @@ class RetrievalPlaygroundEvidence(BaseModel):
     retrieval_score: float
     rerank_score: float | None
     snippet: str
+    # The playground is where a human calibrates knowledge_min_rerank_score and
+    # decides whether a retired document is out-ranking its successor, so it
+    # shows the lifecycle the ranking now depends on. Unlike the search_knowledge
+    # tool result this keeps the successor's id: a raw UUID is noise to a model,
+    # but it is the thing a person needs in order to go look at that document.
+    document_name: str | None = None
+    effective_date: str | None = None
+    superseded: bool = False
+    superseded_by_document_id: str | None = None
 
 
 class RetrievalPlaygroundResponse(BaseModel):

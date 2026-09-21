@@ -176,8 +176,8 @@ export default function AgentsPage() {
                     }))
                   }
                 >
-                  <option value="LATEST">LATEST</option>
-                  <option value="PINNED">PINNED</option>
+                  <option value="LATEST">{t("agents.bindingModeLatest")}</option>
+                  <option value="PINNED">{t("agents.bindingModePinned")}</option>
                 </select>
               </label>
             </div>

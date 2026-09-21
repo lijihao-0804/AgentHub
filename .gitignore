@@ -26,8 +26,12 @@ data/blobs/
 docker-compose.override.yml
 
 # IDE / OS
+.claude/
 .idea/
 .vscode/
 *.swp
 Thumbs.db
 Desktop.ini
+
+# Local scratch (never committed)
+.scratch/

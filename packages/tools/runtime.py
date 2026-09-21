@@ -29,10 +29,11 @@ from packages.tools.contracts import (
     ToolResult,
     ToolResultStatus,
     ToolRisk,
+    ToolSourceKind,
 )
 from packages.tools.errors import ToolHandlerError
 from packages.tools.policy import ToolPolicy, ToolPolicyDecision
-from packages.tools.registry import ToolRegistry
+from packages.tools.registry import ToolHandler, ToolRegistry
 from packages.tools.validation import (
     validate_executable_tool_spec as _validate_executable_tool_spec,
 )
@@ -53,6 +54,28 @@ def _uuid(value: UUID | str, *, field: str) -> UUID:
 
 def validate_executable_tool_spec(spec: Mapping[str, Any]) -> dict[str, Any]:
     return _validate_executable_tool_spec(spec)
+
+
+def _source_projection(spec: Mapping[str, Any]) -> dict[str, Any]:
+    """Project the already-validated spec's source wiring onto a definition.
+
+    Only the source is read here. Everything that decides whether the call may
+    happen at all — effect, risk, approval policy — is read from the same spec
+    by the ordinary path, so a remote tool arrives at ToolPolicy exactly as a
+    builtin one does.
+    """
+
+    if spec["kind"] != "mcp":
+        return {"source_kind": ToolSourceKind.BUILTIN}
+    block = spec["mcp"]
+    return {
+        "source_kind": ToolSourceKind.MCP,
+        "mcp_connection_id": UUID(block["connection_id"]),
+        "mcp_tool_name": block["tool_name"],
+        "mcp_output_schema": (
+            dict(block["output_schema"]) if block.get("output_schema") is not None else None
+        ),
+    }
 
 
 def _strict_input_schema(schema: Mapping[str, Any]) -> dict[str, Any]:
@@ -273,6 +296,7 @@ class PublishedToolResolver:
                 timeout_seconds=spec["timeout_seconds"],
                 snapshot_refs=snapshot_refs,
                 retrieval_config=retrieval_config,
+                **_source_projection(spec),
             )
         raise AgentHubError("UNKNOWN_TOOL", "The published tool was not found.", 404)
 
@@ -300,11 +324,27 @@ class ToolRuntime:
         registry: ToolRegistry | None = None,
         trace_sink: TraceSink | None = None,
         audit_sink: ToolAuditSink | None = None,
+        mcp_handler: ToolHandler | None = None,
     ) -> None:
         self.session_factory = session_factory
         self.registry = registry or ToolRegistry()
         self.trace_sink = trace_sink or NoopTraceSink()
         self.audit_sink = audit_sink or NoopToolAuditSink()
+        # Injected rather than imported: remote calls need a database session and
+        # a cipher, and this runtime stays an orchestrator that owns neither.
+        self.mcp_handler = mcp_handler
+
+    def _resolve_handler(self, definition: ToolDefinition) -> ToolHandler | None:
+        """Pick who runs this tool, by where its body lives.
+
+        Dispatch reads the published definition's source, never a display label
+        and never the identity string, so a remote tool cannot be made to look
+        like a builtin one by naming it after one.
+        """
+
+        if definition.source_kind is ToolSourceKind.MCP:
+            return self.mcp_handler
+        return self.registry.resolve(definition.identity)
 
     async def execute(
         self,
@@ -368,7 +408,9 @@ class ToolRuntime:
                             "This tool requires approval before execution.",
                         )
                     else:
-                        handler = self.registry.resolve(definition.identity)
+                        # Policy first, always. Where the tool runs is decided
+                        # only after it has been decided that it may run.
+                        handler = self._resolve_handler(definition)
                         if handler is None:
                             result = ToolResult.failure(
                                 "UNKNOWN_TOOL", "The requested tool is not registered."

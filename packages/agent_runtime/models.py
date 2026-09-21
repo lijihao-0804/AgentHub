@@ -286,11 +286,17 @@ class AgentRun(Base):
             "started_at",
         ),
         Index("ix_agent_runs_reconciliation", "status", "started_at", "id"),
+        Index("ix_agent_runs_thread", "workspace_id", "thread_id", "started_at"),
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     agent_version_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    # A back-pointer to the thread this run answered a turn of, and nothing
+    # more. Nullable because a Playground run belongs to no thread, and read by
+    # nothing that decides how the run executes: replay, evaluation and
+    # reconciliation all ignore it.
+    thread_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="RUNNING")
     input_text: Mapped[str] = mapped_column(Text, nullable=False)
     final_output: Mapped[str | None] = mapped_column(Text)
@@ -352,12 +358,68 @@ class RunStep(Base):
     )
 
 
+class AgentRunEvent(Base):
+    """The durable, ordered log of the events a run published.
+
+    ``run_steps`` is a coarse projection built for humans reading a timeline.
+    This table is the stream itself, stored so that a run's life no longer
+    depends on the HTTP connection that started it: a consumer that reconnects
+    replays from ``sequence`` and misses nothing, and a consumer in a different
+    process can follow a run it did not start by tailing this table.
+
+    ``message.delta`` is deliberately **not** persisted.  Keeping it would make
+    the log O(tokens) and it buys only the typing animation -- every event that
+    carries structure or the final output is kept, so replay reconstructs the
+    run, just not the keystrokes.  Sequence gaps are therefore expected and
+    ``sequence`` stays a cursor, not a count.
+    """
+
+    __tablename__ = "agent_run_events"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_run_id"],
+            ["agent_runs.workspace_id", "agent_runs.id"],
+            name="fk_agent_run_events_agent_run_workspace",
+            ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "workspace_id", "agent_run_id", "sequence", name="uq_agent_run_events_sequence"
+        ),
+        Index(
+            "ix_agent_run_events_workspace_run",
+            "workspace_id",
+            "agent_run_id",
+            "sequence",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    agent_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    event_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(48), nullable=False)
+    request_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    step_id: Mapped[str | None] = mapped_column(String(64))
+    # The already-validated safe payload, exactly as it went out over SSE.  The
+    # event envelope enforces the field whitelist before it ever reaches here,
+    # so nothing provider-specific or secret can land in this column.
+    payload: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    )
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 __all__ = [
     "Agent",
     "AgentKnowledgeBinding",
     "AgentTool",
     "AgentVersion",
     "AgentRun",
+    "AgentRunEvent",
     "RunStep",
     "Tool",
     "ToolRevision",

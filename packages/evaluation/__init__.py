@@ -6,6 +6,16 @@ from packages.evaluation.build_identity import (
     StaticBuildIdentityProvider,
 )
 from packages.evaluation.experiments import ExperimentService
+from packages.evaluation.judge import (
+    DEFAULT_ANSWER_QUALITY_RUBRIC,
+    AnswerQualityJudge,
+    AnswerQualityRubric,
+    FrozenJudgeProfile,
+    JudgeClient,
+    JudgeRequest,
+    ModelGatewayJudgeClient,
+    freeze_judge_profile,
+)
 from packages.evaluation.models import (
     EvaluationCaseResultStatus,
     EvaluationDataset,
@@ -30,6 +40,14 @@ from packages.evaluation.models import (
 from packages.evaluation.service import EvaluationDatasetService
 
 __all__ = [
+    "DEFAULT_ANSWER_QUALITY_RUBRIC",
+    "AnswerQualityJudge",
+    "AnswerQualityRubric",
+    "FrozenJudgeProfile",
+    "JudgeClient",
+    "JudgeRequest",
+    "ModelGatewayJudgeClient",
+    "freeze_judge_profile",
     "EvaluationDataset",
     "EvaluationDatasetCategory",
     "EvaluationDatasetItem",

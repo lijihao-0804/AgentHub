@@ -21,8 +21,10 @@ from packages.agent_runtime.models import (
 )
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
+    DEFAULT_RUN_COST_LIMIT_MICRO_USD,
     DEFAULT_RUNTIME_LIMITS,
     MAX_CONTEXT_BUDGET,
+    MAX_RUN_COST_LIMIT_MICRO_USD,
     MAX_RUNTIME_LIMITS,
 )
 from packages.agent_runtime.tool_revisions import validate_tool_spec
@@ -31,6 +33,7 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievalStrategy
 from packages.knowledge.snapshots import KnowledgeSnapshotService, ResolvedKnowledgeSnapshot
+from packages.mcp.models import McpConnection
 from packages.model_gateway.capabilities import CapabilityRequirements
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.profile_resolution import (
@@ -52,9 +55,13 @@ DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
 }
 DEFAULT_RUNTIME_CONFIG: dict[str, Any] = {
     **DEFAULT_RUNTIME_LIMITS,
+    "max_cost_micro_usd": DEFAULT_RUN_COST_LIMIT_MICRO_USD,
     "context_budget": DEFAULT_CONTEXT_BUDGET.copy(),
 }
 _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG)
+# Validated on its own terms: it is the one runtime key that may be ``None``,
+# and its ceiling is not a step count.
+_RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {"context_budget", "max_cost_micro_usd"}
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
 _RETRIEVAL_KEYS = frozenset(DEFAULT_RETRIEVAL_CONFIG)
 
@@ -182,6 +189,11 @@ class AgentPublishService:
         agent.retrieval_config = proposed["retrieval_config"]
         agent.runtime_config = proposed["runtime_config"]
         await session.commit()
+        # `updated_at` is filled in by the database on UPDATE, so the flush
+        # expires it no matter what `expire_on_commit` says.  Reload it here,
+        # inside the async context, rather than letting the response serializer
+        # touch an expired attribute where no greenlet is available.
+        await session.refresh(agent)
         return agent
 
     async def publish(
@@ -419,6 +431,7 @@ class AgentPublishService:
             .order_by(AgentTool.tool_id)
         )
         projections: list[dict[str, Any]] = []
+        seen_identities: set[str] = set()
         for binding in bindings:
             tool = await session.scalar(
                 select(Tool).where(
@@ -445,16 +458,63 @@ class AgentPublishService:
             if canonical_json_hash(safe_spec) != revision.spec_hash:
                 raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
             executable_spec = validate_executable_tool_spec(safe_spec)
-            projections.append(
-                {
-                    "tool_revision_id": str(revision.id),
-                    "tool_spec_hash": revision.spec_hash,
-                    "effect": executable_spec["effect"],
-                    "risk_level": executable_spec["risk_level"],
-                    "approval_policy": executable_spec["approval_policy"],
-                }
-            )
+            identity = executable_spec["identity"]
+            if identity in seen_identities:
+                # The model proposes a call by identity and the runtime
+                # dispatches by identity, so two bound tools answering to the
+                # same name have no defined winner. Refusing at publish is the
+                # only place that ambiguity can still be corrected by a human;
+                # after this it would be decided by row order.
+                raise AgentHubError(
+                    "DUPLICATE_TOOL_IDENTITY",
+                    "Two bound tools share the same identity.",
+                    422,
+                )
+            seen_identities.add(identity)
+            projection = {
+                "tool_revision_id": str(revision.id),
+                "tool_spec_hash": revision.spec_hash,
+                "effect": executable_spec["effect"],
+                "risk_level": executable_spec["risk_level"],
+                "approval_policy": executable_spec["approval_policy"],
+            }
+            if executable_spec["kind"] == "mcp":
+                # Only remote tools carry this. Builtin projections are left
+                # byte-identical to what every already-published version froze.
+                projection["source_kind"] = "mcp"
+                await self._validate_mcp_connection(
+                    session, agent.workspace_id, executable_spec["mcp"]["connection_id"]
+                )
+            projections.append(projection)
         return tuple(projections)
+
+    @staticmethod
+    async def _validate_mcp_connection(
+        session: AsyncSession, workspace_id: UUID, connection_id: str
+    ) -> None:
+        """Refuse to publish a remote tool that could not be called today.
+
+        Publishing is a promise that the frozen version is runnable. A tool
+        pointing at a connection that has been deleted, belongs to another
+        workspace, or has been deliberately switched off is not, and finding
+        that out at publish time is much cheaper than finding it out mid-run.
+        """
+
+        record = await session.execute(
+            select(McpConnection.enabled).where(
+                McpConnection.id == UUID(connection_id),
+                McpConnection.workspace_id == workspace_id,
+            )
+        )
+        row = record.first()
+        if row is None:
+            raise AgentHubError(
+                "MCP_CONNECTION_NOT_FOUND", "The MCP connection was not found.", 404
+            )
+        if not row.enabled:
+            raise AgentHubError(
+                "MCP_CONNECTION_DISABLED", "The MCP connection is disabled.", 409
+            )
 
     @staticmethod
     async def _load_agent(
@@ -629,7 +689,7 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
         **DEFAULT_RUNTIME_CONFIG["context_budget"],
         **dict(context_budget),
     }
-    for key in _RUNTIME_KEYS - {"context_budget"}:
+    for key in _RUNTIME_SCALAR_KEYS:
         item = result[key]
         if (
             isinstance(item, bool)
@@ -637,6 +697,13 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
             or not 1 <= item <= MAX_RUNTIME_LIMITS[key]
         ):
             raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    cost_limit = result["max_cost_micro_usd"]
+    if cost_limit is not None and (
+        isinstance(cost_limit, bool)
+        or not isinstance(cost_limit, int)
+        or not 1 <= cost_limit <= MAX_RUN_COST_LIMIT_MICRO_USD
+    ):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
     for item in result["context_budget"].values():
         if isinstance(item, bool) or not isinstance(item, int) or item < 1:
             raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)

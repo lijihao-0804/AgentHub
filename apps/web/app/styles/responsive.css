@@ -34,8 +34,12 @@
   .app-content { padding: var(--space-4) var(--space-3) var(--space-5); }
   .panel { padding: var(--space-4); }
   .kpi-grid, .op-grid, .overview-grid, .form-grid, .stage-grid, .top-k-grid,
+  .app-grid, .quick-grid,
   .dashboard-columns, .playground-overview { grid-template-columns: 1fr; }
   .approval-split { grid-template-columns: 1fr; }
+  /* The rail wraps here, and a connector that leads a new line points at
+     nothing. Narrow screens get the stages as plain tags instead. */
+  .stage-chip + .stage-chip::before { content: none; }
   .query-field { grid-column: auto; }
   .form-actions { justify-content: stretch; }
   .form-actions .button { width: 100%; justify-content: center; }
@@ -49,6 +53,15 @@
 
 @media (max-width: 480px) {
   .session-status { display: none; }
+  /*
+   * Below this the topbar cannot hold every control at full size, so one has
+   * to go, and it is the theme switch. Theme already defaults to the device's
+   * own `prefers-color-scheme`, so a phone is showing the right one without
+   * being asked; "which workspace am I in" has no such default, and in a
+   * control plane where an approval writes to production it is the one piece
+   * of context that must not be squeezed down to a single letter.
+   */
+  .theme-switch { display: none; }
 }
 
 /* Runs table → cards on narrow screens */
@@ -64,6 +77,9 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
+  /* In card mode every cell is its own labelled block, so right alignment
+     would strand the number away from its label. */
+  .data-table td.numeric-cell { text-align: left; }
 }
 
 

@@ -150,9 +150,13 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         vector_index: VectorIndex,
         trace_sink: TraceSink | None = None,
         rrf_k: int = 60,
+        min_rerank_score: float | None = None,
+        superseded_rank_penalty: float = 0.0,
     ) -> None:
         if (session is None) == (session_factory is None):
             raise ValueError("provide exactly one of session or session_factory")
+        if superseded_rank_penalty < 0:
+            raise ValueError("superseded_rank_penalty must not be negative")
         self.session = session
         self.session_factory = session_factory
         self.dense_embedder = dense_embedder
@@ -161,6 +165,8 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         self.vector_index = vector_index
         self.trace_sink = trace_sink or NoopTraceSink()
         self.rrf_k = rrf_k
+        self.min_rerank_score = min_rerank_score
+        self.superseded_rank_penalty = superseded_rank_penalty
 
     @asynccontextmanager
     async def _db_session(self):
@@ -395,6 +401,19 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         "The reranker returned an invalid result.",
                     )
                 rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
+                # The supersession penalty is applied *before* the cut to
+                # ``final_top_k``, not after: the point is to change which
+                # chunks win the slots, not to reorder the ones that already
+                # won. A superseded document can still be returned -- "what did
+                # the old policy say" is a legitimate question -- it just has to
+                # out-score the live one by more than the penalty.
+                if self.superseded_rank_penalty:
+                    rerank_scores = tuple(
+                        score - self.superseded_rank_penalty
+                        if chunk_map[candidate.chunk_id][1].superseded_by_document_id is not None
+                        else score
+                        for candidate, score in zip(candidates, rerank_scores, strict=True)
+                    )
                 ranked = sorted(
                     zip(candidates, rerank_scores, strict=True),
                     key=lambda item: (
@@ -409,9 +428,26 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 )
             else:
                 ranked = [(candidate, None) for candidate in candidates[: query.final_top_k]]
+            # The floor is applied *after* ranking, and only where a rerank
+            # score exists: the fusion score is an RRF rank statistic on an
+            # unrelated scale, so the same number would mean nothing there.
+            # ``rerank_trace_results`` above is deliberately left pre-floor --
+            # "six chunks were dropped, and here is what they scored" is the
+            # thing you need to see when calibrating the value.
+            floor = (
+                query.min_rerank_score
+                if query.min_rerank_score is not None
+                else self.min_rerank_score
+            )
+            dropped_below_floor = 0
+            if floor is not None:
+                kept = [item for item in ranked if item[1] is None or item[1] >= floor]
+                dropped_below_floor = len(ranked) - len(kept)
+                ranked = kept
             evidence: list[RetrievedEvidence] = []
             for candidate, rerank_score in ranked:
                 chunk, document, revision = chunk_map[candidate.chunk_id]
+                superseded_by = document.superseded_by_document_id
                 evidence.append(
                     RetrievedEvidence(
                         document_id=str(document.id),
@@ -425,6 +461,21 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         metadata={
                             "ordinal": chunk.ordinal,
                             "normalized_content_hash": chunk.normalized_content_hash,
+                            # Lifecycle travels with the evidence because the
+                            # model is the last reader that can act on it: a
+                            # chunk carries no hint that its document was
+                            # replaced, and ranking alone cannot decide that a
+                            # superseded document is the wrong answer.
+                            "document_name": document.name,
+                            "effective_date": (
+                                document.effective_date.isoformat()
+                                if document.effective_date is not None
+                                else None
+                            ),
+                            "superseded": superseded_by is not None,
+                            "superseded_by_document_id": (
+                                str(superseded_by) if superseded_by is not None else None
+                            ),
                         },
                     )
                 )
@@ -453,6 +504,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     "rerank_latency_ms": round(rerank_latency_ms, 3),
                     "rerank_input_count": len(candidates),
                     "rerank_output_count": len(evidence),
+                    "dropped_below_floor": dropped_below_floor,
                     "total_latency_ms": round(total_latency_ms, 3),
                 },
             )
@@ -477,6 +529,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         results=rerank_trace_results,
                     ),
                     total_latency_ms=round(total_latency_ms, 3),
+                    dropped_below_floor=dropped_below_floor,
                 ),
             )
         except KnowledgeProviderError as exc:
@@ -544,11 +597,15 @@ class SessionScopedKnowledgeRetriever(KnowledgeRetriever):
         components,
         trace_sink: TraceSink | None = None,
         rrf_k: int = 60,
+        min_rerank_score: float | None = None,
+        superseded_rank_penalty: float = 0.0,
     ) -> None:
         self.session_factory = session_factory
         self.components = components
         self.trace_sink = trace_sink
         self.rrf_k = rrf_k
+        self.min_rerank_score = min_rerank_score
+        self.superseded_rank_penalty = superseded_rank_penalty
 
     async def retrieve_with_trace(
         self,
@@ -563,6 +620,8 @@ class SessionScopedKnowledgeRetriever(KnowledgeRetriever):
             vector_index=self.components.index,
             trace_sink=self.trace_sink,
             rrf_k=self.rrf_k,
+            min_rerank_score=self.min_rerank_score,
+            superseded_rank_penalty=self.superseded_rank_penalty,
         ).retrieve_with_trace(context, query)
 
     async def retrieve(

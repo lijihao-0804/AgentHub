@@ -8,10 +8,17 @@ from typing import Any
 
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
+from packages.evaluation.judge import (
+    JUDGE_DISABLED_VERSION,
+    JUDGE_MANIFEST_KEY,
+    FrozenJudgeProfile,
+    judge_manifest_entry,
+)
 from packages.evaluation.models import PricingSnapshot
 
 EVALUATION_SCHEMA_VERSION = 1
 DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
+    JUDGE_MANIFEST_KEY: JUDGE_DISABLED_VERSION,
     "approval-evaluator": "v1",
     "citation-evaluator": "v1",
     "dataset-validator": "v1",
@@ -21,11 +28,37 @@ DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
 }
 
 
-def default_evaluator_manifest() -> dict[str, Any]:
-    return {
+def default_evaluator_manifest(
+    judge_profile: FrozenJudgeProfile | None = None,
+) -> dict[str, Any]:
+    """Freeze the evaluator identities for one experiment.
+
+    The judge, when one is configured, is frozen here alongside the deterministic
+    evaluators: its provider/model/parameter projection is reduced to an evaluator
+    version, so the experiment can never be re-scored by a different judge model
+    without the manifest -- and every metric row derived from it -- changing.
+    """
+    versions = dict(DEFAULT_EVALUATOR_VERSIONS)
+    versions[JUDGE_MANIFEST_KEY] = judge_manifest_entry(judge_profile)
+    manifest: dict[str, Any] = {
         "evaluation_schema_version": EVALUATION_SCHEMA_VERSION,
-        "evaluator_versions": dict(sorted(DEFAULT_EVALUATOR_VERSIONS.items())),
+        "evaluator_versions": dict(sorted(versions.items())),
     }
+    if judge_profile is not None:
+        # The non-secret projection is kept beside the version so the worker can
+        # rebuild exactly the judge the experiment was frozen with, instead of
+        # re-resolving a profile that may have been edited since.  The key is
+        # absent when there is no judge, so manifests written before the judge
+        # existed -- and their hashes -- are untouched.
+        manifest["judge_profile"] = judge_profile.projection()
+    return manifest
+
+
+def frozen_judge_version(manifest: Mapping[str, Any] | None) -> str:
+    versions = manifest.get("evaluator_versions") if isinstance(manifest, Mapping) else None
+    if not isinstance(versions, Mapping):
+        return JUDGE_DISABLED_VERSION
+    return str(versions.get(JUDGE_MANIFEST_KEY, JUDGE_DISABLED_VERSION))
 
 
 def normalize_knowledge_snapshots(value: Any) -> list[dict[str, str]]:
@@ -126,6 +159,7 @@ __all__ = [
     "EVALUATION_SCHEMA_VERSION",
     "default_evaluator_manifest",
     "experiment_spec_hash",
+    "frozen_judge_version",
     "normalize_knowledge_snapshots",
     "pricing_snapshot_content_hash",
     "variant_hash",

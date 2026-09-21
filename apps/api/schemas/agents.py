@@ -6,7 +6,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from packages.agent_runtime.runtime_config import MAX_RUNTIME_LIMITS
+from packages.agent_runtime.runtime_config import (
+    MAX_RUN_COST_LIMIT_MICRO_USD,
+    MAX_RUNTIME_LIMITS,
+)
 
 
 class ModelRetryPolicyRequest(BaseModel):
@@ -46,6 +49,12 @@ class RuntimeConfigRequest(BaseModel):
     )
     max_parallel_reads: int | None = Field(
         default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_parallel_reads"]
+    )
+    # Per-run spend ceiling in micro-USD (1_000_000 == USD 1.00). ``None``
+    # leaves the run uncapped, which is what every agent published before this
+    # field existed has.
+    max_cost_micro_usd: int | None = Field(
+        default=None, ge=1, le=MAX_RUN_COST_LIMIT_MICRO_USD
     )
     context_budget: ContextBudgetRequest | None = None
 

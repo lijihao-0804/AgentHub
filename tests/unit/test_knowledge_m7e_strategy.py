@@ -140,7 +140,12 @@ async def test_retrieval_strategy_controls_provider_calls_and_trace(
                     ordinal=1,
                     normalized_content_hash="hash",
                 ),
-                SimpleNamespace(id=uuid4()),
+                SimpleNamespace(
+                    id=uuid4(),
+                    name=f"document-{chunk_id}.md",
+                    effective_date=None,
+                    superseded_by_document_id=None,
+                ),
                 SimpleNamespace(id=uuid4()),
             )
             for chunk_id in ("c1", "c2", "c3")

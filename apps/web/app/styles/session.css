@@ -5,6 +5,13 @@
   border: 1px solid var(--border-strong);
   border-radius: 999px;
   display: flex;
+  /*
+   * A pair of fixed-size toggles has nothing to give. Without this they are
+   * the first thing the topbar squeezes on a phone -- they were collapsing
+   * to 2px, with the labels spilling out of the pill -- because the one
+   * control that *can* truncate, the workspace selector, was refusing to.
+   */
+  flex-shrink: 0;
   overflow: hidden;
 }
 .lang-option {
@@ -18,6 +25,14 @@
   padding: 0.28rem 0.7rem;
   white-space: nowrap;
 }
+/*
+ * The pill clips to its own rounded edge, so the global focus ring -- drawn
+ * 2px *outside* the button -- lands in the clipped region and vanishes. These
+ * buttons have under 1px of slack inside the pill, which meant keyboard users
+ * got no visible focus on the language or theme switch at all. Drawing the
+ * ring inside keeps it within the clip.
+ */
+.lang-option:focus-visible { outline-offset: -2px; }
 .lang-option[aria-pressed="true"] {
   background: var(--accent-soft);
   color: var(--accent);

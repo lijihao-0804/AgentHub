@@ -15,6 +15,7 @@ from apps.api.knowledge_dependencies import (
 )
 from apps.api.retrieval_projection import RetrievalTraceMetadata, project_retrieval_trace
 from apps.api.schemas.knowledge import (
+    DocumentLifecycleUpdateRequest,
     DocumentResponse,
     DocumentRevisionResponse,
     DocumentRevisionStatusResponse,
@@ -117,6 +118,10 @@ def _playground_response(
                 retrieval_score=item.retrieval_score,
                 rerank_score=item.rerank_score,
                 snippet=item.text[:1_000],
+                document_name=item.metadata.get("document_name"),
+                effective_date=item.metadata.get("effective_date"),
+                superseded=bool(item.metadata.get("superseded", False)),
+                superseded_by_document_id=item.metadata.get("superseded_by_document_id"),
             )
             for item in result.evidence
         ],
@@ -147,6 +152,8 @@ async def retrieval_playground(
         reranker=components.reranker,
         vector_index=components.index,
         rrf_k=request.app.state.settings.knowledge_rrf_k,
+        superseded_rank_penalty=request.app.state.settings.knowledge_superseded_rank_penalty,
+        min_rerank_score=request.app.state.settings.knowledge_min_rerank_score,
     ).retrieve_with_trace(
         context,
         RetrievalQuery(
@@ -157,6 +164,7 @@ async def retrieval_playground(
             sparse_top_k=payload.sparse_top_k,
             candidate_top_k=payload.candidate_top_k,
             final_top_k=payload.final_top_k,
+            min_rerank_score=payload.min_rerank_score,
         ),
     )
     metadata = await _load_trace_metadata(
@@ -335,6 +343,32 @@ async def upload_revision(
         queue=queue,
     )
     return _upload_response(document, revision, job)
+
+
+@router.patch(
+    "/api/v1/workspaces/{workspace_id}/knowledge-bases/{knowledge_base_id}/documents/{document_id}",
+    response_model=DocumentResponse,
+)
+async def update_document_lifecycle(
+    workspace_id: UUID,
+    knowledge_base_id: UUID,
+    document_id: UUID,
+    payload: DocumentLifecycleUpdateRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> DocumentResponse:
+    del workspace_id
+    document = await KnowledgeService().update_document_lifecycle(
+        session,
+        context=context,
+        knowledge_base_id=knowledge_base_id,
+        document_id=document_id,
+        effective_date=payload.effective_date,
+        superseded_by_document_id=payload.superseded_by_document_id,
+        set_effective_date="effective_date" in payload.model_fields_set,
+        set_superseded_by="superseded_by_document_id" in payload.model_fields_set,
+    )
+    return DocumentResponse.model_validate(document, from_attributes=True)
 
 
 @router.get(

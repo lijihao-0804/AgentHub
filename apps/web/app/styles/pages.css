@@ -15,7 +15,11 @@
 .breadcrumbs a { color: var(--text-muted); text-decoration: none; }
 .breadcrumbs a:hover { color: var(--text); text-decoration: underline; }
 .breadcrumbs span[aria-current="page"] { color: var(--text); font-weight: 600; }
-.breadcrumb-separator { color: var(--border-strong); }
+/* A recessive-text token, not a border one. The separator is aria-hidden, so
+   it is exempt from the contrast minimum, but --border-strong is tuned to be
+   read as a hairline against a surface and renders this glyph at about 1.9:1
+   in the light theme -- present in the DOM and invisible on the screen. */
+.breadcrumb-separator { color: var(--text-placeholder); }
 
 .page-header { margin-bottom: var(--space-4); max-width: 46rem; }
 .page-lede { color: var(--text-muted); line-height: 1.6; margin-top: 0.4rem; }
@@ -36,13 +40,168 @@
 .overview-card-description { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
 .overview-card-cta { color: var(--accent); font-size: 0.82rem; font-weight: 700; }
 
+/* Home
+ *
+ * Everything on this page used to be an `.overview-card`: the four
+ * applications, which are the argument the product makes, looked exactly
+ * like the four shortcuts to pages the sidebar already lists. The split
+ * below is the hierarchy — one hero panel that carries weight, and a quiet
+ * row of shortcuts underneath that deliberately does not.
+ */
+.page-context {
+  align-items: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  gap: 0.45rem;
+  margin-top: var(--space-3);
+}
+.page-context .icon { color: var(--accent); }
+.page-context-label { letter-spacing: 0.02em; }
+.page-context strong { color: var(--text); font-weight: 600; }
+/* A text-weight control for a secondary action inside a sentence, where a
+   real button would outweigh the sentence it sits in. */
+.link-button {
+  background: none;
+  border: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.link-button:hover { filter: brightness(1.12); }
+
+.home-hero {
+  /* A wash from the accent, not a flat tint: it lifts the panel off the page
+     background without introducing a second surface colour. */
+  background:
+    linear-gradient(160deg, var(--accent-soft), transparent 55%),
+    var(--surface);
+  border-color: var(--border-strong);
+}
+.home-hero-intro { max-width: 52rem; }
+.home-hero-intro h2 { font-size: clamp(1.35rem, 2.6vw, 1.75rem); margin: 0.25rem 0 0; }
+.home-hero-lede { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; margin-top: 0.5rem; }
+
+/* The five actions every application performs, as a rail rather than a
+   sentence: it is a sequence, and a sequence should look like one. */
+.stage-rail {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+}
+.stage-chip {
+  align-items: center;
+  background: var(--surface-inset);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  display: flex;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.7rem;
+}
+.stage-chip + .stage-chip::before {
+  color: var(--border-strong);
+  content: "→";
+  margin: 0 0.55rem 0 -0.35rem;
+}
+
+.app-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--space-4); }
+.app-card {
+  align-content: start;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: inherit;
+  display: grid;
+  gap: 0.5rem;
+  padding: var(--space-5);
+  text-decoration: none;
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+.app-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.app-card-icon {
+  align-items: center;
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  color: var(--accent);
+  display: flex;
+  height: 2.6rem;
+  justify-content: center;
+  margin-bottom: 0.2rem;
+  width: 2.6rem;
+}
+.app-card-title { font-size: 1.1rem; font-weight: 700; }
+.app-card-description { color: var(--text-muted); font-size: 0.85rem; line-height: 1.55; }
+/*
+ * The `act` line is the claim the page is making — what this application is
+ * permitted to do — so it is set apart from the description rather than
+ * reading as a third sentence of it.
+ */
+.app-card-act {
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  padding-top: 0.55rem;
+}
+.app-card-cta {
+  align-items: center;
+  color: var(--accent);
+  display: flex;
+  font-size: 0.82rem;
+  font-weight: 700;
+  gap: 0.35rem;
+}
+.app-card:hover .app-card-cta .icon { transform: translateX(2px); }
+.app-card-cta .icon { transition: transform 120ms ease; }
+
+/* Shortcuts to pages the sidebar already lists: useful, not important. */
+.quick-links { margin-top: var(--space-6); }
+.quick-grid { display: grid; gap: var(--space-2); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--space-3); }
+.quick-card {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: inherit;
+  display: flex;
+  gap: var(--space-3);
+  padding: 0.85rem var(--space-4);
+  text-decoration: none;
+}
+.quick-card:hover { border-color: var(--accent); }
+.quick-card-icon { color: var(--text-muted); flex-shrink: 0; }
+.quick-card:hover .quick-card-icon { color: var(--accent); }
+.quick-card-body { display: grid; gap: 0.15rem; min-width: 0; }
+.quick-card-title { font-size: 0.9rem; font-weight: 600; }
+.quick-card-description { color: var(--text-muted); font-size: 0.78rem; line-height: 1.45; }
+.quick-card-arrow { color: var(--border-strong); flex-shrink: 0; margin-left: auto; }
+.quick-card:hover .quick-card-arrow { color: var(--accent); }
+
 /* Dashboard */
 .kpi-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: var(--space-4); }
 .op-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: var(--space-4); }
 .dashboard-columns { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--space-4); }
 .dashboard-columns .panel { margin-top: 0; }
 
-.trend-chart { display: block; width: 100%; height: auto; }
+/*
+ * Fixed height, not `height: auto`. With `auto` the viewBox scales to the
+ * panel width, so two buckets rendered as two enormous blocks filling the
+ * panel. A fixed height plus `xMinYMax meet` keeps bars at a readable size
+ * and grows the series rightwards from the axis as buckets are added.
+ */
+.trend-chart { display: block; width: 100%; height: 11rem; }
 .trend-note { color: var(--text-muted); font-size: 0.75rem; margin-top: var(--space-2); }
 .trend-legend { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
 .trend-legend span { align-items: center; color: var(--text-muted); display: flex; font-size: 0.75rem; gap: 0.35rem; }
@@ -72,6 +231,33 @@
 a.split-row:hover { border-color: var(--accent); }
 .split-row .muted { font-size: 0.8rem; }
 .split-row > * { min-width: 0; overflow-wrap: anywhere; }
+
+/*
+ * Two-line variant of .split-row for the half-width dashboard panels. Five
+ * columns inside a half-width panel gives each value ~55px, which wraps a
+ * cost like "0.00055 USD" character by character. Here the row reads as a
+ * headline line (lead + value) and a meta line, so nothing has to be hidden
+ * at narrow widths the way .split-row hides its trailing columns.
+ */
+.stat-row {
+  background: var(--surface-inset);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  display: grid;
+  gap: 0.2rem var(--space-3);
+  /* The lead is short and must not break mid-word ("RUNT / IME"); the value
+     column takes the rest and is the one allowed to wrap. */
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  padding: 0.6rem 0.8rem;
+  text-decoration: none;
+}
+a.stat-row:hover { border-color: var(--accent); }
+.stat-row > * { min-width: 0; overflow-wrap: anywhere; }
+.stat-row-lead { font-weight: 600; overflow-wrap: normal; white-space: nowrap; }
+.stat-row-value { font-variant-numeric: tabular-nums; text-align: right; }
+.stat-row-meta { color: var(--text-muted); font-size: 0.8rem; }
+.stat-row-meta-end { text-align: right; }
 
 /* Runs */
 .runs-toolbar { align-items: end; display: grid; gap: var(--space-3); grid-template-columns: 1fr 1.4fr auto auto; }
@@ -121,13 +307,22 @@ a.split-row:hover { border-color: var(--accent); }
 /* Approvals */
 .approval-counts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .approval-counts .status-badge { font-size: 0.8rem; padding: 0.35rem 0.8rem; }
-.approval-list { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+/*
+ * Both of these state their single column as `minmax(0, 1fr)` rather than
+ * letting it be implicit. An implicit `auto` track sizes to max-content and
+ * is not clamped by its container, so one wide descendant — an expanded raw
+ * payload, a long unbroken id — stretches the card, then the list, then the
+ * page. Capping the track at the container makes the card the authority on
+ * its own width.
+ */
+.approval-list { display: grid; gap: var(--space-3); grid-template-columns: minmax(0, 1fr); margin-top: var(--space-4); }
 .approval-card {
   background: var(--surface-raised);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   display: grid;
   gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
   padding: var(--space-4) var(--space-5);
 }
 .approval-header { align-items: flex-start; display: flex; gap: var(--space-3); justify-content: space-between; }

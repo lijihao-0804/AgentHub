@@ -35,7 +35,16 @@ const WINDOW_OPTIONS = [
 ] as const;
 
 export default function DashboardPage() {
-  const { t, statusLabel, failureCategoryLabel, formatNumber, formatPercent, formatUTCBucketDate, formatCurrencyAmount } = useI18n();
+  const {
+    t,
+    statusLabel,
+    failureCategoryLabel,
+    formatNumber,
+    formatCount,
+    formatDurationMs,
+    formatPercent,
+    formatCurrencyAmount,
+  } = useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [days, setDays] = useState("7");
   const [summary, setSummary] = useState<ObservabilitySummary | null>(null);
@@ -141,15 +150,15 @@ export default function DashboardPage() {
             />
             <MetricCard
               label={t("dashboard.kpi.p95Latency")}
-              value={summary.latency.p95_ms === null ? "—" : `${formatNumber(summary.latency.p95_ms)} ms`}
+              value={summary.latency.p95_ms === null ? "—" : formatDurationMs(summary.latency.p95_ms)}
               hint={t("dashboard.kpi.p95Hint", {
-                p50: summary.latency.p50_ms === null ? "—" : `${formatNumber(summary.latency.p50_ms)} ms`,
+                p50: summary.latency.p50_ms === null ? "—" : formatDurationMs(summary.latency.p50_ms),
                 count: summary.latency.sample_count,
               })}
             />
             <MetricCard
               label={t("dashboard.kpi.tokensPerRun")}
-              value={summary.usage.avg_tokens_per_run === null ? "—" : summary.usage.avg_tokens_per_run}
+              value={summary.usage.avg_tokens_per_run === null ? "—" : formatCount(summary.usage.avg_tokens_per_run)}
               hint={t("dashboard.kpi.tokensHint", {
                 known: summary.usage.known_usage_count,
                 unknown: summary.usage.unknown_usage_count,
@@ -162,7 +171,12 @@ export default function DashboardPage() {
                   ? t("dashboard.cost.mixed")
                   : summary.cost.cost_per_successful_run === null
                     ? t("common.unknown")
-                    : formatCurrencyAmount(summary.cost.cost_per_successful_run, summary.cost.currency)
+                    : formatCurrencyAmount(summary.cost.cost_per_successful_run, null)
+              }
+              unit={
+                summary.cost.mixed_currency || summary.cost.cost_per_successful_run === null
+                  ? null
+                  : summary.cost.currency
               }
               hint={t("dashboard.kpi.costHint", { count: summary.cost.successful_cost_denominator })}
             />
@@ -233,15 +247,20 @@ export default function DashboardPage() {
               ) : (
                 <div className="split-list">
                   {summary.cost.currencies.map((item) => (
-                    <div className="split-row" key={item.currency}>
-                      <span>{item.currency}</span>
-                      <span>{item.total_cost === null ? t("common.unknown") : formatCurrencyAmount(item.total_cost, null)}</span>
-                      <span className="muted">
+                    <div className="stat-row" key={item.currency}>
+                      <span className="stat-row-lead">{item.currency}</span>
+                      <span className="stat-row-value" title={item.total_cost === null ? undefined : String(item.total_cost)}>
+                        {item.total_cost === null ? t("common.unknown") : formatCurrencyAmount(item.total_cost, null)}
+                      </span>
+                      <span className="stat-row-meta">
                         {t("dashboard.cost.samples", { estimated: item.estimated_count, exact: item.exact_count })}
                       </span>
-                      <span className="muted">
+                      <span className="stat-row-meta stat-row-meta-end">
                         {t("dashboard.cost.perSuccess", {
-                          value: item.cost_per_successful_run === null ? t("common.unknown") : item.cost_per_successful_run,
+                          value:
+                            item.cost_per_successful_run === null
+                              ? t("common.unknown")
+                              : formatCurrencyAmount(item.cost_per_successful_run, null),
                         })}
                       </span>
                     </div>
@@ -275,27 +294,30 @@ export default function DashboardPage() {
                 <div className="split-list">
                   {versions.items.map((item) => (
                     <Link
-                      className="split-row"
+                      className="stat-row"
                       href={`/runs?agent_version_id=${encodeURIComponent(item.agent_version_id)}`}
                       key={item.agent_version_id}
                     >
-                      <span>v{item.version_number}</span>
-                      <span>
+                      <span className="stat-row-lead">v{item.version_number}</span>
+                      <span className="stat-row-value">
                         {t(item.run_count === 1 ? "dashboard.versions.runCountOne" : "dashboard.versions.runCountOther", {
                           count: item.run_count,
                         })}
                       </span>
-                      <span className="muted">
+                      <span className="stat-row-meta">
                         {item.success_count} ✓ · {item.failed_count} ✕ · {item.needs_attention_count} ⚠
                       </span>
-                      <span className="muted">
-                        {item.p95_latency_ms === null ? "p95 —" : `p95 ${formatNumber(item.p95_latency_ms)} ms`}
-                      </span>
-                      <span className="muted">
+                      <span className="stat-row-meta stat-row-meta-end">
+                        {item.p95_latency_ms === null ? "p95 —" : `p95 ${formatDurationMs(item.p95_latency_ms)}`}
+                        {" · "}
                         {item.cost_by_currency.length === 0
                           ? t("dashboard.versions.costUnknown")
                           : item.cost_by_currency
-                              .map((c) => (c.total_cost === null ? t("common.unknown") : `${c.total_cost} ${c.currency}`))
+                              .map((c) =>
+                                c.total_cost === null
+                                  ? t("common.unknown")
+                                  : formatCurrencyAmount(c.total_cost, c.currency),
+                              )
                               .join(" · ")}
                       </span>
                     </Link>
@@ -320,15 +342,15 @@ export default function DashboardPage() {
               ) : (
                 <div className="split-list">
                   {failures.items.map((item) => (
-                    <Link className="split-row" href={`/runs/${encodeURIComponent(item.run_id)}`} key={item.run_id}>
-                      <span>{failureCategoryLabel(item.failure_category)}</span>
-                      <span>
+                    <Link className="stat-row" href={`/runs/${encodeURIComponent(item.run_id)}`} key={item.run_id}>
+                      <span className="stat-row-lead">{failureCategoryLabel(item.failure_category)}</span>
+                      <span className="stat-row-value">
                         <code>{item.failure_code}</code>
                       </span>
-                      <span className="muted">
+                      <span className="stat-row-meta">
                         v{item.agent_version_number} · {statusLabel(item.status)}
                       </span>
-                      <span className="muted">
+                      <span className="stat-row-meta stat-row-meta-end">
                         {item.action_failure_code
                           ? t("dashboard.failureRuns.actionPrefix", { code: item.action_failure_code })
                           : ""}
@@ -346,7 +368,7 @@ export default function DashboardPage() {
 }
 
 function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
-  const { t, formatNumber, formatUTCBucketDate } = useI18n();
+  const { t, formatNumber, formatCount, formatUTCBucketDate } = useI18n();
   const maxRuns = Math.max(...items.map((item) => item.runs), 1);
   const width = Math.max(items.length * 34, 120);
   const chartHeight = 130;
@@ -371,6 +393,7 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
       <svg
         className="trend-chart"
         viewBox={`0 0 ${width} ${chartHeight + 18}`}
+        preserveAspectRatio="xMinYMax meet"
         role="img"
         aria-label={`${t("dashboard.trend.ariaPrefix")} ${ariaEntries}`}
       >
@@ -388,7 +411,7 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
                   succeeded: item.succeeded,
                   failed: item.failed,
                   needsAttention: item.needs_attention,
-                  tokens: item.tokens ?? t("common.unknown"),
+                  tokens: item.tokens === null ? t("common.unknown") : formatCount(item.tokens),
                 })}
               </title>
               {segmentColors.map(([key, color]) => {

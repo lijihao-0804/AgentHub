@@ -10,6 +10,15 @@ from statistics import mean
 from typing import Any
 
 from packages.core.canonical.json_hash import canonical_json_hash
+from packages.evaluation.judge import (
+    ANSWER_QUALITY_METRIC,
+    JUDGE_DISABLED_VERSION,
+    JUDGE_MANIFEST_KEY,
+    JUDGE_OBSERVATION_KEY,
+    JudgeVerdictStatus,
+    is_judge_evaluator_version,
+    judge_version_from_manifest,
+)
 
 
 class MetricStatus(StrEnum):
@@ -104,9 +113,11 @@ Evaluator = Callable[[Mapping[str, Any], Mapping[str, Any]], dict[str, MetricVal
 class EvaluatorRegistry:
     """Versioned category registry bound to the experiment's frozen manifest."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, judge_version: str = JUDGE_DISABLED_VERSION) -> None:
         self._evaluators: dict[str, tuple[str, Evaluator]] = {}
         self._definitions: dict[str, MetricDefinition] = dict(METRIC_DEFINITIONS)
+        self._judge_version = JUDGE_DISABLED_VERSION
+        self.bind_judge_version(judge_version)
         self.register("RETRIEVAL", "v1", evaluate_retrieval)
         self.register("KNOWLEDGE_QA", "v1", evaluate_knowledge_qa)
         self.register("TOOL", "v1", evaluate_tool)
@@ -150,6 +161,30 @@ class EvaluatorRegistry:
     def version_for_metric(self, name: str) -> str:
         return self.definition_for(name).version
 
+    @property
+    def judge_version(self) -> str:
+        return self._judge_version
+
+    def bind_judge_version(self, version: str) -> None:
+        """Bind the frozen judge identity that scored this run.
+
+        The bound version becomes the ``answer_quality`` metric definition version, so it
+        lands in ``EvaluationMetricResult.evaluator_version`` and the existing comparison
+        guard refuses to pair runs scored by different judge models.
+        """
+        if version != JUDGE_DISABLED_VERSION and not is_judge_evaluator_version(version):
+            raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
+        self._judge_version = version
+        self.register_metric_definition(
+            ANSWER_QUALITY_METRIC,
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.SCALAR,
+            version=version,
+        )
+
+    def bind_judge_manifest(self, manifest: Mapping[str, Any] | None) -> None:
+        self.bind_judge_version(judge_version_from_manifest(manifest))
+
     def validate_manifest(self, manifest: Mapping[str, Any]) -> None:
         versions = manifest.get("evaluator_versions")
         if not isinstance(versions, Mapping):
@@ -158,6 +193,9 @@ class EvaluatorRegistry:
             key = _manifest_key(category)
             if versions.get(key) != version:
                 raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
+        judge_entry = versions.get(JUDGE_MANIFEST_KEY, JUDGE_DISABLED_VERSION)
+        if judge_entry != JUDGE_DISABLED_VERSION and not is_judge_evaluator_version(judge_entry):
+            raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
 
     def evaluate(
         self,
@@ -177,10 +215,14 @@ class EvaluatorRegistry:
                     reason="unsupported_category",
                 )
             }
-        return {
+        metrics = {
             name: _with_version(metric, version)
             for name, metric in evaluator(expected, observation).items()
         }
+        judged = evaluate_answer_quality(observation, judge_version=self._judge_version)
+        if judged is not None:
+            metrics[ANSWER_QUALITY_METRIC] = judged
+        return metrics
 
 
 def evaluate_case(
@@ -391,6 +433,54 @@ def evaluate_faithfulness(
     if not isinstance(observation.get("evidence_support"), bool):
         return _not_available("faithfulness", "structured_evidence_support_missing")
     return _binary_metric("faithfulness", observation["evidence_support"])
+
+
+def evaluate_answer_quality(
+    observation: Mapping[str, Any], *, judge_version: str = JUDGE_DISABLED_VERSION
+) -> MetricValue | None:
+    """Turn a persisted judge verdict into the supplementary ``answer_quality`` metric.
+
+    Returns ``None`` when the case was never judged, so unjudged runs keep exactly the
+    metric set they had before the judge existed.  A verdict whose frozen judge identity
+    does not match the identity pinned in the experiment manifest is reported as
+    NOT_AVAILABLE rather than scored: an unpinned judge would make the score
+    unreproducible, which is the one thing the evaluation platform must not allow.
+    """
+    verdict = observation.get(JUDGE_OBSERVATION_KEY)
+    if not isinstance(verdict, Mapping):
+        return None
+    if judge_version == JUDGE_DISABLED_VERSION:
+        return _not_available(
+            ANSWER_QUALITY_METRIC, "judge_not_frozen_in_manifest", version=judge_version
+        )
+    if verdict.get("judge_evaluator_version") != judge_version:
+        return _not_available(
+            ANSWER_QUALITY_METRIC, "judge_identity_mismatch", version=judge_version
+        )
+    if verdict.get("status") != JudgeVerdictStatus.SCORED:
+        return _not_available(
+            ANSWER_QUALITY_METRIC,
+            str(verdict.get("reason") or "judge_verdict_unavailable"),
+            version=judge_version,
+        )
+    score = verdict.get("score")
+    if isinstance(score, bool) or not isinstance(score, (int, float)) or not 0 <= score <= 1:
+        return _not_available(
+            ANSWER_QUALITY_METRIC, "judge_score_out_of_range", version=judge_version
+        )
+    return MetricValue(
+        name=ANSWER_QUALITY_METRIC,
+        status=MetricStatus.AVAILABLE,
+        value=float(score),
+        sample_count=1,
+        evaluator_version=judge_version,
+        details={
+            "dimension_scores": dict(verdict.get("dimension_scores") or {}),
+            "rubric_id": verdict.get("rubric_id"),
+            "rubric_version": verdict.get("rubric_version"),
+            "judge_identity_hash": verdict.get("judge_identity_hash"),
+        },
+    )
 
 
 def aggregate_metric_values(
@@ -635,6 +725,7 @@ __all__ = [
     "PairedMetric",
     "aggregate_metric_values",
     "compare_metric_values",
+    "evaluate_answer_quality",
     "evaluate_case",
     "evaluate_faithfulness",
     "metric_direction",
@@ -789,6 +880,9 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
             MetricAggregationKind.SCALAR,
             False,
         ),
+        # Judge-backed and supplementary: never task_success relevant, so the judge can
+        # never alter the deterministic verdict of a case.
+        ("answer_quality", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.SCALAR, False),
         ("input_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
         ("output_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
         ("total_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),

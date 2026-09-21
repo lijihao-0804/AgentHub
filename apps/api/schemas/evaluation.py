@@ -54,6 +54,18 @@ class EvaluationDatasetVersionCreateRequest(BaseModel):
     items: list[EvaluationDatasetItemRequest] = Field(min_length=1)
 
 
+class EvaluationDatasetVersionFromRunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: UUID
+    base_version_id: UUID
+    case_key: str = Field(min_length=1, max_length=200)
+    split: str
+    category: str
+    expected: dict[str, Any]
+    tags: list[str] = Field(default_factory=list)
+
+
 class EvaluationDatasetVersionResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 
@@ -116,6 +128,10 @@ class EvaluationExperimentCreateRequest(BaseModel):
     split: str
     purpose: str
     repetitions: int = Field(default=1, ge=1, le=5)
+    # Opting an experiment into LLM-as-judge scoring.  The profile is frozen at
+    # creation time into the evaluator manifest, so changing it afterwards is
+    # impossible by construction -- a different judge is a different experiment.
+    judge_model_profile_id: UUID | None = None
 
 
 class EvaluationExperimentVariantCreateRequest(BaseModel):
@@ -192,7 +208,11 @@ class EvaluationExperimentRunResponse(BaseModel):
     completed_at: datetime | None
     failure_code: str | None
     safe_failure_message: str | None
-    holdout_exposure_index: int | None
+    # The exposure index is not a column on the run: it lives in the holdout exposure
+    # ledger and is supplied by the route with model_copy.  Without a default, building
+    # the response from the ORM row raises before that update ever happens, so every
+    # attempt to start or read an experiment run answers 500.
+    holdout_exposure_index: int | None = None
     created_by: UUID
     created_at: datetime
 
