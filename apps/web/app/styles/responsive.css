@@ -64,6 +64,9 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
+  /* In card mode every cell is its own labelled block, so right alignment
+     would strand the number away from its label. */
+  .data-table td.numeric-cell { text-align: left; }
 }
 
 

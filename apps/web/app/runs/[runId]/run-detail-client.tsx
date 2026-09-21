@@ -27,7 +27,16 @@ function shortId(value: string): string {
 type RunView = { detail: RunDetail; timeline: RunTimelineEntry[] };
 
 export default function RunDetailClient({ runId }: { runId: string }) {
-  const { t, statusLabel, failureCategoryLabel, timelineKindLabel, formatDateTime, formatNumber, formatCurrencyAmount } = useI18n();
+  const {
+    t,
+    statusLabel,
+    failureCategoryLabel,
+    timelineKindLabel,
+    formatDateTime,
+    formatCount,
+    formatDurationMs,
+    formatCurrencyAmount,
+  } = useI18n();
   const { workspaceId, connected, sessionId } = useFrontendSession();
   const [replay, setReplay] = useState<AgentRun | null>(null);
   const replayMutation = useWorkspaceMutation(`run-replay:${workspaceId}:${runId}`);
@@ -227,11 +236,22 @@ export default function RunDetailClient({ runId }: { runId: string }) {
               </div>
             )}
             <div className="run-facts">
-              <span>{t("run.facts.duration")}<strong>{run.duration_ms === null ? "—" : `${formatNumber(run.duration_ms)} ms`}</strong></span>
-              <span>{t("run.facts.tokens")}<strong>{run.total_tokens ?? "—"}</strong></span>
+              <span>
+                {t("run.facts.duration")}
+                <strong title={run.duration_ms === null ? undefined : `${run.duration_ms} ms`}>
+                  {run.duration_ms === null ? "—" : formatDurationMs(run.duration_ms)}
+                </strong>
+              </span>
+              <span>{t("run.facts.tokens")}<strong>{run.total_tokens === null ? "—" : formatCount(run.total_tokens)}</strong></span>
               <span>
                 {t("run.facts.cost")}
-                <strong>
+                <strong
+                  title={
+                    run.total_cost_amount === null
+                      ? undefined
+                      : `${run.total_cost_amount} ${run.cost_currency ?? ""}`.trim()
+                  }
+                >
                   {run.total_cost_amount === null
                     ? "—"
                     : formatCurrencyAmount(run.total_cost_amount, run.cost_currency)}
@@ -264,7 +284,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
                         <strong>{timelineKindLabel(entry.kind)}</strong>
                         <StatusBadge status={entry.status} />
                         {entry.duration_ms !== null && (
-                          <span className="timeline-meta">{formatNumber(Math.round(entry.duration_ms))} ms</span>
+                          <span className="timeline-meta">{formatDurationMs(entry.duration_ms)}</span>
                         )}
                       </div>
                       {entrySubtitle(entry) && <p className="timeline-summary">{entrySubtitle(entry)}</p>}

@@ -72,7 +72,7 @@ function latestPublished(versions: AgentVersion[]): AgentVersion | null {
 }
 
 export default function AgentPlaygroundClient({ agentId }: { agentId: string }) {
-  const { t, formatNumber } = useI18n();
+  const { t, formatDurationMs } = useI18n();
   const { connected, workspaceId, accessToken, sessionId } = useFrontendSession();
 
   const loadVersions = useCallback((auth: AuthInput) => listAgentVersions(auth, agentId), [agentId]);
@@ -231,7 +231,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
       const payload = event.payload;
       const durationMeta = () => {
         const ms = payloadNumber(payload, "duration_ms");
-        return ms === null ? [] : [t("agents.playground.durationMs", { ms: formatNumber(Math.round(ms)) })];
+        return ms === null ? [] : [t("agents.playground.durationMs", { value: formatDurationMs(ms) })];
       };
       const countMeta = () => {
         const count = payloadNumber(payload, "result_count");
@@ -351,7 +351,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
           break;
       }
     },
-    [t, formatNumber, pushActivity, syncUrl],
+    [t, formatDurationMs, pushActivity, syncUrl],
   );
 
   async function startRun() {

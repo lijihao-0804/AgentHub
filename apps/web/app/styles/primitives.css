@@ -127,7 +127,9 @@
 .metric-card-link:hover { border-color: var(--accent); }
 .metric-card-emphasis { border-color: var(--accent); }
 .metric-label { color: var(--text-muted); font-size: 0.78rem; }
-.metric-value { font-size: 1.7rem; font-variant-numeric: tabular-nums; line-height: 1.15; }
+/* Scales down inside the narrow cards a four-column KPI grid produces. */
+.metric-value { font-size: clamp(1.3rem, 2.3vw, 1.7rem); font-variant-numeric: tabular-nums; line-height: 1.15; }
+.metric-unit { color: var(--text-muted); font-size: 0.7em; font-weight: 500; margin-left: 0.3em; }
 .metric-hint { color: var(--text-muted); font-size: 0.78rem; line-height: 1.4; }
 
 .key-values { display: grid; gap: 0.4rem; margin: 0; }
@@ -155,7 +157,12 @@
 .form-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .form-grid label { color: var(--text-muted); display: grid; font-size: 0.8rem; gap: 0.35rem; }
 
-.data-table { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; width: 100%; }
+/*
+ * `overflow-x: auto` rather than `hidden`: a wide table (runs has nine
+ * columns) should scroll, not lose its last column. Rounded corners are still
+ * clipped, which is what the `hidden` here was originally for.
+ */
+.data-table { border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; overflow-y: hidden; width: 100%; }
 .data-table table { border-collapse: collapse; font-size: 0.86rem; width: 100%; }
 .data-table th {
   background: var(--surface-inset);
@@ -165,6 +172,8 @@
   padding: 0.6rem 0.8rem;
   text-align: left;
   text-transform: uppercase;
+  /* Column labels are short; wrapping them ("版 / 本") only adds header height. */
+  white-space: nowrap;
 }
 .data-table td { border-top: 1px solid var(--border); overflow-wrap: anywhere; padding: 0.65rem 0.8rem; vertical-align: top; }
 .data-table tbody tr:hover { background: var(--row-hover); }
@@ -174,6 +183,25 @@
  */
 .data-table td > .state-hint { display: block; margin-top: 0.2rem; }
 .data-table td > code + .state-hint { margin-top: 0.3rem; }
+/*
+ * Short, atomic cells — a truncated id, a timestamp. Breaking "2026/9/21" or
+ * "3d0d98dd…" across three lines costs more vertical space than the column
+ * saves horizontally.
+ */
+.data-table td.tight-cell { overflow-wrap: normal; white-space: nowrap; }
+/*
+ * Measurement columns (duration, tokens, cost, counts). `overflow-wrap:
+ * anywhere` is right for identities and free text but wrong for a number —
+ * it broke "0.0008 USD" across three lines. Numbers stay on one line, right
+ * aligned, in tabular figures so the decimal points line up down the column.
+ */
+.data-table td.numeric-cell,
+.data-table th.numeric-cell {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: normal;
+  text-align: right;
+  white-space: nowrap;
+}
 /* Row actions are secondary to the row itself: smaller than page buttons. */
 .data-table td .button { font-size: 0.8rem; padding: 0.32rem 0.7rem; }
 .data-table td .row-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }

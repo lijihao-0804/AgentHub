@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import {
+  formatCount,
   formatCurrencyAmount,
   formatDateTime,
   formatDurationMs,
@@ -42,9 +43,11 @@ type I18nContextValue = {
   formatDateTime: (value: string | Date) => string;
   formatUTCBucketDate: (value: string | Date) => string;
   formatNumber: (value: number) => string;
+  /** Rounded integer rendering for anything that counts discrete things. */
+  formatCount: (value: number | null | undefined) => string;
   formatPercent: (rate: number) => string;
   formatCurrencyAmount: (value: number | string | null | undefined, currency: string | null | undefined) => string;
-  formatDurationMs: (value: number | null) => string;
+  formatDurationMs: (value: number | null | undefined) => string;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -120,8 +123,9 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       formatDateTime: (value) => formatDateTime(value, locale),
       formatUTCBucketDate: (value) => formatUTCBucketDate(value, locale),
       formatNumber: (value) => formatNumber(value, locale),
+      formatCount: (value) => formatCount(value, locale),
       formatPercent: (rate) => formatPercent(rate, locale),
-      formatCurrencyAmount: (value, currency) => formatCurrencyAmount(value, currency),
+      formatCurrencyAmount: (value, currency) => formatCurrencyAmount(value, currency, locale),
       formatDurationMs: (value) => formatDurationMs(value, locale),
     }),
     [locale, setLocale],

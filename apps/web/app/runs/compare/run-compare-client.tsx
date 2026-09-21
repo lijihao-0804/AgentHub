@@ -70,7 +70,7 @@ function toolIdentity(entry: RunTimelineEntry): string | null {
  * which output is better is what Evaluation exists for.
  */
 export default function RunCompareClient() {
-  const { t, timelineKindLabel, formatNumber, formatCurrencyAmount } = useI18n();
+  const { t, timelineKindLabel, formatNumber, formatDurationMs, formatCurrencyAmount } = useI18n();
   const { connected, workspaceId, sessionId } = useFrontendSession();
 
   const [leftId, setLeftId] = useState("");
@@ -125,6 +125,7 @@ export default function RunCompareClient() {
     if (!left.data || !right.data) return [];
     return buildMetrics(left.data.detail, right.data.detail, {
       formatNumber,
+      formatDurationMs,
       formatCurrencyAmount,
       mixedCurrency: t("runCompare.metrics.mixedCurrency"),
       labels: {
@@ -139,7 +140,7 @@ export default function RunCompareClient() {
         approvals: t("runCompare.metrics.approvals"),
       },
     });
-  }, [left.data, right.data, t, formatNumber, formatCurrencyAmount]);
+  }, [left.data, right.data, t, formatNumber, formatDurationMs, formatCurrencyAmount]);
 
   if (!connected) {
     return (
@@ -394,6 +395,7 @@ function buildMetrics(
   right: RunDetail,
   options: {
     formatNumber: (value: number) => string;
+    formatDurationMs: (value: number | null | undefined) => string;
     formatCurrencyAmount: (
       value: number | string | null | undefined,
       currency: string | null | undefined,
@@ -402,7 +404,7 @@ function buildMetrics(
     labels: Record<string, string>;
   },
 ): MetricRow[] {
-  const { formatNumber, formatCurrencyAmount, labels } = options;
+  const { formatNumber, formatDurationMs, formatCurrencyAmount, labels } = options;
 
   const numeric = (
     key: string,
@@ -431,8 +433,22 @@ function buildMetrics(
         ? `${rightCost - leftCost > 0 ? "+" : ""}${formatCurrencyAmount(rightCost - leftCost, left.cost_currency)}`
         : options.mixedCurrency;
 
+  // Duration carries its own unit, so it never goes through `numeric`.
+  const durationDelta =
+    left.duration_ms === null || right.duration_ms === null
+      ? "—"
+      : `${right.duration_ms - left.duration_ms > 0 ? "+" : ""}${formatDurationMs(
+          right.duration_ms - left.duration_ms,
+        )}`;
+
   return [
-    numeric("durationMs", labels.durationMs, left.duration_ms, right.duration_ms),
+    {
+      key: "durationMs",
+      label: labels.durationMs,
+      left: left.duration_ms === null ? "—" : formatDurationMs(left.duration_ms),
+      right: right.duration_ms === null ? "—" : formatDurationMs(right.duration_ms),
+      delta: durationDelta,
+    },
     numeric("totalTokens", labels.totalTokens, left.total_tokens, right.total_tokens),
     numeric("inputTokens", labels.inputTokens, left.total_input_tokens, right.total_input_tokens),
     numeric("outputTokens", labels.outputTokens, left.total_output_tokens, right.total_output_tokens),

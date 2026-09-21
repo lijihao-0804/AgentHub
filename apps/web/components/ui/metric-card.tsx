@@ -5,12 +5,19 @@ import type { ReactNode } from "react";
 export default function MetricCard({
   label,
   value,
+  unit,
   hint,
   href,
   emphasis,
 }: {
   label: string;
   value: ReactNode;
+  /**
+   * Unit or currency code, set apart from the figure. "0.00055 USD" at the
+   * metric type size wraps inside a quarter-width card; the number is the
+   * thing being read, so the unit is rendered smaller beside it instead.
+   */
+  unit?: string | null;
   hint?: ReactNode;
   href?: string;
   emphasis?: boolean;
@@ -18,7 +25,10 @@ export default function MetricCard({
   const body = (
     <>
       <span className="metric-label">{label}</span>
-      <strong className="metric-value">{value}</strong>
+      <strong className="metric-value">
+        {value}
+        {unit ? <span className="metric-unit">{unit}</span> : null}
+      </strong>
       {hint && <small className="metric-hint">{hint}</small>}
     </>
   );

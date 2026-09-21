@@ -627,7 +627,7 @@ export const enUS = {
       delta: "Δ = Right − Left",
       neutralHint:
         "Deltas are facts, not judgements. Fewer tokens or a shorter duration is not automatically better.",
-      durationMs: "Duration (ms)",
+      durationMs: "Duration",
       totalTokens: "Total tokens",
       inputTokens: "Input tokens",
       outputTokens: "Output tokens",
@@ -1510,7 +1510,7 @@ export const enUS = {
       runNotOwned: "This run does not belong to this agent.",
       streamProtocolError: "Stream protocol error",
       resultCount: "{count} results",
-      durationMs: "{ms} ms",
+      durationMs: "Took {value}",
       errorCode: "Error {code}",
     },
     tab: {

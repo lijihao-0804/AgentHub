@@ -42,7 +42,13 @@
 .dashboard-columns { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--space-4); }
 .dashboard-columns .panel { margin-top: 0; }
 
-.trend-chart { display: block; width: 100%; height: auto; }
+/*
+ * Fixed height, not `height: auto`. With `auto` the viewBox scales to the
+ * panel width, so two buckets rendered as two enormous blocks filling the
+ * panel. A fixed height plus `xMinYMax meet` keeps bars at a readable size
+ * and grows the series rightwards from the axis as buckets are added.
+ */
+.trend-chart { display: block; width: 100%; height: 11rem; }
 .trend-note { color: var(--text-muted); font-size: 0.75rem; margin-top: var(--space-2); }
 .trend-legend { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
 .trend-legend span { align-items: center; color: var(--text-muted); display: flex; font-size: 0.75rem; gap: 0.35rem; }
@@ -72,6 +78,33 @@
 a.split-row:hover { border-color: var(--accent); }
 .split-row .muted { font-size: 0.8rem; }
 .split-row > * { min-width: 0; overflow-wrap: anywhere; }
+
+/*
+ * Two-line variant of .split-row for the half-width dashboard panels. Five
+ * columns inside a half-width panel gives each value ~55px, which wraps a
+ * cost like "0.00055 USD" character by character. Here the row reads as a
+ * headline line (lead + value) and a meta line, so nothing has to be hidden
+ * at narrow widths the way .split-row hides its trailing columns.
+ */
+.stat-row {
+  background: var(--surface-inset);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  display: grid;
+  gap: 0.2rem var(--space-3);
+  /* The lead is short and must not break mid-word ("RUNT / IME"); the value
+     column takes the rest and is the one allowed to wrap. */
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  padding: 0.6rem 0.8rem;
+  text-decoration: none;
+}
+a.stat-row:hover { border-color: var(--accent); }
+.stat-row > * { min-width: 0; overflow-wrap: anywhere; }
+.stat-row-lead { font-weight: 600; overflow-wrap: normal; white-space: nowrap; }
+.stat-row-value { font-variant-numeric: tabular-nums; text-align: right; }
+.stat-row-meta { color: var(--text-muted); font-size: 0.8rem; }
+.stat-row-meta-end { text-align: right; }
 
 /* Runs */
 .runs-toolbar { align-items: end; display: grid; gap: var(--space-3); grid-template-columns: 1fr 1.4fr auto auto; }
