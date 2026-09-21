@@ -208,7 +208,11 @@ class EvaluationExperimentRunResponse(BaseModel):
     completed_at: datetime | None
     failure_code: str | None
     safe_failure_message: str | None
-    holdout_exposure_index: int | None
+    # The exposure index is not a column on the run: it lives in the holdout exposure
+    # ledger and is supplied by the route with model_copy.  Without a default, building
+    # the response from the ORM row raises before that update ever happens, so every
+    # attempt to start or read an experiment run answers 500.
+    holdout_exposure_index: int | None = None
     created_by: UUID
     created_at: datetime
 

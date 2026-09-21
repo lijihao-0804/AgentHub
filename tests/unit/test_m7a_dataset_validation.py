@@ -135,3 +135,55 @@ def test_supported_categories_have_explicit_shapes() -> None:
     ]
 
     assert len(validate_dataset_items(items)) == 2
+
+
+def _qa_item(expected: dict[str, object]) -> dict[str, object]:
+    return {
+        "case_key": "open-ended",
+        "split": "DEV",
+        "category": "KNOWLEDGE_QA",
+        "input": {"question": "Why does this matter?"},
+        "expected": expected,
+        "tags": [],
+        "source_provenance": {"source_kind": "fixture", "source_id": "open-ended"},
+        "ordinal": 0,
+    }
+
+
+def test_the_open_ended_slice_is_expressible_in_a_dataset_item() -> None:
+    """The judge is opted into per case, so the flag has to survive validation.
+
+    The driver only judges an item whose ``expected["open_ended"]`` is True. While the
+    category shapes rejected that key, an experiment could be frozen with a judge, the
+    worker would rebuild it, and it would score nothing -- a feature that passes every
+    one of its own tests and never runs.
+    """
+
+    validated = validate_dataset_items(
+        [_qa_item({"answer": "Because.", "citations": [], "open_ended": True})]
+    )
+
+    assert validated[0]["expected"]["open_ended"] is True
+
+
+def test_an_item_that_does_not_opt_in_is_unchanged() -> None:
+    validated = validate_dataset_items([_qa_item({"answer": "Because.", "citations": []})])
+
+    assert "open_ended" not in validated[0]["expected"]
+
+
+@pytest.mark.parametrize("value", ["true", 1, None])
+def test_a_non_boolean_open_ended_flag_is_refused(value: object) -> None:
+    with pytest.raises(AgentHubError):
+        validate_dataset_items(
+            [_qa_item({"answer": "Because.", "citations": [], "open_ended": value})]
+        )
+
+
+def test_a_closed_category_still_refuses_the_flag() -> None:
+    item = _qa_item({"relevant_chunk_ids": ["chunk-1"], "open_ended": True})
+    item["category"] = "RETRIEVAL"
+    item["input"] = {"query": "anything"}
+
+    with pytest.raises(AgentHubError):
+        validate_dataset_items([item])

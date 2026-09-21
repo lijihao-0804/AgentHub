@@ -31,15 +31,22 @@ _SECRET_KEYS = frozenset(
 # The category schemas intentionally stay small in M7-A.  Later importers normalize legacy
 # benchmark formats into these explicit shapes; accepting arbitrary dictionaries here would make
 # dataset hashes and evaluator semantics ambiguous.
+#
+# ``open_ended`` is the one optional flag the free-text categories share: it is how a
+# case opts into the supplementary LLM-as-judge score.  Without it in these shapes the
+# flag is unexpressible, the driver's ``open_ended is True`` test never passes, and a
+# judge an experiment was frozen with would be rebuilt by the worker only to score
+# nothing.  The deterministic evaluators stay primary for these cases either way.
+_OPEN_ENDED = frozenset({"open_ended"})
 _CATEGORY_SHAPES: dict[str, tuple[frozenset[str], frozenset[str], frozenset[str]]] = {
     "RETRIEVAL": (frozenset({"query"}), frozenset({"relevant_chunk_ids"}), frozenset()),
-    "KNOWLEDGE_QA": (frozenset({"question"}), frozenset({"answer", "citations"}), frozenset()),
+    "KNOWLEDGE_QA": (frozenset({"question"}), frozenset({"answer", "citations"}), _OPEN_ENDED),
     "TOOL": (
         frozenset({"request"}),
         frozenset({"tool_identity", "arguments"}),
         frozenset({"tool_sequence"}),
     ),
-    "NO_ANSWER": (frozenset({"question"}), frozenset({"answer"}), frozenset()),
+    "NO_ANSWER": (frozenset({"question"}), frozenset({"answer"}), _OPEN_ENDED),
     "APPROVAL": (
         frozenset({"action"}),
         frozenset({"decision"}),
@@ -117,6 +124,8 @@ def validate_dataset_item(raw: Mapping[str, Any]) -> dict[str, Any]:
             f"{category} input/expected fields do not match the category schema.",
             422,
         )
+    if "open_ended" in expected_value and not isinstance(expected_value["open_ended"], bool):
+        raise AgentHubError("EVALUATION_DATASET_INVALID", "open_ended must be a boolean.", 422)
     _validate_category_types(category, input_value, expected_value)
     return {
         "case_key": case_key.strip(),
