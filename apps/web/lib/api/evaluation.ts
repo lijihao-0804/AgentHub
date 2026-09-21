@@ -72,6 +72,16 @@ export type EvaluationDatasetVersionDetail = EvaluationDatasetVersion & {
   items: EvaluationDatasetItem[];
 };
 
+export type EvaluationDatasetVersionFromRunInput = {
+  run_id: string;
+  base_version_id: string;
+  case_key: string;
+  split: string;
+  category: string;
+  expected: Record<string, unknown>;
+  tags: string[];
+};
+
 export function listDatasets(input: AuthInput): Promise<EvaluationDataset[]> {
   return get(input, "/datasets");
 }
@@ -101,6 +111,14 @@ export function createDatasetVersion(
   payload: { schema_version: number; items: EvaluationDatasetItemInput[] },
 ): Promise<EvaluationDatasetVersion> {
   return post(input, `/datasets/${encodeURIComponent(datasetId)}/versions`, payload);
+}
+
+export function createDatasetVersionFromRun(
+  input: AuthInput,
+  datasetId: string,
+  payload: EvaluationDatasetVersionFromRunInput,
+): Promise<EvaluationDatasetVersion> {
+  return post(input, `/datasets/${encodeURIComponent(datasetId)}/versions/from-run`, payload);
 }
 
 export function publishDatasetVersion(
