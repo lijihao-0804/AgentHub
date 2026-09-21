@@ -302,7 +302,12 @@ async def test_search_external_stages_do_not_see_tool_runtime_session(monkeypatc
                     ordinal=0,
                     normalized_content_hash="hash",
                 ),
-                SimpleNamespace(id=uuid4()),
+                SimpleNamespace(
+                    id=uuid4(),
+                    name="document.md",
+                    effective_date=None,
+                    superseded_by_document_id=None,
+                ),
                 SimpleNamespace(id=uuid4()),
             )
         }

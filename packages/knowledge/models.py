@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKeyConstraint,
     Index,
@@ -87,6 +88,20 @@ class Document(Base):
         UniqueConstraint(
             "workspace_id", "knowledge_base_id", "id", name="uq_documents_workspace_kb_id"
         ),
+        # A single-column self reference rather than the composite one used
+        # elsewhere in this module: a composite FK with ON DELETE SET NULL would
+        # null ``workspace_id`` too, which is NOT NULL. The same-knowledge-base
+        # rule is therefore enforced in the service, not by the constraint.
+        ForeignKeyConstraint(
+            ["superseded_by_document_id"],
+            ["documents.id"],
+            name="fk_documents_superseded_by",
+            ondelete="SET NULL",
+        ),
+        CheckConstraint(
+            "superseded_by_document_id IS NULL OR superseded_by_document_id <> id",
+            name="ck_documents_supersession_not_self",
+        ),
         Index("ix_documents_workspace_kb", "workspace_id", "knowledge_base_id"),
     )
 
@@ -94,6 +109,14 @@ class Document(Base):
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     knowledge_base_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Lifecycle. ``DocumentRevision.lifecycle_status`` already retires *a
+    # revision of one document*; these two columns carry the other kind of
+    # retirement -- a separate document that replaces this one (policy v1
+    # superseded by policy v2) -- which nothing modelled before.
+    effective_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    superseded_by_document_id: Mapped[UUID | None] = mapped_column(
+        SQLUuid(as_uuid=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

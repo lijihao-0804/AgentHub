@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import AsyncIterable
+from datetime import date
 from typing import NoReturn
 from uuid import UUID, uuid4
 
@@ -178,6 +179,100 @@ class KnowledgeService:
                 extra={"job_id": str(job.id), "adapter": type(queue).__name__},
             )
         return document, revision, job
+
+    async def update_document_lifecycle(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        knowledge_base_id: UUID,
+        document_id: UUID,
+        effective_date: date | None,
+        superseded_by_document_id: UUID | None,
+        set_effective_date: bool,
+        set_superseded_by: bool,
+    ) -> Document:
+        """Record which document replaced this one, and when it took effect.
+
+        Reuses ``knowledge_edit``: this is editing a document's metadata, which
+        that permission already covers. A lifecycle-specific permission would
+        have to be granted to every role that can already replace the file's
+        contents, which is strictly more dangerous.
+
+        The two ``set_*`` flags exist because ``None`` is a meaningful value
+        here -- "clear the supersession" is a different request from "leave it
+        alone", and a plain optional field cannot tell them apart.
+        """
+
+        self._require_permission(context, "knowledge_edit")
+        workspace_id = self._workspace_id(context)
+        document = await session.scalar(
+            select(Document).where(
+                Document.id == document_id,
+                Document.workspace_id == workspace_id,
+                Document.knowledge_base_id == knowledge_base_id,
+            )
+        )
+        if document is None:
+            self._not_found()
+        if set_superseded_by and superseded_by_document_id is not None:
+            if superseded_by_document_id == document_id:
+                raise AgentHubError(
+                    "INVALID_DOCUMENT_SUPERSESSION",
+                    "A document cannot supersede itself.",
+                    422,
+                )
+            # Same workspace *and* same knowledge base: a snapshot is built from
+            # one knowledge base, so a cross-base successor would be invisible
+            # at the only moment this field is read. Missing and out-of-scope
+            # both answer 404, so the check leaks nothing either way.
+            successor = await session.scalar(
+                select(Document.id).where(
+                    Document.id == superseded_by_document_id,
+                    Document.workspace_id == workspace_id,
+                    Document.knowledge_base_id == knowledge_base_id,
+                )
+            )
+            if successor is None:
+                self._not_found()
+        if set_effective_date:
+            document.effective_date = effective_date
+        if set_superseded_by:
+            document.superseded_by_document_id = superseded_by_document_id
+        append_audit(
+            session,
+            action="document_lifecycle_update",
+            resource_type="document",
+            resource_id=str(document.id),
+            request_id=context.request_id,
+            actor_user_id=self._user_id(context),
+            organization_id=self._organization_id(context),
+            workspace_id=workspace_id,
+            safe_metadata={
+                "knowledge_base_id": str(knowledge_base_id),
+                "effective_date": (
+                    document.effective_date.isoformat()
+                    if document.effective_date is not None
+                    else None
+                ),
+                "superseded_by_document_id": (
+                    str(document.superseded_by_document_id)
+                    if document.superseded_by_document_id is not None
+                    else None
+                ),
+            },
+        )
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise AgentHubError(
+                "DOCUMENT_LIFECYCLE_UPDATE_FAILED",
+                "The document lifecycle could not be recorded.",
+                409,
+            ) from exc
+        await session.refresh(document)
+        return document
 
     async def list_revisions(
         self,

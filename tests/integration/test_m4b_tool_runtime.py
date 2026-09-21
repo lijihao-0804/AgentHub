@@ -254,6 +254,9 @@ class _RecordingTraceSink:
 
 
 class _FakeRetriever:
+    def __init__(self, metadata: dict | None = None) -> None:
+        self.metadata = metadata or {}
+
     async def retrieve_with_trace(self, context, query):
         del context
         stage = RetrievalTraceStage(latency_ms=0, results=())
@@ -268,7 +271,7 @@ class _FakeRetriever:
                     text=f"result for {query.text}",
                     retrieval_score=1.0,
                     rerank_score=2.0,
-                    metadata={},
+                    metadata=dict(self.metadata),
                 ),
             ),
             trace=RetrievalTrace(
@@ -599,3 +602,57 @@ async def test_search_knowledge_uses_published_concrete_snapshot_and_retriever(d
     )
     assert result.status == "SUCCESS"
     assert result.data["results"][0]["chunk_id"] == "chunk-1"
+    # A retriever that populates no lifecycle metadata is still valid; the tool
+    # reports "unknown / not superseded" rather than failing.
+    assert result.data["results"][0]["document_name"] is None
+    assert result.data["results"][0]["effective_date"] is None
+    assert result.data["results"][0]["superseded"] is False
+
+
+@pytest.mark.asyncio
+async def test_search_knowledge_tells_the_model_a_document_was_superseded(db_factory) -> None:
+    """Without this the model sees a UUID and a snippet, and cannot tell a live
+    policy from the one that replaced it -- the corpus test's worst failure."""
+
+    spec = {
+        "kind": "builtin",
+        "identity": "search_knowledge",
+        "input_schema": {
+            "type": "object",
+            "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}},
+            "required": ["query", "limit"],
+        },
+        "effect": "READ",
+        "risk_level": "LOW",
+        "approval_policy": "NEVER",
+    }
+    async with db_factory() as session:
+        base = await _seed_base(session, label=uuid4().hex, tool_spec=spec, snapshot=True)
+    runtime = ToolRuntime(
+        session_factory=db_factory,
+        registry=ToolRegistry(
+            retriever=_FakeRetriever(
+                metadata={
+                    "document_name": "password-policy-v1.md",
+                    "effective_date": "2024-03-01",
+                    "superseded": True,
+                    "superseded_by_document_id": "doc-2",
+                }
+            )
+        ),
+    )
+    result = await runtime.execute(
+        context=base["context"],
+        agent_version_id=base["version"].id,
+        tool_identity="search_knowledge",
+        arguments={"query": "alpha", "limit": 1},
+        tool_call_id="call-search-superseded",
+    )
+    assert result.status == "SUCCESS"
+    row = result.data["results"][0]
+    assert row["document_name"] == "password-policy-v1.md"
+    assert row["effective_date"] == "2024-03-01"
+    assert row["superseded"] is True
+    # The successor's raw id would tell the model nothing it can act on, so it
+    # is deliberately not part of the tool result.
+    assert "superseded_by_document_id" not in row

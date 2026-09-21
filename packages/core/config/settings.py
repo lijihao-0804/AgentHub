@@ -38,6 +38,18 @@ class Settings(BaseSettings):
     knowledge_reranker_batch_size: int = Field(default=8, ge=1, le=64)
     knowledge_qdrant_timeout_seconds: float = Field(default=10, gt=0, le=120)
     knowledge_rrf_k: int = Field(default=60, ge=1, le=10_000)
+    # Evidence whose rerank score falls below this is dropped, so a question the
+    # corpus cannot answer yields an empty evidence set instead of the six
+    # least-bad chunks. Off by default on purpose: the usable value is a
+    # property of a corpus, not a constant. Measured on a 60-document
+    # enterprise corpus, unanswerable questions topped out at +0.10 while the
+    # weakest answerable one scored +1.88 -- the distributions did not overlap,
+    # so anything in that gap works *there* and nowhere else by assumption.
+    knowledge_min_rerank_score: float | None = Field(default=None, ge=-100, le=100)
+    # Subtracted from the rerank score of a chunk whose document has been
+    # superseded. A penalty rather than a filter: "what did the old policy
+    # say" is a legitimate question, and filtering would make it unanswerable.
+    knowledge_superseded_rank_penalty: float = Field(default=0.0, ge=0, le=100)
     blob_root: str = "data/blobs"
     knowledge_max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1)
     knowledge_ingestion_lease_seconds: int = Field(default=300, ge=5, le=86_400)

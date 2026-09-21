@@ -35,6 +35,8 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
             session_factory=factory,
             components=components,
             rrf_k=settings.knowledge_rrf_k,
+            min_rerank_score=settings.knowledge_min_rerank_score,
+            superseded_rank_penalty=settings.knowledge_superseded_rank_penalty,
             trace_sink=trace_sink,
         )
         # One executor serves both sides of the approval boundary: the same

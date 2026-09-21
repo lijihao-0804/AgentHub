@@ -24,6 +24,9 @@ class RetrievalQuery:
     sparse_top_k: int = 30
     candidate_top_k: int = 20
     final_top_k: int = 6
+    # Per-query override of the configured relevance floor. ``None`` means
+    # "use the retriever's configured value"; it does not mean "no floor".
+    min_rerank_score: float | None = None
 
 
 @dataclass(frozen=True)
@@ -64,6 +67,10 @@ class RetrievalTrace:
     fusion: RetrievalTraceStage
     rerank: RetrievalTraceStage
     total_latency_ms: float
+    # How many reranked chunks the relevance floor removed. Without this an
+    # empty evidence set is indistinguishable from an empty index, which is
+    # the one question someone looking at a trace will actually have.
+    dropped_below_floor: int = 0
 
 
 @dataclass(frozen=True)
