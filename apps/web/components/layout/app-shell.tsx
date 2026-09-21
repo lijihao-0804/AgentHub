@@ -13,10 +13,12 @@ import ThemeSwitcher from "@/components/layout/theme-switcher";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import WorkspaceSelector from "@/components/layout/workspace-selector";
 import UserMenu from "@/components/layout/user-menu";
+import Icon, { type IconName } from "@/components/ui/icon";
 
 type NavItem = {
   href: string;
   labelKey: MessageKey;
+  icon: IconName;
   match: (pathname: string) => boolean;
   /** Rendered indented under the entry above it, for a tool that belongs to it. */
   nested?: boolean;
@@ -41,44 +43,45 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
   {
     headingKey: "nav.overview",
     items: [
-      { href: "/dashboard", labelKey: "nav.dashboard", match: prefixMatch("/dashboard") },
-      { href: "/runs", labelKey: "nav.runs", match: prefixMatch("/runs", "/runs/compare") },
-      { href: "/runs/compare", labelKey: "nav.runCompare", match: prefixMatch("/runs/compare"), nested: true },
-      { href: "/approvals", labelKey: "nav.approvals", match: prefixMatch("/approvals") },
+      { href: "/dashboard", labelKey: "nav.dashboard", icon: "dashboard", match: prefixMatch("/dashboard") },
+      { href: "/runs", labelKey: "nav.runs", icon: "runs", match: prefixMatch("/runs", "/runs/compare") },
+      { href: "/runs/compare", labelKey: "nav.runCompare", icon: "compare", match: prefixMatch("/runs/compare"), nested: true },
+      { href: "/approvals", labelKey: "nav.approvals", icon: "approvals", match: prefixMatch("/approvals") },
     ],
   },
   {
     headingKey: "nav.applications",
     items: [
-      { href: "/research", labelKey: "nav.research", match: prefixMatch("/research") },
-      { href: "/incidents", labelKey: "nav.incidents", match: prefixMatch("/incidents") },
-      { href: "/analytics", labelKey: "nav.analytics", match: prefixMatch("/analytics") },
-      { href: "/support", labelKey: "nav.support", match: prefixMatch("/support") },
+      { href: "/research", labelKey: "nav.research", icon: "research", match: prefixMatch("/research") },
+      { href: "/incidents", labelKey: "nav.incidents", icon: "incidents", match: prefixMatch("/incidents") },
+      { href: "/analytics", labelKey: "nav.analytics", icon: "analytics", match: prefixMatch("/analytics") },
+      { href: "/support", labelKey: "nav.support", icon: "support", match: prefixMatch("/support") },
     ],
   },
   {
     headingKey: "nav.build",
     items: [
-      { href: "/agents", labelKey: "nav.agents", match: prefixMatch("/agents") },
-      { href: "/knowledge", labelKey: "nav.knowledge", match: prefixMatch("/knowledge", "/knowledge/playground") },
+      { href: "/agents", labelKey: "nav.agents", icon: "agents", match: prefixMatch("/agents") },
+      { href: "/knowledge", labelKey: "nav.knowledge", icon: "knowledge", match: prefixMatch("/knowledge", "/knowledge/playground") },
       {
         href: "/knowledge/playground",
         labelKey: "nav.retrievalPlayground",
+        icon: "search",
         match: prefixMatch("/knowledge/playground"),
         nested: true,
       },
-      { href: "/tools", labelKey: "nav.tools", match: prefixMatch("/tools") },
+      { href: "/tools", labelKey: "nav.tools", icon: "tools", match: prefixMatch("/tools") },
     ],
   },
   {
     headingKey: "nav.evaluate",
-    items: [{ href: "/evaluations", labelKey: "nav.evaluations", match: prefixMatch("/evaluations") }],
+    items: [{ href: "/evaluations", labelKey: "nav.evaluations", icon: "evaluations", match: prefixMatch("/evaluations") }],
   },
   {
     headingKey: "nav.workspace",
     items: [
-      { href: "/settings", labelKey: "nav.settings", match: prefixMatch("/settings", "/settings/models") },
-      { href: "/settings/models", labelKey: "nav.models", match: prefixMatch("/settings/models"), nested: true },
+      { href: "/settings", labelKey: "nav.settings", icon: "settings", match: prefixMatch("/settings", "/settings/models") },
+      { href: "/settings/models", labelKey: "nav.models", icon: "models", match: prefixMatch("/settings/models"), nested: true },
     ],
   },
 ];
@@ -102,7 +105,10 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }
         aria-current={active ? "page" : undefined}
         onClick={onNavigate}
       >
-        {t(item.labelKey)}
+        <span className="nav-link-label">
+          <Icon name={item.icon} size={16} />
+          <span>{t(item.labelKey)}</span>
+        </span>
       </Link>
     </li>
   );

@@ -34,8 +34,12 @@
   .app-content { padding: var(--space-4) var(--space-3) var(--space-5); }
   .panel { padding: var(--space-4); }
   .kpi-grid, .op-grid, .overview-grid, .form-grid, .stage-grid, .top-k-grid,
+  .app-grid, .quick-grid,
   .dashboard-columns, .playground-overview { grid-template-columns: 1fr; }
   .approval-split { grid-template-columns: 1fr; }
+  /* The rail wraps here, and a connector that leads a new line points at
+     nothing. Narrow screens get the stages as plain tags instead. */
+  .stage-chip + .stage-chip::before { content: none; }
   .query-field { grid-column: auto; }
   .form-actions { justify-content: stretch; }
   .form-actions .button { width: 100%; justify-content: center; }

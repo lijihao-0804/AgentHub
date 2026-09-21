@@ -42,6 +42,16 @@
   padding: 0.42rem 0.6rem;
   text-decoration: none;
 }
+/*
+ * The icon travels with the label rather than being a sibling of it, so the
+ * link's `space-between` still pushes a trailing badge to the far edge.
+ */
+.nav-link-label { align-items: center; display: flex; gap: 0.55rem; min-width: 0; }
+.nav-link-label > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Icons are wayfinding, not decoration: they stay quieter than the label
+   until the row is hovered or current, and then they come up with it. */
+.nav-link .icon { color: var(--text-muted); flex-shrink: 0; transition: color 120ms ease; }
+.nav-link:hover .icon, .nav-link-active .icon { color: var(--accent); }
 .nav-link:hover { background: var(--accent-soft); color: var(--text); }
 .nav-link-active {
   background: var(--accent-soft);
@@ -50,18 +60,16 @@
   font-weight: 700;
 }
 .nav-link-disabled { cursor: not-allowed; opacity: 0.55; }
-/* A standalone tool that belongs to the section above it: visible in its own
-   right, but indented and a shade lighter so the section still reads first. */
+/*
+ * A standalone tool that belongs to the section above it: visible in its own
+ * right, but indented and a shade lighter so the section still reads first.
+ * The indent used to be drawn with a "└" glyph; now that every row carries an
+ * icon, the glyph and the icon were two competing nesting signals in the same
+ * gutter, so the indent alone does the work.
+ */
 .nav-link-nested {
   font-size: 0.85rem;
-  padding-left: 1.35rem;
-}
-.nav-link-nested::before {
-  color: var(--border-strong);
-  content: "└";
-  font-size: 0.7rem;
-  margin-left: -0.75rem;
-  margin-right: 0.15rem;
+  padding-left: 1.5rem;
 }
 .nav-soon {
   border: 1px solid var(--border);
