@@ -254,3 +254,79 @@ export async function putAgentToolBindings(
   );
   return listItems<AgentToolBinding>(payload);
 }
+
+// ---------- Long-term memory ----------
+
+/**
+ * One thing an agent remembers across threads.
+ *
+ * `status` is the whole vocabulary: ACTIVE is what it believes now,
+ * SUPERSEDED was replaced by something it learned later, INVALIDATED was
+ * switched off by a human. Nothing is ever deleted, so a run that already
+ * used a memory can still explain itself — which is why the UI offers
+ * "stop using this" rather than "delete".
+ */
+export type AgentMemoryStatus = "ACTIVE" | "SUPERSEDED" | "INVALIDATED";
+export type AgentMemoryKind = "FACT" | "PREFERENCE" | "DECISION" | "CONSTRAINT";
+
+export type AgentMemory = {
+  id: string;
+  workspace_id: string;
+  agent_id: string;
+  thread_id: string | null;
+  source_run_id: string | null;
+  content: string;
+  kind: AgentMemoryKind;
+  status: AgentMemoryStatus;
+  superseded_by_id: string | null;
+  salience: number;
+  provenance: Record<string, unknown>;
+  expires_at: string | null;
+  last_used_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AgentMemoryPage = { items: AgentMemory[]; total: number };
+
+export async function listAgentMemories(
+  input: AuthInput,
+  agentId: string,
+  options: { status?: AgentMemoryStatus; limit?: number; offset?: number } = {},
+): Promise<AgentMemoryPage> {
+  const query = new URLSearchParams();
+  if (options.status) query.set("status", options.status);
+  if (options.limit !== undefined) query.set("limit", String(options.limit));
+  if (options.offset !== undefined) query.set("offset", String(options.offset));
+  const serialized = query.toString();
+  const suffix = serialized ? `?${serialized}` : "";
+  const payload = await apiRequest<AgentMemoryPage>(
+    `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/memories${suffix}`,
+    input.accessToken,
+  );
+  return { items: payload.items ?? [], total: payload.total ?? 0 };
+}
+
+export async function invalidateAgentMemory(
+  input: AuthInput,
+  agentId: string,
+  memoryId: string,
+): Promise<AgentMemory> {
+  return apiRequest<AgentMemory>(
+    `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/memories/${encodeURIComponent(memoryId)}/invalidate`,
+    input.accessToken,
+    { method: "POST" },
+  );
+}
+
+export async function reactivateAgentMemory(
+  input: AuthInput,
+  agentId: string,
+  memoryId: string,
+): Promise<AgentMemory> {
+  return apiRequest<AgentMemory>(
+    `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/memories/${encodeURIComponent(memoryId)}/reactivate`,
+    input.accessToken,
+    { method: "POST" },
+  );
+}

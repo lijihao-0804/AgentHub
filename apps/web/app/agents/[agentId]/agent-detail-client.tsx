@@ -13,13 +13,19 @@ import {
   getAgent,
   getAgentKnowledgeBindings,
   getAgentToolBindings,
+  invalidateAgentMemory,
+  listAgentMemories,
   listAgentVersions,
   patchAgent,
   preflightAgent,
   publishAgent,
   putAgentKnowledgeBindings,
   putAgentToolBindings,
+  reactivateAgentMemory,
   type Agent,
+  type AgentMemoryKind,
+  type AgentMemoryPage,
+  type AgentMemoryStatus,
   type AgentPreflightResult,
   type AgentKnowledgeBinding,
   type AgentToolBinding,
@@ -33,17 +39,39 @@ import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
 import { listToolRevisions, listTools, type Tool, type ToolRevision } from "@/lib/api/tools";
 import { useI18n } from "@/i18n/provider";
 
-type Tab = "general" | "model" | "knowledge" | "tools" | "runtime" | "versions";
+type Tab = "general" | "model" | "knowledge" | "tools" | "runtime" | "memories" | "versions";
 
-const TABS: Tab[] = ["general", "model", "knowledge", "tools", "runtime", "versions"];
+const TABS: Tab[] = ["general", "model", "knowledge", "tools", "runtime", "memories", "versions"];
 
-const TAB_LABEL: Record<Tab, "agents.tab.general" | "agents.tab.model" | "agents.tab.knowledge" | "agents.tab.tools" | "agents.tab.runtime" | "agents.tab.versions"> = {
+const TAB_LABEL: Record<Tab, "agents.tab.general" | "agents.tab.model" | "agents.tab.knowledge" | "agents.tab.tools" | "agents.tab.runtime" | "agents.tab.memories" | "agents.tab.versions"> = {
   general: "agents.tab.general",
   model: "agents.tab.model",
   knowledge: "agents.tab.knowledge",
   tools: "agents.tab.tools",
   runtime: "agents.tab.runtime",
+  memories: "agents.tab.memories",
   versions: "agents.tab.versions",
+};
+
+const MEMORY_PAGE_SIZE = 50;
+
+const MEMORY_KIND_LABEL: Record<
+  AgentMemoryKind,
+  "agents.memory.kind.FACT" | "agents.memory.kind.PREFERENCE" | "agents.memory.kind.DECISION" | "agents.memory.kind.CONSTRAINT"
+> = {
+  FACT: "agents.memory.kind.FACT",
+  PREFERENCE: "agents.memory.kind.PREFERENCE",
+  DECISION: "agents.memory.kind.DECISION",
+  CONSTRAINT: "agents.memory.kind.CONSTRAINT",
+};
+
+const MEMORY_STATUS_LABEL: Record<
+  AgentMemoryStatus,
+  "agents.memory.status.ACTIVE" | "agents.memory.status.SUPERSEDED" | "agents.memory.status.INVALIDATED"
+> = {
+  ACTIVE: "agents.memory.status.ACTIVE",
+  SUPERSEDED: "agents.memory.status.SUPERSEDED",
+  INVALIDATED: "agents.memory.status.INVALIDATED",
 };
 
 /**
@@ -99,6 +127,13 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const [tab, setTab] = useState<Tab>("general");
   const [notice, setNotice] = useState<string | null>(null);
   /**
+   * Memory browsing state. It lives outside the drafts because nothing here
+   * is edited and submitted — the list is a view, and the two buttons act on
+   * the server immediately.
+   */
+  const [memoryStatus, setMemoryStatus] = useState<AgentMemoryStatus | "">("");
+  const [memoryOffset, setMemoryOffset] = useState(0);
+  /**
    * A READY preflight, valid only for this session generation, this
    * workspace, this agent and the draft as it stood when the check ran.
    * It gates the confirmation panel; it is never a publish permit.
@@ -118,6 +153,15 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     [agentId],
   );
   const loadToolBindings = useCallback((auth: AuthInput) => getAgentToolBindings(auth, agentId), [agentId]);
+  const loadMemories = useCallback(
+    (auth: AuthInput) =>
+      listAgentMemories(auth, agentId, {
+        status: memoryStatus || undefined,
+        limit: MEMORY_PAGE_SIZE,
+        offset: memoryOffset,
+      }),
+    [agentId, memoryStatus, memoryOffset],
+  );
 
   const agent = useWorkspaceData<Agent>(loadAgent, `agent:${scope}`);
   const versions = useWorkspaceData<AgentVersion[]>(loadVersions, `agent-versions:${scope}`);
@@ -133,7 +177,16 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     `agent-tool-bindings:${scope}`,
   );
 
+  // The key carries the filter and page so an in-flight load for the
+  // previous filter cannot write itself back over the new one.
+  const memories = useWorkspaceData<AgentMemoryPage>(
+    loadMemories,
+    `agent-memories:${scope}:${memoryStatus || "ALL"}:${memoryOffset}`,
+    { enabled: tab === "memories" },
+  );
+
   const agentMutation = useWorkspaceMutation(`agent:${scope}`);
+  const memoryMutation = useWorkspaceMutation(`agent-memories:${scope}`);
   const knowledgeMutation = useWorkspaceMutation(`agent-knowledge-bindings:${scope}`);
   const toolMutation = useWorkspaceMutation(`agent-tool-bindings:${scope}`);
   const preflightMutation = useWorkspaceMutation(`agent-preflight:${scope}`);
@@ -180,6 +233,8 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     setMemory({ thread_history_search: false, long_term_memory: false });
     setKnowledgeDraft([]);
     setToolDraft([]);
+    setMemoryStatus("");
+    setMemoryOffset(0);
   }, [sessionId, agentId]);
 
   const loadedAgent = agent.data;
@@ -248,6 +303,8 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const baseList = bases.data ?? [];
   const toolList = tools.data ?? [];
   const versionList = versions.data ?? [];
+  const memoryList = memories.data?.items ?? [];
+  const memoryTotal = memories.data?.total ?? 0;
   const runtimeValuesValid = Object.values(runtime).every((value) => validRuntimeValue(value));
 
   // Preview figures come from the server's resolved spec, never from the
@@ -387,6 +444,21 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     publishMutation.clearError();
     const result = await preflightMutation.run((auth) => preflightAgent(auth, agentId));
     if (result) setPreflight(result);
+  }
+
+  /**
+   * Both overrides reload rather than patching the row in place: invalidating
+   * can change which page a memory falls on, and reactivating can be refused
+   * by the backend when an identical memory has since become active.
+   */
+  async function overrideMemory(memoryId: string, next: "INVALIDATE" | "REACTIVATE") {
+    setNotice(null);
+    const result = await memoryMutation.run((auth) =>
+      next === "INVALIDATE"
+        ? invalidateAgentMemory(auth, agentId, memoryId)
+        : reactivateAgentMemory(auth, agentId, memoryId),
+    );
+    if (result) memories.reload();
   }
 
   async function runPublish() {
@@ -908,6 +980,135 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               </button>
             </div>
           </form>
+        </Panel>
+      )}
+
+      {tab === "memories" && (
+        <Panel ariaLabel={t("agents.tab.memories")} title={t("agents.tab.memories")}>
+          <p className="state-hint">{t("agents.memory.hint")}</p>
+          {!memory.long_term_memory && <p className="state-hint">{t("agents.memory.disabledHint")}</p>}
+
+          <div className="form-grid">
+            <label>
+              {t("agents.memory.statusFilter")}
+              <select
+                value={memoryStatus}
+                onChange={(event) => {
+                  setMemoryStatus(event.target.value as AgentMemoryStatus | "");
+                  setMemoryOffset(0);
+                }}
+              >
+                <option value="">{t("agents.memory.statusAll")}</option>
+                <option value="ACTIVE">{t("agents.memory.status.ACTIVE")}</option>
+                <option value="SUPERSEDED">{t("agents.memory.status.SUPERSEDED")}</option>
+                <option value="INVALIDATED">{t("agents.memory.status.INVALIDATED")}</option>
+              </select>
+            </label>
+          </div>
+
+          <InlineError error={memoryMutation.error} fallback={t("errors.requestFailed")} />
+          {memories.error && (
+            <ErrorState
+              code={memories.error.code}
+              message={memories.error.message || t("errors.loadMemories")}
+              hint={errorHintKey(memories.error) ? t(errorHintKey(memories.error)!) : undefined}
+              onRetry={memories.reload}
+            />
+          )}
+          {memories.loading && !memories.error && <LoadingState />}
+          {memories.loaded && !memories.error && memoryList.length === 0 && (
+            <EmptyState title={t("agents.memory.empty")} hint={t("agents.memory.emptyHint")} />
+          )}
+
+          {memoryList.length > 0 && (
+            <>
+              <div className="data-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t("agents.memory.content")}</th>
+                      <th scope="col">{t("agents.memory.kindColumn")}</th>
+                      <th scope="col">{t("agents.memory.statusColumn")}</th>
+                      <th scope="col">{t("agents.memory.salience")}</th>
+                      <th scope="col">{t("agents.memory.lastUsed")}</th>
+                      <th scope="col">{t("agents.memory.source")}</th>
+                      <th scope="col">{t("common.actions")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {memoryList.map((item) => (
+                      <tr key={item.id}>
+                        <td data-label={t("agents.memory.content")}>{item.content}</td>
+                        <td data-label={t("agents.memory.kindColumn")}>
+                          {t(MEMORY_KIND_LABEL[item.kind])}
+                        </td>
+                        <td data-label={t("agents.memory.statusColumn")}>
+                          {t(MEMORY_STATUS_LABEL[item.status])}
+                        </td>
+                        <td data-label={t("agents.memory.salience")}>{item.salience}</td>
+                        <td data-label={t("agents.memory.lastUsed")}>
+                          {item.last_used_at ? formatDateTime(item.last_used_at) : "—"}
+                        </td>
+                        <td data-label={t("agents.memory.source")}>
+                          {/* The run that taught it. This is the whole point of
+                              keeping provenance: "why does it think that". */}
+                          {item.source_run_id ? (
+                            <Link href={`/runs/${item.source_run_id}`}>
+                              {t("agents.memory.viewRun")}
+                            </Link>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td data-label={t("common.actions")}>
+                          {item.status === "INVALIDATED" ? (
+                            <button
+                              type="button"
+                              className="button button-ghost"
+                              disabled={memoryMutation.pending}
+                              onClick={() => overrideMemory(item.id, "REACTIVATE")}
+                            >
+                              {t("agents.memory.reactivate")}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="button button-ghost"
+                              disabled={memoryMutation.pending || item.status === "SUPERSEDED"}
+                              onClick={() => overrideMemory(item.id, "INVALIDATE")}
+                            >
+                              {t("agents.memory.invalidate")}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="button button-ghost"
+                  disabled={memoryOffset === 0}
+                  onClick={() => setMemoryOffset((current) => Math.max(0, current - MEMORY_PAGE_SIZE))}
+                >
+                  {t("agents.memory.previous")}
+                </button>
+                <button
+                  type="button"
+                  className="button button-ghost"
+                  disabled={memoryOffset + memoryList.length >= memoryTotal}
+                  onClick={() => setMemoryOffset((current) => current + MEMORY_PAGE_SIZE)}
+                >
+                  {t("agents.memory.next")}
+                </button>
+                <span className="state-hint">
+                  {t("agents.memory.total")}: {memoryTotal}
+                </span>
+              </div>
+            </>
+          )}
         </Panel>
       )}
 

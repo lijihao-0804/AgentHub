@@ -154,3 +154,39 @@ class AgentPublishResponse(BaseModel):
     version_number: int
     resolved_spec_hash: str = Field(min_length=64, max_length=64)
     created_at: datetime
+
+
+class AgentMemoryResponse(BaseModel):
+    """What an agent remembers, as a human is allowed to see it.
+
+    ``provenance`` is included on purpose: the first question anyone asks about
+    a memory is "where did this come from", and answering it from the run and
+    thread ids is the difference between a feature people trust and one they
+    turn off. Nothing here is a secret -- the content is a sentence the agent
+    was told, not a credential.
+    """
+
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    agent_id: UUID
+    thread_id: UUID | None
+    source_run_id: UUID | None
+    content: str
+    kind: Literal["FACT", "PREFERENCE", "DECISION", "CONSTRAINT"]
+    status: Literal["ACTIVE", "SUPERSEDED", "INVALIDATED"]
+    superseded_by_id: UUID | None
+    salience: int
+    provenance: dict[str, Any]
+    expires_at: datetime | None
+    last_used_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class AgentMemoryListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[AgentMemoryResponse]
+    total: int
