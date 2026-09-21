@@ -440,6 +440,29 @@ ThreadTurn（:76）                       一次性
 这个设计的收益是：不需要维护两份真相。
 消息内容本来就在事件流里，再存一份 Message 表就会出现两者不一致的可能。
 
+先读模型文件开头那段 docstring，它把这个对象的定位说死了：
+
+```python
+# packages/threads/models.py:1-7
+"""Persistence for threads and their turns.
+
+A thread owns no execution semantics. It holds no checkpoint, no approval, no
+model binding and no tool binding; it only records that a sequence of runs
+belongs to one piece of a user's work. Everything that decides how a run
+behaves still lives on the AgentVersion the run was bound to.
+"""
+```
+
+> 会话不拥有任何执行语义。它没有检查点、没有审批、没有模型绑定、没有工具绑定；
+> 它只是记录「这一串 Run 属于用户的同一件事」。
+
+**这是一条可以拿来做判断的规则**：以后看到任何一个「要不要把某个状态放到 Thread 上」
+的设计问题，答案几乎都是不要——放上去就等于给 Thread 造了一套执行语义，
+而 Run 就不再是可复现单元了。
+对照着看 `kind` 字段的注释（`models.py:62-63`）：
+「A routing label only: no runtime behaviour branches on it.」
+连这个字段都被明确声明为「只是给前端分流用的，运行时不会 if 它」。
+
 ### 为什么 Thread 绑 agent_id 而不是 version
 
 因为会话是**长期**的，版本是**每轮**的。
@@ -453,7 +476,156 @@ ThreadTurn（:76）                       一次性
 已经跑过的 Run 仍然指向 v3，**可解释性不受影响**。
 如果 Thread 绑死 version，那发新版本就得新开会话，用户体验会很荒谬。
 
-`resolve_agent_version`（`threads/service.py:213`）每轮解析一次。
+`resolve_agent_version`（`threads/service.py:213`）每轮解析一次，
+它的 docstring 把利弊讲得比我清楚：
+
+> Resolving at submission time is what lets a long thread pick up a newer
+> published version, and what keeps the run — not the thread — the
+> reproducible unit.
+
+注意解析规则本身（`service.py:226-234`）：按 `version_number` 倒序取第一条。
+**「当前版本」不是一个存在数据库里的字段，是一个查询。**
+没有 `agents.current_version_id` 这种列，也就没有「指针和实际版本对不上」的可能。
+
+### ★ 同一个问题提交两次，会跑两次吗
+
+这是 Thread 这一节唯一真正复杂的地方，值得单独讲。
+
+`open_turn`（`service.py:244`）在**执行任何东西之前**先把问题落库，
+它的 docstring 说明了为什么：
+
+> Records the question before anything is executed. Returns ``None`` when
+> ``client_token`` has already been used in this thread: a retried submission
+> must find the turn it already created rather than turn one follow-up
+> question into two runs.
+
+防重复靠的是两条唯一约束（`models.py:94-95`）：
+
+```python
+UniqueConstraint("thread_id", "sequence", name="uq_thread_turns_sequence"),
+UniqueConstraint("thread_id", "client_token", name="uq_thread_turns_client_token"),
+```
+
+然后是这段——**本节最值得抄下来的十行**：
+
+```python
+# packages/threads/service.py:284
+try:
+    await session.commit()
+except IntegrityError:
+    # Either two retries raced on the token, or two tabs raced on
+    # the sequence. Both are the caller asking again, not an error.
+    await session.rollback()
+    return None
+```
+
+> 要么是两次重试在 token 上撞了，要么是两个标签页在 sequence 上撞了。
+> **两种都是「调用方又问了一次」，不是错误。**
+
+看清楚这里有**三层**，而不是一层：
+
+| 层 | 代码 | 拦住什么 |
+|---|---|---|
+| 提前查 token | `service.py:266-269` | 常规重试（第二次点提交） |
+| `sequence` 唯一约束 | `models.py:94` | 两个标签页同时提交（没带 token 也拦得住） |
+| `IntegrityError` → `return None` | `service.py:286-290` | 上面两层之间的竞态窗口 |
+
+第一层是快路径，第二、三层才是正确性保证。
+**只写第一层是错的**——「先查再插」之间永远有一个窗口，
+只有数据库约束能关掉它。这和第 2 章 §12 写动作幂等那三层是同一种思路。
+
+`return None` 之后，`submit_turn`（`:334-341`）用 `token_turn` 把**已经存在的那一轮**
+捞回来返回，并打上 `reused=True`。
+**调用方拿到的是第一次那个 run_id，不是一个空响应，也不是一个新 Run。**
+
+### 历史是怎么喂给模型的
+
+读 `packages/threads/context.py`，98 行，一次读完。文件头写着它**故意不做什么**：
+
+```python
+# packages/threads/context.py:1-7
+"""The adapter that supplies thread history to the runtime.
+
+It reads only finished turns, so the same run recomputes the same context after
+a durable resume. There is no summarization, no embedding and no memory
+extraction here on purpose: history is the earlier turns, verbatim and bounded,
+and anything cleverer would be a new abstraction the runtime cannot explain.
+"""
+```
+
+> 没有摘要、没有向量化、没有记忆抽取，**这是故意的**：
+> 历史就是先前那几轮的原文，有上限；任何更聪明的做法都会变成一个
+> 运行时解释不了的新抽象。
+
+查询条件有五个，每一个都对应一句话（`context.py:59-66`）：
+
+```python
+ThreadTurn.agent_run_id.is_not(None),        # 还没绑 Run 的轮次不算数
+ThreadTurn.agent_run_id != before_run_id,    # 排掉「我自己」
+AgentRun.status == _SUCCEEDED,               # 失败的轮次不进历史
+AgentRun.final_output.is_not(None),          # 没有输出的不进历史
+```
+
+**「只读已完成的轮次」是确定性的来源**：崩溃后重跑、审批唤醒后续跑，
+组装出来的历史是同一份。如果把 RUNNING 的轮次也算进去，
+同一个 Run 两次组装就可能得到不同的上下文。
+
+Artifact 不进历史原文，只留一行引用（`:25-38`）：
+
+```python
+def _artifact_ref(artifact: Artifact) -> str:
+    """One line standing in for a whole artifact.
+
+    Twenty abstracts would eat the budget to tell the model something one line
+    already tells it: that a search happened, and roughly what it found. A
+    follow-up that really needs the contents searches again.
+    """
+```
+
+> 二十篇摘要会吃掉预算，只为了告诉模型一行字就能说清的事：
+> 发生过一次检索，大致找到了什么。真的需要内容的追问，会再检索一次。
+
+最后看运行时这一侧（`runtime.py:1337-1364`）：
+
+```python
+thread_id = getattr(self.run, "thread_id", None)
+provider = self.service.thread_context_provider
+if thread_id is None or provider is None:
+    return [], None
+```
+
+**`thread_id IS NULL` 就是 Playground。** 这一行是整个会话功能对单次调试运行的
+全部影响——没有会话就直接返回空，后面的逻辑一行都不执行。
+这也是为什么可以确定「Playground 的行为和加会话之前逐字节一致」。
+
+窗口裁剪发生在 `context.py:71` 的 `rows[-max_turns:]`，
+而被裁掉了多少会被记进 metadata（`runtime.py:1359-1361`）：
+
+```python
+"turns_available": conversation.turns_available,
+"turns_included": len(conversation.turns),
+"turns_dropped_by_window": max(conversation.turns_available - len(conversation.turns), 0),
+```
+
+对应 `prepare` 那段 docstring 的最后一句：
+
+> the PREPARE step records how much was dropped so the answer to
+> "why did it forget" is a lookup rather than a guess.
+
+> **「它为什么忘了」应该是一次查询，而不是一次猜测。**
+> 这句话可以直接当面试答案用。
+
+注意这里有**两层裁剪，作用在不同维度**：
+`max_turns` 按轮数裁（`thread_context_max_turns`，`runtime.py:209`），
+第 2 章 §4 讲的上下文预算按 token 裁。
+**先按轮数丢，再按 token 丢**，两者互不知道对方存在。
+
+### 自检
+
+1. 用户在两个标签页同时提交同一个问题，会产生几条 `ThreadTurn`？靠什么保证？
+2. 第 3 轮失败了，第 4 轮的历史里有没有第 3 轮？
+3. 一个 Run 的 `thread_id` 是 NULL，它会去读会话历史吗？
+4. 会话里跑过一次文献检索产生了 Artifact，下一轮模型看到的是什么？
 
 ---
 

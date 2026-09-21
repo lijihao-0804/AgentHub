@@ -26,6 +26,11 @@
 5. 人点「批准」之后，是**新开一个 Run**，还是在原 Run 上继续？
 6. 恢复之后，模型需要重新推理一遍前面四次工具调用吗？
 7. 如果在「等待审批」的时候把 API 进程杀掉，Run 会怎样？
+8. 人点了**拒绝**，这次 Run 是失败了，还是继续跑？
+9. 模型叫了一个不存在的工具名，Run 会失败吗？
+10. 整张图里**只有一个节点有三个出口**，是哪个？依据是什么？
+
+后三个是这一章展开讲的重点，也是最容易想当然的三个。
 
 ---
 
@@ -157,19 +162,120 @@ NEEDS_ATTENTION · CANCEL_REQUESTED · CANCELLED
 | **写了哪张表** | `agent_run_events` |
 | **下一步为什么去那里** | 路由函数 `after_prepare`（`runtime.py:2300`）：有 `failure_code` 就去 `finish`，否则去 `model`。prepare 失败的典型原因是**声明哈希对不上** |
 
-prepare 里做了一件容易被忽略的事（`runtime.py:974` 的校验被它触发）：
+### prepare 到底做了几件事？四件，顺序不能换
 
+把 `runtime.py:1366-1430` 整段打开，你会发现它像一张**登机口的检查清单**：
+在花第一分钱之前，把所有「这次执行的前提」验一遍。
+
+#### 第 1 件：三道完整性校验（`:1376` → `:1401`）
+
+```python
+# :1376  版本还在吗（而且是本 workspace 的）
+if version is None:
+    raise AgentHubError("AGENT_VERSION_NOT_FOUND", ..., 404)
+
+# :1380  声明本身有没有被改过
+if canonical_json_hash(version.resolved_spec) != version.resolved_spec_hash:
+    raise AgentHubError("AGENT_VERSION_INTEGRITY_ERROR", ..., 422)
+
+# :1386  这次 Run 当初记下的哈希，和版本现在的哈希一致吗
+if (self.run.resolved_spec_hash is not None
+        and self.run.resolved_spec_hash != version.resolved_spec_hash):
+    raise AgentHubError("AGENT_VERSION_INTEGRITY_ERROR", ..., 422)
+
+# :1396  schema 版本号和 spec 里自述的版本号一致吗
+if version.spec_schema_version != version.resolved_spec.get("spec_schema_version"):
+    raise AgentHubError("AGENT_VERSION_INTEGRITY_ERROR", ..., 422)
 ```
-重算 canonical_json_hash(resolved_spec)  vs  agent_versions.resolved_spec_hash
-对不上 → failure_code = AGENT_VERSION_INTEGRITY_ERROR
-```
+
+**四个 if，值得逐条想清楚它各自防的是什么**，因为它们不是重复的：
+
+| 检查 | 防的是 | 什么时候真的会触发 |
+|---|---|---|
+| `:1376` | 跨 workspace 读 / 版本被删 | 工单里带了别人的 version_id |
+| `:1380` | **声明被旁路修改** | 有人手工 `UPDATE resolved_spec` |
+| `:1386` | **Run 中途换了声明** | Run 创建后版本行被替换（恢复一次长时间挂起的 Run 时最有可能） |
+| `:1396` | spec 内外自述不一致 | 迁移写了一半、手工造数据 |
+
+第 3 条尤其值得注意：它比较的是 **Run 上冻结的哈希** 和 **版本行当前的哈希**。
+这一列（`agent_runs.resolved_spec_hash`，`models.py:314`）存在的唯一理由就是这个比较。
+**一次审批可以挂几个小时**，中间世界会变；这条检查保证「恢复的这次 Run，
+和当初被批准的那次 Run，跑的是同一份声明」。
 
 **这就是 01 章 §2 那个哈希的兑现点。** 发布时算一次，每次执行前校验一次。
 不是防止有人改，是**保证改了会被发现**。
+03 章 §11 会让你亲手把 `resolved_spec` 改掉，然后看这条 if 在**模型被调用之前**拦住它。
+
+#### 第 2 件：解析成不可变的 spec（`:1395`）
+
+```python
+spec = parse_frozen_agent_spec(version.resolved_spec, workspace_id=workspace_id)
+```
+
+从这一行往后，运行时**不再读数据库里的 agent 配置**。
+system prompt、模型档案、retrieval 配置、runtime 上限，全都从这个对象里拿。
+「跑到一半有人改了 Agent」这件事在物理上不可能影响本次 Run——
+不是因为加了锁，是因为**根本没有第二次读取**。
+
+#### 第 3 件：列出这次能用的工具（`:1402`）
+
+```python
+definitions = await PublishedToolCatalog(session).list(
+    workspace_id=workspace_id, agent_version_id=version.id)
+tool_definitions = {definition.identity: definition for definition in definitions}
+```
+
+注意参数：查的是 **agent_version_id**，不是 agent_id。
+工具清单是**版本级**的，跟着 `resolved_spec` 一起被冻住。
+这个字典后面会被三个节点用到——`model` 拿它生成工具声明，
+`policy` 拿它做治理判定，`action_execute` 拿它找执行器。
+**一个来源，三处消费，所以三处看到的一定是同一份。**
+
+#### 第 4 件：拼 messages，而且顺序是有约束的
+
+```python
+messages = [
+    ModelMessage(role="system", content=_RUNTIME_POLICY),   # 运行时自己的规矩
+    ModelMessage(role="system", content=spec.system_prompt), # 这个 Agent 的人设
+    *history,                                                # 线程历史
+    ModelMessage(role="user", content=self.run.input_text),  # 本轮问题
+]
+```
+
+上面那段注释（`:1407-1410`）说得很直接，**这段注释比代码重要**：
+
+> The two system messages stay first and the current task stays last. That
+> ordering is not cosmetic: the budget categorizer reads position, and history
+> placed anywhere else would either become unevictable or displace the question
+> being asked.
+
+> 两条 system 消息必须在最前，当前任务必须在最后。这个顺序不是排版：
+> 预算分类器是**按位置**判断消息类别的，历史放在别处，
+> 要么变得不可驱逐，要么会把「正在问的问题」挤掉。
+
+也就是说，**上下文预算是靠位置来认类别的**（见 §9）。
+改这个列表的顺序，不会报错，但会静默地改变「上下文不够时先扔什么」。
+这是全项目里少数几处「顺序即语义」的地方之一，所以它被注释保护了起来。
 
 历史注入在 `runtime.py:1324` `_thread_history`。
 **打断点看它的返回值**——只有用户输入和最终回答，没有中间工具结果。
 这一条决定了后面模型的行为（见 §9）。
+
+#### prepare 的失败是怎么表达的
+
+整个函数包在三层 `except` 里（`:1431` / `:1434` / `:1440`），三层都**不抛出**：
+
+```python
+except AgentHubError as error:
+    await self.step("PREPARE", "FAILED", {"error_code": error.code})
+    return {"failure_code": error.code}          # ← 返回，不是 raise
+```
+
+数据库异常单独归成 `AGENT_PREPARE_DATABASE_FAILURE`，其余兜底成 `AGENT_PREPARE_FAILED`。
+**为什么要把异常翻译成返回值？** 因为图的失败必须走 `after_prepare → finish`，
+这样收尾逻辑只有一份（详见 §13）。
+一个节点如果真的抛出去了，收尾就落到 LangGraph 外面，
+「写终态 / 发 run.finished / 关流」这三件事就得在第二个地方再写一遍。
 
 ---
 
@@ -225,16 +331,75 @@ if not usage_records:
 | **写了哪张表** | `agent_run_events`（`tool.requested` × 4） |
 | **下一步为什么去那里** | `after_proposal`（`:2310`）：只看 `failure_code`。这个节点唯一会失败的原因是**预算**，不是内容 |
 
-两道闸在这里：
+这个节点把「模型吐出来的一坨东西」变成「运行时能处理的结构」，做四件事。
+
+#### ① 先确认模型真的说了话（`:1695`）
+
+```python
+AGENT_MODEL_EMPTY_RESPONSE
+```
+
+既没有 `final_output` 也没有 `tool_calls` —— 这是一种真实存在的模型故障，
+而且如果不显式拦，它会表现成「Run 成功了但什么也没做」。
+**这是全章第一个「沉默的成功比失败更糟」的例子，后面还会遇到两次。**
+
+#### ② 给每个调用配一个稳定 id（`:1706`）
+
+```python
+f"call-{state['model_round_count']}-{index}"
+```
+
+供应商**应该**返回 `tool_call_id`，但不是所有供应商都返回，也不是每次都返回。
+没有 id 就没法把工具结果配回对应的调用。
+所以运行时准备了一个兜底：`轮次 + 序号`。
+
+为什么这个兜底是安全的？因为它只需要在**一次 Run 的一轮之内**唯一，
+而 `(model_round_count, index)` 天然满足。
+**注意它不是随机 UUID**——随机值会让同一次 Run 的重放产生不同的 id，
+而这个 Run 是要被 checkpoint 反复恢复的。
+
+#### ③ 每个调用都发 `tool.requested`，**包括非法的那些**（`:1717-1720`）
+
+这一点容易读漏，但它很重要：参数解析失败的调用**也会**发事件。
+
+如果只给合法调用发事件，那么事后看事件流，你会看到
+「模型提议了 3 个工具、执行了 3 个」，完全看不出它其实提议了 4 个、有 1 个是坏的。
+**「模型提了什么」和「运行时做了什么」是两个问题，事件流必须能分别回答。**
+
+#### ④ 两道预算闸
 
 ```
-runtime.py:1724   max_identical_calls  默认 2   同一个工具+同一组参数最多提两次
-runtime.py:1732   max_tool_calls       默认 12  整个 Run 的总量
+runtime.py:1722   算签名     canonical_json_hash({"tool": name, "arguments": 归一化参数})
+runtime.py:1729   max_identical_calls  默认 2   同一个工具+同一组参数最多提两次
+runtime.py:1735   max_tool_calls       默认 12  整个 Run 的总量
 ```
 
 `max_identical_calls` 拦的是**模型打转**：
 工具返回了它看不懂的东西，它就再调一次一模一样的，无限循环。
 限制设成 2 而不是 1，是因为「重试一次」是合理行为，「重试三次」不是。
+
+判定「相同」用的是**归一化后的参数哈希**，不是字符串：
+`{"a":1,"b":2}` 和 `{"b":2,"a":1}` 算同一个调用。
+这套归一化跟审批的幂等键用的是同一套（`packages/approvals/contracts.py:53`），
+因为两边问的是同一个问题：**这两次是不是同一件事。**
+
+#### 这个节点输出了两个列表，不是一个（`:1749-1750`）
+
+```python
+return {"proposed_tool_calls": ..., "pending_tool_calls": ...}
+```
+
+刚开始两者内容相同，但它们的**命运不同**：
+
+- `pending_tool_calls` 会被 `policy` **重写**（只留放行的），再被 `read_execute` 消费掉。
+- `proposed_tool_calls` **一路不变**，一直活到 `observation`。
+
+为什么要留一份不变的？因为 `observation` 必须给**每一个被提议过的调用**
+都往 `messages` 里补一条 tool 消息——包括被 policy 拒掉的、参数非法的、审批被否的。
+少补一条，模型那边就会看到一个「有 tool_call 但没有对应结果」的对话，
+绝大多数供应商会直接报错。
+
+**记住这一对列表**，§7 和 §9 都靠它。
 
 ---
 
@@ -272,6 +437,52 @@ def decide(definition: ToolDefinition) -> ToolPolicyDecision:
    所以「改治理属性」= 新建一个 revision，不是 `UPDATE tools SET effect=...`。
 
 `query_metrics` 是 `effect=READ, approval_policy=NEVER` → `ALLOW_AUTO` × 4。
+
+### 还有一个机制在这里，本案例没触发，但你必须知道：`pre_observations`
+
+`policy` 除了「放行 / 要审批」之外，还有第三种处理方式：
+**直接给出一个失败结果，连执行节点都不去。** 它攒在一个叫 `pre_observations` 的字典里。
+
+三种情况会进这个字典：
+
+```python
+# :1766  参数解析失败（tool_proposal 标了 invalid_code）
+pre_observations[call_id] = ToolResult.failure(
+    "TOOL_ARGUMENT_INVALID", "The tool arguments are invalid.")
+
+# :1772  模型叫了一个这个版本没发布的工具
+pre_observations[call_id] = ToolResult.failure(
+    "UNKNOWN_TOOL", "The requested tool is not published for this agent.")
+
+# :1920  人点了「拒绝」
+pre_observations[call_id] = ToolResult.failure(
+    "TOOL_APPROVAL_DENIED", "The action was not approved.")
+```
+
+三行后面都跟着 `continue`——**不是 `return`**。
+
+**这个区别是这一节的重点。** 请对照着想清楚：
+
+| | 进 `pre_observations` | 写 `failure_code` |
+|---|---|---|
+| 例子 | 参数非法 / 工具不存在 / 审批被拒 | `TOOL_APPROVAL_NOT_AVAILABLE`（`:1787`） |
+| Run 会怎样 | **继续跑** | 直接去 `finish`，Run 结束 |
+| 模型会知道吗 | 会，作为一条失败的 tool 结果喂回去 | 不会，它没有下一轮了 |
+| 判断依据 | 这是**模型犯的错**，模型可以改 | 这是**系统能力缺失**，模型改不了 |
+
+最后一行是全部的道理所在：
+
+- 模型叫错了工具名 → 告诉它「没这个工具」，它自己会换一个。**这是正常对话，不是事故。**
+- 人拒绝了这次回滚 → 告诉它「没批准」，它可以改成先发个通知。**拒绝是一个答案，不是一个错误。**
+- 系统根本没有审批通道 → 模型再聪明也变不出来一个。**这必须停。**
+
+**「审批被拒不等于 Run 失败」这一条特别值得记住。**
+很多实现会把「人点了拒绝」直接做成 Run 失败，那等于告诉用户
+「你不同意，所以这次对话作废了」。而这里的做法是：
+**把拒绝当成一条信息还给模型，让它带着这条信息继续想别的办法。**
+
+这几条 `pre_observations` 会一路带到 `observation` 节点，
+在那里和真正执行出来的结果**混在一起**，按 `proposed_tool_calls` 的顺序拼回 messages（见 §9）。
 
 ---
 
@@ -321,9 +532,91 @@ WHERE run_id = '<run_id>' ORDER BY created_at;
 | **写了哪张表** | `agent_run_events` |
 | **下一步为什么去那里** | `after_observation`（`:2320`）：回 `model`。这就是那个循环 |
 
+### 这个节点的循环，是全章最值得抄一遍的十行
+
+```python
+# runtime.py:2214
+for call in state.get("proposed_tool_calls", []):
+    result = pre.get(call["tool_call_id"],
+                     executed.get(call["tool_call_id"]))
+    if result is None:
+        result = ToolResult.failure("TOOL_EXECUTION_FAILED",
+                                    "The tool execution failed.")
+```
+
+三件事一起发生：
+
+1. **遍历的是 `proposed_tool_calls`**，不是 `pending_tool_calls`。
+   也就是 §6 说的那份「一路不变」的清单。
+   **每一个被模型提议过的调用，都保证有一条结果回去**，一条都不能少。
+2. **先查 `pre_observations`，再查 `executed_observations`。**
+   §7 那三种「模型犯的错」和真正执行出来的结果，在这里汇合成一条统一的时间线。
+   模型看到的是同一种格式的 tool 消息——它不需要知道哪条是被 policy 拦的、哪条是真跑出来的。
+3. **两个字典都没有，就兜底一条 `TOOL_EXECUTION_FAILED`。**
+   这个兜底看着像防御性编程，其实是有真实触发路径的——04 章 Lab 2 末尾那个
+   「同一轮里既有审批又有 READ」的场景，READ 那条就会掉进这里。
+
+### 终止错误：只有四个
+
+```python
+# runtime.py:97
+_TERMINAL_TOOL_ERRORS = frozenset({
+    "TOOL_APPROVAL_NOT_AVAILABLE",
+    "TOOL_REVISION_INTEGRITY_ERROR",
+    "AGENT_VERSION_INTEGRITY_ERROR",
+    "AGENT_VERSION_MODEL_BINDING_INVALID",
+})
+```
+
+工具失败的 code 有几十种，但只有这四个会让 Run **就地结束**。
+看一眼它们的共同点：**四个全是「系统自身的前提出问题了」**——
+审批通道没了、工具声明被改了、Agent 声明被改了、模型绑定非法。
+
+而 `TOOL_ARGUMENT_INVALID`、`UNKNOWN_TOOL`、`TOOL_APPROVAL_DENIED`、
+`ACTION_NOT_WRITE`、各种业务报错，**一个都不在里面**。
+这些都是「可以告诉模型，让它换个做法」的事情。
+
+**这个 frozenset 是整个失败策略的浓缩。** 想清楚一个 code 该不该进去，
+问题永远是同一个：*告诉模型有用吗？* 有用就不进，没用就进。
+
+### 失败码的优先级（`:2251-2255`）
+
+返回值里有一行带长注释的表达式，值得单独看：
+
+```python
+"failure_code": terminal_code or state.get("failure_code"),
+```
+
+> A code the execution node already set outranks this one. Reaching here with
+> one set means the run is already over — an unconfirmed action, a lost claim —
+> and blanking it would turn a run that needs a human into a run that quietly
+> looks fine.
+
+> 执行节点已经设过的 code 优先级更高。带着一个 code 走到这里，
+> 说明这次 Run 已经结束了——一个没确认的动作、一个抢丢的 claim——
+> 把它抹掉，就会让一个需要人介入的 Run 看起来一切正常。
+
+「静默地看起来正常」是这个项目反复防的同一件事。
+在 §5 是成本测不出来，在 §6 是空响应，在这里是被覆盖的失败码。
+**三个地方，同一个价值判断：宁可显式地失败，不要隐式地成功。**
+
+### 上下文预算
+
 写回 `messages` 时会过一遍上下文预算（`runtime.py:1625` → `context_budget.py:321`）。
 `max_tool_result_tokens` 默认 4000。超了就截断，并在事件里记一份**准入报告**
 ——不是静默丢弃。04 章 Lab 6 会让你把它调到 200 看会发生什么。
+
+注意预算是**在这里、按每条工具结果**算的：
+
+```python
+# runtime.py:2220
+budget = ContextBudgetConfig(**state["runtime"]["context_budget"])
+payload = _bounded_tool_result(result, max_tool_result_tokens=budget.max_tool_result_tokens)
+```
+
+所以「一个超大的工具结果」不会挤掉历史，它先被自己那条上限削平。
+而 §4 提到的**按位置分类**，处理的是另一个层面——整体不够时先扔谁。
+**两层预算，一层管单条，一层管全局。**
 
 同一个地方还会剥掉 payload 自带的 `trust` / `data_trust` 键
 （`context_budget.py:924`）。工具说自己可信，进不了上下文。
@@ -494,6 +787,78 @@ SELECT count(*) FROM agent_run_events WHERE agent_run_id = '<run_id>';
 
 数字只增不减，且没有重复的 `tool.completed`。
 
+### 11.1 恢复不是「继续跑」，是「先核对身份再继续跑」
+
+这是本章最容易被跳过、但面试最容易被追问的一段。
+
+`interrupt()` 那一行（`:1855`）是**有返回值**的。
+挂起时它抛出；恢复时，LangGraph 从 checkpoint 重放到这一行，
+把 `resume_command` 里的 payload 作为**返回值**交给它。
+所以代码读起来像是「这个函数睡了三个小时然后醒了」。
+
+醒来之后，`policy` 做的第一件事不是执行，是**连查四道**：
+
+```python
+# :1871  ① 传回来的 approval_id 是个合法 UUID 吗
+except (TypeError, ValueError):
+    raise AgentHubError("APPROVAL_RESUME_MISMATCH", "...identity is invalid.", 409)
+
+# :1878  ② 它和当初挂起时那个 approval 是同一个吗
+if approval_id != approval.id:
+    raise ... "...does not match the durable interrupt."
+
+# :1884  ③ logical_action_id 对得上吗（允许不传，但传了就得对）
+if resume.get("logical_action_id") not in {None, approval.logical_action_id}:
+    raise ... "...logical action does not match the durable interrupt."
+
+# :1894  ④ 从数据库重新读出来那一行，四个绑定全部对得上吗
+if (current.run_id != self.run.id
+        or current.agent_version_id != self.run.agent_version_id
+        or current.tool_identity != definition.identity
+        or current.tool_revision_id != definition.revision_id):
+    raise ... "...binding does not match the durable tool request."
+```
+
+四道都是 **409 `APPROVAL_RESUME_MISMATCH`**。
+
+**为什么要查四次？一次不够吗？**
+
+因为这四道防的是四件不同的事，按「攻击面」从外到内排：
+
+| 道 | 数据来自哪 | 防什么 |
+|---|---|---|
+| ① | 恢复调用的入参 | 垃圾输入 |
+| ② | 入参 vs **checkpoint 里的记忆** | 拿 B 的审批去恢复 A 的中断 |
+| ③ | 入参 vs checkpoint | 幂等身份被掉包 |
+| ④ | **数据库当前行** vs Run 和工具定义 | 挂起期间世界变了：版本换了、工具换了 revision |
+
+第 ④ 道最有意思：前三道比的都是「你说的」和「我记得的」，
+第 ④ 道比的是「数据库现在的事实」和「我记得的」。
+**一次审批可能挂几个小时**，这几个小时里 Agent 可能被重新发布、
+工具可能有了新 revision。第 ④ 道保证：**人批准的那个动作，
+和马上要执行的这个动作，是同一个动作**——同一个 Run、同一个版本、
+同一个工具身份、同一个工具 revision。
+
+少了这一道，就会出现「人看着旧卡片点了同意，系统执行了新定义」——
+这是审批系统里最严重的一类漏洞，因为它**看起来完全正常**。
+
+### 11.2 醒来发现还是 PENDING 怎么办
+
+```python
+# :1914
+if current.decision_status == ApprovalDecisionStatus.PENDING:
+    return {"approval_required": {...}}
+```
+
+恢复被触发了，但审批还没人做决定——比如有人直接调了 `resume`，
+或者两个请求撞在一起、另一个先跑完了。
+这时**不是报错，也不是当成拒绝**，而是原样返回「还需要审批」，
+Run 回到 `WAITING_APPROVAL` 继续等。
+
+**「没决定」和「拒绝」是两种状态，不能合并。**
+合并的后果是：一次误触的 resume 会把一个等待中的审批变成一次拒绝，
+而那个拒绝在审计记录里看起来和人真的点了拒绝一模一样。
+
 ---
 
 ## 12. 步骤 ⑭：action_execute
@@ -528,6 +893,66 @@ SELECT count(*) FROM agent_run_events WHERE agent_run_id = '<run_id>';
 两个人同时点批准，两个请求都会尝试 claim，数据库保证只有一个拿到返回行。
 不需要分布式锁，不需要 Redis。
 
+### 12.1 但在 claim 之前，还有一道「已经跑过了」的短路
+
+把 `runtime.py:1976` 打开：
+
+```python
+if approval.execution_status in {SUCCEEDED, FAILED, UNKNOWN_OUTCOME}:
+    result = _approval_tool_result(approval)
+    executed[call["tool_call_id"]] = result
+    ...
+    continue      # 直接用已有结果，不再执行一次
+```
+
+**这是幂等的最后一层。** 想象这个场景：
+动作执行成功了，回写数据库也成功了，**然后进程在写事件之前崩了**。
+恢复时图会从 checkpoint 重放到 `action_execute`。
+如果没有这个短路，回滚就会被执行第二次。
+
+三层保护叠在一起，各管一段：
+
+| 层 | 在哪 | 管的是 |
+|---|---|---|
+| `logical_action_id` 唯一约束 | `create_or_get` | 同一次提议不会产生两条审批 |
+| 终态短路（`:1976`） | `action_execute` 开头 | 已经有结论的，不再执行 |
+| 原子 claim（`:1993`） | 紧接其后 | 同时到达的两个执行者，只有一个赢 |
+
+抢输的那个还会**再读一次**（`:1997`）：如果对方已经跑完了，就直接用对方的结果；
+只有在对方 claim 了但还没跑完的情况下，才报 `ACTION_CLAIM_LOST` + `NEEDS_ATTENTION`。
+**「输了」和「出错了」被区分开了**——输给一个已经完成的执行不算错。
+
+### 12.2 本地动作和远端动作的处理是**不对称**的
+
+`ActionRuntime.execute`（`packages/tools/actions.py:170`）里有一条岔路，
+它是理解 `UNKNOWN_OUTCOME` 的关键，但光看 `runtime.py` 看不到。
+
+本地动作（`:189`）**有超时，且超时算 FAILED**：
+
+```python
+except TimeoutError:
+    # Safe for a local action: the work runs in this process, so
+    # cancelling it is the same as it not having happened.
+    return ActionExecutionResult.failed("ACTION_TIMEOUT", "The action timed out.")
+```
+
+远端动作（`:206`）**没有超时**，docstring 的措辞很重：
+
+> Cutting a remote call off from this layer would be a lie.
+> 从这一层掐断远端调用是在撒谎。
+
+而且兜底是 `unknown_outcome("ACTION_OUTCOME_UNKNOWN")`——**任何**异常都算不确定。
+
+| | 本地 action | 远端 MCP action |
+|---|---|---|
+| 超时归谁管 | 这一层（`timeout_seconds`） | 客户端（真正交出字节的那层） |
+| 异常算什么 | FAILED | **UNKNOWN_OUTCOME** |
+| 默认答案 | 「没发生」 | 「不知道」 |
+
+**同一个函数，两条分支的默认答案是相反的**，而且两边都是对的——
+因为「取消本进程里的一段代码」和「取消一个已经上路的网络请求」，
+在认识论上根本不是一回事。
+
 **第 ③ 步的 `UNKNOWN_OUTCOME` 是这个设计里最诚实的地方。**
 `packages/mcp/runtime.py:105` `execute_write` 的注释直说了不声称 exactly-once：
 请求发出去之后连接断了，远端**可能执行了也可能没有**。
@@ -557,10 +982,72 @@ Run 被置成 **`NEEDS_ATTENTION`** ——七个状态里专门为这件事留�
 否则              → SUCCEEDED
 ```
 
+函数本体短得离谱（`:2258-2271`，14 行），而且**它不写 `agent_runs.status`**：
+
+```python
+async def finish(self, state):
+    failure_code = state.get("failure_code")
+    status = state.get("run_status") or ("FAILED" if failure_code else "SUCCEEDED")
+    await self.step("FINISH", status, {
+        "status": status, "error_code": failure_code,
+        "model_round": state.get("model_round_count", 0),
+        "tool_count": state.get("tool_call_count", 0)})
+    return {}
+```
+
+注意 `state.get("run_status") or ...` 这个写法：
+**显式设过的状态优先。** `CANCELLED` 和 `NEEDS_ATTENTION` 都是这样进来的——
+它们不是从 `failure_code` 推出来的，是某个节点明确写进 state 的。
+只有两种「没人特别说什么」的情况，才退化成 `FAILED` / `SUCCEEDED` 二选一。
+
 这是一个值得单独指出来的设计：**没有任何节点抛异常表示业务失败**。
 失败是往 state 里写 `failure_code`，由条件边路由到 `finish`。
 好处是收尾逻辑（写终态、发 `run.finished` 事件、关流）只有一份，
 不会出现「某条失败路径忘了关流」这种问题。
+
+### 五个路由函数，一起读只要二十行
+
+整张图的**全部**控制流就在 `runtime.py:2300-2321`。
+这二十行比八个节点加起来更值得背：
+
+```python
+def after_prepare(self, state):   # :2300
+    return "finish" if state.get("failure_code") else "model"
+
+def after_model(self, state):     # :2303
+    return "finish" if state.get("failure_code") or state.get("final_output") is not None \
+           else "tool_proposal"
+
+def after_proposal(self, state):  # :2310
+    return "finish" if state.get("failure_code") else "policy"
+
+def after_policy(self, state):    # :2313
+    if state.get("failure_code") or state.get("run_status"):
+        return "finish"
+    if state.get("action_calls"):
+        return "action_execute"
+    return "read_execute"
+
+def after_observation(self, state):  # :2320
+    return "finish" if state.get("failure_code") else "model"
+```
+
+加上三条无条件边（`:1307-1311`）：
+`START → prepare`、`read_execute → observation`、`action_execute → observation`、
+`finish → END`。
+
+**三个观察，值得停下来想：**
+
+1. **五个函数里有四个的第一个判断是同一句** `failure_code` 有没有。
+   这就是「失败用返回值表达」带来的整齐：
+   任何节点想终止，只要往 state 里放一个 code，不用知道自己在图的哪个位置。
+2. **`after_policy` 是唯一一个有三个出口的**。整张图只有这一处真正分叉，
+   而分叉依据是 `action_calls` 空不空。04 章 Lab 2 就是拿这一行做文章的。
+3. **`read_execute` 和 `action_execute` 都直接连 `observation`，而且是无条件边。**
+   所以它俩**永远不会在同一轮里都执行**——`after_policy` 只会挑一个。
+   这个事实在架构图上完全看不出来，只有把路由函数和边列表一起读才会浮现。
+
+**把这二十行抄到纸上，然后不看代码把整张图画出来。** 画得出来，这一章就过了。
 
 **最后查一次**：
 
@@ -582,11 +1069,15 @@ WHERE agent_run_id = '<run_id>' ORDER BY sequence;
 **操作**：
 
 1. 上面那次 Run 的 id 记下来。
-2. 用 SSE 端点从头拉一遍（`apps/api/routes/agent_runs.py:133`）：
+2. 用 SSE 端点从头拉一遍（`apps/api/routes/agent_runs.py:133`）。
+   **路径是 `/stream`，而且挂在 workspace 前缀下**（`agent_runs.py:27`）：
 
 ```bash
-curl -N "http://127.0.0.1:8000/agent-runs/<run_id>/events?after_sequence=0"
+curl -N -H "Authorization: Bearer $TOKEN" \
+  "http://127.0.0.1:8000/api/v1/workspaces/$WS/agent-runs/<run_id>/stream?after_sequence=0"
 ```
+
+（`$TOKEN` 怎么拿见 [04 章 §0.5](04-runtime-labs.md#05-先搞清楚怎么改三条真实路径)。）
 
 3. 然后把 `after_sequence` 换成 20 再拉一次。
 
@@ -622,8 +1113,14 @@ curl -N "http://127.0.0.1:8000/agent-runs/<run_id>/events?after_sequence=0"
 | 5 | 同一个 Run，run_id 不变 | §11 |
 | 6 | 不需要，checkpoint 里有完整 messages | §11 |
 | 7 | 什么都不会发生，状态在数据库里 | §10.5 |
+| 8 | **继续跑。** 变成一条 `TOOL_APPROVAL_DENIED` 的工具结果回喂给模型 | §7 `pre_observations` |
+| 9 | **不会。** `UNKNOWN_TOOL` 同样是回喂，模型自己换一个 | §7 `pre_observations` |
+| 10 | `after_policy`，依据是 `action_calls` 空不空 | §13 |
 
 **猜错的那几条，去把对应小节的代码再打开一次**（代码，不是这篇文档）。
+
+第 8、9 两条如果你猜的是「失败」，请把 §7 最后那张表和 §9 的 `_TERMINAL_TOOL_ERRORS`
+一起重读一遍。**「什么算失败」这个判断，是这个项目里信息密度最高的一处设计。**
 
 ---
 
@@ -647,7 +1144,14 @@ curl -N "http://127.0.0.1:8000/agent-runs/<run_id>/events?after_sequence=0"
 >
 > 如果 WRITE 派发出去之后连接断了，不标成功也不标失败，标 `UNKNOWN_OUTCOME`，
 > Run 变 `NEEDS_ATTENTION`——因为标 FAILED 会诱导重试，而重试一次回滚
-> 可能意味着回滚两次。
+> 可能意味着回滚两次。本地动作则相反：超时就是 FAILED，因为取消本进程里的活儿，
+> 等价于它没发生过。
+>
+> 还有一条容易被忽略的：**人点拒绝不等于 Run 失败**。
+> 拒绝、参数非法、工具名不存在，这三类都不终止 Run，
+> 而是作为一条失败的工具结果回喂给模型，让它换个做法。
+> 真正会就地终止的 code 只有四个，全是「系统自身前提出问题」那一类。
+> 判断标准很简单：**告诉模型有用吗？有用就不终止。**
 
 ---
 

@@ -32,17 +32,175 @@
 
 ---
 
+## 0.5 先搞清楚「怎么改」——三条真实路径
+
+这一节是后面十个实验的公共前提。
+**不读这一节，Lab 1/2/4/6/7 你会卡在第一步**，因为它们要改的东西不在同一个地方，
+而其中一类**根本没有 HTTP 接口**。
+
+### 拿一个 token
+
+所有 curl 都要带 `Authorization: Bearer <token>`。先登录拿一个：
+
+```bash
+TOKEN=$(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"<你的邮箱>","password":"<你的密码>"}' | python -c "import sys,json;print(json.load(sys.stdin)['access_token'])")
+echo "$TOKEN" | head -c 20
+```
+
+后面用两个变量：`WS`（workspace_id）、`AGENT`（agent_id）。两个都能从浏览器地址栏拿到。
+
+### 路径 A：Agent 自己的配置 —— 有接口，直接 PATCH
+
+`max_steps` / `max_tool_calls` / `max_identical_calls` / `max_parallel_reads` /
+`max_cost_micro_usd` / `context_budget`，**全部**挂在 Agent 草稿的 `runtime_config` 上：
+
+```bash
+curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"runtime_config":{"max_identical_calls":1,
+                         "context_budget":{"max_tool_result_tokens":200}}}'
+```
+
+然后**必须**发布，否则改的只是草稿：
+
+```bash
+curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT/publish" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{}'
+```
+
+字段定义在 [`apps/api/schemas/agents.py:32`](../../apps/api/schemas/agents.py#L32)（`ContextBudgetRequest`）
+和 [`:40`](../../apps/api/schemas/agents.py#L40)（`RuntimeConfigRequest`）。
+两个 schema 都是 `extra="forbid"`——**拼错一个字段名会直接 422，不会被静默忽略**。
+这本身就值得你故意试一次：把 `max_identical_calls` 写成 `max_identical_call`，看它报什么。
+
+### 路径 B：工具的治理属性 —— **没有接口**，只能写脚本
+
+这是整章最容易卡住的地方，所以单独说清楚。
+
+`effect` / `risk_level` / `approval_policy` 这三个属性住在 `tool_revisions.spec`（JSONB）里。
+而工具的 PATCH 接口只接受三个字段：
+
+```python
+# apps/api/schemas/product_control_plane.py:130
+class ToolPatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: str | None = ...
+    description: str | None = ...
+    enabled: bool | None = ...
+```
+
+**没有 `effect`，没有 `approval_policy`，也没有 POST `/tools/{id}/revisions`。**
+`revisions` 路由只有两个 GET。
+
+为什么？因为内置工具的 spec 来自**服务端自有目录**
+[`BUILTIN_TOOL_CATALOG`](../../packages/control_plane/product_control_plane.py#L49)（`product_control_plane.py:49`），
+创建工具时由 `_catalog_spec(identity)` 生成 revision 1。
+租户可以选择**用不用**某个工具，但不能自己声明「我这个工具是 READ 的」——
+否则治理属性就成了租户可写的字段，默认拒绝也就名存实亡了。
+
+所以改 spec 要走**服务层**。`ToolRevisionService.create_revision` 是存在的
+（[`packages/agent_runtime/tool_revisions.py:59`](../../packages/agent_runtime/tool_revisions.py#L59)），
+只是没暴露成路由。写个脚本调它：
+
+```python
+# .scratch/lab_tool_revision.py
+import asyncio, os, sys
+from uuid import UUID
+from sqlalchemy import select
+from packages.agent_runtime.models import Tool, ToolRevision
+from packages.agent_runtime.tool_revisions import ToolRevisionService
+from packages.core.execution_context.models import WorkspaceExecutionContext
+# session_factory 的拿法跟 .scratch/serve.py 里一致，照抄那几行
+
+TOOL_ID   = UUID(sys.argv[1])
+FIELD     = sys.argv[2]          # effect / approval_policy
+NEW_VALUE = sys.argv[3]          # WRITE / ALWAYS
+
+async def main():
+    async with session_factory() as session:
+        latest = await session.scalar(
+            select(ToolRevision)
+            .where(ToolRevision.tool_id == TOOL_ID)
+            .order_by(ToolRevision.revision_number.desc()).limit(1))
+        spec = dict(latest.spec)
+        print("old:", FIELD, "=", spec[FIELD])
+        spec[FIELD] = NEW_VALUE
+        ctx = WorkspaceExecutionContext(...)   # 需要带 tool_edit 权限
+        rev = await ToolRevisionService().create_revision(
+            session, ctx, tool_id=TOOL_ID, spec=spec)
+        print("new revision", rev.revision_number, rev.spec_hash)
+
+asyncio.run(main())
+```
+
+**为什么不直接写一条 SQL `UPDATE tool_revisions SET spec = ...`？**
+因为 `spec_hash` 要跟着变。你改了 spec 不改 hash，下一次 Run 读到它会抛
+`TOOL_REVISION_INTEGRITY_ERROR`，而这个 code 在
+[`_TERMINAL_TOOL_ERRORS`](../../packages/agent_runtime/runtime.py#L97)（`runtime.py:97`）里，
+**整个 Run 直接失败**，你就看不到想看的策略行为了。
+（想亲手看这个失败长什么样，去做 03 章 §11——那一节故意让你制造一次哈希不一致。）
+
+改完 revision 之后还要**重新发布 Agent**。
+发布时 tool-binding 的 `tool_revision_id` 如果是 `null`，
+会取**当前最大的 revision_number**
+（[`product_control_plane.py:847`](../../packages/control_plane/product_control_plane.py#L847)）。
+新 revision 就是这样被 pin 进 `resolved_spec` 的。
+
+### 路径 C：进程级开关 —— 改 `.env` 并重启
+
+只有 Lab 10 用到（`AGENTHUB_MCP_ALLOW_PRIVATE_TARGETS`）。
+这一类是**部署方的决定，不是租户的决定**，所以它既不在 Agent 配置里，也不在工具 spec 里。
+这个分层本身就是 Lab 10 的考点。
+
+### 一张速查表
+
+| 你想改的东西 | 住在哪 | 怎么改 | 改完要做什么 |
+|---|---|---|---|
+| `max_steps` 等运行时上限 | `agents.runtime_config` | PATCH agent | **发布** |
+| `context_budget.*` | 同上（嵌套） | PATCH agent | **发布** |
+| `effect` / `approval_policy` | `tool_revisions.spec` JSONB | **写脚本**调 `create_revision` | **重新发布 agent** |
+| 模型档案 | `model_profiles` | PATCH model-profile | 发布（版本会 pin 绑定） |
+| 私网开关 | 进程配置 | 改 `.env` | **重启 API** |
+
+---
+
 ## Lab 1 · 把 READ 改成 WRITE
 
 **目标**：验证 `ToolPolicy.decide` 只看两个属性。
 
 ### 操作
 
-1. 找到 `query_customer` 的工具定义。
-2. **新建一个 revision**，把 spec 里的 `effect` 从 `READ` 改成 `WRITE`。
-   （直接改 `Tool` 表没用——治理属性在 `tool_revisions.spec` 这个 JSONB 里，03 章 §3）
-3. 重新发布 lab Agent。
-4. 跑一次会触发这个工具的 Run。
+1. 拿到 `query_customer` 的 `tool_id`：
+
+   ```bash
+   curl -s "http://127.0.0.1:8000/api/v1/workspaces/$WS/tools" \
+     -H "Authorization: Bearer $TOKEN" | python -m json.tool | grep -B4 query_customer
+   ```
+
+   顺手记下返回里的 `effect` / `risk_level` / `approval_policy` / `current_spec_hash`——
+   一会儿要对比。
+
+2. 用 §0.5 路径 B 的脚本新建 revision，把 `effect` 从 `READ` 改成 `WRITE`：
+
+   ```bash
+   "E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe" .scratch/lab_tool_revision.py <tool_id> effect WRITE
+   ```
+
+   **不要直接 UPDATE 那行 JSONB**，理由见 §0.5（`spec_hash` 会对不上，Run 直接终止）。
+
+3. 重新发布 lab Agent（`POST .../agents/$AGENT/publish`）。
+4. 确认新版本真的 pin 到了新 revision：
+
+   ```bash
+   curl -s "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT/versions" \
+     -H "Authorization: Bearer $TOKEN" | python -m json.tool | tail -40
+   ```
+
+   在 `resolved_spec` 里找到 `query_customer`，看它的 `effect` 是不是 `WRITE`。
+   **这一步不要跳**——「实验没反应」十次有九次是版本没发出去。
+5. 跑一次会触发这个工具的 Run。
 
 ### 预测与观察
 
@@ -68,6 +226,28 @@
 
 `tool.started` 不会出现：policy 在 `read_execute` 之前，工具根本没被调用。
 
+**但这次的结局会让你意外，请务必跑完。**
+批准之后，`query_customer` 会被送进 `action_execute`，
+而 `ActionRegistry` 里**只有一个本地执行器**：
+
+```python
+# packages/tools/actions.py:133
+self._executors = {"create_ticket": CreateTicketActionExecutor(session_factory)}
+```
+
+`query_customer` 不在里面，也不是 MCP 远端工具。
+所以「把一个内置 READ 工具改成 WRITE」的真实结果是：
+**它要审批，批准了也执行不了。**
+具体报什么 code，你会在 Lab 2 的 Explain 里拿到完整答案——两个 Lab 是同一条链路的两截。
+
+这不是 bug，是一个**刻意的不对称**：
+一个工具能不能被审批，是治理属性说了算（数据）；
+一个工具能不能被执行，是有没有执行器说了算（代码）。
+前者租户可配，后者租户不可配。
+Registry 的 docstring（`actions.py:143-149`）把这条讲得很直白：
+远端工具共用一个执行器，是因为「远端工具是表里的一行，不是一段代码，
+而一个会随 import 增长的 registry，就是一个 workspace 可以往里写东西的 registry」。
+
 ### Interview 一句话
 
 > 工具的 effect 不是代码里的 if，是 ToolRevision spec 里的一个字段。
@@ -83,7 +263,14 @@
 
 ### 操作
 
-新建 revision，`effect` 保持 `READ`，只把 `approval_policy` 改成 `ALWAYS`。发布，跑。
+1. 先把 Lab 1 的 `effect` 改回 `READ`（再建一个 revision，值写回 `READ`）。
+2. 再建一个 revision，**`effect` 保持 `READ`，只把 `approval_policy` 改成 `ALWAYS`**：
+
+   ```bash
+   "E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe" .scratch/lab_tool_revision.py <tool_id> approval_policy ALWAYS
+   ```
+
+3. 发布，跑，**批准**。注意：一定要真的点批准，这个实验的答案在批准之后。
 
 ### 预测与观察
 
@@ -92,8 +279,12 @@
 | 一个 READ 工具会要求审批吗 | | |
 | 和 Lab 1 的结果有区别吗 | | |
 | 批准之后走哪个节点执行 | | |
+| **批准之后它成功了吗** | | |
+| `approvals.decision_status` / `execution_status` 最终各是什么 | | |
 
 ### Explain
+
+**第一层：为什么会要审批。**
 
 ```python
 if (definition.effect is ToolEffect.READ
@@ -105,10 +296,80 @@ return REQUIRE_APPROVAL
 **两个条件都满足才自动放行。** 这就是「默认拒绝」的写法——
 兜底分支是拒绝，不是放行。新增工具忘填属性的代价是**变严**。
 
-但这次批准后走的是 `read_execute` 还是 `action_execute`？
-去 `runtime.py:2313` `after_policy` 看路由依据——
-它看的是 `action_calls` 是否非空，而那个列表由 `effect` 决定，不由审批决定。
-**这一条跑出来的结果，和你在 Lab 1 的直觉多半不一样。记录下来。**
+**第二层：批准之后发生了什么（这才是这个 Lab 的价值）。**
+
+跟着代码走三步，一步都别跳：
+
+1. `policy` 里，审批通过的调用被无条件塞进 `action_calls`：
+
+   ```python
+   # runtime.py:1924 —— 注意这一行完全没有看 effect
+   action_calls.append({"call": call, "approval_id": str(current.id)})
+   ```
+
+2. `after_policy` 只看这个列表空不空：
+
+   ```python
+   # runtime.py:2313
+   if state.get("action_calls"):
+       return "action_execute"
+   return "read_execute"
+   ```
+
+3. `ActionRuntime.execute` 第一件事就是拒绝非 WRITE：
+
+   ```python
+   # packages/tools/actions.py:178
+   if definition.effect.value != "WRITE":
+       return ActionExecutionResult.failed(
+           "ACTION_NOT_WRITE", "Only WRITE tools can use the action runtime."
+       )
+   ```
+
+所以真实结论是：
+**一个 `READ` + `ALWAYS` 的工具，会拦住人去审批，人批准了，然后它失败，
+code 是 `ACTION_NOT_WRITE`。**
+
+`approvals` 那一行的最终状态是
+`decision_status = APPROVED`、`execution_status = FAILED`、`failure_code = ACTION_NOT_WRITE`。
+Run 本身不会因此整体失败——`ACTION_NOT_WRITE` 不在 `_TERMINAL_TOOL_ERRORS` 里，
+它作为一条失败的工具结果回喂给模型，模型自己决定下一步。
+
+**第三层：这算设计还是算缺陷？**
+
+诚实地说：这是一条**可表达但不可执行**的配置组合，是个毛刺。
+`READ + ALWAYS` 在语义上是说得通的（「查这张表得有人点头」），
+但当前实现把「要不要审批」和「用哪个执行器」绑在了同一个判断链上，
+于是这个组合落到了一个执行不了的分支里。
+
+它没有造成安全问题——失败是往严的方向失败，不是往松的方向。
+但它说明一件事：**治理属性的组合空间，比实现真正覆盖的组合要大。**
+这是你读任何一个「配置驱动」系统时都该问的问题：
+*所有合法取值的笛卡尔积，是不是每一格都有人实现过？*
+
+**这一条很值得记住，因为它同时是一个技术亮点和一个短板，
+面试里被追问「你们这个设计有什么问题」的时候，它是一个真实、具体、你亲手撞到过的答案。**
+
+### 顺手再看一个副作用（不用动手，读代码就行）
+
+既然 `after_policy` 看到 `action_calls` 非空就直接去 `action_execute`，
+而图里 `action_execute` 的出边是**直连 `observation`**
+（`runtime.py:1307-1311` 的 edges 列表）——
+那么当模型**同一轮里既提了一个要审批的工具、又提了一个自动放行的 READ 工具**时，
+那个 READ 工具的调用会怎么样？
+
+顺着看 `observation`：
+
+```python
+# runtime.py:2215
+result = pre.get(call["tool_call_id"], executed.get(call["tool_call_id"]))
+if result is None:
+    result = ToolResult.failure("TOOL_EXECUTION_FAILED", "The tool execution failed.")
+```
+
+它会拿到那个兜底的 `TOOL_EXECUTION_FAILED`。
+**这是一条你光看架构图绝对看不出来的路径**，只有把「节点 + 路由函数 + 出边」三样合起来读才会浮现。
+这就是 02 章一直在强调的那句话：**图的行为不在节点里，在路由里。**
 
 ---
 
@@ -149,6 +410,58 @@ return REQUIRE_APPROVAL
 所以标 `UNKNOWN_OUTCOME`，Run 置 `NEEDS_ATTENTION`。
 **不自动重试。** 这个状态的语义是「人来看」。
 
+#### 追加：本地动作和远端动作的处理是**不对称**的
+
+这一点是全章我最想让你看到的细节，因为它解释了「为什么不能一刀切地加超时」。
+
+打开 [`packages/tools/actions.py:189`](../../packages/tools/actions.py#L189)，本地分支：
+
+```python
+try:
+    async with asyncio.timeout(definition.timeout_seconds):
+        return await executor.execute(...)
+except TimeoutError:
+    # Safe for a local action: the work runs in this process, so
+    # cancelling it is the same as it not having happened.
+    return ActionExecutionResult.failed("ACTION_TIMEOUT", "The action timed out.")
+```
+
+本地动作**有超时，而且超时算 FAILED**（不是 UNKNOWN）。
+理由写在注释里：活儿就在本进程里干，取消它等价于它没发生过。所以「失败」是真话。
+
+再看远端分支（`:206`），它**完全没有超时**，docstring 说得很重：
+
+> Cutting a remote call off from this layer would be a lie: the request may
+> already be with the other side, and cancelling our end tells us nothing about
+> theirs. ... the safe answer to "did it happen?" is "ask a human", never "no".
+
+> 从这一层掐断远端调用是在撒谎：请求可能已经到了对面，
+> 取消我们这一端并不能告诉我们对面怎么样了。……
+> 「它发生了吗」这个问题的安全答案是「问人」，永远不是「没有」。
+
+而且兜底是：
+
+```python
+except Exception:
+    return ActionExecutionResult.unknown_outcome("ACTION_OUTCOME_UNKNOWN")
+```
+
+**任何**漏出来的异常都算「不确定」，不算失败。
+
+所以同一个 `ActionRuntime.execute`，两条分支的默认答案是相反的：
+本地默认「没发生」，远端默认「不知道」。
+
+| | 本地 action | 远端 MCP action |
+|---|---|---|
+| 这一层有超时吗 | 有，`timeout_seconds` | **没有**，deadline 归客户端 |
+| 超时/异常算什么 | `FAILED`（可以重试） | `UNKNOWN_OUTCOME`（不重试） |
+| Run 结局 | 继续，失败结果回喂模型 | `NEEDS_ATTENTION` |
+| 依据 | 取消 = 没发生 | 取消 ≠ 知道对面没发生 |
+
+**自检**：如果有人给远端分支也加上 `asyncio.timeout`，会坏掉什么？
+答案不是「超时不准」，而是**一个已经在对面执行了的写操作，会被标成 FAILED，
+然后被当成可重试的失败重来一次。** 这就是为什么那段 docstring 用了 "a lie" 这个词。
+
 ### Interview 一句话
 
 > 我们不声称 exactly-once，因为跨网络的副作用本来就做不到。
@@ -162,8 +475,23 @@ return REQUIRE_APPROVAL
 
 ### 操作
 
-1. 在 lab Agent 的 runtime 配置里设 `max_cost_micro_usd = 1`（= 0.000001 USD）。
-2. 发布，跑一次会调模型的 Run。
+走 §0.5 的**路径 A**：
+
+```bash
+curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"runtime_config":{"max_cost_micro_usd":1}}'
+
+curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT/publish" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{}'
+```
+
+`1` = 0.000001 USD，任何一次真实调用都会超。然后跑一次会调模型的 Run。
+
+> **顺手做一次边界测试**：把值改成 `0` 再 PATCH 一次。
+> schema 上写的是 `ge=1`，所以你应该拿到 422 而不是「无上限」。
+> 这个区分很重要：`0` 不是「不限」，`null` 才是「不限」——
+> 字段注释直说了，`None` 留给「这个字段出现之前发布的所有 agent」。
 
 ### 预测与观察
 
@@ -213,13 +541,24 @@ currency 不是 `USD`。再跑一次。
 2. 跑到一半**直接关掉浏览器标签页**。
 3. 等它跑完。
 4. 重新打开 Run 详情页。
-5. 再用 curl 手动拉一次：
+5. 再用 curl 手动拉一次。**注意路径是 `/stream` 不是 `/events`**，
+   而且它挂在 workspace 前缀下面（`apps/api/routes/agent_runs.py:27` 定义了 prefix）：
 
 ```bash
-curl -N "http://127.0.0.1:8000/agent-runs/<run_id>/events?after_sequence=0"
+curl -N -H "Authorization: Bearer $TOKEN" \
+  "http://127.0.0.1:8000/api/v1/workspaces/$WS/agent-runs/<run_id>/stream?after_sequence=0"
 ```
 
-6. 换成 `after_sequence=15` 再拉一次。
+6. 换成 `after_sequence=15` 再拉一次，数一下少了多少条。
+7. 再试一个大得离谱的值（`after_sequence=99999`），看它是报错还是干净地返回空。
+
+> **两个端点不要搞混**：
+> `POST /agent-versions/{id}/runs/stream` 是**开一个新 Run 并跟着看**；
+> `GET /agent-runs/{run_id}/stream` 是**跟上一个已经在跑（或已经跑完）的 Run**。
+> 后者的 docstring（`agent_runs.py:144-150`）一句话说清了它存在的理由：
+> 「掉线的客户端带着它看到的最后一个 sequence 回来，
+> 先从持久事件日志里补齐缺口，再汇入实时流，
+> 所以刷新一下或者网络抖一下，代价是几帧，不是这个 Run。」
 
 ### 预测与观察
 
@@ -260,8 +599,19 @@ curl -N "http://127.0.0.1:8000/agent-runs/<run_id>/events?after_sequence=0"
 
 ### 操作
 
-1. lab Agent 的 `context_budget.max_tool_result_tokens` 从默认 **4000** 改成 **200**。
-2. 发布，跑一个会返回大结果的工具（比如 `search_knowledge` 或 `query_customer`）。
+```bash
+curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"runtime_config":{"context_budget":{"max_tool_result_tokens":200}}}'
+```
+
+发布，然后跑一个会返回大结果的工具
+（`search_knowledge` 最容易撑爆，`query_customer` 带 `include_open_tickets=true` 也行）。
+
+> **注意这是个嵌套对象**。`context_budget` 是 `RuntimeConfigRequest` 里的一个子模型
+> （`apps/api/schemas/agents.py:59`），不是平铺字段。
+> 写成 `{"runtime_config":{"max_tool_result_tokens":200}}` 会 422——
+> 因为 `extra="forbid"`。**建议你先故意写错一次，把这个 422 看清楚。**
 
 ### 预测与观察
 
@@ -305,9 +655,14 @@ DEFAULT_CONTEXT_BUDGET = {"reserved_output_tokens": 2_000,
 
 ### 操作
 
-1. 把 `max_identical_calls` 设成 **1**（默认 2）。
-2. 提一个会让模型反复查同一个东西的问题
-   （比如让它"确认三次"某个客户的状态）。
+```bash
+curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"runtime_config":{"max_identical_calls":1}}'
+```
+
+发布，然后提一个会让模型反复查同一个东西的问题
+（比如「把客户 C-1001 的状态确认三遍，每次都重新查一次再回答」）。
 
 ### 预测与观察
 
@@ -319,17 +674,38 @@ DEFAULT_CONTEXT_BUDGET = {"reserved_output_tokens": 2_000,
 
 ### 要看的代码
 
-`runtime.py:1724`（identical）和 `runtime.py:1732`（总量）
+`runtime.py:1722`（算签名）、`:1729`（identical 上限）、`:1735`（总量上限）
 参数归一化用的是 `packages/approvals/contracts.py:53` 同一套 canonicalize。
 
 ### Explain
 
-判「相同」用的是**归一化后的参数哈希**，不是字符串比较。
-`{"a":1,"b":2}` 和 `{"b":2,"a":1}` 是同一个调用。
+判「相同」用的是**归一化后的参数哈希**，不是字符串比较：
+
+```python
+# runtime.py:1722
+signature = canonical_json_hash({"tool": name, "arguments": normalized_arguments})
+```
+
+两件事同时成立：
+
+1. `{"a":1,"b":2}` 和 `{"b":2,"a":1}` 是**同一个**调用（键序被归一化掉了）。
+2. 工具名参与哈希，所以**不同工具、相同参数**不算重复。
+
+为什么是「归一化后的哈希」而不是「原始字符串」？
+因为模型每一轮重新生成 JSON，键序、空格、数字写法都可能抖。
+用字符串比较会漏掉绝大多数真正的打转。
+**而且这套 canonicalize 跟审批幂等键用的是同一套**（`contracts.py:53`）——
+这不是巧合：两个地方问的是同一个问题，「这两次是不是同一件事」。
+同一个问题用两套答案，迟早对不上。
 
 默认值为什么是 2 不是 1？因为「重试一次」是合理行为
 （第一次工具返回了它没看懂的格式），「重试三次」不是。
 把它设成 1 会误伤正常重试——你刚才应该已经看到了。
+
+**顺手看清楚拦截位置**：这个检查在 `tool_proposal` 里，
+也就是在 `policy` **之前**、在任何工具真正执行之前。
+所以打转被拦下来时，你**不会**看到 `tool.started`，也**不会**产生 approval 行。
+这和 Lab 1 的观察是同一条规律：**贵的操作都排在判断之后。**
 
 **收尾**：改回 2。
 
@@ -501,12 +877,19 @@ scheme 限制在 `parse_endpoint_url` 这一层，开关碰不到。
 不看任何文档，回答：
 
 1. `ToolPolicy.decide` 的两个条件是 AND 还是 OR？兜底分支返回什么？
-2. `UNKNOWN_OUTCOME` 为什么不能标成 FAILED？
-3. 成本测不出来时会发生什么？为什么不是放过？
-4. `after_sequence` 解决的是什么问题？为什么 `message.delta` 不落库？
-5. 快照的 content_hash 哈希了什么？没哈希什么？
-6. 重启进程后审批还在，是因为什么？
-7. `mcp_allow_private_targets` 打开后，`file://` 能过吗？为什么？
+2. 一个 `READ` + `approval_policy=ALWAYS` 的工具，人批准之后会怎么样？
+   为什么会这样？这算设计还是算毛刺？
+3. `UNKNOWN_OUTCOME` 为什么不能标成 FAILED？
+4. 本地 action 超时算 FAILED，远端 action 异常算 UNKNOWN_OUTCOME。
+   为什么不统一？给远端也加超时会坏掉什么？
+5. 成本测不出来时会发生什么？为什么不是放过？
+6. `after_sequence` 解决的是什么问题？为什么 `message.delta` 不落库？
+7. 快照的 content_hash 哈希了什么？没哈希什么？
+8. 重启进程后审批还在，是因为什么？
+9. `mcp_allow_private_targets` 打开后，`file://` 能过吗？为什么？
+10. 工具的 `effect` 为什么没有 HTTP 接口可以改？这个「不方便」换来了什么？
+
+**第 2、4、10 三题答不上来，说明你跑的是步骤不是实验。** 回去把对应的 Explain 重读一遍。
 
 ### 补充你自己的 Lab 11
 

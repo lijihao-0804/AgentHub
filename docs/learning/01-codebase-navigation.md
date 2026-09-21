@@ -659,25 +659,250 @@ if artifact.run_id is not None:
 
 ## 10. Evaluation 怎么跑
 
-> 这条线最长，且**不建议第一遍学习就深入**。这里只给入口，够你回答追问。
+> 这条线最长——`packages/evaluation/` 九千行，比 `agent_runtime` 还大。
+> 但它的骨架只有一句话：**把「这次评测到底跑了什么」冻成一串哈希，
+> 然后把笛卡尔积落成数据库里的待办行，让 worker 一行一行地认领。**
+> 抓住这句话，九千行就只是它的展开。
 
-- 路由：`apps/api/routes/evaluation.py`
-- 服务：`packages/evaluation/service.py`（数据集）、`experiments.py`（实验）、
-  `metrics_service.py`、`ablation.py`、`release_gate.py`
-- 模型：`packages/evaluation/models.py`，16 张表
+### Before reading
 
-四个关键不变量，各自的证据位置：
+先写答案，再看代码：
 
-| 不变量 | 在哪 |
-|---|---|
-| 数据集版本一旦 PUBLISHED 就不可变 | `service.py:360-365`，`EVALUATION_DATASET_IMMUTABLE` 409 |
-| 实验一旦 READY 就不可变 | `experiments.py:784-791`，`EVALUATION_EXPERIMENT_IMMUTABLE` 409 |
-| 实验变体固定到具体 AgentVersion | `models.py:334`，FK RESTRICT |
-| 定价快照冻结，成本可复算 | `models.py:340`，FK RESTRICT 到 `PricingSnapshot`（`:191`） |
+1. 数据集发布之后还能改吗？如果不能，**靠什么拦住**——Python 里的
+   `if`，还是数据库约束？
+2. 一个实验有 3 个变体、数据集有 50 条、重复 2 次，
+   那么「一次实验运行」要执行多少次 Agent？**这些执行单元是什么时候被创建的**——
+   worker 边跑边建，还是一开始就全建出来？
+3. 评测跑 Agent 的时候，用的是**另一套运行时**，还是第 5 节那张一模一样的图？
+4. 如果 worker 跑到一半进程被杀，重启之后那些「正在跑」的用例怎么办？
 
-**不应该看什么**：第一遍全部跳过 `ablation.py` 和 `release_gate.py`。
-发布门禁目前跑着 0 条策略（见 `docs/report/18` §17），
-读一个没在用的模块收益很低。
+### Code reading（按这个顺序，别跳）
+
+**第一步：读 `packages/evaluation/reproducibility.py`（166 行，全文）。**
+
+这是整条线的心脏，而且它短到可以一次读完。它只做一件事：
+把「实验身份」定义成若干个 `canonical_json_hash`。
+
+```python
+# packages/evaluation/reproducibility.py:126
+def variant_hash(
+    *,
+    agent_version_id: str,
+    resolved_spec_hash: str,
+    effective_knowledge_snapshots: list[dict[str, str]],
+    pricing_snapshot_id: str,
+    pricing_snapshot_hash: str,
+    variant_metadata: Mapping[str, Any],
+) -> str:
+```
+
+**看这六个参数，然后问自己：为什么是这六个？**
+
+因为这正好是「同一个问题问两次，答案可能不同」的全部来源：
+agent 的配置（`resolved_spec_hash`，第 6 节那个冻结快照）、
+它能查到的知识（知识快照的内容哈希）、
+以及算钱用的价目表（`pricing_snapshot_hash`）。
+任何一个变了，`variant_hash` 就变，两次结果就不该被放在一张表里比较。
+
+再看 `:31` 的 `default_evaluator_manifest`，注意它的 docstring：
+
+> its provider/model/parameter projection is reduced to an evaluator version,
+> so the experiment can never be re-scored by a different judge model
+> without the manifest — and every metric row derived from it — changing.
+
+「评分的人」也是实验身份的一部分。换了裁判模型，
+manifest 变 → 派生的每一行指标都变。这是一个很容易被忽略的可复现性漏洞，
+这份代码堵上了。
+
+顺手读 `build_identity.py`（63 行）：`AGENTHUB_BUILD_SHA` 环境变量优先，
+否则 `git rev-parse HEAD`（`:29`，带 2 秒超时），
+再用正则 `^[0-9a-fA-F]{7,64}$` 校验（`:11`）。
+**代码版本也是实验身份的一部分**——这就是 `build_sha` 字段的来历。
+
+**第二步：读状态机，只看四个 `if`。**
+
+| 卡点 | 在哪 | 拦住什么 |
+|---|---|---|
+| 数据集版本 PUBLISHED 后不可变 | `service.py:360-365`，`EVALUATION_DATASET_IMMUTABLE` 409 | 改题目 |
+| 只有 DRAFT 实验能改 | `experiments.py:786-790`，`EVALUATION_EXPERIMENT_IMMUTABLE` 409 | 改实验设计 |
+| finalize 时重新核对数据集绑定 | `experiments.py:308-318`，`EVALUATION_DATASET_INTEGRITY_ERROR` 409 | 绑定后数据集被换掉 |
+| 建 run 时重算 spec_hash | `experiments.py:387-392`，`EVALUATION_EXPERIMENT_INTEGRITY_ERROR` 409 | 绕过 API 直改数据库 |
+
+第三条和第四条值得多看一眼：
+
+```python
+# packages/evaluation/experiments.py:387
+if experiment_spec_hash(experiment.spec_json) != experiment.spec_hash:
+    raise AgentHubError(
+        "EVALUATION_EXPERIMENT_INTEGRITY_ERROR",
+        "The experiment specification hash is invalid.",
+        409,
+    )
+```
+
+这和第 6 节里 `prepare` 节点核对 `resolved_spec_hash` 是**同一个招式**：
+存一份冻结内容 + 存一份它的哈希，用的时候重算一遍对比。
+整个代码库里这个模式出现了至少四次（agent 发布、工具修订、知识快照、实验规格）。
+认出它，你就少读三千行。
+
+**第三步：读 `runner.py:404` 的 `prepare_run`——回答你的第 2 题。**
+
+```python
+# packages/evaluation/runner.py:439
+rows = [
+    {
+        ...
+        "case_execution_key": _execution_key(run.id, variant.id, item.id, repetition_index),
+        "status": EvaluationCaseResultStatus.PENDING,
+        "observation": {},
+    }
+    for item in items
+    for variant in variants
+    for repetition_index in range(run.repetitions)
+]
+```
+
+**笛卡尔积在运行开始之前就被整个写进数据库**，全是 `PENDING`。
+3 变体 × 50 条 × 2 次 = 300 行，一次 `insert(...).on_conflict_do_nothing(...)`
+（`:456-468`）落库。
+
+为什么不边跑边建？看文件头的 docstring（`:1-5`）：
+
+> The database is the source of truth. Celery only transports an experiment run id;
+> workers rebuild the frozen execution plan from the persisted M7-B records.
+
+Celery 消息里**只有一个 run_id**。消息丢了、worker 换了台机器、
+队列被清空重建，都不影响执行计划——计划在数据库里，不在消息里。
+代价是一次实验要先写几百行；收益是整条链路没有任何一处依赖「消息没丢」。
+
+接着看三个方法名就够了：`claim_case`（`:612`，抢一行）、
+`heartbeat`（`:585`，续租）、`recover_inflight_cases`（`:532`，崩溃恢复）。
+这是一个**写在数据库里的工作队列**，三个动作各对应一行关键代码：
+
+- 认领：`SELECT ... FOR UPDATE SKIP LOCKED`（`runner.py:671`）。
+  `skip_locked=True` 是多 worker 并行的全部秘密——
+  别人锁住的那行直接跳过，不排队、不阻塞。
+- 持有：`lease_owner` + `lease_generation` + `lease_expires_at`，
+  心跳只在 `lease_owner == owner` 且 generation 匹配时才续租（`runner.py:595-608`），
+  `rowcount == 1` 就是「我还拿着这把锁」的判据。
+- 释放：不需要显式释放，lease 过期即可被别人接管。
+
+和第 2 章 §12 那个「原子认领」是同一个招式，
+只是粒度从「一次写动作」放大到「一个评测用例」。
+**认出这个模式，整个项目里的异步执行你都不用再读第二遍。**
+
+**第四步：`recover_inflight_cases`——回答你的第 4 题。**
+
+worker 重启后，`RUNNING` 的用例不会被简单重跑。代码去查它绑定的那条 `AgentRun`：
+
+```python
+# packages/evaluation/runner.py:563
+if agent_run.status not in terminal_statuses:
+    case.status = EvaluationCaseResultStatus.FAILED
+    case.failure_code = "EVALUATION_AGENT_RUN_RECOVERY_REQUIRED"
+```
+
+AgentRun 已经终态 → 用例判 `SUCCEEDED`，把真实状态抄过来（`:571-582`）；
+还没终态 → 判 `FAILED`，给一个专门的 failure_code。
+**没有「不知道就重跑一遍」这个选项**——因为重跑意味着可能重复产生副作用，
+而第 2 章 §12 那三层写幂等保护的是单次 Run，不是跨 Run 的重试。
+
+**第五步：`AgentRuntimeEvaluationDriver`（`runner.py:174`）——回答你的第 3 题。**
+
+答案是：**同一套运行时，一个字都没改。**
+
+```python
+# packages/evaluation/runner.py:265
+execution_overrides=AgentRunExecutionOverrides.for_evaluation(
+    list(variant.effective_knowledge_snapshots)
+),
+```
+
+```python
+# packages/agent_runtime/runtime.py:156
+@dataclass(frozen=True, slots=True)
+class AgentRunExecutionOverrides:
+    """Trusted runtime-only inputs used by reproducible internal evaluation workers.
+
+    This type is intentionally not part of any transport/API schema.  The factory is
+    named for the only supported caller so ordinary API clients cannot construct it via
+    request data or a public route.
+    """
+```
+
+整个评测线对运行时的「特权」就只有这一个 dataclass：
+**把知识快照钉死**，其他全走公共路径。而且它刻意不出现在任何请求 schema 里，
+工厂方法直接以唯一合法调用方命名——想通过 HTTP 构造它，没有入口。
+
+这是本项目里我最推荐讲的一个设计取舍：
+评测确实需要绕过一点正常逻辑（知识库不能「用最新的」），
+处理方式不是加一个 `if is_evaluation:` 分支，
+而是造一个**无法从外部构造的类型**，把特权收敛到一个可以被 grep 穷举的点上。
+
+顺带看 `:270-304` 的 `execute_agent`：APPROVAL 类用例是怎么自动过审批的——
+跑到 `WAITING_APPROVAL` → 查出 approval → 按数据集里 `expected["decision"]`
+调 `approval_service.decide` → `resume`。
+第 2 章 §11 那套断点续跑机制，在这里被当成库来用了。
+如果一个 Run 停了两次（`:303`），直接 `EVALUATION_MULTIPLE_APPROVALS_NOT_SUPPORTED`——
+**一个诚实的「我还没实现」**，而不是悄悄跑成一个错的结果。
+
+### 不应该看什么
+
+- 第一遍全部跳过 `ablation.py`（354 行）和 `release_gate.py`（692 行）。
+  发布门禁目前跑着 0 条策略（见 `docs/report/18` §17），
+  读一个没在用的模块收益很低。
+- `metrics.py`（891 行）+ `metrics_service.py`（1351 行）第一遍只看
+  **有哪些 category**（从 `DeterministicEvaluationDriver.execute`，`runner.py:107`
+  那一串 `elif` 就能看全：RETRIEVAL / KNOWLEDGE_QA / TOOL / NO_ANSWER /
+  APPROVAL / MULTI_STEP / FAILURE），不要读具体的指标公式。
+  公式是可以现场查的，「为什么要分这七类」才是要理解的。
+- `models.py` 991 行 16 张表，不要通读。只认三条 FK：
+  变体 → AgentVersion（`:334`，RESTRICT）、变体 → PricingSnapshot（`:340`，
+  RESTRICT，定义在 `:191`）、用例结果 → AgentRun。
+  **RESTRICT 不是随手选的**：它意味着「被实验引用过的 agent 版本删不掉」，
+  这正是可复现性的数据库级保证。
+
+### Explain（讲给别人听）
+
+用两分钟讲完这一节，只讲三句：
+
+1. **一次实验的身份是一串哈希**，包括 agent 配置、知识快照、价目表、
+   评分器清单、代码 commit。任何一个变了就不是同一个实验。
+2. **执行计划先落库再执行**，Celery 只搬一个 id。
+   所以这条链路能容忍消息丢失、worker 崩溃、队列重建。
+3. **评测不复制运行时**，它用的就是生产那张八节点图，
+   唯一的特权是一个无法从 HTTP 构造的 `AgentRunExecutionOverrides`。
+
+如果你能补上第四句——「崩溃恢复宁可把用例判失败，也不重跑，
+因为重跑可能重复产生副作用」——说明你真读懂了，而不是记住了目录。
+
+### Interview
+
+**「你们的评测是怎么保证可复现的？」**
+
+> 不是靠固定随机种子，那只解决一小部分问题。我们把一次实验的**身份**
+> 定义成一串内容哈希：agent 版本的 resolved_spec_hash、
+> 每个知识库的快照 content hash、定价快照的 hash、评分器版本清单、
+> 以及构建的 git commit。这些在实验 finalize 的时候被冻进
+> `spec_json` 并算出 `spec_hash`，创建运行时会重算一遍做完整性校验。
+> 所以「换了个裁判模型重新打分」这种事不会被悄悄当成同一个实验——
+> manifest 变了，每一行派生指标都跟着变。
+>
+> 执行侧，我们把变体 × 用例 × 重复次数的笛卡尔积在运行开始前
+> 一次性写成数据库里的 PENDING 行，Celery 消息里只有一个 run id。
+> worker 靠 lease 认领、心跳续租；崩溃重启后，在飞的用例不会被重跑，
+> 而是去查它绑定的 AgentRun 是否已经终态——终态就把真实结果抄过来，
+> 没终态就判失败并给一个专门的 recovery-required 错误码。
+> 宁可少一条数据，不要多一次副作用。
+
+**追问：「评测是不是要单独写一套简化的运行时？」**
+
+> 不。评测跑的就是生产那张图，一个分支都没有加。
+> 它唯一的特权是把知识快照钉死，而且这个特权被封装成一个
+> 刻意不进任何 API schema 的 dataclass，工厂方法直接以唯一合法调用方命名。
+> 要是当初图省事加一个 `is_evaluation` 标志位，
+> 这个标志位半年后一定会长出第二个、第三个含义，
+> 到那时「评测里过了」就不再能推出「线上也能过」。
 
 ---
 
@@ -709,7 +934,13 @@ if artifact.run_id is not None:
 4. 检索的范围由什么决定？
 5. Artifact 能被模型直接写入吗？
 6. Playground 和 Thread 是两套运行时吗？
+7. 一次评测实验的「身份」由哪几样东西的哈希组成？少算一样会出什么问题？
+8. 评测的执行计划是什么时候落库的？为什么不能让 Celery 消息携带它？
+9. 评测跑 Agent 用的是生产运行时吗？它唯一的特权是什么，
+   为什么这个特权做成了一个类型而不是一个布尔开关？
 
-六个里答不上两个以上，回到对应小节重读一遍**代码**（不是这篇文档）。
+九个里答不上三个以上，回到对应小节重读一遍**代码**（不是这篇文档）。
+第 7、8、9 三题如果答不上，说明你把第 10 节当目录读了——
+那一节现在是有代码可读的，不是索引。
 
 下一章：[02 · 跟一次真实的 Run 走到底](02-one-run-end-to-end.md)
