@@ -1464,7 +1464,9 @@ class _AgentRunGraph:
             await self.step("GUARD", "FAILED", {"error_code": "AGENT_MAX_STEPS_EXCEEDED"})
             return {"failure_code": "AGENT_MAX_STEPS_EXCEEDED"}
         cost_failure = _cost_guard_failure(
-            self.usage_records, runtime.get("max_cost_micro_usd")
+            self.usage_records,
+            runtime.get("max_cost_micro_usd"),
+            rounds_completed=rounds,
         )
         if cost_failure is not None:
             # Checked before the call, not after: a ceiling that only notices it
@@ -2347,7 +2349,10 @@ _MICRO_USD = Decimal(1_000_000)
 
 
 def _cost_guard_failure(
-    usage_records: list[dict[str, Any]], limit_micro_usd: Any
+    usage_records: list[dict[str, Any]],
+    limit_micro_usd: Any,
+    *,
+    rounds_completed: int = 0,
 ) -> str | None:
     """Decide whether this run has spent what it was allowed to spend.
 
@@ -2360,8 +2365,14 @@ def _cost_guard_failure(
     operator asked for a ceiling -- uncapped runs are untouched.
     """
 
-    if limit_micro_usd is None or not usage_records:
+    if limit_micro_usd is None:
         return None
+    if not usage_records:
+        # Before the first call there is genuinely nothing to measure, so the run
+        # is allowed to start. After a call has been made, an empty record means
+        # the provider reported no usage at all -- indistinguishable, to this
+        # guard, from a run that has already spent everything.
+        return None if rounds_completed <= 0 else "AGENT_COST_UNMEASURABLE"
     aggregate = _aggregate_usage(usage_records)
     amount = aggregate["total_cost_amount"]
     currency = aggregate["cost_currency"]

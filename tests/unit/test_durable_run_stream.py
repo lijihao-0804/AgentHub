@@ -21,6 +21,7 @@ from packages.agent_runtime.event_store import (
     should_persist,
 )
 from packages.agent_runtime.events import AgentEvent, AgentEventType
+from packages.agent_runtime.frozen import parse_frozen_agent_spec
 from packages.agent_runtime.publish import _validate_runtime_config
 from packages.agent_runtime.runtime import _cost_guard_failure
 from packages.agent_runtime.stream_hub import RunStreamHub, RunStreamRegistry
@@ -236,6 +237,18 @@ def test_an_unpriced_or_foreign_currency_run_stops_rather_than_pretending():
     assert _cost_guard_failure(usage("0.001", "EUR"), 5_000) == "AGENT_COST_UNMEASURABLE"
 
 
+def test_a_provider_that_reports_no_usage_at_all_stops_the_run():
+    """The silent hole: a ceiling with nothing to measure must not read as a pass.
+
+    A provider that returns no usage leaves the record list empty however much the
+    run has spent, which is why emptiness alone cannot mean "nothing spent yet".
+    """
+
+    assert _cost_guard_failure([], 5_000, rounds_completed=0) is None
+    assert _cost_guard_failure([], 5_000, rounds_completed=1) == "AGENT_COST_UNMEASURABLE"
+    assert _cost_guard_failure([], None, rounds_completed=3) is None
+
+
 # --- frozen config ----------------------------------------------------------
 
 
@@ -247,6 +260,56 @@ def test_a_ceiling_is_frozen_as_given():
     assert _validate_runtime_config({"max_cost_micro_usd": 250_000})["max_cost_micro_usd"] == (
         250_000
     )
+
+
+def _resolved_spec(runtime: dict) -> dict:
+    return {
+        "spec_schema_version": 2,
+        "model": {
+            "profile_id": str(uuid4()),
+            "credential_ref": str(uuid4()),
+            "provider": "deepseek",
+            "model": "deepseek-chat",
+            "temperature": "0.2",
+            "max_tokens": 2048,
+            "timeout_seconds": "60",
+            "capabilities": {
+                "vision": False,
+                "streaming": True,
+                "tool_calling": True,
+                "structured_output": True,
+                "max_context_tokens": 65536,
+            },
+        },
+        "prompt": {"system_prompt": "You are helpful.", "prompt_version": 1},
+        "retrieval": {"knowledge_bindings": []},
+        "runtime": runtime,
+    }
+
+
+@pytest.mark.parametrize("ceiling", [None, 1, 250_000])
+def test_the_ceiling_survives_the_freeze_boundary(ceiling):
+    """A ceiling the executing spec does not carry is a ceiling that does nothing.
+
+    Publication validates ``max_cost_micro_usd`` and writes it into the resolved
+    spec; the guard reads it off the frozen runtime. If the parse in between drops
+    the key, both halves pass their own tests and the run is silently uncapped.
+    """
+
+    spec = parse_frozen_agent_spec(
+        _resolved_spec({"max_steps": 8, "max_cost_micro_usd": ceiling}),
+        workspace_id=uuid4(),
+    )
+
+    assert spec.runtime["max_cost_micro_usd"] == ceiling
+
+
+@pytest.mark.parametrize("ceiling", [0, -1, True, "5000", 100_000_001])
+def test_a_spec_carrying_an_impossible_ceiling_is_refused(ceiling):
+    with pytest.raises(AgentHubError):
+        parse_frozen_agent_spec(
+            _resolved_spec({"max_cost_micro_usd": ceiling}), workspace_id=uuid4()
+        )
 
 
 @pytest.mark.parametrize("value", [0, -1, True, 1.5, "1000", 100_000_001])

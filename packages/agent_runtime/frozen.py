@@ -11,6 +11,7 @@ from uuid import UUID
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
     DEFAULT_RUNTIME_LIMITS,
+    MAX_RUN_COST_LIMIT_MICRO_USD,
     MAX_RUNTIME_LIMITS,
 )
 from packages.core.errors.exceptions import AgentHubError
@@ -98,6 +99,18 @@ def parse_frozen_agent_spec(
         ):
             raise _invalid_binding()
         runtime[key] = value
+    # The cost ceiling is carried across the freeze boundary by hand rather than
+    # with the scalar limits above: it is the one runtime value that may legally
+    # be absent, and a published ceiling the executing spec does not carry is a
+    # ceiling that does nothing.
+    cost_limit = runtime_value.get("max_cost_micro_usd")
+    if cost_limit is not None and (
+        isinstance(cost_limit, bool)
+        or not isinstance(cost_limit, int)
+        or not 1 <= cost_limit <= MAX_RUN_COST_LIMIT_MICRO_USD
+    ):
+        raise _invalid_binding()
+    runtime["max_cost_micro_usd"] = cost_limit
     context_budget_value = runtime_value.get("context_budget", _DEFAULT_CONTEXT_BUDGET)
     if not isinstance(context_budget_value, Mapping):
         raise _invalid_binding()
