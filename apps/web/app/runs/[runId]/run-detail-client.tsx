@@ -27,6 +27,80 @@ function shortId(value: string): string {
 
 type RunView = { detail: RunDetail; timeline: RunTimelineEntry[] };
 
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+type ThreadContextFacts = {
+  turns_available: number | null;
+  turns_included: number | null;
+  turns_dropped_by_window: number | null;
+  max_turns: number | null;
+};
+
+function threadContext(entry: RunTimelineEntry): ThreadContextFacts | null {
+  const raw = entry.metadata.thread_context;
+  if (typeof raw !== "object" || raw === null) return null;
+  const record = raw as Record<string, unknown>;
+  return {
+    turns_available: numberOrNull(record.turns_available),
+    turns_included: numberOrNull(record.turns_included),
+    turns_dropped_by_window: numberOrNull(record.turns_dropped_by_window),
+    max_turns: numberOrNull(record.max_turns),
+  };
+}
+
+type ContextFacts = {
+  contextLimit: number | null;
+  reservedOutput: number | null;
+  estimatedBefore: number | null;
+  estimatedAfter: number | null;
+  droppedExchanges: number;
+  truncated: boolean;
+  history: ThreadContextFacts | null;
+  sawAdmission: boolean;
+};
+
+/**
+ * The context story is spread across two step kinds: PREPARE knows how much
+ * thread history was replayed, and each MODEL step knows what the budget then
+ * did with it. Reading only one of them would answer half the question.
+ *
+ * The admission numbers are taken from the widest round rather than the last:
+ * a run that trimmed on round three and not on round four did trim, and saying
+ * otherwise would hide exactly the event a reader came here to find.
+ */
+function contextFacts(timeline: RunTimelineEntry[]): ContextFacts {
+  const facts: ContextFacts = {
+    contextLimit: null,
+    reservedOutput: null,
+    estimatedBefore: null,
+    estimatedAfter: null,
+    droppedExchanges: 0,
+    truncated: false,
+    history: null,
+    sawAdmission: false,
+  };
+  for (const entry of timeline) {
+    const history = threadContext(entry);
+    if (history) facts.history = history;
+    const limit = numberOrNull(entry.metadata.context_limit);
+    if (limit === null) continue;
+    facts.sawAdmission = true;
+    facts.contextLimit = Math.max(facts.contextLimit ?? 0, limit);
+    const reserved = numberOrNull(entry.metadata.reserved_output);
+    if (reserved !== null) facts.reservedOutput = Math.max(facts.reservedOutput ?? 0, reserved);
+    const before = numberOrNull(entry.metadata.estimated_input_before);
+    if (before !== null) facts.estimatedBefore = Math.max(facts.estimatedBefore ?? 0, before);
+    const after = numberOrNull(entry.metadata.estimated_input_after);
+    if (after !== null) facts.estimatedAfter = Math.max(facts.estimatedAfter ?? 0, after);
+    const dropped = numberOrNull(entry.metadata.dropped_exchange_count);
+    if (dropped !== null) facts.droppedExchanges = Math.max(facts.droppedExchanges, dropped);
+    if (entry.metadata.truncated === true) facts.truncated = true;
+  }
+  return facts;
+}
+
 export default function RunDetailClient({ runId }: { runId: string }) {
   const {
     t,
@@ -61,6 +135,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   const view = useWorkspaceData<RunView>(load, `run-detail:${workspaceId}:${runId}`);
   const run = view.data?.detail ?? null;
   const timeline = view.data?.timeline ?? [];
+  const context = contextFacts(timeline);
   const error = view.error;
 
   // A replay belongs to the workspace session that created it; switching
@@ -142,6 +217,18 @@ export default function RunDetailClient({ runId }: { runId: string }) {
       case "RUN_STARTED": {
         const versionId = typeof meta.agent_version_id === "string" ? meta.agent_version_id : null;
         return versionId ? t("timeline.subtitle.agentVersion", { id: shortId(versionId) }) : null;
+      }
+      case "PREPARE": {
+        const history = threadContext(entry);
+        if (!history || history.turns_included === null) return t("timeline.subtitle.historyNone");
+        return t("timeline.subtitle.historyReplayed", {
+          included: String(history.turns_included),
+          available: String(history.turns_available ?? history.turns_included),
+        });
+      }
+      case "MODEL": {
+        const dropped = numberOrNull(meta.dropped_exchange_count) ?? 0;
+        return dropped > 0 ? t("timeline.subtitle.contextTrimmed", { count: String(dropped) }) : null;
       }
       case "FAILURE":
         return entry.failure_code ? t("timeline.subtitle.failureCode", { code: entry.failure_code }) : null;
@@ -292,6 +379,81 @@ export default function RunDetailClient({ runId }: { runId: string }) {
             open={addToEvaluationOpen}
             onClose={() => setAddToEvaluationOpen(false)}
           />
+
+          <Panel title={t("run.context.title")} eyebrow={t("run.context.eyebrow")}>
+            {!context.sawAdmission ? (
+              <EmptyState title={t("run.context.empty")} hint={t("run.context.emptyHint")} />
+            ) : (
+              <>
+                <div className="run-facts">
+                  <span>
+                    {t("run.context.contextLimit")}
+                    <strong>{context.contextLimit === null ? "—" : formatCount(context.contextLimit)}</strong>
+                  </span>
+                  <span>
+                    {t("run.context.reservedOutput")}
+                    <strong>{context.reservedOutput === null ? "—" : formatCount(context.reservedOutput)}</strong>
+                  </span>
+                  <span>
+                    {t("run.context.estimatedBefore")}
+                    <strong>{context.estimatedBefore === null ? "—" : formatCount(context.estimatedBefore)}</strong>
+                  </span>
+                  <span>
+                    {t("run.context.estimatedAfter")}
+                    <strong>{context.estimatedAfter === null ? "—" : formatCount(context.estimatedAfter)}</strong>
+                  </span>
+                  <span>
+                    {t("run.context.droppedExchanges")}
+                    <strong>{formatCount(context.droppedExchanges)}</strong>
+                  </span>
+                  <span>
+                    {t("run.context.truncated")}
+                    <strong>
+                      {context.truncated ? t("run.context.truncatedYes") : t("run.context.truncatedNo")}
+                    </strong>
+                  </span>
+                </div>
+                {context.truncated && <p className="state-hint">{t("run.context.trimmedNotice")}</p>}
+                <p className="eyebrow">{t("run.context.historyTitle")}</p>
+                {context.history === null ? (
+                  <p className="state-hint">{t("run.context.standalone")}</p>
+                ) : (
+                  <div className="run-facts">
+                    <span>
+                      {t("run.context.turnsAvailable")}
+                      <strong>
+                        {context.history.turns_available === null
+                          ? "—"
+                          : formatCount(context.history.turns_available)}
+                      </strong>
+                    </span>
+                    <span>
+                      {t("run.context.turnsIncluded")}
+                      <strong>
+                        {context.history.turns_included === null
+                          ? "—"
+                          : formatCount(context.history.turns_included)}
+                      </strong>
+                    </span>
+                    <span>
+                      {t("run.context.turnsDroppedByWindow")}
+                      <strong>
+                        {context.history.turns_dropped_by_window === null
+                          ? "—"
+                          : formatCount(context.history.turns_dropped_by_window)}
+                      </strong>
+                    </span>
+                    <span>
+                      {t("run.context.maxTurns")}
+                      <strong>
+                        {context.history.max_turns === null ? "—" : formatCount(context.history.max_turns)}
+                      </strong>
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+          </Panel>
 
           <Panel title={t("timeline.title")} eyebrow={t("timeline.eyebrow")}>
             {timeline.length === 0 ? (

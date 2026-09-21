@@ -2445,13 +2445,23 @@ def _categorize_messages(
     from the current task: a user message is normally mandatory context, and a
     thread ten turns long would otherwise pin ten unevictable questions in the
     window and leave no room for the eleventh.
+
+    Replayed history is grouped by turn rather than by message. ``_thread_history``
+    emits exactly one user message and one assistant message per finished turn, so
+    the pair at history offsets ``2n`` and ``2n + 1`` is one exchange. Grouping them
+    together is what makes the budget policy's atomicity promise true for
+    conversation as well as for tool exchanges: dropping the oldest group now
+    removes a question together with its answer, instead of evicting the question
+    and leaving the model an answer to nothing.
     """
 
     categorized: list[ContextMessage] = []
     tool_groups: dict[str, tuple[str, int]] = {}
-    history_end = _SYSTEM_PREFIX_LENGTH + max(history_message_count, 0)
+    history_start = _SYSTEM_PREFIX_LENGTH
+    history_end = history_start + max(history_message_count, 0)
     for index, message in enumerate(messages):
         is_history = index < history_end
+        history_turn = (index - history_start) // 2 if is_history else None
         if index == 0 and message.role == "system":
             category = ContextCategory.RUNTIME_POLICY
             group = None
@@ -2462,7 +2472,7 @@ def _categorize_messages(
             category = (
                 ContextCategory.CONVERSATION if is_history else ContextCategory.CURRENT_USER_TASK
             )
-            group = ("conversation", index) if is_history else ("user", index)
+            group = ("conversation", history_turn) if is_history else ("user", index)
         elif message.role == "tool":
             category = (
                 ContextCategory.RAG_EVIDENCE
@@ -2480,6 +2490,8 @@ def _categorize_messages(
                 group = ("tool_exchange", index, *ids)
                 for call_id in ids:
                     tool_groups[call_id] = group
+            elif is_history:
+                group = ("conversation", history_turn)
             else:
                 group = ("conversation", index)
         categorized.append(ContextMessage(message, category, group))

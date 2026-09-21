@@ -57,6 +57,24 @@ _SAFE_METADATA_KEYS = frozenset(
     }
 )
 
+# One nested block is allowed through, and only because its shape is fixed and
+# entirely numeric.  ``thread_context`` says how many earlier turns were replayed
+# into this run and how many the window left behind; without it the timeline can
+# show that context was trimmed but never say what was trimmed.  The inner keys
+# are whitelisted separately so that a future producer cannot widen the payload
+# by accident, and the value filter below still rejects anything non-scalar.
+_SAFE_NESTED_METADATA_KEYS: dict[str, frozenset[str]] = {
+    "thread_context": frozenset(
+        {
+            "thread_id",
+            "turns_available",
+            "turns_included",
+            "turns_dropped_by_window",
+            "max_turns",
+        }
+    ),
+}
+
 
 @dataclass(frozen=True, slots=True)
 class RunCursor:
@@ -146,6 +164,21 @@ def _require_read(context: WorkspaceExecutionContext) -> UUID:
 def _safe_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
     result: dict[str, Any] = {}
     for key, value in metadata.items():
+        inner_keys = _SAFE_NESTED_METADATA_KEYS.get(key)
+        if inner_keys is not None:
+            if isinstance(value, Mapping):
+                nested = {
+                    inner_key: inner_value
+                    for inner_key, inner_value in value.items()
+                    if inner_key in inner_keys
+                    and (
+                        inner_value is None
+                        or isinstance(inner_value, (bool, int, float, str))
+                    )
+                }
+                if nested:
+                    result[key] = nested
+            continue
         if key not in _SAFE_METADATA_KEYS:
             continue
         if value is None or isinstance(value, (bool, int, float, str)):
@@ -577,6 +610,9 @@ def _map_step(step: RunStep) -> TimelineSource | None:
         )
     )
     kind_map = {
+        # PREPARE used to be dropped here, which made the one step that knows how
+        # much conversation history entered the run invisible to every reader.
+        "PREPARE": "FAILURE" if step.status == "FAILED" else "PREPARE",
         "MODEL": "MODEL",
         "TOOL_PROPOSAL": "TOOL",
         "TOOL_EXECUTE": "TOOL",
