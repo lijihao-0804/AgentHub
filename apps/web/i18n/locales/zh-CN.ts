@@ -1358,6 +1358,8 @@ export const zhCN: MessageSchema = {
     needsProfile: "请先在「设置 › 模型」中创建模型配置。",
     bindingMode: "绑定模式",
     defaultBindingMode: "默认知识绑定模式",
+    bindingModeLatest: "跟随最新快照",
+    bindingModePinned: "固定到指定快照",
     promptVersion: "提示词版本",
     advanced: "高级选项",
     advancedHint: "可选的运行时限制，留空则使用服务端默认值。",

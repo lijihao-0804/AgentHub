@@ -1,6 +1,12 @@
 /* Workspace switcher and user menu popovers. */
 /* Topbar workspace selector + user menu */
-.ws-selector { position: relative; }
+/*
+ * The workspace name is the only topbar content that can be shortened without
+ * losing a control, so this is the item that absorbs a narrow viewport. Both
+ * levels need `min-width: 0`: the flex item, so it is allowed to shrink below
+ * its content, and the trigger, so the ellipsis on `.ws-path` can engage.
+ */
+.ws-selector { min-width: 0; position: relative; }
 .ws-selector-trigger {
   align-items: center;
   background: var(--surface-raised);
@@ -11,10 +17,17 @@
   display: inline-flex;
   font-size: 0.85rem;
   gap: 0.5rem;
-  max-width: 20rem;
+  max-width: min(20rem, 100%);
+  min-width: 0;
   padding: 0.4rem 0.75rem;
 }
 .ws-selector-trigger .ws-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The organisation is context; the workspace is where you are. When the
+   topbar runs out of room the context goes first. */
+.ws-selector-trigger .ws-org-prefix { color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
+@media (max-width: 720px) {
+  .ws-selector-trigger .ws-org-prefix { display: none; }
+}
 .ws-selector-trigger .ws-org { color: var(--text-muted); }
 .ws-menu {
   background: var(--surface-raised);
@@ -46,7 +59,7 @@
 .ws-menu-item:hover { background: var(--accent-soft); }
 .ws-menu-item[aria-current="true"] { background: var(--accent-soft); color: var(--accent); }
 .ws-menu-empty { color: var(--text-muted); font-size: 0.8rem; padding: 0.45rem 0.55rem; }
-.user-menu { position: relative; }
+.user-menu { flex-shrink: 0; position: relative; }
 .user-menu .ws-menu { min-width: 13rem; }
 .user-email { color: var(--text-muted); font-size: 0.8rem; overflow: hidden; padding: 0.45rem 0.55rem; text-overflow: ellipsis; white-space: nowrap; }
 .ws-menu-divider { border-top: 1px solid var(--border); margin: var(--space-2) 0; }

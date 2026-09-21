@@ -1368,6 +1368,10 @@ export const enUS = {
     needsProfile: "Create a model profile in Settings › Models first.",
     bindingMode: "Binding mode",
     defaultBindingMode: "Default knowledge binding mode",
+    // The wire values are LATEST/PINNED; these labels say what they mean, so
+    // the option does not ask the reader to already know the enum.
+    bindingModeLatest: "Follow the latest snapshot",
+    bindingModePinned: "Pin to one snapshot",
     promptVersion: "Prompt version",
     advanced: "Advanced",
     advancedHint: "Optional runtime limits. Leave blank to use server defaults.",

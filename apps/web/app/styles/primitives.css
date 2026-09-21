@@ -152,6 +152,17 @@
   max-height: 20rem;
   overflow: auto;
   padding: var(--space-3);
+  /*
+   * Wrap rather than scroll sideways. Two reasons, and the second is the
+   * one that bites: an approver reading a tool payload should not have to
+   * drag a horizontal scrollbar across the thing they are approving; and
+   * an unwrapped <pre> has a max-content width of the longest line, which
+   * an `auto` grid track will happily grow to — past the edge of the
+   * viewport, taking the whole page's layout with it. Wrapping bounds the
+   * max-content contribution to the longest unbreakable token.
+   */
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .form-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(3, minmax(0, 1fr)); }

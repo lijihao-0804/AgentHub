@@ -12,7 +12,9 @@ export default function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
   const { t } = useI18n();
   return (
-    <div className="lang-switch" role="group" aria-label={t("shell.theme")}>
+    // Shares the pill styling with the language switch; the second class is
+    // what lets a narrow topbar drop this one and keep that one.
+    <div className="lang-switch theme-switch" role="group" aria-label={t("shell.theme")}>
       <button
         type="button"
         className="lang-option"

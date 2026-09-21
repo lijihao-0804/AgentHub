@@ -15,7 +15,11 @@
 .breadcrumbs a { color: var(--text-muted); text-decoration: none; }
 .breadcrumbs a:hover { color: var(--text); text-decoration: underline; }
 .breadcrumbs span[aria-current="page"] { color: var(--text); font-weight: 600; }
-.breadcrumb-separator { color: var(--border-strong); }
+/* A recessive-text token, not a border one. The separator is aria-hidden, so
+   it is exempt from the contrast minimum, but --border-strong is tuned to be
+   read as a hairline against a surface and renders this glyph at about 1.9:1
+   in the light theme -- present in the DOM and invisible on the screen. */
+.breadcrumb-separator { color: var(--text-placeholder); }
 
 .page-header { margin-bottom: var(--space-4); max-width: 46rem; }
 .page-lede { color: var(--text-muted); line-height: 1.6; margin-top: 0.4rem; }
@@ -303,13 +307,22 @@ a.stat-row:hover { border-color: var(--accent); }
 /* Approvals */
 .approval-counts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .approval-counts .status-badge { font-size: 0.8rem; padding: 0.35rem 0.8rem; }
-.approval-list { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+/*
+ * Both of these state their single column as `minmax(0, 1fr)` rather than
+ * letting it be implicit. An implicit `auto` track sizes to max-content and
+ * is not clamped by its container, so one wide descendant — an expanded raw
+ * payload, a long unbroken id — stretches the card, then the list, then the
+ * page. Capping the track at the container makes the card the authority on
+ * its own width.
+ */
+.approval-list { display: grid; gap: var(--space-3); grid-template-columns: minmax(0, 1fr); margin-top: var(--space-4); }
 .approval-card {
   background: var(--surface-raised);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   display: grid;
   gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
   padding: var(--space-4) var(--space-5);
 }
 .approval-header { align-items: flex-start; display: flex; gap: var(--space-3); justify-content: space-between; }

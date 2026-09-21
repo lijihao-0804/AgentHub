@@ -652,8 +652,8 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               value={bindingMode}
               onChange={(event) => setBindingMode(event.target.value as KnowledgeBindingMode)}
             >
-              <option value="LATEST">LATEST</option>
-              <option value="PINNED">PINNED</option>
+              <option value="LATEST">{t("agents.bindingModeLatest")}</option>
+              <option value="PINNED">{t("agents.bindingModePinned")}</option>
             </select>
           </label>
 
@@ -983,8 +983,8 @@ function KnowledgeBindingRow({
             onChange({ ...binding, binding_mode: mode, snapshot_id: mode === "PINNED" ? binding.snapshot_id : null });
           }}
         >
-          <option value="LATEST">LATEST</option>
-          <option value="PINNED">PINNED</option>
+          <option value="LATEST">{t("agents.bindingModeLatest")}</option>
+          <option value="PINNED">{t("agents.bindingModePinned")}</option>
         </select>
       </label>
       {pinned ? (
