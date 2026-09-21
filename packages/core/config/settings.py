@@ -41,14 +41,30 @@ class Settings(BaseSettings):
     # Evidence whose rerank score falls below this is dropped, so a question the
     # corpus cannot answer yields an empty evidence set instead of the six
     # least-bad chunks. Off by default on purpose: the usable value is a
-    # property of a corpus, not a constant. Measured on a 60-document
-    # enterprise corpus, unanswerable questions topped out at +0.10 while the
-    # weakest answerable one scored +1.88 -- the distributions did not overlap,
-    # so anything in that gap works *there* and nowhere else by assumption.
+    # property of a corpus, not a constant, and the usable *window* is narrow.
+    # Measured on a 60-document enterprise corpus: the strongest unanswerable
+    # question scored +0.1038 and the weakest answerable one +0.1483, so the
+    # whole window is 0.04 wide. Calibrate against the weakest score of any
+    # document a real question needs -- not against top-1 scores, which are far
+    # higher and suggest a margin that is not there. At +0.13 this corpus
+    # rejected 10/10 unanswerable questions and lost no answerable one; at
+    # +1.0, still well under the weakest top-1, it silently lost three.
     knowledge_min_rerank_score: float | None = Field(default=None, ge=-100, le=100)
     # Subtracted from the rerank score of a chunk whose document has been
     # superseded. A penalty rather than a filter: "what did the old policy
     # say" is a legitimate question, and filtering would make it unanswerable.
+    #
+    # Off by default because measurement says a constant cannot do this job:
+    # on the corpus above, the score gaps of questions wanting the current
+    # version (1.07, 0.10) interleave with those wanting the retired one
+    # (0.87, 0.15, 1.83), so no value separates them -- 2.0 fixed two cases and
+    # broke three. Worse, it interacts with the floor: demoting a retired
+    # document pushes correct evidence below the unanswerable questions, which
+    # inverts the separation the floor depends on. Enable it only on a corpus
+    # where a retired document is never the answer, and not with a floor.
+    # Version *selection* belongs to the model, which sees the question: the
+    # ``superseded`` and ``effective_date`` fields on every search_knowledge
+    # row answered 4/4 of these cases that the ranking layer could not.
     knowledge_superseded_rank_penalty: float = Field(default=0.0, ge=0, le=100)
     blob_root: str = "data/blobs"
     knowledge_max_upload_bytes: int = Field(default=10 * 1024 * 1024, ge=1)
