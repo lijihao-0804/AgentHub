@@ -41,12 +41,33 @@ Dropping the connection no longer aborts the run. A run is aborted only after
 reconnecting inside that window cancels the abort. A run executing in the worker
 is never aborted for being unwatched, because unwatched is its normal state.
 
+A repeated `client_token` on `POST .../threads/{thread_id}/turns/stream` is not a
+new turn and is not an empty stream either: the request is answered with the
+stream of the turn that token already opened, replayed from sequence 0. If the
+token's turn exists but has not been attached to a run yet -- two requests
+racing with the same token -- the second gets `THREAD_TURN_IN_PROGRESS` (409)
+and should retry rather than receive a stream that will never carry anything.
+
 Settings:
 
 | Setting | Default | Meaning |
 |---|---|---|
 | `AGENTHUB_RUN_STREAM_GRACE_SECONDS` | `60.0` | How long an unwatched run keeps going before it is aborted. |
 | `AGENTHUB_RUN_EXECUTION_IN_WORKER` | `false` | When on, `POST .../runs/stream` enqueues the run for the Celery worker and the request becomes an ordinary follower of it. Off keeps execution in the API process, which is what Playground single-shot debugging relies on. |
+
+## What a run response shows, and to whom
+
+Reading a run requires `workspace_read`, which every VIEWER holds. That buys the
+run's identity, status, counters, token usage and cost -- the same safe surface
+the M6 observability projection exposes. It does not buy `input_text` or
+`final_output`: those are the user's prompt verbatim and the model's answer
+verbatim, and a role that may not run an agent may not read what was sent to one.
+
+For a caller holding only `workspace_read`, both fields are returned as `null`.
+A caller holding `agent_run` gets them populated. The fields are always present
+in the response shape -- their presence is frozen contract, their content is
+gated -- so clients must treat `null` as "withheld or absent", not as "empty
+string". No permission was added for this; `agent_run` already existed.
 
 ## Per-run cost ceiling
 
