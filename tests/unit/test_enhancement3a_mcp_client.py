@@ -33,6 +33,7 @@ from packages.mcp.client import (
     McpRemoteError,
 )
 from packages.mcp.models import McpAuthType
+from tests.support.settings import declared_settings
 
 pytestmark = pytest.mark.asyncio
 
@@ -46,7 +47,10 @@ def target(endpoint: str = "https://mcp.example.com/mcp") -> McpConnectionTarget
 
 
 def settings(**overrides: object) -> Settings:
-    return Settings(testing=True, environment="test", **overrides)
+    # Declared defaults only. A test that drives the adapter's *default*
+    # behaviour has to start from the code's own defaults, not from whatever
+    # the developer running it has configured locally.
+    return declared_settings(testing=True, environment="test", **overrides)
 
 
 def tool(

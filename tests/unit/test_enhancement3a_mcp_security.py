@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import pytest
 
-from packages.core.config.settings import Settings
 from packages.mcp.security import (
     DNS_FAILED,
     ENDPOINT_INVALID,
@@ -24,6 +23,7 @@ from packages.mcp.security import (
     is_forbidden_address,
     parse_endpoint_url,
 )
+from tests.support.settings import declared_settings
 
 PUBLIC = "93.184.216.34"
 
@@ -206,8 +206,12 @@ def test_the_opt_in_does_not_widen_the_scheme_allowlist() -> None:
 
 
 def test_the_opt_in_defaults_to_off_and_is_not_inferred_from_the_environment() -> None:
-    assert Settings(testing=True, environment="local").mcp_allow_private_targets is False
-    production = Settings(testing=True, environment="production", auth_jwt_secret="x" * 32)
+    # Read from the declared defaults, not from this machine's .env: the point
+    # of the assertion is that nothing turns the opt-in on implicitly.
+    assert declared_settings(testing=True, environment="local").mcp_allow_private_targets is False
+    production = declared_settings(
+        testing=True, environment="production", auth_jwt_secret="x" * 32
+    )
     assert production.mcp_allow_private_targets is False
 
 
@@ -227,7 +231,9 @@ def test_peer_address_is_rechecked_after_the_connection_is_made() -> None:
 
 def cipher() -> McpSecretCipher:
     return McpSecretCipher.from_settings(
-        Settings(testing=True, environment="test", credential_master_key="unit-test-master-key")
+        declared_settings(
+            testing=True, environment="test", credential_master_key="unit-test-master-key"
+        )
     )
 
 
@@ -243,7 +249,7 @@ def test_a_token_round_trips_through_versioned_ciphertext() -> None:
 
 def test_ciphertext_from_another_master_key_cannot_be_read() -> None:
     other = McpSecretCipher.from_settings(
-        Settings(testing=True, environment="test", credential_master_key="a-different-key")
+        declared_settings(testing=True, environment="test", credential_master_key="a-different-key")
     )
 
     with pytest.raises(McpSecretError):
@@ -261,7 +267,7 @@ def test_malformed_ciphertext_is_refused_without_echoing_it(bad: str) -> None:
 def test_encryption_is_unavailable_outside_development_without_a_master_key() -> None:
     with pytest.raises(McpSecretError):
         McpSecretCipher.from_settings(
-            Settings(
+            declared_settings(
                 testing=True,
                 environment="production",
                 auth_jwt_secret="x" * 32,
