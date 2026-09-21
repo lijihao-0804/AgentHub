@@ -41,6 +41,11 @@ class ContextCategory(StrEnum):
     RAG_EVIDENCE = "RAG_EVIDENCE"
     TOOL_RESULT = "TOOL_RESULT"
     CONVERSATION = "CONVERSATION"
+    # Long-term memory injected from an earlier conversation.  Evidence, not
+    # instruction: a preference recorded three months ago must never be able to
+    # push the question being asked now out of the window, which is exactly
+    # what putting it in the mandatory tier would let it do.
+    MEMORY = "MEMORY"
 
 
 _MANDATORY_CATEGORIES = frozenset(
@@ -52,7 +57,14 @@ _MANDATORY_CATEGORIES = frozenset(
     }
 )
 _PROJECTABLE_CATEGORIES = frozenset(
-    {ContextCategory.RAG_EVIDENCE, ContextCategory.TOOL_RESULT}
+    {ContextCategory.RAG_EVIDENCE, ContextCategory.TOOL_RESULT, ContextCategory.MEMORY}
+)
+# Content that entered the window from outside the published agent version.
+# Tool output is untrusted because a remote system produced it; memory is
+# untrusted because a model wrote it.  Neither may promote itself by putting a
+# friendlier ``trust`` value in its own payload.
+_UNTRUSTED_CATEGORIES = frozenset(
+    {ContextCategory.TOOL_RESULT, ContextCategory.MEMORY}
 )
 _ALL_CATEGORIES = frozenset(ContextCategory)
 _PROJECTION_UNAVAILABLE = object()
@@ -510,11 +522,23 @@ class ContextBudgetPolicy:
         items: tuple[_NormalizedMessage, ...],
     ) -> tuple[_NormalizedMessage, ...]:
         projected: list[_NormalizedMessage] = []
-        for category, cap in (
-            (ContextCategory.RAG_EVIDENCE, self.config.max_retrieval_tokens),
-            (ContextCategory.TOOL_RESULT, self.config.max_tool_result_tokens),
+        # Memory and retrieval share one evidence pool.  They are the same kind
+        # of thing -- external evidence injected into the prompt -- and giving
+        # memory its own budget key would change ``DEFAULT_CONTEXT_BUDGET`` and
+        # therefore the published spec hash of every agent in the estate, for a
+        # feature almost none of them have enabled.  Memory is served first: it
+        # is capped at a handful of short statements, so it cannot starve
+        # retrieval, while retrieval could trivially starve it.
+        pools = {
+            "evidence": self.config.max_retrieval_tokens,
+            "tool_result": self.config.max_tool_result_tokens,
+        }
+        for category, pool in (
+            (ContextCategory.MEMORY, "evidence"),
+            (ContextCategory.RAG_EVIDENCE, "evidence"),
+            (ContextCategory.TOOL_RESULT, "tool_result"),
         ):
-            remaining = cap
+            remaining = pools[pool]
             category_items = [item for item in items if item.category is category]
             if category is ContextCategory.TOOL_RESULT:
                 # Newer observations belong to the newest exchange more often
@@ -541,6 +565,7 @@ class ContextBudgetPolicy:
                         was_projected=was_projected,
                     )
                 )
+            pools[pool] = remaining
 
         projected_by_index = {item.index: item for item in projected}
         result: list[_NormalizedMessage] = []
@@ -692,7 +717,7 @@ class ContextBudgetPolicy:
             # may still be too large for an intentionally pathological custom
             # estimator, in which case the item is omitted safely.
             marker: dict[str, Any] = {"truncated": True}
-            if category is ContextCategory.TOOL_RESULT:
+            if category in _UNTRUSTED_CATEGORIES:
                 marker["trust"] = "UNTRUSTED"
             marker_message = replace(item.message, content=_json_dumps(marker))
             marker_estimated = self._estimate_message(marker_message)
@@ -916,11 +941,12 @@ def _project_json_value(
         return _PROJECTION_UNAVAILABLE, True
     normalized = _json_safe(value)
     trust_fields: dict[str, Any] = {}
-    if category is ContextCategory.TOOL_RESULT:
-        # Tool output is an untrusted boundary regardless of labels supplied
-        # by the tool itself.  Never allow a payload to promote itself.
+    if category in _UNTRUSTED_CATEGORIES:
+        # Tool output and recalled memory are untrusted boundaries regardless
+        # of labels supplied by the payload itself.  Never allow a payload to
+        # promote itself.
         trust_fields["trust"] = "UNTRUSTED"
-    if isinstance(normalized, Mapping) and category is not ContextCategory.TOOL_RESULT:
+    if isinstance(normalized, Mapping) and category not in _UNTRUSTED_CATEGORIES:
         for key in ("trust", "data_trust"):
             if key in normalized:
                 trust_fields[key] = normalized[key]
@@ -930,7 +956,12 @@ def _project_json_value(
         candidate = dict(normalized) if isinstance(normalized, Mapping) else normalized
         if isinstance(candidate, dict):
             for key, trust in trust_fields.items():
-                candidate.setdefault(key, trust)
+                # Assigned, not defaulted. For an untrusted category the label
+                # is forced, and a payload that already carries ``"trust":
+                # "SYSTEM"`` is exactly the case this exists to defeat; for a
+                # trusted one the value was read out of this same mapping, so
+                # writing it back changes nothing.
+                candidate[key] = trust
             if _json_estimate(candidate, estimator) <= budget:
                 return candidate, False
 

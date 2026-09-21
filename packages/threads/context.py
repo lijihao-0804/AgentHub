@@ -8,7 +8,6 @@ and anything cleverer would be a new abstraction the runtime cannot explain.
 
 from __future__ import annotations
 
-import re
 from uuid import UUID
 
 from sqlalchemy import or_, select
@@ -21,6 +20,7 @@ from packages.agent_runtime.work_layer import (
     ThreadTurnContext,
 )
 from packages.artifacts.models import Artifact
+from packages.core.text import search_terms
 from packages.threads.models import ThreadTurn
 
 _SUCCEEDED = "SUCCEEDED"
@@ -31,51 +31,10 @@ MAX_REF_TITLE = 80
 # save.
 MAX_HIT_INPUT = 300
 MAX_HIT_OUTPUT = 800
-MAX_SEARCH_TERMS = 8
-MIN_TERM_LENGTH = 2
-_CJK = r"㐀-䶿一-鿿豈-﫿"
-_LATIN_WORD = re.compile(r"[0-9A-Za-z_]+")
-_CJK_RUN = re.compile(f"[{_CJK}]+")
-
-
-def _terms(query: str) -> list[str]:
-    """Split a question into the strings worth matching on.
-
-    Deliberately not ``to_tsquery``. PostgreSQL ships no Chinese tokenizer, so
-    a Chinese question becomes one lexeme and full-text search degrades into
-    exact-sentence matching — precisely the case this tool exists for. Latin
-    text is split on word boundaries; CJK runs are cut into overlapping
-    bigrams, which is what every CJK search engine does in the absence of a
-    dictionary and what makes "上次的预算" find a turn that said "预算是".
-
-    The corpus is one thread — tens of rows — so scanning it with
-    case-insensitive containment costs nothing and answers correctly in both
-    languages, which an index-shaped answer would not.
-    """
-
-    seen: list[str] = []
-
-    def add(term: str) -> bool:
-        if term and term not in seen:
-            seen.append(term)
-        return len(seen) < MAX_SEARCH_TERMS
-
-    for run in _CJK_RUN.finditer(query):
-        text_value = run.group()
-        if len(text_value) == 1:
-            if not add(text_value):
-                return seen
-            continue
-        for index in range(len(text_value) - 1):
-            if not add(text_value[index : index + 2]):
-                return seen
-    for word in _LATIN_WORD.finditer(query):
-        term = word.group().lower()
-        if len(term) < MIN_TERM_LENGTH:
-            continue
-        if not add(term):
-            return seen
-    return seen
+# The thread search shares the project-wide tokenizer; it is kept as a module
+# level alias because "what counts as a term" is the whole reason this search
+# works in Chinese, and a reader looking at the query builder should find it.
+_terms = search_terms
 
 
 def _excerpt(text_value: str, limit: int) -> str:

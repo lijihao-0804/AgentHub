@@ -19,6 +19,7 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
             "apps.worker.tasks.knowledge",
             "apps.worker.tasks.approvals",
             "apps.worker.tasks.evaluation",
+            "apps.worker.tasks.memories",
         ],
     )
     app.conf.update(

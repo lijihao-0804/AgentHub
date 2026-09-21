@@ -12,6 +12,8 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
+from packages.memory.queue import CeleryMemoryWriteQueue
+from packages.memory.store import SqlAlchemyMemoryStore
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.observability import ProductionTraceSink
 from packages.threads.context import SqlAlchemyThreadContextProvider
@@ -28,6 +30,8 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
         raise AgentHubError("DATABASE_NOT_CONFIGURED", "Database access is not configured.", 503)
     service = getattr(app.state, "agent_run_service", None)
     if service is None:
+        from apps.worker.celery_app import create_celery_app
+
         settings = app.state.settings
         trace_sink = ProductionTraceSink()
         components = production_retrieval_components(settings)
@@ -63,6 +67,12 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
             # exactly as it did before threads existed, which is what keeps a
             # Playground run unchanged.
             thread_context_provider=SqlAlchemyThreadContextProvider(factory),
+            # Long-term memory, both halves. Selection reads the store
+            # directly; extraction is queued so that learning never runs on the
+            # path a user is waiting on. Both are no-ops for every agent whose
+            # published spec has not turned the switch on. See ADR-011.
+            memory_selector=SqlAlchemyMemoryStore(factory),
+            memory_writer=CeleryMemoryWriteQueue(create_celery_app(settings)),
             artifact_recorder=ToolResultArtifactRecorder(factory),
             # Held on app.state, so the registry of live runs outlives the
             # request that started any one of them -- which is the whole point.

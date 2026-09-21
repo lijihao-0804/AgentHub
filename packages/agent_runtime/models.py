@@ -315,6 +315,18 @@ class AgentRun(Base):
     effective_knowledge_snapshots: Mapped[list[dict[str, Any]]] = mapped_column(
         JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
     )
+    # The long-term memories this run was given, frozen at its first PREPARE:
+    # ``{"selected_at": <iso8601>, "memory_ids": [...]}``. Selection happens
+    # once; every later PREPARE of the same run -- a durable approval resume, a
+    # replay -- reads this instead of the memory table, so the run's input
+    # cannot change underneath it. An *object* rather than a bare list so that
+    # "selected nothing" is distinguishable from "has not selected yet";
+    # an empty list cannot tell those apart, and the difference is the whole
+    # determinism claim. Empty for every agent that has not turned long-term
+    # memory on. See ADR-011.
+    effective_memory_snapshot: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    )
     model_step_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     tool_call_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     total_input_tokens: Mapped[int | None] = mapped_column(Integer)

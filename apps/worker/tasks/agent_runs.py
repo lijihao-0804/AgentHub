@@ -43,6 +43,8 @@ from packages.core.execution_context.models import PrincipalContext
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
+from packages.memory.queue import CeleryMemoryWriteQueue
+from packages.memory.store import SqlAlchemyMemoryStore
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.observability import ProductionTraceSink
 from packages.threads.context import SqlAlchemyThreadContextProvider
@@ -159,6 +161,8 @@ def _build_service(settings: Settings, factory) -> AgentRunService:
         # differently -- lose its thread history, stop recording artifacts --
         # merely because of which process picked it up.
         thread_context_provider=SqlAlchemyThreadContextProvider(factory),
+        memory_selector=SqlAlchemyMemoryStore(factory),
+        memory_writer=CeleryMemoryWriteQueue(celery_app),
         artifact_recorder=ToolResultArtifactRecorder(factory),
     )
 
