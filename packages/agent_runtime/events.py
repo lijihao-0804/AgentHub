@@ -187,8 +187,11 @@ class AgentEvent:
             "step_id": self.step_id,
             "timestamp": self.timestamp.isoformat(),
             "payload": dict(self.payload),
-            # These are documented AgentHub extensions.  sequence is local
-            # ordering only; it is not an SSE replay guarantee.
+            # These are documented AgentHub extensions. ``sequence`` is the
+            # run's replay cursor: reconnect with
+            # GET .../agent-runs/{id}/stream?after_sequence=<last seen> to
+            # receive what was missed. It is a cursor, not a count -- deltas
+            # are not persisted, so gaps in a replayed stream are normal.
             "sequence": self.sequence,
             "agent_version_id": self.agent_version_id,
         }

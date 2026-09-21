@@ -64,6 +64,9 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
             # Playground run unchanged.
             thread_context_provider=SqlAlchemyThreadContextProvider(factory),
             artifact_recorder=ToolResultArtifactRecorder(factory),
+            # Held on app.state, so the registry of live runs outlives the
+            # request that started any one of them -- which is the whole point.
+            stream_grace_seconds=settings.run_stream_grace_seconds,
         )
         app.state.agent_run_service = service
     return service

@@ -34,6 +34,12 @@ from packages.approvals.models import Approval
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings
 from packages.core.errors.exceptions import AgentHubError
+from packages.evaluation.judge import (
+    JUDGE_OBSERVATION_KEY,
+    AnswerQualityJudge,
+    JudgeRequest,
+    sequence_of_text,
+)
 from packages.evaluation.models import (
     EvaluationCaseResultStatus,
     EvaluationDatasetItem,
@@ -180,11 +186,39 @@ class AgentRuntimeEvaluationDriver:
         *,
         retriever: KnowledgeRetriever | None = None,
         approval_context_factory: Callable[[EvaluationExperimentRun], Awaitable[Any]] | None = None,
+        judge: AnswerQualityJudge | None = None,
     ) -> None:
         self.agent_run_service = agent_run_service
         self.context_factory = context_factory
         self.retriever = retriever
         self.approval_context_factory = approval_context_factory
+        self.judge = judge
+
+    def judge_request(self, item: EvaluationDatasetItem, final_output: Any) -> JudgeRequest | None:
+        """Build the judge input for an open-ended dataset item, or None to skip it.
+
+        Only items that opt in with ``expected["open_ended"] is True`` are judged: the
+        deterministic evaluators remain the only scorer for every other item.
+        """
+        if self.judge is None or item.expected.get("open_ended") is not True:
+            return None
+        if not isinstance(final_output, str) or not final_output.strip():
+            return None
+        reference = item.expected.get("answer")
+        return JudgeRequest(
+            question=_case_input_text(item),
+            answer=final_output,
+            reference_answer=reference if isinstance(reference, str) else None,
+            evidence=sequence_of_text(item.expected.get("evidence")),
+        )
+
+    async def judge_answer(
+        self, item: EvaluationDatasetItem, final_output: Any
+    ) -> dict[str, Any] | None:
+        request = self.judge_request(item, final_output)
+        if request is None or self.judge is None:
+            return None
+        return await self.judge.judge(request)
 
     async def prepare(
         self,
@@ -275,18 +309,24 @@ class AgentRuntimeEvaluationDriver:
                         AgentRun.id == result.run_id,
                     )
                 )
+            observation: dict[str, Any] = {
+                "category": item.category,
+                "agent_run_id": str(result.run_id),
+                "status": result.status,
+                "observed_agent_status": result.status,
+                "observed_agent_failure_code": result.failure_code,
+                "model_step_count": result.model_step_count,
+                "tool_call_count": result.tool_call_count,
+                "output_hash": canonical_json_hash(result.final_output or ""),
+                "variant_hash": variant.variant_hash,
+            }
+            # Supplementary only: the verdict carries scores, identities and hashes, never
+            # the judged text, so the observation stays the safe projection it already was.
+            judgement = await self.judge_answer(item, result.final_output)
+            if judgement is not None:
+                observation[JUDGE_OBSERVATION_KEY] = judgement
             return CaseExecutionObservation(
-                observation={
-                    "category": item.category,
-                    "agent_run_id": str(result.run_id),
-                    "status": result.status,
-                    "observed_agent_status": result.status,
-                    "observed_agent_failure_code": result.failure_code,
-                    "model_step_count": result.model_step_count,
-                    "tool_call_count": result.tool_call_count,
-                    "output_hash": canonical_json_hash(result.final_output or ""),
-                    "variant_hash": variant.variant_hash,
-                },
+                observation=observation,
                 agent_run_id=result.run_id,
                 latency_ms=max(0, round((time.perf_counter() - started) * 1000)),
                 input_tokens=(

@@ -104,6 +104,16 @@ class Settings(BaseSettings):
     request_id_header: str = "X-Request-ID"
     ready_timeout_ms: int = Field(default=500, ge=50, le=10_000)
     sse_heartbeat_seconds: float = Field(default=15, gt=0, le=120)
+    # How long a run may go unwatched before it is aborted. A run used to die
+    # the instant its SSE consumer disconnected; this is the window in which a
+    # client can reconnect (GET .../runs/{id}/stream?after_sequence=N) and take
+    # the stream back. Bounded above so "nobody is coming back" still ends the
+    # run rather than leaking an executor.
+    run_stream_grace_seconds: float = Field(default=60, ge=0, le=3_600)
+    # Execute runs in the Celery worker instead of inside the API process.
+    # Off by default: Playground runs are single-shot debugging and must keep
+    # their current in-process latency and behaviour exactly.
+    run_execution_in_worker: bool = False
     auth_jwt_secret: str = Field(default=DEFAULT_AUTH_JWT_SECRET, min_length=32)
     auth_access_token_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     auth_refresh_token_ttl_seconds: int = Field(default=2_592_000, ge=300, le=31_536_000)

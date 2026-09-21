@@ -33,13 +33,19 @@ from apps.api.schemas.evaluation import (
     PricingSnapshotCreateRequest,
     PricingSnapshotResponse,
 )
+from packages.control_plane.rbac import EVALUATION_MANAGE
+from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
+from packages.evaluation.judge import FrozenJudgeProfile, freeze_judge_profile
 from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
+from packages.model_gateway.errors import ModelGatewayError
+from packages.model_gateway.profile_resolution import ModelProfileResolver
+from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}/evaluation", tags=["evaluation"])
 context_dependency = Depends(get_workspace_context)
@@ -256,6 +262,46 @@ async def list_pricing_snapshots(
     ]
 
 
+async def _freeze_judge_profile(
+    session: AsyncSession,
+    context: WorkspaceExecutionContext,
+    model_profile_id: UUID | None,
+) -> FrozenJudgeProfile | None:
+    """Freeze the judge identity through the same path agent publication uses.
+
+    The permission is re-checked here rather than left to the service, because the
+    resolution happens first and an unauthorised caller must not learn from it
+    whether a model profile exists.  It is the existing ``evaluation_manage``
+    permission -- choosing a judge is part of defining an experiment, not a new
+    capability.
+    """
+
+    if model_profile_id is None:
+        return None
+    if EVALUATION_MANAGE not in context.permissions:
+        raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
+    repository = SqlAlchemyModelGatewayRepository(session)
+    try:
+        chain = await ModelProfileResolver(repository).resolve_chain(context, model_profile_id)
+    except ModelGatewayError:
+        raise _judge_profile_unavailable() from None
+    profile = chain[0]
+    credential = await repository.get_provider_credential(
+        context, profile.provider_credential_id
+    )
+    if credential is None or not credential.enabled:
+        raise _judge_profile_unavailable()
+    return freeze_judge_profile(profile, provider=credential.provider)
+
+
+def _judge_profile_unavailable() -> AgentHubError:
+    return AgentHubError(
+        "MODEL_PROFILE_DISABLED",
+        "The judge model profile is unavailable.",
+        422,
+    )
+
+
 @router.post(
     "/experiments",
     response_model=EvaluationExperimentResponse,
@@ -268,6 +314,9 @@ async def create_experiment(
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationExperimentResponse:
     del workspace_id
+    judge_profile = await _freeze_judge_profile(
+        session, context, payload.judge_model_profile_id
+    )
     experiment = await ExperimentService().create_experiment(
         session,
         context=context,
@@ -277,6 +326,7 @@ async def create_experiment(
         split=payload.split,
         purpose=payload.purpose,
         repetitions=payload.repetitions,
+        judge_profile=judge_profile,
     )
     return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
 

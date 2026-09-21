@@ -69,6 +69,9 @@ class EvaluationMetricsService:
 
         experiment = await self._load_experiment(session, workspace_id, run.experiment_id)
         self._validate_manifest(experiment)
+        # The judge identity frozen with the experiment decides the evaluator version of
+        # every answer_quality row written below.
+        self.registry.bind_judge_manifest(experiment.evaluator_manifest)
         rows = await self._load_and_validate_case_set(session, workspace_id, run, experiment)
         output = self._metrics_output(run_id, rows)
         metric_records = self._metric_records(workspace_id, run_id, output)
@@ -386,6 +389,7 @@ class EvaluationMetricsService:
         )
         if canonical_json_hash(snapshot.evaluator_manifest) != snapshot.evaluator_manifest_hash:
             self._integrity_error("EVALUATION_METRICS_INTEGRITY_ERROR")
+        self.registry.bind_judge_manifest(snapshot.evaluator_manifest)
         run_rows = await self._case_rows(session, snapshot.workspace_id, snapshot.experiment_run_id)
         if self._case_result_set_hash(run_rows) != snapshot.case_result_set_hash:
             self._integrity_error("EVALUATION_METRICS_INTEGRITY_ERROR")

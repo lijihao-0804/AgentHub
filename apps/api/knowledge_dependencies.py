@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.api.auth_dependencies import get_current_principal
 from apps.api.dependencies import get_db_session
 from apps.api.schemas.citation_qa import CitationQaRequest
+from packages.agent_runtime.queue import AgentRunQueue, CeleryAgentRunQueue
 from packages.control_plane.services import TenantService
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
@@ -56,6 +57,16 @@ async def get_experiment_run_queue(request: Request) -> ExperimentRunQueue:
 
         queue = CeleryExperimentRunQueue(create_celery_app(request.app.state.settings))
         request.app.state.experiment_run_queue = queue
+    return queue
+
+
+async def get_agent_run_queue(request: Request) -> AgentRunQueue:
+    queue = getattr(request.app.state, "agent_run_queue", None)
+    if queue is None:
+        from apps.worker.celery_app import create_celery_app
+
+        queue = CeleryAgentRunQueue(create_celery_app(request.app.state.settings))
+        request.app.state.agent_run_queue = queue
     return queue
 
 

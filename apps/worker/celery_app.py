@@ -15,6 +15,7 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
         "agenthub",
         broker=app_settings.redis_url,
         include=[
+            "apps.worker.tasks.agent_runs",
             "apps.worker.tasks.knowledge",
             "apps.worker.tasks.approvals",
             "apps.worker.tasks.evaluation",

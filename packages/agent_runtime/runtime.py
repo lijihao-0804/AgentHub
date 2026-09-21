@@ -32,9 +32,11 @@ from packages.agent_runtime.context_budget import (
     ContextMessage,
     Utf8ByteTokenEstimator,
 )
+from packages.agent_runtime.event_store import RunEventReader, RunEventRecorder
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
+from packages.agent_runtime.stream_hub import RunStreamHub, RunStreamRegistry
 from packages.agent_runtime.work_layer import (
     RecordedToolCall,
     RunArtifactRecorder,
@@ -80,6 +82,18 @@ _RUNTIME_POLICY = (
 # the one being asked now.
 _SYSTEM_PREFIX_LENGTH = 2
 DEFAULT_THREAD_CONTEXT_MAX_TURNS = 10
+# How long a run may go unwatched before it is aborted. Long enough to survive
+# a reload, a flaky network or a hand-off between tabs; short enough that "no
+# consumer will ever return" still terminates the run, which is the property
+# the old abort-on-disconnect behaviour was protecting.
+DEFAULT_STREAM_GRACE_SECONDS = 60.0
+# Statuses in which a run has stopped publishing. WAITING_APPROVAL is included
+# on purpose: the producer really has ended there and only a human decision
+# starts a new one, so a follower must not hang waiting for events that this
+# run will never emit.
+STREAM_FOLLOW_STOP_STATUSES = frozenset(
+    {"SUCCEEDED", "FAILED", "CANCELLED", "NEEDS_ATTENTION", "WAITING_APPROVAL"}
+)
 _TERMINAL_TOOL_ERRORS = frozenset(
     {
         "TOOL_APPROVAL_NOT_AVAILABLE",
@@ -174,6 +188,8 @@ class AgentRunService:
         thread_context_provider: ThreadContextProvider | None = None,
         artifact_recorder: RunArtifactRecorder | None = None,
         thread_context_max_turns: int = DEFAULT_THREAD_CONTEXT_MAX_TURNS,
+        stream_grace_seconds: float = DEFAULT_STREAM_GRACE_SECONDS,
+        stream_registry: RunStreamRegistry | None = None,
     ) -> None:
         self.session_factory = session_factory
         self.trace_sink = trace_sink or NoopTraceSink()
@@ -191,6 +207,11 @@ class AgentRunService:
         self.thread_context_provider = thread_context_provider
         self.artifact_recorder = artifact_recorder
         self.thread_context_max_turns = thread_context_max_turns
+        self.stream_grace_seconds = stream_grace_seconds
+        # A run is owned by its hub, not by whoever is currently reading it, so
+        # that a dropped connection is not the same thing as "stop the run".
+        self.stream_registry = stream_registry or RunStreamRegistry()
+        self.event_reader = RunEventReader(session_factory)
 
     async def run(
         self,
@@ -522,15 +543,26 @@ class AgentRunService:
                 cost_currency=persisted.cost_currency,
             )
 
-    async def stream(
+    async def open_stream(
         self,
         context: WorkspaceExecutionContext,
         *,
         agent_version_id: UUID,
         input_text: str,
         prepared_run: AgentRun | None = None,
-    ) -> AsyncIterator[AgentEvent]:
-        """Run the same LangGraph execution path while publishing AgentHub events."""
+        detached: bool = False,
+    ) -> RunStreamHub:
+        """Start a run and hand back the hub that owns it.
+
+        The caller subscribes to the returned hub; it does not own the run.
+        Dropping the subscription starts the hub's grace window instead of
+        aborting, so a disconnected client can come back -- or a different one
+        can take over -- without the work being thrown away.
+
+        ``detached`` removes the grace window altogether, for a caller that is
+        executing the run rather than watching it (the worker): there, having
+        no subscribers is the normal state, not a sign of abandonment.
+        """
 
         self._require_permission(context, "agent_run")
         if prepared_run is None:
@@ -580,18 +612,118 @@ class AgentRunService:
                 )
             )
 
-        try:
+        hub = RunStreamHub(
+            run_id=run.id,
+            source=queue,
+            abort=abort_if_active,
+            grace_seconds=None if detached else self.stream_grace_seconds,
+            recorder=RunEventRecorder(
+                self.session_factory,
+                workspace_id=UUID(context.workspace_id),
+                run_id=run.id,
+            ),
+            on_closed=self.stream_registry.discard,
+        )
+        self.stream_registry.register(hub)
+        hub.start()
+        return hub
+
+    async def stream(
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        agent_version_id: UUID,
+        input_text: str,
+        prepared_run: AgentRun | None = None,
+    ) -> AsyncIterator[AgentEvent]:
+        """Run the same LangGraph execution path while publishing AgentHub events."""
+
+        hub = await self.open_stream(
+            context,
+            agent_version_id=agent_version_id,
+            input_text=input_text,
+            prepared_run=prepared_run,
+        )
+        async for event in hub.subscribe():
+            yield event
+
+    async def attach_stream(
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        run_id: UUID,
+        after_sequence: int = 0,
+        poll_seconds: float = 0.25,
+    ) -> AsyncIterator[AgentEvent]:
+        """Follow a run that this consumer did not start.
+
+        Replays everything after ``after_sequence`` from the durable log, then
+        keeps following: from the live hub when this process owns the run, and
+        otherwise by tailing ``agent_run_events`` until the run reaches a
+        terminal state. Tailing an ordered, durably-stored log is what lets a
+        run be followed across processes without a second delivery path --
+        the log already guarantees order and exactly-once.
+        """
+
+        self._require_permission(context, "agent_run")
+        workspace_id = UUID(context.workspace_id)
+        # Reuse the read path so a run in another workspace 404s rather than
+        # revealing that the id exists.
+        run = await self.get_run(context, run_id)
+        agent_version_id = run.agent_version_id
+        cursor = after_sequence
+
+        async def replay() -> AsyncIterator[AgentEvent]:
+            nonlocal cursor
             while True:
-                event = await queue.get()
-                if event is None:
-                    break
+                events = await self.event_reader.read_after(
+                    workspace_id=workspace_id,
+                    run_id=run_id,
+                    agent_version_id=agent_version_id,
+                    after_sequence=cursor,
+                )
+                if not events:
+                    return
+                for event in events:
+                    cursor = event.sequence
+                    yield event
+
+        async for event in replay():
+            yield event
+
+        hub = self.stream_registry.get(run_id)
+        if hub is not None:
+            async for event in hub.subscribe():
+                if event.sequence <= cursor:
+                    continue
+                cursor = event.sequence
                 yield event
-        except (asyncio.CancelledError, GeneratorExit):
-            await abort_if_active()
-            raise
-        finally:
-            if not producer.done():
-                await abort_if_active()
+            # The hub may have closed between the replay above and the
+            # subscribe, so drain whatever landed in the gap.
+            async for event in replay():
+                yield event
+            return
+
+        while True:
+            if await self._run_stopped_publishing(context, run_id):
+                async for event in replay():
+                    yield event
+                return
+            await asyncio.sleep(poll_seconds)
+            async for event in replay():
+                yield event
+
+    async def _run_stopped_publishing(
+        self, context: WorkspaceExecutionContext, run_id: UUID
+    ) -> bool:
+        async with self.session_factory() as session:
+            status = await session.scalar(
+                select(AgentRun.status).where(
+                    AgentRun.workspace_id == UUID(context.workspace_id),
+                    AgentRun.id == run_id,
+                )
+            )
+        return status in STREAM_FOLLOW_STOP_STATUSES
 
     @staticmethod
     def _initial_state(run: AgentRun, agent_version_id: UUID) -> AgentRunState:
@@ -1331,6 +1463,20 @@ class _AgentRunGraph:
         if rounds >= runtime["max_steps"]:
             await self.step("GUARD", "FAILED", {"error_code": "AGENT_MAX_STEPS_EXCEEDED"})
             return {"failure_code": "AGENT_MAX_STEPS_EXCEEDED"}
+        cost_failure = _cost_guard_failure(
+            self.usage_records, runtime.get("max_cost_micro_usd")
+        )
+        if cost_failure is not None:
+            # Checked before the call, not after: a ceiling that only notices it
+            # has been passed is a report, not a limit.
+            #
+            # NEEDS_ATTENTION rather than FAILED, and deliberately the existing
+            # state rather than a new one: the run stopped mid-way, it may
+            # already have taken WRITE actions, and it produced no answer. That
+            # is precisely the condition NEEDS_ATTENTION already names -- a
+            # human decides whether to raise the budget or abandon the work.
+            await self.step("GUARD", "FAILED", {"error_code": cost_failure})
+            return {"failure_code": cost_failure, "run_status": "NEEDS_ATTENTION"}
         next_round = rounds + 1
         try:
             admission = self._admit_context(state)
@@ -2195,6 +2341,35 @@ def _run_result(run: AgentRun) -> AgentRunResult:
         total_cost_amount=run.total_cost_amount,
         cost_currency=run.cost_currency,
     )
+
+
+_MICRO_USD = Decimal(1_000_000)
+
+
+def _cost_guard_failure(
+    usage_records: list[dict[str, Any]], limit_micro_usd: Any
+) -> str | None:
+    """Decide whether this run has spent what it was allowed to spend.
+
+    Returns the failure code to stop on, or ``None`` to continue.
+
+    An unmeasurable spend stops the run too. A ceiling that silently does
+    nothing when the provider reports no price, or reports it in a currency the
+    ceiling is not denominated in, is worse than no ceiling: it reads as a
+    guarantee while providing none. This only ever triggers for an agent whose
+    operator asked for a ceiling -- uncapped runs are untouched.
+    """
+
+    if limit_micro_usd is None or not usage_records:
+        return None
+    aggregate = _aggregate_usage(usage_records)
+    amount = aggregate["total_cost_amount"]
+    currency = aggregate["cost_currency"]
+    if amount is None or str(currency).upper() != "USD":
+        return "AGENT_COST_UNMEASURABLE"
+    if Decimal(str(amount)) * _MICRO_USD >= Decimal(int(limit_micro_usd)):
+        return "AGENT_COST_LIMIT_EXCEEDED"
+    return None
 
 
 def _is_uncertain_action_failure(failure_code: str | None) -> bool:

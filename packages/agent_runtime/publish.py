@@ -21,8 +21,10 @@ from packages.agent_runtime.models import (
 )
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
+    DEFAULT_RUN_COST_LIMIT_MICRO_USD,
     DEFAULT_RUNTIME_LIMITS,
     MAX_CONTEXT_BUDGET,
+    MAX_RUN_COST_LIMIT_MICRO_USD,
     MAX_RUNTIME_LIMITS,
 )
 from packages.agent_runtime.tool_revisions import validate_tool_spec
@@ -53,9 +55,13 @@ DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
 }
 DEFAULT_RUNTIME_CONFIG: dict[str, Any] = {
     **DEFAULT_RUNTIME_LIMITS,
+    "max_cost_micro_usd": DEFAULT_RUN_COST_LIMIT_MICRO_USD,
     "context_budget": DEFAULT_CONTEXT_BUDGET.copy(),
 }
 _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG)
+# Validated on its own terms: it is the one runtime key that may be ``None``,
+# and its ceiling is not a step count.
+_RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {"context_budget", "max_cost_micro_usd"}
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
 _RETRIEVAL_KEYS = frozenset(DEFAULT_RETRIEVAL_CONFIG)
 
@@ -683,7 +689,7 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
         **DEFAULT_RUNTIME_CONFIG["context_budget"],
         **dict(context_budget),
     }
-    for key in _RUNTIME_KEYS - {"context_budget"}:
+    for key in _RUNTIME_SCALAR_KEYS:
         item = result[key]
         if (
             isinstance(item, bool)
@@ -691,6 +697,13 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
             or not 1 <= item <= MAX_RUNTIME_LIMITS[key]
         ):
             raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    cost_limit = result["max_cost_micro_usd"]
+    if cost_limit is not None and (
+        isinstance(cost_limit, bool)
+        or not isinstance(cost_limit, int)
+        or not 1 <= cost_limit <= MAX_RUN_COST_LIMIT_MICRO_USD
+    ):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
     for item in result["context_budget"].values():
         if isinstance(item, bool) or not isinstance(item, int) or item < 1:
             raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)

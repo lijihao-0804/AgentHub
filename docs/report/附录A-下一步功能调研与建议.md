@@ -147,6 +147,7 @@ except (asyncio.CancelledError, GeneratorExit):
    | 状态持久化 | ✅ LangGraph checkpoint 已落 Postgres |
    | worker 能读 checkpoint | ✅ `approvals.py` 已经在 probe |
    | 补播数据源 | ✅ `run_steps` 带 `sequence_number`，11 种 kind 覆盖全图 |
+   | | （**实现时改用了更强的一条**：新建 `agent_run_events` 事件日志，直接按 `sequence` 存事件本身，见下方实现记录） |
    | 状态对账 | ✅ `reconcile_approval_runs` 每 30s 跑一次 |
 
    **六个零件全是现成的，缺的只是把它们接起来。**
@@ -156,7 +157,15 @@ except (asyncio.CancelledError, GeneratorExit):
 | 步 | 做什么 | 规模 | 风险 |
 |---|---|---|---|
 | **A1** | 断连不再中止：改成**宽限期**（比如 60s 内无订阅者才中止），并给 SSE 加 `?after_sequence=N`，从 `run_steps` 补播已发生的步骤 | 小 | 低。不碰审批状态机、不新增 Run 状态、不新增 RBAC 权限 |
-| **A2** | 执行移进 Celery worker，API 退化成 **Redis pub/sub 的订阅端**；`reconcile` 顺带接管孤儿 Run | 中 | 中。需要一条新的 worker 任务与一次投递语义设计 |
+| **A2** | 执行移进 Celery worker，API 退化成**事件日志的跟读端**；`reconcile` 顺带接管孤儿 Run | 中 | 中。需要一条新的 worker 任务与一次投递语义设计 |
+
+> **实现记录（已落地，与上表原文有两处出入，以此处为准）**
+>
+> 1. **补播数据源不是 `run_steps`，而是新建的 `agent_run_events` 表。** `run_steps` 记的是"步骤"，不是"发给客户端的那条事件"；拿它补播等于让重连客户端看到一份与原始流形状不同的流。新表直接按 `sequence` 存事件本身，重连拿到的与首次连接逐字节同构。代价是多一张表和一次迁移（`0027_agent_run_events`）。
+> 2. **跨进程扇出不用 Redis pub/sub，而是 tail 这张有序日志。** 日志本身已经保证顺序与"恰好一次"；再叠一条投递保证更弱的 pub/sub 通道，等于给同一份数据造两条语义不同的路径，出了错还要先判断是哪条路径的错。API 侧统一走 `after_sequence` 游标读表，在线与重连是同一条代码路径。
+> 3. **`message.delta` 故意不落库。** 落 delta 会把日志体积变成 O(tokens)，买到的只是一个打字动画。因此 `sequence` 是**游标不是计数**，补播出现跳号是正常的（已写进 `events.py` 的注释和契约文档）。
+> 4. **worker 执行是显式开关**（`AGENTHUB_RUN_EXECUTION_IN_WORKER`，默认 `false`）。Playground 单次调试必须保持现有进程内时延与行为不变。
+> 5. **队列消息不是授权。** worker 拿到的只有 `workspace_id / run_id / request_id`，权限一律用 `TenantService().get_workspace_access(...)` 从库里重新推导——否则伪造一条队列消息就等于越权执行。
 
 只做 A1 就已经能说：
 **「Run 的生命周期由 checkpoint 定义，不由 HTTP 连接定义——审批中断只是这个性质的一个特例。」**

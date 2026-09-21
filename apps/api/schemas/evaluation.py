@@ -128,6 +128,10 @@ class EvaluationExperimentCreateRequest(BaseModel):
     split: str
     purpose: str
     repetitions: int = Field(default=1, ge=1, le=5)
+    # Opting an experiment into LLM-as-judge scoring.  The profile is frozen at
+    # creation time into the evaluator manifest, so changing it afterwards is
+    # impossible by construction -- a different judge is a different experiment.
+    judge_model_profile_id: UUID | None = None
 
 
 class EvaluationExperimentVariantCreateRequest(BaseModel):
