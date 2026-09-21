@@ -103,6 +103,15 @@ class Document(Base):
             name="ck_documents_supersession_not_self",
         ),
         Index("ix_documents_workspace_kb", "workspace_id", "knowledge_base_id"),
+        # The partial index 0026 builds. Retrieval asks "is this superseded" for
+        # nearly every chunk and the answer is NULL for nearly every row, so the
+        # predicate is part of the index's identity -- and it has to be part of
+        # the metadata too, or a drift check reads it as an index to drop.
+        Index(
+            "ix_documents_superseded_by",
+            "superseded_by_document_id",
+            postgresql_where=sql_text("superseded_by_document_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)

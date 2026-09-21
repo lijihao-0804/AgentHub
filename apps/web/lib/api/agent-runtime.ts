@@ -22,7 +22,12 @@ export type AgentRun = {
   workspace_id: string;
   agent_version_id: string;
   status: string;
-  input_text: string;
+  /**
+   * Null for a reader who only holds `workspace_read`: the backend withholds
+   * the raw prompt and the model's answer from anyone without `agent_run`.
+   * The fields stay present in the contract; only their content is gated.
+   */
+  input_text: string | null;
   final_output: string | null;
   failure_code: string | null;
   resolved_spec_hash: string | null;
@@ -226,42 +231,17 @@ export class SseFrameBuffer {
 }
 
 /**
- * Opens the streaming run.
+ * Turns a live SSE response into events.
  *
- * Streaming is POST + Authorization + JSON body, which EventSource
- * cannot express, so this uses fetch + ReadableStream directly. Reaching
- * end-of-stream is not an error: the backend deliberately closes the
- * stream when a run pauses for approval.
+ * Shared by the endpoint that starts a run and the one that follows an
+ * existing one, because the framing, the error envelope and the
+ * cancellation handling are identical and a second copy of them is a
+ * second place for them to drift.
  */
-export async function streamAgentRun(
-  input: AuthInput,
-  options: {
-    agentVersionId: string;
-    inputText: string;
-    signal: AbortSignal;
-    onEvent: (event: AgentEvent) => void;
-  },
+async function consumeEventStream(
+  response: Response,
+  onEvent: (event: AgentEvent) => void,
 ): Promise<void> {
-  const token = input.accessToken.trim();
-  if (!token) {
-    throw new ApiError("SESSION_REQUIRED", "A workspace session with an access token is required.", 401);
-  }
-  const path =
-    `${runtimeBase(input.workspaceId)}/agent-versions/` +
-    `${encodeURIComponent(options.agentVersionId)}/runs/stream`;
-
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
-    },
-    credentials: "include",
-    body: JSON.stringify({ input_text: options.inputText }),
-    signal: options.signal,
-  });
-
   if (!response.ok) {
     // A structured failure before the stream starts is still the normal
     // error envelope; it must not be reported as a network problem.
@@ -286,16 +266,97 @@ export async function streamAgentRun(
       if (done) break;
       for (const frame of frames.push(decoder.decode(value, { stream: true }))) {
         const event = parseAgentEventFrame(frame);
-        if (event) options.onEvent(event);
+        if (event) onEvent(event);
       }
     }
     for (const frame of frames.flush()) {
       const event = parseAgentEventFrame(frame);
-      if (event) options.onEvent(event);
+      if (event) onEvent(event);
     }
   } finally {
     reader.cancel().catch(() => undefined);
   }
+}
+
+function bearer(input: AuthInput): string {
+  const token = input.accessToken.trim();
+  if (!token) {
+    throw new ApiError("SESSION_REQUIRED", "A workspace session with an access token is required.", 401);
+  }
+  return `Bearer ${token}`;
+}
+
+/**
+ * Opens the streaming run.
+ *
+ * Streaming is POST + Authorization + JSON body, which EventSource
+ * cannot express, so this uses fetch + ReadableStream directly. Reaching
+ * end-of-stream is not an error: the backend deliberately closes the
+ * stream when a run pauses for approval.
+ */
+export async function streamAgentRun(
+  input: AuthInput,
+  options: {
+    agentVersionId: string;
+    inputText: string;
+    signal: AbortSignal;
+    onEvent: (event: AgentEvent) => void;
+  },
+): Promise<void> {
+  const authorization = bearer(input);
+  const path =
+    `${runtimeBase(input.workspaceId)}/agent-versions/` +
+    `${encodeURIComponent(options.agentVersionId)}/runs/stream`;
+
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: authorization,
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
+    credentials: "include",
+    body: JSON.stringify({ input_text: options.inputText }),
+    signal: options.signal,
+  });
+
+  await consumeEventStream(response, options.onEvent);
+}
+
+/**
+ * Follows a run this connection did not start.
+ *
+ * `afterSequence` is the last sequence the caller already processed; the
+ * backend replays everything after it from the durable event log before
+ * joining the live stream. That is what makes a reload or a dropped
+ * connection cost frames rather than the run: pass 0 to rebuild the whole
+ * timeline, or the highest sequence seen to resume exactly where the
+ * stream broke. Replayed events carry their original sequence numbers, so
+ * a caller that keys off `sequence` never double-counts one.
+ */
+export async function followAgentRun(
+  input: AuthInput,
+  options: {
+    runId: string;
+    afterSequence?: number;
+    signal: AbortSignal;
+    onEvent: (event: AgentEvent) => void;
+  },
+): Promise<void> {
+  const authorization = bearer(input);
+  const after = options.afterSequence ?? 0;
+  const path =
+    `${runtimeBase(input.workspaceId)}/agent-runs/` +
+    `${encodeURIComponent(options.runId)}/stream?after_sequence=${encodeURIComponent(String(after))}`;
+
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    method: "GET",
+    headers: { Authorization: authorization, Accept: "text/event-stream" },
+    credentials: "include",
+    signal: options.signal,
+  });
+
+  await consumeEventStream(response, options.onEvent);
 }
 
 /** Reads a string field from an event payload, rejecting other shapes. */

@@ -166,7 +166,7 @@ export default function AddRunToDatasetPanel({
   open: boolean;
   onClose: () => void;
 }) {
-  const { t: translate } = useI18n();
+  const { t: translate, statusLabel, formatCount } = useI18n();
   const t = useCallback(
     (key: string, values?: Record<string, string | number>) =>
       translate(
@@ -418,7 +418,15 @@ export default function AddRunToDatasetPanel({
                       <option value="">{t("evaluation.addToEvaluation.baseVersionPlaceholder")}</option>
                       {versions.map((version) => (
                         <option value={version.id} key={version.id}>
-                          v{version.version_number} · {version.status} · {version.item_count ?? "?"} items
+                          {t("evaluation.addToEvaluation.baseVersionOption", {
+                            version: version.version_number,
+                            status: statusLabel(version.status),
+                            // Unknown stays "?" rather than a formatted 0: the
+                            // count is missing, not zero.
+                            items: version.item_count === null || version.item_count === undefined
+                              ? "?"
+                              : formatCount(version.item_count),
+                          })}
                         </option>
                       ))}
                     </select>

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import asyncio
+from collections.abc import AsyncIterator
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, Response, status
@@ -16,7 +16,9 @@ from apps.api.schemas.threads import (
     ThreadTurnDetailResponse,
     ThreadTurnSubmitResponse,
 )
-from packages.agent_runtime.sse import event_to_sse
+from packages.agent_runtime.events import AgentEvent
+from packages.agent_runtime.sse import sse_frames
+from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.threads.service import ThreadService
 
@@ -30,6 +32,12 @@ agent_id_query = Query(default=None)
 kind_query = Query(default=None, max_length=32)
 limit_query = Query(default=50, ge=1, le=200)
 offset_query = Query(default=0, ge=0)
+
+
+def _sse_frames(stream: AsyncIterator[AgentEvent], request: Request) -> AsyncIterator[str]:
+    return sse_frames(
+        stream, heartbeat_seconds=request.app.state.settings.sse_heartbeat_seconds
+    )
 
 
 def _service(request: Request) -> ThreadService:
@@ -187,15 +195,32 @@ async def stream_turn(
         client_token=payload.client_token,
     )
     if turn is None:
-        # A repeated client_token. The caller already has a run; it is not
-        # started a second time, and the stream is simply empty.
-        async def empty():
-            yield ": duplicate\n\n"
-
+        # A repeated client_token. The turn was recorded the first time and the
+        # run is already going or already done, so the retry must arrive at
+        # that run rather than at an empty stream: the caller cannot otherwise
+        # learn which run to follow. The durable event log makes this exact --
+        # the reply is a replay from sequence 0, which is the same stream the
+        # first attempt would have received had it not dropped.
+        existing = await service.token_turn(context, thread_id, payload.client_token)
+        if existing.agent_run_id is None:
+            # The turn exists but its run has not been attached yet: two
+            # requests raced, and the answer is "ask again", not a stream that
+            # will never carry anything.
+            raise AgentHubError(
+                "THREAD_TURN_IN_PROGRESS",
+                "The turn is still being started; retry with the same client token.",
+                409,
+            )
+        replay = run_service.attach_stream(context, run_id=existing.agent_run_id)
         return StreamingResponse(
-            empty(),
+            _sse_frames(replay, request),
             media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no",
+                "X-AgentHub-Run-Id": str(existing.agent_run_id),
+                "X-AgentHub-Turn-Id": str(existing.id),
+            },
         )
 
     prepared_run = await run_service.prepare_stream(
@@ -206,37 +231,15 @@ async def stream_turn(
     )
     await service.attach_run(context, turn_id=turn.id, run_id=prepared_run.id)
 
-    async def frames():
-        stream = run_service.stream(
-            context,
-            agent_version_id=agent_version_id,
-            input_text=turn.user_input,
-            prepared_run=prepared_run,
-        )
-        iterator = stream.__aiter__()
-        pending = asyncio.create_task(iterator.__anext__())
-        try:
-            while True:
-                done, _ = await asyncio.wait(
-                    {pending}, timeout=request.app.state.settings.sse_heartbeat_seconds
-                )
-                if not done:
-                    yield ": heartbeat\n\n"
-                    continue
-                try:
-                    event = pending.result()
-                except StopAsyncIteration:
-                    break
-                yield event_to_sse(event)
-                pending = asyncio.create_task(iterator.__anext__())
-        finally:
-            if not pending.done():
-                pending.cancel()
-                await asyncio.gather(pending, return_exceptions=True)
-            await stream.aclose()
+    stream = run_service.stream(
+        context,
+        agent_version_id=agent_version_id,
+        input_text=turn.user_input,
+        prepared_run=prepared_run,
+    )
 
     return StreamingResponse(
-        frames(),
+        _sse_frames(stream, request),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

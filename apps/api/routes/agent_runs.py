@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from collections.abc import AsyncIterator
 from uuid import UUID
 
@@ -21,7 +20,7 @@ from apps.api.schemas.approvals import ApprovalResponse
 from packages.agent_runtime.events import AgentEvent
 from packages.agent_runtime.queue import AgentRunQueue
 from packages.agent_runtime.runtime import AgentRunService
-from packages.agent_runtime.sse import event_to_sse
+from packages.agent_runtime.sse import sse_frames
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 
@@ -34,35 +33,28 @@ def _service(request: Request) -> AgentRunService:
     return get_production_agent_run_service(request)
 
 
-async def _sse_frames(stream: AsyncIterator[AgentEvent], request: Request):
-    """Serialize an event stream as SSE, keeping the connection warm.
+def _run_response(context: WorkspaceExecutionContext, run: object) -> AgentRunResponse:
+    """Project a run for the caller, withholding raw content from readers.
 
-    Closing this generator -- which is what a client disconnect does -- closes
-    the subscription, not the run. Whether the run then survives is the stream
-    hub's decision, and it only aborts once nobody has come back for it.
+    ``workspace_read`` is what a VIEWER has, and it is the permission this
+    endpoint is reached with. It buys the run's identity, status, counters,
+    usage and cost -- the same safe surface the M6 observability projection
+    exposes -- but not the prompt a user typed or the text the model wrote
+    back. Those need ``agent_run``: whoever may run the agent may read what
+    was sent to it. No new permission is introduced; the existing boundary is
+    simply applied to content it always should have covered.
     """
 
-    iterator = stream.__aiter__()
-    pending = asyncio.create_task(iterator.__anext__())
-    try:
-        while True:
-            done, _ = await asyncio.wait(
-                {pending}, timeout=request.app.state.settings.sse_heartbeat_seconds
-            )
-            if not done:
-                yield ": heartbeat\n\n"
-                continue
-            try:
-                event = pending.result()
-            except StopAsyncIteration:
-                break
-            yield event_to_sse(event)
-            pending = asyncio.create_task(iterator.__anext__())
-    finally:
-        if not pending.done():
-            pending.cancel()
-            await asyncio.gather(pending, return_exceptions=True)
-        await stream.aclose()
+    response = AgentRunResponse.model_validate(run)
+    if "agent_run" in context.permissions:
+        return response
+    return response.model_copy(update={"input_text": None, "final_output": None})
+
+
+def _sse_frames(stream: AsyncIterator[AgentEvent], request: Request) -> AsyncIterator[str]:
+    return sse_frames(
+        stream, heartbeat_seconds=request.app.state.settings.sse_heartbeat_seconds
+    )
 
 
 def _approval_service(request: Request):
@@ -93,7 +85,7 @@ async def create_agent_run(
         agent_version_id=agent_version_id,
         input_text=payload.input_text,
     )
-    return AgentRunResponse.model_validate(await service.get_run(context, run.run_id))
+    return _run_response(context, await service.get_run(context, run.run_id))
 
 
 @router.post(
@@ -175,7 +167,7 @@ async def get_agent_run(
     context: WorkspaceExecutionContext = context_dependency,
 ) -> AgentRunResponse:
     del workspace_id
-    return AgentRunResponse.model_validate(await _service(request).get_run(context, run_id))
+    return _run_response(context, await _service(request).get_run(context, run_id))
 
 
 @router.get("/agent-runs/{run_id}/steps", response_model=list[RunStepResponse])
@@ -211,7 +203,7 @@ async def cancel_agent_run(
 ) -> AgentRunResponse:
     del workspace_id
     result = await _service(request).cancel(context, run_id=run_id)
-    return AgentRunResponse.model_validate(await _service(request).get_run(context, result.run_id))
+    return _run_response(context, await _service(request).get_run(context, result.run_id))
 
 
 __all__ = ["router"]

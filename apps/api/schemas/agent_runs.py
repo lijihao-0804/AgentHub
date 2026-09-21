@@ -25,7 +25,12 @@ class AgentRunResponse(BaseModel):
     workspace_id: UUID
     agent_version_id: UUID
     status: str
-    input_text: str
+    # The two raw-content fields on this response. They are the prompt a user
+    # typed and the text the model produced, so they are not workspace_read
+    # material: a VIEWER gets the run's identity, status, counters and cost and
+    # sees ``None`` here. Nullable rather than absent because the field's
+    # presence is part of the frozen contract; its content is not.
+    input_text: str | None
     final_output: str | None
     failure_code: str | None
     resolved_spec_hash: str | None

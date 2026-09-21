@@ -13,6 +13,7 @@ import { ApiError, errorHintKey, toApiError, type AuthInput } from "@/lib/api/cl
 import { getAgentVersion, listAgentVersions, type AgentVersion } from "@/lib/api/agents";
 import {
   cancelAgentRun,
+  followAgentRun,
   getAgentRun,
   payloadNumber,
   payloadString,
@@ -32,6 +33,10 @@ import { useI18n } from "@/i18n/provider";
  * Run read back from `/agent-runs/{id}` is the authority. Full history
  * stays where it belongs, on the observability Run Detail page.
  */
+
+/** How many times a dropped stream is rejoined before it is called a failure. */
+const MAX_FOLLOW_ATTEMPTS = 3;
+const RECONNECT_BACKOFF_MS = 500;
 
 type ActivityEntry = {
   key: string;
@@ -109,6 +114,10 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
   const generationRef = useRef(0);
   const streamRef = useRef<AbortController | null>(null);
   const recoveryRef = useRef<string | null>(null);
+  // The highest sequence this page has processed for the current run. It is
+  // the cursor a reconnect resumes from: the backend replays the durable log
+  // after it, so a dropped connection costs frames, not the run.
+  const lastSequenceRef = useRef(0);
 
   const abortStream = useCallback(() => {
     streamRef.current?.abort();
@@ -116,6 +125,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
   }, []);
 
   const resetRun = useCallback(() => {
+    lastSequenceRef.current = 0;
     setRunId(null);
     setRunStatus(null);
     setAssistantOutput("");
@@ -217,7 +227,12 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
   );
 
   const pushActivity = useCallback((entry: ActivityEntry) => {
-    setActivity((current) => [...current, entry]);
+    // Keyed by (sequence, type), so an event that arrives twice -- a replay
+    // that overlaps what the live stream already delivered -- lands on the
+    // entry it already produced instead of a duplicate row.
+    setActivity((current) =>
+      current.some((existing) => existing.key === entry.key) ? current : [...current, entry],
+    );
   }, []);
 
   /**
@@ -229,6 +244,9 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
     (event: AgentEvent, versionId: string) => {
       const key = `${event.sequence}-${event.type}`;
       const payload = event.payload;
+      // Every event goes through here, live or replayed, so this is the one
+      // place the reconnect cursor has to be advanced.
+      if (event.sequence > lastSequenceRef.current) lastSequenceRef.current = event.sequence;
       const durationMeta = () => {
         const ms = payloadNumber(payload, "duration_ms");
         return ms === null ? [] : [t("agents.playground.durationMs", { value: formatDurationMs(ms) })];
@@ -354,6 +372,41 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
     [t, formatDurationMs, pushActivity, syncUrl],
   );
 
+  /**
+   * Attaches to a run this page did not start on this connection.
+   *
+   * Used for both halves of recovery: a `?run=` pointer after a reload,
+   * where the cursor is 0 and the whole structure of the run is rebuilt
+   * from the durable log, and a live stream that dropped, where the cursor
+   * is the last sequence already processed. Either way the events are the
+   * same envelopes the first attempt would have received, so they go
+   * through the same handler. `message.delta` is deliberately not stored,
+   * so a replay rebuilds the run's structure and its final output -- not
+   * the typing animation, and never a second copy of the answer.
+   */
+  const followRun = useCallback(
+    async (
+      targetRunId: string,
+      versionId: string,
+      generation: number,
+      controller: AbortController,
+    ) => {
+      await followAgentRun(
+        { workspaceId, accessToken },
+        {
+          runId: targetRunId,
+          afterSequence: lastSequenceRef.current,
+          signal: controller.signal,
+          onEvent: (event) => {
+            if (generationRef.current !== generation) return;
+            handleEvent(event, versionId);
+          },
+        },
+      );
+    },
+    [workspaceId, accessToken, handleEvent],
+  );
+
   async function startRun() {
     const text = inputText.trim();
     if (!text || !selectedVersionId || streaming) return;
@@ -371,25 +424,46 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
     syncUrl(versionId, null);
 
     const observed: { id: string | null } = { id: null };
-    try {
-      await streamAgentRun(
-        { workspaceId, accessToken },
-        {
-          agentVersionId: versionId,
-          inputText: text,
-          signal: controller.signal,
-          onEvent: (event) => {
-            if (!isCurrent()) return;
-            observed.id = event.run_id;
-            handleEvent(event, versionId);
-          },
-        },
-      );
-    } catch (caught) {
-      if (!isCurrent() || controller.signal.aborted) return;
-      setStreaming(false);
-      setError(toApiError(caught, t("errors.requestFailed")));
-      return;
+    // A dropped connection is not a dropped run: the run keeps going on the
+    // server, and the durable event log lets this page rejoin at the last
+    // sequence it processed. Bounded, because a follow that keeps failing is
+    // something to report rather than something to retry forever -- and the
+    // persisted run is still readable through `Refresh`.
+    let attempt = 0;
+    for (;;) {
+      try {
+        if (attempt === 0) {
+          await streamAgentRun(
+            { workspaceId, accessToken },
+            {
+              agentVersionId: versionId,
+              inputText: text,
+              signal: controller.signal,
+              onEvent: (event) => {
+                if (!isCurrent()) return;
+                observed.id = event.run_id;
+                handleEvent(event, versionId);
+              },
+            },
+          );
+        } else {
+          await followRun(observed.id as string, versionId, generation, controller);
+        }
+        break;
+      } catch (caught) {
+        if (!isCurrent() || controller.signal.aborted) return;
+        attempt += 1;
+        // Nothing to reconnect to, a refusal from the server rather than a
+        // broken pipe, or too many tries: this is a real failure.
+        const refused = caught instanceof ApiError && caught.status >= 400;
+        if (observed.id === null || refused || attempt > MAX_FOLLOW_ATTEMPTS) {
+          setStreaming(false);
+          setError(toApiError(caught, t("errors.requestFailed")));
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, RECONNECT_BACKOFF_MS * attempt));
+        if (!isCurrent() || controller.signal.aborted) return;
+      }
     }
     if (!isCurrent()) return;
     setStreaming(false);
@@ -457,8 +531,12 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
     }
   }
 
-  // Refresh recovery: a `?run=` pointer reads the persisted run instead
-  // of starting a new one. There is no event replay.
+  // Refresh recovery: a `?run=` pointer adopts the existing run instead of
+  // starting a new one. The persisted record is read first because it is the
+  // authority on status, usage and ownership; the durable event log is then
+  // replayed from the beginning so the activity timeline comes back too, and
+  // -- if the run is still going -- the replay runs straight on into the live
+  // stream. A reload therefore resumes the run rather than merely reporting it.
   useEffect(() => {
     if (!connected || urlParams === null || !urlParams.run) return;
     const targetRunId = urlParams.run;
@@ -482,10 +560,37 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
         }
         applyRun(run);
         setSelectedVersionId(run.agent_version_id);
-        setInputText(run.input_text);
+        // Null when the reader may see the run but not its content; the
+        // composer is then empty rather than showing the string "null".
+        setInputText(run.input_text ?? "");
         setAssistantOutput(run.final_output ?? "");
         setRecovered(true);
         if (run.status === "WAITING_APPROVAL") await loadPendingApproval(targetRunId, generation);
+
+        // Adoption is done; what follows can take as long as the run does, and
+        // holding `busy` across it would disable Cancel on the run being
+        // recovered -- exactly the control that reload is meant to give back.
+        setBusy(false);
+
+        // Replay from sequence 0. The stream stays open past the replay when
+        // the run has not finished, which is what makes a reload mid-run keep
+        // streaming instead of freezing on the last persisted snapshot.
+        abortStream();
+        const controller = new AbortController();
+        streamRef.current = controller;
+        lastSequenceRef.current = 0;
+        setStreaming(true);
+        try {
+          await followRun(targetRunId, run.agent_version_id, generation, controller);
+        } finally {
+          if (generationRef.current === generation && !controller.signal.aborted) {
+            setStreaming(false);
+          }
+        }
+        if (generationRef.current !== generation || controller.signal.aborted) return;
+        // The stream ends at a pause as well as at the end, so the persisted
+        // record settles the outcome exactly as it does for a fresh run.
+        await reconcile(targetRunId, generation);
       } catch (caught) {
         if (generationRef.current === generation) setError(toApiError(caught, t("errors.requestFailed")));
       } finally {
@@ -501,6 +606,9 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
     accessToken,
     applyRun,
     loadPendingApproval,
+    abortStream,
+    followRun,
+    reconcile,
     t,
   ]);
 

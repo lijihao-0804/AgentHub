@@ -264,6 +264,16 @@ class AgentRun(Base):
         ForeignKeyConstraint(
             ["created_by"], ["users.id"], name="fk_agent_runs_created_by", ondelete="RESTRICT"
         ),
+        # Declared here as well as in 0023 so the metadata a schema-drift check
+        # compares against is the schema the migrations actually build. A
+        # constraint that exists only in a migration reads to autogenerate as
+        # one to drop.
+        ForeignKeyConstraint(
+            ["workspace_id", "thread_id"],
+            ["agent_threads.workspace_id", "agent_threads.id"],
+            name="fk_agent_runs_thread_workspace",
+            ondelete="SET NULL",
+        ),
         CheckConstraint(
             "status IN ('RUNNING', 'WAITING_APPROVAL', 'SUCCEEDED', 'FAILED', "
             "'NEEDS_ATTENTION', 'CANCEL_REQUESTED', 'CANCELLED')",

@@ -142,7 +142,7 @@ export const enUS = {
       research: {
         title: "Research",
         description: "Search the literature, keep every paper with the call that found it, shortlist what matters.",
-        act: "Act: nothing is written — the whole application is read and record.",
+        act: "Act: nothing is written back — the whole application only reads and records.",
       },
       incidents: {
         title: "Incidents",
@@ -595,6 +595,8 @@ export const enUS = {
       compare: "Compare with original",
       open: "Open replay",
       failed: "Could not create the replay run.",
+      inputWithheld:
+        "Replay needs the original input, and your role cannot read it. Ask someone who can run this agent to replay it.",
       waitingApproval:
         "The replay is waiting for an approval decision. Open it and use the normal approval flow — no decision is copied from the original run.",
     },
@@ -610,6 +612,7 @@ export const enUS = {
       createDatasetLink: "Create a dataset",
       baseVersion: "Base dataset version",
       baseVersionPlaceholder: "Select a base version",
+      baseVersionOption: "v{version} · {status} · {items} items",
       baseVersionLoading: "Loading dataset versions…",
       baseVersionEmpty: "This dataset has no DRAFT or PUBLISHED versions yet.",
       baseVersionHint: "A new DRAFT dataset version will be created. The selected base version will not be modified.",

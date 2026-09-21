@@ -9,7 +9,7 @@ import Breadcrumbs from "@/components/layout/breadcrumbs";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import TechnicalDetails from "@/components/ui/technical-details";
 import AddRunToDatasetPanel from "@/components/evaluation/add-run-to-dataset-panel";
-import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { ApiError, errorHintKey, type AuthInput } from "@/lib/api/client";
 import { createAgentRun, getAgentRun, type AgentRun } from "@/lib/api/agent-runtime";
 import { getRunDetail, getRunTimeline, RunDetail, RunTimelineEntry } from "@/lib/api/runs";
 import { useFrontendSession } from "@/components/providers/session-provider";
@@ -79,6 +79,12 @@ export default function RunDetailClient({ runId }: { runId: string }) {
     await replayMutation.run(
       async (auth) => {
         const source = await getAgentRun(auth, runId);
+        if (source.input_text === null) {
+          // A reader without `agent_run` sees the run but not its prompt, and
+          // a replay without the original input would be a different run
+          // wearing the same name. Refusing is the honest outcome.
+          throw new ApiError("PERMISSION_DENIED", t("run.replay.inputWithheld"), 403);
+        }
         return createAgentRun(auth, {
           agentVersionId: source.agent_version_id,
           inputText: source.input_text,
@@ -86,7 +92,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
       },
       (created) => setReplay(created),
     );
-  }, [replayMutation, runId]);
+  }, [replayMutation, runId, t]);
 
   // A missing run is a normal outcome, not a failure to report as one.
   // With a single guarded load, `loaded` implies data, so not-found can

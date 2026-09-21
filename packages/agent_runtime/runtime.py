@@ -881,10 +881,15 @@ class AgentRunService:
     async def get_run(self, context: WorkspaceExecutionContext, run_id: UUID) -> AgentRun:
         self._require_permission(context, "workspace_read")
         async with self.session_factory() as session:
+            # A plain read. This is the read path -- the detail endpoint, the
+            # step listing and every reconnecting stream follower go through it
+            # -- and taking a row lock here makes readers queue behind the
+            # worker that is still writing status, usage and output. Locking
+            # belongs to the mutation paths that actually change the row.
             run = await session.scalar(
                 select(AgentRun).where(
                     AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run_id
-                ).with_for_update()
+                )
             )
             if run is None:
                 raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)

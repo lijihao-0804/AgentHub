@@ -354,6 +354,20 @@ class ThreadService:
             reused=False,
         )
 
+    async def token_turn(
+        self, context: WorkspaceExecutionContext, thread_id: UUID, client_token: str | None
+    ) -> ThreadTurn:
+        """Find the turn a ``client_token`` already created.
+
+        ``open_turn`` answers ``None`` for a repeated token because it refuses
+        to create a second turn; this is how a caller then reaches the first
+        one. The streaming path needs it for the same reason the synchronous
+        path does: a retry must arrive at the run it already started, not at
+        an empty response.
+        """
+
+        return await self._require_token_turn(context, thread_id, client_token)
+
     # -- internals -------------------------------------------------------
 
     async def _require_token_turn(

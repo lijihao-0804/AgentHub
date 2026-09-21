@@ -221,8 +221,13 @@ export default function RunCompareClient() {
   const leftSide = left.data;
   const rightSide = right.data;
   const bothLoaded = Boolean(leftSide && rightSide);
+  // Two withheld inputs are both null, which is not evidence that they match:
+  // a reader who cannot see either prompt must not be told they are the same.
   const sameInput = Boolean(
-    leftSide && rightSide && leftSide.agent.input_text === rightSide.agent.input_text,
+    leftSide &&
+      rightSide &&
+      leftSide.agent.input_text !== null &&
+      leftSide.agent.input_text === rightSide.agent.input_text,
   );
 
   return (

@@ -134,7 +134,7 @@ export const zhCN: MessageSchema = {
     applications: {
       eyebrow: "应用",
       title: "四个应用，一套运行时",
-      lede: "它们都可以归结为同样的五个动作，也都跑在同一套 AgentVersion、Thread、Run、Knowledge、Tool、Approval 与 Artifact 之上。下面没有任何一个是第二套运行时。",
+      lede: "四个应用都归结为相同的五个动作，运行在同一套 AgentVersion、Thread、Run、Knowledge、Tool、Approval 与 Artifact 之上；它们不是彼此独立的第二套运行时。",
       stages: "理解 → 获取 → 推理 → 行动 → 交付",
       research: {
         title: "研究",
@@ -143,7 +143,7 @@ export const zhCN: MessageSchema = {
       },
       incidents: {
         title: "故障排查",
-        description: "指标、日志、发布记录与代码差异，然后是一次停在审批门前的回滚。",
+        description: "查看指标、日志、发布记录和代码差异，并在需要时发起一次停在审批门前的回滚。",
         act: "行动：一次需要人工批准后才执行的 WRITE。",
       },
       analytics: {
@@ -153,8 +153,8 @@ export const zhCN: MessageSchema = {
       },
       support: {
         title: "客户支持",
-        description: "查客户、对政策、给解释——或者把已经做完的调查交接给人。",
-        act: "行动：走审批的退款，或者一次本身就是交付物的升级转人工。",
+        description: "查询客户信息、核对政策、给出解释——或者把已经做完的调查交接给人工。",
+        act: "行动：需要审批的退款，或直接生成交接单并转人工。",
       },
     },
   },
@@ -496,11 +496,11 @@ export const zhCN: MessageSchema = {
       legendSucceeded: "成功",
       legendFailed: "失败",
       legendNeedsAttention: "需要处理",
-      ariaPrefix: "各时间桶运行数：",
+      ariaPrefix: "各时间段运行数：",
       ariaEntry: "{date}：成功 {succeeded}，失败 {failed}，需要处理 {needsAttention}",
       barTitle:
         "{date} —— 共 {runs} 次运行：成功 {succeeded}，失败 {failed}，需要处理 {needsAttention}，Token {tokens}",
-      note: "每个时间桶峰值 {peak} 次运行；精确数值：{values}",
+      note: "每个时间段峰值 {peak} 次运行；精确数值：{values}",
     },
     versions: {
       eyebrow: "按版本统计",
@@ -587,6 +587,8 @@ export const zhCN: MessageSchema = {
       compare: "与原始运行对比",
       open: "打开重跑",
       failed: "无法创建重跑运行。",
+      inputWithheld:
+        "重跑需要原始输入，而当前角色无权查看它。请让有权运行该 Agent 的成员发起重跑。",
       waitingApproval:
         "重跑正在等待审批决定。请打开它并走正常审批流程——系统不会复用原始运行的审批决定。",
     },
@@ -602,6 +604,7 @@ export const zhCN: MessageSchema = {
       createDatasetLink: "创建数据集",
       baseVersion: "基础数据集版本",
       baseVersionPlaceholder: "选择基础版本",
+      baseVersionOption: "v{version} · {status} · {items} 个条目",
       baseVersionLoading: "正在加载数据集版本…",
       baseVersionEmpty: "该数据集还没有 DRAFT 或 PUBLISHED 版本。",
       baseVersionHint: "系统将创建新的 DRAFT 数据集版本，所选基础版本不会被修改。",
@@ -868,7 +871,7 @@ export const zhCN: MessageSchema = {
         creating: "创建中…",
         formTitle: "创建版本（JSON 导入）",
         jsonLabel: "用例 JSON",
-        jsonHint: "粘贴 API 形状的 items 数组：case_key、split（DEV 或 HOLDOUT）、category、input、expected、tags、source_provenance、ordinal。",
+        jsonHint: "粘贴符合 API 格式的条目数组：case_key、split（DEV 或 HOLDOUT）、category、input、expected、tags、source_provenance、ordinal。",
         fileLabel: "从 .json 文件导入",
         fileHint: "仅在浏览器本地解析——文件不会离开这台设备。",
         parsed: "已解析 {count} 条 items",
@@ -876,7 +879,7 @@ export const zhCN: MessageSchema = {
         parsedHoldout: "留出集 {count} 条",
         parsedCategories: "分类：{categories}",
         invalidJson: "JSON 无效：{message}",
-        invalidItems: "Items 必须是符合 item schema 的非空数组。",
+        invalidItems: "条目必须是符合条目结构的非空数组。",
         schemaVersion: "Schema 版本",
         columns: {
           version: "版本",
@@ -919,7 +922,7 @@ export const zhCN: MessageSchema = {
     pricing: {
       eyebrow: "定价",
       title: "定价快照",
-      lede: "绑定到实验变体的不可变模型价格记录。金额保持记录时的货币，不做任何换算。",
+      lede: "绑定到实验变体的不可变模型价格记录。金额保留记录时的币种，不进行换算。",
       columns: {
         name: "名称",
         provider: "供应商",
@@ -1164,7 +1167,7 @@ export const zhCN: MessageSchema = {
     gate: {
       stepTitle: "发布门禁",
       eligibilityNotice:
-        "正式发布门禁要求实验用途为 RELEASE_GATE 且 split 为 HOLDOUT。",
+        "正式发布门禁要求实验用途必须为 RELEASE_GATE，且切分必须为 HOLDOUT。",
       needsComparison: "请先创建对比——门禁评估的是对比证据。",
       policySelect: "发布门禁策略",
       run: "运行发布门禁",
@@ -1760,12 +1763,12 @@ export const zhCN: MessageSchema = {
     threadTitlePlaceholder: "例如 INC-2026-091 checkout-api 5xx",
     recent: "进行中的故障",
     noThreads: "还没有排查会话",
-    noThreadsHint: "开一个开始排查，它读到的每条指标、日志和发布记录都会被留存。",
+    noThreadsHint: "新建一个排查会话；智能体读取的每条指标、日志和发布记录都会被留存。",
     summary: "{events} 个事件 · {turns} 轮对话",
     timeline: {
       paneTitle: "时间线",
       empty: "还没有记录到事件",
-      emptyHint: "让智能体去看指标、日志或发布记录。它读到的内容会落在这里，并带上来源的那次调用。",
+      emptyHint: "让智能体去看指标、日志或发布记录。这里会记录智能体读取的内容，并标明对应的调用来源。",
       entries: "{count} 个事件",
       merged: "由 {count} 条记录结果合并而成",
       kinds: {
@@ -1859,20 +1862,20 @@ export const zhCN: MessageSchema = {
       saving: "保存中…",
       needsFields: "结论需要一个问题和一段结论。",
       empty: "还没有结论",
-      emptyHint: "下钻有了着落之后，把它写下来。",
+      emptyHint: "完成下钻分析后，在这里记录结论。",
       queryCount: "已附加 {count} 条查询",
     },
   },
   support: {
     eyebrow: "应用",
     title: "客户支持",
-    lede: "一个工单会话会查客户、对政策，然后要么给出解释，要么把已经做完的调查交接给人。",
+    lede: "一个工单会话会查询客户信息、核对政策，然后要么给出解释，要么把已经做完的调查交接给人工。",
     newThread: "新建工单",
     createTitle: "开一个客服工单",
     threadTitlePlaceholder: "例如 CS-10291 退款没有到账",
     recent: "进行中的工单",
     noThreads: "还没有工单",
-    noThreadsHint: "开一个，智能体做过的每一次查询都会留在这张工单上。",
+    noThreadsHint: "新建工单后，智能体执行的每次查询都会留在这张工单上。",
     summary: "{turns} 轮对话",
     context: {
       paneTitle: "客户信息",

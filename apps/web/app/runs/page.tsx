@@ -35,6 +35,8 @@ export default function RunsPage() {
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
+  // null until the URL has been read; the first load waits for it.
+  const [urlFilters, setUrlFilters] = useState<{ status: string; agentVersionId: string } | null>(null);
 
   const refresh = useCallback(
     async (cursor: string | null = null, overrides?: { status?: string; agentVersionId?: string }) => {
@@ -64,6 +66,12 @@ export default function RunsPage() {
   );
 
   // Deep links such as /runs?status=NEEDS_ATTENTION must preload the filters.
+  // The parsed values are kept in state of their own, not just pushed into the
+  // controls: setting the controls does not retroactively change the `refresh`
+  // closure the first load already captured, so the first request has to be
+  // given the filters explicitly or it fetches every run and then never
+  // re-fetches, leaving the deep link showing the opposite of what it asked
+  // for until the user presses Apply.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlStatus = params.get("status") ?? "";
@@ -72,14 +80,15 @@ export default function RunsPage() {
       setStatus(urlStatus);
       setAgentVersionId(urlVersion);
     }
+    setUrlFilters({ status: urlStatus, agentVersionId: urlVersion });
   }, []);
 
   useEffect(() => {
-    if (connected && !initialLoaded) {
+    if (connected && !initialLoaded && urlFilters !== null) {
       setInitialLoaded(true);
-      void refresh();
+      void refresh(null, urlFilters);
     }
-  }, [connected, initialLoaded, refresh]);
+  }, [connected, initialLoaded, refresh, urlFilters]);
 
   useEffect(() => {
     if (!connected) setInitialLoaded(false);
