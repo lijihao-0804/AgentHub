@@ -284,6 +284,47 @@ async def test_the_existing_edit_permission_is_what_gates_this(db_factory) -> No
 
 
 @pytest.mark.asyncio
+async def test_the_document_listing_shows_a_document_was_superseded(db_factory) -> None:
+    # Writing supersession is useless if nothing can read it back: the listing
+    # is the only place a person sees the whole knowledge base at once, and it
+    # projects its own response model rather than DocumentResponse.
+    from datetime import date
+
+    bundle = await _seed(db_factory)
+    await _update(
+        db_factory,
+        bundle,
+        superseded_by_document_id=bundle.v2_document_id,
+        effective_date=date(2024, 3, 1),
+        set_effective_date=True,
+    )
+    settings = Settings(testing=True, database_url=async_database_url(TEST_DATABASE_URL))
+    app = create_app(settings)
+
+    async def override_db() -> AsyncIterator[AsyncSession]:
+        async with db_factory() as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = override_db
+    token = issue_access_token(bundle.user_id, settings)
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        listed = await client.get(
+            f"/api/v1/workspaces/{bundle.workspace_id}/"
+            f"knowledge-bases/{bundle.knowledge_base_id}/documents",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert listed.status_code == 200, listed.text
+    rows = {row["id"]: row for row in listed.json()}
+    superseded = rows[str(bundle.v1_document_id)]
+    assert superseded["superseded_by_document_id"] == str(bundle.v2_document_id)
+    assert superseded["effective_date"] == "2024-03-01"
+    # The successor is listed too, and must not look retired.
+    assert rows[str(bundle.v2_document_id)]["superseded_by_document_id"] is None
+
+
+@pytest.mark.asyncio
 async def test_the_patch_route_applies_and_rejects_unknown_fields(db_factory) -> None:
     bundle = await _seed(db_factory)
     settings = Settings(testing=True, database_url=async_database_url(TEST_DATABASE_URL))

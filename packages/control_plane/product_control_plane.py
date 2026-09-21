@@ -1082,6 +1082,8 @@ class ProductControlPlaneService:
                 revision.lifecycle_status if revision is not None else None
             ),
             "current_revision_created_at": revision.created_at if revision is not None else None,
+            "effective_date": document.effective_date,
+            "superseded_by_document_id": document.superseded_by_document_id,
         }
 
     @staticmethod

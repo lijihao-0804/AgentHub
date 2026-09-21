@@ -165,6 +165,15 @@ class RetrievalPlaygroundEvidence(BaseModel):
     retrieval_score: float
     rerank_score: float | None
     snippet: str
+    # The playground is where a human calibrates knowledge_min_rerank_score and
+    # decides whether a retired document is out-ranking its successor, so it
+    # shows the lifecycle the ranking now depends on. Unlike the search_knowledge
+    # tool result this keeps the successor's id: a raw UUID is noise to a model,
+    # but it is the thing a person needs in order to go look at that document.
+    document_name: str | None = None
+    effective_date: str | None = None
+    superseded: bool = False
+    superseded_by_document_id: str | None = None
 
 
 class RetrievalPlaygroundResponse(BaseModel):

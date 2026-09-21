@@ -118,6 +118,10 @@ def _playground_response(
                 retrieval_score=item.retrieval_score,
                 rerank_score=item.rerank_score,
                 snippet=item.text[:1_000],
+                document_name=item.metadata.get("document_name"),
+                effective_date=item.metadata.get("effective_date"),
+                superseded=bool(item.metadata.get("superseded", False)),
+                superseded_by_document_id=item.metadata.get("superseded_by_document_id"),
             )
             for item in result.evidence
         ],

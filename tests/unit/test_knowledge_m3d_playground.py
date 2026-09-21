@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from datetime import date
 from uuid import UUID, uuid4
 
 import httpx
@@ -222,6 +223,54 @@ async def test_playground_returns_enriched_stages_and_bounded_evidence() -> None
     assert "qdrant-internal-point" not in response.text
     assert index.dense_limit == 30
     assert index.sparse_limit == 30
+
+
+@pytest.mark.asyncio
+async def test_playground_evidence_carries_document_lifecycle() -> None:
+    # The playground is the only surface a human uses to calibrate the rerank
+    # floor and to check whether a retired document out-ranks its successor,
+    # so the lifecycle the ranking depends on has to reach the response. It
+    # used to stop at the retrieval layer's metadata dict.
+    session = _FakeSession()
+    successor_id = uuid4()
+    session.document.effective_date = date(2024, 3, 1)
+    session.document.superseded_by_document_id = successor_id
+    components, _ = _components(session)
+    app = _app(session, components, _context(session, permissions=frozenset({"knowledge_run"})))
+
+    response = await _post(
+        app,
+        session.workspace_id,
+        session.knowledge_base_id,
+        {"query": "handbook", "knowledge_snapshot_id": str(session.snapshot_id)},
+    )
+
+    assert response.status_code == 200, response.text
+    evidence = response.json()["evidence"][0]
+    assert evidence["document_name"] == "handbook.txt"
+    assert evidence["effective_date"] == "2024-03-01"
+    assert evidence["superseded"] is True
+    assert evidence["superseded_by_document_id"] == str(successor_id)
+
+
+@pytest.mark.asyncio
+async def test_playground_evidence_of_a_live_document_is_not_marked_superseded() -> None:
+    session = _FakeSession()
+    components, _ = _components(session)
+    app = _app(session, components, _context(session, permissions=frozenset({"knowledge_run"})))
+
+    response = await _post(
+        app,
+        session.workspace_id,
+        session.knowledge_base_id,
+        {"query": "handbook", "knowledge_snapshot_id": str(session.snapshot_id)},
+    )
+
+    assert response.status_code == 200, response.text
+    evidence = response.json()["evidence"][0]
+    assert evidence["superseded"] is False
+    assert evidence["superseded_by_document_id"] is None
+    assert evidence["effective_date"] is None
 
 
 @pytest.mark.asyncio

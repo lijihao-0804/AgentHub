@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any, Literal
 from uuid import UUID
@@ -215,6 +215,13 @@ class KnowledgeDocumentManagementResponse(BaseModel):
     current_revision_status: str | None
     current_revision_lifecycle_status: str | None
     current_revision_created_at: datetime | None
+    # Cross-document supersession, which is a different thing from the
+    # revision's own lifecycle_status above: that retires one revision of this
+    # document, these say the whole document was replaced by another one.
+    # Without them a listing cannot show that a document is obsolete, even
+    # though the PATCH endpoint can set it.
+    effective_date: date | None
+    superseded_by_document_id: UUID | None
 
 
 class KnowledgeSnapshotManagementResponse(BaseModel):
