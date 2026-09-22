@@ -272,7 +272,10 @@ class AgentRun(Base):
             ["workspace_id", "thread_id"],
             ["agent_threads.workspace_id", "agent_threads.id"],
             name="fk_agent_runs_thread_workspace",
-            ondelete="SET NULL",
+            # Naming the column matters: a bare SET NULL nulls the whole
+            # constraint, and `workspace_id` is NOT NULL, so deleting a thread
+            # failed outright rather than orphaning its runs. See 0029.
+            ondelete="SET NULL (thread_id)",
         ),
         CheckConstraint(
             "status IN ('RUNNING', 'WAITING_APPROVAL', 'SUCCEEDED', 'FAILED', "

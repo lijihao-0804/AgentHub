@@ -43,7 +43,9 @@ class Artifact(Base):
             ["workspace_id", "run_id"],
             ["agent_runs.workspace_id", "agent_runs.id"],
             name="fk_artifacts_run_workspace",
-            ondelete="SET NULL",
+            # Only the run reference may be cleared. A bare SET NULL would also
+            # null `workspace_id`, which is NOT NULL. See 0029.
+            ondelete="SET NULL (run_id)",
         ),
         ForeignKeyConstraint(
             ["created_by"], ["users.id"], name="fk_artifacts_created_by", ondelete="RESTRICT"

@@ -57,17 +57,23 @@ class WorkspaceMemory(Base):
         # The thread and the run are provenance, not ownership: a memory
         # survives the deletion of the conversation that taught it, so these
         # null out rather than cascade.
+        #
+        # The column list after SET NULL is load-bearing. A bare SET NULL nulls
+        # every column of the constraint, ``workspace_id`` included, and that
+        # column is NOT NULL -- so deleting a thread raised a NotNullViolation
+        # instead of forgetting where the memory came from. Only the provenance
+        # column may be cleared; the tenant never moves.
         ForeignKeyConstraint(
             ["workspace_id", "thread_id"],
             ["agent_threads.workspace_id", "agent_threads.id"],
             name="fk_workspace_memories_thread_workspace",
-            ondelete="SET NULL",
+            ondelete="SET NULL (thread_id)",
         ),
         ForeignKeyConstraint(
             ["workspace_id", "source_run_id"],
             ["agent_runs.workspace_id", "agent_runs.id"],
             name="fk_workspace_memories_run_workspace",
-            ondelete="SET NULL",
+            ondelete="SET NULL (source_run_id)",
         ),
         CheckConstraint(
             "kind IN ('FACT', 'PREFERENCE', 'DECISION', 'CONSTRAINT')",
