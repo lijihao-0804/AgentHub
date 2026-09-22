@@ -6,11 +6,10 @@ the request-shaped half: one open session, permission checks, and the workspace
 isolation rule that a memory belonging to another workspace is reported as
 absent rather than as forbidden.
 
-Two permissions, both of which already exist: ``workspace_read`` to look and
-``agent_edit`` to override. Being allowed to change what an agent believes is
-the same authority as being allowed to change its prompt, so it is the same
-permission -- a separate one would be a new thing to grant, forget to grant,
-and grant too widely.
+Reading shared agent memory requires the existing ``agent_run`` or
+``agent_edit`` permission. ``workspace_read`` alone is intentionally not
+enough because memory content is operational context, not general workspace
+metadata. Invalidation and reactivation still require ``agent_edit``.
 
 Nothing here deletes. ``invalidate`` is how a human says "stop using this", and
 the row stays so that a run which already used it still explains itself.
@@ -74,7 +73,7 @@ class MemoryAdminService:
         limit: int = 50,
         offset: int = 0,
     ) -> MemoryPage:
-        self._require_permission(context, "workspace_read")
+        self._require_any_permission(context, "agent_run", "agent_edit")
         workspace_id = UUID(context.workspace_id)
         await self._require_agent(session, workspace_id=workspace_id, agent_id=agent_id)
         if status is not None and status not in MEMORY_STATUSES:
@@ -226,6 +225,13 @@ class MemoryAdminService:
     @staticmethod
     def _require_permission(context: WorkspaceExecutionContext, permission: str) -> None:
         if permission not in context.permissions:
+            raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
+
+    @staticmethod
+    def _require_any_permission(
+        context: WorkspaceExecutionContext, *permissions: str
+    ) -> None:
+        if not any(permission in context.permissions for permission in permissions):
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
 
 

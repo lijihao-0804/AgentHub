@@ -1492,13 +1492,13 @@ export const zhCN: MessageSchema = {
     runtimeHint: "留空的字段将回退到服务端默认值。",
     memoryTitle: "记忆",
     memoryHint:
-      "所有 agent 默认关闭，只有在这里打开才生效。打开开关会改变行为，因此也会改变发布后的 spec 哈希；两个都不开，发布结果与记忆功能存在之前完全一致。",
+      "所有 agent 默认关闭，只有在这里打开才生效。这里的长期记忆属于工作区内该 agent 的共享项目与工作流上下文，不是个人画像。打开开关会改变行为，因此也会改变发布后的 spec 哈希；两个都不开，发布结果与记忆功能存在之前完全一致。",
     memoryThreadSearch: "允许 agent 检索本会话更早的轮次",
-    memoryLongTerm: "允许 agent 使用长期记忆",
+    memoryLongTerm: "允许 agent 使用工作区共享长期记忆",
     memoryThreadSearchHint:
       "每次运行只会回放最近几轮对话。打开会话检索后，agent 会拿到一个工具，用它去查被窗口丢掉的轮次，而不是回答“我不记得了”。它只读本 agent 自己的会话，对 Playground 单次调试运行没有任何影响。",
     memory: {
-      hint: "这个 agent 从过往对话里留下来的东西。记忆是在一轮问答回答完之后才写入的，所以新记忆可能要稍等一会儿才会出现在这里。",
+      hint: "这个 agent 从工作区共享的过往对话里留下的项目与工作流信息。记忆是在一轮问答回答完之后异步写入的，所以新记忆可能要稍等一会儿才会出现在这里；一次运行成功不代表一定产生了记忆。",
       disabledHint:
         "该 agent 的长期记忆当前是关闭的，不会再写入新记忆。下面列出的是它开启期间学到的内容，仍然保留展示，以便过去的运行依然可以被解释。",
       search: "搜索内容",
@@ -1510,12 +1510,12 @@ export const zhCN: MessageSchema = {
       clearFilters: "清除筛选",
       status: {
         ACTIVE: "生效中",
-        SUPERSEDED: "已被取代",
+        SUPERSEDED: "预留状态（未来语义替换）",
         INVALIDATED: "已停用",
       },
       kind: {
         FACT: "事实",
-        PREFERENCE: "偏好",
+        PREFERENCE: "团队/项目偏好",
         DECISION: "决定",
         CONSTRAINT: "约束",
       },

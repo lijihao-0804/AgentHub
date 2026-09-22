@@ -1,4 +1,4 @@
-"""Long-term agent memory: what an agent keeps after a thread ends."""
+"""Shared workspace-scoped long-term memory for an agent's work."""
 
 from packages.memory.contracts import (
     MAX_INJECTED_MEMORIES,

@@ -27,7 +27,12 @@ import pytest
 
 from packages.agent_runtime.context_budget import ContextCategory
 from packages.agent_runtime.runtime import _AgentRunGraph, _categorize_messages
-from packages.memory.contracts import SelectedMemory
+from packages.core.errors.exceptions import AgentHubError
+from packages.memory.contracts import (
+    MemorySnapshotIntegrityError,
+    SelectedMemory,
+    memory_content_hash,
+)
 from packages.model_gateway.contracts import ModelMessage
 
 
@@ -38,13 +43,17 @@ class _RecordingSelector:
         self._memories = memories
         self.select_calls = 0
         self.load_calls: list[tuple[UUID, ...]] = []
+        self.load_hashes: list[dict[UUID, str] | None] = []
 
     async def select(self, *, workspace_id, agent_id, query, limit):  # noqa: ANN001
         self.select_calls += 1
         return self._memories[:limit]
 
-    async def load(self, *, workspace_id, memory_ids):  # noqa: ANN001
+    async def load(
+        self, *, workspace_id, memory_ids, memory_content_hashes=None
+    ):  # noqa: ANN001
         self.load_calls.append(tuple(memory_ids))
+        self.load_hashes.append(memory_content_hashes)
         by_id = {item.id: item for item in self._memories}
         return tuple(by_id[mid] for mid in memory_ids if mid in by_id)
 
@@ -137,6 +146,9 @@ async def test_the_first_prepare_selects_and_writes_the_snapshot() -> None:
     snapshot = bundle[2].effective_memory_snapshot
     assert snapshot["selected_at"]
     assert len(snapshot["memory_ids"]) == 3
+    assert snapshot["memory_content_hashes"] == {
+        str(item.id): memory_content_hash(item.content) for item in selector._memories
+    }
 
 
 @pytest.mark.asyncio
@@ -152,6 +164,9 @@ async def test_a_second_prepare_replays_the_snapshot_instead_of_reselecting() ->
 
     assert selector.select_calls == 1, "selection happens once per run, not once per PREPARE"
     assert selector.load_calls == [tuple(item.id for item in memories)]
+    assert selector.load_hashes == [
+        {str(item.id): memory_content_hash(item.content) for item in memories}
+    ]
     assert metadata == {"memory_count": 3, "replayed_from_snapshot": True}
 
 
@@ -195,6 +210,61 @@ async def test_a_memory_invalidated_after_the_run_started_is_still_replayed() ->
     assert selector.load_calls[-1] == tuple(item.id for item in memories)
     assert metadata["replayed_from_snapshot"] is True
     assert len(messages) == 1
+
+
+@pytest.mark.asyncio
+async def test_hash_mismatch_fails_closed_with_stable_error() -> None:
+    class _BrokenSelector(_RecordingSelector):
+        async def load(self, *, workspace_id, memory_ids, memory_content_hashes=None):
+            raise MemorySnapshotIntegrityError("hash mismatch")
+
+    memory = _some(1)[0]
+    snapshot = {
+        "selected_at": "2026-09-22T00:00:00+00:00",
+        "memory_ids": [str(memory.id)],
+        "memory_content_hashes": {str(memory.id): "0" * 64},
+    }
+    bundle = _graph(_BrokenSelector((memory,)), snapshot=snapshot)
+
+    with pytest.raises(AgentHubError) as raised:
+        await _memories(
+            bundle,
+            _spec(long_term_memory=True),
+            workspace_id=uuid4(),
+            agent_id=uuid4(),
+        )
+
+    assert raised.value.code == "AGENT_MEMORY_SNAPSHOT_INTEGRITY_ERROR"
+
+
+@pytest.mark.asyncio
+async def test_only_ids_present_in_the_admitted_memory_message_are_touched() -> None:
+    class _TouchingSelector(_RecordingSelector):
+        def __init__(self, memories):  # noqa: ANN001
+            super().__init__(memories)
+            self.touched: list[UUID] = []
+
+        async def touch(self, *, workspace_id, memory_ids):  # noqa: ANN001
+            self.touched.extend(memory_ids)
+
+    memories = _some(2)
+    selector = _TouchingSelector(memories)
+    graph, service, run = _graph(selector)
+    graph.service = service
+    graph.run = run
+    workspace_id = uuid4()
+    graph.context = SimpleNamespace(workspace_id=str(workspace_id))
+    state = {"memory_ids": (memories[0].id, memories[1].id)}
+    admitted = (
+        ModelMessage(
+            role="system",
+            content=json.dumps({"memories": [{"id": str(memories[1].id)}]}),
+        ),
+    )
+
+    await graph._touch_admitted_memories(state, admitted)
+
+    assert selector.touched == [memories[1].id]
 
 
 @pytest.mark.asyncio

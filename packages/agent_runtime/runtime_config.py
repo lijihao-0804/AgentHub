@@ -34,6 +34,11 @@ DEFAULT_CONTEXT_BUDGET: dict[str, int] = {
     "max_tool_result_tokens": 4_000,
 }
 
+# Server-owned ceiling for newly published long-term-memory-enabled versions.
+# It is deliberately outside DEFAULT_CONTEXT_BUDGET so memory-off versions keep
+# their historical resolved-spec hash and shared evidence semantics.
+DEFAULT_MEMORY_TOKENS = 1_500
+
 MAX_CONTEXT_BUDGET: dict[str, int] = {
     "reserved_output_tokens": 128_000,
     "max_retrieval_tokens": 128_000,
@@ -61,6 +66,7 @@ DEFAULT_MEMORY_CONFIG: dict[str, bool] = {
 __all__ = [
     "DEFAULT_CONTEXT_BUDGET",
     "DEFAULT_MEMORY_CONFIG",
+    "DEFAULT_MEMORY_TOKENS",
     "DEFAULT_RUNTIME_LIMITS",
     "DEFAULT_RUN_COST_LIMIT_MICRO_USD",
     "MAX_CONTEXT_BUDGET",

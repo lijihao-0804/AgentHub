@@ -77,6 +77,10 @@ class ContextBudgetConfig:
     reserved_output_tokens: int = 2_000
     max_retrieval_tokens: int = 5_000
     max_tool_result_tokens: int = 4_000
+    # None preserves the historical shared memory+retrieval evidence pool.
+    # Published versions created with long-term memory enabled carry this
+    # server-owned independent cap explicitly.
+    max_memory_tokens: int | None = None
 
     def __post_init__(self) -> None:
         for name in (
@@ -87,6 +91,12 @@ class ContextBudgetConfig:
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
                 raise ValueError(f"{name} must be a non-negative integer")
+        if self.max_memory_tokens is not None and (
+            isinstance(self.max_memory_tokens, bool)
+            or not isinstance(self.max_memory_tokens, int)
+            or self.max_memory_tokens < 0
+        ):
+            raise ValueError("max_memory_tokens must be a non-negative integer or None")
 
 
 class TokenEstimator(Protocol):
@@ -522,22 +532,31 @@ class ContextBudgetPolicy:
         items: tuple[_NormalizedMessage, ...],
     ) -> tuple[_NormalizedMessage, ...]:
         projected: list[_NormalizedMessage] = []
-        # Memory and retrieval share one evidence pool.  They are the same kind
-        # of thing -- external evidence injected into the prompt -- and giving
-        # memory its own budget key would change ``DEFAULT_CONTEXT_BUDGET`` and
-        # therefore the published spec hash of every agent in the estate, for a
-        # feature almost none of them have enabled.  Memory is served first: it
-        # is capped at a handful of short statements, so it cannot starve
-        # retrieval, while retrieval could trivially starve it.
-        pools = {
-            "evidence": self.config.max_retrieval_tokens,
-            "tool_result": self.config.max_tool_result_tokens,
-        }
-        for category, pool in (
-            (ContextCategory.MEMORY, "evidence"),
-            (ContextCategory.RAG_EVIDENCE, "evidence"),
-            (ContextCategory.TOOL_RESULT, "tool_result"),
-        ):
+        # Old specs keep the shared evidence pool for hash and behaviour
+        # compatibility. New memory-enabled specs carry an independent cap so
+        # a large memory set cannot starve current retrieval evidence.
+        if self.config.max_memory_tokens is None:
+            pools = {
+                "evidence": self.config.max_retrieval_tokens,
+                "tool_result": self.config.max_tool_result_tokens,
+            }
+            allocations = (
+                (ContextCategory.MEMORY, "evidence"),
+                (ContextCategory.RAG_EVIDENCE, "evidence"),
+                (ContextCategory.TOOL_RESULT, "tool_result"),
+            )
+        else:
+            pools = {
+                "memory": self.config.max_memory_tokens,
+                "evidence": self.config.max_retrieval_tokens,
+                "tool_result": self.config.max_tool_result_tokens,
+            }
+            allocations = (
+                (ContextCategory.MEMORY, "memory"),
+                (ContextCategory.RAG_EVIDENCE, "evidence"),
+                (ContextCategory.TOOL_RESULT, "tool_result"),
+            )
+        for category, pool in allocations:
             remaining = pools[pool]
             category_items = [item for item in items if item.category is category]
             if category is ContextCategory.TOOL_RESULT:

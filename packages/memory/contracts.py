@@ -8,6 +8,8 @@ wires neither behaves exactly as the runtime behaved before memory existed.
 
 from __future__ import annotations
 
+import hashlib
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Protocol
 from uuid import UUID
@@ -25,6 +27,21 @@ MAX_MEMORY_LENGTH = 400
 # Per turn, not per run. A turn that claims to have learned ten new permanent
 # facts has misunderstood the job.
 MAX_MEMORIES_PER_TURN = 3
+MAX_EVIDENCE_LENGTH = 300
+MEMORY_SNAPSHOT_INTEGRITY_ERROR = "AGENT_MEMORY_SNAPSHOT_INTEGRITY_ERROR"
+
+
+class MemorySnapshotIntegrityError(RuntimeError):
+    """A frozen memory snapshot cannot be reconstructed safely."""
+
+    code = MEMORY_SNAPSHOT_INTEGRITY_ERROR
+
+
+def memory_content_hash(content: str) -> str:
+    """Return the canonical content hash used by persisted memory rows."""
+
+    normalized = " ".join(content.split()).casefold()
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,6 +52,9 @@ class SelectedMemory:
     kind: str
     content: str
     salience: int
+    # The empty default keeps old test-only selectors source compatible. The
+    # production store always supplies the authoritative persisted hash.
+    content_hash: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,6 +63,7 @@ class MemoryCandidate:
 
     content: str
     kind: str
+    evidence: str | None = None
 
 
 class MemorySelector(Protocol):
@@ -52,9 +73,16 @@ class MemorySelector(Protocol):
         """Rank the agent's active memories against the question being asked."""
 
     async def load(
-        self, *, workspace_id: UUID, memory_ids: tuple[UUID, ...]
+        self,
+        *,
+        workspace_id: UUID,
+        memory_ids: tuple[UUID, ...],
+        memory_content_hashes: Mapping[UUID | str, str] | None = None,
     ) -> tuple[SelectedMemory, ...]:
         """Re-read an earlier selection by id, preserving the given order."""
+
+    async def touch(self, *, workspace_id: UUID, memory_ids: tuple[UUID, ...]) -> None:
+        """Mark only memories that reached the admitted model input as used."""
 
 
 class MemoryWriteQueue(Protocol):
@@ -66,9 +94,13 @@ __all__ = [
     "MAX_INJECTED_MEMORIES",
     "MAX_MEMORIES_PER_TURN",
     "MAX_MEMORY_LENGTH",
+    "MAX_EVIDENCE_LENGTH",
+    "MEMORY_SNAPSHOT_INTEGRITY_ERROR",
     "MIN_MEMORY_LENGTH",
     "MemoryCandidate",
+    "MemorySnapshotIntegrityError",
     "MemorySelector",
     "MemoryWriteQueue",
     "SelectedMemory",
+    "memory_content_hash",
 ]

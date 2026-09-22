@@ -1505,13 +1505,13 @@ export const enUS = {
     runtimeHint: "Leave a field blank to fall back to the server default.",
     memoryTitle: "Memory",
     memoryHint:
-      "Off for every agent until you turn it on here. Turning a switch on changes behaviour, so it changes the published spec hash; leaving both off publishes exactly what this agent published before memory existed.",
+      "Off for every agent until you turn it on here. Long-term memory is shared operational context for this agent within the workspace, not a personal profile. Turning a switch on changes behaviour, so it changes the published spec hash; leaving both off publishes exactly what this agent published before memory existed.",
     memoryThreadSearch: "Let the agent search earlier turns of the conversation",
-    memoryLongTerm: "Let the agent use long-term memory",
+    memoryLongTerm: "Let the agent use shared workspace memory",
     memoryThreadSearchHint:
       "Only the most recent turns are replayed into each run. With conversation search on, the agent gets a tool that looks up the turns the window dropped instead of answering that it does not remember. It reads only this agent's own threads, and has no effect on single-shot Playground runs.",
     memory: {
-      hint: "What this agent has kept from earlier conversations. Memory is written after a turn has already answered, so a new memory may take a moment to appear here.",
+      hint: "Shared project and workflow context this agent kept from earlier workspace conversations. Memory is written asynchronously after a turn has answered, so a new memory may take a moment to appear; a successful run does not guarantee that a memory was created.",
       disabledHint:
         "Long-term memory is off for this agent, so nothing new will be written. Anything listed below was learned while it was on, and is still shown so past runs remain explainable.",
       search: "Search",
@@ -1523,12 +1523,12 @@ export const enUS = {
       clearFilters: "Clear filters",
       status: {
         ACTIVE: "Active",
-        SUPERSEDED: "Superseded",
+        SUPERSEDED: "Reserved (future semantic replacement)",
         INVALIDATED: "Invalidated",
       },
       kind: {
         FACT: "Fact",
-        PREFERENCE: "Preference",
+        PREFERENCE: "Team/project preference",
         DECISION: "Decision",
         CONSTRAINT: "Constraint",
       },

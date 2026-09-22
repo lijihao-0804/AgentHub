@@ -48,6 +48,7 @@ from packages.model_gateway.contracts import (
     ModelCapabilities,
     ModelMessage,
     ModelResponse,
+    ModelToolCall,
     ResolvedModelExecutionPlan,
     ResolvedModelExecutionProfile,
     RetryPolicy,
@@ -91,12 +92,17 @@ def test_an_unknown_kind_is_rejected_by_the_gate() -> None:
 
 def test_the_gate_normalizes_whitespace_and_kind_casing() -> None:
     normalized = normalize_candidate(
-        MemoryCandidate(content="  the user  ships on\nFridays ", kind=" preference ")
+        MemoryCandidate(
+            content="  the team  ships on\nFridays ",
+            kind=" preference ",
+            evidence="ships on Fridays",
+        )
     )
 
     assert normalized is not None
-    assert normalized.content == "the user ships on Fridays"
+    assert normalized.content == "the team ships on Fridays"
     assert normalized.kind == "PREFERENCE"
+    assert normalized.evidence == "ships on Fridays"
 
 
 # --------------------------------------------------------------------------
@@ -115,12 +121,13 @@ def test_an_empty_array_is_a_successful_extraction() -> None:
 
 
 def test_a_fenced_or_prefaced_reply_still_parses() -> None:
-    fenced = '```json\n{"memories": [{"content": "the user ships on Fridays", '
-    fenced += '"kind": "PREFERENCE"}]}\n```'
-    parsed = parse_candidates(_response(fenced))
+    fenced = '```json\n{"memories": [{"content": "the team ships on Fridays", '
+    fenced += '"kind": "PREFERENCE", "evidence": "ships on Fridays"}]}\n```'
+    parsed = parse_candidates(_response(fenced), user_input="The team ships on Fridays")
 
     assert len(parsed) == 1
     assert parsed[0].kind == "PREFERENCE"
+    assert parsed[0].evidence == "ships on Fridays"
 
 
 def test_unparseable_output_yields_nothing_instead_of_raising() -> None:
@@ -133,11 +140,41 @@ def test_unparseable_output_yields_nothing_instead_of_raising() -> None:
 
 def test_an_unknown_kind_from_the_model_becomes_a_fact() -> None:
     parsed = parse_candidates(
-        _response('{"memories": [{"content": "a durable fact", "kind": "VIBE"}]}')
+        _response(
+            '{"memories": [{"content": "a durable fact", "kind": "VIBE", '
+            '"evidence": "durable fact"}]}'
+        ),
+        user_input="This is a durable fact.",
     )
 
     assert len(parsed) == 1
     assert parsed[0].kind == "FACT"
+
+
+def test_evidence_must_be_an_exact_user_quote_and_bad_siblings_are_dropped() -> None:
+    parsed = parse_candidates(
+        _response(
+            '{"memories": ['
+            '{"content": "团队周五发版", "kind": "FACT", "evidence": "周五发版"}, '
+            '{"content": "团队周一发版", "kind": "FACT", "evidence": "周一发版"}'
+            ']}'
+        ),
+        user_input="团队周五发版。",
+    )
+
+    assert [(item.content, item.evidence) for item in parsed] == [("团队周五发版", "周五发版")]
+
+
+def test_assistant_only_claim_cannot_become_memory_without_user_evidence() -> None:
+    parsed = parse_candidates(
+        _response(
+            '{"memories": [{"content": "助手声称项目已上线", "kind": "FACT", '
+            '"evidence": "助手声称项目已上线"}]}'
+        ),
+        user_input="请告诉我项目状态。",
+    )
+
+    assert parsed == ()
 
 
 def test_a_model_that_ignores_the_cap_is_capped_anyway() -> None:
@@ -158,7 +195,8 @@ def test_the_extraction_prompt_carries_both_sides_of_the_turn() -> None:
     payload = json.loads(request.messages[1].content)
     # ensure_ascii would turn the user's own language into escapes and make the
     # model extract memories about \u escapes.
-    assert payload == {"user": "我周五发版", "assistant": "记下了"}
+    assert payload == {"user": "我周五发版"}
+    assert "assistant" not in request.messages[1].content
 
 
 # --------------------------------------------------------------------------
@@ -257,7 +295,9 @@ class _CharEstimator:
         return len(text)
 
 
-def _policy(*, context: int, retrieval: int = 5_000) -> ContextBudgetPolicy:
+def _policy(
+    *, context: int, retrieval: int = 5_000, memory: int | None = None
+) -> ContextBudgetPolicy:
     spec = FrozenAgentSpec(
         model_plan=ResolvedModelExecutionPlan(
             primary=ResolvedModelExecutionProfile(
@@ -279,7 +319,11 @@ def _policy(*, context: int, retrieval: int = 5_000) -> ContextBudgetPolicy:
     )
     return ContextBudgetPolicy(
         spec,
-        ContextBudgetConfig(reserved_output_tokens=1, max_retrieval_tokens=retrieval),
+        ContextBudgetConfig(
+            reserved_output_tokens=1,
+            max_retrieval_tokens=retrieval,
+            max_memory_tokens=memory,
+        ),
         estimator=_CharEstimator(),
     )
 
@@ -294,6 +338,41 @@ def test_memory_is_dropped_before_the_current_question_is() -> None:
     contents = [message.content for message in result.admitted_messages]
     assert "the question being asked now" in contents
     assert "agent prompt" in contents
+
+
+def test_new_memory_budget_does_not_share_the_retrieval_ceiling() -> None:
+    built = [
+        ModelMessage(role="system", content="runtime policy"),
+        ModelMessage(role="system", content="agent prompt"),
+        _memory_message(_selected(8)),
+        ModelMessage(
+            role="assistant",
+            tool_calls=(
+                ModelToolCall(
+                    name="search_knowledge",
+                    arguments={},
+                    provider_tool_call_id="retrieval-1",
+                ),
+            ),
+        ),
+        ModelMessage(
+            role="tool",
+            name="search_knowledge",
+            tool_call_id="retrieval-1",
+            content=json.dumps({"results": [{"chunk": "current evidence"}]}),
+        ),
+        ModelMessage(role="user", content="the question being asked now"),
+    ]
+    categorized = _categorize_messages(built, memory_message_count=1)
+
+    result = _policy(context=500, retrieval=80, memory=20).admit(categorized)
+
+    retained = result.usage.retained_by_category
+    assert retained[ContextCategory.MEMORY] <= 20
+    assert retained[ContextCategory.RAG_EVIDENCE] > 0
+    assert "the question being asked now" in [
+        message.content for message in result.admitted_messages
+    ]
 
 
 def test_a_memory_payload_reaching_the_window_is_labelled_untrusted() -> None:

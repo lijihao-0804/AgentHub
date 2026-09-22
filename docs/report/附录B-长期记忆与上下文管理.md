@@ -32,6 +32,7 @@
 | `RUNTIME_POLICY` / `SYSTEM_PROMPT` / `CURRENT_USER_TASK` / `TOOL_DEFINITIONS` | **强制**，装不下直接报错 | `:46-53`、`:441` |
 | `RAG_EVIDENCE` | 独立上限 `max_retrieval_tokens`（默认 5000） | `:514` |
 | `TOOL_RESULT` | 独立上限 `max_tool_result_tokens`（默认 4000），**新的优先** | `:515-523` |
+| `MEMORY`（新启用版本） | 服务端冻结的独立上限 `max_memory_tokens`（默认 1500） | 与 RAG 预算分开，避免共享记忆挤掉当前检索证据 |
 | `CONVERSATION` | 整组丢弃，**从最旧开始** | `:612-628` |
 
 三个已经做对、值得保留的性质：
@@ -258,7 +259,7 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 最实用的一条启发式，叫**耐久性测试**：
 
 > 这句话在一个**完全不同的任务**的会话里还有用吗？
-> - 「用户偏好简短回答」→ 记（跨任务成立）
+> - 「团队项目偏好简短回答」→ 记（跨任务成立）
 > - 「用户要求**这一个问题**简短回答」→ 不记（局部约束）
 
 工程上的核心问题是：任何把每条候选都走完整写入路径的系统，
@@ -520,7 +521,7 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 > | ADR 文件名 `0011-memory-must-be-snapshotted.md` | `docs/adr/ADR-011-memory-must-be-snapshotted.md` | 与目录里既有 ADR 命名对齐 |
 > | 双时态字段 `valid_at` / `invalid_at` + `superseded_at` | 三值 `status`（`ACTIVE` / `SUPERSEDED` / `INVALIDATED`）+ `kind` + `content_hash`，配一条**只约束 ACTIVE** 的部分唯一索引 `uq_workspace_memories_active_hash` | 双时态要答的问题我们答不出来（「在哪个时刻有效」对一个还没有真实用户的系统是空概念）；而「同一条事实不要存两遍」是真问题，部分唯一索引让去重竞态由数据库兜底，第二个写入者拿到 `IntegrityError` 而不是一条重复行。`salience` / `last_used_at` / `expires_at` 留了列但**没有做衰减** |
 > | 快照是一个 memory id 数组 | 快照是**对象** `{"selected_at": …, "memory_ids": [...]}`，JSONB NOT NULL，server_default `{}` | 裸数组分不清「选过，但一条都没选中」和「还没选过」——两者都是 falsy。而这两件事在事后归因时是完全不同的结论 |
-> | 可能需要 `WORKSPACE_ADMIN` 之类的新权限 | 复用既有的 `workspace_read`（看）与 `agent_edit`（推翻），`WORKSPACE_ADMIN` 没用上，**而且完全没有 delete 路由** | 能改变一个 agent 相信什么，本来就是「编辑这个 agent」的一部分，不值得新开一个权限。没有 delete 是因为删掉就拿走了「这次 Run 为什么这么答」的答案——只能 invalidate |
+> | 可能需要 `WORKSPACE_ADMIN` 之类的新权限 | 读取复用既有的 `agent_run` / `agent_edit`，修改仍为 `agent_edit`，**而且完全没有 delete 路由** | `workspace_read` 只读工作区元数据，不足以读取记忆正文；能改变一个 agent 相信什么仍属于编辑权限。没有 delete 是因为删掉就拿走了「这次 Run 为什么这么答」的答案——只能 invalidate |
 
 **这一阶段之前必须先写 ADR。**
 `docs/adr/0011-memory-must-be-snapshotted.md`，把 附录A §D 的立场落成决议：
@@ -563,8 +564,8 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
    （novelty = 与已有记忆的 cosine 距离；耐久性启发式；type prior），
    只有幸存者才调一次 LLM 判断，产出**候选**记忆。
 
-**冲突不做硬删除**：新条目写入时给被取代的旧条目盖 `superseded_at` +
-`superseded_by_id`。旧行永远留着。
+**当前不自动判定冲突**：重复内容只增加 `salience`，不会自动创建 `SUPERSEDED`。旧行永远留着；
+`superseded_by_id` 仅供未来明确的语义替换流程使用。
 这样「重跑三个月前那次 Run」仍然能拿到当时那条事实。
 
 **读取路径：建 Run 时冻结**

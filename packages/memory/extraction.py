@@ -17,6 +17,7 @@ import logging
 from dataclasses import dataclass
 
 from packages.memory.contracts import (
+    MAX_EVIDENCE_LENGTH,
     MAX_MEMORIES_PER_TURN,
     MAX_MEMORY_LENGTH,
     MemoryCandidate,
@@ -30,19 +31,18 @@ logger = logging.getLogger(__name__)
 # turn, not a compression of it, so the first part of each side is enough and
 # sending the whole thing would make a background job cost as much as the run.
 MAX_PROMPT_INPUT = 2_000
-MAX_PROMPT_OUTPUT = 4_000
 
 EXTRACTION_SYSTEM_PROMPT = (
-    "You extract durable memories from one finished exchange between a user and "
-    "an assistant.\n"
+    "You extract durable shared workspace memories from one user's message.\n"
     "\n"
-    "Remember ONLY statements that will still be true and useful in a different "
-    "conversation next week: stable user preferences, project constraints, "
-    "decisions that were made, and durable facts about the user's situation.\n"
+    "Remember ONLY team, project, or workflow statements that will still be true "
+    "and useful in a different conversation next week: shared preferences, "
+    "project constraints, decisions, and durable operational facts. This is "
+    "workspace-scoped memory, not personal user memory.\n"
     "\n"
-    "Do NOT remember: anything specific to this one question, the assistant's "
-    "own answer or reasoning, greetings, temporary state, anything you are "
-    "guessing at, or anything the user did not actually assert.\n"
+    "Do NOT remember: anything specific to this one question, any assistant "
+    "answer or reasoning, greetings, temporary state, guesses, personal profile "
+    "facts, or anything the user did not actually assert.\n"
     "\n"
     "Most exchanges contain nothing worth remembering. Returning an empty array "
     "is the correct and expected answer, and is much better than inventing "
@@ -50,17 +50,23 @@ EXTRACTION_SYSTEM_PROMPT = (
     "\n"
     "Reply with JSON only, no prose and no code fence, in exactly this shape:\n"
     '{"memories": [{"content": "<one short standalone sentence>", '
-    '"kind": "FACT|PREFERENCE|DECISION|CONSTRAINT"}]}\n'
+    '"kind": "FACT|PREFERENCE|DECISION|CONSTRAINT", '
+    '"evidence": "<exact non-empty quote from the user message>"}]}\n'
     f"At most {MAX_MEMORIES_PER_TURN} entries. Each content under "
     f"{MAX_MEMORY_LENGTH} characters, written so it makes sense on its own "
-    "without this conversation. Write each memory in the language the user used."
+    "without this conversation. The evidence must be an exact quote from the "
+    "user message, no longer than "
+    f"{MAX_EVIDENCE_LENGTH} characters. Write each memory in the language the "
+    "user used."
 )
 
 
 @dataclass(frozen=True, slots=True)
 class TurnForExtraction:
     user_input: str
-    final_output: str
+    # Kept as an optional source-compatible field for callers that still build
+    # the old DTO. It is deliberately never sent to the extractor.
+    final_output: str | None = None
 
 
 def _excerpt(value: str, limit: int) -> str:
@@ -75,10 +81,7 @@ def extraction_request(turn: TurnForExtraction) -> ModelRequest:
             ModelMessage(
                 role="user",
                 content=json.dumps(
-                    {
-                        "user": _excerpt(turn.user_input, MAX_PROMPT_INPUT),
-                        "assistant": _excerpt(turn.final_output, MAX_PROMPT_OUTPUT),
-                    },
+                    {"user": _excerpt(turn.user_input, MAX_PROMPT_INPUT)},
                     ensure_ascii=False,
                 ),
             ),
@@ -102,7 +105,9 @@ def _strip_fence(content: str) -> str:
     return text[start : end + 1]
 
 
-def parse_candidates(response: ModelResponse) -> tuple[MemoryCandidate, ...]:
+def parse_candidates(
+    response: ModelResponse, *, user_input: str | None = None
+) -> tuple[MemoryCandidate, ...]:
     payload = _strip_fence(response.content)
     if not payload:
         return ()
@@ -122,11 +127,27 @@ def parse_candidates(response: ModelResponse) -> tuple[MemoryCandidate, ...]:
             continue
         content = entry.get("content")
         kind = entry.get("kind", "FACT")
+        evidence = entry.get("evidence")
         if not isinstance(content, str) or not isinstance(kind, str):
+            continue
+        if (
+            not isinstance(user_input, str)
+            or not isinstance(evidence, str)
+            or not evidence
+            or len(evidence) > MAX_EVIDENCE_LENGTH
+            or evidence not in user_input
+        ):
+            # One malformed candidate must not discard valid siblings.
             continue
         if kind.strip().upper() not in MEMORY_KINDS:
             kind = "FACT"
-        candidates.append(MemoryCandidate(content=content, kind=kind.strip().upper()))
+        candidates.append(
+            MemoryCandidate(
+                content=content,
+                kind=kind.strip().upper(),
+                evidence=evidence,
+            )
+        )
     return tuple(candidates)
 
 
