@@ -5,13 +5,19 @@ from __future__ import annotations
 import asyncio
 import os
 from decimal import Decimal
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
+import pytest_asyncio
+from alembic import command
+from alembic.config import Config
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import Agent
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
+from packages.core.database import create_database
 from packages.memory.contracts import MemoryCandidate, MemorySnapshotIntegrityError
 from packages.memory.models import WorkspaceMemory
 from packages.memory.store import SqlAlchemyMemoryStore, content_hash
@@ -25,6 +31,38 @@ pytestmark = [
         reason="Set AGENTHUB_TEST_DATABASE_URL to run PostgreSQL memory integration tests.",
     ),
 ]
+
+
+def async_database_url(database_url: str) -> str:
+    if database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    if database_url.startswith("postgres://"):
+        return database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    return database_url
+
+
+@pytest.fixture(scope="session")
+def migrated_database() -> None:
+    previous = os.environ.get("AGENTHUB_DATABASE_URL")
+    os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
+    try:
+        command.upgrade(Config(str(Path("alembic.ini"))), "head")
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop("AGENTHUB_DATABASE_URL", None)
+        else:
+            os.environ["AGENTHUB_DATABASE_URL"] = previous
+
+
+@pytest_asyncio.fixture
+async def db_factory(migrated_database: None) -> async_sessionmaker[AsyncSession]:
+    del migrated_database
+    engine, factory = create_database(async_database_url(TEST_DATABASE_URL))
+    try:
+        yield factory
+    finally:
+        await engine.dispose()
 
 
 async def _seed_workspace(db_factory) -> tuple[object, object]:  # noqa: ANN001
