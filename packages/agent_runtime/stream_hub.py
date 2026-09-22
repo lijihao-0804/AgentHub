@@ -207,6 +207,20 @@ class RunStreamHub:
         if not self._closed:
             await self._finish()
 
+    async def abort_if_unwatched(self) -> None:
+        """Abort and fully drain the producer when no subscriber remains.
+
+        Direct ``AgentRunService.stream`` consumers own their subscription and
+        must get deterministic cancellation on ``aclose``. Reconnecting
+        consumers use ``subscribe`` directly and retain the grace window.
+        """
+
+        self._cancel_grace()
+        if self._closed or self._subscribers:
+            return
+        await self._abort()
+        await self.wait_closed()
+
 
 class RunStreamRegistry:
     """The live runs this process is executing, addressable by run id."""

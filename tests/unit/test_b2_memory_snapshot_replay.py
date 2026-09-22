@@ -171,6 +171,26 @@ async def test_a_second_prepare_replays_the_snapshot_instead_of_reselecting() ->
 
 
 @pytest.mark.asyncio
+async def test_a_legacy_id_only_snapshot_stays_on_the_legacy_load_contract() -> None:
+    memory = _some(1)[0]
+    selector = _RecordingSelector((memory,))
+    bundle = _graph(
+        selector,
+        snapshot={
+            "selected_at": "2026-09-22T00:00:00+00:00",
+            "memory_ids": [str(memory.id)],
+        },
+    )
+
+    _, metadata = await _memories(
+        bundle, _spec(long_term_memory=True), workspace_id=uuid4(), agent_id=uuid4()
+    )
+
+    assert selector.load_hashes == [None]
+    assert metadata == {"memory_count": 1, "replayed_from_snapshot": True}
+
+
+@pytest.mark.asyncio
 async def test_selecting_nothing_is_recorded_and_is_not_reselected() -> None:
     # The reason the snapshot is an object and not a bare list: an empty list
     # and "not selected yet" are both falsy, and telling them apart is the
@@ -235,6 +255,65 @@ async def test_hash_mismatch_fails_closed_with_stable_error() -> None:
         )
 
     assert raised.value.code == "AGENT_MEMORY_SNAPSHOT_INTEGRITY_ERROR"
+
+
+@pytest.mark.asyncio
+async def test_malformed_hash_map_fails_closed_before_selector_load() -> None:
+    memory = _some(1)[0]
+    selector = _RecordingSelector((memory,))
+    bundle = _graph(
+        selector,
+        snapshot={
+            "selected_at": "2026-09-22T00:00:00+00:00",
+            "memory_ids": [str(memory.id)],
+            "memory_content_hashes": ["not-a-map"],
+        },
+    )
+
+    with pytest.raises(AgentHubError) as raised:
+        await _memories(
+            bundle,
+            _spec(long_term_memory=True),
+            workspace_id=uuid4(),
+            agent_id=uuid4(),
+        )
+
+    assert raised.value.code == "AGENT_MEMORY_SNAPSHOT_INTEGRITY_ERROR"
+    assert selector.load_calls == []
+
+
+@pytest.mark.asyncio
+async def test_hash_aware_snapshot_never_retries_as_id_only() -> None:
+    memory = _some(1)[0]
+    calls: list[dict | None] = []
+
+    class _StrictSelector(_RecordingSelector):
+        async def load(
+            self, *, workspace_id, memory_ids, memory_content_hashes=None
+        ):  # noqa: ANN001
+            calls.append(memory_content_hashes)
+            if memory_content_hashes is None:
+                raise AssertionError("hashed snapshots must never use the ID-only path")
+            raise TypeError("selector implementation failure")
+
+    bundle = _graph(
+        _StrictSelector((memory,)),
+        snapshot={
+            "selected_at": "2026-09-22T00:00:00+00:00",
+            "memory_ids": [str(memory.id)],
+            "memory_content_hashes": {str(memory.id): memory_content_hash(memory.content)},
+        },
+    )
+
+    with pytest.raises(TypeError, match="selector implementation failure"):
+        await _memories(
+            bundle,
+            _spec(long_term_memory=True),
+            workspace_id=uuid4(),
+            agent_id=uuid4(),
+        )
+
+    assert calls == [{str(memory.id): memory_content_hash(memory.content)}]
 
 
 @pytest.mark.asyncio

@@ -116,6 +116,35 @@ async def test_last_subscriber_leaving_aborts_only_after_the_grace_window():
 
 
 @pytest.mark.asyncio
+async def test_direct_owner_can_abort_an_unwatched_hub_and_wait_for_close():
+    source: asyncio.Queue = asyncio.Queue()
+    aborted: list[bool] = []
+
+    async def abort() -> None:
+        aborted.append(True)
+        source.put_nowait(None)
+
+    hub = RunStreamHub(
+        run_id=RUN_ID,
+        source=source,
+        abort=abort,
+        grace_seconds=60,
+    )
+    hub.start()
+    subscription = hub.subscribe()
+    consumer = asyncio.create_task(anext(subscription))
+    await asyncio.sleep(0)
+    source.put_nowait(make_event(1))
+    await consumer
+    await subscription.aclose()
+
+    await hub.abort_if_unwatched()
+
+    assert aborted == [True]
+    assert hub.closed is True
+
+
+@pytest.mark.asyncio
 async def test_reattaching_inside_the_grace_window_cancels_the_abort():
     hub, source, aborted = build_hub(grace_seconds=0.2)
     hub.start()

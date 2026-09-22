@@ -12,7 +12,7 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import Agent
@@ -122,7 +122,7 @@ async def test_postgres_candidate_conflict_does_not_rollback_siblings(db_factory
     workspace_id, agent_id = await _seed_workspace(db_factory)
     store = SqlAlchemyMemoryStore(db_factory)
     repeated = MemoryCandidate(
-        content="团队每周五发版", kind="PREFERENCE", evidence="每周五发版"
+        content="团队项目每周五发布版本", kind="PREFERENCE", evidence="每周五发布版本"
     )
     await store.record(
         workspace_id=workspace_id,
@@ -139,8 +139,14 @@ async def test_postgres_candidate_conflict_does_not_rollback_siblings(db_factory
         source_run_id=None,
         candidates=(
             repeated,
-            MemoryCandidate(content="项目使用蓝绿部署", kind="FACT", evidence="使用蓝绿部署"),
-            MemoryCandidate(content="发布前需要审批", kind="CONSTRAINT", evidence="发布前需要审批"),
+            MemoryCandidate(
+                content="项目生产环境采用蓝绿部署", kind="FACT", evidence="采用蓝绿部署"
+            ),
+            MemoryCandidate(
+                content="项目发布前需要人工审批",
+                kind="CONSTRAINT",
+                evidence="发布前需要人工审批",
+            ),
         ),
     )
 
@@ -202,7 +208,9 @@ async def test_postgres_partial_unique_index_handles_independent_writers(db_fact
 async def test_postgres_snapshot_hash_match_mismatch_and_missing_id(db_factory) -> None:
     workspace_id, agent_id = await _seed_workspace(db_factory)
     store = SqlAlchemyMemoryStore(db_factory)
-    candidate = MemoryCandidate(content="知识库按月归档", kind="FACT", evidence="按月归档")
+    candidate = MemoryCandidate(
+        content="知识库数据按月进行归档", kind="FACT", evidence="按月进行归档"
+    )
     await store.record(
         workspace_id=workspace_id,
         agent_id=agent_id,
@@ -235,3 +243,109 @@ async def test_postgres_snapshot_hash_match_mismatch_and_missing_id(db_factory) 
             memory_ids=(missing_id,),
             memory_content_hashes={missing_id: "0" * 64},
         )
+
+
+async def _wait_for_memory_insert_lock(db_factory) -> None:  # noqa: ANN001
+    """Wait for PostgreSQL to prove writer 2 reached the unique index wait."""
+
+    deadline = asyncio.get_running_loop().time() + 5
+    statement = text(
+        """
+        SELECT count(*)
+        FROM pg_stat_activity
+        WHERE wait_event_type = 'Lock'
+          AND query ILIKE '%workspace_memories%'
+          AND query ILIKE '%INSERT%'
+        """
+    )
+    while asyncio.get_running_loop().time() < deadline:
+        async with db_factory() as session:
+            waiting = int(await session.scalar(statement) or 0)
+        if waiting:
+            return
+        # This is an event-loop yield, not a timing delay: the database lock
+        # is the synchronization primitive and the deadline only bounds a
+        # broken test setup.
+        await asyncio.sleep(0)
+    raise AssertionError("writer 2 never reached the PostgreSQL unique-index wait")
+
+
+@pytest.mark.asyncio
+async def test_postgres_collision_savepoint_preserves_siblings(db_factory) -> None:
+    """A real insert collision must only roll back candidate A's savepoint."""
+
+    workspace_id, agent_id = await _seed_workspace(db_factory)
+    candidate_a = MemoryCandidate(
+        content="项目发布前需要人工审批", kind="CONSTRAINT", evidence="需要人工审批"
+    )
+    candidate_b = MemoryCandidate(
+        content="项目生产环境采用蓝绿部署", kind="FACT", evidence="采用蓝绿部署"
+    )
+    candidate_c = MemoryCandidate(
+        content="知识库数据按月进行归档", kind="FACT", evidence="按月进行归档"
+    )
+    winner_engine, winner_factory = create_database(async_database_url(TEST_DATABASE_URL))
+    writer_engine, writer_factory = create_database(async_database_url(TEST_DATABASE_URL))
+    observer_engine, observer_factory = create_database(async_database_url(TEST_DATABASE_URL))
+    writer_task: asyncio.Task[tuple[object, ...]] | None = None
+    try:
+        # Writer 1 holds A uncommitted. Writer 2's initial SELECT therefore
+        # sees no A, but its INSERT is forced to wait on the real partial
+        # unique index until Writer 1 commits.
+        async with winner_factory() as winner_session:
+            await winner_session.begin()
+            winner_session.add(
+                WorkspaceMemory(
+                    id=uuid4(),
+                    workspace_id=workspace_id,
+                    agent_id=agent_id,
+                    content=candidate_a.content,
+                    content_hash=content_hash(candidate_a.content),
+                    kind=candidate_a.kind,
+                    status="ACTIVE",
+                    provenance={"evidence": candidate_a.evidence},
+                )
+            )
+            await winner_session.flush()
+
+            store = SqlAlchemyMemoryStore(writer_factory)
+            writer_task = asyncio.create_task(
+                store.record(
+                    workspace_id=workspace_id,
+                    agent_id=agent_id,
+                    thread_id=None,
+                    source_run_id=None,
+                    candidates=(candidate_a, candidate_b, candidate_c),
+                )
+            )
+            await _wait_for_memory_insert_lock(observer_factory)
+            await winner_session.commit()
+            created = await writer_task
+
+        async with db_factory() as session:
+            rows = (
+                await session.scalars(
+                    select(WorkspaceMemory).where(
+                        WorkspaceMemory.workspace_id == workspace_id,
+                        WorkspaceMemory.agent_id == agent_id,
+                        WorkspaceMemory.status == "ACTIVE",
+                    )
+                )
+            ).all()
+        by_content = {row.content: row for row in rows}
+        assert len(rows) == 3
+        assert sum(row.content == candidate_a.content for row in rows) == 1
+        assert by_content[candidate_a.content].salience == 2
+        assert by_content[candidate_b.content].id in set(created)
+        assert by_content[candidate_c.content].id in set(created)
+        assert set(created) == {
+            by_content[candidate_b.content].id,
+            by_content[candidate_c.content].id,
+        }
+    finally:
+        if writer_task is not None and not writer_task.done():
+            writer_task.cancel()
+            await asyncio.gather(writer_task, return_exceptions=True)
+        await winner_engine.dispose()
+        await writer_engine.dispose()
+        await observer_engine.dispose()

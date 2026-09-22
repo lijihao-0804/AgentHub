@@ -236,6 +236,7 @@ async def stream_turn(
         agent_version_id=agent_version_id,
         input_text=turn.user_input,
         prepared_run=prepared_run,
+        graceful_disconnect=True,
     )
 
     return StreamingResponse(

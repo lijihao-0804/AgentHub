@@ -660,8 +660,14 @@ class AgentRunService:
         agent_version_id: UUID,
         input_text: str,
         prepared_run: AgentRun | None = None,
+        graceful_disconnect: bool = False,
     ) -> AsyncIterator[AgentEvent]:
-        """Run the same LangGraph execution path while publishing AgentHub events."""
+        """Run the same LangGraph execution path while publishing AgentHub events.
+
+        Direct callers receive deterministic cancellation when their consumer
+        closes. HTTP routes opt into the hub's reconnect grace window because
+        their SSE connection can be replaced by ``attach_stream``.
+        """
 
         hub = await self.open_stream(
             context,
@@ -669,8 +675,14 @@ class AgentRunService:
             input_text=input_text,
             prepared_run=prepared_run,
         )
-        async for event in hub.subscribe():
-            yield event
+        subscription = hub.subscribe()
+        try:
+            async for event in subscription:
+                yield event
+        finally:
+            await subscription.aclose()
+            if not graceful_disconnect:
+                await hub.abort_if_unwatched()
 
     async def attach_stream(
         self,
@@ -1491,15 +1503,6 @@ class _AgentRunGraph:
                     "The frozen memory snapshot no longer matches stored memory.",
                     422,
                 ) from error
-            except TypeError as error:
-                # Keep old test-only selectors source compatible while the
-                # production store enforces the new hash contract.
-                if hashed and "memory_content_hashes" in str(error):
-                    selected = await selector.load(
-                        workspace_id=workspace_id, memory_ids=memory_ids
-                    )
-                else:
-                    raise
         else:
             selected = await selector.select(
                 workspace_id=workspace_id,

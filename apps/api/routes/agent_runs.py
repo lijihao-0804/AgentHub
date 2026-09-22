@@ -122,6 +122,7 @@ async def stream_agent_run(
             agent_version_id=agent_version_id,
             input_text=payload.input_text,
             prepared_run=prepared_run,
+            graceful_disconnect=True,
         )
     return StreamingResponse(
         _sse_frames(stream, request),
