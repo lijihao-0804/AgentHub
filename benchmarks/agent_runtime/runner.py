@@ -30,12 +30,14 @@ from benchmarks.agent_runtime.schema import (
     dataset_summary,
     load_dataset,
 )
-from packages.agent_runtime.models import Agent, AgentVersion, Tool, ToolRevision
-from packages.agent_runtime.publish import (
-    DEFAULT_RETRIEVAL_CONFIG,
-    DEFAULT_RUNTIME_CONFIG,
-    SPEC_SCHEMA_VERSION,
+from packages.agent_runtime.models import (
+    Agent,
+    AgentKnowledgeBinding,
+    AgentTool,
+    Tool,
+    ToolRevision,
 )
+from packages.agent_runtime.publish import AgentPublishService
 from packages.agent_runtime.runtime import AgentRunService
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -102,7 +104,9 @@ def _context(user_id: UUID, organization_id: UUID, workspace_id: UUID) -> Worksp
         ),
         workspace_id=str(workspace_id),
         workspace_role="DEVELOPER",
-        permissions=frozenset({"agent_run", "tool_run", "knowledge_run", "workspace_read"}),
+        permissions=frozenset(
+            {"agent_edit", "agent_run", "tool_run", "knowledge_run", "workspace_read"}
+        ),
     )
 
 
@@ -262,75 +266,6 @@ def _tool_spec(identity: str, *, approval_policy: str) -> dict[str, Any]:
     }
 
 
-def _resolved_spec(
-    *,
-    profile: ModelProfile,
-    credential: ProviderCredential,
-    tool_revisions: list[ToolRevision],
-    snapshot: KnowledgeSnapshot,
-    runtime: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    runtime_config = {
-        key: value for key, value in DEFAULT_RUNTIME_CONFIG.items() if key != "memory"
-    }
-    runtime_config["context_budget"] = {
-        **DEFAULT_RUNTIME_CONFIG["context_budget"],
-        "reserved_output_tokens": 32,
-        "max_retrieval_tokens": 2048,
-        "max_tool_result_tokens": 4096,
-    }
-    return {
-        "spec_schema_version": SPEC_SCHEMA_VERSION,
-        "model": {
-            "profile_id": str(profile.id),
-            "credential_ref": str(credential.id),
-            "provider": "fake",
-            "model": "m4-scripted",
-            "temperature": 0,
-            "max_tokens": 256,
-            "timeout_seconds": 5,
-            "capabilities": {
-                "tool_calling": True,
-                "streaming": False,
-                "structured_output": False,
-                "vision": False,
-                "max_context_tokens": 8192,
-            },
-            "retry_policy": {"max_attempts": 1},
-            "fallback_chain": [],
-            "fallback_profiles": [],
-        },
-        "prompt": {"system_prompt": "Use only the published READ tools.", "prompt_version": 1},
-        "retrieval": {
-            **DEFAULT_RETRIEVAL_CONFIG,
-            "knowledge_binding_mode": "PINNED",
-            "knowledge_snapshot_ids": [str(snapshot.id)],
-            "knowledge_snapshots": [
-                {"snapshot_id": str(snapshot.id), "snapshot_hash": snapshot.content_hash}
-            ],
-            "knowledge_bindings": [
-                {
-                    "knowledge_base_id": str(snapshot.knowledge_base_id),
-                    "binding_mode": "PINNED",
-                    "snapshot_id": str(snapshot.id),
-                    "snapshot_hash": snapshot.content_hash,
-                }
-            ],
-        },
-        "tools": [
-            {
-                "tool_revision_id": str(revision.id),
-                "tool_spec_hash": revision.spec_hash,
-                "effect": revision.spec["effect"],
-                "risk_level": revision.spec["risk_level"],
-                "approval_policy": revision.spec["approval_policy"],
-            }
-            for revision in tool_revisions
-        ],
-        "runtime": {**runtime_config, **(runtime or {})},
-    }
-
-
 async def _seed_environment(factory: async_sessionmaker[AsyncSession]) -> dict[str, Any]:
     label = uuid4().hex
     async with factory() as session:
@@ -437,6 +372,15 @@ async def _seed_environment(factory: async_sessionmaker[AsyncSession]) -> dict[s
                 document_revision_id=revision.id,
             )
         )
+        session.add(
+            AgentKnowledgeBinding(
+                workspace_id=workspace.id,
+                agent_id=agent.id,
+                knowledge_base_id=knowledge_base.id,
+                binding_mode="PINNED",
+                snapshot_id=snapshot.id,
+            )
+        )
 
         customer_specs = (
             ("C-ACME", "Acme Labs", "acme@example.test", "T-ACME"),
@@ -468,9 +412,12 @@ async def _seed_environment(factory: async_sessionmaker[AsyncSession]) -> dict[s
             await session.flush()
             tools[identity] = tool
 
-        versions: dict[str, AgentVersion] = {}
+        publish_service = AgentPublishService()
+        tool_bindings: dict[str, AgentTool] = {}
+        versions: dict[str, Any] = {}
+        seed_context = _context(user.id, organization.id, workspace.id)
         for version_number, approval_policy in ((1, "NEVER"), (2, "ALWAYS")):
-            revisions: list[ToolRevision] = []
+            revisions: dict[str, ToolRevision] = {}
             for identity in ("calculator", "query_customer", "search_knowledge"):
                 spec = _tool_spec(identity, approval_policy=approval_policy)
                 tool_revision = ToolRevision(
@@ -483,30 +430,26 @@ async def _seed_environment(factory: async_sessionmaker[AsyncSession]) -> dict[s
                 )
                 session.add(tool_revision)
                 await session.flush()
-                revisions.append(tool_revision)
-            resolved = _resolved_spec(
-                profile=profile,
-                credential=credential,
-                tool_revisions=revisions,
-                snapshot=snapshot,
-            )
-            version = AgentVersion(
-                workspace_id=workspace.id,
-                agent_id=agent.id,
-                version_number=version_number,
-                spec_schema_version=1,
-                resolved_spec=resolved,
-                resolved_spec_hash=canonical_json_hash(resolved),
-                created_by=user.id,
-            )
-            session.add(version)
+                revisions[identity] = tool_revision
+                if version_number == 1:
+                    binding = AgentTool(
+                        workspace_id=workspace.id,
+                        agent_id=agent.id,
+                        tool_id=tools[identity].id,
+                        tool_revision_id=tool_revision.id,
+                    )
+                    session.add(binding)
+                    tool_bindings[identity] = binding
+                else:
+                    tool_bindings[identity].tool_revision_id = tool_revision.id
             await session.flush()
-            versions[approval_policy] = version
+            published = await publish_service.publish(session, seed_context, agent.id)
+            versions[approval_policy] = published.id
         await session.commit()
         return {
-            "context": _context(user.id, organization.id, workspace.id),
-            "base_version_id": versions["NEVER"].id,
-            "approval_version_id": versions["ALWAYS"].id,
+            "context": seed_context,
+            "base_version_id": versions["NEVER"],
+            "approval_version_id": versions["ALWAYS"],
             "retriever": DeterministicKnowledgeRetriever(
                 workspace_id=workspace.id,
                 snapshot_id=snapshot.id,

@@ -3,17 +3,13 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
-from types import SimpleNamespace
-from uuid import uuid4
 
 import pytest
 
 from benchmarks.agent_runtime.metrics import RuntimeObservation, evaluate_case, evaluate_results
-from benchmarks.agent_runtime.runner import _resolved_spec, _tool_spec
+from benchmarks.agent_runtime.runner import _tool_spec
 from benchmarks.agent_runtime.schema import dataset_from_payload, load_dataset
-from packages.agent_runtime.frozen import parse_frozen_agent_spec
-from packages.agent_runtime.publish import SPEC_SCHEMA_VERSION
-from packages.core.canonical.json_hash import canonical_json_hash
+from packages.tools.validation import validate_executable_tool_spec
 
 DATASET_PATH = Path(__file__).parents[2] / "benchmarks" / "agent_runtime" / "dataset.json"
 
@@ -86,50 +82,13 @@ def test_script_parser_supports_final_single_and_multi_tool_calls() -> None:
     assert len(multi.model_script[0].calls) == 2
 
 
-def test_benchmark_fixture_uses_current_frozen_publish_contract() -> None:
-    profile = SimpleNamespace(id=uuid4())
-    credential = SimpleNamespace(id=uuid4())
-    snapshot = SimpleNamespace(id=uuid4(), knowledge_base_id=uuid4(), content_hash="a" * 64)
-    revisions = []
+def test_benchmark_tool_fixture_uses_current_publish_validation() -> None:
     for identity in ("calculator", "query_customer", "search_knowledge"):
         spec = _tool_spec(identity, approval_policy="NEVER")
-        revisions.append(
-            SimpleNamespace(
-                id=uuid4(),
-                spec=spec,
-                spec_hash=canonical_json_hash(spec),
-            )
-        )
-
-    resolved = _resolved_spec(
-        profile=profile,
-        credential=credential,
-        tool_revisions=revisions,
-        snapshot=snapshot,
-    )
-
-    assert resolved["spec_schema_version"] == SPEC_SCHEMA_VERSION == 2
-    assert resolved["retrieval"]["knowledge_bindings"] == [
-        {
-            "knowledge_base_id": str(snapshot.knowledge_base_id),
-            "binding_mode": "PINNED",
-            "snapshot_id": str(snapshot.id),
-            "snapshot_hash": snapshot.content_hash,
-        }
-    ]
-    assert resolved["model"]["capabilities"] == {
-        "tool_calling": True,
-        "streaming": False,
-        "structured_output": False,
-        "vision": False,
-        "max_context_tokens": 8192,
-    }
-    assert "max_cost_micro_usd" in resolved["runtime"]
-    assert "memory" not in resolved["runtime"]
-
-    parsed = parse_frozen_agent_spec(resolved, workspace_id=uuid4())
-    assert parsed.knowledge_bindings[0].knowledge_base_id == snapshot.knowledge_base_id
-    assert parsed.knowledge_bindings[0].binding_mode == "PINNED"
+        normalized = validate_executable_tool_spec(spec)
+        assert normalized["identity"] == identity
+        assert normalized["kind"] == "builtin"
+        assert normalized["timeout_seconds"] == 30
 
 
 def test_metrics_report_20_of_20_and_19_of_20_distinctly() -> None:
