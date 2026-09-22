@@ -1514,8 +1514,13 @@ export const enUS = {
       hint: "What this agent has kept from earlier conversations. Memory is written after a turn has already answered, so a new memory may take a moment to appear here.",
       disabledHint:
         "Long-term memory is off for this agent, so nothing new will be written. Anything listed below was learned while it was on, and is still shown so past runs remain explainable.",
+      search: "Search",
+      searchPlaceholder: "A phrase from the memory",
       statusFilter: "Status",
       statusAll: "All",
+      kindFilter: "Kind",
+      kindAll: "All",
+      clearFilters: "Clear filters",
       status: {
         ACTIVE: "Active",
         SUPERSEDED: "Superseded",
@@ -1539,9 +1544,12 @@ export const enUS = {
       empty: "No memories yet",
       emptyHint:
         "Memories are written from conversation turns, not from Playground runs. Turn long-term memory on under Runtime, then hold a conversation with a published version.",
+      noMatches: "Nothing matched",
+      noMatchesHint: "Try a different phrase, or set status and kind back to All.",
       previous: "Previous",
       next: "Next",
       total: "Total",
+      range: "{from}–{to} of {total}",
     },
     runtimeOmitHint: "Blank fields are omitted from the request, not sent as empty values.",
     runtimeInvalid: "Runtime limits must be whole numbers of 1 or more, or left blank.",

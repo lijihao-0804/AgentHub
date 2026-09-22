@@ -1501,8 +1501,13 @@ export const zhCN: MessageSchema = {
       hint: "这个 agent 从过往对话里留下来的东西。记忆是在一轮问答回答完之后才写入的，所以新记忆可能要稍等一会儿才会出现在这里。",
       disabledHint:
         "该 agent 的长期记忆当前是关闭的，不会再写入新记忆。下面列出的是它开启期间学到的内容，仍然保留展示，以便过去的运行依然可以被解释。",
+      search: "搜索内容",
+      searchPlaceholder: "输入记忆里的一段话",
       statusFilter: "状态",
       statusAll: "全部",
+      kindFilter: "类型",
+      kindAll: "全部",
+      clearFilters: "清除筛选",
       status: {
         ACTIVE: "生效中",
         SUPERSEDED: "已被取代",
@@ -1526,9 +1531,12 @@ export const zhCN: MessageSchema = {
       empty: "还没有任何记忆",
       emptyHint:
         "记忆来自会话中的问答轮次，而不是 Playground 单次调试。请先在「运行时」里打开长期记忆，再与已发布版本进行一次对话。",
+      noMatches: "没有符合条件的记忆",
+      noMatchesHint: "换个词，或者把状态和类型放宽到「全部」再看看。",
       previous: "上一页",
       next: "下一页",
       total: "共计",
+      range: "第 {from}–{to} 条，共 {total} 条",
     },
     runtimeOmitHint: "留空的字段不会出现在请求中，也不会以空值发送。",
     runtimeInvalid: "运行时限制必须为不小于 1 的整数，或留空。",

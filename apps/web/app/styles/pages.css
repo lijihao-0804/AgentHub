@@ -391,3 +391,8 @@ a.stat-row:hover { border-color: var(--accent); }
 .evidence-meta { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
 .evidence-meta span { color: var(--text-muted); font-size: 0.78rem; }
 .evidence-body p { color: var(--text-muted); line-height: 1.6; margin: 0.4rem 0 0; white-space: pre-wrap; }
+
+/* A memory is a whole sentence competing with six narrow columns for width.
+   Without a floor it collapses to one or two words per line; without a
+   ceiling it pushes the actions button off the right edge. */
+.data-table td.memory-content { line-height: 1.55; max-width: 38rem; min-width: 18rem; white-space: pre-wrap; }

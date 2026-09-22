@@ -22,7 +22,7 @@ from packages.agent_runtime.models import Agent
 from packages.agent_runtime.publish import AgentPublishService
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.memory.models import WorkspaceMemory
-from packages.memory.service import MAX_PAGE_SIZE, MemoryAdminService
+from packages.memory.service import MAX_PAGE_SIZE, MAX_SEARCH_LENGTH, MemoryAdminService
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}/agents", tags=["agents"])
 db_session_dependency = Depends(get_db_session)
@@ -30,7 +30,10 @@ context_dependency = Depends(get_workspace_context)
 
 
 MemoryStatusFilter = Literal["ACTIVE", "SUPERSEDED", "INVALIDATED"]
+MemoryKindFilter = Literal["FACT", "PREFERENCE", "DECISION", "CONSTRAINT"]
 memory_status_query = Query(default=None, alias="status")
+memory_kind_query = Query(default=None, alias="kind")
+memory_search_query = Query(default=None, alias="q", max_length=MAX_SEARCH_LENGTH)
 memory_limit_query = Query(default=50, ge=1, le=MAX_PAGE_SIZE)
 memory_offset_query = Query(default=0, ge=0)
 
@@ -176,6 +179,8 @@ async def list_agent_memories(
     workspace_id: UUID,
     agent_id: UUID,
     status_filter: MemoryStatusFilter | None = memory_status_query,
+    kind_filter: MemoryKindFilter | None = memory_kind_query,
+    search: str | None = memory_search_query,
     limit: int = memory_limit_query,
     offset: int = memory_offset_query,
     context: WorkspaceExecutionContext = context_dependency,
@@ -187,6 +192,8 @@ async def list_agent_memories(
         context,
         agent_id=agent_id,
         status=status_filter,
+        kind=kind_filter,
+        search=search,
         limit=limit,
         offset=offset,
     )

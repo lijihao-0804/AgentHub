@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import Breadcrumbs from "@/components/layout/breadcrumbs";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import StatusBadge from "@/components/ui/status-badge";
 import TechnicalDetails from "@/components/ui/technical-details";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
@@ -54,6 +55,16 @@ const TAB_LABEL: Record<Tab, "agents.tab.general" | "agents.tab.model" | "agents
 };
 
 const MEMORY_PAGE_SIZE = 50;
+const MEMORY_SEARCH_DEBOUNCE_MS = 300;
+// Matches MAX_SEARCH_LENGTH on the server, which rejects anything longer.
+const MEMORY_SEARCH_MAX_LENGTH = 200;
+
+/** Tones for the three memory states, which are not run states. */
+const MEMORY_STATUS_TONE: Record<AgentMemoryStatus, "success" | "neutral" | "warning"> = {
+  ACTIVE: "success",
+  SUPERSEDED: "neutral",
+  INVALIDATED: "warning",
+};
 
 const MEMORY_KIND_LABEL: Record<
   AgentMemoryKind,
@@ -132,7 +143,15 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
    * the server immediately.
    */
   const [memoryStatus, setMemoryStatus] = useState<AgentMemoryStatus | "">("");
+  const [memoryKind, setMemoryKind] = useState<AgentMemoryKind | "">("");
   const [memoryOffset, setMemoryOffset] = useState(0);
+  /**
+   * Two variables for one box: what the user is typing, and what has been
+   * asked of the server. Every keystroke would otherwise be a request, and
+   * the answers would race each other back.
+   */
+  const [memoryQueryInput, setMemoryQueryInput] = useState("");
+  const [memoryQuery, setMemoryQuery] = useState("");
   /**
    * A READY preflight, valid only for this session generation, this
    * workspace, this agent and the draft as it stood when the check ran.
@@ -157,11 +176,23 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     (auth: AuthInput) =>
       listAgentMemories(auth, agentId, {
         status: memoryStatus || undefined,
+        kind: memoryKind || undefined,
+        q: memoryQuery || undefined,
         limit: MEMORY_PAGE_SIZE,
         offset: memoryOffset,
       }),
-    [agentId, memoryStatus, memoryOffset],
+    [agentId, memoryStatus, memoryKind, memoryQuery, memoryOffset],
   );
+
+  // Typing settles before the server hears about it. Also resets to the first
+  // page, because page 3 of the old search is not page 3 of the new one.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMemoryQuery(memoryQueryInput.trim());
+      setMemoryOffset(0);
+    }, MEMORY_SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [memoryQueryInput]);
 
   const agent = useWorkspaceData<Agent>(loadAgent, `agent:${scope}`);
   const versions = useWorkspaceData<AgentVersion[]>(loadVersions, `agent-versions:${scope}`);
@@ -181,7 +212,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   // previous filter cannot write itself back over the new one.
   const memories = useWorkspaceData<AgentMemoryPage>(
     loadMemories,
-    `agent-memories:${scope}:${memoryStatus || "ALL"}:${memoryOffset}`,
+    `agent-memories:${scope}:${memoryStatus || "ALL"}:${memoryKind || "ALL"}:${memoryQuery}:${memoryOffset}`,
     { enabled: tab === "memories" },
   );
 
@@ -234,6 +265,9 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     setKnowledgeDraft([]);
     setToolDraft([]);
     setMemoryStatus("");
+    setMemoryKind("");
+    setMemoryQueryInput("");
+    setMemoryQuery("");
     setMemoryOffset(0);
   }, [sessionId, agentId]);
 
@@ -305,6 +339,10 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const versionList = versions.data ?? [];
   const memoryList = memories.data?.items ?? [];
   const memoryTotal = memories.data?.total ?? 0;
+  // `memoryQueryInput` rather than `memoryQuery` so the button appears as soon
+  // as there is something to clear, not a debounce later.
+  const memoryFiltered =
+    memoryStatus !== "" || memoryKind !== "" || memoryQueryInput.trim() !== "";
   const runtimeValuesValid = Object.values(runtime).every((value) => validRuntimeValue(value));
 
   // Preview figures come from the server's resolved spec, never from the
@@ -990,6 +1028,16 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
           <div className="form-grid">
             <label>
+              {t("agents.memory.search")}
+              <input
+                type="search"
+                value={memoryQueryInput}
+                maxLength={MEMORY_SEARCH_MAX_LENGTH}
+                placeholder={t("agents.memory.searchPlaceholder")}
+                onChange={(event) => setMemoryQueryInput(event.target.value)}
+              />
+            </label>
+            <label>
               {t("agents.memory.statusFilter")}
               <select
                 value={memoryStatus}
@@ -1004,7 +1052,39 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                 <option value="INVALIDATED">{t("agents.memory.status.INVALIDATED")}</option>
               </select>
             </label>
+            <label>
+              {t("agents.memory.kindFilter")}
+              <select
+                value={memoryKind}
+                onChange={(event) => {
+                  setMemoryKind(event.target.value as AgentMemoryKind | "");
+                  setMemoryOffset(0);
+                }}
+              >
+                <option value="">{t("agents.memory.kindAll")}</option>
+                <option value="FACT">{t("agents.memory.kind.FACT")}</option>
+                <option value="PREFERENCE">{t("agents.memory.kind.PREFERENCE")}</option>
+                <option value="DECISION">{t("agents.memory.kind.DECISION")}</option>
+                <option value="CONSTRAINT">{t("agents.memory.kind.CONSTRAINT")}</option>
+              </select>
+            </label>
           </div>
+          {memoryFiltered && (
+            <div className="form-actions">
+              <button
+                type="button"
+                className="button button-ghost"
+                onClick={() => {
+                  setMemoryStatus("");
+                  setMemoryKind("");
+                  setMemoryQueryInput("");
+                  setMemoryOffset(0);
+                }}
+              >
+                {t("agents.memory.clearFilters")}
+              </button>
+            </div>
+          )}
 
           <InlineError error={memoryMutation.error} fallback={t("errors.requestFailed")} />
           {memories.error && (
@@ -1017,7 +1097,12 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
           )}
           {memories.loading && !memories.error && <LoadingState />}
           {memories.loaded && !memories.error && memoryList.length === 0 && (
-            <EmptyState title={t("agents.memory.empty")} hint={t("agents.memory.emptyHint")} />
+            // "Nothing matched" and "nothing learned yet" need different
+            // answers: one is a filter to widen, the other is a run to make.
+            <EmptyState
+              title={memoryFiltered ? t("agents.memory.noMatches") : t("agents.memory.empty")}
+              hint={memoryFiltered ? t("agents.memory.noMatchesHint") : t("agents.memory.emptyHint")}
+            />
           )}
 
           {memoryList.length > 0 && (
@@ -1038,12 +1123,18 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                   <tbody>
                     {memoryList.map((item) => (
                       <tr key={item.id}>
-                        <td data-label={t("agents.memory.content")}>{item.content}</td>
+                        <td className="memory-content" data-label={t("agents.memory.content")}>
+                          {item.content}
+                        </td>
                         <td data-label={t("agents.memory.kindColumn")}>
                           {t(MEMORY_KIND_LABEL[item.kind])}
                         </td>
                         <td data-label={t("agents.memory.statusColumn")}>
-                          {t(MEMORY_STATUS_LABEL[item.status])}
+                          <StatusBadge
+                            status={item.status}
+                            label={t(MEMORY_STATUS_LABEL[item.status])}
+                            tone={MEMORY_STATUS_TONE[item.status]}
+                          />
                         </td>
                         <td data-label={t("agents.memory.salience")}>{item.salience}</td>
                         <td data-label={t("agents.memory.lastUsed")}>
@@ -1104,7 +1195,11 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                   {t("agents.memory.next")}
                 </button>
                 <span className="state-hint">
-                  {t("agents.memory.total")}: {memoryTotal}
+                  {t("agents.memory.range", {
+                    from: String(memoryOffset + 1),
+                    to: String(memoryOffset + memoryList.length),
+                    total: String(memoryTotal),
+                  })}
                 </span>
               </div>
             </>

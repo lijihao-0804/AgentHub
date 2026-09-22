@@ -28,10 +28,31 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from packages.agent_runtime.models import Agent
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
-from packages.memory.models import MEMORY_STATUSES, WorkspaceMemory
+from packages.memory.models import MEMORY_KINDS, MEMORY_STATUSES, WorkspaceMemory
 from packages.memory.store import ACTIVE, INVALIDATED
 
 MAX_PAGE_SIZE = 100
+# Long enough for a phrase, short enough that nobody pushes a novel through
+# LIKE. Memory content itself is capped at 400 characters.
+MAX_SEARCH_LENGTH = 200
+
+
+def _like_pattern(search: str | None) -> str | None:
+    """Turn a user's phrase into a LIKE pattern that means what they typed.
+
+    ``%`` and ``_`` are ordinary characters in a memory, so they are escaped
+    rather than honoured: a search for "50%" must not match everything. The
+    backslash used to escape them has to be escaped first, or the escape
+    character itself becomes unsearchable.
+    """
+
+    if search is None:
+        return None
+    text = search.strip()[:MAX_SEARCH_LENGTH]
+    if not text:
+        return None
+    escaped = text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{escaped}%"
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +69,8 @@ class MemoryAdminService:
         *,
         agent_id: UUID,
         status: str | None = None,
+        kind: str | None = None,
+        search: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> MemoryPage:
@@ -56,6 +79,8 @@ class MemoryAdminService:
         await self._require_agent(session, workspace_id=workspace_id, agent_id=agent_id)
         if status is not None and status not in MEMORY_STATUSES:
             raise AgentHubError("VALIDATION_ERROR", "The memory status is invalid.", 422)
+        if kind is not None and kind not in MEMORY_KINDS:
+            raise AgentHubError("VALIDATION_ERROR", "The memory kind is invalid.", 422)
         limit = max(1, min(limit, MAX_PAGE_SIZE))
         offset = max(0, offset)
 
@@ -65,6 +90,14 @@ class MemoryAdminService:
         ]
         if status is not None:
             conditions.append(WorkspaceMemory.status == status)
+        if kind is not None:
+            conditions.append(WorkspaceMemory.kind == kind)
+        pattern = _like_pattern(search)
+        if pattern is not None:
+            # Substring, not the term overlap the runtime selects with. Someone
+            # hunting for the memory that made an answer wrong types a fragment
+            # of the sentence they saw, and expects that fragment to match.
+            conditions.append(WorkspaceMemory.content.ilike(pattern, escape="\\"))
         total = int(
             await session.scalar(
                 select(func.count()).select_from(WorkspaceMemory).where(*conditions)
@@ -196,4 +229,4 @@ class MemoryAdminService:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
 
 
-__all__ = ["MAX_PAGE_SIZE", "MemoryAdminService", "MemoryPage"]
+__all__ = ["MAX_PAGE_SIZE", "MAX_SEARCH_LENGTH", "MemoryAdminService", "MemoryPage"]

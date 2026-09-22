@@ -27,7 +27,7 @@ from pydantic import ValidationError
 from apps.api.app import create_app
 from apps.api.schemas.agents import AgentMemoryListResponse, AgentMemoryResponse
 from packages.core.config.settings import Settings
-from packages.memory.service import MAX_PAGE_SIZE
+from packages.memory.service import MAX_PAGE_SIZE, MAX_SEARCH_LENGTH, _like_pattern
 
 _BASE = "/api/v1/workspaces/{workspace_id}/agents/{agent_id}/memories"
 
@@ -75,6 +75,58 @@ def test_the_status_filter_only_accepts_the_three_real_statuses() -> None:
     )
 
     assert set(enums) == {"ACTIVE", "SUPERSEDED", "INVALIDATED"}
+
+
+def test_the_kind_filter_only_accepts_the_four_real_kinds() -> None:
+    kind = next(
+        parameter
+        for parameter in _paths()[_BASE]["get"]["parameters"]
+        if parameter["name"] == "kind"
+    )
+    schema = kind["schema"]
+    enums = schema.get("enum") or next(
+        member["enum"] for member in schema.get("anyOf", []) if "enum" in member
+    )
+
+    assert set(enums) == {"FACT", "PREFERENCE", "DECISION", "CONSTRAINT"}
+
+
+def test_the_documented_search_length_matches_the_enforced_one() -> None:
+    search = next(
+        parameter for parameter in _paths()[_BASE]["get"]["parameters"] if parameter["name"] == "q"
+    )
+    schema = search["schema"]
+    lengths = [schema.get("maxLength")] + [
+        member.get("maxLength") for member in schema.get("anyOf", [])
+    ]
+
+    assert MAX_SEARCH_LENGTH in lengths
+
+
+@pytest.mark.parametrize(
+    ("typed", "expected"),
+    [
+        ("friday", "%friday%"),
+        # A memory may legitimately contain either wildcard. Honouring them
+        # would make "50%" match every row, and "a_b" match "axb".
+        ("50%", r"%50\%%"),
+        ("a_b", r"%a\_b%"),
+        # The escape character has to be escaped first or it is unsearchable.
+        ("c:\\path", r"%c:\\path%"),
+        ("   ", None),
+        (None, None),
+    ],
+)
+def test_the_search_phrase_is_taken_literally(typed: str | None, expected: str | None) -> None:
+    assert _like_pattern(typed) == expected
+
+
+def test_a_very_long_search_is_truncated_rather_than_rejected_twice() -> None:
+    # The route rejects over-long input at the edge; this is the belt to that
+    # braces, for callers that reach the service directly.
+    pattern = _like_pattern("x" * (MAX_SEARCH_LENGTH + 50))
+
+    assert pattern == "%" + "x" * MAX_SEARCH_LENGTH + "%"
 
 
 def _payload(**overrides: object) -> dict[str, object]:

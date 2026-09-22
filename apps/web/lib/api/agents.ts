@@ -292,10 +292,18 @@ export type AgentMemoryPage = { items: AgentMemory[]; total: number };
 export async function listAgentMemories(
   input: AuthInput,
   agentId: string,
-  options: { status?: AgentMemoryStatus; limit?: number; offset?: number } = {},
+  options: {
+    status?: AgentMemoryStatus;
+    kind?: AgentMemoryKind;
+    q?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
 ): Promise<AgentMemoryPage> {
   const query = new URLSearchParams();
   if (options.status) query.set("status", options.status);
+  if (options.kind) query.set("kind", options.kind);
+  if (options.q) query.set("q", options.q);
   if (options.limit !== undefined) query.set("limit", String(options.limit));
   if (options.offset !== undefined) query.set("offset", String(options.offset));
   const serialized = query.toString();
