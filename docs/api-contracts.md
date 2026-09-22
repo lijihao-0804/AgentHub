@@ -85,6 +85,57 @@ human has to decide whether to raise the budget or abandon the work) with one of
 - `AGENT_COST_UNMEASURABLE` -- spend so far is unpriced or not in USD, so the
   ceiling cannot be enforced. The run stops rather than pretending to be capped.
 
+## Long-term memory: what a human may do to it
+
+Memory lives under the agent, never at workspace level: a memory belongs to one
+agent, and a workspace-level route would invite a caller to pass an `agent_id`
+nobody checked.
+
+- `GET /api/v1/workspaces/{workspace_id}/agents/{agent_id}/memories`
+  — `status` (`ACTIVE` / `SUPERSEDED` / `INVALIDATED`), `kind` (`FACT` /
+  `PREFERENCE` / `DECISION` / `CONSTRAINT`), `q` (substring, ≤200 chars),
+  `limit` (≤ `MAX_PAGE_SIZE`), `offset`. Filters are ANDed. `q` is taken
+  literally: `%` and `_` are escaped, so a memory containing "50%" does not
+  match every row.
+- `POST .../memories/{memory_id}/invalidate` — the human override. Idempotent.
+- `POST .../memories/{memory_id}/reactivate` — `409 MEMORY_NOT_INVALIDATED`
+  when the row is already active.
+
+**There is deliberately no delete route.** Deleting would take away the answer
+to "why did this run say that"; invalidating leaves the row and its provenance
+in place. No permission was added: reading and overriding an agent's memory is
+part of managing the agent.
+
+The response is exactly the table's own columns and `extra="forbid"` — not to
+reject input, but so that a column added to the table later cannot appear in the
+API without someone deciding it should. `content_hash` is not among them.
+
+Selection is frozen per run into `agent_runs.effective_memory_snapshot`. A run
+that selected nothing and a run that has not selected yet are distinguishable,
+because "the agent knew nothing then" is a different fact from "we do not know".
+Invalidating a memory therefore does not rewrite what an earlier run saw.
+
+Both memory behaviours are per-agent switches under `runtime_config.memory`
+(`thread_history_search`, `long_term_memory`), **default off**, frozen into the
+published `AgentVersion`. The worker re-checks `long_term_memory` before
+extracting: the API does not read the spec when enqueueing, so that check is the
+only place the switch is actually enforced.
+
+## Retrieval model warm-up
+
+`AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START` (default `false`) loads the embedder,
+the sparse encoder and the reranker at process start instead of inside the first
+`search_knowledge` call.
+
+It is a correctness setting, not a tuning knob. A cold process needs ~35s to load
+both models; a tool call is given 30. Without warm-up the first retrieval after
+every deploy fails with `TOOL_TIMEOUT`, which reaches the user as "the knowledge
+base does not have that" rather than "the system is not ready yet".
+
+Default off because turning it on downloads ~3.3GB of weights the first time.
+Any deployment that serves `search_knowledge` should turn it on; the shipped
+compose file does, for both `api` and `worker`.
+
 ## LLM-as-judge (evaluation)
 
 `POST /api/v1/workspaces/{workspace_id}/evaluation/experiments` accepts an optional

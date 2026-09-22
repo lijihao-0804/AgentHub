@@ -2,7 +2,7 @@
 
 > **这一章没有理论。** 不解释设计，不讲背景，不做总结。
 >
-> 十个实验，每个都是：**改一个变量 → 先写预测 → 跑 → 记录真实结果 → 解释落差。**
+> 十二个实验，每个都是：**改一个变量 → 先写预测 → 跑 → 记录真实结果 → 解释落差。**
 >
 > 前三章是读代码。这一章是**让代码在你手里变一次行为**。
 > 这两件事的记忆留存差一个量级。
@@ -16,9 +16,12 @@
 1. **新建一个 lab Agent。** 不要动 `Research Assistant`（8 个版本，被截图文档引用）。
    名字带 `lab-`，绑两个工具：一个 READ（`query_customer`），一个 WRITE（`create_ticket`）。
 2. **发布一个 v1。** 后面每个实验都会产生新版本，这是正常的。
-3. **不要删实验产生的 Run。** Lab 5、Lab 9 要求回头对比。
+3. **不要删实验产生的 Run。** Lab 5、Lab 9、Lab 11 要求回头对比。
 4. **不要改 `.env`。** 所有可调项都能从界面或 API 改。
-   唯一例外是 Lab 10，它明确说明了要设哪个环境变量。
+   **两个例外**，都明确说明了要设哪个环境变量：Lab 10
+   （`AGENTHUB_MCP_ALLOW_PRIVATE_TARGETS`）和 Lab 12
+   （`AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START`）。
+   这两个之所以是例外，正是它们的考点——见路径 C。
 
 ### 记录模板
 
@@ -34,9 +37,9 @@
 
 ## 0.5 先搞清楚「怎么改」——三条真实路径
 
-这一节是后面十个实验的公共前提。
-**不读这一节，Lab 1/2/4/6/7 你会卡在第一步**，因为它们要改的东西不在同一个地方，
-而其中一类**根本没有 HTTP 接口**。
+这一节是后面十二个实验的公共前提。
+**不读这一节，Lab 1/2/4/6/7/11/12 你会卡在第一步**，因为它们要改的东西不在同一个地方，
+而其中一类**根本没有 HTTP 接口**，另一类**连重启进程都不够**。
 
 ### 拿一个 token
 
@@ -54,7 +57,8 @@ echo "$TOKEN" | head -c 20
 ### 路径 A：Agent 自己的配置 —— 有接口，直接 PATCH
 
 `max_steps` / `max_tool_calls` / `max_identical_calls` / `max_parallel_reads` /
-`max_cost_micro_usd` / `context_budget`，**全部**挂在 Agent 草稿的 `runtime_config` 上：
+`max_cost_micro_usd` / `context_budget` / `memory`，**全部**挂在 Agent 草稿的
+`runtime_config` 上：
 
 ```bash
 curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
@@ -70,10 +74,29 @@ curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT/publi
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{}'
 ```
 
-字段定义在 [`apps/api/schemas/agents.py:32`](../../apps/api/schemas/agents.py#L32)（`ContextBudgetRequest`）
-和 [`:40`](../../apps/api/schemas/agents.py#L40)（`RuntimeConfigRequest`）。
-两个 schema 都是 `extra="forbid"`——**拼错一个字段名会直接 422，不会被静默忽略**。
+字段定义在 [`apps/api/schemas/agents.py:32`](../../apps/api/schemas/agents.py#L32)（`ContextBudgetRequest`）、
+[`:40`](../../apps/api/schemas/agents.py#L40)（`MemoryConfigRequest`）
+和 [`:54`](../../apps/api/schemas/agents.py#L54)（`RuntimeConfigRequest`）。
+三个 schema 都是 `extra="forbid"`——**拼错一个字段名会直接 422，不会被静默忽略**。
 这本身就值得你故意试一次：把 `max_identical_calls` 写成 `max_identical_call`，看它报什么。
+
+**记忆的两个开关也走这条路径**，它们在 `runtime_config.memory` 里
+（`agents.py:74`），两个都**默认关**（`packages/agent_runtime/runtime_config.py:56-59`）：
+
+```bash
+curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"runtime_config":{"memory":{"long_term_memory":true,
+                                   "thread_history_search":true}}}'
+```
+
+去读 `runtime_config.py:44-55` 那段注释再往下走，它解释了为什么默认关不是胆小：
+两个开关都在**操作者没有要求**的情况下改变了模型被喂到的东西，
+而且「记忆开」和「记忆关」的 A/B 只有在「关」是一个**真实发布过的状态**、
+而不是「没做过决定」时才构造得出来。
+
+还有一句对 Lab 11 很关键：**两个开关全 false 时，这个块会被整体从发布的 spec 里省掉**，
+所以不开记忆的草稿，发布出来的 `resolved_spec` 和这个 key 存在之前**逐字节一样**。
 
 ### 路径 B：工具的治理属性 —— **没有接口**，只能写脚本
 
@@ -138,9 +161,9 @@ asyncio.run(main())
 **为什么不直接写一条 SQL `UPDATE tool_revisions SET spec = ...`？**
 因为 `spec_hash` 要跟着变。你改了 spec 不改 hash，下一次 Run 读到它会抛
 `TOOL_REVISION_INTEGRITY_ERROR`，而这个 code 在
-[`_TERMINAL_TOOL_ERRORS`](../../packages/agent_runtime/runtime.py#L97)（`runtime.py:97`）里，
+[`_TERMINAL_TOOL_ERRORS`](../../packages/agent_runtime/runtime.py#L109)（`runtime.py:109`）里，
 **整个 Run 直接失败**，你就看不到想看的策略行为了。
-（想亲手看这个失败长什么样，去做 03 章 §11——那一节故意让你制造一次哈希不一致。）
+（想亲手看这个失败长什么样，去做 03 章 §12——那一节故意让你制造一次哈希不一致。）
 
 改完 revision 之后还要**重新发布 Agent**。
 发布时 tool-binding 的 `tool_revision_id` 如果是 `null`，
@@ -150,7 +173,17 @@ asyncio.run(main())
 
 ### 路径 C：进程级开关 —— 改 `.env` 并重启
 
-只有 Lab 10 用到（`AGENTHUB_MCP_ALLOW_PRIVATE_TARGETS`）。
+两个实验用到，改的是**两个不同的进程**：
+
+| 开关 | 代码 | 用在 | 重启谁 |
+|---|---|---|---|
+| `AGENTHUB_MCP_ALLOW_PRIVATE_TARGETS` | `packages/core/config/settings.py:99` | Lab 10 | **API** |
+| `AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START` | `packages/core/config/settings.py:87` | Lab 12 | **跑检索的那个进程** |
+
+第二行的「重启谁」不是废话。预热发生在进程启动时，
+所以你重启了 API 但检索实际跑在 worker 里，那这个开关对你的实验**一点效果都没有**——
+Lab 12 一半的价值就在这个坑上。
+
 这一类是**部署方的决定，不是租户的决定**，所以它既不在 Agent 配置里，也不在工具 spec 里。
 这个分层本身就是 Lab 10 的考点。
 
@@ -162,7 +195,9 @@ asyncio.run(main())
 | `context_budget.*` | 同上（嵌套） | PATCH agent | **发布** |
 | `effect` / `approval_policy` | `tool_revisions.spec` JSONB | **写脚本**调 `create_revision` | **重新发布 agent** |
 | 模型档案 | `model_profiles` | PATCH model-profile | 发布（版本会 pin 绑定） |
+| `memory.long_term_memory` / `memory.thread_history_search` | `agents.runtime_config.memory` | PATCH agent | **发布** |
 | 私网开关 | 进程配置 | 改 `.env` | **重启 API** |
+| 检索模型预热 | 进程配置 | 改 `.env` | **重启跑检索的那个进程** |
 
 ---
 
@@ -215,8 +250,8 @@ asyncio.run(main())
 ### 要看的代码
 
 `packages/tools/policy.py:17`（全文 26 行）
-→ `runtime.py:1755` `policy`
-→ `runtime.py:2313` `after_policy`
+→ `runtime.py:1962` `policy`
+→ `runtime.py:2530` `after_policy`
 
 ### Explain（跑完再读）
 
@@ -303,14 +338,14 @@ return REQUIRE_APPROVAL
 1. `policy` 里，审批通过的调用被无条件塞进 `action_calls`：
 
    ```python
-   # runtime.py:1924 —— 注意这一行完全没有看 effect
+   # 约 runtime.py:2131 —— 注意这一行完全没有看 effect
    action_calls.append({"call": call, "approval_id": str(current.id)})
    ```
 
 2. `after_policy` 只看这个列表空不空：
 
    ```python
-   # runtime.py:2313
+   # runtime.py:2530
    if state.get("action_calls"):
        return "action_execute"
    return "read_execute"
@@ -354,14 +389,14 @@ Run 本身不会因此整体失败——`ACTION_NOT_WRITE` 不在 `_TERMINAL_TOO
 
 既然 `after_policy` 看到 `action_calls` 非空就直接去 `action_execute`，
 而图里 `action_execute` 的出边是**直连 `observation`**
-（`runtime.py:1307-1311` 的 edges 列表）——
+（`runtime.py:1361-1366` 的 edges 列表）——
 那么当模型**同一轮里既提了一个要审批的工具、又提了一个自动放行的 READ 工具**时，
 那个 READ 工具的调用会怎么样？
 
 顺着看 `observation`：
 
 ```python
-# runtime.py:2215
+# 约 runtime.py:2432
 result = pre.get(call["tool_call_id"], executed.get(call["tool_call_id"]))
 if result is None:
     result = ToolResult.failure("TOOL_EXECUTION_FAILED", "The tool execution failed.")
@@ -398,7 +433,7 @@ if result is None:
 
 `packages/mcp/runtime.py:105` 的注释（**念注释，不要念代码**）
 → `packages/approvals/service.py:245` `complete_execution`
-→ `runtime.py:2391` `_is_uncertain_action_failure`
+→ `runtime.py:2608` `_is_uncertain_action_failure`
 
 ### Explain
 
@@ -514,8 +549,8 @@ currency 不是 `USD`。再跑一次。
 
 ### 要看的代码
 
-`runtime.py:1473` → `runtime.py:2356` `_cost_guard_failure`（**读完整 docstring**）
-→ `runtime.py:1485`
+约 `runtime.py:1679` → `runtime.py:2573` `_cost_guard_failure`（**读完整 docstring**）
+→ 约 `runtime.py:1691`
 限额常量在 `packages/agent_runtime/runtime_config.py`：
 `MAX_RUN_COST_LIMIT_MICRO_USD = 100_000_000`（USD 100/run）。
 
@@ -573,10 +608,10 @@ curl -N -H "Authorization: Bearer $TOKEN" \
 ### 要看的代码
 
 `packages/agent_runtime/event_store.py:181` `read_after`
-→ `runtime.py:650` `attach_stream`
+→ `runtime.py:672` `attach_stream`
 → `apps/api/routes/agent_runs.py:133-154`
-心跳间隔 `sse_heartbeat_seconds = 15`（`settings.py:106`），
-宽限期 `run_stream_grace_seconds = 60`（`:112`）。
+心跳间隔 `sse_heartbeat_seconds = 15`（`settings.py:111`），
+宽限期 `run_stream_grace_seconds = 60`（`:117`）。
 
 ### Explain
 
@@ -609,7 +644,7 @@ curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
 （`search_knowledge` 最容易撑爆，`query_customer` 带 `include_open_tickets=true` 也行）。
 
 > **注意这是个嵌套对象**。`context_budget` 是 `RuntimeConfigRequest` 里的一个子模型
-> （`apps/api/schemas/agents.py:59`），不是平铺字段。
+> （`apps/api/schemas/agents.py:73`），不是平铺字段。
 > 写成 `{"runtime_config":{"max_tool_result_tokens":200}}` 会 422——
 > 因为 `extra="forbid"`。**建议你先故意写错一次，把这个 422 看清楚。**
 
@@ -622,11 +657,13 @@ curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
 | 事件流里有没有"我截断了"的记录 | | |
 | 模型的回答质量变化 | | |
 | 报告里分几个类别 | | |
+| 开了长期记忆之后，报告里多出来的那个类别叫什么 | | |
 
 ### 要看的代码
 
-`runtime.py:1625-1640` → `packages/agent_runtime/context_budget.py:321`
-截断点 `context_budget.py:515` 和 `runtime.py:2503`
+`runtime.py:1695`（调用）→ `:1831` `_admit_context` →
+`packages/agent_runtime/context_budget.py:333` `admit`
+截断点 `context_budget.py:520` `_project_optional_items` 和 `runtime.py:2783` `_bounded_tool_result`
 默认值在 `runtime_config.py`：
 
 ```python
@@ -635,9 +672,18 @@ DEFAULT_CONTEXT_BUDGET = {"reserved_output_tokens": 2_000,
                           "max_tool_result_tokens": 4_000}
 ```
 
-顺手看一眼 `context_budget.py:924`：
+顺手看一眼 `context_budget.py:950`：
 它会**剥掉 payload 自带的 `trust` / `data_trust` 键**。
 工具说自己可信，进不了上下文。
+
+分类是**按位置**做的，不是按内容猜的（`runtime.py:2690` `_categorize_messages`）。
+所以如果你在 Lab 11 之后回来重做一次这个实验，报告里会多出一个
+`MEMORY` 类别（`context_budget.py:48`）——它和工具结果一样被标为
+**不可信证据**（`context_budget.py:66-67` 的 `_UNTRUSTED_CATEGORIES`），
+也一样是**可投影的**（`:59-61`），也就是预算紧张时可以被裁；
+而 `SYSTEM_PROMPT` 在 `:51-58` 的必留集合里，永远裁不掉。
+看一眼 `context_budget.py:63-65` 那句注释：
+「工具输出不可信是因为远端系统产生了它，记忆不可信是因为**一个模型写了它**。」
 
 ### Explain
 
@@ -674,7 +720,7 @@ curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
 
 ### 要看的代码
 
-`runtime.py:1722`（算签名）、`:1729`（identical 上限）、`:1735`（总量上限）
+约 `runtime.py:1929`（算签名）、`:1936`（identical 上限）、`:1942`（总量上限）
 参数归一化用的是 `packages/approvals/contracts.py:53` 同一套 canonicalize。
 
 ### Explain
@@ -682,7 +728,7 @@ curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
 判「相同」用的是**归一化后的参数哈希**，不是字符串比较：
 
 ```python
-# runtime.py:1722
+# 约 runtime.py:1929
 signature = canonical_json_hash({"tool": name, "arguments": normalized_arguments})
 ```
 
@@ -719,6 +765,12 @@ signature = canonical_json_hash({"tool": name, "arguments": normalized_arguments
 
 1. 让 lab Agent 绑一个知识库，用 **PINNED** 模式发布（必须有 snapshot_id）。
 2. 跑一次检索，记下命中的文档数和来源。
+
+> ⚠️ **如果这是这个进程启动之后的第一次 `search_knowledge`，它很可能直接
+> `TOOL_TIMEOUT`，不是你操作错了。** BGE-M3 加 cross-encoder 冷加载约 35 秒，
+> 而工具预算是 30 秒。成因写在 `packages/knowledge/composition.py:78-88` 的 docstring 里。
+> **重跑第二次就正常**，因为模型已经在进程里了。
+> 想让它第一次就不超时，见 Lab 12。
 3. 往知识库**上传一篇新文档**，等它 ingestion 完成。
 4. **不重建快照，不重新发布**，再跑一次同样的检索。
 
@@ -778,6 +830,8 @@ items 里只有 `document_id` + `document_revision_id`。
 | 恢复后模型需要重跑前面的工具吗 | | |
 | 事件总数是增加还是重来 | | |
 | checkpoint 存在哪 | | |
+| 恢复之后会**重新选一次记忆**吗 | | |
+| `effective_memory_snapshot` 的 `selected_at` 变了吗 | | |
 
 ### 查 checkpoint
 
@@ -786,12 +840,24 @@ SELECT table_name FROM information_schema.tables
 WHERE table_schema = 'langgraph_checkpoint';
 ```
 
+### 查记忆快照
+
+批准前后各查一次，对比 `selected_at`：
+
+```sql
+SELECT status, effective_memory_snapshot
+FROM agent_runs WHERE id = '<run_id>';
+```
+
+如果 `selected_at` 两次一样，说明恢复走的是 `load` 重放分支而不是重新 `select`。
+**这一列就是 02 章 §4 第 4 件事的产物。** 想看它被作废之后还灵不灵，做 Lab 11。
+
 ### 要看的代码
 
-`runtime.py:1855` `approval_interrupt`
+`runtime.py:2062` `approval_interrupt`
 → `packages/agent_runtime/adapters/langgraph/runtime.py:17` `interrupt()`
-→ `runtime.py:500` `_mark_waiting`
-→ `runtime.py:366` `resume` → `:428` `resume_command`
+→ `runtime.py:522` `_mark_waiting`
+→ `runtime.py:388` `resume` → `:451` `resume_command`
 
 ### Explain
 
@@ -845,7 +911,7 @@ WHERE table_schema = 'langgraph_checkpoint';
 | 预检 | `authorize_endpoint` | `:197` | **解析 DNS，任一条记录是私网就整体拒** |
 | 连接后 | `authorize_peer_address` | `:229` | 真实 socket 对端 |
 
-开关定义：`packages/core/config/settings.py:94`，默认 `False`，
+开关定义：`packages/core/config/settings.py:99`，默认 `False`，
 注释写着「never an inference from the environment name」。
 唯一读取点：`packages/mcp/client.py:530`。
 
@@ -870,7 +936,190 @@ scheme 限制在 `parse_endpoint_url` 这一层，开关碰不到。
 
 ---
 
-## 11. 做完十个之后
+## Lab 11 · 在等待审批的中途，把记忆作废
+
+**目标**：看到「记忆是 Run 的输入，输入必须冻结」这件事的**唯一**可观测证据。
+这是 ADR-011 的实验版，也是本章唯一一个「什么都没发生」才算成功的实验。
+
+### 操作
+
+1. 给 lab Agent 打开长期记忆并发布：
+
+```bash
+curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"runtime_config":{"memory":{"long_term_memory":true}}}'
+curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT/publish" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{}'
+```
+
+2. 在**同一个会话里**跑一两轮成功的对话，让它学到点东西
+   （例如告诉它「我们的工单一律先分给二线」）。等 worker 抽完，确认有记忆：
+
+```bash
+curl -s "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT/memories" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+3. **在同一个会话里**再提一个会触发 WRITE 的问题，让 Run 停在 `WAITING_APPROVAL`。
+   记下 `run_id`，并抄下它的记忆快照：
+
+```sql
+SELECT status, effective_memory_snapshot FROM agent_runs WHERE id = '<run_id>';
+```
+
+4. **趁它还卡着**，把快照里出现的那条记忆作废（没有 delete 路由，只有 invalidate）：
+
+```bash
+curl -s -X POST \
+  "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT/memories/<memory_id>/invalidate" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+5. 回界面点批准，让 Run 跑完。
+
+### 预测与观察
+
+| 观察项 | 我的预测 | 实际 | 差在哪 |
+|---|---|---|---|
+| 批准之后，恢复的那次 PREPARE 还会注入那条记忆吗 | | | |
+| `effective_memory_snapshot` 的 `selected_at` 变了吗 | | | |
+| `memory_ids` 里那个 id 被移掉了吗 | | | |
+| 走的是 `select` 还是 `load` | | | |
+| 这次的 `step_metadata.memory.replayed_from_snapshot` 是什么 | | | |
+| 如果此时**新开**一轮对话，还会注入那条记忆吗 | | | |
+| 记忆那一行的 status 现在是什么 | | | |
+
+第 6 行是对照组。**同一件事在两次 Run 上必须给出不同答案**，
+否则不是「冻结」，是「根本没在选」。
+
+### 要看的代码
+
+`runtime.py:1420` `_memories` —— 整个方法就一个二选一：
+
+```python
+snapshot = getattr(self.run, "effective_memory_snapshot", None) or {}
+frozen = bool(snapshot.get("selected_at"))          # :1442
+if frozen:
+    selected = await selector.load(...)             # :1448
+else:
+    selected = await selector.select(..., limit=MAX_INJECTED_MEMORIES)   # :1450-1455
+    await self._freeze_memory_snapshot(selected, workspace_id=workspace_id)  # :1456
+```
+
+→ `packages/memory/store.py:120` `load`（**读完整 docstring，这是这个实验的答案**）
+→ 对比 `store.py:87` `select` 的 where 条件
+→ `runtime.py:1465` `_freeze_memory_snapshot`，注意**最后两行**
+→ 作废路由 `apps/api/routes/agents.py:205`，以及**不存在**的 delete 路由
+
+### Explain
+
+`select` 滤掉非 ACTIVE 和已过期的行；`load` **只按 id 取，什么都不滤**，
+并且按冻结时的顺序还原。docstring 把理由说完了：
+
+> A run replaying its own snapshot must see what it saw, including rows
+> that have since been superseded or invalidated: the snapshot records
+> what the model was told, and rewriting history to be tidier would make
+> the run log a worse answer to "why did it say that" than it is now.
+
+> 重放快照的 Run 必须看到**它当时看到的**，包括那些后来已经被取代或作废的行。
+> 把历史改得更整洁，只会让运行日志对「它当时为什么那么说」给出**更差**的回答。
+
+这就是为什么这个实验「什么都没发生」才算对。
+如果恢复时重新 `select` 一遍，那么一次审批前后，模型的上下文会在**人没有察觉**的情况下变掉——
+审批人看到的提案，和实际执行时模型依据的信息，就不是同一份。
+**审批的前提是「我批的就是它要做的」。**
+
+顺带记住判据是 `selected_at` 存不存在，**不是列为不为空**：
+空选择也会写快照，所以「这次没选到」和「这次还没选过」是两个可区分的状态。
+
+**收尾**：`.../memories/<memory_id>/reactivate` 可以把它放回去
+（`apps/api/routes/agents.py:222`）。这条路由存在本身也是个信息——
+系统**故意没有**提供删除记忆的办法。
+
+### Interview 一句话
+
+> 长期记忆是 Run 的输入，所以在第一次 PREPARE 时就冻结成
+> `agent_runs.effective_memory_snapshot`，之后任何一次恢复都只按 id 重放，
+> 不重新选。这样一条记忆在审批中途被作废，也不会让审批人批的那个提案
+> 和真正执行时的上下文对不上。
+
+---
+
+## Lab 12 · 让部署之后的第一次检索不再超时
+
+**目标**：亲手复现「冷启动 `TOOL_TIMEOUT`」，然后用一个进程级开关消掉它。
+顺便搞清楚**这个开关到底该在哪个进程上打开**——这是本实验真正的考点。
+
+### 操作
+
+1. 确保 `AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START` 是默认值（不设，或 `false`）。
+2. **完全重启**跑检索的那个进程。
+3. 立刻跑一次 `search_knowledge`（Lab 8 那个 Agent 就行），**掐表**。
+4. 不改任何东西，**再跑一次**同样的检索，再掐一次表。
+5. 设 `AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START=true`，再次完全重启。
+6. 等进程日志安静下来，再跑第一次检索。
+
+### 预测与观察
+
+| 观察项 | 我的预测 | 实际 | 差在哪 |
+|---|---|---|---|
+| 第 3 步耗时 / failure_code | | | |
+| 第 4 步耗时 | | | |
+| 两次的差值大概是多少 | | | |
+| 第 6 步还超时吗 | | | |
+| 开了预热之后，进程「能接请求」到「检索能用」之间还有间隔吗 | | | |
+| 你重启的是哪个进程？检索实际跑在哪个进程？ | | | |
+
+**最后一行是这个实验的重点。** 如果第 6 步还是超时，
+先别怀疑开关——先确认你重启的进程，和跑检索的进程是不是同一个。
+
+### 要看的代码
+
+`packages/knowledge/composition.py:77` `warm_retrieval_components`
+（**整段 docstring 都要读，数字都在里面**）
+
+```
+BGE-M3 + cross-encoder 冷加载 ≈ 35s
+工具超时预算              = 30s
+→ 每次部署后的第一次检索必然 TOOL_TIMEOUT，
+   而 Agent 给用户的回答是「我没找到」
+```
+
+两个调用点，**这是本实验的关键**：
+
+| 进程 | 调用点 | 方式 |
+|---|---|---|
+| API | `apps/api/app.py:62` | `asyncio.to_thread`，**不阻塞启动** |
+| Worker | `apps/worker/celery_app.py:70` | 启动时同步调 |
+
+开关：`packages/core/config/settings.py:87`，默认 `False`。
+
+### Explain
+
+三件事，一件比一件重要：
+
+1. **为什么默认关**：不是所有部署都提供 `search_knowledge`。
+   一个不做检索的部署没理由在启动时花 35 秒加载两个模型。
+   `settings.py:85-86` 的注释写得很直白：提供 `search_knowledge` 的部署**应该**打开它。
+
+2. **为什么是 best effort**（docstring 第二段）：
+   加载不动模型的进程，**仍然应该把不需要模型的路由服务好**，
+   然后在真正用到的时候**响亮地失败**——因为那时候的错误带着 request id。
+   预热失败只 `logger.warning`，不阻止进程起来。
+
+3. **为什么 API 用 `to_thread` 而 worker 直接调**：
+   API 要尽快接住 health check 和其他路由；
+   worker 在任务开始前多等一会儿没有代价，反而更干净。
+   代价是 API 上「进程起来了」和「检索能用了」之间**仍然有一个窗口**——
+   预热只是把这个窗口从「第一个用户」挪到了「进程启动之后的 35 秒」。
+   它**缩短**了暴露面，没有消灭它。这个诚实的说法比「加了预热就没问题了」值钱。
+
+**收尾**：把环境变量改回去，或者干脆留着——这是个该开的开关。
+
+---
+
+## 11. 做完十二个之后
 
 ### 自检
 
@@ -888,17 +1137,20 @@ scheme 限制在 `parse_endpoint_url` 这一层，开关碰不到。
 8. 重启进程后审批还在，是因为什么？
 9. `mcp_allow_private_targets` 打开后，`file://` 能过吗？为什么？
 10. 工具的 `effect` 为什么没有 HTTP 接口可以改？这个「不方便」换来了什么？
+11. 一条记忆在审批中途被作废，恢复之后模型还看得到它吗？
+    是哪个函数决定的，它和另一个函数的 where 条件差在哪？
+12. 预热开关打开了，第一次检索还是超时。第一个该怀疑的是什么？
 
-**第 2、4、10 三题答不上来，说明你跑的是步骤不是实验。** 回去把对应的 Explain 重读一遍。
+**第 2、4、10、11 四题答不上来，说明你跑的是步骤不是实验。** 回去把对应的 Explain 重读一遍。
 
-### 补充你自己的 Lab 11
+### 补充你自己的 Lab 13
 
-这十个是我挑的。**真正属于你的那个实验，是你在跑上面某一个时冒出来的疑问。**
+这十二个是我挑的。**真正属于你的那个实验，是你在跑上面某一个时冒出来的疑问。**
 
 写下来，按同样的格式做一遍：
 
 ```
-Lab 11 · ____________________
+Lab 13 · ____________________
 
 操作：
 预测：
@@ -921,7 +1173,16 @@ Lab 11 · ____________________
 - [`docs/report/05-面试问答.md`](../report/05-面试问答.md) — 追问和回答。
   现在每一条你都能补上「我试过，它的实际表现是……」。
 - [`docs/report/08-代码级细节.md`](../report/08-代码级细节.md) — 逐段代码注解。
-  跑完十个实验之后，这一章读起来会像复习而不是学习。
+  跑完十二个实验之后，这一章读起来会像复习而不是学习。
+
+Lab 11 和 Lab 12 还有三份专门的配套材料，做完再读，落差会最大：
+
+- [`docs/report/19-长期记忆与上下文管理实施报告.md`](../report/19-长期记忆与上下文管理实施报告.md)
+  — 记忆子系统的完整实现与实测。
+- [`docs/adr/ADR-011-memory-must-be-snapshotted.md`](../adr/ADR-011-memory-must-be-snapshotted.md)
+  — Lab 11 那个「什么都没发生」背后的决策记录。
+- [`docs/report/11-真机验证报告.md`](../report/11-真机验证报告.md)
+  — 冷启动 35 秒这个数字是在哪台机器上、怎么量出来的。
 
 **这句话现在可以说了**：
 你不是读过这个项目，你是**让它在你手里变过行为**。

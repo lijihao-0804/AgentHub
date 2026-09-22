@@ -15,6 +15,7 @@
 apps/                    进程（可执行的东西）
   api/                   FastAPI，HTTP 入口 + 依赖装配
   worker/                Celery，异步执行
+    tasks/memories.py    运行结束之后把这一轮抽成长期记忆（失败也不许影响 Run）
   web/                   Next.js 前端
   literature_mcp/        四个独立的 MCP 服务器进程
   ops_mcp/               （它们是"外部系统"的模拟，不属于 AgentHub 本体）
@@ -28,6 +29,7 @@ packages/                领域逻辑（不可执行，被 apps/ 组装）
   mcp/                   远程工具接入
   knowledge/             RAG 全链路
   threads/               多轮会话
+  memory/                ★ 长期记忆：抽取 / 写入闸门 / 选择
   artifacts/             产出物投影
   evaluation/            评估平台
   model_gateway/         模型供应商抽象
@@ -37,18 +39,23 @@ packages/                领域逻辑（不可执行，被 apps/ 组装）
   core/                  config / auth / errors / canonical / database
   research/              科研助理专用逻辑
 
-migrations/versions/     27 个 Alembic 迁移，严格线性，单 head
+migrations/versions/     29 个 Alembic 迁移，严格线性，单 head（当前 head = 0029）
 ```
+
+`packages/memory/` 一共只有六个文件，加起来不到 1000 行，按这个顺序看：
+`store.py`（365 行，写入闸门 + 选择）→ `service.py`（232 行，管理面）→
+`extraction.py`（138 行，抽取）→ `models.py`（130 行，表）→
+`contracts.py`（74 行，常量与协议）→ `queue.py`（33 行，投递）。
 
 **第一条规则：`apps/` 里没有业务逻辑。**
 `apps/api/routes/*.py` 只做三件事：解析请求、装配依赖、调用 `packages/` 里的 service。
 所以「这个功能在哪」的答案永远在 `packages/`，
 但「这个功能怎么被触发」的答案永远在 `apps/api/routes/`。
 
-**第二条规则：`packages/agent_runtime/runtime.py` 是 2721 行，不要通读。**
+**第二条规则：`packages/agent_runtime/runtime.py` 是 3001 行，不要通读。**
 它里面只有两个类值得你知道名字：
-- `AgentRunService`（约 216–1250 行）—— 对外的服务门面：创建 Run、流式、恢复、取消
-- `_AgentRunGraph`（1253 行起）—— 图里那 8 个节点的实现
+- `AgentRunService`（约 189–1300 行，class 在 `:189`，`async def run` 在 `:238`）—— 对外的服务门面：创建 Run、流式、恢复、取消
+- `_AgentRunGraph`（1307 行起）—— 图里那 8 个节点的实现
 
 其余是私有辅助函数。**按节点名跳着读，不要按行号顺读。**
 
@@ -58,18 +65,20 @@ migrations/versions/     27 个 Alembic 迁移，严格线性，单 head
 
 | 我想理解什么 | 第一入口 | 然后看 | 最后看 |
 |---|---|---|---|
-| **Agent 怎么发布** | `packages/agent_runtime/publish.py:199` `publish()` | `_resolve_draft_spec:271` → `_resolve_tools:422` / `_resolve_knowledge:370` | `_resolved_spec:562`，以及 `models.py:85` `AgentVersion` |
-| **一次 Run 怎么执行** | `apps/api/routes/agent_runs.py:69` | `runtime.py:216` `AgentRunService.run` → `:1277` `_AgentRunGraph.invoke` | `adapters/langgraph/runtime.py:42` 图的定义 |
-| **READ 工具怎么调用** | `runtime.py:2092` `read_execute` | `packages/tools/runtime.py:349` `ToolRuntime.execute` | `packages/tools/registry.py:45` 或 `packages/mcp/runtime.py:80` |
-| **WRITE 为什么要审批** | `runtime.py:1755` `policy` | `packages/tools/policy.py:17` `ToolPolicy.decide`（全文 26 行） | `packages/approvals/service.py:39` `create_or_get` |
-| **审批之后怎么继续** | `apps/api/routes/approvals.py:54` | `runtime.py:366` `AgentRunService.resume` | `runtime.py:1941` `action_execute` |
+| **Agent 怎么发布** | `packages/agent_runtime/publish.py:203` `publish()` | `_resolve_draft_spec:275` → `_resolve_tools:426` / `_resolve_knowledge:374` | `_resolved_spec:566`，以及 `models.py:85` `AgentVersion` |
+| **一次 Run 怎么执行** | `apps/api/routes/agent_runs.py:69` | `runtime.py:238` `AgentRunService.run` → `:1349-1376` 图的 compile / invoke | `adapters/langgraph/runtime.py:42` 图的定义 |
+| **READ 工具怎么调用** | `runtime.py:2299` `read_execute` | `packages/tools/runtime.py:349` `ToolRuntime.execute` | `packages/tools/registry.py:45` 或 `packages/mcp/runtime.py:80` |
+| **WRITE 为什么要审批** | `runtime.py:1962` `policy` | `packages/tools/policy.py:17` `ToolPolicy.decide`（全文 26 行） | `packages/approvals/service.py:39` `create_or_get` |
+| **审批之后怎么继续** | `apps/api/routes/approvals.py:54` | `runtime.py:388` `AgentRunService.resume` | `runtime.py:2148` `action_execute` |
 | **MCP 怎么进 Runtime** | `packages/mcp/service.py:402` `import_tool` | `packages/tools/runtime.py:337` `_resolve_handler` | `packages/mcp/runtime.py:80` / `:105` |
 | **RAG 怎么跑** | `packages/tools/builtins/search_knowledge.py:104` | `packages/knowledge/retrieval.py:246` `retrieve_with_trace` | `packages/knowledge/snapshots.py:61` `_content_hash` |
-| **Thread 怎么连续** | `apps/api/routes/threads.py:145` | `packages/threads/service.py:318` `submit_turn` | `runtime.py:1324` `_thread_history` |
-| **Artifact 怎么产生** | `runtime.py:2164` `_record_artifacts` | `packages/artifacts/recorder.py:86` | `packages/artifacts/service.py:138` 的不可编辑守卫 |
+| **Thread 怎么连续** | `apps/api/routes/threads.py:145` | `packages/threads/service.py:318` `submit_turn` | `runtime.py:1378` `_thread_history` |
+| **Artifact 怎么产生** | `runtime.py:2377` `_record_artifacts` | `packages/artifacts/recorder.py:86` | `packages/artifacts/service.py:138` 的不可编辑守卫 |
 | **Evaluation 怎么跑** | `apps/api/routes/evaluation.py` | `packages/evaluation/experiments.py` | `packages/evaluation/models.py:256` `EvaluationExperiment` |
+| **长期记忆怎么进上下文** | `runtime.py:1420` `_memories` | `packages/memory/store.py:87` `select` / `:120` `load` 选择 → `:217` `record` 写入闸门 | `runtime.py:2690` `_categorize_messages` 里的 `ContextCategory.MEMORY` |
+| **记忆怎么被抽取** | `apps/worker/tasks/memories.py` | `packages/memory/extraction.py` | `packages/memory/store.py` |
 
-下面九节把前九行展开。**每节固定四问**：
+下面十一节把前十一行展开。**每节固定四问**：
 入口函数是谁 / 核心数据结构是谁 / 不应该看什么 / 最值得打断点的位置。
 
 ---
@@ -88,16 +97,16 @@ migrations/versions/     27 个 Alembic 迁移，严格线性，单 head
 
 ### Code reading
 
-**入口函数**：`packages/agent_runtime/publish.py:199`
+**入口函数**：`packages/agent_runtime/publish.py:203`
 
 ```
 AgentPublishService.publish(session, context, agent_id)
   ├── 版本号 = max(version_number) + 1                    publish.py:213
-  ├── _resolve_draft_spec(...)                           publish.py:271
-  │     ├── _resolve_model(...)          模型档案 + fallback 链 + 凭据引用    :332
-  │     ├── _validate_runtime_config(...)  预算校验（含 max_cost_micro_usd）  :679
-  │     ├── _resolve_knowledge(...)      PINNED 必须有 snapshot_id            :370
-  │     └── _resolve_tools(...)          挑 revision，重算 hash，拒绝重复身份  :422
+  ├── _resolve_draft_spec(...)                           publish.py:275
+  │     ├── _resolve_model(...)          模型档案 + fallback 链 + 凭据引用    :336
+  │     ├── _validate_runtime_config(...)  预算校验（含 max_cost_micro_usd）  :683
+  │     ├── _resolve_knowledge(...)      PINNED 必须有 snapshot_id            :374
+  │     └── _resolve_tools(...)          挑 revision，重算 hash，拒绝重复身份  :426
   ├── canonical_json_hash(resolved_spec)  ← 声明哈希在这一行诞生   publish.py:295
   └── INSERT agent_versions                                      publish.py:228
 ```
@@ -119,7 +128,7 @@ AgentPublishService.publish(session, context, agent_id)
   工具绑定在草稿上用关联表（`AgentTool`，`models.py:225`），
   发布时被**拍平进 `resolved_spec.tools` 这个 JSON 数组**。
   这是全项目最容易猜错的一处，见 03 章。
-- ❌ `preflight()`（`publish.py:248`）和 `publish()` 只差一个 INSERT，
+- ❌ `preflight()`（`publish.py:252`）和 `publish()` 只差一个 INSERT，
   读懂一个就够了。
 
 **最值得打断点的位置**：`publish.py:295`
@@ -136,7 +145,7 @@ return resolved_spec, canonical_json_hash(resolved_spec)
 
 为什么一定要哈希？因为 `resolved_spec` 是 JSONB，
 数据库层面完全可以被一条 `UPDATE` 改掉。哈希不是防篡改，
-是**在读的时候发现篡改**——`runtime.py:974` 每次执行前都会重算一遍，
+是**在读的时候发现篡改**——`runtime.py:1566` 每次执行前都会重算一遍，
 对不上就抛 `AGENT_VERSION_INTEGRITY_ERROR`。
 
 ### Interview（两分钟）
@@ -162,26 +171,31 @@ return resolved_spec, canonical_json_hash(resolved_spec)
 ### Code reading
 
 **图的定义**在 `packages/agent_runtime/adapters/langgraph/runtime.py:42-52`，
-但节点和边是在 `runtime.py:1297-1318` 传进去的：
+但节点和边是在 `runtime.py:1350-1373` 传进去的：
 
 ```
-节点（8 个，runtime.py:1297-1305）
+节点（8 个，runtime.py:1350-1359）
   prepare → model → tool_proposal → policy → read_execute ┐
                                             └ action_execute ┴→ observation → (回到 model)
                                                                               → finish
 
-条件边（runtime.py:1313-1318），路由函数都在 runtime.py:2300-2322：
-  after_prepare      :2300   有 failure_code → finish，否则 model
-  after_model        :2303   有 failure_code 或 final_output → finish，否则 tool_proposal
-  after_proposal     :2310   有 failure_code → finish，否则 policy
-  after_policy       :2313   有 failure_code 或 run_status → finish
+条件边（runtime.py:1367-1373），路由函数都在 runtime.py:2517-2540：
+  after_prepare      :2517   有 failure_code → finish，否则 model
+  after_model        :2520   有 failure_code 或 final_output → finish，否则 tool_proposal
+  after_proposal     :2527   有 failure_code → finish，否则 policy
+  after_policy       :2530   有 failure_code 或 run_status → finish
                              有 action_calls → action_execute
                              否则 → read_execute
-  after_observation  :2320   有 failure_code → finish，否则 model
+  after_observation  :2537   有 failure_code → finish，否则 model
 ```
 
-**核心数据结构**：`AgentRunState`（`runtime.py:107`，一个 `TypedDict`）。
-23 个字段，但你现在只需要记住六个：
+记忆上线之后这些行号整体往下挪了两百多行，但**拓扑一个字没变**：
+八个节点、五条条件边、路由条件都还是上面这些。
+记忆是在 `prepare` 内部多做了一件事，不是多了一个节点——
+这件事值得你自己去图的定义里确认一遍。
+
+**核心数据结构**：`AgentRunState`（`runtime.py:119`，一个 `TypedDict`）。
+24 个字段，但你现在只需要记住七个：
 
 | 字段 | 含义 |
 |---|---|
@@ -191,18 +205,19 @@ return resolved_spec, canonical_json_hash(resolved_spec)
 | `failure_code` | 一旦非空，下一跳一定是 `finish` |
 | `run_status` | 只有需要把 Run 置成 `NEEDS_ATTENTION` 时才写 |
 | `usage_records` | 成本闸门的原料 |
+| `memory_message_count` | 系统前缀之后有几条是注入的长期记忆；预算分类靠它认出 MEMORY 类别 |
 
 **不应该看什么**：
 
-- ❌ 不要一上来读 `context_budget.py`（1058 行）。
-  它只在 `model` 节点被调一次（`runtime.py:1625`），
+- ❌ 不要一上来读 `context_budget.py`（1089 行）。
+  它只在 `model` 节点被调一次（调用点 `runtime.py:1695`，函数定义在 `:1831`），
   在你搞清楚八个节点的顺序之前，它是噪音。
 - ❌ 不要读 `stream_hub.py`。SSE 扇出是**运输层**，
   和「Agent 怎么思考」完全无关。等 04 章 Lab 6 再来。
 - ❌ 不要试图读懂 `_produce_stream_body`（`runtime.py:805`）。
   它是 `_invoke_graph` 的流式包装，逻辑在被包的那个里面。
 
-**最值得打断点的位置**：`runtime.py:2313`，路由函数 `after_policy`。
+**最值得打断点的位置**：`runtime.py:2530`，路由函数 `after_policy`。
 
 三行代码决定了整个项目的性格：
 
@@ -236,7 +251,7 @@ return resolved_spec, canonical_json_hash(resolved_spec)
 ### Code reading
 
 ```
-runtime.py:2092  read_execute
+runtime.py:2299  read_execute
   └ 并发信号量 max_parallel_reads              runtime.py:2097
   └ execute_one(...)                           runtime.py:2099
       └ tool_runtime.execute(...)              runtime.py:2114
@@ -308,7 +323,7 @@ data_trust="UNTRUSTED",
    runtime.py:1689  tool_proposal   把模型的 tool_calls 解析进 pending_tool_calls
 
 ② 判定
-   runtime.py:1755  policy
+   runtime.py:1962  policy
      └ packages/tools/policy.py:17  ToolPolicy.decide(definition)
          只有  effect is READ  AND  approval_policy is NEVER  → ALLOW_AUTO
          其余全部                                            → REQUIRE_APPROVAL
@@ -328,12 +343,12 @@ data_trust="UNTRUSTED",
 ⑤ 人批准
    apps/api/routes/approvals.py:54  POST .../approve
      ├ ApprovalService.decide(...)   service.py:155
-     └ AgentRunService.resume(...)   routes:70 → runtime.py:366
+     └ AgentRunService.resume(...)   routes:70 → runtime.py:388
 
 ⑥ 恢复并执行
    runtime.py:428  graph.invoke(resume_command({...}))
    → after_policy 这次走 action_execute
-   runtime.py:1941  action_execute
+   runtime.py:2148  action_execute
      ├ claim_execution(...)          service.py:218   ← 原子抢占
      ├ ActionRuntime.execute(...)    tools/actions.py:170
      └ complete_execution(...)       service.py:245
@@ -525,6 +540,26 @@ packages/knowledge/retrieval.py:246  HybridKnowledgeRetriever.retrieve_with_trac
 （倒数排名融合，`retrieval.py:117`）——它只看名次，不看分数。
 `rrf_k` 默认 60（`settings.py:40`）。
 
+**什么时候模型被加载**（这一小块不读完，你会把一个正常现象当成 bug）：
+
+检索需要两个本地模型——BGE-M3（dense + sparse）和 cross-encoder（rerank）。
+它们默认是**懒加载**的：第一次真的去检索时才把权重读进内存。
+
+```
+packages/knowledge/composition.py:77  warm_retrieval_components(settings)
+  ├── adapters/embeddings.py:112  warm()    BGE-M3 dense
+  ├── adapters/sparse.py:63       warm()    BGE-M3 sparse
+  └── adapters/reranker.py:91     warm()    cross-encoder
+开关：packages/core/config/settings.py:87  knowledge_warm_models_on_start（默认 False）
+```
+
+实测冷加载约 **35 秒**，而单个工具调用的上限是 **30 秒**——
+于是**每次部署之后的第一次 `search_knowledge` 必然 `TOOL_TIMEOUT`**，
+第二次就正常。`composition.py:78-88` 的 docstring 把这件事和实测日期都写下来了，
+**去读那段 docstring**，它比这里任何转述都准确。
+
+预热是 best-effort：预热失败不阻止 API 起来，只是把这个代价推回给第一次检索。
+
 **不应该看什么**：
 
 - ❌ `packages/knowledge/ingestion.py`（入库流水线）。
@@ -532,7 +567,8 @@ packages/knowledge/retrieval.py:246  HybridKnowledgeRetriever.retrieve_with_trac
 - ❌ `packages/knowledge/parser_child.py`（子进程解析）。纯工程隔离，与检索无关。
 - ❌ `citation_qa.py`。它是一个独立的问答端点，不在 Agent 执行路径上。
 
-**最值得打断点的位置**：`retrieval.py:180` `_snapshot_scope` 的返回值。
+**最值得打断点的位置**：`retrieval.py:180` `_snapshot_scope` 的返回值，
+外加 `composition.py:77` `warm_retrieval_components`（看它到底有没有被调用）。
 把 `revision_ids` 打出来，数一数。
 然后往知识库传一份新文档 —— 再跑一次，**数量不变**。
 这就是「RAG 的可复现性来自快照 ID，不是 LATEST」的实证。
@@ -567,7 +603,7 @@ apps/api/routes/threads.py:145  POST /threads/{id}/turns
 ```
 
 历史注入发生在 `prepare` 节点：
-`runtime.py:1324` `_thread_history` → `packages/threads/context.py:45`
+`runtime.py:1378` `_thread_history` → `packages/threads/context.py:67`
 `SqlAlchemyThreadContextProvider.conversation`，
 默认最多 10 轮（`DEFAULT_THREAD_CONTEXT_MAX_TURNS`，`runtime.py:86`）。
 
@@ -590,7 +626,30 @@ apps/api/routes/threads.py:145  POST /threads/{id}/turns
   纯粹是路由标签，DB 上连 CHECK 都没有，运行时没有任何分支读它。
   确认这件事花 30 秒，然后就可以永远忘掉。
 
-**最值得打断点的位置**：`runtime.py:1324` `_thread_history` 的返回值。
+**会话历史还可以被检索**（不只是被回放）：
+
+上面那条路径是「把最近 N 轮原样塞进去」。还有第二条路径——
+把历史做成一个模型可以主动调的工具 `thread_history_search`：
+
+```
+runtime.py:1483  _thread_history_search_enabled   三个条件，缺一不可
+runtime.py:1499  _search_thread_history           工具的实现
+packages/threads/context.py:119  search()         真正去查的地方
+注册点：runtime.py:1597-1605（prepare 里塞进 tool_definitions）
+派发点：runtime.py:2321（read_execute 里单独一个分支，不走 ToolRuntime）
+```
+
+三个条件是：发布的版本打开了 `memory.thread_history_search`、
+这次 Run 属于某个 Thread、装配时真的接上了 searcher。
+**缺任何一个就干脆不提供这个工具**，而不是提供了再失败。
+`_thread_history_search_enabled` 的 docstring 把理由写死了：
+「一个模型看得见但用不了的工具，比没有这个工具更糟」——
+因为模型会花掉一整轮去发现这件事。这句值得你原文读一遍。
+
+注意它是**运行时自带**的工具，不来自 `PublishedToolCatalog`，
+所以你在 Agent 的工具列表里找不到它。
+
+**最值得打断点的位置**：`runtime.py:1378` `_thread_history` 的返回值。
 把它打出来，你会看到历史里**只有用户输入和最终回答**，
 没有中间的工具原始返回值。
 这解释了 `docs/report/07` 里那句「它重新调了 query_sql，没有从上一轮摘要里读数字」——
@@ -615,7 +674,7 @@ apps/api/routes/threads.py:145  POST /threads/{id}/turns
 ### Code reading
 
 ```
-runtime.py:2164  _record_artifacts          ← 在 read_execute 里面，工具执行之后
+runtime.py:2377  _record_artifacts          ← 在 read_execute 里面，工具执行之后
   └ packages/artifacts/recorder.py:86       从 RecordedToolCall 投影
       写入 artifacts 表，带 run_id
 ```
@@ -906,9 +965,83 @@ class AgentRunExecutionOverrides:
 
 ---
 
-## 11. 三条"不要踩"的地图陷阱
+## 11. 长期记忆怎么进上下文
 
-这三个是我自己找错过的，写下来省你时间：
+### Before reading
+
+- 一次 Run 里，记忆是在哪一步被挑出来的？挑几条？
+- 一次 Run 卡在审批三小时，恢复之后 `prepare` 会重新跑一遍——
+  它会**重新挑一次**记忆吗？
+- 注入的记忆在 `messages` 里是什么 role？上下文预算会不会把它压掉？
+
+写完再往下。
+
+### Code reading
+
+**入口函数**：`runtime.py:1420` `_AgentRunGraph._memories`。
+它被 `prepare` 调用（`runtime.py:1592`），一次 Run 里可能被调很多次，
+但**只在第一次真的去选**：
+
+```
+runtime.py:1420  _memories(spec, workspace_id, agent_id)
+  ├── 开关没开 / 没装配 selector  → 返回空，什么都不做      :1438-1441
+  ├── 读 run.effective_memory_snapshot                     :1442
+  │     frozen = bool(snapshot["selected_at"])             :1443
+  ├── frozen 为真  → selector.load(memory_ids=...)         :1448   ← 重放分支，按 id 取
+  └── frozen 为假  → selector.select(..., limit=MAX_INJECTED_MEMORIES)  :1450-1455
+                    → _freeze_memory_snapshot(...)          :1456（定义在 :1465）
+```
+
+选择与写入闸门都在 `packages/memory/store.py`：
+`select`（`:87`）、`load`（`:120`）、`record`（`:217`，写入闸门）、
+`supersede`（`:304`）、`invalidate`（`:320`）、`reactivate`（`:336`）。
+管理面（列表、失效、恢复）在 `packages/memory/service.py`。
+
+**核心数据结构**（两个，方向相反，别混）：
+
+- `WorkspaceMemory`（`packages/memory/models.py:42`，表 `workspace_memories`）
+  —— 工作区级别的、可变的记忆行，状态在 ACTIVE / SUPERSEDED / INVALIDATED 之间走
+- `agent_runs.effective_memory_snapshot`（`packages/agent_runtime/models.py:330`）
+  —— **这一次 Run 用了哪几条**的冻结记录，写下去就不再改
+
+`_memories` 的 docstring 解释了为什么快照是一个**对象**而不是一个裸数组：
+`{"selected_at": ..., "memory_ids": [...]}`。
+如果只存数组，「选了但一条都没选中」和「还没选过」都是空列表、都是 falsy，
+而这两者的区别正是整个确定性主张的全部内容。**去读那段 docstring。**
+
+**不应该看什么**：
+
+- ❌ `packages/memory/queue.py`（33 行）。它只是把一条消息投出去，
+  看完除了知道「有个队列」之外不会多懂任何东西。
+- ❌ `packages/memory/extraction.py` 里的 prompt 细节。
+  抽取质量是另一个问题；你现在要理解的是**记忆怎么进上下文**，
+  不是**记忆怎么被写出来**。
+
+**最值得打断点的位置**（两个，各看一半）：
+
+1. `runtime.py:1465` `_freeze_memory_snapshot` —— 看 `payload` 长什么样，
+   以及它是在**自己的 session、自己的 commit** 里写的。
+2. `runtime.py:2727` `_categorize_messages` 里的 `is_memory` —— 看分类器
+   是怎么仅靠**位置**（系统前缀长度 + `memory_message_count`）
+   把一条 `role="system"` 的消息认成 MEMORY 而不是 SYSTEM_PROMPT 的。
+
+### Explain
+
+记忆是 Run 的**输入**。
+输入必须在第一次 PREPARE 时冻结，否则同一个 Run 恢复两次会得到两个不同的上下文，
+「复现三个月前那次 Run」这句话就不成立了——
+这和 `resolved_spec`、和知识快照是同一个道理，只是换了一个被冻结的对象。
+`docs/adr/ADR-011-memory-must-be-snapshotted.md` 就是在说这件事。
+
+### Interview 一句话
+
+> 记忆是 Run 的输入。输入必须冻结，否则同一个 Run 恢复两次会得到两个不同的上下文。
+
+---
+
+## 12. 四条"不要踩"的地图陷阱
+
+这四个是我自己找错过的，写下来省你时间：
 
 1. **`packages/tools/models.py` 不是工具模型。**
    它是 `customers` / `tickets` 两张演示数据表。
@@ -920,13 +1053,19 @@ class AgentRunExecutionOverrides:
 
 3. **Run 状态和审批状态都不是 Python 枚举。**
    两者都只有 DB CHECK 约束：
-   `agent_runs` 见 `models.py:278-281`，
+   `agent_runs` 见 `models.py:280-284`，
    `approvals` 见 `approvals/models.py:54` 和 `:58`。
    所以想知道合法值，**看迁移和模型的约束，不要 grep `class ...Status`**。
 
+4. **`workspace_memories` 没有 delete 接口。**
+   只有 invalidate 和 reactivate（`apps/api/routes/agents.py:205` / `:222`）。
+   `invalidate` 那条路由的 docstring 直接写着 `Not a delete -- see ADR-011`。
+   原因在 §11：已经冻结进某次 Run 的记忆 id 必须永远能被 `load` 回来，
+   删行会让那次 Run 不可重放。
+
 ---
 
-## 12. 自检：读完这一章，你应该能不看文档回答
+## 13. 自检：读完这一章，你应该能不看文档回答
 
 1. 一次 Run 有几个节点？哪个节点是唯一的分叉？
 2. `ToolPolicy.decide` 看哪两个属性？`risk_level` 参与判定吗？
@@ -938,8 +1077,12 @@ class AgentRunExecutionOverrides:
 8. 评测的执行计划是什么时候落库的？为什么不能让 Celery 消息携带它？
 9. 评测跑 Agent 用的是生产运行时吗？它唯一的特权是什么，
    为什么这个特权做成了一个类型而不是一个布尔开关？
+10. 长期记忆是在哪一步被选中的？一次 Run 卡在审批之后恢复，
+    第二次 PREPARE 会不会重新选一遍？靠哪一列判断？
+11. 注入的记忆 role 是 `system`，但它不算 SYSTEM_PROMPT——
+    分类器靠什么区分这两者？
 
-九个里答不上三个以上，回到对应小节重读一遍**代码**（不是这篇文档）。
+十一个里答不上四个以上，回到对应小节重读一遍**代码**（不是这篇文档）。
 第 7、8、9 三题如果答不上，说明你把第 10 节当目录读了——
 那一节现在是有代码可读的，不是索引。
 

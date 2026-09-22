@@ -11,6 +11,22 @@ with an unconditional one on the same column: the predicate is part of the
 object's identity and has to be mirrored in `__table_args__` as
 `postgresql_where`.
 
+Two consequences of that rule are now load-bearing:
+
+`workspace_memories` carries a **partial** unique index (active memories only,
+`postgresql_where=status == 'ACTIVE'`), which is what makes the de-duplication
+race safe: a second writer gets an `IntegrityError` rather than a duplicate. An
+unconditional index on the same columns would forbid ever superseding a memory,
+so the predicate is the object's identity here in the strongest sense.
+
+A composite foreign key with `ON DELETE SET NULL` must **name the column** it may
+null (`ON DELETE SET NULL (thread_id)`, PostgreSQL 15+). The composite keys are
+`(workspace_id, <ref>)` so a child can never point at another tenant's parent —
+but an unqualified `SET NULL` nulls *every* column of the key, `workspace_id`
+included, and that column is `NOT NULL`. Deleting the parent then raises
+`NotNullViolation` instead of forgetting the provenance.
+`tests/unit/test_set_null_scopes_to_column.py` scans the metadata for this.
+
 LangGraph checkpoint tables are framework-owned. They are created by the explicit
 `scripts/bootstrap_checkpoint.py` deployment step in the `langgraph_checkpoint` schema;
 the API process never runs framework setup automatically.

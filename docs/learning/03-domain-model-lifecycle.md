@@ -1,6 +1,6 @@
-# 03 · 八个核心对象的生命周期
+# 03 · 九个核心对象的生命周期
 
-> 全库 60+ 张表。**这一章只讲 8 个对象，而且不讲字段。**
+> 全库 60+ 张表。**这一章只讲 9 个对象，而且不讲字段。**
 >
 > 字段表是查询手册，看完记不住也不该记住。
 > 真正要理解的是：**这个对象从哪来，会变成什么，谁能改它，为什么。**
@@ -22,7 +22,7 @@
 
 ---
 
-## 1. 八个对象和它们的关系
+## 1. 九个对象和它们的关系
 
 ```
 Agent ──publish──▶ AgentVersion ──run──▶ AgentRun ──▶ Artifact
@@ -38,16 +38,39 @@ Document ──revise──▶ DocumentRevision ──membership──▶ Knowle
 
 Thread ──turn──▶ ThreadTurn ──▶ AgentRun
  长期存在          一次性
+
+AgentRun(SUCCEEDED) ──extract──▶ WorkspaceMemory ──select+freeze──▶ agent_runs.effective_memory_snapshot
+    一次性                        可变、长期存在                        这一次 Run 的不可变输入
 ```
 
-四条链，一个共同的形状：
+第五条链的**方向是反的**，值得单独盯一眼：
+前四条都是「先有不可变的东西，再有一次执行」；
+第五条是「一次执行结束之后，产生了一个可变的东西」，
+然后这个可变的东西**再往回**成为下一次执行的不可变输入。
+所以记忆同时站在 Run 的出口和入口，这是它比别的对象难想清楚的唯一原因。
+
+五条链，一个共同的形状：
 
 ```
 可变的「容器」  ──固化──▶  不可变的「版本」  ──引用──▶  一次执行
 ```
 
-**这个形状重复了四次不是巧合。** 它是这个项目唯一的架构主张：
+**这个形状重复了五次不是巧合。** 它是这个项目唯一的架构主张：
 **可复现性 = 执行时引用的每一样东西都不会再变。**
+
+第五次（记忆）的实现方式和前四次**不一样**，这是这一章新增的重点：
+
+- 前四次：可变容器 → **另铸一行版本表**（`AgentVersion` / `ToolRevision` /
+  `DocumentRevision` / `KnowledgeSnapshot`），冻结发生在**被引用的那一侧**。
+- 第五次：可变容器是 `workspace_memories` 的行，它的 status 可以在
+  ACTIVE ↔ INVALIDATED 之间**来回翻**，没有版本表；
+  冻结发生在 **Run 这一侧**——`agent_runs.effective_memory_snapshot`
+  记下「这次 Run 用了哪几条」。
+
+为什么不铸版本表？因为记忆不是「声明」，是「证据」。
+一条记忆被作废不代表要产生它的新版本，只代表以后别再选它了；
+而已经被某次 Run 选中的那条，必须永远能按 id 取回来。
+一列快照就够了，详见 §9。
 
 ---
 
@@ -63,7 +86,7 @@ Thread ──turn──▶ ThreadTurn ──▶ AgentRun
    ├ 挂知识库           随便改
    └ 调预算             随便改
         │
-     publish()  packages/agent_runtime/publish.py:199
+     publish()  packages/agent_runtime/publish.py:203
         │
         ▼
   AgentVersion(version_number = N+1)
@@ -87,7 +110,7 @@ Thread ──turn──▶ ThreadTurn ──▶ AgentRun
 -- 你找不到。没有 agent_version_tools 这张表。
 ```
 
-绑定关系被**拍平**了。这是全项目最容易猜错的一处（01 章 §11 也提过）。
+绑定关系被**拍平**了。这是全项目最容易猜错的一处（01 章 §12 也提过）。
 
 ### 为什么 Agent 必须可变
 
@@ -114,7 +137,7 @@ FK 指向 `agent_versions` 且是 **RESTRICT**——
 
 **这是本章最需要说清楚的一点，也是最容易答错的一点。**
 
-去翻 `migrations/versions/` 里全部 27 个迁移，你会发现：
+去翻 `migrations/versions/` 里全部 29 个迁移，你会发现：
 
 - ❌ 没有数据库触发器
 - ❌ 没有行级安全策略（RLS）
@@ -124,7 +147,8 @@ FK 指向 `agent_versions` 且是 **RESTRICT**——
 
 ```
 写入时：publish.py:295   hash = canonical_json_hash(resolved_spec)
-读取时：runtime.py:974    重算，对不上 → AGENT_VERSION_INTEGRITY_ERROR
+读取时：runtime.py:1566   重算，对不上 → AGENT_VERSION_INTEGRITY_ERROR
+        （同一段 prepare 里还有另外三道，见 02 章 §4；另一处相关校验在 :1582）
 ```
 
 哈希**不阻止**篡改。它保证篡改**会被发现**，而且是在执行前发现。
@@ -137,7 +161,7 @@ FK 指向 `agent_versions` 且是 **RESTRICT**——
 > 所以绕过服务层改了数据，下一次执行会直接失败而不是静默用错版本。
 > 这是个取舍：触发器能强制，但也会让迁移和数据修复变得极难。
 
-**有真正 DB/服务层强制的只有四种对象**（这四个是特例，记住）：
+**有真正 DB/服务层强制的只有五种对象**（这五个是特例，记住）：
 
 | 对象 | 守卫位置 | 错误码 |
 |---|---|---|
@@ -145,6 +169,7 @@ FK 指向 `agent_versions` 且是 **RESTRICT**——
 | EvaluationDatasetVersion（PUBLISHED） | `packages/evaluation/service.py:360` | `EVALUATION_DATASET_IMMUTABLE` 409 |
 | EvaluationExperiment（READY 之后） | `packages/evaluation/experiments.py:784` | `EVALUATION_EXPERIMENT_IMMUTABLE` 409 |
 | McpConnection（部分字段） | `packages/mcp/service.py` | — |
+| WorkspaceMemory | 两条 DB CHECK（`packages/memory/models.py:78-86`）+ 一条**只约束 ACTIVE 行**的部分唯一索引（`:97`）；API 层**完全没有 delete 路由**，只有 invalidate / reactivate | — |
 
 ### Interview
 
@@ -299,7 +324,7 @@ Run、AgentVersion、prompt、模型、温度**全都没变**，结论却变了�
 
 ### 生命周期：七个状态
 
-`packages/agent_runtime/models.py:278-281` 的 CHECK 约束：
+`packages/agent_runtime/models.py:280-284` 的 CHECK 约束（class `AgentRun` 在 `:255`）：
 
 ```
                     ┌──────────────────┐
@@ -327,7 +352,7 @@ WRITE 派发出去之后连接断了（`packages/mcp/runtime.py:105` 的注释�
 
 所以必须有第三个状态，并且这个状态的语义是「**人来看**」，不是「系统会重试」。
 
-`runtime.py:2391` `_is_uncertain_action_failure` 匹配三个码：
+`runtime.py:2608` `_is_uncertain_action_failure` 匹配三个码：
 `UNKNOWN_OUTCOME` / `ACTION_OUTCOME_UNKNOWN` / `ACTION_RECONCILIATION_REQUIRED`。
 
 **为什么 `CANCEL_REQUESTED` 和 `CANCELLED` 是两个状态？**
@@ -338,12 +363,21 @@ WRITE 派发出去之后连接断了（`packages/mcp/runtime.py:105` 的注释�
 ### AgentRun 是不可变的吗？
 
 **不是，而且不该是。** 它的状态就是要变的——这是它的本质。
-但它的**引用**是冻结的：`agent_version_id` + `resolved_spec_hash`（`models.py:314`）。
-执行中的东西可变，执行依赖的东西不可变。
+但它的**引用**是冻结的，而且不止一样：
+
+| 列 | 位置 | 冻的是什么 |
+|---|---|---|
+| `agent_version_id` + `resolved_spec_hash` | `models.py:317` | 这次跑的是哪一份声明 |
+| `effective_knowledge_snapshots` | `models.py:318` | 这次检索的范围是哪几个快照 |
+| `effective_memory_snapshot` | `models.py:330` | 这次被喂了哪几条长期记忆（见 §9） |
+
+三列一个模式：**执行中的东西可变，执行依赖的东西不可变。**
+第三列的注释（`:322-329`）最长，因为它是最新加的、也最容易被实现错的一个。
 
 ### `thread_id` 是个例外，要单独讲
 
-`models.py:305-308` 的注释写得很直白：这是一个**反向指针**，
+`models.py:307-311` 的注释写得很直白：这是一个**反向指针**，
+（列本身声明在 `:312`）
 「replay、评估、对账都忽略它」。
 
 意思是：**没有任何执行分支读 `thread_id`。**
@@ -540,7 +574,18 @@ except IntegrityError:
 
 ### 历史是怎么喂给模型的
 
-读 `packages/threads/context.py`，98 行，一次读完。文件头写着它**故意不做什么**：
+读 `packages/threads/context.py`，191 行，一次读完。这个文件对外只有两条路径：
+
+| 方法 | 行号 | 谁在调 | 给出什么 |
+|---|---|---|---|
+| `conversation()` | `context.py:67` | PREPARE 自动调，每次都调 | 最近 N 轮的**原文**，顺序固定 |
+| `search()` | `context.py:119` | 模型显式调 `thread_history_search` 才走 | 命中关键词的**更早**几轮 |
+
+第一条是「默认给你看的」，第二条是「你自己开口要的」。
+后者的作用域被刻意收窄到同一个会话（`context.py:127-133` 的 docstring：
+跨会话的检索是「披着记忆外衣的检索功能」，要另一套治理）。
+
+文件头写着它**故意不做什么**：
 
 ```python
 # packages/threads/context.py:1-7
@@ -557,7 +602,13 @@ and anything cleverer would be a new abstraction the runtime cannot explain.
 > 历史就是先前那几轮的原文，有上限；任何更聪明的做法都会变成一个
 > 运行时解释不了的新抽象。
 
-查询条件有五个，每一个都对应一句话（`context.py:59-66`）：
+⚠️ 这句 "no memory extraction here" 现在容易读歪。
+它说的是**不在这里**，不是**没有**。长期记忆的抽取确实存在，但发生在
+`apps/worker/tasks/memories.py`，是 Run 结束之后**另一个进程**里的事，
+和这个适配器没有任何调用关系。这个文件到今天仍然不做抽取。
+本章 §9 讲记忆那条链。
+
+查询条件有四个，每一个都对应一句话（`context.py:84-87`）：
 
 ```python
 ThreadTurn.agent_run_id.is_not(None),        # 还没绑 Run 的轮次不算数
@@ -585,7 +636,7 @@ def _artifact_ref(artifact: Artifact) -> str:
 > 二十篇摘要会吃掉预算，只为了告诉模型一行字就能说清的事：
 > 发生过一次检索，大致找到了什么。真的需要内容的追问，会再检索一次。
 
-最后看运行时这一侧（`runtime.py:1337-1364`）：
+最后看运行时这一侧（约 `runtime.py:1391-1418`）：
 
 ```python
 thread_id = getattr(self.run, "thread_id", None)
@@ -598,8 +649,8 @@ if thread_id is None or provider is None:
 全部影响——没有会话就直接返回空，后面的逻辑一行都不执行。
 这也是为什么可以确定「Playground 的行为和加会话之前逐字节一致」。
 
-窗口裁剪发生在 `context.py:71` 的 `rows[-max_turns:]`，
-而被裁掉了多少会被记进 metadata（`runtime.py:1359-1361`）：
+窗口裁剪发生在 `context.py:93` 的 `rows[-max_turns:]`，
+而被裁掉了多少会被记进 metadata（约 `runtime.py:1412-1414`）：
 
 ```python
 "turns_available": conversation.turns_available,
@@ -615,10 +666,26 @@ if thread_id is None or provider is None:
 > **「它为什么忘了」应该是一次查询，而不是一次猜测。**
 > 这句话可以直接当面试答案用。
 
-注意这里有**两层裁剪，作用在不同维度**：
-`max_turns` 按轮数裁（`thread_context_max_turns`，`runtime.py:209`），
-第 2 章 §4 讲的上下文预算按 token 裁。
-**先按轮数丢，再按 token 丢**，两者互不知道对方存在。
+同一段 metadata 旁边还挂着记忆那一份（`runtime.py:1627`）：
+
+```python
+step_metadata["memory"] = memory_metadata
+# {"memory_count": ..., "replayed_from_snapshot": ...}
+```
+
+两份 metadata 是并列的，谁也不引用谁——**历史和记忆是两条独立的输入**。
+
+注意这里有**三层裁剪，作用在不同维度，顺序固定**：
+
+| 层 | 裁什么 | 在哪 |
+|---|---|---|
+| 1 | 记忆条数 | `MAX_INJECTED_MEMORIES`，`runtime.py:1454` |
+| 2 | 历史轮数 | `max_turns` / `thread_context_max_turns`，`runtime.py:209` |
+| 3 | token 预算 | 第 2 章 §4 讲的 `_admit_context` |
+
+**先按条数丢记忆，再按轮数丢历史，最后按 token 丢**，三者互不知道对方存在。
+第 3 层是唯一一层「看得见前两层产物」的——但它看到的只是消息列表，
+不知道哪条是被前两层放行的幸存者。
 
 ### 自检
 
@@ -626,6 +693,8 @@ if thread_id is None or provider is None:
 2. 第 3 轮失败了，第 4 轮的历史里有没有第 3 轮？
 3. 一个 Run 的 `thread_id` 是 NULL，它会去读会话历史吗？
 4. 会话里跑过一次文献检索产生了 Artifact，下一轮模型看到的是什么？
+5. 文件头说「没有记忆抽取」，可是长期记忆确实存在。这两句话怎么同时成立？
+   抽取到底发生在哪个进程、哪个文件？
 
 ---
 
@@ -672,7 +741,152 @@ run_id 为 NULL（人手建）  →  可编辑
 
 ---
 
-## 9. 横切：MCP 凭据为什么可以轮换
+## 9. WorkspaceMemory 与 effective_memory_snapshot
+
+### ★ 这一对是全章唯一「方向反过来」的组合
+
+前面八节的形状都是**容器 → 版本 → 执行**：先有不可变的声明，Run 再去引用它。
+记忆这条链是反的：
+
+```
+AgentRun(SUCCEEDED) ──extract──▶ WorkspaceMemory ──select+freeze──▶ 下一个 AgentRun
+```
+
+**Run 先产出记忆，记忆再喂给后来的 Run。** 所以这里有两个对象，
+它们的可变性刚好相反，而且必须相反：
+
+| 对象 | 可变？ | 是什么 |
+|---|---|---|
+| `WorkspaceMemory` | ✅ **必须可变** | 工作区当前相信什么。会被加强、被取代、被作废 |
+| `agent_runs.effective_memory_snapshot` | ❌ **必须不可变** | 那一次 Run **当时被告知了什么** |
+
+如果只有前者，「为什么它那次这么说」就永远答不出来——因为记忆已经变了。
+如果只有后者，Agent 就学不到东西。这是 ADR-011 的全部内容。
+
+### 写入这一侧：抽取 → 闸门 → 去重
+
+入口只有一个（`runtime.py:1270` `_enqueue_memory_extraction`），docstring 说明了为什么：
+
+> ``ThreadService.submit_turn`` runs in process, ``/runs/stream`` may hand
+> off to a worker, and a resumed approval takes a third route; the only
+> thing all of them share is that they end here.
+
+> 三条执行路径唯一的共同点是**都在这里结束**，在状态提交之后。
+> 放在别处入队，总会静默漏掉一条路径。
+
+三个前置条件写在 `runtime.py:1290`，缺一不做：有 queue、`thread_id` 非空、
+状态是 `SUCCEEDED`。**Playground 没有会话可记，失败的 Run 没有答案可记。**
+
+注意 docstring 里刻意点出的一件事：**这里不检查版本上的 `long_term_memory` 开关**，
+由 worker 重新对着数据库查一次。理由是「一条陈旧的或被重放的消息，
+不能让一个没配置学习的 Agent 学到东西」。
+
+然后进 worker（`apps/worker/tasks/memories.py:62`，另一个进程），
+模型抽完候选之后要过写入闸门（`packages/memory/store.py:64` `normalize_candidate`）：
+
+```python
+content = " ".join((candidate.content or "").split())
+if not MIN_MEMORY_LENGTH <= len(content) <= MAX_MEMORY_LENGTH:
+    return None
+kind = (candidate.kind or "FACT").strip().upper()
+if kind not in MEMORY_KINDS:
+    return None
+```
+
+**返回 `None` 而不是抛异常，是故意的**（docstring 原话）：抽取器是个模型，
+模型偶尔会提出垃圾，一批三条里的一条坏的**不该连累另外两条**。
+
+落库在 `store.py:217` `record`，去重靠一个**部分唯一索引**
+（`packages/memory/models.py:91-99`）：
+
+```python
+Index(
+    "uq_workspace_memories_active_hash",
+    "workspace_id", "agent_id", "content_hash",
+    unique=True,
+    postgresql_where=text("status = 'ACTIVE'"),
+)
+```
+
+`postgresql_where` 这半行是关键。注释说得很清楚：
+去重针对的是**当前相信什么**，不是**曾经相信过什么**——
+一条被 SUPERSEDED 的事实，后来重新学到是合法的，必须允许插入。
+
+撞上已有 ACTIVE 行时不插第二条，而是把 `salience` 加一
+（`record` 的 docstring：**重复自己应该让 Agent 更确信，而不是更吵**）。
+
+### 约束一览
+
+`packages/memory/models.py:44-101`，四个 CHECK / 索引值得记：
+
+| 约束 | 行 | 管什么 |
+|---|---|---|
+| `ck_workspace_memories_kind` | `:78-81` | 只有 FACT / PREFERENCE / DECISION / CONSTRAINT |
+| `ck_workspace_memories_status` | `:82-85` | 只有 ACTIVE / SUPERSEDED / INVALIDATED |
+| `ck_workspace_memories_salience_positive` | `:86` | salience > 0 |
+| `uq_workspace_memories_active_hash` | `:91-99` | 只对 ACTIVE 去重 |
+
+还有一个容易漏的细节在外键上（`models.py:66-76`）。
+`thread_id` 和 `source_run_id` 是**溯源，不是归属**，所以是 `SET NULL` 不是 `CASCADE`：
+**删掉那次对话，记忆本身要活下来。**
+
+而且是带列名的 `SET NULL (thread_id)`。注释解释了为什么不能写裸的 `SET NULL`：
+
+> A bare SET NULL nulls every column of the constraint, ``workspace_id``
+> included, and that column is NOT NULL -- so deleting a thread raised a
+> NotNullViolation instead of forgetting where the memory came from.
+
+> 裸 `SET NULL` 会把约束里**每一列**都置空，包括 NOT NULL 的 `workspace_id`，
+> 于是删会话不是「忘记来源」而是直接报错。**只有溯源列能被清空，租户永远不动。**
+
+### 读取这一侧：选择一次，之后只重放
+
+`runtime.py:1420` `_memories`，整个方法就是一个二选一：
+
+```python
+snapshot = getattr(self.run, "effective_memory_snapshot", None) or {}
+frozen = bool(snapshot.get("selected_at"))
+if frozen:
+    selected = await selector.load(workspace_id=..., memory_ids=memory_ids)   # :1448
+else:
+    selected = await selector.select(..., limit=MAX_INJECTED_MEMORIES)        # :1450-1455
+    await self._freeze_memory_snapshot(selected, workspace_id=workspace_id)   # :1456
+```
+
+**判据是 `selected_at` 存不存在，不是列存不存在。** 空选择也会写快照
+（`_freeze_memory_snapshot :1465` 无条件写），所以「这次没选到记忆」
+和「这次还没选过」是两个可区分的状态——否则每次 PREPARE 都会重选一遍。
+
+`load` 的 docstring 是这一节最该背的一句：
+
+> A run replaying its own snapshot must see what it saw, including rows
+> that have since been superseded or invalidated.
+
+> 重放快照的 Run 必须看到**它当时看到的**，包括那些后来已经被取代或作废的行。
+> 把历史改得更整洁，只会让运行日志对「它当时为什么那么说」给出更差的回答。
+
+所以 `load`（`store.py:120`）**不过滤 status，也不过滤 expires_at**，
+只按 id 取，并且按冻结时的顺序还原。而 `select`（`store.py:87`）会滤掉
+非 ACTIVE 和已过期的。**同一张表，两个读法，差别全在「这是不是一次重放」。**
+
+最后 `_freeze_memory_snapshot` 结尾那两行也别跳过（`runtime.py:1481-1483`）：
+写完 DB 之后还手动把 `self.run.effective_memory_snapshot` 赋了一遍，
+因为内存里那个 run 对象是 detached 的——不补这一下，
+**同一个进程里的第二次 PREPARE 会再走一遍选择分支**，白冻。
+
+### 自检
+
+1. 一次 Run 跑完，接着有人把它学到的那条记忆作废了。
+   现在从审批唤醒这个 Run，它看到的是哪份记忆？靠哪个函数？
+2. 同一句话被学到两次，数据库里有几行？第二次发生了什么？
+3. 为什么去重索引要带 `postgresql_where=text("status = 'ACTIVE'")`？
+   去掉会怎样？
+4. 删掉一个会话，它教出来的记忆会跟着没吗？外键写的是什么？
+5. Playground 跑成功一次，会产生记忆吗？在哪一行被挡掉的？
+
+---
+
+## 10. 横切：MCP 凭据为什么可以轮换
 
 这是 §0 第 4 题。
 
@@ -705,12 +919,12 @@ McpConnection（mcp/models.py:32）
 
 ---
 
-## 10. 总表：谁可变，谁不可变，谁在拦
+## 11. 总表：谁可变，谁不可变，谁在拦
 
 | 对象 | 可变？ | 谁在拦 | 拦不住会怎样 |
 |---|---|---|---|
 | Agent | ✅ 完全可变 | — | — |
-| **AgentVersion** | ❌ | 约定 + `runtime.py:974` 读时哈希校验 | Run 失败（`AGENT_VERSION_INTEGRITY_ERROR`），不会静默用错 |
+| **AgentVersion** | ❌ | 约定 + `runtime.py:1566` 读时哈希校验 | Run 失败（`AGENT_VERSION_INTEGRITY_ERROR`），不会静默用错 |
 | Tool | ✅ 展示字段可变 | — | — |
 | **ToolRevision** | ❌ | 约定 + `spec_hash` | 同上，传递性不可变断裂 |
 | DocumentRevision | ❌ | 约定 + lifecycle_status | 快照指向的内容变了 |
@@ -722,10 +936,12 @@ McpConnection（mcp/models.py:32）
 | Artifact（人建） | ✅ | — | — |
 | MCP 凭据 | ✅ 可轮换 | 加密 + 响应契约 | 泄露 |
 | MCP 工具契约 | ❌ | 冻进 ToolRevision | 同 ToolRevision |
+| **WorkspaceMemory** | ✅ **必须可变** | 两条 CHECK + 只管 ACTIVE 行的部分唯一索引；API 没有 delete 路由 | 学不到新东西，或者错误永远改不掉 |
+| **effective_memory_snapshot** | ❌ | `_memories` 的 `selected_at` 分支（`runtime.py:1442`）：有快照就只走 `load` 重放 | 记忆改了之后，“它当时为什么那么说”永远答不出来 |
 
 ---
 
-## 11. Lab：亲手验证「不可变是约定不是强制」
+## 12. Lab：亲手验证「不可变是约定不是强制」
 
 **五分钟，直接看到取舍。**
 
@@ -762,7 +978,7 @@ WHERE id = '<version_id>';
 
 UPDATE **会成功**——没有触发器拦它。
 Run **会失败**，`AGENT_VERSION_INTEGRITY_ERROR`，
-在 `prepare` 节点（`runtime.py:1366` → `:974`），**模型还没被调用**。
+在 `prepare` 节点（`runtime.py:1552` → `:1566`），**模型还没被调用**。
 
 这就是「约定 + 读时校验」的完整画像：
 写入端不设防，执行端必校验，且校验在花钱之前。
@@ -771,7 +987,7 @@ Run **会失败**，`AGENT_VERSION_INTEGRITY_ERROR`，
 
 ---
 
-## 12. 对答案
+## 13. 对答案
 
 | # | 答案 |
 |---|---|
@@ -783,11 +999,18 @@ Run **会失败**，`AGENT_VERSION_INTEGRITY_ERROR`，
 
 ---
 
-## 13. Interview：两分钟版本
+## 14. Interview：两分钟版本
 
-> 数据模型里有一个重复了四次的形状：**可变容器 → 不可变版本 → 一次执行**。
+> 数据模型里有一个重复了五次的形状：**可变容器 → 不可变版本 → 一次执行**。
 > Agent→AgentVersion、Tool→ToolRevision、Document→DocumentRevision→Snapshot、
-> Thread→Turn→Run。
+> Thread→Turn→Run，以及长期记忆。
+>
+> 第五次形状一样但实现方式不同，这个差别值得讲：记忆没有版本表。
+> `workspace_memories` 的行**必须可变**——会被加强、取代、作废；
+> 冻结改在 Run 这一侧，`agent_runs.effective_memory_snapshot` 记下
+> 「这次用了哪几条 id」。重放时按 id 回捞，不过滤状态，
+> 所以一条后来被作废的记忆，在它影响过的那次 Run 里永远还在。
+> 因为快照回答的问题是「模型当时被告知了什么」，不是「现在还相不相信」。
 >
 > 可变的是迭代面，不可变的是**执行时引用的那一份**。
 > 因为可复现性的定义就是：重跑时引用的每一样东西都没变过。
@@ -805,7 +1028,7 @@ Run **会失败**，`AGENT_VERSION_INTEGRITY_ERROR`，
 
 ---
 
-## 14. 下一步
+## 15. 下一步
 
 你现在知道对象怎么演化。接下来去**改一个变量，看运行时怎么反应**：
 

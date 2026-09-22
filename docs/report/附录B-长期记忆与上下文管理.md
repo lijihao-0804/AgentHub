@@ -1,5 +1,12 @@
 # 附录 B · 长期记忆与上下文管理：调研、现状盘点与开工方案
 
+> **状态（2026-09-22）：本文是开工方案，阶段 0 – 阶段 3 已全部实现并推送。**
+> 实际落地的设计、与本方案的差异、以及实测结果，见
+> [19 章](19-长期记忆与上下文管理实施报告.md) 与
+> `docs/adr/ADR-011-memory-must-be-snapshotted.md`。
+> **凡本文与 19 章冲突之处，以 19 章为准**——本文保留原样是为了留下
+> 「当时怎么想的」这条线索，下面各阶段标题已逐一标注完成状态。
+
 > 本文回答三个问题：
 > 1. **别人是怎么做的**（mem0 / Zep / Letta / LangMem / OpenAI / Anthropic）
 > 2. **我们现在有什么、缺什么**（逐条 grep 过，带 `file:line`）
@@ -100,13 +107,19 @@ messages = [
 
 逐条 grep 确认（`grep -rniI 'memory|summariz' --include=*.py packages/ apps/`）：
 
-- **没有任何记忆表**。27 个迁移，最后一个是 `0027_agent_run_events`，单 head。
-- **没有任何摘要/压缩逻辑**。唯一的"压缩"是丢弃和 JSON 投影。
-- **没有跨 thread 的任何状态**。`AgentThread` 的 docstring 明确写着
-  「A thread owns no execution semantics」（`threads/models.py:3`）。
-- **没有 user-level 的任何画像**。
+- ✅ ~~**没有任何记忆表**。27 个迁移，最后一个是 `0027_agent_run_events`，单 head。~~
+  **已建**：现在 29 个迁移，head 为 `0029_set_null_columns`；
+  `workspace_memories` 由 `0028_workspace_memories` 建出，仍是单 head。
+- ❌ **没有任何摘要/压缩逻辑**。唯一的"压缩"是丢弃和 JSON 投影。
+  **这一条至今仍然成立，而且是故意的**——散文摘要会让「模型为什么这么答」
+  不可追溯，我们选择存结构化条目而不是存段落（19 章 §7）。
+- ✅ ~~**没有跨 thread 的任何状态**。~~ `AgentThread` 的 docstring
+  「A thread owns no execution semantics」仍在原处、仍然准确；
+  跨 thread 的状态不挂在 thread 上，而是挂在 agent 上（`workspace_memories`）。
+- ❌ **没有 user-level 的任何画像**。**至今仍然没有，也仍然是故意的**：
+  记忆归属于 agent，不归属于自然人（19 章 §7）。
 
-### 1.6 ★ 盘点时发现的一个真实缺陷
+### 1.6 ★ 盘点时发现的一个真实缺陷（**已修，阶段 0 / `d1700f3`**）
 
 `_categorize_messages`（`runtime.py:2461-2465` 和 `:2474-2484`）给历史消息分组时：
 
@@ -355,6 +368,13 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 - **CI 里必须有泄露测试**：播两个长得很像的 workspace，
   「以 A 身份写、以 B 身份读」，断言什么都不该跨过去。
   **没有这个测试，漂移只会被客户发现。**
+
+  > **现状（2026-09-22）**：跨工作区隔离**已在容器里端到端验证过**——
+  > 以 B 身份读 A 的记忆返回 404（而不是 403，否则 404/403 的差别本身
+  > 就泄露了「这条记忆存在」）。但它**还不是一张 CI 回归网**：
+  > 仓库里没有 `aiosqlite`，也没有在 SQL 层跑的进程内单测，
+  > 所以这条断言目前靠人工复验，不靠 CI。这是一个真实的缺口，
+  > 不是「已经有了」。
 - 如果将来走 pgvector + RLS：`FORCE ROW LEVEL SECURITY`、
   用非 owner 非 superuser 角色连接、用 `SET LOCAL` 而非裸 `SET`、
   **绝不要 statement pooling + RLS**、
@@ -412,7 +432,7 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 > 每个阶段都独立可交付、可回滚，且都满足：
 > 单 Alembic head、不新增 RBAC permission、`thread_id IS NULL` 行为不变。
 
-### 阶段 0 · 先把现有的修对（不新增任何东西）
+### 阶段 0 · 先把现有的修对（不新增任何东西）　**✅ 已完成（`d1700f3`）**
 
 **做两件事：**
 
@@ -434,7 +454,15 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 
 ---
 
-### 阶段 1 · 会话记忆：把 10 轮窗口从「墙」变成「热区」
+### 阶段 1 · 会话记忆：把 10 轮窗口从「墙」变成「热区」　**✅ 已完成（`e520825`）**
+
+> **实现差异**：工具最终叫 `thread_history_search`（不是 `search_thread_history`），
+> 而且**不是无条件注册**的。它只在三个条件同时成立时才出现在 `tool_definitions` 里：
+> 已发布 spec 的 `runtime_config.memory.thread_history_search` 开着、
+> 这次 run 有 `thread_id`（Playground 单次调试没有）、
+> searcher 确实被注入了。
+> 三缺一就不注册——**一个看得见却调不动的工具，比没有这个工具更糟**：
+> 模型会围绕它规划，然后在执行时拿到一个它无法理解的失败。
 
 **核心主张：不做摘要，做 just-in-time retrieval。**
 
@@ -483,7 +511,16 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 
 ---
 
-### 阶段 2 · 长期记忆：跨 thread，但走快照
+### 阶段 2 · 长期记忆：跨 thread，但走快照　**✅ 已完成（`9365339`）**
+
+> **方案 vs 实现，四处差异**（以实现为准）：
+>
+> | 本文写的 | 实际做的 | 为什么改 |
+> |---|---|---|
+> | ADR 文件名 `0011-memory-must-be-snapshotted.md` | `docs/adr/ADR-011-memory-must-be-snapshotted.md` | 与目录里既有 ADR 命名对齐 |
+> | 双时态字段 `valid_at` / `invalid_at` + `superseded_at` | 三值 `status`（`ACTIVE` / `SUPERSEDED` / `INVALIDATED`）+ `kind` + `content_hash`，配一条**只约束 ACTIVE** 的部分唯一索引 `uq_workspace_memories_active_hash` | 双时态要答的问题我们答不出来（「在哪个时刻有效」对一个还没有真实用户的系统是空概念）；而「同一条事实不要存两遍」是真问题，部分唯一索引让去重竞态由数据库兜底，第二个写入者拿到 `IntegrityError` 而不是一条重复行。`salience` / `last_used_at` / `expires_at` 留了列但**没有做衰减** |
+> | 快照是一个 memory id 数组 | 快照是**对象** `{"selected_at": …, "memory_ids": [...]}`，JSONB NOT NULL，server_default `{}` | 裸数组分不清「选过，但一条都没选中」和「还没选过」——两者都是 falsy。而这两件事在事后归因时是完全不同的结论 |
+> | 可能需要 `WORKSPACE_ADMIN` 之类的新权限 | 复用既有的 `workspace_read`（看）与 `agent_edit`（推翻），`WORKSPACE_ADMIN` 没用上，**而且完全没有 delete 路由** | 能改变一个 agent 相信什么，本来就是「编辑这个 agent」的一部分，不值得新开一个权限。没有 delete 是因为删掉就拿走了「这次 Run 为什么这么答」的答案——只能 invalidate |
 
 **这一阶段之前必须先写 ADR。**
 `docs/adr/0011-memory-must-be-snapshotted.md`，把 附录A §D 的立场落成决议：
@@ -576,28 +613,34 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 
 ---
 
-### 阶段 3 · 可选：写入门调优与运营面
+### 阶段 3 · 可选：写入门调优与运营面　**🟡 部分完成（`570a2ee` + 一轮界面增强）**
 
 只有在阶段 2 跑了一段时间、积累了真实数据之后才做：
 
 - 用真实 trace 调投影 worker 的判断 prompt，
   **按 Anthropic 的方法论：先优化 recall，再收紧 precision**
-- 记忆管理 UI：列出、查看 provenance（跳到产生它的那次 Run）、手动作废
+- ✅ 记忆管理 UI：列出、查看 provenance（跳到产生它的那次 Run）、手动作废
   —— ChatGPT 的「用户可见可编辑」是工程方案普遍缺失的优势，我们应该有
-- decay 策略与条数上限的参数化
+  （**已做**：agent 详情页的记忆标签页，支持 status / kind / 关键词过滤与
+  失效、恢复；记忆多起来之后又补了分页与两种语义不同的空态，见 19 章 §5.7。
+  注意这一页**没有截图验证**——本机没有可用的浏览器自动化，19 章如实记了这个缺口）
+- ❌ decay 策略与条数上限的参数化 —— **仍未做**。
+  `salience` / `last_used_at` / `expires_at` 三列已经留出来了，但没有任何衰减逻辑
+  在写它们。理由见 19 章 §7：在没有真实使用数据之前调衰减曲线，
+  调的是想象力不是系统。
 
 ---
 
 ## 5. 开工顺序与一句话理由
 
-| 阶段 | 内容 | 新表 | 新迁移 | 动 Playground | 一句话价值 |
-|---|---|---|---|---|---|
-| **0** | 修分组缺陷 + 裁剪信息上 UI | 0 | 0 | 否 | **先让「它为什么忘了」可见** |
-| **1** | `search_thread_history` 工具 | 0 | 0–1（索引） | 否 | **10 轮窗口从墙变成热区，零复现性代价** |
-| **2** | `workspace_memories` + 快照绑定 + 后台投影 | 1 | 1 | 否 | **跨会话记忆，且能被评测平台证伪** |
-| **3** | 写入门调优 + 管理 UI + decay | 0 | 0 | 否 | **防止堆成垃圾** |
+| 阶段 | 内容 | 新表 | 新迁移 | 动 Playground | 一句话价值 | 状态 |
+|---|---|---|---|---|---|---|
+| **0** | 修分组缺陷 + 裁剪信息上 UI | 0 | 0 | 否 | **先让「它为什么忘了」可见** | ✅ `d1700f3` |
+| **1** | `thread_history_search` 工具 | 0 | 0 | 否 | **10 轮窗口从墙变成热区，零复现性代价** | ✅ `e520825` |
+| **2** | `workspace_memories` + 快照绑定 + 后台投影 | 1 | **2**（`0028` 建表、`0029` 顺带修掉 4 个复合外键的 `SET NULL` 范围） | 否 | **跨会话记忆，且能被评测平台证伪** | ✅ `9365339` |
+| **3** | 写入门调优 + 管理 UI + decay | 0 | 0 | 否 | **防止堆成垃圾** | 🟡 `570a2ee`，decay 未做 |
 
-**建议的开工点是阶段 0 + 阶段 1 一起做。**
+~~**建议的开工点是阶段 0 + 阶段 1 一起做。**~~
 它们合起来是一个不大的 PR，不碰 schema、不碰 RBAC、不碰 Playground，
 却直接回答了「不能检索一下就开一个新对话」这个诉求的大半——
 因为大多数「它忘了」其实发生在**同一个 thread 内**，
@@ -606,4 +649,25 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 阶段 2 的前置条件是先写 ADR-0011 把立场钉死。
 **在 ADR 落地之前不要建表**——记忆是最容易一开始图快、
 后面发现不可回放的那种功能。
+
+---
+
+## 6. 实际是怎么走的（2026-09）
+
+这个「建议」没有被采纳成分期交付：用户明确授权「0–3 直接一起全做」，
+于是四个阶段在一轮里连着做完，每阶段一个提交、逐个推到 `origin main`。
+
+但**两条纪律都守住了**，而且顺序没有被压缩掉：
+
+1. **ADR 先于表。** `ADR-011-memory-must-be-snapshotted.md` 在
+   `0028_workspace_memories` 之前落地。上面那句「在 ADR 落地之前不要建表」
+   不是仪式——它决定了 `effective_memory_snapshot` 这一列会不会存在，
+   而那一列是整件事里唯一不可事后补的东西。
+2. **阶段 0 先于阶段 2。** 先让上下文可重放、让裁剪可见，
+   记忆才敢往里加。反过来做的话，「模型为什么这么答」会在加记忆的同一天变成黑盒。
+
+一并做完还带出两个计划外的收获：`0029` 修掉了「删除任何跑过的会话必 500」
+这个从 `0023` 起就存在的老 bug，以及检索模型预热修掉了
+「每次部署后第一次 `search_knowledge` 必然超时」。
+两个都是做记忆时顺手撞见的——见 19 章 §5.2 与 §5.6。
 
