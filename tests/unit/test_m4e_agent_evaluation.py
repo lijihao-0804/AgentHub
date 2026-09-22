@@ -9,6 +9,7 @@ import pytest
 from benchmarks.agent_runtime.metrics import RuntimeObservation, evaluate_case, evaluate_results
 from benchmarks.agent_runtime.runner import _tool_spec
 from benchmarks.agent_runtime.schema import dataset_from_payload, load_dataset
+from packages.core.database import Base
 from packages.tools.validation import validate_executable_tool_spec
 
 DATASET_PATH = Path(__file__).parents[2] / "benchmarks" / "agent_runtime" / "dataset.json"
@@ -89,6 +90,10 @@ def test_benchmark_tool_fixture_uses_current_publish_validation() -> None:
         assert normalized["identity"] == identity
         assert normalized["kind"] == "builtin"
         assert normalized["timeout_seconds"] == 30
+
+
+def test_benchmark_registers_agent_thread_table_for_agent_run_foreign_key() -> None:
+    assert "agent_threads" in Base.metadata.tables
 
 
 def test_metrics_report_20_of_20_and_19_of_20_distinctly() -> None:

@@ -66,6 +66,7 @@ from packages.knowledge.models import (
 )
 from packages.model_gateway.contracts import ModelResponse, ModelToolCall
 from packages.model_gateway.models import ModelProfile, ProviderCredential
+from packages.threads import models as _thread_models  # noqa: F401
 from packages.tools.builtins.calculator import calculate
 from packages.tools.builtins.query_customer import query_customer
 from packages.tools.builtins.search_knowledge import search_knowledge
@@ -73,6 +74,9 @@ from packages.tools.contracts import ToolDefinition, ToolExecutionContext
 from packages.tools.models import Customer, Ticket
 from packages.tools.registry import ToolHandler, ToolRegistry
 from packages.tools.runtime import ToolRuntime
+
+# AgentRun carries a composite foreign key to agent_threads. Register the
+# thread table before SQLAlchemy flushes the benchmark's first run.
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATASET = PROJECT_ROOT / "benchmarks" / "agent_runtime" / "dataset.json"
