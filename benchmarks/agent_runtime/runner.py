@@ -7,7 +7,9 @@ import asyncio
 import json
 import os
 import subprocess
+import sys
 import time
+import traceback
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
@@ -29,6 +31,11 @@ from benchmarks.agent_runtime.schema import (
     load_dataset,
 )
 from packages.agent_runtime.models import Agent, AgentVersion, Tool, ToolRevision
+from packages.agent_runtime.publish import (
+    DEFAULT_RETRIEVAL_CONFIG,
+    DEFAULT_RUNTIME_CONFIG,
+    SPEC_SCHEMA_VERSION,
+)
 from packages.agent_runtime.runtime import AgentRunService
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -263,8 +270,17 @@ def _resolved_spec(
     snapshot: KnowledgeSnapshot,
     runtime: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    runtime_config = {
+        key: value for key, value in DEFAULT_RUNTIME_CONFIG.items() if key != "memory"
+    }
+    runtime_config["context_budget"] = {
+        **DEFAULT_RUNTIME_CONFIG["context_budget"],
+        "reserved_output_tokens": 32,
+        "max_retrieval_tokens": 2048,
+        "max_tool_result_tokens": 4096,
+    }
     return {
-        "spec_schema_version": 1,
+        "spec_schema_version": SPEC_SCHEMA_VERSION,
         "model": {
             "profile_id": str(profile.id),
             "credential_ref": str(credential.id),
@@ -273,21 +289,33 @@ def _resolved_spec(
             "temperature": 0,
             "max_tokens": 256,
             "timeout_seconds": 5,
-            "capabilities": {"tool_calling": True, "max_context_tokens": 8192},
+            "capabilities": {
+                "tool_calling": True,
+                "streaming": False,
+                "structured_output": False,
+                "vision": False,
+                "max_context_tokens": 8192,
+            },
             "retry_policy": {"max_attempts": 1},
             "fallback_chain": [],
             "fallback_profiles": [],
         },
         "prompt": {"system_prompt": "Use only the published READ tools.", "prompt_version": 1},
         "retrieval": {
+            **DEFAULT_RETRIEVAL_CONFIG,
             "knowledge_binding_mode": "PINNED",
+            "knowledge_snapshot_ids": [str(snapshot.id)],
             "knowledge_snapshots": [
                 {"snapshot_id": str(snapshot.id), "snapshot_hash": snapshot.content_hash}
             ],
-            "dense_top_k": 1,
-            "sparse_top_k": 1,
-            "candidate_top_k": 1,
-            "final_top_k": 1,
+            "knowledge_bindings": [
+                {
+                    "knowledge_base_id": str(snapshot.knowledge_base_id),
+                    "binding_mode": "PINNED",
+                    "snapshot_id": str(snapshot.id),
+                    "snapshot_hash": snapshot.content_hash,
+                }
+            ],
         },
         "tools": [
             {
@@ -299,18 +327,7 @@ def _resolved_spec(
             }
             for revision in tool_revisions
         ],
-        "runtime": {
-            "max_steps": 8,
-            "max_tool_calls": 12,
-            "max_identical_calls": 2,
-            "max_parallel_reads": 3,
-            "context_budget": {
-                "reserved_output_tokens": 32,
-                "max_retrieval_tokens": 2048,
-                "max_tool_result_tokens": 4096,
-            },
-            **(runtime or {}),
-        },
+        "runtime": {**runtime_config, **(runtime or {})},
     }
 
 
@@ -521,12 +538,14 @@ async def _run_case(
         if case.category == "approval_unavailable"
         else seed["base_version_id"]
     )
+    stage = "AgentRunService.run"
     try:
         result = await service.run(
             seed["context"],
             agent_version_id=version_id,
             input_text=case.input,
         )
+        stage = "AgentRunService.list_steps"
         steps = await service.list_steps(seed["context"], result.run_id)
         tool_sequence: list[str] = []
         for step in steps:
@@ -545,7 +564,13 @@ async def _run_case(
             handler_calls=sum(counters.values()),
             duration_ms=round((time.perf_counter() - started) * 1000, 3),
         )
-    except Exception:
+    except Exception as error:
+        print(
+            f"M4 case {case.case_id} failed during {stage}: "
+            f"{type(error).__name__}: {error}",
+            file=sys.stderr,
+        )
+        traceback.print_exc(file=sys.stderr)
         return RuntimeObservation(
             status="FAILED",
             failure_code="RUNNER_ERROR",
