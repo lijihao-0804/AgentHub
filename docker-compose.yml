@@ -67,6 +67,12 @@ services:
       AGENTHUB_ENVIRONMENT: docker
       AGENTHUB_PROCESS_ROLE: worker
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@postgres:5432/agenthub
+      # The worker resolves provider credentials itself -- agent runs,
+      # evaluation and memory extraction all decrypt here. Without the same
+      # key the API encrypted with, every model call in the worker fails with
+      # "Credential encryption is not configured" (`docker` is not a
+      # development environment, so there is no fallback key).
+      AGENTHUB_CREDENTIAL_MASTER_KEY: ${AGENTHUB_CREDENTIAL_MASTER_KEY:?AGENTHUB_CREDENTIAL_MASTER_KEY is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
       AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs

@@ -34,10 +34,15 @@ def test_provider_credential_cipher_is_versioned_and_round_trips() -> None:
     assert "provider-secret" not in str(error.value)
 
 
-def test_provider_credential_cipher_requires_key_in_production() -> None:
+def test_provider_credential_cipher_requires_key_in_production(monkeypatch) -> None:
+    # The absence of the key is the whole subject here, so it has to be made
+    # absent on both paths `Settings` reads: the process environment and the
+    # local .env, which any developer who can start docker compose must have
+    # AGENTHUB_CREDENTIAL_MASTER_KEY in.
+    monkeypatch.delenv("AGENTHUB_CREDENTIAL_MASTER_KEY", raising=False)
     with pytest.raises(CredentialEncryptionError):
         ProviderCredentialCipher.from_settings(
-            Settings(environment="production", auth_jwt_secret="x" * 32)
+            Settings(environment="production", auth_jwt_secret="x" * 32, _env_file=None)
         )
 
 

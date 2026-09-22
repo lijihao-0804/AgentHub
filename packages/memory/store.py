@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import hashlib
 from datetime import UTC, datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError
@@ -271,6 +271,11 @@ class SqlAlchemyMemoryStore:
                     previous.last_used_at = datetime.now(UTC)
                     continue
                 row = WorkspaceMemory(
+                    # Assigned here rather than left to the column default,
+                    # which SQLAlchemy only applies at flush: reading `row.id`
+                    # straight after `add` would otherwise hand every caller a
+                    # tuple of None.
+                    id=uuid4(),
                     workspace_id=workspace_id,
                     agent_id=agent_id,
                     thread_id=thread_id,
