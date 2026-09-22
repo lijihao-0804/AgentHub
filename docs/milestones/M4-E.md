@@ -1,6 +1,6 @@
 # M4-E — Agent Runtime Evaluation
 
-Status: PASS — H1 closure verified in GitHub Actions run #73.
+Status: PASS — deterministic baseline closure verified in GitHub Actions run #218.
 
 ## Scope
 
@@ -30,13 +30,19 @@ of the authoritative integration job.
 
 ## Final verification
 
-- Implementation commit: `79d9d0f`
-- Baseline commit: `6b4796e`
-- H1 hardening / closure commit: `baad451`
+- Final benchmark closure commit: `5f6ea28b0610e637cc61d491009574ac3f1ee9d7`
+- Contract alignment commits: `33ec146`, `dd0b181`, `5f6ea28`
 - Dataset: `m4-agent-runtime-v1`, hash `e4bfda27c20e757f01dbf091fa1965a9712cefc7aa0c26bed234505348258aa3`
 - Results: 20/20 PASS; dev 14/14; holdout 6/6; every category 1.0000
-- GitHub Actions #73: backend PASS, frontend PASS, marker-driven integration PASS,
-  M4-E integration PASS, and M4 evaluation baseline PASS
+- GitHub Actions #218: backend PASS, frontend PASS, all integration PASS, M4 evaluation
+  baseline PASS, M5/M6 evaluation PASS, non-integration PASS, and M7 contract validations PASS
+
+The closure identified benchmark drift rather than a production runtime or Memory regression:
+the runner had not registered the `agent_threads` model required by `AgentRun`'s composite
+foreign key, and it maintained a handcrafted frozen spec separate from the production publish
+contract. The benchmark now uses `AgentPublishService` to create the immutable versions and
+registers the referenced thread model before execution. No Memory contract, production runtime,
+migration, API, or dependency was changed.
 
 M4 overall is PASS. M5 is the next milestone; Approval Runtime, checkpoint/resume, and WRITE
 execution were not added in M4-E.
