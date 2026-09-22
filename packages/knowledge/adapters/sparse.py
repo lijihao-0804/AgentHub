@@ -60,5 +60,10 @@ class BgeM3SparseEncoder:
         values = tuple(1.0 + math.log(counts[index]) for index in indices)
         return SparseEncoding(indices=indices, values=values)
 
+    def warm(self) -> None:
+        """Fetch and build the tokenizer ahead of the first query."""
+
+        self._load_tokenizer()
+
 
 __all__ = ["BgeM3SparseEncoder"]

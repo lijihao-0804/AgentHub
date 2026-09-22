@@ -47,11 +47,20 @@ services:
       AGENTHUB_CREDENTIAL_MASTER_KEY: ${AGENTHUB_CREDENTIAL_MASTER_KEY:?AGENTHUB_CREDENTIAL_MASTER_KEY is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
+      # The first `search_knowledge` of a process loads BGE-M3 and the
+      # cross-encoder, which took ~35s here -- longer than the 30s a tool call
+      # is given, so the first retrieval after every deploy failed with
+      # TOOL_TIMEOUT. Load them at start instead, off the request path.
+      AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START: "true"
       AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs
     ports:
       - "8000:8000"
     volumes:
       - agenthub_blobs:/var/lib/agenthub/blobs
+      # BGE-M3 and its reranker are ~3.3GB, downloaded lazily on the first
+      # retrieval. Without somewhere durable to put them, every `up --build`
+      # pays for that again, and the first request after it appears to hang.
+      - hf_cache:/root/.cache/huggingface
     depends_on:
       postgres:
         condition: service_healthy
@@ -75,9 +84,17 @@ services:
       AGENTHUB_CREDENTIAL_MASTER_KEY: ${AGENTHUB_CREDENTIAL_MASTER_KEY:?AGENTHUB_CREDENTIAL_MASTER_KEY is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
+      # The first `search_knowledge` of a process loads BGE-M3 and the
+      # cross-encoder, which took ~35s here -- longer than the 30s a tool call
+      # is given, so the first retrieval after every deploy failed with
+      # TOOL_TIMEOUT. Load them at start instead, off the request path.
+      AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START: "true"
       AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs
     volumes:
       - agenthub_blobs:/var/lib/agenthub/blobs
+      # Ingestion runs here, so the worker is usually the process that pays
+      # the model download. Same cache as the API: one copy, not two.
+      - hf_cache:/root/.cache/huggingface
     depends_on:
       postgres:
         condition: service_healthy
@@ -109,3 +126,4 @@ volumes:
   redis_data:
   qdrant_data:
   agenthub_blobs:
+  hf_cache:

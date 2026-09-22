@@ -88,5 +88,10 @@ class BgeReranker:
                 "The reranker provider failed.",
             ) from exc
 
+    def warm(self) -> None:
+        """Load the cross-encoder now; it is the second model a query waits on."""
+
+        self._load()
+
 
 __all__ = ["BgeReranker"]

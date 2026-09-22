@@ -80,6 +80,11 @@ class Settings(BaseSettings):
     knowledge_ingestion_max_attempts: int = Field(default=3, ge=1, le=100)
     knowledge_ingestion_retry_base_seconds: int = Field(default=30, ge=1, le=86_400)
     knowledge_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
+    # Off by default because warming downloads ~3.3GB of weights the first time,
+    # which is not what someone running the API to look at a settings page wants.
+    # Deployments that serve `search_knowledge` should turn it on -- see
+    # `warm_retrieval_components` for what the first query costs without it.
+    knowledge_warm_models_on_start: bool = False
     approval_ttl_seconds: int = Field(default=3_600, ge=60, le=31_536_000)
     approval_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
     approval_reconciliation_stale_seconds: int = Field(default=300, ge=30, le=86_400)

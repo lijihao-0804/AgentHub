@@ -109,5 +109,15 @@ class BgeM3DenseEmbedder:
     def embed_query(self, text: str) -> tuple[float, ...]:
         return self.embed_documents((text,))[0]
 
+    def warm(self) -> None:
+        """Load the weights now, so the first real query does not pay for them.
+
+        Loading BGE-M3 takes tens of seconds; inside a tool call that is longer
+        than the tool timeout, so the first retrieval after a process start
+        fails rather than being slow.
+        """
+
+        self._load_model()
+
 
 __all__ = ["BgeM3DenseEmbedder"]

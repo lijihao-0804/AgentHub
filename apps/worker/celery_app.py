@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from celery import Celery
-from celery.signals import worker_process_shutdown
+from celery.signals import worker_process_init, worker_process_shutdown
 
 from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
 from packages.core.config.settings import Settings, get_settings
-from packages.knowledge.composition import close_production_retrieval_components
+from packages.knowledge.composition import (
+    close_production_retrieval_components,
+    warm_retrieval_components,
+)
 
 
 def create_celery_app(settings: Settings | None = None) -> Celery:
@@ -49,6 +52,22 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
 
 
 celery_app = create_celery_app()
+
+
+@worker_process_init.connect
+def _warm_worker_retrieval_components(**_kwargs) -> None:
+    """Pay for the models once per child process, before any task is claimed.
+
+    The components cache is process-local and Celery forks its children after
+    the app is imported, so a warm in the parent would not be inherited on
+    every platform. Ingestion can afford a cold load inside its lease; an agent
+    run executing `search_knowledge` here cannot -- the tool gives up at 30s.
+    """
+
+    settings = get_settings()
+    if not settings.knowledge_warm_models_on_start or settings.testing:
+        return
+    warm_retrieval_components(settings)
 
 
 @worker_process_shutdown.connect

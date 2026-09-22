@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from threading import Lock
@@ -23,6 +24,8 @@ class RetrievalComponents:
 
 
 RetrievalComponentsFactory = Callable[[Settings], RetrievalComponents]
+
+logger = logging.getLogger(__name__)
 
 _components_lock = Lock()
 _components_cache: dict[tuple[object, ...], RetrievalComponents] = {}
@@ -71,6 +74,35 @@ def production_retrieval_components(settings: Settings) -> RetrievalComponents:
         return components
 
 
+def warm_retrieval_components(settings: Settings) -> None:
+    """Load the retrieval models before anything asks a question of them.
+
+    The first ``search_knowledge`` call in a fresh process otherwise loads
+    BGE-M3 and its cross-encoder inside the tool's own timeout budget -- about
+    35 seconds against a 30 second ceiling, so the first retrieval after every
+    deploy comes back as TOOL_TIMEOUT and the agent answers "I could not find
+    it". Measured in the API container on 2026-09-22.
+
+    Best effort on purpose: a process that cannot load the models should still
+    serve every route that does not need them, and fail loudly at the point of
+    use, where the error carries a request id.
+    """
+
+    components = production_retrieval_components(settings)
+    for part in (components.dense, components.sparse, components.reranker):
+        warm = getattr(part, "warm", None)
+        if warm is None:
+            continue
+        try:
+            warm()
+        except Exception:
+            logger.warning(
+                "knowledge_model_warm_failed",
+                extra={"component": type(part).__name__},
+                exc_info=True,
+            )
+
+
 def close_production_retrieval_components() -> None:
     """Close and clear cached production adapters during process shutdown."""
 
@@ -91,5 +123,6 @@ __all__ = [
     "RetrievalComponents",
     "RetrievalComponentsFactory",
     "production_retrieval_components",
+    "warm_retrieval_components",
     "close_production_retrieval_components",
 ]

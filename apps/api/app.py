@@ -33,7 +33,10 @@ from packages.core.database import create_database
 from packages.core.errors.handlers import install_error_handlers
 from packages.core.http.request_id import RequestIdMiddleware
 from packages.core.logging.json_logging import configure_logging
-from packages.knowledge.composition import close_production_retrieval_components
+from packages.knowledge.composition import (
+    close_production_retrieval_components,
+    warm_retrieval_components,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +53,21 @@ async def lifespan(app: FastAPI):
         app.state.db_engine, app.state.db_session_factory = create_database(settings.database_url)
         app.state.redis = redis_asyncio.from_url(settings.redis_url, decode_responses=True)
 
+    warm_task: asyncio.Task[None] | None = None
+    if settings.knowledge_warm_models_on_start and not settings.testing:
+        # In a thread, and not awaited: loading the models takes about half a
+        # minute, and nothing else this process serves should wait behind it.
+        # What must not wait is the first `search_knowledge` call, which has
+        # only 30 seconds of its own before the run gives up on the tool.
+        warm_task = asyncio.create_task(asyncio.to_thread(warm_retrieval_components, settings))
+
     try:
         yield
     finally:
+        if warm_task is not None and not warm_task.done():
+            # Shutting down mid-load is legitimate; do not let the task outlive
+            # the components it is warming.
+            warm_task.cancel()
         close_production_retrieval_components()
         if app.state.db_engine is not None:
             await app.state.db_engine.dispose()
