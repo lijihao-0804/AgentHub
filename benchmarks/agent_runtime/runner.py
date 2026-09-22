@@ -9,7 +9,6 @@ import os
 import subprocess
 import sys
 import time
-import traceback
 from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
@@ -508,12 +507,11 @@ async def _run_case(
             duration_ms=round((time.perf_counter() - started) * 1000, 3),
         )
     except Exception as error:
+        diagnostic_type = type(error).__name__
         print(
-            f"M4 case {case.case_id} failed during {stage}: "
-            f"{type(error).__name__}: {error}",
+            f"::error title=M4 case {case.case_id}::{diagnostic_type} during {stage}",
             file=sys.stderr,
         )
-        traceback.print_exc(file=sys.stderr)
         return RuntimeObservation(
             status="FAILED",
             failure_code="RUNNER_ERROR",
