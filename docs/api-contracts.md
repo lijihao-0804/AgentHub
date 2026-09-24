@@ -36,6 +36,11 @@ Every frame carries two AgentHub extensions alongside the payload: `sequence` an
 events are deliberately not persisted (doing so would make the log O(tokens) to
 buy a typing animation), so gaps in a replayed stream are normal and expected.
 
+This event-log replay is transport replay, not deterministic model replay: it returns the
+persisted events emitted by the original Run. `message.delta` is intentionally ephemeral,
+and resuming an interrupted Run continues its checkpointed graph; starting a new Run or
+re-evaluating a case invokes the model again and does not promise identical text.
+
 Dropping the connection no longer aborts the run. A run is aborted only after
 `AGENTHUB_RUN_STREAM_GRACE_SECONDS` have passed with no subscriber attached;
 reconnecting inside that window cancels the abort. A run executing in the worker
@@ -47,6 +52,13 @@ stream of the turn that token already opened, replayed from sequence 0. If the
 token's turn exists but has not been attached to a run yet -- two requests
 racing with the same token -- the second gets `THREAD_TURN_IN_PROGRESS` (409)
 and should retry rather than receive a stream that will never carry anything.
+
+The non-streaming `POST .../threads/{thread_id}/turns` uses the same request
+identity and race response: an attached duplicate returns the existing turn,
+run id and the AgentVersion actually used by that run; a duplicate that arrives
+before attachment gets `THREAD_TURN_IN_PROGRESS` (409). The request field is
+`input_text` (not `input`). These writes are ordered persistence steps, not one
+transaction spanning the turn, run and their events.
 
 Settings:
 
@@ -120,6 +132,43 @@ Both memory behaviours are per-agent switches under `runtime_config.memory`
 published `AgentVersion`. The worker re-checks `long_term_memory` before
 extracting: the API does not read the spec when enqueueing, so that check is the
 only place the switch is actually enforced.
+
+New snapshots contain `selected_at`, `memory_ids`, and a `memory_content_hashes`
+map. Replay verifies that each stored memory still matches its frozen hash and
+fails closed on a missing or changed row; older ID-only snapshots remain readable
+for compatibility. `last_used_at` is updated only for memories that survive final
+context admission, not merely because they were selected. Newly published
+memory-enabled versions receive a separate `max_memory_tokens` budget (default
+1500); memory-off versions and legacy specs keep their historical shared evidence
+pool semantics.
+
+## MCP connection management
+
+These workspace-scoped routes manage remote MCP servers. Importing a remote tool
+creates a normal governed AgentHub Tool; discovery alone does not persist or import it.
+
+| Method | Route | Purpose |
+|---|---|---|
+| `GET` / `POST` | `/api/v1/workspaces/{workspace_id}/mcp-connections` | List connections / create a connection (`201`). |
+| `GET` / `PATCH` | `/api/v1/workspaces/{workspace_id}/mcp-connections/{connection_id}` | Read / update a connection. |
+| `POST` | `/api/v1/workspaces/{workspace_id}/mcp-connections/{connection_id}/rotate-secret` | Replace its secret. |
+| `POST` | `/api/v1/workspaces/{workspace_id}/mcp-connections/{connection_id}/test` | Test reachability and MCP handshake. Remote failure is returned as `200` with `unavailable` and a normalized failure code; request/authorization errors remain 4xx. |
+| `POST` | `/api/v1/workspaces/{workspace_id}/mcp-connections/{connection_id}/discover-tools` | Read the remote catalog without importing or persisting it. |
+| `POST` | `/api/v1/workspaces/{workspace_id}/mcp-connections/{connection_id}/import-tool` | Promote one selected remote tool into a governed Tool at revision 1 (`201`). Governance fields are supplied by the importer, not trusted from remote annotations. |
+
+## Evaluation ablation and release gates
+
+The following routes share the `/api/v1/workspaces/{workspace_id}/evaluation` prefix:
+
+| Method | Suffix | Purpose |
+|---|---|---|
+| `POST` | `/experiment-runs/{run_id}/comparisons/{comparison_id}/ablation` | Create and persist the ablation for a comparison. |
+| `GET` | `/experiment-runs/{run_id}/comparisons/{comparison_id}/ablation` | Retrieve the persisted ablation. |
+| `POST` / `GET` | `/release-gate-policies` | Create an immutable policy (`201`) / list workspace policies. |
+| `GET` | `/release-gate-policies/{policy_id}` | Retrieve a policy. |
+| `POST` | `/experiment-runs/{run_id}/comparisons/{comparison_id}/release-gates` | Evaluate a comparison against the supplied `policy_id` and persist the decision (`201`). |
+| `GET` | `/experiment-runs/{run_id}/comparisons/{comparison_id}/release-gates` | List persisted decisions for a comparison. |
+| `GET` | `/experiment-runs/{run_id}/comparisons/{comparison_id}/release-gates/{policy_id}` | Retrieve a decision by policy. |
 
 ## Retrieval model warm-up
 

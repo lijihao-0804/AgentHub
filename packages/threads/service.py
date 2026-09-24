@@ -2,8 +2,10 @@
 
 This layer owns authorization, workspace scoping and turn bookkeeping. It never
 executes anything: submitting a turn resolves an agent version and hands the
-work to the existing :class:`AgentRunService`, so a threaded run takes exactly
-the same path a Playground run takes.
+work to the existing :class:`AgentRunService`. Threaded runs share its execution
+graph with Playground runs, while thread-specific context and work-layer
+integrations add history, history search, artifact recording and memory
+extraction where configured.
 """
 
 from __future__ import annotations
@@ -333,10 +335,20 @@ class ThreadService:
         )
         if turn is None:
             reused = await self._require_token_turn(context, thread_id, client_token)
+            if reused.agent_run_id is None:
+                # The first request has committed its turn but has not yet
+                # attached the run. Do not return a sentinel run id or claim
+                # that this incomplete turn has a run/version to reuse yet.
+                raise AgentHubError(
+                    "THREAD_TURN_IN_PROGRESS",
+                    "The turn is still being started; retry with the same client token.",
+                    409,
+                )
+            existing_run = await self.run_service.get_run(context, reused.agent_run_id)
             return SubmittedTurn(
                 turn=reused,
-                run_id=reused.agent_run_id or UUID(int=0),
-                agent_version_id=agent_version_id,
+                run_id=reused.agent_run_id,
+                agent_version_id=existing_run.agent_version_id,
                 reused=True,
             )
         result = await self.run_service.run(

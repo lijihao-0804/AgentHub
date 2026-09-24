@@ -519,8 +519,8 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
 > | 本文写的 | 实际做的 | 为什么改 |
 > |---|---|---|
 > | ADR 文件名 `0011-memory-must-be-snapshotted.md` | `docs/adr/ADR-011-memory-must-be-snapshotted.md` | 与目录里既有 ADR 命名对齐 |
-> | 双时态字段 `valid_at` / `invalid_at` + `superseded_at` | 三值 `status`（`ACTIVE` / `SUPERSEDED` / `INVALIDATED`）+ `kind` + `content_hash`，配一条**只约束 ACTIVE** 的部分唯一索引 `uq_workspace_memories_active_hash` | 双时态要答的问题我们答不出来（「在哪个时刻有效」对一个还没有真实用户的系统是空概念）；而「同一条事实不要存两遍」是真问题，部分唯一索引让去重竞态由数据库兜底，第二个写入者拿到 `IntegrityError` 而不是一条重复行。`salience` / `last_used_at` / `expires_at` 留了列但**没有做衰减** |
-> | 快照是一个 memory id 数组 | 快照是**对象** `{"selected_at": …, "memory_ids": [...]}`，JSONB NOT NULL，server_default `{}` | 裸数组分不清「选过，但一条都没选中」和「还没选过」——两者都是 falsy。而这两件事在事后归因时是完全不同的结论 |
+> | 双时态字段 `valid_at` / `invalid_at` + `superseded_at` | 三值 `status`（`ACTIVE` / `SUPERSEDED` / `INVALIDATED`）+ `kind` + `content_hash`，配一条**只约束 ACTIVE** 的部分唯一索引 `uq_workspace_memories_active_hash` | 双时态要答的问题我们答不出来（「在哪个时刻有效」对一个还没有真实用户的系统是空概念）；而「同一条事实不要存两遍」是真问题，部分唯一索引让去重竞态由数据库兜底，第二个写入者拿到 `IntegrityError` 而不是一条重复行。`salience` 尚无衰减策略；`last_used_at` 现在记录实际通过上下文准入的记忆；`expires_at` 会参与选择过滤，但没有自动 TTL 分配或清理流程 |
+> | 快照是一个 memory id 数组 | 初始实现是**对象** `{"selected_at": …, "memory_ids": [...]}`，JSONB NOT NULL，server_default `{}`；2026-09-22 的硬化补充为新快照加入 `memory_content_hashes`，旧 ID-only 快照仍兼容 | 裸数组分不清「选过，但一条都没选中」和「还没选过」——两者都是 falsy。而这两件事在事后归因时是完全不同的结论 |
 > | 可能需要 `WORKSPACE_ADMIN` 之类的新权限 | 读取复用既有的 `agent_run` / `agent_edit`，修改仍为 `agent_edit`，**而且完全没有 delete 路由** | `workspace_read` 只读工作区元数据，不足以读取记忆正文；能改变一个 agent 相信什么仍属于编辑权限。没有 delete 是因为删掉就拿走了「这次 Run 为什么这么答」的答案——只能 invalidate |
 
 **这一阶段之前必须先写 ADR。**
@@ -626,8 +626,9 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
   失效、恢复；记忆多起来之后又补了分页与两种语义不同的空态，见 19 章 §5.7。
   注意这一页**没有截图验证**——本机没有可用的浏览器自动化，19 章如实记了这个缺口）
 - ❌ decay 策略与条数上限的参数化 —— **仍未做**。
-  `salience` / `last_used_at` / `expires_at` 三列已经留出来了，但没有任何衰减逻辑
-  在写它们。理由见 19 章 §7：在没有真实使用数据之前调衰减曲线，
+  `salience` / `last_used_at` / `expires_at` 三列已存在；`last_used_at` 记录实际注入时间，
+  `expires_at` 会参与选择过滤，但尚无衰减策略、自动 TTL 分配或清理流程。
+  理由见 19 章 §7：在没有真实使用数据之前调衰减曲线，
   调的是想象力不是系统。
 
 ---
@@ -668,7 +669,7 @@ context reset 后读回自己的笔记接上）、**sub-agent 隔离**（子 age
    记忆才敢往里加。反过来做的话，「模型为什么这么答」会在加记忆的同一天变成黑盒。
 
 一并做完还带出两个计划外的收获：`0029` 修掉了「删除任何跑过的会话必 500」
-这个从 `0023` 起就存在的老 bug，以及检索模型预热修掉了
-「每次部署后第一次 `search_knowledge` 必然超时」。
-两个都是做记忆时顺手撞见的——见 19 章 §5.2 与 §5.6。
+这个从 `0023` 起就存在的老 bug，以及检索模型预热解决了
+「未预热冷进程首次 `search_knowledge` 超出工具预算」的风险。
+两个都是做记忆时顺手撞见的——见 19 章 §5.2 与 §5.6；后者不代表所有部署都必然超时。
 

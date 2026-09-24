@@ -2,7 +2,7 @@
 
 > **这一章没有理论。** 不解释设计，不讲背景，不做总结。
 >
-> 十二个实验，每个都是：**改一个变量 → 先写预测 → 跑 → 记录真实结果 → 解释落差。**
+> 十三个实验，每个都是：**改一个变量/定义 → 先写预测 → 跑 → 记录真实结果 → 解释落差。**
 >
 > 前三章是读代码。这一章是**让代码在你手里变一次行为**。
 > 这两件事的记忆留存差一个量级。
@@ -17,8 +17,8 @@
    名字带 `lab-`，绑两个工具：一个 READ（`query_customer`），一个 WRITE（`create_ticket`）。
 2. **发布一个 v1。** 后面每个实验都会产生新版本，这是正常的。
 3. **不要删实验产生的 Run。** Lab 5、Lab 9、Lab 11 要求回头对比。
-4. **不要改 `.env`。** 所有可调项都能从界面或 API 改。
-   **两个例外**，都明确说明了要设哪个环境变量：Lab 10
+4. Agent runtime 参数优先用 Agent 草稿 API；ToolRevision 治理字段没有 HTTP 写路由；部署级参数才改 `.env`。
+   **两个实验需要部署级开关**，都明确说明了要设哪个环境变量：Lab 10
    （`AGENTHUB_MCP_ALLOW_PRIVATE_TARGETS`）和 Lab 12
    （`AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START`）。
    这两个之所以是例外，正是它们的考点——见路径 C。
@@ -37,22 +37,29 @@
 
 ## 0.5 先搞清楚「怎么改」——三条真实路径
 
-这一节是后面十二个实验的公共前提。
+这一节是后面实验的公共前提。
 **不读这一节，Lab 1/2/4/6/7/11/12 你会卡在第一步**，因为它们要改的东西不在同一个地方，
 而其中一类**根本没有 HTTP 接口**，另一类**连重启进程都不够**。
+
+**终端约定**：本章带 `$TOKEN`、`$(...)`、`grep` 的 API 示例使用 Bash，请在 Git Bash 或 WSL 执行，
+并从仓库根目录运行；Windows PowerShell 不支持这些 Bash 语法。运行下面的辅助脚本前，确保所用 `python`
+是已安装项目依赖的本地虚拟环境解释器，且 `.env` 指向隔离的开发数据库。
 
 ### 拿一个 token
 
 所有 curl 都要带 `Authorization: Bearer <token>`。先登录拿一个：
 
 ```bash
-TOKEN=$(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login \
+AUTH_JSON=$(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"<你的邮箱>","password":"<你的密码>"}' | python -c "import sys,json;print(json.load(sys.stdin)['access_token'])")
-echo "$TOKEN" | head -c 20
+  -d '{"email":"<你的邮箱>","password":"<你的密码>"}')
+TOKEN=$(printf '%s' "$AUTH_JSON" | python -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+USER_ID=$(printf '%s' "$AUTH_JSON" | python -c "import sys,json; print(json.load(sys.stdin)['user_id'])")
 ```
 
-后面用两个变量：`WS`（workspace_id）、`AGENT`（agent_id）。两个都能从浏览器地址栏拿到。
+`WS`（workspace_id）和 `AGENT`（agent_id）可从浏览器地址栏取得。
+辅助脚本还要用 `ORG` 和 `TOOL_ID`：从 `GET /api/v1/workspaces` 响应取该 workspace 配对的
+`organization_id`，从 tools 列表中取工具 `id`；`USER_ID` 已由登录响应给出。
 
 ### 路径 A：Agent 自己的配置 —— 有接口，直接 PATCH
 
@@ -98,7 +105,7 @@ curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
 还有一句对 Lab 11 很关键：**两个开关全 false 时，这个块会被整体从发布的 spec 里省掉**，
 所以不开记忆的草稿，发布出来的 `resolved_spec` 和这个 key 存在之前**逐字节一样**。
 
-### 路径 B：工具的治理属性 —— **没有接口**，只能写脚本
+### 路径 B：工具的治理属性 —— **没有 HTTP 写接口**，本地实验使用仓库脚本
 
 这是整章最容易卡住的地方，所以单独说清楚。
 
@@ -123,45 +130,29 @@ class ToolPatchRequest(BaseModel):
 租户可以选择**用不用**某个工具，但不能自己声明「我这个工具是 READ 的」——
 否则治理属性就成了租户可写的字段，默认拒绝也就名存实亡了。
 
-所以改 spec 要走**服务层**。`ToolRevisionService.create_revision` 是存在的
-（[`packages/agent_runtime/tool_revisions.py:59`](../../packages/agent_runtime/tool_revisions.py#L59)），
-只是没暴露成路由。写个脚本调它：
+所以改 spec 要走**服务层**。`ToolRevisionService.create_revision` 存在，
+但没有暴露成 HTTP 路由。仓库提供了一个仅用于隔离本地开发库的辅助脚本：
 
-```python
-# .scratch/lab_tool_revision.py
-import asyncio, os, sys
-from uuid import UUID
-from sqlalchemy import select
-from packages.agent_runtime.models import Tool, ToolRevision
-from packages.agent_runtime.tool_revisions import ToolRevisionService
-from packages.core.execution_context.models import WorkspaceExecutionContext
-# session_factory 的拿法跟 .scratch/serve.py 里一致，照抄那几行
-
-TOOL_ID   = UUID(sys.argv[1])
-FIELD     = sys.argv[2]          # effect / approval_policy
-NEW_VALUE = sys.argv[3]          # WRITE / ALWAYS
-
-async def main():
-    async with session_factory() as session:
-        latest = await session.scalar(
-            select(ToolRevision)
-            .where(ToolRevision.tool_id == TOOL_ID)
-            .order_by(ToolRevision.revision_number.desc()).limit(1))
-        spec = dict(latest.spec)
-        print("old:", FIELD, "=", spec[FIELD])
-        spec[FIELD] = NEW_VALUE
-        ctx = WorkspaceExecutionContext(...)   # 需要带 tool_edit 权限
-        rev = await ToolRevisionService().create_revision(
-            session, ctx, tool_id=TOOL_ID, spec=spec)
-        print("new revision", rev.revision_number, rev.spec_hash)
-
-asyncio.run(main())
+```bash
+python -m scripts.lab_tool_revision --help
 ```
+
+示例（在仓库根目录、已加载本地 `.env` 的 Python 环境执行）：
+
+```bash
+python -m scripts.lab_tool_revision \
+  --workspace-id "$WS" --organization-id "$ORG" --user-id "$USER_ID" --tool-id "$TOOL_ID" \
+  effect WRITE
+```
+
+**权限边界要讲清楚：**这是直接连本地数据库的开发辅助工具，会把传入的 `user-id` 写入审计字段，
+但不会验证该用户的 membership；脚本自行构造 `tool_edit` 上下文。因此它不是受认证的管理接口，
+只能对隔离的本地开发库使用，绝不能拿去连接共享/生产数据库。实际 HTTP API 仍不允许租户修改这些治理字段。
 
 **为什么不直接写一条 SQL `UPDATE tool_revisions SET spec = ...`？**
 因为 `spec_hash` 要跟着变。你改了 spec 不改 hash，下一次 Run 读到它会抛
 `TOOL_REVISION_INTEGRITY_ERROR`，而这个 code 在
-[`_TERMINAL_TOOL_ERRORS`](../../packages/agent_runtime/runtime.py#L109)（`runtime.py:109`）里，
+[`_TERMINAL_TOOL_ERRORS`](../../packages/agent_runtime/runtime.py#L109)（`runtime.py:111`）里，
 **整个 Run 直接失败**，你就看不到想看的策略行为了。
 （想亲手看这个失败长什么样，去做 03 章 §12——那一节故意让你制造一次哈希不一致。）
 
@@ -193,7 +184,7 @@ Lab 12 一半的价值就在这个坑上。
 |---|---|---|---|
 | `max_steps` 等运行时上限 | `agents.runtime_config` | PATCH agent | **发布** |
 | `context_budget.*` | 同上（嵌套） | PATCH agent | **发布** |
-| `effect` / `approval_policy` | `tool_revisions.spec` JSONB | **写脚本**调 `create_revision` | **重新发布 agent** |
+| `effect` / `approval_policy` | `tool_revisions.spec` JSONB | 本地实验脚本 `scripts.lab_tool_revision`（直接 DB） | **重新发布 agent** |
 | 模型档案 | `model_profiles` | PATCH model-profile | 发布（版本会 pin 绑定） |
 | `memory.long_term_memory` / `memory.thread_history_search` | `agents.runtime_config.memory` | PATCH agent | **发布** |
 | 私网开关 | 进程配置 | 改 `.env` | **重启 API** |
@@ -220,7 +211,7 @@ Lab 12 一半的价值就在这个坑上。
 2. 用 §0.5 路径 B 的脚本新建 revision，把 `effect` 从 `READ` 改成 `WRITE`：
 
    ```bash
-   "E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe" .scratch/lab_tool_revision.py <tool_id> effect WRITE
+   python -m scripts.lab_tool_revision --workspace-id "$WS" --organization-id "$ORG" --user-id "$USER_ID" --tool-id "$TOOL_ID" effect WRITE
    ```
 
    **不要直接 UPDATE 那行 JSONB**，理由见 §0.5（`spec_hash` 会对不上，Run 直接终止）。
@@ -250,8 +241,8 @@ Lab 12 一半的价值就在这个坑上。
 ### 要看的代码
 
 `packages/tools/policy.py:17`（全文 26 行）
-→ `runtime.py:1962` `policy`
-→ `runtime.py:2530` `after_policy`
+→ `runtime.py:2082` `policy`
+→ `runtime.py:2650` `after_policy`
 
 ### Explain（跑完再读）
 
@@ -302,7 +293,7 @@ Registry 的 docstring（`actions.py:143-149`）把这条讲得很直白：
 2. 再建一个 revision，**`effect` 保持 `READ`，只把 `approval_policy` 改成 `ALWAYS`**：
 
    ```bash
-   "E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe" .scratch/lab_tool_revision.py <tool_id> approval_policy ALWAYS
+   python -m scripts.lab_tool_revision --workspace-id "$WS" --organization-id "$ORG" --user-id "$USER_ID" --tool-id "$TOOL_ID" approval_policy ALWAYS
    ```
 
 3. 发布，跑，**批准**。注意：一定要真的点批准，这个实验的答案在批准之后。
@@ -338,14 +329,14 @@ return REQUIRE_APPROVAL
 1. `policy` 里，审批通过的调用被无条件塞进 `action_calls`：
 
    ```python
-   # 约 runtime.py:2131 —— 注意这一行完全没有看 effect
+   # 约 runtime.py:2182 —— 注意这一行完全没有看 effect
    action_calls.append({"call": call, "approval_id": str(current.id)})
    ```
 
 2. `after_policy` 只看这个列表空不空：
 
    ```python
-   # runtime.py:2530
+   # runtime.py:2650
    if state.get("action_calls"):
        return "action_execute"
    return "read_execute"
@@ -389,14 +380,14 @@ Run 本身不会因此整体失败——`ACTION_NOT_WRITE` 不在 `_TERMINAL_TOO
 
 既然 `after_policy` 看到 `action_calls` 非空就直接去 `action_execute`，
 而图里 `action_execute` 的出边是**直连 `observation`**
-（`runtime.py:1361-1366` 的 edges 列表）——
+（`_AgentRunGraph.invoke` 装配 edges，并由 `packages/agent_runtime/adapters/langgraph/runtime.py` 编译）——
 那么当模型**同一轮里既提了一个要审批的工具、又提了一个自动放行的 READ 工具**时，
 那个 READ 工具的调用会怎么样？
 
 顺着看 `observation`：
 
 ```python
-# 约 runtime.py:2432
+# 约 runtime.py:2545
 result = pre.get(call["tool_call_id"], executed.get(call["tool_call_id"]))
 if result is None:
     result = ToolResult.failure("TOOL_EXECUTION_FAILED", "The tool execution failed.")
@@ -417,7 +408,7 @@ if result is None:
 1. 让 lab Agent 绑一个 **MCP 来源的 WRITE 工具**（比如 ops MCP 的某个动作）。
 2. 跑一次，停在审批。
 3. **点批准的同一瞬间**，把对应的 MCP 服务器进程杀掉。
-   （不好卡时间的话：在 `packages/mcp/runtime.py:105` `execute_write` 里
+   （不好卡时间的话：在 `packages/mcp/runtime.py` 的 `McpToolExecutor.execute_write` 里
    临时加一行 `await asyncio.sleep(20)`，给自己 20 秒窗口。**记得删掉。**）
 
 ### 预测与观察
@@ -431,9 +422,9 @@ if result is None:
 
 ### 要看的代码
 
-`packages/mcp/runtime.py:105` 的注释（**念注释，不要念代码**）
+`packages/mcp/runtime.py` 中 `McpToolExecutor.execute_write` 的注释（**念注释，不要念代码**）
 → `packages/approvals/service.py:245` `complete_execution`
-→ `runtime.py:2608` `_is_uncertain_action_failure`
+→ `runtime.py:2728` `_is_uncertain_action_failure`
 
 ### Explain
 
@@ -549,8 +540,8 @@ currency 不是 `USD`。再跑一次。
 
 ### 要看的代码
 
-约 `runtime.py:1679` → `runtime.py:2573` `_cost_guard_failure`（**读完整 docstring**）
-→ 约 `runtime.py:1691`
+约 `runtime.py:1739` → `runtime.py:2693` `_cost_guard_failure`（**读完整 docstring**）
+→ 约 `runtime.py:1739`
 限额常量在 `packages/agent_runtime/runtime_config.py`：
 `MAX_RUN_COST_LIMIT_MICRO_USD = 100_000_000`（USD 100/run）。
 
@@ -608,7 +599,7 @@ curl -N -H "Authorization: Bearer $TOKEN" \
 ### 要看的代码
 
 `packages/agent_runtime/event_store.py:181` `read_after`
-→ `runtime.py:672` `attach_stream`
+→ `runtime.py:687` `attach_stream`
 → `apps/api/routes/agent_runs.py:133-154`
 心跳间隔 `sse_heartbeat_seconds = 15`（`settings.py:111`），
 宽限期 `run_stream_grace_seconds = 60`（`:117`）。
@@ -661,9 +652,9 @@ curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
 
 ### 要看的代码
 
-`runtime.py:1695`（调用）→ `:1831` `_admit_context` →
-`packages/agent_runtime/context_budget.py:333` `admit`
-截断点 `context_budget.py:520` `_project_optional_items` 和 `runtime.py:2783` `_bounded_tool_result`
+`runtime.py:1766`（调用）→ `:1903` `_admit_context` →
+`packages/agent_runtime/context_budget.py:343` `admit`
+截断点 `context_budget.py:530` `_project_optional_items` 和 `runtime.py:2903` `_bounded_tool_result`
 默认值在 `runtime_config.py`：
 
 ```python
@@ -672,11 +663,11 @@ DEFAULT_CONTEXT_BUDGET = {"reserved_output_tokens": 2_000,
                           "max_tool_result_tokens": 4_000}
 ```
 
-顺手看一眼 `context_budget.py:950`：
+顺手看一眼 `context_budget.py:962`：
 它会**剥掉 payload 自带的 `trust` / `data_trust` 键**。
 工具说自己可信，进不了上下文。
 
-分类是**按位置**做的，不是按内容猜的（`runtime.py:2690` `_categorize_messages`）。
+分类是**按位置**做的，不是按内容猜的（当前 `runtime.py:2810` `_categorize_messages`）。
 所以如果你在 Lab 11 之后回来重做一次这个实验，报告里会多出一个
 `MEMORY` 类别（`context_budget.py:48`）——它和工具结果一样被标为
 **不可信证据**（`context_budget.py:66-67` 的 `_UNTRUSTED_CATEGORIES`），
@@ -720,7 +711,7 @@ curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
 
 ### 要看的代码
 
-约 `runtime.py:1929`（算签名）、`:1936`（identical 上限）、`:1942`（总量上限）
+在 `_AgentRunGraph.tool_proposal` 中查看签名、`max_identical_calls` 与 `max_tool_calls` 上限
 参数归一化用的是 `packages/approvals/contracts.py:53` 同一套 canonicalize。
 
 ### Explain
@@ -728,7 +719,7 @@ curl -s -X PATCH "http://127.0.0.1:8000/api/v1/workspaces/$WS/agents/$AGENT" \
 判「相同」用的是**归一化后的参数哈希**，不是字符串比较：
 
 ```python
-# 约 runtime.py:1929
+# `_AgentRunGraph.tool_proposal`
 signature = canonical_json_hash({"tool": name, "arguments": normalized_arguments})
 ```
 
@@ -854,10 +845,10 @@ FROM agent_runs WHERE id = '<run_id>';
 
 ### 要看的代码
 
-`runtime.py:2062` `approval_interrupt`
-→ `packages/agent_runtime/adapters/langgraph/runtime.py:17` `interrupt()`
-→ `runtime.py:522` `_mark_waiting`
-→ `runtime.py:388` `resume` → `:451` `resume_command`
+`_AgentRunGraph.policy` 调用 `approval_interrupt`
+→ LangGraph adapter 的 `interrupt()`
+→ `runtime.py:525` `_mark_waiting`
+→ `AgentRunService.resume` → adapter 的 `resume_command`
 
 ### Explain
 
@@ -995,27 +986,29 @@ curl -s -X POST \
 
 ### 要看的代码
 
-`runtime.py:1420` `_memories` —— 整个方法就一个二选一：
+`runtime.py:1435` `_memories` —— 整个方法就一个二选一：
 
 ```python
 snapshot = getattr(self.run, "effective_memory_snapshot", None) or {}
-frozen = bool(snapshot.get("selected_at"))          # :1442
+frozen = "selected_at" in snapshot                  # :1464
 if frozen:
-    selected = await selector.load(...)             # :1448
+    # 当前快照传 memory_content_hashes 做完整性核验；老快照没有该键
+    selected = await selector.load(...)             # :1491
 else:
-    selected = await selector.select(..., limit=MAX_INJECTED_MEMORIES)   # :1450-1455
-    await self._freeze_memory_snapshot(selected, workspace_id=workspace_id)  # :1456
+    selected = await selector.select(..., limit=MAX_INJECTED_MEMORIES)   # :1507
+    await self._freeze_memory_snapshot(selected, workspace_id=workspace_id)  # :1513
 ```
 
-→ `packages/memory/store.py:120` `load`（**读完整 docstring，这是这个实验的答案**）
-→ 对比 `store.py:87` `select` 的 where 条件
-→ `runtime.py:1465` `_freeze_memory_snapshot`，注意**最后两行**
+→ `packages/memory/store.py:131` `load`（**读完整 docstring，这是这个实验的答案**）
+→ 对比 `store.py:98` `select` 的 where 条件
+→ `runtime.py:1523` `_freeze_memory_snapshot`，注意**最后几行**
 → 作废路由 `apps/api/routes/agents.py:205`，以及**不存在**的 delete 路由
 
 ### Explain
 
-`select` 滤掉非 ACTIVE 和已过期的行；`load` **只按 id 取，什么都不滤**，
-并且按冻结时的顺序还原。docstring 把理由说完了：
+`select` 滤掉非 ACTIVE 和已过期的行；`load` 不过滤状态和过期时间，
+按冻结顺序取回；当前新快照还会逐条核验内容哈希，历史 ID-only 快照兼容但无哈希核验。
+docstring 把保留历史输入的理由说完了：
 
 > A run replaying its own snapshot must see what it saw, including rows
 > that have since been superseded or invalidated: the snapshot records
@@ -1040,7 +1033,8 @@ else:
 ### Interview 一句话
 
 > 长期记忆是 Run 的输入，所以在第一次 PREPARE 时就冻结成
-> `agent_runs.effective_memory_snapshot`，之后任何一次恢复都只按 id 重放，
+> `agent_runs.effective_memory_snapshot`，之后任何一次恢复都按快照重放并核验内容哈希
+>（历史 ID-only 快照兼容读取），
 > 不重新选。这样一条记忆在审批中途被作废，也不会让审批人批的那个提案
 > 和真正执行时的上下文对不上。
 
@@ -1082,8 +1076,8 @@ else:
 ```
 BGE-M3 + cross-encoder 冷加载 ≈ 35s
 工具超时预算              = 30s
-→ 每次部署后的第一次检索必然 TOOL_TIMEOUT，
-   而 Agent 给用户的回答是「我没找到」
+→ 若冷进程在首次检索前没有成功预热，工具调用可能 TOOL_TIMEOUT，
+   而 Agent 给用户的回答看起来像「我没找到」
 ```
 
 两个调用点，**这是本实验的关键**：
@@ -1119,7 +1113,7 @@ BGE-M3 + cross-encoder 冷加载 ≈ 35s
 
 ---
 
-## 11. 做完十二个之后
+## 11. 做完十二个运行时实验之后
 
 ### 自检
 
@@ -1143,14 +1137,14 @@ BGE-M3 + cross-encoder 冷加载 ≈ 35s
 
 **第 2、4、10、11 四题答不上来，说明你跑的是步骤不是实验。** 回去把对应的 Explain 重读一遍。
 
-### 补充你自己的 Lab 13
+### 补充你自己的实验
 
 这十二个是我挑的。**真正属于你的那个实验，是你在跑上面某一个时冒出来的疑问。**
 
 写下来，按同样的格式做一遍：
 
 ```
-Lab 13 · ____________________
+自拟实验 · ____________________
 
 操作：
 预测：
@@ -1160,6 +1154,120 @@ Lab 13 · ____________________
 两分钟怎么讲：
 ```
 
+---
+
+## Lab 13 · 跑一个最小的正式评测
+
+**目标**：亲手走通 DatasetVersion 发布、Experiment 定义冻结、Run 入队和指标物化；不要把
+`spec_hash` 理解成“模型输出确定性”的证明。
+
+### 准备
+
+- 一个可运行的已发布 AgentVersion；确认 evaluation worker 可连接当前模型 provider。
+- 记下该 AgentVersion 实际绑定的 provider/model，以及 workspace、organization、user、version ID。
+- 一条你能判断对错的 `KNOWLEDGE_QA` 用例。下例只示意 schema，问题和参考答案请替换为你自己的知识。
+- pricing snapshot 要用该 provider/model 的真实计价和来源；不要用示例价格做真实成本结论。
+
+### 操作
+
+以下命令使用 Bash（Git Bash / WSL），沿用 §0.5 的 `$TOKEN` 与 `$WS`：
+
+1. 新建 Dataset，保存响应里的 `id` 为 `DATASET_ID`：
+
+   ```bash
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/datasets" \
+     -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+     -d '{"name":"lab-evaluation","description":"Local learning lab"}'
+   ```
+
+2. 为它创建版本。`source_provenance` 中 source kind/id 必须是非空字符串，item 字段必须完整：
+
+   ```bash
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/datasets/$DATASET_ID/versions" \
+     -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+     -d '{"schema_version":1,"items":[{"case_key":"lab-qa-1","split":"DEV","category":"KNOWLEDGE_QA","input":{"question":"替换为可核验的问题"},"expected":{"answer":"替换为参考答案","citations":[]},"tags":["learning"],"source_provenance":{"source_kind":"manual","source_id":"lab-qa-1"},"ordinal":0}]}'
+   ```
+
+   从响应保存 `id` 为 `DATASET_VERSION_ID`，再发布它：
+
+   ```bash
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/datasets/$DATASET_ID/versions/$DATASET_VERSION_ID/publish" \
+     -H "Authorization: Bearer $TOKEN"
+   ```
+
+   发布版本不可编辑；改题目要另建 version。
+
+3. 创建 pricing snapshot：`provider` / `model` 要和目标 AgentVersion 解析出的模型一致，价格按你选定的
+   来源填写，`effective_at` 用带时区的 ISO-8601 时间。保存响应 `id` 为 `PRICE_ID`。
+
+   ```bash
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/pricing-snapshots" \
+     -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+     -d '{"name":"lab-price","provider":"<实际provider>","model":"<实际model>","currency":"USD","input_price_per_1m":0,"output_price_per_1m":0,"effective_at":"2026-09-23T00:00:00Z","source_note":"<真实来源与日期>"}'
+   ```
+
+   上面的 0 只是 schema 示例，不可用来报告成本；请替换为真实价格。实现会校验 provider/model 与已发布 AgentVersion 匹配。
+
+4. 创建实验（`purpose` 用 `DEVELOPMENT`，`split` 与数据集 item 的 `DEV` 匹配）：
+
+   ```bash
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/experiments" \
+     -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+     -d '{"name":"lab-qa-baseline","dataset_version_id":"<DATASET_VERSION_ID>","split":"DEV","purpose":"DEVELOPMENT","repetitions":1}'
+   ```
+
+   保存返回的 experiment `id` 为 `EXPERIMENT_ID`。再加一个变体，使用真实 AgentVersion ID 和 `PRICE_ID`：
+
+   ```bash
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/experiments/$EXPERIMENT_ID/variants" \
+     -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+     -d '{"label":"baseline","agent_version_id":"<AGENT_VERSION_ID>","pricing_snapshot_id":"<PRICE_ID>","ordinal":0,"variant_metadata":{"condition":"baseline"}}'
+   ```
+
+5. 冻结实验定义并记下 `spec_hash`；之后不能再改变实验定义。创建并排队 Run，保存返回 `id` 为 `RUN_ID`：
+
+   ```bash
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/experiments/$EXPERIMENT_ID/finalize" \
+     -H "Authorization: Bearer $TOKEN"
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/experiments/$EXPERIMENT_ID/runs" \
+     -H "Authorization: Bearer $TOKEN"
+   ```
+
+   轮询 Run 和进度：
+
+   ```bash
+   curl -s "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/experiment-runs/$RUN_ID" -H "Authorization: Bearer $TOKEN"
+   curl -s "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/experiment-runs/$RUN_ID/progress" -H "Authorization: Bearer $TOKEN"
+   ```
+
+   Run 终态后物化并读取指标：
+
+   ```bash
+   curl -s -X POST "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/experiment-runs/$RUN_ID/metrics" \
+     -H "Authorization: Bearer $TOKEN"
+   curl -s "http://127.0.0.1:8000/api/v1/workspaces/$WS/evaluation/experiment-runs/$RUN_ID/metrics" \
+     -H "Authorization: Bearer $TOKEN"
+   ```
+
+   如果队列没有 worker、模型凭据不可用或 case 执行失败，检查 Run/case failure，而不是把“已入队”当作评测成功。
+
+### 预测与观察
+
+| 观察项 | 我的预测 | 实际 |
+|---|---|---|
+| DatasetVersion 发布后能否原地改题 | | |
+| finalize 前后 Experiment 状态与 `spec_hash` | | |
+| 1 个 variant × 1 个 DEV case × 1 repetition 会有几条 case result | | |
+| Run 入队和 Run 完成分别由什么证明 | | |
+| metrics 里哪些是确定性字段，哪些受模型输出影响 | | |
+
+### Explain
+
+`evaluator_manifest`、variant hash 和 experiment spec hash 是不同层级；pricing 不在 evaluator manifest 内。
+它们能固化并校验数据/运行定义，却不冻结外部模型实现或每次推理文本。每个 AgentRun 还会记录实际选中的
+`effective_memory_snapshot`；查询相关的记忆命中不由 variant hash 预先固定。评测的目标是让差异有证据可查，
+不是承诺任意重跑都逐字相同。
+
 一个你自己设计并做完的实验，抵得上五个照着做的。
 
 ---
@@ -1168,12 +1276,12 @@ Lab 13 · ____________________
 
 四章学习文档到此结束。现在去读：
 
-- [`docs/report/03-核心机制详解.md`](../report/03-核心机制详解.md) — 11 个技术亮点。
+- [`docs/report/03-核心机制详解.md`](../report/03-核心机制详解.md) — 15 个技术机制。
   第一次读它们是 11 条并列结论；现在它们是 11 个你亲手碰过的位置。
 - [`docs/report/05-面试问答.md`](../report/05-面试问答.md) — 追问和回答。
   现在每一条你都能补上「我试过，它的实际表现是……」。
 - [`docs/report/08-代码级细节.md`](../report/08-代码级细节.md) — 逐段代码注解。
-  跑完十二个实验之后，这一章读起来会像复习而不是学习。
+  跑完十三个实验之后，这一章读起来会像复习而不是学习。
 
 Lab 11 和 Lab 12 还有三份专门的配套材料，做完再读，落差会最大：
 

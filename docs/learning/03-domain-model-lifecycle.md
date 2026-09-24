@@ -49,14 +49,27 @@ AgentRun(SUCCEEDED) ──extract──▶ WorkspaceMemory ──select+freeze�
 然后这个可变的东西**再往回**成为下一次执行的不可变输入。
 所以记忆同时站在 Run 的出口和入口，这是它比别的对象难想清楚的唯一原因。
 
+建议按真实执行因果顺序理解对象，而不是依赖本章后续小节的排版顺序：
+
+1. 先读 §7 的 Thread / Turn：用户输入先被记录，之后才关联 Run；Thread 身份也决定哪些会话能力可用。
+2. 再读 §5 的 AgentRun：一次执行固定引用 AgentVersion，并在首次 PREPARE 冻结它实际选中的上下文输入。
+3. 接着读 §6 的 Approval：写动作中断后，决策状态和执行状态分开持久化，再从 checkpoint 恢复。
+4. 最后读 §8 Artifact 与 §9 Memory：前者从执行事实投影，后者从已完成的 Run 异步抽取，供之后的 Run 选择。
+
+对应的主链是：`ThreadTurn → AgentRun → Approval/Resume → Artifact`，并从成功 Run
+另有一条异步支线到 `WorkspaceMemory → 后续 Run 的冻结输入`。可从 [一次 Run 的端到端追踪](02-one-run-end-to-end.md)
+对照 API 与持久化边界。
+
 五条链，一个共同的形状：
 
 ```
 可变的「容器」  ──固化──▶  不可变的「版本」  ──引用──▶  一次执行
 ```
 
-**这个形状重复了五次不是巧合。** 它是这个项目唯一的架构主张：
-**可复现性 = 执行时引用的每一样东西都不会再变。**
+这个形状重复出现，是项目用来保存**输入来源和完整性**的重要方式：版本、文档修订、
+快照、价目表以及 Run 实际选中的记忆，都能被标识和核验。但这不等于输出完全确定：
+模型采样、远端模型版本/实现、外部服务状态和检索排序过程仍可能造成结果差异。
+因此准确的说法是「输入身份可审计、已冻结内容可完整性校验」，不是「同样的实验必然得到逐字相同的输出」。
 
 第五次（记忆）的实现方式和前四次**不一样**，这是这一章新增的重点：
 
@@ -69,7 +82,7 @@ AgentRun(SUCCEEDED) ──extract──▶ WorkspaceMemory ──select+freeze�
 
 为什么不铸版本表？因为记忆不是「声明」，是「证据」。
 一条记忆被作废不代表要产生它的新版本，只代表以后别再选它了；
-而已经被某次 Run 选中的那条，必须永远能按 id 取回来。
+而已经被某次 Run 选中的那条，必须能按 id 取回来并核验冻结时的内容哈希。
 一列快照就够了，详见 §9。
 
 ---
@@ -147,7 +160,7 @@ FK 指向 `agent_versions` 且是 **RESTRICT**——
 
 ```
 写入时：publish.py:295   hash = canonical_json_hash(resolved_spec)
-读取时：runtime.py:1566   重算，对不上 → AGENT_VERSION_INTEGRITY_ERROR
+读取时：runtime.py:1628   重算，对不上 → AGENT_VERSION_INTEGRITY_ERROR
         （同一段 prepare 里还有另外三道，见 02 章 §4；另一处相关校验在 :1582）
 ```
 
@@ -352,7 +365,7 @@ WRITE 派发出去之后连接断了（`packages/mcp/runtime.py:105` 的注释�
 
 所以必须有第三个状态，并且这个状态的语义是「**人来看**」，不是「系统会重试」。
 
-`runtime.py:2608` `_is_uncertain_action_failure` 匹配三个码：
+`runtime.py:2728` `_is_uncertain_action_failure` 匹配三个码：
 `UNKNOWN_OUTCOME` / `ACTION_OUTCOME_UNKNOWN` / `ACTION_RECONCILIATION_REQUIRED`。
 
 **为什么 `CANCEL_REQUESTED` 和 `CANCELLED` 是两个状态？**
@@ -374,15 +387,13 @@ WRITE 派发出去之后连接断了（`packages/mcp/runtime.py:105` 的注释�
 三列一个模式：**执行中的东西可变，执行依赖的东西不可变。**
 第三列的注释（`:322-329`）最长，因为它是最新加的、也最容易被实现错的一个。
 
-### `thread_id` 是个例外，要单独讲
+### `thread_id` 是关联信息，但不只是查询字段
 
-`models.py:307-311` 的注释写得很直白：这是一个**反向指针**，
-（列本身声明在 `:312`）
-「replay、评估、对账都忽略它」。
-
-意思是：**没有任何执行分支读 `thread_id`。**
-Playground（`thread_id IS NULL`）和多轮会话跑的是**完全相同**的代码路径。
-它只是一个方便查询的关联，不是一个行为开关。
+`thread_id` 不会改变 Run 冻结的 AgentVersion、工具治理或审批规则，但运行图确实会读取它：
+PREPARE 用它装配已完成轮次，历史搜索工具要求它非空；成功工具结果的 Artifact 记录与
+成功后的长期记忆抽取也只对 Thread Run 开放。Playground 和 Thread Run 共用执行图，
+但输入上下文及 work-layer 副作用不同。不要把“Thread 不拥有模型/工具/审批配置”
+误读成“运行时不读取 thread_id”。
 
 ---
 
@@ -451,7 +462,7 @@ WHERE id=:id AND execution_status='NOT_STARTED'
 RETURNING ...
 ```
 
-守卫在 WHERE 里。抢不到的拿 `ACTION_CLAIM_LOST`（`runtime.py:2007`）。
+守卫在 WHERE 里。抢不到的拿 `ACTION_CLAIM_LOST`（`runtime.py:2268`）。
 **没有用锁，没有用 Redis。** 数据库的原子 UPDATE 就够了。
 
 ---
@@ -636,7 +647,7 @@ def _artifact_ref(artifact: Artifact) -> str:
 > 二十篇摘要会吃掉预算，只为了告诉模型一行字就能说清的事：
 > 发生过一次检索，大致找到了什么。真的需要内容的追问，会再检索一次。
 
-最后看运行时这一侧（约 `runtime.py:1391-1418`）：
+最后看运行时这一侧（`_AgentRunGraph._thread_history`）：
 
 ```python
 thread_id = getattr(self.run, "thread_id", None)
@@ -645,9 +656,10 @@ if thread_id is None or provider is None:
     return [], None
 ```
 
-**`thread_id IS NULL` 就是 Playground。** 这一行是整个会话功能对单次调试运行的
-全部影响——没有会话就直接返回空，后面的逻辑一行都不执行。
-这也是为什么可以确定「Playground 的行为和加会话之前逐字节一致」。
+**`thread_id IS NULL` 会关闭 Thread 轮次历史**：没有会话就返回空，不执行后续历史装配。
+它不等于禁用所有记忆。长期记忆选择不依赖 Thread 身份，因此 memory-enabled AgentVersion 的
+Playground / 单次 Run 仍可能读取 workspace-agent 记忆；相反，记忆抽取写入要求 `thread_id` 非空，
+所以没有 Thread 的 Playground Run 不会排队生成长期记忆。不要把「无 Thread 历史」泛化成「上下文完全相同」。
 
 窗口裁剪发生在 `context.py:93` 的 `rows[-max_turns:]`，
 而被裁掉了多少会被记进 metadata（约 `runtime.py:1412-1414`）：
@@ -666,7 +678,7 @@ if thread_id is None or provider is None:
 > **「它为什么忘了」应该是一次查询，而不是一次猜测。**
 > 这句话可以直接当面试答案用。
 
-同一段 metadata 旁边还挂着记忆那一份（`runtime.py:1627`）：
+同一段 metadata 旁边还挂着记忆那一份（在 `_AgentRunGraph.prepare` 组装 step metadata）：
 
 ```python
 step_metadata["memory"] = memory_metadata
@@ -679,8 +691,8 @@ step_metadata["memory"] = memory_metadata
 
 | 层 | 裁什么 | 在哪 |
 |---|---|---|
-| 1 | 记忆条数 | `MAX_INJECTED_MEMORIES`，`runtime.py:1454` |
-| 2 | 历史轮数 | `max_turns` / `thread_context_max_turns`，`runtime.py:209` |
+| 1 | 记忆条数 | `MAX_INJECTED_MEMORIES`（`packages/memory` 配置） |
+| 2 | 历史轮数 | `max_turns` / `thread_context_max_turns`（`AgentRunService` 配置） |
 | 3 | token 预算 | 第 2 章 §4 讲的 `_admit_context` |
 
 **先按条数丢记忆，再按轮数丢历史，最后按 token 丢**，三者互不知道对方存在。
@@ -730,7 +742,7 @@ run_id 为 NULL（人手建）  →  可编辑
 
 ### Artifact 不是模型写的
 
-`runtime.py:2164` `_record_artifacts` 在 `read_execute` 里，
+`_AgentRunGraph._record_artifacts` 在 `read_execute` 里，
 从 `RecordedToolCall` 投影（`packages/artifacts/recorder.py:86`），
 带四个溯源戳：`run_id` / `tool_call_id` / `tool_identity` / `step_sequence`。
 
@@ -757,7 +769,7 @@ AgentRun(SUCCEEDED) ──extract──▶ WorkspaceMemory ──select+freeze�
 
 | 对象 | 可变？ | 是什么 |
 |---|---|---|
-| `WorkspaceMemory` | ✅ **必须可变** | 工作区当前相信什么。会被加强、被取代、被作废 |
+| `WorkspaceMemory` | ✅ **必须可变** | `(workspace_id, agent_id)` 范围内当前相信什么；不会被同一工作区的其他 Agent 共用。会被加强、被取代、被作废 |
 | `agent_runs.effective_memory_snapshot` | ❌ **必须不可变** | 那一次 Run **当时被告知了什么** |
 
 如果只有前者，「为什么它那次这么说」就永远答不出来——因为记忆已经变了。
@@ -765,7 +777,7 @@ AgentRun(SUCCEEDED) ──extract──▶ WorkspaceMemory ──select+freeze�
 
 ### 写入这一侧：抽取 → 闸门 → 去重
 
-入口只有一个（`runtime.py:1270` `_enqueue_memory_extraction`），docstring 说明了为什么：
+入口只有一个（当前 `runtime.py:1285` `_enqueue_memory_extraction`），docstring 说明了为什么：
 
 > ``ThreadService.submit_turn`` runs in process, ``/runs/stream`` may hand
 > off to a worker, and a resumed approval takes a third route; the only
@@ -782,7 +794,7 @@ AgentRun(SUCCEEDED) ──extract──▶ WorkspaceMemory ──select+freeze�
 不能让一个没配置学习的 Agent 学到东西」。
 
 然后进 worker（`apps/worker/tasks/memories.py:62`，另一个进程），
-模型抽完候选之后要过写入闸门（`packages/memory/store.py:64` `normalize_candidate`）：
+模型抽完候选之后要过写入闸门（当前 `packages/memory/store.py:69` `normalize_candidate`）：
 
 ```python
 content = " ".join((candidate.content or "").split())
@@ -796,7 +808,7 @@ if kind not in MEMORY_KINDS:
 **返回 `None` 而不是抛异常，是故意的**（docstring 原话）：抽取器是个模型，
 模型偶尔会提出垃圾，一批三条里的一条坏的**不该连累另外两条**。
 
-落库在 `store.py:217` `record`，去重靠一个**部分唯一索引**
+落库在 `store.py:257` `record`，去重靠一个**部分唯一索引**
 （`packages/memory/models.py:91-99`）：
 
 ```python
@@ -841,20 +853,26 @@ Index(
 
 ### 读取这一侧：选择一次，之后只重放
 
-`runtime.py:1420` `_memories`，整个方法就是一个二选一：
+`runtime.py:1435` `_memories`，整个方法就是一个二选一：
 
 ```python
 snapshot = getattr(self.run, "effective_memory_snapshot", None) or {}
-frozen = bool(snapshot.get("selected_at"))
+frozen = "selected_at" in snapshot
 if frozen:
-    selected = await selector.load(workspace_id=..., memory_ids=memory_ids)   # :1448
+    if "memory_content_hashes" in snapshot:                              # :1473+
+        selected = await selector.load(
+            workspace_id=..., memory_ids=memory_ids,
+            memory_content_hashes=snapshot["memory_content_hashes"],
+        )
+    else:  # 历史 ID-only 快照
+        selected = await selector.load(workspace_id=..., memory_ids=memory_ids)
 else:
-    selected = await selector.select(..., limit=MAX_INJECTED_MEMORIES)        # :1450-1455
-    await self._freeze_memory_snapshot(selected, workspace_id=workspace_id)   # :1456
+    selected = await selector.select(..., limit=MAX_INJECTED_MEMORIES)        # :1507
+    await self._freeze_memory_snapshot(selected, workspace_id=workspace_id)   # :1513
 ```
 
 **判据是 `selected_at` 存不存在，不是列存不存在。** 空选择也会写快照
-（`_freeze_memory_snapshot :1465` 无条件写），所以「这次没选到记忆」
+（`_freeze_memory_snapshot :1523` 无条件写），所以「这次没选到记忆」
 和「这次还没选过」是两个可区分的状态——否则每次 PREPARE 都会重选一遍。
 
 `load` 的 docstring 是这一节最该背的一句：
@@ -865,11 +883,12 @@ else:
 > 重放快照的 Run 必须看到**它当时看到的**，包括那些后来已经被取代或作废的行。
 > 把历史改得更整洁，只会让运行日志对「它当时为什么那么说」给出更差的回答。
 
-所以 `load`（`store.py:120`）**不过滤 status，也不过滤 expires_at**，
-只按 id 取，并且按冻结时的顺序还原。而 `select`（`store.py:87`）会滤掉
+所以 `load`（`store.py:131`）**不过滤 status，也不过滤 expires_at**，
+按冻结时的顺序还原；新快照还校验内容哈希，缺行或哈希不符会 fail closed。
+历史 ID-only 快照仍兼容读取，但没有内容哈希校验。而 `select`（`store.py:98`）会滤掉
 非 ACTIVE 和已过期的。**同一张表，两个读法，差别全在「这是不是一次重放」。**
 
-最后 `_freeze_memory_snapshot` 结尾那两行也别跳过（`runtime.py:1481-1483`）：
+最后 `_freeze_memory_snapshot` 结尾的内存同步也别跳过（`runtime.py:1538-1543`）：
 写完 DB 之后还手动把 `self.run.effective_memory_snapshot` 赋了一遍，
 因为内存里那个 run 对象是 detached 的——不补这一下，
 **同一个进程里的第二次 PREPARE 会再走一遍选择分支**，白冻。
@@ -924,7 +943,7 @@ McpConnection（mcp/models.py:32）
 | 对象 | 可变？ | 谁在拦 | 拦不住会怎样 |
 |---|---|---|---|
 | Agent | ✅ 完全可变 | — | — |
-| **AgentVersion** | ❌ | 约定 + `runtime.py:1566` 读时哈希校验 | Run 失败（`AGENT_VERSION_INTEGRITY_ERROR`），不会静默用错 |
+| **AgentVersion** | ❌ | 约定 + `runtime.py:1628` 读时哈希校验 | Run 失败（`AGENT_VERSION_INTEGRITY_ERROR`），不会静默用错 |
 | Tool | ✅ 展示字段可变 | — | — |
 | **ToolRevision** | ❌ | 约定 + `spec_hash` | 同上，传递性不可变断裂 |
 | DocumentRevision | ❌ | 约定 + lifecycle_status | 快照指向的内容变了 |
@@ -937,7 +956,7 @@ McpConnection（mcp/models.py:32）
 | MCP 凭据 | ✅ 可轮换 | 加密 + 响应契约 | 泄露 |
 | MCP 工具契约 | ❌ | 冻进 ToolRevision | 同 ToolRevision |
 | **WorkspaceMemory** | ✅ **必须可变** | 两条 CHECK + 只管 ACTIVE 行的部分唯一索引；API 没有 delete 路由 | 学不到新东西，或者错误永远改不掉 |
-| **effective_memory_snapshot** | ❌ | `_memories` 的 `selected_at` 分支（`runtime.py:1442`）：有快照就只走 `load` 重放 | 记忆改了之后，“它当时为什么那么说”永远答不出来 |
+| **effective_memory_snapshot** | ❌ | `_memories` 的 `selected_at` 分支（当前 `runtime.py:1464`）：有快照就走 `load` 重放并校验哈希；历史 ID-only 快照兼容 | 记忆改了之后，“它当时为什么那么说”永远答不出来 |
 
 ---
 
@@ -978,7 +997,7 @@ WHERE id = '<version_id>';
 
 UPDATE **会成功**——没有触发器拦它。
 Run **会失败**，`AGENT_VERSION_INTEGRITY_ERROR`，
-在 `prepare` 节点（`runtime.py:1552` → `:1566`），**模型还没被调用**。
+在 `prepare` 节点重算 `resolved_spec_hash`，**模型还没被调用**。
 
 这就是「约定 + 读时校验」的完整画像：
 写入端不设防，执行端必校验，且校验在花钱之前。
@@ -1008,7 +1027,7 @@ Run **会失败**，`AGENT_VERSION_INTEGRITY_ERROR`，
 > 第五次形状一样但实现方式不同，这个差别值得讲：记忆没有版本表。
 > `workspace_memories` 的行**必须可变**——会被加强、取代、作废；
 > 冻结改在 Run 这一侧，`agent_runs.effective_memory_snapshot` 记下
-> 「这次用了哪几条 id」。重放时按 id 回捞，不过滤状态，
+> 「这次用了哪几条 id 及其内容哈希」。重放时按冻结顺序回捞并校验哈希，不过滤状态，
 > 所以一条后来被作废的记忆，在它影响过的那次 Run 里永远还在。
 > 因为快照回答的问题是「模型当时被告知了什么」，不是「现在还相不相信」。
 >

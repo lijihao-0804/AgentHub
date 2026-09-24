@@ -79,8 +79,10 @@ and completes after a newly instantiated runtime service.
 The independent deterministic M5 dataset is
 `benchmarks/approval_runtime/dataset.json` (`m5-approval-runtime-v1`, 20 cases: 14 dev and
 6 holdout). It covers approval required/denied/approved, duplicate approval, multi-step action,
-self-approval denial, restart/resume, idempotent action, unknown outcome, cancel race, and crash
-recovery. It uses no public LLM and records its canonical dataset hash and metrics in
+self-approval-denial fixtures, restart/resume, idempotent action, unknown outcome, cancel race,
+and crash recovery. The fixture covers the denial branch; production authorization blocks
+self-approval except for organization OWNER/ADMIN roles. The dataset uses no public LLM and
+records its canonical dataset hash and metrics in
 `benchmarks/approval_runtime/results/m5-approval-runtime-v1.json`.
 
 ## Verification record
@@ -97,4 +99,5 @@ Local verification before final CI includes:
 - bootstrap accepts the project `postgresql+asyncpg` configuration URL and routes framework
   tables to `langgraph_checkpoint`.
 
-M5-B MCP, M6, and later milestones have not started.
+At the time this frozen M5-A record was written, M5-B MCP, M6, and later milestones had not
+started. Current-checkout implementation status is summarized in the repository README.

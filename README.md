@@ -1,17 +1,29 @@
 # AgentHub
 
-AgentHub is an Enterprise Agent Runtime & Control Plane. The project follows the staged
-implementation plan in [`plan/plan.md`](plan/plan.md). M3-F Snapshot and the M3 retrieval
+AgentHub is an Enterprise Agent Runtime & Control Plane. M3-F Snapshot and the M3 retrieval
 evaluation baseline are accepted; M3 overall is PASS. M4-A Agent Draft / AgentVersion publish,
 M4-B READ Tool Runtime, M4-C Agent Run + LangGraph execution, M4-D Context Budget,
 Streaming and AgentHub Event Protocol, and M4-E Agent Runtime Evaluation are accepted. M4 overall
-is PASS. M5-A Approval Runtime + Durable Approval Resume is accepted; M5-B MCP has not started.
+is PASS. M5-A Approval Runtime + Durable Approval Resume is accepted. MCP connection,
+discovery and governed-tool import backend code and tests are present; the web management UI and
+a formal M5-B acceptance record are not present.
 M6-A Run Query, Run Detail and Timeline and M6-B Metrics / Dashboard / Failure Analytics are
 accepted on the observability branch. M6 overall is PASS; M7-A through M7-F are accepted, and
 M7-H backend deterministic evaluation conformance is recorded. M7-E/F semantic closure and the
-real retrieval ablation were verified by exact-head GitHub Actions. M7-G frontend
-integration remains pending, so M7 overall is not marked complete.
+real retrieval ablation were verified by exact-head GitHub Actions. The current checkout contains
+the M7-G evaluation ablation and release-gate UI, but no formal M7-G acceptance record or tracked
+frontend test suite was found; M7 overall is therefore not marked complete.
 Post-M5 review hardening is recorded separately and does not change the frozen M5-A state machine.
+
+## Documentation
+
+- [Learning path](docs/learning/README.md): where to start, how to trace a Run, and hands-on labs.
+- [Project narrative](docs/report/README.md): architecture story, mechanisms, evidence and interview review.
+- [Architecture overview](docs/architecture.md): module boundaries; detailed process and data flows are in
+  [report 02](docs/report/02-架构与数据流.md).
+- [Selected API contracts](docs/api-contracts.md): behavior and invariants for the core routes. The route
+  inventory and data model map are in [report 09](docs/report/09-数据模型与API.md); the running OpenAPI
+  schema is the route-level request/response reference.
 
 ## Basic development setup
 
@@ -98,6 +110,9 @@ deferred to M8.
 - M2 deliberately contains no Agent, RAG or Tool product implementation.
 - M3 overall is PASS after the real retrieval evaluation baseline and CI verification. M4-A
   through M4-E are accepted in sequence; M4 overall is PASS. M5-A covers durable approval
-  resume and M5-B MCP has not started. M6-A and M6-B cover read-only run observability and
+  resume. MCP connection, discovery and governed-tool import backend code and tests are present,
+  while the web management UI and a formal M5-B acceptance record are absent. M6-A and M6-B
+  cover read-only run observability and
   workspace metrics; M6 overall is PASS. M7-A through M7-F and M7-H backend conformance are
-  accepted, but M7 overall is not marked complete; M7-G frontend integration is pending.
+  accepted, but M7 overall is not marked complete: M7-G evaluation UI code exists in this
+  checkout, while its formal acceptance record and tracked frontend tests are absent.

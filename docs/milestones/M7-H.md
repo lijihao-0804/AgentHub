@@ -2,8 +2,14 @@
 
 Status: PASS — exact-head GitHub Actions verification passed.
 
-M7-H is a backend/evaluation closure stage. It does not declare M7 overall complete while
-the independent M7-G frontend branch remains unintegrated.
+At the frozen M7-H baseline, the independent M7-G frontend branch remained unintegrated, so this
+backend/evaluation closure record did not declare M7 overall complete.
+
+> **Current-checkout note (2026-09-23):** The statements above and below describe the frozen
+> baseline at the SHA recorded in this document. The current checkout now contains the evaluation
+> ablation workflow and release-gate UI, but no M7-G acceptance record or tracked frontend test
+> suite was found. Treat the frozen result as historical evidence; M7 overall is still not marked
+> complete until M7-G acceptance is recorded.
 
 ## Frozen baseline
 
@@ -86,5 +92,5 @@ The real local retrieval evidence remains the M7-E artifact:
 
 Real Provider Evaluation is `NOT_RUN`; no paid or external LLM provider is called by M7-H.
 
-M7-G frontend integration is pending on its independent branch. M7 overall remains pending
-M7-G integration, and M8 has not started.
+At this frozen baseline, M7-G frontend integration was pending on its independent branch, M7
+overall remained pending that integration, and M8 had not started.

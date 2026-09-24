@@ -77,11 +77,13 @@ def production_retrieval_components(settings: Settings) -> RetrievalComponents:
 def warm_retrieval_components(settings: Settings) -> None:
     """Load the retrieval models before anything asks a question of them.
 
-    The first ``search_knowledge`` call in a fresh process otherwise loads
-    BGE-M3 and its cross-encoder inside the tool's own timeout budget -- about
-    35 seconds against a 30 second ceiling, so the first retrieval after every
-    deploy comes back as TOOL_TIMEOUT and the agent answers "I could not find
-    it". Measured in the API container on 2026-09-22.
+    If startup warming has not completed and the model cache is cold, the first
+    ``search_knowledge`` call loads BGE-M3 and its cross-encoder inside the
+    tool's own timeout budget -- about 35 seconds against a 30 second ceiling
+    in the API-container measurement from 2026-09-22. In that configuration,
+    the first retrieval can come back as TOOL_TIMEOUT and the agent may answer
+    "I could not find it". This does not apply once the process has warmed the
+    models or already has them resident in its process cache.
 
     Best effort on purpose: a process that cannot load the models should still
     serve every route that does not need them, and fail loudly at the point of

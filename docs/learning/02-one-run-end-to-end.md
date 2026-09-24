@@ -45,24 +45,24 @@
 ②  ThreadService.submit_turn               packages/threads/service.py:318
 ③  resolve_agent_version                   service.py:213      草稿 → 具体版本
 ④  open_turn（INSERT thread_turns）         service.py:244
-⑤  AgentRunService.run（INSERT agent_runs） runtime.py:238
+   ⑤  AgentRunService.run（创建并执行 Run） runtime.py:241
    │
    ├─ 图开始 ──────────────────────────────────────────────
-⑥  prepare        runtime.py:1552   校验声明完整性 / 选择并冻结记忆 / 组装 messages
-⑦  model          runtime.py:1668   调模型，拿 tool_calls
-⑧  tool_proposal  runtime.py:1896   解析成结构化调用
-⑨  policy         runtime.py:1962   ← 本章的核心
-⑩  read_execute   runtime.py:2299   并发执行 READ
-⑪  observation    runtime.py:2425   把结果写回 messages
+⑥  prepare        runtime.py:1614   校验声明完整性 / 选择并冻结记忆 / 组装 messages
+⑦  model          runtime.py:1739   调模型，拿 tool_calls
+⑧  tool_proposal  runtime.py:2016   解析成结构化调用
+⑨  policy         runtime.py:2082   ← 本章的核心
+⑩  read_execute   runtime.py:2419   并发执行 READ
+⑪  observation    runtime.py:2545   把结果写回 messages
    │  （⑦→⑪ 循环了两轮）
-⑫  policy 再次命中，这次是 WRITE → interrupt()      approval_interrupt runtime.py:2062
+⑫  policy 再次命中，这次是 WRITE → interrupt()      approval_interrupt runtime.py:2182
    ├─ 图挂起 ──── Run = WAITING_APPROVAL ──── 人在界面上看到审批卡片
    │
 ⑬  POST /approvals/{id}/approve            apps/api/routes/approvals.py:54
-   └ AgentRunService.resume                runtime.py:388
+   └ AgentRunService.resume                runtime.py:391
    ├─ 图恢复 ──────────────────────────────────────────────
-⑭  action_execute runtime.py:2148   抢占 → 执行 → 回写
-   observation → model → finish     runtime.py:2475
+⑭  action_execute runtime.py:2268   抢占 → 执行 → 回写
+   observation → model → finish     runtime.py:2595
 ```
 
 下面每一步都写四件事：**输入是什么 / 输出是什么 / 写了哪张表 / 下一步为什么去那里。**
@@ -77,15 +77,16 @@
 
 | | |
 |---|---|
-| **输入** | `POST /threads/{thread_id}/turns`，body 里是 `{"input": "...", "client_token": "..."}` |
-| **输出** | 一个 `ThreadTurnResponse`，里面带 `agent_run_id` |
+| **输入** | `POST /threads/{thread_id}/turns`，body 里是 `{"input_text": "...", "client_token": "..."}` |
+| **输出** | `ThreadTurnSubmitResponse`：`turn`、`run_id`、`agent_version_id`、`reused` |
 | **写了哪张表** | 这一层不写表 |
-| **下一步为什么去那里** | 路由层只做解析和装配。它调 `ThreadService.submit_turn` 是因为「一次提交」这个业务动作需要跨 3 张表事务性完成，那不是路由的职责 |
+| **下一步为什么去那里** | 路由层只做解析和装配。`ThreadService.submit_turn` 按顺序记录 Turn、创建/执行 Run、再关联 Run；这些是分段提交，不是跨表原子事务 |
 
 > **注意 `client_token`。** 它不是装饰。`thread_turns` 上有唯一约束
 > `(thread_id, client_token)`（`packages/threads/models.py:76` 附近）。
-> 用户手抖双击两次发送，第二次会命中约束，拿到**同一个 turn**，
-> 不会产生两次 Run、两次模型调用、两次花钱。
+> 相同 token 不会创建第二个 Turn/Run。若原请求已关联 Run，重试复用其 `run_id`；
+> 若 Turn 已落库但 Run 尚未关联，同步和流式接口都会返回 `THREAD_TURN_IN_PROGRESS`（409），
+> 客户端应使用同一 token 重试。token 是提交幂等身份，不是“任何时刻都能立即拿到 Run”的保证。
 
 ### ③ 解析版本
 
@@ -123,7 +124,7 @@ SELECT agent_id, agent_version_id FROM agent_threads WHERE id = '<thread_id>';
 
 ## 3. 步骤 ⑤：创建 Run
 
-**文件**：`packages/agent_runtime/runtime.py:216` `AgentRunService.run`
+**文件**：`packages/agent_runtime/runtime.py` 的 `AgentRunService.run`
 
 | | |
 |---|---|
@@ -139,8 +140,9 @@ SELECT id, status, agent_version_id, thread_id
 FROM agent_runs ORDER BY created_at DESC LIMIT 1;
 ```
 
-`status = 'RUNNING'`，`thread_id` 有值。
-（如果你是从 Playground 发的，这里会是 `NULL` —— 但除此之外**没有任何区别**。）
+`status = 'RUNNING'`，Thread 提交时 `thread_id` 有值。
+Playground 的 `thread_id` 为 `NULL`；它仍走同一执行图，但不会装配 Thread 历史，
+也不会运行只对 Thread 开放的历史搜索、Artifact 归属和记忆抽取路径。
 
 `agent_runs.status` 的合法值由 DB CHECK 约束定死（`models.py:278-281`）：
 
@@ -155,37 +157,37 @@ NEEDS_ATTENTION · CANCEL_REQUESTED · CANCELLED
 
 ## 4. 步骤 ⑥：prepare
 
-**文件**：`runtime.py:1552`
+**文件**：`runtime.py:1614`
 
 | | |
 |---|---|
 | **输入** | `AgentRunState` 的初始值（只有 `input` 和一堆空列表） |
 | **输出** | 填好的 `messages`（system prompt + **记忆** + 历史 + 本轮输入）、`tool_definitions`（可能包含运行时自带的 `thread_history_search`）、以及两个计数 `memory_message_count` / `history_message_count` |
-| **写了哪张表** | `agent_run_events`；**首次 PREPARE 时还会写 `agent_runs.effective_memory_snapshot`**（自己的 session、自己的 commit，`runtime.py:1465-1479`） |
-| **下一步为什么去那里** | 路由函数 `after_prepare`（`runtime.py:2517`）：有 `failure_code` 就去 `finish`，否则去 `model`。prepare 失败的典型原因是**声明哈希对不上** |
+| **写了哪张表** | `agent_run_events`；**首次 PREPARE 时还会写 `agent_runs.effective_memory_snapshot`**（自己的 session、自己的 commit，`runtime.py:1523-1543`） |
+| **下一步为什么去那里** | 路由函数 `after_prepare`（`runtime.py:2637`）：有 `failure_code` 就去 `finish`，否则去 `model`。prepare 失败的典型原因是**声明哈希对不上** |
 
 ### prepare 到底做了几件事？五件，顺序不能换
 
-把 `runtime.py:1552-1648` 整段打开，你会发现它像一张**登机口的检查清单**：
+把 `runtime.py:1614-1720` 整段打开，你会发现它像一张**登机口的检查清单**：
 在花第一分钱之前，把所有「这次执行的前提」验一遍。
 
 #### 第 1 件：四道完整性校验（`:1562` → `:1587`）
 
 ```python
-# :1562  版本还在吗（而且是本 workspace 的）
+# _AgentRunGraph.prepare：版本还在吗（而且是本 workspace 的）
 if version is None:
     raise AgentHubError("AGENT_VERSION_NOT_FOUND", ..., 404)
 
-# :1566  声明本身有没有被改过
+# 声明本身有没有被改过
 if canonical_json_hash(version.resolved_spec) != version.resolved_spec_hash:
     raise AgentHubError("AGENT_VERSION_INTEGRITY_ERROR", ..., 422)
 
-# :1572  这次 Run 当初记下的哈希，和版本现在的哈希一致吗
+# 这次 Run 当初记下的哈希，和版本现在的哈希一致吗
 if (self.run.resolved_spec_hash is not None
         and self.run.resolved_spec_hash != version.resolved_spec_hash):
     raise AgentHubError("AGENT_VERSION_INTEGRITY_ERROR", ..., 422)
 
-# :1582  schema 版本号和 spec 里自述的版本号一致吗
+# schema 版本号和 spec 里自述的版本号一致吗
 if version.spec_schema_version != version.resolved_spec.get("spec_schema_version"):
     raise AgentHubError("AGENT_VERSION_INTEGRITY_ERROR", ..., 422)
 ```
@@ -194,10 +196,10 @@ if version.spec_schema_version != version.resolved_spec.get("spec_schema_version
 
 | 检查 | 防的是 | 什么时候真的会触发 |
 |---|---|---|
-| `:1562` | 跨 workspace 读 / 版本被删 | 工单里带了别人的 version_id |
-| `:1566` | **声明被旁路修改** | 有人手工 `UPDATE resolved_spec` |
-| `:1572` | **Run 中途换了声明** | Run 创建后版本行被替换（恢复一次长时间挂起的 Run 时最有可能） |
-| `:1582` | spec 内外自述不一致 | 迁移写了一半、手工造数据 |
+| version lookup | 跨 workspace 读 / 版本被删 | 工单里带了别人的 version_id |
+| canonical hash check | **声明被旁路修改** | 有人手工 `UPDATE resolved_spec` |
+| Run hash comparison | **Run 中途换了声明** | Run 创建后版本行被替换（恢复一次长时间挂起的 Run 时最有可能） |
+| schema-version check | spec 内外自述不一致 | 迁移写了一半、手工造数据 |
 
 第 3 条尤其值得注意：它比较的是 **Run 上冻结的哈希** 和 **版本行当前的哈希**。
 这一列（`agent_runs.resolved_spec_hash`，`models.py:317`）存在的唯一理由就是这个比较。
@@ -208,7 +210,7 @@ if version.spec_schema_version != version.resolved_spec.get("spec_schema_version
 不是防止有人改，是**保证改了会被发现**。
 03 章 §12 会让你亲手把 `resolved_spec` 改掉，然后看这条 if 在**模型被调用之前**拦住它。
 
-#### 第 2 件：解析成不可变的 spec（`:1581`）
+#### 第 2 件：解析成不可变的 spec
 
 ```python
 spec = parse_frozen_agent_spec(version.resolved_spec, workspace_id=workspace_id)
@@ -219,7 +221,7 @@ system prompt、模型档案、retrieval 配置、runtime 上限，全都从这�
 「跑到一半有人改了 Agent」这件事在物理上不可能影响本次 Run——
 不是因为加了锁，是因为**根本没有第二次读取**。
 
-#### 第 3 件：列出这次能用的工具（`:1588`）
+#### 第 3 件：列出这次能用的工具
 
 ```python
 definitions = await PublishedToolCatalog(session).list(
@@ -234,41 +236,46 @@ tool_definitions = {definition.identity: definition for definition in definition
 **一个来源，三处消费，所以三处看到的一定是同一份。**
 
 有一个例外值得知道：如果这个版本打开了 `memory.thread_history_search`，
-prepare 还会往这个字典里**塞一个运行时自带的工具**（`runtime.py:1598`）。
+prepare 还会往这个字典里**塞一个运行时自带的工具**（`_AgentRunGraph.prepare`）。
 它不来自 `PublishedToolCatalog`，所以你在 Agent 的工具列表里找不到它，
 但模型看得见。三个前置条件在 01 章 §8 里。
 
-#### 第 4 件：选记忆，并且只选一次（`:1420` `_memories`，调用点 `:1592`）
+#### 第 4 件：选记忆，并且只选一次（`_AgentRunGraph._memories`，由 `prepare` 调用）
 
 长期记忆默认是**关着**的（`memory.long_term_memory`，默认 `false`），
-关着的时候这一件事等于零成本：`_memories` 在 `:1438` 就返回空了。
+关着的时候这一件事等于零成本：`_memories` 在入口检查后就返回空了。
 
 打开之后，它的行为分两支，而**分支依据是 Run 自己的一列**：
 
 ```python
-snapshot = getattr(self.run, "effective_memory_snapshot", None) or {}   # :1442
-frozen = bool(snapshot.get("selected_at"))                              # :1443
+snapshot = getattr(self.run, "effective_memory_snapshot", None) or {}
+frozen = "selected_at" in snapshot
 if frozen:
-    selected = await selector.load(memory_ids=...)      # :1448  按 id 取回来
+    if "memory_content_hashes" in snapshot:
+        selected = await selector.load(memory_ids=..., memory_content_hashes=...)
+    else:  # 历史 ID-only 快照
+        selected = await selector.load(memory_ids=...)
 else:
-    selected = await selector.select(..., limit=MAX_INJECTED_MEMORIES)  # :1450
-    await self._freeze_memory_snapshot(selected, ...)   # :1456  写死
+    selected = await selector.select(..., limit=MAX_INJECTED_MEMORIES)
+    await self._freeze_memory_snapshot(selected, ...)
 ```
 
 - **第一次 PREPARE** 走 `select`，条数上限是 `MAX_INJECTED_MEMORIES`，
-  然后立刻把选中的 id 写进 `agent_runs.effective_memory_snapshot`：
-  `{"selected_at": "...", "memory_ids": [...]}`（`_freeze_memory_snapshot`，`:1465`）。
-- **之后的每一次 PREPARE**（审批恢复、重放）都走 `load`，**按 id 取**，
-  连已经被 supersede 或 invalidate 的行也照取不误。
+  然后立刻把选中的 id 和内容哈希写进 `agent_runs.effective_memory_snapshot`：
+  `{"selected_at": "...", "memory_ids": [...], "memory_content_hashes": {id: sha256}}`
+  （`_freeze_memory_snapshot`）。
+- **之后的每一次 PREPARE**（审批恢复、重放）都走 `load`，按冻结顺序取回并校验哈希，
+  连已经被 supersede 或 invalidate 的行也照取不误；更早的 ID-only 快照仍兼容读取。
 
 为什么？因为一次重放要回答的问题是「**这次 Run 当时被喂了什么**」，
 不是「**它现在会被喂什么**」。这两个问题的答案一旦混在一起，
-「复现三个月前那次 Run」就不再成立。ADR-011 写的就是这件事。
+「复原同一个 Run 当时的上下文输入」就不再成立。它不保证重新调用模型能逐字复现原答案；
+ADR-011 讲的是单次 Run 的输入快照与恢复语义。
 
 还有一个细节值得单独想三十秒：**快照是一个对象，不是一个裸数组**。
 如果只存 `["id1", "id2"]`，那么「选过，但一条都没选中」和「还没选过」
 都是空列表、都是 falsy——而这两者的区别正是整个确定性主张的全部内容。
-`_memories` 的 docstring（`:1423-1435`）把这句话写下来了，去读原文。
+`_AgentRunGraph._memories` 的 docstring 把这句话写下来了，去读原文。
 
 #### 第 5 件：拼 messages，而且顺序是有约束的
 
@@ -313,14 +320,14 @@ messages = [                                             # :1613-1619
 
 这里有一处**故意的反直觉**：记忆消息的 `role` 是 `"system"`，
 但它**不算** SYSTEM_PROMPT。`_categorize_messages` 的 docstring
-（`runtime.py:2713-2717`）解释了原因——分类器读的是**位置**，不是 role；
+（当前 `runtime.py:2810` 起）解释了原因——分类器读的是**位置**，不是 role；
 记忆是「证据」，上下文不够时它应该可以被丢掉，
 而 Agent 的人设不能。靠 role 分类就没法表达这个区别了。
 
 改这个列表的顺序，不会报错，但会静默地改变「上下文不够时先扔什么」。
 这是全项目里少数几处「顺序即语义」的地方之一，所以它被注释保护了起来。
 
-历史注入在 `runtime.py:1378` `_thread_history`。
+历史注入在 `runtime.py:1393` `_thread_history`。
 **打断点看它的返回值**——只有用户输入和最终回答，没有中间工具结果。
 这一条决定了后面模型的行为（见 §9）。
 
@@ -357,7 +364,7 @@ SELECT effective_memory_snapshot FROM agent_runs WHERE id = '<run_id>';
 
 ## 5. 步骤 ⑦：model（第一轮）
 
-**文件**：`runtime.py:1668`
+**文件**：`runtime.py:1739`
 
 | | |
 |---|---|
@@ -368,16 +375,12 @@ SELECT effective_memory_snapshot FROM agent_runs WHERE id = '<run_id>';
 
 **进节点就先检查预算**，顺序很重要：
 
-```
-runtime.py:1674   max_steps 超了吗？            → AGENT_STEP_LIMIT_EXCEEDED
-runtime.py:1677   _cost_guard_failure(...)      → 定义在 :2573
-runtime.py:1691   拿到结果，写回 failure_code
-```
+`model` 节点依次检查 `max_steps`、Run 成本闸门，再请求模型；失败码在拿到模型响应前就能返回。
 
 默认 `max_steps = 8`（`runtime_config.py`）。
 **这是在调模型之前检查的**，所以第 9 轮不会产生费用。
 
-成本闸门（`runtime.py:2573`）里有一条反直觉的规则，值得现在就看：
+成本闸门（`runtime.py:2693`）里有一条反直觉的规则，值得现在就看：
 
 ```python
 if not usage_records:
@@ -398,7 +401,7 @@ if not usage_records:
 
 ## 6. 步骤 ⑧：tool_proposal
 
-**文件**：`runtime.py:1896`
+**文件**：`runtime.py:2016`
 
 | | |
 |---|---|
@@ -445,9 +448,9 @@ f"call-{state['model_round_count']}-{index}"
 #### ④ 两道预算闸
 
 ```
-runtime.py:1929   算签名     canonical_json_hash({"tool": name, "arguments": 归一化参数})
-runtime.py:1936   max_identical_calls  默认 2   同一个工具+同一组参数最多提两次
-runtime.py:1942   max_tool_calls       默认 12  整个 Run 的总量
+runtime.py:2016   算签名     canonical_json_hash({"tool": name, "arguments": 归一化参数})
+runtime.py:2016   max_identical_calls  默认 2   同一个工具+同一组参数最多提两次
+runtime.py:2016   max_tool_calls       默认 12  整个 Run 的总量
 ```
 
 `max_identical_calls` 拦的是**模型打转**：
@@ -481,7 +484,7 @@ return {"proposed_tool_calls": ..., "pending_tool_calls": ...}
 
 ## 7. 步骤 ⑨：policy（第一次命中 — 全部放行）
 
-**文件**：`runtime.py:1962` — **整章最重要的一节。**
+**文件**：`runtime.py:2082` — **整章最重要的一节。**
 
 | | |
 |---|---|
@@ -564,7 +567,7 @@ pre_observations[call_id] = ToolResult.failure(
 
 ## 8. 步骤 ⑩：read_execute
 
-**文件**：`runtime.py:2299`
+**文件**：`runtime.py:2419`
 
 | | |
 |---|---|
@@ -576,7 +579,7 @@ pre_observations[call_id] = ToolResult.failure(
 **回答猜测 3**：并行，上限 3。
 
 ```python
-# runtime.py:2304
+# runtime.py:2419
 semaphore = asyncio.Semaphore(limits.max_parallel_reads)   # 默认 3
 ```
 
@@ -584,7 +587,7 @@ semaphore = asyncio.Semaphore(limits.max_parallel_reads)   # 默认 3
 为什么是 3 不是 4？因为这些调用打的是外部系统（MCP 服务器、数据库），
 并发上限是**保护被调方**的，不是优化自己的。
 
-Artifact 在这一步产生（`runtime.py:2377` `_record_artifacts`）。
+Artifact 在这一步产生（`runtime.py:2497` `_record_artifacts`）。
 **去查一下**：
 
 ```sql
@@ -599,7 +602,7 @@ WHERE run_id = '<run_id>' ORDER BY created_at;
 
 ## 9. 步骤 ⑪→⑦：observation 与第二轮
 
-**文件**：`runtime.py:2425`
+**文件**：`runtime.py:2545`
 
 | | |
 |---|---|
@@ -611,7 +614,7 @@ WHERE run_id = '<run_id>' ORDER BY created_at;
 ### 这个节点的循环，是全章最值得抄一遍的十行
 
 ```python
-# runtime.py:2431
+# runtime.py:2545
 for call in state.get("proposed_tool_calls", []):
     result = pre.get(call["tool_call_id"],
                      executed.get(call["tool_call_id"]))
@@ -635,7 +638,7 @@ for call in state.get("proposed_tool_calls", []):
 ### 终止错误：只有四个
 
 ```python
-# runtime.py:109
+# runtime.py:111
 _TERMINAL_TOOL_ERRORS = frozenset({
     "TOOL_APPROVAL_NOT_AVAILABLE",
     "TOOL_REVISION_INTEGRITY_ERROR",
@@ -678,14 +681,14 @@ _TERMINAL_TOOL_ERRORS = frozenset({
 
 ### 上下文预算
 
-写回 `messages` 时会过一遍上下文预算（调用点 `runtime.py:1695` → `_admit_context` 定义在 `:1831` → `context_budget.py:333` `admit`）。
+写回 `messages` 时会过一遍上下文预算（`_AgentRunGraph.model` → `_admit_context` → `ContextBudgetPolicy.admit`）。
 `max_tool_result_tokens` 默认 4000。超了就截断，并在事件里记一份**准入报告**
 ——不是静默丢弃。04 章 Lab 6 会让你把它调到 200 看会发生什么。
 
 注意预算是**在这里、按每条工具结果**算的：
 
 ```python
-# runtime.py:2437
+# _AgentRunGraph.observation
 budget = ContextBudgetConfig(**state["runtime"]["context_budget"])
 payload = _bounded_tool_result(result, max_tool_result_tokens=budget.max_tool_result_tokens)
 ```
@@ -695,7 +698,7 @@ payload = _bounded_tool_result(result, max_tool_result_tokens=budget.max_tool_re
 **两层预算，一层管单条，一层管全局。**
 
 同一个地方还会剥掉 payload 自带的 `trust` / `data_trust` 键
-（`context_budget.py:950`）。工具说自己可信，进不了上下文。
+（`context_budget.py:962`）。工具说自己可信，进不了上下文。
 
 **准入报告里还有一个类别值得你专门找一下：`MEMORY`**
 （`context_budget.py:48`）。打开长期记忆之后它才会出现，它的归属很说明问题：
@@ -704,7 +707,7 @@ payload = _bounded_tool_result(result, max_tool_result_tokens=budget.max_tool_re
 _MANDATORY_CATEGORIES    :51-58   RUNTIME_POLICY / SYSTEM_PROMPT / CURRENT_USER_TASK / TOOL_DEFINITIONS
 _PROJECTABLE_CATEGORIES  :59-61   RAG_EVIDENCE / TOOL_RESULT / MEMORY      ← 记忆在这里
 _UNTRUSTED_CATEGORIES    :66-67   TOOL_RESULT / MEMORY                     ← 记忆也在这里
-分池             :537   MEMORY 和 RAG_EVIDENCE 共用 evidence 池
+分池             :538+  新启用长期记忆的版本有独立 max_memory_tokens=1500；旧 spec / 记忆关闭时仍共用 evidence 池
 ```
 
 也就是说，**记忆被当成证据，不是当成指令**：
@@ -712,6 +715,8 @@ _UNTRUSTED_CATEGORIES    :66-67   TOOL_RESULT / MEMORY                     ← �
 枚举定义上方那段注释（`:45-47`）把理由写死了——
 三个月前记下的一条偏好，**绝不能把现在正在问的问题挤出窗口**，
 而把它放进 mandatory 层正好就会允许这件事发生。
+对新发布的记忆启用版本，记忆池独立于 RAG evidence；老版本继续沿用共享池以保持既有行为。
+`last_used_at` 也不是“被选中”就更新：只有记忆通过最终上下文准入仍被注入时才会触碰。
 
 它同时还是「不可信」的，理由和工具结果并列：工具输出不可信是因为远端系统产生的，
 记忆不可信是因为**模型写的**。两者都不许靠往自己 payload 里塞一个好看的
@@ -751,13 +756,13 @@ approval_policy  = ALWAYS
 
 ### 10.2 一道防线检查
 
-`runtime.py:1994`：如果这个 Run 没有可用的审批通道，
+`_AgentRunGraph.policy`：如果这个 Run 没有可用的审批通道，
 直接 `TOOL_APPROVAL_NOT_AVAILABLE`。
 **不是降级成自动执行。** 缺少审批能力的后果是执行不了，不是不用批。
 
 ### 10.3 建审批记录（幂等）
 
-`runtime.py:1996-2005` → `packages/approvals/service.py:39` `create_or_get`：
+`_AgentRunGraph.policy` → `packages/approvals/service.py` 的 `create_or_get`：
 
 ```
 canonicalize_arguments(...)     contracts.py:53
@@ -769,7 +774,7 @@ compute_logical_action_id(...)  contracts.py:92
   → 输入包含 workspace / tool_identity / canonical_args_hash / proposal_ordinal
 ```
 
-`proposal_ordinal` 在 `runtime.py:1997` 算出来：
+`proposal_ordinal` 在 `policy` 节点按模型轮次和调用序号算出来：
 
 ```python
 proposal_ordinal=state.get("model_round_count", 0) * 1000 + index
@@ -799,7 +804,7 @@ idempotency_key   = logical_action_id     ← service.py:84，两者故意相同
 
 ### 10.4 挂起
 
-`runtime.py:2062`，`approval_interrupt(...)`：
+`runtime.py:2182`，`approval_interrupt(...)`：
 
 ```python
 resume = approval_interrupt({
@@ -813,7 +818,7 @@ resume = approval_interrupt({
 LangGraph 把**整个 state** 序列化进 PostgreSQL 的
 `langgraph_checkpoint` schema，然后抛出。
 
-`runtime.py:522` `_mark_waiting` 把 Run 置成 `WAITING_APPROVAL`。
+`runtime.py:525` `_mark_waiting` 把 Run 置成 `WAITING_APPROVAL`。
 
 **回答猜测 4**：不是 `policy` 节点直接写的状态。
 `interrupt()` 抛出后由 `AgentRunService` 的外层捕获并写状态——
@@ -852,8 +857,8 @@ POST /approvals/{id}/approve
   ├ ApprovalService.decide(...)      packages/approvals/service.py:155
   │   UPDATE approvals SET decision_status='APPROVED', decided_by=..., decided_at=...
   │   WHERE id=... AND decision_status='PENDING'      ← 守卫在 WHERE 里
-  └ AgentRunService.resume(run_id)   routes:67-70 → runtime.py:388
-      └ graph.invoke(resume_command({...}))           runtime.py:428
+  └ AgentRunService.resume(run_id)   routes:67-70 → runtime.py:391
+      └ graph.invoke(resume_command({...}))           runtime.py:454
 ```
 
 | | |
@@ -943,9 +948,9 @@ if (current.run_id != self.run.id
 这几个小时里，worker 可能抽出了新记忆，管理员可能作废了几条旧的。
 恢复之后 `prepare` 会完整地再跑一遍——如果它重新去选一次，
 同一个 Run 就会在中途换掉自己的上下文。
-所以 `_memories` 走的是**重放分支**（`runtime.py:1442-1456`）：
-读 `effective_memory_snapshot.selected_at`，非空就按 id `load` 回来，
-**包括那些已经被 supersede 或 invalidate 的行**。
+所以 `_memories` 走的是**重放分支**：
+读 `effective_memory_snapshot` 的 `selected_at`，存在就按快照中的 id 与内容哈希 `load` 回来，
+**包括那些已经被 supersede 或 invalidate 的行**；ID-only 历史快照继续兼容。
 这和第 ④ 道检查是同一个价值判断的两种形态——
 一个是「变了就拦住」，一个是「变了也照原样」，
 区别在于工具定义变了必须让人重新看，而记忆是 Run 的输入，输入只能冻结。
@@ -971,7 +976,7 @@ Run 回到 `WAITING_APPROVAL` 继续等。
 
 ## 12. 步骤 ⑭：action_execute
 
-**文件**：`runtime.py:2148`
+**文件**：`runtime.py:2268`
 
 | | |
 |---|---|
@@ -988,7 +993,7 @@ Run 回到 `WAITING_APPROVAL` 继续等。
      SET execution_status='CLAIMED', claimed_at=now()
      WHERE id=... AND execution_status='NOT_STARTED'
      RETURNING ...
-     ← 抢不到 → runtime.py:2214 → ACTION_CLAIM_LOST
+     ← 抢不到 → runtime.py:2268 → ACTION_CLAIM_LOST
 
 ② ActionRuntime.execute(...)      packages/tools/actions.py:170
      MCP 的话 → packages/mcp/runtime.py:238 → :105 execute_write
@@ -1003,7 +1008,7 @@ Run 回到 `WAITING_APPROVAL` 继续等。
 
 ### 12.1 但在 claim 之前，还有一道「已经跑过了」的短路
 
-把 `runtime.py:2183` 打开：
+看 `_AgentRunGraph.action_execute` 的终态短路：
 
 ```python
 if approval.execution_status in {SUCCEEDED, FAILED, UNKNOWN_OUTCOME}:
@@ -1070,7 +1075,7 @@ except TimeoutError:
 - 不能标 FAILED（可能执行了，标 FAILED 会诱导重试 → 回滚两次）
 - 只能标 UNKNOWN_OUTCOME
 
-然后 `runtime.py:2391` `_is_uncertain_action_failure` 命中，
+然后 `runtime.py:2728` `_is_uncertain_action_failure` 命中，
 Run 被置成 **`NEEDS_ATTENTION`** ——七个状态里专门为这件事留的那一个。
 
 04 章 Lab 3 会让你亲手制造这个状态：在 WRITE 派发之后、返回之前，
@@ -1080,7 +1085,7 @@ Run 被置成 **`NEEDS_ATTENTION`** ——七个状态里专门为这件事留�
 
 ## 13. 终点：finish
 
-**文件**：`runtime.py:2475`
+**文件**：`runtime.py:2595`
 
 所有路径——成功、失败、预算超限、审批不可用——**都从这里出去**。
 
@@ -1115,7 +1120,7 @@ async def finish(self, state):
 
 ### 五个路由函数，一起读只要二十行
 
-整张图的**全部**控制流就在 `runtime.py:2517-2540`。
+整张图的**全部**控制流就在 `runtime.py:2637-2660`。
 这二十行比八个节点加起来更值得背：
 
 ```python
@@ -1217,14 +1222,14 @@ curl -N -H "Authorization: Bearer $TOKEN" \
 | 1 | `thread_turns`，不是 `agent_runs` | §2 ④ |
 | 2 | 一次性四个 | §5 |
 | 3 | 并行，`max_parallel_reads` 默认 3 | §8 |
-| 4 | 不是 policy 写的，是服务层 `_mark_waiting`（`runtime.py:522`） | §10.4 |
+| 4 | 不是 policy 写的，是服务层 `_mark_waiting`（`runtime.py:525`） | §10.4 |
 | 5 | 同一个 Run，run_id 不变 | §11 |
 | 6 | 不需要，checkpoint 里有完整 messages | §11 |
 | 7 | 什么都不会发生，状态在数据库里 | §10.5 |
 | 8 | **继续跑。** 变成一条 `TOOL_APPROVAL_DENIED` 的工具结果回喂给模型 | §7 `pre_observations` |
 | 9 | **不会。** `UNKNOWN_TOOL` 同样是回喂，模型自己换一个 | §7 `pre_observations` |
 | 10 | `after_policy`，依据是 `action_calls` 空不空 | §13 |
-| 11 | **不会重选。** 第一次 PREPARE 选完就把 id 冻进 `agent_runs.effective_memory_snapshot`，之后每次 PREPARE 都按 id `load`，连已作废的也照取 | §4 第 4 件 / §4.1 |
+| 11 | **不会重选。** 第一次 PREPARE 冻结 id 与内容哈希；之后每次 PREPARE 都按快照重放并校验，连已作废的也照取；历史 ID-only 快照兼容 | §4 第 4 件 / §4.1 |
 
 **猜错的那几条，去把对应小节的代码再打开一次**（代码，不是这篇文档）。
 
@@ -1239,8 +1244,8 @@ curl -N -H "Authorization: Bearer $TOKEN" \
 > 用户提交先写 Turn 再建 Run，Run 状态由一条 DB CHECK 约束限定在七个值里。
 >
 > `prepare` 在调模型之前做四道完整性校验，然后**把这次 Run 的输入冻结下来**——
-> 打开长期记忆的话，它只在第一次 PREPARE 选一次，把选中的 id 写进
-> `effective_memory_snapshot`，之后每次恢复都按 id 取回同一批，
+> 打开长期记忆的话，它只在第一次 PREPARE 选一次，把选中的 id 与内容哈希写进
+> `effective_memory_snapshot`，之后每次恢复都按快照取回并校验同一批，
 > 包括已经被作废的那些。输入不冻结，同一个 Run 恢复两次就会有两个上下文。
 >
 > 图里唯一的分叉是 `policy` 节点。判定函数只有 26 行，

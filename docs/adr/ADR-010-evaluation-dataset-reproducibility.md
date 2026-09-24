@@ -33,3 +33,9 @@ M7-B decisions:
   environment value, or the infrastructure Git adapter. The domain does not invoke subprocesses.
 - Holdout exposure is an append-only persisted record because even a queued holdout run changes
   what may be learned from that split.
+
+These records make evaluation inputs and definitions identifiable, immutable where required,
+and integrity-checkable. They do not make remote model inference deterministic: output text,
+approximate retrieval/reranking behavior, provider-side model revisions, and mutable workspace
+memory selection can still affect case observations. The experiment hash identifies the frozen
+definition; each AgentRun separately records its effective memory snapshot and observed result.

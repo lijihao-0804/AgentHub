@@ -32,6 +32,7 @@ from packages.evaluation.runner import (
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
+from packages.memory.store import SqlAlchemyMemoryStore
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.observability import ProductionTraceSink
@@ -170,6 +171,10 @@ async def _build_driver(settings, factory, *, judge: AnswerQualityJudge | None =
             session_factory=factory, mcp_executor=McpActionExecutor(mcp_executor)
         ),
         checkpoint_adapter=LangGraphCheckpointAdapter(settings.database_url),
+        # Evaluation cases use the same published memory policy as production.
+        # Each AgentRun freezes its selected memory ids and hashes; no writer is
+        # configured, so evaluation cannot train the memory store from its own output.
+        memory_selector=SqlAlchemyMemoryStore(factory),
     )
 
     async def context_factory(run):
