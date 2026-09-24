@@ -272,7 +272,9 @@ accepted = expected.get("accepted_answers")
 第二问现在答不了。而它有一个与本项目完全同构的答案：
 
 > **Memory 也走快照。**
-> 就像检索必须绑 `knowledge_snapshot_id`，一次 Run 绑一个 `memory_snapshot_id`，
+> （这是当时提出的方案名称；当前实现没有独立 `memory_snapshot_id`，而是在
+> `effective_memory_snapshot` 中冻结 memory IDs 与内容哈希。）就像检索必须绑
+> `knowledge_snapshot_id`，一次 Run 绑一个 `memory_snapshot_id`，
 > 写进冻结执行快照。于是「同一输入在不同时间得到不同结果」不再是黑盒——
 > 差异可精确归因到哪个 memory 快照，重放时拿旧快照就能复现。
 >
@@ -292,7 +294,7 @@ A 买的是「Run 不再依赖连接」这个可验证的系统性质，量级�
 > **回头看，这个「量级」判断只对了一半。** ADR 写完之后，
 > 「Memory 走快照」这句话并没有停在一段话上：它直接变成了
 > `agent_runs.effective_memory_snapshot` 这一列，以及「首次 PREPARE 选一次、
-> 之后每次都按 id 重放」这个可验证的系统性质——
+> 之后每次都按快照重放并校验内容哈希」这个可验证的系统性质——
 > 和 A 买的东西是同一类东西。
 > 真正让它从第二档升上来的，不是记忆本身变重要了，
 > 而是**先做阶段 0（让上下文可重放）之后，记忆才变得敢做**。

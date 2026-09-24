@@ -20,16 +20,16 @@
 
 | 文件 | 讲什么 | 什么时候读 |
 |---|---|---|
-| [01-codebase-navigation.md](01-codebase-navigation.md) | **代码地图**：我想理解 X → 第一入口是谁 → 然后看谁 → 最后看谁。九条主线，每条标明入口函数、核心数据结构、**不应该看什么**、最值得打断点的位置 | 最先读。这是整个目录的索引 |
+| [01-codebase-navigation.md](01-codebase-navigation.md) | **代码地图**：我想理解 X → 第一入口是谁 → 然后看谁 → 最后看谁。十条主线，每条标明入口函数、核心数据结构、**不应该看什么**、最值得打断点的位置 | 最先读。这是整个目录的索引 |
 | [02-one-run-end-to-end.md](02-one-run-end-to-end.md) | **只跟一次 Run**：故障排查 Agent 查日志 → 提议 rollback → 卡在审批 → 批准 → 恢复。每一步写清楚输入/输出/写了哪张表/下一步为什么去那里 | 读完 01 立刻读 |
 | [03-domain-model-lifecycle.md](03-domain-model-lifecycle.md) | **9 个核心对象的生命周期**（不是字段表）。重点回答：为什么有些东西可变，有些东西必须不可变，以及「不可变」到底是谁在拦 | 02 读完，想把表结构串起来时 |
-| [04-runtime-labs.md](04-runtime-labs.md) | **12 个实验**，没有理论。改一个变量 → 预测 → 跑 → 记录真实行为 → 解释。覆盖预算、审批、失败、知识、记忆 | 03 之后。也可以在 02 卡住的地方随时插进来 |
+| [04-runtime-labs.md](04-runtime-labs.md) | **13 个实验**，没有理论。改一个变量 → 预测 → 跑 → 记录真实行为 → 解释。覆盖预算、审批、失败、知识、记忆和正式评测 | 03 之后。也可以在 02 卡住的地方随时插进来 |
 
 ---
 
 ## 每章的固定骨架
 
-四章都按同一个结构写，读的时候**按顺序做，不要跳**：
+前三章负责建立代码和领域模型；第四章中的**每个实验**按下面的结构执行，读的时候不要跳：
 
 ```
 Before reading   先不看代码，写下你猜它是怎么实现的
@@ -58,16 +58,17 @@ Interview        用两分钟把这件事讲出来
 阶段 2  02 §5~§9 + 04 Lab 1 / Lab 2  把审批那一段亲手打断一次
 阶段 3  03 全文                      把骨架挂到数据库上
 阶段 4  04 Lab 3 ~ Lab 6             预算、失败、恢复三类边界
-阶段 5  04 Lab 7 ~ Lab 10            知识、MCP、评估
+阶段 5  04 Lab 7 ~ Lab 10            知识与 MCP（不是正式评测）
 阶段 6  04 Lab 11 ~ Lab 12           记忆的选择与冻结、检索模型的预热
-阶段 7  回到 docs/report/03 和 08     此时那两章会变得很好读
+阶段 7  04 Lab 13                    数据集 → 变体 → 实验冻结 → Run → 指标
+阶段 8  回到 docs/report/03 和 08     此时那两章会变得很好读
 ```
 
 阶段 6 配套读 [`docs/report/19-长期记忆与上下文管理实施报告.md`](../report/19-长期记忆与上下文管理实施报告.md)
 和 [`docs/adr/ADR-011-memory-must-be-snapshotted.md`](../adr/ADR-011-memory-must-be-snapshotted.md)。
 这两份解释的是同一件事：记忆是 Run 的**输入**，输入必须在第一次 PREPARE 时冻结。
 
-阶段 7 不是凑数。`docs/report/03-核心机制详解.md` 里有 11 个技术亮点，
+阶段 8 不是凑数。`docs/report/03-核心机制详解.md` 里有 15 个技术机制，
 第一次读的时候它们是 11 条并列的结论；
 走完前六个阶段之后再读，它们会变成 11 个你已经亲手碰过的位置。
 
@@ -101,7 +102,7 @@ Interview        用两分钟把这件事讲出来
 | `06-mcp-and-tool-governance.md` | 连接生命周期、凭据加密、SSRF、发现与导入 | 01 章已给出全部入口和行号，够查了。单独成章要等真正去改 `client.py` 的时候 |
 | `07-evaluation-from-production.md` | 从 Run 导入评估集、实验、消融、发布门禁 | 评估平台目前 0 条门禁策略在跑，写实验手册会变成写使用说明书 |
 | `08-applications-as-proof.md` | 四个应用如何证明「加一个应用改 0 行运行时」 | 这是**论证**不是**学习**，属于 `docs/report/04`，重写一遍是冗余 |
-| `09-failure-casebook.md` | 失败码逐条：怎么复现、怎么读、该怎么处理 | 04 章已经用实验覆盖了最重要的五类（成本、上下文、UNKNOWN_OUTCOME、断流，以及部署之后第一次 `search_knowledge` 必然 `TOOL_TIMEOUT`——BGE-M3 + cross-encoder 冷加载约 35s，工具预算 30s，开关是 `knowledge_warm_models_on_start`，见 `packages/core/config/settings.py:87`，默认 False，成因写在 `packages/knowledge/composition.py:78-88` 的 docstring 里）。剩下的等实验里真撞到再补，凭想象编案例没有价值 |
+| `09-failure-casebook.md` | 失败码逐条：怎么复现、怎么读、该怎么处理 | 04 章已经用实验覆盖了最重要的五类（成本、上下文、UNKNOWN_OUTCOME、断流，以及**未预热的冷进程**第一次 `search_knowledge` 超时——本机 BGE-M3 + cross-encoder 冷加载约 35s，工具预算 30s；`knowledge_warm_models_on_start` 默认 False。开关定义在 `packages/core/config/settings.py`，成因见 `packages/knowledge/composition.py` 的 docstring）。剩下的等实验里真撞到再补，凭想象编案例没有价值 |
 | `10-resume-extraction.md` | 从项目里提炼简历条目 | **现在不该写。** 简历句子是学习的副产品，不是学习的目标；先写它会让人去背结论而不是读代码 |
 | `11-long-term-memory.md` | 长期记忆：抽取 → 写入闸门 → 选择 → 冻结 → 注入 | **不单独成章，故意的。** 长期记忆已经是上线子系统，它不是一条并行支线，而是一次 Run 的组成部分——单独成章会让人以为「记忆」是可以脱离 Run 学的。它被**内联**进了：01 章 §11（代码地图）、02 章 §4（prepare 的第 4 件事）、03 章 §9（`WorkspaceMemory` 与 `effective_memory_snapshot` 的生命周期）、04 章 Lab 11（在审批中途把记忆作废） |
 

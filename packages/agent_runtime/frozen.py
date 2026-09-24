@@ -133,7 +133,8 @@ def parse_frozen_agent_spec(
     memory_value = runtime_value.get("memory", _DEFAULT_MEMORY)
     if not isinstance(memory_value, Mapping):
         raise _invalid_binding()
-    if not set(memory_value).issubset(_DEFAULT_MEMORY):
+    allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens"}
+    if not set(memory_value).issubset(allowed_memory_keys):
         raise _invalid_binding()
     memory: dict[str, bool] = {}
     for key, default in _DEFAULT_MEMORY.items():
@@ -141,6 +142,17 @@ def parse_frozen_agent_spec(
         if not isinstance(value, bool):
             raise _invalid_binding()
         memory[key] = value
+    max_memory_tokens = memory_value.get("max_memory_tokens")
+    if max_memory_tokens is not None and (
+        isinstance(max_memory_tokens, bool)
+        or not isinstance(max_memory_tokens, int)
+        or max_memory_tokens < 1
+    ):
+        raise _invalid_binding()
+    if max_memory_tokens is not None and not memory["long_term_memory"]:
+        raise _invalid_binding()
+    if max_memory_tokens is not None:
+        memory["max_memory_tokens"] = max_memory_tokens
     runtime["memory"] = memory
     return FrozenAgentSpec(
         model_plan=ResolvedModelExecutionPlan(

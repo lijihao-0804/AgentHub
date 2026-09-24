@@ -47,10 +47,8 @@ services:
       AGENTHUB_CREDENTIAL_MASTER_KEY: ${AGENTHUB_CREDENTIAL_MASTER_KEY:?AGENTHUB_CREDENTIAL_MASTER_KEY is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
-      # The first `search_knowledge` of a process loads BGE-M3 and the
-      # cross-encoder, which took ~35s here -- longer than the 30s a tool call
-      # is given, so the first retrieval after every deploy failed with
-      # TOOL_TIMEOUT. Load them at start instead, off the request path.
+      # Retrieval models are lazy-loaded; prewarm them so a cold worker
+      # does not pay model-load time inside the first tool call's timeout.
       AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START: "true"
       AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs
     ports:
@@ -84,10 +82,8 @@ services:
       AGENTHUB_CREDENTIAL_MASTER_KEY: ${AGENTHUB_CREDENTIAL_MASTER_KEY:?AGENTHUB_CREDENTIAL_MASTER_KEY is required}
       AGENTHUB_REDIS_URL: redis://redis:6379/0
       AGENTHUB_QDRANT_URL: http://qdrant:6333
-      # The first `search_knowledge` of a process loads BGE-M3 and the
-      # cross-encoder, which took ~35s here -- longer than the 30s a tool call
-      # is given, so the first retrieval after every deploy failed with
-      # TOOL_TIMEOUT. Load them at start instead, off the request path.
+      # Retrieval models are lazy-loaded; prewarm them so a cold API process
+      # does not pay model-load time inside the first tool call's timeout.
       AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START: "true"
       AGENTHUB_BLOB_ROOT: /var/lib/agenthub/blobs
     volumes:

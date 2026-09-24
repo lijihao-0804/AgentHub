@@ -22,6 +22,7 @@ from packages.agent_runtime.models import (
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
     DEFAULT_MEMORY_CONFIG,
+    DEFAULT_MEMORY_TOKENS,
     DEFAULT_RUN_COST_LIMIT_MICRO_USD,
     DEFAULT_RUNTIME_LIMITS,
     MAX_CONTEXT_BUDGET,
@@ -66,7 +67,7 @@ _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG)
 # with a ceiling that means nothing.
 _RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {"context_budget", "max_cost_micro_usd", "memory"}
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
-_MEMORY_KEYS = frozenset(DEFAULT_MEMORY_CONFIG)
+_MEMORY_KEYS = frozenset((*DEFAULT_MEMORY_CONFIG, "max_memory_tokens"))
 _RETRIEVAL_KEYS = frozenset(DEFAULT_RETRIEVAL_CONFIG)
 
 
@@ -718,13 +719,27 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(memory, Mapping) or not set(memory).issubset(_MEMORY_KEYS):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
     memory = {**DEFAULT_MEMORY_CONFIG, **dict(memory)}
-    if any(not isinstance(item, bool) for item in memory.values()):
+    if any(
+        not isinstance(item, bool)
+        for key, item in memory.items()
+        if key in DEFAULT_MEMORY_CONFIG
+    ):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    if "max_memory_tokens" in memory and (
+        isinstance(memory["max_memory_tokens"], bool)
+        or not isinstance(memory["max_memory_tokens"], int)
+        or memory["max_memory_tokens"] < 1
+    ):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    if memory["long_term_memory"]:
+        memory["max_memory_tokens"] = DEFAULT_MEMORY_TOKENS
+    else:
+        memory.pop("max_memory_tokens", None)
     # All-false is the same decision as never having had the key, so it is
     # written the same way: absent. Projecting a block of falses would change
     # the canonical JSON of every republished draft and therefore its hash,
     # which is the same reason ``source_kind`` is added conditionally above.
-    if any(memory.values()):
+    if any(memory[key] for key in DEFAULT_MEMORY_CONFIG):
         result["memory"] = memory
     else:
         result.pop("memory", None)

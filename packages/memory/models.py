@@ -86,8 +86,8 @@ class WorkspaceMemory(Base):
         CheckConstraint("salience > 0", name="ck_workspace_memories_salience_positive"),
         UniqueConstraint("workspace_id", "id", name="uq_workspace_memories_workspace_id"),
         # Deduplication applies to what the agent currently believes, not to
-        # what it once believed: a fact that was superseded may legitimately be
-        # learned again later, and that has to be allowed to insert.
+        # historical rows. SUPERSEDED is reserved for a future semantic
+        # replacement workflow; automatic extraction never creates it.
         Index(
             "uq_workspace_memories_active_hash",
             "workspace_id",

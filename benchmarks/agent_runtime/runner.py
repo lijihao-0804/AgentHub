@@ -7,6 +7,7 @@ import asyncio
 import json
 import os
 import subprocess
+import sys
 import time
 from collections import Counter
 from datetime import UTC, datetime
@@ -28,7 +29,14 @@ from benchmarks.agent_runtime.schema import (
     dataset_summary,
     load_dataset,
 )
-from packages.agent_runtime.models import Agent, AgentVersion, Tool, ToolRevision
+from packages.agent_runtime.models import (
+    Agent,
+    AgentKnowledgeBinding,
+    AgentTool,
+    Tool,
+    ToolRevision,
+)
+from packages.agent_runtime.publish import AgentPublishService
 from packages.agent_runtime.runtime import AgentRunService
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -58,6 +66,7 @@ from packages.knowledge.models import (
 )
 from packages.model_gateway.contracts import ModelResponse, ModelToolCall
 from packages.model_gateway.models import ModelProfile, ProviderCredential
+from packages.threads import models as _thread_models  # noqa: F401
 from packages.tools.builtins.calculator import calculate
 from packages.tools.builtins.query_customer import query_customer
 from packages.tools.builtins.search_knowledge import search_knowledge
@@ -65,6 +74,9 @@ from packages.tools.contracts import ToolDefinition, ToolExecutionContext
 from packages.tools.models import Customer, Ticket
 from packages.tools.registry import ToolHandler, ToolRegistry
 from packages.tools.runtime import ToolRuntime
+
+# AgentRun carries a composite foreign key to agent_threads. Register the
+# thread table before SQLAlchemy flushes the benchmark's first run.
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATASET = PROJECT_ROOT / "benchmarks" / "agent_runtime" / "dataset.json"
@@ -95,7 +107,9 @@ def _context(user_id: UUID, organization_id: UUID, workspace_id: UUID) -> Worksp
         ),
         workspace_id=str(workspace_id),
         workspace_role="DEVELOPER",
-        permissions=frozenset({"agent_run", "tool_run", "knowledge_run", "workspace_read"}),
+        permissions=frozenset(
+            {"agent_edit", "agent_run", "tool_run", "knowledge_run", "workspace_read"}
+        ),
     )
 
 
@@ -255,65 +269,6 @@ def _tool_spec(identity: str, *, approval_policy: str) -> dict[str, Any]:
     }
 
 
-def _resolved_spec(
-    *,
-    profile: ModelProfile,
-    credential: ProviderCredential,
-    tool_revisions: list[ToolRevision],
-    snapshot: KnowledgeSnapshot,
-    runtime: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    return {
-        "spec_schema_version": 1,
-        "model": {
-            "profile_id": str(profile.id),
-            "credential_ref": str(credential.id),
-            "provider": "fake",
-            "model": "m4-scripted",
-            "temperature": 0,
-            "max_tokens": 256,
-            "timeout_seconds": 5,
-            "capabilities": {"tool_calling": True, "max_context_tokens": 8192},
-            "retry_policy": {"max_attempts": 1},
-            "fallback_chain": [],
-            "fallback_profiles": [],
-        },
-        "prompt": {"system_prompt": "Use only the published READ tools.", "prompt_version": 1},
-        "retrieval": {
-            "knowledge_binding_mode": "PINNED",
-            "knowledge_snapshots": [
-                {"snapshot_id": str(snapshot.id), "snapshot_hash": snapshot.content_hash}
-            ],
-            "dense_top_k": 1,
-            "sparse_top_k": 1,
-            "candidate_top_k": 1,
-            "final_top_k": 1,
-        },
-        "tools": [
-            {
-                "tool_revision_id": str(revision.id),
-                "tool_spec_hash": revision.spec_hash,
-                "effect": revision.spec["effect"],
-                "risk_level": revision.spec["risk_level"],
-                "approval_policy": revision.spec["approval_policy"],
-            }
-            for revision in tool_revisions
-        ],
-        "runtime": {
-            "max_steps": 8,
-            "max_tool_calls": 12,
-            "max_identical_calls": 2,
-            "max_parallel_reads": 3,
-            "context_budget": {
-                "reserved_output_tokens": 32,
-                "max_retrieval_tokens": 2048,
-                "max_tool_result_tokens": 4096,
-            },
-            **(runtime or {}),
-        },
-    }
-
-
 async def _seed_environment(factory: async_sessionmaker[AsyncSession]) -> dict[str, Any]:
     label = uuid4().hex
     async with factory() as session:
@@ -420,6 +375,15 @@ async def _seed_environment(factory: async_sessionmaker[AsyncSession]) -> dict[s
                 document_revision_id=revision.id,
             )
         )
+        session.add(
+            AgentKnowledgeBinding(
+                workspace_id=workspace.id,
+                agent_id=agent.id,
+                knowledge_base_id=knowledge_base.id,
+                binding_mode="PINNED",
+                snapshot_id=snapshot.id,
+            )
+        )
 
         customer_specs = (
             ("C-ACME", "Acme Labs", "acme@example.test", "T-ACME"),
@@ -451,9 +415,12 @@ async def _seed_environment(factory: async_sessionmaker[AsyncSession]) -> dict[s
             await session.flush()
             tools[identity] = tool
 
-        versions: dict[str, AgentVersion] = {}
+        publish_service = AgentPublishService()
+        tool_bindings: dict[str, AgentTool] = {}
+        versions: dict[str, Any] = {}
+        seed_context = _context(user.id, organization.id, workspace.id)
         for version_number, approval_policy in ((1, "NEVER"), (2, "ALWAYS")):
-            revisions: list[ToolRevision] = []
+            revisions: dict[str, ToolRevision] = {}
             for identity in ("calculator", "query_customer", "search_knowledge"):
                 spec = _tool_spec(identity, approval_policy=approval_policy)
                 tool_revision = ToolRevision(
@@ -466,30 +433,26 @@ async def _seed_environment(factory: async_sessionmaker[AsyncSession]) -> dict[s
                 )
                 session.add(tool_revision)
                 await session.flush()
-                revisions.append(tool_revision)
-            resolved = _resolved_spec(
-                profile=profile,
-                credential=credential,
-                tool_revisions=revisions,
-                snapshot=snapshot,
-            )
-            version = AgentVersion(
-                workspace_id=workspace.id,
-                agent_id=agent.id,
-                version_number=version_number,
-                spec_schema_version=1,
-                resolved_spec=resolved,
-                resolved_spec_hash=canonical_json_hash(resolved),
-                created_by=user.id,
-            )
-            session.add(version)
+                revisions[identity] = tool_revision
+                if version_number == 1:
+                    binding = AgentTool(
+                        workspace_id=workspace.id,
+                        agent_id=agent.id,
+                        tool_id=tools[identity].id,
+                        tool_revision_id=tool_revision.id,
+                    )
+                    session.add(binding)
+                    tool_bindings[identity] = binding
+                else:
+                    tool_bindings[identity].tool_revision_id = tool_revision.id
             await session.flush()
-            versions[approval_policy] = version
+            published = await publish_service.publish(session, seed_context, agent.id)
+            versions[approval_policy] = published.id
         await session.commit()
         return {
-            "context": _context(user.id, organization.id, workspace.id),
-            "base_version_id": versions["NEVER"].id,
-            "approval_version_id": versions["ALWAYS"].id,
+            "context": seed_context,
+            "base_version_id": versions["NEVER"],
+            "approval_version_id": versions["ALWAYS"],
             "retriever": DeterministicKnowledgeRetriever(
                 workspace_id=workspace.id,
                 snapshot_id=snapshot.id,
@@ -521,12 +484,14 @@ async def _run_case(
         if case.category == "approval_unavailable"
         else seed["base_version_id"]
     )
+    stage = "AgentRunService.run"
     try:
         result = await service.run(
             seed["context"],
             agent_version_id=version_id,
             input_text=case.input,
         )
+        stage = "AgentRunService.list_steps"
         steps = await service.list_steps(seed["context"], result.run_id)
         tool_sequence: list[str] = []
         for step in steps:
@@ -545,7 +510,12 @@ async def _run_case(
             handler_calls=sum(counters.values()),
             duration_ms=round((time.perf_counter() - started) * 1000, 3),
         )
-    except Exception:
+    except Exception as error:
+        diagnostic_type = type(error).__name__
+        print(
+            f"::error title=M4 case {case.case_id}::{diagnostic_type} during {stage}",
+            file=sys.stderr,
+        )
         return RuntimeObservation(
             status="FAILED",
             failure_code="RUNNER_ERROR",

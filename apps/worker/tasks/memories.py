@@ -92,7 +92,7 @@ async def _extract_run_memories(
             )
             if run is None or run.status != "SUCCEEDED" or run.thread_id is None:
                 return
-            if not run.input_text or not run.final_output:
+            if not run.input_text:
                 return
             version = await session.scalar(
                 select(AgentVersion).where(
@@ -105,9 +105,7 @@ async def _extract_run_memories(
             spec = parse_frozen_agent_spec(version.resolved_spec, workspace_id=workspace_id)
             if not spec.runtime.get("memory", {}).get("long_term_memory", False):
                 return
-            turn = TurnForExtraction(
-                user_input=run.input_text, final_output=run.final_output
-            )
+            turn = TurnForExtraction(user_input=run.input_text)
             agent_id = version.agent_id
             thread_id = run.thread_id
             principal = PrincipalContext(
@@ -136,7 +134,7 @@ async def _extract_run_memories(
         response = await prepared.generate_resolved(
             context, spec.model_plan, extraction_request(turn)
         )
-        candidates = parse_candidates(response)
+        candidates = parse_candidates(response, user_input=run.input_text)
         if not candidates:
             return
         created = await SqlAlchemyMemoryStore(factory).record(

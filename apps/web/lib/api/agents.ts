@@ -260,10 +260,11 @@ export async function putAgentToolBindings(
 /**
  * One thing an agent remembers across threads.
  *
- * `status` is the whole vocabulary: ACTIVE is what it believes now,
- * SUPERSEDED was replaced by something it learned later, INVALIDATED was
- * switched off by a human. Nothing is ever deleted, so a run that already
- * used a memory can still explain itself — which is why the UI offers
+ * `status` is the whole vocabulary: ACTIVE is available to new runs,
+ * SUPERSEDED is reserved for a future trusted semantic-replacement flow,
+ * and INVALIDATED is switched off by a human. Automatic extraction does not
+ * currently create SUPERSEDED rows. Nothing is ever deleted, so a run that
+ * already used a memory can still explain itself — which is why the UI offers
  * "stop using this" rather than "delete".
  */
 export type AgentMemoryStatus = "ACTIVE" | "SUPERSEDED" | "INVALIDATED";

@@ -14,6 +14,12 @@ The dependency direction is:
 Transport/API -> Application -> Domain/Contract -> Infrastructure Adapter
 ```
 
+This page is the boundary summary, not the full request-flow guide. For process topology,
+the Run/approval/Thread/evaluation flows, and event persistence boundaries, see
+[`docs/report/02-架构与数据流.md`](report/02-架构与数据流.md). For selected externally
+observable route behavior, see [`docs/api-contracts.md`](api-contracts.md); the detailed
+route and table inventory is in [`docs/report/09-数据模型与API.md`](report/09-数据模型与API.md).
+
 M6-A provides read-only Run query/detail/timeline projections over the existing Agent Runtime,
 Tool and Approval records. LangGraph and Qdrant remain behind adapter boundaries; raw checkpoint
 payloads and provider SDK types do not cross the application contract.

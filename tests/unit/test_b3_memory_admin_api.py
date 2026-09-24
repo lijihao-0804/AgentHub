@@ -19,6 +19,7 @@ in its OpenAPI, or the documented maximum and the enforced maximum drift.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -27,7 +28,13 @@ from pydantic import ValidationError
 from apps.api.app import create_app
 from apps.api.schemas.agents import AgentMemoryListResponse, AgentMemoryResponse
 from packages.core.config.settings import Settings
-from packages.memory.service import MAX_PAGE_SIZE, MAX_SEARCH_LENGTH, _like_pattern
+from packages.core.errors.exceptions import AgentHubError
+from packages.memory.service import (
+    MAX_PAGE_SIZE,
+    MAX_SEARCH_LENGTH,
+    MemoryAdminService,
+    _like_pattern,
+)
 
 _BASE = "/api/v1/workspaces/{workspace_id}/agents/{agent_id}/memories"
 
@@ -167,3 +174,16 @@ def test_the_list_carries_a_total_so_the_page_means_something() -> None:
 
     assert page.total == 7
     assert len(page.items) == 1
+
+
+def test_workspace_read_alone_cannot_read_memory_but_run_or_edit_can() -> None:
+    service = MemoryAdminService()
+    workspace_read = SimpleNamespace(permissions=frozenset({"workspace_read"}))
+    run = SimpleNamespace(permissions=frozenset({"agent_run"}))
+    edit = SimpleNamespace(permissions=frozenset({"agent_edit"}))
+
+    with pytest.raises(AgentHubError) as raised:
+        service._require_any_permission(workspace_read, "agent_run", "agent_edit")
+    assert raised.value.status_code == 403
+    service._require_any_permission(run, "agent_run", "agent_edit")
+    service._require_any_permission(edit, "agent_run", "agent_edit")

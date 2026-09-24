@@ -14,7 +14,6 @@ become something a future run will read.
 
 from __future__ import annotations
 
-import hashlib
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
@@ -24,11 +23,14 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.text import search_terms
 from packages.memory.contracts import (
+    MAX_EVIDENCE_LENGTH,
     MAX_MEMORIES_PER_TURN,
     MAX_MEMORY_LENGTH,
     MIN_MEMORY_LENGTH,
     MemoryCandidate,
+    MemorySnapshotIntegrityError,
     SelectedMemory,
+    memory_content_hash,
 )
 from packages.memory.models import MEMORY_KINDS, WorkspaceMemory
 
@@ -46,18 +48,21 @@ def content_hash(content: str) -> str:
     """Identity of a statement, insensitive to whitespace and letter case.
 
     Two extractions of the same fact rarely agree on punctuation. Hashing the
-    normalized form is what turns "the user prefers short answers" arriving
+    normalized form is what turns "the team prefers short answers" arriving
     twice into one row with salience 2 rather than two rows that will both be
     injected and waste the budget saying the same thing.
     """
 
-    normalized = " ".join(content.split()).casefold()
-    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+    return memory_content_hash(content)
 
 
 def _selected(row: WorkspaceMemory) -> SelectedMemory:
     return SelectedMemory(
-        id=row.id, kind=row.kind, content=row.content, salience=row.salience
+        id=row.id,
+        kind=row.kind,
+        content=row.content,
+        salience=row.salience,
+        content_hash=row.content_hash,
     )
 
 
@@ -75,7 +80,13 @@ def normalize_candidate(candidate: MemoryCandidate) -> MemoryCandidate | None:
     kind = (candidate.kind or "FACT").strip().upper()
     if kind not in MEMORY_KINDS:
         return None
-    return MemoryCandidate(content=content, kind=kind)
+    if candidate.evidence is not None and (
+        not isinstance(candidate.evidence, str)
+        or not candidate.evidence
+        or len(candidate.evidence) > MAX_EVIDENCE_LENGTH
+    ):
+        return None
+    return MemoryCandidate(content=content, kind=kind, evidence=candidate.evidence)
 
 
 class SqlAlchemyMemoryStore:
@@ -118,7 +129,11 @@ class SqlAlchemyMemoryStore:
         return tuple(_selected(row) for row in scored[:limit])
 
     async def load(
-        self, *, workspace_id: UUID, memory_ids: tuple[UUID, ...]
+        self,
+        *,
+        workspace_id: UUID,
+        memory_ids: tuple[UUID, ...],
+        memory_content_hashes: dict[UUID | str, str] | None = None,
     ) -> tuple[SelectedMemory, ...]:
         """Re-read a frozen selection, in the order it was frozen.
 
@@ -129,6 +144,10 @@ class SqlAlchemyMemoryStore:
         """
 
         if not memory_ids:
+            if memory_content_hashes:
+                raise MemorySnapshotIntegrityError(
+                    "The frozen memory snapshot contains unexpected content hashes."
+                )
             return ()
         async with self.session_factory() as session:
             rows = (
@@ -140,7 +159,28 @@ class SqlAlchemyMemoryStore:
                 )
             ).all()
         by_id = {row.id: row for row in rows}
-        return tuple(_selected(by_id[key]) for key in memory_ids if key in by_id)
+        if memory_content_hashes is None:
+            # ID-only snapshots predate hash freezing and remain replayable.
+            return tuple(_selected(by_id[key]) for key in memory_ids if key in by_id)
+        if len(set(memory_ids)) != len(memory_ids) or len(by_id) != len(set(memory_ids)):
+            raise MemorySnapshotIntegrityError(
+                "The frozen memory snapshot references a missing or duplicate memory."
+            )
+        expected_keys = {str(key) for key in memory_content_hashes}
+        if expected_keys != {str(key) for key in memory_ids}:
+            raise MemorySnapshotIntegrityError(
+                "The frozen memory snapshot hash set does not match its memory ids."
+            )
+        selected: list[SelectedMemory] = []
+        for key in memory_ids:
+            row = by_id.get(key)
+            expected = memory_content_hashes.get(key) or memory_content_hashes.get(str(key))
+            if row is None or not isinstance(expected, str) or row.content_hash != expected:
+                raise MemorySnapshotIntegrityError(
+                    "The frozen memory snapshot does not match the stored memory."
+                )
+            selected.append(_selected(row))
+        return tuple(selected)
 
     async def list_for_agent(
         self,
@@ -268,7 +308,6 @@ class SqlAlchemyMemoryStore:
                 previous = existing.get(digest)
                 if previous is not None:
                     previous.salience += 1
-                    previous.last_used_at = datetime.now(UTC)
                     continue
                 row = WorkspaceMemory(
                     # Assigned here rather than left to the column default,
@@ -284,26 +323,47 @@ class SqlAlchemyMemoryStore:
                     content_hash=digest,
                     kind=candidate.kind,
                     status=ACTIVE,
-                    provenance={"extracted_from_run": str(source_run_id)}
-                    if source_run_id is not None
-                    else {},
+                    provenance={
+                        **(
+                            {"extracted_from_run": str(source_run_id)}
+                            if source_run_id is not None
+                            else {}
+                        ),
+                        **(
+                            {"evidence": candidate.evidence}
+                            if candidate.evidence is not None
+                            else {}
+                        ),
+                    },
                 )
-                session.add(row)
+                try:
+                    async with session.begin_nested():
+                        session.add(row)
+                        await session.flush()
+                except IntegrityError:
+                    # Only this candidate loses its savepoint. Another writer
+                    # won the partial unique active-hash race; reinforce that
+                    # row while allowing siblings in this batch to commit.
+                    previous = await session.scalar(
+                        select(WorkspaceMemory).where(
+                            WorkspaceMemory.workspace_id == workspace_id,
+                            WorkspaceMemory.agent_id == agent_id,
+                            WorkspaceMemory.status == ACTIVE,
+                            WorkspaceMemory.content_hash == digest,
+                        )
+                    )
+                    if previous is not None:
+                        previous.salience += 1
+                        continue
+                    raise
                 created.append(row.id)
-            try:
-                await session.commit()
-            except IntegrityError:
-                # Two turns of the same thread finished close enough together
-                # that both saw the hash as absent. The partial unique index is
-                # the authority; losing the race means the fact is already
-                # remembered, which is the outcome either writer wanted.
-                await session.rollback()
-                return ()
+            await session.commit()
         return tuple(created)
 
     async def supersede(
         self, *, workspace_id: UUID, memory_id: UUID, superseded_by_id: UUID
     ) -> bool:
+        """Reserved internal transition; automatic extraction never calls it."""
         async with self.session_factory() as session:
             result = await session.execute(
                 update(WorkspaceMemory)
