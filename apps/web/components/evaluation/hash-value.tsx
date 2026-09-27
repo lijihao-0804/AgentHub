@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useI18n } from "@/i18n/provider";
 
@@ -8,6 +8,14 @@ import { useI18n } from "@/i18n/provider";
 export default function HashValue({ value, label }: { value: string | null | undefined; label?: string }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<number | null>(null);
+  // The copy feedback timer must not fire into an unmounted component.
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    },
+    [],
+  );
   if (!value) return <span className="muted">—</span>;
   const resolved = value;
   const short = resolved.length <= 12 ? resolved : `${resolved.slice(0, 8)}…`;
@@ -15,7 +23,8 @@ export default function HashValue({ value, label }: { value: string | null | und
     try {
       await navigator.clipboard.writeText(resolved);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+      timerRef.current = window.setTimeout(() => setCopied(false), 1500);
     } catch {
       // Clipboard unavailable (permissions/insecure context) — title still shows the value.
     }

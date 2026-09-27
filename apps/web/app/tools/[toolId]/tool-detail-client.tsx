@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Breadcrumbs from "@/components/layout/breadcrumbs";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import StatusBadge from "@/components/ui/status-badge";
+import { riskTone } from "@/components/ui/badge-tones";
 import TechnicalDetails from "@/components/ui/technical-details";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
@@ -149,7 +150,13 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
               </div>
               <div className="key-value-row">
                 <dt>{t("tools.risk")}</dt>
-                <dd>{current.risk_level ? <StatusBadge status={current.risk_level} /> : "—"}</dd>
+                <dd>
+                  {current.risk_level ? (
+                    <StatusBadge status={current.risk_level} tone={riskTone(current.risk_level)} />
+                  ) : (
+                    "—"
+                  )}
+                </dd>
               </div>
               <div className="key-value-row">
                 <dt>{t("tools.approval")}</dt>

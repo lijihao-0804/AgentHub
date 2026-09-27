@@ -28,14 +28,26 @@ export function listItems<T>(payload: unknown): T[] {
   return [];
 }
 
-export async function listOrganizations(accessToken: string): Promise<Organization[]> {
-  const payload = await apiRequest<unknown>("/api/v1/organizations", accessToken);
-  return listItems<Organization>(payload);
+/**
+ * Same envelope tolerance as ``listItems`` but honest about protocol drift:
+ * an unrecognized shape is ``null`` ("failed to parse"), not ``[]`` ("genuinely
+ * empty"). The shell must be able to tell those apart -- treating a failed
+ * tenancy read as "no workspaces" would wipe the remembered selection.
+ */
+export function listEnvelope<T>(payload: unknown): T[] | null {
+  if (Array.isArray(payload)) return payload as T[];
+  if (isRecord(payload) && Array.isArray(payload.items)) return payload.items as T[];
+  return null;
 }
 
-export async function listWorkspaces(accessToken: string): Promise<Workspace[]> {
+export async function listOrganizations(accessToken: string): Promise<Organization[] | null> {
+  const payload = await apiRequest<unknown>("/api/v1/organizations", accessToken);
+  return listEnvelope<Organization>(payload);
+}
+
+export async function listWorkspaces(accessToken: string): Promise<Workspace[] | null> {
   const payload = await apiRequest<unknown>("/api/v1/workspaces", accessToken);
-  return listItems<Workspace>(payload);
+  return listEnvelope<Workspace>(payload);
 }
 
 export function getWorkspace(workspaceId: string, accessToken: string): Promise<Workspace> {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import MetricCard from "@/components/ui/metric-card";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
@@ -34,6 +34,15 @@ const WINDOW_OPTIONS = [
   { value: "90", labelKey: "dashboard.windows.d90" },
 ] as const;
 
+/** Poll cadence for the live ops cards while runs are in flight. */
+const DASHBOARD_POLL_MS = 5000;
+
+function windowFromUrl(): string {
+  if (typeof window === "undefined") return "7";
+  const param = new URLSearchParams(window.location.search).get("days") ?? "7";
+  return WINDOW_OPTIONS.some((option) => option.value === param) ? param : "7";
+}
+
 export default function DashboardPage() {
   const {
     t,
@@ -46,7 +55,9 @@ export default function DashboardPage() {
     formatCurrencyAmount,
   } = useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
-  const [days, setDays] = useState("7");
+  // null until the URL has been read, so a deep link such as /dashboard?days=30
+  // configures the window before the first load fires.
+  const [days, setDays] = useState<string | null>(null);
   const [summary, setSummary] = useState<ObservabilitySummary | null>(null);
   const [failures, setFailures] = useState<FailureAnalytics | null>(null);
   const [timeseries, setTimeseries] = useState<TimeseriesResponse | null>(null);
@@ -54,38 +65,106 @@ export default function DashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
+  /** Generation of the whole-panel load; stale responses never land. */
+  const generationRef = useRef(0);
+  /** Generation of failures-only reloads, independent of the full load. */
+  const failuresGenerationRef = useRef(0);
+  /** True while a full load is on the wire, so polls cannot stack up. */
+  const loadingRef = useRef(false);
 
   const load = useCallback(
-    async (category?: string, dayOverride?: string) => {
-      setError(null);
+    async (dayOverride?: string) => {
       if (!connected) return;
-      const window = queryForDays(Number(dayOverride ?? days));
+      const effectiveDays = dayOverride ?? days;
+      if (!effectiveDays) return;
+      const generation = (generationRef.current += 1);
+      setError(null);
+      const window = queryForDays(Number(effectiveDays));
+      loadingRef.current = true;
       setLoading(true);
       try {
         const input = { workspaceId, accessToken, ...window };
         const [nextSummary, nextTimeseries, nextFailures, nextVersions] = await Promise.all([
           getObservabilitySummary(input),
-          getObservabilityTimeseries({ ...input, bucket: Number(dayOverride ?? days) <= 1 ? "hour" : "day" }),
-          getObservabilityFailures({ ...input, category }),
+          getObservabilityTimeseries({ ...input, bucket: Number(effectiveDays) <= 1 ? "hour" : "day" }),
+          getObservabilityFailures(input),
           getAgentVersionBreakdown(input),
         ]);
+        if (generationRef.current !== generation) return;
         setSummary(nextSummary);
         setTimeseries(nextTimeseries);
         setFailures(nextFailures);
         setVersions(nextVersions);
-        setSelectedCategory(category ?? null);
+        setSelectedCategory(null);
       } catch (caught) {
+        if (generationRef.current !== generation) return;
         setError(toApiError(caught, ""));
       } finally {
-        setLoading(false);
+        if (generationRef.current === generation) {
+          loadingRef.current = false;
+          setLoading(false);
+        }
       }
     },
     [connected, workspaceId, accessToken, days],
   );
 
+  /** Category drill-down re-pulls only the failures endpoint. */
+  const loadFailures = useCallback(
+    async (category: string | null) => {
+      if (!connected) return;
+      const generation = (failuresGenerationRef.current += 1);
+      const window = queryForDays(Number(days ?? "7"));
+      try {
+        const nextFailures = await getObservabilityFailures({
+          workspaceId,
+          accessToken,
+          ...window,
+          ...(category ? { category } : {}),
+        });
+        if (failuresGenerationRef.current !== generation) return;
+        setFailures(nextFailures);
+        setSelectedCategory(category);
+      } catch (caught) {
+        if (failuresGenerationRef.current !== generation) return;
+        setError(toApiError(caught, ""));
+      }
+    },
+    [connected, workspaceId, accessToken, days],
+  );
+
+  // Read the shared time window from the URL before the first load, and keep
+  // the URL in sync afterwards so a view can be linked or reloaded.
   useEffect(() => {
-    if (connected) void load();
-  }, [connected, load]);
+    setDays(windowFromUrl());
+  }, []);
+
+  const changeDays = useCallback((nextDays: string) => {
+    setDays(nextDays);
+    const params = new URLSearchParams(window.location.search);
+    params.set("days", nextDays);
+    window.history.replaceState(null, "", `/dashboard?${params.toString()}`);
+  }, []);
+
+  useEffect(() => {
+    if (connected && days !== null) void load();
+  }, [connected, days, load]);
+
+  const activeOps =
+    summary !== null &&
+    (summary.current.running_count > 0 ||
+      summary.current.waiting_approval_count > 0 ||
+      summary.current.needs_attention_count > 0);
+
+  // Live ops must not need a manual refresh: poll while anything is in
+  // flight, stop when the workspace is quiet, and skip hidden tabs.
+  useEffect(() => {
+    if (!connected || !activeOps || days === null) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden && !loadingRef.current) void load();
+    }, DASHBOARD_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [connected, activeOps, days, load]);
 
   const hint = error ? errorHintKey(error) : null;
 
@@ -112,7 +191,7 @@ export default function DashboardPage() {
       <section className="runs-toolbar" aria-label={t("dashboard.window")}>
         <label>
           {t("dashboard.window")}
-          <select value={days} onChange={(event) => setDays(event.target.value)}>
+          <select value={days ?? "7"} onChange={(event) => changeDays(event.target.value)}>
             {WINDOW_OPTIONS.map((option) => (
               <option value={option.value} key={option.value}>
                 {t(option.labelKey)}
@@ -218,7 +297,7 @@ export default function DashboardPage() {
                       key={item.failure_category}
                       aria-pressed={selectedCategory === item.failure_category}
                       onClick={() =>
-                        void load(selectedCategory === item.failure_category ? undefined : item.failure_category)
+                        void loadFailures(selectedCategory === item.failure_category ? null : item.failure_category)
                       }
                     >
                       <span className="bar-row-name">{failureCategoryLabel(item.failure_category)}</span>
@@ -357,6 +436,11 @@ export default function DashboardPage() {
                       </span>
                     </Link>
                   ))}
+                  <div className="stat-row">
+                    <Link className="button button-ghost" href="/runs?status=FAILED">
+                      {t("dashboard.failureRuns.viewAll")}
+                    </Link>
+                  </div>
                 </div>
               )}
             </Panel>

@@ -64,6 +64,18 @@ export default function AppConversationPane({
 
   const turnList = [...(turns.data ?? [])].sort((left, right) => left.sequence - right.sequence);
 
+  // The optimistic copy stays up until the reloaded list actually contains
+  // the submitted turn (a just-submitted turn is always the list's last
+  // entry). Clearing before the reload lands makes the message blink out
+  // and back in for one reload round-trip.
+  const lastTurnInput = turnList.length > 0 ? turnList[turnList.length - 1].user_input : null;
+  const pendingVisible = pendingInput !== null && lastTurnInput !== pendingInput;
+  useEffect(() => {
+    if (pendingInput !== null && !mutation.pending && !pendingVisible) {
+      setPendingInput(null);
+    }
+  }, [pendingInput, mutation.pending, pendingVisible]);
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
@@ -76,7 +88,6 @@ export default function AppConversationPane({
         client_token: tokenRef.current ?? undefined,
       }),
     );
-    setPendingInput(null);
     if (result) {
       // A fresh question deserves a fresh identity; a failed one keeps its own.
       tokenRef.current = null;
@@ -191,7 +202,7 @@ export default function AppConversationPane({
             );
           })}
 
-          {pendingInput !== null && (
+          {pendingVisible && (
             <li className="conversation-turn" key="pending">
               <div className="conversation-message conversation-message-user">
                 <p className="conversation-role">{t("appThread.conversation.user")}</p>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
@@ -27,6 +28,7 @@ function splitForPurpose(purpose: string): string {
 
 export default function EvaluationExperimentsPage() {
   const { t, statusLabel, purposeLabel, formatDateTime } = useI18n();
+  const router = useRouter();
   const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [experiments, setExperiments] = useState<EvaluationExperiment[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
@@ -172,7 +174,9 @@ export default function EvaluationExperimentsPage() {
       setShowForm(false);
       setCreatedNotice(true);
       await refresh();
-      window.location.assign(`/evaluations/experiments/${encodeURIComponent(experiment.id)}`);
+      // Client-side navigation keeps the session (and its in-memory access
+      // token) alive; a full page load would discard both.
+      router.push(`/evaluations/experiments/${encodeURIComponent(experiment.id)}`);
     } catch (caught) {
       const apiError = toApiError(caught, "");
       if (activeSessionRef.current === requestSessionId) setCreateError(apiError);

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { statusTone, type StatusTone } from "@/components/ui/badge-tones";
@@ -15,6 +15,10 @@ import { getRunDetail, getRunTimeline, RunDetail, RunTimelineEntry } from "@/lib
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { useI18n } from "@/i18n/provider";
+
+/** Poll cadence for a run that has not reached a terminal state. */
+const RUN_DETAIL_POLL_MS = 4000;
+const TERMINAL_RUN_STATUSES = new Set(["SUCCEEDED", "FAILED", "CANCELLED"]);
 
 function timelineTone(entry: RunTimelineEntry): StatusTone {
   if (entry.status === "UNKNOWN_OUTCOME") return "attention";
@@ -137,6 +141,39 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   const timeline = view.data?.timeline ?? [];
   const context = contextFacts(timeline);
   const error = view.error;
+  const reloadView = view.reload;
+
+  // Runs in flight change without any local action: poll while the run has
+  // not reached a terminal state and the tab is visible, exactly like the
+  // evaluation run pages do.
+  const runActive = run !== null && !TERMINAL_RUN_STATUSES.has(run.status);
+  useEffect(() => {
+    if (!connected || !runActive) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden) reloadView();
+    }, RUN_DETAIL_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [connected, runActive, reloadView]);
+
+  // Copy feedback state; the timer is cleaned up so it cannot fire after
+  // the component is gone.
+  const [copiedId, setCopiedId] = useState(false);
+  const copyTimerRef = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (copyTimerRef.current !== null) window.clearTimeout(copyTimerRef.current);
+    },
+    [],
+  );
+  const copyRunId = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(runId);
+      setCopiedId(true);
+      copyTimerRef.current = window.setTimeout(() => setCopiedId(false), 1500);
+    } catch {
+      // Clipboard unavailable — the id is still visible in the title.
+    }
+  }, [runId]);
 
   // A replay belongs to the workspace session that created it; switching
   // workspaces or runs must not leave a stale replay pointer on screen.
@@ -277,6 +314,14 @@ export default function RunDetailClient({ runId }: { runId: string }) {
                 <h2><StatusBadge status={run.status} /></h2>
               </div>
               <div className="approval-actions">
+                {run.trace_url ? (
+                  <a className="button button-ghost" href={run.trace_url} target="_blank" rel="noreferrer">
+                    {t("run.openTrace")}
+                  </a>
+                ) : null}
+                <button className="button button-ghost" type="button" onClick={() => void copyRunId()}>
+                  {copiedId ? t("common.copied") : t("run.copyId")}
+                </button>
                 {run.status === "WAITING_APPROVAL" && (
                   <Link className="button button-ghost" href="/approvals">
                     {t("run.openApprovals")}
@@ -345,7 +390,17 @@ export default function RunDetailClient({ runId }: { runId: string }) {
                   {run.duration_ms === null ? "—" : formatDurationMs(run.duration_ms)}
                 </strong>
               </span>
-              <span>{t("run.facts.tokens")}<strong>{run.total_tokens === null ? "—" : formatCount(run.total_tokens)}</strong></span>
+              <span>
+                {t("run.facts.tokens")}
+                <strong>{run.total_tokens === null ? "—" : formatCount(run.total_tokens)}</strong>
+                <span className="state-hint">
+                  {t("run.facts.tokensSplit", {
+                    input: run.total_input_tokens === null ? "—" : formatCount(run.total_input_tokens),
+                    output: run.total_output_tokens === null ? "—" : formatCount(run.total_output_tokens),
+                    cached: run.total_cached_tokens === null ? "—" : formatCount(run.total_cached_tokens),
+                  })}
+                </span>
+              </span>
               <span>
                 {t("run.facts.cost")}
                 <strong

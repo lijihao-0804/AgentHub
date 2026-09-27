@@ -28,7 +28,6 @@
 @media (max-width: 720px) {
   .ws-selector-trigger .ws-org-prefix { display: none; }
 }
-.ws-selector-trigger .ws-org { color: var(--text-muted); }
 .ws-menu {
   background: var(--surface-raised);
   border: 1px solid var(--border-strong);

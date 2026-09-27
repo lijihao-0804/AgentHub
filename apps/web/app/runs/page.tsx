@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, SessionRequired } from "@/components/ui/states";
@@ -20,6 +20,10 @@ const RUN_STATUS_OPTIONS = [
   "CANCELLED",
 ];
 
+/** Statuses whose rows go stale fast enough to justify auto-refresh. */
+const ACTIVE_RUN_STATUSES = new Set(["RUNNING", "WAITING_APPROVAL", "CANCEL_REQUESTED"]);
+const RUNS_POLL_MS = 5000;
+
 function shortId(id: string): string {
   return `${id.slice(0, 8)}…`;
 }
@@ -37,13 +41,18 @@ export default function RunsPage() {
   const [initialLoaded, setInitialLoaded] = useState(false);
   // null until the URL has been read; the first load waits for it.
   const [urlFilters, setUrlFilters] = useState<{ status: string; agentVersionId: string } | null>(null);
+  /** Generation of the latest list request; stale responses never land. */
+  const generationRef = useRef(0);
+  /** While the user has paged deeper, a poll must not collapse to page one. */
+  const pagedRef = useRef(false);
 
   const refresh = useCallback(
     async (cursor: string | null = null, overrides?: { status?: string; agentVersionId?: string }) => {
-      setError(null);
       if (!connected) return;
       const effectiveStatus = overrides?.status ?? status;
       const effectiveVersion = overrides?.agentVersionId ?? agentVersionId;
+      const generation = (generationRef.current += 1);
+      pagedRef.current = cursor !== null;
       setLoading(true);
       try {
         const result = await listRuns({
@@ -54,12 +63,15 @@ export default function RunsPage() {
           cursor,
           limit: 25,
         });
+        if (generationRef.current !== generation) return;
         setRuns((current) => (cursor ? [...current, ...result.items] : result.items));
         setNextCursor(result.next_cursor);
+        setError(null);
       } catch (caught) {
+        if (generationRef.current !== generation) return;
         setError(toApiError(caught, ""));
       } finally {
-        setLoading(false);
+        if (generationRef.current === generation) setLoading(false);
       }
     },
     [connected, workspaceId, accessToken, status, agentVersionId],
@@ -93,6 +105,20 @@ export default function RunsPage() {
   useEffect(() => {
     if (!connected) setInitialLoaded(false);
   }, [connected]);
+
+  // Runs in flight go stale fast: poll page one while any visible row is
+  // active and the tab is visible. Paging deeper pauses the poll so a refresh
+  // cannot collapse the list back to its first page.
+  const hasActiveRows = runs.some((run) => ACTIVE_RUN_STATUSES.has(run.status));
+  useEffect(() => {
+    if (!connected || !hasActiveRows || nextCursor !== null) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden && !loading && !pagedRef.current) {
+        void refresh(null);
+      }
+    }, RUNS_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [connected, hasActiveRows, nextCursor, loading, refresh]);
 
   function applyFilters() {
     const params = new URLSearchParams();

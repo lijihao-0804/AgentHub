@@ -18,10 +18,13 @@ import {
   getExperiment,
   listAgentVersions,
   listAgents,
+  listExperimentRuns,
   listPricingSnapshots,
   startExperimentRun,
+  EvaluationExperimentRun,
 } from "@/lib/api/evaluation";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData } from "@/hooks/use-workspace-data";
 import { useI18n } from "@/i18n/provider";
 
 export default function ExperimentDetailClient({ experimentId }: { experimentId: string }) {
@@ -97,6 +100,14 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
   }, [sessionId]);
 
   const input = { workspaceId, accessToken };
+
+  // Run history for this experiment: without it, a run started and left
+  // behind (or a lost run id) is unreachable. Draft experiments have no runs.
+  const runsView = useWorkspaceData<EvaluationExperimentRun[]>(
+    (auth) => listExperimentRuns(auth, experimentId),
+    `experiment-runs:${experimentId}`,
+    { enabled: connected && experiment !== null && experiment.status !== "DRAFT" },
+  );
 
   const load = useCallback(async () => {
     setError(null);
@@ -354,6 +365,64 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
             <InlineError error={finalizeError} fallback={t("errors.requestFailed")} />
             <InlineError error={startRunError} fallback={t("errors.requestFailed")} />
           </Panel>
+
+          {!isDraft && (
+            <Panel
+              title={t("evaluation.experiment.runs.title")}
+              eyebrow={t("evaluation.experiment.eyebrow")}
+              actions={
+                <span className="state-hint">
+                  {t("evaluation.experiment.runs.count", { count: runsView.data?.length ?? 0 })}
+                </span>
+              }
+            >
+              {runsView.error ? (
+                <ErrorState
+                  code={runsView.error.code}
+                  message={runsView.error.message || t("errors.loadEvaluation")}
+                  onRetry={runsView.reload}
+                />
+              ) : !runsView.loaded ? (
+                <LoadingState />
+              ) : (runsView.data?.length ?? 0) === 0 ? (
+                <EmptyState
+                  title={t("evaluation.experiment.runs.empty")}
+                  hint={t("evaluation.experiment.runs.emptyHint")}
+                />
+              ) : (
+                <div className="data-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t("evaluation.experiment.runs.columnRun")}</th>
+                        <th scope="col">{t("evaluation.experiment.runs.columnStatus")}</th>
+                        <th scope="col">{t("evaluation.experiment.runs.columnHoldout")}</th>
+                        <th scope="col">{t("evaluation.experiment.runs.columnCreated")}</th>
+                        <th scope="col">{t("evaluation.experiment.runs.columnFailure")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(runsView.data ?? []).map((run) => (
+                        <tr key={run.id}>
+                          <td className="tight-cell">
+                            <Link href={`/evaluations/runs/${encodeURIComponent(run.id)}`}>
+                              <code title={run.id}>{run.id.slice(0, 8)}…</code>
+                            </Link>
+                          </td>
+                          <td><StatusBadge status={run.status} /></td>
+                          <td className="tight-cell">{run.holdout_exposure_index ?? "—"}</td>
+                          <td className="tight-cell">{formatDateTime(run.created_at)}</td>
+                          <td className="tight-cell">
+                            {run.failure_code ? <code>{run.failure_code}</code> : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Panel>
+          )}
 
           <Panel
             title={t("evaluation.experiment.variants.title")}

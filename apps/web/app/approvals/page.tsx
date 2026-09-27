@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
@@ -47,18 +47,27 @@ export default function ApprovalsPage() {
   const [decisionState, setDecisionState] = useState<DecisionState>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  /** Generation of the list request; a stale workspace's response never lands. */
+  const generationRef = useRef(0);
+  /** Live workspace identity, for guarding decision write-backs. */
+  const workspaceRef = useRef(workspaceId);
+  workspaceRef.current = workspaceId;
 
   const refresh = useCallback(async () => {
-    setError(null);
     if (!connected) return;
+    const generation = (generationRef.current += 1);
+    setError(null);
     setLoading(true);
     try {
-      setApprovals(await listApprovals(workspaceId, accessToken));
+      const nextApprovals = await listApprovals(workspaceId, accessToken);
+      if (generationRef.current !== generation) return;
+      setApprovals(nextApprovals);
       setLoaded(true);
     } catch (caught) {
+      if (generationRef.current !== generation) return;
       setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (generationRef.current === generation) setLoading(false);
     }
   }, [connected, workspaceId, accessToken]);
 
@@ -73,16 +82,19 @@ export default function ApprovalsPage() {
   async function decide(approvalId: string, decision: "approve" | "deny") {
     setDecisionError(null);
     setDecisionState({ approvalId, decision });
+    const requestWorkspace = workspaceRef.current;
     try {
       const result = await decideApproval(workspaceId, approvalId, decision, accessToken);
+      if (workspaceRef.current !== requestWorkspace) return;
       setApprovals((current) =>
         current.map((approval) => (approval.id === approvalId ? result.approval : approval)),
       );
     } catch (caught) {
+      if (workspaceRef.current !== requestWorkspace) return;
       const apiError = toApiError(caught, "");
       setDecisionError({ approvalId, error: apiError });
     } finally {
-      setDecisionState(null);
+      if (workspaceRef.current === requestWorkspace) setDecisionState(null);
     }
   }
 

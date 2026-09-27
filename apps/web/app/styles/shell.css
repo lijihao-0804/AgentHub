@@ -59,7 +59,6 @@
   color: var(--text);
   font-weight: 700;
 }
-.nav-link-disabled { cursor: not-allowed; opacity: 0.55; }
 /*
  * A standalone tool that belongs to the section above it: visible in its own
  * right, but indented and a shade lighter so the section still reads first.
@@ -70,15 +69,6 @@
 .nav-link-nested {
   font-size: 0.85rem;
   padding-left: 1.5rem;
-}
-.nav-soon {
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--text-muted);
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  padding: 0.05rem 0.5rem;
-  text-transform: uppercase;
 }
 
 .sidebar-footnote {

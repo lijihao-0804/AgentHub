@@ -301,8 +301,62 @@ export function getExperimentRunProgress(
   return get(input, `/experiment-runs/${encodeURIComponent(runId)}/progress`);
 }
 
+export function listExperimentRuns(
+  input: AuthInput,
+  experimentId: string,
+): Promise<EvaluationExperimentRun[]> {
+  return get(input, `/experiments/${encodeURIComponent(experimentId)}/runs`);
+}
+
 export function startExperimentRun(input: AuthInput, experimentId: string): Promise<EvaluationExperimentRun> {
   return post(input, `/experiments/${encodeURIComponent(experimentId)}/runs`);
+}
+
+// ---------- Per-case results ----------
+
+export type EvaluationCaseResult = {
+  id: string;
+  workspace_id: string;
+  experiment_run_id: string;
+  experiment_variant_id: string;
+  dataset_item_id: string;
+  repetition_index: number;
+  case_execution_key: string;
+  status: string;
+  agent_run_id: string | null;
+  latency_ms: number | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  total_tokens: number | null;
+  cached_tokens: number | null;
+  cost_amount: number | string | null;
+  cost_currency: string | null;
+  failure_code: string | null;
+  observed_agent_status: string | null;
+  observed_agent_failure_code: string | null;
+  safe_failure_message: string | null;
+  observation: Record<string, unknown>;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+};
+
+export type EvaluationCaseResultList = {
+  total: number;
+  items: EvaluationCaseResult[];
+};
+
+export function listExperimentRunCaseResults(
+  input: AuthInput,
+  runId: string,
+  options?: { status?: string; limit?: number; offset?: number },
+): Promise<EvaluationCaseResultList> {
+  const query = new URLSearchParams();
+  if (options?.status) query.set("status", options.status);
+  if (options?.limit) query.set("limit", String(options.limit));
+  if (options?.offset) query.set("offset", String(options.offset));
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return get(input, `/experiment-runs/${encodeURIComponent(runId)}/case-results${suffix}`);
 }
 
 // ---------- Metric snapshots ----------

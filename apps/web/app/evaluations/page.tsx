@@ -145,12 +145,15 @@ export default function EvaluationOverviewPage() {
                 </Link>
               </div>
             )}
-            {datasets?.length === 0 && experiments?.length === 0 && pricing?.length === 0 && (
-              <EmptyState
-                title={t("evaluation.datasets.empty")}
-                hint={t("evaluation.datasets.emptyHint")}
-              />
-            )}
+            {datasets?.length === 0 &&
+              experiments?.length === 0 &&
+              pricing?.length === 0 &&
+              policies?.length === 0 && (
+                <EmptyState
+                  title={t("evaluation.datasets.empty")}
+                  hint={t("evaluation.datasets.emptyHint")}
+                />
+              )}
           </Panel>
         </>
       )}

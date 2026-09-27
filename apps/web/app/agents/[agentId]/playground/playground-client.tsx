@@ -458,6 +458,13 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
         const refused = caught instanceof ApiError && caught.status >= 400;
         if (observed.id === null || refused || attempt > MAX_FOLLOW_ATTEMPTS) {
           setStreaming(false);
+          if (observed.id === null) {
+            // The stream never produced a run, so there is nothing to
+            // track: leaving the RUNNING badge up (with its refresh button,
+            // which is a no-op without a run id) would promise progress
+            // that does not exist.
+            setRunStatus(null);
+          }
           setError(toApiError(caught, t("errors.requestFailed")));
           return;
         }
@@ -772,7 +779,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
                   {t("agents.playground.cancel")}
                 </button>
               )}
-              {runStatus === "RUNNING" && !streaming && (
+              {runStatus === "RUNNING" && !streaming && runId && (
                 <button
                   type="button"
                   className="button button-ghost"
