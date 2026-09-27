@@ -171,6 +171,14 @@ class KnowledgeService:
             raise AgentHubError(
                 "DOCUMENT_UPLOAD_FAILED", "The document could not be recorded.", 409
             ) from exc
+        except Exception:
+            # Every other failure (connection drop, serialization error, ...)
+            # leaves the same orphaned blob behind: the bytes are on disk but
+            # no revision row references them. Roll back and delete before the
+            # error propagates, whatever the failure was.
+            await session.rollback()
+            await blob_store.delete(stored_blob.blob_key)
+            raise
         try:
             await queue.enqueue(job.id)
         except Exception:

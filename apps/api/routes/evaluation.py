@@ -3,13 +3,15 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_experiment_run_queue, get_workspace_context
 from apps.api.schemas.evaluation import (
     EvaluationAblationResponse,
+    EvaluationCaseResultListResponse,
+    EvaluationCaseResultResponse,
     EvaluationComparisonCreateRequest,
     EvaluationComparisonResponse,
     EvaluationDatasetCreateRequest,
@@ -40,6 +42,7 @@ from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.judge import FrozenJudgeProfile, freeze_judge_profile
 from packages.evaluation.metrics_service import EvaluationMetricsService
+from packages.evaluation.models import EvaluationCaseResultStatus
 from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
@@ -490,6 +493,59 @@ async def get_experiment_run(
     run, exposure_index = await ExperimentService().get_run(session, context=context, run_id=run_id)
     response = EvaluationExperimentRunResponse.model_validate(run, from_attributes=True)
     return response.model_copy(update={"holdout_exposure_index": exposure_index})
+
+
+@router.get(
+    "/experiments/{experiment_id}/runs",
+    response_model=list[EvaluationExperimentRunResponse],
+)
+async def list_experiment_runs(
+    workspace_id: UUID,
+    experiment_id: UUID,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> list[EvaluationExperimentRunResponse]:
+    del workspace_id
+    runs = await ExperimentService().list_experiment_runs(
+        session, context=context, experiment_id=experiment_id, limit=limit, offset=offset
+    )
+    return [
+        EvaluationExperimentRunResponse.model_validate(run, from_attributes=True) for run in runs
+    ]
+
+
+@router.get(
+    "/experiment-runs/{run_id}/case-results",
+    response_model=EvaluationCaseResultListResponse,
+)
+async def list_experiment_run_case_results(
+    workspace_id: UUID,
+    run_id: UUID,
+    status: str | None = Query(default=None, max_length=16),
+    limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationCaseResultListResponse:
+    del workspace_id
+    if status is not None and status not in {item.value for item in EvaluationCaseResultStatus}:
+        raise AgentHubError(
+            "EVALUATION_CASE_RESULT_STATUS_INVALID",
+            "Unknown case result status filter.",
+            422,
+        )
+    result = await ExperimentService().list_case_results(
+        session, context=context, run_id=run_id, status=status, limit=limit, offset=offset
+    )
+    return EvaluationCaseResultListResponse(
+        total=result["total"],
+        items=[
+            EvaluationCaseResultResponse.model_validate(item, from_attributes=True)
+            for item in result["items"]
+        ],
+    )
 
 
 @router.post(

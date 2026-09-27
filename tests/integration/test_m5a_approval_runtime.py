@@ -736,3 +736,59 @@ async def test_expired_approval_and_developer_decision_are_fail_closed(db_factor
         admin_context, approval.id, decision=ApprovalDecisionStatus.APPROVED
     )
     assert expired.decision_status == ApprovalDecisionStatus.EXPIRED
+
+
+@pytest.mark.asyncio
+async def test_zombie_running_run_without_checkpoint_reconciles_to_needs_attention(
+    db_factory,
+) -> None:
+    """A RUNNING run past the zombie threshold with no checkpoint and no
+    pending approval cannot be resumed by anything: reconciliation must move
+    it to NEEDS_ATTENTION instead of leaving followers polling forever."""
+
+    async with db_factory() as session:
+        base = await _seed(session, label=uuid4().hex)
+        run = AgentRun(
+            workspace_id=base["workspace_id"],
+            agent_version_id=base["version"].id,
+            input_text="zombie",
+            created_by=base["user"].id,
+            started_at=datetime.now(UTC) - timedelta(seconds=1200),
+        )
+        session.add(run)
+        await session.commit()
+    reconciler = ApprovalReconciliationService(db_factory)
+    first = await reconciler.reconcile_run(
+        base["context"], run.id, checkpoint_exists=False
+    )
+    second = await reconciler.reconcile_run(
+        base["context"], run.id, checkpoint_exists=False
+    )
+    assert first.status == "NEEDS_ATTENTION"
+    assert first.failure_code == "RUN_CHECKPOINT_MISSING"
+    assert second.status == "NEEDS_ATTENTION"
+    assert second.failure_code == "RUN_CHECKPOINT_MISSING"
+
+
+@pytest.mark.asyncio
+async def test_fresh_running_run_without_checkpoint_stays_running(db_factory) -> None:
+    """A recently started RUNNING run is not misread as a zombie: a live run
+    briefly has neither a checkpoint nor approvals while it works."""
+
+    async with db_factory() as session:
+        base = await _seed(session, label=uuid4().hex)
+        run = AgentRun(
+            workspace_id=base["workspace_id"],
+            agent_version_id=base["version"].id,
+            input_text="in flight",
+            created_by=base["user"].id,
+            started_at=datetime.now(UTC),
+        )
+        session.add(run)
+        await session.commit()
+    reconciler = ApprovalReconciliationService(db_factory)
+    result = await reconciler.reconcile_run(
+        base["context"], run.id, checkpoint_exists=False
+    )
+    assert result.status == "RUNNING"
+    assert result.failure_code is None

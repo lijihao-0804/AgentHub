@@ -126,16 +126,20 @@ async def list_turns(
 ) -> list[ThreadTurnDetailResponse]:
     del workspace_id
     rows = await _service(request).turn_summaries(context, thread_id)
+    # Same content boundary as the runs endpoint's `_run_response`: a caller
+    # without `agent_run` (a workspace VIEWER) gets identity, status and
+    # counters, never the prompt that was sent or the text the model wrote.
+    may_read_content = "agent_run" in context.permissions
     return [
         ThreadTurnDetailResponse(
             id=turn.id,
             thread_id=turn.thread_id,
             sequence=turn.sequence,
-            user_input=turn.user_input,
+            user_input=turn.user_input if may_read_content else None,
             agent_run_id=turn.agent_run_id,
             created_at=turn.created_at,
             status=run.status if run is not None else None,
-            final_output=run.final_output if run is not None else None,
+            final_output=run.final_output if run is not None and may_read_content else None,
             failure_code=run.failure_code if run is not None else None,
         )
         for turn, run in rows

@@ -229,6 +229,42 @@ class EvaluationExperimentRunProgressResponse(BaseModel):
     progress: float
 
 
+class EvaluationCaseResultResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    experiment_run_id: UUID
+    experiment_variant_id: UUID
+    dataset_item_id: UUID
+    repetition_index: int
+    case_execution_key: str
+    status: str
+    agent_run_id: UUID | None
+    latency_ms: int | None
+    input_tokens: int | None
+    output_tokens: int | None
+    total_tokens: int | None
+    cached_tokens: int | None
+    cost_amount: Decimal | None
+    cost_currency: str | None
+    failure_code: str | None
+    observed_agent_status: str | None
+    observed_agent_failure_code: str | None
+    safe_failure_message: str | None
+    observation: dict[str, Any]
+    started_at: datetime | None
+    completed_at: datetime | None
+    created_at: datetime
+
+
+class EvaluationCaseResultListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    total: int
+    items: list[EvaluationCaseResultResponse]
+
+
 class EvaluationComparisonCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

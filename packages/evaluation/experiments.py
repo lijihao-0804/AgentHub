@@ -487,6 +487,70 @@ class ExperimentService:
         )
         return run, exposure_index
 
+    async def list_experiment_runs(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        experiment_id: UUID,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[EvaluationExperimentRun]:
+        """Runs of one experiment, newest first, for the experiment page."""
+
+        await self.get_experiment(session, context=context, experiment_id=experiment_id)
+        return list(
+            await session.scalars(
+                select(EvaluationExperimentRun)
+                .where(
+                    EvaluationExperimentRun.workspace_id == self._workspace_id(context),
+                    EvaluationExperimentRun.experiment_id == experiment_id,
+                )
+                .order_by(EvaluationExperimentRun.created_at.desc(), EvaluationExperimentRun.id)
+                .limit(limit)
+                .offset(offset)
+            )
+        )
+
+    async def list_case_results(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        run_id: UUID,
+        status: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> dict[str, Any]:
+        """Per-case execution rows for one experiment run, with a total count."""
+
+        run, _ = await self.get_run(session, context=context, run_id=run_id)
+        del run
+        conditions = [
+            EvaluationExperimentCaseResult.workspace_id == self._workspace_id(context),
+            EvaluationExperimentCaseResult.experiment_run_id == run_id,
+        ]
+        if status is not None:
+            conditions.append(EvaluationExperimentCaseResult.status == status)
+        total = await session.scalar(
+            select(func.count())
+            .select_from(EvaluationExperimentCaseResult)
+            .where(*conditions)
+        )
+        items = list(
+            await session.scalars(
+                select(EvaluationExperimentCaseResult)
+                .where(*conditions)
+                .order_by(
+                    EvaluationExperimentCaseResult.created_at,
+                    EvaluationExperimentCaseResult.id,
+                )
+                .limit(limit)
+                .offset(offset)
+            )
+        )
+        return {"total": int(total or 0), "items": items}
+
     async def request_run_cancel(
         self,
         session: AsyncSession,

@@ -94,19 +94,16 @@ class TimelineSource:
     failure_code: str | None
 
 
-def classify_failure(failure_code: str | None) -> str | None:
-    """Map an internal failure code to a stable presentation category."""
-
-    if not failure_code:
-        return None
-    code = failure_code.upper()
-    if code == "UNKNOWN_OUTCOME" or code.startswith("ACTION_") or code.startswith("TICKET_"):
-        return "ACTION"
-    if code.startswith(("APPROVAL_", "CHECKPOINT_")):
-        return "APPROVAL"
-    if code.startswith(("TOOL_", "UNKNOWN_TOOL")):
-        return "TOOL"
-    if code.startswith(
+# Category rules in evaluation order: the first matching prefix set wins, so
+# MODEL's AGENT_MODEL must be listed before RUNTIME's AGENT_. The SQL pushdown
+# in ``category_sql_prefixes`` reads the same table, keeping one source of
+# truth for which code belongs to which category.
+_FAILURE_CATEGORY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("ACTION", ("ACTION_", "TICKET_")),
+    ("APPROVAL", ("APPROVAL_", "CHECKPOINT_")),
+    ("TOOL", ("TOOL_", "UNKNOWN_TOOL")),
+    (
+        "KNOWLEDGE",
         (
             "QDRANT",
             "EMBEDDER",
@@ -115,16 +112,44 @@ def classify_failure(failure_code: str | None) -> str | None:
             "RETRIEVAL_",
             "INVALID_DENSE",
             "INVALID_SPARSE",
-        )
-    ):
-        return "KNOWLEDGE"
-    if code.startswith(("MODEL_", "AGENT_MODEL")):
-        return "MODEL"
-    if code.startswith(("AUTH", "ACCESS", "FORBIDDEN", "TENANT", "WORKSPACE")):
-        return "AUTH/TENANT"
-    if code.startswith(("AGENT_", "CONTEXT_", "DATABASE", "RUN_", "INTERNAL_")):
-        return "RUNTIME"
+        ),
+    ),
+    ("MODEL", ("MODEL_", "AGENT_MODEL")),
+    ("AUTH/TENANT", ("AUTH", "ACCESS", "FORBIDDEN", "TENANT", "WORKSPACE")),
+    ("RUNTIME", ("AGENT_", "CONTEXT_", "DATABASE", "RUN_", "INTERNAL_")),
+)
+
+
+def classify_failure(failure_code: str | None) -> str | None:
+    """Map an internal failure code to a stable presentation category."""
+
+    if not failure_code:
+        return None
+    code = failure_code.upper()
+    if code == "UNKNOWN_OUTCOME":
+        return "ACTION"
+    for category, prefixes in _FAILURE_CATEGORY_RULES:
+        if code.startswith(prefixes):
+            return category
     return "UNKNOWN"
+
+
+def category_sql_prefixes(category: str) -> tuple[str, ...]:
+    """Failure-code prefixes whose SQL LIKE match is a *superset* of the category.
+
+    Categories whose prefixes overlap an earlier rule (``AGENT_`` vs
+    ``AGENT_MODEL``) deliberately over-match in SQL; the Python-side
+    ``classify_failure`` stays authoritative, so over-matching only widens the
+    fetch window and never mislabels a row. Categories that cannot be
+    expressed by prefixes (``UNKNOWN``) return an empty tuple.
+    """
+
+    if category == "ACTION":
+        return ("ACTION_", "TICKET_", "UNKNOWN_OUTCOME")
+    for name, prefixes in _FAILURE_CATEGORY_RULES:
+        if name == category:
+            return prefixes
+    return ()
 
 
 def encode_run_cursor(created_at: datetime, run_id: UUID) -> str:

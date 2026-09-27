@@ -11,7 +11,7 @@ extraction where configured.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import NoReturn
 from uuid import UUID
 
@@ -37,6 +37,11 @@ MAX_INPUT_LENGTH = 32_000
 MAX_CLIENT_TOKEN_LENGTH = 64
 DEFAULT_PAGE_SIZE = 50
 MAX_PAGE_SIZE = 200
+# A turn without a run is only rebuildable once it is clearly past the window
+# between committing the turn and ``prepare_run`` creating its run row. That
+# window is normally milliseconds; a full grace minute keeps a slow but alive
+# first request from being mistaken for a dead one.
+TURN_START_GRACE = timedelta(seconds=60)
 
 
 def _workspace_id(context: WorkspaceExecutionContext) -> UUID:
@@ -336,13 +341,53 @@ class ThreadService:
         if turn is None:
             reused = await self._require_token_turn(context, thread_id, client_token)
             if reused.agent_run_id is None:
-                # The first request has committed its turn but has not yet
-                # attached the run. Do not return a sentinel run id or claim
-                # that this incomplete turn has a run/version to reuse yet.
-                raise AgentHubError(
-                    "THREAD_TURN_IN_PROGRESS",
-                    "The turn is still being started; retry with the same client token.",
-                    409,
+                # The first request committed its turn but has not yet attached
+                # a run. Inside the start grace window that is normal -- the
+                # run is attached only once it completes -- so the retry waits.
+                if not self._orphan_turn_expired(reused):
+                    raise AgentHubError(
+                        "THREAD_TURN_IN_PROGRESS",
+                        "The turn is still being started; retry with the same client token.",
+                        409,
+                    )
+                # Past the grace window, look for the run the first request
+                # created: ``prepare_run`` persists it (with this thread's id)
+                # before any external work, so its state tells a live run from
+                # a dead one.
+                turn_run = await self._turn_run(context, thread_id, reused)
+                if turn_run is not None:
+                    if turn_run.status in {"RUNNING", "CANCEL_REQUESTED"}:
+                        raise AgentHubError(
+                            "THREAD_TURN_IN_PROGRESS",
+                            "The turn is still being started; retry with the same client token.",
+                            409,
+                        )
+                    # The run settled (or is waiting for an approval) but the
+                    # first request died before attaching it: finish the
+                    # attach instead of 409ing forever.
+                    await self.attach_run(context, turn_id=reused.id, run_id=turn_run.id)
+                    reused.agent_run_id = turn_run.id
+                    return SubmittedTurn(
+                        turn=reused,
+                        run_id=turn_run.id,
+                        agent_version_id=turn_run.agent_version_id,
+                        reused=True,
+                    )
+                # No run was ever created: the first request died between
+                # recording the turn and starting it. Re-run the recorded
+                # question and attach the fresh run to the same turn.
+                result = await self.run_service.run(
+                    context,
+                    agent_version_id=agent_version_id,
+                    input_text=reused.user_input,
+                    thread_id=thread.id,
+                )
+                await self.attach_run(context, turn_id=reused.id, run_id=result.run_id)
+                return SubmittedTurn(
+                    turn=reused,
+                    run_id=result.run_id,
+                    agent_version_id=agent_version_id,
+                    reused=True,
                 )
             existing_run = await self.run_service.get_run(context, reused.agent_run_id)
             return SubmittedTurn(
@@ -381,6 +426,44 @@ class ThreadService:
         return await self._require_token_turn(context, thread_id, client_token)
 
     # -- internals -------------------------------------------------------
+
+    async def _turn_run(
+        self,
+        context: WorkspaceExecutionContext,
+        thread_id: UUID,
+        turn: ThreadTurn,
+    ) -> AgentRun | None:
+        """The run the turn's first request created, if one exists.
+
+        ``prepare_run`` persists the AgentRun -- with this thread's id -- before
+        any external work starts, so the earliest run created at or after the
+        turn is the one that first request launched. ``None`` means the first
+        request died before it ever created its run.
+        """
+
+        workspace_id = _workspace_id(context)
+        async with self.session_factory() as session:
+            return await session.scalar(
+                select(AgentRun)
+                .where(
+                    AgentRun.workspace_id == workspace_id,
+                    AgentRun.thread_id == thread_id,
+                    AgentRun.created_at >= turn.created_at,
+                )
+                .order_by(AgentRun.created_at, AgentRun.id)
+                .limit(1)
+            )
+
+    @staticmethod
+    def _orphan_turn_expired(turn: ThreadTurn) -> bool:
+        """True once a turn without any run is safely past the start window."""
+
+        created_at = getattr(turn, "created_at", None)
+        if created_at is None:
+            return False
+        if created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=UTC)
+        return datetime.now(UTC) - created_at >= TURN_START_GRACE
 
     async def _require_token_turn(
         self, context: WorkspaceExecutionContext, thread_id: UUID, client_token: str | None

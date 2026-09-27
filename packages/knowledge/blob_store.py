@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 import tempfile
 from collections.abc import AsyncIterable, AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Protocol
+
+# Blocking file writes are batched and pushed to a worker thread, so a
+# near-maximum upload cannot stall the API's event loop.
+_WRITE_FLUSH_BYTES = 1024 * 1024
 
 
 class BlobStoreError(ValueError):
@@ -69,13 +74,19 @@ class LocalBlobStore:
                 mode="wb", dir=self.root, prefix=".upload-", delete=False
             ) as temporary:
                 temporary_path = Path(temporary.name)
+                buffer = bytearray()
                 async for chunk in chunks:
                     if not chunk:
                         continue
-                    temporary.write(chunk)
+                    buffer.extend(chunk)
                     size_bytes += len(chunk)
-                temporary.flush()
-                os.fsync(temporary.fileno())
+                    if len(buffer) >= _WRITE_FLUSH_BYTES:
+                        await asyncio.to_thread(temporary.write, bytes(buffer))
+                        buffer.clear()
+                if buffer:
+                    await asyncio.to_thread(temporary.write, bytes(buffer))
+                await asyncio.to_thread(temporary.flush)
+                await asyncio.to_thread(os.fsync, temporary.fileno())
             os.replace(temporary_path, destination)
             temporary_path = None
             return StoredBlob(blob_key=blob_key, size_bytes=size_bytes)
