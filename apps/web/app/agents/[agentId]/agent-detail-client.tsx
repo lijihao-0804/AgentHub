@@ -1264,28 +1264,43 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                     <th scope="col">{t("agents.schemaVersion")}</th>
                     <th scope="col">{t("common.created")}</th>
                     <th scope="col">{t("agents.playground.run")}</th>
+                    <th scope="col">{t("agents.versionDiff.entry")}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {versionList.map((version) => (
-                    <tr key={version.id}>
-                      <td data-label={t("agents.version")}>
-                        <Link href={`/agents/${agentId}/versions/${version.id}`}>
-                          v{version.version_number}
-                        </Link>
-                      </td>
-                      <td data-label={t("agents.specHash")}>
-                        <code className="hash-value">{version.resolved_spec_hash}</code>
-                      </td>
-                      <td data-label={t("agents.schemaVersion")}>{version.spec_schema_version}</td>
-                      <td data-label={t("common.created")}>{formatDateTime(version.created_at)}</td>
-                      <td data-label={t("agents.playground.run")}>
-                        <Link href={`/agents/${agentId}/playground?version=${encodeURIComponent(version.id)}`}>
-                          {t("agents.playground.run")}
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                  {versionList.map((version) => {
+                    const previousVersion = versionList
+                      .filter((candidate) => candidate.version_number < version.version_number)
+                      .sort((left, right) => right.version_number - left.version_number)[0];
+                    return (
+                      <tr key={version.id}>
+                        <td data-label={t("agents.version")}>
+                          <Link href={`/agents/${agentId}/versions/${version.id}`}>
+                            v{version.version_number}
+                          </Link>
+                        </td>
+                        <td data-label={t("agents.specHash")}>
+                          <code className="hash-value">{version.resolved_spec_hash}</code>
+                        </td>
+                        <td data-label={t("agents.schemaVersion")}>{version.spec_schema_version}</td>
+                        <td data-label={t("common.created")}>{formatDateTime(version.created_at)}</td>
+                        <td data-label={t("agents.playground.run")}>
+                          <Link href={`/agents/${agentId}/playground?version=${encodeURIComponent(version.id)}`}>
+                            {t("agents.playground.run")}
+                          </Link>
+                        </td>
+                        <td data-label={t("agents.versionDiff.entry")}>
+                          {previousVersion ? (
+                            <Link
+                              href={`/agents/${agentId}/versions/compare?left=${encodeURIComponent(previousVersion.id)}&right=${encodeURIComponent(version.id)}`}
+                            >
+                              {t("agents.versionDiff.comparePrevious")}
+                            </Link>
+                          ) : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -22,8 +22,9 @@ function countSummary(approvals: Approval[]) {
   const pending = approvals.filter((a) => a.decision_status === "PENDING").length;
   const approved = approvals.filter((a) => a.decision_status === "APPROVED").length;
   const denied = approvals.filter((a) => a.decision_status === "DENIED").length;
+  const expired = approvals.filter((a) => a.decision_status === "EXPIRED").length;
   const needsAttention = approvals.filter((a) => a.execution_status === "UNKNOWN_OUTCOME").length;
-  return { pending, approved, denied, needsAttention };
+  return { pending, approved, denied, expired, needsAttention };
 }
 
 function argumentEntries(approval: Approval): Array<[string, unknown]> {
@@ -42,7 +43,7 @@ function argumentEntries(approval: Approval): Array<[string, unknown]> {
 }
 
 export default function ApprovalsPage() {
-  const { t, formatDateTime } = useI18n();
+  const { t, formatDateTime, formatDurationMs } = useI18n();
   const { workspaceId, accessToken, connected, permissions } = useFrontendSession();
   const cannotDecide = permissions !== null && !permissions.includes("approve_action");
   const [approvals, setApprovals] = useState<Approval[]>([]);
@@ -52,11 +53,26 @@ export default function ApprovalsPage() {
   const [lastDecisionId, setLastDecisionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [clockNowMs, setClockNowMs] = useState(() => Date.now());
   /** Generation of the list request; a stale workspace's response never lands. */
   const generationRef = useRef(0);
   /** Live workspace identity, for guarding decision write-backs. */
   const workspaceRef = useRef(workspaceId);
   workspaceRef.current = workspaceId;
+  const hasPendingExpirations = approvals.some(
+    (approval) => approval.decision_status === "PENDING" && approval.expires_at,
+  );
+
+  useEffect(() => {
+    if (!hasPendingExpirations) return;
+    const refreshClock = () => setClockNowMs(Date.now());
+    const interval = window.setInterval(refreshClock, 30_000);
+    document.addEventListener("visibilitychange", refreshClock);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshClock);
+    };
+  }, [hasPendingExpirations]);
 
   const refresh = useCallback(async () => {
     if (!connected) return;
@@ -169,6 +185,7 @@ export default function ApprovalsPage() {
           <StatusBadge status="PENDING" label={t("approvals.counts.pending", { count: counts.pending })} />
           <StatusBadge status="APPROVED" label={t("approvals.counts.approved", { count: counts.approved })} />
           <StatusBadge status="DENIED" label={t("approvals.counts.denied", { count: counts.denied })} />
+          <StatusBadge status="EXPIRED" label={t("approvals.counts.expired", { count: counts.expired })} />
           <StatusBadge
             status="UNKNOWN_OUTCOME"
             label={t("approvals.counts.needsAttention", { count: counts.needsAttention })}
@@ -194,6 +211,9 @@ export default function ApprovalsPage() {
             const deciding = decisionState?.approvalId === approval.id ? decisionState.decision : null;
             const cardError = decisionError?.approvalId === approval.id ? decisionError.error : null;
             const decidedAt = approval.decided_at ? formatDateTime(approval.decided_at) : "—";
+            const expiresAtMs = approval.expires_at ? Date.parse(approval.expires_at) : Number.NaN;
+            const expiryElapsed = approval.decision_status === "PENDING" &&
+              Number.isFinite(expiresAtMs) && expiresAtMs <= clockNowMs;
             return (
               <article className="approval-card" key={approval.id}>
                 <div className="approval-header">
@@ -220,6 +240,15 @@ export default function ApprovalsPage() {
                         time: approval.created_at ? formatDateTime(approval.created_at) : "—",
                       })}
                     </span>
+                    {approval.decision_status === "PENDING" && Number.isFinite(expiresAtMs) && (
+                      <span className="approval-state-meta" aria-live="off">
+                        {expiryElapsed
+                          ? t("approvals.card.expiryElapsed")
+                          : t("approvals.card.expiresIn", {
+                              duration: formatDurationMs(expiresAtMs - clockNowMs),
+                            })}
+                      </span>
+                    )}
                   </div>
                   <div className="approval-state-block">
                     <span className="approval-state-label">{t("approvals.card.execution")}</span>
@@ -277,8 +306,8 @@ export default function ApprovalsPage() {
                       type="button"
                       className="button button-ghost"
                       onClick={() => void decide(approval.id, "deny")}
-                      disabled={deciding !== null || cannotDecide}
-                      title={cannotDecide ? t("approvals.noPermissionHint") : undefined}
+                      disabled={deciding !== null || cannotDecide || expiryElapsed}
+                      title={expiryElapsed ? t("approvals.card.expiryElapsed") : cannotDecide ? t("approvals.noPermissionHint") : undefined}
                     >
                       {deciding === "deny" ? t("approvals.card.denying") : t("approvals.card.deny")}
                     </button>
@@ -286,8 +315,8 @@ export default function ApprovalsPage() {
                       type="button"
                       className="button button-primary"
                       onClick={() => void decide(approval.id, "approve")}
-                      disabled={deciding !== null || cannotDecide}
-                      title={cannotDecide ? t("approvals.noPermissionHint") : undefined}
+                      disabled={deciding !== null || cannotDecide || expiryElapsed}
+                      title={expiryElapsed ? t("approvals.card.expiryElapsed") : cannotDecide ? t("approvals.noPermissionHint") : undefined}
                     >
                       {deciding === "approve" ? t("approvals.card.approving") : t("approvals.card.approve")}
                     </button>

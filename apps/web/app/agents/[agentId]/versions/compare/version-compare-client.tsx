@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import Breadcrumbs from "@/components/layout/breadcrumbs";
@@ -45,12 +45,13 @@ const GROUP_LABEL: Record<DiffGroupKey, MessageKey> = {
  * deliberately no winner, score or recommendation here.
  */
 export default function VersionCompareClient({ agentId }: { agentId: string }) {
-  const { t, formatNumber } = useI18n();
+  const { t, formatNumber, formatDateTime } = useI18n();
   const { connected, workspaceId, sessionId } = useFrontendSession();
 
   const [leftId, setLeftId] = useState("");
   const [rightId, setRightId] = useState("");
   const [showUnchanged, setShowUnchanged] = useState(false);
+  const selectionInitializedRef = useRef(false);
 
   const loadVersions = useCallback((auth: AuthInput) => listAgentVersions(auth, agentId), [agentId]);
   const versions = useWorkspaceData<AgentVersion[]>(
@@ -69,9 +70,22 @@ export default function VersionCompareClient({ agentId }: { agentId: string }) {
       return;
     }
     const params = new URLSearchParams(window.location.search);
-    setLeftId(params.get("left") ?? "");
-    setRightId(params.get("right") ?? "");
+    const initialLeft = params.get("left") ?? "";
+    const initialRight = params.get("right") ?? "";
+    setLeftId(initialLeft);
+    setRightId(initialRight);
+    selectionInitializedRef.current = Boolean(initialLeft || initialRight);
   }, [sessionId, agentId]);
+
+  useEffect(() => {
+    if (!versions.loaded || selectionInitializedRef.current) return;
+    selectionInitializedRef.current = true;
+    const ordered = [...versionList].sort((left, right) => left.version_number - right.version_number);
+    if (ordered.length >= 2) {
+      setLeftId(ordered[ordered.length - 2].id);
+      setRightId(ordered[ordered.length - 1].id);
+    }
+  }, [versions.loaded, versionList]);
 
   // A pointer that survived a workspace switch belongs to another
   // workspace's data; it is dropped rather than requested.
@@ -224,7 +238,7 @@ export default function VersionCompareClient({ agentId }: { agentId: string }) {
                   <option value="">{t("agents.versionDiff.selectPlaceholder")}</option>
                   {versionList.map((version) => (
                     <option key={version.id} value={version.id}>
-                      v{version.version_number}
+                      {`v${version.version_number} · ${formatDateTime(version.created_at)} · ${version.resolved_spec_hash.slice(0, 8)}`}
                     </option>
                   ))}
                 </select>
@@ -235,7 +249,7 @@ export default function VersionCompareClient({ agentId }: { agentId: string }) {
                   <option value="">{t("agents.versionDiff.selectPlaceholder")}</option>
                   {versionList.map((version) => (
                     <option key={version.id} value={version.id}>
-                      v{version.version_number}
+                      {`v${version.version_number} · ${formatDateTime(version.created_at)} · ${version.resolved_spec_hash.slice(0, 8)}`}
                     </option>
                   ))}
                 </select>

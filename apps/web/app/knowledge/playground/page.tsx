@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import {
@@ -10,7 +10,10 @@ import {
   type RetrievalPlaygroundResponse,
 } from "@/lib/api/retrieval-playground";
 import { formatLocator } from "@/lib/format/locator";
+import { listKnowledgeBases, listSnapshots, type KnowledgeBase, type KnowledgeSnapshot } from "@/lib/api/knowledge";
+import type { AuthInput } from "@/lib/api/client";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData } from "@/hooks/use-workspace-data";
 import { useI18n } from "@/i18n/provider";
 
 type PageState = "initial" | "loading" | "success" | "empty" | "error";
@@ -64,8 +67,8 @@ function StageCard({ label, stage }: { label: string; stage: PlaygroundStage }) 
 }
 
 export default function RetrievalPlaygroundPage() {
-  const { t, formatNumber } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { t, formatNumber, formatDateTime } = useI18n();
+  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [knowledgeBaseId, setKnowledgeBaseId] = useState("");
   const [snapshotId, setSnapshotId] = useState("");
   const [query, setQuery] = useState("");
@@ -77,6 +80,21 @@ export default function RetrievalPlaygroundPage() {
   const [result, setResult] = useState<RetrievalPlaygroundResponse | null>(null);
   const [error, setError] = useState<{ code: string; message: string } | null>(null);
 
+  const loadKnowledgeBases = useCallback((auth: AuthInput) => listKnowledgeBases(auth), []);
+  const knowledgeBases = useWorkspaceData<KnowledgeBase[]>(
+    loadKnowledgeBases,
+    `retrieval-playground:bases:${workspaceId}`,
+  );
+  const loadSnapshots = useCallback(
+    (auth: AuthInput) => listSnapshots(auth, knowledgeBaseId),
+    [knowledgeBaseId],
+  );
+  const snapshots = useWorkspaceData<KnowledgeSnapshot[]>(
+    loadSnapshots,
+    knowledgeBaseId ? `retrieval-playground:snapshots:${workspaceId}:${knowledgeBaseId}` : "",
+    { enabled: Boolean(knowledgeBaseId) },
+  );
+
   // Deep links from a knowledge base (or snapshot) page preselect the target:
   // arriving with the fields blank throws away the context the user came from.
   useEffect(() => {
@@ -86,6 +104,19 @@ export default function RetrievalPlaygroundPage() {
     const snapshot = params.get("snapshot_id");
     if (snapshot) setSnapshotId(snapshot);
   }, []);
+
+  useEffect(() => {
+    if (!knowledgeBases.loaded || !knowledgeBaseId) return;
+    if (!knowledgeBases.data?.some((base) => base.id === knowledgeBaseId)) {
+      setKnowledgeBaseId("");
+      setSnapshotId("");
+    }
+  }, [knowledgeBases.loaded, knowledgeBases.data, knowledgeBaseId, sessionId]);
+
+  useEffect(() => {
+    if (!snapshots.loaded || !snapshotId) return;
+    if (!snapshots.data?.some((snapshot) => snapshot.id === snapshotId)) setSnapshotId("");
+  }, [snapshots.loaded, snapshots.data, snapshotId, knowledgeBaseId, sessionId]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -98,6 +129,17 @@ export default function RetrievalPlaygroundPage() {
     }
     if (!knowledgeBaseId.trim() || !snapshotId.trim() || !query.trim()) {
       setError({ code: "INVALID_REQUEST", message: t("playground.invalidRequest") });
+      setPageState("error");
+      return;
+    }
+    const topKValues = [
+      { value: denseTopK, max: 100 },
+      { value: sparseTopK, max: 100 },
+      { value: candidateTopK, max: 100 },
+      { value: finalTopK, max: 20 },
+    ];
+    if (topKValues.some(({ value, max }) => !/^\d+$/.test(value) || Number(value) < 1 || Number(value) > max)) {
+      setError({ code: "INVALID_REQUEST", message: t("playground.invalidTopK") });
       setPageState("error");
       return;
     }
@@ -157,21 +199,52 @@ export default function RetrievalPlaygroundPage() {
         <div className="form-grid">
           <label>
             {t("playground.knowledgeBaseId")}
-            <input
+            <select
               required
               value={knowledgeBaseId}
-              onChange={(event) => setKnowledgeBaseId(event.target.value)}
-              spellCheck={false}
-            />
+              onChange={(event) => {
+                setKnowledgeBaseId(event.target.value);
+                setSnapshotId("");
+                setResult(null);
+                setError(null);
+                setPageState("initial");
+              }}
+              disabled={knowledgeBases.loading || Boolean(knowledgeBases.error)}
+            >
+              <option value="">
+                {knowledgeBases.loaded && (knowledgeBases.data ?? []).length === 0
+                  ? t("playground.noKnowledgeBases")
+                  : t("playground.selectKnowledgeBase")}
+              </option>
+              {(knowledgeBases.data ?? []).map((base) => (
+                <option key={base.id} value={base.id}>{base.name}</option>
+              ))}
+            </select>
           </label>
           <label>
             {t("playground.snapshotId")}
-            <input
+            <select
               required
               value={snapshotId}
-              onChange={(event) => setSnapshotId(event.target.value)}
-              spellCheck={false}
-            />
+              onChange={(event) => {
+                setSnapshotId(event.target.value);
+                setResult(null);
+                setError(null);
+                setPageState("initial");
+              }}
+              disabled={!knowledgeBaseId || snapshots.loading || Boolean(snapshots.error)}
+            >
+              <option value="">
+                {snapshots.loaded && (snapshots.data ?? []).length === 0
+                  ? t("playground.noSnapshots")
+                  : t("playground.selectSnapshot")}
+              </option>
+              {(snapshots.data ?? []).map((snapshot) => (
+                <option key={snapshot.id} value={snapshot.id}>
+                  {`${formatNumber(snapshot.item_count)} · ${snapshot.content_hash.slice(0, 8)} · ${formatDateTime(snapshot.created_at)}`}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="query-field">
             {t("playground.query")}
@@ -211,6 +284,21 @@ export default function RetrievalPlaygroundPage() {
           </button>
         </div>
       </form>
+
+      {knowledgeBases.error && (
+        <ErrorState
+          code={knowledgeBases.error.code}
+          message={knowledgeBases.error.message || t("errors.loadKnowledgeBases")}
+          onRetry={knowledgeBases.reload}
+        />
+      )}
+      {snapshots.error && (
+        <ErrorState
+          code={snapshots.error.code}
+          message={snapshots.error.message || t("errors.loadSnapshots")}
+          onRetry={snapshots.reload}
+        />
+      )}
 
       {pageState === "initial" && <EmptyState title={t("playground.initial")} />}
       {pageState === "loading" && <LoadingState label={t("playground.running")} />}
