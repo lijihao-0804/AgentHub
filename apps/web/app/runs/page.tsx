@@ -211,6 +211,11 @@ export default function RunsPage() {
         <EmptyState
           title={t("runs.empty")}
           hint={hasFilters ? t("runs.emptyFilteredHint") : t("runs.emptyHint")}
+          actions={hasFilters ? (
+            <button type="button" className="button button-ghost" onClick={clearFilters}>
+              {t("runs.filters.clear")}
+            </button>
+          ) : undefined}
         />
       )}
 

@@ -481,7 +481,18 @@ export default function DashboardPage() {
                         })}
                       </span>
                       <span className="stat-row-meta">
-                        {formatCount(item.success_count)} ✓ · {formatCount(item.failed_count)} ✕ · {formatCount(item.needs_attention_count)} ⚠
+                        <StatusBadge
+                          status="SUCCEEDED"
+                          label={`${statusLabel("SUCCEEDED")} ${formatCount(item.success_count)}`}
+                        />{" "}
+                        <StatusBadge
+                          status="FAILED"
+                          label={`${statusLabel("FAILED")} ${formatCount(item.failed_count)}`}
+                        />{" "}
+                        <StatusBadge
+                          status="NEEDS_ATTENTION"
+                          label={`${statusLabel("NEEDS_ATTENTION")} ${formatCount(item.needs_attention_count)}`}
+                        />
                       </span>
                       <span className="stat-row-meta stat-row-meta-end">
                         {item.p95_latency_ms === null ? "p95 —" : `p95 ${formatDurationMs(item.p95_latency_ms)}`}
