@@ -87,6 +87,12 @@ export default function ToolsPage() {
 
       {notice && <p className="inline-notice">{notice}</p>}
 
+      <div className="page-toolbar">
+        <Link className="button button-ghost" href="/tools/mcp">
+          {t("tools.mcp.entry")}
+        </Link>
+      </div>
+
       <Panel ariaLabel={t("tools.workspaceTools")} title={t("tools.workspaceTools")}>
         {tools.error && (
           <ErrorState

@@ -268,6 +268,14 @@ export default function EvaluationExperimentsPage() {
                   </select>
                 )}
                 <span className="state-hint">{t("evaluation.experiments.datasetSelector.publishedOnly")}</span>
+                {datasetId && versions.length === 0 && !versionsError && !versionsLoading && (
+                  <Link
+                    className="button button-ghost"
+                    href={`/evaluations/datasets/${encodeURIComponent(datasetId)}`}
+                  >
+                    {t("evaluation.experiments.datasetSelector.goPublish")}
+                  </Link>
+                )}
               </label>
               <label>
                 {t("evaluation.experiments.labels.purpose")}

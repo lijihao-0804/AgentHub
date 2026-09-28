@@ -68,6 +68,10 @@ async function transport<T>(
   let response = await send(token);
   if (response.status === 401 && token && tokenRefresher) {
     const renewed = await tokenRefresher().catch(() => null);
+    // A renewal that returned the unchanged token (no rotation upstream) is
+    // treated as "no renewal": replaying with it would just 401 again. The
+    // caller keeps the original 401 even though the session is technically
+    // healthy -- a rare, fail-visible outcome beats a retry storm.
     if (renewed && renewed.trim() && renewed.trim() !== token) {
       response = await send(renewed.trim());
     }

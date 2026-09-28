@@ -177,6 +177,9 @@ export type EvaluationExperimentVariant = {
   experiment_id: string;
   label: string;
   agent_version_id: string;
+  // Filled by the backend from the AgentVersion table; the gate→publish
+  // bridge links through it.
+  agent_id: string | null;
   resolved_spec_hash: string;
   pricing_snapshot_id: string;
   pricing_snapshot_hash: string;

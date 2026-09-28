@@ -53,6 +53,13 @@ class WorkspaceResponse(BaseModel):
     id: UUID
     organization_id: UUID
     name: str
+    # Caller-relative access, filled by endpoints that resolve it (the single
+    # workspace read). List responses skip the per-workspace access
+    # computation and leave these unset; the client fetches the active
+    # workspace to learn its own role and permissions.
+    org_role: str | None = None
+    workspace_role: str | None = None
+    permissions: list[str] = []
 
 
 class WorkspaceMemberCreateRequest(BaseModel):

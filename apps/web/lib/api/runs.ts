@@ -36,11 +36,13 @@ export type RunListItem = {
   cost_currency: string | null;
   cost_is_estimate: boolean | null;
   approval_summary: ApprovalSummary;
+  thread_id: string | null;
 };
 
 export type RunDetail = RunListItem & {
   effective_knowledge_snapshots: Array<Record<string, unknown>>;
   trace_url?: string | null;
+  thread_kind?: string | null;
 };
 
 export type RunTimelineEntry = {

@@ -404,15 +404,21 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                     <tbody>
                       {(runsView.data ?? []).map((run) => (
                         <tr key={run.id}>
-                          <td className="tight-cell">
+                          <td className="tight-cell" data-label={t("evaluation.experiment.runs.columnRun")}>
                             <Link href={`/evaluations/runs/${encodeURIComponent(run.id)}`}>
                               <code title={run.id}>{run.id.slice(0, 8)}…</code>
                             </Link>
                           </td>
-                          <td><StatusBadge status={run.status} /></td>
-                          <td className="tight-cell">{run.holdout_exposure_index ?? "—"}</td>
-                          <td className="tight-cell">{formatDateTime(run.created_at)}</td>
-                          <td className="tight-cell">
+                          <td data-label={t("evaluation.experiment.runs.columnStatus")}>
+                            <StatusBadge status={run.status} />
+                          </td>
+                          <td className="tight-cell" data-label={t("evaluation.experiment.runs.columnHoldout")}>
+                            {run.holdout_exposure_index ?? "—"}
+                          </td>
+                          <td className="tight-cell" data-label={t("evaluation.experiment.runs.columnCreated")}>
+                            {formatDateTime(run.created_at)}
+                          </td>
+                          <td className="tight-cell" data-label={t("evaluation.experiment.runs.columnFailure")}>
                             {run.failure_code ? <code>{run.failure_code}</code> : "—"}
                           </td>
                         </tr>
@@ -506,6 +512,11 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                           </option>
                         ))}
                       </select>
+                    )}
+                    {!pricingLoading && !pricingError && pricing.length === 0 && (
+                      <Link className="button button-ghost" href="/evaluations/pricing">
+                        {t("evaluation.experiment.variants.goPricing")}
+                      </Link>
                     )}
                   </label>
                   <label>

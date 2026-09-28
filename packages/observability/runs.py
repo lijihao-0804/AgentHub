@@ -17,6 +17,7 @@ from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.approvals.models import Approval
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.threads.models import AgentThread
 
 _RUN_STATUSES = frozenset(
     {
@@ -269,6 +270,9 @@ def _run_projection(
         "trace_id": str(run.id),
         "workspace_id": run.workspace_id,
         "agent_version_id": run.agent_version_id,
+        # The thread this run answered, when it has one: the doorway from run
+        # forensics back to the conversation (and its incident workflow).
+        "thread_id": run.thread_id,
         "agent_version_number": agent_version_number,
         "resolved_spec_hash": run.resolved_spec_hash,
         "status": run.status,
@@ -476,6 +480,14 @@ class RunQueryService:
                 run.effective_knowledge_snapshots
             )
             detail["trace_url"] = None
+            detail["thread_kind"] = None
+            if run.thread_id is not None:
+                detail["thread_kind"] = await session.scalar(
+                    select(AgentThread.kind).where(
+                        AgentThread.workspace_id == workspace_id,
+                        AgentThread.id == run.thread_id,
+                    )
+                )
             return detail
 
     async def get_timeline(

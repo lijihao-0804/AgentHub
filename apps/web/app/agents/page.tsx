@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
@@ -24,6 +25,7 @@ const EMPTY_FORM = {
 
 export default function AgentsPage() {
   const { t, formatDateTime } = useI18n();
+  const router = useRouter();
   const { connected, sessionId, workspaceId } = useFrontendSession();
 
   const loadAgents = useCallback((auth: AuthInput) => listAgents(auth), []);
@@ -85,6 +87,9 @@ export default function AgentsPage() {
       setShowForm(false);
       setShowAdvanced(false);
       agents.reload();
+      // The next step of the journey (model → bindings → publish) happens on
+      // the detail page; dropping the user back on the list loses momentum.
+      router.push(`/agents/${encodeURIComponent(result.id)}`);
     }
   }
 
@@ -179,6 +184,7 @@ export default function AgentsPage() {
                   <option value="LATEST">{t("agents.bindingModeLatest")}</option>
                   <option value="PINNED">{t("agents.bindingModePinned")}</option>
                 </select>
+                <span className="state-hint">{t("agents.bindingModeHint")}</span>
               </label>
             </div>
             <label>
@@ -189,7 +195,9 @@ export default function AgentsPage() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, system_prompt: event.target.value }))
                 }
+                placeholder={t("agents.systemPromptPlaceholder")}
               />
+              <span className="state-hint">{t("agents.systemPromptHint")}</span>
             </label>
 
             <details open={showAdvanced} onToggle={(event) => setShowAdvanced(event.currentTarget.open)}>

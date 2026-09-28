@@ -131,6 +131,12 @@
 .metric-value { font-size: clamp(1.3rem, 2.3vw, 1.7rem); font-variant-numeric: tabular-nums; line-height: 1.15; }
 .metric-unit { color: var(--text-muted); font-size: 0.7em; font-weight: 500; margin-left: 0.3em; }
 .metric-hint { color: var(--text-muted); font-size: 0.78rem; line-height: 1.4; }
+.metric-trendline { align-items: center; display: flex; gap: var(--space-2); min-height: 1.2rem; }
+.metric-delta { font-size: 0.72rem; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.metric-delta-good { color: var(--success); }
+.metric-delta-bad { color: var(--danger); }
+.metric-delta-neutral { color: var(--text-muted); }
+.metric-sparkline { color: var(--accent); flex: 0 0 auto; fill: currentColor; overflow: visible; }
 
 .key-values { display: grid; gap: 0.4rem; margin: 0; }
 .key-value-row { display: grid; gap: 0.15rem; grid-template-columns: minmax(6rem, max-content) 1fr; }

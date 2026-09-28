@@ -22,6 +22,16 @@ export type KnowledgeDocument = {
   knowledge_base_id: string;
   name: string;
   created_at: string;
+  // Projection of the latest revision: the ingestion state machine lives on
+  // the revision, and the list carries it so the table can show progress
+  // without opening each document.
+  current_revision_id: string | null;
+  current_revision_number: number | null;
+  current_revision_status: string | null;
+  current_revision_lifecycle_status: string | null;
+  current_revision_created_at: string | null;
+  effective_date: string | null;
+  superseded_by_document_id: string | null;
 };
 
 export type DocumentRevision = {
@@ -127,6 +137,19 @@ export function uploadDocumentRevision(
     `${kbPath(input.workspaceId, knowledgeBaseId)}/documents/${encodeURIComponent(documentId)}/revisions`,
     input.accessToken,
     formData,
+  );
+}
+
+/** Requeues the latest revision's failed ingestion; 409 when it has not failed. */
+export function retryDocumentIngestion(
+  input: AuthInput,
+  knowledgeBaseId: string,
+  documentId: string,
+): Promise<DocumentUploadResult> {
+  return apiRequest<DocumentUploadResult>(
+    `${kbPath(input.workspaceId, knowledgeBaseId)}/documents/${encodeURIComponent(documentId)}/retries`,
+    input.accessToken,
+    { method: "POST", body: {} },
   );
 }
 

@@ -188,6 +188,9 @@ export default function RunsPage() {
             <button type="button" className="button button-primary" onClick={applyFilters} disabled={loading}>
               {t("runs.filters.apply")}
             </button>
+            <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>
+              {t("common.refresh")}
+            </button>
             <button type="button" className="button button-ghost" onClick={clearFilters} disabled={loading}>
               {t("runs.filters.clear")}
             </button>

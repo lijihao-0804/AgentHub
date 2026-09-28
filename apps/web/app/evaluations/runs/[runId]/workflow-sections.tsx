@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
-import { EmptyState, ErrorState, InlineError, Panel } from "@/components/ui/states";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel } from "@/components/ui/states";
 import TechnicalDetails from "@/components/ui/technical-details";
 import { ApiError, toApiError } from "@/lib/api/client";
 import {
@@ -32,6 +32,8 @@ import {
   uniqueById,
   upsertById,
 } from "@/lib/api/evaluation";
+import Link from "next/link";
+
 import { useI18n } from "@/i18n/provider";
 
 type AuthInput = { workspaceId: string; accessToken: string; sessionId: number };
@@ -494,7 +496,7 @@ export default function RunWorkflow({
       <Panel ariaLabel={t("evaluation.ablation.stepTitle")}>
         <StepHeader step={3} title={t("evaluation.ablation.stepTitle")} eyebrow={t("evaluation.ablation.stepTitle")} />
         {!selectedComparison && <p className="state-hint">{t("evaluation.ablation.needsComparison")}</p>}
-        {selectedComparison && ablationState === "loading" && <p className="state-hint">{t("common.loading")}</p>}
+        {selectedComparison && ablationState === "loading" && <LoadingState />}
         {selectedComparison && ablationState === "error" && ablationError && (
           <ErrorState
             code={ablationError.code}
@@ -529,8 +531,13 @@ export default function RunWorkflow({
                 onRetry={() => void loadPolicies()}
               />
             )}
-            {!policiesError && policies === null && <p className="state-hint">{t("common.loading")}</p>}
-            {!policiesError && policies !== null && policies.length === 0 && <p className="state-hint">{t("evaluation.gate.noPolicies")}</p>}
+            {!policiesError && policies === null && <LoadingState />}
+            {!policiesError && policies !== null && policies.length === 0 && (
+              <p className="state-hint">
+                {t("evaluation.gate.noPolicies")}{" "}
+                <Link href="/evaluations/release-gates">{t("evaluation.gate.goPolicies")}</Link>
+              </p>
+            )}
             {!policiesError && policies && policies.length > 0 && (
               <form
                 className="eval-form"
@@ -546,7 +553,8 @@ export default function RunWorkflow({
                     <option value="">—</option>
                     {policies.map((policy) => (
                       <option value={policy.id} key={policy.id}>
-                        {policy.name} · {policy.policy_json.rules.length} rules
+                        {policy.name} ·{" "}
+                        {t("evaluation.gates.ruleCount", { count: policy.policy_json.rules.length })}
                       </option>
                     ))}
                   </select>
@@ -568,7 +576,27 @@ export default function RunWorkflow({
             )}
             {!decisionsError && decisionsLoaded && decisions.length === 0 && <EmptyState title={t("evaluation.gate.empty")} />}
             {!decisionsError && decisions.map((decision) => (
-              <GateDecisionView key={decision.id} decision={decision} policy={policies?.find((p) => p.id === decision.policy_id) ?? null} />
+              <GateDecisionView
+                key={decision.id}
+                decision={decision}
+                policy={policies?.find((p) => p.id === decision.policy_id) ?? null}
+                candidateVersionHref={(() => {
+                  const comparison = (comparisons ?? []).find((item) => item.id === decision.comparison_id);
+                  if (!comparison) return null;
+                  const candidate = variants.find((v) => v.id === comparison.candidate_variant_id);
+                  return candidate?.agent_id
+                    ? `/agents/${encodeURIComponent(candidate.agent_id)}/versions/${encodeURIComponent(candidate.agent_version_id)}`
+                    : null;
+                })()}
+                candidatePlaygroundHref={(() => {
+                  const comparison = (comparisons ?? []).find((item) => item.id === decision.comparison_id);
+                  if (!comparison) return null;
+                  const candidate = variants.find((v) => v.id === comparison.candidate_variant_id);
+                  return candidate?.agent_id
+                    ? `/agents/${encodeURIComponent(candidate.agent_id)}/playground?version=${encodeURIComponent(candidate.agent_version_id)}`
+                    : null;
+                })()}
+              />
             ))}
           </>
         )}
@@ -745,7 +773,7 @@ function ComparisonView({
 }
 
 function PairedMetricRow({ name, paired }: { name: string; paired: PairedMetricView }) {
-  const { t } = useI18n();
+  const { t, formatPercent } = useI18n();
   const directionKey =
     paired.direction === "HIGHER_IS_BETTER" || paired.direction === "LOWER_IS_BETTER"
       ? paired.direction
@@ -757,7 +785,7 @@ function PairedMetricRow({ name, paired }: { name: string; paired: PairedMetricV
   const relative =
     paired.relative_delta === null || paired.relative_delta === undefined
       ? t("evaluation.comparison.notAvailable")
-      : `${(paired.relative_delta * 100).toFixed(1)}%`;
+      : formatPercent(paired.relative_delta);
   return (
     <tr>
       <td data-label={t("evaluation.comparison.metricColumns.metric")}><code>{name}</code></td>
@@ -823,19 +851,43 @@ function AblationView({
   );
 }
 
-function GateDecisionView({ decision, policy }: { decision: ReleaseGateDecision; policy: ReleaseGatePolicy | null }) {
+function GateDecisionView({
+  decision,
+  policy,
+  candidateVersionHref,
+  candidatePlaygroundHref,
+}: {
+  decision: ReleaseGateDecision;
+  policy: ReleaseGatePolicy | null;
+  /** Where the candidate variant's agent lives; null when it cannot be resolved. */
+  candidateVersionHref: string | null;
+  candidatePlaygroundHref: string | null;
+}) {
   const { t, statusLabel, formatDateTime } = useI18n();
   return (
     <article className="gate-decision">
       <div className="gate-decision-header">
-        <span className={`gate-status gate-${decision.status.toLowerCase()}`}>
-          {statusLabel(decision.status)}
-        </span>
+        <StatusBadge status={decision.status} />
         <div>
           <strong>{policy?.name ?? decision.policy_id.slice(0, 8) + "…"}</strong>
           <span className="state-hint"> · {formatDateTime(decision.created_at)}</span>
         </div>
       </div>
+      {(candidateVersionHref || candidatePlaygroundHref) && (
+        <div className="form-actions">
+          {/* The gate verdict should lead to the exact immutable version that
+              was evaluated, so the next step cannot drift to another candidate. */}
+          {decision.status === "PASS" && candidatePlaygroundHref ? (
+            <Link className="button button-primary" href={candidatePlaygroundHref}>
+              {t("evaluation.gate.testPassedVersion")}
+            </Link>
+          ) : candidateVersionHref ? (
+            <Link className="button button-ghost" href={candidateVersionHref}>
+              {t("evaluation.gate.goCandidate")}
+            </Link>
+          ) : null}
+        </div>
+      )}
       <div className="data-table">
         <table>
           <thead>
@@ -927,6 +979,14 @@ export function RunCaseResults({
     (id: string) => variants.find((variant) => variant.id === id)?.label ?? `${id.slice(0, 8)}…`,
     [variants],
   );
+  // A case's PENDING means "not executed yet". The shared status label for
+  // PENDING is the approval domain's 「待审批」, which would read as if an
+  // approval were waiting for the reader -- the one thing it must not say.
+  const caseStatusLabel = useCallback(
+    (status: string) =>
+      status === "PENDING" ? t("evaluation.run.caseResults.statusPending") : statusLabel(status),
+    [t, statusLabel],
+  );
 
   const isCurrent = (requestSessionId: number, requestRunId: string, generation: number) =>
     activeSessionRef.current === requestSessionId &&
@@ -989,17 +1049,26 @@ export function RunCaseResults({
       title={t("evaluation.run.caseResults.title")}
       eyebrow={t("evaluation.run.caseResults.eyebrow")}
       actions={
-        <label className="state-hint">
-          {t("evaluation.run.caseResults.filterLabel")}{" "}
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-            <option value="">{t("evaluation.run.caseResults.filterAll")}</option>
-            {CASE_RESULT_STATUSES.map((status) => (
-              <option value={status} key={status}>
-                {statusLabel(status)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <>
+          <button
+            type="button"
+            className="button button-ghost"
+            onClick={() => void loadFirstPage(statusFilter)}
+          >
+            {t("common.refresh")}
+          </button>
+          <label className="state-hint">
+            {t("evaluation.run.caseResults.filterLabel")}{" "}
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <option value="">{t("evaluation.run.caseResults.filterAll")}</option>
+              {CASE_RESULT_STATUSES.map((status) => (
+                <option value={status} key={status}>
+                  {caseStatusLabel(status)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </>
       }
     >
       {state.kind === "error" ? (
@@ -1009,7 +1078,7 @@ export function RunCaseResults({
           onRetry={() => void loadFirstPage(statusFilter)}
         />
       ) : state.kind === "loading" ? (
-        <p className="state-hint">{t("common.loading")}</p>
+        <LoadingState />
       ) : items.length === 0 ? (
         <EmptyState
           title={t("evaluation.run.caseResults.empty")}
@@ -1034,23 +1103,29 @@ export function RunCaseResults({
               <tbody>
                 {items.map((item) => (
                   <tr key={item.id}>
-                    <td className="tight-cell">
+                    <td className="tight-cell" data-label={t("evaluation.run.caseResults.columnCase")}>
                       <code title={item.case_execution_key}>
                         {item.case_execution_key.length > 28
                           ? `${item.case_execution_key.slice(0, 28)}…`
                           : item.case_execution_key}
                       </code>
                     </td>
-                    <td><StatusBadge status={item.status} /></td>
-                    <td className="tight-cell">{variantLabel(item.experiment_variant_id)}</td>
-                    <td className="numeric-cell">{item.repetition_index + 1}</td>
-                    <td className="numeric-cell">
+                    <td data-label={t("evaluation.run.caseResults.columnStatus")}>
+                      <StatusBadge status={item.status} label={caseStatusLabel(item.status)} />
+                    </td>
+                    <td className="tight-cell" data-label={t("evaluation.run.caseResults.columnVariant")}>
+                      {variantLabel(item.experiment_variant_id)}
+                    </td>
+                    <td className="numeric-cell" data-label={t("evaluation.run.caseResults.columnRepetition")}>
+                      {item.repetition_index + 1}
+                    </td>
+                    <td className="numeric-cell" data-label={t("evaluation.run.caseResults.columnLatency")}>
                       {item.latency_ms === null ? "—" : formatDurationMs(item.latency_ms)}
                     </td>
-                    <td className="numeric-cell">
+                    <td className="numeric-cell" data-label={t("evaluation.run.caseResults.columnTokens")}>
                       {item.total_tokens === null ? "—" : formatCount(item.total_tokens)}
                     </td>
-                    <td>
+                    <td data-label={t("evaluation.run.caseResults.columnFailure")}>
                       {item.failure_code ? (
                         <span>
                           <code>{item.failure_code}</code>
@@ -1062,9 +1137,9 @@ export function RunCaseResults({
                             </span>
                           )}
                           {item.agent_run_id && (
-                            <a href={`/runs/${encodeURIComponent(item.agent_run_id)}`}>
+                            <Link href={`/runs/${encodeURIComponent(item.agent_run_id)}`}>
                               {t("evaluation.run.caseResults.openAgentRun")}
-                            </a>
+                            </Link>
                           )}
                         </span>
                       ) : (

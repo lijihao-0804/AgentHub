@@ -5,6 +5,10 @@
  * is applied as `data-theme` on <html> by ThemeProvider.
  */
 :root {
+  --z-topbar: 30;
+  --z-floating: 60;
+  --z-skip-link: 100;
+
   --background: #0b0d10;
   --surface: rgba(22, 25, 30, 0.88);
   --surface-raised: rgba(35, 39, 46, 0.95);
@@ -16,6 +20,7 @@
   --border: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.22);
   --border-focus: var(--accent);
+  --focus-ring: var(--accent);
 
   --text: #f4f3ef;
   --text-muted: #a2a5a0;

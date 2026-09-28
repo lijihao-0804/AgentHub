@@ -182,6 +182,11 @@ async def get_workspace(
         id=access.workspace.id,
         organization_id=access.workspace.organization_id,
         name=access.workspace.name,
+        # The caller's own access to this workspace, so the UI can present a
+        # role-appropriate surface instead of teaching the user 403s.
+        org_role=access.context.organization.org_role,
+        workspace_role=access.context.workspace_role,
+        permissions=sorted(access.context.permissions),
     )
 
 

@@ -152,6 +152,9 @@ class EvaluationExperimentVariantResponse(BaseModel):
     experiment_id: UUID
     label: str
     agent_version_id: UUID
+    # The agent this version belongs to, filled by the route from the
+    # AgentVersion table; None only if the version row vanished.
+    agent_id: UUID | None = None
     resolved_spec_hash: str = Field(min_length=64, max_length=64)
     pricing_snapshot_id: UUID
     pricing_snapshot_hash: str = Field(min_length=64, max_length=64)

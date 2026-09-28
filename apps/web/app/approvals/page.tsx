@@ -14,6 +14,9 @@ import { useI18n } from "@/i18n/provider";
 
 type DecisionState = { approvalId: string; decision: "approve" | "deny" } | null;
 
+/** Poll cadence for the approvals inbox while decisions are pending. */
+const APPROVALS_POLL_MS = 5000;
+
 /** Client-side counts over the currently loaded list; no aggregate API exists. */
 function countSummary(approvals: Approval[]) {
   const pending = approvals.filter((a) => a.decision_status === "PENDING").length;
@@ -40,11 +43,13 @@ function argumentEntries(approval: Approval): Array<[string, unknown]> {
 
 export default function ApprovalsPage() {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { workspaceId, accessToken, connected, permissions } = useFrontendSession();
+  const cannotDecide = permissions !== null && !permissions.includes("approve_action");
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [decisionError, setDecisionError] = useState<{ approvalId: string; error: ApiError } | null>(null);
   const [decisionState, setDecisionState] = useState<DecisionState>(null);
+  const [lastDecisionId, setLastDecisionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   /** Generation of the list request; a stale workspace's response never lands. */
@@ -79,16 +84,39 @@ export default function ApprovalsPage() {
     if (!connected) setLoaded(false);
   }, [connected]);
 
+  // Poll even when the inbox is currently empty: otherwise the first new
+  // approval would never be discovered while this page stays open.
+  useEffect(() => {
+    if (!connected) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden) void refresh();
+    }, APPROVALS_POLL_MS);
+    const onVisible = () => {
+      if (!document.hidden) void refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [connected, refresh]);
+
   async function decide(approvalId: string, decision: "approve" | "deny") {
     setDecisionError(null);
+    setLastDecisionId(null);
     setDecisionState({ approvalId, decision });
     const requestWorkspace = workspaceRef.current;
     try {
       const result = await decideApproval(workspaceId, approvalId, decision, accessToken);
       if (workspaceRef.current !== requestWorkspace) return;
+      // An inbox poll that started before this decision must not overwrite its
+      // result with the old PENDING row.
+      generationRef.current += 1;
+      setLoading(false);
       setApprovals((current) =>
         current.map((approval) => (approval.id === approvalId ? result.approval : approval)),
       );
+      setLastDecisionId(approvalId);
     } catch (caught) {
       if (workspaceRef.current !== requestWorkspace) return;
       const apiError = toApiError(caught, "");
@@ -212,6 +240,15 @@ export default function ApprovalsPage() {
                   </div>
                 </div>
 
+                {lastDecisionId === approval.id && approval.decision_status !== "PENDING" && (
+                  <p className="inline-notice" role="status">
+                    {t("approvals.card.decisionSaved")} {" "}
+                    <Link href={`/runs/${encodeURIComponent(approval.run_id)}`}>
+                      {t("approvals.card.returnToRun")}
+                    </Link>
+                  </p>
+                )}
+
                 {approval.failure_code && (
                   <p className="state-hint">
                     {approval.safe_failure_message
@@ -235,11 +272,13 @@ export default function ApprovalsPage() {
 
                 {approval.decision_status === "PENDING" ? (
                   <div className="approval-actions">
+                    {cannotDecide && <p className="state-hint" role="note">{t("approvals.noPermissionHint")}</p>}
                     <button
                       type="button"
                       className="button button-ghost"
                       onClick={() => void decide(approval.id, "deny")}
-                      disabled={deciding !== null}
+                      disabled={deciding !== null || cannotDecide}
+                      title={cannotDecide ? t("approvals.noPermissionHint") : undefined}
                     >
                       {deciding === "deny" ? t("approvals.card.denying") : t("approvals.card.deny")}
                     </button>
@@ -247,7 +286,8 @@ export default function ApprovalsPage() {
                       type="button"
                       className="button button-primary"
                       onClick={() => void decide(approval.id, "approve")}
-                      disabled={deciding !== null}
+                      disabled={deciding !== null || cannotDecide}
+                      title={cannotDecide ? t("approvals.noPermissionHint") : undefined}
                     >
                       {deciding === "approve" ? t("approvals.card.approving") : t("approvals.card.approve")}
                     </button>

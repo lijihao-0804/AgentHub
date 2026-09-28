@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import HashValue from "@/components/evaluation/hash-value";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
@@ -137,7 +138,7 @@ export default function KnowledgeBasesPage() {
                       <Link href={`/knowledge/${base.id}`}>{base.name}</Link>
                     </td>
                     <td data-label={t("common.id")}>
-                      <code>{base.id}</code>
+                      <HashValue value={base.id} label={t("common.id")} />
                     </td>
                     <td data-label={t("common.created")}>
                       {base.created_at ? formatDateTime(base.created_at) : t("common.none")}

@@ -1,7 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
-import { useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import {
@@ -77,6 +76,16 @@ export default function RetrievalPlaygroundPage() {
   const [pageState, setPageState] = useState<PageState>("initial");
   const [result, setResult] = useState<RetrievalPlaygroundResponse | null>(null);
   const [error, setError] = useState<{ code: string; message: string } | null>(null);
+
+  // Deep links from a knowledge base (or snapshot) page preselect the target:
+  // arriving with the fields blank throws away the context the user came from.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const kb = params.get("knowledge_base_id");
+    if (kb) setKnowledgeBaseId(kb);
+    const snapshot = params.get("snapshot_id");
+    if (snapshot) setSnapshotId(snapshot);
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -179,19 +188,19 @@ export default function RetrievalPlaygroundPage() {
           <summary>{t("playground.advancedConfig")}</summary>
           <div className="form-grid top-k-grid">
             <label>
-              Dense Top K
+              {t("playground.denseTopK")}
               <input type="number" min={1} max={100} value={denseTopK} onChange={(event) => setDenseTopK(event.target.value)} />
             </label>
             <label>
-              Sparse Top K
+              {t("playground.sparseTopK")}
               <input type="number" min={1} max={100} value={sparseTopK} onChange={(event) => setSparseTopK(event.target.value)} />
             </label>
             <label>
-              Candidate Top K
+              {t("playground.candidateTopK")}
               <input type="number" min={1} max={100} value={candidateTopK} onChange={(event) => setCandidateTopK(event.target.value)} />
             </label>
             <label>
-              Final Top K
+              {t("playground.finalTopK")}
               <input type="number" min={1} max={20} value={finalTopK} onChange={(event) => setFinalTopK(event.target.value)} />
             </label>
           </div>

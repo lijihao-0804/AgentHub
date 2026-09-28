@@ -4,6 +4,7 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
@@ -35,6 +36,7 @@ from apps.api.schemas.evaluation import (
     PricingSnapshotCreateRequest,
     PricingSnapshotResponse,
 )
+from packages.agent_runtime.models import AgentVersion
 from packages.control_plane.rbac import EVALUATION_MANAGE
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
@@ -54,6 +56,31 @@ router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}/evaluation", tags=[
 context_dependency = Depends(get_workspace_context)
 db_session_dependency = Depends(get_db_session)
 run_queue_dependency = Depends(get_experiment_run_queue)
+
+
+async def _variant_responses(
+    session: AsyncSession,
+    variants: list,
+) -> list[EvaluationExperimentVariantResponse]:
+    """Project variants with the owning agent filled in.
+
+    The gate→publish bridge (and any deep link into an agent page) needs the
+    agent id, which lives on the AgentVersion, not on the variant row.
+    """
+
+    version_ids = {item.agent_version_id for item in variants}
+    agent_by_version: dict = {}
+    if version_ids:
+        rows = await session.execute(
+            select(AgentVersion.id, AgentVersion.agent_id).where(AgentVersion.id.in_(version_ids))
+        )
+        agent_by_version = {version_id: agent_id for version_id, agent_id in rows}
+    responses = []
+    for item in variants:
+        response = EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
+        agent_id = agent_by_version.get(item.agent_version_id)
+        responses.append(response.model_copy(update={"agent_id": agent_id}))
+    return responses
 
 
 @router.post(
@@ -175,6 +202,7 @@ async def get_dataset_version(
     workspace_id: UUID,
     dataset_id: UUID,
     version_id: UUID,
+    include_expected: bool = Query(default=False),
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationDatasetVersionDetailResponse:
@@ -186,14 +214,22 @@ async def get_dataset_version(
     items = await service.list_version_items(
         session, context=context, dataset_id=dataset_id, version_id=version_id
     )
+    # HOLDOUT expected answers are the release gate's secrets. They leave the
+    # API only for callers holding evaluation_manage AND asking explicitly;
+    # everyone else gets empty payloads. Evaluation runners consume the items
+    # through the services directly, so redaction here never affects runs.
+    redact_expected = not (include_expected and EVALUATION_MANAGE in context.permissions)
+    projected_items = []
+    for item in items:
+        item_response = EvaluationDatasetItemResponse.model_validate(item, from_attributes=True)
+        if redact_expected and item.split == "HOLDOUT":
+            item_response = item_response.model_copy(update={"expected": {}})
+        projected_items.append(item_response)
     response = EvaluationDatasetVersionResponse.model_validate(version, from_attributes=True)
     return EvaluationDatasetVersionDetailResponse(
         **response.model_dump(),
         item_count=len(items),
-        items=[
-            EvaluationDatasetItemResponse.model_validate(item, from_attributes=True)
-            for item in items
-        ],
+        items=projected_items,
     )
 
 
@@ -369,10 +405,7 @@ async def get_experiment(
     return EvaluationExperimentDetailResponse(
         **response.model_dump(exclude={"holdout_exposure_count"}),
         holdout_exposure_count=count,
-        variants=[
-            EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
-            for item in variants
-        ],
+        variants=await _variant_responses(session, variants),
     )
 
 
@@ -399,7 +432,7 @@ async def add_experiment_variant(
         ordinal=payload.ordinal,
         variant_metadata=payload.variant_metadata,
     )
-    return EvaluationExperimentVariantResponse.model_validate(variant, from_attributes=True)
+    return (await _variant_responses(session, [variant]))[0]
 
 
 @router.get(
@@ -416,10 +449,7 @@ async def list_experiment_variants(
     variants = await ExperimentService().list_variants(
         session, context=context, experiment_id=experiment_id
     )
-    return [
-        EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
-        for item in variants
-    ]
+    return await _variant_responses(session, variants)
 
 
 @router.post(
@@ -445,10 +475,7 @@ async def finalize_experiment(
     return EvaluationExperimentDetailResponse(
         **response.model_dump(exclude={"holdout_exposure_count"}),
         holdout_exposure_count=count,
-        variants=[
-            EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
-            for item in variants
-        ],
+        variants=await _variant_responses(session, variants),
     )
 
 

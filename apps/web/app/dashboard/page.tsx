@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import MetricCard from "@/components/ui/metric-card";
+import MetricCard, { windowDelta } from "@/components/ui/metric-card";
+import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
 import {
@@ -65,10 +66,11 @@ export default function DashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
-  /** Generation of the whole-panel load; stale responses never land. */
+  /** Generation shared by the full load and failures-only reloads, so a poll
+   * can never land on top of a newer drill-down (or vice versa). */
   const generationRef = useRef(0);
-  /** Generation of failures-only reloads, independent of the full load. */
-  const failuresGenerationRef = useRef(0);
+  /** Live drill-down selection; a full load must re-apply, not clear it. */
+  const selectedCategoryRef = useRef<string | null>(null);
   /** True while a full load is on the wire, so polls cannot stack up. */
   const loadingRef = useRef(false);
 
@@ -78,6 +80,10 @@ export default function DashboardPage() {
       const effectiveDays = dayOverride ?? days;
       if (!effectiveDays) return;
       const generation = (generationRef.current += 1);
+      // The user's failure drill-down survives every refresh and poll: the
+      // failures endpoint is re-pulled with the selected category instead of
+      // being reset to "all categories".
+      const category = selectedCategoryRef.current;
       setError(null);
       const window = queryForDays(Number(effectiveDays));
       loadingRef.current = true;
@@ -87,7 +93,7 @@ export default function DashboardPage() {
         const [nextSummary, nextTimeseries, nextFailures, nextVersions] = await Promise.all([
           getObservabilitySummary(input),
           getObservabilityTimeseries({ ...input, bucket: Number(effectiveDays) <= 1 ? "hour" : "day" }),
-          getObservabilityFailures(input),
+          getObservabilityFailures({ ...input, ...(category ? { category } : {}) }),
           getAgentVersionBreakdown(input),
         ]);
         if (generationRef.current !== generation) return;
@@ -95,7 +101,7 @@ export default function DashboardPage() {
         setTimeseries(nextTimeseries);
         setFailures(nextFailures);
         setVersions(nextVersions);
-        setSelectedCategory(null);
+        setSelectedCategory(category);
       } catch (caught) {
         if (generationRef.current !== generation) return;
         setError(toApiError(caught, ""));
@@ -113,7 +119,8 @@ export default function DashboardPage() {
   const loadFailures = useCallback(
     async (category: string | null) => {
       if (!connected) return;
-      const generation = (failuresGenerationRef.current += 1);
+      const generation = (generationRef.current += 1);
+      selectedCategoryRef.current = category;
       const window = queryForDays(Number(days ?? "7"));
       try {
         const nextFailures = await getObservabilityFailures({
@@ -122,11 +129,11 @@ export default function DashboardPage() {
           ...window,
           ...(category ? { category } : {}),
         });
-        if (failuresGenerationRef.current !== generation) return;
+        if (generationRef.current !== generation) return;
         setFailures(nextFailures);
         setSelectedCategory(category);
       } catch (caught) {
-        if (failuresGenerationRef.current !== generation) return;
+        if (generationRef.current !== generation) return;
         setError(toApiError(caught, ""));
       }
     },
@@ -218,13 +225,50 @@ export default function DashboardPage() {
 
       {summary && (
         <>
+          {summary.success_rate.denominator === 0 && (
+            <Panel title={t("dashboard.onboarding.title")} eyebrow={t("dashboard.onboarding.eyebrow")}>
+              <p className="state-hint">{t("dashboard.onboarding.lede")}</p>
+              <div className="split-list">
+                <Link className="stat-row" href="/settings/models">
+                  <span className="stat-row-lead">{t("dashboard.onboarding.step1")}</span>
+                  <span className="stat-row-meta stat-row-meta-end">{t("dashboard.onboarding.step1Hint")}</span>
+                </Link>
+                <Link className="stat-row" href="/agents">
+                  <span className="stat-row-lead">{t("dashboard.onboarding.step2")}</span>
+                  <span className="stat-row-meta stat-row-meta-end">{t("dashboard.onboarding.step2Hint")}</span>
+                </Link>
+                <Link className="stat-row" href="/knowledge">
+                  <span className="stat-row-lead">{t("dashboard.onboarding.step3")}</span>
+                  <span className="stat-row-meta stat-row-meta-end">{t("dashboard.onboarding.step3Hint")}</span>
+                </Link>
+              </div>
+            </Panel>
+          )}
           <section className="kpi-grid" aria-label={t("dashboard.title")}>
+            <MetricCard
+              label={t("dashboard.kpi.totalRuns")}
+              value={formatCount(summary.finished_runs.denominator)}
+              href="/runs"
+              delta={windowDelta((timeseries?.items ?? []).map((item) => item.runs))}
+              deltaLabel={t("dashboard.kpi.deltaLabel")}
+              sparkline={(timeseries?.items ?? []).map((item) => item.runs)}
+            />
+            <MetricCard
+              label={t("dashboard.kpi.failedRuns")}
+              value={formatCount(summary.finished_runs.failed)}
+              href="/runs?status=FAILED"
+              emphasis={summary.finished_runs.failed > 0}
+              delta={windowDelta((timeseries?.items ?? []).map((item) => item.failed))}
+              deltaLabel={t("dashboard.kpi.deltaLabel")}
+              deltaInverse
+              sparkline={(timeseries?.items ?? []).map((item) => item.failed)}
+            />
             <MetricCard
               label={t("dashboard.kpi.successRate")}
               value={summary.success_rate.rate === null ? "—" : formatPercent(summary.success_rate.rate)}
               hint={t("dashboard.kpi.successHint", {
-                numerator: summary.success_rate.numerator,
-                denominator: summary.success_rate.denominator,
+                numerator: formatCount(summary.success_rate.numerator),
+                denominator: formatCount(summary.success_rate.denominator),
               })}
             />
             <MetricCard
@@ -232,16 +276,27 @@ export default function DashboardPage() {
               value={summary.latency.p95_ms === null ? "—" : formatDurationMs(summary.latency.p95_ms)}
               hint={t("dashboard.kpi.p95Hint", {
                 p50: summary.latency.p50_ms === null ? "—" : formatDurationMs(summary.latency.p50_ms),
-                count: summary.latency.sample_count,
+                avg: summary.latency.avg_ms === null ? "—" : formatDurationMs(summary.latency.avg_ms),
+                count: formatCount(summary.latency.sample_count),
               })}
             />
             <MetricCard
               label={t("dashboard.kpi.tokensPerRun")}
               value={summary.usage.avg_tokens_per_run === null ? "—" : formatCount(summary.usage.avg_tokens_per_run)}
-              hint={t("dashboard.kpi.tokensHint", {
-                known: summary.usage.known_usage_count,
-                unknown: summary.usage.unknown_usage_count,
-              })}
+              hint={
+                <>
+                  {t("dashboard.kpi.tokensHint", {
+                    known: formatCount(summary.usage.known_usage_count),
+                    unknown: formatCount(summary.usage.unknown_usage_count),
+                  })}
+                  <br />
+                  {t("dashboard.kpi.tokensBreakdown", {
+                    input: summary.usage.avg_input_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_input_tokens),
+                    output: summary.usage.avg_output_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_output_tokens),
+                    cached: summary.usage.avg_cached_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_cached_tokens),
+                  })}
+                </>
+              }
             />
             <MetricCard
               label={t("dashboard.kpi.costPerSuccess")}
@@ -257,32 +312,71 @@ export default function DashboardPage() {
                   ? null
                   : summary.cost.currency
               }
-              hint={t("dashboard.kpi.costHint", { count: summary.cost.successful_cost_denominator })}
+              hint={
+                summary.cost.total_cost === null || summary.cost.mixed_currency
+                  ? t("dashboard.kpi.costHint", { count: formatCount(summary.cost.successful_cost_denominator) })
+                  : t("dashboard.kpi.costHintTotal", {
+                      total: formatCurrencyAmount(summary.cost.total_cost, null),
+                      average: summary.cost.avg_cost_per_run === null
+                        ? t("common.unknown")
+                        : formatCurrencyAmount(summary.cost.avg_cost_per_run, null),
+                      count: formatCount(summary.cost.successful_cost_denominator),
+                    })
+              }
             />
           </section>
 
           <section className="op-grid" aria-label={t("dashboard.title")}>
-            <MetricCard label={t("dashboard.ops.running")} value={summary.current.running_count} href="/runs?status=RUNNING" />
+            <MetricCard label={t("dashboard.ops.running")} value={formatCount(summary.current.running_count)} href="/runs?status=RUNNING" />
             <MetricCard
               label={t("dashboard.ops.waitingApproval")}
-              value={summary.current.waiting_approval_count}
+              value={formatCount(summary.current.waiting_approval_count)}
               href="/approvals"
               emphasis={summary.current.waiting_approval_count > 0}
             />
             <MetricCard
+              label={t("dashboard.ops.cancelRequested")}
+              value={formatCount(summary.current.cancel_requested_count)}
+              href="/runs?status=CANCEL_REQUESTED"
+              emphasis={summary.current.cancel_requested_count > 0}
+            />
+            <MetricCard
               label={t("dashboard.ops.needsAttention")}
-              value={summary.current.needs_attention_count}
+              value={formatCount(summary.current.needs_attention_count)}
               href="/runs?status=NEEDS_ATTENTION"
               emphasis={summary.current.needs_attention_count > 0}
             />
             <MetricCard
               label={t("dashboard.ops.unknownOutcome")}
-              value={summary.current.unknown_outcome_action_count}
+              value={formatCount(summary.current.unknown_outcome_action_count)}
               hint={t("dashboard.ops.unknownOutcomeHint")}
               href="/runs?status=NEEDS_ATTENTION"
               emphasis={summary.current.unknown_outcome_action_count > 0}
             />
           </section>
+
+          <Panel title={t("dashboard.approvals.title")} eyebrow={t("dashboard.approvals.eyebrow")}>
+            <div className="run-facts">
+              <span>{t("dashboard.approvals.decisionTotal")}<strong>{formatCount(summary.approvals.approval_total)}</strong></span>
+              <span>{t("dashboard.approvals.waitP50")}<strong>{summary.approvals.wait_latency.p50_ms === null ? "—" : formatDurationMs(summary.approvals.wait_latency.p50_ms)}</strong></span>
+              <span>{t("dashboard.approvals.waitP95")}<strong>{summary.approvals.wait_latency.p95_ms === null ? "—" : formatDurationMs(summary.approvals.wait_latency.p95_ms)}</strong></span>
+            </div>
+            <div className="approval-chips">
+              <StatusBadge status="PENDING" label={t("run.chips.pending", { count: formatCount(summary.approvals.pending) })} />
+              <StatusBadge status="APPROVED" label={t("run.chips.approved", { count: formatCount(summary.approvals.approved) })} />
+              <StatusBadge status="DENIED" label={t("run.chips.denied", { count: formatCount(summary.approvals.denied) })} />
+              <StatusBadge status="EXPIRED" label={t("dashboard.approvals.expired", { count: formatCount(summary.approvals.expired) })} />
+              <StatusBadge status="CANCELLED" label={t("dashboard.approvals.cancelled", { count: formatCount(summary.approvals.cancelled) })} />
+            </div>
+            <p className="state-hint">{t("dashboard.approvals.executionDistribution")}</p>
+            <div className="approval-chips">
+              <StatusBadge status="NOT_STARTED" label={t("dashboard.approvals.executionNotStarted", { count: formatCount(summary.approvals.execution_not_started) })} />
+              <StatusBadge status="CLAIMED" label={t("dashboard.approvals.executionClaimed", { count: formatCount(summary.approvals.claimed) })} />
+              <StatusBadge status="SUCCEEDED" label={t("dashboard.approvals.executionSucceeded", { count: formatCount(summary.approvals.succeeded) })} />
+              <StatusBadge status="FAILED" label={t("dashboard.approvals.executionFailed", { count: formatCount(summary.approvals.failed) })} />
+              <StatusBadge status="UNKNOWN_OUTCOME" label={t("dashboard.approvals.executionUnknown", { count: formatCount(summary.approvals.unknown_outcome) })} />
+            </div>
+          </Panel>
 
           <div className="dashboard-columns">
             <Panel title={t("dashboard.failures.title")} eyebrow={t("dashboard.failures.eyebrow")}>
@@ -332,7 +426,10 @@ export default function DashboardPage() {
                         {item.total_cost === null ? t("common.unknown") : formatCurrencyAmount(item.total_cost, null)}
                       </span>
                       <span className="stat-row-meta">
-                        {t("dashboard.cost.samples", { estimated: item.estimated_count, exact: item.exact_count })}
+                        {t("dashboard.cost.samples", {
+                          estimated: formatCount(item.estimated_count),
+                          exact: formatCount(item.exact_count),
+                        })}
                       </span>
                       <span className="stat-row-meta stat-row-meta-end">
                         {t("dashboard.cost.perSuccess", {
@@ -355,7 +452,7 @@ export default function DashboardPage() {
             actions={<span className="state-hint">{t("common.utcBucket", { bucket: timeseries?.bucket ?? "day" })}</span>}
           >
             {!timeseries || timeseries.items.length === 0 ? (
-              <EmptyState title={t("dashboard.failures.empty")} />
+              <EmptyState title={t("dashboard.trend.empty")} />
             ) : (
               <TimeseriesChart items={timeseries.items} />
             )}
@@ -380,11 +477,11 @@ export default function DashboardPage() {
                       <span className="stat-row-lead">v{item.version_number}</span>
                       <span className="stat-row-value">
                         {t(item.run_count === 1 ? "dashboard.versions.runCountOne" : "dashboard.versions.runCountOther", {
-                          count: item.run_count,
+                          count: formatCount(item.run_count),
                         })}
                       </span>
                       <span className="stat-row-meta">
-                        {item.success_count} ✓ · {item.failed_count} ✕ · {item.needs_attention_count} ⚠
+                        {formatCount(item.success_count)} ✓ · {formatCount(item.failed_count)} ✕ · {formatCount(item.needs_attention_count)} ⚠
                       </span>
                       <span className="stat-row-meta stat-row-meta-end">
                         {item.p95_latency_ms === null ? "p95 —" : `p95 ${formatDurationMs(item.p95_latency_ms)}`}
@@ -452,7 +549,7 @@ export default function DashboardPage() {
 }
 
 function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
-  const { t, formatNumber, formatCount, formatUTCBucketDate } = useI18n();
+  const { t, formatNumber, formatCount, formatUTCBucketDate, formatCurrencyAmount } = useI18n();
   const maxRuns = Math.max(...items.map((item) => item.runs), 1);
   const width = Math.max(items.length * 34, 120);
   const chartHeight = 130;
@@ -491,11 +588,21 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
               <title>
                 {t("dashboard.trend.barTitle", {
                   date: formatUTCBucketDate(item.bucket),
-                  runs: item.runs,
-                  succeeded: item.succeeded,
-                  failed: item.failed,
-                  needsAttention: item.needs_attention,
+                  runs: formatCount(item.runs),
+                  succeeded: formatCount(item.succeeded),
+                  failed: formatCount(item.failed),
+                  needsAttention: formatCount(item.needs_attention),
                   tokens: item.tokens === null ? t("common.unknown") : formatCount(item.tokens),
+                  cost:
+                    item.cost_by_currency.length === 0
+                      ? t("common.unknown")
+                      : item.cost_by_currency
+                          .map((entry) =>
+                            entry.total_cost === null
+                              ? t("common.unknown")
+                              : formatCurrencyAmount(entry.total_cost, entry.currency),
+                          )
+                          .join(", "),
                 })}
               </title>
               {segmentColors.map(([key, color]) => {

@@ -226,8 +226,9 @@ export default function DatasetVersionDetailClient({
                 </table>
               </div>
             )}
-            {/* Holdout note: if the API already ships holdout expected payloads to the browser,
-                hiding them here is presentation only — server-side redaction is the real boundary. */}
+            {/* Holdout note: the backend now redacts HOLDOUT `expected` payloads
+                unless the caller holds evaluation_manage and asks explicitly;
+                the empty payload and this row highlight are all a viewer sees. */}
           </Panel>
         </>
       )}

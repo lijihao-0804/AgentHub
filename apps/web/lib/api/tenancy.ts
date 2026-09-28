@@ -16,6 +16,11 @@ export type Workspace = {
   id: string;
   organization_id: string;
   name: string;
+  // Caller-relative access, present on the single-workspace read (absent on
+  // list responses).
+  org_role?: string | null;
+  workspace_role?: string | null;
+  permissions?: string[];
 };
 
 /**
@@ -50,6 +55,11 @@ export async function listWorkspaces(accessToken: string): Promise<Workspace[] |
   return listEnvelope<Workspace>(payload);
 }
 
+/**
+ * Reads one workspace with the caller's own role and permissions: the shell
+ * uses it for the active workspace, so the UI can present a role-appropriate
+ * surface instead of letting users discover 403s by submit.
+ */
 export function getWorkspace(workspaceId: string, accessToken: string): Promise<Workspace> {
   return apiRequest<Workspace>(`/api/v1/workspaces/${encodeURIComponent(workspaceId)}`, accessToken);
 }

@@ -132,7 +132,9 @@ function specCount(value: unknown): number | null {
 
 export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const { t, formatDateTime } = useI18n();
-  const { connected, sessionId, workspaceId } = useFrontendSession();
+  const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
+  // null = unknown access: fail open (the backend still enforces everything).
+  const cannotPublish = permissions !== null && !permissions.includes("agent_edit");
 
   const scope = `${workspaceId}:${agentId}`;
   const [tab, setTab] = useState<Tab>("general");
@@ -160,7 +162,11 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   const [preflight, setPreflight] = useState<AgentPreflightResult | null>(null);
   /** True once a draft write has dropped a preview the user had open. */
   const [preflightStale, setPreflightStale] = useState(false);
-  const [publishResult, setPublishResult] = useState<{ version: number; hash: string } | null>(null);
+  const [publishResult, setPublishResult] = useState<{
+    version: number;
+    hash: string;
+    versionId: string;
+  } | null>(null);
 
   const loadAgent = useCallback((auth: AuthInput) => getAgent(auth, agentId), [agentId]);
   const loadVersions = useCallback((auth: AuthInput) => listAgentVersions(auth, agentId), [agentId]);
@@ -506,7 +512,11 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     const result = await publishMutation.run((auth) => publishAgent(auth, agentId));
     if (result) {
       setPreflight(null);
-      setPublishResult({ version: result.version_number, hash: result.resolved_spec_hash });
+      setPublishResult({
+        version: result.version_number,
+        hash: result.resolved_spec_hash,
+        versionId: result.agent_version_id,
+      });
       versions.reload();
     }
   }
@@ -542,17 +552,27 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
           type="button"
           className="button button-primary"
           onClick={() => void startPreflight()}
-          disabled={preflightMutation.pending || publishMutation.pending || !loadedAgent}
+          disabled={preflightMutation.pending || publishMutation.pending || !loadedAgent || cannotPublish}
+          title={cannotPublish ? t("agents.noPermissionHint") : undefined}
         >
           {preflightMutation.pending ? t("agents.checkingReadiness") : t("agents.publish")}
         </button>
       </div>
+      {cannotPublish && <p className="state-hint" role="note">{t("agents.noPermissionHint")}</p>}
 
       {notice && <p className="inline-notice">{notice}</p>}
       {publishResult && (
         <p className="inline-notice">
           {t("agents.publishedVersion", { version: publishResult.version })}{" "}
-          <code className="hash-value">{publishResult.hash}</code>
+          <code className="hash-value">{publishResult.hash}</code>{" "}
+          {/* The Playground button just became usable: point at it directly,
+              preloaded with the version that was just published. */}
+          <Link
+            className="button button-ghost"
+            href={`/agents/${agentId}/playground?version=${encodeURIComponent(publishResult.versionId)}`}
+          >
+            {t("agents.goVerify")}
+          </Link>
         </p>
       )}
       <InlineError error={publishMutation.error} fallback={t("errors.requestFailed")} />
@@ -817,9 +837,15 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                 ])
               }
               disabled={baseList.length === 0}
+              title={baseList.length === 0 ? t("agents.noBasesHint") : undefined}
             >
               {t("agents.addBinding")}
             </button>
+            {baseList.length === 0 && (
+              <Link className="button button-ghost" href="/knowledge">
+                {t("agents.goCreateBase")}
+              </Link>
+            )}
             <button
               type="button"
               className="button button-primary"
@@ -878,9 +904,15 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               className="button button-ghost"
               onClick={() => setToolDraft((current) => [...current, { tool_id: "", tool_revision_id: null }])}
               disabled={toolList.length === 0}
+              title={toolList.length === 0 ? t("agents.noToolsHint") : undefined}
             >
               {t("agents.addBinding")}
             </button>
+            {toolList.length === 0 && (
+              <Link className="button button-ghost" href="/tools">
+                {t("agents.goCreateTool")}
+              </Link>
+            )}
             <button
               type="button"
               className="button button-primary"

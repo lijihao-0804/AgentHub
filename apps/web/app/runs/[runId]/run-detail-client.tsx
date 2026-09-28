@@ -20,6 +20,25 @@ import { useI18n } from "@/i18n/provider";
 const RUN_DETAIL_POLL_MS = 4000;
 const TERMINAL_RUN_STATUSES = new Set(["SUCCEEDED", "FAILED", "CANCELLED"]);
 
+/**
+ * Threads are read on the page of the application they belong to. A kind
+ * without a page (or an unknown kind) has nowhere to link to.
+ */
+function threadPath(kind: string | null | undefined, threadId: string): string | null {
+  switch (kind) {
+    case "research":
+      return `/research/${encodeURIComponent(threadId)}`;
+    case "incident":
+      return `/incidents/${encodeURIComponent(threadId)}`;
+    case "analysis":
+      return `/analytics/${encodeURIComponent(threadId)}`;
+    case "support":
+      return `/support/${encodeURIComponent(threadId)}`;
+    default:
+      return null;
+  }
+}
+
 function timelineTone(entry: RunTimelineEntry): StatusTone {
   if (entry.status === "UNKNOWN_OUTCOME") return "attention";
   return statusTone(entry.status);
@@ -158,6 +177,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   // Copy feedback state; the timer is cleaned up so it cannot fire after
   // the component is gone.
   const [copiedId, setCopiedId] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const copyTimerRef = useRef<number | null>(null);
   useEffect(
     () => () => {
@@ -171,7 +191,10 @@ export default function RunDetailClient({ runId }: { runId: string }) {
       setCopiedId(true);
       copyTimerRef.current = window.setTimeout(() => setCopiedId(false), 1500);
     } catch {
-      // Clipboard unavailable — the id is still visible in the title.
+      // Clipboard unavailable (permissions/insecure context): say so instead
+      // of failing silently — the user pressed a button and nothing happened.
+      setCopyFailed(true);
+      copyTimerRef.current = window.setTimeout(() => setCopyFailed(false), 1500);
     }
   }, [runId]);
 
@@ -314,13 +337,18 @@ export default function RunDetailClient({ runId }: { runId: string }) {
                 <h2><StatusBadge status={run.status} /></h2>
               </div>
               <div className="approval-actions">
+                {run.thread_id && threadPath(run.thread_kind, run.thread_id) && (
+                  <Link className="button button-ghost" href={threadPath(run.thread_kind, run.thread_id)!}>
+                    {t("run.openThread")}
+                  </Link>
+                )}
                 {run.trace_url ? (
                   <a className="button button-ghost" href={run.trace_url} target="_blank" rel="noreferrer">
                     {t("run.openTrace")}
                   </a>
                 ) : null}
                 <button className="button button-ghost" type="button" onClick={() => void copyRunId()}>
-                  {copiedId ? t("common.copied") : t("run.copyId")}
+                  {copiedId ? t("common.copied") : copyFailed ? t("run.copyFailed") : t("run.copyId")}
                 </button>
                 {run.status === "WAITING_APPROVAL" && (
                   <Link className="button button-ghost" href="/approvals">
