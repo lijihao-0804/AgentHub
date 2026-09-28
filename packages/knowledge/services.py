@@ -202,8 +202,8 @@ class KnowledgeService:
         """Requeue the latest revision's failed ingestion, in place.
 
         A revision owns exactly one ingestion job (``uq_ingestion_jobs_revision``),
-        so a retry is a reset of that job to PENDING -- lease and backoff
-        cleared -- never a second job. Without this the failure was terminal:
+        so a retry is a reset of that job to PENDING -- attempt count, lease and
+        backoff cleared -- never a second job. Without this the failure was terminal:
         the only remedy was re-uploading the file blind.
         """
 
@@ -246,6 +246,7 @@ class KnowledgeService:
                 409,
             )
         job.status = IngestionJobStatus.PENDING
+        job.attempt_count = 0
         job.lease_token = None
         job.lease_expires_at = None
         job.next_attempt_at = None
