@@ -16,6 +16,7 @@ type DecisionState = { approvalId: string; decision: "approve" | "deny" } | null
 
 /** Poll cadence for the approvals inbox while decisions are pending. */
 const APPROVALS_POLL_MS = 5000;
+const EXPIRY_CLOCK_TOLERANCE_MS = 60_000;
 
 /** Client-side counts over the currently loaded list; no aggregate API exists. */
 function countSummary(approvals: Approval[]) {
@@ -213,7 +214,8 @@ export default function ApprovalsPage() {
             const decidedAt = approval.decided_at ? formatDateTime(approval.decided_at) : "—";
             const expiresAtMs = approval.expires_at ? Date.parse(approval.expires_at) : Number.NaN;
             const expiryElapsed = approval.decision_status === "PENDING" &&
-              Number.isFinite(expiresAtMs) && expiresAtMs <= clockNowMs;
+              Number.isFinite(expiresAtMs) &&
+              expiresAtMs + EXPIRY_CLOCK_TOLERANCE_MS <= clockNowMs;
             return (
               <article className="approval-card" key={approval.id}>
                 <div className="approval-header">
@@ -241,11 +243,15 @@ export default function ApprovalsPage() {
                       })}
                     </span>
                     {approval.decision_status === "PENDING" && Number.isFinite(expiresAtMs) && (
-                      <span className="approval-state-meta" aria-live="off">
+                      <span
+                        className="approval-state-meta"
+                        aria-live="off"
+                        title={t("approvals.card.expiryClockHint")}
+                      >
                         {expiryElapsed
                           ? t("approvals.card.expiryElapsed")
                           : t("approvals.card.expiresIn", {
-                              duration: formatDurationMs(expiresAtMs - clockNowMs),
+                              duration: formatDurationMs(Math.max(0, expiresAtMs - clockNowMs)),
                             })}
                       </span>
                     )}

@@ -68,6 +68,7 @@ export default function AppConversationPane({
   const [streamRunId, setStreamRunId] = useState<string | null>(null);
   const streamAbortRef = useRef<AbortController | null>(null);
   const [stoppingRunId, setStoppingRunId] = useState<string | null>(null);
+  const [cancelFeedback, setCancelFeedback] = useState<"requested" | "failed" | null>(null);
 
   // Another thread is another conversation: nothing in flight carries over.
   useEffect(() => {
@@ -77,6 +78,7 @@ export default function AppConversationPane({
     setStreamText(null);
     setStreamRunId(null);
     setStoppingRunId(null);
+    setCancelFeedback(null);
     streamAbortRef.current = null;
     return () => {
       // Leave the backend run untouched, but stop this pane's stream so a
@@ -110,6 +112,7 @@ export default function AppConversationPane({
   useEffect(() => {
     if (pendingInput !== null && !mutation.pending && !pendingVisible) {
       setPendingInput(null);
+      setStreamText(null);
     }
   }, [pendingInput, mutation.pending, pendingVisible]);
 
@@ -117,6 +120,7 @@ export default function AppConversationPane({
     event.preventDefault();
     const text = draft.trim();
     if (!text || mutation.pending || cannotRun) return;
+    setCancelFeedback(null);
     if (!tokenRef.current) tokenRef.current = newSubmissionToken();
     setPendingInput(text);
     setStreamText("");
@@ -131,8 +135,11 @@ export default function AppConversationPane({
           inputText: text,
           clientToken: tokenRef.current ?? undefined,
           signal: controller.signal,
-          onStarted: (runId) => setStreamRunId(runId),
+          onStarted: (runId) => {
+            if (streamAbortRef.current === controller) setStreamRunId(runId);
+          },
           onEvent: (event) => {
+            if (streamAbortRef.current !== controller) return;
             if (event.type === "message.delta") {
               const delta = payloadString(event.payload, "delta");
               if (delta !== null) setStreamText((current) => (current ?? "") + delta);
@@ -150,13 +157,13 @@ export default function AppConversationPane({
       // reloaded turn list now carries the authoritative answer.
       tokenRef.current = null;
       setDraft("");
-      setStreamText(null);
       setStreamRunId(null);
       turns.reload();
       onTurnCompleted();
     } else if (controller.signal.aborted) {
       // A deliberate stop is not an error to report.
       mutation.clearError();
+      tokenRef.current = null;
       setStreamText(null);
       setStreamRunId(null);
       turns.reload();
@@ -167,13 +174,14 @@ export default function AppConversationPane({
 
   async function stopGeneration(runId: string) {
     setStoppingRunId(runId);
+    setCancelFeedback(null);
     try {
       await cancelAgentRun({ workspaceId, accessToken }, runId);
-    } catch {
-      // The abort below already ends the local stream; the run's own state
-      // stays authoritative and is picked up by the reload.
-    } finally {
+      setCancelFeedback("requested");
       if (streamRunId === runId) streamAbortRef.current?.abort();
+    } catch {
+      setCancelFeedback("failed");
+    } finally {
       setStoppingRunId(null);
       void turns.reload();
       onTurnCompleted();
@@ -352,6 +360,13 @@ export default function AppConversationPane({
           />
         </label>
         <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
+        {cancelFeedback && (
+          <p className="inline-notice" role="status">
+            {cancelFeedback === "requested"
+              ? t("appThread.conversation.cancelRequested")
+              : t("appThread.conversation.cancelFailed")}
+          </p>
+        )}
         {mutation.error && <p className="state-hint">{t("appThread.conversation.retryHint")}</p>}
         <div className="form-actions">
           <button

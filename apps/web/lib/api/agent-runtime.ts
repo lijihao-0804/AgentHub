@@ -81,6 +81,7 @@ export function createAgentRun(
  * CANCEL_REQUESTED — that is a request in flight, not a cancelled run.
  */
 export function cancelAgentRun(input: AuthInput, runId: string): Promise<AgentRun> {
+  // apiRequest uses the session provider's single-flight 401 refresh/replay.
   return apiRequest<AgentRun>(
     `${runtimeBase(input.workspaceId)}/agent-runs/${encodeURIComponent(runId)}/cancel`,
     input.accessToken,
@@ -368,6 +369,8 @@ export async function followAgentRun(
  * "stop" while the answer is still streaming. Reaching end-of-stream is not
  * an error — the backend closes the stream when the run pauses for approval
  * as well as when it ends, and the authoritative turn is re-read afterwards.
+ * This SSE fetch does not use apiRequest's 401 replay; access-token refresh is
+ * managed by the session provider and stream errors remain visible to callers.
  */
 export async function streamThreadTurn(
   input: AuthInput,

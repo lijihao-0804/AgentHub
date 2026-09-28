@@ -225,7 +225,7 @@ export default function DashboardPage() {
 
       {summary && (
         <>
-          {summary.success_rate.denominator === 0 && (
+          {summary.success_rate.denominator === 0 && summary.current.running_count === 0 && (
             <Panel title={t("dashboard.onboarding.title")} eyebrow={t("dashboard.onboarding.eyebrow")}>
               <p className="state-hint">{t("dashboard.onboarding.lede")}</p>
               <div className="split-list">
@@ -246,9 +246,13 @@ export default function DashboardPage() {
           )}
           <section className="kpi-grid" aria-label={t("dashboard.title")}>
             <MetricCard
-              label={t("dashboard.kpi.totalRuns")}
+              label={t("dashboard.kpi.finishedRuns")}
               value={formatCount(summary.finished_runs.denominator)}
               href="/runs"
+              hint={t("dashboard.kpi.finishedRunsHint", {
+                running: formatCount(summary.current.running_count),
+                waitingApproval: formatCount(summary.current.waiting_approval_count),
+              })}
               delta={windowDelta((timeseries?.items ?? []).map((item) => item.runs))}
               deltaLabel={t("dashboard.kpi.deltaLabel")}
               sparkline={(timeseries?.items ?? []).map((item) => item.runs)}
