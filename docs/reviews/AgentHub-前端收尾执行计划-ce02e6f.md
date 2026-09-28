@@ -60,8 +60,8 @@
 ### 1.6 集成测试与发 PR
 
 - [ ] `docker compose up -d postgres`（或本机服务），设 `AGENTHUB_TEST_DATABASE_URL`，跑 `uv run --locked pytest -m integration`——重点确认 BE-06 两个新用例与知识重试新用例。
-- [ ] 提交拆分建议：`fix(web): reset idempotency token after deliberate stop`；`fix(knowledge): reset attempt count on ingestion retry`；`fix(web): surface cancellation feedback and fix run-total semantics`；`fix(web): harden stream guards and expiry tolerance`。
-- [ ] PR 描述引用本计划与收尾清单，注明验证结果（四件套 + 集成测试）。
+- [x] 提交拆分：前端与文档 `fix(web): harden first batch conversation and dashboard UX`；知识重试 `fix(knowledge): reset attempts on ingestion retry`。
+- [x] 已创建 Draft PR #4，描述引用本计划与收尾清单，并列出四件套结果及仍待完成的集成/手测验收。
 
 ---
 
