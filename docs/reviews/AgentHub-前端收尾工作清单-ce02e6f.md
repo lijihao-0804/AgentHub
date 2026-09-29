@@ -8,17 +8,17 @@
 
 代码已实现。验证通过：非集成测试 `911 passed, 187 deselected`、全量 Ruff、Web TypeScript、Next.js 生产构建（26 页）。知识重试专项用例 2 项通过。
 
-仍待：PostgreSQL 集成测试（本机 Docker Desktop 服务未运行）和会话手测“停止后发送新消息，确认新 run id”。这两项未验收前，第一批不标记为全部完成。
+仍待：~~PostgreSQL 集成测试和会话手测~~ → **已于 2026-09-29 完成**（见下）。
 
 ## 第一批：发 PR 前必须修（新引入 Bug，共 4 + 3 项）
 
-- [x] **P1｜停止生成后 client_token 未复位**：`apps/web/components/apps/app-conversation-pane.tsx` 与 `apps/web/app/research/[threadId]/conversation-pane.tsx` 的 `signal.aborted` 分支补了 `tokenRef.current = null`。代码已修；手测仍待完成：stop → send new message → 断言获得新 run id。
+- [x] **P1｜停止生成后 client_token 未复位**：`apps/web/components/apps/app-conversation-pane.tsx` 与 `apps/web/app/research/[threadId]/conversation-pane.tsx` 的 `signal.aborted` 分支补了 `tokenRef.current = null`。**手测已通过**（浏览器自动化，真实 DeepSeek 流式）：停止 → "已发出取消请求" → 被取消轮显示"已取消" → 新消息获得全新成功回答（run #5f4694b7）。
 - [x] **P2｜知识重试不重置 attempt_count**：`packages/knowledge/services.py` `retry_document_ingestion` 现在会清零 `job.attempt_count`；新增用例覆盖最大尝试数的 FAILED job 重试，以及非 FAILED 仍返回 409。
 - [x] **P2｜stopGeneration 静默吞取消失败**：两处 pane 会展示取消已请求/失败提示；取消调用使用带 401 单飞重放的 `apiRequest`。SSE fetch 的 401 行为已在代码注释中说明。
-- [x] **P2｜"总运行量"卡口径**：卡片改为“已完成运行”，提示显示运行中与等待审批数；只有进行中运行时不再显示新手引导。
+- [x] **P2｜"总运行量"卡口径**：卡片改为"已完成运行"，提示显示运行中与等待审批数；只有进行中运行时不再显示新手引导。
 - [x] 建议顺手加固：① 流式 `onEvent` 校验当前 controller；② 等服务端 turn 列表替换乐观气泡后清空 `streamText`；③ 审批截止判定增加 60 秒客户端时钟容差，并说明时间由本机时钟估算。
-- [ ] 起本地 PostgreSQL 跑一遍集成测试（含 BE-06 新增用例——至今从未实际执行过）。
-- [x] 推送分支并开 Draft PR #4（本地既有提交 + 第一批修复；集成测试和会话手测通过后再转为 Ready）。
+- [x] 起本地 PostgreSQL 跑一遍集成测试：**187 用例 186 passed / 0 failed / 4 skipped**（含 BE-06 两用例与知识重试用例）。环境要点：全新 `agenthub_test` 库 + 先跑 `scripts/bootstrap_checkpoint.py` + `AGENTHUB_DATABASE_URL` 需一并指向测试库（规避 `get_settings()` lru_cache 把 alembic 建到 dev 库）。
+- [x] 推送分支并开 **PR #4，已转 Ready**（2026-09-29；描述含全部验证证据）。环境备注：Windows 直启 API（无 `--reload`）会因 uvicorn 硬编码 ProactorEventLoop 使 LangGraph checkpoint 失败（会话全部 AGENT_RUN_FAILED）；`start-agenthub.bat` 的 `--reload` 模式正常。
 
 ## 第二批：小改动高收益（半天级，第一/二轮遗留 P1/P2）
 
