@@ -1962,6 +1962,8 @@ export const enUS = {
     },
   },
   appThread: {
+    summaryDegraded: "Some data failed to load; counts may be incomplete.",
+    loadMore: "Load more",
     noPermissionHint: "Your role does not allow deleting threads",
     back: "Back",
     agent: "Agent",
