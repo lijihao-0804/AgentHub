@@ -743,6 +743,7 @@ export const zhCN: MessageSchema = {
     left: "左侧",
     right: "右侧",
     runIdLabel: "运行 ID",
+    pickRecent: "从最近的运行中选择…",
     runIdPlaceholder: "粘贴一个运行 ID",
     compare: "对比",
     selectBoth: "请输入两个运行 ID 进行对比。",

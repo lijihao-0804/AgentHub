@@ -751,6 +751,7 @@ export const enUS = {
     left: "Left",
     right: "Right",
     runIdLabel: "Run ID",
+    pickRecent: "Pick from recent runs…",
     runIdPlaceholder: "Paste a run ID",
     compare: "Compare",
     selectBoth: "Enter two run IDs to compare.",
