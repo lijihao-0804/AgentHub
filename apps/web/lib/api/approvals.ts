@@ -34,9 +34,30 @@ export type ApprovalDecision = {
   run_status: string;
 };
 
-export function listApprovals(workspaceId: string, accessToken: string): Promise<Approval[]> {
-  return apiRequest<Approval[]>(
-    `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/approvals`,
+export type ApprovalDecisionTab = "PENDING" | "DECIDED";
+
+export type ApprovalList = {
+  items: Approval[];
+  total: number;
+};
+
+/**
+ * Paged approval inbox. `decision` narrows to a tab (PENDING = undecided,
+ * DECIDED = every terminal decision); without it the endpoint returns the
+ * whole workspace history. Newest first.
+ */
+export function listApprovals(
+  workspaceId: string,
+  accessToken: string,
+  options: { decision?: ApprovalDecisionTab; limit?: number; offset?: number } = {},
+): Promise<ApprovalList> {
+  const params = new URLSearchParams();
+  if (options.decision) params.set("decision", options.decision);
+  if (options.limit !== undefined) params.set("limit", String(options.limit));
+  if (options.offset !== undefined) params.set("offset", String(options.offset));
+  const query = params.toString();
+  return apiRequest<ApprovalList>(
+    `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/approvals${query ? `?${query}` : ""}`,
     accessToken,
   );
 }

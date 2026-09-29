@@ -592,3 +592,37 @@ async def test_builtin_write_is_unchanged_when_a_remote_executor_is_present(db_f
             )
         )
     assert len(tickets) == 1
+
+
+@pytest.mark.asyncio
+async def test_approval_inbox_listing_filters_and_paginates(db_factory) -> None:
+    """The paged inbox narrows by decision tab, counts every filtered row."""
+
+    gateway = ScriptedGateway()
+    remote = Remote()
+    adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
+    base = await published(db_factory)
+    context = base["context"]
+    approvals = ApprovalService(db_factory)
+
+    first = await service(db_factory, gateway, remote, adapter).run(
+        context, agent_version_id=base["version"].id, input_text="Refund them"
+    )
+    approval = (await approvals.list(context))[0]
+    assert first.status == "WAITING_APPROVAL"
+
+    pending_items, pending_total = await approvals.list_page(context, "PENDING", 50, 0)
+    assert pending_total == 1
+    assert [item.id for item in pending_items] == [approval.id]
+
+    everything, everything_total = await approvals.list_page(context, None, 50, 0)
+    assert everything_total == 1 and len(everything) == 1
+
+    beyond_total, beyond_count = await approvals.list_page(context, "PENDING", 50, 1)
+    assert beyond_count == 0 and beyond_total == 1
+
+    await approvals.decide(context, approval.id, decision=ApprovalDecisionStatus.APPROVED)
+    pending_after, pending_after_total = await approvals.list_page(context, "PENDING", 50, 0)
+    assert pending_after == [] and pending_after_total == 0
+    decided, decided_total = await approvals.list_page(context, "DECIDED", 50, 0)
+    assert decided_total == 1 and [item.id for item in decided] == [approval.id]

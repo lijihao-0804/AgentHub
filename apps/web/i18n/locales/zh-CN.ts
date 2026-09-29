@@ -820,7 +820,11 @@ export const zhCN: MessageSchema = {
     inboxTitle: "审批收件箱",
     noPermissionHint: "当前角色没有审批权限",
     loaded: "已加载 {count} 项",
-    countsReflect: "计数基于当前已加载的列表。",
+    loadedOf: "已加载 {loaded} 项 / 共 {total} 项",
+    tabPending: "待审批",
+    tabAll: "全部",
+    loadMore: "加载更多",
+    countsReflect: "计数基于当前筛选下已加载的条目。",
     counts: {
       pending: "待审批 {count}",
       approved: "已批准 {count}",

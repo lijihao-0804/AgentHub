@@ -7,7 +7,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -126,6 +126,49 @@ class ApprovalService:
                 .order_by(Approval.created_at, Approval.id)
             )
             return list(result)
+
+    async def list_page(
+        self,
+        context: WorkspaceExecutionContext,
+        decision_filter: str | None,
+        limit: int,
+        offset: int,
+    ) -> tuple[list[Approval], int]:
+        """Paged inbox listing, newest first.
+
+        ``decision_filter`` narrows the inbox to a tab: ``PENDING`` keeps the
+        undecided rows, ``DECIDED`` keeps every terminal decision. The total is
+        the full filtered count so the client can show "loaded X of Y" across
+        pages.
+        """
+        if "workspace_read" not in context.permissions:
+            raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
+        filters = [Approval.workspace_id == _workspace_uuid(context)]
+        if decision_filter == "PENDING":
+            filters.append(Approval.decision_status == ApprovalDecisionStatus.PENDING.value)
+        elif decision_filter == "DECIDED":
+            filters.append(
+                Approval.decision_status.in_(
+                    [
+                        ApprovalDecisionStatus.APPROVED.value,
+                        ApprovalDecisionStatus.DENIED.value,
+                        ApprovalDecisionStatus.EXPIRED.value,
+                        ApprovalDecisionStatus.CANCELLED.value,
+                    ]
+                )
+            )
+        async with self.session_factory() as session:
+            total = await session.scalar(
+                select(func.count()).select_from(Approval).where(*filters)
+            )
+            result = await session.scalars(
+                select(Approval)
+                .where(*filters)
+                .order_by(Approval.created_at.desc(), Approval.id.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+            return list(result), int(total or 0)
 
     async def list_for_run(
         self, context: WorkspaceExecutionContext, run_id: UUID

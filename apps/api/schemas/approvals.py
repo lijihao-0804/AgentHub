@@ -41,3 +41,10 @@ class ApprovalDecisionResponse(BaseModel):
     approval: ApprovalResponse
     run_id: UUID
     run_status: str
+
+
+class ApprovalListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[ApprovalResponse]
+    total: int

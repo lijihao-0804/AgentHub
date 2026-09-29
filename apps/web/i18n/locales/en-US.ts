@@ -829,6 +829,10 @@ export const enUS = {
     inboxTitle: "Approval inbox",
     noPermissionHint: "Your role does not allow approving",
     loaded: "{count} loaded",
+    loadedOf: "{loaded} of {total} loaded",
+    tabPending: "Pending",
+    tabAll: "All",
+    loadMore: "Load more",
     countsReflect: "Counts reflect the currently loaded list.",
     counts: {
       pending: "Pending {count}",

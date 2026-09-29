@@ -55,8 +55,15 @@ export default function ApprovalsPage() {
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [clockNowMs, setClockNowMs] = useState(() => Date.now());
+  /** Which inbox slice is on display; server-side filter via ?decision=. */
+  const [decisionTab, setDecisionTab] = useState<"PENDING" | "ALL">("PENDING");
+  const [total, setTotal] = useState<number | null>(null);
   /** Generation of the list request; a stale workspace's response never lands. */
   const generationRef = useRef(0);
+  /** True once the user paged past the first page; polling then pauses so a
+   * refresh never collapses an expanded list back to page one. */
+  const pagedRef = useRef(false);
+  const PAGE_SIZE = 50;
   /** Live workspace identity, for guarding decision write-backs. */
   const workspaceRef = useRef(workspaceId);
   workspaceRef.current = workspaceId;
@@ -81,9 +88,15 @@ export default function ApprovalsPage() {
     setError(null);
     setLoading(true);
     try {
-      const nextApprovals = await listApprovals(workspaceId, accessToken);
+      const page = await listApprovals(workspaceId, accessToken, {
+        decision: decisionTab === "PENDING" ? "PENDING" : undefined,
+        limit: PAGE_SIZE,
+        offset: 0,
+      });
       if (generationRef.current !== generation) return;
-      setApprovals(nextApprovals);
+      pagedRef.current = false;
+      setApprovals(page.items);
+      setTotal(page.total);
       setLoaded(true);
     } catch (caught) {
       if (generationRef.current !== generation) return;
@@ -91,7 +104,40 @@ export default function ApprovalsPage() {
     } finally {
       if (generationRef.current === generation) setLoading(false);
     }
-  }, [connected, workspaceId, accessToken]);
+  }, [connected, workspaceId, accessToken, decisionTab]);
+
+  const loadMore = useCallback(async () => {
+    if (!connected) return;
+    const generation = (generationRef.current += 1);
+    setError(null);
+    setLoading(true);
+    try {
+      const page = await listApprovals(workspaceId, accessToken, {
+        decision: decisionTab === "PENDING" ? "PENDING" : undefined,
+        limit: PAGE_SIZE,
+        offset: approvals.length,
+      });
+      if (generationRef.current !== generation) return;
+      pagedRef.current = true;
+      setApprovals((current) => [...current, ...page.items]);
+      setTotal(page.total);
+      setLoaded(true);
+    } catch (caught) {
+      if (generationRef.current !== generation) return;
+      setError(toApiError(caught, ""));
+    } finally {
+      if (generationRef.current === generation) setLoading(false);
+    }
+  }, [connected, workspaceId, accessToken, decisionTab, approvals.length]);
+
+  function switchDecisionTab(tab: "PENDING" | "ALL") {
+    if (tab === decisionTab) return;
+    pagedRef.current = false;
+    setDecisionTab(tab);
+    setApprovals([]);
+    setTotal(null);
+    setLoaded(false);
+  }
 
   useEffect(() => {
     if (connected && !loaded) void refresh();
@@ -102,11 +148,13 @@ export default function ApprovalsPage() {
   }, [connected]);
 
   // Poll even when the inbox is currently empty: otherwise the first new
-  // approval would never be discovered while this page stays open.
+  // approval would never be discovered while this page stays open. Once the
+  // user has paged deeper, polling pauses — a page-one refresh would throw
+  // away the loaded history.
   useEffect(() => {
     if (!connected) return;
     const interval = window.setInterval(() => {
-      if (!document.hidden) void refresh();
+      if (!document.hidden && !pagedRef.current) void refresh();
     }, APPROVALS_POLL_MS);
     const onVisible = () => {
       if (!document.hidden) void refresh();
@@ -174,7 +222,11 @@ export default function ApprovalsPage() {
         actions={
           <>
             <span className="state-hint" aria-live="polite">
-              {loading ? t("common.loading") : t("approvals.loaded", { count: approvals.length })}
+              {loading
+                ? t("common.loading")
+                : total !== null
+                  ? t("approvals.loadedOf", { loaded: approvals.length, total })
+                  : t("approvals.loaded", { count: approvals.length })}
             </span>
             <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>
               {t("common.refresh")}
@@ -182,6 +234,22 @@ export default function ApprovalsPage() {
           </>
         }
       >
+        <div className="tab-strip" role="tablist" aria-label={t("approvals.inboxTitle")}>
+          <button
+            type="button"
+            aria-selected={decisionTab === "PENDING"}
+            onClick={() => switchDecisionTab("PENDING")}
+          >
+            {t("approvals.tabPending")}
+          </button>
+          <button
+            type="button"
+            aria-selected={decisionTab === "ALL"}
+            onClick={() => switchDecisionTab("ALL")}
+          >
+            {t("approvals.tabAll")}
+          </button>
+        </div>
         <div className="approval-counts">
           <StatusBadge status="PENDING" label={t("approvals.counts.pending", { count: counts.pending })} />
           <StatusBadge status="APPROVED" label={t("approvals.counts.approved", { count: counts.approved })} />
@@ -339,6 +407,13 @@ export default function ApprovalsPage() {
             );
           })}
         </div>
+        {loaded && !error && total !== null && approvals.length < total && (
+          <div className="form-actions">
+            <button type="button" className="button button-ghost" onClick={() => void loadMore()} disabled={loading}>
+              {t("approvals.loadMore")}
+            </button>
+          </div>
+        )}
       </Panel>
     </div>
   );
