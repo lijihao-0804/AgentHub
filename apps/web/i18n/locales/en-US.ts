@@ -569,8 +569,11 @@ export const enUS = {
     filters: {
       status: "Status",
       allStatuses: "All statuses",
-      agentVersionId: "Agent Version ID",
-      agentVersionPlaceholder: "Leave empty for all versions",
+      agent: "Agent",
+      allAgents: "All agents",
+      version: "Version",
+      allVersions: "All versions",
+      linkedVersion: "Version from the link (ID kept)",
       apply: "Apply",
       clear: "Clear",
     },

@@ -561,8 +561,11 @@ export const zhCN: MessageSchema = {
     filters: {
       status: "状态",
       allStatuses: "全部状态",
-      agentVersionId: "智能体版本 ID",
-      agentVersionPlaceholder: "留空则查询全部版本",
+      agent: "智能体",
+      allAgents: "全部智能体",
+      version: "版本",
+      allVersions: "全部版本",
+      linkedVersion: "链接指定的版本（ID 已保留）",
       apply: "应用",
       clear: "清空",
     },
