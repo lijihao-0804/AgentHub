@@ -9,6 +9,7 @@ from apps.api.agent_runtime_dependencies import get_production_agent_run_service
 from apps.api.knowledge_dependencies import get_workspace_context
 from apps.api.schemas.approvals import (
     ApprovalDecisionResponse,
+    ApprovalDenyRequest,
     ApprovalListResponse,
     ApprovalResponse,
 )
@@ -97,11 +98,17 @@ async def deny_approval(
     workspace_id: UUID,
     approval_id: UUID,
     request: Request,
+    payload: ApprovalDenyRequest | None = None,
     context: WorkspaceExecutionContext = context_dependency,
 ) -> ApprovalDecisionResponse:
     del workspace_id
     approvals = _approval_service(request)
-    approval = await approvals.decide(context, approval_id, decision=ApprovalDecisionStatus.DENIED)
+    approval = await approvals.decide(
+        context,
+        approval_id,
+        decision=ApprovalDecisionStatus.DENIED,
+        reason=payload.reason if payload is not None else None,
+    )
     result = await _agent_run_service(request).resume(
         context, run_id=approval.run_id, approval_id=approval.id
     )

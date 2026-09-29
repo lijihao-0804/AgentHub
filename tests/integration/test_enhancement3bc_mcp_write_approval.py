@@ -38,6 +38,7 @@ from packages.approvals import (
     ApprovalExecutionStatus,
     ApprovalService,
 )
+from packages.control_plane.audit import AuditLog
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.mcp.client import McpClientAdapter, McpConnectionTarget
@@ -626,3 +627,37 @@ async def test_approval_inbox_listing_filters_and_paginates(db_factory) -> None:
     assert pending_after == [] and pending_after_total == 0
     decided, decided_total = await approvals.list_page(context, "DECIDED", 50, 0)
     assert decided_total == 1 and [item.id for item in decided] == [approval.id]
+
+
+@pytest.mark.asyncio
+async def test_denial_reason_is_recorded_in_the_audit_log(db_factory) -> None:
+    """A denial with a reason lands verbatim in the decision's audit entry."""
+
+    gateway = ScriptedGateway()
+    remote = Remote()
+    adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
+    base = await published(db_factory)
+    context = base["context"]
+
+    await service(db_factory, gateway, remote, adapter).run(
+        context, agent_version_id=base["version"].id, input_text="Refund them"
+    )
+    approval = (await ApprovalService(db_factory).list(context))[0]
+    await ApprovalService(db_factory).decide(
+        context,
+        approval.id,
+        decision=ApprovalDecisionStatus.DENIED,
+        reason="金额超出季度退款上限，先走人工复核",
+    )
+
+    async with db_factory() as session:
+        entry = await session.scalar(
+            select(AuditLog).where(
+                AuditLog.workspace_id == base["workspace_id"],
+                AuditLog.action == "approval.decide",
+                AuditLog.resource_id == str(approval.id),
+            )
+        )
+    assert entry is not None
+    assert entry.safe_metadata["decision"] == "DENIED"
+    assert entry.safe_metadata["reason"] == "金额超出季度退款上限，先走人工复核"

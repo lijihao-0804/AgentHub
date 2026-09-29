@@ -83,10 +83,15 @@ export function decideApproval(
   approvalId: string,
   decision: "approve" | "deny",
   accessToken: string,
+  options: { reason?: string } = {},
 ): Promise<ApprovalDecision> {
+  // The reason rides in the body and lands in the decision's audit entry;
+  // the backend treats it as optional so older callers keep working.
+  const body =
+    decision === "deny" && options.reason ? { reason: options.reason } : {};
   return apiRequest<ApprovalDecision>(
     `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/approvals/${encodeURIComponent(approvalId)}/${decision}`,
     accessToken,
-    { method: "POST", body: {} },
+    { method: "POST", body },
   );
 }

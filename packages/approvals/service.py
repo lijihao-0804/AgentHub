@@ -201,6 +201,7 @@ class ApprovalService:
         approval_id: UUID,
         *,
         decision: ApprovalDecisionStatus,
+        reason: str | None = None,
     ) -> Approval:
         if "approve_action" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission to decide approvals.", 403)
@@ -238,6 +239,17 @@ class ApprovalService:
             approval.decision_status = decision.value
             approval.decided_by = user_id
             approval.decided_at = now
+            decision_metadata: dict[str, Any] = {
+                "approval_id": str(approval.id),
+                "logical_action_id": approval.logical_action_id,
+                "tool_identity": approval.tool_identity,
+                "decision": decision.value,
+            }
+            # A denial is stronger with the human's words attached; the audit
+            # log is the durable place for it, not the approval row itself.
+            trimmed_reason = (reason or "").strip()
+            if trimmed_reason:
+                decision_metadata["reason"] = trimmed_reason[:500]
             append_audit(
                 session,
                 action="approval.decide",
@@ -247,12 +259,7 @@ class ApprovalService:
                 actor_user_id=user_id,
                 organization_id=_organization_uuid(context),
                 workspace_id=workspace_id,
-                safe_metadata={
-                    "approval_id": str(approval.id),
-                    "logical_action_id": approval.logical_action_id,
-                    "tool_identity": approval.tool_identity,
-                    "decision": decision.value,
-                },
+                safe_metadata=decision_metadata,
             )
             await session.commit()
             await session.refresh(approval)

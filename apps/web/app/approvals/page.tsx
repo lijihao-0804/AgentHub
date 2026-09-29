@@ -52,6 +52,9 @@ export default function ApprovalsPage() {
   const [decisionError, setDecisionError] = useState<{ approvalId: string; error: ApiError } | null>(null);
   const [decisionState, setDecisionState] = useState<DecisionState>(null);
   const [lastDecisionId, setLastDecisionId] = useState<string | null>(null);
+  /** The approval currently showing its deny-reason prompt, if any. */
+  const [denyPromptId, setDenyPromptId] = useState<string | null>(null);
+  const [denyReason, setDenyReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [clockNowMs, setClockNowMs] = useState(() => Date.now());
@@ -166,13 +169,13 @@ export default function ApprovalsPage() {
     };
   }, [connected, refresh]);
 
-  async function decide(approvalId: string, decision: "approve" | "deny") {
+  async function decide(approvalId: string, decision: "approve" | "deny", reason?: string) {
     setDecisionError(null);
     setLastDecisionId(null);
     setDecisionState({ approvalId, decision });
     const requestWorkspace = workspaceRef.current;
     try {
-      const result = await decideApproval(workspaceId, approvalId, decision, accessToken);
+      const result = await decideApproval(workspaceId, approvalId, decision, accessToken, { reason });
       if (workspaceRef.current !== requestWorkspace) return;
       // An inbox poll that started before this decision must not overwrite its
       // result with the old PENDING row.
@@ -376,15 +379,59 @@ export default function ApprovalsPage() {
                 {approval.decision_status === "PENDING" ? (
                   <div className="approval-actions">
                     {cannotDecide && <p className="state-hint" role="note">{t("approvals.noPermissionHint")}</p>}
-                    <button
-                      type="button"
-                      className="button button-ghost"
-                      onClick={() => void decide(approval.id, "deny")}
-                      disabled={deciding !== null || cannotDecide || expiryElapsed}
-                      title={expiryElapsed ? t("approvals.card.expiryElapsed") : cannotDecide ? t("approvals.noPermissionHint") : undefined}
-                    >
-                      {deciding === "deny" ? t("approvals.card.denying") : t("approvals.card.deny")}
-                    </button>
+                    {denyPromptId === approval.id ? (
+                      <div className="inline-confirm" role="alertdialog" aria-label={t("approvals.denyReasonTitle")}>
+                        <p className="state-title">{t("approvals.denyReasonTitle")}</p>
+                        <textarea
+                          value={denyReason}
+                          onChange={(event) => setDenyReason(event.target.value)}
+                          placeholder={t("approvals.denyReasonPlaceholder")}
+                          rows={3}
+                          maxLength={500}
+                          aria-label={t("approvals.denyReasonTitle")}
+                        />
+                        <p className="state-hint">{t("approvals.denyReasonHint")}</p>
+                        <div className="inline-confirm-actions">
+                          <button
+                            type="button"
+                            className="button button-danger"
+                            disabled={deciding !== null || denyReason.trim().length === 0}
+                            onClick={() => {
+                              const reason = denyReason.trim();
+                              setDenyPromptId(null);
+                              setDenyReason("");
+                              void decide(approval.id, "deny", reason);
+                            }}
+                          >
+                            {deciding === "deny" ? t("approvals.card.denying") : t("approvals.confirmDeny")}
+                          </button>
+                          <button
+                            type="button"
+                            className="button button-ghost"
+                            onClick={() => {
+                              setDenyPromptId(null);
+                              setDenyReason("");
+                            }}
+                            disabled={deciding !== null}
+                          >
+                            {t("common.cancel")}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="button button-ghost"
+                        onClick={() => {
+                          setDenyPromptId(approval.id);
+                          setDenyReason("");
+                        }}
+                        disabled={deciding !== null || cannotDecide || expiryElapsed}
+                        title={expiryElapsed ? t("approvals.card.expiryElapsed") : cannotDecide ? t("approvals.noPermissionHint") : undefined}
+                      >
+                        {deciding === "deny" ? t("approvals.card.denying") : t("approvals.card.deny")}
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="button button-primary"

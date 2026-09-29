@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ApprovalResponse(BaseModel):
@@ -48,3 +48,9 @@ class ApprovalListResponse(BaseModel):
 
     items: list[ApprovalResponse]
     total: int
+
+
+class ApprovalDenyRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    reason: str | None = Field(default=None, max_length=500)
