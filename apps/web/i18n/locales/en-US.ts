@@ -56,6 +56,8 @@ export const enUS = {
     analytics: "Analytics",
     support: "Support",
     applications: "Applications",
+    versions: "Versions",
+    detail: "Detail",
   },
   brand: {
     subtitle: "Enterprise Agent Runtime & Control Plane",

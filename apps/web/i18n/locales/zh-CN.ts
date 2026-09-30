@@ -54,6 +54,8 @@ export const zhCN: MessageSchema = {
     analytics: "数据分析",
     support: "客户支持",
     applications: "应用",
+    versions: "版本",
+    detail: "详情",
   },
   brand: {
     subtitle: "企业级智能体运行时与控制平面",

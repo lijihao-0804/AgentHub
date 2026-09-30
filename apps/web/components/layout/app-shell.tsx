@@ -14,6 +14,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import WorkspaceSelector from "@/components/layout/workspace-selector";
 import UserMenu from "@/components/layout/user-menu";
 import { RouteTitle } from "@/components/layout/route-title";
+import Breadcrumbs, { AutoBreadcrumbs } from "@/components/layout/breadcrumbs";
 import Icon, { type IconName } from "@/components/ui/icon";
 import { getObservabilitySummary } from "@/lib/api/observability";
 
@@ -309,6 +310,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
           <UserMenu />
         </header>
         <main className="app-content" id="app-content">
+          <AutoBreadcrumbs />
           {children}
         </main>
       </div>
