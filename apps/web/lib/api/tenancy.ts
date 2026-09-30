@@ -80,3 +80,51 @@ export function createWorkspace(
     body: { organization_id: body.organization_id, name: body.name },
   });
 }
+
+// ---------- Members ----------
+
+export type Member = { user_id: string; email: string; role: string };
+
+export function listOrganizationMembers(
+  organizationId: string,
+  accessToken: string,
+): Promise<Member[]> {
+  return apiRequest<Member[]>(
+    `/api/v1/organizations/${encodeURIComponent(organizationId)}/members`,
+    accessToken,
+  );
+}
+
+export async function removeOrganizationMember(
+  organizationId: string,
+  userId: string,
+  accessToken: string,
+): Promise<void> {
+  await apiRequest<unknown>(
+    `/api/v1/organizations/${encodeURIComponent(organizationId)}/members/${encodeURIComponent(userId)}`,
+    accessToken,
+    { method: "DELETE" },
+  );
+}
+
+export function listWorkspaceMembers(
+  workspaceId: string,
+  accessToken: string,
+): Promise<Member[]> {
+  return apiRequest<Member[]>(
+    `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/members`,
+    accessToken,
+  );
+}
+
+export async function removeWorkspaceMember(
+  workspaceId: string,
+  userId: string,
+  accessToken: string,
+): Promise<void> {
+  await apiRequest<unknown>(
+    `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/members/${encodeURIComponent(userId)}`,
+    accessToken,
+    { method: "DELETE" },
+  );
+}

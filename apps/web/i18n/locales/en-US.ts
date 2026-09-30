@@ -100,6 +100,7 @@ export const enUS = {
       "Configure a workspace session to view {context}. The session lives in memory only and is cleared on refresh.",
     configure: "Configure session",
     context: {
+      settings: "Member management needs a workspace session",
       home: "the workspace overview",
       dashboard: "the workspace dashboard",
       runs: "the run history",
@@ -1429,6 +1430,19 @@ export const enUS = {
     signOut: "Sign out",
   },
   settings: {
+    members: {
+      title: "Members",
+      lede: "Members, roles and removal for the organization and this workspace. Removal takes effect immediately.",
+      workspaceTitle: "Workspace members",
+      orgTitle: "Organization members",
+      email: "Email",
+      role: "Role",
+      remove: "Remove",
+      removeTitle: "Remove this member?",
+      removeText: "{email} will immediately lose access.",
+      you: "(you)",
+      empty: "No members to show.",
+    },
     eyebrow: "Workspace",
     title: "Settings",
     lede: "Tenancy, model providers and workspace configuration.",

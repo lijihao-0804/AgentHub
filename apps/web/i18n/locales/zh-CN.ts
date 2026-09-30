@@ -97,6 +97,7 @@ export const zhCN: MessageSchema = {
       "请配置工作区会话以查看{context}。会话仅存于内存，刷新后即清除。",
     configure: "配置会话",
     context: {
+      settings: "成员管理需要一个工作区会话",
       home: "工作区总览",
       dashboard: "工作区仪表板",
       runs: "运行历史",
@@ -1416,6 +1417,19 @@ export const zhCN: MessageSchema = {
     signOut: "退出登录",
   },
   settings: {
+    members: {
+      title: "成员管理",
+      lede: "组织与工作区的成员、角色和移除操作。移除立即生效。",
+      workspaceTitle: "工作区成员",
+      orgTitle: "组织成员",
+      email: "邮箱",
+      role: "角色",
+      remove: "移除",
+      removeTitle: "移除这个成员？",
+      removeText: "{email} 将立即失去访问权限。",
+      you: "（你）",
+      empty: "没有成员可显示。",
+    },
     eyebrow: "工作区",
     title: "设置",
     lede: "租户、模型供应商与工作区配置。",

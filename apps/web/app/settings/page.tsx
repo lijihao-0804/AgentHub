@@ -138,6 +138,11 @@ export default function SettingsPage() {
             {t("home.cardCta")} →
           </span>
         </Link>
+        <Link className="overview-card" href="/settings/members">
+          <span className="overview-card-title">{t("settings.members.title")}</span>
+          <span className="overview-card-description">{t("settings.members.lede")}</span>
+          <span className="overview-card-cta" aria-hidden="true">{t("evaluation.overview.open")} →</span>
+        </Link>
       </section>
 
       <Panel ariaLabel={t("settings.tenancy")} title={t("settings.tenancy")} eyebrow={t("settings.eyebrow")}>
