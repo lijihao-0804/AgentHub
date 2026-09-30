@@ -464,6 +464,29 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
+                {(() => {
+                  const totals = new Map<string, number>();
+                  for (const category of failures?.categories ?? []) {
+                    for (const entry of category.top_failure_codes) {
+                      totals.set(entry.failure_code, (totals.get(entry.failure_code) ?? 0) + entry.count);
+                    }
+                  }
+                  const top = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+                  if (top.length === 0) return null;
+                  return (
+                    <div className="failure-codes">
+                      <p className="state-title">{t("dashboard.failureCodes.title")}</p>
+                      <ul className="failure-code-list">
+                        {top.map(([code, count]) => (
+                          <li key={code}>
+                            <code>{code}</code>
+                            <span>{formatCount(count)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })()}
             </Panel>
           </div>
 
@@ -514,6 +537,11 @@ export default function DashboardPage() {
                           status="NEEDS_ATTENTION"
                           label={`${statusLabel("NEEDS_ATTENTION")} ${formatCount(item.needs_attention_count)}`}
                         />
+                      </span>
+                      <span className="stat-row-meta">
+                        {item.avg_tokens === null
+                          ? t("dashboard.versions.tokensUnknown")
+                          : t("dashboard.versions.avgTokens", { count: formatCount(item.avg_tokens) })}
                       </span>
                       <span className="stat-row-meta stat-row-meta-end">
                         {item.p95_latency_ms === null ? "p95 —" : `p95 ${formatDurationMs(item.p95_latency_ms)}`}
@@ -595,6 +623,31 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
   const labelStride = Math.max(1, Math.ceil(items.length / 12));
   const showLabel = (index: number) =>
     index % labelStride === 0 || index === items.length - 1;
+  // A cost line is drawn only when every bucket holds a single currency:
+  // converting between currencies client-side is never allowed, so a mixed
+  // window falls back to the per-bucket tooltip amounts only.
+  const costValues: Array<number | null> = items.map((item) => {
+    if (item.cost_by_currency.length !== 1) return null;
+    const raw = item.cost_by_currency[0].total_cost;
+    const parsed = raw === null ? null : Number(raw);
+    return parsed !== null && Number.isFinite(parsed) ? parsed : null;
+  });
+  const currencies = new Set(
+    items.flatMap((item) => item.cost_by_currency.map((entry) => entry.currency)),
+  );
+  const costCurrency = currencies.size === 1 ? [...currencies][0] : null;
+  const drawCostLine = costValues.every((value) => value !== null) && costCurrency !== null;
+  const maxCost = Math.max(...costValues.map((value) => value ?? 0), 0.000001);
+  const costPoints = costValues
+    .map((value, index) => {
+      if (value === null) return null;
+      const x = index * 34 + 6 + 11;
+      const y = chartHeight - (value / maxCost) * (chartHeight * 0.85);
+      return `${x},${Math.max(1, Math.round(y))}`;
+    })
+    .filter((point): point is string => point !== null)
+    .join(" ");
+
   const ariaEntries = items
     .map((item) =>
       t("dashboard.trend.ariaEntry", {
@@ -660,8 +713,23 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
             </g>
           );
         })}
+        {drawCostLine && costPoints && (
+          <polyline
+            points={costPoints}
+            fill="none"
+            stroke="var(--info)"
+            strokeWidth="1.5"
+            strokeDasharray="3 2"
+          />
+        )}
       </svg>
       <div className="trend-legend" aria-hidden="true">
+        {drawCostLine && costCurrency && (
+          <span>
+            <span className="legend-swatch" style={{ background: "var(--info)" }} />{" "}
+            {t("dashboard.trend.costLine", { currency: costCurrency })}
+          </span>
+        )}
         <span><span className="legend-swatch" style={{ background: "var(--success)" }} /> {t("dashboard.trend.legendSucceeded")}</span>
         <span><span className="legend-swatch" style={{ background: "var(--danger)" }} /> {t("dashboard.trend.legendFailed")}</span>
         <span><span className="legend-swatch" style={{ background: "var(--attention)" }} /> {t("dashboard.trend.legendNeedsAttention")}</span>

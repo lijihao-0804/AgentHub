@@ -461,6 +461,7 @@ export const zhCN: MessageSchema = {
     },
   },
   dashboard: {
+    failureCodes: { title: "最常见的失败代码" },
     eyebrow: "可观测性",
     title: "工作区仪表板",
     lede: "成功率、延迟、用量、成本与失败分析，所有百分比均附样本分母；原始提示词与工具负载数据不会出现在此视图中。",
@@ -538,6 +539,7 @@ export const zhCN: MessageSchema = {
       empty: "该时间段内没有运行记录。",
       legendSucceeded: "成功",
       legendFailed: "失败",
+      costLine: "成本（{currency}）",
       legendNeedsAttention: "需要处理",
       ariaPrefix: "各时间段运行数：",
       ariaEntry: "{date}：成功 {succeeded}，失败 {failed}，需要处理 {needsAttention}",
@@ -552,6 +554,8 @@ export const zhCN: MessageSchema = {
       empty: "暂无智能体版本运行数据。",
       runCountOne: "1 次运行",
       runCountOther: "{count} 次运行",
+      avgTokens: "平均 {count} tokens",
+      tokensUnknown: "tokens 未知",
       costUnknown: "成本未知",
     },
     failureRuns: {

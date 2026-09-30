@@ -467,6 +467,7 @@ export const enUS = {
     },
   },
   dashboard: {
+    failureCodes: { title: "Most common failure codes" },
     eyebrow: "Observability",
     title: "Workspace dashboard",
     lede: "Bounded success, latency, usage, cost and failure analytics. Percentages always show their sample denominator; raw prompts and tool payloads never enter this view.",
@@ -545,6 +546,7 @@ export const enUS = {
       empty: "No runs in this window.",
       legendSucceeded: "Succeeded",
       legendFailed: "Failed",
+      costLine: "Cost ({currency})",
       legendNeedsAttention: "Needs attention",
       ariaPrefix: "Runs per bucket:",
       ariaEntry:
@@ -560,6 +562,8 @@ export const enUS = {
       empty: "No AgentVersion activity.",
       runCountOne: "1 run",
       runCountOther: "{count} runs",
+      avgTokens: "{count} avg tokens",
+      tokensUnknown: "tokens unknown",
       costUnknown: "cost unknown",
     },
     failureRuns: {
