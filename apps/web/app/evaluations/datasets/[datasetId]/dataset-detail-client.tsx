@@ -12,9 +12,11 @@ import {
   EvaluationDatasetItemInput,
   EvaluationDatasetVersion,
   createDatasetVersion,
+  getDataset,
   listDatasetVersions,
 } from "@/lib/api/evaluation";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import { useWorkspaceData } from "@/hooks/use-workspace-data";
 import { useI18n } from "@/i18n/provider";
 
 type ParsedImport = {
@@ -94,6 +96,12 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
   const [createdNotice, setCreatedNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const activeSessionRef = useRef(sessionId);
+
+  const loadDataset = useCallback(
+    (auth: { workspaceId: string; accessToken: string }) => getDataset(auth, datasetId),
+    [datasetId],
+  );
+  const datasetInfo = useWorkspaceData(loadDataset, `dataset:${datasetId}`);
   activeSessionRef.current = sessionId;
 
   useEffect(() => {
@@ -180,10 +188,13 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
     <div className="page">
       <header className="page-header">
         <p className="eyebrow">{t("evaluation.datasets.eyebrow")}</p>
-        <h1>{t("evaluation.datasets.title")}</h1>
+        <h1>{datasetInfo.data?.name ?? t("evaluation.datasets.title")}</h1>
         <p className="page-lede">
           <Link href="/evaluations/datasets">{t("evaluation.overview.datasets")} /</Link>{" "}
-          <code>{datasetId}</code>
+          {datasetInfo.data?.description ? (
+            <span>{datasetInfo.data.description} · </span>
+          ) : null}
+          <code>{datasetId.slice(0, 8)}…</code>
         </p>
       </header>
 

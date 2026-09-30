@@ -127,6 +127,23 @@ async def list_datasets(
     )
 
 
+@router.get(
+    "/datasets/{dataset_id}",
+    response_model=EvaluationDatasetResponse,
+)
+async def get_dataset(
+    workspace_id: UUID,
+    dataset_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationDatasetResponse:
+    del workspace_id
+    dataset = await EvaluationDatasetService().get_dataset(
+        session, context=context, dataset_id=dataset_id
+    )
+    return EvaluationDatasetResponse.model_validate(dataset, from_attributes=True)
+
+
 @router.post(
     "/datasets/{dataset_id}/versions",
     response_model=EvaluationDatasetVersionResponse,

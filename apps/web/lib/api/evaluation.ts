@@ -84,6 +84,10 @@ export type EvaluationDatasetVersionFromRunInput = {
 
 export type EvaluationDatasetList = { items: EvaluationDataset[]; total: number };
 
+export async function getDataset(input: AuthInput, datasetId: string): Promise<EvaluationDataset> {
+  return get(input, `/datasets/${encodeURIComponent(datasetId)}`);
+}
+
 export function listDatasets(
   input: AuthInput,
   query: { limit?: number; offset?: number } = {},

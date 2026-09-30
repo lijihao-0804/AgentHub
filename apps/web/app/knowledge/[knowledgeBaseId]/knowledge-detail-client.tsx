@@ -476,10 +476,10 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
                   {snapshotList.map((snapshot) => (
                     <tr key={snapshot.id}>
                       <td data-label={t("common.id")}>
-                        <code>{snapshot.id}</code>
+                        <HashValue value={snapshot.id} label={t("common.id")} />
                       </td>
                       <td data-label={t("knowledge.contentHash")}>
-                        <code className="hash-value">{snapshot.content_hash}</code>
+                        <HashValue value={snapshot.content_hash} label={t("knowledge.contentHash")} />
                       </td>
                       <td data-label={t("knowledge.items")}>{formatNumber(snapshot.item_count)}</td>
                       <td data-label={t("knowledge.schemaVersion")}>{snapshot.snapshot_schema_version}</td>
