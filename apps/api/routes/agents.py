@@ -10,6 +10,7 @@ from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_workspace_context
 from apps.api.schemas.agents import (
     AgentCreateRequest,
+    AgentDeriveResponse,
     AgentMemoryListResponse,
     AgentMemoryResponse,
     AgentPatchRequest,
@@ -168,6 +169,23 @@ async def get_agent_version(
     return AgentVersionResponse.model_validate(
         await AgentPublishService().get_version(session, context, agent_id, version_id),
         from_attributes=True,
+    )
+
+
+@router.post(
+    "/{agent_id}/versions/{version_id}/derive",
+    response_model=AgentDeriveResponse,
+)
+async def derive_agent_draft(
+    workspace_id: UUID,
+    agent_id: UUID,
+    version_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> AgentDeriveResponse:
+    del workspace_id
+    return AgentDeriveResponse.model_validate(
+        await AgentPublishService().derive_draft_values(session, context, agent_id, version_id)
     )
 
 

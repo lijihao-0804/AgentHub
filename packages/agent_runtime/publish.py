@@ -273,6 +273,53 @@ class AgentPublishService:
             "resolved_spec": resolved_spec,
         }
 
+    async def derive_draft_values(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        agent_id: UUID,
+        version_id: UUID,
+    ) -> dict[str, Any]:
+        """Extract an editable-draft payload out of a published version.
+
+        Derive does not silently overwrite the draft: it returns the values
+        the caller reviews and then applies through the normal draft update
+        path, where every field is validated again. Knowledge and tool
+        bindings stay where they are managed (their own editors); only the
+        draft-owned fields come back.
+        """
+        self._require_permission(context, "agent_edit")
+        version = await self.get_version(session, context, agent_id, version_id)
+        spec = version.resolved_spec or {}
+        prompt = dict(spec.get("prompt") or {})
+        model = dict(spec.get("model") or {})
+        retrieval_source = dict(spec.get("retrieval") or {})
+        retrieval = {
+            key: value
+            for key, value in retrieval_source.items()
+            if key
+            not in {
+                "knowledge_binding_mode",
+                "knowledge_snapshot_ids",
+                "knowledge_snapshots",
+                "knowledge_bindings",
+            }
+        }
+        return {
+            "source_version_id": str(version.id),
+            "source_version_number": version.version_number,
+            "source_resolved_spec_hash": version.resolved_spec_hash,
+            "values": {
+                "system_prompt": prompt.get("system_prompt"),
+                "prompt_version": prompt.get("prompt_version"),
+                "model_profile_id": model.get("profile_id"),
+                "knowledge_binding_mode": retrieval_source.get("knowledge_binding_mode"),
+                "model_retry_policy": model.get("retry_policy"),
+                "retrieval_config": retrieval,
+                "runtime_config": spec.get("runtime") or {},
+            },
+        }
+
     async def _resolve_draft_spec(
         self,
         session: AsyncSession,
