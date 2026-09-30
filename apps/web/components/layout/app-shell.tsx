@@ -13,6 +13,7 @@ import ThemeSwitcher from "@/components/layout/theme-switcher";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import WorkspaceSelector from "@/components/layout/workspace-selector";
 import UserMenu from "@/components/layout/user-menu";
+import { RouteTitle } from "@/components/layout/route-title";
 import Icon, { type IconName } from "@/components/ui/icon";
 import { getObservabilitySummary } from "@/lib/api/observability";
 
@@ -221,6 +222,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     <ThemeProvider>
       <LocaleProvider>
         <FrontendSessionProvider>
+          <RouteTitle />
           <ShellGate>{children}</ShellGate>
         </FrontendSessionProvider>
       </LocaleProvider>
