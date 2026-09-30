@@ -123,3 +123,13 @@
   border-color: transparent;
   color: var(--background);
 }
+.user-menu-id {
+  margin-left: 0.4rem;
+  padding: 0 0.3rem;
+  border-radius: 6px;
+  background: var(--row-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}

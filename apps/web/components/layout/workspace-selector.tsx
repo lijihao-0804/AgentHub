@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { useI18n } from "@/i18n/provider";
+import { useMenuKeyboardNav } from "@/components/layout/menu-keyboard";
 import { useFrontendSession } from "@/components/providers/session-provider";
 
 /**
@@ -26,7 +27,7 @@ export default function WorkspaceSelector() {
     openPanel,
     closePanel,
   } = useFrontendSession();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useMenuKeyboardNav(panelOpen);
 
   useEffect(() => {
     if (!panelOpen) return;
