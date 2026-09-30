@@ -619,8 +619,8 @@ async def test_approval_inbox_listing_filters_and_paginates(db_factory) -> None:
     everything, everything_total = await approvals.list_page(context, None, 50, 0)
     assert everything_total == 1 and len(everything) == 1
 
-    beyond_total, beyond_count = await approvals.list_page(context, "PENDING", 50, 1)
-    assert beyond_count == 0 and beyond_total == 1
+    beyond_items, beyond_total = await approvals.list_page(context, "PENDING", 50, 1)
+    assert beyond_items == [] and beyond_total == 1
 
     await approvals.decide(context, approval.id, decision=ApprovalDecisionStatus.APPROVED)
     pending_after, pending_after_total = await approvals.list_page(context, "PENDING", 50, 0)
