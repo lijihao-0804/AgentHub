@@ -1645,6 +1645,11 @@ export const enUS = {
     fullSpec: "Full spec",
   },
   agents: {
+    templates: {
+      title: "Create from a template",
+      pick: "Pick a template to prefill the draft (still editable)",
+      toolHints: "Suggested tools: {hints}",
+    },
     derive: {
       entry: "Copy to draft",
       working: "Extracting…",

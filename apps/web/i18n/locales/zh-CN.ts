@@ -1632,6 +1632,11 @@ export const zhCN: MessageSchema = {
     fullSpec: "完整 Spec",
   },
   agents: {
+    templates: {
+      title: "从模板创建",
+      pick: "选择一个模板预填草稿（可再修改）",
+      toolHints: "建议绑定工具：{hints}",
+    },
     derive: {
       entry: "复制为新草稿",
       working: "提取中…",

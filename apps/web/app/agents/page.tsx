@@ -9,6 +9,7 @@ import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import { createAgent, listAgents, type Agent, type KnowledgeBindingMode } from "@/lib/api/agents";
+import { listAgentTemplates, type AgentTemplate } from "@/lib/api/agent-templates";
 import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
 import { useI18n } from "@/i18n/provider";
 
@@ -38,6 +39,10 @@ export default function AgentsPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const templates = useWorkspaceData<AgentTemplate[]>(
+    (auth: AuthInput) => listAgentTemplates(auth),
+    `agent-templates:${workspaceId}`,
+  );
 
   useEffect(() => {
     setForm(EMPTY_FORM);
@@ -132,6 +137,32 @@ export default function AgentsPage() {
           </p>
         )}
 
+        {showForm && (templates.data?.length ?? 0) > 0 && (
+          <div className="template-strip" role="group" aria-label={t("agents.templates.title")}>
+            <p className="state-hint">{t("agents.templates.pick")}</p>
+            {templates.data!.map((template) => (
+              <button
+                type="button"
+                key={template.key}
+                className="overview-card"
+                onClick={() =>
+                  setForm((current) => ({
+                    ...current,
+                    name: current.name || template.name,
+                    description: current.description || template.description,
+                    system_prompt: template.system_prompt,
+                  }))
+                }
+              >
+                <span className="overview-card-title">{template.name}</span>
+                <span className="overview-card-description">{template.description}</span>
+                {template.tool_hints.length > 0 && (
+                  <span className="overview-card-cta">{t("agents.templates.toolHints", { hints: template.tool_hints.join(", ") })}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
         {showForm && (
           <form className="eval-form" onSubmit={submit} noValidate>
             <p className="eval-form-title">{t("agents.createAgent")}</p>
