@@ -1397,6 +1397,9 @@ export const enUS = {
     },
   },
   auth: {
+    emailInvalid: "That email address does not look valid",
+    confirmPassword: "Confirm password",
+    passwordMismatch: "The two passwords do not match",
     loginTitle: "Sign in",
     registerTitle: "Create an account",
     email: "Email",

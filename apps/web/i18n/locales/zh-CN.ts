@@ -1384,6 +1384,9 @@ export const zhCN: MessageSchema = {
     },
   },
   auth: {
+    emailInvalid: "邮箱格式不正确",
+    confirmPassword: "确认密码",
+    passwordMismatch: "两次输入的密码不一致",
     loginTitle: "登录",
     registerTitle: "创建账户",
     email: "邮箱",
