@@ -1646,6 +1646,23 @@ export const zhCN: MessageSchema = {
     fullSpec: "完整 Spec",
   },
   agents: {
+      chat: {
+      entry: "多轮对话",
+      eyebrow: "多轮对话",
+      title: "与智能体多轮对话",
+      lede: "多轮会话使用智能体当前已发布版本；每次追问都会带上完整上下文。",
+      newThread: "新建对话",
+      createTitle: "新建多轮对话",
+      threadTitlePlaceholder: "这段对话聊什么？",
+      recent: "最近的对话",
+      noThreads: "还没有对话",
+      noThreadsHint: "新建一个多轮对话，追问会保留上下文。",
+      summary: "对话 {turns} 轮",
+      sideTitle: "关于这段对话",
+      sideHint: "多轮对话使用已发布版本运行；单次调试请用调试台。",
+      openAgent: "打开智能体 →",
+      openPlayground: "打开调试台 →",
+    },
     templates: {
       title: "从模板创建",
       pick: "选择一个模板预填草稿（可再修改）",

@@ -1659,6 +1659,23 @@ export const enUS = {
     fullSpec: "Full spec",
   },
   agents: {
+      chat: {
+      entry: "Multi-turn chat",
+      eyebrow: "Chat",
+      title: "Chat with this agent",
+      lede: "Multi-turn conversations run the agent's published version; every turn carries the full context.",
+      newThread: "New chat",
+      createTitle: "New conversation",
+      threadTitlePlaceholder: "What is this conversation about?",
+      recent: "Recent chats",
+      noThreads: "No conversations yet",
+      noThreadsHint: "Start a multi-turn chat; follow-ups keep their context.",
+      summary: "{turns} turns",
+      sideTitle: "About this conversation",
+      sideHint: "Chats run the published version; use the playground for single-shot debugging.",
+      openAgent: "Open agent →",
+      openPlayground: "Open playground →",
+    },
     templates: {
       title: "Create from a template",
       pick: "Pick a template to prefill the draft (still editable)",

@@ -539,6 +539,11 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
       <div className="page-toolbar">
         {/* The Playground only runs published versions, never the draft. */}
+        {versionList.length > 0 && (
+          <Link className="button button-ghost" href={`/agents/${agentId}/chat`}>
+            {t("agents.chat.entry")}
+          </Link>
+        )}
         {versionList.length > 0 ? (
           <Link className="button button-ghost" href={`/agents/${agentId}/playground`}>
             {t("agents.playground.open")}

@@ -684,6 +684,9 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
       </header>
 
       <div className="page-toolbar">
+        <Link className="button button-ghost" href={`/agents/${agentId}/chat`}>
+          {t("agents.chat.entry")}
+        </Link>
         {runId && (
           <Link className="button button-ghost" href={`/runs/${encodeURIComponent(runId)}`}>
             {t("agents.playground.openRunDetail")}
