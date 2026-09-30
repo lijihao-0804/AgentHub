@@ -1107,6 +1107,8 @@ export const zhCN: MessageSchema = {
         split: "切分",
         purpose: "用途",
         datasetHash: "数据集哈希",
+      datasetVersion: "数据集版本",
+      openDatasetVersion: "打开数据集版本 →",
         schemaVersion: "Schema 版本",
         repetitions: "重复次数",
         buildSha: "构建 SHA",

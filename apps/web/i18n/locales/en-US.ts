@@ -1119,6 +1119,8 @@ export const enUS = {
         split: "Split",
         purpose: "Purpose",
         datasetHash: "Dataset hash",
+      datasetVersion: "Dataset version",
+      openDatasetVersion: "Open dataset version →",
         schemaVersion: "Schema version",
         repetitions: "Repetitions",
         buildSha: "Build SHA",

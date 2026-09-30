@@ -204,6 +204,7 @@ export type EvaluationExperiment = {
   workspace_id: string;
   name: string;
   description: string | null;
+  dataset_id: string;
   dataset_version_id: string;
   dataset_content_hash: string;
   dataset_schema_version: number;

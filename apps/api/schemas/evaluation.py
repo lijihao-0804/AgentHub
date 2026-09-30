@@ -172,6 +172,7 @@ class EvaluationExperimentResponse(BaseModel):
     workspace_id: UUID
     name: str
     description: str | None
+    dataset_id: UUID
     dataset_version_id: UUID
     dataset_content_hash: str = Field(min_length=64, max_length=64)
     dataset_schema_version: int

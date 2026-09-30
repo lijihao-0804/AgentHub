@@ -323,6 +323,14 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                 <strong><HashValue value={experiment.dataset_content_hash} label={t("evaluation.experiment.facts.datasetHash")} /></strong>
               </span>
               <span>
+                {t("evaluation.experiment.facts.datasetVersion")}
+                <strong>
+                  <Link href={`/evaluations/datasets/${encodeURIComponent(experiment.dataset_id)}/versions/${encodeURIComponent(experiment.dataset_version_id)}`}>
+                    {t("evaluation.experiment.facts.openDatasetVersion")}
+                  </Link>
+                </strong>
+              </span>
+              <span>
                 {t("evaluation.experiment.facts.specHash")}
                 <strong>{experiment.spec_hash ? <HashValue value={experiment.spec_hash} label={t("evaluation.experiment.facts.specHash")} /> : "—"}</strong>
               </span>
