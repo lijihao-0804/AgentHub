@@ -26,6 +26,12 @@ export const zhCN: MessageSchema = {
     disabled: "已停用",
   },
   nav: {
+    datasets: "数据集",
+    experiments: "实验",
+    releaseGates: "发布门禁",
+    pricing: "定价",
+    badgePending: "{count} 条审批待处理",
+    badgeRunning: "{count} 个运行进行中",
     overview: "总览",
     knowledge: "知识库",
     comingLater: "即将推出",

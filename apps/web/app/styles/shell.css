@@ -105,3 +105,21 @@
   padding: var(--space-6) var(--space-5) var(--space-6);
   width: 100%;
 }
+.nav-badge {
+  margin-left: auto;
+  min-width: 1.15rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  background: var(--row-hover);
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.35rem;
+  text-align: center;
+}
+.nav-badge-urgent {
+  background: var(--danger);
+  border-color: transparent;
+  color: var(--background);
+}

@@ -28,6 +28,12 @@ export const enUS = {
     disabled: "Disabled",
   },
   nav: {
+    datasets: "Datasets",
+    experiments: "Experiments",
+    releaseGates: "Release gates",
+    pricing: "Pricing",
+    badgePending: "{count} approvals pending",
+    badgeRunning: "{count} runs in flight",
     overview: "Overview",
     knowledge: "Knowledge",
     comingLater: "Coming soon",

@@ -14,6 +14,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import WorkspaceSelector from "@/components/layout/workspace-selector";
 import UserMenu from "@/components/layout/user-menu";
 import Icon, { type IconName } from "@/components/ui/icon";
+import { getObservabilitySummary } from "@/lib/api/observability";
 
 type NavItem = {
   href: string;
@@ -22,7 +23,52 @@ type NavItem = {
   match: (pathname: string) => boolean;
   /** Rendered indented under the entry above it, for a tool that belongs to it. */
   nested?: boolean;
+  /** Live counter source; hidden while zero or unknown. */
+  badge?: keyof NavCounts;
 };
+
+type NavCounts = { approvalsPending: number | null; running: number | null };
+
+/**
+ * Sidebar counters: pending approvals and in-flight runs. One lightweight
+ * summary poll every 30 seconds while the tab is visible; a failed poll
+ * simply hides the badges instead of shouting.
+ */
+function useNavCounts(): NavCounts {
+  const { connected, workspaceId, accessToken } = useFrontendSession();
+  const [counts, setCounts] = useState<NavCounts>({ approvalsPending: null, running: null });
+  useEffect(() => {
+    if (!connected) {
+      setCounts({ approvalsPending: null, running: null });
+      return;
+    }
+    let cancelled = false;
+    const load = () => {
+      if (document.hidden) return;
+      getObservabilitySummary({ workspaceId, accessToken })
+        .then((summary) => {
+          if (!cancelled) {
+            setCounts({
+              approvalsPending: summary.approvals.pending,
+              running: summary.current.running_count,
+            });
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setCounts({ approvalsPending: null, running: null });
+        });
+    };
+    load();
+    const interval = window.setInterval(load, 30_000);
+    document.addEventListener("visibilitychange", load);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", load);
+    };
+  }, [connected, workspaceId, accessToken]);
+  return counts;
+}
 
 function prefixMatch(prefix: string, ...except: string[]): (pathname: string) => boolean {
   return (pathname) => {
@@ -44,9 +90,9 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
     headingKey: "nav.overview",
     items: [
       { href: "/dashboard", labelKey: "nav.dashboard", icon: "dashboard", match: prefixMatch("/dashboard") },
-      { href: "/runs", labelKey: "nav.runs", icon: "runs", match: prefixMatch("/runs", "/runs/compare") },
+      { href: "/runs", labelKey: "nav.runs", icon: "runs", match: prefixMatch("/runs", "/runs/compare"), badge: "running" },
       { href: "/runs/compare", labelKey: "nav.runCompare", icon: "compare", match: prefixMatch("/runs/compare"), nested: true },
-      { href: "/approvals", labelKey: "nav.approvals", icon: "approvals", match: prefixMatch("/approvals") },
+      { href: "/approvals", labelKey: "nav.approvals", icon: "approvals", match: prefixMatch("/approvals"), badge: "approvalsPending" },
     ],
   },
   {
@@ -75,7 +121,13 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
   },
   {
     headingKey: "nav.evaluate",
-    items: [{ href: "/evaluations", labelKey: "nav.evaluations", icon: "evaluations", match: prefixMatch("/evaluations") }],
+    items: [
+      { href: "/evaluations", labelKey: "nav.evaluations", icon: "evaluations", match: prefixMatch("/evaluations") },
+      { href: "/evaluations/datasets", labelKey: "nav.datasets", icon: "evaluations", nested: true, match: prefixMatch("/evaluations/datasets") },
+      { href: "/evaluations/experiments", labelKey: "nav.experiments", icon: "evaluations", nested: true, match: prefixMatch("/evaluations/experiments") },
+      { href: "/evaluations/release-gates", labelKey: "nav.releaseGates", icon: "evaluations", nested: true, match: prefixMatch("/evaluations/release-gates") },
+      { href: "/evaluations/pricing", labelKey: "nav.pricing", icon: "evaluations", nested: true, match: prefixMatch("/evaluations/pricing") },
+    ],
   },
   {
     headingKey: "nav.workspace",
@@ -93,10 +145,20 @@ function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 }
 
-function NavLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
-  const { t } = useI18n();
+function NavLink({
+  item,
+  onNavigate,
+  counts,
+}: {
+  item: NavItem;
+  onNavigate: () => void;
+  counts: NavCounts;
+}) {
+  const { t, formatNumber } = useI18n();
   const pathname = usePathname() ?? "";
   const active = item.match(pathname);
+  const badgeCount = item.badge ? counts[item.badge] : null;
+  const showBadge = badgeCount !== null && badgeCount > 0;
   return (
     <li>
       <Link
@@ -109,13 +171,26 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }
           <Icon name={item.icon} size={16} />
           <span>{t(item.labelKey)}</span>
         </span>
+        {showBadge && (
+          <span
+            className={`nav-badge${item.badge === "approvalsPending" ? " nav-badge-urgent" : ""}`}
+            title={
+              item.badge === "approvalsPending"
+                ? t("nav.badgePending", { count: badgeCount })
+                : t("nav.badgeRunning", { count: badgeCount })
+            }
+          >
+            {formatNumber(badgeCount)}
+          </span>
+        )}
       </Link>
     </li>
   );
 }
 
 function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
-  const { t } = useI18n();
+  const { t, formatNumber } = useI18n();
+  const counts = useNavCounts();
   return (
     <>
       <div className="sidebar-brand">
@@ -130,7 +205,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
             <p className="nav-group-heading">{t(group.headingKey)}</p>
             <ul>
               {group.items.map((item) => (
-                <NavLink item={item} onNavigate={onNavigate} key={item.href} />
+                <NavLink item={item} onNavigate={onNavigate} counts={counts} key={item.href} />
               ))}
             </ul>
           </div>
