@@ -595,13 +595,13 @@ export const zhCN: MessageSchema = {
     loadMore: "加载更多",
   },
   run: {
+    openApprovals: "打开审批",
     eyebrow: "运行详情",
     title: "运行",
     agentVersionEyebrow: "AgentVersion v{version}",
     waitingCallout: "等待审批决定后才会执行操作。",
     attentionCallout:
       "需要处理：该运行需要人工跟进（例如未确认的操作结果）。",
-    openApprovals: "打开审批",
     openTrace: "查看原始 Trace",
     openThread: "打开对话线程",
     copyId: "复制运行 ID",
@@ -1806,6 +1806,9 @@ export const zhCN: MessageSchema = {
       },
     },
     playground: {
+      unknownOutcome: "结果未知——需要人工确认后才能继续",
+      needsAttentionNotice: "这次运行结束于未知结果，请在审批收件箱处理。",
+      openApprovals: "打开审批收件箱 →",
       title: "调试台",
       open: "打开调试台",
       lede: "运行已发布的智能体版本并实时查看执行过程。一次提交即一次运行，这里不保留对话历史。",

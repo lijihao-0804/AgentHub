@@ -302,14 +302,20 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
         case "tool.started":
           pushActivity({ key, label: t("agents.playground.toolStarted"), meta: toolMeta() });
           break;
-        case "tool.completed":
+        case "tool.completed": {
+          const toolStatus = payloadString(payload, "status") ?? undefined;
           pushActivity({
             key,
             label: t("agents.playground.toolCompleted"),
-            status: payloadString(payload, "status") ?? undefined,
-            meta: [...toolMeta(), ...durationMeta()],
+            status: toolStatus,
+            meta: [
+              ...toolMeta(),
+              ...durationMeta(),
+              ...(toolStatus === "UNKNOWN_OUTCOME" ? [t("agents.playground.unknownOutcome")] : []),
+            ],
           });
           break;
+        }
         case "tool.failed": {
           const code = payloadString(payload, "error_code");
           pushActivity({
@@ -702,6 +708,12 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
           runStatus ? (
             <>
               <StatusBadge status={runStatus} />
+              {runStatus === "NEEDS_ATTENTION" && (
+                <span className="inline-notice" role="status">
+                  {t("agents.playground.needsAttentionNotice")}{" "}
+                  <Link href="/approvals">{t("agents.playground.openApprovals")}</Link>
+                </span>
+              )}
               {recovered && <span className="state-hint">{t("agents.playground.recoveredRun")}</span>}
             </>
           ) : undefined

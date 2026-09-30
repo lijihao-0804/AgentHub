@@ -603,13 +603,13 @@ export const enUS = {
     loadMore: "Load more",
   },
   run: {
+    openApprovals: "Open approvals",
     eyebrow: "Run detail",
     title: "Run",
     agentVersionEyebrow: "AgentVersion v{version}",
     waitingCallout: "Waiting for an approval decision before action execution.",
     attentionCallout:
       "Needs attention: the run requires operator follow-up (for example an unconfirmed action outcome).",
-    openApprovals: "Open approvals",
     openTrace: "Open raw trace",
     openThread: "Open conversation",
     copyId: "Copy run ID",
@@ -1823,6 +1823,9 @@ export const enUS = {
       },
     },
     playground: {
+      unknownOutcome: "Unknown outcome — human confirmation is required",
+      needsAttentionNotice: "This run ended in an unknown outcome; handle it in the approvals inbox.",
+      openApprovals: "Open approvals inbox →",
       title: "Playground",
       open: "Open Playground",
       lede: "Run a published Agent version and watch it work. One submit is one run — there is no chat history here.",
