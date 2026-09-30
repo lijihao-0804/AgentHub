@@ -20,7 +20,7 @@
   color: var(--text-muted);
   cursor: pointer;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   padding: 0.28rem 0.7rem;
   white-space: nowrap;
@@ -46,4 +46,4 @@
   height: 0.5rem;
   width: 0.5rem;
 }
-.session-error { color: var(--danger); font-size: 0.8rem; }
+.session-error { color: var(--danger); font-size: var(--text-sm); }

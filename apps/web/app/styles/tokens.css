@@ -113,3 +113,14 @@
 }
 
 :root { color-scheme: dark; }
+
+/* Type scale: the four size steps the product actually uses, derived from a
+   frequency survey of the stylesheets (0.66-1.05rem collapses into these).
+   New UI should pick from this scale; page-level migrations continue
+   incrementally. */
+:root {
+  --text-xs: 0.72rem;
+  --text-sm: 0.8rem;
+  --text-base: 0.88rem;
+  --text-lg: 1.05rem;
+}
