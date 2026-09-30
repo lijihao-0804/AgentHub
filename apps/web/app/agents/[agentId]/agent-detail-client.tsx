@@ -1359,6 +1359,14 @@ function KnowledgeBindingRow({
             </option>
           ))}
         </select>
+        {knowledgeBaseId && (
+          <Link
+            className="button button-ghost"
+            href={`/knowledge/${encodeURIComponent(knowledgeBaseId)}`}
+          >
+            {t("agents.openKnowledgeBase")}
+          </Link>
+        )}
       </label>
       <label>
         {t("agents.bindingMode")}

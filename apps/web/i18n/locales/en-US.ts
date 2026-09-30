@@ -1502,6 +1502,10 @@ export const enUS = {
     },
   },
   knowledge: {
+    usedByTitle: "Agents using this knowledge base",
+    usedByEyebrow: "Relations",
+    usedByPinned: "PINNED · snapshot {snapshot}…",
+    usedByLatest: "LATEST · follows newest snapshot",
     eyebrow: "Build",
     title: "Knowledge",
     lede: "Knowledge bases, documents and retrieval snapshots.",
@@ -1726,6 +1730,7 @@ export const enUS = {
       "The selected model profile does not declare tool calling support. Publishing an agent with tools may fail.",
     knowledgeBase: "Knowledge base",
     selectKnowledgeBase: "Select knowledge base",
+    openKnowledgeBase: "Open knowledge base →",
     snapshot: "Snapshot",
     selectSnapshot: "Select snapshot",
     latestResolves: "Latest resolves at publish time.",

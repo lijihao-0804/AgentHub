@@ -10,6 +10,8 @@ import StatusBadge from "@/components/ui/status-badge";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { listAgents, type Agent } from "@/lib/api/agents";
+import { getAgentKnowledgeBindings, type KnowledgeBindingMode } from "@/lib/api/agents";
 import {
   createSnapshot,
   listDocumentRevisions,
@@ -75,6 +77,32 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
   const bases = useWorkspaceData<KnowledgeBase[]>(loadBases, `knowledge-bases:${workspaceId}`);
   const documents = useWorkspaceData<KnowledgeDocument[]>(loadDocuments, `kb-documents:${scope}`);
   const snapshots = useWorkspaceData<KnowledgeSnapshot[]>(loadSnapshots, `kb-snapshots:${scope}`);
+  const loadUsage = useCallback(
+    async (
+      auth: AuthInput,
+    ): Promise<Array<{ agent: Agent; mode: KnowledgeBindingMode; snapshotId: string | null }>> => {
+      const agents = await listAgents(auth);
+      const hits = await Promise.all(
+        agents.map(async (agent) => {
+          try {
+            const bindings = await getAgentKnowledgeBindings(auth, agent.id);
+            const binding = bindings.find((entry) => entry.knowledge_base_id === knowledgeBaseId);
+            return binding ? { agent, mode: binding.binding_mode, snapshotId: binding.snapshot_id } : null;
+          } catch {
+            return null;
+          }
+        }),
+      );
+      return hits.filter(
+        (
+          hit,
+        ): hit is { agent: Agent; mode: KnowledgeBindingMode; snapshotId: string | null } =>
+          hit !== null,
+      );
+    },
+    [knowledgeBaseId],
+  );
+  const usage = useWorkspaceData(loadUsage, `kb-used-by:${scope}`);
   const revisions = useWorkspaceData<DocumentRevisionStatus[]>(
     loadRevisions,
     `kb-revisions:${scope}:${selectedDocumentId ?? ""}`,
@@ -470,6 +498,25 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
               </table>
             </div>
           )}
+        </Panel>
+      )}
+
+      {(usage.data ?? []).length > 0 && (
+        <Panel ariaLabel={t("knowledge.usedByTitle")} title={t("knowledge.usedByTitle")} eyebrow={t("knowledge.usedByEyebrow")}>
+          <ul className="research-thread-cards">
+            {(usage.data ?? []).map(({ agent, mode, snapshotId }) => (
+              <li key={agent.id}>
+                <Link className="research-thread-card" href={`/agents/${encodeURIComponent(agent.id)}`}>
+                  <span className="research-thread-card-title">{agent.name}</span>
+                  <span className="research-thread-card-meta">
+                    {mode === "PINNED" && snapshotId
+                      ? t("knowledge.usedByPinned", { snapshot: snapshotId.slice(0, 8) })
+                      : t("knowledge.usedByLatest")}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Panel>
       )}
     </div>

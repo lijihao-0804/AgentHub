@@ -1489,6 +1489,10 @@ export const zhCN: MessageSchema = {
     },
   },
   knowledge: {
+    usedByTitle: "使用此知识库的智能体",
+    usedByEyebrow: "关联",
+    usedByPinned: "PINNED · 快照 {snapshot}…",
+    usedByLatest: "LATEST · 跟随最新快照",
     eyebrow: "构建",
     title: "知识库",
     lede: "知识库、文档与检索快照。",
@@ -1710,6 +1714,7 @@ export const zhCN: MessageSchema = {
     toolCallingWarning: "所选模型配置未声明支持工具调用，发布携带工具的智能体可能失败。",
     knowledgeBase: "知识库",
     selectKnowledgeBase: "选择知识库",
+    openKnowledgeBase: "打开知识库 →",
     snapshot: "快照",
     selectSnapshot: "选择快照",
     latestResolves: "LATEST 在发布时解析。",
