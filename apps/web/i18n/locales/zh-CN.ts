@@ -1979,6 +1979,7 @@ export const zhCN: MessageSchema = {
     updated: "更新于 {time}",
     turns: "{count} 轮对话",
     conversation: {
+      backToBottom: "回到底部",
       paneTitle: "对话",
       empty: "还没有对话",
       emptyHint: "在下方提出第一个问题。",

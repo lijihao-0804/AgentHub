@@ -1996,6 +1996,7 @@ export const enUS = {
     updated: "Updated {time}",
     turns: "{count} turns",
     conversation: {
+      backToBottom: "Back to latest",
       paneTitle: "Conversation",
       empty: "No turns yet",
       emptyHint: "Ask the first question below.",

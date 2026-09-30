@@ -15,6 +15,8 @@ import {
 } from "@/lib/api/agent-runtime";
 import type { ThreadTurn } from "@/lib/api/threads";
 import { useI18n } from "@/i18n/provider";
+import { Markdown } from "@/components/ui/markdown";
+import { useAutoScroll } from "@/components/ui/use-auto-scroll";
 
 const PENDING_STATUSES = new Set(["RUNNING", "WAITING_APPROVAL", "CANCEL_REQUESTED"]);
 const TURN_POLL_MS = 2500;
@@ -69,6 +71,11 @@ export default function AppConversationPane({
   const streamAbortRef = useRef<AbortController | null>(null);
   const [stoppingRunId, setStoppingRunId] = useState<string | null>(null);
   const [cancelFeedback, setCancelFeedback] = useState<"requested" | "failed" | null>(null);
+  const turnCount = turns.data?.length ?? 0;
+  const { containerRef, onScroll, following, scrollToBottom } = useAutoScroll([
+    streamText,
+    turnCount,
+  ]);
 
   // Another thread is another conversation: nothing in flight carries over.
   useEffect(() => {
@@ -205,7 +212,7 @@ export default function AppConversationPane({
         </button>
       </div>
 
-      <div className="research-pane-body">
+      <div className="research-pane-body" ref={containerRef} onScroll={onScroll}>
         {turns.error && (
           <ErrorState
             code={turns.error.code}
@@ -245,11 +252,15 @@ export default function AppConversationPane({
                       {t("appThread.conversation.pending")}
                     </p>
                   ) : (
-                    <p className="conversation-text">
-                      {contentRestricted
-                        ? t("appThread.conversation.contentRestricted")
-                        : turn.final_output ?? t("appThread.conversation.noOutput")}
-                    </p>
+                    <div className="conversation-text">
+                      {contentRestricted ? (
+                        t("appThread.conversation.contentRestricted")
+                      ) : turn.final_output ? (
+                        <Markdown text={turn.final_output} />
+                      ) : (
+                        t("appThread.conversation.noOutput")
+                      )}
+                    </div>
                   )}
 
                   {turn.status === "WAITING_APPROVAL" && (
@@ -319,7 +330,9 @@ export default function AppConversationPane({
               <div className="conversation-message conversation-message-agent">
                 <p className="conversation-role">{t("appThread.conversation.agent")}</p>
                 {streamText ? (
-                  <p className="conversation-text">{streamText}</p>
+                  <div className="conversation-text">
+                    <Markdown text={streamText} />
+                  </div>
                 ) : (
                   <p className="conversation-text conversation-pending">
                     {t("appThread.conversation.pending")}
@@ -342,6 +355,13 @@ export default function AppConversationPane({
             </li>
           )}
         </ol>
+        {!following && (
+          <div className="jump-bottom-row">
+            <button type="button" className="button button-ghost" onClick={scrollToBottom}>
+              {t("appThread.conversation.backToBottom")}
+            </button>
+          </div>
+        )}
       </div>
 
       <form className="conversation-composer" onSubmit={submit} noValidate>

@@ -47,3 +47,4 @@
   width: 0.5rem;
 }
 .session-error { color: var(--danger); font-size: var(--text-sm); }
+.jump-bottom-row { display: flex; justify-content: center; padding: 0.3rem 0; }
