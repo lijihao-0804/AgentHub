@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { latestHandoff } from "@/components/support/context-pane";
 import { EmptyState, InlineError } from "@/components/ui/states";
@@ -38,6 +38,10 @@ export default function HandoffPane({
 
   const [customerRef, setCustomerRef] = useState("");
   const [caseRef, setCaseRef] = useState("");
+  // Once the user edits a field, a reload that re-derives the carried
+  // references must not quietly fill back what they deliberately cleared.
+  const customerTouchedRef = useRef(false);
+  const caseTouchedRef = useRef(false);
   const [problem, setProblem] = useState("");
   const [checked, setChecked] = useState<string[]>([]);
   const [checkedDraft, setCheckedDraft] = useState("");
@@ -48,6 +52,8 @@ export default function HandoffPane({
 
   // Another case is another escalation: nothing half-written carries over.
   useEffect(() => {
+    customerTouchedRef.current = false;
+    caseTouchedRef.current = false;
     setCustomerRef("");
     setCaseRef("");
     setProblem("");
@@ -73,8 +79,12 @@ export default function HandoffPane({
   const carriedCustomer = carried?.customer_ref ?? null;
   const carriedCase = carried?.case_ref ?? null;
   useEffect(() => {
-    if (carriedCustomer) setCustomerRef((current) => current || carriedCustomer);
-    if (carriedCase) setCaseRef((current) => current || carriedCase);
+    if (carriedCustomer && !customerTouchedRef.current) {
+      setCustomerRef((current) => current || carriedCustomer);
+    }
+    if (carriedCase && !caseTouchedRef.current) {
+      setCaseRef((current) => current || carriedCase);
+    }
   }, [carriedCustomer, carriedCase]);
 
   const ready = problem.trim() !== "" && recommendedAction.trim() !== "";
@@ -126,7 +136,10 @@ export default function HandoffPane({
               {t("support.context.customerRef")}
               <input
                 value={customerRef}
-                onChange={(event) => setCustomerRef(event.target.value)}
+                onChange={(event) => {
+                  customerTouchedRef.current = true;
+                  setCustomerRef(event.target.value);
+                }}
                 maxLength={200}
               />
             </label>
@@ -134,7 +147,10 @@ export default function HandoffPane({
               {t("support.context.caseRef")}
               <input
                 value={caseRef}
-                onChange={(event) => setCaseRef(event.target.value)}
+                onChange={(event) => {
+                  caseTouchedRef.current = true;
+                  setCaseRef(event.target.value);
+                }}
                 maxLength={200}
               />
             </label>
