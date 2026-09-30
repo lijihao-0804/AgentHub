@@ -22,6 +22,23 @@ import { useI18n } from "@/i18n/provider";
 
 type QueryState = { from?: string; to?: string };
 
+/** Category → token color: approval issues read as process, model issues as
+ * upstream, knowledge as configuration; everything else stays danger. The
+ * backend's category set lives in packages/observability/runs.py. */
+const FAILURE_CATEGORY_TONES: Record<string, string> = {
+  APPROVAL: "var(--attention)",
+  MODEL: "var(--info)",
+  KNOWLEDGE: "var(--accent)",
+  TOOL: "var(--warning)",
+  ACTION: "var(--warning)",
+  "AUTH/TENANT": "var(--danger)",
+  RUNTIME: "var(--danger)",
+};
+
+function failureCategoryTone(category: string): string {
+  return FAILURE_CATEGORY_TONES[category] ?? "var(--danger)";
+}
+
 function queryForDays(days: number): QueryState {
   const to = new Date();
   const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
@@ -404,7 +421,7 @@ export default function DashboardPage() {
                           className="bar-fill"
                           style={{
                             width: `${item.percentage === null ? 0 : Math.max(item.percentage * 100, 1)}%`,
-                            background: "var(--danger)",
+                            background: failureCategoryTone(item.failure_category),
                           }}
                         />
                       </span>
@@ -573,6 +590,11 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
     ["failed", "var(--danger)"],
     ["needs_attention", "var(--attention)"],
   ];
+  // At most ~12 x-axis labels; the first and the last always render so the
+  // window edges stay readable on narrow screens.
+  const labelStride = Math.max(1, Math.ceil(items.length / 12));
+  const showLabel = (index: number) =>
+    index % labelStride === 0 || index === items.length - 1;
   const ariaEntries = items
     .map((item) =>
       t("dashboard.trend.ariaEntry", {
@@ -630,9 +652,11 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
               {item.runs === 0 && (
                 <rect x={x} y={chartHeight - 1} width={barWidth} height={1} fill="var(--border-strong)" />
               )}
-              <text x={x + barWidth / 2} y={chartHeight + 12} textAnchor="middle" fontSize="8" fill="var(--text-muted)">
-                {formatUTCBucketDate(item.bucket)}
-              </text>
+              {showLabel(index) && (
+                <text x={x + barWidth / 2} y={chartHeight + 12} textAnchor="middle" fontSize="8" fill="var(--text-muted)">
+                  {formatUTCBucketDate(item.bucket)}
+                </text>
+              )}
             </g>
           );
         })}

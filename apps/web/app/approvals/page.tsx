@@ -287,6 +287,12 @@ export default function ApprovalsPage() {
             const expiryElapsed = approval.decision_status === "PENDING" &&
               Number.isFinite(expiresAtMs) &&
               expiresAtMs + EXPIRY_CLOCK_TOLERANCE_MS <= clockNowMs;
+            /** Inside five minutes the countdown turns warning-colored so an
+             * operator scanning the inbox sees urgency without reading. */
+            const expiringSoon = approval.decision_status === "PENDING" &&
+              Number.isFinite(expiresAtMs) &&
+              !expiryElapsed &&
+              expiresAtMs - clockNowMs <= 5 * 60_000;
             return (
               <article className="approval-card" key={approval.id}>
                 <div className="approval-header">
@@ -315,7 +321,7 @@ export default function ApprovalsPage() {
                     </span>
                     {approval.decision_status === "PENDING" && Number.isFinite(expiresAtMs) && (
                       <span
-                        className="approval-state-meta"
+                        className={`approval-state-meta${expiringSoon ? " approval-state-expiring" : ""}`}
                         aria-live="off"
                         title={t("approvals.card.expiryClockHint")}
                       >
