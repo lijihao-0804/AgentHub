@@ -79,8 +79,17 @@ async function transport<T>(
   const body = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
     const error = isRecord(body) && isRecord(body.error) ? body.error : {};
+    // A body that is not the API envelope (a proxy's HTML error page, an
+    // empty body) means the API itself never answered -- report that as its
+    // own condition instead of a generic request failure.
+    const envelopeMissing = !isRecord(body) || !isRecord(body.error);
+    const code = envelopeMissing
+      ? "UPSTREAM_UNAVAILABLE"
+      : typeof error.code === "string"
+        ? error.code
+        : "REQUEST_FAILED";
     throw new ApiError(
-      typeof error.code === "string" ? error.code : "REQUEST_FAILED",
+      code,
       typeof error.message === "string" ? error.message : "The API request failed.",
       response.status,
     );

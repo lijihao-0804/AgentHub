@@ -210,6 +210,7 @@ export const zhCN: MessageSchema = {
     KNOWLEDGE: "知识库",
   },
   errors: {
+    UPSTREAM_UNAVAILABLE: "服务暂时无法访问（API 未响应），请稍后重试。",
     codeLabel: "错误码",
     /**
      * Plain-language text for the documented backend error codes. The raw

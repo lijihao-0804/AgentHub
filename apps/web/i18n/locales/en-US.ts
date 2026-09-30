@@ -213,6 +213,7 @@ export const enUS = {
     KNOWLEDGE: "Knowledge",
   },
   errors: {
+    UPSTREAM_UNAVAILABLE: "The service is temporarily unreachable (the API did not respond). Please retry shortly.",
     codeLabel: "Error code",
     /**
      * Plain-language text for the documented backend error codes. The raw
