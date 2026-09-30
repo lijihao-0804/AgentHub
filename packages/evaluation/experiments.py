@@ -142,14 +142,26 @@ class ExperimentService:
         session: AsyncSession,
         *,
         context: WorkspaceExecutionContext,
-    ) -> list[EvaluationExperiment]:
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> tuple[list[EvaluationExperiment], int]:
         self._require_read(context)
-        result = await session.scalars(
-            select(EvaluationExperiment)
-            .where(EvaluationExperiment.workspace_id == self._workspace_id(context))
-            .order_by(EvaluationExperiment.created_at.desc(), EvaluationExperiment.id)
+        workspace_id = self._workspace_id(context)
+        total = await session.scalar(
+            select(func.count())
+            .select_from(EvaluationExperiment)
+            .where(EvaluationExperiment.workspace_id == workspace_id)
         )
-        return list(result)
+        statement = (
+            select(EvaluationExperiment)
+            .where(EvaluationExperiment.workspace_id == workspace_id)
+            .order_by(EvaluationExperiment.created_at.desc(), EvaluationExperiment.id)
+            .offset(offset)
+        )
+        if limit is not None:
+            statement = statement.limit(limit)
+        result = await session.scalars(statement)
+        return list(result), int(total or 0)
 
     async def get_experiment(
         self,

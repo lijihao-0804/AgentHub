@@ -82,8 +82,17 @@ export type EvaluationDatasetVersionFromRunInput = {
   tags: string[];
 };
 
-export function listDatasets(input: AuthInput): Promise<EvaluationDataset[]> {
-  return get(input, "/datasets");
+export type EvaluationDatasetList = { items: EvaluationDataset[]; total: number };
+
+export function listDatasets(
+  input: AuthInput,
+  query: { limit?: number; offset?: number } = {},
+): Promise<EvaluationDatasetList> {
+  const params = new URLSearchParams();
+  if (query.limit !== undefined) params.set("limit", String(query.limit));
+  if (query.offset !== undefined) params.set("offset", String(query.offset));
+  const suffix = params.toString() ? `?${params.toString()}` : "";
+  return get(input, `/datasets${suffix}`);
 }
 
 export function createDataset(
@@ -216,8 +225,17 @@ export type EvaluationExperimentDetail = EvaluationExperiment & {
   variants: EvaluationExperimentVariant[];
 };
 
-export function listExperiments(input: AuthInput): Promise<EvaluationExperiment[]> {
-  return get(input, "/experiments");
+export type EvaluationExperimentList = { items: EvaluationExperiment[]; total: number };
+
+export function listExperiments(
+  input: AuthInput,
+  query: { limit?: number; offset?: number } = {},
+): Promise<EvaluationExperimentList> {
+  const params = new URLSearchParams();
+  if (query.limit !== undefined) params.set("limit", String(query.limit));
+  if (query.offset !== undefined) params.set("offset", String(query.offset));
+  const suffix = params.toString() ? `?${params.toString()}` : "";
+  return get(input, `/experiments${suffix}`);
 }
 
 export function getExperiment(input: AuthInput, experimentId: string): Promise<EvaluationExperimentDetail> {

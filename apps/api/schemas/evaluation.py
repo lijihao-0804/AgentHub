@@ -385,3 +385,17 @@ __all__ = [
     "PricingSnapshotCreateRequest",
     "PricingSnapshotResponse",
 ]
+
+
+class EvaluationDatasetListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[EvaluationDatasetResponse]
+    total: int
+
+
+class EvaluationExperimentListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[EvaluationExperimentResponse]
+    total: int

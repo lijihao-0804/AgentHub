@@ -17,6 +17,7 @@ from apps.api.schemas.evaluation import (
     EvaluationComparisonResponse,
     EvaluationDatasetCreateRequest,
     EvaluationDatasetItemResponse,
+    EvaluationDatasetListResponse,
     EvaluationDatasetResponse,
     EvaluationDatasetVersionCreateRequest,
     EvaluationDatasetVersionDetailResponse,
@@ -24,6 +25,7 @@ from apps.api.schemas.evaluation import (
     EvaluationDatasetVersionResponse,
     EvaluationExperimentCreateRequest,
     EvaluationExperimentDetailResponse,
+    EvaluationExperimentListResponse,
     EvaluationExperimentResponse,
     EvaluationExperimentRunProgressResponse,
     EvaluationExperimentRunResponse,
@@ -104,17 +106,25 @@ async def create_dataset(
     return EvaluationDatasetResponse.model_validate(dataset, from_attributes=True)
 
 
-@router.get("/datasets", response_model=list[EvaluationDatasetResponse])
+@router.get("/datasets", response_model=EvaluationDatasetListResponse)
 async def list_datasets(
     workspace_id: UUID,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
-) -> list[EvaluationDatasetResponse]:
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> EvaluationDatasetListResponse:
     del workspace_id
-    datasets = await EvaluationDatasetService().list_datasets(session, context=context)
-    return [
-        EvaluationDatasetResponse.model_validate(item, from_attributes=True) for item in datasets
-    ]
+    datasets, total = await EvaluationDatasetService().list_datasets(
+        session, context=context, limit=limit, offset=offset
+    )
+    return EvaluationDatasetListResponse(
+        items=[
+            EvaluationDatasetResponse.model_validate(item, from_attributes=True)
+            for item in datasets
+        ],
+        total=total,
+    )
 
 
 @router.post(
@@ -370,18 +380,25 @@ async def create_experiment(
     return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
 
 
-@router.get("/experiments", response_model=list[EvaluationExperimentResponse])
+@router.get("/experiments", response_model=EvaluationExperimentListResponse)
 async def list_experiments(
     workspace_id: UUID,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
-) -> list[EvaluationExperimentResponse]:
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> EvaluationExperimentListResponse:
     del workspace_id
-    experiments = await ExperimentService().list_experiments(session, context=context)
-    return [
-        EvaluationExperimentResponse.model_validate(item, from_attributes=True)
-        for item in experiments
-    ]
+    experiments, total = await ExperimentService().list_experiments(
+        session, context=context, limit=limit, offset=offset
+    )
+    return EvaluationExperimentListResponse(
+        items=[
+            EvaluationExperimentResponse.model_validate(item, from_attributes=True)
+            for item in experiments
+        ],
+        total=total,
+    )
 
 
 @router.get(

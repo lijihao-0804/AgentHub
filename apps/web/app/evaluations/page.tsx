@@ -7,10 +7,8 @@ import MetricCard from "@/components/ui/metric-card";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import { ApiError, toApiError } from "@/lib/api/client";
 import {
-  EvaluationDataset,
   PricingSnapshot,
   ReleaseGatePolicy,
-  EvaluationExperiment,
   listDatasets,
   listExperiments,
   listPricingSnapshots,
@@ -20,10 +18,10 @@ import { useFrontendSession } from "@/components/providers/session-provider";
 import { useI18n } from "@/i18n/provider";
 
 export default function EvaluationOverviewPage() {
-  const { t } = useI18n();
+  const { t, formatNumber } = useI18n();
   const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
-  const [datasets, setDatasets] = useState<EvaluationDataset[] | null>(null);
-  const [experiments, setExperiments] = useState<EvaluationExperiment[] | null>(null);
+  const [datasetTotal, setDatasetTotal] = useState<number | null>(null);
+  const [experimentTotal, setExperimentTotal] = useState<number | null>(null);
   const [pricing, setPricing] = useState<PricingSnapshot[] | null>(null);
   const [policies, setPolicies] = useState<ReleaseGatePolicy[] | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
@@ -33,8 +31,8 @@ export default function EvaluationOverviewPage() {
   activeSessionRef.current = sessionId;
 
   useEffect(() => {
-    setDatasets(null);
-    setExperiments(null);
+    setDatasetTotal(null);
+    setExperimentTotal(null);
     setPricing(null);
     setPolicies(null);
     setError(null);
@@ -50,15 +48,16 @@ export default function EvaluationOverviewPage() {
     setError(null);
     const input = { workspaceId, accessToken };
     Promise.all([
-      listDatasets(input),
-      listExperiments(input),
+      // The overview only needs counts: limit=1 keeps four cards cheap.
+      listDatasets(input, { limit: 1 }),
+      listExperiments(input, { limit: 1 }),
       listPricingSnapshots(input),
       listReleaseGatePolicies(input),
     ])
       .then(([d, e, p, g]) => {
         if (activeSessionRef.current !== requestSessionId) return;
-        setDatasets(d);
-        setExperiments(e);
+        setDatasetTotal(d.total);
+        setExperimentTotal(e.total);
         setPricing(p);
         setPolicies(g);
       })
@@ -104,13 +103,13 @@ export default function EvaluationOverviewPage() {
           <section className="kpi-grid" aria-label={t("evaluation.overview.title")}>
             <MetricCard
               label={t("evaluation.overview.datasets")}
-              value={datasets?.length ?? 0}
+              value={formatNumber(datasetTotal ?? 0)}
               hint={t("evaluation.overview.countsHint")}
               href="/evaluations/datasets"
             />
             <MetricCard
               label={t("evaluation.overview.experiments")}
-              value={experiments?.length ?? 0}
+              value={formatNumber(experimentTotal ?? 0)}
               href="/evaluations/experiments"
             />
             <MetricCard
@@ -126,7 +125,7 @@ export default function EvaluationOverviewPage() {
           </section>
 
           <Panel title={t("evaluation.overview.quick")} eyebrow={t("evaluation.eyebrow")}>
-            {datasets !== null && experiments !== null && pricing !== null && policies !== null && (
+            {datasetTotal !== null && experimentTotal !== null && pricing !== null && policies !== null && (
               <div className="overview-grid">
                 <Link className="overview-card" href="/evaluations/datasets">
                   <span className="overview-card-title">{t("evaluation.overview.newDataset")}</span>
@@ -145,8 +144,8 @@ export default function EvaluationOverviewPage() {
                 </Link>
               </div>
             )}
-            {datasets?.length === 0 &&
-              experiments?.length === 0 &&
+            {datasetTotal === 0 &&
+              experimentTotal === 0 &&
               pricing?.length === 0 &&
               policies?.length === 0 && (
                 <EmptyState

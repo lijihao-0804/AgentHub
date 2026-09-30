@@ -207,11 +207,12 @@ export default function AddRunToDatasetPanel({
     setLoadError(null);
     setCreatedVersion(null);
     try {
-      const [nextRun, nextDatasets] = await Promise.all([
+      const [nextRun, nextPage] = await Promise.all([
         getAgentRun({ workspaceId, accessToken }, runId),
-        listDatasets({ workspaceId, accessToken }),
+        listDatasets({ workspaceId, accessToken }, { limit: 200 }),
       ]);
       if (activeSessionRef.current !== requestSessionId) return;
+      const nextDatasets = nextPage.items;
       setSourceRun(nextRun);
       setDatasets(nextDatasets);
       setDatasetId((current) => (current && nextDatasets.some((dataset) => dataset.id === current) ? current : nextDatasets[0]?.id ?? ""));

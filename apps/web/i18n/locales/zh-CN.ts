@@ -940,6 +940,7 @@ export const zhCN: MessageSchema = {
       open: "打开",
     },
     datasets: {
+      loadMore: "加载更多",
       eyebrow: "数据集",
       title: "数据集",
       lede: "带版本的评估用例集合。已发布版本不可变，可被实验绑定。",
@@ -1055,6 +1056,7 @@ export const zhCN: MessageSchema = {
       emptyHint: "实验变体绑定需要定价快照。",
     },
     experiments: {
+      loadMore: "加载更多",
       eyebrow: "实验",
       title: "实验",
       lede: "冻结在某个已发布数据集版本上的评估规格，包含一个或多个智能体变体。",

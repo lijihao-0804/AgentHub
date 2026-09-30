@@ -951,6 +951,7 @@ export const enUS = {
       open: "Open",
     },
     datasets: {
+      loadMore: "Load more",
       eyebrow: "Datasets",
       title: "Datasets",
       lede: "Versioned evaluation case collections. Published versions are immutable and can be bound by experiments.",
@@ -1066,6 +1067,7 @@ export const enUS = {
       emptyHint: "Variant bindings require a pricing snapshot.",
     },
     experiments: {
+      loadMore: "Load more",
       eyebrow: "Experiments",
       title: "Experiments",
       lede: "Frozen evaluation specifications over a published dataset version, one or more agent variants.",

@@ -31,6 +31,10 @@ export default function EvaluationExperimentsPage() {
   const router = useRouter();
   const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [experiments, setExperiments] = useState<EvaluationExperiment[]>([]);
+  const [experimentTotal, setExperimentTotal] = useState<number | null>(null);
+  const [extraPages, setExtraPages] = useState<EvaluationExperiment[][]>([]);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -58,6 +62,9 @@ export default function EvaluationExperimentsPage() {
 
   useEffect(() => {
     setExperiments([]);
+    setExtraPages([]);
+    setExperimentTotal(null);
+    setHasMore(true);
     setError(null);
     setLoading(false);
     setLoaded(false);
@@ -82,15 +89,34 @@ export default function EvaluationExperimentsPage() {
 
   const input = { workspaceId, accessToken };
 
+  const loadMore = useCallback(async () => {
+    if (!connected || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const offset = experiments.length;
+      const page = await listExperiments(input, { limit: 50, offset });
+      setExtraPages((current) => [...current, page.items]);
+      setExperimentTotal(page.total);
+      if (page.items.length < 50) setHasMore(false);
+    } catch {
+      // A failed page keeps the visible list untouched.
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [connected, experiments.length, loadingMore, input]);
+
   const refresh = useCallback(async () => {
     setError(null);
     if (!connected) return;
     const requestSessionId = sessionId;
     setLoading(true);
     try {
-      const nextExperiments = await listExperiments(input);
+      const page = await listExperiments(input, { limit: 50 });
       if (activeSessionRef.current !== requestSessionId) return;
-      setExperiments(nextExperiments);
+      setExperiments(page.items);
+      setExperimentTotal(page.total);
+      setExtraPages([]);
+      setHasMore(true);
       setLoaded(true);
     } catch (caught) {
       if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
@@ -109,9 +135,9 @@ export default function EvaluationExperimentsPage() {
     setDatasetsLoading(true);
     setDatasetsError(null);
     try {
-      const nextDatasets = await listDatasets(input);
+      const page = await listDatasets(input, { limit: 200 });
       if (activeSessionRef.current !== requestSessionId) return;
-      setDatasets(nextDatasets);
+      setDatasets(page.items);
       setDatasetsLoaded(true);
     } catch (caught) {
       if (activeSessionRef.current === requestSessionId) setDatasetsError(toApiError(caught, ""));
@@ -195,6 +221,14 @@ export default function EvaluationExperimentsPage() {
         <SessionRequired contextKey="session.context.evaluations" />
       </div>
     );
+  }
+
+  const seenExperimentIds = new Set<string>();
+  const visible: EvaluationExperiment[] = [];
+  for (const experiment of [...experiments, ...extraPages.flat()]) {
+    if (seenExperimentIds.has(experiment.id)) continue;
+    seenExperimentIds.add(experiment.id);
+    visible.push(experiment);
   }
 
   return (
@@ -324,7 +358,7 @@ export default function EvaluationExperimentsPage() {
           <EmptyState title={t("evaluation.experiments.empty")} hint={t("evaluation.experiments.emptyHint")} />
         )}
 
-        {experiments.length > 0 && (
+        {visible.length > 0 && (
           <div className="data-table">
             <table>
               <thead>
@@ -340,7 +374,7 @@ export default function EvaluationExperimentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {experiments.map((experiment) => (
+                {visible.map((experiment) => (
                   <tr key={experiment.id}>
                     <td data-label={t("evaluation.experiments.columns.name")}>
                       <Link href={`/evaluations/experiments/${encodeURIComponent(experiment.id)}`}>{experiment.name}</Link>
@@ -364,6 +398,18 @@ export default function EvaluationExperimentsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {visible.length > 0 && hasMore && (
+          <div className="form-actions">
+            <button
+              type="button"
+              className="button button-ghost"
+              onClick={() => void loadMore()}
+              disabled={loadingMore}
+            >
+              {loadingMore ? t("common.loading") : t("evaluation.experiments.loadMore")}
+            </button>
           </div>
         )}
       </Panel>

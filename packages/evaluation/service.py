@@ -65,15 +65,26 @@ class EvaluationDatasetService:
         session: AsyncSession,
         *,
         context: WorkspaceExecutionContext,
-    ) -> list[EvaluationDataset]:
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> tuple[list[EvaluationDataset], int]:
         self._require_permission(context, "workspace_read")
         workspace_id = self._workspace_id(context)
-        result = await session.scalars(
+        total = await session.scalar(
+            select(func.count())
+            .select_from(EvaluationDataset)
+            .where(EvaluationDataset.workspace_id == workspace_id)
+        )
+        statement = (
             select(EvaluationDataset)
             .where(EvaluationDataset.workspace_id == workspace_id)
             .order_by(EvaluationDataset.created_at, EvaluationDataset.id)
+            .offset(offset)
         )
-        return list(result)
+        if limit is not None:
+            statement = statement.limit(limit)
+        result = await session.scalars(statement)
+        return list(result), int(total or 0)
 
     async def get_dataset(
         self,
