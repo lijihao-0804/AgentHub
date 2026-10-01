@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import type { AppThreadCopy } from "@/components/apps/app-thread-copy";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
@@ -29,28 +29,51 @@ export type ThreadWeight = {
   values: (artifacts: Artifact[], turns: number) => Record<string, number>;
 };
 
-type ThreadSummary = { thread: Thread; values: Record<string, number> };
+type ThreadSummary = { thread: Thread; values: Record<string, number>; degraded: boolean };
 
 export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; weight: ThreadWeight }) {
   const { t, formatDateTime, formatNumber } = useI18n();
-  const { connected, sessionId, workspaceId } = useFrontendSession();
+  const { connected, sessionId, workspaceId, accessToken } = useFrontendSession();
   const router = useRouter();
 
   const compute = weight.values;
-  const loadSummaries = useCallback(
-    async (auth: AuthInput): Promise<ThreadSummary[]> => {
-      const threads = await listThreads(auth, { kind: copy.kind, limit: THREAD_PAGE_SIZE });
-      return Promise.all(
-        threads.map(async (thread) => {
-          const [turns, artifacts] = await Promise.all([
-            listThreadTurns(auth, thread.id),
-            listThreadArtifacts(auth, thread.id, { limit: 200 }),
-          ]);
-          return { thread, values: compute(artifacts, turns.length) };
-        }),
-      );
+  /** Per-thread summary cache: unchanged threads (same updated_at) are not
+   * re-fetched, so revisiting a list costs one request instead of 2N. */
+  const summaryCacheRef = useRef(new Map<string, ThreadSummary>());
+  useEffect(() => {
+    summaryCacheRef.current.clear();
+  }, [sessionId]);
+
+  const summarize = useCallback(
+    async (auth: AuthInput, thread: Thread): Promise<ThreadSummary> => {
+      const cacheKey = `${thread.id}:${thread.updated_at}`;
+      const cached = summaryCacheRef.current.get(cacheKey);
+      if (cached) return cached;
+      const [turnsResult, artifactsResult] = await Promise.allSettled([
+        listThreadTurns(auth, thread.id),
+        listThreadArtifacts(auth, thread.id, { limit: 200 }),
+      ]);
+      // One failing sub-request degrades that row's counts; it must not take
+      // the whole list down with it.
+      const turns = turnsResult.status === "fulfilled" ? turnsResult.value : [];
+      const artifacts = artifactsResult.status === "fulfilled" ? artifactsResult.value : [];
+      const summary: ThreadSummary = {
+        thread,
+        values: compute(artifacts, turns.length),
+        degraded: turnsResult.status === "rejected" || artifactsResult.status === "rejected",
+      };
+      summaryCacheRef.current.set(cacheKey, summary);
+      return summary;
     },
-    [compute, copy.kind],
+    [compute],
+  );
+
+  const loadSummaries = useCallback(
+    async (auth: AuthInput, offset = 0): Promise<ThreadSummary[]> => {
+      const threads = await listThreads(auth, { kind: copy.kind, limit: THREAD_PAGE_SIZE, offset });
+      return Promise.all(threads.map((thread) => summarize(auth, thread)));
+    },
+    [copy.kind, summarize],
   );
   const loadAgentList = useCallback((auth: AuthInput) => listAgents(auth), []);
 
@@ -58,6 +81,31 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
   const threads = useWorkspaceData<ThreadSummary[]>(loadSummaries, `app-threads:${scope}`);
   const agents = useWorkspaceData<Agent[]>(loadAgentList, `agents:${workspaceId}`);
   const mutation = useWorkspaceMutation(`app-threads:${scope}`);
+
+  // Offset paging beyond the first 20 threads: the backend returns no total,
+  // so a short page means the end has been reached.
+  const [extraPages, setExtraPages] = useState<ThreadSummary[][]>([]);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  useEffect(() => {
+    setExtraPages([]);
+    setHasMore(true);
+  }, [threads.data]);
+
+  const loadMore = useCallback(async () => {
+    if (!connected || !accessToken || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const offset = (threads.data?.length ?? 0) + extraPages.flat().length;
+      const more = await loadSummaries({ workspaceId, accessToken }, offset);
+      setExtraPages((current) => [...current, more]);
+      if (more.length < THREAD_PAGE_SIZE) setHasMore(false);
+    } catch {
+      // A failed page keeps the visible list untouched; the button stays.
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [connected, accessToken, loadingMore, threads.data, extraPages, loadSummaries, workspaceId]);
 
   const [showForm, setShowForm] = useState(false);
   const [agentId, setAgentId] = useState("");
@@ -84,7 +132,15 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
   }
 
   const agentList = agents.data ?? [];
-  const summaries = threads.data ?? [];
+  // First page plus whatever the user paged in; dedupe by id in case a new
+  // thread shifted a row across a page boundary between fetches.
+  const seen = new Set<string>();
+  const summaries: ThreadSummary[] = [];
+  for (const summary of [...(threads.data ?? []), ...extraPages.flat()]) {
+    if (seen.has(summary.thread.id)) continue;
+    seen.add(summary.thread.id);
+    summaries.push(summary);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -193,7 +249,7 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
 
         {summaries.length > 0 && (
           <ul className="research-thread-cards">
-            {summaries.map(({ thread, values }) => (
+            {summaries.map(({ thread, values, degraded }) => (
               <li key={thread.id}>
                 <Link
                   className="research-thread-card"
@@ -204,17 +260,31 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
                     {t("appThread.updated", { time: formatDateTime(thread.updated_at) })}
                   </span>
                   <span className="research-thread-card-summary">
-                    {t(
-                      weight.summaryKey,
-                      Object.fromEntries(
-                        Object.entries(values).map(([name, count]) => [name, formatNumber(count)]),
-                      ),
-                    )}
+                    {degraded
+                      ? t("appThread.summaryDegraded")
+                      : t(
+                          weight.summaryKey,
+                          Object.fromEntries(
+                            Object.entries(values).map(([name, count]) => [name, formatNumber(count)]),
+                          ),
+                        )}
                   </span>
                 </Link>
               </li>
             ))}
           </ul>
+        )}
+        {summaries.length > 0 && hasMore && (
+          <div className="form-actions">
+            <button
+              type="button"
+              className="button button-ghost"
+              onClick={() => void loadMore()}
+              disabled={loadingMore}
+            >
+              {loadingMore ? t("common.loading") : t("appThread.loadMore")}
+            </button>
+          </div>
         )}
       </Panel>
     </div>

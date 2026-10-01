@@ -50,6 +50,9 @@ class RunListItem(BaseModel):
     cost_currency: str | None
     cost_is_estimate: bool | None
     approval_summary: ApprovalSummary
+    # The conversation this run answered, when it has one. Runs launched from
+    # the Playground have no thread.
+    thread_id: UUID | None = None
 
 
 class RunListResponse(BaseModel):
@@ -62,6 +65,9 @@ class RunListResponse(BaseModel):
 class RunDetail(RunListItem):
     effective_knowledge_snapshots: list[dict[str, Any]]
     trace_url: str | None = None
+    # Which application surface owns the thread, so the client can route to
+    # the right page; None when the run has no thread.
+    thread_kind: str | None = None
 
 
 class TimelineEntry(BaseModel):

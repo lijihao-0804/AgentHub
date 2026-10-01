@@ -39,7 +39,7 @@ export type ThreadTurn = {
   id: string;
   thread_id: string;
   sequence: number;
-  user_input: string;
+  user_input: string | null;
   /** Null only while the turn has not been attached to its run yet. */
   agent_run_id: string | null;
   created_at: string;

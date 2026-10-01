@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import MetricCard from "@/components/ui/metric-card";
+import MetricCard, { windowDelta } from "@/components/ui/metric-card";
+import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
 import {
@@ -21,6 +22,23 @@ import { useI18n } from "@/i18n/provider";
 
 type QueryState = { from?: string; to?: string };
 
+/** Category → token color: approval issues read as process, model issues as
+ * upstream, knowledge as configuration; everything else stays danger. The
+ * backend's category set lives in packages/observability/runs.py. */
+const FAILURE_CATEGORY_TONES: Record<string, string> = {
+  APPROVAL: "var(--attention)",
+  MODEL: "var(--info)",
+  KNOWLEDGE: "var(--accent)",
+  TOOL: "var(--warning)",
+  ACTION: "var(--warning)",
+  "AUTH/TENANT": "var(--danger)",
+  RUNTIME: "var(--danger)",
+};
+
+function failureCategoryTone(category: string): string {
+  return FAILURE_CATEGORY_TONES[category] ?? "var(--danger)";
+}
+
 function queryForDays(days: number): QueryState {
   const to = new Date();
   const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
@@ -34,6 +52,15 @@ const WINDOW_OPTIONS = [
   { value: "90", labelKey: "dashboard.windows.d90" },
 ] as const;
 
+/** Poll cadence for the live ops cards while runs are in flight. */
+const DASHBOARD_POLL_MS = 5000;
+
+function windowFromUrl(): string {
+  if (typeof window === "undefined") return "7";
+  const param = new URLSearchParams(window.location.search).get("days") ?? "7";
+  return WINDOW_OPTIONS.some((option) => option.value === param) ? param : "7";
+}
+
 export default function DashboardPage() {
   const {
     t,
@@ -46,7 +73,9 @@ export default function DashboardPage() {
     formatCurrencyAmount,
   } = useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
-  const [days, setDays] = useState("7");
+  // null until the URL has been read, so a deep link such as /dashboard?days=30
+  // configures the window before the first load fires.
+  const [days, setDays] = useState<string | null>(null);
   const [summary, setSummary] = useState<ObservabilitySummary | null>(null);
   const [failures, setFailures] = useState<FailureAnalytics | null>(null);
   const [timeseries, setTimeseries] = useState<TimeseriesResponse | null>(null);
@@ -54,38 +83,112 @@ export default function DashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
+  /** Generation shared by the full load and failures-only reloads, so a poll
+   * can never land on top of a newer drill-down (or vice versa). */
+  const generationRef = useRef(0);
+  /** Live drill-down selection; a full load must re-apply, not clear it. */
+  const selectedCategoryRef = useRef<string | null>(null);
+  /** True while a full load is on the wire, so polls cannot stack up. */
+  const loadingRef = useRef(false);
 
   const load = useCallback(
-    async (category?: string, dayOverride?: string) => {
-      setError(null);
+    async (dayOverride?: string) => {
       if (!connected) return;
-      const window = queryForDays(Number(dayOverride ?? days));
+      const effectiveDays = dayOverride ?? days;
+      if (!effectiveDays) return;
+      const generation = (generationRef.current += 1);
+      // The user's failure drill-down survives every refresh and poll: the
+      // failures endpoint is re-pulled with the selected category instead of
+      // being reset to "all categories".
+      const category = selectedCategoryRef.current;
+      setError(null);
+      const window = queryForDays(Number(effectiveDays));
+      loadingRef.current = true;
       setLoading(true);
       try {
         const input = { workspaceId, accessToken, ...window };
         const [nextSummary, nextTimeseries, nextFailures, nextVersions] = await Promise.all([
           getObservabilitySummary(input),
-          getObservabilityTimeseries({ ...input, bucket: Number(dayOverride ?? days) <= 1 ? "hour" : "day" }),
-          getObservabilityFailures({ ...input, category }),
+          getObservabilityTimeseries({ ...input, bucket: Number(effectiveDays) <= 1 ? "hour" : "day" }),
+          getObservabilityFailures({ ...input, ...(category ? { category } : {}) }),
           getAgentVersionBreakdown(input),
         ]);
+        if (generationRef.current !== generation) return;
         setSummary(nextSummary);
         setTimeseries(nextTimeseries);
         setFailures(nextFailures);
         setVersions(nextVersions);
-        setSelectedCategory(category ?? null);
+        setSelectedCategory(category);
       } catch (caught) {
+        if (generationRef.current !== generation) return;
         setError(toApiError(caught, ""));
       } finally {
-        setLoading(false);
+        if (generationRef.current === generation) {
+          loadingRef.current = false;
+          setLoading(false);
+        }
       }
     },
     [connected, workspaceId, accessToken, days],
   );
 
+  /** Category drill-down re-pulls only the failures endpoint. */
+  const loadFailures = useCallback(
+    async (category: string | null) => {
+      if (!connected) return;
+      const generation = (generationRef.current += 1);
+      selectedCategoryRef.current = category;
+      const window = queryForDays(Number(days ?? "7"));
+      try {
+        const nextFailures = await getObservabilityFailures({
+          workspaceId,
+          accessToken,
+          ...window,
+          ...(category ? { category } : {}),
+        });
+        if (generationRef.current !== generation) return;
+        setFailures(nextFailures);
+        setSelectedCategory(category);
+      } catch (caught) {
+        if (generationRef.current !== generation) return;
+        setError(toApiError(caught, ""));
+      }
+    },
+    [connected, workspaceId, accessToken, days],
+  );
+
+  // Read the shared time window from the URL before the first load, and keep
+  // the URL in sync afterwards so a view can be linked or reloaded.
   useEffect(() => {
-    if (connected) void load();
-  }, [connected, load]);
+    setDays(windowFromUrl());
+  }, []);
+
+  const changeDays = useCallback((nextDays: string) => {
+    setDays(nextDays);
+    const params = new URLSearchParams(window.location.search);
+    params.set("days", nextDays);
+    window.history.replaceState(null, "", `/dashboard?${params.toString()}`);
+  }, []);
+
+  useEffect(() => {
+    if (connected && days !== null) void load();
+  }, [connected, days, load]);
+
+  const activeOps =
+    summary !== null &&
+    (summary.current.running_count > 0 ||
+      summary.current.waiting_approval_count > 0 ||
+      summary.current.needs_attention_count > 0);
+
+  // Live ops must not need a manual refresh: poll while anything is in
+  // flight, stop when the workspace is quiet, and skip hidden tabs.
+  useEffect(() => {
+    if (!connected || !activeOps || days === null) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden && !loadingRef.current) void load();
+    }, DASHBOARD_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [connected, activeOps, days, load]);
 
   const hint = error ? errorHintKey(error) : null;
 
@@ -112,7 +215,7 @@ export default function DashboardPage() {
       <section className="runs-toolbar" aria-label={t("dashboard.window")}>
         <label>
           {t("dashboard.window")}
-          <select value={days} onChange={(event) => setDays(event.target.value)}>
+          <select value={days ?? "7"} onChange={(event) => changeDays(event.target.value)}>
             {WINDOW_OPTIONS.map((option) => (
               <option value={option.value} key={option.value}>
                 {t(option.labelKey)}
@@ -139,13 +242,54 @@ export default function DashboardPage() {
 
       {summary && (
         <>
+          {summary.success_rate.denominator === 0 && summary.current.running_count === 0 && (
+            <Panel title={t("dashboard.onboarding.title")} eyebrow={t("dashboard.onboarding.eyebrow")}>
+              <p className="state-hint">{t("dashboard.onboarding.lede")}</p>
+              <div className="split-list">
+                <Link className="stat-row" href="/settings/models">
+                  <span className="stat-row-lead">{t("dashboard.onboarding.step1")}</span>
+                  <span className="stat-row-meta stat-row-meta-end">{t("dashboard.onboarding.step1Hint")}</span>
+                </Link>
+                <Link className="stat-row" href="/agents">
+                  <span className="stat-row-lead">{t("dashboard.onboarding.step2")}</span>
+                  <span className="stat-row-meta stat-row-meta-end">{t("dashboard.onboarding.step2Hint")}</span>
+                </Link>
+                <Link className="stat-row" href="/knowledge">
+                  <span className="stat-row-lead">{t("dashboard.onboarding.step3")}</span>
+                  <span className="stat-row-meta stat-row-meta-end">{t("dashboard.onboarding.step3Hint")}</span>
+                </Link>
+              </div>
+            </Panel>
+          )}
           <section className="kpi-grid" aria-label={t("dashboard.title")}>
+            <MetricCard
+              label={t("dashboard.kpi.finishedRuns")}
+              value={formatCount(summary.finished_runs.denominator)}
+              href="/runs"
+              hint={t("dashboard.kpi.finishedRunsHint", {
+                running: formatCount(summary.current.running_count),
+                waitingApproval: formatCount(summary.current.waiting_approval_count),
+              })}
+              delta={windowDelta((timeseries?.items ?? []).map((item) => item.runs))}
+              deltaLabel={t("dashboard.kpi.deltaLabel")}
+              sparkline={(timeseries?.items ?? []).map((item) => item.runs)}
+            />
+            <MetricCard
+              label={t("dashboard.kpi.failedRuns")}
+              value={formatCount(summary.finished_runs.failed)}
+              href="/runs?status=FAILED"
+              emphasis={summary.finished_runs.failed > 0}
+              delta={windowDelta((timeseries?.items ?? []).map((item) => item.failed))}
+              deltaLabel={t("dashboard.kpi.deltaLabel")}
+              deltaInverse
+              sparkline={(timeseries?.items ?? []).map((item) => item.failed)}
+            />
             <MetricCard
               label={t("dashboard.kpi.successRate")}
               value={summary.success_rate.rate === null ? "—" : formatPercent(summary.success_rate.rate)}
               hint={t("dashboard.kpi.successHint", {
-                numerator: summary.success_rate.numerator,
-                denominator: summary.success_rate.denominator,
+                numerator: formatCount(summary.success_rate.numerator),
+                denominator: formatCount(summary.success_rate.denominator),
               })}
             />
             <MetricCard
@@ -153,16 +297,27 @@ export default function DashboardPage() {
               value={summary.latency.p95_ms === null ? "—" : formatDurationMs(summary.latency.p95_ms)}
               hint={t("dashboard.kpi.p95Hint", {
                 p50: summary.latency.p50_ms === null ? "—" : formatDurationMs(summary.latency.p50_ms),
-                count: summary.latency.sample_count,
+                avg: summary.latency.avg_ms === null ? "—" : formatDurationMs(summary.latency.avg_ms),
+                count: formatCount(summary.latency.sample_count),
               })}
             />
             <MetricCard
               label={t("dashboard.kpi.tokensPerRun")}
               value={summary.usage.avg_tokens_per_run === null ? "—" : formatCount(summary.usage.avg_tokens_per_run)}
-              hint={t("dashboard.kpi.tokensHint", {
-                known: summary.usage.known_usage_count,
-                unknown: summary.usage.unknown_usage_count,
-              })}
+              hint={
+                <>
+                  {t("dashboard.kpi.tokensHint", {
+                    known: formatCount(summary.usage.known_usage_count),
+                    unknown: formatCount(summary.usage.unknown_usage_count),
+                  })}
+                  <br />
+                  {t("dashboard.kpi.tokensBreakdown", {
+                    input: summary.usage.avg_input_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_input_tokens),
+                    output: summary.usage.avg_output_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_output_tokens),
+                    cached: summary.usage.avg_cached_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_cached_tokens),
+                  })}
+                </>
+              }
             />
             <MetricCard
               label={t("dashboard.kpi.costPerSuccess")}
@@ -178,32 +333,71 @@ export default function DashboardPage() {
                   ? null
                   : summary.cost.currency
               }
-              hint={t("dashboard.kpi.costHint", { count: summary.cost.successful_cost_denominator })}
+              hint={
+                summary.cost.total_cost === null || summary.cost.mixed_currency
+                  ? t("dashboard.kpi.costHint", { count: formatCount(summary.cost.successful_cost_denominator) })
+                  : t("dashboard.kpi.costHintTotal", {
+                      total: formatCurrencyAmount(summary.cost.total_cost, null),
+                      average: summary.cost.avg_cost_per_run === null
+                        ? t("common.unknown")
+                        : formatCurrencyAmount(summary.cost.avg_cost_per_run, null),
+                      count: formatCount(summary.cost.successful_cost_denominator),
+                    })
+              }
             />
           </section>
 
           <section className="op-grid" aria-label={t("dashboard.title")}>
-            <MetricCard label={t("dashboard.ops.running")} value={summary.current.running_count} href="/runs?status=RUNNING" />
+            <MetricCard label={t("dashboard.ops.running")} value={formatCount(summary.current.running_count)} href="/runs?status=RUNNING" />
             <MetricCard
               label={t("dashboard.ops.waitingApproval")}
-              value={summary.current.waiting_approval_count}
+              value={formatCount(summary.current.waiting_approval_count)}
               href="/approvals"
               emphasis={summary.current.waiting_approval_count > 0}
             />
             <MetricCard
+              label={t("dashboard.ops.cancelRequested")}
+              value={formatCount(summary.current.cancel_requested_count)}
+              href="/runs?status=CANCEL_REQUESTED"
+              emphasis={summary.current.cancel_requested_count > 0}
+            />
+            <MetricCard
               label={t("dashboard.ops.needsAttention")}
-              value={summary.current.needs_attention_count}
+              value={formatCount(summary.current.needs_attention_count)}
               href="/runs?status=NEEDS_ATTENTION"
               emphasis={summary.current.needs_attention_count > 0}
             />
             <MetricCard
               label={t("dashboard.ops.unknownOutcome")}
-              value={summary.current.unknown_outcome_action_count}
+              value={formatCount(summary.current.unknown_outcome_action_count)}
               hint={t("dashboard.ops.unknownOutcomeHint")}
               href="/runs?status=NEEDS_ATTENTION"
               emphasis={summary.current.unknown_outcome_action_count > 0}
             />
           </section>
+
+          <Panel title={t("dashboard.approvals.title")} eyebrow={t("dashboard.approvals.eyebrow")}>
+            <div className="run-facts">
+              <span>{t("dashboard.approvals.decisionTotal")}<strong>{formatCount(summary.approvals.approval_total)}</strong></span>
+              <span>{t("dashboard.approvals.waitP50")}<strong>{summary.approvals.wait_latency.p50_ms === null ? "—" : formatDurationMs(summary.approvals.wait_latency.p50_ms)}</strong></span>
+              <span>{t("dashboard.approvals.waitP95")}<strong>{summary.approvals.wait_latency.p95_ms === null ? "—" : formatDurationMs(summary.approvals.wait_latency.p95_ms)}</strong></span>
+            </div>
+            <div className="approval-chips">
+              <StatusBadge status="PENDING" label={t("run.chips.pending", { count: formatCount(summary.approvals.pending) })} />
+              <StatusBadge status="APPROVED" label={t("run.chips.approved", { count: formatCount(summary.approvals.approved) })} />
+              <StatusBadge status="DENIED" label={t("run.chips.denied", { count: formatCount(summary.approvals.denied) })} />
+              <StatusBadge status="EXPIRED" label={t("dashboard.approvals.expired", { count: formatCount(summary.approvals.expired) })} />
+              <StatusBadge status="CANCELLED" label={t("dashboard.approvals.cancelled", { count: formatCount(summary.approvals.cancelled) })} />
+            </div>
+            <p className="state-hint">{t("dashboard.approvals.executionDistribution")}</p>
+            <div className="approval-chips">
+              <StatusBadge status="NOT_STARTED" label={t("dashboard.approvals.executionNotStarted", { count: formatCount(summary.approvals.execution_not_started) })} />
+              <StatusBadge status="CLAIMED" label={t("dashboard.approvals.executionClaimed", { count: formatCount(summary.approvals.claimed) })} />
+              <StatusBadge status="SUCCEEDED" label={t("dashboard.approvals.executionSucceeded", { count: formatCount(summary.approvals.succeeded) })} />
+              <StatusBadge status="FAILED" label={t("dashboard.approvals.executionFailed", { count: formatCount(summary.approvals.failed) })} />
+              <StatusBadge status="UNKNOWN_OUTCOME" label={t("dashboard.approvals.executionUnknown", { count: formatCount(summary.approvals.unknown_outcome) })} />
+            </div>
+          </Panel>
 
           <div className="dashboard-columns">
             <Panel title={t("dashboard.failures.title")} eyebrow={t("dashboard.failures.eyebrow")}>
@@ -218,7 +412,7 @@ export default function DashboardPage() {
                       key={item.failure_category}
                       aria-pressed={selectedCategory === item.failure_category}
                       onClick={() =>
-                        void load(selectedCategory === item.failure_category ? undefined : item.failure_category)
+                        void loadFailures(selectedCategory === item.failure_category ? null : item.failure_category)
                       }
                     >
                       <span className="bar-row-name">{failureCategoryLabel(item.failure_category)}</span>
@@ -227,7 +421,7 @@ export default function DashboardPage() {
                           className="bar-fill"
                           style={{
                             width: `${item.percentage === null ? 0 : Math.max(item.percentage * 100, 1)}%`,
-                            background: "var(--danger)",
+                            background: failureCategoryTone(item.failure_category),
                           }}
                         />
                       </span>
@@ -253,7 +447,10 @@ export default function DashboardPage() {
                         {item.total_cost === null ? t("common.unknown") : formatCurrencyAmount(item.total_cost, null)}
                       </span>
                       <span className="stat-row-meta">
-                        {t("dashboard.cost.samples", { estimated: item.estimated_count, exact: item.exact_count })}
+                        {t("dashboard.cost.samples", {
+                          estimated: formatCount(item.estimated_count),
+                          exact: formatCount(item.exact_count),
+                        })}
                       </span>
                       <span className="stat-row-meta stat-row-meta-end">
                         {t("dashboard.cost.perSuccess", {
@@ -267,6 +464,29 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
+                {(() => {
+                  const totals = new Map<string, number>();
+                  for (const category of failures?.categories ?? []) {
+                    for (const entry of category.top_failure_codes) {
+                      totals.set(entry.failure_code, (totals.get(entry.failure_code) ?? 0) + entry.count);
+                    }
+                  }
+                  const top = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+                  if (top.length === 0) return null;
+                  return (
+                    <div className="failure-codes">
+                      <p className="state-title">{t("dashboard.failureCodes.title")}</p>
+                      <ul className="failure-code-list">
+                        {top.map(([code, count]) => (
+                          <li key={code}>
+                            <code>{code}</code>
+                            <span>{formatCount(count)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })()}
             </Panel>
           </div>
 
@@ -276,7 +496,7 @@ export default function DashboardPage() {
             actions={<span className="state-hint">{t("common.utcBucket", { bucket: timeseries?.bucket ?? "day" })}</span>}
           >
             {!timeseries || timeseries.items.length === 0 ? (
-              <EmptyState title={t("dashboard.failures.empty")} />
+              <EmptyState title={t("dashboard.trend.empty")} />
             ) : (
               <TimeseriesChart items={timeseries.items} />
             )}
@@ -301,11 +521,27 @@ export default function DashboardPage() {
                       <span className="stat-row-lead">v{item.version_number}</span>
                       <span className="stat-row-value">
                         {t(item.run_count === 1 ? "dashboard.versions.runCountOne" : "dashboard.versions.runCountOther", {
-                          count: item.run_count,
+                          count: formatCount(item.run_count),
                         })}
                       </span>
                       <span className="stat-row-meta">
-                        {item.success_count} ✓ · {item.failed_count} ✕ · {item.needs_attention_count} ⚠
+                        <StatusBadge
+                          status="SUCCEEDED"
+                          label={`${statusLabel("SUCCEEDED")} ${formatCount(item.success_count)}`}
+                        />{" "}
+                        <StatusBadge
+                          status="FAILED"
+                          label={`${statusLabel("FAILED")} ${formatCount(item.failed_count)}`}
+                        />{" "}
+                        <StatusBadge
+                          status="NEEDS_ATTENTION"
+                          label={`${statusLabel("NEEDS_ATTENTION")} ${formatCount(item.needs_attention_count)}`}
+                        />
+                      </span>
+                      <span className="stat-row-meta">
+                        {item.avg_tokens === null
+                          ? t("dashboard.versions.tokensUnknown")
+                          : t("dashboard.versions.avgTokens", { count: formatCount(item.avg_tokens) })}
                       </span>
                       <span className="stat-row-meta stat-row-meta-end">
                         {item.p95_latency_ms === null ? "p95 —" : `p95 ${formatDurationMs(item.p95_latency_ms)}`}
@@ -357,6 +593,11 @@ export default function DashboardPage() {
                       </span>
                     </Link>
                   ))}
+                  <div className="stat-row">
+                    <Link className="button button-ghost" href="/runs?status=FAILED">
+                      {t("dashboard.failureRuns.viewAll")}
+                    </Link>
+                  </div>
                 </div>
               )}
             </Panel>
@@ -368,7 +609,7 @@ export default function DashboardPage() {
 }
 
 function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
-  const { t, formatNumber, formatCount, formatUTCBucketDate } = useI18n();
+  const { t, formatNumber, formatCount, formatUTCBucketDate, formatCurrencyAmount } = useI18n();
   const maxRuns = Math.max(...items.map((item) => item.runs), 1);
   const width = Math.max(items.length * 34, 120);
   const chartHeight = 130;
@@ -377,6 +618,36 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
     ["failed", "var(--danger)"],
     ["needs_attention", "var(--attention)"],
   ];
+  // At most ~12 x-axis labels; the first and the last always render so the
+  // window edges stay readable on narrow screens.
+  const labelStride = Math.max(1, Math.ceil(items.length / 12));
+  const showLabel = (index: number) =>
+    index % labelStride === 0 || index === items.length - 1;
+  // A cost line is drawn only when every bucket holds a single currency:
+  // converting between currencies client-side is never allowed, so a mixed
+  // window falls back to the per-bucket tooltip amounts only.
+  const costValues: Array<number | null> = items.map((item) => {
+    if (item.cost_by_currency.length !== 1) return null;
+    const raw = item.cost_by_currency[0].total_cost;
+    const parsed = raw === null ? null : Number(raw);
+    return parsed !== null && Number.isFinite(parsed) ? parsed : null;
+  });
+  const currencies = new Set(
+    items.flatMap((item) => item.cost_by_currency.map((entry) => entry.currency)),
+  );
+  const costCurrency = currencies.size === 1 ? [...currencies][0] : null;
+  const drawCostLine = costValues.every((value) => value !== null) && costCurrency !== null;
+  const maxCost = Math.max(...costValues.map((value) => value ?? 0), 0.000001);
+  const costPoints = costValues
+    .map((value, index) => {
+      if (value === null) return null;
+      const x = index * 34 + 6 + 11;
+      const y = chartHeight - (value / maxCost) * (chartHeight * 0.85);
+      return `${x},${Math.max(1, Math.round(y))}`;
+    })
+    .filter((point): point is string => point !== null)
+    .join(" ");
+
   const ariaEntries = items
     .map((item) =>
       t("dashboard.trend.ariaEntry", {
@@ -407,11 +678,21 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
               <title>
                 {t("dashboard.trend.barTitle", {
                   date: formatUTCBucketDate(item.bucket),
-                  runs: item.runs,
-                  succeeded: item.succeeded,
-                  failed: item.failed,
-                  needsAttention: item.needs_attention,
+                  runs: formatCount(item.runs),
+                  succeeded: formatCount(item.succeeded),
+                  failed: formatCount(item.failed),
+                  needsAttention: formatCount(item.needs_attention),
                   tokens: item.tokens === null ? t("common.unknown") : formatCount(item.tokens),
+                  cost:
+                    item.cost_by_currency.length === 0
+                      ? t("common.unknown")
+                      : item.cost_by_currency
+                          .map((entry) =>
+                            entry.total_cost === null
+                              ? t("common.unknown")
+                              : formatCurrencyAmount(entry.total_cost, entry.currency),
+                          )
+                          .join(", "),
                 })}
               </title>
               {segmentColors.map(([key, color]) => {
@@ -424,14 +705,31 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
               {item.runs === 0 && (
                 <rect x={x} y={chartHeight - 1} width={barWidth} height={1} fill="var(--border-strong)" />
               )}
-              <text x={x + barWidth / 2} y={chartHeight + 12} textAnchor="middle" fontSize="8" fill="var(--text-muted)">
-                {formatUTCBucketDate(item.bucket)}
-              </text>
+              {showLabel(index) && (
+                <text x={x + barWidth / 2} y={chartHeight + 12} textAnchor="middle" fontSize="8" fill="var(--text-muted)">
+                  {formatUTCBucketDate(item.bucket)}
+                </text>
+              )}
             </g>
           );
         })}
+        {drawCostLine && costPoints && (
+          <polyline
+            points={costPoints}
+            fill="none"
+            stroke="var(--info)"
+            strokeWidth="1.5"
+            strokeDasharray="3 2"
+          />
+        )}
       </svg>
       <div className="trend-legend" aria-hidden="true">
+        {drawCostLine && costCurrency && (
+          <span>
+            <span className="legend-swatch" style={{ background: "var(--info)" }} />{" "}
+            {t("dashboard.trend.costLine", { currency: costCurrency })}
+          </span>
+        )}
         <span><span className="legend-swatch" style={{ background: "var(--success)" }} /> {t("dashboard.trend.legendSucceeded")}</span>
         <span><span className="legend-swatch" style={{ background: "var(--danger)" }} /> {t("dashboard.trend.legendFailed")}</span>
         <span><span className="legend-swatch" style={{ background: "var(--attention)" }} /> {t("dashboard.trend.legendNeedsAttention")}</span>

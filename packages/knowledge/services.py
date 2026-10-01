@@ -18,7 +18,9 @@ from packages.knowledge.models import (
     Document,
     DocumentRevision,
     IngestionJob,
+    IngestionJobStatus,
     KnowledgeBase,
+    RevisionIngestionStatus,
 )
 from packages.knowledge.queue import IngestionQueue
 from packages.knowledge.upload_security import UploadSecurityError
@@ -171,6 +173,85 @@ class KnowledgeService:
             raise AgentHubError(
                 "DOCUMENT_UPLOAD_FAILED", "The document could not be recorded.", 409
             ) from exc
+        except Exception:
+            # Every other failure (connection drop, serialization error, ...)
+            # leaves the same orphaned blob behind: the bytes are on disk but
+            # no revision row references them. Roll back and delete before the
+            # error propagates, whatever the failure was.
+            await session.rollback()
+            await blob_store.delete(stored_blob.blob_key)
+            raise
+        try:
+            await queue.enqueue(job.id)
+        except Exception:
+            logger.warning(
+                "knowledge_ingestion_enqueue_failed",
+                extra={"job_id": str(job.id), "adapter": type(queue).__name__},
+            )
+        return document, revision, job
+
+    async def retry_document_ingestion(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        knowledge_base_id: UUID,
+        document_id: UUID,
+        queue: IngestionQueue,
+    ) -> tuple[Document, DocumentRevision, IngestionJob]:
+        """Requeue the latest revision's failed ingestion, in place.
+
+        A revision owns exactly one ingestion job (``uq_ingestion_jobs_revision``),
+        so a retry is a reset of that job to PENDING -- attempt count, lease and
+        backoff cleared -- never a second job. Without this the failure was terminal:
+        the only remedy was re-uploading the file blind.
+        """
+
+        self._require_permission(context, "knowledge_edit")
+        workspace_id = self._workspace_id(context)
+        document = await session.scalar(
+            select(Document).where(
+                Document.workspace_id == workspace_id,
+                Document.knowledge_base_id == knowledge_base_id,
+                Document.id == document_id,
+            )
+        )
+        if document is None:
+            self._not_found()
+        revision = await session.scalar(
+            select(DocumentRevision)
+            .where(
+                DocumentRevision.workspace_id == workspace_id,
+                DocumentRevision.document_id == document_id,
+            )
+            .order_by(DocumentRevision.revision_number.desc())
+            .limit(1)
+        )
+        if revision is None:
+            self._not_found()
+        job = await session.scalar(
+            select(IngestionJob).where(
+                IngestionJob.workspace_id == workspace_id,
+                IngestionJob.document_revision_id == revision.id,
+            )
+        )
+        if (
+            revision.ingestion_status != RevisionIngestionStatus.FAILED
+            or job is None
+            or job.status != IngestionJobStatus.FAILED
+        ):
+            raise AgentHubError(
+                "KNOWLEDGE_INGESTION_NOT_FAILED",
+                "Only a failed ingestion can be retried.",
+                409,
+            )
+        job.status = IngestionJobStatus.PENDING
+        job.attempt_count = 0
+        job.lease_token = None
+        job.lease_expires_at = None
+        job.next_attempt_at = None
+        revision.ingestion_status = RevisionIngestionStatus.PENDING
+        await session.commit()
         try:
             await queue.enqueue(job.id)
         except Exception:

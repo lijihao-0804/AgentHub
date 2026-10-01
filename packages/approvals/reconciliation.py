@@ -15,6 +15,15 @@ from packages.approvals.models import Approval
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 
+# A RUNNING run that has no pending approval and no checkpoint at all cannot
+# be resumed by anything: its worker died before the graph wrote its first
+# checkpoint. Once it is also older than this threshold it is migrated to
+# NEEDS_ATTENTION instead of being followed forever. The threshold is
+# deliberately far above the batch cutoff: a live run virtually always has a
+# checkpoint within seconds of starting, so only a genuinely dead run is
+# caught, never a slow model call.
+RUN_CHECKPOINT_MISSING_AFTER_SECONDS = 900
+
 
 class ApprovalReconciliationService:
     def __init__(
@@ -82,7 +91,11 @@ class ApprovalReconciliationService:
                 if approval.decision_status == ApprovalDecisionStatus.PENDING
             ]
             _apply_reconciliation_transition(
-                run, pending, checkpoint_exists, approvals=approvals
+                run,
+                pending,
+                checkpoint_exists,
+                approvals=approvals,
+                stale=_run_is_stale(run, now),
             )
             if run.status in {"NEEDS_ATTENTION", "CANCELLED"} and run.completed_at is None:
                 run.completed_at = now
@@ -176,7 +189,13 @@ class ApprovalReconciliationService:
                         for approval in pending
                         if approval.decision_status == ApprovalDecisionStatus.PENDING
                     ]
-                    _apply_reconciliation_transition(run, pending, exists, approvals=approvals)
+                    _apply_reconciliation_transition(
+                        run,
+                        pending,
+                        exists,
+                        approvals=approvals,
+                        stale=_run_is_stale(run, now),
+                    )
                     if run.status in {"NEEDS_ATTENTION", "CANCELLED"} and run.completed_at is None:
                         run.completed_at = now
                     changed = (
@@ -204,6 +223,7 @@ def _apply_reconciliation_transition(
     checkpoint_exists: bool,
     *,
     approvals: list[Approval] | None = None,
+    stale: bool = False,
 ) -> None:
     if run.status == "RUNNING" and pending:
         if not checkpoint_exists:
@@ -211,6 +231,12 @@ def _apply_reconciliation_transition(
             run.failure_code = "APPROVAL_CHECKPOINT_MISSING"
         else:
             run.status = "WAITING_APPROVAL"
+    if run.status == "RUNNING" and stale and not checkpoint_exists:
+        # No pending approval, no checkpoint, and no progress for longer than
+        # the zombie threshold: nothing can resume this run, so it must not
+        # stay RUNNING (and keep stream followers polling) forever.
+        run.status = "NEEDS_ATTENTION"
+        run.failure_code = "RUN_CHECKPOINT_MISSING"
     if run.status == "WAITING_APPROVAL" and not checkpoint_exists:
         run.status = "NEEDS_ATTENTION"
         run.failure_code = "APPROVAL_CHECKPOINT_MISSING"
@@ -220,6 +246,13 @@ def _apply_reconciliation_transition(
     ):
         run.status = "NEEDS_ATTENTION"
         run.failure_code = "ACTION_RECONCILIATION_REQUIRED"
+
+
+def _run_is_stale(run: AgentRun, now: datetime) -> bool:
+    if run.started_at is None:
+        return False
+    started_at = run.started_at if run.started_at.tzinfo else run.started_at.replace(tzinfo=UTC)
+    return started_at <= now - timedelta(seconds=RUN_CHECKPOINT_MISSING_AFTER_SECONDS)
 
 
 async def _append_reconciliation_step(
@@ -259,6 +292,8 @@ def _reconciliation_reason(run: AgentRun, expired_count: int) -> str:
         return "approval_expired"
     if run.failure_code == "APPROVAL_CHECKPOINT_MISSING":
         return "checkpoint_missing"
+    if run.failure_code == "RUN_CHECKPOINT_MISSING":
+        return "orphan_running_reconciliation"
     if run.failure_code == "ACTION_RECONCILIATION_REQUIRED":
         return "claimed_action_reconciliation"
     if run.status == "WAITING_APPROVAL":

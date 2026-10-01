@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import Breadcrumbs from "@/components/layout/breadcrumbs";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
@@ -9,7 +9,17 @@ import TechnicalDetails from "@/components/ui/technical-details";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData } from "@/hooks/use-workspace-data";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
-import { getAgentVersion, type AgentVersion } from "@/lib/api/agents";
+import {
+  deriveAgentDraft,
+  getAgentVersion,
+  type KnowledgeBindingMode,
+  type ModelRetryPolicy,
+  type RetrievalConfig,
+  type RuntimeConfig,
+  patchAgent,
+  type AgentDeriveResult,
+  type AgentVersion,
+} from "@/lib/api/agents";
 import { useI18n } from "@/i18n/provider";
 
 /**
@@ -24,7 +34,7 @@ export default function AgentVersionDetailClient({
   versionId: string;
 }) {
   const { t, formatDateTime } = useI18n();
-  const { connected, workspaceId } = useFrontendSession();
+  const { connected, workspaceId, accessToken } = useFrontendSession();
 
   // One version is fetched by id: the page never downloads the whole
   // version list only to search it in the browser.
@@ -36,6 +46,51 @@ export default function AgentVersionDetailClient({
     load,
     `agent-version:${workspaceId}:${agentId}:${versionId}`,
   );
+
+  const [derive, setDerive] = useState<AgentDeriveResult | null>(null);
+  const [deriving, setDeriving] = useState(false);
+  const [deriveError, setDeriveError] = useState<string | null>(null);
+  const [applied, setApplied] = useState(false);
+
+  async function runDerive() {
+    setDeriving(true);
+    setDeriveError(null);
+    setApplied(false);
+    try {
+      setDerive(await deriveAgentDraft({ workspaceId, accessToken }, agentId, versionId));
+    } catch {
+      setDeriveError("derive-failed");
+    } finally {
+      setDeriving(false);
+    }
+  }
+
+  async function applyDerive() {
+    if (!derive) return;
+    setDeriving(true);
+    setDeriveError(null);
+    try {
+      const values = derive.values;
+      await patchAgent({ workspaceId, accessToken }, agentId, {
+        system_prompt: values.system_prompt ?? "",
+        prompt_version: values.prompt_version ?? 1,
+        model_profile_id: values.model_profile_id ?? "",
+        ...(values.knowledge_binding_mode
+          ? { knowledge_binding_mode: values.knowledge_binding_mode as KnowledgeBindingMode }
+          : {}),
+        ...(values.model_retry_policy
+          ? { model_retry_policy: values.model_retry_policy as ModelRetryPolicy }
+          : {}),
+        ...(values.retrieval_config ? { retrieval_config: values.retrieval_config as RetrievalConfig } : {}),
+        ...(values.runtime_config ? { runtime_config: values.runtime_config as RuntimeConfig } : {}),
+      });
+      setApplied(true);
+    } catch {
+      setDeriveError("apply-failed");
+    } finally {
+      setDeriving(false);
+    }
+  }
 
   if (!connected) {
     return (
@@ -75,7 +130,46 @@ export default function AgentVersionDetailClient({
         >
           {t("agents.versionDiff.entry")}
         </Link>
+        <button type="button" className="button button-primary" onClick={() => void runDerive()} disabled={deriving}>
+          {deriving ? t("agents.derive.working") : t("agents.derive.entry")}
+        </button>
       </div>
+
+      {deriveError && (
+        <p className="inline-error" role="alert">
+          {deriveError === "apply-failed" ? t("agents.derive.applyFailed") : t("agents.derive.failed")}
+        </p>
+      )}
+      {applied && <p className="inline-notice" role="status">{t("agents.derive.applied")}</p>}
+      {derive && (
+        <Panel ariaLabel={t("agents.derive.title")} title={t("agents.derive.title")} eyebrow={t("agents.derive.eyebrow")}>
+          <p className="state-hint">
+            {t("agents.derive.note", {
+              version: `v${derive.source_version_number}`,
+              hash: derive.source_resolved_spec_hash.slice(0, 8),
+            })}
+          </p>
+          <div className="approval-split">
+            <div className="approval-state-block">
+              <span className="approval-state-label">{t("agents.derive.systemPrompt")}</span>
+              <p className="state-hint">{derive.values.system_prompt}</p>
+            </div>
+            <div className="approval-state-block">
+              <span className="approval-state-label">{t("agents.derive.modelProfile")}</span>
+              <code>{derive.values.model_profile_id}</code>
+            </div>
+          </div>
+          <TechnicalDetails summary={t("common.technicalDetails")} value={derive.values} />
+          <div className="form-actions">
+            <button type="button" className="button button-primary" onClick={() => void applyDerive()} disabled={deriving}>
+              {t("agents.derive.apply")}
+            </button>
+            <button type="button" className="button button-ghost" onClick={() => setDerive(null)} disabled={deriving}>
+              {t("common.cancel")}
+            </button>
+          </div>
+        </Panel>
+      )}
 
       <Panel ariaLabel={t("agents.versionDetail")} title={t("agents.resolvedSpec")}>
         {versions.error && (

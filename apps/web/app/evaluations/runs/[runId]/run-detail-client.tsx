@@ -20,7 +20,7 @@ import {
 } from "@/lib/api/evaluation";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useI18n } from "@/i18n/provider";
-import RunWorkflow from "@/app/evaluations/runs/[runId]/workflow-sections";
+import RunWorkflow, { RunCaseResults } from "@/app/evaluations/runs/[runId]/workflow-sections";
 
 const POLL_INTERVAL_MS = 2500;
 
@@ -289,6 +289,11 @@ export default function RunDetailClient({ runId }: { runId: string }) {
             run={run}
             variants={experiment?.variants ?? []}
             terminal={terminal}
+          />
+          <RunCaseResults
+            input={{ workspaceId, accessToken, sessionId }}
+            runId={run.id}
+            variants={experiment?.variants ?? []}
           />
         </>
       )}

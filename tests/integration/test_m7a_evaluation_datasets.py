@@ -160,9 +160,14 @@ async def test_m7a_workspace_isolation_and_viewer_read(db_factory) -> None:
             items=[_item()],
         )
 
-        assert await service.list_datasets(
-            session, context=_viewer_context(owner)
+        page, total = await service.list_datasets(
+            session, context=_viewer_context(owner), limit=10, offset=0
         )
+        assert total >= 1 and any(item.id == dataset.id for item in page)
+        empty_page, empty_total = await service.list_datasets(
+            session, context=_viewer_context(owner), limit=10, offset=total
+        )
+        assert empty_page == [] and empty_total == total
         with pytest.raises(AgentHubError) as raised:
             await service.get_dataset(
                 session,

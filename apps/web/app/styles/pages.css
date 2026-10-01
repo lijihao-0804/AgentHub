@@ -344,6 +344,7 @@ a.stat-row:hover { border-color: var(--accent); }
   text-transform: uppercase;
 }
 .approval-state-meta { color: var(--text-muted); font-size: 0.78rem; overflow-wrap: anywhere; }
+.approval-state-expiring { color: var(--warning); font-weight: 600; }
 .approval-facts { display: grid; gap: var(--space-2); }
 .approval-facts .state-hint code { color: var(--text); }
 .approval-actions { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-2); }

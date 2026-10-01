@@ -121,6 +121,35 @@ export function patchAgent(input: AuthInput, agentId: string, body: AgentPatchIn
   );
 }
 
+export type AgentDeriveResult = {
+  source_version_id: string;
+  source_version_number: number;
+  source_resolved_spec_hash: string;
+  values: {
+    system_prompt: string | null;
+    prompt_version: number | null;
+    model_profile_id: string | null;
+    knowledge_binding_mode: string | null;
+    model_retry_policy: unknown;
+    retrieval_config: unknown;
+    runtime_config: unknown;
+  };
+};
+
+/** Draft-shaped values extracted from a published version; applying them goes
+ * through the normal (fully validated) draft update path. */
+export function deriveAgentDraft(
+  input: AuthInput,
+  agentId: string,
+  versionId: string,
+): Promise<AgentDeriveResult> {
+  return apiRequest<AgentDeriveResult>(
+    `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/versions/${encodeURIComponent(versionId)}/derive`,
+    input.accessToken,
+    { method: "POST" },
+  );
+}
+
 export function publishAgent(input: AuthInput, agentId: string): Promise<AgentPublishResult> {
   return apiRequest<AgentPublishResult>(
     `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/publish`,

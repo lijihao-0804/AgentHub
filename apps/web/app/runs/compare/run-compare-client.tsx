@@ -13,7 +13,10 @@ import { getAgentRun, type AgentRun } from "@/lib/api/agent-runtime";
 import {
   getRunDetail,
   getRunTimeline,
+  listRuns,
   type RunDetail,
+  type RunListItem,
+  type RunListResponse,
   type RunTimelineEntry,
 } from "@/lib/api/runs";
 import { useI18n } from "@/i18n/provider";
@@ -70,13 +73,28 @@ function toolIdentity(entry: RunTimelineEntry): string | null {
  * which output is better is what Evaluation exists for.
  */
 export default function RunCompareClient() {
-  const { t, timelineKindLabel, formatNumber, formatDurationMs, formatCurrencyAmount } = useI18n();
-  const { connected, workspaceId, sessionId } = useFrontendSession();
+  const { t, statusLabel, formatDateTime, timelineKindLabel, formatNumber, formatDurationMs, formatCurrencyAmount } =
+    useI18n();
+  const { connected, workspaceId, sessionId, accessToken } = useFrontendSession();
 
   const [leftId, setLeftId] = useState("");
   const [rightId, setRightId] = useState("");
   const [leftDraft, setLeftDraft] = useState("");
   const [rightDraft, setRightDraft] = useState("");
+
+  const loadRecent = useCallback(
+    (auth: AuthInput) => listRuns({ workspaceId: auth.workspaceId, accessToken: auth.accessToken, limit: 20 }),
+    [],
+  );
+  const recent = useWorkspaceData<RunListResponse>(
+    loadRecent,
+    connected ? `run-compare-recent:${workspaceId}` : "",
+    { enabled: connected },
+  );
+
+  function recentLabel(run: RunListItem): string {
+    return `${statusLabel(run.status)} · v${run.agent_version_number} · ${formatDateTime(run.created_at)} · ${shortId(run.id)}`;
+  }
 
   // The URL query is the whole persistence story: no comparison record is
   // created anywhere.
@@ -243,6 +261,20 @@ export default function RunCompareClient() {
         <div className="form-grid compare-selectors">
           <label>
             {t("runCompare.left")} · {t("runCompare.runIdLabel")}
+            <select
+              value=""
+              onChange={(event) => {
+                if (event.target.value) setLeftDraft(event.target.value);
+              }}
+              aria-label={t("runCompare.pickRecent")}
+            >
+              <option value="">{t("runCompare.pickRecent")}</option>
+              {(recent.data?.items ?? []).map((run) => (
+                <option value={run.id} key={run.id}>
+                  {recentLabel(run)}
+                </option>
+              ))}
+            </select>
             <input
               value={leftDraft}
               onChange={(event) => setLeftDraft(event.target.value)}
@@ -251,6 +283,20 @@ export default function RunCompareClient() {
           </label>
           <label>
             {t("runCompare.right")} · {t("runCompare.runIdLabel")}
+            <select
+              value=""
+              onChange={(event) => {
+                if (event.target.value) setRightDraft(event.target.value);
+              }}
+              aria-label={t("runCompare.pickRecent")}
+            >
+              <option value="">{t("runCompare.pickRecent")}</option>
+              {(recent.data?.items ?? []).map((run) => (
+                <option value={run.id} key={run.id}>
+                  {recentLabel(run)}
+                </option>
+              ))}
+            </select>
             <input
               value={rightDraft}
               onChange={(event) => setRightDraft(event.target.value)}

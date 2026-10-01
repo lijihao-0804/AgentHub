@@ -10,12 +10,16 @@ import { useI18n } from "@/i18n/provider";
 
 /** Backend contract: password is 8–128 characters. */
 const MIN_PASSWORD_LENGTH = 8;
+/** Pragmatic email shape: one @, non-empty halves, no spaces. The server
+ * remains the authority; this just keeps obviously wrong input local. */
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function RegisterPage() {
   const { t } = useI18n();
   const { signUp } = useFrontendSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<ApiError | null>(null);
   // Held apart from `error`: these rules are checked here, before anything is
   // sent, so there is no error code behind them and none should be shown.
@@ -30,8 +34,16 @@ export default function RegisterPage() {
       setInvalid(t("auth.requiredFields"));
       return;
     }
+    if (!EMAIL_PATTERN.test(email.trim())) {
+      setInvalid(t("auth.emailInvalid"));
+      return;
+    }
     if (password.length < MIN_PASSWORD_LENGTH) {
       setInvalid(t("auth.passwordTooShort"));
+      return;
+    }
+    if (password !== confirmPassword) {
+      setInvalid(t("auth.passwordMismatch"));
       return;
     }
     setSubmitting(true);
@@ -75,6 +87,15 @@ export default function RegisterPage() {
             onChange={(event) => setPassword(event.target.value)}
           />
           <span className="state-hint">{t("auth.passwordHint")}</span>
+        </label>
+        <label>
+          {t("auth.confirmPassword")}
+          <input
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+          />
         </label>
         {invalid && (
           <p className="inline-error" role="alert">

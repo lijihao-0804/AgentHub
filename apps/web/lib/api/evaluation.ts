@@ -82,8 +82,21 @@ export type EvaluationDatasetVersionFromRunInput = {
   tags: string[];
 };
 
-export function listDatasets(input: AuthInput): Promise<EvaluationDataset[]> {
-  return get(input, "/datasets");
+export type EvaluationDatasetList = { items: EvaluationDataset[]; total: number };
+
+export async function getDataset(input: AuthInput, datasetId: string): Promise<EvaluationDataset> {
+  return get(input, `/datasets/${encodeURIComponent(datasetId)}`);
+}
+
+export function listDatasets(
+  input: AuthInput,
+  query: { limit?: number; offset?: number } = {},
+): Promise<EvaluationDatasetList> {
+  const params = new URLSearchParams();
+  if (query.limit !== undefined) params.set("limit", String(query.limit));
+  if (query.offset !== undefined) params.set("offset", String(query.offset));
+  const suffix = params.toString() ? `?${params.toString()}` : "";
+  return get(input, `/datasets${suffix}`);
 }
 
 export function createDataset(
@@ -177,6 +190,9 @@ export type EvaluationExperimentVariant = {
   experiment_id: string;
   label: string;
   agent_version_id: string;
+  // Filled by the backend from the AgentVersion table; the gate→publish
+  // bridge links through it.
+  agent_id: string | null;
   resolved_spec_hash: string;
   pricing_snapshot_id: string;
   pricing_snapshot_hash: string;
@@ -192,6 +208,7 @@ export type EvaluationExperiment = {
   workspace_id: string;
   name: string;
   description: string | null;
+  dataset_id: string;
   dataset_version_id: string;
   dataset_content_hash: string;
   dataset_schema_version: number;
@@ -213,8 +230,17 @@ export type EvaluationExperimentDetail = EvaluationExperiment & {
   variants: EvaluationExperimentVariant[];
 };
 
-export function listExperiments(input: AuthInput): Promise<EvaluationExperiment[]> {
-  return get(input, "/experiments");
+export type EvaluationExperimentList = { items: EvaluationExperiment[]; total: number };
+
+export function listExperiments(
+  input: AuthInput,
+  query: { limit?: number; offset?: number } = {},
+): Promise<EvaluationExperimentList> {
+  const params = new URLSearchParams();
+  if (query.limit !== undefined) params.set("limit", String(query.limit));
+  if (query.offset !== undefined) params.set("offset", String(query.offset));
+  const suffix = params.toString() ? `?${params.toString()}` : "";
+  return get(input, `/experiments${suffix}`);
 }
 
 export function getExperiment(input: AuthInput, experimentId: string): Promise<EvaluationExperimentDetail> {
@@ -301,8 +327,62 @@ export function getExperimentRunProgress(
   return get(input, `/experiment-runs/${encodeURIComponent(runId)}/progress`);
 }
 
+export function listExperimentRuns(
+  input: AuthInput,
+  experimentId: string,
+): Promise<EvaluationExperimentRun[]> {
+  return get(input, `/experiments/${encodeURIComponent(experimentId)}/runs`);
+}
+
 export function startExperimentRun(input: AuthInput, experimentId: string): Promise<EvaluationExperimentRun> {
   return post(input, `/experiments/${encodeURIComponent(experimentId)}/runs`);
+}
+
+// ---------- Per-case results ----------
+
+export type EvaluationCaseResult = {
+  id: string;
+  workspace_id: string;
+  experiment_run_id: string;
+  experiment_variant_id: string;
+  dataset_item_id: string;
+  repetition_index: number;
+  case_execution_key: string;
+  status: string;
+  agent_run_id: string | null;
+  latency_ms: number | null;
+  input_tokens: number | null;
+  output_tokens: number | null;
+  total_tokens: number | null;
+  cached_tokens: number | null;
+  cost_amount: number | string | null;
+  cost_currency: string | null;
+  failure_code: string | null;
+  observed_agent_status: string | null;
+  observed_agent_failure_code: string | null;
+  safe_failure_message: string | null;
+  observation: Record<string, unknown>;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+};
+
+export type EvaluationCaseResultList = {
+  total: number;
+  items: EvaluationCaseResult[];
+};
+
+export function listExperimentRunCaseResults(
+  input: AuthInput,
+  runId: string,
+  options?: { status?: string; limit?: number; offset?: number },
+): Promise<EvaluationCaseResultList> {
+  const query = new URLSearchParams();
+  if (options?.status) query.set("status", options.status);
+  if (options?.limit) query.set("limit", String(options.limit));
+  if (options?.offset) query.set("offset", String(options.offset));
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return get(input, `/experiment-runs/${encodeURIComponent(runId)}/case-results${suffix}`);
 }
 
 // ---------- Metric snapshots ----------

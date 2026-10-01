@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import StatusBadge from "@/components/ui/status-badge";
+import { riskTone } from "@/components/ui/badge-tones";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
@@ -16,20 +17,6 @@ import {
   type ToolCatalogItem,
 } from "@/lib/api/tools";
 import { useI18n } from "@/i18n/provider";
-
-/** Effect and risk are server facts; the UI only colours what it is told. */
-function riskTone(risk: string | null | undefined): "neutral" | "info" | "warning" | "danger" {
-  switch ((risk ?? "").toUpperCase()) {
-    case "LOW":
-      return "info";
-    case "MEDIUM":
-      return "warning";
-    case "HIGH":
-      return "danger";
-    default:
-      return "neutral";
-  }
-}
 
 export default function ToolsPage() {
   const { t } = useI18n();
@@ -99,6 +86,12 @@ export default function ToolsPage() {
       </header>
 
       {notice && <p className="inline-notice">{notice}</p>}
+
+      <div className="page-toolbar">
+        <Link className="button button-ghost" href="/tools/mcp">
+          {t("tools.mcp.entry")}
+        </Link>
+      </div>
 
       <Panel ariaLabel={t("tools.workspaceTools")} title={t("tools.workspaceTools")}>
         {tools.error && (

@@ -30,6 +30,50 @@ function initialPricingForm() {
   };
 }
 
+type PricingValidationKey =
+  | "evaluation.pricing.validation.required"
+  | "evaluation.pricing.validation.currency"
+  | "evaluation.pricing.validation.price"
+  | "evaluation.pricing.validation.effectiveAt"
+  | "evaluation.pricing.validation.length";
+
+function validatePricingForm(form: ReturnType<typeof initialPricingForm>): PricingValidationKey | null {
+  if (
+    !form.name.trim() ||
+    !form.provider.trim() ||
+    !form.model.trim() ||
+    !form.inputPrice.trim() ||
+    !form.outputPrice.trim() ||
+    !form.effectiveAt.trim() ||
+    !form.sourceNote.trim()
+  ) {
+    return "evaluation.pricing.validation.required";
+  }
+  if (
+    form.name.trim().length > 200 ||
+    form.provider.trim().length > 100 ||
+    form.model.trim().length > 200 ||
+    form.sourceNote.trim().length > 4_000
+  ) {
+    return "evaluation.pricing.validation.length";
+  }
+  if (!/^[a-z]{3}$/i.test(form.currency.trim())) {
+    return "evaluation.pricing.validation.currency";
+  }
+  const validPrice = (value: string) => /^(?:\d{1,12}(?:\.\d{0,8})?|\.\d{1,8})$/.test(value.trim());
+  if (
+    !validPrice(form.inputPrice) ||
+    !validPrice(form.outputPrice) ||
+    (form.cachedPrice.trim() !== "" && !validPrice(form.cachedPrice))
+  ) {
+    return "evaluation.pricing.validation.price";
+  }
+  if (!Number.isFinite(Date.parse(form.effectiveAt))) {
+    return "evaluation.pricing.validation.effectiveAt";
+  }
+  return null;
+}
+
 export default function EvaluationPricingPage() {
   const { t, formatDateTime } = useI18n();
   const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
@@ -42,6 +86,7 @@ export default function EvaluationPricingPage() {
   const [form, setForm] = useState(initialPricingForm);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<ApiError | null>(null);
+  const [validationError, setValidationError] = useState<PricingValidationKey | null>(null);
   const [createdNotice, setCreatedNotice] = useState(false);
   const activeSessionRef = useRef(sessionId);
   activeSessionRef.current = sessionId;
@@ -55,6 +100,7 @@ export default function EvaluationPricingPage() {
     setForm(initialPricingForm());
     setCreating(false);
     setCreateError(null);
+    setValidationError(null);
     setCreatedNotice(false);
   }, [sessionId]);
 
@@ -83,12 +129,19 @@ export default function EvaluationPricingPage() {
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((current) => ({ ...current, [key]: value }));
+    setValidationError(null);
   }
 
   /** Prices are submitted as strings so the backend Decimal parses them exactly. */
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setCreateError(null);
+    const validation = validatePricingForm(form);
+    if (validation) {
+      setValidationError(validation);
+      return;
+    }
+    setValidationError(null);
     const requestSessionId = sessionId;
     setCreating(true);
     try {
@@ -105,6 +158,7 @@ export default function EvaluationPricingPage() {
       });
       if (activeSessionRef.current !== requestSessionId) return;
       setForm((current) => ({ ...current, name: "", provider: "", model: "", inputPrice: "", outputPrice: "", cachedPrice: "", sourceNote: "" }));
+      setValidationError(null);
       setShowForm(false);
       setCreatedNotice(true);
       await refresh();
@@ -225,6 +279,7 @@ export default function EvaluationPricingPage() {
                 />
               </label>
             </div>
+            {validationError && <p className="inline-error" role="alert">{t(validationError)}</p>}
             <InlineError error={createError} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button type="submit" className="button button-primary" disabled={creating}>

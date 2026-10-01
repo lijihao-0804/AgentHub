@@ -51,7 +51,10 @@ export default function AppThreadShell({
   children: (context: AppThreadContext) => ReactNode;
 }) {
   const { t, formatDateTime } = useI18n();
-  const { connected, sessionId, workspaceId } = useFrontendSession();
+  const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
+  // Deleting a thread runs through the run-scoped permission; a viewer sees
+  // the control disabled instead of discovering the 403 by submit.
+  const cannotDelete = permissions !== null && !permissions.includes("agent_run");
   const router = useRouter();
 
   const scope = `${copy.basePath}:${workspaceId}:${threadId}`;
@@ -241,10 +244,12 @@ export default function AppThreadShell({
                     type="button"
                     className="button button-ghost"
                     onClick={() => setConfirmDelete(true)}
-                    disabled={!current}
+                    disabled={!current || cannotDelete}
+                    title={cannotDelete ? t("appThread.noPermissionHint") : undefined}
                   >
                     {t("appThread.threads.delete")}
                   </button>
+                  {cannotDelete && <span className="state-hint" role="note">{t("appThread.noPermissionHint")}</span>}
                 </div>
               )}
 

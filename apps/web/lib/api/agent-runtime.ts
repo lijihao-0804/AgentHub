@@ -81,6 +81,7 @@ export function createAgentRun(
  * CANCEL_REQUESTED — that is a request in flight, not a cancelled run.
  */
 export function cancelAgentRun(input: AuthInput, runId: string): Promise<AgentRun> {
+  // apiRequest uses the session provider's single-flight 401 refresh/replay.
   return apiRequest<AgentRun>(
     `${runtimeBase(input.workspaceId)}/agent-runs/${encodeURIComponent(runId)}/cancel`,
     input.accessToken,
@@ -357,6 +358,56 @@ export async function followAgentRun(
   });
 
   await consumeEventStream(response, options.onEvent);
+}
+
+/**
+ * Submits a thread turn and streams the run that answers it.
+ *
+ * Same event contract as the playground stream (the backend streams the run
+ * it started, framed identically), with one addition: the run and turn ids
+ * arrive as response headers before the first frame, so the caller can offer
+ * "stop" while the answer is still streaming. Reaching end-of-stream is not
+ * an error — the backend closes the stream when the run pauses for approval
+ * as well as when it ends, and the authoritative turn is re-read afterwards.
+ * This SSE fetch does not use apiRequest's 401 replay; access-token refresh is
+ * managed by the session provider and stream errors remain visible to callers.
+ */
+export async function streamThreadTurn(
+  input: AuthInput,
+  options: {
+    threadId: string;
+    inputText: string;
+    clientToken?: string;
+    signal: AbortSignal;
+    onStarted?: (runId: string | null, turnId: string | null) => void;
+    onEvent: (event: AgentEvent) => void;
+  },
+): Promise<{ runId: string | null; turnId: string | null }> {
+  const authorization = bearer(input);
+  const path =
+    `${runtimeBase(input.workspaceId)}/threads/` +
+    `${encodeURIComponent(options.threadId)}/turns/stream`;
+
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: authorization,
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      input_text: options.inputText,
+      ...(options.clientToken ? { client_token: options.clientToken } : {}),
+    }),
+    signal: options.signal,
+  });
+
+  const runId = response.headers.get("X-AgentHub-Run-Id");
+  const turnId = response.headers.get("X-AgentHub-Turn-Id");
+  options.onStarted?.(runId, turnId);
+  await consumeEventStream(response, options.onEvent);
+  return { runId, turnId };
 }
 
 /** Reads a string field from an event payload, rejecting other shapes. */

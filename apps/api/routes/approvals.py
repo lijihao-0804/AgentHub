@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
 
 from apps.api.agent_runtime_dependencies import get_production_agent_run_service
 from apps.api.knowledge_dependencies import get_workspace_context
-from apps.api.schemas.approvals import ApprovalDecisionResponse, ApprovalResponse
+from apps.api.schemas.approvals import (
+    ApprovalDecisionResponse,
+    ApprovalDenyRequest,
+    ApprovalListResponse,
+    ApprovalResponse,
+)
 from packages.agent_runtime.runtime import AgentRunService
 from packages.approvals import ApprovalDecisionStatus, ApprovalService
 from packages.core.execution_context.models import WorkspaceExecutionContext
@@ -28,15 +34,21 @@ def _agent_run_service(request: Request) -> AgentRunService:
     return get_production_agent_run_service(request)
 
 
-@router.get("/approvals", response_model=list[ApprovalResponse])
+@router.get("/approvals", response_model=ApprovalListResponse)
 async def list_approvals(
     workspace_id: UUID,
     request: Request,
+    decision: Literal["PENDING", "DECIDED"] | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
     context: WorkspaceExecutionContext = context_dependency,
-) -> list[ApprovalResponse]:
+) -> ApprovalListResponse:
     del workspace_id
-    approvals = await _approval_service(request).list(context)
-    return [ApprovalResponse.model_validate(approval) for approval in approvals]
+    items, total = await _approval_service(request).list_page(context, decision, limit, offset)
+    return ApprovalListResponse(
+        items=[ApprovalResponse.model_validate(approval) for approval in items],
+        total=total,
+    )
 
 
 @router.get("/approvals/{approval_id}", response_model=ApprovalResponse)
@@ -86,11 +98,17 @@ async def deny_approval(
     workspace_id: UUID,
     approval_id: UUID,
     request: Request,
+    payload: ApprovalDenyRequest | None = None,
     context: WorkspaceExecutionContext = context_dependency,
 ) -> ApprovalDecisionResponse:
     del workspace_id
     approvals = _approval_service(request)
-    approval = await approvals.decide(context, approval_id, decision=ApprovalDecisionStatus.DENIED)
+    approval = await approvals.decide(
+        context,
+        approval_id,
+        decision=ApprovalDecisionStatus.DENIED,
+        reason=payload.reason if payload is not None else None,
+    )
     result = await _agent_run_service(request).resume(
         context, run_id=approval.run_id, approval_id=approval.id
     )

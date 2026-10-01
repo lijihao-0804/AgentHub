@@ -302,14 +302,20 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
         case "tool.started":
           pushActivity({ key, label: t("agents.playground.toolStarted"), meta: toolMeta() });
           break;
-        case "tool.completed":
+        case "tool.completed": {
+          const toolStatus = payloadString(payload, "status") ?? undefined;
           pushActivity({
             key,
             label: t("agents.playground.toolCompleted"),
-            status: payloadString(payload, "status") ?? undefined,
-            meta: [...toolMeta(), ...durationMeta()],
+            status: toolStatus,
+            meta: [
+              ...toolMeta(),
+              ...durationMeta(),
+              ...(toolStatus === "UNKNOWN_OUTCOME" ? [t("agents.playground.unknownOutcome")] : []),
+            ],
           });
           break;
+        }
         case "tool.failed": {
           const code = payloadString(payload, "error_code");
           pushActivity({
@@ -458,6 +464,13 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
         const refused = caught instanceof ApiError && caught.status >= 400;
         if (observed.id === null || refused || attempt > MAX_FOLLOW_ATTEMPTS) {
           setStreaming(false);
+          if (observed.id === null) {
+            // The stream never produced a run, so there is nothing to
+            // track: leaving the RUNNING badge up (with its refresh button,
+            // which is a no-op without a run id) would promise progress
+            // that does not exist.
+            setRunStatus(null);
+          }
           setError(toApiError(caught, t("errors.requestFailed")));
           return;
         }
@@ -671,6 +684,9 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
       </header>
 
       <div className="page-toolbar">
+        <Link className="button button-ghost" href={`/agents/${agentId}/chat`}>
+          {t("agents.chat.entry")}
+        </Link>
         {runId && (
           <Link className="button button-ghost" href={`/runs/${encodeURIComponent(runId)}`}>
             {t("agents.playground.openRunDetail")}
@@ -695,6 +711,12 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
           runStatus ? (
             <>
               <StatusBadge status={runStatus} />
+              {runStatus === "NEEDS_ATTENTION" && (
+                <span className="inline-notice" role="status">
+                  {t("agents.playground.needsAttentionNotice")}{" "}
+                  <Link href="/approvals">{t("agents.playground.openApprovals")}</Link>
+                </span>
+              )}
               {recovered && <span className="state-hint">{t("agents.playground.recoveredRun")}</span>}
             </>
           ) : undefined
@@ -772,7 +794,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
                   {t("agents.playground.cancel")}
                 </button>
               )}
-              {runStatus === "RUNNING" && !streaming && (
+              {runStatus === "RUNNING" && !streaming && runId && (
                 <button
                   type="button"
                   className="button button-ghost"

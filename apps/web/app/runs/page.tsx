@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, SessionRequired } from "@/components/ui/states";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
+import { Agent, AgentVersion, listAgents, listAgentVersions } from "@/lib/api/agents";
 import { listRuns, RunListItem } from "@/lib/api/runs";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useI18n } from "@/i18n/provider";
@@ -20,6 +21,10 @@ const RUN_STATUS_OPTIONS = [
   "CANCELLED",
 ];
 
+/** Statuses whose rows go stale fast enough to justify auto-refresh. */
+const ACTIVE_RUN_STATUSES = new Set(["RUNNING", "WAITING_APPROVAL", "CANCEL_REQUESTED"]);
+const RUNS_POLL_MS = 5000;
+
 function shortId(id: string): string {
   return `${id.slice(0, 8)}…`;
 }
@@ -30,6 +35,11 @@ export default function RunsPage() {
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [status, setStatus] = useState("");
   const [agentVersionId, setAgentVersionId] = useState("");
+  /** Draft filter picks; the applied version id stays `agentVersionId`. */
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentVersions, setAgentVersions] = useState<AgentVersion[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState("");
+  const [selectedVersionId, setSelectedVersionId] = useState("");
   const [runs, setRuns] = useState<RunListItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
@@ -37,13 +47,18 @@ export default function RunsPage() {
   const [initialLoaded, setInitialLoaded] = useState(false);
   // null until the URL has been read; the first load waits for it.
   const [urlFilters, setUrlFilters] = useState<{ status: string; agentVersionId: string } | null>(null);
+  /** Generation of the latest list request; stale responses never land. */
+  const generationRef = useRef(0);
+  /** While the user has paged deeper, a poll must not collapse to page one. */
+  const pagedRef = useRef(false);
 
   const refresh = useCallback(
     async (cursor: string | null = null, overrides?: { status?: string; agentVersionId?: string }) => {
-      setError(null);
       if (!connected) return;
       const effectiveStatus = overrides?.status ?? status;
       const effectiveVersion = overrides?.agentVersionId ?? agentVersionId;
+      const generation = (generationRef.current += 1);
+      pagedRef.current = cursor !== null;
       setLoading(true);
       try {
         const result = await listRuns({
@@ -54,12 +69,15 @@ export default function RunsPage() {
           cursor,
           limit: 25,
         });
+        if (generationRef.current !== generation) return;
         setRuns((current) => (cursor ? [...current, ...result.items] : result.items));
         setNextCursor(result.next_cursor);
+        setError(null);
       } catch (caught) {
+        if (generationRef.current !== generation) return;
         setError(toApiError(caught, ""));
       } finally {
-        setLoading(false);
+        if (generationRef.current === generation) setLoading(false);
       }
     },
     [connected, workspaceId, accessToken, status, agentVersionId],
@@ -94,19 +112,82 @@ export default function RunsPage() {
     if (!connected) setInitialLoaded(false);
   }, [connected]);
 
+  // The version filter is a pick list, not a hand-typed UUID: load the agent
+  // roster once per workspace. Failure degrades silently — the raw id stays
+  // in the deep link and the selects simply stay empty.
+  useEffect(() => {
+    if (!connected || !accessToken) {
+      setAgents([]);
+      return;
+    }
+    let cancelled = false;
+    listAgents({ workspaceId, accessToken })
+      .then((items) => {
+        if (!cancelled) setAgents(items);
+      })
+      .catch(() => {
+        if (!cancelled) setAgents([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [connected, workspaceId, accessToken]);
+
+  useEffect(() => {
+    if (!selectedAgentId || !connected || !accessToken) {
+      setAgentVersions([]);
+      return;
+    }
+    let cancelled = false;
+    listAgentVersions({ workspaceId, accessToken }, selectedAgentId)
+      .then((items) => {
+        if (!cancelled) setAgentVersions(items);
+      })
+      .catch(() => {
+        if (!cancelled) setAgentVersions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [connected, workspaceId, accessToken, selectedAgentId]);
+
+  // A deep-linked version id has to show up as the picked option even before
+  // the agent behind it is known.
+  useEffect(() => {
+    if (agentVersionId && !selectedVersionId) setSelectedVersionId(agentVersionId);
+  }, [agentVersionId, selectedVersionId]);
+
+  // Runs in flight go stale fast: poll page one while any visible row is
+  // active and the tab is visible. Paging deeper pauses the poll so a refresh
+  // cannot collapse the list back to its first page.
+  const hasActiveRows = runs.some((run) => ACTIVE_RUN_STATUSES.has(run.status));
+  useEffect(() => {
+    if (!connected || !hasActiveRows || nextCursor !== null) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden && !loading && !pagedRef.current) {
+        void refresh(null);
+      }
+    }, RUNS_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [connected, hasActiveRows, nextCursor, loading, refresh]);
+
   function applyFilters() {
+    const appliedVersion = selectedVersionId.trim();
     const params = new URLSearchParams();
     if (status.trim()) params.set("status", status.trim());
-    if (agentVersionId.trim()) params.set("agent_version_id", agentVersionId.trim());
+    if (appliedVersion) params.set("agent_version_id", appliedVersion);
     const query = params.toString();
     window.history.replaceState(null, "", query ? `/runs?${query}` : "/runs");
+    setAgentVersionId(appliedVersion);
     setInitialLoaded(true);
-    void refresh();
+    void refresh(null, { status, agentVersionId: appliedVersion });
   }
 
   function clearFilters() {
     setStatus("");
     setAgentVersionId("");
+    setSelectedAgentId("");
+    setSelectedVersionId("");
     window.history.replaceState(null, "", "/runs");
     setInitialLoaded(true);
     void refresh(null, { status: "", agentVersionId: "" });
@@ -150,17 +231,46 @@ export default function RunsPage() {
             </select>
           </label>
           <label>
-            {t("runs.filters.agentVersionId")}
-            <input
-              value={agentVersionId}
-              onChange={(event) => setAgentVersionId(event.target.value)}
-              placeholder={t("runs.filters.agentVersionPlaceholder")}
-              spellCheck={false}
-            />
+            {t("runs.filters.agent")}
+            <select
+              value={selectedAgentId}
+              onChange={(event) => {
+                setSelectedAgentId(event.target.value);
+                setSelectedVersionId("");
+              }}
+            >
+              <option value="">{t("runs.filters.allAgents")}</option>
+              {agents.map((agent) => (
+                <option value={agent.id} key={agent.id}>
+                  {agent.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {t("runs.filters.version")}
+            <select
+              value={selectedVersionId}
+              onChange={(event) => setSelectedVersionId(event.target.value)}
+              disabled={!selectedAgentId && agentVersions.length === 0 && !selectedVersionId}
+            >
+              <option value="">{t("runs.filters.allVersions")}</option>
+              {selectedVersionId && !agentVersions.some((v) => v.id === selectedVersionId) && (
+                <option value={selectedVersionId}>{t("runs.filters.linkedVersion")}</option>
+              )}
+              {agentVersions.map((version) => (
+                <option value={version.id} key={version.id}>
+                  {`v${version.version_number} · ${version.resolved_spec_hash.slice(0, 8)}`}
+                </option>
+              ))}
+            </select>
           </label>
           <div className="runs-toolbar-actions">
             <button type="button" className="button button-primary" onClick={applyFilters} disabled={loading}>
               {t("runs.filters.apply")}
+            </button>
+            <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>
+              {t("common.refresh")}
             </button>
             <button type="button" className="button button-ghost" onClick={clearFilters} disabled={loading}>
               {t("runs.filters.clear")}
@@ -182,6 +292,11 @@ export default function RunsPage() {
         <EmptyState
           title={t("runs.empty")}
           hint={hasFilters ? t("runs.emptyFilteredHint") : t("runs.emptyHint")}
+          actions={hasFilters ? (
+            <button type="button" className="button button-ghost" onClick={clearFilters}>
+              {t("runs.filters.clear")}
+            </button>
+          ) : undefined}
         />
       )}
 

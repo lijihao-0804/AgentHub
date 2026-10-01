@@ -22,6 +22,21 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
+ * Registered by the session provider. When a request comes back 401 the
+ * transport asks it for a renewed access token (single-flight behind the
+ * provider's own refresh scheduling) and replays the request exactly once
+ * with it; ``null`` means the session is really gone and the original 401
+ * stands. Auth endpoints themselves never carry a token and never trigger it,
+ * so there is no refresh loop.
+ */
+type TokenRefresher = () => Promise<string | null>;
+let tokenRefresher: TokenRefresher | null = null;
+
+export function setTokenRefresher(refresher: TokenRefresher | null): void {
+  tokenRefresher = refresher;
+}
+
+/**
  * Core transport for the documented /api/v1 envelope.
  *
  * `credentials: "include"` is always sent so the backend-owned HttpOnly
@@ -30,30 +45,51 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
  */
 async function transport<T>(
   path: string,
-  init: { method?: string; body?: unknown; accessToken?: string; formData?: FormData },
+  init: { method?: string; body?: unknown; accessToken?: string; formData?: FormData; signal?: AbortSignal },
 ): Promise<T> {
+  const send = (token: string | undefined) => {
+    const hasJsonBody = init.formData === undefined && init.body !== undefined;
+    return fetch(`${apiBaseUrl}${path}`, {
+      method: init.method ?? "GET",
+      headers: {
+        ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+      ...(init.signal !== undefined ? { signal: init.signal } : {}),
+      ...(init.formData !== undefined
+        ? { body: init.formData }
+        : hasJsonBody
+          ? { body: JSON.stringify(init.body) }
+          : {}),
+    });
+  };
   const token = init.accessToken?.trim();
-  // The browser must set its own multipart boundary, so Content-Type is
-  // only declared for JSON bodies.
-  const hasJsonBody = init.formData === undefined && init.body !== undefined;
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    method: init.method ?? "GET",
-    headers: {
-      ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    credentials: "include",
-    ...(init.formData !== undefined
-      ? { body: init.formData }
-      : hasJsonBody
-        ? { body: JSON.stringify(init.body) }
-        : {}),
-  });
+  let response = await send(token);
+  if (response.status === 401 && token && tokenRefresher) {
+    const renewed = await tokenRefresher().catch(() => null);
+    // A renewal that returned the unchanged token (no rotation upstream) is
+    // treated as "no renewal": replaying with it would just 401 again. The
+    // caller keeps the original 401 even though the session is technically
+    // healthy -- a rare, fail-visible outcome beats a retry storm.
+    if (renewed && renewed.trim() && renewed.trim() !== token) {
+      response = await send(renewed.trim());
+    }
+  }
   const body = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
     const error = isRecord(body) && isRecord(body.error) ? body.error : {};
+    // A body that is not the API envelope (a proxy's HTML error page, an
+    // empty body) means the API itself never answered -- report that as its
+    // own condition instead of a generic request failure.
+    const envelopeMissing = !isRecord(body) || !isRecord(body.error);
+    const code = envelopeMissing
+      ? "UPSTREAM_UNAVAILABLE"
+      : typeof error.code === "string"
+        ? error.code
+        : "REQUEST_FAILED";
     throw new ApiError(
-      typeof error.code === "string" ? error.code : "REQUEST_FAILED",
+      code,
       typeof error.message === "string" ? error.message : "The API request failed.",
       response.status,
     );
@@ -64,13 +100,18 @@ async function transport<T>(
 export async function apiRequest<T>(
   path: string,
   accessToken: string,
-  init?: { method?: string; body?: unknown },
+  init?: { method?: string; body?: unknown; signal?: AbortSignal },
 ): Promise<T> {
   const token = accessToken.trim();
   if (!token) {
     throw new ApiError("SESSION_REQUIRED", "A workspace session with an access token is required.", 401);
   }
-  return transport<T>(path, { method: init?.method, body: init?.body, accessToken: token });
+  return transport<T>(path, {
+    method: init?.method,
+    body: init?.body,
+    signal: init?.signal,
+    accessToken: token,
+  });
 }
 
 /** Multipart upload against the same envelope and error contract. */
@@ -78,12 +119,13 @@ export async function apiUpload<T>(
   path: string,
   accessToken: string,
   formData: FormData,
+  init?: { signal?: AbortSignal },
 ): Promise<T> {
   const token = accessToken.trim();
   if (!token) {
     throw new ApiError("SESSION_REQUIRED", "A workspace session with an access token is required.", 401);
   }
-  return transport<T>(path, { method: "POST", formData, accessToken: token });
+  return transport<T>(path, { method: "POST", formData, signal: init?.signal, accessToken: token });
 }
 
 /**

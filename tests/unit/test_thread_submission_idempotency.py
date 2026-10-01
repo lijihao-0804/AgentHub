@@ -1,3 +1,4 @@
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from uuid import UUID
 
@@ -79,3 +80,97 @@ async def test_attached_duplicate_returns_the_original_run_and_version() -> None
     assert submitted.turn.id == _TURN_ID
     assert submitted.run_id == _RUN_ID
     assert submitted.agent_version_id == _RUN_VERSION_ID
+
+
+class _RecoveringRunService(_RunService):
+    """Fake run service whose ``run`` records the re-run input."""
+
+    def __init__(self, run_status: str | None = None):
+        self.run_status = run_status
+        self.rerun_input: str | None = None
+
+    async def run(self, _context, *, agent_version_id, input_text, thread_id=None):
+        self.rerun_input = input_text
+        return SimpleNamespace(run_id=_RUN_ID, agent_version_id=agent_version_id)
+
+
+class _OrphanRecoveryService(_RetryService):
+    """Retries past the grace window with a controllable orphan-run probe."""
+
+    def __init__(self, existing_turn, run_service, turn_run=None):
+        super().__init__(existing_turn)
+        self.run_service = run_service
+        self.turn_run = turn_run
+        self.attached: tuple[UUID, UUID] | None = None
+
+    async def _turn_run(self, _context, _thread_id, _turn):
+        return self.turn_run
+
+    async def attach_run(self, _context, *, turn_id, run_id):
+        self.attached = (turn_id, run_id)
+
+
+def _stale_turn() -> SimpleNamespace:
+    return SimpleNamespace(
+        id=_TURN_ID,
+        agent_run_id=None,
+        created_at=datetime.now(UTC) - timedelta(seconds=600),
+        user_input="question",
+    )
+
+
+@pytest.mark.asyncio
+async def test_settled_run_created_after_turn_is_attached_on_retry() -> None:
+    """The first request died between run completion and attach_run: the retry
+    attaches the settled run instead of answering 409 forever."""
+
+    turn_run = SimpleNamespace(
+        id=_RUN_ID, status="SUCCEEDED", agent_version_id=_RUN_VERSION_ID
+    )
+    service = _OrphanRecoveryService(_stale_turn(), _RecoveringRunService(), turn_run)
+
+    submitted = await service.submit_turn(
+        _context(), _THREAD_ID, user_input="question", client_token="token-1"
+    )
+
+    assert submitted.reused is True
+    assert submitted.run_id == _RUN_ID
+    assert submitted.agent_version_id == _RUN_VERSION_ID
+    assert service.attached == (_TURN_ID, _RUN_ID)
+
+
+@pytest.mark.asyncio
+async def test_orphan_turn_past_grace_window_reruns_the_question() -> None:
+    """No run was ever created and the turn is past the start grace window:
+    the retry re-runs the recorded question instead of 409ing forever."""
+
+    run_service = _RecoveringRunService()
+    service = _OrphanRecoveryService(_stale_turn(), run_service, turn_run=None)
+
+    submitted = await service.submit_turn(
+        _context(), _THREAD_ID, user_input="question", client_token="token-1"
+    )
+
+    assert submitted.reused is True
+    assert submitted.run_id == _RUN_ID
+    assert run_service.rerun_input == "question"
+    assert service.attached == (_TURN_ID, _RUN_ID)
+
+
+@pytest.mark.asyncio
+async def test_inflight_run_created_after_turn_keeps_retryable_conflict() -> None:
+    """A still-running run belongs to a live first request: the retry must
+    keep waiting rather than double-running the question."""
+
+    turn_run = SimpleNamespace(
+        id=_RUN_ID, status="RUNNING", agent_version_id=_RUN_VERSION_ID
+    )
+    service = _OrphanRecoveryService(_stale_turn(), _RecoveringRunService(), turn_run)
+
+    with pytest.raises(AgentHubError) as raised:
+        await service.submit_turn(
+            _context(), _THREAD_ID, user_input="question", client_token="token-1"
+        )
+
+    assert raised.value.code == "THREAD_TURN_IN_PROGRESS"
+    assert raised.value.status_code == 409

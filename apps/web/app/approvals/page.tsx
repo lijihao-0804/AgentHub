@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
@@ -14,13 +14,18 @@ import { useI18n } from "@/i18n/provider";
 
 type DecisionState = { approvalId: string; decision: "approve" | "deny" } | null;
 
+/** Poll cadence for the approvals inbox while decisions are pending. */
+const APPROVALS_POLL_MS = 5000;
+const EXPIRY_CLOCK_TOLERANCE_MS = 60_000;
+
 /** Client-side counts over the currently loaded list; no aggregate API exists. */
 function countSummary(approvals: Approval[]) {
   const pending = approvals.filter((a) => a.decision_status === "PENDING").length;
   const approved = approvals.filter((a) => a.decision_status === "APPROVED").length;
   const denied = approvals.filter((a) => a.decision_status === "DENIED").length;
+  const expired = approvals.filter((a) => a.decision_status === "EXPIRED").length;
   const needsAttention = approvals.filter((a) => a.execution_status === "UNKNOWN_OUTCOME").length;
-  return { pending, approved, denied, needsAttention };
+  return { pending, approved, denied, expired, needsAttention };
 }
 
 function argumentEntries(approval: Approval): Array<[string, unknown]> {
@@ -39,28 +44,103 @@ function argumentEntries(approval: Approval): Array<[string, unknown]> {
 }
 
 export default function ApprovalsPage() {
-  const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected } = useFrontendSession();
+  const { t, formatDateTime, formatDurationMs } = useI18n();
+  const { workspaceId, accessToken, connected, permissions } = useFrontendSession();
+  const cannotDecide = permissions !== null && !permissions.includes("approve_action");
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [decisionError, setDecisionError] = useState<{ approvalId: string; error: ApiError } | null>(null);
   const [decisionState, setDecisionState] = useState<DecisionState>(null);
+  const [lastDecisionId, setLastDecisionId] = useState<string | null>(null);
+  /** The approval currently showing its deny-reason prompt, if any. */
+  const [denyPromptId, setDenyPromptId] = useState<string | null>(null);
+  const [denyReason, setDenyReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [clockNowMs, setClockNowMs] = useState(() => Date.now());
+  /** Which inbox slice is on display; server-side filter via ?decision=. */
+  const [decisionTab, setDecisionTab] = useState<"PENDING" | "ALL">("PENDING");
+  const [total, setTotal] = useState<number | null>(null);
+  /** Generation of the list request; a stale workspace's response never lands. */
+  const generationRef = useRef(0);
+  /** True once the user paged past the first page; polling then pauses so a
+   * refresh never collapses an expanded list back to page one. */
+  const pagedRef = useRef(false);
+  const PAGE_SIZE = 50;
+  /** Live workspace identity, for guarding decision write-backs. */
+  const workspaceRef = useRef(workspaceId);
+  workspaceRef.current = workspaceId;
+  const hasPendingExpirations = approvals.some(
+    (approval) => approval.decision_status === "PENDING" && approval.expires_at,
+  );
+
+  useEffect(() => {
+    if (!hasPendingExpirations) return;
+    const refreshClock = () => setClockNowMs(Date.now());
+    const interval = window.setInterval(refreshClock, 30_000);
+    document.addEventListener("visibilitychange", refreshClock);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshClock);
+    };
+  }, [hasPendingExpirations]);
 
   const refresh = useCallback(async () => {
-    setError(null);
     if (!connected) return;
+    const generation = (generationRef.current += 1);
+    setError(null);
     setLoading(true);
     try {
-      setApprovals(await listApprovals(workspaceId, accessToken));
+      const page = await listApprovals(workspaceId, accessToken, {
+        decision: decisionTab === "PENDING" ? "PENDING" : undefined,
+        limit: PAGE_SIZE,
+        offset: 0,
+      });
+      if (generationRef.current !== generation) return;
+      pagedRef.current = false;
+      setApprovals(page.items);
+      setTotal(page.total);
       setLoaded(true);
     } catch (caught) {
+      if (generationRef.current !== generation) return;
       setError(toApiError(caught, ""));
     } finally {
-      setLoading(false);
+      if (generationRef.current === generation) setLoading(false);
     }
-  }, [connected, workspaceId, accessToken]);
+  }, [connected, workspaceId, accessToken, decisionTab]);
+
+  const loadMore = useCallback(async () => {
+    if (!connected) return;
+    const generation = (generationRef.current += 1);
+    setError(null);
+    setLoading(true);
+    try {
+      const page = await listApprovals(workspaceId, accessToken, {
+        decision: decisionTab === "PENDING" ? "PENDING" : undefined,
+        limit: PAGE_SIZE,
+        offset: approvals.length,
+      });
+      if (generationRef.current !== generation) return;
+      pagedRef.current = true;
+      setApprovals((current) => [...current, ...page.items]);
+      setTotal(page.total);
+      setLoaded(true);
+    } catch (caught) {
+      if (generationRef.current !== generation) return;
+      setError(toApiError(caught, ""));
+    } finally {
+      if (generationRef.current === generation) setLoading(false);
+    }
+  }, [connected, workspaceId, accessToken, decisionTab, approvals.length]);
+
+  function switchDecisionTab(tab: "PENDING" | "ALL") {
+    if (tab === decisionTab) return;
+    pagedRef.current = false;
+    setDecisionTab(tab);
+    setApprovals([]);
+    setTotal(null);
+    setLoaded(false);
+  }
 
   useEffect(() => {
     if (connected && !loaded) void refresh();
@@ -70,19 +150,47 @@ export default function ApprovalsPage() {
     if (!connected) setLoaded(false);
   }, [connected]);
 
-  async function decide(approvalId: string, decision: "approve" | "deny") {
+  // Poll even when the inbox is currently empty: otherwise the first new
+  // approval would never be discovered while this page stays open. Once the
+  // user has paged deeper, polling pauses — a page-one refresh would throw
+  // away the loaded history.
+  useEffect(() => {
+    if (!connected) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden && !pagedRef.current) void refresh();
+    }, APPROVALS_POLL_MS);
+    const onVisible = () => {
+      if (!document.hidden) void refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [connected, refresh]);
+
+  async function decide(approvalId: string, decision: "approve" | "deny", reason?: string) {
     setDecisionError(null);
+    setLastDecisionId(null);
     setDecisionState({ approvalId, decision });
+    const requestWorkspace = workspaceRef.current;
     try {
-      const result = await decideApproval(workspaceId, approvalId, decision, accessToken);
+      const result = await decideApproval(workspaceId, approvalId, decision, accessToken, { reason });
+      if (workspaceRef.current !== requestWorkspace) return;
+      // An inbox poll that started before this decision must not overwrite its
+      // result with the old PENDING row.
+      generationRef.current += 1;
+      setLoading(false);
       setApprovals((current) =>
         current.map((approval) => (approval.id === approvalId ? result.approval : approval)),
       );
+      setLastDecisionId(approvalId);
     } catch (caught) {
+      if (workspaceRef.current !== requestWorkspace) return;
       const apiError = toApiError(caught, "");
       setDecisionError({ approvalId, error: apiError });
     } finally {
-      setDecisionState(null);
+      if (workspaceRef.current === requestWorkspace) setDecisionState(null);
     }
   }
 
@@ -117,7 +225,11 @@ export default function ApprovalsPage() {
         actions={
           <>
             <span className="state-hint" aria-live="polite">
-              {loading ? t("common.loading") : t("approvals.loaded", { count: approvals.length })}
+              {loading
+                ? t("common.loading")
+                : total !== null
+                  ? t("approvals.loadedOf", { loaded: approvals.length, total })
+                  : t("approvals.loaded", { count: approvals.length })}
             </span>
             <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>
               {t("common.refresh")}
@@ -125,10 +237,27 @@ export default function ApprovalsPage() {
           </>
         }
       >
+        <div className="tab-strip" role="tablist" aria-label={t("approvals.inboxTitle")}>
+          <button
+            type="button"
+            aria-selected={decisionTab === "PENDING"}
+            onClick={() => switchDecisionTab("PENDING")}
+          >
+            {t("approvals.tabPending")}
+          </button>
+          <button
+            type="button"
+            aria-selected={decisionTab === "ALL"}
+            onClick={() => switchDecisionTab("ALL")}
+          >
+            {t("approvals.tabAll")}
+          </button>
+        </div>
         <div className="approval-counts">
           <StatusBadge status="PENDING" label={t("approvals.counts.pending", { count: counts.pending })} />
           <StatusBadge status="APPROVED" label={t("approvals.counts.approved", { count: counts.approved })} />
           <StatusBadge status="DENIED" label={t("approvals.counts.denied", { count: counts.denied })} />
+          <StatusBadge status="EXPIRED" label={t("approvals.counts.expired", { count: counts.expired })} />
           <StatusBadge
             status="UNKNOWN_OUTCOME"
             label={t("approvals.counts.needsAttention", { count: counts.needsAttention })}
@@ -154,6 +283,16 @@ export default function ApprovalsPage() {
             const deciding = decisionState?.approvalId === approval.id ? decisionState.decision : null;
             const cardError = decisionError?.approvalId === approval.id ? decisionError.error : null;
             const decidedAt = approval.decided_at ? formatDateTime(approval.decided_at) : "—";
+            const expiresAtMs = approval.expires_at ? Date.parse(approval.expires_at) : Number.NaN;
+            const expiryElapsed = approval.decision_status === "PENDING" &&
+              Number.isFinite(expiresAtMs) &&
+              expiresAtMs + EXPIRY_CLOCK_TOLERANCE_MS <= clockNowMs;
+            /** Inside five minutes the countdown turns warning-colored so an
+             * operator scanning the inbox sees urgency without reading. */
+            const expiringSoon = approval.decision_status === "PENDING" &&
+              Number.isFinite(expiresAtMs) &&
+              !expiryElapsed &&
+              expiresAtMs - clockNowMs <= 5 * 60_000;
             return (
               <article className="approval-card" key={approval.id}>
                 <div className="approval-header">
@@ -180,6 +319,19 @@ export default function ApprovalsPage() {
                         time: approval.created_at ? formatDateTime(approval.created_at) : "—",
                       })}
                     </span>
+                    {approval.decision_status === "PENDING" && Number.isFinite(expiresAtMs) && (
+                      <span
+                        className={`approval-state-meta${expiringSoon ? " approval-state-expiring" : ""}`}
+                        aria-live="off"
+                        title={t("approvals.card.expiryClockHint")}
+                      >
+                        {expiryElapsed
+                          ? t("approvals.card.expiryElapsed")
+                          : t("approvals.card.expiresIn", {
+                              duration: formatDurationMs(Math.max(0, expiresAtMs - clockNowMs)),
+                            })}
+                      </span>
+                    )}
                   </div>
                   <div className="approval-state-block">
                     <span className="approval-state-label">{t("approvals.card.execution")}</span>
@@ -199,6 +351,15 @@ export default function ApprovalsPage() {
                     )}
                   </div>
                 </div>
+
+                {lastDecisionId === approval.id && approval.decision_status !== "PENDING" && (
+                  <p className="inline-notice" role="status">
+                    {t("approvals.card.decisionSaved")} {" "}
+                    <Link href={`/runs/${encodeURIComponent(approval.run_id)}`}>
+                      {t("approvals.card.returnToRun")}
+                    </Link>
+                  </p>
+                )}
 
                 {approval.failure_code && (
                   <p className="state-hint">
@@ -223,19 +384,66 @@ export default function ApprovalsPage() {
 
                 {approval.decision_status === "PENDING" ? (
                   <div className="approval-actions">
-                    <button
-                      type="button"
-                      className="button button-ghost"
-                      onClick={() => void decide(approval.id, "deny")}
-                      disabled={deciding !== null}
-                    >
-                      {deciding === "deny" ? t("approvals.card.denying") : t("approvals.card.deny")}
-                    </button>
+                    {cannotDecide && <p className="state-hint" role="note">{t("approvals.noPermissionHint")}</p>}
+                    {denyPromptId === approval.id ? (
+                      <div className="inline-confirm" role="alertdialog" aria-label={t("approvals.denyReasonTitle")}>
+                        <p className="state-title">{t("approvals.denyReasonTitle")}</p>
+                        <textarea
+                          value={denyReason}
+                          onChange={(event) => setDenyReason(event.target.value)}
+                          placeholder={t("approvals.denyReasonPlaceholder")}
+                          rows={3}
+                          maxLength={500}
+                          aria-label={t("approvals.denyReasonTitle")}
+                        />
+                        <p className="state-hint">{t("approvals.denyReasonHint")}</p>
+                        <div className="inline-confirm-actions">
+                          <button
+                            type="button"
+                            className="button button-danger"
+                            disabled={deciding !== null || denyReason.trim().length === 0}
+                            onClick={() => {
+                              const reason = denyReason.trim();
+                              setDenyPromptId(null);
+                              setDenyReason("");
+                              void decide(approval.id, "deny", reason);
+                            }}
+                          >
+                            {deciding === "deny" ? t("approvals.card.denying") : t("approvals.confirmDeny")}
+                          </button>
+                          <button
+                            type="button"
+                            className="button button-ghost"
+                            onClick={() => {
+                              setDenyPromptId(null);
+                              setDenyReason("");
+                            }}
+                            disabled={deciding !== null}
+                          >
+                            {t("common.cancel")}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="button button-ghost"
+                        onClick={() => {
+                          setDenyPromptId(approval.id);
+                          setDenyReason("");
+                        }}
+                        disabled={deciding !== null || cannotDecide || expiryElapsed}
+                        title={expiryElapsed ? t("approvals.card.expiryElapsed") : cannotDecide ? t("approvals.noPermissionHint") : undefined}
+                      >
+                        {deciding === "deny" ? t("approvals.card.denying") : t("approvals.card.deny")}
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="button button-primary"
                       onClick={() => void decide(approval.id, "approve")}
-                      disabled={deciding !== null}
+                      disabled={deciding !== null || cannotDecide || expiryElapsed}
+                      title={expiryElapsed ? t("approvals.card.expiryElapsed") : cannotDecide ? t("approvals.noPermissionHint") : undefined}
                     >
                       {deciding === "approve" ? t("approvals.card.approving") : t("approvals.card.approve")}
                     </button>
@@ -252,6 +460,13 @@ export default function ApprovalsPage() {
             );
           })}
         </div>
+        {loaded && !error && total !== null && approvals.length < total && (
+          <div className="form-actions">
+            <button type="button" className="button button-ghost" onClick={() => void loadMore()} disabled={loading}>
+              {t("approvals.loadMore")}
+            </button>
+          </div>
+        )}
       </Panel>
     </div>
   );

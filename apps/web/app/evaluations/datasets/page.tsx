@@ -14,6 +14,10 @@ export default function EvaluationDatasetsPage() {
   const { t, formatDateTime } = useI18n();
   const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [datasets, setDatasets] = useState<EvaluationDataset[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
+  const [extraPages, setExtraPages] = useState<EvaluationDataset[][]>([]);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -29,6 +33,9 @@ export default function EvaluationDatasetsPage() {
 
   useEffect(() => {
     setDatasets([]);
+    setExtraPages([]);
+    setTotal(null);
+    setHasMore(true);
     setError(null);
     setLoading(false);
     setLoaded(false);
@@ -40,15 +47,34 @@ export default function EvaluationDatasetsPage() {
     setCreatedNotice(false);
   }, [sessionId]);
 
+  const loadMore = useCallback(async () => {
+    if (!connected || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const offset = datasets.length;
+      const page = await listDatasets({ workspaceId, accessToken }, { limit: 50, offset });
+      setExtraPages((current) => [...current, page.items]);
+      setTotal(page.total);
+      if (page.items.length < 50) setHasMore(false);
+    } catch {
+      // A failed page keeps the visible list untouched.
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [connected, datasets.length, loadingMore, workspaceId, accessToken]);
+
   const refresh = useCallback(async () => {
     setError(null);
     if (!connected) return;
     const requestSessionId = sessionId;
     setLoading(true);
     try {
-      const nextDatasets = await listDatasets({ workspaceId, accessToken });
+      const page = await listDatasets({ workspaceId, accessToken }, { limit: 50 });
       if (activeSessionRef.current !== requestSessionId) return;
-      setDatasets(nextDatasets);
+      setDatasets(page.items);
+      setTotal(page.total);
+      setExtraPages([]);
+      setHasMore(true);
       setLoaded(true);
     } catch (caught) {
       if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
@@ -93,6 +119,13 @@ export default function EvaluationDatasetsPage() {
         <SessionRequired contextKey="session.context.evaluations" />
       </div>
     );
+  }
+
+  const visible = datasets;
+  for (const extra of extraPages) {
+    for (const item of extra) {
+      if (!visible.some((d) => d.id === item.id)) visible.push(item);
+    }
   }
 
   return (
@@ -147,7 +180,7 @@ export default function EvaluationDatasetsPage() {
           <EmptyState title={t("evaluation.datasets.empty")} hint={t("evaluation.datasets.emptyHint")} />
         )}
 
-        {datasets.length > 0 && (
+        {visible.length > 0 && (
           <div className="data-table">
             <table>
               <thead>
@@ -159,7 +192,7 @@ export default function EvaluationDatasetsPage() {
                 </tr>
               </thead>
               <tbody>
-                {datasets.map((dataset) => (
+                {visible.map((dataset) => (
                   <tr key={dataset.id}>
                     <td data-label={t("evaluation.datasets.columns.name")}>
                       <Link href={`/evaluations/datasets/${encodeURIComponent(dataset.id)}`}>{dataset.name}</Link>

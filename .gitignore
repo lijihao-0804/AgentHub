@@ -25,6 +25,10 @@ infra/data/
 data/blobs/
 docker-compose.override.yml
 
+# Celery runtime artifacts
+celerybeat-schedule*
+celerybeat.pid
+
 # IDE / OS
 .claude/
 .idea/

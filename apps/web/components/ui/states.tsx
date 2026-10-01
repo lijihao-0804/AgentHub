@@ -9,11 +9,20 @@ import type { ApiError } from "@/lib/api/client";
 import { useFrontendSession } from "@/components/providers/session-provider";
 
 /** Quiet, structural placeholder for "nothing here yet". */
-export function EmptyState({ title, hint }: { title: string; hint?: string }) {
+export function EmptyState({
+  title,
+  hint,
+  actions,
+}: {
+  title: string;
+  hint?: string;
+  actions?: ReactNode;
+}) {
   return (
     <div className="state-block state-empty">
       <p className="state-title">{title}</p>
       {hint && <p className="state-hint">{hint}</p>}
+      {actions && <div className="form-actions">{actions}</div>}
     </div>
   );
 }

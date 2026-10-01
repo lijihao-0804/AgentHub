@@ -11,9 +11,9 @@ import {
   type ReactNode,
 } from "react";
 
-import { ApiError, toApiError } from "@/lib/api/client";
+import { ApiError, setTokenRefresher, toApiError } from "@/lib/api/client";
 import { login as loginRequest, logout as logoutRequest, refresh as refreshRequest, register as registerRequest } from "@/lib/api/auth";
-import { listOrganizations, listWorkspaces, type Organization, type Workspace } from "@/lib/api/tenancy";
+import { getWorkspace, listOrganizations, listWorkspaces, type Organization, type Workspace } from "@/lib/api/tenancy";
 
 /**
  * Formal control-plane session.
@@ -35,6 +35,8 @@ const WORKSPACE_STORAGE_KEY = "agenthub.workspaceId";
 /** Refresh this far before the access token expires (fraction of lifetime). */
 const REFRESH_LEAD_RATIO = 0.75;
 const MIN_REFRESH_DELAY_MS = 30_000;
+/** Refresh this eagerly when the tab wakes up and the token is nearly out. */
+const EXPIRY_WAKE_MARGIN_MS = 30_000;
 
 type FrontendSessionContextValue = {
   status: SessionStatus;
@@ -44,6 +46,13 @@ type FrontendSessionContextValue = {
   workspaces: Workspace[];
   organizationId: string;
   workspaceId: string;
+  /**
+   * The signed-in user's permissions in the active workspace, or null while
+   * unknown (not yet loaded, or the load failed). Null disables nothing: the
+   * backend still enforces every permission, and a transient failure must
+   * not brick the UI -- it only loses the role-aware polish.
+   */
+  permissions: string[] | null;
   /** Monotonic identity for the in-memory session + workspace selection. */
   sessionId: number;
   authenticated: boolean;
@@ -90,6 +99,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [workspaceId, setWorkspaceId] = useState("");
   const [sessionId, setSessionId] = useState(0);
+  const [permissions, setPermissions] = useState<string[] | null>(null);
   const [tenancyLoading, setTenancyLoading] = useState(false);
   const [tenancyError, setTenancyError] = useState<ApiError | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -97,8 +107,20 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
   /** Generation for tenancy loads, so a stale list never lands. */
   const tenancyGenerationRef = useRef(0);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  /** Guards against a refresh loop: only one refresh may be in flight. */
-  const refreshInFlightRef = useRef(false);
+  /**
+   * Single-flight refresh shared by the proactive timer and the transport's
+   * 401 recovery: one promise per moment, so two triggers can never fire two
+   * competing refresh calls (the cookie rotates; the loser would 401 and
+   * look like a dead session). Holds the in-flight promise, or null.
+   */
+  const refreshInFlightRef = useRef<Promise<string | null> | null>(null);
+  /** Resolved by `renewAccessToken` below; lets the timer reach it without a
+   * declaration-order cycle. */
+  const renewRef = useRef<() => Promise<string | null>>(async () => null);
+  /** Wall-clock time the current access token expires, for visibility wake-ups. */
+  const tokenExpiresAtRef = useRef<number | null>(null);
+  /** Generation of active-workspace access loads. */
+  const accessGenerationRef = useRef(0);
 
   const clearRefreshTimer = useCallback(() => {
     if (refreshTimerRef.current !== null) {
@@ -109,6 +131,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
 
   const resetToUnauthenticated = useCallback(() => {
     clearRefreshTimer();
+    tokenExpiresAtRef.current = null;
     tenancyGenerationRef.current += 1;
     setSessionId((current) => current + 1);
     setStatus("UNAUTHENTICATED");
@@ -117,6 +140,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
     setOrganizations([]);
     setWorkspaces([]);
     setWorkspaceId("");
+    setPermissions(null);
     setTenancyError(null);
     setTenancyLoading(false);
     setPanelOpen(false);
@@ -124,9 +148,10 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
 
   /**
    * Loads the tenancy projection for a token. Returns the workspaces so
-   * the caller can pick an active one in the same pass.
+   * the caller can pick an active one in the same pass, or ``null`` when
+   * the load failed -- a failure must never read as "no workspaces exist".
    */
-  const loadTenancy = useCallback(async (token: string): Promise<Workspace[]> => {
+  const loadTenancy = useCallback(async (token: string): Promise<Workspace[] | null> => {
     const generation = (tenancyGenerationRef.current += 1);
     setTenancyLoading(true);
     setTenancyError(null);
@@ -135,7 +160,15 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
         listOrganizations(token),
         listWorkspaces(token),
       ]);
-      if (tenancyGenerationRef.current !== generation) return [];
+      if (tenancyGenerationRef.current !== generation) return null;
+      if (nextOrganizations === null || nextWorkspaces === null) {
+        // Envelope drift is a failed read, not an empty directory.
+        throw new ApiError(
+          "TENANCY_ENVELOPE_INVALID",
+          "The tenancy response had an unexpected shape.",
+          0,
+        );
+      }
       setOrganizations(nextOrganizations);
       setWorkspaces(nextWorkspaces);
       return nextWorkspaces;
@@ -145,7 +178,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
         setWorkspaces([]);
         setTenancyError(toApiError(caught, ""));
       }
-      return [];
+      return null;
     } finally {
       if (tenancyGenerationRef.current === generation) setTenancyLoading(false);
     }
@@ -163,28 +196,91 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
   const scheduleRefresh = useCallback(
     (expiresInSeconds: number | null | undefined) => {
       clearRefreshTimer();
-      if (!expiresInSeconds || expiresInSeconds <= 0) return;
+      if (!expiresInSeconds || expiresInSeconds <= 0) {
+        // No usable lifetime from the backend: drop any stale expiry so the
+        // visibility wake-up cannot act on a token that is already gone.
+        tokenExpiresAtRef.current = null;
+        return;
+      }
+      tokenExpiresAtRef.current = Date.now() + expiresInSeconds * 1000;
       const delay = Math.max(MIN_REFRESH_DELAY_MS, expiresInSeconds * REFRESH_LEAD_RATIO * 1000);
       refreshTimerRef.current = setTimeout(() => {
-        void (async () => {
-          if (refreshInFlightRef.current) return;
-          refreshInFlightRef.current = true;
-          try {
-            const renewed = await refreshRequest();
-            setUserId(renewed.user_id);
-            setAccessToken(renewed.access_token);
-            scheduleRefresh(renewed.expires_in);
-          } catch {
-            // A failed proactive refresh ends the session rather than retrying.
-            resetToUnauthenticated();
-          } finally {
-            refreshInFlightRef.current = false;
-          }
-        })();
+        void renewRef.current();
       }, delay);
     },
-    [clearRefreshTimer, resetToUnauthenticated],
+    [clearRefreshTimer],
   );
+
+  /**
+   * Refreshes the access token once no matter how many callers ask at the
+   * same moment. Returns the new token (for the transport's 401 replay) or
+   * null when the session is truly over. A failed refresh ends the session
+   * rather than retrying.
+   */
+  const renewAccessToken = useCallback((): Promise<string | null> => {
+    refreshInFlightRef.current ??= (async () => {
+      try {
+        const renewed = await refreshRequest();
+        setUserId(renewed.user_id);
+        setAccessToken(renewed.access_token);
+        scheduleRefresh(renewed.expires_in);
+        return renewed.access_token;
+      } catch {
+        resetToUnauthenticated();
+        return null;
+      } finally {
+        refreshInFlightRef.current = null;
+      }
+    })();
+    return refreshInFlightRef.current;
+  }, [scheduleRefresh, resetToUnauthenticated]);
+
+  // Assign during an effect, not render: writing a ref during render is a
+  // render side effect (and StrictMode renders twice).
+  useEffect(() => {
+    renewRef.current = renewAccessToken;
+  }, [renewAccessToken]);
+
+  // The transport's 401 path replays a request once with the renewed token;
+  // register the single-flight refresher for the provider's lifetime.
+  useEffect(() => {
+    setTokenRefresher(renewAccessToken);
+    return () => setTokenRefresher(null);
+  }, [renewAccessToken]);
+
+  // A background tab's timers run late, so a token can already be expired
+  // (or nearly) when the tab becomes visible again; refresh eagerly then.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.hidden) return;
+      const expiresAt = tokenExpiresAtRef.current;
+      if (expiresAt !== null && Date.now() >= expiresAt - EXPIRY_WAKE_MARGIN_MS) {
+        void renewRef.current();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+
+  // Track the active workspace's access so the UI can present a
+  // role-appropriate surface (see the `permissions` context field).
+  useEffect(() => {
+    if (status !== "AUTHENTICATED" || !accessToken || !workspaceId) {
+      accessGenerationRef.current += 1;
+      setPermissions(null);
+      return;
+    }
+    const generation = (accessGenerationRef.current += 1);
+    void (async () => {
+      try {
+        const workspace = await getWorkspace(workspaceId, accessToken);
+        if (accessGenerationRef.current !== generation) return;
+        setPermissions(workspace?.permissions ?? null);
+      } catch {
+        if (accessGenerationRef.current === generation) setPermissions(null);
+      }
+    })();
+  }, [status, accessToken, workspaceId]);
 
   const adoptSession = useCallback(
     async (result: { user_id: string; access_token: string; expires_in?: number | null }) => {
@@ -194,7 +290,9 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
       setStatus("AUTHENTICATED");
       scheduleRefresh(result.expires_in);
       const available = await loadTenancy(result.access_token);
-      selectInitialWorkspace(available);
+      // A failed load keeps whatever selection is already remembered: a
+      // network blip must not look like "the user has no workspaces".
+      if (available !== null) selectInitialWorkspace(available);
     },
     [loadTenancy, scheduleRefresh, selectInitialWorkspace],
   );
@@ -250,20 +348,26 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
     resetToUnauthenticated();
   }, [resetToUnauthenticated]);
 
-  const setActiveWorkspace = useCallback((nextWorkspaceId: string) => {
-    setWorkspaceId((current) => {
-      if (current === nextWorkspaceId) return current;
-      storeWorkspaceId(nextWorkspaceId);
-      setSessionId((generation) => generation + 1);
-      return nextWorkspaceId;
-    });
-    setPanelOpen(false);
-  }, []);
+  const setActiveWorkspace = useCallback(
+    (nextWorkspaceId: string) => {
+      // Updaters must stay pure, so the decision happens here against the
+      // live state and each commit is its own plain statement. The previous
+      // version did the storage write and the generation bump *inside* the
+      // updater, which StrictMode's double invocation executed twice.
+      if (workspaceId !== nextWorkspaceId) {
+        storeWorkspaceId(nextWorkspaceId);
+        setSessionId((generation) => generation + 1);
+        setWorkspaceId(nextWorkspaceId);
+      }
+      setPanelOpen(false);
+    },
+    [workspaceId],
+  );
 
   const reloadTenancy = useCallback(async () => {
     if (!accessToken) return;
     const available = await loadTenancy(accessToken);
-    if (available.length > 0 && !available.some((workspace) => workspace.id === workspaceId)) {
+    if (available !== null && available.length > 0 && !available.some((workspace) => workspace.id === workspaceId)) {
       selectInitialWorkspace(available);
     }
   }, [accessToken, loadTenancy, selectInitialWorkspace, workspaceId]);
@@ -284,6 +388,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
       workspaces,
       organizationId,
       workspaceId,
+      permissions,
       sessionId,
       authenticated,
       connected: authenticated && Boolean(workspaceId && accessToken),
@@ -306,6 +411,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
       workspaces,
       organizationId,
       workspaceId,
+      permissions,
       sessionId,
       authenticated,
       tenancyLoading,

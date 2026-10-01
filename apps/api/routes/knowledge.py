@@ -345,6 +345,32 @@ async def upload_revision(
     return _upload_response(document, revision, job)
 
 
+@router.post(
+    "/api/v1/workspaces/{workspace_id}/knowledge-bases/{knowledge_base_id}/documents/{document_id}/retries",
+    response_model=DocumentUploadResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def retry_document_ingestion(
+    workspace_id: UUID,
+    knowledge_base_id: UUID,
+    document_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+    queue: IngestionQueue = queue_dependency,
+) -> DocumentUploadResponse:
+    """Requeue the latest revision's failed ingestion; 409 if it has not failed."""
+
+    del workspace_id
+    document, revision, job = await KnowledgeService().retry_document_ingestion(
+        session,
+        context=context,
+        knowledge_base_id=knowledge_base_id,
+        document_id=document_id,
+        queue=queue,
+    )
+    return _upload_response(document, revision, job)
+
+
 @router.patch(
     "/api/v1/workspaces/{workspace_id}/knowledge-bases/{knowledge_base_id}/documents/{document_id}",
     response_model=DocumentResponse,

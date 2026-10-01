@@ -8,14 +8,14 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Select, and_, func, select
+from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import AgentRun, AgentVersion
 from packages.approvals.models import Approval
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
-from packages.observability.runs import _require_read, classify_failure
+from packages.observability.runs import _require_read, category_sql_prefixes, classify_failure
 
 _FINISHED = ("SUCCEEDED", "FAILED", "CANCELLED", "NEEDS_ATTENTION")
 _RUN_STATUSES = frozenset(
@@ -464,6 +464,21 @@ class MetricsQueryService:
             .order_by(AgentRun.completed_at.desc().nullslast(), AgentRun.started_at.desc())
             .limit(min(500, limit * 5))
         )
+        # Push the category into SQL so the fetch window is filled with rows
+        # the caller can actually use. The prefix match is a deliberate
+        # superset: classify_failure stays authoritative below, and categories
+        # without a prefix shape (UNKNOWN) fall back to in-Python filtering.
+        if normalized_category:
+            prefixes = category_sql_prefixes(normalized_category)
+            if prefixes:
+                failure_statement = failure_statement.where(
+                    or_(
+                        *(
+                            func.upper(AgentRun.failure_code).like(f"{prefix}%")
+                            for prefix in prefixes
+                        )
+                    )
+                )
         async with self.session_factory() as session:
             code_rows = (await session.execute(code_statement)).all()
             failure_rows = (await session.execute(failure_statement)).all()

@@ -43,3 +43,21 @@ const TONE_BY_STATUS: Record<string, StatusTone> = {
 export function statusTone(status: string): StatusTone {
   return TONE_BY_STATUS[status.toUpperCase()] ?? "neutral";
 }
+
+/**
+ * Tool risk is its own dimension (AGENTS.md rule 9: READ does not mean
+ * safe), so it never maps through the status table: HIGH must read as
+ * danger everywhere, not neutral grey.
+ */
+export function riskTone(risk: string | null | undefined): StatusTone {
+  switch ((risk ?? "").toUpperCase()) {
+    case "LOW":
+      return "info";
+    case "MEDIUM":
+      return "warning";
+    case "HIGH":
+      return "danger";
+    default:
+      return "neutral";
+  }
+}

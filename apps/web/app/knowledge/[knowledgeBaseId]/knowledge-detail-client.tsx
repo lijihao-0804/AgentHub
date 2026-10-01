@@ -4,17 +4,21 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import Breadcrumbs from "@/components/layout/breadcrumbs";
+import HashValue from "@/components/evaluation/hash-value";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import StatusBadge from "@/components/ui/status-badge";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { listAgents, type Agent } from "@/lib/api/agents";
+import { getAgentKnowledgeBindings, type KnowledgeBindingMode } from "@/lib/api/agents";
 import {
   createSnapshot,
   listDocumentRevisions,
   listDocuments,
   listKnowledgeBases,
   listSnapshots,
+  retryDocumentIngestion,
   uploadDocument,
   uploadDocumentRevision,
   type DocumentRevisionStatus,
@@ -23,8 +27,24 @@ import {
   type KnowledgeSnapshot,
 } from "@/lib/api/knowledge";
 import { useI18n } from "@/i18n/provider";
+import type { MessageKey } from "@/i18n/messages";
 
 type Tab = "documents" | "snapshots";
+
+/** Poll cadence while any document's ingestion is still in flight. */
+const INGESTION_POLL_MS = 5000;
+/** Revision ingestion statuses that mean "keep watching". */
+const INGESTION_ACTIVE_STATUSES = new Set(["PENDING", "PROCESSING"]);
+
+/**
+ * Revision ingestion status is the knowledge domain's own state machine: its
+ * PENDING means "waiting to be ingested", not the approval domain's 待审批.
+ */
+function ingestionStatusLabel(status: string, translate: (key: MessageKey) => string): string {
+  const known: string[] = ["PENDING", "PROCESSING", "READY", "FAILED"];
+  if (!known.includes(status)) return status;
+  return translate(`knowledge.ingestionStatus.${status}` as MessageKey);
+}
 
 export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowledgeBaseId: string }) {
   const { t, formatDateTime, formatNumber } = useI18n();
@@ -57,6 +77,32 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
   const bases = useWorkspaceData<KnowledgeBase[]>(loadBases, `knowledge-bases:${workspaceId}`);
   const documents = useWorkspaceData<KnowledgeDocument[]>(loadDocuments, `kb-documents:${scope}`);
   const snapshots = useWorkspaceData<KnowledgeSnapshot[]>(loadSnapshots, `kb-snapshots:${scope}`);
+  const loadUsage = useCallback(
+    async (
+      auth: AuthInput,
+    ): Promise<Array<{ agent: Agent; mode: KnowledgeBindingMode; snapshotId: string | null }>> => {
+      const agents = await listAgents(auth);
+      const hits = await Promise.all(
+        agents.map(async (agent) => {
+          try {
+            const bindings = await getAgentKnowledgeBindings(auth, agent.id);
+            const binding = bindings.find((entry) => entry.knowledge_base_id === knowledgeBaseId);
+            return binding ? { agent, mode: binding.binding_mode, snapshotId: binding.snapshot_id } : null;
+          } catch {
+            return null;
+          }
+        }),
+      );
+      return hits.filter(
+        (
+          hit,
+        ): hit is { agent: Agent; mode: KnowledgeBindingMode; snapshotId: string | null } =>
+          hit !== null,
+      );
+    },
+    [knowledgeBaseId],
+  );
+  const usage = useWorkspaceData(loadUsage, `kb-used-by:${scope}`);
   const revisions = useWorkspaceData<DocumentRevisionStatus[]>(
     loadRevisions,
     `kb-revisions:${scope}:${selectedDocumentId ?? ""}`,
@@ -65,6 +111,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
 
   const documentMutation = useWorkspaceMutation(`kb-documents:${scope}`);
   const snapshotMutation = useWorkspaceMutation(`kb-snapshots:${scope}`);
+  const retryMutation = useWorkspaceMutation(`kb-retry:${scope}`);
 
   useEffect(() => {
     setTab("documents");
@@ -91,6 +138,32 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
   const snapshotList = snapshots.data ?? [];
   const revisionList = revisions.data ?? [];
   const selectedDocument = documentList.find((item) => item.id === selectedDocumentId) ?? null;
+
+  // Ingestion is asynchronous and can fail: while anything is in flight the
+  // list refreshes itself, so "uploaded" is never the last thing the user
+  // hears about their document.
+  const ingestionInFlight = documentList.some((item) =>
+    item.current_revision_status ? INGESTION_ACTIVE_STATUSES.has(item.current_revision_status) : false,
+  );
+  const reloadDocuments = documents.reload;
+  useEffect(() => {
+    if (!ingestionInFlight) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden) reloadDocuments();
+    }, INGESTION_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [ingestionInFlight, reloadDocuments]);
+
+  async function retryIngestion(documentId: string) {
+    setNotice(null);
+    const result = await retryMutation.run((auth) =>
+      retryDocumentIngestion(auth, knowledgeBaseId, documentId),
+    );
+    if (result) {
+      setNotice(t("knowledge.retryAccepted"));
+      reloadDocuments();
+    }
+  }
 
   async function submitUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -142,12 +215,17 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
         <p className="eyebrow">{t("knowledge.eyebrow")}</p>
         <h1>{base?.name ?? t("knowledge.baseDetail")}</h1>
         <p className="page-lede">
-          <code>{knowledgeBaseId}</code>
+          <HashValue value={knowledgeBaseId} label={t("common.id")} />
         </p>
       </header>
 
       <div className="page-toolbar">
-        <Link className="button button-ghost" href="/knowledge/playground">
+        {/* The playground preselects this KB from the query, so tuning starts
+            in context instead of a hand-pasted UUID. */}
+        <Link
+          className="button button-ghost"
+          href={`/knowledge/playground?knowledge_base_id=${encodeURIComponent(knowledgeBaseId)}`}
+        >
           {t("knowledge.openPlayground")}
         </Link>
       </div>
@@ -206,42 +284,66 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
             )}
 
             {documentList.length > 0 && (
-              <div className="data-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th scope="col">{t("knowledge.documentName")}</th>
-                      <th scope="col">{t("common.created")}</th>
-                      <th scope="col">{t("settings.models.actions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {documentList.map((document) => (
-                      <tr key={document.id}>
-                        <td data-label={t("knowledge.documentName")}>{document.name}</td>
-                        <td data-label={t("common.created")}>
-                          {document.created_at ? formatDateTime(document.created_at) : t("common.none")}
-                        </td>
-                        <td data-label={t("settings.models.actions")}>
-                          <button
-                            type="button"
-                            className="button button-ghost"
-                            onClick={() =>
-                              setSelectedDocumentId((current) =>
-                                current === document.id ? null : document.id,
-                              )
-                            }
-                          >
-                            {selectedDocumentId === document.id
-                              ? t("knowledge.hideRevisions")
-                              : t("knowledge.viewRevisions")}
-                          </button>
-                        </td>
+              <>
+                <InlineError error={retryMutation.error} fallback={t("errors.requestFailed")} />
+                <div className="data-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t("knowledge.documentName")}</th>
+                        <th scope="col">{t("knowledge.ingestionStatusColumn")}</th>
+                        <th scope="col">{t("common.created")}</th>
+                        <th scope="col">{t("settings.models.actions")}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {documentList.map((document) => (
+                        <tr key={document.id}>
+                          <td data-label={t("knowledge.documentName")}>{document.name}</td>
+                          <td data-label={t("knowledge.ingestionStatusColumn")}>
+                            {document.current_revision_status ? (
+                              <StatusBadge
+                                status={document.current_revision_status}
+                                label={ingestionStatusLabel(document.current_revision_status, t)}
+                              />
+                            ) : (
+                              t("common.none")
+                            )}
+                          </td>
+                          <td data-label={t("common.created")}>
+                            {document.created_at ? formatDateTime(document.created_at) : t("common.none")}
+                          </td>
+                          <td data-label={t("settings.models.actions")}>
+                            {document.current_revision_status === "FAILED" && (
+                              <button
+                                type="button"
+                                className="button button-ghost"
+                                disabled={retryMutation.pending}
+                                onClick={() => void retryIngestion(document.id)}
+                              >
+                                {t("knowledge.retryIngestion")}
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              className="button button-ghost"
+                              onClick={() =>
+                                setSelectedDocumentId((current) =>
+                                  current === document.id ? null : document.id,
+                                )
+                              }
+                            >
+                              {selectedDocumentId === document.id
+                                ? t("knowledge.hideRevisions")
+                                : t("knowledge.viewRevisions")}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </Panel>
 
@@ -301,7 +403,10 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
                             <StatusBadge status={entry.revision.lifecycle_status} />
                           </td>
                           <td data-label={t("knowledge.ingestion")}>
-                            <StatusBadge status={entry.revision.ingestion_status} />
+                            <StatusBadge
+                              status={entry.revision.ingestion_status}
+                              label={ingestionStatusLabel(entry.revision.ingestion_status, t)}
+                            />
                           </td>
                           <td data-label={t("knowledge.stage")}>
                             <code>{entry.ingestion_job?.stage ?? "—"}</code>
@@ -364,26 +469,54 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
                     <th scope="col">{t("knowledge.items")}</th>
                     <th scope="col">{t("knowledge.schemaVersion")}</th>
                     <th scope="col">{t("common.created")}</th>
+                    <th scope="col">{t("settings.models.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {snapshotList.map((snapshot) => (
                     <tr key={snapshot.id}>
                       <td data-label={t("common.id")}>
-                        <code>{snapshot.id}</code>
+                        <HashValue value={snapshot.id} label={t("common.id")} />
                       </td>
                       <td data-label={t("knowledge.contentHash")}>
-                        <code className="hash-value">{snapshot.content_hash}</code>
+                        <HashValue value={snapshot.content_hash} label={t("knowledge.contentHash")} />
                       </td>
                       <td data-label={t("knowledge.items")}>{formatNumber(snapshot.item_count)}</td>
                       <td data-label={t("knowledge.schemaVersion")}>{snapshot.snapshot_schema_version}</td>
                       <td data-label={t("common.created")}>{formatDateTime(snapshot.created_at)}</td>
+                      <td data-label={t("settings.models.actions")}>
+                        <Link
+                          className="button button-ghost"
+                          href={`/knowledge/playground?knowledge_base_id=${encodeURIComponent(knowledgeBaseId)}&snapshot_id=${encodeURIComponent(snapshot.id)}`}
+                        >
+                          {t("knowledge.testSnapshot")}
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
+        </Panel>
+      )}
+
+      {(usage.data ?? []).length > 0 && (
+        <Panel ariaLabel={t("knowledge.usedByTitle")} title={t("knowledge.usedByTitle")} eyebrow={t("knowledge.usedByEyebrow")}>
+          <ul className="research-thread-cards">
+            {(usage.data ?? []).map(({ agent, mode, snapshotId }) => (
+              <li key={agent.id}>
+                <Link className="research-thread-card" href={`/agents/${encodeURIComponent(agent.id)}`}>
+                  <span className="research-thread-card-title">{agent.name}</span>
+                  <span className="research-thread-card-meta">
+                    {mode === "PINNED" && snapshotId
+                      ? t("knowledge.usedByPinned", { snapshot: snapshotId.slice(0, 8) })
+                      : t("knowledge.usedByLatest")}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Panel>
       )}
     </div>

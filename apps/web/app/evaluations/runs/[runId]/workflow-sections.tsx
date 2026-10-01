@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
-import { EmptyState, ErrorState, InlineError, Panel } from "@/components/ui/states";
+import { EmptyState, ErrorState, InlineError, LoadingState, Panel } from "@/components/ui/states";
 import TechnicalDetails from "@/components/ui/technical-details";
 import { ApiError, toApiError } from "@/lib/api/client";
 import {
+  EvaluationCaseResult,
   EvaluationComparison,
   EvaluationExperimentRun,
   EvaluationExperimentVariant,
@@ -23,6 +24,7 @@ import {
   getExperimentAblation,
   getExperimentRunMetrics,
   listExperimentComparisons,
+  listExperimentRunCaseResults,
   listReleaseGateDecisions,
   listReleaseGatePolicies,
   materializeExperimentRunMetrics,
@@ -30,6 +32,8 @@ import {
   uniqueById,
   upsertById,
 } from "@/lib/api/evaluation";
+import Link from "next/link";
+
 import { useI18n } from "@/i18n/provider";
 
 type AuthInput = { workspaceId: string; accessToken: string; sessionId: number };
@@ -409,7 +413,7 @@ export default function RunWorkflow({
           <ErrorState code={metrics.error.code} message={metrics.error.message || t("evaluation.metrics.loadError")} onRetry={() => void loadMetrics()} />
         )}
         {terminal && metrics.kind === "ready" && (
-          <MetricsView payload={metrics.payload} />
+          <MetricsView payload={metrics.payload} variantLabel={variantLabel} />
         )}
       </Panel>
 
@@ -492,7 +496,7 @@ export default function RunWorkflow({
       <Panel ariaLabel={t("evaluation.ablation.stepTitle")}>
         <StepHeader step={3} title={t("evaluation.ablation.stepTitle")} eyebrow={t("evaluation.ablation.stepTitle")} />
         {!selectedComparison && <p className="state-hint">{t("evaluation.ablation.needsComparison")}</p>}
-        {selectedComparison && ablationState === "loading" && <p className="state-hint">{t("common.loading")}</p>}
+        {selectedComparison && ablationState === "loading" && <LoadingState />}
         {selectedComparison && ablationState === "error" && ablationError && (
           <ErrorState
             code={ablationError.code}
@@ -527,8 +531,13 @@ export default function RunWorkflow({
                 onRetry={() => void loadPolicies()}
               />
             )}
-            {!policiesError && policies === null && <p className="state-hint">{t("common.loading")}</p>}
-            {!policiesError && policies !== null && policies.length === 0 && <p className="state-hint">{t("evaluation.gate.noPolicies")}</p>}
+            {!policiesError && policies === null && <LoadingState />}
+            {!policiesError && policies !== null && policies.length === 0 && (
+              <p className="state-hint">
+                {t("evaluation.gate.noPolicies")}{" "}
+                <Link href="/evaluations/release-gates">{t("evaluation.gate.goPolicies")}</Link>
+              </p>
+            )}
             {!policiesError && policies && policies.length > 0 && (
               <form
                 className="eval-form"
@@ -544,7 +553,8 @@ export default function RunWorkflow({
                     <option value="">—</option>
                     {policies.map((policy) => (
                       <option value={policy.id} key={policy.id}>
-                        {policy.name} · {policy.policy_json.rules.length} rules
+                        {policy.name} ·{" "}
+                        {t("evaluation.gates.ruleCount", { count: policy.policy_json.rules.length })}
                       </option>
                     ))}
                   </select>
@@ -566,7 +576,27 @@ export default function RunWorkflow({
             )}
             {!decisionsError && decisionsLoaded && decisions.length === 0 && <EmptyState title={t("evaluation.gate.empty")} />}
             {!decisionsError && decisions.map((decision) => (
-              <GateDecisionView key={decision.id} decision={decision} policy={policies?.find((p) => p.id === decision.policy_id) ?? null} />
+              <GateDecisionView
+                key={decision.id}
+                decision={decision}
+                policy={policies?.find((p) => p.id === decision.policy_id) ?? null}
+                candidateVersionHref={(() => {
+                  const comparison = (comparisons ?? []).find((item) => item.id === decision.comparison_id);
+                  if (!comparison) return null;
+                  const candidate = variants.find((v) => v.id === comparison.candidate_variant_id);
+                  return candidate?.agent_id
+                    ? `/agents/${encodeURIComponent(candidate.agent_id)}/versions/${encodeURIComponent(candidate.agent_version_id)}`
+                    : null;
+                })()}
+                candidatePlaygroundHref={(() => {
+                  const comparison = (comparisons ?? []).find((item) => item.id === decision.comparison_id);
+                  if (!comparison) return null;
+                  const candidate = variants.find((v) => v.id === comparison.candidate_variant_id);
+                  return candidate?.agent_id
+                    ? `/agents/${encodeURIComponent(candidate.agent_id)}/playground?version=${encodeURIComponent(candidate.agent_version_id)}`
+                    : null;
+                })()}
+              />
             ))}
           </>
         )}
@@ -575,7 +605,13 @@ export default function RunWorkflow({
   );
 }
 
-function MetricsView({ payload }: { payload: MetricSnapshotPayload }) {
+function MetricsView({
+  payload,
+  variantLabel,
+}: {
+  payload: MetricSnapshotPayload;
+  variantLabel: (id: string) => string;
+}) {
   const { t, formatNumber } = useI18n();
   const variantEntries = Object.entries(payload.variants ?? {});
 
@@ -659,9 +695,7 @@ function MetricsView({ payload }: { payload: MetricSnapshotPayload }) {
         const group = narrowMetricGroup(node);
         return (
           <div key={variantId}>
-            <p className="eyebrow">
-              <code>{variantId.slice(0, 8)}…</code>
-            </p>
+            <p className="eyebrow">{variantLabel(variantId)}</p>
             <MetricRows metrics={group.metrics} />
             {Object.entries(group.categories).map(([category, metrics]) => (
               <div key={category}>
@@ -739,7 +773,7 @@ function ComparisonView({
 }
 
 function PairedMetricRow({ name, paired }: { name: string; paired: PairedMetricView }) {
-  const { t } = useI18n();
+  const { t, formatPercent } = useI18n();
   const directionKey =
     paired.direction === "HIGHER_IS_BETTER" || paired.direction === "LOWER_IS_BETTER"
       ? paired.direction
@@ -751,7 +785,7 @@ function PairedMetricRow({ name, paired }: { name: string; paired: PairedMetricV
   const relative =
     paired.relative_delta === null || paired.relative_delta === undefined
       ? t("evaluation.comparison.notAvailable")
-      : `${(paired.relative_delta * 100).toFixed(1)}%`;
+      : formatPercent(paired.relative_delta);
   return (
     <tr>
       <td data-label={t("evaluation.comparison.metricColumns.metric")}><code>{name}</code></td>
@@ -817,19 +851,43 @@ function AblationView({
   );
 }
 
-function GateDecisionView({ decision, policy }: { decision: ReleaseGateDecision; policy: ReleaseGatePolicy | null }) {
+function GateDecisionView({
+  decision,
+  policy,
+  candidateVersionHref,
+  candidatePlaygroundHref,
+}: {
+  decision: ReleaseGateDecision;
+  policy: ReleaseGatePolicy | null;
+  /** Where the candidate variant's agent lives; null when it cannot be resolved. */
+  candidateVersionHref: string | null;
+  candidatePlaygroundHref: string | null;
+}) {
   const { t, statusLabel, formatDateTime } = useI18n();
   return (
     <article className="gate-decision">
       <div className="gate-decision-header">
-        <span className={`gate-status gate-${decision.status.toLowerCase()}`}>
-          {statusLabel(decision.status)}
-        </span>
+        <StatusBadge status={decision.status} />
         <div>
           <strong>{policy?.name ?? decision.policy_id.slice(0, 8) + "…"}</strong>
           <span className="state-hint"> · {formatDateTime(decision.created_at)}</span>
         </div>
       </div>
+      {(candidateVersionHref || candidatePlaygroundHref) && (
+        <div className="form-actions">
+          {/* The gate verdict should lead to the exact immutable version that
+              was evaluated, so the next step cannot drift to another candidate. */}
+          {decision.status === "PASS" && candidatePlaygroundHref ? (
+            <Link className="button button-primary" href={candidatePlaygroundHref}>
+              {t("evaluation.gate.testPassedVersion")}
+            </Link>
+          ) : candidateVersionHref ? (
+            <Link className="button button-ghost" href={candidateVersionHref}>
+              {t("evaluation.gate.goCandidate")}
+            </Link>
+          ) : null}
+        </div>
+      )}
       <div className="data-table">
         <table>
           <thead>
@@ -883,5 +941,225 @@ function GateDecisionView({ decision, policy }: { decision: ReleaseGateDecision;
         value={{ reasons: decision.reasons, comparison_hash: decision.comparison_hash, policy_hash: decision.policy_hash, decision_hash: decision.decision_hash }}
       />
     </article>
+  );
+}
+
+// ---------- Per-case results (failure drill-down) ----------
+
+const CASE_RESULT_STATUSES = ["PENDING", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"];
+const CASE_RESULTS_PAGE_SIZE = 50;
+
+type CaseResultsState =
+  | { kind: "loading" }
+  | { kind: "ready" }
+  | { kind: "error"; error: ApiError };
+
+/** One experiment run's per-case executions, filterable by case status. */
+export function RunCaseResults({
+  input,
+  runId,
+  variants,
+}: {
+  input: AuthInput;
+  runId: string;
+  variants: EvaluationExperimentVariant[];
+}) {
+  const { t, statusLabel, formatCount, formatDurationMs, formatCurrencyAmount } = useI18n();
+  const [statusFilter, setStatusFilter] = useState("");
+  const [items, setItems] = useState<EvaluationCaseResult[]>([]);
+  const [total, setTotal] = useState(0);
+  const [state, setState] = useState<CaseResultsState>({ kind: "loading" });
+  const [loadingMore, setLoadingMore] = useState(false);
+  const generationRef = useRef(0);
+  const activeSessionRef = useRef(input.sessionId);
+  activeSessionRef.current = input.sessionId;
+  const activeRunRef = useRef(runId);
+  activeRunRef.current = runId;
+  const variantLabel = useCallback(
+    (id: string) => variants.find((variant) => variant.id === id)?.label ?? `${id.slice(0, 8)}…`,
+    [variants],
+  );
+  // A case's PENDING means "not executed yet". The shared status label for
+  // PENDING is the approval domain's 「待审批」, which would read as if an
+  // approval were waiting for the reader -- the one thing it must not say.
+  const caseStatusLabel = useCallback(
+    (status: string) =>
+      status === "PENDING" ? t("evaluation.run.caseResults.statusPending") : statusLabel(status),
+    [t, statusLabel],
+  );
+
+  const isCurrent = (requestSessionId: number, requestRunId: string, generation: number) =>
+    activeSessionRef.current === requestSessionId &&
+    activeRunRef.current === requestRunId &&
+    generationRef.current === generation;
+
+  const loadFirstPage = useCallback(
+    async (status: string) => {
+      const generation = (generationRef.current += 1);
+      const requestSessionId = activeSessionRef.current;
+      const requestRunId = activeRunRef.current;
+      setState({ kind: "loading" });
+      try {
+        const result = await listExperimentRunCaseResults(
+          { workspaceId: input.workspaceId, accessToken: input.accessToken },
+          requestRunId,
+          { status: status || undefined, limit: CASE_RESULTS_PAGE_SIZE, offset: 0 },
+        );
+        if (!isCurrent(requestSessionId, requestRunId, generation)) return;
+        setTotal(result.total);
+        setItems(uniqueById(result.items));
+        setState({ kind: "ready" });
+      } catch (caught) {
+        if (!isCurrent(requestSessionId, requestRunId, generation)) return;
+        setState({ kind: "error", error: toApiError(caught, "") });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [input.workspaceId, input.accessToken],
+  );
+
+  useEffect(() => {
+    void loadFirstPage(statusFilter);
+  }, [statusFilter, loadFirstPage]);
+
+  const loadMore = useCallback(async () => {
+    const generation = (generationRef.current += 1);
+    const requestSessionId = activeSessionRef.current;
+    const requestRunId = activeRunRef.current;
+    setLoadingMore(true);
+    try {
+      const result = await listExperimentRunCaseResults(
+        { workspaceId: input.workspaceId, accessToken: input.accessToken },
+        requestRunId,
+        { status: statusFilter || undefined, limit: CASE_RESULTS_PAGE_SIZE, offset: items.length },
+      );
+      if (!isCurrent(requestSessionId, requestRunId, generation)) return;
+      setTotal(result.total);
+      setItems((current) => uniqueById([...current, ...result.items]));
+    } catch {
+      // A failed extra page keeps the rows already shown; retry via the button.
+    } finally {
+      setLoadingMore(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input.workspaceId, input.accessToken, statusFilter, items.length]);
+
+  return (
+    <Panel
+      title={t("evaluation.run.caseResults.title")}
+      eyebrow={t("evaluation.run.caseResults.eyebrow")}
+      actions={
+        <>
+          <button
+            type="button"
+            className="button button-ghost"
+            onClick={() => void loadFirstPage(statusFilter)}
+          >
+            {t("common.refresh")}
+          </button>
+          <label className="state-hint">
+            {t("evaluation.run.caseResults.filterLabel")}{" "}
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <option value="">{t("evaluation.run.caseResults.filterAll")}</option>
+              {CASE_RESULT_STATUSES.map((status) => (
+                <option value={status} key={status}>
+                  {caseStatusLabel(status)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </>
+      }
+    >
+      {state.kind === "error" ? (
+        <ErrorState
+          code={state.error.code}
+          message={state.error.message || t("errors.loadEvaluation")}
+          onRetry={() => void loadFirstPage(statusFilter)}
+        />
+      ) : state.kind === "loading" ? (
+        <LoadingState />
+      ) : items.length === 0 ? (
+        <EmptyState
+          title={t("evaluation.run.caseResults.empty")}
+          hint={t("evaluation.run.caseResults.emptyHint")}
+        />
+      ) : (
+        <>
+          <p className="state-hint">{t("evaluation.run.caseResults.total", { count: formatCount(total) })}</p>
+          <div className="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">{t("evaluation.run.caseResults.columnCase")}</th>
+                  <th scope="col">{t("evaluation.run.caseResults.columnStatus")}</th>
+                  <th scope="col">{t("evaluation.run.caseResults.columnVariant")}</th>
+                  <th scope="col">{t("evaluation.run.caseResults.columnRepetition")}</th>
+                  <th className="numeric-cell" scope="col">{t("evaluation.run.caseResults.columnLatency")}</th>
+                  <th className="numeric-cell" scope="col">{t("evaluation.run.caseResults.columnTokens")}</th>
+                  <th scope="col">{t("evaluation.run.caseResults.columnFailure")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id}>
+                    <td className="tight-cell" data-label={t("evaluation.run.caseResults.columnCase")}>
+                      <code title={item.case_execution_key}>
+                        {item.case_execution_key.length > 28
+                          ? `${item.case_execution_key.slice(0, 28)}…`
+                          : item.case_execution_key}
+                      </code>
+                    </td>
+                    <td data-label={t("evaluation.run.caseResults.columnStatus")}>
+                      <StatusBadge status={item.status} label={caseStatusLabel(item.status)} />
+                    </td>
+                    <td className="tight-cell" data-label={t("evaluation.run.caseResults.columnVariant")}>
+                      {variantLabel(item.experiment_variant_id)}
+                    </td>
+                    <td className="numeric-cell" data-label={t("evaluation.run.caseResults.columnRepetition")}>
+                      {item.repetition_index + 1}
+                    </td>
+                    <td className="numeric-cell" data-label={t("evaluation.run.caseResults.columnLatency")}>
+                      {item.latency_ms === null ? "—" : formatDurationMs(item.latency_ms)}
+                    </td>
+                    <td className="numeric-cell" data-label={t("evaluation.run.caseResults.columnTokens")}>
+                      {item.total_tokens === null ? "—" : formatCount(item.total_tokens)}
+                    </td>
+                    <td data-label={t("evaluation.run.caseResults.columnFailure")}>
+                      {item.failure_code ? (
+                        <span>
+                          <code>{item.failure_code}</code>
+                          {item.safe_failure_message && (
+                            <span className="state-hint" title={item.safe_failure_message}>
+                              {item.safe_failure_message.length > 80
+                                ? `${item.safe_failure_message.slice(0, 80)}…`
+                                : item.safe_failure_message}
+                            </span>
+                          )}
+                          {item.agent_run_id && (
+                            <Link href={`/runs/${encodeURIComponent(item.agent_run_id)}`}>
+                              {t("evaluation.run.caseResults.openAgentRun")}
+                            </Link>
+                          )}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {items.length < total && (
+            <div className="form-actions">
+              <button type="button" className="button button-ghost" onClick={() => void loadMore()} disabled={loadingMore}>
+                {loadingMore ? t("common.loading") : t("evaluation.run.caseResults.loadMore")}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </Panel>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useI18n } from "@/i18n/provider";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import { useMenuKeyboardNav } from "@/components/layout/menu-keyboard";
 
 function shortUserId(value: string): string {
   if (value.length <= 10) return value;
@@ -18,7 +19,7 @@ export default function UserMenu() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useMenuKeyboardNav(open);
 
   useEffect(() => {
     if (!open) return;
@@ -54,6 +55,7 @@ export default function UserMenu() {
         onClick={() => setOpen((value) => !value)}
       >
         {t("user.account")}
+        <span className="user-menu-id">{shortUserId(userId)}</span>
       </button>
       {open && (
         <div className="ws-menu" role="menu" aria-label={t("user.account")}>

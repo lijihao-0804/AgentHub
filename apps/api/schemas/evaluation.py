@@ -152,6 +152,9 @@ class EvaluationExperimentVariantResponse(BaseModel):
     experiment_id: UUID
     label: str
     agent_version_id: UUID
+    # The agent this version belongs to, filled by the route from the
+    # AgentVersion table; None only if the version row vanished.
+    agent_id: UUID | None = None
     resolved_spec_hash: str = Field(min_length=64, max_length=64)
     pricing_snapshot_id: UUID
     pricing_snapshot_hash: str = Field(min_length=64, max_length=64)
@@ -169,6 +172,7 @@ class EvaluationExperimentResponse(BaseModel):
     workspace_id: UUID
     name: str
     description: str | None
+    dataset_id: UUID
     dataset_version_id: UUID
     dataset_content_hash: str = Field(min_length=64, max_length=64)
     dataset_schema_version: int
@@ -227,6 +231,42 @@ class EvaluationExperimentRunProgressResponse(BaseModel):
     failed: int
     cancelled: int
     progress: float
+
+
+class EvaluationCaseResultResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    id: UUID
+    workspace_id: UUID
+    experiment_run_id: UUID
+    experiment_variant_id: UUID
+    dataset_item_id: UUID
+    repetition_index: int
+    case_execution_key: str
+    status: str
+    agent_run_id: UUID | None
+    latency_ms: int | None
+    input_tokens: int | None
+    output_tokens: int | None
+    total_tokens: int | None
+    cached_tokens: int | None
+    cost_amount: Decimal | None
+    cost_currency: str | None
+    failure_code: str | None
+    observed_agent_status: str | None
+    observed_agent_failure_code: str | None
+    safe_failure_message: str | None
+    observation: dict[str, Any]
+    started_at: datetime | None
+    completed_at: datetime | None
+    created_at: datetime
+
+
+class EvaluationCaseResultListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    total: int
+    items: list[EvaluationCaseResultResponse]
 
 
 class EvaluationComparisonCreateRequest(BaseModel):
@@ -346,3 +386,17 @@ __all__ = [
     "PricingSnapshotCreateRequest",
     "PricingSnapshotResponse",
 ]
+
+
+class EvaluationDatasetListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[EvaluationDatasetResponse]
+    total: int
+
+
+class EvaluationExperimentListResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[EvaluationExperimentResponse]
+    total: int

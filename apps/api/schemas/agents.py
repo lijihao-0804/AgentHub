@@ -190,3 +190,12 @@ class AgentMemoryListResponse(BaseModel):
 
     items: list[AgentMemoryResponse]
     total: int
+
+
+class AgentDeriveResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_version_id: UUID
+    source_version_number: int
+    source_resolved_spec_hash: str
+    values: dict[str, Any]

@@ -7,7 +7,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -127,6 +127,49 @@ class ApprovalService:
             )
             return list(result)
 
+    async def list_page(
+        self,
+        context: WorkspaceExecutionContext,
+        decision_filter: str | None,
+        limit: int,
+        offset: int,
+    ) -> tuple[list[Approval], int]:
+        """Paged inbox listing, newest first.
+
+        ``decision_filter`` narrows the inbox to a tab: ``PENDING`` keeps the
+        undecided rows, ``DECIDED`` keeps every terminal decision. The total is
+        the full filtered count so the client can show "loaded X of Y" across
+        pages.
+        """
+        if "workspace_read" not in context.permissions:
+            raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
+        filters = [Approval.workspace_id == _workspace_uuid(context)]
+        if decision_filter == "PENDING":
+            filters.append(Approval.decision_status == ApprovalDecisionStatus.PENDING.value)
+        elif decision_filter == "DECIDED":
+            filters.append(
+                Approval.decision_status.in_(
+                    [
+                        ApprovalDecisionStatus.APPROVED.value,
+                        ApprovalDecisionStatus.DENIED.value,
+                        ApprovalDecisionStatus.EXPIRED.value,
+                        ApprovalDecisionStatus.CANCELLED.value,
+                    ]
+                )
+            )
+        async with self.session_factory() as session:
+            total = await session.scalar(
+                select(func.count()).select_from(Approval).where(*filters)
+            )
+            result = await session.scalars(
+                select(Approval)
+                .where(*filters)
+                .order_by(Approval.created_at.desc(), Approval.id.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+            return list(result), int(total or 0)
+
     async def list_for_run(
         self, context: WorkspaceExecutionContext, run_id: UUID
     ) -> list[Approval]:
@@ -158,6 +201,7 @@ class ApprovalService:
         approval_id: UUID,
         *,
         decision: ApprovalDecisionStatus,
+        reason: str | None = None,
     ) -> Approval:
         if "approve_action" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission to decide approvals.", 403)
@@ -195,6 +239,17 @@ class ApprovalService:
             approval.decision_status = decision.value
             approval.decided_by = user_id
             approval.decided_at = now
+            decision_metadata: dict[str, Any] = {
+                "approval_id": str(approval.id),
+                "logical_action_id": approval.logical_action_id,
+                "tool_identity": approval.tool_identity,
+                "decision": decision.value,
+            }
+            # A denial is stronger with the human's words attached; the audit
+            # log is the durable place for it, not the approval row itself.
+            trimmed_reason = (reason or "").strip()
+            if trimmed_reason:
+                decision_metadata["reason"] = trimmed_reason[:500]
             append_audit(
                 session,
                 action="approval.decide",
@@ -204,12 +259,7 @@ class ApprovalService:
                 actor_user_id=user_id,
                 organization_id=_organization_uuid(context),
                 workspace_id=workspace_id,
-                safe_metadata={
-                    "approval_id": str(approval.id),
-                    "logical_action_id": approval.logical_action_id,
-                    "tool_identity": approval.tool_identity,
-                    "decision": decision.value,
-                },
+                safe_metadata=decision_metadata,
             )
             await session.commit()
             await session.refresh(approval)

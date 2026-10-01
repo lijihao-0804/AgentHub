@@ -3,17 +3,21 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_experiment_run_queue, get_workspace_context
 from apps.api.schemas.evaluation import (
     EvaluationAblationResponse,
+    EvaluationCaseResultListResponse,
+    EvaluationCaseResultResponse,
     EvaluationComparisonCreateRequest,
     EvaluationComparisonResponse,
     EvaluationDatasetCreateRequest,
     EvaluationDatasetItemResponse,
+    EvaluationDatasetListResponse,
     EvaluationDatasetResponse,
     EvaluationDatasetVersionCreateRequest,
     EvaluationDatasetVersionDetailResponse,
@@ -21,6 +25,7 @@ from apps.api.schemas.evaluation import (
     EvaluationDatasetVersionResponse,
     EvaluationExperimentCreateRequest,
     EvaluationExperimentDetailResponse,
+    EvaluationExperimentListResponse,
     EvaluationExperimentResponse,
     EvaluationExperimentRunProgressResponse,
     EvaluationExperimentRunResponse,
@@ -33,6 +38,7 @@ from apps.api.schemas.evaluation import (
     PricingSnapshotCreateRequest,
     PricingSnapshotResponse,
 )
+from packages.agent_runtime.models import AgentVersion
 from packages.control_plane.rbac import EVALUATION_MANAGE
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
@@ -40,6 +46,7 @@ from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.judge import FrozenJudgeProfile, freeze_judge_profile
 from packages.evaluation.metrics_service import EvaluationMetricsService
+from packages.evaluation.models import EvaluationCaseResultStatus
 from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
@@ -51,6 +58,31 @@ router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}/evaluation", tags=[
 context_dependency = Depends(get_workspace_context)
 db_session_dependency = Depends(get_db_session)
 run_queue_dependency = Depends(get_experiment_run_queue)
+
+
+async def _variant_responses(
+    session: AsyncSession,
+    variants: list,
+) -> list[EvaluationExperimentVariantResponse]:
+    """Project variants with the owning agent filled in.
+
+    The gate→publish bridge (and any deep link into an agent page) needs the
+    agent id, which lives on the AgentVersion, not on the variant row.
+    """
+
+    version_ids = {item.agent_version_id for item in variants}
+    agent_by_version: dict = {}
+    if version_ids:
+        rows = await session.execute(
+            select(AgentVersion.id, AgentVersion.agent_id).where(AgentVersion.id.in_(version_ids))
+        )
+        agent_by_version = {version_id: agent_id for version_id, agent_id in rows}
+    responses = []
+    for item in variants:
+        response = EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
+        agent_id = agent_by_version.get(item.agent_version_id)
+        responses.append(response.model_copy(update={"agent_id": agent_id}))
+    return responses
 
 
 @router.post(
@@ -74,17 +106,42 @@ async def create_dataset(
     return EvaluationDatasetResponse.model_validate(dataset, from_attributes=True)
 
 
-@router.get("/datasets", response_model=list[EvaluationDatasetResponse])
+@router.get("/datasets", response_model=EvaluationDatasetListResponse)
 async def list_datasets(
     workspace_id: UUID,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
-) -> list[EvaluationDatasetResponse]:
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> EvaluationDatasetListResponse:
     del workspace_id
-    datasets = await EvaluationDatasetService().list_datasets(session, context=context)
-    return [
-        EvaluationDatasetResponse.model_validate(item, from_attributes=True) for item in datasets
-    ]
+    datasets, total = await EvaluationDatasetService().list_datasets(
+        session, context=context, limit=limit, offset=offset
+    )
+    return EvaluationDatasetListResponse(
+        items=[
+            EvaluationDatasetResponse.model_validate(item, from_attributes=True)
+            for item in datasets
+        ],
+        total=total,
+    )
+
+
+@router.get(
+    "/datasets/{dataset_id}",
+    response_model=EvaluationDatasetResponse,
+)
+async def get_dataset(
+    workspace_id: UUID,
+    dataset_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationDatasetResponse:
+    del workspace_id
+    dataset = await EvaluationDatasetService().get_dataset(
+        session, context=context, dataset_id=dataset_id
+    )
+    return EvaluationDatasetResponse.model_validate(dataset, from_attributes=True)
 
 
 @router.post(
@@ -172,6 +229,7 @@ async def get_dataset_version(
     workspace_id: UUID,
     dataset_id: UUID,
     version_id: UUID,
+    include_expected: bool = Query(default=False),
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationDatasetVersionDetailResponse:
@@ -183,14 +241,22 @@ async def get_dataset_version(
     items = await service.list_version_items(
         session, context=context, dataset_id=dataset_id, version_id=version_id
     )
+    # HOLDOUT expected answers are the release gate's secrets. They leave the
+    # API only for callers holding evaluation_manage AND asking explicitly;
+    # everyone else gets empty payloads. Evaluation runners consume the items
+    # through the services directly, so redaction here never affects runs.
+    redact_expected = not (include_expected and EVALUATION_MANAGE in context.permissions)
+    projected_items = []
+    for item in items:
+        item_response = EvaluationDatasetItemResponse.model_validate(item, from_attributes=True)
+        if redact_expected and item.split == "HOLDOUT":
+            item_response = item_response.model_copy(update={"expected": {}})
+        projected_items.append(item_response)
     response = EvaluationDatasetVersionResponse.model_validate(version, from_attributes=True)
     return EvaluationDatasetVersionDetailResponse(
         **response.model_dump(),
         item_count=len(items),
-        items=[
-            EvaluationDatasetItemResponse.model_validate(item, from_attributes=True)
-            for item in items
-        ],
+        items=projected_items,
     )
 
 
@@ -331,18 +397,25 @@ async def create_experiment(
     return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
 
 
-@router.get("/experiments", response_model=list[EvaluationExperimentResponse])
+@router.get("/experiments", response_model=EvaluationExperimentListResponse)
 async def list_experiments(
     workspace_id: UUID,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
-) -> list[EvaluationExperimentResponse]:
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> EvaluationExperimentListResponse:
     del workspace_id
-    experiments = await ExperimentService().list_experiments(session, context=context)
-    return [
-        EvaluationExperimentResponse.model_validate(item, from_attributes=True)
-        for item in experiments
-    ]
+    experiments, total = await ExperimentService().list_experiments(
+        session, context=context, limit=limit, offset=offset
+    )
+    return EvaluationExperimentListResponse(
+        items=[
+            EvaluationExperimentResponse.model_validate(item, from_attributes=True)
+            for item in experiments
+        ],
+        total=total,
+    )
 
 
 @router.get(
@@ -366,10 +439,7 @@ async def get_experiment(
     return EvaluationExperimentDetailResponse(
         **response.model_dump(exclude={"holdout_exposure_count"}),
         holdout_exposure_count=count,
-        variants=[
-            EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
-            for item in variants
-        ],
+        variants=await _variant_responses(session, variants),
     )
 
 
@@ -396,7 +466,7 @@ async def add_experiment_variant(
         ordinal=payload.ordinal,
         variant_metadata=payload.variant_metadata,
     )
-    return EvaluationExperimentVariantResponse.model_validate(variant, from_attributes=True)
+    return (await _variant_responses(session, [variant]))[0]
 
 
 @router.get(
@@ -413,10 +483,7 @@ async def list_experiment_variants(
     variants = await ExperimentService().list_variants(
         session, context=context, experiment_id=experiment_id
     )
-    return [
-        EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
-        for item in variants
-    ]
+    return await _variant_responses(session, variants)
 
 
 @router.post(
@@ -442,10 +509,7 @@ async def finalize_experiment(
     return EvaluationExperimentDetailResponse(
         **response.model_dump(exclude={"holdout_exposure_count"}),
         holdout_exposure_count=count,
-        variants=[
-            EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
-            for item in variants
-        ],
+        variants=await _variant_responses(session, variants),
     )
 
 
@@ -490,6 +554,59 @@ async def get_experiment_run(
     run, exposure_index = await ExperimentService().get_run(session, context=context, run_id=run_id)
     response = EvaluationExperimentRunResponse.model_validate(run, from_attributes=True)
     return response.model_copy(update={"holdout_exposure_index": exposure_index})
+
+
+@router.get(
+    "/experiments/{experiment_id}/runs",
+    response_model=list[EvaluationExperimentRunResponse],
+)
+async def list_experiment_runs(
+    workspace_id: UUID,
+    experiment_id: UUID,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> list[EvaluationExperimentRunResponse]:
+    del workspace_id
+    runs = await ExperimentService().list_experiment_runs(
+        session, context=context, experiment_id=experiment_id, limit=limit, offset=offset
+    )
+    return [
+        EvaluationExperimentRunResponse.model_validate(run, from_attributes=True) for run in runs
+    ]
+
+
+@router.get(
+    "/experiment-runs/{run_id}/case-results",
+    response_model=EvaluationCaseResultListResponse,
+)
+async def list_experiment_run_case_results(
+    workspace_id: UUID,
+    run_id: UUID,
+    status: str | None = Query(default=None, max_length=16),
+    limit: int = Query(default=100, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationCaseResultListResponse:
+    del workspace_id
+    if status is not None and status not in {item.value for item in EvaluationCaseResultStatus}:
+        raise AgentHubError(
+            "EVALUATION_CASE_RESULT_STATUS_INVALID",
+            "Unknown case result status filter.",
+            422,
+        )
+    result = await ExperimentService().list_case_results(
+        session, context=context, run_id=run_id, status=status, limit=limit, offset=offset
+    )
+    return EvaluationCaseResultListResponse(
+        total=result["total"],
+        items=[
+            EvaluationCaseResultResponse.model_validate(item, from_attributes=True)
+            for item in result["items"]
+        ],
+    )
 
 
 @router.post(

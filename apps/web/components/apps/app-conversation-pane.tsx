@@ -5,12 +5,21 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, InlineError, LoadingState } from "@/components/ui/states";
+import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceMutation, type WorkspaceQuery } from "@/hooks/use-workspace-data";
 import { errorHintKey } from "@/lib/api/client";
-import { submitThreadTurn, type ThreadTurn } from "@/lib/api/threads";
+import {
+  cancelAgentRun,
+  payloadString,
+  streamThreadTurn,
+} from "@/lib/api/agent-runtime";
+import type { ThreadTurn } from "@/lib/api/threads";
 import { useI18n } from "@/i18n/provider";
+import { Markdown } from "@/components/ui/markdown";
+import { useAutoScroll } from "@/components/ui/use-auto-scroll";
 
 const PENDING_STATUSES = new Set(["RUNNING", "WAITING_APPROVAL", "CANCEL_REQUESTED"]);
+const TURN_POLL_MS = 2500;
 
 function shortId(id: string): string {
   return id.slice(0, 8);
@@ -50,38 +59,138 @@ export default function AppConversationPane({
   onTurnCompleted: () => void;
 }) {
   const { t, formatDateTime } = useI18n();
+  const { workspaceId, accessToken, permissions } = useFrontendSession();
+  const cannotRun = permissions !== null && !permissions.includes("agent_run");
   const mutation = useWorkspaceMutation(`app-turns:${threadId}`);
   const tokenRef = useRef<string | null>(null);
   const [draft, setDraft] = useState("");
   const [pendingInput, setPendingInput] = useState<string | null>(null);
+  /** Live answer text from message.delta events, shown inside the pending bubble. */
+  const [streamText, setStreamText] = useState<string | null>(null);
+  const [streamRunId, setStreamRunId] = useState<string | null>(null);
+  const streamAbortRef = useRef<AbortController | null>(null);
+  const [stoppingRunId, setStoppingRunId] = useState<string | null>(null);
+  const [cancelFeedback, setCancelFeedback] = useState<"requested" | "failed" | null>(null);
+  const turnCount = turns.data?.length ?? 0;
+  const { containerRef, onScroll, following, scrollToBottom } = useAutoScroll([
+    streamText,
+    turnCount,
+  ]);
 
   // Another thread is another conversation: nothing in flight carries over.
   useEffect(() => {
     tokenRef.current = null;
     setDraft("");
     setPendingInput(null);
+    setStreamText(null);
+    setStreamRunId(null);
+    setStoppingRunId(null);
+    setCancelFeedback(null);
+    streamAbortRef.current = null;
+    return () => {
+      // Leave the backend run untouched, but stop this pane's stream so a
+      // response from the previous thread cannot update the next conversation.
+      streamAbortRef.current?.abort();
+      streamAbortRef.current = null;
+    };
   }, [threadId]);
 
   const turnList = [...(turns.data ?? [])].sort((left, right) => left.sequence - right.sequence);
+  const hasActiveRun = turnList.some(
+    (turn) => PENDING_STATUSES.has(turn.status ?? "") && turn.agent_run_id,
+  );
+
+  // A reload loses the original SSE request. Poll durable active states so a
+  // waiting approval or cancellation also resolves without reopening the page.
+  useEffect(() => {
+    if (!hasActiveRun) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden) void turns.reload();
+    }, TURN_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [hasActiveRun, turns.reload]);
+
+  // The optimistic copy stays up until the reloaded list actually contains
+  // the submitted turn (a just-submitted turn is always the list's last
+  // entry). Clearing before the reload lands makes the message blink out
+  // and back in for one reload round-trip.
+  const lastTurnInput = turnList.length > 0 ? turnList[turnList.length - 1].user_input : null;
+  const pendingVisible = pendingInput !== null && lastTurnInput !== pendingInput;
+  useEffect(() => {
+    if (pendingInput !== null && !mutation.pending && !pendingVisible) {
+      setPendingInput(null);
+      setStreamText(null);
+    }
+  }, [pendingInput, mutation.pending, pendingVisible]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = draft.trim();
-    if (!text || mutation.pending) return;
+    if (!text || mutation.pending || cannotRun) return;
+    setCancelFeedback(null);
     if (!tokenRef.current) tokenRef.current = newSubmissionToken();
     setPendingInput(text);
+    setStreamText("");
+    setStreamRunId(null);
+    const controller = new AbortController();
+    streamAbortRef.current = controller;
     const result = await mutation.run((auth) =>
-      submitThreadTurn(auth, threadId, {
-        input_text: text,
-        client_token: tokenRef.current ?? undefined,
-      }),
+      streamThreadTurn(
+        { workspaceId: auth.workspaceId, accessToken: auth.accessToken },
+        {
+          threadId,
+          inputText: text,
+          clientToken: tokenRef.current ?? undefined,
+          signal: controller.signal,
+          onStarted: (runId) => {
+            if (streamAbortRef.current === controller) setStreamRunId(runId);
+          },
+          onEvent: (event) => {
+            if (streamAbortRef.current !== controller) return;
+            if (event.type === "message.delta") {
+              const delta = payloadString(event.payload, "delta");
+              if (delta !== null) setStreamText((current) => (current ?? "") + delta);
+            } else if (event.type === "run.started") {
+              setStreamRunId(event.run_id);
+            }
+          },
+        },
+      ),
     );
-    setPendingInput(null);
+    if (streamAbortRef.current !== controller) return;
+    streamAbortRef.current = null;
     if (result) {
-      // A fresh question deserves a fresh identity; a failed one keeps its own.
+      // The stream closed (completed, paused for approval or cancelled): the
+      // reloaded turn list now carries the authoritative answer.
       tokenRef.current = null;
       setDraft("");
+      setStreamRunId(null);
       turns.reload();
+      onTurnCompleted();
+    } else if (controller.signal.aborted) {
+      // A deliberate stop is not an error to report.
+      mutation.clearError();
+      tokenRef.current = null;
+      setStreamText(null);
+      setStreamRunId(null);
+      turns.reload();
+    }
+    // A failed submission keeps the pending bubble (and its token) up so the
+    // same message can be retried.
+  }
+
+  async function stopGeneration(runId: string) {
+    setStoppingRunId(runId);
+    setCancelFeedback(null);
+    try {
+      await cancelAgentRun({ workspaceId, accessToken }, runId);
+      setCancelFeedback("requested");
+      if (streamRunId === runId) streamAbortRef.current?.abort();
+    } catch {
+      setCancelFeedback("failed");
+    } finally {
+      setStoppingRunId(null);
+      void turns.reload();
       onTurnCompleted();
     }
   }
@@ -103,7 +212,7 @@ export default function AppConversationPane({
         </button>
       </div>
 
-      <div className="research-pane-body">
+      <div className="research-pane-body" ref={containerRef} onScroll={onScroll}>
         {turns.error && (
           <ErrorState
             code={turns.error.code}
@@ -123,11 +232,14 @@ export default function AppConversationPane({
         <ol className="conversation-list">
           {turnList.map((turn) => {
             const pending = turn.status === null || PENDING_STATUSES.has(turn.status);
+            const contentRestricted = cannotRun || turn.user_input === null;
             return (
               <li className="conversation-turn" key={turn.id}>
                 <div className="conversation-message conversation-message-user">
                   <p className="conversation-role">{t("appThread.conversation.user")}</p>
-                  <p className="conversation-text">{turn.user_input}</p>
+                  <p className="conversation-text">
+                    {contentRestricted ? t("appThread.conversation.contentRestricted") : turn.user_input}
+                  </p>
                   <p className="conversation-meta">{formatDateTime(turn.created_at)}</p>
                 </div>
                 <div className="conversation-message conversation-message-agent">
@@ -140,9 +252,15 @@ export default function AppConversationPane({
                       {t("appThread.conversation.pending")}
                     </p>
                   ) : (
-                    <p className="conversation-text">
-                      {turn.final_output ?? t("appThread.conversation.noOutput")}
-                    </p>
+                    <div className="conversation-text">
+                      {contentRestricted ? (
+                        t("appThread.conversation.contentRestricted")
+                      ) : turn.final_output ? (
+                        <Markdown text={turn.final_output} />
+                      ) : (
+                        t("appThread.conversation.noOutput")
+                      )}
+                    </div>
                   )}
 
                   {turn.status === "WAITING_APPROVAL" && (
@@ -182,6 +300,18 @@ export default function AppConversationPane({
                       <Link href={`/runs/${encodeURIComponent(turn.agent_run_id)}`}>
                         {t("appThread.conversation.viewRun")}
                       </Link>
+                      {turn.status === "RUNNING" && (
+                        <button
+                          type="button"
+                          className="button button-ghost"
+                          onClick={() => void stopGeneration(turn.agent_run_id!)}
+                          disabled={cannotRun || stoppingRunId === turn.agent_run_id}
+                        >
+                          {stoppingRunId === turn.agent_run_id
+                            ? t("appThread.conversation.stopping")
+                            : t("appThread.conversation.stop")}
+                        </button>
+                      )}
                     </p>
                   ) : (
                     <p className="conversation-meta">{t("appThread.conversation.noRun")}</p>
@@ -191,7 +321,7 @@ export default function AppConversationPane({
             );
           })}
 
-          {pendingInput !== null && (
+          {pendingVisible && (
             <li className="conversation-turn" key="pending">
               <div className="conversation-message conversation-message-user">
                 <p className="conversation-role">{t("appThread.conversation.user")}</p>
@@ -199,17 +329,45 @@ export default function AppConversationPane({
               </div>
               <div className="conversation-message conversation-message-agent">
                 <p className="conversation-role">{t("appThread.conversation.agent")}</p>
-                <p className="conversation-text conversation-pending">
-                  {t("appThread.conversation.pending")}
-                </p>
+                {streamText ? (
+                  <div className="conversation-text">
+                    <Markdown text={streamText} />
+                  </div>
+                ) : (
+                  <p className="conversation-text conversation-pending">
+                    {t("appThread.conversation.pending")}
+                  </p>
+                )}
                 <p className="conversation-meta">{t("appThread.conversation.pendingHint")}</p>
+                {streamRunId && (
+                  <button
+                    type="button"
+                    className="button button-ghost"
+                    onClick={() => void stopGeneration(streamRunId)}
+                    disabled={cannotRun || stoppingRunId === streamRunId}
+                  >
+                    {stoppingRunId === streamRunId
+                      ? t("appThread.conversation.stopping")
+                      : t("appThread.conversation.stop")}
+                  </button>
+                )}
               </div>
             </li>
           )}
         </ol>
+        {!following && (
+          <div className="jump-bottom-row">
+            <button type="button" className="button button-ghost" onClick={scrollToBottom}>
+              {t("appThread.conversation.backToBottom")}
+            </button>
+          </div>
+        )}
       </div>
 
       <form className="conversation-composer" onSubmit={submit} noValidate>
+        {(cannotRun || turnList.some((turn) => turn.user_input === null)) && (
+          <p className="state-hint" role="note">{t("appThread.conversation.readOnlyHint")}</p>
+        )}
         <label>
           {t("appThread.conversation.composerLabel")}
           <textarea
@@ -218,16 +376,23 @@ export default function AppConversationPane({
             onChange={(event) => setDraft(event.target.value)}
             placeholder={t("appThread.conversation.composerPlaceholder")}
             maxLength={32000}
-            disabled={mutation.pending}
+            disabled={mutation.pending || cannotRun}
           />
         </label>
         <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
+        {cancelFeedback && (
+          <p className="inline-notice" role="status">
+            {cancelFeedback === "requested"
+              ? t("appThread.conversation.cancelRequested")
+              : t("appThread.conversation.cancelFailed")}
+          </p>
+        )}
         {mutation.error && <p className="state-hint">{t("appThread.conversation.retryHint")}</p>}
         <div className="form-actions">
           <button
             type="submit"
             className="button button-primary"
-            disabled={mutation.pending || !draft.trim()}
+            disabled={mutation.pending || cannotRun || !draft.trim()}
           >
             {mutation.pending
               ? t("appThread.conversation.sending")
