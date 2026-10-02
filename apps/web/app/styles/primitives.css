@@ -1,7 +1,9 @@
 /* Buttons, panels, forms, badges, tables — reused everywhere. */
 .button {
   align-items: center;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -36,12 +38,13 @@
 .panel-heading {
   align-items: flex-start;
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
   justify-content: space-between;
   margin-bottom: var(--space-4);
 }
 .panel-heading h2 { margin-top: 0.2rem; }
-.panel-actions { align-items: center; display: flex; gap: var(--space-3); }
+.panel-actions { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-3); }
 
 .state-block {
   border: 1px solid var(--border);

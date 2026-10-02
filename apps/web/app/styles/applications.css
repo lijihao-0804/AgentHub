@@ -25,6 +25,7 @@
   overflow-wrap: anywhere;
   padding: 0.3rem 0.6rem;
 }
+.string-list-items li > span { min-width: 0; }
 .checkbox-label {
   align-items: center;
   display: flex;

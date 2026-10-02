@@ -27,6 +27,11 @@
 }
 
 @media (max-width: 640px) {
+  .stat-row { grid-template-columns: minmax(0, 1fr); }
+  .stat-row-lead { white-space: normal; overflow-wrap: anywhere; }
+  .stat-row-meta-end, .stat-row-value { text-align: left; }
+  .key-value-row { grid-template-columns: minmax(0, 1fr); }
+  .research-pane-head, .artifact-card-head, .paper-card-head { flex-wrap: wrap; }
   .topbar { gap: var(--space-2); padding: 0 var(--space-3); }
   .nav-toggle-label { display: none; }
   .session-control .button { padding: 0.35rem 0.55rem; font-size: 0.8rem; }
@@ -52,6 +57,12 @@
 }
 
 @media (max-width: 480px) {
+  /* Keep workspace context on its own row instead of squeezing it under
+     the account control. The existing trigger still truncates long names. */
+  .topbar { flex-wrap: wrap; padding-top: var(--space-2); padding-bottom: var(--space-2); }
+  .topbar-spacer { display: none; }
+  .topbar .ws-selector { flex-basis: 100%; order: 1; }
+  .topbar .ws-selector-trigger { max-width: 100%; width: 100%; }
   .session-status { display: none; }
   /*
    * Below this the topbar cannot hold every control at full size, so one has

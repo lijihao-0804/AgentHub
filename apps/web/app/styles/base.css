@@ -16,6 +16,9 @@ h2 { font-size: 1.1rem; margin: 0; }
 h3 { font-size: 0.98rem; margin: 0; }
 p { margin: 0; }
 
+/* User-authored names and explanations may contain long IDs or URLs. */
+h1, h2, h3, h4, p, dt, dd { overflow-wrap: anywhere; }
+
 code {
   font-family: var(--font-mono);
   font-size: 0.85em;
@@ -40,6 +43,7 @@ a { color: var(--accent); }
  * blessed wrapper rendered as a raw browser control.
  */
 input, select, textarea {
+  min-width: 0;
   background: var(--surface-inset);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);

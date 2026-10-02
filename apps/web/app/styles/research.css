@@ -50,11 +50,14 @@
 .research-pane-head h2 { font-size: 0.95rem; margin: 0; }
 .research-pane-body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: var(--space-3);
   max-height: 34rem;
   overflow-y: auto;
   padding: var(--space-3) var(--space-4);
 }
+.research-pane-body > * { min-width: 0; }
 
 /* ---- Thread list ---- */
 .thread-list { display: grid; gap: 0.35rem; list-style: none; margin: 0; padding: 0; }
@@ -111,6 +114,9 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  overflow-wrap: anywhere;
   gap: var(--space-2);
   padding: var(--space-3);
 }
@@ -133,7 +139,7 @@
 .artifact-facts { display: grid; gap: 0.3rem; margin: 0; }
 .artifact-facts div { display: flex; gap: var(--space-2); }
 .artifact-facts dt { color: var(--text-muted); font-size: 0.75rem; min-width: 4.5rem; }
-.artifact-facts dd { font-size: 0.8rem; margin: 0; overflow-wrap: anywhere; }
+.artifact-facts dd { font-size: 0.8rem; margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .artifact-note { color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; margin: 0; }
 
 /* ---- Paper cards ---- */
@@ -170,12 +176,12 @@
 
 @media (max-width: 1280px) {
   .research-workbench { grid-template-columns: 15rem minmax(0, 1fr); }
-  .research-pane-artifacts { grid-column: 1 / -1; }
+  .research-pane-artifacts, .research-workbench > .app-pane-stack { grid-column: 1 / -1; }
 }
 
 @media (max-width: 900px) {
   .research-workbench { grid-template-columns: minmax(0, 1fr); }
-  .research-pane-artifacts { grid-column: auto; }
+  .research-pane-artifacts, .research-workbench > .app-pane-stack { grid-column: auto; }
   .artifact-toolbar { grid-template-columns: minmax(0, 1fr); }
   .research-pane-body { max-height: none; }
 }

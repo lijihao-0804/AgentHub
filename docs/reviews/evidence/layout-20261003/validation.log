@@ -1,0 +1,67 @@
+Final production build: exit_code=0
+   ▲ Next.js 15.2.4
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/27) ...
+   Generating static pages (6/27) 
+   Generating static pages (13/27) 
+   Generating static pages (20/27) 
+ ✓ Generating static pages (27/27)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                    Size  First Load JS
+┌ ○ /                                                       2.45 kB         165 kB
+├ ○ /_not-found                                               982 B         102 kB
+├ ○ /agents                                                 4.48 kB         167 kB
+├ ƒ /agents/[agentId]                                       10.7 kB         173 kB
+├ ƒ /agents/[agentId]/chat                                    501 B         170 kB
+├ ƒ /agents/[agentId]/chat/[threadId]                         683 B         179 kB
+├ ƒ /agents/[agentId]/playground                            6.88 kB         173 kB
+├ ƒ /agents/[agentId]/versions/[versionId]                  4.61 kB         167 kB
+├ ƒ /agents/[agentId]/versions/compare                      6.47 kB         169 kB
+├ ○ /analytics                                                513 B         170 kB
+├ ƒ /analytics/[threadId]                                    2.5 kB         181 kB
+├ ○ /approvals                                              4.63 kB         167 kB
+├ ○ /dashboard                                              6.86 kB         170 kB
+├ ○ /evaluations                                             3.7 kB         166 kB
+├ ○ /evaluations/datasets                                   4.11 kB         167 kB
+├ ƒ /evaluations/datasets/[datasetId]                       5.75 kB         168 kB
+├ ƒ /evaluations/datasets/[datasetId]/versions/[versionId]  4.87 kB         168 kB
+├ ○ /evaluations/experiments                                5.15 kB         168 kB
+├ ƒ /evaluations/experiments/[experimentId]                 7.17 kB         170 kB
+├ ○ /evaluations/pricing                                    4.64 kB         167 kB
+├ ○ /evaluations/release-gates                              5.13 kB         168 kB
+├ ƒ /evaluations/runs/[runId]                               11.1 kB         174 kB
+├ ○ /incidents                                                501 B         170 kB
+├ ƒ /incidents/[threadId]                                    3.1 kB         181 kB
+├ ○ /knowledge                                              3.24 kB         166 kB
+├ ƒ /knowledge/[knowledgeBaseId]                            6.77 kB         169 kB
+├ ○ /knowledge/playground                                    4.5 kB         167 kB
+├ ○ /login                                                  1.57 kB         164 kB
+├ ○ /register                                               1.67 kB         164 kB
+├ ○ /research                                                 471 B         169 kB
+├ ƒ /research/[threadId]                                    2.98 kB         181 kB
+├ ○ /runs                                                   4.39 kB         167 kB
+├ ƒ /runs/[runId]                                           9.17 kB         179 kB
+├ ○ /runs/compare                                           4.68 kB         171 kB
+├ ○ /settings                                               2.18 kB         165 kB
+├ ○ /settings/members                                       2.63 kB         165 kB
+├ ○ /settings/models                                         6.2 kB         169 kB
+├ ○ /support                                                  473 B         169 kB
+├ ƒ /support/[threadId]                                     4.33 kB         183 kB
+├ ○ /tools                                                  3.72 kB         166 kB
+├ ƒ /tools/[toolId]                                         5.13 kB         168 kB
+└ ○ /tools/mcp                                              4.98 kB         168 kB
++ First Load JS shared by all                                101 kB
+  ├ chunks/1684-18936f0a53864587.js                         45.3 kB
+  ├ chunks/4bd1b696-0c304e719bf675ed.js                     53.2 kB
+  └ other shared chunks (total)                             1.99 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

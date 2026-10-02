@@ -1,0 +1,1035 @@
+[
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Workspace dashboard",
+    "pageWidth": 345,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      }
+    ],
+    "textRects": 110
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Agents",
+    "pageWidth": 360,
+    "topbarCollisions": [],
+    "url": "/agents",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 3.037517547607422,
+        "y": 15.60000228881836
+      }
+    ],
+    "textRects": 25
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Knowledge",
+    "pageWidth": 360,
+    "topbarCollisions": [],
+    "url": "/knowledge",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 3.037517547607422,
+        "y": 15.60000228881836
+      }
+    ],
+    "textRects": 21
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Tools",
+    "pageWidth": 345,
+    "topbarCollisions": [],
+    "url": "/tools",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      }
+    ],
+    "textRects": 53
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Runs",
+    "pageWidth": 345,
+    "topbarCollisions": [],
+    "url": "/runs",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      }
+    ],
+    "textRects": 31
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Approvals",
+    "pageWidth": 360,
+    "topbarCollisions": [],
+    "url": "/approvals",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 3.037517547607422,
+        "y": 15.60000228881836
+      }
+    ],
+    "textRects": 31
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Evaluation platform",
+    "pageWidth": 345,
+    "topbarCollisions": [],
+    "url": "/evaluations",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      }
+    ],
+    "textRects": 47
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Settings",
+    "pageWidth": 345,
+    "topbarCollisions": [],
+    "url": "/settings",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      }
+    ],
+    "textRects": 40
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 345,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 360,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 320.8000183105469
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 320.8000183105469
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 320.8000183105469
+      }
+    ],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      }
+    ],
+    "textRects": 178
+  },
+  {
+    "locale": "en-US",
+    "escaped": [
+      {
+        "class": "",
+        "right": 1297.9124755859375,
+        "tag": "LI",
+        "text": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      },
+      {
+        "class": "",
+        "right": 1297.9124755859375,
+        "tag": "SPAN",
+        "text": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      }
+    ],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 1298,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      }
+    ],
+    "textRects": 43
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Run 3c062697…",
+    "pageWidth": 345,
+    "topbarCollisions": [],
+    "url": "/runs/3c062697-f6d8-4f28-8e85-2fa88450c7b3",
+    "width": 360,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      }
+    ],
+    "textRects": 81
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Workspace dashboard",
+    "pageWidth": 375,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 108
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Agents",
+    "pageWidth": 390,
+    "topbarCollisions": [],
+    "url": "/agents",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 23
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Knowledge",
+    "pageWidth": 390,
+    "topbarCollisions": [],
+    "url": "/knowledge",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 20
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Tools",
+    "pageWidth": 375,
+    "topbarCollisions": [],
+    "url": "/tools",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 49
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Runs",
+    "pageWidth": 375,
+    "topbarCollisions": [],
+    "url": "/runs",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 29
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Approvals",
+    "pageWidth": 390,
+    "topbarCollisions": [],
+    "url": "/approvals",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 30
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Evaluation platform",
+    "pageWidth": 375,
+    "topbarCollisions": [],
+    "url": "/evaluations",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 43
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Settings",
+    "pageWidth": 375,
+    "topbarCollisions": [],
+    "url": "/settings",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 37
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 375,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 390,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 351.20001220703125
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 351.20001220703125
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 351.20001220703125
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 180
+  },
+  {
+    "locale": "en-US",
+    "escaped": [
+      {
+        "class": "",
+        "right": 1297.9124755859375,
+        "tag": "LI",
+        "text": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      },
+      {
+        "class": "",
+        "right": 1297.9124755859375,
+        "tag": "SPAN",
+        "text": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      }
+    ],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 1298,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 42
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Run 3c062697…",
+    "pageWidth": 375,
+    "topbarCollisions": [],
+    "url": "/runs/3c062697-f6d8-4f28-8e85-2fa88450c7b3",
+    "width": 390,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 76
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Workspace dashboard",
+    "pageWidth": 753,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 168.14999389648438,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 54,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 35.75,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 75.67498779296875,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 114
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Agents",
+    "pageWidth": 768,
+    "topbarCollisions": [],
+    "url": "/agents",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 160.55001831054688,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 61.824981689453125,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 20.76251220703125,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 68.2874755859375,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 29
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Knowledge",
+    "pageWidth": 768,
+    "topbarCollisions": [],
+    "url": "/knowledge",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 160.55001831054688,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 61.824981689453125,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 20.76251220703125,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 68.2874755859375,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 25
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Tools",
+    "pageWidth": 753,
+    "topbarCollisions": [],
+    "url": "/tools",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 168.14999389648438,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 54,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 35.75,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 75.67498779296875,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 54
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Runs",
+    "pageWidth": 768,
+    "topbarCollisions": [],
+    "url": "/runs",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 160.55001831054688,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 61.824981689453125,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 20.76251220703125,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 68.2874755859375,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 37
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Approvals",
+    "pageWidth": 768,
+    "topbarCollisions": [],
+    "url": "/approvals",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 160.55001831054688,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 61.824981689453125,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 20.76251220703125,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 68.2874755859375,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 35
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Evaluation platform",
+    "pageWidth": 753,
+    "topbarCollisions": [],
+    "url": "/evaluations",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 168.14999389648438,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 54,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 35.75,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 75.67498779296875,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 50
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Settings",
+    "pageWidth": 753,
+    "topbarCollisions": [],
+    "url": "/settings",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 168.14999389648438,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 54,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 35.75,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 75.67498779296875,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 45
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 753,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 768,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 720.7999877929688
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 720.7999877929688
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 720.7999877929688
+      }
+    ],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 168.14999389648438,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 54,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 35.75,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 75.67498779296875,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 140
+  },
+  {
+    "locale": "en-US",
+    "escaped": [
+      {
+        "class": "",
+        "right": 1301.9124755859375,
+        "tag": "LI",
+        "text": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      },
+      {
+        "class": "",
+        "right": 1301.9124755859375,
+        "tag": "SPAN",
+        "text": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      }
+    ],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 1302,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 168.14999389648438,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 54,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 35.75,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 75.67498779296875,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 47
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Run 3c062697…",
+    "pageWidth": 753,
+    "topbarCollisions": [],
+    "url": "/runs/3c062697-f6d8-4f28-8e85-2fa88450c7b3",
+    "width": 768,
+    "workbench": [],
+    "textOverlaps": [
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 168.14999389648438,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "x": 54,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 35.75,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "▾",
+        "x": 12.000030517578123,
+        "y": 15.599998474121094
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "Account",
+        "x": 58.4749755859375,
+        "y": 16
+      },
+      {
+        "a": "M4-C dea7172c51c9477e881a3a1cb0ac802d",
+        "b": "084ac4…ef44",
+        "x": 75.67498779296875,
+        "y": 15.199996948242188
+      }
+    ],
+    "textRects": 78
+  }
+]

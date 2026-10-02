@@ -1,0 +1,16 @@
+{
+  "baseline": "e064c36",
+  "recorded_at": "2026-10-02T21:55:39.463Z",
+  "sha256": {
+    "apps/web/app/styles/base.css": "092b8dfb5628bf89e5f791f4e32e90a1d1a78ed11f428a4db7727bdc01f5e608",
+    "apps/web/app/styles/menus.css": "3a3cc0ac3487e4b5658724c50cf57267ac9d7e4215415b9725d41b075caf2d30",
+    "apps/web/app/styles/primitives.css": "38bc5e642295e552b538c2c22f38b5c53af8e131bac460a99b7e57dfef10f995",
+    "apps/web/app/styles/research.css": "7f67359ac3cf5065448b27db9ead76ce29a72a9ca2ebc6881ce1efbcd7c07c39",
+    "apps/web/app/styles/responsive.css": "1f93902cd01c9c64c2d0868ee4ee94951108cc2fadce19b8f1becb68153f887f",
+    "apps/web/app/styles/pages.css": "de60683e2ac36f5f9185b98a03999abbef82667e274e83c9e4ee792b09feb165",
+    "apps/web/app/styles/applications.css": "7b18977ea47a6c136befd7eb7a9ce0490e52c3cacee961390bbeea5fbde9273c",
+    "scripts/layout_audit.mjs": "ed9ccaa97edbb50360de7a9dd52796d620e6cace6a4fafef21e7894ef3136a48",
+    "docs/reviews/evidence/layout-20261003/matrix.json": "343b81cd535553fd660c36e5be3ca9e6b57125b1294550b2ca0d73332a956c4b",
+    "docs/reviews/evidence/layout-20261003/edges.json": "6ee4ba0544f40f76b5fdb49c2bf8f21bef9136b9c1a95fb45a35dd7690884d5a"
+  }
+}

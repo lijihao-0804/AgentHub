@@ -1,0 +1,418 @@
+[
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Workspace dashboard",
+    "pageWidth": 305,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 320,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 113
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 305,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 320,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 48
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 305,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 320,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 280.8000183105469
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 280.8000183105469
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 280.8000183105469
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 291
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Workspace dashboard",
+    "pageWidth": 466,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 482,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 106
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 466,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 482,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 43
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 466,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 482,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 442.3999938964844
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 442.3999938964844
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 442.3999938964844
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 199
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Workspace dashboard",
+    "pageWidth": 886,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 902,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 111
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 886,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 902,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 45
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 886,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 902,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 240
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 350.3999938964844
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "1 / -1",
+        "width": 602.4000244140625
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 78
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "Workspace dashboard",
+    "pageWidth": 1266,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 1282,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 112
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 1266,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 1282,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 43
+  },
+  {
+    "locale": "en-US",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 1266,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 1282,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 272
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 319.25
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 367.1375122070313
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 81
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "工作区仪表板",
+    "pageWidth": 305,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 320,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 109
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 305,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 320,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 48
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 305,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 320,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 280.8000183105469
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 280.8000183105469
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 280.8000183105469
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 280
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "工作区仪表板",
+    "pageWidth": 466,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 482,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 107
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 466,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 482,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 45
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 466,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 482,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 442.3999938964844
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 442.3999938964844
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 442.3999938964844
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 196
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "工作区仪表板",
+    "pageWidth": 886,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 902,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 109
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 886,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 902,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 45
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 886,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 902,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 240
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 350.3999938964844
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "1 / -1",
+        "width": 602.4000244140625
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 75
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "工作区仪表板",
+    "pageWidth": 1266,
+    "topbarCollisions": [],
+    "url": "/dashboard",
+    "width": 1282,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 109
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "客服Agent_LongUnbrokenReference_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "pageWidth": 1266,
+    "topbarCollisions": [],
+    "url": "/agents/4df4e263-e76f-4191-9c87-337203d75490",
+    "width": 1282,
+    "workbench": [],
+    "textOverlaps": [],
+    "textRects": 43
+  },
+  {
+    "locale": "zh-CN",
+    "escaped": [],
+    "heading": "人工接管验收：外部工单结果未知，保留证据并人工核查",
+    "pageWidth": 1266,
+    "topbarCollisions": [],
+    "url": "/support/beda6147-1c2a-4f72-b3a7-4500289125f8",
+    "width": 1282,
+    "workbench": [
+      {
+        "class": "research-pane research-pane-threads",
+        "col": "auto",
+        "width": 272
+      },
+      {
+        "class": "research-pane research-pane-conversation",
+        "col": "auto",
+        "width": 319.25
+      },
+      {
+        "class": "app-pane-stack",
+        "col": "auto",
+        "width": 367.1375122070313
+      }
+    ],
+    "textOverlaps": [],
+    "textRects": 80
+  }
+]

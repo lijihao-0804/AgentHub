@@ -21,10 +21,10 @@
   min-width: 0;
   padding: 0.4rem 0.75rem;
 }
-.ws-selector-trigger .ws-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-selector-trigger .ws-path { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* The organisation is context; the workspace is where you are. When the
    topbar runs out of room the context goes first. */
-.ws-selector-trigger .ws-org-prefix { color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
+.ws-selector-trigger .ws-org-prefix { color: var(--text-muted); flex-shrink: 0; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 720px) {
   .ws-selector-trigger .ws-org-prefix { display: none; }
 }

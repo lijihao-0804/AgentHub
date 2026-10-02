@@ -13,6 +13,7 @@
   padding: 0;
 }
 .breadcrumbs a { color: var(--text-muted); text-decoration: none; }
+.breadcrumbs li { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .breadcrumbs a:hover { color: var(--text); text-decoration: underline; }
 .breadcrumbs span[aria-current="page"] { color: var(--text); font-weight: 600; }
 /* A recessive-text token, not a border one. The separator is aria-hidden, so
