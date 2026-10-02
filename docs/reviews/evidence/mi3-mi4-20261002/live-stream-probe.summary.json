@@ -1,0 +1,93 @@
+{
+  "version": "real-http-stream-summary-v1",
+  "raw_report_hash": "783a22575a7f8bffaf1ee81b9fd0fa4b22094dd586505d2cb85be163e1dab584",
+  "groups": {
+    "direct_answer_cold_first": {
+      "count": 1,
+      "statuses": {
+        "SUCCEEDED": 1
+      },
+      "metrics": {
+        "client_ttft_ms": {
+          "known": 1,
+          "missing": 0,
+          "p50": 4996.906699961983,
+          "p95": 4996.906699961983
+        },
+        "server_ttft_ms": {
+          "known": 1,
+          "missing": 0,
+          "p50": 4862.178399984259,
+          "p95": 4862.178399984259
+        },
+        "http_duration_ms": {
+          "known": 1,
+          "missing": 0,
+          "p50": 5537.887400016189,
+          "p95": 5537.887400016189
+        }
+      }
+    },
+    "direct_answer_warm": {
+      "count": 23,
+      "statuses": {
+        "SUCCEEDED": 23
+      },
+      "metrics": {
+        "client_ttft_ms": {
+          "known": 23,
+          "missing": 0,
+          "p50": 581.4051000052132,
+          "p95": 981.8807100353295
+        },
+        "server_ttft_ms": {
+          "known": 23,
+          "missing": 0,
+          "p50": 580.1214000093751,
+          "p95": 980.6082600378429
+        },
+        "http_duration_ms": {
+          "known": 23,
+          "missing": 0,
+          "p50": 1084.6670999890193,
+          "p95": 1454.9258799816014
+        }
+      }
+    },
+    "approval_wait": {
+      "count": 3,
+      "statuses": {
+        "WAITING_APPROVAL": 3
+      },
+      "metrics": {
+        "client_ttft_ms": {
+          "known": 3,
+          "missing": 0,
+          "p50": 715.6863000127487,
+          "p95": 750.7398599642329
+        },
+        "server_ttft_ms": {
+          "known": 3,
+          "missing": 0,
+          "p50": 714.0866999980062,
+          "p95": 749.3754300114233
+        },
+        "http_duration_ms": {
+          "known": 3,
+          "missing": 0,
+          "p50": 2323.1857999926433,
+          "p95": 2395.2100999827962
+        }
+      }
+    }
+  },
+  "provider_calls": 30,
+  "upper_estimated_cny": "0.108762",
+  "percentile_method": "project percentile, linear interpolation",
+  "limitations": [
+    "fixture_identity_injected_not_login_test",
+    "small_sample_not_SLA",
+    "approval_wait_not_included_in_direct_answer_group",
+    "cold means first request in new local service process, not controlled provider cold start"
+  ]
+}

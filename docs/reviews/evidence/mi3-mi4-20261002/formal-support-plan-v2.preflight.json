@@ -1,0 +1,569 @@
+{
+  "status": "PASS",
+  "plan_hash": "91546bd593a586ea31f43b582ff8bcbb636bc281146aedbb3b11390255edca91",
+  "provider": "controlled",
+  "scope": "first_turn_mandatory_context_admission_only",
+  "cases": [
+    {
+      "case_id": "refund-single_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "843e56dc-d84a-495b-8097-75664c3210e1",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-multi_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "29989cd2-576a-4260-a271-0fb6b6b0e85b",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-unanswerable",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "7882b4f5-8df0-4adc-9733-dbf38e4cae06",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-clarification",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "3aaf58bf-bdda-44a3-abb3-bd09d6a08c13",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-approval_denied",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "74d1ba3e-3d94-4f12-8066-dc1bd771e5eb",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-single_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "f882c1f3-c969-4ca4-946e-d17eb6035548",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-multi_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "3e6f3270-8db4-462c-80d7-3792d027da8b",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-unanswerable",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "3261d8b5-3a2a-428b-a5c8-b6714b39c3cc",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-clarification",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "84c72b9f-dc91-4859-9081-b90792e62b76",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-approval_denied",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "bce320b1-ec01-4916-9fc4-cf2e1a94600a",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-single_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "05676cd7-3586-487b-ae33-39230c9aa7bf",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-multi_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "fe19cbca-b8c7-496f-8dcd-90e206976c22",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-unanswerable",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "5df6fae5-4f61-4976-aceb-f032caf48c27",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-clarification",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "e03cdaaa-3edb-4651-b994-42fad3a43b5e",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-approval_denied",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "220f70c4-3e9a-4f0f-ad75-b7606291e1a0",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-single_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "0b45b604-fcb7-4bf3-9dc1-b15b6e0c912d",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-multi_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "3ffacf9b-9d8e-4165-b432-a90d8584f57b",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-unanswerable",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "44441f2b-f200-45e9-b9f5-9df3f68da121",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-clarification",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "40fbcbce-583d-4530-9caf-eb7124b780d0",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-approval_denied",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "e99e8f8f-d3b7-4646-adaa-5a6e90ccf54e",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-single_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "f11fdd33-5c54-4d8f-84d4-2b42a47c89b1",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-multi_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "8cc471b4-eb3a-4a6b-831f-3d40350c9ca4",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-unanswerable",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "6aa6e66c-7113-41c9-8d1d-af8ad3aa927c",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-clarification",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "850f2bcf-b404-42ec-8a98-dd45df94f5c5",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-approval_denied",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "cf208f2f-eb05-4b4f-9549-15892a12b23d",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-single_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "ba7f9420-8183-4506-aa9f-02b2aec0edd0",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-multi_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "1b2ede7c-d722-4a5a-97c3-922b9ab1e8f7",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-unanswerable",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "762c5dfc-9b25-49b5-b035-abd225c8ef1e",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-clarification",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "430323ca-038c-4a06-a86b-06aba2381ac9",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-approval_denied",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "40d7c1cf-751f-4600-86de-5c1ff28a6ec1",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-single_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "966453dd-5e63-4c80-bdc7-13de44cc4d67",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-multi_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "76aa06b1-722c-4fc4-aa8e-fbd7c3daa828",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-unanswerable",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "7216ad21-9887-4add-894b-694aeec2c484",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-clarification",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "654da58a-6b54-4e67-8c6c-7ecf5cea924c",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-approval_denied",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "08906f47-8a78-4744-a5b8-3c863468e833",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-single_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "12c305d0-9bac-4b0c-9ab4-3d0d226ee276",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-multi_hop",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "0cdfd859-fa64-4bea-91be-30936f97bc7e",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-unanswerable",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "8593e8fe-05bb-4d6f-9cd8-5d10a6fc96a5",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-clarification",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "c4a3906e-eefb-46c3-af17-bbe070d48a95",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-approval_denied",
+      "variant_id": "c199b1a1-1539-446a-95c3-a74a349e34f7",
+      "run_id": "f7bb4a9b-6956-4534-b82f-c5792f61b443",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-single_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "fc3f8580-4e03-4339-b804-a9e677d4b4e0",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-multi_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "98e931ef-6ed4-4327-ad98-a5ce635dd911",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-unanswerable",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "f9e7f9a7-56d4-4fe9-a8e5-588e5349672c",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-clarification",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "92cdd32f-c550-4c9a-bdf0-0dc544d42f83",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "refund-approval_denied",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "0c40eeae-9919-4ed9-86c0-9c0c5ed9361a",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-single_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "7746fd39-dd68-4a74-840b-eda8f3ce9622",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-multi_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "bd4b7668-170e-4b1b-a66f-74980204a6ef",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-unanswerable",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "f82cc71b-c31a-4615-89b8-28466611454f",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-clarification",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "84ff4536-1e0b-4bf0-a893-d8d9b4a67332",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "warranty-approval_denied",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "3a150c73-e20b-4010-ab90-5eda62f485a2",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-single_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "449c6108-b15e-4339-a1c6-3d865b879fd2",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-multi_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "797ad8b6-2fba-45ff-95fe-e6194fdf40fc",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-unanswerable",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "6a37991d-9fbc-4954-a77a-5e30f43fff26",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-clarification",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "b2a99062-618d-4cf2-96cd-f651101f0c25",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "delivery-approval_denied",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "27be8735-605c-48f5-9d8c-2038d5e67de3",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-single_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "76eb3124-bb69-49cb-9fda-58860e3f8b30",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-multi_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "70a37b3d-c601-403c-a4d5-d43059347055",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-unanswerable",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "e397a778-6062-4000-8b5a-7fab4d1560a0",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-clarification",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "3b368d3d-7607-4d89-8e28-59f16c7fa1f5",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "cancel-approval_denied",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "9d403741-9a1d-465a-9179-b7f70d996709",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-single_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "b79c5edd-43ae-47fe-bf20-c217e996a697",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-multi_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "6078c024-9c89-4242-9646-1954b35eace7",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-unanswerable",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "259ac826-1736-45d9-a630-2128c055d1e2",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-clarification",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "e0b03924-9e3f-4248-ac90-8c7f3e1ca03e",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "account-approval_denied",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "937009b1-2da3-4215-b0ff-e4473cfaec44",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-single_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "19af3be1-f35d-4fb4-9f38-a030232c82df",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-multi_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "70a46460-16f2-4a48-879a-01b540e58079",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-unanswerable",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "ac914b29-ca0a-4c8e-b262-a247ec9a15dd",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-clarification",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "9b708107-586f-4d7f-86b3-691e1271361b",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "billing-approval_denied",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "13c92983-3ecd-4675-9de4-254a5f9b21f1",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-single_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "08845a75-9cd8-401c-bb6a-eb625e3ed1f7",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-multi_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "319ea7a2-a6b8-4970-a1b2-6b3796f1717f",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-unanswerable",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "49c1cfb2-083b-433c-9906-f2ac2c9dbc8b",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-clarification",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "049545b9-6907-40ca-974c-3cc6bee48132",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "return-approval_denied",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "c33937c3-bb63-48a8-9a89-f9b1bbf54d5f",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-single_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "73079dc0-0708-4a38-90b6-07c2e570c9a7",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-multi_hop",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "595a039f-720f-400f-9766-9bac0b3dbe67",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-unanswerable",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "3695365f-feea-427b-ac7e-0e941c4ef1b9",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-clarification",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "545bb082-c34b-441d-823e-c8bbc59c383f",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    },
+    {
+      "case_id": "subscription-approval_denied",
+      "variant_id": "db2fbfd8-e8b3-4da9-8963-01178bbf9be9",
+      "run_id": "5a2db010-09ba-4de3-bc0c-6d353bd69473",
+      "status": "SUCCEEDED",
+      "failure_code": null
+    }
+  ],
+  "paid_calls": 0
+}

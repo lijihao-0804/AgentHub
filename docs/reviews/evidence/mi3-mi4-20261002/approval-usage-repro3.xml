@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="3.743" timestamp="2026-10-02T23:59:53.033427+08:00" hostname="DESKTOP-PVA3D0V"><testcase classname="tests.integration.test_approval_usage_resume" name="test_restart_resume_preserves_usage_and_waiting_cost[APPROVED]" time="0.857"><failure message="AssertionError: assert None == 100&#10; +  where None = AgentRunResult(run_id=UUID('7c153e24-a826-4336-812e-2ff6c12f57d7'), agent_version_id=UUID('03e67e39-0bcc-4f04-811b-f4b...one, total_output_tokens=None, total_tokens=None, total_cached_tokens=None, total_cost_amount=None, cost_currency=None).total_input_tokens">db_factory = async_sessionmaker(class_='AsyncSession', bind=&lt;sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0x00000212E2E76890&gt;, autoflush=True, expire_on_commit=False)
+decision = &lt;ApprovalDecisionStatus.APPROVED: 'APPROVED'&gt;
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("decision", [ApprovalDecisionStatus.APPROVED, ApprovalDecisionStatus.DENIED])
+    async def test_restart_resume_preserves_usage_and_waiting_cost(db_factory, decision):
+        tool_spec = {"kind":"builtin","identity":"create_ticket","description":"Controlled ticket",
+            "input_schema":{"type":"object","properties":{"customer_ref":{"type":"string"},"subject":{"type":"string"},"priority":{"type":"string"}},"required":["customer_ref","subject"],"additionalProperties":False},
+            "effect":"WRITE","risk_level":"HIGH","approval_policy":"ALWAYS"}
+        async with db_factory() as session:
+            base = await _seed(session,label=uuid4().hex,tool_spec=tool_spec)
+            session.add(Customer(workspace_id=base['workspace_id'],customer_ref='cust-1',name='synthetic'))
+            await session.commit()
+        gateway = ScriptedApprovalGateway()
+        gateway.responses = [replace(r,usage=ModelUsage(input_tokens=100,output_tokens=10,total_tokens=110,cached_tokens=20),cost_estimate=CostEstimate(Decimal('0.01'),'USD')) for r in gateway.responses]
+        def service():
+            return AgentRunService(db_factory,model_gateway_factory=lambda s:gateway,
+                approval_service=ApprovalService(db_factory),action_runtime=ActionRuntime(session_factory=db_factory),
+                checkpoint_adapter=LangGraphCheckpointAdapter(TEST_DATABASE_URL))
+        ctx=base['context'].model_copy(update={'permissions':base['context'].permissions|{'workspace_read','approve_action'}})
+        first=await service().run(ctx,agent_version_id=base['version'].id,input_text='Open controlled ticket')
+        assert first.status=='WAITING_APPROVAL'
+&gt;       assert first.total_input_tokens==100
+E       AssertionError: assert None == 100
+E        +  where None = AgentRunResult(run_id=UUID('7c153e24-a826-4336-812e-2ff6c12f57d7'), agent_version_id=UUID('03e67e39-0bcc-4f04-811b-f4b...one, total_output_tokens=None, total_tokens=None, total_cached_tokens=None, total_cost_amount=None, cost_currency=None).total_input_tokens
+
+tests\integration\test_approval_usage_resume.py:42: AssertionError</failure></testcase><testcase classname="tests.integration.test_approval_usage_resume" name="test_restart_resume_preserves_usage_and_waiting_cost[DENIED]" time="0.651"><failure message="AssertionError: assert None == 100&#10; +  where None = AgentRunResult(run_id=UUID('e2869049-2c01-492f-b83d-dfd5fa9c85a7'), agent_version_id=UUID('eb046d80-7297-4e64-95cc-0e4...one, total_output_tokens=None, total_tokens=None, total_cached_tokens=None, total_cost_amount=None, cost_currency=None).total_input_tokens">db_factory = async_sessionmaker(class_='AsyncSession', bind=&lt;sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0x00000212E35611D0&gt;, autoflush=True, expire_on_commit=False)
+decision = &lt;ApprovalDecisionStatus.DENIED: 'DENIED'&gt;
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("decision", [ApprovalDecisionStatus.APPROVED, ApprovalDecisionStatus.DENIED])
+    async def test_restart_resume_preserves_usage_and_waiting_cost(db_factory, decision):
+        tool_spec = {"kind":"builtin","identity":"create_ticket","description":"Controlled ticket",
+            "input_schema":{"type":"object","properties":{"customer_ref":{"type":"string"},"subject":{"type":"string"},"priority":{"type":"string"}},"required":["customer_ref","subject"],"additionalProperties":False},
+            "effect":"WRITE","risk_level":"HIGH","approval_policy":"ALWAYS"}
+        async with db_factory() as session:
+            base = await _seed(session,label=uuid4().hex,tool_spec=tool_spec)
+            session.add(Customer(workspace_id=base['workspace_id'],customer_ref='cust-1',name='synthetic'))
+            await session.commit()
+        gateway = ScriptedApprovalGateway()
+        gateway.responses = [replace(r,usage=ModelUsage(input_tokens=100,output_tokens=10,total_tokens=110,cached_tokens=20),cost_estimate=CostEstimate(Decimal('0.01'),'USD')) for r in gateway.responses]
+        def service():
+            return AgentRunService(db_factory,model_gateway_factory=lambda s:gateway,
+                approval_service=ApprovalService(db_factory),action_runtime=ActionRuntime(session_factory=db_factory),
+                checkpoint_adapter=LangGraphCheckpointAdapter(TEST_DATABASE_URL))
+        ctx=base['context'].model_copy(update={'permissions':base['context'].permissions|{'workspace_read','approve_action'}})
+        first=await service().run(ctx,agent_version_id=base['version'].id,input_text='Open controlled ticket')
+        assert first.status=='WAITING_APPROVAL'
+&gt;       assert first.total_input_tokens==100
+E       AssertionError: assert None == 100
+E        +  where None = AgentRunResult(run_id=UUID('e2869049-2c01-492f-b83d-dfd5fa9c85a7'), agent_version_id=UUID('eb046d80-7297-4e64-95cc-0e4...one, total_output_tokens=None, total_tokens=None, total_cached_tokens=None, total_cost_amount=None, cost_currency=None).total_input_tokens
+
+tests\integration\test_approval_usage_resume.py:42: AssertionError</failure></testcase><testcase classname="tests.integration.test_approval_usage_resume" name="test_resumed_cost_guard_uses_checkpoint_spend" time="1.293"><failure message="AssertionError: assert 'AGENT_COST_UNMEASURABLE' == 'AGENT_COST_LIMIT_EXCEEDED'&#10;  &#10;  - AGENT_COST_LIMIT_EXCEEDED&#10;  + AGENT_COST_UNMEASURABLE">db_factory = async_sessionmaker(class_='AsyncSession', bind=&lt;sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0x00000212E34E2910&gt;, autoflush=True, expire_on_commit=False)
+
+    @pytest.mark.asyncio
+    async def test_resumed_cost_guard_uses_checkpoint_spend(db_factory):
+        tool_spec={"kind":"builtin","identity":"create_ticket","description":"Controlled ticket",
+            "input_schema":{"type":"object","properties":{"customer_ref":{"type":"string"},"subject":{"type":"string"},"priority":{"type":"string"}},"required":["customer_ref","subject"],"additionalProperties":False},
+            "effect":"WRITE","risk_level":"HIGH","approval_policy":"ALWAYS"}
+        async with db_factory() as session:
+            base=await _seed(session,label=uuid4().hex,tool_spec=tool_spec)
+            spec=dict(base['version'].resolved_spec)
+            spec['runtime']={**spec.get('runtime',{}),'max_cost_micro_usd':5000}
+            base['version'].resolved_spec=spec
+            base['version'].resolved_spec_hash=canonical_json_hash(spec)
+            session.add(Customer(workspace_id=base['workspace_id'],customer_ref='cust-1',name='synthetic'))
+            await session.commit()
+        gateway=ScriptedApprovalGateway()
+        gateway.responses=[replace(r,usage=ModelUsage(input_tokens=100,output_tokens=10,total_tokens=110),cost_estimate=CostEstimate(Decimal('0.01'),'USD')) for r in gateway.responses]
+        def service():
+            return AgentRunService(db_factory,model_gateway_factory=lambda s:gateway,approval_service=ApprovalService(db_factory),action_runtime=ActionRuntime(session_factory=db_factory),checkpoint_adapter=LangGraphCheckpointAdapter(TEST_DATABASE_URL))
+        ctx=base['context'].model_copy(update={'permissions':base['context'].permissions|{'workspace_read','approve_action'}})
+        first=await service().run(ctx,agent_version_id=base['version'].id,input_text='Open ticket')
+        approval=(await ApprovalService(db_factory).list(ctx))[0]
+        await ApprovalService(db_factory).decide(ctx,approval.id,decision=ApprovalDecisionStatus.APPROVED)
+        result=await service().resume(ctx,run_id=first.run_id,approval_id=approval.id)
+        assert result.status=='NEEDS_ATTENTION'
+&gt;       assert result.failure_code=='AGENT_COST_LIMIT_EXCEEDED'
+E       AssertionError: assert 'AGENT_COST_UNMEASURABLE' == 'AGENT_COST_LIMIT_EXCEEDED'
+E         
+E         - AGENT_COST_LIMIT_EXCEEDED
+E         + AGENT_COST_UNMEASURABLE
+
+tests\integration\test_approval_usage_resume.py:80: AssertionError</failure></testcase></testsuite></testsuites>

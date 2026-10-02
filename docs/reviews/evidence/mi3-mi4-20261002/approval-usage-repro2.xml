@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="3" failures="0" skipped="0" tests="3" time="1.117" timestamp="2026-10-02T23:59:34.672306+08:00" hostname="DESKTOP-PVA3D0V"><testcase classname="tests.integration.test_approval_usage_resume" name="test_restart_resume_preserves_usage_and_waiting_cost[APPROVED]" time="0.070"><error message="failed on setup with &quot;ModuleNotFoundError: No module named 'psycopg2'&quot;">@pytest.fixture(scope="session")
+    def migrated_database() -&gt; None:
+        previous = os.environ.get("AGENTHUB_DATABASE_URL")
+        os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
+        get_settings.cache_clear()
+        try:
+&gt;           command.upgrade(Config("alembic.ini"), "head")
+
+tests\integration\test_m5a_approval_runtime.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\alembic\command.py:487: in upgrade
+    script.run_env()
+.venv\Lib\site-packages\alembic\script\base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+.venv\Lib\site-packages\alembic\util\pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\alembic\util\pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrations\env.py:58: in &lt;module&gt;
+    run_migrations_online()
+migrations\env.py:44: in run_migrations_online
+    connectable = engine_from_config(
+.venv\Lib\site-packages\sqlalchemy\engine\create.py:844: in engine_from_config
+    return create_engine(url, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\create.py:617: in create_engine
+    dbapi = dbapi_meth(**dbapi_args)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+cls = &lt;class 'sqlalchemy.dialects.postgresql.psycopg2.PGDialect_psycopg2'&gt;
+
+    @classmethod
+    def import_dbapi(cls):
+&gt;       import psycopg2
+E       ModuleNotFoundError: No module named 'psycopg2'
+
+.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\psycopg2.py:697: ModuleNotFoundError</error></testcase><testcase classname="tests.integration.test_approval_usage_resume" name="test_restart_resume_preserves_usage_and_waiting_cost[DENIED]" time="0.001"><error message="failed on setup with &quot;ModuleNotFoundError: No module named 'psycopg2'&quot;">@pytest.fixture(scope="session")
+    def migrated_database() -&gt; None:
+        previous = os.environ.get("AGENTHUB_DATABASE_URL")
+        os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
+        get_settings.cache_clear()
+        try:
+&gt;           command.upgrade(Config("alembic.ini"), "head")
+
+tests\integration\test_m5a_approval_runtime.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\alembic\command.py:487: in upgrade
+    script.run_env()
+.venv\Lib\site-packages\alembic\script\base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+.venv\Lib\site-packages\alembic\util\pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\alembic\util\pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrations\env.py:58: in &lt;module&gt;
+    run_migrations_online()
+migrations\env.py:44: in run_migrations_online
+    connectable = engine_from_config(
+.venv\Lib\site-packages\sqlalchemy\engine\create.py:844: in engine_from_config
+    return create_engine(url, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\create.py:617: in create_engine
+    dbapi = dbapi_meth(**dbapi_args)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+cls = &lt;class 'sqlalchemy.dialects.postgresql.psycopg2.PGDialect_psycopg2'&gt;
+
+    @classmethod
+    def import_dbapi(cls):
+&gt;       import psycopg2
+E       ModuleNotFoundError: No module named 'psycopg2'
+
+.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\psycopg2.py:697: ModuleNotFoundError</error></testcase><testcase classname="tests.integration.test_approval_usage_resume" name="test_resumed_cost_guard_uses_checkpoint_spend" time="0.001"><error message="failed on setup with &quot;ModuleNotFoundError: No module named 'psycopg2'&quot;">@pytest.fixture(scope="session")
+    def migrated_database() -&gt; None:
+        previous = os.environ.get("AGENTHUB_DATABASE_URL")
+        os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
+        get_settings.cache_clear()
+        try:
+&gt;           command.upgrade(Config("alembic.ini"), "head")
+
+tests\integration\test_m5a_approval_runtime.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\alembic\command.py:487: in upgrade
+    script.run_env()
+.venv\Lib\site-packages\alembic\script\base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+.venv\Lib\site-packages\alembic\util\pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\alembic\util\pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+migrations\env.py:58: in &lt;module&gt;
+    run_migrations_online()
+migrations\env.py:44: in run_migrations_online
+    connectable = engine_from_config(
+.venv\Lib\site-packages\sqlalchemy\engine\create.py:844: in engine_from_config
+    return create_engine(url, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\engine\create.py:617: in create_engine
+    dbapi = dbapi_meth(**dbapi_args)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+cls = &lt;class 'sqlalchemy.dialects.postgresql.psycopg2.PGDialect_psycopg2'&gt;
+
+    @classmethod
+    def import_dbapi(cls):
+&gt;       import psycopg2
+E       ModuleNotFoundError: No module named 'psycopg2'
+
+.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\psycopg2.py:697: ModuleNotFoundError</error></testcase></testsuite></testsuites>

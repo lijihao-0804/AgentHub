@@ -1,0 +1,2041 @@
+{
+  "version": "persisted-model-step-cost-reconciliation-v1",
+  "raw_report_hash": "2376cc33b041217cede9022f53403e9d385683400aac3324a5325bee9f05a83d",
+  "source": "workspace_scoped_run_steps_model_metadata",
+  "rows": [
+    {
+      "case_result_id": "b5530c27-8e71-4109-8c0a-eb1a75c33f30",
+      "case_id": "replacement-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "7a4566de-b48e-4195-9f2f-184001d40952",
+        "82eead48-adda-4100-8378-02173e0676a6",
+        "e0e69ff7-5afd-4846-984c-3e5efd877724",
+        "dd159690-4237-4134-b541-394d9d32f54f"
+      ],
+      "step_metadata_hash": "533efb49930a01f1969529e3fe323084f46d66bfb058dd4317a8a88fc4c3cb60",
+      "model_step_count": 4,
+      "cost_amount": "0.016448",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00834600",
+      "input_tokens": 6996,
+      "output_tokens": 307
+    },
+    {
+      "case_result_id": "6e8123d5-4eb2-486c-bbb5-5de65a3d4b5a",
+      "case_id": "replacement-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "c715384b-d526-457d-821d-f926fe0edf6a",
+        "c07f3405-5be9-41d0-9124-d5413c81c212",
+        "b8348853-8819-4879-83c8-ba08151c4a8d"
+      ],
+      "step_metadata_hash": "78571304197690f507e08fe261cdb933ab9fb97b82283907caf33ecf455bdc1e",
+      "model_step_count": 3,
+      "cost_amount": "0.011748",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00449200",
+      "input_tokens": 4646,
+      "output_tokens": 307
+    },
+    {
+      "case_result_id": "e2a2c30f-697d-4673-ac7f-8c930378fe8b",
+      "case_id": "invoice-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "c938e733-8b42-4011-a606-032f507ed5f7"
+      ],
+      "step_metadata_hash": "66345bff58a9baa719269a1716b10abd3bd563fa9dbef3bcd86958230d0836dc",
+      "model_step_count": 1,
+      "cost_amount": "0.004178",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00417800",
+      "input_tokens": 1397,
+      "output_tokens": 173
+    },
+    {
+      "case_result_id": "ded0238f-affd-4094-aec9-25b0710c79cd",
+      "case_id": "invoice-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "2cafce85-33ee-4b58-a98c-a98f553205b4"
+      ],
+      "step_metadata_hash": "cd971489d6e33302de327c038597a8af9dcdbeef7d780aae156de778703c85c5",
+      "model_step_count": 1,
+      "cost_amount": "0.004954",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00495400",
+      "input_tokens": 1397,
+      "output_tokens": 270
+    },
+    {
+      "case_result_id": "e474ae0d-5dcc-44f9-a482-b6670f698d34",
+      "case_id": "invoice-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "1d911432-6ec2-43df-9c55-eef1b3b3bb20"
+      ],
+      "step_metadata_hash": "37775e07e3b879d9cc7674fe389e27b42c1842c096ac236dc10db16d510cf91f",
+      "model_step_count": 1,
+      "cost_amount": "0.00498",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00498000",
+      "input_tokens": 1590,
+      "output_tokens": 225
+    },
+    {
+      "case_result_id": "5095838d-cfa7-4769-8857-31adbb10b77d",
+      "case_id": "invoice-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "59cf0a94-6aa2-4d1b-8098-097e72f092bd"
+      ],
+      "step_metadata_hash": "1912151e978f8007438a50dcffd841787d3015616b2d3f8f582d06da3f0c38bb",
+      "model_step_count": 1,
+      "cost_amount": "0.004724",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00472400",
+      "input_tokens": 1590,
+      "output_tokens": 193
+    },
+    {
+      "case_result_id": "f9318bf1-1890-45f2-9fe7-efd6ec204a3c",
+      "case_id": "invoice-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "a309cde9-1448-4000-8d0a-a15a33c281b1"
+      ],
+      "step_metadata_hash": "0a0969cb189d6d78bb303382875bbf13e3079042877cf22448dfa25cc7a05392",
+      "model_step_count": 1,
+      "cost_amount": "0.005364",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00536400",
+      "input_tokens": 1590,
+      "output_tokens": 273
+    },
+    {
+      "case_result_id": "6c354d39-8802-4c0b-892d-1c5f5d93a5d1",
+      "case_id": "invoice-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "77ef326d-45d0-429a-a3b2-d63907b8a338",
+        "fb2b0e19-34f8-47de-b2b2-d55a1a45ad58",
+        "e395d63a-84a9-466d-b59c-03d0913dd258"
+      ],
+      "step_metadata_hash": "428a550a9509f6b3c0cc44d387dd7251570b0db94d16a2e0e1027bf38eb26580",
+      "model_step_count": 3,
+      "cost_amount": "0.011534",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01153400",
+      "input_tokens": 4611,
+      "output_tokens": 289
+    },
+    {
+      "case_result_id": "fd5eb31c-e615-4cc6-a958-9ff5b10b9ae4",
+      "case_id": "invoice-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "f8d6b407-e7b6-48b9-a051-54517d4e255b",
+        "383e1684-08e0-4855-ad02-67471f988568",
+        "135e1fbf-9acf-4990-8196-d437e1ed767b"
+      ],
+      "step_metadata_hash": "5c60843b48efc86b5635bb4425e75c413bd86db796b3469ac729da3df997d59f",
+      "model_step_count": 3,
+      "cost_amount": "0.011082",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01108200",
+      "input_tokens": 4513,
+      "output_tokens": 257
+    },
+    {
+      "case_result_id": "6cd81d7f-9a99-456a-b983-96bb68aead6a",
+      "case_id": "invoice-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "bd206c0d-cebe-4f76-b769-37e9f75ab804",
+        "199611c9-7b65-48d7-9fa4-a3dc33dd3d83",
+        "509f9bc7-1926-46b7-973c-484ca1047c15"
+      ],
+      "step_metadata_hash": "18140c9b70a2cd0e3a4bcd83944a5060edd1dd6f8df3b8bd67c567e3b836ca42",
+      "model_step_count": 3,
+      "cost_amount": "0.011792",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01179200",
+      "input_tokens": 4628,
+      "output_tokens": 317
+    },
+    {
+      "case_result_id": "5781723d-b097-4761-a45a-699ffcda70a3",
+      "case_id": "invoice-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "a9b6ae76-2f8f-4eb7-ac35-002db66a0ce4",
+        "d7fcbfea-c6e6-4d03-a3bd-770fa4a6f333",
+        "e5c6f0a4-cd84-4505-91cc-90a2f5a3e978",
+        "8fcdf0e9-f845-439b-8ded-95b1f1ee13ab"
+      ],
+      "step_metadata_hash": "158c439da922351400691e0c868ba7b999d1ba08032ab6759e358f85084b2e6c",
+      "model_step_count": 4,
+      "cost_amount": "0.016372",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00815200",
+      "input_tokens": 6994,
+      "output_tokens": 298
+    },
+    {
+      "case_result_id": "44ff3200-386e-417f-aeff-705eed6b4d1f",
+      "case_id": "invoice-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "6368bf6d-5a55-4f6c-a96b-d055972b881f",
+        "ad80efd5-373b-4742-8371-c2289d9ea18b",
+        "5ac2aa9b-cc38-421f-b3a7-da380cb4732b",
+        "8d31c019-3f4c-4609-99a8-38e0bdcdc381"
+      ],
+      "step_metadata_hash": "31bc237b73d37cb887192695f6a083d69abc6ba3b8c2d89ab1b9c26257903f40",
+      "model_step_count": 4,
+      "cost_amount": "0.017140",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00890000",
+      "input_tokens": 7046,
+      "output_tokens": 381
+    },
+    {
+      "case_result_id": "182952bc-fa4e-4b2e-8b45-0d6bfce8bf09",
+      "case_id": "invoice-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "63c92855-1c21-49da-97e2-a5453702fb59",
+        "6228a83a-0ca4-43cb-97a2-792e70da1e96",
+        "1378a988-9c78-45f0-8a2b-9d30c56eb653",
+        "3067765c-126d-4fbc-bba9-8a563b38a44a"
+      ],
+      "step_metadata_hash": "aa8a1f049ccf6363acc16199aec991c7d8c1e07e6c5cdd0aac52631f54cedb8a",
+      "model_step_count": 4,
+      "cost_amount": "0.016166",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00815200",
+      "input_tokens": 6967,
+      "output_tokens": 279
+    },
+    {
+      "case_result_id": "3503e83a-1130-4c8b-aa59-75f994f250e6",
+      "case_id": "invoice-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "09e73908-a36b-46ba-801d-120a98a2becc",
+        "e7fa6074-ab3a-4af7-a7ea-149822dfba01",
+        "07243f2b-07e3-46b9-ae1f-1578a9f2edab"
+      ],
+      "step_metadata_hash": "be184ed04f41593557762d4275ef24e0c721600490840e582a9b93626cb37449",
+      "model_step_count": 3,
+      "cost_amount": "0.011876",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00455600",
+      "input_tokens": 4674,
+      "output_tokens": 316
+    },
+    {
+      "case_result_id": "48b19fed-44b6-4306-82b8-323ea50628d7",
+      "case_id": "invoice-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "b6268ba7-0b54-4e9c-b681-7f7448b8ce6b",
+        "15d0a8e5-287c-42f6-9035-2699bc7808c3",
+        "60ad3736-711e-43e9-941d-866f37b6032d"
+      ],
+      "step_metadata_hash": "2991f45e9b471dfb05469a5affaf2a981c105353e95e69700256568e00530fa0",
+      "model_step_count": 3,
+      "cost_amount": "0.011764",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00462800",
+      "input_tokens": 4630,
+      "output_tokens": 313
+    },
+    {
+      "case_result_id": "cca93cd7-f017-47a9-bede-6ff3962f4378",
+      "case_id": "invoice-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "89921236-2872-4a52-8847-a86cc763db1d",
+        "81f2ef03-a951-4a96-ac07-ab86cd33a641",
+        "9e5c276b-6cb8-48b8-8438-9d63cee93289"
+      ],
+      "step_metadata_hash": "28d356df9247f8a51b66b9625c2819dbc1b10dd3e0023b7d8064b7c00470ee47",
+      "model_step_count": 3,
+      "cost_amount": "0.012780",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00472800",
+      "input_tokens": 5242,
+      "output_tokens": 287
+    },
+    {
+      "case_result_id": "c8021e6f-24d1-45ad-ae30-dafda9c5c718",
+      "case_id": "invoice-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "48598178-9819-431e-ae04-9e6f96fc01e6",
+        "b4df5826-a7b3-4f81-942a-b82ffcfeaf4d",
+        "0ac91a35-1fc6-4aba-8a68-1f0e84f4f4b0"
+      ],
+      "step_metadata_hash": "741e8eb54ca4fb4dcba7c8e9ecdbe62a6dfa33a7628a07f90a259df72622aa18",
+      "model_step_count": 3,
+      "cost_amount": "0.011960",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00459200",
+      "input_tokens": 4680,
+      "output_tokens": 325
+    },
+    {
+      "case_result_id": "c2106d5d-412f-4106-83c9-2236eedabb75",
+      "case_id": "invoice-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "4d956115-8d5b-41b3-b0ea-fb1a1f1d194e",
+        "5f787c5e-8e22-4bf0-94dc-3d3d379fde0a",
+        "b6d13d85-a0c3-408d-8003-16fccbb95670"
+      ],
+      "step_metadata_hash": "c0beac5b19dd32080f78a652cf2b31118efaa8698f79867e4aea883fc107339a",
+      "model_step_count": 3,
+      "cost_amount": "0.012734",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00471400",
+      "input_tokens": 5243,
+      "output_tokens": 281
+    },
+    {
+      "case_result_id": "71efb9af-30fd-4130-8e6b-5f09b6fdbbbf",
+      "case_id": "invoice-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "06bba9e5-c332-4470-ab4d-6143a6abe184",
+        "78f0f1a6-9a69-40fa-861f-125ad6d01eaa",
+        "031ef60b-85e1-44a3-a0c2-ab80742d1f3f"
+      ],
+      "step_metadata_hash": "efab63c05edd80145915e86469c7b2ab4cb60d4da8cb6f9145be1eec9294db60",
+      "model_step_count": 3,
+      "cost_amount": "0.012726",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00469000",
+      "input_tokens": 5255,
+      "output_tokens": 277
+    },
+    {
+      "case_result_id": "684a22dc-f72c-4c86-8372-afffd5ce61f4",
+      "case_id": "repair-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "e2410047-ec8e-45e9-8a41-7dde334c2d2b"
+      ],
+      "step_metadata_hash": "58d15ae1349099d1f9c63fe274b0bab58787b90d42be0b125da8950f12a12713",
+      "model_step_count": 1,
+      "cost_amount": "0.00394",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00394000",
+      "input_tokens": 1386,
+      "output_tokens": 146
+    },
+    {
+      "case_result_id": "a31eb949-13bc-4a3d-968a-874cd59ecdd3",
+      "case_id": "repair-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "c6d443c6-73ee-4a1a-9a36-423712f45ac8"
+      ],
+      "step_metadata_hash": "292f35dc74a6b9f5197abe883e4a4403c5544c822b4823d8b9569d458eed2ce4",
+      "model_step_count": 1,
+      "cost_amount": "0.004316",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00431600",
+      "input_tokens": 1386,
+      "output_tokens": 193
+    },
+    {
+      "case_result_id": "9a909d5d-a184-4c86-a645-035e4e1fed75",
+      "case_id": "repair-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "6057a7ff-cc73-4749-9e50-c4f75b9ac98f"
+      ],
+      "step_metadata_hash": "f7a0509788c33ec9c7b261c34934f210bf3add4bcdbeb5ddc33176bb6dec6ff2",
+      "model_step_count": 1,
+      "cost_amount": "0.00382",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00382000",
+      "input_tokens": 1386,
+      "output_tokens": 131
+    },
+    {
+      "case_result_id": "9e279dda-4380-4403-8a53-b131b1642a25",
+      "case_id": "repair-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "11e24510-c931-40c2-b29a-61272f2b6bcf"
+      ],
+      "step_metadata_hash": "bdcd40733c84e56b276dba4a0e66b8d6882b64c0438cc39390167cf53bea9be8",
+      "model_step_count": 1,
+      "cost_amount": "0.00443",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00443000",
+      "input_tokens": 1579,
+      "output_tokens": 159
+    },
+    {
+      "case_result_id": "31d10ec7-cd14-4133-b1cb-266ba92a3600",
+      "case_id": "repair-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "2310a418-e5a6-4b84-9a6c-d560aa0b470b"
+      ],
+      "step_metadata_hash": "3406074b89702c0fe692a4571e13b57f6dd9af766dee124876fd2e4383488f68",
+      "model_step_count": 1,
+      "cost_amount": "0.005402",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00540200",
+      "input_tokens": 1397,
+      "output_tokens": 326
+    },
+    {
+      "case_result_id": "779254ea-1b5d-46e8-b5cb-219f1a2e7667",
+      "case_id": "repair-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "11b41194-00ac-45b7-afb1-5a9bee1f445b"
+      ],
+      "step_metadata_hash": "e1356567cd3ac74718f69d92211eb8244c6c1d6c35465e4b4aa27eaeeacf2286",
+      "model_step_count": 1,
+      "cost_amount": "0.004422",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00442200",
+      "input_tokens": 1579,
+      "output_tokens": 158
+    },
+    {
+      "case_result_id": "352a080a-3056-4034-a770-5f108965485d",
+      "case_id": "repair-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "c44126d4-7e34-4bda-91eb-2935a477e415"
+      ],
+      "step_metadata_hash": "daa6e93cbda194baf01bb08a4df35dd1f7ea00644de24c72402bb05adc881a7f",
+      "model_step_count": 1,
+      "cost_amount": "0.00415",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00415000",
+      "input_tokens": 1579,
+      "output_tokens": 124
+    },
+    {
+      "case_result_id": "e5a9b5b8-34a5-46c1-90d0-97b42e02d5dd",
+      "case_id": "repair-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "a254da1e-196a-4369-889d-ab7625935d56"
+      ],
+      "step_metadata_hash": "008d73c222de90ceb188da4e8089db56f4293a24c34e0037ec3f35f79b0ce062",
+      "model_step_count": 1,
+      "cost_amount": "0.004444",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00444400",
+      "input_tokens": 1590,
+      "output_tokens": 158
+    },
+    {
+      "case_result_id": "2484a9ea-67f2-40cc-9754-477e1f19988f",
+      "case_id": "repair-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "0530f2d7-814e-459b-8098-57c4b4b8f850"
+      ],
+      "step_metadata_hash": "5b7a07c3543187d720ee97f636495bd4e7d154d8d4cc0d3e04297ec251337a54",
+      "model_step_count": 1,
+      "cost_amount": "0.00669",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00669000",
+      "input_tokens": 1397,
+      "output_tokens": 487
+    },
+    {
+      "case_result_id": "3258ac26-6807-4710-b7b3-64c2cc4d5a05",
+      "case_id": "repair-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "2b547c8e-6ed4-4abd-a064-65ec62e5deeb"
+      ],
+      "step_metadata_hash": "1dde135f555b0361f01a3a8a1061e78547fda733051c445173612edcdb0637ab",
+      "model_step_count": 1,
+      "cost_amount": "0.006412",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00641200",
+      "input_tokens": 1590,
+      "output_tokens": 404
+    },
+    {
+      "case_result_id": "31c436a7-09d8-4e43-a714-3e0d13d8e22b",
+      "case_id": "repair-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "354b75cd-004b-4b68-9ab6-cf036966190b"
+      ],
+      "step_metadata_hash": "ce7d34a59426e6fcc0d9c3d79e8b7ea1f9df8bb0dcc2d99724aa3a25f1d834b6",
+      "model_step_count": 1,
+      "cost_amount": "0.004538",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00453800",
+      "input_tokens": 1397,
+      "output_tokens": 218
+    },
+    {
+      "case_result_id": "68129375-924b-4470-8ef7-34a5f54416fb",
+      "case_id": "repair-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "d1d1caa2-ab47-4983-8dd9-c26db1adef53"
+      ],
+      "step_metadata_hash": "ad8286ecdbcb80981d252be6cb25607c991439debbb7938c59d111f7a60303c2",
+      "model_step_count": 1,
+      "cost_amount": "0.006036",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00603600",
+      "input_tokens": 1590,
+      "output_tokens": 357
+    },
+    {
+      "case_result_id": "bd7a43dd-945f-4c40-9895-a465c94b985c",
+      "case_id": "repair-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "f45d1d00-a1f8-4224-afe2-d149cf2e6f70"
+      ],
+      "step_metadata_hash": "901ec3a5833dcd1e9c892ad83c7e35e3896959878b60bca4671302c61a7367e2",
+      "model_step_count": 1,
+      "cost_amount": "0.006588",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00658800",
+      "input_tokens": 1590,
+      "output_tokens": 426
+    },
+    {
+      "case_result_id": "2b928f2c-419d-43ac-bdb4-639d625accf5",
+      "case_id": "repair-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "763fd3f2-7930-41e2-b881-b276827b2664"
+      ],
+      "step_metadata_hash": "0c119a4962fd5ef3696cc0f125328dd26ce617313d8c2c1cc68a6f74fc5d8489",
+      "model_step_count": 1,
+      "cost_amount": "0.00441",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00441000",
+      "input_tokens": 1397,
+      "output_tokens": 202
+    },
+    {
+      "case_result_id": "0c25c49e-d3d8-44e9-bc7d-0fdf952df6be",
+      "case_id": "repair-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "b7b54d6d-3c3d-4f48-8320-2801b4ea05a8"
+      ],
+      "step_metadata_hash": "e022d3fc21718d00f6c4a4e7349fc01f1f6e3a543dc12a8322a307ef469b9254",
+      "model_step_count": 1,
+      "cost_amount": "0.004906",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00490600",
+      "input_tokens": 1397,
+      "output_tokens": 264
+    },
+    {
+      "case_result_id": "df534f30-d2e7-4c32-a31d-74359b066f75",
+      "case_id": "repair-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "999044f4-e9cf-44d4-8034-9b79c792e2cd"
+      ],
+      "step_metadata_hash": "8b6afb57beae7166a598a8abd4523586bcd47b2710638b115217cfd4cd395b99",
+      "model_step_count": 1,
+      "cost_amount": "0.00477",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00477000",
+      "input_tokens": 1397,
+      "output_tokens": 247
+    },
+    {
+      "case_result_id": "243490c1-e9ef-41a5-9954-2e7eafc9032f",
+      "case_id": "repair-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "b375332e-4d57-4367-ad57-2cf53bf00c2e"
+      ],
+      "step_metadata_hash": "e4558d08ff135c44505fca0981c1aa30e621f3f51bd7b416ae5003d6a3804ef3",
+      "model_step_count": 1,
+      "cost_amount": "0.004524",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00452400",
+      "input_tokens": 1590,
+      "output_tokens": 168
+    },
+    {
+      "case_result_id": "70a6f69d-19c1-4260-b75d-de7eff6f82a1",
+      "case_id": "repair-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "1bf44259-2316-4404-abbe-192a2c0af1c4"
+      ],
+      "step_metadata_hash": "06d632ae470afc340b01a9570f7cfc10d6ac06fbb75b6be7ed7188b2430851e3",
+      "model_step_count": 1,
+      "cost_amount": "0.004796",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00479600",
+      "input_tokens": 1590,
+      "output_tokens": 202
+    },
+    {
+      "case_result_id": "f86009d4-0b8e-4911-a78c-09125da997b3",
+      "case_id": "repair-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "ab4ad9cb-629a-4f0d-a64f-b2d0e2cf2280",
+        "f6339393-de24-49ff-9de0-20d4a0f23a7c",
+        "a41543be-82d7-488c-999f-9b4f52fb6972"
+      ],
+      "step_metadata_hash": "1984a593fafe2f137fb9d29c123aeacfaa5f8876a339bd429acab26167b5bd99",
+      "model_step_count": 3,
+      "cost_amount": "0.010758",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01075800",
+      "input_tokens": 4511,
+      "output_tokens": 217
+    },
+    {
+      "case_result_id": "26a66725-c931-43f1-9244-057fe409f447",
+      "case_id": "repair-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "00b6659e-97d0-447a-bd23-4b2c33ec4bac",
+        "f42d4b4f-c0c2-4970-952c-060f3e72e43b",
+        "9d106b69-3a3f-44c2-9d71-ecf65cdda36f"
+      ],
+      "step_metadata_hash": "9de7aa452d4cad9f7e56fb2cff2b0d62b7bce7d7e5f9919761f92828bc0e097e",
+      "model_step_count": 3,
+      "cost_amount": "0.010804",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01080400",
+      "input_tokens": 4498,
+      "output_tokens": 226
+    },
+    {
+      "case_result_id": "d8ba1743-ad6a-4d95-be4e-2a736642f60c",
+      "case_id": "repair-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "85b7b519-e098-47cd-9694-b5a772b11a81",
+        "1eb2e4ce-d21a-4225-93f0-5fee284d43a1",
+        "7a48e0f6-798b-4130-8bdf-2fdb2ba48f70"
+      ],
+      "step_metadata_hash": "188b27bcc5a59244b55dcfe6957877aab61610e017ceadc0fd67679a761c7b8d",
+      "model_step_count": 3,
+      "cost_amount": "0.010792",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01079200",
+      "input_tokens": 4504,
+      "output_tokens": 223
+    },
+    {
+      "case_result_id": "17939afe-9e66-4f47-bd1a-0e1696e36896",
+      "case_id": "replacement-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "31f50f10-1962-4767-ac42-f94a03fc894e"
+      ],
+      "step_metadata_hash": "1a45c860f90c05678ee2b3fc662ce50507e1733ff19fa070712c373513abcd5b",
+      "model_step_count": 1,
+      "cost_amount": "0.00602",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00602000",
+      "input_tokens": 1398,
+      "output_tokens": 403
+    },
+    {
+      "case_result_id": "fc201b4b-f2ac-45e1-833e-61e9d9fe4b1b",
+      "case_id": "replacement-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "c6a18018-0bc0-4f48-8673-eb64fb45aa16"
+      ],
+      "step_metadata_hash": "42ae11b515def41e3862830305e880f1f0a5929c76baa8bc0e996a26e6043d9e",
+      "model_step_count": 1,
+      "cost_amount": "0.005742",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00574200",
+      "input_tokens": 1591,
+      "output_tokens": 320
+    },
+    {
+      "case_result_id": "5eda8696-cd45-484e-b665-5e28c15c7c50",
+      "case_id": "replacement-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "6e9be496-cf6b-4e67-9db2-a17ba8f55fe3"
+      ],
+      "step_metadata_hash": "47cb9b115823b17e0be42127ca615a2c6b4fa738dde30eb6d46626fa92815aec",
+      "model_step_count": 1,
+      "cost_amount": "0.006254",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00625400",
+      "input_tokens": 1591,
+      "output_tokens": 384
+    },
+    {
+      "case_result_id": "9a59a88b-4554-4da3-9179-be3d0760dba6",
+      "case_id": "replacement-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "77f38939-9c97-493c-b571-83710d69e554"
+      ],
+      "step_metadata_hash": "f1530ad26d72b74485c08fa7db0762fb6f6a721e3524a3e1237c01896eb4fb64",
+      "model_step_count": 1,
+      "cost_amount": "0.0047",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00470000",
+      "input_tokens": 1398,
+      "output_tokens": 238
+    },
+    {
+      "case_result_id": "54b61442-f547-4bf1-8526-a6db65ce4ef2",
+      "case_id": "replacement-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "9f1b1aff-4979-4bfc-bcce-9b298edddfb4"
+      ],
+      "step_metadata_hash": "e95d4d6ce0f431df98437b62571b45be6d42d3b84c6629357ed36b4f3cc7797e",
+      "model_step_count": 1,
+      "cost_amount": "0.004348",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00434800",
+      "input_tokens": 1398,
+      "output_tokens": 194
+    },
+    {
+      "case_result_id": "1736c9fa-5352-4564-a818-886a4e71ad03",
+      "case_id": "replacement-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "bef81047-4700-4eb9-aa24-3456d9c49c9a"
+      ],
+      "step_metadata_hash": "043f859e4f4373f183ba4b1efec069b4b11b89a75055ea1078a9b20420f5c664",
+      "model_step_count": 1,
+      "cost_amount": "0.004862",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00486200",
+      "input_tokens": 1591,
+      "output_tokens": 210
+    },
+    {
+      "case_result_id": "e8e5a002-d9f7-4774-8374-6a31f5b74fec",
+      "case_id": "replacement-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "1395f8ae-d7d4-4d70-ad36-89c930cbe9b4",
+        "30533d8f-1d50-4053-9da3-1eac367ce22e",
+        "326a75ab-8c54-4046-b0ef-08195237848d"
+      ],
+      "step_metadata_hash": "eb9ea1d3ed8c7f613533bdd34b15543ec6580d244c79d86aa7c578f843992e66",
+      "model_step_count": 3,
+      "cost_amount": "0.011084",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01108400",
+      "input_tokens": 4494,
+      "output_tokens": 262
+    },
+    {
+      "case_result_id": "7b616d33-fb82-49dc-a28d-bae8adfc448f",
+      "case_id": "replacement-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "45efc87e-ed20-489d-9e54-c156bbe68440",
+        "5c42385d-4f67-4c7f-a579-d68fc75c3a84",
+        "600e27ac-3439-4327-9fba-d1fe71d649bb"
+      ],
+      "step_metadata_hash": "3aefe2ad733b17fdd8efde933bc21132582adf2ffaf27af864026cd0956ac377",
+      "model_step_count": 3,
+      "cost_amount": "0.010764",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01076400",
+      "input_tokens": 4494,
+      "output_tokens": 222
+    },
+    {
+      "case_result_id": "7d2d9074-a538-45e0-a465-3e84edec5c98",
+      "case_id": "replacement-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "a28e6b9b-36e8-4ec2-835d-18866788aa31",
+        "8bd74017-f32d-44db-bf3e-e2714d7f9844",
+        "cc75d63a-0df0-48f1-83b5-c7568ea4347d",
+        "8d9dc228-7290-458c-8441-fad11c65a9fc"
+      ],
+      "step_metadata_hash": "1a97a3a80b8d7163d67d4d3ebac47e7e78a7283fb8d8e4eabf912364eeecab1a",
+      "model_step_count": 4,
+      "cost_amount": "0.016606",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00832600",
+      "input_tokens": 7023,
+      "output_tokens": 320
+    },
+    {
+      "case_result_id": "66d66cb8-e17e-491a-a526-e7c0b874cfe3",
+      "case_id": "replacement-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "3fc8d2cb-8c05-46e8-8ed8-edfd761b6a08",
+        "172af6ef-901e-4424-86b2-7c761801de0c",
+        "a6b4d1cf-e572-4ef7-a6ac-daf11428fb44",
+        "87c82ec5-7c89-44d9-85a3-a3c7116ee879"
+      ],
+      "step_metadata_hash": "d6b35c55f756575dbf11cf49496377adf855d5f18de9689c36b46f9e9e1a2f81",
+      "model_step_count": 4,
+      "cost_amount": "0.016762",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00842600",
+      "input_tokens": 7029,
+      "output_tokens": 338
+    },
+    {
+      "case_result_id": "47acf0ca-4736-4c78-92a6-d7c5300275b7",
+      "case_id": "replacement-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "745bc1e3-2723-4881-a57a-fc0c65196785",
+        "5c74d8d9-8975-4d11-8f16-05c6c7e1f49d"
+      ],
+      "step_metadata_hash": "748873d37f61c103c66cbb5c476c59357ad8e38160bbb9a104cd9ecc19cc7185",
+      "model_step_count": 2,
+      "cost_amount": "0.008560",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00856000",
+      "input_tokens": 2980,
+      "output_tokens": 325
+    },
+    {
+      "case_result_id": "b8025177-a322-4f63-9be7-7bd3fa2f70f5",
+      "case_id": "replacement-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "da965e15-4b38-466b-9273-023602c098ab",
+        "428bb3f4-654b-453d-9bbc-9d1b0159768a",
+        "b196bfbc-f040-465f-b23f-e59abeb485ba"
+      ],
+      "step_metadata_hash": "5b657031ea9675cefe35773b906f5c0715030c7ce2c08d67ff57579c0c7b77ef",
+      "model_step_count": 3,
+      "cost_amount": "0.011796",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00446800",
+      "input_tokens": 4670,
+      "output_tokens": 307
+    },
+    {
+      "case_result_id": "8934e5fb-dc65-49a3-a9a3-cdf0eb42144c",
+      "case_id": "replacement-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "ab4c716e-a651-48d7-a60a-5e2a135b7c76",
+        "4621fa73-c301-4963-9db8-530fe4f72ee0",
+        "e518eb83-cbf1-4c36-ad82-60e9ccfab4fe"
+      ],
+      "step_metadata_hash": "d4eca7c156e15ead603a6e9f39041d2d1e168518a93d681d4c9555dc49f00b2b",
+      "model_step_count": 3,
+      "cost_amount": "0.012696",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00467600",
+      "input_tokens": 5248,
+      "output_tokens": 275
+    },
+    {
+      "case_result_id": "0eb75e81-69c4-4b65-aecf-b040bcc921fa",
+      "case_id": "privacy-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "754fe7a4-066a-4929-b6fa-919b1cd1a499"
+      ],
+      "step_metadata_hash": "f7a0509788c33ec9c7b261c34934f210bf3add4bcdbeb5ddc33176bb6dec6ff2",
+      "model_step_count": 1,
+      "cost_amount": "0.00382",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00382000",
+      "input_tokens": 1386,
+      "output_tokens": 131
+    },
+    {
+      "case_result_id": "8243f501-3028-4321-94dc-24f91919b52f",
+      "case_id": "privacy-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "5e522b30-7846-428e-bc05-5f826ca97ee6"
+      ],
+      "step_metadata_hash": "456547f6e1f878e083be3dd4b472539083e3116d944d9cdea318131593b950cb",
+      "model_step_count": 1,
+      "cost_amount": "0.0039",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00390000",
+      "input_tokens": 1386,
+      "output_tokens": 141
+    },
+    {
+      "case_result_id": "323f0b18-05a3-40b0-b876-794b0af0455c",
+      "case_id": "privacy-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "53647839-c32f-40d4-8eaa-0c846d68590b"
+      ],
+      "step_metadata_hash": "9b5db44ea312a4f3f01b1226cb0f0fb64fe1bc63496560865771b56456967dfc",
+      "model_step_count": 1,
+      "cost_amount": "0.003918",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00391800",
+      "input_tokens": 1579,
+      "output_tokens": 95
+    },
+    {
+      "case_result_id": "7a1545e1-7bd5-47a9-9925-3196ac3d406f",
+      "case_id": "privacy-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "64e51c4e-4797-4fe4-9d2d-ae92071b6a34"
+      ],
+      "step_metadata_hash": "022f7c43b5d3aa7cb1cce342e6aa2beef25d76d207dc9b0d5cde2f6bf9cdd55a",
+      "model_step_count": 1,
+      "cost_amount": "0.003822",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00382200",
+      "input_tokens": 1579,
+      "output_tokens": 83
+    },
+    {
+      "case_result_id": "0bfff627-2e64-45b2-8463-c5a3dd4fc268",
+      "case_id": "privacy-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "d9853c02-5cac-4ff7-be34-8b5cc0f357b0"
+      ],
+      "step_metadata_hash": "1a159446f552e62a973c1564411259ef9ea7bd27bbee2be5ac30a6d326d8407a",
+      "model_step_count": 1,
+      "cost_amount": "0.006186",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00618600",
+      "input_tokens": 1397,
+      "output_tokens": 424
+    },
+    {
+      "case_result_id": "1365d146-ef24-4362-b503-5511cd67f148",
+      "case_id": "privacy-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "fe776b0b-ee25-46ce-a508-7e509ccc7e7d"
+      ],
+      "step_metadata_hash": "689160d9126c6013d5eb423a1d9a5eae361cd4eca1e61a6e39220d570ce436f2",
+      "model_step_count": 1,
+      "cost_amount": "0.006298",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00629800",
+      "input_tokens": 1397,
+      "output_tokens": 438
+    },
+    {
+      "case_result_id": "d3fb71bb-7c8e-44d7-b6ef-1c58e939e925",
+      "case_id": "privacy-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "852f24c1-e3b0-45d3-baaf-f1f7a9b80d4a"
+      ],
+      "step_metadata_hash": "1dde135f555b0361f01a3a8a1061e78547fda733051c445173612edcdb0637ab",
+      "model_step_count": 1,
+      "cost_amount": "0.006412",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00641200",
+      "input_tokens": 1590,
+      "output_tokens": 404
+    },
+    {
+      "case_result_id": "8bde4926-c554-4ec6-ad6d-80fb4f57a076",
+      "case_id": "invoice-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "0a8a331f-87d7-4115-836f-052662a5c4f0"
+      ],
+      "step_metadata_hash": "b75fbbaec420b703c604dcca52437241710bb7b6c3cd532b6c7c37146dacabf2",
+      "model_step_count": 1,
+      "cost_amount": "0.003684",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00368400",
+      "input_tokens": 1386,
+      "output_tokens": 114
+    },
+    {
+      "case_result_id": "4d0deca3-4a7b-4923-8ff9-13c9457be7a7",
+      "case_id": "invoice-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "3743f1cd-26d3-4c07-971b-ea3f485166c3"
+      ],
+      "step_metadata_hash": "b1038389bf2e7b4418e12e61d0f89f7b4736bae0015667a57fe3f07017fe5076",
+      "model_step_count": 1,
+      "cost_amount": "0.005044",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00504400",
+      "input_tokens": 1386,
+      "output_tokens": 284
+    },
+    {
+      "case_result_id": "fd282d7c-29a7-4954-8426-55f94186942b",
+      "case_id": "privacy-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "85c90012-3b9d-44b6-89d1-fc6d5d5930a7"
+      ],
+      "step_metadata_hash": "6b048255119c9967ffb0ed7d0f1950ffb8998f6dc3a1c78e38704104215fa09f",
+      "model_step_count": 1,
+      "cost_amount": "0.005018",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00501800",
+      "input_tokens": 1397,
+      "output_tokens": 278
+    },
+    {
+      "case_result_id": "2fbf0cdb-da73-49cf-bf4b-546eed94f0ff",
+      "case_id": "invoice-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "9917a161-c851-47a3-8913-cfbac8b17a35"
+      ],
+      "step_metadata_hash": "349cb0e27fab21c0e4b2e7ab936baa16e563d9abdfd54e2de1dfd52026993ae2",
+      "model_step_count": 1,
+      "cost_amount": "0.003966",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00396600",
+      "input_tokens": 1579,
+      "output_tokens": 101
+    },
+    {
+      "case_result_id": "e285eff4-fa87-4322-9ea8-5bd8dc353871",
+      "case_id": "invoice-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "0df44501-e3ee-4fa2-9f09-d27775f9ca94"
+      ],
+      "step_metadata_hash": "a5dc50460b4fe362f4302a78c2f0b1975b1fb60cb1e5008b2dc7b6075f8cf9b7",
+      "model_step_count": 1,
+      "cost_amount": "0.004644",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00464400",
+      "input_tokens": 1386,
+      "output_tokens": 234
+    },
+    {
+      "case_result_id": "94c5de2a-af5b-4768-8470-7ef11484d584",
+      "case_id": "invoice-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "4665d304-1de7-4edb-9270-a4fdc27f6352"
+      ],
+      "step_metadata_hash": "ddcfca7c35b9eca9c1ada947d9f445e6307a7fb9a2676880abe2edb636f7abd5",
+      "model_step_count": 1,
+      "cost_amount": "0.004046",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00404600",
+      "input_tokens": 1579,
+      "output_tokens": 111
+    },
+    {
+      "case_result_id": "38825fa9-2bb5-4b4d-81d4-579261ac0c92",
+      "case_id": "invoice-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "33a2c71f-c5d6-467e-a3bd-933adfa32671"
+      ],
+      "step_metadata_hash": "e42a50904755c530cfbc899347c85941cba65a299fbe72a08b9d24f8761a7d57",
+      "model_step_count": 1,
+      "cost_amount": "0.004006",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00400600",
+      "input_tokens": 1579,
+      "output_tokens": 106
+    },
+    {
+      "case_result_id": "9f00530b-0979-4799-a602-8e67ca65949b",
+      "case_id": "privacy-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "0396ccbe-c22e-4578-bd2b-4b4c4ae4b59c"
+      ],
+      "step_metadata_hash": "ace666c6c8d6181980b746f05c0082f6896157fcf2587ca6b33cc3dd40cb9aac",
+      "model_step_count": 1,
+      "cost_amount": "0.004794",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00479400",
+      "input_tokens": 1397,
+      "output_tokens": 250
+    },
+    {
+      "case_result_id": "6e421ec1-a35b-4308-afcc-3baecaf3d7c0",
+      "case_id": "invoice-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "533ba469-ed14-440d-bbbb-7629a6d873f2"
+      ],
+      "step_metadata_hash": "829ecb549a3ad950a54c90b7b1516c177ffdbcefb78895378414883908dbe338",
+      "model_step_count": 1,
+      "cost_amount": "0.005794",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00579400",
+      "input_tokens": 1397,
+      "output_tokens": 375
+    },
+    {
+      "case_result_id": "4cf8c758-2514-485f-967f-8b4d4e419f45",
+      "case_id": "privacy-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "c7a27a34-e787-473b-8f22-a0e1c23544f7"
+      ],
+      "step_metadata_hash": "99bc1dc1346c41cf0d0ff37c9c88add5ba0b30bb0a8de101a238479add9eb2fe",
+      "model_step_count": 1,
+      "cost_amount": "0.004956",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00495600",
+      "input_tokens": 1590,
+      "output_tokens": 222
+    },
+    {
+      "case_result_id": "4b81555b-2872-42dd-918b-0de28b937566",
+      "case_id": "invoice-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "c7df13a5-eebb-47ae-bfc9-d04b7936efd7"
+      ],
+      "step_metadata_hash": "cb6f743ba7cd445ce93c5eb9dec71bc3759dc7e0eb59e679534bc01a3eb58da9",
+      "model_step_count": 1,
+      "cost_amount": "0.005978",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00597800",
+      "input_tokens": 1397,
+      "output_tokens": 398
+    },
+    {
+      "case_result_id": "dd1a115f-41b8-4f5b-9caa-0fe4c60769c4",
+      "case_id": "invoice-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "ec4c5f7a-6566-4d4a-9dd0-c1979911193b"
+      ],
+      "step_metadata_hash": "0d4fec58c627ede2a451f5ef143743a0984345cf0dce675e64bf2f410dab593d",
+      "model_step_count": 1,
+      "cost_amount": "0.00585",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00585000",
+      "input_tokens": 1397,
+      "output_tokens": 382
+    },
+    {
+      "case_result_id": "9bc215a5-45c8-408e-9520-ba0b88711ff0",
+      "case_id": "invoice-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "076de16d-2f27-49bc-bd0e-0a1c2a69fde6"
+      ],
+      "step_metadata_hash": "62ed1b12ae54c4941bb8b0e941e83b745e751e8fecfaf54597ff27a1ce27eacc",
+      "model_step_count": 1,
+      "cost_amount": "0.005756",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00575600",
+      "input_tokens": 1590,
+      "output_tokens": 322
+    },
+    {
+      "case_result_id": "bbd9282b-7630-4ff5-8dea-73ca100649f4",
+      "case_id": "privacy-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "8e6bee9d-2bab-4f4d-92ae-90db20710697"
+      ],
+      "step_metadata_hash": "da272e30e355d756122d8866cb7b8f46a76c8c160c440b883cec6e3d7071a903",
+      "model_step_count": 1,
+      "cost_amount": "0.004748",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00474800",
+      "input_tokens": 1590,
+      "output_tokens": 196
+    },
+    {
+      "case_result_id": "915f0115-bc4c-4833-bd3e-8aec51c45e67",
+      "case_id": "privacy-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "6b658817-c840-421e-9e12-0cb230162cdc",
+        "01e03596-f8df-4ad0-bfb0-d0383b8ea509",
+        "71b91214-3e03-4925-9c67-fa0623df4905"
+      ],
+      "step_metadata_hash": "7ec290e9e731304b68886e3cc52f5e38858eeac205b8f015c408476d84d305c0",
+      "model_step_count": 3,
+      "cost_amount": "0.010684",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01068400",
+      "input_tokens": 4498,
+      "output_tokens": 211
+    },
+    {
+      "case_result_id": "9f5a25d8-7ede-49c2-8a6c-b80838612554",
+      "case_id": "privacy-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "79ef2f44-f6fb-4d88-b7b6-7c76a2c445f5",
+        "39ec3886-dc7c-4078-a5c2-8cf30137a95e",
+        "8ab21801-319a-4d15-aed0-04045ff51695",
+        "6b0c8e75-de44-4188-9d33-509502bfb4a9"
+      ],
+      "step_metadata_hash": "363c029d1c5137ab199bdc64113b66024aaff5799f30b32803e2a7b13dba5efe",
+      "model_step_count": 4,
+      "cost_amount": "0.016892",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00858800",
+      "input_tokens": 7046,
+      "output_tokens": 350
+    },
+    {
+      "case_result_id": "d50fa7fa-b0db-484a-afa5-fd9416ad671f",
+      "case_id": "privacy-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "76e7849c-7193-424a-8533-68d55be3a3ad",
+        "2ebdf9b2-5fcc-4301-9f81-6f22f7e5cf1c",
+        "aebc00df-7ff2-48c9-ae3a-90622f35dabe",
+        "efb507f9-eab1-4a7c-b02e-3c3ae5f1bf93"
+      ],
+      "step_metadata_hash": "c42caf3dee7828cb27dc2026cff021c04f31960c06e965b63b7650ae4afb1f22",
+      "model_step_count": 4,
+      "cost_amount": "0.017234",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00885400",
+      "input_tokens": 7073,
+      "output_tokens": 386
+    },
+    {
+      "case_result_id": "8bc311ce-0c6a-42b4-8368-0172db878b62",
+      "case_id": "privacy-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "92793ae1-3e94-4e7c-ae19-fa5a7d894430",
+        "017e9c1f-4bd1-4ab3-b7d7-7bca474c81e6",
+        "6dbf55f9-1328-4066-86a6-e0e8a5e891f7"
+      ],
+      "step_metadata_hash": "4f1e910cb74846f7c971a08626bbede5138754dca126146ed136d930e55121cc",
+      "model_step_count": 3,
+      "cost_amount": "0.011966",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00461400",
+      "input_tokens": 4683,
+      "output_tokens": 325
+    },
+    {
+      "case_result_id": "716798c0-7e01-49d6-a7fa-f9e1a254a03d",
+      "case_id": "privacy-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "61957cd7-cb96-4dd8-9c1f-a684eccc7647",
+        "7265c321-e937-405c-a819-6faafad45269",
+        "d3671e1e-11a5-4d50-b91b-e5c6abe982f5"
+      ],
+      "step_metadata_hash": "3f2a41bc1908555ec8f2f918f69d59f7e21f9459892ce04ac0dc7ef4375a4b54",
+      "model_step_count": 3,
+      "cost_amount": "0.011908",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00449200",
+      "input_tokens": 4686,
+      "output_tokens": 317
+    },
+    {
+      "case_result_id": "8277b849-bcaf-48b9-92c2-ff58345f6630",
+      "case_id": "privacy-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "f15373df-a8b2-4d59-b022-fed49808f7a8",
+        "bd67af11-1625-43e1-a483-f2ce67ef6c8b",
+        "1d381564-11d0-43c0-b606-5bbba4d16839"
+      ],
+      "step_metadata_hash": "03fc20ee2293d0c0936cf2fed09398b391de53fbf90b7992643f6883e5e63fca",
+      "model_step_count": 3,
+      "cost_amount": "0.012646",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00461000",
+      "input_tokens": 5235,
+      "output_tokens": 272
+    },
+    {
+      "case_result_id": "897bbdd4-4006-4ea5-8276-2ff33e5b49e4",
+      "case_id": "privacy-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "2bd1b2ec-e2fe-4a87-892f-acd2616c5f1c",
+        "4bb10317-6db2-4c4d-b003-869ca8e4eed5",
+        "77575e98-b94f-49e5-b3ed-1d408ea84467"
+      ],
+      "step_metadata_hash": "f601dbe04ab1eb523eaa81d3b7139f404558c8b8e0383fc6cdafbc7dd81ea6e6",
+      "model_step_count": 3,
+      "cost_amount": "0.012750",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00465800",
+      "input_tokens": 5247,
+      "output_tokens": 282
+    },
+    {
+      "case_result_id": "eace5616-638f-4239-9087-bef7f88036bd",
+      "case_id": "invoice-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "b62db81f-8b21-4b26-aad3-9c9d351147d2"
+      ],
+      "step_metadata_hash": "06bb9ab14f4e9052d68c2d22c4b843e86ce553a8b5e32eb9921b45333fb33056",
+      "model_step_count": 1,
+      "cost_amount": "0.004994",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00499400",
+      "input_tokens": 1397,
+      "output_tokens": 275
+    },
+    {
+      "case_result_id": "67dffb53-f802-49fd-87b6-5cebec380618",
+      "case_id": "invoice-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "efa3894c-b0a8-49ef-9ac7-7eec090d2de0"
+      ],
+      "step_metadata_hash": "252f95095c747ff11574e8579eedf905dd986af1e49705399b6f26da101006b2",
+      "model_step_count": 1,
+      "cost_amount": "0.00578",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00578000",
+      "input_tokens": 1590,
+      "output_tokens": 325
+    },
+    {
+      "case_result_id": "0385ad2e-b0f1-4785-b9f2-da012d166e46",
+      "case_id": "repair-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "7477fbb1-0fda-4797-9943-3021c832c96c",
+        "4d87efa4-e5b6-4516-b4de-794bcd9952a9",
+        "9efcbd0c-b5a4-4cf6-b308-8004a96c961b",
+        "1afb1491-0256-4015-a803-b310cece5e11"
+      ],
+      "step_metadata_hash": "034b7496bf2dc0fd577db31eaac30dbceceea62cd62f88ace60be18bb0907cf1",
+      "model_step_count": 4,
+      "cost_amount": "0.017234",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00882600",
+      "input_tokens": 7105,
+      "output_tokens": 378
+    },
+    {
+      "case_result_id": "973171d9-53a9-468e-9c40-4faf12be2f24",
+      "case_id": "invoice-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "b71e3121-e4ee-4765-8a31-e9d48d13449e"
+      ],
+      "step_metadata_hash": "27f2616d8630bbf221c19574d8b02c5a8d9e023403e55b0f4f0952e81c3773d9",
+      "model_step_count": 1,
+      "cost_amount": "0.005868",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00586800",
+      "input_tokens": 1590,
+      "output_tokens": 336
+    },
+    {
+      "case_result_id": "61534f34-b62b-4a7c-b287-d8d825007d23",
+      "case_id": "repair-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "4829f175-fba4-4677-b66d-7fd30c12647c",
+        "cf0aaa4f-7984-4d42-bbe2-ca25b34b86a5",
+        "d0844e2f-4b4d-40c5-9e78-4e3e85a6a221",
+        "0a491d8b-a7f3-4600-b593-de52b1994736"
+      ],
+      "step_metadata_hash": "24b483336d2f2b82efc8c8688ce8082c14dbd6cf7d7092c8ace0122f44954175",
+      "model_step_count": 4,
+      "cost_amount": "0.017308",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00887200",
+      "input_tokens": 7098,
+      "output_tokens": 389
+    },
+    {
+      "case_result_id": "bbc120d9-d6c4-40f0-813b-ea2d33bb1ada",
+      "case_id": "repair-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "e81e152b-0643-4ae8-be20-1abd1100c99b",
+        "dc6ae92c-fb04-429e-b46d-999cba8b674a",
+        "718b7bd1-1ede-4a2b-be81-47d2b81c846c",
+        "f4657369-7556-4429-9229-72d5f68dcb66"
+      ],
+      "step_metadata_hash": "cf47b03e5af57184985c958023a277cb5a00255b8fda58dbd5ef20591c2b35b5",
+      "model_step_count": 4,
+      "cost_amount": "0.017512",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00904400",
+      "input_tokens": 7136,
+      "output_tokens": 405
+    },
+    {
+      "case_result_id": "d2ba780d-42d3-4afe-bb48-3f377f726b37",
+      "case_id": "repair-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "a83901ba-10ff-41c8-9213-bef443fbc93a",
+        "d5bcb5e6-73df-4e53-b45a-f450f12aa381",
+        "1840b48e-6d7e-4dcc-abbb-6abf3072b031"
+      ],
+      "step_metadata_hash": "e637e532ccc1ce8a1dd6dd479cb74496b3656df2ae685ca43ef343f736487d6e",
+      "model_step_count": 3,
+      "cost_amount": "0.011370",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00419200",
+      "input_tokens": 4641,
+      "output_tokens": 261
+    },
+    {
+      "case_result_id": "4bb1091a-25f6-4e5c-af4c-0ca7f9e8eb95",
+      "case_id": "repair-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "7062e3ad-337e-41a1-853d-315ba950bb73",
+        "2e55f464-7194-4f7e-8373-2106c7000164",
+        "5e273e9c-6ea6-46e9-aee6-2a45151c0587"
+      ],
+      "step_metadata_hash": "e8c0cd6a682445ba3fd8d96bf007b676213b0383ea0440c0b464ec51ab678adb",
+      "model_step_count": 3,
+      "cost_amount": "0.011796",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00438800",
+      "input_tokens": 4690,
+      "output_tokens": 302
+    },
+    {
+      "case_result_id": "bd6374d5-fdce-4436-aae9-b026e279636e",
+      "case_id": "repair-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "0bd52da0-73b4-4132-bd18-98b190d640c7",
+        "a8b18e3f-a6b4-4a20-b7c5-5e79ad6996a7",
+        "2e22582d-18a4-4d4b-ac63-8da4a3bab216"
+      ],
+      "step_metadata_hash": "71b78f762d10c1e724af720ce19d37b744bb5e50e6546aa1f69dadbcad2ecf58",
+      "model_step_count": 3,
+      "cost_amount": "0.011436",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00425800",
+      "input_tokens": 4646,
+      "output_tokens": 268
+    },
+    {
+      "case_result_id": "cd841294-83ad-4d86-bc11-564dff4060ea",
+      "case_id": "repair-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "418dfd01-bdfd-4f90-a059-4e9a5a38dd7c",
+        "3b49ceb1-3435-486f-a2c9-bd96e3f7e786",
+        "8a836cc2-652e-4716-a4b1-6023c58a1234"
+      ],
+      "step_metadata_hash": "987b6ff4b40fbc3e5c88cac48ea2d6b58c06b2725c17019081a38ce830b974f3",
+      "model_step_count": 3,
+      "cost_amount": "0.012890",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00495800",
+      "input_tokens": 5217,
+      "output_tokens": 307
+    },
+    {
+      "case_result_id": "baca88bb-3e93-4b00-b5ce-025d8e2df395",
+      "case_id": "repair-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "b4a29c5f-84aa-45b5-9f50-e445cc0e4c75",
+        "c06199a9-23b3-4d67-a1dd-c891552c734f",
+        "4b55ebe6-da83-4164-a311-bbd50093f74c"
+      ],
+      "step_metadata_hash": "13c621aed774181c0583e95d98484219d99f84d1d9e1269149acf5d95ea362ad",
+      "model_step_count": 3,
+      "cost_amount": "0.013410",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00523800",
+      "input_tokens": 5277,
+      "output_tokens": 357
+    },
+    {
+      "case_result_id": "aea6e93a-397a-460a-ac1f-853c5b919dcd",
+      "case_id": "repair-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "1c07a63e-4518-451f-bed1-3abbf2c6f04a",
+        "87880d6a-d904-4ca3-8f27-d8be8313bd92",
+        "13b118b8-2a08-414b-99c0-ab7beddade23"
+      ],
+      "step_metadata_hash": "c2fd36f734a1ef03eaf3ea377282145bf93856cfe244d08edc1a8040695e40ca",
+      "model_step_count": 3,
+      "cost_amount": "0.012644",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00449600",
+      "input_tokens": 5254,
+      "output_tokens": 267
+    },
+    {
+      "case_result_id": "6278c7b7-a8e6-4d7a-8f84-1cc6f79c2199",
+      "case_id": "replacement-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "c989f097-ac28-40a7-99b1-e31dedf1ca84"
+      ],
+      "step_metadata_hash": "0e02cd5974c81d6ad872fecac2c44b5c3a6d91c44255f6c67ec417305da3d67e",
+      "model_step_count": 1,
+      "cost_amount": "0.003846",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00384600",
+      "input_tokens": 1387,
+      "output_tokens": 134
+    },
+    {
+      "case_result_id": "80f2e527-5245-4baf-851f-ddda269870f2",
+      "case_id": "replacement-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "6a1c3575-1e76-4128-89df-2f5c001adc07"
+      ],
+      "step_metadata_hash": "76feeeea8863f3e6684eebf90c054288ea208df9f32b385e13fdf35416e7c586",
+      "model_step_count": 1,
+      "cost_amount": "0.003894",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00389400",
+      "input_tokens": 1387,
+      "output_tokens": 140
+    },
+    {
+      "case_result_id": "5ac95266-8cab-416f-a2b9-1408a309c6e1",
+      "case_id": "replacement-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "c25d3fbd-db5e-4a64-876d-1028151f0012"
+      ],
+      "step_metadata_hash": "bad5f9c64a306a61c4e0db6fb7ff2fb218854f72dcda36605eb7824c861a8cbe",
+      "model_step_count": 1,
+      "cost_amount": "0.00376",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00376000",
+      "input_tokens": 1580,
+      "output_tokens": 75
+    },
+    {
+      "case_result_id": "985fbdd9-ef74-4bd3-9851-f072ab14efa8",
+      "case_id": "replacement-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "6547077d-5325-433d-bf8d-401f279e20b8"
+      ],
+      "step_metadata_hash": "39a7ddd8766bd46057d0a9a5ee9ee0cc1e3945f3ab47ba1e1ec5c8141d75f9d6",
+      "model_step_count": 1,
+      "cost_amount": "0.004896",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00489600",
+      "input_tokens": 1580,
+      "output_tokens": 217
+    },
+    {
+      "case_result_id": "4983f338-eb98-43ca-802e-e7dbf770edd4",
+      "case_id": "replacement-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "90f592e5-2817-422f-8a38-8d06e3a77e32"
+      ],
+      "step_metadata_hash": "c478412b15a0198545f3d6d1cf84a9252285e4537f041873f1f60f4b141d8e21",
+      "model_step_count": 1,
+      "cost_amount": "0.003768",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00376800",
+      "input_tokens": 1580,
+      "output_tokens": 76
+    },
+    {
+      "case_result_id": "769dd3eb-abf8-4aa7-9582-8120fee7cb6a",
+      "case_id": "replacement-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "5dd429eb-b4dc-4bc4-b5f6-f5fb1133f98c"
+      ],
+      "step_metadata_hash": "10d38150719c482e7b1adbaeed2998a5dc41ab6163d9bc9bd133fbadda8b688a",
+      "model_step_count": 1,
+      "cost_amount": "0.004356",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00435600",
+      "input_tokens": 1398,
+      "output_tokens": 195
+    },
+    {
+      "case_result_id": "127bf3bb-0697-4354-ba18-1e49784b61e7",
+      "case_id": "replacement-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "4cc07159-04fd-4d91-917f-8c054c59be6e"
+      ],
+      "step_metadata_hash": "d0827bbeb7bc32a349b3affe388bd1979bdc1c77e854a484fd57aeae55e2eadd",
+      "model_step_count": 1,
+      "cost_amount": "0.004518",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00451800",
+      "input_tokens": 1591,
+      "output_tokens": 167
+    },
+    {
+      "case_result_id": "15e0d623-3b89-468b-9f19-dbb6346caa84",
+      "case_id": "replacement-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "47cddb66-3db2-4d33-af4c-1e046d35a3cf"
+      ],
+      "step_metadata_hash": "fe1894ad9d4eeb81c863750d3fe79641948be7ae77335c02fd0820c10edb269c",
+      "model_step_count": 1,
+      "cost_amount": "0.005558",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00555800",
+      "input_tokens": 1591,
+      "output_tokens": 297
+    },
+    {
+      "case_result_id": "3c905f81-adad-49f5-9bff-ba65710a905d",
+      "case_id": "replacement-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "6bf600a7-46b9-4c37-8a9e-4b71103f3ac0",
+        "ddc4affa-f81b-426b-bb70-4c2b5ed3986d",
+        "b65ed8e2-4015-4291-b911-e80bf24e51a5"
+      ],
+      "step_metadata_hash": "0ed3ed8699fc244306ce81c8b8c3a7910d593b105fb6ca805760a328da1bf9d2",
+      "model_step_count": 3,
+      "cost_amount": "0.010908",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01090800",
+      "input_tokens": 4506,
+      "output_tokens": 237
+    },
+    {
+      "case_result_id": "ad258b03-09f6-4e74-ae9f-8dcd83625c37",
+      "case_id": "replacement-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "b005959f-ef14-4204-8743-a3402f50e2f0"
+      ],
+      "step_metadata_hash": "334ed9df0e976ea74e0b9073005b55d1a6ffc063ad03a1699e9d333a80e33f68",
+      "model_step_count": 1,
+      "cost_amount": "0.003854",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00385400",
+      "input_tokens": 1387,
+      "output_tokens": 135
+    },
+    {
+      "case_result_id": "4bf66876-cdbd-4062-950e-1f993bb8a8aa",
+      "case_id": "replacement-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "ae92a55a-8006-4efd-96aa-feee3c44391b"
+      ],
+      "step_metadata_hash": "abee5b6217a8d5e6e91f614cffdc6213894a8b718f5d164271fef7f311fc7797",
+      "model_step_count": 1,
+      "cost_amount": "0.006236",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00623600",
+      "input_tokens": 1398,
+      "output_tokens": 430
+    },
+    {
+      "case_result_id": "e7d5c8de-8ea6-4b5e-8d23-bb4f44051a3b",
+      "case_id": "replacement-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "ea68ad0c-2647-4400-b946-51b16ed0a87c"
+      ],
+      "step_metadata_hash": "1a56db08febb6b3ff621d4d436faa608b4136f04d0d173bc397c463f31fa93a1",
+      "model_step_count": 1,
+      "cost_amount": "0.00542",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00542000",
+      "input_tokens": 1398,
+      "output_tokens": 328
+    },
+    {
+      "case_result_id": "d5e86b49-9c60-4e63-b705-10f4258d0234",
+      "case_id": "replacement-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "1e82c9f3-92b9-4cb7-ae8a-d70b1cd50005"
+      ],
+      "step_metadata_hash": "2d34bbc533f98d0c2653624a01826487f2fe5c32ebc71fadce4bc6d4aa13580c",
+      "model_step_count": 1,
+      "cost_amount": "0.006118",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00611800",
+      "input_tokens": 1591,
+      "output_tokens": 367
+    },
+    {
+      "case_result_id": "3ef947d2-2229-489b-9bd5-e1659c18f224",
+      "case_id": "privacy-multi_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "95dd5613-5f72-423d-9512-2afa9b3b692d"
+      ],
+      "step_metadata_hash": "d59347c243ecd5424e4e52fa886e86dfd7031f8ac35b69e90244779322f1a2e6",
+      "model_step_count": 1,
+      "cost_amount": "0.006266",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00626600",
+      "input_tokens": 1397,
+      "output_tokens": 434
+    },
+    {
+      "case_result_id": "ea422872-a9b4-419f-8f76-5e99e88ecf57",
+      "case_id": "privacy-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "f70ed85b-5017-4301-8afb-5ef87d3419d2"
+      ],
+      "step_metadata_hash": "aaefd169880a1495b0cd509f9a53c38297a435b3d12ab92fea23f2e24e27b8be",
+      "model_step_count": 1,
+      "cost_amount": "0.006436",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00643600",
+      "input_tokens": 1590,
+      "output_tokens": 407
+    },
+    {
+      "case_result_id": "f6f732ef-ec33-4f3b-a101-f693e87ae366",
+      "case_id": "privacy-unanswerable",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "eb16963b-489f-4961-8be3-d86bb9fb3edd"
+      ],
+      "step_metadata_hash": "0b76d58eeed3edf86f25d1f9e2abfa447b8af19f6e9cc8ac22755f59e193b2bd",
+      "model_step_count": 1,
+      "cost_amount": "0.004498",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00449800",
+      "input_tokens": 1397,
+      "output_tokens": 213
+    },
+    {
+      "case_result_id": "ebbf8dcf-d04a-4c6b-bf39-9249c263d97c",
+      "case_id": "privacy-unanswerable",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "06bb4c71-7834-4a37-b223-75035ca4c39e"
+      ],
+      "step_metadata_hash": "b55c0ecd59877ea3a9155b07550611c8b0834423f910f81c93220eb3ca6c912d",
+      "model_step_count": 1,
+      "cost_amount": "0.005164",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00516400",
+      "input_tokens": 1590,
+      "output_tokens": 248
+    },
+    {
+      "case_result_id": "16671e30-fdff-4e74-bb49-653cb8f9a3f0",
+      "case_id": "privacy-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 0,
+      "step_ids": [
+        "f2f50776-67eb-447d-9b0f-6ee84abe12fb",
+        "24dcfdb0-fda7-47c4-99de-4fb03119c433",
+        "292f1c07-7c87-4522-a17d-e3058cf0ba44"
+      ],
+      "step_metadata_hash": "01c16d1b3b511cb9a8b1b54cc44d5378d174d2945d5e76e2164eede0aa5c8265",
+      "model_step_count": 3,
+      "cost_amount": "0.011064",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01106400",
+      "input_tokens": 4496,
+      "output_tokens": 259
+    },
+    {
+      "case_result_id": "8c0bfc4e-74fd-43a8-999f-3bada659459f",
+      "case_id": "privacy-clarification",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "22cffa8b-a5c1-4869-a5e0-c3bb10b101c7",
+        "73905f98-83b7-45eb-83e2-26085cce5776",
+        "52677f0d-23dd-45fb-b5aa-a5a9347540cd",
+        "b796513d-7de0-43f8-a318-65dc1f17519a"
+      ],
+      "step_metadata_hash": "05732a599f1397b849e586029ef6a5ea9d138beda79951b456d7b33dc3851565",
+      "model_step_count": 4,
+      "cost_amount": "0.016820",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00852400",
+      "input_tokens": 7062,
+      "output_tokens": 337
+    },
+    {
+      "case_result_id": "b315bca6-2b27-4c3f-a27a-09c1cbcaa0ed",
+      "case_id": "privacy-approval_denied",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "4aeda24f-f83f-4b74-95dc-2e73a5243d44",
+        "6bd504d8-e820-4ef8-acf6-279c3b1a7eef",
+        "90a834bc-7935-45f1-9f5c-6225c6798883"
+      ],
+      "step_metadata_hash": "60fcb914bfb326532a9718c65246453c256f3ad6ca485106f283440782dbc130",
+      "model_step_count": 3,
+      "cost_amount": "0.011426",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00418400",
+      "input_tokens": 4649,
+      "output_tokens": 266
+    },
+    {
+      "case_result_id": "403d5fa9-7aa1-41e1-aa51-7f018bf57f45",
+      "case_id": "privacy-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "ff5606af-bca3-497f-80bd-88fbb5460fc4",
+        "61b0806e-fd31-4040-aa9f-3b1764779870",
+        "a457a8df-b01d-4d0e-88fe-9070d1dd5535"
+      ],
+      "step_metadata_hash": "027ebaa56c1f1014085cfaa5af9f92cf8ba7194245761acc483e486666ebe06a",
+      "model_step_count": 3,
+      "cost_amount": "0.012398",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00445800",
+      "input_tokens": 5203,
+      "output_tokens": 249
+    },
+    {
+      "case_result_id": "61e9755a-5127-41b9-8da6-7c0f118b59c5",
+      "case_id": "replacement-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "8b8b616b-e96f-4152-a7cd-30c0f0fed911",
+        "6511afb3-63c7-44cd-8c5a-4fd0e764e7a3",
+        "219cc80e-c791-424d-b6da-d6aa02ef8f43"
+      ],
+      "step_metadata_hash": "814692c7a04a0c16cd3aea011f14f19ae3c1e86f08ac9fab60a53df70a8569de",
+      "model_step_count": 3,
+      "cost_amount": "0.012824",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00481200",
+      "input_tokens": 5232,
+      "output_tokens": 295
+    },
+    {
+      "case_result_id": "362ac639-eef7-405a-a573-a631ca811f24",
+      "case_id": "replacement-approval_denied",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 2,
+      "step_ids": [
+        "63aa7cc1-afab-4c2b-9d22-2dfcd3eb5013",
+        "1d9f4c04-9a6a-407b-8496-298a1b61c6c0",
+        "8f08df25-fe6a-45a1-ac42-4b068796a960"
+      ],
+      "step_metadata_hash": "8d932b2d3fb00d2be8324a3e51a20229ff7c73f4bb8be1d7e10d684362e6fd95",
+      "model_step_count": 3,
+      "cost_amount": "0.012480",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00455600",
+      "input_tokens": 5216,
+      "output_tokens": 256
+    },
+    {
+      "case_result_id": "abd1086d-d478-4d0e-a6cb-095b2f6ddc53",
+      "case_id": "privacy-single_hop",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 1,
+      "step_ids": [
+        "95ff99e5-c347-4c0c-89d3-fe2c038e6e6f"
+      ],
+      "step_metadata_hash": "06760b57b62605fa412d955c5cc80f125a84d07a9d8ec5b9110248d9bd2a3983",
+      "model_step_count": 1,
+      "cost_amount": "0.00406",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00406000",
+      "input_tokens": 1386,
+      "output_tokens": 161
+    },
+    {
+      "case_result_id": "9c372201-924c-4c32-926f-4f2f9bf83a29",
+      "case_id": "privacy-single_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 1,
+      "step_ids": [
+        "797dc26f-ccf5-42d5-9277-55fd3c89ae31"
+      ],
+      "step_metadata_hash": "9b5db44ea312a4f3f01b1226cb0f0fb64fe1bc63496560865771b56456967dfc",
+      "model_step_count": 1,
+      "cost_amount": "0.003918",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00391800",
+      "input_tokens": 1579,
+      "output_tokens": 95
+    },
+    {
+      "case_result_id": "0fd32513-f383-4112-b964-10d7bdb8e189",
+      "case_id": "privacy-multi_hop",
+      "variant_id": "bebbb0e4-ce0f-4eaa-9b10-64b25e6ba82a",
+      "repetition": 0,
+      "step_ids": [
+        "cde2d705-6c62-4731-b2ad-ae694cc7f132"
+      ],
+      "step_metadata_hash": "81b3a7e4b7694959251ecc27e513b713dbc169dcc0f3640e6a49aa74d31737e8",
+      "model_step_count": 1,
+      "cost_amount": "0.006052",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.00605200",
+      "input_tokens": 1590,
+      "output_tokens": 359
+    },
+    {
+      "case_result_id": "9020eef1-43fd-41f5-929e-9cc0a8578eee",
+      "case_id": "privacy-clarification",
+      "variant_id": "e1db68a6-ae07-44f6-b609-4c47f3a7ea49",
+      "repetition": 2,
+      "step_ids": [
+        "7e06e9fa-f620-4546-b252-0b26f6d4377e",
+        "ccbde462-1cbd-4cba-9246-9a980c0156c4",
+        "ab60e579-c578-4c70-bd68-853cea15aa27"
+      ],
+      "step_metadata_hash": "ace346bb8d2d74ec27d9dd1e2f813f15821064bb7c6a862541b821f2ae3037b9",
+      "model_step_count": 3,
+      "cost_amount": "0.010720",
+      "cost_currency": "CNY",
+      "runtime_reported_cost_amount": "0.01072000",
+      "input_tokens": 4488,
+      "output_tokens": 218
+    }
+  ],
+  "persisted_model_step_count": 227,
+  "adapter_call_count": 227,
+  "persisted_step_total_cny": "0.981684",
+  "adapter_total_cny": "0.981684",
+  "status": "PASS",
+  "runtime_cost_understatement_cny": "0.27605000",
+  "history_policy": "raw experiment observations preserved; supplemental accounting only"
+}

@@ -1,0 +1,2820 @@
+{
+  "status": "EXECUTED",
+  "provider": "deepseek-flash",
+  "transport": "real_loopback_http_sse",
+  "billing_method": "peak_upper_cny_not_invoice",
+  "cases": [
+    {
+      "ordinal": 0,
+      "group": "direct_answer",
+      "case_id": "refund-single_hop",
+      "run_id": "fe248757-74e2-4d23-8bea-c2c0d0266eb0",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 4996.906699961983,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 5537.887400016189,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 4862.178399984259,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.004199973773211241
+          ],
+          "model.generate": [
+            5019.184999982826
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "06f9b6906af14594a7cf1a5fa3822650"
+      ]
+    },
+    {
+      "ordinal": 1,
+      "group": "direct_answer",
+      "case_id": "refund-single_hop",
+      "run_id": "6691ecc6-6f33-4ad1-ab3e-dd71229ae117",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 515.7417999580503,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1044.037899991963,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 514.2949000000954,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.003999972250312567
+          ],
+          "model.generate": [
+            733.7891000206582
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "e4642e0ce51f4463ad0922209f2798ec"
+      ]
+    },
+    {
+      "ordinal": 2,
+      "group": "direct_answer",
+      "case_id": "refund-single_hop",
+      "run_id": "6d26af42-0bcb-4f82-8c65-6e8808c4d35c",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 571.0324000101537,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1131.0868000146002,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 569.6516000316478,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.007800001185387373
+          ],
+          "model.generate": [
+            804.5927999773994
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "4d3642a6b5c44f26ace4b2ced60209d0"
+      ]
+    },
+    {
+      "ordinal": 3,
+      "group": "direct_answer",
+      "case_id": "warranty-single_hop",
+      "run_id": "627f6ed2-1401-4957-a202-3c1233bdf528",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 833.7317999685183,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1370.6379999639466,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 832.1784000145271,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.0028999638743698597
+          ],
+          "model.generate": [
+            1069.8576999711804
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "95eb6d33175e403f895a89be06af3d15"
+      ]
+    },
+    {
+      "ordinal": 4,
+      "group": "direct_answer",
+      "case_id": "warranty-single_hop",
+      "run_id": "dec19df5-9cba-4576-97b3-2f3908eeabd3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 546.1530000320636,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1175.4762000055052,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 544.7943999897689,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002200016751885414
+          ],
+          "model.generate": [
+            879.1420999914408
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "000be8c89c6d4c129af485969d09c5a8"
+      ]
+    },
+    {
+      "ordinal": 5,
+      "group": "direct_answer",
+      "case_id": "warranty-single_hop",
+      "run_id": "d7567d4d-fb60-4dbf-956e-9e169bc13758",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 537.4935999861918,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 883.455699949991,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 536.1247999826446,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.0020999577827751637
+          ],
+          "model.generate": [
+            586.7563000065275
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "1c78bc8f47de4bb1b1a0aae75ef31a44"
+      ]
+    },
+    {
+      "ordinal": 6,
+      "group": "direct_answer",
+      "case_id": "delivery-single_hop",
+      "run_id": "17d87f24-cad3-41e5-82c6-6753bff3eb42",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 527.265399985481,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1015.2195999980904,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 526.0182999772951,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002300017513334751
+          ],
+          "model.generate": [
+            720.7439999911003
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "fdb914620d784aea9d1b9dd333bf98aa"
+      ]
+    },
+    {
+      "ordinal": 7,
+      "group": "direct_answer",
+      "case_id": "delivery-single_hop",
+      "run_id": "c8c1fdec-9933-4f16-be1f-e5e499b10af2",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 629.8037999658845,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1288.9627999975346,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 628.457700018771,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.00200001522898674
+          ],
+          "model.generate": [
+            985.6934999697842
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "362330e8829a4b2caf4898588987b9ec"
+      ]
+    },
+    {
+      "ordinal": 8,
+      "group": "direct_answer",
+      "case_id": "delivery-single_hop",
+      "run_id": "ab6a529a-7105-4865-901c-7fa75e94541a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 319.96049999725074,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 737.5743999728002,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 318.6410000198521,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002300017513334751
+          ],
+          "model.generate": [
+            427.47510003391653
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "a493fbfdf3f74408a50ec9c3d22a63ed"
+      ]
+    },
+    {
+      "ordinal": 9,
+      "group": "direct_answer",
+      "case_id": "cancel-single_hop",
+      "run_id": "a19038d7-6d4f-40b9-8bd9-57a540f6e34c",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 601.3224000344053,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 991.295900021214,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 599.9540999764577,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.00500003807246685
+          ],
+          "model.generate": [
+            691.3013000157662
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "65fa14f994684d92a82c87c736c4ea5a"
+      ]
+    },
+    {
+      "ordinal": 10,
+      "group": "direct_answer",
+      "case_id": "cancel-single_hop",
+      "run_id": "0b1e8d6b-16ad-4adc-bd6d-097ef1931655",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 619.7499000118114,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1002.0153999794275,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 618.4680000296794,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.004999979864805937
+          ],
+          "model.generate": [
+            697.0381999853998
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "87d1a11c013446fb97d21d29fccb1fe5"
+      ]
+    },
+    {
+      "ordinal": 11,
+      "group": "direct_answer",
+      "case_id": "cancel-single_hop",
+      "run_id": "0ea007f9-2f1e-4b46-8387-b79508f025c0",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 441.8850999791175,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 939.8065999848768,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 440.4561999836005,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002500019036233425
+          ],
+          "model.generate": [
+            624.6526000322774
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "cac79907125040cf985a20b43ddc7031"
+      ]
+    },
+    {
+      "ordinal": 12,
+      "group": "direct_answer",
+      "case_id": "account-single_hop",
+      "run_id": "bdd42409-ec68-4112-a7a5-8dff7a49d80a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 589.8391000228003,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1146.9336000154726,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 588.5084999608807,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002100015990436077
+          ],
+          "model.generate": [
+            839.4906999892555
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "b29cee2cb76d4feb8b214bf8179f80dc"
+      ]
+    },
+    {
+      "ordinal": 13,
+      "group": "direct_answer",
+      "case_id": "account-single_hop",
+      "run_id": "da116a85-1238-45da-8438-310668564e4b",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 856.1922000371851,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1222.0516000525095,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 854.6690999646671,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002500019036233425
+          ],
+          "model.generate": [
+            920.7342999870889
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "c2cd4b8fd3b14f8e84820a8afd03aaa0"
+      ]
+    },
+    {
+      "ordinal": 14,
+      "group": "direct_answer",
+      "case_id": "account-single_hop",
+      "run_id": "630d10ff-5d16-469e-aff3-55a5a85670bd",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 543.8437999691814,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 925.8435000083409,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 542.5026000011712,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002100015990436077
+          ],
+          "model.generate": [
+            629.814499989152
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "e379f4742c354306a4b6f05581ce84b3"
+      ]
+    },
+    {
+      "ordinal": 15,
+      "group": "direct_answer",
+      "case_id": "billing-single_hop",
+      "run_id": "c860f5d6-d448-43e0-bbd9-05dd3f993908",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 507.4731999775395,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1037.4323999858461,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 506.1429999768734,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.00300002284348011
+          ],
+          "model.generate": [
+            704.672199964989
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "6c8f3c5f41a6470da987625d3a130f23"
+      ]
+    },
+    {
+      "ordinal": 16,
+      "group": "direct_answer",
+      "case_id": "billing-single_hop",
+      "run_id": "91bddf2a-780a-472b-9aa5-b9ef81fe5bf8",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 827.657799993176,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1364.3739999970421,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 826.3388999621384,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.0021999585442245007
+          ],
+          "model.generate": [
+            1068.3195000165142
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "76236fe2226045b8a24ce8d27969bafa"
+      ]
+    },
+    {
+      "ordinal": 17,
+      "group": "direct_answer",
+      "case_id": "billing-single_hop",
+      "run_id": "5922b707-39c8-4693-9658-5d64079125f7",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 545.1206000288948,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1084.6670999890193,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 543.7843999825418,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.0024999608285725117
+          ],
+          "model.generate": [
+            763.1605000351556
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "b758240301ec4a20b1fbedbe1c1e5120"
+      ]
+    },
+    {
+      "ordinal": 18,
+      "group": "direct_answer",
+      "case_id": "return-single_hop",
+      "run_id": "1b609956-f129-4b0c-a25b-21478fc2f4af",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 806.2395000015385,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1521.2555999751203,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 804.8292999737896,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002100015990436077
+          ],
+          "model.generate": [
+            1218.3931000181474
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "41b46d23f1c44df3999f7f4c8ae2eba0"
+      ]
+    },
+    {
+      "ordinal": 19,
+      "group": "direct_answer",
+      "case_id": "return-single_hop",
+      "run_id": "53b00705-854d-4d45-b9de-b380227ffe3f",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 512.0419000159018,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 973.361800017301,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 510.68130001658574,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002700020559132099
+          ],
+          "model.generate": [
+            645.338999980595
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "26164f939ad84589ad5e61b366f8bcf5"
+      ]
+    },
+    {
+      "ordinal": 20,
+      "group": "direct_answer",
+      "case_id": "return-single_hop",
+      "run_id": "afe13229-fe2e-4336-a7e1-7437d2ff720e",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 581.4051000052132,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1063.6093000066467,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 580.1214000093751,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.00200001522898674
+          ],
+          "model.generate": [
+            743.367200018838
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "e2a72deb192b40b189df96ebf537b7b3"
+      ]
+    },
+    {
+      "ordinal": 21,
+      "group": "direct_answer",
+      "case_id": "subscription-single_hop",
+      "run_id": "767443be-9f3c-4e7c-92ff-05f6d7aaefee",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 1023.7133000046015,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1351.138899975922,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 1022.1889999811538,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.0024999608285725117
+          ],
+          "model.generate": [
+            1045.3678999911062
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "e42799381e604eeaaa5c908adc08eb65"
+      ]
+    },
+    {
+      "ordinal": 22,
+      "group": "direct_answer",
+      "case_id": "subscription-single_hop",
+      "run_id": "d67a9a2e-d077-45ca-afbc-62f1e7ac9dcd",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 624.7958000167273,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1092.0420000329614,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 623.5483000054955,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002500019036233425
+          ],
+          "model.generate": [
+            789.7327999817207
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "ad17c30be78e4968915a2be732d740ef"
+      ]
+    },
+    {
+      "ordinal": 23,
+      "group": "direct_answer",
+      "case_id": "subscription-single_hop",
+      "run_id": "eec7f8a6-2a8b-441b-91d8-9e7f2d2af616",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "client_ttft_ms": 995.8461000351235,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 1464.2911999835633,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 994.6015000459738,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 1,
+          "known_usage_count": 1,
+          "known_cost_count": 1
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002100015990436077
+          ],
+          "model.generate": [
+            1154.5621000113897
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ],
+      "attempt_ids": [
+        "01aeebb3465246ddaf8fbe0f646159f6"
+      ]
+    },
+    {
+      "ordinal": 24,
+      "group": "approval_wait",
+      "case_id": "approval-stream",
+      "run_id": "811bb428-b983-4997-8b40-ac86947b5e3b",
+      "status": "WAITING_APPROVAL",
+      "failure_code": null,
+      "client_ttft_ms": 715.6863000127487,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 2073.7135999952443,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 714.0866999980062,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 2,
+          "known_usage_count": 2,
+          "known_cost_count": 2
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002400018274784088,
+            0.002600019797682762
+          ],
+          "model.generate": [
+            893.3857000083663,
+            778.4553000237793
+          ],
+          "tool.execute": [
+            13.45600001513958
+          ],
+          "approval.wait": [
+            0.012599979527294636
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "tool.requested",
+        "tool.started",
+        "tool.completed",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "tool.requested",
+        "approval.required"
+      ],
+      "attempt_ids": [
+        "90511153237745f598fb4ae399c98e32",
+        "52e66910c00b4529b336ce53f1beaf40"
+      ]
+    },
+    {
+      "ordinal": 25,
+      "group": "approval_wait",
+      "case_id": "approval-stream",
+      "run_id": "4cf16eda-3479-48ca-b530-3b43394f9809",
+      "status": "WAITING_APPROVAL",
+      "failure_code": null,
+      "client_ttft_ms": 754.6346999588422,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 2403.212799981702,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 753.2964000129141,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 2,
+          "known_usage_count": 2,
+          "known_cost_count": 2
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.0022999593056738377,
+            0.003999972250312567
+          ],
+          "model.generate": [
+            932.9129000543617,
+            1053.0667999992147
+          ],
+          "tool.execute": [
+            12.374999991152436
+          ],
+          "approval.wait": [
+            0.015099998563528061
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "tool.requested",
+        "tool.started",
+        "tool.completed",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "tool.requested",
+        "approval.required"
+      ],
+      "attempt_ids": [
+        "3e432902184146d69e9642a905c47cca",
+        "274e87d6bdc5425ba68eeffcc075953a"
+      ]
+    },
+    {
+      "ordinal": 26,
+      "group": "approval_wait",
+      "case_id": "approval-stream",
+      "run_id": "627365b5-0338-48f2-b65a-df0e180d1482",
+      "status": "WAITING_APPROVAL",
+      "failure_code": null,
+      "client_ttft_ms": 574.1770000313409,
+      "client_ttft_missing_reason": null,
+      "http_duration_ms": 2323.1857999926433,
+      "server_timing": {
+        "clock": "process_monotonic",
+        "origin": "server_http_request_start",
+        "server_ttft_ms": 572.9014000389725,
+        "server_ttft_missing_reason": null,
+        "billing": {
+          "collection_complete": true,
+          "provider_attempt_count": 2,
+          "known_usage_count": 2,
+          "known_cost_count": 2
+        },
+        "stage_durations_ms": {
+          "agent.context_budget": [
+            0.002700020559132099,
+            0.0027999631129205227
+          ],
+          "model.generate": [
+            707.4789999751374,
+            1196.5996000217274
+          ],
+          "tool.execute": [
+            12.817899987567216
+          ],
+          "approval.wait": [
+            0.012200034689158201
+          ]
+        }
+      },
+      "event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "tool.requested",
+        "tool.started",
+        "tool.completed",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "tool.requested",
+        "approval.required"
+      ],
+      "attempt_ids": [
+        "d66b4d0024584d84bb2065ba30f42f79",
+        "4c010001dece4f19b715c162bc3969a4"
+      ]
+    }
+  ],
+  "limitations": [
+    "fixture_identity_injected_not_login_test",
+    "small_sample_not_SLA",
+    "approval_wait_not_included_in_direct_answer_group"
+  ],
+  "agent_version_id": "05052576-8376-4a36-a051-2ad54e0ed1d6",
+  "spec_hash": "22fc212d6ca783440f644f76f54a7fdc3a2e1b43d222bdd999f66ca2ed15ba7a",
+  "planned_case_count": 27,
+  "calls": [
+    {
+      "attempt_id": "06f9b6906af14594a7cf1a5fa3822650",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 55,
+        "total_tokens": 1620,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00357",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "e4642e0ce51f4463ad0922209f2798ec",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 47,
+        "total_tokens": 1612,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003506",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "4d3642a6b5c44f26ace4b2ced60209d0",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 54,
+        "total_tokens": 1619,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003562",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "95eb6d33175e403f895a89be06af3d15",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 50,
+        "total_tokens": 1615,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00353",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "000be8c89c6d4c129af485969d09c5a8",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 64,
+        "total_tokens": 1629,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003642",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "1c78bc8f47de4bb1b1a0aae75ef31a44",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 23,
+        "total_tokens": 1588,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003314",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "fdb914620d784aea9d1b9dd333bf98aa",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 55,
+        "total_tokens": 1620,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00357",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "362330e8829a4b2caf4898588987b9ec",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 75,
+        "total_tokens": 1640,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00373",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "a493fbfdf3f74408a50ec9c3d22a63ed",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 24,
+        "total_tokens": 1589,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003322",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "65fa14f994684d92a82c87c736c4ea5a",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 23,
+        "total_tokens": 1588,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003314",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "87d1a11c013446fb97d21d29fccb1fe5",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 23,
+        "total_tokens": 1588,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003314",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "cac79907125040cf985a20b43ddc7031",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 59,
+        "total_tokens": 1624,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003602",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "b29cee2cb76d4feb8b214bf8179f80dc",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 59,
+        "total_tokens": 1624,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003602",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "c2cd4b8fd3b14f8e84820a8afd03aaa0",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 23,
+        "total_tokens": 1588,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003314",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "e379f4742c354306a4b6f05581ce84b3",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 23,
+        "total_tokens": 1588,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003314",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "6c8f3c5f41a6470da987625d3a130f23",
+      "usage": {
+        "input_tokens": 1566,
+        "output_tokens": 60,
+        "total_tokens": 1626,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003612",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "76236fe2226045b8a24ce8d27969bafa",
+      "usage": {
+        "input_tokens": 1566,
+        "output_tokens": 58,
+        "total_tokens": 1624,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003596",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "b758240301ec4a20b1fbedbe1c1e5120",
+      "usage": {
+        "input_tokens": 1566,
+        "output_tokens": 61,
+        "total_tokens": 1627,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00362",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "41b46d23f1c44df3999f7f4c8ae2eba0",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 89,
+        "total_tokens": 1654,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003842",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "26164f939ad84589ad5e61b366f8bcf5",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 43,
+        "total_tokens": 1608,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003474",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "e2a72deb192b40b189df96ebf537b7b3",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 41,
+        "total_tokens": 1606,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003458",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "e42799381e604eeaaa5c908adc08eb65",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 75,
+        "total_tokens": 1640,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00373",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "ad17c30be78e4968915a2be732d740ef",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 44,
+        "total_tokens": 1609,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003482",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "01aeebb3465246ddaf8fbe0f646159f6",
+      "usage": {
+        "input_tokens": 1565,
+        "output_tokens": 44,
+        "total_tokens": 1609,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003482",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "90511153237745f598fb4ae399c98e32",
+      "usage": {
+        "input_tokens": 1597,
+        "output_tokens": 72,
+        "total_tokens": 1669,
+        "cached_tokens": 1408
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00377",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "52e66910c00b4529b336ce53f1beaf40",
+      "usage": {
+        "input_tokens": 1733,
+        "output_tokens": 106,
+        "total_tokens": 1839,
+        "cached_tokens": 1536
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.004314",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "3e432902184146d69e9642a905c47cca",
+      "usage": {
+        "input_tokens": 1597,
+        "output_tokens": 72,
+        "total_tokens": 1669,
+        "cached_tokens": 1408
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00377",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "274e87d6bdc5425ba68eeffcc075953a",
+      "usage": {
+        "input_tokens": 1733,
+        "output_tokens": 104,
+        "total_tokens": 1837,
+        "cached_tokens": 1536
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.004298",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "d66b4d0024584d84bb2065ba30f42f79",
+      "usage": {
+        "input_tokens": 1598,
+        "output_tokens": 73,
+        "total_tokens": 1671,
+        "cached_tokens": 1408
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00378",
+      "transport": "stream"
+    },
+    {
+      "attempt_id": "4c010001dece4f19b715c162bc3969a4",
+      "usage": {
+        "input_tokens": 1736,
+        "output_tokens": 107,
+        "total_tokens": 1843,
+        "cached_tokens": 1536
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.004328",
+      "transport": "stream"
+    }
+  ],
+  "allocated_cny": "5.265182"
+}
