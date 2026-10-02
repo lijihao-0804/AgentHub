@@ -87,6 +87,7 @@ class CaseExecutionObservation:
 class PreparedCaseExecution:
     agent_run_id: UUID | None
     execute: Callable[[], Awaitable[CaseExecutionObservation]]
+    preparation_observation: dict[str, Any] | None = None
 
 
 class CaseExecutionDriver(Protocol):
@@ -238,6 +239,12 @@ class AgentRuntimeEvaluationDriver:
         if str(context.workspace_id) != str(run.workspace_id):
             raise AgentHubError(
                 "FORBIDDEN", "The evaluation context belongs to another workspace.", 403
+            )
+        if item.category == "MULTI_STEP" and "scenario" in item.input:
+            raise AgentHubError(
+                "EVALUATION_SCENARIO_DRIVER_NOT_CONFIGURED",
+                "A scenario execution driver is required for this dataset.",
+                422,
             )
         postcondition = support_condition_from_expected(
             item.expected, workspace_id=context.workspace_id
@@ -521,7 +528,11 @@ class ExperimentRunner:
         agent_run_id: UUID,
         owner: str,
         generation: int,
+        preparation_observation: dict[str, Any] | None = None,
     ) -> bool:
+        values: dict[str, Any] = {"agent_run_id": agent_run_id}
+        if preparation_observation is not None:
+            values["observation"] = preparation_observation
         result = await session.execute(
             update(EvaluationExperimentCaseResult)
             .where(
@@ -532,7 +543,7 @@ class ExperimentRunner:
                 EvaluationExperimentCaseResult.lease_generation == generation,
                 EvaluationExperimentCaseResult.agent_run_id.is_(None),
             )
-            .values(agent_run_id=agent_run_id)
+            .values(**values)
         )
         await session.commit()
         return result.rowcount == 1
@@ -585,6 +596,21 @@ class ExperimentRunner:
         )
         terminal_statuses = {"SUCCEEDED", "FAILED", "NEEDS_ATTENTION", "CANCELLED"}
         for case in cases:
+            item = await session.scalar(
+                select(EvaluationDatasetItem).where(
+                    EvaluationDatasetItem.workspace_id == case.workspace_id,
+                    EvaluationDatasetItem.id == case.dataset_item_id,
+                )
+            )
+            if item is not None and item.category == "MULTI_STEP" and "scenario" in item.input:
+                # A linked first turn being terminal cannot prove the whole
+                # conversation finished. Never replay fixtures or mark partial
+                # scenario work successful after a worker lease is lost.
+                case.status = EvaluationCaseResultStatus.FAILED
+                case.failure_code = "EVALUATION_SCENARIO_RECOVERY_REQUIRED"
+                case.safe_failure_message = "The scenario requires durable outcome reconciliation."
+                case.completed_at = _now()
+                continue
             if case.agent_run_id is None:
                 case.status = EvaluationCaseResultStatus.FAILED
                 case.failure_code = "EVALUATION_AGENT_RUN_MISSING"
@@ -1002,6 +1028,7 @@ class ExperimentRunner:
                                 agent_run_id=prepared.agent_run_id,
                                 owner=owner,
                                 generation=generation,
+                                preparation_observation=prepared.preparation_observation,
                             )
                         if not linked:
                             return

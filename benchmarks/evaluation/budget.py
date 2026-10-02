@@ -15,7 +15,7 @@ from pathlib import Path
 
 class TrialBudget:
     def __init__(self, path: Path, *, limit_cny: Decimal, price_identity: str):
-        if not limit_cny.is_finite() or not 0 < limit_cny <= 5 or not price_identity:
+        if not limit_cny.is_finite() or not 0 < limit_cny <= 50 or not price_identity:
             raise ValueError("INVALID_TRIAL_BUDGET")
         self.path = path
         if path.exists():
@@ -40,6 +40,30 @@ class TrialBudget:
         return sum(
             (Decimal(row["charged_or_reserved_cny"]) for row in self.state["attempts"]), Decimal(0)
         )
+
+    def increase_limit(self, limit_cny: Decimal, *, authorization_ref: str) -> None:
+        """Explicit authorization changes the ceiling, never past attempt accounting."""
+        previous_limit = Decimal(self.state["limit_cny"])
+        if (
+            not limit_cny.is_finite()
+            or not previous_limit < limit_cny <= 50
+            or not authorization_ref.strip()
+        ):
+            raise ValueError("INVALID_BUDGET_INCREASE")
+        previous = json.loads(json.dumps(self.state))
+        self.state["limit_cny"] = str(limit_cny)
+        self.state.setdefault("limit_changes", []).append(
+            {
+                "previous_cny": str(previous_limit),
+                "new_cny": str(limit_cny),
+                "authorization_ref": authorization_ref,
+            }
+        )
+        try:
+            self._save()
+        except OSError:
+            self.state = previous
+            raise
 
     def reserve(self, attempt_id: str, *, upper_cost_cny: Decimal) -> None:
         if not attempt_id or any(row["attempt_id"] == attempt_id for row in self.state["attempts"]):

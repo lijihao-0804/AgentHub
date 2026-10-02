@@ -118,6 +118,13 @@ class EvaluationDatasetService:
         if schema_version < 1:
             raise AgentHubError("EVALUATION_DATASET_INVALID", "schema_version is invalid.", 422)
         normalized_items = validate_dataset_items(items)
+        if schema_version < 2 and any(
+            item["category"] == "MULTI_STEP" and "scenario" in item["input"]
+            for item in normalized_items
+        ):
+            raise AgentHubError(
+                "EVALUATION_DATASET_INVALID", "Scenario datasets require schema_version 2.", 422
+            )
         content_hash = dataset_content_hash(normalized_items, schema_version=schema_version)
         workspace_id = self._workspace_id(context)
         dataset = await session.scalar(

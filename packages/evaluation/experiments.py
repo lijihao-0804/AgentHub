@@ -125,6 +125,27 @@ class ExperimentService:
             evaluator_manifest=default_evaluator_manifest(judge_profile),
             created_by=self._user_id(context),
         )
+        scenario_item = await session.scalar(
+            select(EvaluationDatasetItem.id)
+            .where(
+                EvaluationDatasetItem.workspace_id == workspace_id,
+                EvaluationDatasetItem.dataset_version_id == dataset_version.id,
+                EvaluationDatasetItem.split == split,
+                EvaluationDatasetItem.input.has_key("scenario"),
+                EvaluationDatasetItem.category == "MULTI_STEP",
+            )
+            .limit(1)
+        )
+        if scenario_item is not None:
+            experiment.evaluator_manifest = {
+                **experiment.evaluator_manifest,
+                "scenario": {
+                    "input_schema_version": 1,
+                    "driver_version": "scripted-scenario-v2",
+                    "postcondition_version": "support-scenario-postcondition-v2",
+                    "recovery_policy": "fail_closed_no_fixture_replay",
+                },
+            }
         session.add(experiment)
         try:
             await session.commit()
@@ -545,9 +566,7 @@ class ExperimentService:
         if status is not None:
             conditions.append(EvaluationExperimentCaseResult.status == status)
         total = await session.scalar(
-            select(func.count())
-            .select_from(EvaluationExperimentCaseResult)
-            .where(*conditions)
+            select(func.count()).select_from(EvaluationExperimentCaseResult).where(*conditions)
         )
         items = list(
             await session.scalars(

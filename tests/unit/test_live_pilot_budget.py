@@ -44,13 +44,21 @@ async def test_unknown_provider_cost_keeps_full_reserve(tmp_path, monkeypatch):
         return ModelResponse(content="answer", provider="deepseek", model="deepseek-flash")
 
     monkeypatch.setattr(LiteLLMProviderAdapter, "complete", complete)
+    adapter = BudgetedAdapter(budget)
     with pytest.raises(ValueError, match="USAGE_UNKNOWN"):
-        await BudgetedAdapter(budget).complete(
+        await adapter.complete(
             SimpleNamespace(model="deepseek-flash", max_tokens=800),
             None,
             ModelRequest((ModelMessage("user", "question"),)),
         )
     assert budget.allocated == Decimal("0.0704")
+    with pytest.raises(ValueError, match="HALTED"):
+        await adapter.complete(
+            SimpleNamespace(model="deepseek-flash", max_tokens=800),
+            None,
+            ModelRequest((ModelMessage("user", "next case"),)),
+        )
+    assert len(budget.state["attempts"]) == 1
 
 
 @pytest.mark.asyncio

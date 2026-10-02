@@ -9,6 +9,56 @@ from pathlib import Path
 
 from benchmarks.evaluation.interview_draft import POLICIES, build_draft
 from packages.core.canonical.json_hash import canonical_json_hash
+from packages.evaluation.validation import validate_dataset_items
+
+
+def formal_items(data=None):
+    """Normalize labels separately from scenario inputs; publication remains explicit."""
+    data = data or reviewed_source()
+    validate_reviewed_source(data)
+    return validate_dataset_items(
+        [
+            {
+                "case_key": case["case_id"],
+                "split": case["split"],
+                "category": "MULTI_STEP",
+                "input": {
+                    "task": case["user_turns"][0],
+                    "scenario": {
+                        "schema_version": 1,
+                        "fixture_kind": "support_customer",
+                        "user_turns": case["user_turns"],
+                    },
+                },
+                "expected": {
+                    "steps": case["required_tools"],
+                    "terminal_status": "SUCCEEDED",
+                    "scenario": {
+                        "schema_version": 1,
+                        "ticket_count": case["expected_ticket_count"],
+                        "approval_decisions": [case["approval_decision"]]
+                        if case["approval_decision"]
+                        else [],
+                        "required_tools": case["required_tools"],
+                        "forbidden_tools": case["forbidden_tools"],
+                        "reference_answer": case["reference_answer"],
+                        "answer_available": case["answer_available"],
+                    },
+                },
+                "tags": ["synthetic", case["category"], "assistant-reviewed"],
+                "source_provenance": {
+                    "source_kind": "assistant_reviewed_synthetic",
+                    "source_id": case["case_id"],
+                    "source_group": case["source_group"],
+                    "template_group": case["template_group"],
+                    "source_content_hash": data["content_hash"],
+                    "reviewer_kind": "assistant",
+                },
+                "ordinal": ordinal,
+            }
+            for ordinal, case in enumerate(data["cases"])
+        ]
+    )
 
 
 def reviewed_source():

@@ -8,6 +8,7 @@ from typing import Any
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.models import EvaluationDatasetCategory, EvaluationDatasetSplit
+from packages.evaluation.scenario_contracts import ScenarioExpected, ScenarioInput
 
 _SECRET_KEYS = frozenset(
     {
@@ -55,7 +56,7 @@ _CATEGORY_SHAPES: dict[str, tuple[frozenset[str], frozenset[str], frozenset[str]
     "MULTI_STEP": (
         frozenset({"task"}),
         frozenset({"steps"}),
-        frozenset({"terminal_status"}),
+        frozenset({"terminal_status", "scenario"}),
     ),
     "FAILURE": (
         frozenset({"scenario"}),
@@ -114,8 +115,10 @@ def validate_dataset_item(raw: Mapping[str, Any]) -> dict[str, Any]:
     _reject_secret_keys({"input": input_value, "expected": expected_value, "source": source})
 
     required_input, required_expected, optional_expected = _CATEGORY_SHAPES[category]
+    optional_input = {"scenario"} if category == "MULTI_STEP" else set()
     if (
-        set(input_value) != required_input
+        not required_input.issubset(input_value)
+        or not set(input_value).issubset(required_input | optional_input)
         or not required_expected.issubset(expected_value)
         or not set(expected_value).issubset(required_expected | optional_expected)
     ):
@@ -124,6 +127,16 @@ def validate_dataset_item(raw: Mapping[str, Any]) -> dict[str, Any]:
             f"{category} input/expected fields do not match the category schema.",
             422,
         )
+    if category == "MULTI_STEP" and ("scenario" in input_value or "scenario" in expected_value):
+        try:
+            scenario = ScenarioInput.model_validate(input_value.get("scenario"))
+            ScenarioExpected.model_validate(expected_value.get("scenario"))
+            if input_value["task"] != scenario.user_turns[0]:
+                raise ValueError("SCENARIO_TASK_MUST_MATCH_FIRST_TURN")
+        except ValueError as error:
+            raise AgentHubError(
+                "EVALUATION_DATASET_INVALID", "Scenario input/expected is invalid.", 422
+            ) from error
     if "open_ended" in expected_value and not isinstance(expected_value["open_ended"], bool):
         raise AgentHubError("EVALUATION_DATASET_INVALID", "open_ended must be a boolean.", 422)
     _validate_category_types(category, input_value, expected_value)

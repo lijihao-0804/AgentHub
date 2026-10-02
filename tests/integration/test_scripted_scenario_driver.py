@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from uuid import uuid4
+from types import SimpleNamespace
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import func, select
@@ -12,6 +13,7 @@ from packages.agent_runtime.runtime import AgentRunService
 from packages.approvals import ApprovalService
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.scenario_driver import ScriptedScenarioDriver
+from packages.evaluation.scenario_runner import ScenarioEvaluationDriver
 from packages.model_gateway.contracts import ModelResponse, ModelToolCall
 from packages.threads.context import SqlAlchemyThreadContextProvider
 from packages.tools.actions import ActionRuntime
@@ -167,3 +169,156 @@ async def test_scripted_approval_uses_persisted_decision_and_never_infers_consen
     if decision is None:
         assert observation["stop_reason"] == "approval_script_exhausted"
         assert observation["turns"][0]["status"] == "WAITING_APPROVAL"
+
+
+@pytest.mark.asyncio
+async def test_formal_scenario_links_first_run_before_model_and_checks_persisted_facts(db_factory):
+    from benchmarks.evaluation.reviewed_support_data import formal_items
+
+    async with db_factory() as session:
+        base = await _seed(session, label=f"scenario-formal-{uuid4().hex}")
+    context = base["context"].model_copy(
+        update={"permissions": base["context"].permissions | {"evaluation_run"}}
+    )
+    gateway = ScriptedGateway(
+        [ModelResponse(content="fixture final", provider="fake", model="fake")]
+    )
+    runtime = AgentRunService(db_factory, model_gateway_factory=lambda session: gateway)
+    scenarios = ScriptedScenarioDriver(runtime, driver_kind="controlled")
+
+    async def context_factory(run):
+        return context
+
+    async def fixture_factory(ctx):
+        async with db_factory() as session:
+            customer = Customer(
+                workspace_id=base["workspace_id"], customer_ref=uuid4().hex, name="fixture"
+            )
+            session.add(customer)
+            await session.commit()
+            return customer.id
+
+    driver = ScenarioEvaluationDriver(scenarios, context_factory, fixture_factory)
+    raw = formal_items()[0]
+    item = SimpleNamespace(**raw)
+    variant = SimpleNamespace(agent_version_id=base["version"].id, effective_knowledge_snapshots=[])
+    prepared = await driver.prepare(
+        run=SimpleNamespace(workspace_id=base["workspace_id"]), variant=variant, item=item
+    )
+    assert not gateway.requests
+    async with db_factory() as session:
+        persisted = await session.get(AgentRun, prepared.agent_run_id)
+        assert persisted is not None and persisted.thread_id is not None
+    result = await prepared.execute()
+    assert result.agent_run_id == prepared.agent_run_id
+    assert result.observation["business_outcome"]["success"] is True
+    assert result.observation["business_outcome"]["ticket_count"] == 0
+    assert result.observation["steps"] == []
+    assert raw["expected"]["scenario"]["reference_answer"] not in str(gateway.requests)
+
+
+@pytest.mark.asyncio
+async def test_prepared_scenario_rejects_changed_input_without_model_call(db_factory):
+    async with db_factory() as session:
+        base = await _seed(session, label=f"scenario-prepared-{uuid4().hex}")
+    context = base["context"].model_copy(
+        update={"permissions": base["context"].permissions | {"evaluation_run"}}
+    )
+    gateway = ScriptedGateway([])
+    driver = ScriptedScenarioDriver(
+        AgentRunService(db_factory, model_gateway_factory=lambda session: gateway),
+        driver_kind="controlled",
+    )
+    handle = await driver.prepare_first(
+        context, agent_version_id=base["version"].id, first_input="original", knowledge_snapshots=[]
+    )
+    with pytest.raises(RuntimeError, match="IDENTITY_MISMATCH"):
+        await driver.execute(
+            context,
+            case_id="changed",
+            agent_version_id=base["version"].id,
+            user_turns=["different"],
+            knowledge_snapshots=[],
+            prepared_first=handle,
+        )
+    assert not gateway.requests
+
+
+@pytest.mark.asyncio
+async def test_formal_dataset_freezes_driver_and_recovery_does_not_infer_whole_scenario_success(
+    db_factory,
+):
+    from benchmarks.evaluation.reviewed_support_data import formal_items
+    from packages.evaluation.build_identity import StaticBuildIdentityProvider
+    from packages.evaluation.experiments import ExperimentService
+    from packages.evaluation.models import EvaluationExperimentCaseResult
+    from packages.evaluation.runner import ExperimentRunner
+    from packages.evaluation.service import EvaluationDatasetService
+    from tests.integration.test_m7b_experiments import _manager_context, _pricing
+
+    async with db_factory() as session:
+        base = await _seed(session, label=f"scenario-recovery-{uuid4().hex}")
+        context = _manager_context(base)
+        datasets = EvaluationDatasetService()
+        dataset = await datasets.create_dataset(session, context=context, name=uuid4().hex)
+        items = [formal_items()[0]]
+        with pytest.raises(AgentHubError, match="schema_version 2"):
+            await datasets.create_version(
+                session, context=context, dataset_id=dataset.id, items=items
+            )
+        version = await datasets.create_version(
+            session, context=context, dataset_id=dataset.id, items=items, schema_version=2
+        )
+        await datasets.publish_version(
+            session, context=context, dataset_id=dataset.id, version_id=version.id
+        )
+        pricing = await _pricing(session, base)
+        service = ExperimentService(StaticBuildIdentityProvider("1" * 40))
+        experiment = await service.create_experiment(
+            session,
+            context=context,
+            name=uuid4().hex,
+            description=None,
+            dataset_version_id=version.id,
+            split="DEV",
+            purpose="DEVELOPMENT",
+        )
+        assert experiment.evaluator_manifest["scenario"]["driver_version"] == "scripted-scenario-v2"
+        await service.add_variant(
+            session,
+            context=context,
+            experiment_id=experiment.id,
+            label="controlled",
+            agent_version_id=base["version"].id,
+            pricing_snapshot_id=pricing.id,
+            ordinal=0,
+        )
+        await service.finalize_experiment(session, context=context, experiment_id=experiment.id)
+        run, _ = await service.create_run(session, context=context, experiment_id=experiment.id)
+    gateway = ScriptedGateway([ModelResponse(content="controlled", provider="fake", model="fake")])
+    driver = ScriptedScenarioDriver(
+        AgentRunService(db_factory, model_gateway_factory=lambda session: gateway),
+        driver_kind="controlled",
+    )
+    observed = await driver.execute(
+        context,
+        case_id="first-turn-only",
+        agent_version_id=base["version"].id,
+        user_turns=["first turn"],
+        knowledge_snapshots=[],
+    )
+    runner = ExperimentRunner(db_factory)
+    async with db_factory() as session:
+        await runner.prepare_run(session, run_id=run.id)
+        case = await session.scalar(
+            select(EvaluationExperimentCaseResult).where(
+                EvaluationExperimentCaseResult.experiment_run_id == run.id
+            )
+        )
+        case.status = "RUNNING"
+        case.agent_run_id = UUID(observed["turns"][0]["run_id"])
+        await session.commit()
+        await runner.recover_inflight_cases(session, run_id=run.id)
+        await session.refresh(case)
+        assert case.status == "FAILED"
+        assert case.failure_code == "EVALUATION_SCENARIO_RECOVERY_REQUIRED"

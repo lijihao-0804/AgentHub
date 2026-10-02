@@ -170,8 +170,18 @@ class BudgetedAdapter(LiteLLMProviderAdapter):
         self.budget = budget
         self.calls = []
         self.local_failures = []
+        self.halted = False
 
     async def complete(self, profile, credential, request):
+        if self.halted:
+            raise ValueError("TRIAL_PROVIDER_HALTED_AFTER_UNCERTAIN_ATTEMPT")
+        try:
+            return await self._complete_bounded(profile, credential, request)
+        except (Exception, asyncio.CancelledError):
+            self.halted = True
+            raise
+
+    async def _complete_bounded(self, profile, credential, request):
         # Restrict the serialized business payload, not credentials. Reserve a
         # much larger input envelope to cover provider framing/tokenization.
         body = json.dumps(asdict(request), ensure_ascii=False, default=list)
@@ -266,7 +276,7 @@ async def run(
     draft = build_draft()
     engine, factory = create_database(ISOLATED_URL)
     budget = TrialBudget(
-        output.with_name("live-budget.json"), limit_cny=Decimal("5"), price_identity=PRICE_ID
+        output.with_name("live-budget.json"), limit_cny=Decimal("50"), price_identity=PRICE_ID
     )
     adapter = BudgetedAdapter(budget)
     report = {

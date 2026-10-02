@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "currency": "CNY",
-  "limit_cny": "5",
+  "limit_cny": "50",
   "price_identity": "deepseek-flash-20261002-peak-upper-cny-input2-output8",
   "attempts": [
     {
@@ -2901,6 +2901,13 @@
       "status": "SETTLED_ESTIMATE",
       "charged_or_reserved_cny": "0.003994",
       "upper_cost_cny": "0.0704"
+    }
+  ],
+  "limit_changes": [
+    {
+      "previous_cny": "5",
+      "new_cny": "50",
+      "authorization_ref": "user-20261002-total-50-cny-and-mi5-after-mi3-mi4"
     }
   ]
 }
