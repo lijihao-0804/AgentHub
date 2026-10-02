@@ -49,8 +49,10 @@ for (const row of edges) {
   assert.deepEqual(row.textOverlaps, []);
 }
 const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'manifest.json'), 'utf8'));
+assert.equal(manifest.hash_normalization, 'UTF-8 text with LF line endings');
 for (const [file, expected] of Object.entries(manifest.sha256)) {
-  const actual = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex');
+  const text = fs.readFileSync(path.join(root, file), 'utf8').replace(/\r\n/g, '\n');
+  const actual = crypto.createHash('sha256').update(text, 'utf8').digest('hex');
   assert.equal(actual, expected, `evidence is stale: ${file}`);
 }
 // Prove the gate rejects the regressions it claims to cover.
