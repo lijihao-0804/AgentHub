@@ -170,8 +170,17 @@ async def prepare(source_plan: Path, output: Path):
                 ]
                 spec["retrieval"] = {
                     "knowledge_binding_mode": "PINNED",
+                    "knowledge_bindings": [
+                        {
+                            "knowledge_base_id": str(kb_id),
+                            "binding_mode": "PINNED",
+                            "snapshot_id": str(snapshot.snapshot_id),
+                            "snapshot_hash": snapshot.content_hash,
+                        }
+                    ],
                     "knowledge_snapshots": [
                         {
+                            "knowledge_base_id": str(kb_id),
                             "snapshot_id": str(snapshot.snapshot_id),
                             "snapshot_hash": snapshot.content_hash,
                         }
