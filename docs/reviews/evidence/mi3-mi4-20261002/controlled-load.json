@@ -1,0 +1,3948 @@
+{
+  "schema_version": 1,
+  "driver_kind": "controlled",
+  "provider_kind": "in_process_scripted",
+  "build_sha": "5d6e204cc8dc5c48c67259bb9f86a77528e561d3",
+  "working_tree_changes_present": true,
+  "agent_version_id": "1dbbde3b-a38c-49c6-9795-10e5727745f8",
+  "resolved_spec_hash": "ee47c615e341af9b448abb8a79e1172c986f217d9fe04b98229ee06fb40e03d5",
+  "workspace_id": "365a8afd-71cd-49cc-a436-7ae5b97ad84f",
+  "environment": {
+    "os": "Windows-11-10.0.22635-SP0",
+    "python": "3.12.10",
+    "logical_cpu_count": 16,
+    "database": "isolated_database_shared_local_postgres"
+  },
+  "limitations": [
+    "not_real_provider_qps",
+    "not_http_sse_client_latency",
+    "no_model_weights_cold_start",
+    "rate_capped_not_maximum_capacity",
+    "resource_cpu_is_python_process_only",
+    "heap_is_python_allocations_not_process_rss",
+    "container_resources_not_collected"
+  ],
+  "warmups": [
+    {
+      "label": "process_first_runtime_run",
+      "run_id": "da9e13cc-2716-4b48-bc26-e233ea1153be",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "latency_ms": 305.6543000275269
+    },
+    {
+      "label": "immediate_warm_runtime_run",
+      "run_id": "530ab5ec-d64b-4010-93a0-3b672b7bf748",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "latency_ms": 267.8052000119351
+    }
+  ],
+  "phases": [
+    {
+      "concurrency": 1,
+      "target_window_seconds": 60.0,
+      "actual_window_seconds": 60.18531129998155,
+      "attempt_count": 118,
+      "successful_count": 118,
+      "failure_or_unknown_count": 0,
+      "success_per_second": 1.9606112762606276,
+      "failure_or_unknown_rate": 0.0,
+      "latency_p50_ms": 257.26000001304783,
+      "latency_p95_ms": 276.86672997369897,
+      "process_cpu_seconds": 11.328125,
+      "python_traced_heap_bytes": {
+        "current": 3707529,
+        "phase_peak": 4249082
+      },
+      "failure_codes": {},
+      "queue": {
+        "status": "NOT_APPLICABLE",
+        "reason": "closed_loop_no_celery_queue"
+      },
+      "offered_load": {
+        "per_worker_max_requests_per_second": 2,
+        "capacity_saturation_claimed": false
+      },
+      "records": [
+        {
+          "run_id": "1602d81b-f8a9-46b3-beb5-28208c2d1a51",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.52360000135377
+        },
+        {
+          "run_id": "64d895fa-cbe7-4330-a1ce-9908cf6912c7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 260.8325999462977
+        },
+        {
+          "run_id": "2a580ca2-ccf3-4d58-b1d4-06e984d57975",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 262.0899999747053
+        },
+        {
+          "run_id": "055fa810-1220-40f0-a77f-4cbd1af2520c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 253.18759999936447
+        },
+        {
+          "run_id": "6e4414fb-c195-4641-9116-839fa992bd21",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 267.018900020048
+        },
+        {
+          "run_id": "df7c50db-59c0-4b82-85c7-9e2e69946136",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 260.0465000141412
+        },
+        {
+          "run_id": "4868df43-76b1-48d5-bd70-4ce7845b93d4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 247.83700000261888
+        },
+        {
+          "run_id": "5dd31f10-6b4c-4b13-885c-744a516e6063",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 265.50310000311583
+        },
+        {
+          "run_id": "040ab8c8-79c4-4f41-89c6-e61e8ca5392e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 267.9643000010401
+        },
+        {
+          "run_id": "1be2c105-c369-458f-83e4-2f3b356e6396",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 269.3952000117861
+        },
+        {
+          "run_id": "7f5f447f-3b83-4bd4-8808-cc4bde42df60",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 250.35170000046492
+        },
+        {
+          "run_id": "a92f98cd-54f6-430c-8f82-db439c82e491",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 259.29830002132803
+        },
+        {
+          "run_id": "baca596b-fe2a-4c25-a0f2-4c1e4e0fe404",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.5708999754861
+        },
+        {
+          "run_id": "82ea1f08-a43d-44c8-8b5c-a0428dbb9e8b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 267.6950999884866
+        },
+        {
+          "run_id": "ce71aac4-b0eb-46f8-838d-5c3e60ccb7e6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.69830001425
+        },
+        {
+          "run_id": "131b9f9d-9d0c-4f09-95d1-a952940e9cf3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 321.8153000343591
+        },
+        {
+          "run_id": "bf22d0e2-6a74-4514-a7a8-b8f74a61f229",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 248.17120004445314
+        },
+        {
+          "run_id": "31750f3e-8bc0-4be1-9b52-bac326a5f3de",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 262.7739000017755
+        },
+        {
+          "run_id": "e8b3d630-7661-424a-96c5-e68a6aba0279",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 249.97470004018396
+        },
+        {
+          "run_id": "89bee650-c4ee-4566-bef1-fa911201716e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 252.58660002145916
+        },
+        {
+          "run_id": "e208b0bf-c787-4c18-aa23-a61622931c1f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 250.38689997745678
+        },
+        {
+          "run_id": "b978aa29-52fb-4967-8170-22eac2bb235c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.052799988538
+        },
+        {
+          "run_id": "cf5168a0-429f-44ef-8466-34b26651b15c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 254.2140000150539
+        },
+        {
+          "run_id": "02ffb74d-6730-4c80-b62b-1eab371fd6ff",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 249.66240004869178
+        },
+        {
+          "run_id": "aae38408-e65d-4669-aeb0-4b5a057e705b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 263.66649998817593
+        },
+        {
+          "run_id": "b193d77c-b21e-4da4-8893-4af6a6f9e3c0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 252.82809999771416
+        },
+        {
+          "run_id": "e4f83978-e7f8-4568-9b06-5d3de1c62b03",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 264.84629994956776
+        },
+        {
+          "run_id": "3966c022-3ac0-4082-91f5-e1c0ebde1820",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 252.3131999769248
+        },
+        {
+          "run_id": "59c628cc-087b-44be-99a1-43e718b5b8db",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 275.71570000145584
+        },
+        {
+          "run_id": "13e0f144-1b5a-499e-854e-47ef6c3c60da",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 254.85079997451976
+        },
+        {
+          "run_id": "ff799362-f4d8-4c1c-81fb-a8359bed3927",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 268.55699997395277
+        },
+        {
+          "run_id": "cb1fa0bd-8746-4e0e-b3d4-7fe5c71eb5f4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 253.35439998889342
+        },
+        {
+          "run_id": "04b2c452-1643-4abe-b859-e106d37101a8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 269.89990001311526
+        },
+        {
+          "run_id": "c2faa622-f731-4fab-9255-ba68f07f610d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 251.1032999609597
+        },
+        {
+          "run_id": "7a5e7f5d-b654-458f-822b-47ca32a4eab2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 263.46500002546236
+        },
+        {
+          "run_id": "352a2a91-a2a8-48eb-baa0-5bff7b002f42",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 246.27860001055524
+        },
+        {
+          "run_id": "83a18616-14ae-4788-843b-789a204222e7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 254.7779000014998
+        },
+        {
+          "run_id": "ee847dd7-4cc9-466e-b5ee-a49e7f7e31f2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 252.89509998401627
+        },
+        {
+          "run_id": "c5b97340-806f-48d1-a20e-1b8691b071aa",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 259.5414000097662
+        },
+        {
+          "run_id": "711b4eef-62e3-4231-9ccb-3ad52b858946",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.67439998546615
+        },
+        {
+          "run_id": "ee1b5cc3-894f-4b06-b524-2c28dc72f925",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 266.2766000139527
+        },
+        {
+          "run_id": "5840fc57-9bef-4c2e-8ea5-05f45ea411fc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 255.16639999113977
+        },
+        {
+          "run_id": "2a70c469-edbc-4fa1-9dda-ad5b3b266055",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 251.12369999988005
+        },
+        {
+          "run_id": "551ba9e1-bbaa-4229-a952-8d6f97482f1d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 276.91620000405237
+        },
+        {
+          "run_id": "9512cdb2-1ab3-4fcb-bb93-bd653c1e16a4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 259.34970000525936
+        },
+        {
+          "run_id": "5563c964-5de0-4dd6-be20-243c325af65f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.7369000171311
+        },
+        {
+          "run_id": "c7de9b00-17d4-4898-8724-5dad7f3ae149",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 254.58199996501207
+        },
+        {
+          "run_id": "48dac62f-0fd2-48e7-a60e-79b432c4f3a2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 274.471300013829
+        },
+        {
+          "run_id": "811e238a-39d3-4a55-afb3-507b7b759a67",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 254.4245999888517
+        },
+        {
+          "run_id": "0deb086f-7589-402e-8ee0-7a75ca1e954b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 269.4894999731332
+        },
+        {
+          "run_id": "d307cf8e-83f3-4cca-8e47-d616f7bcb331",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.35360000887886
+        },
+        {
+          "run_id": "72f42f42-37be-4269-919b-510f6536f494",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 268.36139999795705
+        },
+        {
+          "run_id": "b68ae521-57e6-49ea-8c76-6dbc5898f777",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 255.97320002270862
+        },
+        {
+          "run_id": "9bc3b769-452d-4de8-9742-9cdfcd082adf",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 267.6287000067532
+        },
+        {
+          "run_id": "e9818b6e-62ee-4e63-a09a-a53a852aba8e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 273.68939999723807
+        },
+        {
+          "run_id": "0e78cb3c-79d3-41f9-8a85-9e9c23a09ab8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 318.3622000506148
+        },
+        {
+          "run_id": "56cd7331-2d02-4573-b7ea-52cd2853d0db",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 268.8477999763563
+        },
+        {
+          "run_id": "7c286178-15f4-4b0b-a9df-b0f2101bc342",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 265.1301000150852
+        },
+        {
+          "run_id": "95323a47-abaf-4116-a52a-4f67f21f41d1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 255.8642000076361
+        },
+        {
+          "run_id": "ee0ed271-6662-46f8-bfe8-ef61af7d60aa",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.1824000333436
+        },
+        {
+          "run_id": "6a5e1e19-d172-435c-9af8-6319a417b02b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.23909999942407
+        },
+        {
+          "run_id": "957586d6-3e3c-4ae2-b593-1f0774dabcc4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.69780004723
+        },
+        {
+          "run_id": "c3437f5b-d079-48d6-aa07-0e7110a762a3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 247.71540000801906
+        },
+        {
+          "run_id": "671cac47-b0c9-47c3-bdaf-58664fe181cd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 273.3394999522716
+        },
+        {
+          "run_id": "69215b2d-17ac-4698-82a5-0018e74478dd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 261.6097999853082
+        },
+        {
+          "run_id": "7ceae0d5-e73b-4230-86aa-749146234dab",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 277.20589999808
+        },
+        {
+          "run_id": "d1c87d99-2de2-4d84-9a87-5e6781583752",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 252.79020000016317
+        },
+        {
+          "run_id": "f5f5e38e-6323-42da-a78c-00c847969544",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 280.9675000025891
+        },
+        {
+          "run_id": "02824d1d-d575-4b37-af63-85c82faf9349",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.6657999996096
+        },
+        {
+          "run_id": "53893d18-66a0-4cc6-b143-6a2cc2baf386",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 255.44119998812675
+        },
+        {
+          "run_id": "0b15e354-7781-4c7d-9f70-0e6575fbd0d3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 255.940200004261
+        },
+        {
+          "run_id": "4af49410-faa3-448b-8a3c-80fa113c640f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 266.06710004853085
+        },
+        {
+          "run_id": "0ce6b41c-bcdb-4484-94a2-545d26d83255",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.166400027927
+        },
+        {
+          "run_id": "f8404f6c-107d-4ecb-a0fb-2aa83da4e60f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.56649997876957
+        },
+        {
+          "run_id": "07b7c3da-af56-480f-82f4-258e7cbddcc5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 254.93669998832047
+        },
+        {
+          "run_id": "5ba883de-869b-44d5-b460-453f7a150191",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.2968000420369
+        },
+        {
+          "run_id": "fc4faef1-c0cb-4564-b783-e612541a112f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 250.3495000419207
+        },
+        {
+          "run_id": "859a40c0-e2eb-41f6-99ee-2460a8973637",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 247.18080001184717
+        },
+        {
+          "run_id": "96d92710-b5b7-49d6-ba73-0130a087365c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.6911999969743
+        },
+        {
+          "run_id": "1a608908-6c4d-4754-9d37-474c46a27a01",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 254.52259997837245
+        },
+        {
+          "run_id": "b97af4a5-c1bb-4b2e-a06f-792da500e0a2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 262.5370000023395
+        },
+        {
+          "run_id": "ce60582c-2730-4a2d-abf3-9531fbd20c60",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 276.3132000109181
+        },
+        {
+          "run_id": "64b9e0eb-037d-4ad6-9445-d23892f7246f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.8310999670066
+        },
+        {
+          "run_id": "411afb66-db7f-4f20-ad31-5539ae32c700",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 251.60580000374466
+        },
+        {
+          "run_id": "cc7c8ed8-2da6-4549-9c4a-642ab826d913",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 248.87670000316575
+        },
+        {
+          "run_id": "a860f114-9858-4880-bb2c-6ec368625076",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 251.84989999979734
+        },
+        {
+          "run_id": "c016eb6c-8705-43f2-9045-6a737afc8de3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.9161000214517
+        },
+        {
+          "run_id": "519aa21b-40d3-46da-ad53-13c6c2de5888",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.33480001892895
+        },
+        {
+          "run_id": "e6c22c11-5732-4a34-8345-ecdf6b14aa5f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 251.171899959445
+        },
+        {
+          "run_id": "d7b52c74-07d8-453a-bc93-3e728dfd7c8f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 244.5395999820903
+        },
+        {
+          "run_id": "55f7f0c8-c685-4420-b98c-d196a7d895b6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 248.82000003708526
+        },
+        {
+          "run_id": "5b7cf573-c577-48d9-b1f5-8eebd64f4b52",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 271.218299982138
+        },
+        {
+          "run_id": "5f499577-0832-48a9-a4ed-87e38363a921",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.8174999798648
+        },
+        {
+          "run_id": "8bc6f164-d7c3-4197-aa78-75edcabfaa55",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 248.6034000176005
+        },
+        {
+          "run_id": "94704c95-eb5a-4871-bac3-56ff1f0cf84e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 255.22639998234808
+        },
+        {
+          "run_id": "0ac3d63a-d16c-4e86-9280-fc3e8dd7deef",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 252.5951000279747
+        },
+        {
+          "run_id": "9a570ce9-0a35-48eb-b5c8-97234331908b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.98529998771846
+        },
+        {
+          "run_id": "d0e88e62-9195-41ea-8575-3e2fc559153b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 252.60969996452332
+        },
+        {
+          "run_id": "2bf6e276-2a92-48e0-931a-99bc111afc35",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.65390001470223
+        },
+        {
+          "run_id": "bb4749f6-c102-4f7a-9c1e-9161a59d9dc6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.86720001976937
+        },
+        {
+          "run_id": "245470cb-cdd2-41a6-8c3f-ae68c15b5ac1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 253.9952999795787
+        },
+        {
+          "run_id": "e826aa3a-adeb-4d56-9e9e-dc3289a810fb",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.5613999981433
+        },
+        {
+          "run_id": "8e33e2a4-5d5a-48dc-aa2f-c24a0b65537c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 276.8579999683425
+        },
+        {
+          "run_id": "fdec2428-6395-4877-9d8c-0eef99f5f325",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 277.12839999003336
+        },
+        {
+          "run_id": "5086125b-ede5-495d-a4a2-086f19f93bb4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 259.47430002270266
+        },
+        {
+          "run_id": "1d564167-c1d5-492b-b794-b75d71a92b4d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.3907999903895
+        },
+        {
+          "run_id": "c85888c0-9c48-44f2-bc81-5ec90f966961",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 274.5084000052884
+        },
+        {
+          "run_id": "e28e775d-b1e4-4002-befe-02df819f4c0e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 256.11039996147156
+        },
+        {
+          "run_id": "f5d39d7c-a99b-404f-b238-3b949e21d7b3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 253.56860004831105
+        },
+        {
+          "run_id": "5d51d9f8-454a-4c19-93ed-17b582334406",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 264.24729998689145
+        },
+        {
+          "run_id": "6dd6e9cf-dd70-47a6-ac53-c5490a0add45",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 258.01690004300326
+        },
+        {
+          "run_id": "27a167a7-628d-40a7-96f4-460eeecd4240",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.9740000073798
+        },
+        {
+          "run_id": "d5f57cea-da53-4354-977e-1e0ceed7dcfc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.2809000266716
+        },
+        {
+          "run_id": "65329e51-5fc9-4c7f-be33-5bfd8c8c8a0b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 249.90759999491274
+        },
+        {
+          "run_id": "2d214974-a6b6-4809-b9d3-29792033157d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 255.91490004444495
+        },
+        {
+          "run_id": "6ae9004e-78f6-465a-a8cb-51d0ad34735b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 257.57429999066517
+        },
+        {
+          "run_id": "f45165c5-a500-4b4f-a206-093b95f01881",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 254.70519997179508
+        },
+        {
+          "run_id": "103721e0-649a-4fe6-9265-17dbe5e59bae",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 263.37050000438467
+        }
+      ]
+    },
+    {
+      "concurrency": 4,
+      "target_window_seconds": 60.0,
+      "actual_window_seconds": 60.10134039999684,
+      "attempt_count": 264,
+      "successful_count": 264,
+      "failure_or_unknown_count": 0,
+      "success_per_second": 4.3925809015736,
+      "failure_or_unknown_rate": 0.0,
+      "latency_p50_ms": 903.0953999899793,
+      "latency_p95_ms": 973.0583449796541,
+      "process_cpu_seconds": 26.59375,
+      "python_traced_heap_bytes": {
+        "current": 4179753,
+        "phase_peak": 5614887
+      },
+      "failure_codes": {},
+      "queue": {
+        "status": "NOT_APPLICABLE",
+        "reason": "closed_loop_no_celery_queue"
+      },
+      "offered_load": {
+        "per_worker_max_requests_per_second": 2,
+        "capacity_saturation_claimed": false
+      },
+      "records": [
+        {
+          "run_id": "a0d0108a-6ee0-4e5d-b1d8-11d087be988c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1037.466499954462
+        },
+        {
+          "run_id": "71b90beb-1ee0-47c0-811c-ec08eeea141d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1054.120699991472
+        },
+        {
+          "run_id": "e7968dd2-4d07-4f11-b3d5-3a808b3b6f93",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1056.8767999648117
+        },
+        {
+          "run_id": "fc10c21c-7f1d-4aea-b4c2-1a60464b1f07",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1063.4343000128865
+        },
+        {
+          "run_id": "b94aabaf-5b03-462a-bcab-8ecf5b0826b5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 902.6410999940708
+        },
+        {
+          "run_id": "751bcece-6b4b-42b9-af47-220bce6db1f3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 903.0502999667078
+        },
+        {
+          "run_id": "2f4359af-d36c-4274-89b3-667bd93f6c37",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.0728000062518
+        },
+        {
+          "run_id": "8b28f427-98f1-4ddf-88c2-e696cf9465de",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 901.4936999883503
+        },
+        {
+          "run_id": "37e46453-f964-4d63-8d4f-fb3576128bc0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 962.9419000120834
+        },
+        {
+          "run_id": "d9b49276-74ce-41b5-9689-24f6f1946b7e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 959.3609999865294
+        },
+        {
+          "run_id": "cb4259e8-5b98-4d2c-9722-202327f603fa",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 962.7358000143431
+        },
+        {
+          "run_id": "61c1e139-f475-4720-9281-84f57e5ff320",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 967.472100048326
+        },
+        {
+          "run_id": "f3e5fafe-df35-40e4-85b5-950401a83297",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 882.441799971275
+        },
+        {
+          "run_id": "241741de-9467-4ca1-b36c-e2281289a075",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 879.3848000350408
+        },
+        {
+          "run_id": "c9113065-b822-430d-aeb4-153669ad01ba",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 876.524499966763
+        },
+        {
+          "run_id": "7e70bc08-ee74-4ea5-b074-f77ce20e2c13",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 880.0742999883369
+        },
+        {
+          "run_id": "fc0a53ce-300b-4564-8504-de1145998011",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 911.5166999981739
+        },
+        {
+          "run_id": "1fbb678c-038e-47cb-a493-beb22fbb7d9c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 908.3010999602266
+        },
+        {
+          "run_id": "838859d4-37d6-40ce-b38d-cc259c9bcebf",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 906.2384000280872
+        },
+        {
+          "run_id": "381feef4-4261-4edd-8efb-7a9ba6c97dc8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 911.2024999922141
+        },
+        {
+          "run_id": "23c101c4-cb8e-4d3f-9551-70fa32418d65",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 883.9723999844864
+        },
+        {
+          "run_id": "94678171-c5ed-442c-81e9-032ed3371a93",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 876.3055000454187
+        },
+        {
+          "run_id": "88708df8-f282-41bb-8dfe-08621a71c7ef",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 879.960399994161
+        },
+        {
+          "run_id": "e912ca0d-00d1-4e98-9321-4cd3c67b26dc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 876.9619000377133
+        },
+        {
+          "run_id": "821add13-08e9-4c3f-b873-57140c15658f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 933.3456000313163
+        },
+        {
+          "run_id": "717627bd-d1d9-4bab-b321-f6b79a1e0ea6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 937.086200050544
+        },
+        {
+          "run_id": "2e155200-1726-45e0-b932-6980827abf12",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 932.8169000218622
+        },
+        {
+          "run_id": "1a25bee2-8000-4b40-b17d-23bd25c18092",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 934.2007999657653
+        },
+        {
+          "run_id": "e3e8e0b2-c3b5-4405-aa9e-421ad26298a7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 925.2599000465125
+        },
+        {
+          "run_id": "507dbd84-0f45-4692-97df-c5b170137c37",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 927.8408999671228
+        },
+        {
+          "run_id": "aaed13db-43c5-48fc-9c33-df1aa5f4c357",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 931.7241000244394
+        },
+        {
+          "run_id": "b0923fca-b690-49c8-9006-80876e405673",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 931.1611000448465
+        },
+        {
+          "run_id": "397bdf3a-a4a2-4cfd-9c50-a423d6e45570",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1024.552000046242
+        },
+        {
+          "run_id": "150439d3-8950-4e5e-9161-49389627804f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1020.5362999695353
+        },
+        {
+          "run_id": "4894af06-d2f7-43c0-9151-fa8dec2c62d9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1018.2940000086091
+        },
+        {
+          "run_id": "be85dd02-8581-421f-bbd5-be4790ad181c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1020.5142999766394
+        },
+        {
+          "run_id": "74ac5ac8-cb3c-42c3-875c-2b5d576e2fed",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 903.9410999976099
+        },
+        {
+          "run_id": "87c8d780-b5bb-4168-8144-601cb07c4f8e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 898.3459000010043
+        },
+        {
+          "run_id": "675d0bc2-e356-41c5-9385-50cfb88705ff",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 898.8913999637589
+        },
+        {
+          "run_id": "3b3a62cf-faf9-4049-a902-a441dcee9ad1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 896.4754000189714
+        },
+        {
+          "run_id": "f57a34f9-f012-4868-9e78-ebfee7467083",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 882.6516999979503
+        },
+        {
+          "run_id": "40a7f99e-7447-4b8e-8266-b191a78d8c4b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 880.243000050541
+        },
+        {
+          "run_id": "714d3c39-0f76-48e2-9b4c-cf2e5a4ffe8c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 880.5873999954201
+        },
+        {
+          "run_id": "877a143c-556b-4373-ad37-0a8ac368c2a6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 883.1534999771975
+        },
+        {
+          "run_id": "e558bdd2-0055-4a57-841f-eb9f813bebad",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 888.818999985233
+        },
+        {
+          "run_id": "87f079ae-e661-4bdc-ab6d-4f4a54a5df14",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 888.5254999622703
+        },
+        {
+          "run_id": "f973c969-85e9-471e-8e52-c01c6d71e579",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 887.7800999907777
+        },
+        {
+          "run_id": "159e9afe-2c6c-40b0-aa1f-6fb752e063b3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 885.3973000077531
+        },
+        {
+          "run_id": "6c6cc300-3a1e-40df-80fa-b37a648fc01f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 881.5292000072077
+        },
+        {
+          "run_id": "d882a9b5-d5b0-4079-97e8-45fd24d9fb14",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 884.3011000426486
+        },
+        {
+          "run_id": "59477c5d-fb2b-4e52-98b1-805124f5ff78",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 885.2787999785505
+        },
+        {
+          "run_id": "e6ceb255-bd35-4ddb-98f5-a20b59732de1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 887.1014000033028
+        },
+        {
+          "run_id": "b42fdb13-4014-4a2e-97ea-7a57b51b696e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 903.5841000149958
+        },
+        {
+          "run_id": "178e8abd-4bf1-45d3-8930-88a0eec895d6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.836799996905
+        },
+        {
+          "run_id": "245e92bc-71ce-4ba0-b7a6-96c60fa40df3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 902.0833999966271
+        },
+        {
+          "run_id": "21654ad1-4902-49c6-9d5c-e6158afddc61",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 903.992300038226
+        },
+        {
+          "run_id": "2e63f04b-e704-4c14-9a82-f636e5fe2b70",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 972.6285000215285
+        },
+        {
+          "run_id": "b136c123-4ea3-40b1-bbbe-ef803be6f0ee",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 975.7438000524417
+        },
+        {
+          "run_id": "a56bfc6e-c2af-4e5f-a77a-fad24c196041",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 975.647300016135
+        },
+        {
+          "run_id": "48929038-f1e7-496a-966f-cafa9ef9f545",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 973.1341999722645
+        },
+        {
+          "run_id": "3fc2d9d1-eab4-47a4-abcc-28992abafa2c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.2413000087254
+        },
+        {
+          "run_id": "43fb133d-8eca-48bc-b484-a5ccae886163",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.3369999807328
+        },
+        {
+          "run_id": "d3a9d053-2b0d-4d1d-86d8-78959a2a84e4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.3729999638163
+        },
+        {
+          "run_id": "43609ad0-f134-4d82-8a06-3bfd4bf7ade1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 897.0466000027955
+        },
+        {
+          "run_id": "70189486-0902-4ee5-ae30-298a052f0a4a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 884.8356999806128
+        },
+        {
+          "run_id": "195320ce-3d18-4ba9-81b1-d7566f0dd3ef",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 887.2120999731123
+        },
+        {
+          "run_id": "245b2441-2d40-4195-adab-6d5617e6c1a7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 887.3582000378519
+        },
+        {
+          "run_id": "9f66e419-ef94-4908-9121-cfd2380aeade",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 889.5200000260957
+        },
+        {
+          "run_id": "78ba0044-7309-4f2b-bd96-4c7e86464d6b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 886.9399999966845
+        },
+        {
+          "run_id": "088d8369-db58-4b72-a138-383ac4060432",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 886.9122000178322
+        },
+        {
+          "run_id": "a41d80a4-9d40-4ca3-bec7-4c11055c5052",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 886.9145999778993
+        },
+        {
+          "run_id": "c7ed59af-b5b2-4874-a863-d8848dd2eff8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 885.6795000028796
+        },
+        {
+          "run_id": "1fe20195-465c-4463-a123-71029a5c76de",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 893.987899995409
+        },
+        {
+          "run_id": "e2827b50-cd81-4fca-bdd9-b1c7c5c51072",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 895.6159999943338
+        },
+        {
+          "run_id": "0d3cc39b-2d29-40a7-a89a-b02b8bc47e58",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 894.6318000089377
+        },
+        {
+          "run_id": "833fa17d-e525-4f6f-8940-28b132222eb0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 894.7055999888107
+        },
+        {
+          "run_id": "90a74bd1-a2f6-4d9f-84fd-031f0766c6f2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 877.8509999974631
+        },
+        {
+          "run_id": "14ac3879-558f-4b89-8f48-92a2d6569cc2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 876.7683999612927
+        },
+        {
+          "run_id": "78734650-67a6-490a-abea-2194c534fe3e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 877.1839000401087
+        },
+        {
+          "run_id": "4e5afe6d-8669-4d08-86a8-6b608964b7dd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 876.6979000065476
+        },
+        {
+          "run_id": "cb3d66db-59f3-4c82-9567-8beb1d5ff350",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 894.1335999988951
+        },
+        {
+          "run_id": "8e161e4f-c99d-4bc0-bb7d-05e6244f6795",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 894.1983000258915
+        },
+        {
+          "run_id": "1e7bb83a-2ccb-4bd5-a0db-a58901f295e4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 893.4811999788508
+        },
+        {
+          "run_id": "04afa269-6286-41ab-8722-d7bef0f4498f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 895.2191999997012
+        },
+        {
+          "run_id": "d77c46e6-f5d8-42fe-a46c-0b4aeba5193d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.0814000074752
+        },
+        {
+          "run_id": "d8dd7198-00d7-4c29-80a2-b3a27017ac69",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 904.6673999982886
+        },
+        {
+          "run_id": "bc8fd59e-94e9-4fb9-ad81-fca0e54b528b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 908.036099979654
+        },
+        {
+          "run_id": "f9bb7940-cfba-4915-afd9-ba4e377e1afa",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 906.0904000070877
+        },
+        {
+          "run_id": "21791b93-207e-4226-a64e-4b2286f996e1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 879.8083000001498
+        },
+        {
+          "run_id": "232edaa8-a9f8-4d08-8a3b-cf9f9849b72e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 879.1520000086166
+        },
+        {
+          "run_id": "3c10ad01-f2f9-43a8-a3cb-3964cdc41e81",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 880.837100034114
+        },
+        {
+          "run_id": "b3e8dd28-1111-4158-9084-238f1751bde6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 879.3476999853738
+        },
+        {
+          "run_id": "8dfc52db-ec20-4a23-99f3-e0883e8b5107",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 896.4518000138924
+        },
+        {
+          "run_id": "7892f310-0234-480c-90a6-72084d93ff2a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 896.6413000016473
+        },
+        {
+          "run_id": "7c17100b-9e59-4b00-b5f7-d6bde25e181c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 896.62179996958
+        },
+        {
+          "run_id": "42cc9da6-18aa-4928-8f3b-e7800e134490",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 902.1370999980718
+        },
+        {
+          "run_id": "2c772afa-a1da-4f51-89c9-81ac2941a058",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 907.1360999951139
+        },
+        {
+          "run_id": "57a30824-8454-4f56-94f9-6655bc9e9198",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.9208999969997
+        },
+        {
+          "run_id": "8b6943c1-f8b2-4e86-953a-df86d75f56a1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 909.6235000179149
+        },
+        {
+          "run_id": "8b965f4e-2ea5-47cc-9239-ee7fa21df5f7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 910.7504999847151
+        },
+        {
+          "run_id": "254c6144-6532-4171-952a-1bfcf4d0e107",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 896.8087999965064
+        },
+        {
+          "run_id": "a1931dd9-ae21-49a6-9f3e-975fc9b93112",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 900.4788000020199
+        },
+        {
+          "run_id": "646bb958-c444-4150-8aa1-37bc9f4a4d6f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 904.5754999970086
+        },
+        {
+          "run_id": "3e92d733-8f35-4735-b4c1-001ae5eaed20",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 896.1616000160575
+        },
+        {
+          "run_id": "ff1d3158-5ef2-49a2-a7f7-2dc7d03b82bf",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.6624999502674
+        },
+        {
+          "run_id": "0c6c3140-ac16-4a4f-ad13-d077a5e9adbe",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 902.4878999916837
+        },
+        {
+          "run_id": "402a7838-6bdd-4a17-afaa-fb8aa3068c84",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 904.3260999605991
+        },
+        {
+          "run_id": "5649d190-a1ec-4f0c-9728-f96e145607af",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.550499970559
+        },
+        {
+          "run_id": "83c3144f-a4a0-42bd-a220-4b5fe6cc4693",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 954.0920000290498
+        },
+        {
+          "run_id": "d9f63db2-5d31-4c50-ae3c-eb986c589907",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 953.2937000039965
+        },
+        {
+          "run_id": "afca507d-b803-43fd-9452-5e67214ed53c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 951.7920999787748
+        },
+        {
+          "run_id": "ef08c9db-67eb-46e2-bc1c-da6c0cfd39bb",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 956.8041000165977
+        },
+        {
+          "run_id": "46916a70-20d8-43fb-92b6-b3f2799d37ec",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 873.4644000069238
+        },
+        {
+          "run_id": "bfe1d8ed-b1a0-4288-ad03-49d5c2db8007",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 874.9602999887429
+        },
+        {
+          "run_id": "e41da652-2cf4-42d2-85cd-8bb4bd638b66",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 876.2713000178337
+        },
+        {
+          "run_id": "bcb5d622-dc6e-4e13-be78-2a796b7a8f97",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 876.4911000034772
+        },
+        {
+          "run_id": "8e7681d1-8648-4d61-b07b-e4ffaf8dfc1e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 914.2843000008725
+        },
+        {
+          "run_id": "ac2641c6-2d72-4a82-a04c-cd22842be115",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 913.1122999824584
+        },
+        {
+          "run_id": "a5e7ec42-9d8f-4c2d-8cbd-d49478023074",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 922.9178000241518
+        },
+        {
+          "run_id": "72540356-aa64-4cac-a887-73bce5dccb6b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 922.5423000170849
+        },
+        {
+          "run_id": "4d805d00-1cc3-4df8-a807-46f0483a24f3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 883.7505000410601
+        },
+        {
+          "run_id": "fa2c2d00-87bb-4bef-a4b6-1b66e56bb9f6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 886.0677999909967
+        },
+        {
+          "run_id": "73602ff2-9910-4960-9f5a-786014ca2943",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 886.3302000099793
+        },
+        {
+          "run_id": "bb729e5e-a74c-4759-b0dc-53c4100d1ab1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 890.0271999882534
+        },
+        {
+          "run_id": "75c14ebc-7309-4dbb-a7d5-2ff725f6a03d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 915.2186999563128
+        },
+        {
+          "run_id": "3783bf05-e24a-411c-a1b8-a010ad3ed002",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 917.9473000112921
+        },
+        {
+          "run_id": "d0b6bdff-1602-4800-a6d0-999f641f40cb",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 920.8190999925137
+        },
+        {
+          "run_id": "fc88a9d4-195b-423e-8669-25d876c2e6c3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 922.7206999785267
+        },
+        {
+          "run_id": "fcdb99aa-3299-4b55-89ae-56e65b271b4b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 912.8863999503665
+        },
+        {
+          "run_id": "23aae087-1f69-4a2e-95c1-49b96fb9f976",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 913.5341999935918
+        },
+        {
+          "run_id": "18be92eb-71e7-4fa7-9142-7fe421c359e1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 911.783599993214
+        },
+        {
+          "run_id": "c9c873f1-b479-47be-981b-47eb078e3fbf",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 907.9125000280328
+        },
+        {
+          "run_id": "5dc639e4-d356-4e82-a3d4-500606920a61",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 893.9421999966726
+        },
+        {
+          "run_id": "54732f2b-dcba-46a6-94d0-2df300ea7e38",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 888.440900016576
+        },
+        {
+          "run_id": "edc490e8-c032-4d86-a241-f80fa09fd4a4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 898.866800009273
+        },
+        {
+          "run_id": "2946c6dd-f42c-4d22-97c8-a50197443919",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 892.3601999995299
+        },
+        {
+          "run_id": "e8169fbe-4a2d-494d-aea2-a3d7cd9f79bb",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 901.1035999865271
+        },
+        {
+          "run_id": "61d89256-889c-4365-8416-1f820a9784be",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 903.1405000132509
+        },
+        {
+          "run_id": "5db1f991-3907-4d4c-ab74-9bbf8b1e79c9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 906.6631000023335
+        },
+        {
+          "run_id": "46af2460-1280-41dc-9c2b-82f62927d1e5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 906.1560000409372
+        },
+        {
+          "run_id": "b10f9790-9898-4e0f-9217-54ca127b2075",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 914.0314999967813
+        },
+        {
+          "run_id": "63f52d2b-05c8-4da7-a6f8-c26d2467da3a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 915.7456999528222
+        },
+        {
+          "run_id": "030e7bfa-5c57-4cc5-aa2b-a346d91b23db",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 910.0141999660991
+        },
+        {
+          "run_id": "1de2e8bc-85a5-4f02-8998-5bc39a8ba078",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 907.9890999710187
+        },
+        {
+          "run_id": "dbffe2c4-91c3-4dbc-a5b4-ba703bbffd94",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 890.2651999960653
+        },
+        {
+          "run_id": "3c69d6ee-cb3b-4012-ad15-8c761dfb9913",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 895.730399992317
+        },
+        {
+          "run_id": "aad3d02c-37af-4589-b37e-446fab2e1bf6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 891.9804000179283
+        },
+        {
+          "run_id": "f66483e9-eb47-4c23-9743-8cff743599c6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 892.2248000162654
+        },
+        {
+          "run_id": "8a0ff395-b7ea-4fdc-8fca-9dacb2e1f44b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 898.4727000351995
+        },
+        {
+          "run_id": "0faa49e1-d6d6-4f6f-a2d5-f3d7cb9c42c9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 897.9195000138134
+        },
+        {
+          "run_id": "e54e1cb0-95ff-40e6-9666-aa0557f99e46",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 900.1215999596752
+        },
+        {
+          "run_id": "4593e5aa-3e56-4112-8b83-8e4373d78ca0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.2424000110477
+        },
+        {
+          "run_id": "b26e6aa1-d4f3-4332-a3b1-b13913a147cc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 926.9370999536477
+        },
+        {
+          "run_id": "cc8eaaf1-2bcd-4f8e-8141-2834d79eae9e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 931.3156999996863
+        },
+        {
+          "run_id": "e17d4f41-2f77-4189-9bc6-e411917339fe",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 936.4146000007167
+        },
+        {
+          "run_id": "7e8ddcc6-6423-494a-803b-a7f0fb017ab2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 934.5087999827228
+        },
+        {
+          "run_id": "c41703a5-75e7-4b67-9bcd-f4ce0c114b97",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 902.4181999848224
+        },
+        {
+          "run_id": "c0d152c4-8728-44cf-87b9-cf8fd8624865",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 906.2642999924719
+        },
+        {
+          "run_id": "68b00dc4-11fe-4c42-9eae-0c241cccac23",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 898.6481000320055
+        },
+        {
+          "run_id": "afc1e1ec-6a5e-4078-aa26-3cdce8903be5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 895.5343999550678
+        },
+        {
+          "run_id": "a83440ff-42db-47a4-9ad4-88e6603ddc40",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 966.708899999503
+        },
+        {
+          "run_id": "6bdf50b9-9297-4bdc-b30d-28baace7f6c9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 965.8706999616697
+        },
+        {
+          "run_id": "3043766d-f928-4e06-a453-484dbc0527a5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 968.801099981647
+        },
+        {
+          "run_id": "fc7cb7dd-3b53-4979-a32c-2b995f56b430",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 969.1929999971762
+        },
+        {
+          "run_id": "85c89076-7f69-4660-9733-fa4d9094f49d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 886.1180000239983
+        },
+        {
+          "run_id": "243ad17e-df3f-48ec-8293-3b826646944d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 886.7575000040233
+        },
+        {
+          "run_id": "7da66d17-d200-4490-8abd-2f78ddbb58f4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 881.5869999816641
+        },
+        {
+          "run_id": "b6d033aa-bec4-4143-aa77-7b9709911239",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 882.59829999879
+        },
+        {
+          "run_id": "a242c176-9c05-4d70-91b4-b33220a6b780",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 891.0140999942087
+        },
+        {
+          "run_id": "38168228-171c-4ee6-8a2b-a262724440b8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 890.2847000281326
+        },
+        {
+          "run_id": "07911654-8b5b-4829-9a88-ea01a05f2a75",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 895.0831000111066
+        },
+        {
+          "run_id": "6e282945-5b72-4807-aa95-2d677dbf61d5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 900.6656999699771
+        },
+        {
+          "run_id": "5089ee5f-4e96-408d-a74b-b881b90d0925",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 900.6838999921456
+        },
+        {
+          "run_id": "a2d72925-ef0d-458b-b0fc-3ed8a020c986",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 904.7879999852739
+        },
+        {
+          "run_id": "3ea922d9-2e53-486e-b0cf-af98f917b763",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 902.9172000009567
+        },
+        {
+          "run_id": "cde2f994-1080-40a4-bde1-8db8b2cc9865",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 900.0586000038311
+        },
+        {
+          "run_id": "48e2bc5e-61cd-47e7-8760-7f1a572f4ac0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 882.990800018888
+        },
+        {
+          "run_id": "ba1f629d-b54d-4c03-bf0b-942a3a564456",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 879.0696000214666
+        },
+        {
+          "run_id": "a316b0c1-faa6-4da9-9adb-9e052e96b03e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 881.0004999977536
+        },
+        {
+          "run_id": "cd1da3f5-9293-46c8-9755-f6e3beb4cbbf",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1261.3531000097282
+        },
+        {
+          "run_id": "424e9008-3dd7-4b80-aba6-d74de05a2bef",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 892.0971999759786
+        },
+        {
+          "run_id": "bf0c57b7-0b0f-4fe8-841c-947344d8c114",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 895.471700001508
+        },
+        {
+          "run_id": "a1aa1cf7-b425-4dbd-9e1d-bf02535571e6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 894.0866999910213
+        },
+        {
+          "run_id": "01fe1ad4-51e9-4609-9f6a-530fae16708c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 919.5618000230752
+        },
+        {
+          "run_id": "a8fc901e-2197-4ad9-989f-a5d9cc37a1c0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 915.8835000125691
+        },
+        {
+          "run_id": "f38097fc-4098-4117-901e-f92fa0518fdd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 922.52019996522
+        },
+        {
+          "run_id": "07488db0-8f5c-4662-9efe-cb471ebdc6cc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 917.7508999709971
+        },
+        {
+          "run_id": "5ec7237b-111a-4958-b2ab-60cad19e149f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 903.9658000110649
+        },
+        {
+          "run_id": "d4a746af-db5e-42e7-8c69-d3d0ebcab57f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 910.0609999732114
+        },
+        {
+          "run_id": "028d3b19-4f0e-4c60-b478-8e21af9ce10d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 911.2809999496676
+        },
+        {
+          "run_id": "d2368cb6-59c4-46e9-bef4-4164d5f259c5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 909.3824999872595
+        },
+        {
+          "run_id": "7fe266d0-f74c-4e17-b585-1d8f26d710e8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 716.5332000004128
+        },
+        {
+          "run_id": "bdf99a50-068e-4d38-a01f-eae8f396f2d5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 909.7722999867983
+        },
+        {
+          "run_id": "6dbcbd9a-f0f6-4f87-86e7-d9801f840691",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.9580000466667
+        },
+        {
+          "run_id": "b906c121-8e6a-46e6-a6af-6b08bfd408c5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 908.681999950204
+        },
+        {
+          "run_id": "50c03de6-e9d9-4363-a3e2-23a9a690a7ad",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1103.0932000139728
+        },
+        {
+          "run_id": "13163e6c-bb9c-49e1-83dd-68b3e382850d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 900.1787999877706
+        },
+        {
+          "run_id": "b337acc1-c719-4ef9-9c35-b5977a79726e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.9631000333466
+        },
+        {
+          "run_id": "0b8f117d-6485-491e-a3c9-f2ff7e204393",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 898.465100035537
+        },
+        {
+          "run_id": "c0cf5cf3-ee2e-4e81-890c-ce0ea95c2df9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 893.8116999925114
+        },
+        {
+          "run_id": "0f433211-e51f-4301-9e47-fd1643bc15cb",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 892.070900008548
+        },
+        {
+          "run_id": "1dfcbc62-f206-411c-9b10-735779ca4da4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 893.6910000047646
+        },
+        {
+          "run_id": "dde97166-c78c-475d-8e3f-ebdd8942beba",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 893.6413999763317
+        },
+        {
+          "run_id": "0695837b-7ae7-4f8a-9c50-57742c90ff7e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 920.2938000089489
+        },
+        {
+          "run_id": "e96e1a19-5747-46cd-9067-52db35f90e23",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 936.837800021749
+        },
+        {
+          "run_id": "c102c3da-559e-466f-9e71-d44a79520dc0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 942.8480999777094
+        },
+        {
+          "run_id": "cfc11599-4741-4a9a-a0c4-10f4be496b68",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 941.54410000192
+        },
+        {
+          "run_id": "d84e0897-c9ce-43bb-a0d8-3443a2488d63",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 919.9294000281952
+        },
+        {
+          "run_id": "d38f790a-3b39-4fa1-876e-a845d0a73f52",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.5431999792345
+        },
+        {
+          "run_id": "ad4b1bd0-958b-4cfb-aa20-f2f815fb16bc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 900.5146999843419
+        },
+        {
+          "run_id": "d1c209ec-5d47-4226-a6f1-fd9f20e2c960",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.6784000191838
+        },
+        {
+          "run_id": "1e0ef1be-7e99-4ef1-bd6b-9972e150c2a8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 953.77019996522
+        },
+        {
+          "run_id": "3a73d6d9-2b61-4c04-8adc-ae3c58b6fb7f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 940.2042999863625
+        },
+        {
+          "run_id": "9f859198-f137-4105-be70-5af04a64d07b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 942.7593000000343
+        },
+        {
+          "run_id": "b7482fce-d545-4960-8c87-dcc7d0a78e3f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 942.8085999679752
+        },
+        {
+          "run_id": "e0f8796c-6d57-42e9-b976-e80278409cba",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 915.2145000407472
+        },
+        {
+          "run_id": "56cbe54e-1d3a-4e4b-b864-bc2fc770c03e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.9193000430241
+        },
+        {
+          "run_id": "742f5562-b3ac-4955-8614-490d4580ebc7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 909.8837000201456
+        },
+        {
+          "run_id": "502dad13-9bb7-42f6-85be-af11ad5cfa77",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 904.023099981714
+        },
+        {
+          "run_id": "84484623-8262-4bc0-92af-c6fc8c3d65c7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 881.5777999698184
+        },
+        {
+          "run_id": "cbf0ebec-9d6d-4f67-9d97-d44e18a05092",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 895.9412000258453
+        },
+        {
+          "run_id": "ad45eea7-0c0c-4033-9636-149d1df6b22d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 885.5884000076912
+        },
+        {
+          "run_id": "d7d857f1-0533-444f-b047-ad9dece19fbd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 890.1605000137351
+        },
+        {
+          "run_id": "36479e6b-9668-4970-aa82-a83183d0325c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1097.058699990157
+        },
+        {
+          "run_id": "0d31f84e-b782-440e-97da-b33bf2104fd8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 915.6799999764189
+        },
+        {
+          "run_id": "c4209861-7bdf-4bf9-8f83-bb34f0712757",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 913.6237999773584
+        },
+        {
+          "run_id": "1e44e920-eb2d-4134-82cd-27bb3fcc251b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 915.6508999876678
+        },
+        {
+          "run_id": "9749577f-620d-4692-af6f-30a876f86133",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 920.7384000183083
+        },
+        {
+          "run_id": "c157a78a-403f-4f0a-be4b-5ac85a6a411f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 915.2582000242546
+        },
+        {
+          "run_id": "a46f24be-4219-4ffb-92c3-d07fac255096",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 913.2206999929622
+        },
+        {
+          "run_id": "7f5505e8-5528-4bdc-8902-b46a477050d3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 909.8134000087157
+        },
+        {
+          "run_id": "ea2c8813-a336-4f51-ab9f-19ff8709d805",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 698.7977999961004
+        },
+        {
+          "run_id": "13879097-089e-473f-8d33-decb0ae67d0d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 888.2520999759436
+        },
+        {
+          "run_id": "0283085b-47ce-4c02-abb9-874875f796fc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 887.4787000240758
+        },
+        {
+          "run_id": "1d359ce1-31a9-4d1b-9403-97c5f8fcbb06",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 890.9923000028357
+        },
+        {
+          "run_id": "e215efbb-ed55-46f1-a770-c22b46d51526",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 886.2403000239283
+        },
+        {
+          "run_id": "cb89db6e-c003-4486-b72e-eba12b63881d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 917.2799999942072
+        },
+        {
+          "run_id": "7227a11d-86ee-40c8-b2a4-92fc268b031a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 914.0126999700442
+        },
+        {
+          "run_id": "f58c52a2-a271-4597-ae86-52488999891a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 920.7804999896325
+        },
+        {
+          "run_id": "9ebee900-05c5-450d-ae81-dbf19804e939",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 917.749099957291
+        },
+        {
+          "run_id": "dfa62995-b17d-4941-a66f-349a0204514e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 900.4665999673307
+        },
+        {
+          "run_id": "ef89516b-8bbd-4196-9fb7-3138290abe9f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.6532000019215
+        },
+        {
+          "run_id": "28c706d8-96b1-455f-be5c-b60e77fe2b71",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 899.3594999774359
+        },
+        {
+          "run_id": "2f44a57c-3262-49cf-9855-457dc24d3c01",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 917.8810000303201
+        },
+        {
+          "run_id": "d9acf3b3-a3c4-43f3-9189-4d6aab923a90",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 913.5924000293016
+        },
+        {
+          "run_id": "e726dfcd-c616-45c5-a2c9-bb8d001d8c5d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 915.0173999951221
+        },
+        {
+          "run_id": "c02e9b0b-1d13-4244-b088-6b55273ef807",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 913.9091999968514
+        },
+        {
+          "run_id": "7701a7f1-14c4-440a-a1ca-8a83589c7165",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 909.5985000021756
+        },
+        {
+          "run_id": "7682cafa-e3a5-48a3-8b05-a5b0a7d7ea1f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.2732000127435
+        },
+        {
+          "run_id": "d12ae45c-d32d-4ef6-be07-b4f877e1d98c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 903.7051000050269
+        },
+        {
+          "run_id": "70418e94-3f3a-41d1-b8df-dae008b8fcc1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 906.3274000072852
+        },
+        {
+          "run_id": "beb82b1c-c055-4ca6-badb-80d8d90c5fde",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 894.568599993363
+        },
+        {
+          "run_id": "bb5825bb-43cb-421a-9a8b-b41d1531426a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 893.2981000398286
+        },
+        {
+          "run_id": "ee9333d0-af2d-43e0-a727-a44c7fd1aad1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 897.3088000202551
+        },
+        {
+          "run_id": "73a245ec-c749-4298-afd1-1d277442436a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 905.7087999535725
+        },
+        {
+          "run_id": "f4741ca5-1bcf-464c-af9a-abfdf88bd6fb",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 907.3645999887958
+        },
+        {
+          "run_id": "282e74aa-b046-4431-937a-432320d11170",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 910.1479999953881
+        },
+        {
+          "run_id": "06876bb9-ada5-4293-9e46-a0b0d5907537",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 909.0760999824852
+        },
+        {
+          "run_id": "22427f4c-2c80-411d-a1ce-ec307d8810d7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 902.9907999793068
+        },
+        {
+          "run_id": "58fad541-e0d3-4274-8b20-d86bb5469ebd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 966.7738000280224
+        },
+        {
+          "run_id": "7506aa72-7a19-4a6a-897c-6c0dbeb40b7a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 960.2220999659039
+        },
+        {
+          "run_id": "f8b54cc1-955c-4959-a7c0-5bd287141a9e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 959.1508999583311
+        },
+        {
+          "run_id": "e1fff80c-0515-49ae-8d29-62244fb39a92",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 947.6832000073045
+        },
+        {
+          "run_id": "6715398b-d793-475f-b1db-1ae761970714",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 485.59820000082254
+        }
+      ]
+    },
+    {
+      "concurrency": 8,
+      "target_window_seconds": 60.0,
+      "actual_window_seconds": 61.33472580002854,
+      "attempt_count": 254,
+      "successful_count": 254,
+      "failure_or_unknown_count": 0,
+      "success_per_second": 4.141210328845749,
+      "failure_or_unknown_rate": 0.0,
+      "latency_p50_ms": 1913.9906999771483,
+      "latency_p95_ms": 2118.0900199746247,
+      "process_cpu_seconds": 25.546875,
+      "python_traced_heap_bytes": {
+        "current": 6122059,
+        "phase_peak": 8495643
+      },
+      "failure_codes": {},
+      "queue": {
+        "status": "NOT_APPLICABLE",
+        "reason": "closed_loop_no_celery_queue"
+      },
+      "offered_load": {
+        "per_worker_max_requests_per_second": 2,
+        "capacity_saturation_claimed": false
+      },
+      "records": [
+        {
+          "run_id": "efd58401-d6d2-4572-a334-248990897547",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2040.1734000188299
+        },
+        {
+          "run_id": "916742d8-1f49-4170-973d-be94b3acc6e4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2045.094600005541
+        },
+        {
+          "run_id": "6afbdd08-62d3-4ceb-936d-f0e083619ee5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2047.4620999884792
+        },
+        {
+          "run_id": "93d34746-ca93-4f1c-8cbf-0e89ed01704d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2079.420000023674
+        },
+        {
+          "run_id": "076b62fc-06f1-498c-bffd-7fcf0652cd25",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2108.5838999715634
+        },
+        {
+          "run_id": "d314777f-736f-4641-a202-6688073eab82",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2120.9735999582335
+        },
+        {
+          "run_id": "0b1e7236-cf6f-4dba-a0d1-8aa455722f82",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2119.033299968578
+        },
+        {
+          "run_id": "e2d3ec21-abb2-4e70-89e3-04436a985b25",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2127.907099958975
+        },
+        {
+          "run_id": "8317bc18-dfa8-4b10-a2d5-a238d92d0df1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1985.132200003136
+        },
+        {
+          "run_id": "549efcac-67dd-4e98-a825-07f2bbd38d02",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1985.315099998843
+        },
+        {
+          "run_id": "fc21d4fe-9649-4498-91fa-1b71f96270c6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2062.4928000033833
+        },
+        {
+          "run_id": "69b4bb85-c8c6-4528-a293-0f5f255523c0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2019.8071000049822
+        },
+        {
+          "run_id": "bafcefce-77ca-407d-8975-515f1b25624c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2035.5954999686219
+        },
+        {
+          "run_id": "455955ce-b27f-4f04-b8a3-92ded21e4523",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2031.1197999981232
+        },
+        {
+          "run_id": "ae5e489b-f657-4407-860f-2c1cfae8b489",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2026.4843999757431
+        },
+        {
+          "run_id": "abffdd04-a526-4202-9299-2a2d31f66566",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2123.580800020136
+        },
+        {
+          "run_id": "28715250-3b81-48eb-9d6a-4918dd30578b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2087.79640001012
+        },
+        {
+          "run_id": "aee20964-42ac-4ddc-af6a-2fb3a9a3f7bd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2056.1633000033908
+        },
+        {
+          "run_id": "a09c014e-578d-434f-9a9b-676a94bd6680",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2169.0357999759726
+        },
+        {
+          "run_id": "34a9d70a-7b72-49f3-a1ba-b4d8e00f42c3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2045.1666000299156
+        },
+        {
+          "run_id": "f35e9efb-1811-427f-ae31-5f0d3bb3f3a1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2050.722499960102
+        },
+        {
+          "run_id": "fcbfc680-a3ba-48a1-abf5-89e54fd65861",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2046.80210002698
+        },
+        {
+          "run_id": "154d3133-b870-4d2b-90b2-90097a3b913d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2098.95770001458
+        },
+        {
+          "run_id": "cd471caa-2908-4ac0-b24c-9cabe2a2079a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2269.700400007423
+        },
+        {
+          "run_id": "a1cb1923-b48e-4c96-8b45-6bc413bce577",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1969.3990999949165
+        },
+        {
+          "run_id": "4865f004-52db-4598-9d84-be6ba9f1bd54",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1918.4228000231087
+        },
+        {
+          "run_id": "eb83ddf7-8f49-4f1b-9cc3-3d86bf031169",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1925.4574000369757
+        },
+        {
+          "run_id": "4fc1bb93-93cf-4956-9836-f88f41eb29fc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1919.4808999891393
+        },
+        {
+          "run_id": "acb910e4-04e0-4bff-897c-b61f0e4a58e7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1930.4836000083014
+        },
+        {
+          "run_id": "b3db3e81-9af6-4187-85e0-894f2b7c935d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1957.131400005892
+        },
+        {
+          "run_id": "edde0a4d-9853-4c47-9e82-5696f8e36371",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1951.5149000217207
+        },
+        {
+          "run_id": "c4cc0365-7eba-4663-9848-fdb3377d5b7d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2146.087399974931
+        },
+        {
+          "run_id": "96efa627-506a-4c9b-a890-cec2103ff513",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1967.6893000141717
+        },
+        {
+          "run_id": "7c4c885a-9b85-4c3b-8feb-5256f740cbe0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2001.5869999770075
+        },
+        {
+          "run_id": "13cce02f-ad90-489c-bdb5-e4cba421882c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2010.1596000022255
+        },
+        {
+          "run_id": "7f716d7d-f176-4afa-845e-2b7bfe2660cc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2016.897199966479
+        },
+        {
+          "run_id": "8142b949-b3ff-46ea-bf43-c075e74f013c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1997.5965000339784
+        },
+        {
+          "run_id": "20d7a2de-5231-44d5-a05b-870ebae53c2e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2000.9092999971472
+        },
+        {
+          "run_id": "cb28497a-594a-4937-8303-71099767d276",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2031.115099962335
+        },
+        {
+          "run_id": "92a12a36-9cf7-4bb9-8652-dd54cbc02b6c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2173.9317000028677
+        },
+        {
+          "run_id": "a3cc2cab-2e3c-4217-abfe-81f0ee5db379",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1981.754699954763
+        },
+        {
+          "run_id": "7fbb8af8-cbb7-4d13-a370-974ff54c2ef1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1949.5029000099748
+        },
+        {
+          "run_id": "d2654bd6-383b-45c2-b85f-9ec7266f1a1f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1970.7958999788389
+        },
+        {
+          "run_id": "08922b30-9ceb-4a2b-ae76-edf2ad59d83d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1946.8077999772504
+        },
+        {
+          "run_id": "32b2bb04-270c-4fa5-816f-75485cfe09c1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1975.806200003717
+        },
+        {
+          "run_id": "b144bc46-16cd-4d95-8709-7657792b8738",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1951.987000007648
+        },
+        {
+          "run_id": "d81c61e3-cc4b-4ae7-82ed-8b9676560e28",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1957.6329999836162
+        },
+        {
+          "run_id": "a9d72613-b275-441e-81df-2ada1a62c6c2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1605.4158000042662
+        },
+        {
+          "run_id": "d3b7b40f-24d0-4538-9fb3-686c0c49975a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1929.9521999782883
+        },
+        {
+          "run_id": "e4e87e1d-32b7-427d-bafb-a81d5cbc32e8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1910.2517000283115
+        },
+        {
+          "run_id": "d46d8dad-525d-414e-972e-333b7c2365f4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1919.0745000378229
+        },
+        {
+          "run_id": "08bbae1f-e3d9-486a-9050-0e7c42915764",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1901.6448999755085
+        },
+        {
+          "run_id": "de1f994d-b8e7-4d26-b843-325149e5a955",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1908.469799964223
+        },
+        {
+          "run_id": "55db4448-aebb-458f-b20d-2e1721afa89e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1916.8087000143714
+        },
+        {
+          "run_id": "4f859163-4f4f-4144-ab7d-76c9e73a4dc9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1937.0105999987572
+        },
+        {
+          "run_id": "daaf4e42-a786-495d-8b80-67fe634de3cc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1916.4302000426687
+        },
+        {
+          "run_id": "a7ab1e2f-cc0b-471b-8dd5-3e599176da09",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1871.4949000277556
+        },
+        {
+          "run_id": "84f9e4a3-b053-4cf4-b1e4-391bbe38f34b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1860.571799974423
+        },
+        {
+          "run_id": "0f634f75-f1f5-4dce-a6e9-49951e7fed71",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1863.4523999644443
+        },
+        {
+          "run_id": "07c27f4f-88f9-4b2a-b4b6-f632e44486b4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1857.3872999986634
+        },
+        {
+          "run_id": "2c6f0fc8-de5b-4abf-975c-a234a05cd39e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1858.392299967818
+        },
+        {
+          "run_id": "2f7eea7c-ad07-4e68-b36a-5293fd3c5029",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1879.348399990704
+        },
+        {
+          "run_id": "d32f8b12-8cb1-40d5-aea4-5a48ac990438",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1855.1523000351153
+        },
+        {
+          "run_id": "2dd67534-d851-4872-bb1e-5d14313bf0cd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2429.1357999900356
+        },
+        {
+          "run_id": "efbfc31d-6547-450e-82f8-8163c1cb0788",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1986.1023999983445
+        },
+        {
+          "run_id": "e820280e-400d-4bcc-9672-dfd271fca96d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1980.4117999738082
+        },
+        {
+          "run_id": "acf93096-a80e-4a50-8ebf-eba951c428d9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1984.9717000033706
+        },
+        {
+          "run_id": "ad8baf73-e351-4158-9222-9c30d7c8bb63",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1985.9026999911293
+        },
+        {
+          "run_id": "ed75d0f3-2b75-48a0-869f-1fa637b9de12",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1994.2110000411049
+        },
+        {
+          "run_id": "d455c744-6331-4c18-a460-1448a0249f00",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2000.5377000197768
+        },
+        {
+          "run_id": "2812247b-8447-45fa-9ba9-f9a9ea82a507",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2003.7673999904655
+        },
+        {
+          "run_id": "f26dd0f8-16be-44ca-a2f3-bd3715951d6e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1984.6257999888621
+        },
+        {
+          "run_id": "d67a914f-c043-42d3-ae3a-929a27e07663",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1838.1155999959446
+        },
+        {
+          "run_id": "f50de9f3-4459-4995-b122-c54440807e20",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1823.4510000329465
+        },
+        {
+          "run_id": "1860d208-7b74-4a20-b8d1-bcbedfa2a30f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1822.3603999940678
+        },
+        {
+          "run_id": "29db9733-7d9e-46d9-866f-2b34cb9aab7c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1821.4769000187516
+        },
+        {
+          "run_id": "78c54056-d2c2-49f9-b26e-43714d07869f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1830.4969999589957
+        },
+        {
+          "run_id": "2ab95532-2143-4116-a267-e240e47d4bf7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1834.1704999911599
+        },
+        {
+          "run_id": "18e39fb3-c147-4706-a391-c716bd1dd001",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1819.6335000102408
+        },
+        {
+          "run_id": "65fdde58-d5f6-4bf0-a088-bd85c54f41b6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1822.7115999907255
+        },
+        {
+          "run_id": "13228f70-a929-4f79-bd28-cb6a0ec3b736",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1829.7581999795511
+        },
+        {
+          "run_id": "e8b7c26d-fa78-4c6b-baa4-4f41cabbedbc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1830.9946000226773
+        },
+        {
+          "run_id": "fc6612a5-195e-4274-9945-a7d6c5238ec7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1828.9717999869026
+        },
+        {
+          "run_id": "d34015e3-441e-4132-aaf3-7e5d1cdd97f7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1831.4785999828018
+        },
+        {
+          "run_id": "0815af82-20f5-47e0-a45e-1924afb2b63a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1831.2437999993563
+        },
+        {
+          "run_id": "c4785619-8d92-4ccc-995f-bf6bace41ec0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1831.551999959629
+        },
+        {
+          "run_id": "009be0aa-65ef-4388-8afb-646fe2513e56",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1832.3865999700502
+        },
+        {
+          "run_id": "81ba1a63-fd8f-48f6-8fe0-942815c75845",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1873.9009000128135
+        },
+        {
+          "run_id": "13a19a61-b1d8-406c-b7d7-8d2d68d21252",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1907.7668000245467
+        },
+        {
+          "run_id": "8d285612-87da-4743-9769-e8d1d5b07b89",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1904.2690999922343
+        },
+        {
+          "run_id": "62f37324-4f2c-4487-86ac-2c300a8edeab",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1907.5466000358574
+        },
+        {
+          "run_id": "e57678f9-381f-4323-b866-46b77a460a89",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1904.4996000011452
+        },
+        {
+          "run_id": "c8346990-5fea-406c-9acb-b0222026a13f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1904.474399983883
+        },
+        {
+          "run_id": "af2322a4-c486-4d6f-b9cf-c07613fccc97",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1908.5421999916434
+        },
+        {
+          "run_id": "255e7dbb-83c9-4e22-928a-491d1ead12ff",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1905.1238000392914
+        },
+        {
+          "run_id": "483b19ac-1d2a-4dea-9c8b-0c9a82a9e5eb",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1894.1404999932274
+        },
+        {
+          "run_id": "0d947e63-177c-4729-92ff-ce22c527f097",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1860.5759000056423
+        },
+        {
+          "run_id": "cf784c37-0db2-4ea6-a8e4-a77d5b26296c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1864.2529000062495
+        },
+        {
+          "run_id": "72062ef1-06e4-4601-bb0f-4562d34fe90c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1859.2459000064991
+        },
+        {
+          "run_id": "93e75aff-724e-451c-bdec-b482111cdcf7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1859.7337999963202
+        },
+        {
+          "run_id": "00bf98a9-be65-4dd7-b5fc-b1e86b9eff4e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1909.4712000223808
+        },
+        {
+          "run_id": "ebf758dd-0da0-4cac-b02d-a0a4ffebbb92",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1906.7221999866888
+        },
+        {
+          "run_id": "1ac7e5bf-a34d-4c25-98ff-d6b2e2b9f6e1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1921.9634999753907
+        },
+        {
+          "run_id": "dba39c7a-e4ec-480d-91eb-29c57108aa59",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2299.7383999754675
+        },
+        {
+          "run_id": "0c7e4c64-4fde-422a-9bf1-09cffa4fce25",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2071.7994999722578
+        },
+        {
+          "run_id": "aa211a2d-097b-4137-9274-48ff6dfc1f2f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2060.3389000170864
+        },
+        {
+          "run_id": "63746987-9377-4983-8890-c4eaf20ce3c4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2062.866499996744
+        },
+        {
+          "run_id": "908fd628-823d-4ef5-9d2c-bf8dda08f50b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2067.644399998244
+        },
+        {
+          "run_id": "2c2178d1-1872-443e-8f5f-f836066a98d2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2034.0740999672562
+        },
+        {
+          "run_id": "6141332a-cf0d-4f6f-bb98-dc2faca6fac0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2038.4053000016138
+        },
+        {
+          "run_id": "cea5776e-e1d3-4029-92df-35ca428754dd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2026.7852999968454
+        },
+        {
+          "run_id": "4637dfb9-8102-4554-af92-28db5eb51988",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2216.48100001039
+        },
+        {
+          "run_id": "f5242608-01b8-4ac1-8914-95fceeaa793b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1885.428600013256
+        },
+        {
+          "run_id": "168dd90f-1c9c-4f5d-986c-dc6f81fda12b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1887.9334999946877
+        },
+        {
+          "run_id": "499349bb-da02-4d7a-a370-cd3e6eb7da28",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1920.9316999767907
+        },
+        {
+          "run_id": "3b0057e3-b049-4ce8-9bfe-15277b016f48",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1915.5951999709941
+        },
+        {
+          "run_id": "a2254d04-e59c-435b-b5ff-052adbccc1ea",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1891.5218000183813
+        },
+        {
+          "run_id": "7611923a-d8c6-40c0-aee3-cef47f9ea7bb",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1884.933099965565
+        },
+        {
+          "run_id": "fc864d69-1a47-426d-bff3-15d0166b94e1",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1904.9967000028118
+        },
+        {
+          "run_id": "dcdae76a-bbf0-4e0d-a0d5-75610f9b1bc7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1894.6352999773808
+        },
+        {
+          "run_id": "0fc4a31d-2a9e-4180-bfbb-914ccdb11599",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1956.6064999671653
+        },
+        {
+          "run_id": "e2ddf92c-7e1c-40ab-9a2b-b1e8e8f22706",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1984.1272999765351
+        },
+        {
+          "run_id": "04ca4d84-8686-4f6b-8a65-45e9d6cbbf68",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1962.0140000479296
+        },
+        {
+          "run_id": "4ff31467-3635-4738-b517-d3b8c469829d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1986.9032999849878
+        },
+        {
+          "run_id": "26f191b8-e698-4994-be86-dca54cc1f142",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1956.1238000169396
+        },
+        {
+          "run_id": "0564472e-3fc8-4da5-9be2-f48e077badc3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1969.721799949184
+        },
+        {
+          "run_id": "9befd1a5-9403-4b72-8ab0-65bef26606a0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1955.4698000429198
+        },
+        {
+          "run_id": "0792aff3-d14e-47da-94e4-3345085bf722",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1960.2434000116773
+        },
+        {
+          "run_id": "033aa528-f2f6-49e7-9c80-ec960dc4df59",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1877.0416000043042
+        },
+        {
+          "run_id": "fa8cef4a-b03a-402e-9ba7-d7e3c460e01c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1858.150000043679
+        },
+        {
+          "run_id": "42cb7fc0-cc92-4eee-8656-56428a07823a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1858.9110999600962
+        },
+        {
+          "run_id": "dc44dfcb-17aa-4b1c-bd6a-c9ed7e3f25f8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1864.6903000189923
+        },
+        {
+          "run_id": "ee9b8477-6a30-454d-a138-20b45113317d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1891.7191000073217
+        },
+        {
+          "run_id": "0572ef47-ab7c-431b-a8f9-3f2f9d20f995",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1878.022000018973
+        },
+        {
+          "run_id": "c975aa47-ca07-40c0-bfab-002f2b6a633a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1875.8947999449447
+        },
+        {
+          "run_id": "7d6ec786-097f-4b19-b00b-0763172aaf06",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1732.1710999822244
+        },
+        {
+          "run_id": "eb9e8bae-32ad-45c9-bf8d-91cb84b7d590",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1966.9915999984369
+        },
+        {
+          "run_id": "4b46c8f4-7c83-4c8e-9d5f-98f53513a9b8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1965.9807000425644
+        },
+        {
+          "run_id": "61656bb0-e4ce-4b50-a810-d8162db62721",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2041.4670000318438
+        },
+        {
+          "run_id": "ee4f264a-313a-4b61-a7f4-c81ea19230b0",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2030.3958000149578
+        },
+        {
+          "run_id": "4d86ac4d-c257-43c1-bdab-6cf71ac8f3da",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2012.5867999740876
+        },
+        {
+          "run_id": "bc78c1c9-ce75-41ad-91cc-a498316a856c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2027.4477999773808
+        },
+        {
+          "run_id": "51dd58db-52e2-487c-8d9b-55dd9a99aab5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2422.12840000866
+        },
+        {
+          "run_id": "5b8dac6c-e2c3-4d24-a14d-361cb5b099ba",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2079.878699965775
+        },
+        {
+          "run_id": "7b23a1b3-6231-401f-b0c4-74a024a224b3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1972.3304999643005
+        },
+        {
+          "run_id": "193c914c-73d3-461a-9bd3-0f4ba63bd38f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1974.923400033731
+        },
+        {
+          "run_id": "bd365963-9782-4200-98de-9624e970df6e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1910.3669000323862
+        },
+        {
+          "run_id": "93532e57-878d-41df-a26c-bd841c20ff24",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1912.3861999833025
+        },
+        {
+          "run_id": "f8ba5cce-12a2-4ac4-a42f-43ac13157e56",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1908.8531999732368
+        },
+        {
+          "run_id": "0ba5865c-f845-4730-aff0-8886abdc6b71",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2107.9586999840103
+        },
+        {
+          "run_id": "f7f60110-0a83-4d19-a707-d832db92487c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1909.1784000047483
+        },
+        {
+          "run_id": "8474fbf3-d74b-4f40-811c-9e55f0aebcdc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1879.7141999821179
+        },
+        {
+          "run_id": "0ee8bd75-39e7-4efc-823f-a9f5a457484c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1889.135700010229
+        },
+        {
+          "run_id": "0a2b36bd-53f2-4b49-a8f4-d6f0cf125a6d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1893.8556000357494
+        },
+        {
+          "run_id": "1724e343-b854-4483-ade5-e01a232b5117",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1887.269600003492
+        },
+        {
+          "run_id": "8239cdcf-a36e-4e0f-bb68-a84657ad166a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1907.9842999926768
+        },
+        {
+          "run_id": "93de8e58-ca5c-456a-a95e-f40fbbbcbf03",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1904.2521999799646
+        },
+        {
+          "run_id": "f929c9e3-0275-4f7e-90ce-c0ef07d0a389",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1707.7862999867648
+        },
+        {
+          "run_id": "fb0366c0-a795-4b12-8270-91731ce05d3b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2111.3674999796785
+        },
+        {
+          "run_id": "8da2a708-6583-4294-b688-f67593e04330",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1852.5960000115447
+        },
+        {
+          "run_id": "aa0f9686-71ee-4680-9e37-f866c9192f0d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1920.1202999684028
+        },
+        {
+          "run_id": "0ce06abd-1911-4f79-b1ea-40529972db30",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1918.4402999817394
+        },
+        {
+          "run_id": "c081427e-02d8-4a17-a7b2-8bdbe6603e75",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1942.340300010983
+        },
+        {
+          "run_id": "f54491e4-2a36-4b6e-8659-6834af32402e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1920.9886000026017
+        },
+        {
+          "run_id": "006deffe-c88b-4863-9b08-43f5827f85d2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1916.258899960667
+        },
+        {
+          "run_id": "50d19b96-47d1-4bfa-a196-e8bfbfa4d376",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1931.6576999844983
+        },
+        {
+          "run_id": "ea64a515-8640-4aef-a216-e4af9306e6a5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1717.2967999940738
+        },
+        {
+          "run_id": "692073d2-5039-493f-b189-5a56e3f7194e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1954.5080999960192
+        },
+        {
+          "run_id": "14f70bb3-6b0d-40b5-a761-300eb560bb80",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1882.473299978301
+        },
+        {
+          "run_id": "b1016477-fc00-445b-960c-4d0c77e758e4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1893.387799966149
+        },
+        {
+          "run_id": "728bb71e-a696-4152-92ea-eafa5861810a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1889.6786999539472
+        },
+        {
+          "run_id": "c61af8c9-51f8-4eea-80c1-d69f7334ab5a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1887.4563000281341
+        },
+        {
+          "run_id": "d56557a7-e35b-4a6b-96ed-d4b7130c00e3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2086.1803999869153
+        },
+        {
+          "run_id": "334108ac-6b28-491e-bde9-4573fd9a73e7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2087.943600025028
+        },
+        {
+          "run_id": "bee38758-f8db-4784-bbdd-dacab26ee2dd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1889.802800025791
+        },
+        {
+          "run_id": "59032f6e-8c04-460e-8330-ca7c425d9a0e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1855.6704000220634
+        },
+        {
+          "run_id": "008b1a7e-201a-4a43-ae8b-6d52f36b233d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1851.6878000227734
+        },
+        {
+          "run_id": "ab1a20c0-1a74-4167-9a5d-be06abbdc92d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1839.9672000086866
+        },
+        {
+          "run_id": "358ceb0f-cb64-4fe2-8b91-f296691f19fd",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1841.83029999258
+        },
+        {
+          "run_id": "417611ba-5349-4ca3-83a8-5e5744cdabe4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1838.697500003036
+        },
+        {
+          "run_id": "883ca101-633f-4395-b7eb-15762a865a89",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1854.1753999888897
+        },
+        {
+          "run_id": "4feb3101-7261-45e8-a127-12144c5562e3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1847.3851999733597
+        },
+        {
+          "run_id": "120c7db7-f667-4476-ae58-6edcd9f3ca1e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1652.1970000467263
+        },
+        {
+          "run_id": "d6508d29-01db-4628-ad3a-f8494dbf1629",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2084.6637999638915
+        },
+        {
+          "run_id": "68538a5a-875c-4bf3-9a81-bcb8bc4a1a19",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1877.2678999812342
+        },
+        {
+          "run_id": "7afe342a-75ca-491e-a250-cae32084b3bf",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1886.155299958773
+        },
+        {
+          "run_id": "db7386a0-fb76-47dc-bcbf-345dd667d46b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1875.1398000167683
+        },
+        {
+          "run_id": "683a3aa4-d6fa-4293-9bfc-5bc8c855cda9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1882.2985000442713
+        },
+        {
+          "run_id": "e7e6fe4c-78b8-40f0-8d2e-612473a043a9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1866.8263999861665
+        },
+        {
+          "run_id": "18db315b-60de-41ce-8703-1d5f906a5d1e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1871.7694000224583
+        },
+        {
+          "run_id": "efb15cb5-8170-42f4-8fec-1b4955e7403f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2064.436200016644
+        },
+        {
+          "run_id": "51385993-3f0e-4770-a074-e9c933790bbc",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1627.3075999924913
+        },
+        {
+          "run_id": "a7a0425d-6e9d-4afa-a2b0-940c00702d73",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1811.138499993831
+        },
+        {
+          "run_id": "0b59c4ab-5d4d-4e4a-a702-54aa693190e3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1809.9597000400536
+        },
+        {
+          "run_id": "be3402fa-34e7-4f9d-8a35-c616226b6020",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1810.688899946399
+        },
+        {
+          "run_id": "6f050470-d701-4f21-8c8f-8d069fd7250d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1811.967299960088
+        },
+        {
+          "run_id": "287c060b-e5ae-4736-8c22-6c1e7edcf4b4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1608.1486999755725
+        },
+        {
+          "run_id": "2bc5b0b3-609b-43cc-90c9-c7810cabf72f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1796.9331999775022
+        },
+        {
+          "run_id": "7c525c5d-aad4-484e-8da6-d8ebdc2b1760",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1610.245899995789
+        },
+        {
+          "run_id": "4e61b261-6c93-4700-ae20-b3016a406917",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1793.830499984324
+        },
+        {
+          "run_id": "4cd0bd42-c7ee-429a-b4a7-4ce7d71b83fe",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1818.0513000115752
+        },
+        {
+          "run_id": "94c63a8d-0122-4825-a0b3-8abe5f034411",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1858.1373999477364
+        },
+        {
+          "run_id": "70e60b66-c893-48b1-ac99-b29996c47945",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1864.6355000091717
+        },
+        {
+          "run_id": "284e0842-362e-4e47-8eb2-f167b828c9af",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1858.500800037291
+        },
+        {
+          "run_id": "a4cbb71b-41aa-4b89-a08c-207893dfde47",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1862.9494000342675
+        },
+        {
+          "run_id": "9411b93d-656c-4ff1-8f7c-11119c56c5bf",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1873.4494000091217
+        },
+        {
+          "run_id": "3578cf48-3570-4d04-add3-b1fc38677d11",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1865.5038999859244
+        },
+        {
+          "run_id": "b6743823-7a0d-42f7-a069-26d3c189234e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1879.9670999869704
+        },
+        {
+          "run_id": "3144450b-60bc-4f7e-b10b-1fd1a76ec512",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1875.6496999994852
+        },
+        {
+          "run_id": "c5f7f024-a2f5-409a-aa93-ed95d5ee6b3f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1844.4913999992423
+        },
+        {
+          "run_id": "085e3138-de6a-4265-bd73-ff5114a832f6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1822.9178000474349
+        },
+        {
+          "run_id": "002fe93e-5787-4dad-a1bd-50b1204f22c6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1821.4659999939613
+        },
+        {
+          "run_id": "5f0ac2c1-0930-469d-8490-950d9cc76077",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1822.6539999595843
+        },
+        {
+          "run_id": "162261b0-5d10-460a-b8e4-92995bcfd66e",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1893.8206000020728
+        },
+        {
+          "run_id": "491f26eb-a598-414d-a58c-4646370b04b8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1904.899800021667
+        },
+        {
+          "run_id": "d547f5e4-7d6e-4098-8d25-9517b78ad1c9",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2185.3292000014335
+        },
+        {
+          "run_id": "36579a90-36d8-4e9a-8f77-efcdc46de9f4",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2065.193200018257
+        },
+        {
+          "run_id": "d05520ec-bd0c-497f-84b0-b9ebb678118c",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2093.3609000057913
+        },
+        {
+          "run_id": "ef137ec6-5663-416e-8f32-7151ec6440ec",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2102.4695000378415
+        },
+        {
+          "run_id": "e7d37bc4-1a59-4fc5-ba4f-63f7e41b3c2b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2109.9167999927886
+        },
+        {
+          "run_id": "758f9f7b-713d-459e-8647-e19796cd7ab3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2113.597800023854
+        },
+        {
+          "run_id": "8fffdff0-b95f-4fad-a94f-57dfc060e30b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1830.3014999837615
+        },
+        {
+          "run_id": "0870f200-6c5f-4788-9ac4-bb02e6b8480b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1861.7633000249043
+        },
+        {
+          "run_id": "4554aed3-c9f3-4a71-bffd-23ff34a39ab6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2017.2454999992624
+        },
+        {
+          "run_id": "36908cfe-8fb5-46d7-9b7c-6fe2874b1cb6",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1957.1363999857567
+        },
+        {
+          "run_id": "75b547a3-6f9e-4e5a-9324-f8b499b2dfb7",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1920.7865999778733
+        },
+        {
+          "run_id": "f81fd84c-860e-4975-8e47-198bc1b4722f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1924.5917999651283
+        },
+        {
+          "run_id": "dadae23e-013e-4a63-ac17-d1f34e21a527",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1906.1944999848492
+        },
+        {
+          "run_id": "f81518de-73eb-412d-965a-ce1ad9d450f5",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1900.308699987363
+        },
+        {
+          "run_id": "0877161c-50c2-44cd-9607-8b198e3c638a",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1903.0939999502152
+        },
+        {
+          "run_id": "11ba5d1c-b413-4f35-81e7-1bf90c547cca",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1901.024300022982
+        },
+        {
+          "run_id": "18b7d4f7-9574-4406-987c-cbbd2da09c5b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1906.471700000111
+        },
+        {
+          "run_id": "bce086ce-3955-468f-8c1b-dde816a8417d",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2015.1236000237986
+        },
+        {
+          "run_id": "bf0884e4-d348-45b3-93a8-f1c044cafc57",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2008.3308999892324
+        },
+        {
+          "run_id": "bf9b1c54-3e8a-458e-9f54-4e22bc3b4e38",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2019.8083000141196
+        },
+        {
+          "run_id": "2bd3d45e-74b2-4b48-9829-5a2f82872678",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2005.908899998758
+        },
+        {
+          "run_id": "55b2ca41-c8b6-49e8-b860-5b6f35ce6234",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2001.1373999877833
+        },
+        {
+          "run_id": "f33e9647-8b2b-426d-a030-614ebda16abe",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2031.755100004375
+        },
+        {
+          "run_id": "15f72ee0-9de2-4575-b77a-dce5b6c0199b",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2015.5849000439048
+        },
+        {
+          "run_id": "e5cf392d-fa56-4421-b34b-5a802476d4d3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1957.8668999602087
+        },
+        {
+          "run_id": "73a108f2-25ba-4d4e-9d4d-6dba43634132",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1693.0166999809444
+        },
+        {
+          "run_id": "2139c534-c38d-4f2b-911d-29d0c8db8c23",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1867.2145000309683
+        },
+        {
+          "run_id": "b79f03c5-74f3-406f-8185-12b078921590",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1928.3540999749675
+        },
+        {
+          "run_id": "c061d177-7fd4-4688-8521-d84327156c42",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1921.1728000082076
+        },
+        {
+          "run_id": "5dc3402a-8521-4571-91c5-edf93969ca89",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1961.7242000531405
+        },
+        {
+          "run_id": "db1df339-8dde-4747-b3ad-f3e794ac8856",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1937.6578000374138
+        },
+        {
+          "run_id": "92561b94-35a3-4639-abd9-32173de84e40",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 2117.5820999778807
+        },
+        {
+          "run_id": "22954182-497f-4f93-a491-714e7a985bc8",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1712.0106000220403
+        },
+        {
+          "run_id": "e115d338-3b2d-4163-93f9-183d4bd19b9f",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1636.2850000150502
+        },
+        {
+          "run_id": "7eb3b250-aefb-4887-ae22-a4755dd68a53",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1465.594900015276
+        },
+        {
+          "run_id": "e92f64c6-43a0-4529-abc3-cfd53f28d2b2",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1374.2001000209711
+        },
+        {
+          "run_id": "9e09175a-ce90-44a5-afe6-b1ec14903af3",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1358.7234999868087
+        },
+        {
+          "run_id": "7fdce1fa-d1e8-47f6-8c35-97d7025d9bcf",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1355.1089000538923
+        },
+        {
+          "run_id": "544a70e4-6261-413f-856d-e440691d91df",
+          "status": "SUCCEEDED",
+          "failure_code": null,
+          "latency_ms": 1357.4215999688022
+        }
+      ]
+    }
+  ],
+  "persistent_status_counts": {
+    "SUCCEEDED": 638
+  },
+  "expected_persisted_run_count": 638,
+  "persistence_count_matches": true
+}

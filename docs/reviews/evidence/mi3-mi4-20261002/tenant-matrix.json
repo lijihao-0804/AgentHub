@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "driver_kind": "controlled",
+  "source": "real_api_jwt_real_postgres",
+  "records": [
+    {
+      "kind": "read",
+      "method": "GET",
+      "status_code": 404,
+      "error_code": "RESOURCE_NOT_FOUND",
+      "content_leak": false
+    },
+    {
+      "kind": "read",
+      "method": "GET",
+      "status_code": 404,
+      "error_code": "RESOURCE_NOT_FOUND",
+      "content_leak": false
+    },
+    {
+      "kind": "read",
+      "method": "GET",
+      "status_code": 404,
+      "error_code": "RESOURCE_NOT_FOUND",
+      "content_leak": false
+    },
+    {
+      "kind": "read",
+      "method": "GET",
+      "status_code": 404,
+      "error_code": "AGENT_RUN_NOT_FOUND",
+      "content_leak": false
+    },
+    {
+      "kind": "write",
+      "method": "POST",
+      "status_code": 404,
+      "error_code": "RESOURCE_NOT_FOUND",
+      "content_leak": false
+    },
+    {
+      "kind": "write",
+      "method": "POST",
+      "status_code": 404,
+      "error_code": "AGENT_RUN_NOT_FOUND",
+      "content_leak": false
+    }
+  ],
+  "read_leaks": {
+    "numerator": 0,
+    "denominator": 4
+  },
+  "unauthorized_writes": {
+    "numerator": 0,
+    "denominator": 2
+  },
+  "healthy_control_created_count": 1,
+  "limitation": "Six API tenant scenarios; not every resource or real model attack."
+}
