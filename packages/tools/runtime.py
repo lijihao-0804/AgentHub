@@ -20,6 +20,7 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.observability import NoopTraceSink
 from packages.observability.contracts import TraceSink, TraceSpan
+from packages.observability.timing import timed_span
 from packages.tools.audit import NoopToolAuditSink, ToolAudit, ToolAuditSink, record_tool_audit
 from packages.tools.contracts import (
     ToolApprovalPolicy,
@@ -104,7 +105,7 @@ async def _safe_span_start(
     attributes: Mapping[str, Any],
 ) -> TraceSpan | None:
     try:
-        return await sink.start_span("tool.execute", attributes)
+        return timed_span(await sink.start_span("tool.execute", attributes), "tool.execute")
     except Exception:
         logger.warning("tool_trace_start_failed")
         return None

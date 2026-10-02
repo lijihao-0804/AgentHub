@@ -19,12 +19,13 @@ from packages.evaluation.models import PricingSnapshot
 EVALUATION_SCHEMA_VERSION = 1
 DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
     JUDGE_MANIFEST_KEY: JUDGE_DISABLED_VERSION,
-    "approval-evaluator": "v1",
-    "citation-evaluator": "v1",
+    "approval-evaluator": "v2",
+    "citation-evaluator": "v2",
     "dataset-validator": "v1",
-    "failure-evaluator": "v1",
-    "retrieval-evaluator": "v1",
-    "tool-evaluator": "v1",
+    "failure-evaluator": "v2",
+    "retrieval-evaluator": "v2",
+    "tool-evaluator": "v2",
+    "support-postcondition-evaluator": "support-postcondition-v1",
 }
 
 
@@ -42,6 +43,7 @@ def default_evaluator_manifest(
     versions[JUDGE_MANIFEST_KEY] = judge_manifest_entry(judge_profile)
     manifest: dict[str, Any] = {
         "evaluation_schema_version": EVALUATION_SCHEMA_VERSION,
+        "observation_schema_version": 2,
         "evaluator_versions": dict(sorted(versions.items())),
     }
     if judge_profile is not None:

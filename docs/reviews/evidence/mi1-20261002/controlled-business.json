@@ -1,0 +1,246 @@
+{
+  "report_schema_version": 1,
+  "source": "controlled_postgresql_fixtures",
+  "real_provider_eval": "NOT_RUN",
+  "base_build_sha": "a1c51b4",
+  "dataset_fixture_hash": "8ca0cde41ebc885cc48ab1c9659e2bb6fd7516027ccf8da0294ff6e461eb9e83",
+  "snapshot": "NOT_APPLICABLE_controlled_ticket_fixtures",
+  "pricing": "NOT_APPLICABLE_no_provider_calls",
+  "model": "NOT_APPLICABLE_no_provider_calls",
+  "evaluator_manifest": {
+    "evaluation_schema_version": 1,
+    "observation_schema_version": 2,
+    "evaluator_versions": {
+      "answer-quality-judge": "disabled",
+      "approval-evaluator": "v2",
+      "citation-evaluator": "v2",
+      "dataset-validator": "v1",
+      "failure-evaluator": "v2",
+      "retrieval-evaluator": "v2",
+      "support-postcondition-evaluator": "support-postcondition-v1",
+      "tool-evaluator": "v2"
+    }
+  },
+  "case_count": 10,
+  "source_groups": {
+    "runtime": 0,
+    "controlled": 10,
+    "synthetic": 0
+  },
+  "business_denominator": 10,
+  "unknown_business_count": 1,
+  "records": [
+    {
+      "case_id": "created",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": true,
+        "missing_reason": null,
+        "ticket_count": 1,
+        "failed_checks": []
+      },
+      "expected_verdict": true,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "341de675-1f84-4270-b8f7-fc82beb8f65d"
+    },
+    {
+      "case_id": "claimed_but_absent",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": false,
+        "missing_reason": null,
+        "ticket_count": 0,
+        "failed_checks": [
+          "ticket_count"
+        ]
+      },
+      "expected_verdict": false,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "b21c6db5-68c1-4834-b64c-9288edcf035c"
+    },
+    {
+      "case_id": "wrong_customer",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": false,
+        "missing_reason": null,
+        "ticket_count": 1,
+        "failed_checks": [
+          "customer_identity"
+        ]
+      },
+      "expected_verdict": false,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "2120797c-ba1a-4730-9ce4-e5a86908eb43"
+    },
+    {
+      "case_id": "duplicate_business_effect",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": false,
+        "missing_reason": null,
+        "ticket_count": 2,
+        "failed_checks": [
+          "ticket_count"
+        ]
+      },
+      "expected_verdict": false,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "ccc59820-bf03-449c-b77a-40b132a66458"
+    },
+    {
+      "case_id": "wrong_ticket_state",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": false,
+        "missing_reason": null,
+        "ticket_count": 1,
+        "failed_checks": [
+          "ticket_status"
+        ]
+      },
+      "expected_verdict": false,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "3546f18f-8e55-4b20-824a-52f6f6d68686"
+    },
+    {
+      "case_id": "denied_no_effect",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": true,
+        "missing_reason": null,
+        "ticket_count": 0,
+        "failed_checks": []
+      },
+      "expected_verdict": true,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "5c762de0-4979-4303-9e23-babdb425bd11"
+    },
+    {
+      "case_id": "denied_but_effect",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": false,
+        "missing_reason": null,
+        "ticket_count": 1,
+        "failed_checks": [
+          "ticket_count"
+        ]
+      },
+      "expected_verdict": false,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "3ec63b54-6c95-4a4d-96bf-d846d4ad33af"
+    },
+    {
+      "case_id": "unknown_preserved",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": true,
+        "missing_reason": null,
+        "ticket_count": 0,
+        "failed_checks": []
+      },
+      "expected_verdict": true,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "c1291926-c451-4c24-ae24-c40a96c2c391"
+    },
+    {
+      "case_id": "wrong_run_state",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "AVAILABLE",
+        "success": false,
+        "missing_reason": null,
+        "ticket_count": 1,
+        "failed_checks": [
+          "run_status"
+        ]
+      },
+      "expected_verdict": false,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "3a25b493-baa6-4d81-adf7-31c95a505ecb"
+    },
+    {
+      "case_id": "run_missing",
+      "observation_schema_version": 2,
+      "driver_kind": "controlled",
+      "field_sources": {
+        "business_outcome": "workspace_scoped_ticket_query"
+      },
+      "business_outcome": {
+        "evaluator_version": "support-postcondition-v1",
+        "source": "workspace_scoped_ticket_query",
+        "status": "NOT_AVAILABLE",
+        "success": null,
+        "missing_reason": "run_status_missing",
+        "ticket_count": 1,
+        "failed_checks": []
+      },
+      "expected_verdict": null,
+      "agent_version_id": "a04ef801-84ab-43ae-a9d1-bb5ea2a887ef",
+      "run_id": "5edb9ca4-9c30-4e11-9f07-3243abf3e954"
+    }
+  ]
+}

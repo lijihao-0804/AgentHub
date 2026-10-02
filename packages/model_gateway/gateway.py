@@ -40,6 +40,7 @@ from packages.model_gateway.profile_resolution import (
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
 from packages.observability.contracts import TraceSink, TraceSpan
 from packages.observability.noop import NoopTraceSink, NoopTraceSpan
+from packages.observability.timing import timed_span
 
 logger = logging.getLogger(__name__)
 
@@ -673,7 +674,7 @@ async def _start_trace_span(
     attributes: Mapping[str, Any],
 ) -> TraceSpan:
     try:
-        return await trace_sink.start_span(name, attributes=attributes)
+        return timed_span(await trace_sink.start_span(name, attributes=attributes), name)
     except Exception as error:
         logger.warning("trace start failed: %s", type(error).__name__)
         return NoopTraceSpan()

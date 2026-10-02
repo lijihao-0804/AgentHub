@@ -295,6 +295,42 @@ function bearer(input: AuthInput): string {
  * end-of-stream is not an error: the backend deliberately closes the
  * stream when a run pauses for approval.
  */
+export type ClientStreamTiming = {
+  clientTtftMs: number | null;
+  elapsedMs: number;
+  outcome: "completed" | "aborted" | "failed";
+  clock: "performance.now";
+  origin: "fetch_start";
+};
+
+/** Measurement callbacks cannot change stream control or expose message content. */
+async function measureStream(
+  started: number,
+  onTiming: ((timing: ClientStreamTiming) => void) | undefined,
+  onEvent: (event: AgentEvent) => void,
+  consume: (emit: (event: AgentEvent) => void) => Promise<void>,
+): Promise<void> {
+  let first: number | null = null;
+  let outcome: ClientStreamTiming["outcome"] = "completed";
+  try {
+    await consume((event) => {
+      if (first === null && event.type === "message.delta" &&
+          typeof event.payload.delta === "string" && event.payload.delta.length > 0) {
+        first = performance.now() - started;
+      }
+      onEvent(event);
+    });
+  } catch (error) {
+    outcome = error instanceof Error && error.name === "AbortError" ? "aborted" : "failed";
+    throw error;
+  } finally {
+    try {
+      onTiming?.({ clientTtftMs: first, elapsedMs: performance.now() - started,
+        outcome, clock: "performance.now", origin: "fetch_start" });
+    } catch { /* Optional telemetry must not break a successful or failed stream. */ }
+  }
+}
+
 export async function streamAgentRun(
   input: AuthInput,
   options: {
@@ -302,6 +338,7 @@ export async function streamAgentRun(
     inputText: string;
     signal: AbortSignal;
     onEvent: (event: AgentEvent) => void;
+    onTiming?: (timing: ClientStreamTiming) => void;
   },
 ): Promise<void> {
   const authorization = bearer(input);
@@ -309,19 +346,21 @@ export async function streamAgentRun(
     `${runtimeBase(input.workspaceId)}/agent-versions/` +
     `${encodeURIComponent(options.agentVersionId)}/runs/stream`;
 
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: authorization,
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
-    },
-    credentials: "include",
-    body: JSON.stringify({ input_text: options.inputText }),
-    signal: options.signal,
-  });
+  await measureStream(performance.now(), options.onTiming, options.onEvent, async (emit) => {
+    const response = await fetch(`${apiBaseUrl}${path}`, {
+      method: "POST",
+      headers: {
+        Authorization: authorization,
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+      },
+      credentials: "include",
+      body: JSON.stringify({ input_text: options.inputText }),
+      signal: options.signal,
+    });
 
-  await consumeEventStream(response, options.onEvent);
+    await consumeEventStream(response, emit);
+  });
 }
 
 /**
@@ -381,6 +420,7 @@ export async function streamThreadTurn(
     signal: AbortSignal;
     onStarted?: (runId: string | null, turnId: string | null) => void;
     onEvent: (event: AgentEvent) => void;
+    onTiming?: (timing: ClientStreamTiming) => void;
   },
 ): Promise<{ runId: string | null; turnId: string | null }> {
   const authorization = bearer(input);
@@ -388,25 +428,29 @@ export async function streamThreadTurn(
     `${runtimeBase(input.workspaceId)}/threads/` +
     `${encodeURIComponent(options.threadId)}/turns/stream`;
 
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: authorization,
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      input_text: options.inputText,
-      ...(options.clientToken ? { client_token: options.clientToken } : {}),
-    }),
-    signal: options.signal,
-  });
+  let runId: string | null = null;
+  let turnId: string | null = null;
+  await measureStream(performance.now(), options.onTiming, options.onEvent, async (emit) => {
+    const response = await fetch(`${apiBaseUrl}${path}`, {
+      method: "POST",
+      headers: {
+        Authorization: authorization,
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        input_text: options.inputText,
+        ...(options.clientToken ? { client_token: options.clientToken } : {}),
+      }),
+      signal: options.signal,
+    });
 
-  const runId = response.headers.get("X-AgentHub-Run-Id");
-  const turnId = response.headers.get("X-AgentHub-Turn-Id");
-  options.onStarted?.(runId, turnId);
-  await consumeEventStream(response, options.onEvent);
+    runId = response.headers.get("X-AgentHub-Run-Id");
+    turnId = response.headers.get("X-AgentHub-Turn-Id");
+    options.onStarted?.(runId, turnId);
+    await consumeEventStream(response, emit);
+  });
   return { runId, turnId };
 }
 

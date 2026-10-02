@@ -126,6 +126,61 @@ class EvaluatorRegistry:
         self.register("MULTI_STEP", "v1", evaluate_multi_step)
         self.register("FAILURE", "v1", evaluate_failure)
 
+    def for_manifest(self, manifest: Mapping[str, Any]) -> EvaluatorRegistry:
+        """Build an isolated registry; never mutate a shared service for a run."""
+        from packages.evaluation.observed_metrics import observed_metrics
+
+        registry = EvaluatorRegistry()
+        # Keep registered adapters/definitions while isolating per-run version binding.
+        registry._evaluators = dict(self._evaluators)
+        registry._definitions = dict(self._definitions)
+        versions = manifest.get("evaluator_versions", {})
+        if not isinstance(versions, Mapping):
+            raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
+        for category, (registered_version, evaluator) in tuple(registry._evaluators.items()):
+            version = versions.get(_manifest_key(category))
+            if version not in {"v1", "v2"}:
+                raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
+            if registered_version not in {"v1", version}:
+                raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
+            if version == "v2" and registered_version == "v1":
+
+                def guarded(expected, observation, category=category, evaluator=evaluator):
+                    return observed_metrics(
+                        category, expected, observation, evaluator(expected, observation)
+                    )
+
+                registry.register(category, version, guarded)
+            for name in evaluator({}, {}):
+                definition = registry.definition_for(name)
+                registry.register_metric_definition(
+                    name,
+                    definition.direction,
+                    definition.aggregation_kind,
+                    task_success_relevant=definition.task_success_relevant,
+                    version=version,
+                )
+        # task_success is shared across categories; mixed manifests cannot use one version.
+        category_versions = {versions.get(_manifest_key(c)) for c in registry._evaluators}
+        if len(category_versions) != 1:
+            raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
+        for name in (
+            "candidate_recall_at_configured_k",
+            "final_recall_at_configured_k",
+            "mrr_at_configured_k",
+        ):
+            registry.register_metric_definition(
+                name, MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, version="v2"
+            )
+        if category_versions == {"v2"} and (
+            manifest.get("observation_schema_version") != 2
+            or versions.get("support-postcondition-evaluator") != "support-postcondition-v1"
+        ):
+            raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
+        registry.bind_judge_manifest(manifest)
+        registry.validate_manifest(manifest)
+        return registry
+
     def register(self, category: str, version: str, evaluator: Evaluator) -> None:
         self._evaluators[category] = (version, evaluator)
 

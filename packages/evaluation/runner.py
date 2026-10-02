@@ -34,6 +34,7 @@ from packages.approvals.models import Approval
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings
 from packages.core.errors.exceptions import AgentHubError
+from packages.evaluation.business import inspect_support_outcome, support_condition_from_expected
 from packages.evaluation.judge import (
     JUDGE_OBSERVATION_KEY,
     AnswerQualityJudge,
@@ -51,6 +52,7 @@ from packages.evaluation.models import (
     EvaluationExperimentVariant,
     PricingSnapshot,
 )
+from packages.evaluation.observations import observation_identity, retrieval_observation
 from packages.evaluation.reproducibility import (
     experiment_spec_hash,
     normalize_knowledge_snapshots,
@@ -61,6 +63,7 @@ from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.observability import NoopTraceSink
 from packages.observability.contracts import TraceSink, TraceSpan
+from packages.observability.timing import capture_timings
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +119,7 @@ class DeterministicEvaluationDriver:
         started = time.perf_counter()
         category = str(item.category)
         observation: dict[str, Any] = {
+            **observation_identity("synthetic", {"all": "expected_fixture"}),
             "category": category,
             "input_hash": canonical_json_hash(item.input),
             "variant_hash": variant.variant_hash,
@@ -124,6 +128,8 @@ class DeterministicEvaluationDriver:
             relevant = list(item.expected.get("relevant_chunk_ids", []))
             observation["candidate_chunk_ids"] = [*relevant, f"noise-{item.case_key}"]
             observation["final_chunk_ids"] = relevant
+            observation["candidate_top_k"] = 20
+            observation["final_top_k"] = 5
             observation["citation_ids"] = relevant
         elif category == "KNOWLEDGE_QA":
             observation["citation_ids"] = list(item.expected.get("citations", []))
@@ -137,6 +143,7 @@ class DeterministicEvaluationDriver:
         elif category == "NO_ANSWER":
             observation["answerable"] = False
         elif category == "APPROVAL":
+            observation["approval_required"] = item.expected.get("approval_required", True)
             observation["approval_decision"] = item.expected.get("decision")
             observation["action_executed"] = False
             observation["unauthorized_execution"] = False
@@ -228,6 +235,13 @@ class AgentRuntimeEvaluationDriver:
         item: EvaluationDatasetItem,
     ) -> PreparedCaseExecution:
         context = await self.context_factory(run)
+        if str(context.workspace_id) != str(run.workspace_id):
+            raise AgentHubError(
+                "FORBIDDEN", "The evaluation context belongs to another workspace.", 403
+            )
+        postcondition = support_condition_from_expected(
+            item.expected, workspace_id=context.workspace_id
+        )
         started = time.perf_counter()
         if item.category == "RETRIEVAL":
             if self.retriever is None or not variant.effective_knowledge_snapshots:
@@ -235,20 +249,16 @@ class AgentRuntimeEvaluationDriver:
             binding = variant.effective_knowledge_snapshots[0]
 
             async def execute_retrieval() -> CaseExecutionObservation:
-                result = await self.retriever.retrieve_with_trace(
-                    context,
-                    RetrievalQuery(
-                        text=str(item.input["query"]),
-                        knowledge_base_id=str(binding["knowledge_base_id"]),
-                        knowledge_snapshot_id=str(binding["snapshot_id"]),
-                    ),
+                query = RetrievalQuery(
+                    text=str(item.input["query"]),
+                    knowledge_base_id=str(binding["knowledge_base_id"]),
+                    knowledge_snapshot_id=str(binding["snapshot_id"]),
                 )
+                result = await self.retriever.retrieve_with_trace(context, query)
                 return CaseExecutionObservation(
-                    observation={
-                        "category": item.category,
-                        "chunk_ids": [e.chunk_id for e in result.evidence],
-                        "variant_hash": variant.variant_hash,
-                    },
+                    observation=retrieval_observation(
+                        result, query, variant_hash=variant.variant_hash
+                    ),
                     latency_ms=max(0, round((time.perf_counter() - started) * 1000)),
                 )
 
@@ -310,6 +320,7 @@ class AgentRuntimeEvaluationDriver:
                     )
                 )
             observation: dict[str, Any] = {
+                **observation_identity("runtime", {"status": "agent_run", "usage": "agent_run"}),
                 "category": item.category,
                 "agent_run_id": str(result.run_id),
                 "status": result.status,
@@ -320,6 +331,12 @@ class AgentRuntimeEvaluationDriver:
                 "output_hash": canonical_json_hash(result.final_output or ""),
                 "variant_hash": variant.variant_hash,
             }
+            if postcondition is not None:
+                async with self.agent_run_service.session_factory() as session:
+                    observation["business_outcome"] = await inspect_support_outcome(
+                        session, context, postcondition, run_id=prepared_run.id
+                    )
+                observation["field_sources"]["business_outcome"] = "workspace_scoped_ticket_query"
             # Supplementary only: the verdict carries scores, identities and hashes, never
             # the judged text, so the observation stays the safe projection it already was.
             judgement = await self.judge_answer(item, result.final_output)
@@ -343,7 +360,9 @@ class AgentRuntimeEvaluationDriver:
                 cost_currency=persisted.cost_currency if persisted else result.cost_currency,
             )
 
-        return PreparedCaseExecution(agent_run_id=prepared_run.id, execute=execute_agent)
+        return PreparedCaseExecution(
+            agent_run_id=prepared_run.id, execute=lambda: _timed_execution(execute_agent)
+        )
 
     async def execute(
         self,
@@ -354,6 +373,30 @@ class AgentRuntimeEvaluationDriver:
     ) -> CaseExecutionObservation:
         prepared = await self.prepare(run=run, variant=variant, item=item)
         return await prepared.execute()
+
+
+async def _timed_execution(
+    execute: Callable[[], Awaitable[CaseExecutionObservation]],
+) -> CaseExecutionObservation:
+    from dataclasses import replace
+
+    with capture_timings() as timing:
+        result = await execute()
+    projection = timing.projection()
+    projection["billing"]["collection_complete"] = timing.model_calls == result.observation.get(
+        "model_step_count"
+    )
+    return replace(
+        result,
+        observation={
+            **result.observation,
+            "timing": projection,
+            "field_sources": {
+                **result.observation.get("field_sources", {}),
+                "timing": "request_local_trace_span",
+            },
+        },
+    )
 
 
 def _case_input_text(item: EvaluationDatasetItem) -> str:

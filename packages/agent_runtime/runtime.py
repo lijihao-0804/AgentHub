@@ -79,6 +79,7 @@ from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCo
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.observability import NoopTraceSink
 from packages.observability.contracts import TraceSink, TraceSpan
+from packages.observability.timing import mark_visible_text, timed_span
 from packages.tools.actions import ActionExecutionStatus, ActionRuntime
 from packages.tools.contracts import ToolDefinition, ToolResult, ToolResultStatus
 from packages.tools.policy import ToolPolicy, ToolPolicyDecision
@@ -1722,6 +1723,8 @@ class _AgentRunGraph:
     async def _emit(self, event_type: AgentEventType, data: Mapping[str, Any]) -> None:
         if self.emitter is None or self.event_queue is None:
             return
+        if event_type is AgentEventType.MESSAGE_DELTA and data.get("delta"):
+            mark_visible_text()
         await _queue_event(self.event_queue, await self.emitter.emit(event_type, data))
 
     async def close_active_model_stream(self) -> None:
@@ -3097,7 +3100,7 @@ async def _safe_start_span(
     sink: TraceSink, name: str, attributes: Mapping[str, Any]
 ) -> TraceSpan | None:
     try:
-        return await sink.start_span(name, attributes)
+        return timed_span(await sink.start_span(name, attributes), name)
     except Exception:
         logger.warning("agent_trace_start_failed")
         return None

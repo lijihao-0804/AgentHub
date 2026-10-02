@@ -81,6 +81,12 @@ class _CountingDriver:
             observation={
                 "category": item.category,
                 "candidate_chunk_ids": list(item.expected.get("relevant_chunk_ids", [])),
+                "final_chunk_ids": list(item.expected.get("relevant_chunk_ids", [])),
+                "candidate_top_k": 20,
+                "final_top_k": 5,
+                "citation_ids": list(item.expected.get("relevant_chunk_ids", [])),
+                "driver_kind": "controlled",
+                "observation_schema_version": 2,
             },
             input_tokens=10,
             output_tokens=5,

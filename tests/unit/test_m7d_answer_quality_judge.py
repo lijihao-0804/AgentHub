@@ -147,7 +147,7 @@ def test_manifest_freezes_the_judge_identity() -> None:
     assert without_judge["evaluator_versions"][JUDGE_MANIFEST_KEY] == JUDGE_DISABLED_VERSION
     assert frozen_judge_version(manifest) == profile.evaluator_version
 
-    registry = EvaluatorRegistry()
+    registry = EvaluatorRegistry().for_manifest(manifest)
     registry.validate_manifest(manifest)
     registry.validate_manifest(without_judge)
 

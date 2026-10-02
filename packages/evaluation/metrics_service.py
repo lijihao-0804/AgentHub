@@ -17,6 +17,7 @@ from packages.control_plane.rbac import EVALUATION_READ, EVALUATION_RUN
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.evaluation.foundation_metrics import foundation_metrics
 from packages.evaluation.metrics import (
     EvaluatorRegistry,
     MetricAggregationKind,
@@ -68,13 +69,18 @@ class EvaluationMetricsService:
             return await self._read_snapshot(session, existing)
 
         experiment = await self._load_experiment(session, workspace_id, run.experiment_id)
-        self._validate_manifest(experiment)
-        # The judge identity frozen with the experiment decides the evaluator version of
-        # every answer_quality row written below.
-        self.registry.bind_judge_manifest(experiment.evaluator_manifest)
+        try:
+            registry = self.registry.for_manifest(experiment.evaluator_manifest)
+        except ValueError:
+            raise AgentHubError(
+                "EXPERIMENT_EVALUATOR_VERSION_MISMATCH",
+                "The persisted evaluator manifest is not compatible.",
+                409,
+            ) from None
+        service = EvaluationMetricsService(registry)
         rows = await self._load_and_validate_case_set(session, workspace_id, run, experiment)
-        output = self._metrics_output(run_id, rows)
-        metric_records = self._metric_records(workspace_id, run_id, output)
+        output = service._metrics_output(run_id, rows)
+        metric_records = service._metric_records(workspace_id, run_id, output)
         for record in metric_records:
             session.add(record)
         await session.flush()
@@ -163,6 +169,16 @@ class EvaluationMetricsService:
                 409,
             )
         await self._read_snapshot(session, snapshot)
+        try:
+            comparison_service = EvaluationMetricsService(
+                self.registry.for_manifest(snapshot.evaluator_manifest)
+            )
+        except ValueError:
+            raise AgentHubError(
+                "EXPERIMENT_EVALUATOR_VERSION_MISMATCH",
+                "The persisted evaluator manifest is not compatible.",
+                409,
+            ) from None
         baseline, candidate = await self._load_comparison_variants(
             session, workspace_id, run, baseline_variant_id, candidate_variant_id
         )
@@ -196,7 +212,7 @@ class EvaluationMetricsService:
         by_variant: dict[UUID, dict[str, EvaluationMetricResult]] = defaultdict(dict)
         for row in metric_rows:
             by_variant[row.experiment_variant_id][row.metric_name] = row
-            self._register_persisted_definition(row)
+            comparison_service._register_persisted_definition(row)
         names = sorted(
             set(by_variant[baseline_variant_id]).intersection(by_variant[candidate_variant_id])
         )
@@ -217,8 +233,8 @@ class EvaluationMetricsService:
             metrics[name] = compare_metric_values(
                 before,
                 after,
-                direction=self.registry.direction_for(name),
-                paired=await self._paired_metric_values(
+                direction=comparison_service.registry.direction_for(name),
+                paired=await comparison_service._paired_metric_values(
                     session,
                     workspace_id,
                     run_id,
@@ -389,7 +405,6 @@ class EvaluationMetricsService:
         )
         if canonical_json_hash(snapshot.evaluator_manifest) != snapshot.evaluator_manifest_hash:
             self._integrity_error("EVALUATION_METRICS_INTEGRITY_ERROR")
-        self.registry.bind_judge_manifest(snapshot.evaluator_manifest)
         run_rows = await self._case_rows(session, snapshot.workspace_id, snapshot.experiment_run_id)
         if self._case_result_set_hash(run_rows) != snapshot.case_result_set_hash:
             self._integrity_error("EVALUATION_METRICS_INTEGRITY_ERROR")
@@ -701,10 +716,7 @@ class EvaluationMetricsService:
             item_task_success = _aggregate_repetitions(
                 "task_success", by_item_metric.get((item_key, "task_success"), [])
             )
-            if (
-                item_task_success.status == MetricStatus.AVAILABLE
-                and item_task_success.value == 1
-            ):
+            if item_task_success.status == MetricStatus.AVAILABLE and item_task_success.value == 1:
                 successful_dataset_item_costs[currency].append(
                     sum(amounts, Decimal("0")) / len(amounts)
                 )
@@ -814,6 +826,19 @@ class EvaluationMetricsService:
                         "unit": "successful case execution",
                     },
                 }
+        if self.registry.version_for("RETRIEVAL") == "v2":
+            for name, metric in foundation_metrics(rows).items():
+                self.registry.register_metric_definition(
+                    name,
+                    MetricDirection.LOWER_IS_BETTER
+                    if name.startswith("effective_task_cost_") or name.endswith("_ms")
+                    else MetricDirection.HIGHER_IS_BETTER,
+                    MetricAggregationKind.COST
+                    if name.startswith("effective_task_cost_")
+                    else MetricAggregationKind.SCALAR,
+                    version="v2",
+                )
+                output[name] = metric.to_dict()
         output["cost_by_currency"] = cost_groups
         if include_categories:
             output["categories"] = {
@@ -873,6 +898,8 @@ class EvaluationMetricsService:
             metric = self.registry.evaluate(item.category, item.expected, case.observation).get(
                 metric_name
             )
+            if metric is None and self.registry.version_for("RETRIEVAL") == "v2":
+                metric = foundation_metrics([(case, item, variant)]).get(metric_name)
             if metric is not None:
                 by_item[item.id][variant.id].append(metric)
         return [

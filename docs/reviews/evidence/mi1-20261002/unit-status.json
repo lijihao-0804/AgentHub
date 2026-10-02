@@ -1,0 +1,15 @@
+{
+  "state": "completed",
+  "started_at": "2026-10-02T09:40:49.935970+00:00",
+  "cwd": "E:\\JAVA\\AI+agent\\AgentHub",
+  "executable": "E:\\JAVA\\AI+agent\\AgentHub\\.venv\\Scripts\\python.exe",
+  "argument_count": 7,
+  "supervisor_pid": 40972,
+  "pid": 34720,
+  "exit_code": 0,
+  "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\mi1-20261002\\unit-run-5\\stdout.log",
+  "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\mi1-20261002\\unit-run-5\\stderr.log",
+  "progress_query_interval_seconds": 600,
+  "finished_at": "2026-10-02T09:41:16.783007+00:00",
+  "elapsed_seconds": 26.843
+}

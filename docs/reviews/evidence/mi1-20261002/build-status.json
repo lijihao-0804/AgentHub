@@ -1,0 +1,15 @@
+{
+  "state": "completed",
+  "started_at": "2026-10-02T09:28:16.640424+00:00",
+  "cwd": "E:\\JAVA\\AI+agent\\AgentHub\\apps\\web",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "argument_count": 2,
+  "supervisor_pid": 13068,
+  "pid": 36192,
+  "exit_code": 0,
+  "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\mi1-20261002\\build-run-2\\stdout.log",
+  "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\mi1-20261002\\build-run-2\\stderr.log",
+  "progress_query_interval_seconds": 600,
+  "finished_at": "2026-10-02T09:28:43.131074+00:00",
+  "elapsed_seconds": 26.484
+}
