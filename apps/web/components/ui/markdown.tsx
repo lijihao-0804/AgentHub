@@ -5,20 +5,14 @@ import { Fragment, type ReactNode } from "react";
 /**
  * A deliberately small, dependency-free markdown renderer for model output.
  *
- * The input is never trusted: text is escaped character-for-character and the
+ * The input is never trusted: React escapes text and attributes, and the
  * result is built as React nodes, so no `dangerouslySetInnerHTML` exists on
  * the path. Supported: headings (#..###), bullet and numbered lists,
- * blockquotes, fenced code blocks (with copy), inline code, bold, italic and
+ * blockquotes, fenced code blocks, inline code, bold, italic and
  * http(s) links. Everything else renders as plain text.
  */
 
-function escapeText(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
+// React escapes text nodes and attributes; never pre-escape the input.
 
 type Token = { kind: "text" | "code" | "bold" | "italic" | "link"; value: string; href?: string };
 
@@ -68,7 +62,7 @@ function renderInline(escaped: string, keyPrefix: string): ReactNode[] {
   });
 }
 
-/** Copy button for fenced blocks; feedback is local and self-clearing. */
+/** Fenced code is rendered verbatim in a text node. */
 function CodeBlock({ code }: { code: string }) {
   return (
     <div className="md-code">
@@ -90,13 +84,13 @@ export function Markdown({ text }: { text: string }) {
 
   const flushParagraph = () => {
     if (paragraph.length === 0) return;
-    const escaped = escapeText(paragraph.join(" "));
+    const escaped = paragraph.join(" ");
     blocks.push(<p key={`p-${key++}`}>{renderInline(escaped, `p-${key}`)}</p>);
     paragraph = [];
   };
   const flushList = () => {
     if (!list) return;
-    const escapedItems = list.items.map((item) => renderInline(escapeText(item), `li-${key}`));
+    const escapedItems = list.items.map((item) => renderInline(item, `li-${key}`));
     blocks.push(
       list.ordered ? (
         <ol key={`ol-${key++}`}>{escapedItems.map((node, index) => <li key={index}>{node}</li>)}</ol>
@@ -110,7 +104,7 @@ export function Markdown({ text }: { text: string }) {
     if (quote.length === 0) return;
     blocks.push(
       <blockquote key={`q-${key++}`}>
-        {renderInline(escapeText(quote.join(" ")), `q-${key}`)}
+        {renderInline(quote.join(" "), `q-${key}`)}
       </blockquote>,
     );
     quote = [];
@@ -140,7 +134,7 @@ export function Markdown({ text }: { text: string }) {
     if (heading) {
       flushAll();
       const level = heading[1].length;
-      const content = renderInline(escapeText(heading[2]), `h-${key}`);
+      const content = renderInline(heading[2], `h-${key}`);
       blocks.push(
         level === 1 ? <h3 key={`h-${key++}`}>{content}</h3> : level === 2 ? <h4 key={`h-${key++}`}>{content}</h4> : <h5 key={`h-${key++}`}>{content}</h5>,
       );
@@ -150,7 +144,8 @@ export function Markdown({ text }: { text: string }) {
     if (bullet) {
       flushParagraph();
       flushQuote();
-      if (!list || list.ordered) list = { ordered: false, items: [] };
+      if (list?.ordered) flushList();
+      if (!list) list = { ordered: false, items: [] };
       list.items.push(bullet[1]);
       continue;
     }
@@ -158,7 +153,8 @@ export function Markdown({ text }: { text: string }) {
     if (numbered) {
       flushParagraph();
       flushQuote();
-      if (!list || !list.ordered) list = { ordered: true, items: [] };
+      if (list && !list.ordered) flushList();
+      if (!list) list = { ordered: true, items: [] };
       list.items.push(numbered[1]);
       continue;
     }

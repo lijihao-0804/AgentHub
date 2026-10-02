@@ -29,44 +29,59 @@ export default function SettingsMembersPage() {
   const [loaded, setLoaded] = useState(false);
   const [rowError, setRowError] = useState<{ scope: string; userId: string; error: ApiError } | null>(null);
   const [confirming, setConfirming] = useState<{ scope: string; userId: string } | null>(null);
+  const [removing, setRemoving] = useState(false);
   const activeSessionRef = useRef(sessionId);
   activeSessionRef.current = sessionId;
+  const generationRef = useRef(0);
 
   useEffect(() => {
     setOrgMembers([]);
     setWsMembers([]);
     setError(null);
     setLoaded(false);
+    setConfirming(null);
+    setRowError(null);
+    setRemoving(false);
+    generationRef.current += 1;
   }, [sessionId]);
 
   const refresh = useCallback(async () => {
     if (!connected) return;
     const requestSessionId = sessionId;
+    const generation = ++generationRef.current;
     setLoading(true);
     setError(null);
     try {
       const [org, ws] = await Promise.all([
-        organizationId
-          ? listOrganizationMembers(organizationId, accessToken)
+        organizationId && canManageOrg
+          ? listOrganizationMembers(organizationId, accessToken).catch((caught) => {
+              // Permissions may still be loading. An organization-only 403
+              // must not hide the workspace roster the caller can read.
+              if (toApiError(caught, "").status === 403) return [];
+              throw caught;
+            })
           : Promise.resolve([]),
         listWorkspaceMembers(workspaceId, accessToken),
       ]);
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (activeSessionRef.current !== requestSessionId || generationRef.current !== generation) return;
       setOrgMembers(org);
       setWsMembers(ws);
       setLoaded(true);
     } catch (caught) {
-      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId && generationRef.current === generation) setError(toApiError(caught, ""));
     } finally {
-      if (activeSessionRef.current === requestSessionId) setLoading(false);
+      if (activeSessionRef.current === requestSessionId && generationRef.current === generation) setLoading(false);
     }
-  }, [connected, organizationId, workspaceId, accessToken, sessionId]);
+  }, [connected, organizationId, workspaceId, accessToken, sessionId, canManageOrg]);
 
   useEffect(() => {
-    if (connected && !loaded) void refresh();
-  }, [connected, loaded, refresh]);
+    if (connected) void refresh();
+  }, [connected, refresh]);
 
   async function removeMember(scope: "org" | "workspace", targetUserId: string) {
+    if (removing || targetUserId === userId) return;
+    const requestSessionId = sessionId;
+    setRemoving(true);
     setRowError(null);
     try {
       if (scope === "org") {
@@ -74,9 +89,13 @@ export default function SettingsMembersPage() {
       } else {
         await removeWorkspaceMember(workspaceId, targetUserId, accessToken);
       }
+      if (activeSessionRef.current !== requestSessionId) return;
+      setConfirming(null);
       await refresh();
     } catch (caught) {
-      setRowError({ scope, userId: targetUserId, error: toApiError(caught, "") });
+      if (activeSessionRef.current === requestSessionId) setRowError({ scope, userId: targetUserId, error: toApiError(caught, "") });
+    } finally {
+      if (activeSessionRef.current === requestSessionId) setRemoving(false);
     }
   }
 
@@ -100,7 +119,7 @@ export default function SettingsMembersPage() {
                   confirmLabel={t("settings.members.remove")}
                   pendingLabel={t("common.loading")}
                   cancelLabel={t("common.cancel")}
-                  pending={false}
+                  pending={removing}
                   onConfirm={() => void removeMember(scope, member.user_id)}
                   onCancel={() => setConfirming(null)}
                 />
@@ -176,7 +195,7 @@ export default function SettingsMembersPage() {
             )}
           </Panel>
 
-          <Panel ariaLabel={t("settings.members.orgTitle")} title={t("settings.members.orgTitle")}>
+          {canManageOrg && <Panel ariaLabel={t("settings.members.orgTitle")} title={t("settings.members.orgTitle")}>
             {orgMembers.length === 0 ? (
               <EmptyState title={t("settings.members.empty")} />
             ) : (
@@ -193,7 +212,7 @@ export default function SettingsMembersPage() {
                 </table>
               </div>
             )}
-          </Panel>
+          </Panel>}
         </>
       )}
     </div>

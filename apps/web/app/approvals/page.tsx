@@ -45,7 +45,7 @@ function argumentEntries(approval: Approval): Array<[string, unknown]> {
 
 export default function ApprovalsPage() {
   const { t, formatDateTime, formatDurationMs } = useI18n();
-  const { workspaceId, accessToken, connected, permissions } = useFrontendSession();
+  const { workspaceId, accessToken, connected, permissions, sessionId } = useFrontendSession();
   const cannotDecide = permissions !== null && !permissions.includes("approve_action");
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
@@ -63,6 +63,22 @@ export default function ApprovalsPage() {
   const [total, setTotal] = useState<number | null>(null);
   /** Generation of the list request; a stale workspace's response never lands. */
   const generationRef = useRef(0);
+  const activeSessionRef = useRef(sessionId);
+  activeSessionRef.current = sessionId;
+  useEffect(() => {
+    generationRef.current += 1;
+    pagedRef.current = false;
+    setApprovals([]);
+    setTotal(null);
+    setLoaded(false);
+    setLoading(false);
+    setError(null);
+    setDecisionState(null);
+    setDecisionError(null);
+    setDenyPromptId(null);
+    setDenyReason("");
+    setLastDecisionId(null);
+  }, [sessionId]);
   /** True once the user paged past the first page; polling then pauses so a
    * refresh never collapses an expanded list back to page one. */
   const pagedRef = useRef(false);
@@ -88,6 +104,7 @@ export default function ApprovalsPage() {
   const refresh = useCallback(async () => {
     if (!connected) return;
     const generation = (generationRef.current += 1);
+    const requestSessionId = sessionId;
     setError(null);
     setLoading(true);
     try {
@@ -96,22 +113,23 @@ export default function ApprovalsPage() {
         limit: PAGE_SIZE,
         offset: 0,
       });
-      if (generationRef.current !== generation) return;
+      if (generationRef.current !== generation || activeSessionRef.current !== requestSessionId) return;
       pagedRef.current = false;
       setApprovals(page.items);
       setTotal(page.total);
       setLoaded(true);
     } catch (caught) {
-      if (generationRef.current !== generation) return;
+      if (generationRef.current !== generation || activeSessionRef.current !== requestSessionId) return;
       setError(toApiError(caught, ""));
     } finally {
-      if (generationRef.current === generation) setLoading(false);
+      if (generationRef.current === generation && activeSessionRef.current === requestSessionId) setLoading(false);
     }
-  }, [connected, workspaceId, accessToken, decisionTab]);
+  }, [connected, workspaceId, accessToken, decisionTab, sessionId]);
 
   const loadMore = useCallback(async () => {
     if (!connected) return;
     const generation = (generationRef.current += 1);
+    const requestSessionId = sessionId;
     setError(null);
     setLoading(true);
     try {
@@ -120,18 +138,18 @@ export default function ApprovalsPage() {
         limit: PAGE_SIZE,
         offset: approvals.length,
       });
-      if (generationRef.current !== generation) return;
+      if (generationRef.current !== generation || activeSessionRef.current !== requestSessionId) return;
       pagedRef.current = true;
       setApprovals((current) => [...current, ...page.items]);
       setTotal(page.total);
       setLoaded(true);
     } catch (caught) {
-      if (generationRef.current !== generation) return;
+      if (generationRef.current !== generation || activeSessionRef.current !== requestSessionId) return;
       setError(toApiError(caught, ""));
     } finally {
-      if (generationRef.current === generation) setLoading(false);
+      if (generationRef.current === generation && activeSessionRef.current === requestSessionId) setLoading(false);
     }
-  }, [connected, workspaceId, accessToken, decisionTab, approvals.length]);
+  }, [connected, workspaceId, accessToken, decisionTab, approvals.length, sessionId]);
 
   function switchDecisionTab(tab: "PENDING" | "ALL") {
     if (tab === decisionTab) return;
@@ -174,9 +192,10 @@ export default function ApprovalsPage() {
     setLastDecisionId(null);
     setDecisionState({ approvalId, decision });
     const requestWorkspace = workspaceRef.current;
+    const requestSessionId = sessionId;
     try {
       const result = await decideApproval(workspaceId, approvalId, decision, accessToken, { reason });
-      if (workspaceRef.current !== requestWorkspace) return;
+      if (workspaceRef.current !== requestWorkspace || activeSessionRef.current !== requestSessionId) return;
       // An inbox poll that started before this decision must not overwrite its
       // result with the old PENDING row.
       generationRef.current += 1;
@@ -186,11 +205,11 @@ export default function ApprovalsPage() {
       );
       setLastDecisionId(approvalId);
     } catch (caught) {
-      if (workspaceRef.current !== requestWorkspace) return;
+      if (workspaceRef.current !== requestWorkspace || activeSessionRef.current !== requestSessionId) return;
       const apiError = toApiError(caught, "");
       setDecisionError({ approvalId, error: apiError });
     } finally {
-      if (workspaceRef.current === requestWorkspace) setDecisionState(null);
+      if (workspaceRef.current === requestWorkspace && activeSessionRef.current === requestSessionId) setDecisionState(null);
     }
   }
 

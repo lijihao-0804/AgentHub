@@ -14,6 +14,8 @@ import type { ThreadKind } from "@/lib/api/threads";
 export type AppThreadCopy = {
   /** The routing label written on threads this application creates. */
   kind: ThreadKind;
+  /** When present, both listing and creation belong to this agent only. */
+  agentId?: string;
   /** Where the list page lives; a thread is `${basePath}/${id}`. */
   basePath: string;
   eyebrow: MessageKey;

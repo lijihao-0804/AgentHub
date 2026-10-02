@@ -68,7 +68,7 @@
 
 ## 执行记录（2026-10-01 归档）
 
-**全部四批完成。** 验证：`pytest -m "not integration"` 全绿；ruff 全部通过；`tsc --noEmit` 0 错误；`next build` 成功（27 页，含新增多轮对话路由）；集成测试在全新 `agenthub_test` 库（含 checkpoint bootstrap）**189 用例 0 失败 / 4 环境跳过**。
+**四批本轮实现已交付；原计划部分验收项尚未完成。** 验证：`pytest -m "not integration"` 全绿；ruff 全部通过；`tsc --noEmit` 0 错误；`next build` 成功（27 页，含新增多轮对话路由）；集成测试在全新 `agenthub_test` 库（含 checkpoint bootstrap）**189 用例 0 失败 / 4 环境跳过**。
 
 各批提交：T04 `3b08e0a`、T05 `2b7cf18`、T06 `caeb844`、T07 `46f42a3`、T08/09 `faeb290`、T10 `a3d2a10`、T11 `aedad53`、T12 `8ce27d4`、T13-15 `1e683d3`、T16/17 `8057c6b`、T18 `8c5364f`、T19 `6a81049`、T20 `ed1990b`、T21 `a7cbd1f`、T22 `893daed`、T23 `a4af155`、T24 `7fd902e`（净删 780 行）、T33 `974ce4f`、T31 `c903e6f`、T26 `0d5c820`、T27 `7a95dd1`、T28 `7b06894`、T32 `700effa`、T30 `a8c6713`、T25 `163a2a9`、T29 `f9c97ce`、归档 `c41bc18` 后续。
 
@@ -87,3 +87,8 @@
 ### 已知抖动
 
 `test_m3c_indexing.py::test_qdrant_unavailable_keeps_indexing_retryable_then_recovers` 为对账重入队时序敏感用例：全套件偶发因窗口内重入队次数漂移而失败，全新库重跑即通过（本轮终验即如此）。与本轮改动无关（涉及文件未触碰）。
+
+
+## 2026-10-02 复审校正
+
+详见 `AgentHub-最新迭代复审-20261002.md`。上方勾选代表本轮实现已交付；T12 快照分片预览、T25 每轮参数覆盖、T26 新建派生草稿及关系持久化、T28 代码块复制、T29 完整双轴布局与窗口汇总、T31 工具入参、T32 handoff 生命周期、T30 邀请与角色修改仍未实现。不能据勾选宣称原计划全部验收标准已达成。复审发现的 8 组缺陷已修复并验证。

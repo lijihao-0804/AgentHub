@@ -14,6 +14,7 @@ export default function AgentChatPageClient({ agentId }: { agentId: string }) {
   const copy = useMemo<AppThreadCopy>(
     () => ({
       kind: "general",
+      agentId,
       basePath: `/agents/${agentId}/chat`,
       eyebrow: "agents.chat.eyebrow",
       title: "agents.chat.title",
