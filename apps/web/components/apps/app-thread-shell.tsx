@@ -11,7 +11,7 @@ import { InlineConfirm } from "@/components/evaluation/hash-value";
 import { ErrorState, InlineError, LoadingState, SessionRequired } from "@/components/ui/states";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation, type WorkspaceQuery } from "@/hooks/use-workspace-data";
-import { errorHintKey, type AuthInput } from "@/lib/api/client";
+import { ApiError, errorHintKey, type AuthInput } from "@/lib/api/client";
 import { listThreadArtifacts, type Artifact } from "@/lib/api/artifacts";
 import {
   deleteThread,
@@ -59,10 +59,16 @@ export default function AppThreadShell({
 
   const scope = `${copy.basePath}:${workspaceId}:${threadId}`;
 
-  const loadThread = useCallback((auth: AuthInput) => getThread(auth, threadId), [threadId]);
+  const loadThread = useCallback(async (auth: AuthInput) => {
+    const result = await getThread(auth, threadId);
+    if (copy.agentId && (result.agent_id !== copy.agentId || result.kind !== copy.kind)) {
+      throw new ApiError("THREAD_NOT_FOUND", "The thread was not found for this agent.", 404);
+    }
+    return result;
+  }, [threadId, copy.agentId, copy.kind]);
   const loadThreadList = useCallback(
-    (auth: AuthInput) => listThreads(auth, { kind: copy.kind, limit: 50 }),
-    [copy.kind],
+    (auth: AuthInput) => listThreads(auth, { kind: copy.kind, agentId: copy.agentId, limit: 50 }),
+    [copy.kind, copy.agentId],
   );
   const loadTurns = useCallback((auth: AuthInput) => listThreadTurns(auth, threadId), [threadId]);
   const loadArtifacts = useCallback(
@@ -271,8 +277,8 @@ export default function AppThreadShell({
           </div>
         </section>
 
-        <AppConversationPane threadId={threadId} turns={turns} onTurnCompleted={onTurnCompleted} />
-        {children({ threadId, thread: current, artifacts, turns })}
+        {current && <AppConversationPane key={`${sessionId}:${threadId}`} threadId={threadId} turns={turns} onTurnCompleted={onTurnCompleted} />}
+        {current && children({ threadId, thread: current, artifacts, turns })}
       </div>
     </div>
   );

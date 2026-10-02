@@ -59,8 +59,11 @@ export default function EvaluationExperimentsPage() {
   const activeSessionRef = useRef(sessionId);
   const versionsRequestGenerationRef = useRef(0);
   activeSessionRef.current = sessionId;
+  const listGenerationRef = useRef(0);
 
   useEffect(() => {
+    listGenerationRef.current += 1;
+    setLoadingMore(false);
     setExperiments([]);
     setExtraPages([]);
     setExperimentTotal(null);
@@ -90,38 +93,43 @@ export default function EvaluationExperimentsPage() {
   const input = { workspaceId, accessToken };
 
   const loadMore = useCallback(async () => {
-    if (!connected || loadingMore) return;
+    if (!connected || loading || loadingMore) return;
+    const requestSessionId = sessionId;
+    const generation = ++listGenerationRef.current;
     setLoadingMore(true);
     try {
-      const offset = experiments.length;
+      const offset = experiments.length + extraPages.flat().length;
       const page = await listExperiments(input, { limit: 50, offset });
+      if (activeSessionRef.current !== requestSessionId || listGenerationRef.current !== generation) return;
       setExtraPages((current) => [...current, page.items]);
       setExperimentTotal(page.total);
-      if (page.items.length < 50) setHasMore(false);
-    } catch {
-      // A failed page keeps the visible list untouched.
+      setHasMore(page.items.length === 50 && offset + page.items.length < page.total);
+    } catch (caught) {
+      if (activeSessionRef.current === requestSessionId && listGenerationRef.current === generation) setError(toApiError(caught, ""));
     } finally {
-      setLoadingMore(false);
+      if (activeSessionRef.current === requestSessionId && listGenerationRef.current === generation) setLoadingMore(false);
     }
-  }, [connected, experiments.length, loadingMore, input]);
+  }, [connected, experiments.length, extraPages, loading, loadingMore, workspaceId, accessToken, sessionId]);
 
   const refresh = useCallback(async () => {
     setError(null);
     if (!connected) return;
     const requestSessionId = sessionId;
+    const generation = ++listGenerationRef.current;
+    setLoadingMore(false);
     setLoading(true);
     try {
       const page = await listExperiments(input, { limit: 50 });
-      if (activeSessionRef.current !== requestSessionId) return;
+      if (activeSessionRef.current !== requestSessionId || listGenerationRef.current !== generation) return;
       setExperiments(page.items);
       setExperimentTotal(page.total);
       setExtraPages([]);
-      setHasMore(true);
+      setHasMore(page.items.length < page.total);
       setLoaded(true);
     } catch (caught) {
-      if (activeSessionRef.current === requestSessionId) setError(toApiError(caught, ""));
+      if (activeSessionRef.current === requestSessionId && listGenerationRef.current === generation) setError(toApiError(caught, ""));
     } finally {
-      if (activeSessionRef.current === requestSessionId) setLoading(false);
+      if (activeSessionRef.current === requestSessionId && listGenerationRef.current === generation) setLoading(false);
     }
   }, [connected, workspaceId, accessToken, sessionId]);
 
@@ -406,7 +414,7 @@ export default function EvaluationExperimentsPage() {
               type="button"
               className="button button-ghost"
               onClick={() => void loadMore()}
-              disabled={loadingMore}
+              disabled={loading || loadingMore}
             >
               {loadingMore ? t("common.loading") : t("evaluation.experiments.loadMore")}
             </button>

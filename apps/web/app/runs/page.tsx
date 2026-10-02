@@ -97,6 +97,7 @@ export default function RunsPage() {
     if (urlStatus || urlVersion) {
       setStatus(urlStatus);
       setAgentVersionId(urlVersion);
+      setSelectedVersionId(urlVersion);
     }
     setUrlFilters({ status: urlStatus, agentVersionId: urlVersion });
   }, []);
@@ -150,12 +151,6 @@ export default function RunsPage() {
       cancelled = true;
     };
   }, [connected, workspaceId, accessToken, selectedAgentId]);
-
-  // A deep-linked version id has to show up as the picked option even before
-  // the agent behind it is known.
-  useEffect(() => {
-    if (agentVersionId && !selectedVersionId) setSelectedVersionId(agentVersionId);
-  }, [agentVersionId, selectedVersionId]);
 
   // Runs in flight go stale fast: poll page one while any visible row is
   // active and the tab is visible. Paging deeper pauses the poll so a refresh

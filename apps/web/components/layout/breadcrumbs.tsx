@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fragment, useLayoutEffect, useMemo, useState } from "react";
+import { Fragment, useLayoutEffect, useMemo, useState, useRef } from "react";
 
 import { useI18n } from "@/i18n/provider";
 import type { MessageKey } from "@/i18n/messages";
@@ -110,9 +110,17 @@ export function AutoBreadcrumbs() {
   const { t } = useI18n();
   const items = useMemo(() => autoBreadcrumbs(pathname, t), [pathname, t]);
   const [pageOwnsTrail, setPageOwnsTrail] = useState(true);
+  const fallbackRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
-    setPageOwnsTrail(Boolean(document.querySelector("main .breadcrumbs")));
+    const update = () => setPageOwnsTrail(
+      [...document.querySelectorAll("main .breadcrumbs")].some((trail) => !fallbackRef.current?.contains(trail)),
+    );
+    update();
+    const main = document.querySelector("main");
+    const observer = new MutationObserver(update);
+    if (main) observer.observe(main, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [pathname]);
   if (items === null || pageOwnsTrail) return null;
-  return <Breadcrumbs items={items} />;
+  return <div ref={fallbackRef}><Breadcrumbs items={items} /></div>;
 }

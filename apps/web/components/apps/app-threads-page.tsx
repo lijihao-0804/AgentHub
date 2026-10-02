@@ -70,14 +70,17 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
 
   const loadSummaries = useCallback(
     async (auth: AuthInput, offset = 0): Promise<ThreadSummary[]> => {
-      const threads = await listThreads(auth, { kind: copy.kind, limit: THREAD_PAGE_SIZE, offset });
+      const threads = await listThreads(auth, { kind: copy.kind, agentId: copy.agentId, limit: THREAD_PAGE_SIZE, offset });
       return Promise.all(threads.map((thread) => summarize(auth, thread)));
     },
-    [copy.kind, summarize],
+    [copy.kind, copy.agentId, summarize],
   );
   const loadAgentList = useCallback((auth: AuthInput) => listAgents(auth), []);
 
   const scope = `${copy.basePath}:${workspaceId}`;
+  const activePageRef = useRef({ sessionId, scope, generation: 0 });
+  activePageRef.current.sessionId = sessionId;
+  activePageRef.current.scope = scope;
   const threads = useWorkspaceData<ThreadSummary[]>(loadSummaries, `app-threads:${scope}`);
   const agents = useWorkspaceData<Agent[]>(loadAgentList, `agents:${workspaceId}`);
   const mutation = useWorkspaceMutation(`app-threads:${scope}`);
@@ -88,24 +91,30 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   useEffect(() => {
+    activePageRef.current.generation += 1;
     setExtraPages([]);
     setHasMore(true);
-  }, [threads.data]);
+    setLoadingMore(false);
+  }, [threads.data, sessionId, scope]);
 
   const loadMore = useCallback(async () => {
     if (!connected || !accessToken || loadingMore) return;
+    const requestSessionId = sessionId;
+    const generation = ++activePageRef.current.generation;
+    const isCurrent = () => activePageRef.current.sessionId === requestSessionId && activePageRef.current.scope === scope && activePageRef.current.generation === generation;
     setLoadingMore(true);
     try {
       const offset = (threads.data?.length ?? 0) + extraPages.flat().length;
       const more = await loadSummaries({ workspaceId, accessToken }, offset);
+      if (!isCurrent()) return;
       setExtraPages((current) => [...current, more]);
       if (more.length < THREAD_PAGE_SIZE) setHasMore(false);
     } catch {
       // A failed page keeps the visible list untouched; the button stays.
     } finally {
-      setLoadingMore(false);
+      if (isCurrent()) setLoadingMore(false);
     }
-  }, [connected, accessToken, loadingMore, threads.data, extraPages, loadSummaries, workspaceId]);
+  }, [connected, accessToken, loadingMore, threads.data, extraPages, loadSummaries, workspaceId, sessionId, scope]);
 
   const [showForm, setShowForm] = useState(false);
   const [agentId, setAgentId] = useState("");
@@ -114,9 +123,9 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
   // A session or workspace change invalidates the half-filled form.
   useEffect(() => {
     setShowForm(false);
-    setAgentId("");
+    setAgentId(copy.agentId ?? "");
     setTitle("");
-  }, [sessionId]);
+  }, [sessionId, copy.agentId]);
 
   if (!connected) {
     return (
@@ -131,7 +140,7 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
     );
   }
 
-  const agentList = agents.data ?? [];
+  const agentList = (agents.data ?? []).filter((agent) => !copy.agentId || agent.id === copy.agentId);
   // First page plus whatever the user paged in; dedupe by id in case a new
   // thread shifted a row across a page boundary between fetches.
   const seen = new Set<string>();
@@ -145,7 +154,7 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const created = await mutation.run((auth) =>
-      createThread(auth, agentId, { title: title.trim(), kind: copy.kind }),
+      createThread(auth, copy.agentId ?? agentId, { title: title.trim(), kind: copy.kind }),
     );
     if (created) {
       setShowForm(false);
@@ -199,7 +208,7 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
             <div className="form-grid">
               <label>
                 {t("appThread.agent")}
-                <select value={agentId} onChange={(event) => setAgentId(event.target.value)}>
+                <select value={copy.agentId ?? agentId} disabled={Boolean(copy.agentId)} onChange={(event) => setAgentId(event.target.value)}>
                   <option value="">{t("appThread.selectAgent")}</option>
                   {agentList.map((agent) => (
                     <option value={agent.id} key={agent.id}>
