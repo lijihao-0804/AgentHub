@@ -156,6 +156,7 @@ async def prepare(source_plan: Path, output: Path):
             versions = []
             for ordinal, strategy in enumerate(("DENSE", "HYBRID_RERANK")):
                 spec = json.loads(json.dumps(old_version.resolved_spec))
+                spec["spec_schema_version"] = 2
                 spec["agent_id"] = str(agent.id)
                 spec["model"].update(profile_id=str(profile.id), credential_ref=str(credential.id))
                 spec["prompt"] = {"prompt_version": 1, "system_prompt": PROMPT}
@@ -195,7 +196,7 @@ async def prepare(source_plan: Path, output: Path):
                     workspace_id=UUID(context.workspace_id),
                     agent_id=agent.id,
                     version_number=ordinal + 1,
-                    spec_schema_version=1,
+                    spec_schema_version=2,
                     resolved_spec=spec,
                     resolved_spec_hash=canonical_json_hash(spec),
                     created_by=UUID(context.user_id),
@@ -466,6 +467,7 @@ async def execute(plan: Path, output: Path):
 
 async def preflight(plan: Path):
     """Controlled model, actual retrieval and mandatory context admission; zero paid calls."""
+    from packages.evaluation.models import EvaluationExperimentVariant
     from packages.model_gateway.contracts import ModelResponse, ModelToolCall
 
     assert_committed_code()
@@ -519,6 +521,14 @@ async def preflight(plan: Path):
     try:
         context = await context_for(factory, UUID(frozen["user_id"]), UUID(frozen["workspace_id"]))
         async with factory() as session:
+            experiment_run = await session.get(EvaluationExperimentRun, UUID(frozen["run_id"]))
+            variants = list(
+                await session.scalars(
+                    select(EvaluationExperimentVariant).where(
+                        EvaluationExperimentVariant.experiment_id == experiment_run.experiment_id
+                    )
+                )
+            )
             items = list(
                 await session.scalars(
                     select(EvaluationDatasetItem).where(
@@ -527,12 +537,18 @@ async def preflight(plan: Path):
                     )
                 )
             )
-        for version_id in frozen["agent_version_ids"]:
+
+        async def contexts(run):
+            return await context_for(factory, run.created_by, run.workspace_id)
+
+        driver = RagDriver(runtime, contexts, recording)
+        for variant in variants:
+            version_id = str(variant.agent_version_id)
             for item in items:
                 start = len(recording.records)
-                result = await runtime.run(
-                    context, agent_version_id=UUID(version_id), input_text=item.input["question"]
-                )
+                prepared = await driver.prepare(run=experiment_run, variant=variant, item=item)
+                observed = await prepared.execute()
+                result = await runtime.get_run(context, observed.agent_run_id)
                 actual = recording.records[start:]
                 report["cases"].append(
                     {
