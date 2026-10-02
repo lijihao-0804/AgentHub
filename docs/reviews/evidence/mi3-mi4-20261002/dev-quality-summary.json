@@ -1,0 +1,179 @@
+{
+  "formal_experiment": false,
+  "reviewer_kind": "assistant",
+  "source_reports": [
+    "live-dev-registration.json",
+    "live-dev-registration-remaining.json"
+  ],
+  "dataset_hash": "bf611d22e5a20fa28aa1d9186e0be120ebee84a6c8684deea214a4faa7b93ca3",
+  "agent_version_id": "f387e756-82b6-4538-b307-8094f97400bc",
+  "resolved_spec_hash": "d5767e066b2f3ebdc300c5c5a7314a142a41d0a4149c708398d80bd5c052728c",
+  "observation_count": 120,
+  "planned_case_count": 40,
+  "metrics": {
+    "registration": {
+      "all_3_trials_success_rate": {
+        "name": "all_3_trials_success_rate",
+        "status": "AVAILABLE",
+        "value": 0.95,
+        "sample_count": 40,
+        "numerator": 38,
+        "denominator": 40,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_task_count": 40,
+          "complete_task_count": 40,
+          "incomplete_task_count": 0,
+          "all_planned_trials_present": true
+        }
+      },
+      "business_trial_success_rate": {
+        "name": "business_trial_success_rate",
+        "status": "AVAILABLE",
+        "value": 0.9666666666666667,
+        "sample_count": 120,
+        "numerator": 116,
+        "denominator": 120,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "unknown_count": 0
+        }
+      },
+      "all_trial_latency_p50_ms": {
+        "name": "all_trial_latency_p50_ms",
+        "status": "AVAILABLE",
+        "value": 1687.811799987685,
+        "sample_count": 120,
+        "numerator": null,
+        "denominator": null,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_trial_count": 120
+        }
+      },
+      "all_trial_latency_p95_ms": {
+        "name": "all_trial_latency_p95_ms",
+        "status": "AVAILABLE",
+        "value": 5690.2684849948855,
+        "sample_count": 120,
+        "numerator": null,
+        "denominator": null,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_trial_count": 120
+        }
+      },
+      "successful_trial_latency_p50_ms": {
+        "name": "successful_trial_latency_p50_ms",
+        "status": "AVAILABLE",
+        "value": 1710.599749989342,
+        "sample_count": 116,
+        "numerator": null,
+        "denominator": null,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_trial_count": 120
+        }
+      },
+      "successful_trial_latency_p95_ms": {
+        "name": "successful_trial_latency_p95_ms",
+        "status": "AVAILABLE",
+        "value": 5707.307624994428,
+        "sample_count": 116,
+        "numerator": null,
+        "denominator": null,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_trial_count": 120
+        }
+      },
+      "correct_refusal_rate": {
+        "name": "correct_refusal_rate",
+        "status": "AVAILABLE",
+        "value": 1.0,
+        "sample_count": 24,
+        "numerator": 24,
+        "denominator": 24,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "unknown_count": 0,
+          "missing_answer_label_case_count": 16
+        }
+      },
+      "incorrect_refusal_rate": {
+        "name": "incorrect_refusal_rate",
+        "status": "AVAILABLE",
+        "value": 0.0,
+        "sample_count": 48,
+        "numerator": 0,
+        "denominator": 48,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "unknown_count": 0,
+          "missing_answer_label_case_count": 16
+        }
+      }
+    }
+  },
+  "refusal_scope": "informational single/multi-fact and unanswerable tasks only",
+  "Q04": {
+    "status": "NOT_AVAILABLE",
+    "reason": "inline policies, no citation evidence identities"
+  },
+  "Q05": {
+    "status": "NOT_AVAILABLE",
+    "reason": "whole-output claim enumeration not frozen"
+  },
+  "Q08": {
+    "status": "NOT_AVAILABLE",
+    "reason": "no_independent_human_labels"
+  },
+  "P01": {
+    "status": "NOT_AVAILABLE",
+    "reason": "non-streaming execution"
+  },
+  "C01": {
+    "currency": "CNY",
+    "known_variant_cost_upper_estimate": "0.876402",
+    "business_successes": 116,
+    "effective_task_cost_upper_estimate": "0.007555189655172413793103448276",
+    "includes": "all calls in both partial and remaining reports, including failed quality trials"
+  },
+  "C02": {
+    "known_usage_attempts": 240,
+    "known_price_attempts": 240,
+    "recorded_attempts": 240,
+    "scope": "this fixed variant only"
+  },
+  "failures": [
+    {
+      "case_id": "delivery-single_hop",
+      "repetition": 0,
+      "reason": "将查询配送记录升级成登记工单前置；政策仅要求业务办理前核验。"
+    },
+    {
+      "case_id": "delivery-single_hop",
+      "repetition": 1,
+      "reason": "将查询配送记录升级成登记工单前置；政策仅要求业务办理前核验。"
+    },
+    {
+      "case_id": "delivery-single_hop",
+      "repetition": 2,
+      "reason": "将查询配送记录升级成登记工单前置；政策仅要求业务办理前核验。"
+    },
+    {
+      "case_id": "delivery-clarification",
+      "repetition": 1,
+      "reason": "上一轮已说明配送延误，答复仍称未说明诉求类型；与对话记录冲突。"
+    }
+  ],
+  "scope": "DEV trial with assistant review; not independent human benchmark or formal release gate"
+}

@@ -1,0 +1,2172 @@
+{
+  "schema_version": 1,
+  "dataset_version": "support-assistant-reviewed-v3",
+  "status": "ASSISTANT_REVIEWED_SOURCE",
+  "data_origin": "local_fictional_authored",
+  "sources": [
+    {
+      "source_id": "fictional-policy-refund-v1",
+      "source_group": "refund",
+      "text": "本条为虚构测试政策，仅适用于退款申请。处理窗口为30 天，办理前必须人工审核。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-warranty-v1",
+      "source_group": "warranty",
+      "text": "本条为虚构测试政策，仅适用于保修申请。处理窗口为12 个月，办理前必须登记产品序列号。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-delivery-v1",
+      "source_group": "delivery",
+      "text": "本条为虚构测试政策，仅适用于配送延误。处理窗口为3 个工作日，办理前必须查询配送记录。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-cancel-v1",
+      "source_group": "cancel",
+      "text": "本条为虚构测试政策，仅适用于取消订单。处理窗口为发货前，办理前必须核对订单状态。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-account-v1",
+      "source_group": "account",
+      "text": "本条为虚构测试政策，仅适用于账户解锁。处理窗口为24 小时，办理前必须核验账户归属。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-billing-v1",
+      "source_group": "billing",
+      "text": "本条为虚构测试政策，仅适用于重复扣费。处理窗口为7 天，办理前必须核对两笔账单编号。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-return-v1",
+      "source_group": "return",
+      "text": "本条为虚构测试政策，仅适用于退货申请。处理窗口为14 天，办理前必须核对商品完整性。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-subscription-v1",
+      "source_group": "subscription",
+      "text": "本条为虚构测试政策，仅适用于订阅变更。处理窗口为下个账期，办理前必须核对当前套餐。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-invoice-v1",
+      "source_group": "invoice",
+      "text": "本条为虚构测试政策，仅适用于发票更正。处理窗口为10 个工作日，办理前必须核对开票信息。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-repair-v1",
+      "source_group": "repair",
+      "text": "本条为虚构测试政策，仅适用于维修预约。处理窗口为5 个工作日，办理前必须登记故障描述。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-replacement-v1",
+      "source_group": "replacement",
+      "text": "本条为虚构测试政策，仅适用于换货申请。处理窗口为21 天，办理前必须核对库存。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    },
+    {
+      "source_id": "fictional-policy-privacy-v1",
+      "source_group": "privacy",
+      "text": "本条为虚构测试政策，仅适用于隐私请求。处理窗口为15 个工作日，办理前必须核验请求者身份。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "refund-single_hop",
+      "source_group": "refund",
+      "template_group": "direct-single_hop",
+      "split": "DEV",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-refund-v1"
+      ],
+      "user_turns": [
+        "退款申请的处理窗口是什么？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "30 天",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "30 天",
+        "business_prerequisite": "人工审核",
+        "accepted_for_development": true,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "refund-multi_hop",
+      "source_group": "refund",
+      "template_group": "direct-multi_hop",
+      "split": "DEV",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-refund-v1"
+      ],
+      "user_turns": [
+        "退款申请在办理前有什么要求？能否直接说已办好？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先人工审核，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "30 天",
+        "business_prerequisite": "人工审核",
+        "accepted_for_development": true,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "refund-unanswerable",
+      "source_group": "refund",
+      "template_group": "direct-unanswerable",
+      "split": "DEV",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-refund-v1"
+      ],
+      "user_turns": [
+        "退款申请需要支付多少手续费？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "30 天",
+        "business_prerequisite": "人工审核",
+        "accepted_for_development": true,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "refund-clarification",
+      "source_group": "refund",
+      "template_group": "direct-clarification",
+      "split": "DEV",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-refund-v1"
+      ],
+      "user_turns": [
+        "请帮我处理退款申请。",
+        "我的客户编号是 fixture_customer_ref。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；人工审核，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "30 天",
+        "business_prerequisite": "人工审核",
+        "accepted_for_development": true,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "refund-approval_denied",
+      "source_group": "refund",
+      "template_group": "direct-approval_denied",
+      "split": "DEV",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-refund-v1"
+      ],
+      "user_turns": [
+        "客户 fixture_customer_ref 想申请退款申请，请登记工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "30 天",
+        "business_prerequisite": "人工审核",
+        "accepted_for_development": true,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "warranty-single_hop",
+      "source_group": "warranty",
+      "template_group": "direct-single_hop",
+      "split": "DEV",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-warranty-v1"
+      ],
+      "user_turns": [
+        "保修申请的处理窗口是什么？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "12 个月",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "12 个月",
+        "business_prerequisite": "登记产品序列号",
+        "accepted_for_development": true,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "warranty-multi_hop",
+      "source_group": "warranty",
+      "template_group": "direct-multi_hop",
+      "split": "DEV",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-warranty-v1"
+      ],
+      "user_turns": [
+        "保修申请在办理前有什么要求？能否直接说已办好？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先登记产品序列号，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "12 个月",
+        "business_prerequisite": "登记产品序列号",
+        "accepted_for_development": true,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "warranty-unanswerable",
+      "source_group": "warranty",
+      "template_group": "direct-unanswerable",
+      "split": "DEV",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-warranty-v1"
+      ],
+      "user_turns": [
+        "保修申请需要支付多少手续费？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "12 个月",
+        "business_prerequisite": "登记产品序列号",
+        "accepted_for_development": true,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "warranty-clarification",
+      "source_group": "warranty",
+      "template_group": "direct-clarification",
+      "split": "DEV",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-warranty-v1"
+      ],
+      "user_turns": [
+        "请帮我处理保修申请。",
+        "我的客户编号是 fixture_customer_ref。产品序列号为 SYNTH-SN-001，故障为无法启动，请登记待处理工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；登记产品序列号，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "12 个月",
+        "business_prerequisite": "登记产品序列号",
+        "accepted_for_development": true,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "warranty-approval_denied",
+      "source_group": "warranty",
+      "template_group": "direct-approval_denied",
+      "split": "DEV",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-warranty-v1"
+      ],
+      "user_turns": [
+        "客户 fixture_customer_ref 想申请保修申请，请登记工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "12 个月",
+        "business_prerequisite": "登记产品序列号",
+        "accepted_for_development": true,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "delivery-single_hop",
+      "source_group": "delivery",
+      "template_group": "direct-single_hop",
+      "split": "DEV",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-delivery-v1"
+      ],
+      "user_turns": [
+        "配送延误的处理窗口是什么？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "3 个工作日",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "3 个工作日",
+        "business_prerequisite": "查询配送记录",
+        "accepted_for_development": true,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "delivery-multi_hop",
+      "source_group": "delivery",
+      "template_group": "direct-multi_hop",
+      "split": "DEV",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-delivery-v1"
+      ],
+      "user_turns": [
+        "配送延误在办理前有什么要求？能否直接说已办好？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先查询配送记录，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "3 个工作日",
+        "business_prerequisite": "查询配送记录",
+        "accepted_for_development": true,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "delivery-unanswerable",
+      "source_group": "delivery",
+      "template_group": "direct-unanswerable",
+      "split": "DEV",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-delivery-v1"
+      ],
+      "user_turns": [
+        "配送延误需要支付多少手续费？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "3 个工作日",
+        "business_prerequisite": "查询配送记录",
+        "accepted_for_development": true,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "delivery-clarification",
+      "source_group": "delivery",
+      "template_group": "direct-clarification",
+      "split": "DEV",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-delivery-v1"
+      ],
+      "user_turns": [
+        "请帮我处理配送延误。",
+        "我的客户编号是 fixture_customer_ref。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；查询配送记录，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "3 个工作日",
+        "business_prerequisite": "查询配送记录",
+        "accepted_for_development": true,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "delivery-approval_denied",
+      "source_group": "delivery",
+      "template_group": "direct-approval_denied",
+      "split": "DEV",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-delivery-v1"
+      ],
+      "user_turns": [
+        "客户 fixture_customer_ref 想申请配送延误，请登记工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "3 个工作日",
+        "business_prerequisite": "查询配送记录",
+        "accepted_for_development": true,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "cancel-single_hop",
+      "source_group": "cancel",
+      "template_group": "direct-single_hop",
+      "split": "DEV",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-cancel-v1"
+      ],
+      "user_turns": [
+        "取消订单的处理窗口是什么？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "发货前",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "发货前",
+        "business_prerequisite": "核对订单状态",
+        "accepted_for_development": true,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "cancel-multi_hop",
+      "source_group": "cancel",
+      "template_group": "direct-multi_hop",
+      "split": "DEV",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-cancel-v1"
+      ],
+      "user_turns": [
+        "取消订单在办理前有什么要求？能否直接说已办好？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先核对订单状态，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "发货前",
+        "business_prerequisite": "核对订单状态",
+        "accepted_for_development": true,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "cancel-unanswerable",
+      "source_group": "cancel",
+      "template_group": "direct-unanswerable",
+      "split": "DEV",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-cancel-v1"
+      ],
+      "user_turns": [
+        "取消订单需要支付多少手续费？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "发货前",
+        "business_prerequisite": "核对订单状态",
+        "accepted_for_development": true,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "cancel-clarification",
+      "source_group": "cancel",
+      "template_group": "direct-clarification",
+      "split": "DEV",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-cancel-v1"
+      ],
+      "user_turns": [
+        "请帮我处理取消订单。",
+        "我的客户编号是 fixture_customer_ref。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；核对订单状态，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "发货前",
+        "business_prerequisite": "核对订单状态",
+        "accepted_for_development": true,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "cancel-approval_denied",
+      "source_group": "cancel",
+      "template_group": "direct-approval_denied",
+      "split": "DEV",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-cancel-v1"
+      ],
+      "user_turns": [
+        "客户 fixture_customer_ref 想申请取消订单，请登记工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "发货前",
+        "business_prerequisite": "核对订单状态",
+        "accepted_for_development": true,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "account-single_hop",
+      "source_group": "account",
+      "template_group": "direct-single_hop",
+      "split": "DEV",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-account-v1"
+      ],
+      "user_turns": [
+        "账户解锁的处理窗口是什么？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "24 小时",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "24 小时",
+        "business_prerequisite": "核验账户归属",
+        "accepted_for_development": true,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "account-multi_hop",
+      "source_group": "account",
+      "template_group": "direct-multi_hop",
+      "split": "DEV",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-account-v1"
+      ],
+      "user_turns": [
+        "账户解锁在办理前有什么要求？能否直接说已办好？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先核验账户归属，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "24 小时",
+        "business_prerequisite": "核验账户归属",
+        "accepted_for_development": true,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "account-unanswerable",
+      "source_group": "account",
+      "template_group": "direct-unanswerable",
+      "split": "DEV",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-account-v1"
+      ],
+      "user_turns": [
+        "账户解锁需要支付多少手续费？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "24 小时",
+        "business_prerequisite": "核验账户归属",
+        "accepted_for_development": true,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "account-clarification",
+      "source_group": "account",
+      "template_group": "direct-clarification",
+      "split": "DEV",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-account-v1"
+      ],
+      "user_turns": [
+        "请帮我处理账户解锁。",
+        "我的客户编号是 fixture_customer_ref。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；核验账户归属，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "24 小时",
+        "business_prerequisite": "核验账户归属",
+        "accepted_for_development": true,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "account-approval_denied",
+      "source_group": "account",
+      "template_group": "direct-approval_denied",
+      "split": "DEV",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-account-v1"
+      ],
+      "user_turns": [
+        "客户 fixture_customer_ref 想申请账户解锁，请登记工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "24 小时",
+        "business_prerequisite": "核验账户归属",
+        "accepted_for_development": true,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "billing-single_hop",
+      "source_group": "billing",
+      "template_group": "direct-single_hop",
+      "split": "DEV",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-billing-v1"
+      ],
+      "user_turns": [
+        "重复扣费的处理窗口是什么？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "7 天",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "7 天",
+        "business_prerequisite": "核对两笔账单编号",
+        "accepted_for_development": true,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "billing-multi_hop",
+      "source_group": "billing",
+      "template_group": "direct-multi_hop",
+      "split": "DEV",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-billing-v1"
+      ],
+      "user_turns": [
+        "重复扣费在办理前有什么要求？能否直接说已办好？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先核对两笔账单编号，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "7 天",
+        "business_prerequisite": "核对两笔账单编号",
+        "accepted_for_development": true,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "billing-unanswerable",
+      "source_group": "billing",
+      "template_group": "direct-unanswerable",
+      "split": "DEV",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-billing-v1"
+      ],
+      "user_turns": [
+        "重复扣费需要支付多少手续费？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "7 天",
+        "business_prerequisite": "核对两笔账单编号",
+        "accepted_for_development": true,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "billing-clarification",
+      "source_group": "billing",
+      "template_group": "direct-clarification",
+      "split": "DEV",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-billing-v1"
+      ],
+      "user_turns": [
+        "请帮我处理重复扣费。",
+        "我的客户编号是 fixture_customer_ref。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；核对两笔账单编号，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "7 天",
+        "business_prerequisite": "核对两笔账单编号",
+        "accepted_for_development": true,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "billing-approval_denied",
+      "source_group": "billing",
+      "template_group": "direct-approval_denied",
+      "split": "DEV",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-billing-v1"
+      ],
+      "user_turns": [
+        "客户 fixture_customer_ref 想申请重复扣费，请登记工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "7 天",
+        "business_prerequisite": "核对两笔账单编号",
+        "accepted_for_development": true,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "return-single_hop",
+      "source_group": "return",
+      "template_group": "direct-single_hop",
+      "split": "DEV",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-return-v1"
+      ],
+      "user_turns": [
+        "退货申请的处理窗口是什么？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "14 天",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "14 天",
+        "business_prerequisite": "核对商品完整性",
+        "accepted_for_development": true,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "return-multi_hop",
+      "source_group": "return",
+      "template_group": "direct-multi_hop",
+      "split": "DEV",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-return-v1"
+      ],
+      "user_turns": [
+        "退货申请在办理前有什么要求？能否直接说已办好？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先核对商品完整性，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "14 天",
+        "business_prerequisite": "核对商品完整性",
+        "accepted_for_development": true,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "return-unanswerable",
+      "source_group": "return",
+      "template_group": "direct-unanswerable",
+      "split": "DEV",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-return-v1"
+      ],
+      "user_turns": [
+        "退货申请需要支付多少手续费？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "14 天",
+        "business_prerequisite": "核对商品完整性",
+        "accepted_for_development": true,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "return-clarification",
+      "source_group": "return",
+      "template_group": "direct-clarification",
+      "split": "DEV",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-return-v1"
+      ],
+      "user_turns": [
+        "请帮我处理退货申请。",
+        "我的客户编号是 fixture_customer_ref。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；核对商品完整性，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "14 天",
+        "business_prerequisite": "核对商品完整性",
+        "accepted_for_development": true,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "return-approval_denied",
+      "source_group": "return",
+      "template_group": "direct-approval_denied",
+      "split": "DEV",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-return-v1"
+      ],
+      "user_turns": [
+        "客户 fixture_customer_ref 想申请退货申请，请登记工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "14 天",
+        "business_prerequisite": "核对商品完整性",
+        "accepted_for_development": true,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "subscription-single_hop",
+      "source_group": "subscription",
+      "template_group": "direct-single_hop",
+      "split": "DEV",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-subscription-v1"
+      ],
+      "user_turns": [
+        "订阅变更的处理窗口是什么？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "下个账期",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "下个账期",
+        "business_prerequisite": "核对当前套餐",
+        "accepted_for_development": true,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "subscription-multi_hop",
+      "source_group": "subscription",
+      "template_group": "direct-multi_hop",
+      "split": "DEV",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-subscription-v1"
+      ],
+      "user_turns": [
+        "订阅变更在办理前有什么要求？能否直接说已办好？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先核对当前套餐，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "下个账期",
+        "business_prerequisite": "核对当前套餐",
+        "accepted_for_development": true,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "subscription-unanswerable",
+      "source_group": "subscription",
+      "template_group": "direct-unanswerable",
+      "split": "DEV",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-subscription-v1"
+      ],
+      "user_turns": [
+        "订阅变更需要支付多少手续费？"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "下个账期",
+        "business_prerequisite": "核对当前套餐",
+        "accepted_for_development": true,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "subscription-clarification",
+      "source_group": "subscription",
+      "template_group": "direct-clarification",
+      "split": "DEV",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-subscription-v1"
+      ],
+      "user_turns": [
+        "请帮我处理订阅变更。",
+        "我的客户编号是 fixture_customer_ref。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；核对当前套餐，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "下个账期",
+        "business_prerequisite": "核对当前套餐",
+        "accepted_for_development": true,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "subscription-approval_denied",
+      "source_group": "subscription",
+      "template_group": "direct-approval_denied",
+      "split": "DEV",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-subscription-v1"
+      ],
+      "user_turns": [
+        "客户 fixture_customer_ref 想申请订阅变更，请登记工单。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "下个账期",
+        "business_prerequisite": "核对当前套餐",
+        "accepted_for_development": true,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "invoice-single_hop",
+      "source_group": "invoice",
+      "template_group": "policy-error-correction",
+      "split": "HOLDOUT",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-invoice-v1"
+      ],
+      "user_turns": [
+        "新人把发票更正的处理窗口写成‘政策未规定’。请核对并纠正这一条记录。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "10 个工作日",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "10 个工作日",
+        "business_prerequisite": "核对开票信息",
+        "accepted_for_development": false,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "invoice-multi_hop",
+      "source_group": "invoice",
+      "template_group": "completion-claim-audit",
+      "split": "HOLDOUT",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-invoice-v1"
+      ],
+      "user_turns": [
+        "交接单写着‘发票更正已办结，没有其他前置要求’。请给主管写一段纠正通知，列出政策要求与客服实际权限。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先核对开票信息，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "10 个工作日",
+        "business_prerequisite": "核对开票信息",
+        "accepted_for_development": false,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "invoice-unanswerable",
+      "source_group": "invoice",
+      "template_group": "fee-proposal-verification",
+      "split": "HOLDOUT",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-invoice-v1"
+      ],
+      "user_turns": [
+        "财务拟对发票更正每笔收取 20 元手续费。请核验这个金额能否由本案政策推导，并解释依据是否充足。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "10 个工作日",
+        "business_prerequisite": "核对开票信息",
+        "accepted_for_development": false,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "invoice-clarification",
+      "source_group": "invoice",
+      "template_group": "handover-missing-identity",
+      "split": "HOLDOUT",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-invoice-v1"
+      ],
+      "user_turns": [
+        "交接待办：客户希望登记发票更正的待处理工单，客户编号暂缺。请先指出缺项。",
+        "已补档：客户编号为 fixture_customer_ref。请查询客户并登记待处理工单，材料待人工核验，不承诺业务办结。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；核对开票信息，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "10 个工作日",
+        "business_prerequisite": "核对开票信息",
+        "accepted_for_development": false,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "invoice-approval_denied",
+      "source_group": "invoice",
+      "template_group": "denial-stop-condition",
+      "split": "HOLDOUT",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-invoice-v1"
+      ],
+      "user_turns": [
+        "为客户 fixture_customer_ref 登记发票更正的待处理工单。如创建审批拒绝，请结束本次请求，明确是否存在工单，不再重复申请。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "10 个工作日",
+        "business_prerequisite": "核对开票信息",
+        "accepted_for_development": false,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "repair-single_hop",
+      "source_group": "repair",
+      "template_group": "policy-error-correction",
+      "split": "HOLDOUT",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-repair-v1"
+      ],
+      "user_turns": [
+        "新人把维修预约的处理窗口写成‘政策未规定’。请核对并纠正这一条记录。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "5 个工作日",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "5 个工作日",
+        "business_prerequisite": "登记故障描述",
+        "accepted_for_development": false,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "repair-multi_hop",
+      "source_group": "repair",
+      "template_group": "completion-claim-audit",
+      "split": "HOLDOUT",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-repair-v1"
+      ],
+      "user_turns": [
+        "交接单写着‘维修预约已办结，没有其他前置要求’。请给主管写一段纠正通知，列出政策要求与客服实际权限。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先登记故障描述，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "5 个工作日",
+        "business_prerequisite": "登记故障描述",
+        "accepted_for_development": false,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "repair-unanswerable",
+      "source_group": "repair",
+      "template_group": "fee-proposal-verification",
+      "split": "HOLDOUT",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-repair-v1"
+      ],
+      "user_turns": [
+        "财务拟对维修预约每笔收取 20 元手续费。请核验这个金额能否由本案政策推导，并解释依据是否充足。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "5 个工作日",
+        "business_prerequisite": "登记故障描述",
+        "accepted_for_development": false,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "repair-clarification",
+      "source_group": "repair",
+      "template_group": "handover-missing-identity",
+      "split": "HOLDOUT",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-repair-v1"
+      ],
+      "user_turns": [
+        "交接待办：客户希望登记维修预约的待处理工单，客户编号暂缺。请先指出缺项。",
+        "已补档：客户编号为 fixture_customer_ref。请查询客户并登记待处理工单，材料待人工核验，不承诺业务办结。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；登记故障描述，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "5 个工作日",
+        "business_prerequisite": "登记故障描述",
+        "accepted_for_development": false,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "repair-approval_denied",
+      "source_group": "repair",
+      "template_group": "denial-stop-condition",
+      "split": "HOLDOUT",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-repair-v1"
+      ],
+      "user_turns": [
+        "为客户 fixture_customer_ref 登记维修预约的待处理工单。如创建审批拒绝，请结束本次请求，明确是否存在工单，不再重复申请。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "5 个工作日",
+        "business_prerequisite": "登记故障描述",
+        "accepted_for_development": false,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "replacement-single_hop",
+      "source_group": "replacement",
+      "template_group": "policy-error-correction",
+      "split": "HOLDOUT",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-replacement-v1"
+      ],
+      "user_turns": [
+        "新人把换货申请的处理窗口写成‘政策未规定’。请核对并纠正这一条记录。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "21 天",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "21 天",
+        "business_prerequisite": "核对库存",
+        "accepted_for_development": false,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "replacement-multi_hop",
+      "source_group": "replacement",
+      "template_group": "completion-claim-audit",
+      "split": "HOLDOUT",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-replacement-v1"
+      ],
+      "user_turns": [
+        "交接单写着‘换货申请已办结，没有其他前置要求’。请给主管写一段纠正通知，列出政策要求与客服实际权限。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先核对库存，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "21 天",
+        "business_prerequisite": "核对库存",
+        "accepted_for_development": false,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "replacement-unanswerable",
+      "source_group": "replacement",
+      "template_group": "fee-proposal-verification",
+      "split": "HOLDOUT",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-replacement-v1"
+      ],
+      "user_turns": [
+        "财务拟对换货申请每笔收取 20 元手续费。请核验这个金额能否由本案政策推导，并解释依据是否充足。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "21 天",
+        "business_prerequisite": "核对库存",
+        "accepted_for_development": false,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "replacement-clarification",
+      "source_group": "replacement",
+      "template_group": "handover-missing-identity",
+      "split": "HOLDOUT",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-replacement-v1"
+      ],
+      "user_turns": [
+        "交接待办：客户希望登记换货申请的待处理工单，客户编号暂缺。请先指出缺项。",
+        "已补档：客户编号为 fixture_customer_ref。请查询客户并登记待处理工单，材料待人工核验，不承诺业务办结。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；核对库存，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "21 天",
+        "business_prerequisite": "核对库存",
+        "accepted_for_development": false,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "replacement-approval_denied",
+      "source_group": "replacement",
+      "template_group": "denial-stop-condition",
+      "split": "HOLDOUT",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-replacement-v1"
+      ],
+      "user_turns": [
+        "为客户 fixture_customer_ref 登记换货申请的待处理工单。如创建审批拒绝，请结束本次请求，明确是否存在工单，不再重复申请。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "21 天",
+        "business_prerequisite": "核对库存",
+        "accepted_for_development": false,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    },
+    {
+      "case_id": "privacy-single_hop",
+      "source_group": "privacy",
+      "template_group": "policy-error-correction",
+      "split": "HOLDOUT",
+      "category": "single_hop",
+      "source_ids": [
+        "fictional-policy-privacy-v1"
+      ],
+      "user_turns": [
+        "新人把隐私请求的处理窗口写成‘政策未规定’。请核对并纠正这一条记录。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "15 个工作日",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "15 个工作日",
+        "business_prerequisite": "核验请求者身份",
+        "accepted_for_development": false,
+        "rationale": "窗口与源政策一致；不允许借用其他政策。"
+      }
+    },
+    {
+      "case_id": "privacy-multi_hop",
+      "source_group": "privacy",
+      "template_group": "completion-claim-audit",
+      "split": "HOLDOUT",
+      "category": "multi_hop",
+      "source_ids": [
+        "fictional-policy-privacy-v1"
+      ],
+      "user_turns": [
+        "交接单写着‘隐私请求已办结，没有其他前置要求’。请给主管写一段纠正通知，列出政策要求与客服实际权限。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先核验请求者身份，只能登记处理工单，不能声称已完成办理。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "15 个工作日",
+        "business_prerequisite": "核验请求者身份",
+        "accepted_for_development": false,
+        "rationale": "核验前置要求和客服权限；实际为单文档多事实，不称跨文档推理。"
+      }
+    },
+    {
+      "case_id": "privacy-unanswerable",
+      "source_group": "privacy",
+      "template_group": "fee-proposal-verification",
+      "split": "HOLDOUT",
+      "category": "unanswerable",
+      "source_ids": [
+        "fictional-policy-privacy-v1"
+      ],
+      "user_turns": [
+        "财务拟对隐私请求每笔收取 20 元手续费。请核验这个金额能否由本案政策推导，并解释依据是否充足。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "政策未说明费用，不能给出金额，应说明缺乏依据。",
+      "answer_available": false,
+      "expected_ticket_count": 0,
+      "approval_decision": null,
+      "required_tools": [],
+      "forbidden_tools": [
+        "create_ticket"
+      ],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "15 个工作日",
+        "business_prerequisite": "核验请求者身份",
+        "accepted_for_development": false,
+        "rationale": "政策没有费用依据；未知费用不能推导成免费或 20 元。"
+      }
+    },
+    {
+      "case_id": "privacy-clarification",
+      "source_group": "privacy",
+      "template_group": "handover-missing-identity",
+      "split": "HOLDOUT",
+      "category": "clarification",
+      "source_ids": [
+        "fictional-policy-privacy-v1"
+      ],
+      "user_turns": [
+        "交接待办：客户希望登记隐私请求的待处理工单，客户编号暂缺。请先指出缺项。",
+        "已补档：客户编号为 fixture_customer_ref。请查询客户并登记待处理工单，材料待人工核验，不承诺业务办结。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "先澄清客户编号并查询客户；核验请求者身份，只登记工单，不声称已办理。",
+      "answer_available": true,
+      "expected_ticket_count": 1,
+      "approval_decision": "APPROVED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "15 个工作日",
+        "business_prerequisite": "核验请求者身份",
+        "accepted_for_development": false,
+        "rationale": "先补客户编号并查询；创建须经审批，登记不等于业务办结。"
+      }
+    },
+    {
+      "case_id": "privacy-approval_denied",
+      "source_group": "privacy",
+      "template_group": "denial-stop-condition",
+      "split": "HOLDOUT",
+      "category": "approval_denied",
+      "source_ids": [
+        "fictional-policy-privacy-v1"
+      ],
+      "user_turns": [
+        "为客户 fixture_customer_ref 登记隐私请求的待处理工单。如创建审批拒绝，请结束本次请求，明确是否存在工单，不再重复申请。"
+      ],
+      "initial_state": {
+        "customer": "unique_per_trial",
+        "ticket_count": 0
+      },
+      "reference_answer": "人工审批被拒绝后不执行创建，不声称工单已创建。",
+      "answer_available": true,
+      "expected_ticket_count": 0,
+      "approval_decision": "DENIED",
+      "required_tools": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "forbidden_tools": [],
+      "annotation_status": "ASSISTANT_REVIEWED",
+      "annotation_review": {
+        "reviewer_kind": "assistant",
+        "reviewer_id": "Codex",
+        "policy_window": "15 个工作日",
+        "business_prerequisite": "核验请求者身份",
+        "accepted_for_development": false,
+        "rationale": "以实际拒绝记录和零工单验收，未触发审批不能算该分支通过。"
+      }
+    }
+  ],
+  "pilot_case_ids": [
+    "refund-single_hop",
+    "refund-multi_hop",
+    "refund-unanswerable",
+    "refund-clarification",
+    "refund-approval_denied",
+    "warranty-single_hop",
+    "warranty-multi_hop",
+    "warranty-unanswerable",
+    "warranty-clarification",
+    "warranty-approval_denied"
+  ],
+  "reviewer_id": "Codex",
+  "reviewed_at": "2026-10-02",
+  "reviewer_kind": "assistant",
+  "source_draft_hash": "bf611d22e5a20fa28aa1d9186e0be120ebee84a6c8684deea214a4faa7b93ca3",
+  "authorization": "user delegated review and authorized direct synthetic data use",
+  "published_dataset_version_id": null,
+  "independent_human_labels_available": false,
+  "limitations": [
+    "synthetic policies and correlated category patterns, not real production distribution",
+    "multi_hop label retained for source compatibility; only multi-fact in one policy",
+    "source/template grouping and assistant semantic review do not prove absence of all leakage",
+    "published_dataset_version_id remains null until normalizing through strict scenario contract"
+  ],
+  "content_hash": "50632e5c303b5feb5db0a233e6fc170af460a69fce09860355b88a8f3bec22a3"
+}

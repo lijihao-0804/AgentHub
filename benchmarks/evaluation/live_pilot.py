@@ -17,6 +17,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
 
+from benchmarks.evaluation.artifacts import write_json_atomic
 from benchmarks.evaluation.budget import TrialBudget
 from benchmarks.evaluation.interview_draft import build_draft
 from packages.agent_runtime.adapters.langgraph import (
@@ -44,6 +45,35 @@ from tests.integration.test_m4c_agent_runtime import _context, _seed
 
 PRICE_ID = "deepseek-flash-20261002-peak-upper-cny-input2-output8"
 ISOLATED_URL = "postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_mi34_20261002"
+
+
+def prompt_revision_text(revision: str) -> str:
+    if revision == "state-and-registration":
+        return prompt_revision_text("state-clarity") + (
+            "\n登记目标说明：同一会话中用户已明确请求登记工单，随后补充客户编号时，"
+            "该登记请求仍有效；查询成功后直接提出 create_ticket 请求，"
+            "不要再次询问是否登记，也不要让可后补的订单号、金额、退款原因阻断登记。"
+            "不得编造缺失材料；仅在 subject 中说明待核验。"
+            "必需序列号已提供时应带入 subject，不得丢失。"
+        )
+    if revision == "state-clarity":
+        return (
+            "\n状态说明：工单创建审批与后续业务办理/材料核验是两个阶段。"
+            "create_ticket 返回成功和工单编号表示本次创建审批已通过、工单已登记；"
+            "OPEN 只表示工单待业务处理，不表示创建审批仍待批准。"
+            "成功后应明确说创建审批已通过、已登记待处理工单，"
+            "不能再说工单等待创建审批；不得承诺退款或保修业务已完成。"
+            "只有实际审批等待时才说等待创建审批，审批拒绝时明确未创建。"
+        )
+    if revision != "approval-bridge":
+        raise ValueError("UNKNOWN_PROMPT_REVISION")
+    return (
+        "\n工具治理说明：调用 create_ticket 只提出创建请求，"
+        "运行时会自动暂停并等待人工审批；"
+        "模型不需要另一个审批工具，也不得自行批准。查询客户成功且用户请求登记时，"
+        "应调用 create_ticket，由运行时决定是否执行；"
+        "缺少业务材料可在 subject 中标注待人工补充。"
+    )
 
 
 def security_cases():
@@ -186,6 +216,8 @@ async def run(
     reuse_version: UUID | None = None,
     suite: str = "pilot",
     repetitions: int = 1,
+    prompt_revision: str = "approval-bridge",
+    remaining_from: Path | None = None,
 ):
     if repetitions not in {1, 3}:
         raise ValueError("PILOT_REPETITIONS_MUST_BE_ONE_OR_THREE")
@@ -193,6 +225,20 @@ async def run(
         raise ValueError("PILOT_OUTPUT_EXISTS_USE_A_FRESH_REPORT_PATH")
     if baseline_version is not None and reuse_version is not None:
         raise ValueError("PILOT_VARIANT_ARGUMENTS_CONFLICT")
+    revision_text = prompt_revision_text(prompt_revision)
+    if prompt_revision != "approval-bridge" and baseline_version is None:
+        raise ValueError("PROMPT_REVISION_REQUIRES_NEW_DERIVED_VERSION")
+    previous = None
+    if remaining_from is not None:
+        previous = json.loads(remaining_from.read_text(encoding="utf-8"))
+        if (
+            reuse_version is None
+            or str(reuse_version) != previous.get("agent_version_id")
+            or suite != previous.get("suite")
+            or repetitions != previous.get("repetitions")
+            or previous.get("dataset_hash") != build_draft()["draft_hash"]
+        ):
+            raise ValueError("REMAINING_PLAN_IDENTITY_MISMATCH")
     settings = Settings()
     cipher = ProviderCredentialCipher.from_settings(settings)
     source_engine, source_factory = create_database(settings.database_url)
@@ -251,7 +297,7 @@ async def run(
         report["local_failures"] = adapter.local_failures
         report["allocated_cny"] = str(budget.allocated)
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        write_json_atomic(output, report)
 
     try:
         if baseline_version is not None or reuse_version is not None:
@@ -270,13 +316,7 @@ async def run(
                     version = baseline
                 else:
                     spec = json.loads(json.dumps(baseline.resolved_spec))
-                    spec["prompt"]["system_prompt"] += (
-                        "\n工具治理说明：调用 create_ticket 只提出创建请求，"
-                        "运行时会自动暂停并等待人工审批；"
-                        "模型不需要另一个审批工具，也不得自行批准。查询客户成功且用户请求登记时，"
-                        "应调用 create_ticket，由运行时决定是否执行；"
-                        "缺少业务材料可在 subject 中标注待人工补充。"
-                    )
+                    spec["prompt"]["system_prompt"] += revision_text
                     spec["prompt"]["prompt_version"] += 1
                     number = await db.scalar(
                         select(func.max(AgentVersion.version_number)).where(
@@ -298,6 +338,7 @@ async def run(
                         baseline_agent_version_id=str(baseline.id),
                         baseline_spec_hash=baseline.resolved_spec_hash,
                         changed_spec_sections=["prompt"],
+                        prompt_revision=prompt_revision,
                     )
         else:
             write_spec = {
@@ -436,13 +477,40 @@ async def run(
         )
         save()
         planned_cases = [c for c in draft["cases"] if c["case_id"] in draft["pilot_case_ids"]]
-        if suite == "security":
+        if suite == "dev":
+            planned_cases = [c for c in draft["cases"] if c["split"] == "DEV"]
+        elif suite == "security":
             planned_cases = security_cases()
+        elif suite != "pilot":
+            raise ValueError("UNKNOWN_PILOT_SUITE")
         report["suite"] = suite
         report["repetitions"] = repetitions
         planned_trials = [
             (case, repetition) for case in planned_cases for repetition in range(repetitions)
         ]
+        if previous is not None:
+            completed = {(c["case_id"], c["repetition"]) for c in previous["cases"]}
+            identities = {(c["case_id"], repetition) for c, repetition in planned_trials}
+            if (
+                len(completed) != len(previous["cases"])
+                or not completed <= identities
+                or previous["resolved_spec_hash"] != version.resolved_spec_hash
+            ):
+                raise ValueError("REMAINING_PLAN_CASE_MISMATCH")
+            report["remaining_plan"] = {
+                "source_report": str(remaining_from),
+                "source_hash": canonical_json_hash(previous),
+                "previous_observed_trials": len(completed),
+                "full_planned_trials": len(planned_trials),
+                "semantics": (
+                    "new fixtures for missing observations; never replay an existing action"
+                ),
+            }
+            planned_trials = [
+                (case, rep)
+                for case, rep in planned_trials
+                if (case["case_id"], rep) not in completed
+            ]
         for case, repetition in planned_trials:
             call_start = len(adapter.calls)
             customer_ref = "pilot-" + uuid4().hex
@@ -557,8 +625,14 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--baseline-version", type=UUID)
     parser.add_argument("--reuse-version", type=UUID)
-    parser.add_argument("--suite", choices=["pilot", "security"], default="pilot")
+    parser.add_argument("--suite", choices=["pilot", "dev", "security"], default="pilot")
     parser.add_argument("--repetitions", type=int, choices=[1, 3], default=1)
+    parser.add_argument("--remaining-from", type=Path)
+    parser.add_argument(
+        "--prompt-revision",
+        choices=["approval-bridge", "state-clarity", "state-and-registration"],
+        default="approval-bridge",
+    )
     args = parser.parse_args()
     configure_windows_asyncio_policy()
     asyncio.run(
@@ -569,5 +643,7 @@ if __name__ == "__main__":
             args.reuse_version,
             args.suite,
             args.repetitions,
+            args.prompt_revision,
+            args.remaining_from,
         )
     )

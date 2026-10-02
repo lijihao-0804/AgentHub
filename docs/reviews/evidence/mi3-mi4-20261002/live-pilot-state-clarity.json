@@ -1,0 +1,3422 @@
+{
+  "status": "PILOT_EXECUTED_REVIEW_REQUIRED",
+  "formal_experiment": false,
+  "build_sha": "611a5ec90e5e10e131b7fc8855eea1beb5b14c92",
+  "working_tree_changes_present": true,
+  "dataset_hash": "bf611d22e5a20fa28aa1d9186e0be120ebee84a6c8684deea214a4faa7b93ca3",
+  "model": "deepseek-flash",
+  "thinking": "disabled",
+  "price_identity": "deepseek-flash-20261002-peak-upper-cny-input2-output8",
+  "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing",
+  "cost_method": "peak_full_input_upper_estimate_not_provider_invoice",
+  "data_use_authorization": "user_20261002_use_synthetic_data_directly",
+  "limitations": [
+    "inline_policy_not_retrieval",
+    "development_trials_not_formal_experiment",
+    "no_independent_human_quality_labels",
+    "not_published_dataset_or_formal_experiment"
+  ],
+  "cases": [
+    {
+      "case_id": "refund-single_hop",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-single_hop",
+        "instance_id": "2289078c3f064f3ab58722db0b4a047c",
+        "thread_id": "3cb3bca1-63af-47fb-acdc-3d201e526c4f",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "2f43de32-9596-41c7-b083-2a490ff8d0f5",
+            "turn_id": "8fe6e694-207d-44c7-bb11-b1ac46e91cbf",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "104b7be600f190322dacff31177fc13180adde44b98cb0b7e068f48401452c34",
+            "input_tokens": 1240,
+            "output_tokens": 58,
+            "cost_amount": "0.00294400",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 7052.0798999932595,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.004300032742321491
+            ],
+            "model.generate": [
+              6634.316099982243
+            ],
+            "agent.run": [
+              6993.990899994969
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "退款申请的处理窗口是 **30 天**。\n\n另外提醒一下：该政策要求办理前必须人工审核，客服只能登记处理工单，不能承诺已经完成办理。如果您需要申请退款，请提供客户编号，我先为您查询客户，再申请登记工单。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "6e05c3e6e7894f47bc825b969765f458"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-single_hop",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-single_hop",
+        "instance_id": "702d9f34ee0f4e1ba309779c36618a33",
+        "thread_id": "17c8deb7-33c5-4591-8003-8f0ee5205184",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "7df683e9-4913-4ab6-b237-35882aa8c1d5",
+            "turn_id": "e68faf16-a331-4e2f-8127-f24171a3f50a",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "30b997006df70836ad4657bc79defd3e50bfd83e963e9a0ee1f44e3481eada6c",
+            "input_tokens": 1240,
+            "output_tokens": 56,
+            "cost_amount": "0.00292800",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1054.307299957145,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0030999653972685337
+            ],
+            "model.generate": [
+              729.4357999926433
+            ],
+            "agent.run": [
+              1016.0006000078283
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "退款申请的处理窗口是 **30 天**。\n\n另外提醒一下：该政策下办理前必须经过人工审核，客服只能登记处理工单，不能承诺已经完成办理。如需登记，请提供客户编号，我会先查询客户再申请创建工单。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "19848347246546c2a8eb852615fb8ccc"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-single_hop",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-single_hop",
+        "instance_id": "bb0d7888e26b464aa4c5b62cf6198028",
+        "thread_id": "e80ebf1e-0079-47c7-9f0a-9f84cf30bca1",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "072632ba-0501-4eb1-a12d-f06063a9cb92",
+            "turn_id": "824ef707-a13c-4461-8e09-c065ff66e9db",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "25396c4b637988b06b1ad1f475307598533513d4f8bc5301c92ea8aa8ae26dc6",
+            "input_tokens": 1240,
+            "output_tokens": 53,
+            "cost_amount": "0.00290400",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 903.1309999991208,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.003600027412176132
+            ],
+            "model.generate": [
+              569.833200017456
+            ],
+            "agent.run": [
+              867.6099000149406
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "退款申请的处理窗口是 **30 天**。\n\n另外补充说明：办理前必须经过人工审核；客服只能登记处理工单，不能承诺已经完成办理。如需登记，请提供客户编号，我会先查询客户并申请创建工单。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "298e8155a33840ceb2e901d9ae1c0cd5"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-multi_hop",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-multi_hop",
+        "instance_id": "052d0870010c4b93979dc3d5c0b11e6e",
+        "thread_id": "3456e0a1-9ceb-4114-a213-7dee4ab4eef2",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "da36963f-dccb-413b-b2fc-d565244087ea",
+            "turn_id": "373dd742-deaf-4bda-bced-44182e611133",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "08bd553f250ea77dcab02feb32ba2fb63440c14d30926cb6e5bc426a7920c6e6",
+            "input_tokens": 1248,
+            "output_tokens": 104,
+            "cost_amount": "0.00332800",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1737.6977000385523,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.004400033503770828
+            ],
+            "model.generate": [
+              1401.669699989725
+            ],
+            "agent.run": [
+              1697.3201000364497
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据虚构测试政策（退款申请）：\n\n- **处理窗口**：30 天。\n- **办理前要求**：必须经过人工审核。\n- **客服权限**：客服只能登记处理工单，**不能承诺已经完成办理**。\n\n所以，**不能直接说已办好**。我只能为您登记处理工单，实际办理需由人工审核完成。\n\n如果您需要登记，请提供**客户编号**，我会先查询客户，再申请创建工单（创建需经人工审批）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "e98ebd5c262349f6a465f1dabf6b771f"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-multi_hop",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-multi_hop",
+        "instance_id": "3be08ce5dfe44431a06e3808a51a65a7",
+        "thread_id": "88bbd39c-5916-449b-a44f-a26dab6ae204",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "61db6caf-38a7-4944-bcdb-00c68f2a8771",
+            "turn_id": "08fc2805-b8c4-40c1-bca0-75de311528cd",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "a37df7b46c749ca41913d5102a12eaf853a3dd60bf76cac76e6bb6dfe11b9570",
+            "input_tokens": 1248,
+            "output_tokens": 89,
+            "cost_amount": "0.00320800",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1055.5698999669403,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.003200024366378784
+            ],
+            "model.generate": [
+              658.9448999729939
+            ],
+            "agent.run": [
+              976.1759999673814
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据虚构测试政策（退款申请）：\n\n- **处理窗口**：30 天。\n- **办理前要求**：必须经过人工审核。\n- **客服权限**：客服只能登记处理工单，**不能承诺已经完成办理**。\n\n所以不能直接说“已办好”。如果您需要登记退款处理工单，请提供客户编号，我会先查询客户，再申请创建工单（创建需经人工审批）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "3110a2f653414daeb3cbe717636e1f07"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-multi_hop",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-multi_hop",
+        "instance_id": "cebad37384ca4a93a5bd677be996949a",
+        "thread_id": "d6083851-a176-40a6-a735-9b690c04e45a",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "a02d3eed-81cf-4e5f-8a0d-682e945dfaee",
+            "turn_id": "fc12f6ac-557d-4a61-9594-189bf60510a6",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "58ac6a64c02605a4f6df5e72c0bf34ca1b337d337770d656f8ea25aed9693516",
+            "input_tokens": 1248,
+            "output_tokens": 98,
+            "cost_amount": "0.00328000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1545.7823000033386,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.003999972250312567
+            ],
+            "model.generate": [
+              1200.3212999552488
+            ],
+            "agent.run": [
+              1509.1681000194512
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据虚构测试政策（退款申请）：\n\n- **处理窗口**：30 天。\n- **办理前要求**：必须经过人工审核。\n- **客服权限**：客服只能登记处理工单，**不能承诺已经完成办理**。\n\n所以，**不能直接说已办好**。我只能为您登记处理工单，实际办理需由人工审核完成。\n\n如果您需要登记，请提供**客户编号**，我会先查询客户，再申请创建工单。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "4b771d07f4304a9ba2da3dd2e3cc2dc4"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-unanswerable",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-unanswerable",
+        "instance_id": "60038d0ba813448c8b88f1f3fa8bf1e4",
+        "thread_id": "cf0976d8-e631-4bd9-986f-427d41e0378d",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "17682776-1008-4045-98b2-c8bc3b0ff930",
+            "turn_id": "34ed90a5-e391-4ffe-8a38-c86483add500",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "0be39dfb1862b84170b68c5844a5da5bed9ce39f51ed6addce6985b0a768bbc6",
+            "input_tokens": 1241,
+            "output_tokens": 76,
+            "cost_amount": "0.00309000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1262.6076000160538,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.002900022082030773
+            ],
+            "model.generate": [
+              892.9148000315763
+            ],
+            "agent.run": [
+              1199.7883999720216
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据现行虚构测试政策，退款申请这一项**没有说明是否收费**，因此我不能推测，也不能从其他政策借用费用规则来回答你。\n\n如果你需要，我可以帮你登记退款处理工单（需先提供客户编号，并经过人工审批）。但工单只代表登记待处理，不代表退款已办理完成，也不代表任何费用已确定。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "dc8d062622ee4d6facb7382335513002"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-unanswerable",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-unanswerable",
+        "instance_id": "93cf8ae0c8474373a041e2cc908714e8",
+        "thread_id": "a8e9d46f-9a1b-4d07-af4a-f7da32a197e2",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "654eba6c-bf31-4932-827c-d05ecaf46293",
+            "turn_id": "71e3583b-07b8-4b70-a7aa-f4846367eb52",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "4cec8fd6c673d085deab844a0eb274b954849999b73c27edf94da2cc64d34685",
+            "input_tokens": 1241,
+            "output_tokens": 65,
+            "cost_amount": "0.00300200",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1367.1273999498226,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0023999600671231747
+            ],
+            "model.generate": [
+              1029.075299971737
+            ],
+            "agent.run": [
+              1330.9500999748707
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据现行虚构测试政策，退款申请这一项**没有说明是否收费**，因此我不能推测或从其他政策借用费用规则，也无法告知具体手续费金额。\n\n如果您需要，我可以帮您登记一个退款处理工单（需先提供客户编号，我会先查询客户，再由人工审批决定是否创建）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "9a5f489a03ac426a9d8738c55beb5f8f"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-unanswerable",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-unanswerable",
+        "instance_id": "e4abf7102d89444f99b8e418b676f61b",
+        "thread_id": "4269f30e-56bc-45af-b146-2c81d0aad9d3",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "2039e618-f378-4420-b213-336384348c5f",
+            "turn_id": "f89721e0-0ecd-4f22-a6a3-d5ed95f86897",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "c465cb95dc718dcbbbafd57969ddc28272e1ddf693927c8249aaf899b089a0b8",
+            "input_tokens": 1241,
+            "output_tokens": 84,
+            "cost_amount": "0.00315400",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1309.8172000027262,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0025999615900218487
+            ],
+            "model.generate": [
+              930.5541000212543
+            ],
+            "agent.run": [
+              1275.3351000137627
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据现行虚构测试政策，退款申请这一项**没有说明是否收费**，因此我不能推测，也不能从其他政策借用费用规则——我无法给出具体的手续费金额。\n\n如果您需要办理退款申请，我可以帮您登记处理工单（处理窗口为 30 天，办理前需人工审核）。请提供您的客户编号，我会先查询客户信息，再申请创建工单。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "a2b07b476c3449f6a9a65be7d183da50"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-clarification",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-clarification",
+        "instance_id": "5f0b45672c2e47998b405dbd77dc4d02",
+        "thread_id": "f8c93216-6dc9-4c48-85f5-84d918bbdc77",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 2,
+        "executed_turn_count": 2,
+        "turns": [
+          {
+            "run_id": "78daaec8-bc98-4400-8698-6f1e61368e53",
+            "turn_id": "4e95fab1-535e-435e-851e-f199eda1f320",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "bac5e7ad50726a2367716379604e5842a3b7f00579e655a2b3f6ca0559841b45",
+            "input_tokens": 1240,
+            "output_tokens": 25,
+            "cost_amount": "0.00268000",
+            "cost_currency": "CNY"
+          },
+          {
+            "run_id": "8fd17131-0809-4c8d-874e-f62d07b8cfb0",
+            "turn_id": "59a5bd0f-b432-4677-959f-4e6f85654399",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "9fa640bb836778571eb97bc997c0ebf4b27e722cd93dcf8970a8b8fb12211212",
+            "input_tokens": 1617,
+            "output_tokens": 122,
+            "cost_amount": "0.00421000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 5136.959600029513,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 4,
+            "known_usage_count": 4,
+            "known_cost_count": 4
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0048999791033566,
+              0.005299982149153948,
+              0.0026999623514711857,
+              0.002500019036233425
+            ],
+            "model.generate": [
+              1014.1419999999925,
+              441.32809998700395,
+              1133.637599996291,
+              1111.3295999821275
+            ],
+            "agent.run": [
+              1344.2238999996334,
+              2049.7244000434875
+            ],
+            "tool.execute": [
+              13.80549999885261
+            ],
+            "approval.wait": [
+              0.014899997040629387,
+              0.013800046872347593
+            ],
+            "approval.execute": [
+              31.276299967430532
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 1,
+      "approval_states": [
+        {
+          "decision": "APPROVED",
+          "execution": "SUCCEEDED"
+        }
+      ],
+      "outputs": [
+        "您好，我可以帮您登记退款申请的处理工单。请先提供您的客户编号，我查询后为您办理。",
+        "您的退款申请工单已登记成功：\n\n- 工单编号：T-7693CDB805284187\n- 状态：OPEN（待业务处理）\n\n说明：\n1. 本次工单创建审批已通过，工单已登记，无需再等待创建审批。\n2. 退款业务本身仍需人工审核后办理，我无法承诺退款已完成。\n3. 该政策未说明是否收费，因此不涉及任何费用说明。\n4. 如后续需要补充业务材料，会由人工在工单中核验。\n\n请问还有其他需要帮您登记的吗？"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "7ecce1d5b2c742adb27e29b83605e895",
+        "5ff7af2d24814bfa9e3605c1184a2210",
+        "8de988ea85924d83b568c99cc74eadff",
+        "c04b1276c5cd4a9597f8b81de4f90008"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "refund-clarification",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-clarification",
+        "instance_id": "9232c3f1a4924df899773dc5dfc0d38b",
+        "thread_id": "5d83c5d6-a275-42ff-a983-38f2930b237f",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 2,
+        "executed_turn_count": 2,
+        "turns": [
+          {
+            "run_id": "fd9aae1a-35aa-4b6a-802c-523ce7a74b82",
+            "turn_id": "10263f45-fc4d-4d7a-9dc2-8d5d0fb0bc87",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "2408ae226bb7751ccf6399bc91ea849072737e5f22f7d73f28e540301e0fc991",
+            "input_tokens": 1240,
+            "output_tokens": 25,
+            "cost_amount": "0.00268000",
+            "cost_currency": "CNY"
+          },
+          {
+            "run_id": "0fab9f2e-ec07-4db7-9fe1-b689fb3e5566",
+            "turn_id": "25ee54ed-9d92-4a31-a3cf-ea3f734dd7ad",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "ee942fb037e1957917cb8a3d5599f4e148ff0169ae89bcfa76894fe7bc29c4a2",
+            "input_tokens": 2718,
+            "output_tokens": 158,
+            "cost_amount": "0.00670000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 1,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 3030.119500006549,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 3,
+            "known_usage_count": 3,
+            "known_cost_count": 3
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.002600019797682762,
+              0.002500019036233425,
+              0.0033999676816165447
+            ],
+            "model.generate": [
+              381.7062000161968,
+              657.0094999624416,
+              1241.05499999132
+            ],
+            "agent.run": [
+              670.2597999828868,
+              2294.0263000200503
+            ],
+            "tool.execute": [
+              20.288500003516674
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": false,
+        "approval_decision": false
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "您好，我可以帮您登记退款申请的处理工单。请先提供您的客户编号，以便我查询客户信息。",
+        "已查询到您的客户信息（虚构测试客户）。\n\n在为您登记退款处理工单前，请补充以下信息，以便人工核验：\n\n1. 退款涉及的订单编号\n2. 申请退款的原因\n3. 其他相关业务材料（如有）\n\n另外说明：退款申请的处理窗口为 30 天，办理前必须经过人工审核。我这边只能为您登记处理工单，不能承诺退款已经完成办理。请问是否现在为您登记？"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "e811e38943024f8cbeb54c11b8485359",
+        "ce9e95593832437da5e23c54169fc00d",
+        "8bc0e87f527f45df82d6a5e6950594de"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "refund-clarification",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-clarification",
+        "instance_id": "494d3e56e14747ebb8bd32c47bc8ab06",
+        "thread_id": "c29ced92-4c87-49f9-a0d0-6011f7982f20",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 2,
+        "executed_turn_count": 2,
+        "turns": [
+          {
+            "run_id": "1cc9fc45-6e01-491b-881e-96f5a76d6f97",
+            "turn_id": "76552123-3737-4b86-beb2-65528681a5c1",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "bac5e7ad50726a2367716379604e5842a3b7f00579e655a2b3f6ca0559841b45",
+            "input_tokens": 1240,
+            "output_tokens": 25,
+            "cost_amount": "0.00268000",
+            "cost_currency": "CNY"
+          },
+          {
+            "run_id": "a1ee324e-f94c-44a5-b39e-9d63b0877d99",
+            "turn_id": "f9f3c3c9-0fd3-4f79-85d0-6736b50d2e79",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "6e3adc07f983a1370dd1fae02646da0cde4f6c2f1913766abb1cfaba2ee92688",
+            "input_tokens": 1623,
+            "output_tokens": 94,
+            "cost_amount": "0.00399800",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 5062.231099989731,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 4,
+            "known_usage_count": 4,
+            "known_cost_count": 4
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0026999623514711857,
+              0.005200039595365524,
+              0.0026999623514711857,
+              0.005099980626255274
+            ],
+            "model.generate": [
+              1013.8588999980129,
+              889.1906999633648,
+              962.5894000055268,
+              944.5975000271574
+            ],
+            "agent.run": [
+              1304.8267999547534,
+              2311.424600018654
+            ],
+            "tool.execute": [
+              13.23069998761639
+            ],
+            "approval.wait": [
+              0.024800014216452837,
+              0.018799968529492617
+            ],
+            "approval.execute": [
+              29.0406999993138
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 1,
+      "approval_states": [
+        {
+          "decision": "APPROVED",
+          "execution": "SUCCEEDED"
+        }
+      ],
+      "outputs": [
+        "您好，我可以帮您登记退款申请的处理工单。请先提供您的客户编号，我查询后为您办理。",
+        "已为您登记退款处理工单：\n\n- 工单编号：T-E2BF32FD1A8641BA\n- 状态：OPEN（待业务处理）\n- 客户：虚构测试客户\n\n说明：本次创建审批已通过，工单已登记，后续将由人工进行审核与办理。退款申请的处理窗口为 30 天，办理前必须人工审核。我无法承诺退款已完成，请您耐心等待人工处理结果。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "ab33dfa0aec042e6958cb9e590f4d88a",
+        "d00456e3c31a47fb92ad8b68cf2c3cbe",
+        "066535460de1445ab296bf1583bdc9ab",
+        "00c7d3ac847e4511a0cfad042d53f36f"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "refund-approval_denied",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-approval_denied",
+        "instance_id": "2be5833cf0b2419685cd84dcc15477b9",
+        "thread_id": "abf07634-8249-45d1-b7a8-cb182aa6a246",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "52e92236-205b-4a76-85b0-0308dce03803",
+            "turn_id": "315c52ea-197b-48ac-9a85-5d82332067ec",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "2e7c9cd03e4dab39508b58efc3e5908a775cbe4856df43069219910e637928b8",
+            "input_tokens": 1563,
+            "output_tokens": 120,
+            "cost_amount": "0.00408600",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 3572.4252000218257,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 3,
+            "known_usage_count": 3,
+            "known_cost_count": 3
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.00300002284348011,
+              0.003100023604929447,
+              0.00400003045797348
+            ],
+            "model.generate": [
+              579.098999965936,
+              1264.9859999655746,
+              893.9484999864362
+            ],
+            "tool.execute": [
+              11.15650002611801
+            ],
+            "approval.wait": [
+              0.013100041542202234,
+              0.015500001609325409
+            ],
+            "agent.run": [
+              2249.277999973856
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [
+        {
+          "decision": "DENIED",
+          "execution": "NOT_STARTED"
+        }
+      ],
+      "outputs": [
+        "已为您查询到客户信息（虚构测试客户），但**工单创建审批被拒绝**，因此本次**未创建工单**，我也不会再次申请。\n\n说明：\n- 退款申请政策要求：处理窗口 30 天，办理前必须人工审核；客服只能登记处理工单，不能承诺已完成办理。\n- 本次创建请求未获人工批准，故未登记成功。\n- 该政策未说明是否收费，我无法就费用作任何说明。\n\n如需继续，请补充/确认相关信息后由人工重新评估，或稍后再试。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "7458284429f647b69f85a4d6182aa9b7",
+        "d8ac317a48134022bba1295c99794382",
+        "ff03fa9d7bf943719913ac20f3671b49"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "refund-approval_denied",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-approval_denied",
+        "instance_id": "73045b3d444748f1bd2bff8fef94bd33",
+        "thread_id": "14487ace-9f96-4652-b05a-9b78d4d390c0",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "4f45ce07-76b3-4aeb-aa2d-ae28268afebf",
+            "turn_id": "1bcf211a-8185-49e3-8075-cde6d66f129f",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "aaeb17319b3f1d8d97755db5c0b8941c8ac13156105f440a588b1103676987b7",
+            "input_tokens": 1543,
+            "output_tokens": 103,
+            "cost_amount": "0.00391000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 3919.0463999984786,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 3,
+            "known_usage_count": 3,
+            "known_cost_count": 3
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0026999623514711857,
+              0.004500034265220165,
+              0.00300002284348011
+            ],
+            "model.generate": [
+              557.8974999953061,
+              1324.0062999539077,
+              1135.018500033766
+            ],
+            "tool.execute": [
+              16.71260001603514
+            ],
+            "approval.wait": [
+              0.019599974621087313,
+              0.020600040443241596
+            ],
+            "agent.run": [
+              2326.8066000309773
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [
+        {
+          "decision": "DENIED",
+          "execution": "NOT_STARTED"
+        }
+      ],
+      "outputs": [
+        "已查询到客户（虚构测试客户），但本次工单创建审批**被拒绝**，因此**未创建工单**，我也不会再重复申请。\n\n说明：\n- 退款申请的处理窗口为 30 天，办理前必须人工审核。\n- 客服只能登记处理工单，不能承诺已完成办理。\n- 本次创建审批未通过，故没有生成任何工单编号。\n\n如需继续，请补充/确认相关信息后由人工重新评估，或稍后再试。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "b520ef50217c461c990fce11b55ca613",
+        "788f25e0da1c4613a06145133c705f3b",
+        "a0b7b8671a4641b1bf11451432cc6098"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "refund-approval_denied",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-approval_denied",
+        "instance_id": "ff640dee54184818863e692c0fa0f31f",
+        "thread_id": "1421ebb4-be30-4703-b75d-54ab21a12e2b",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "ad84e2b0-7d94-4a4d-accd-fe2f27d950a3",
+            "turn_id": "64005733-1bd9-4cd6-a871-319ae0d6a02c",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "409663a309e03e678b5b37c7ba75ede53f0e6d273e646b1da0e205c79b807480",
+            "input_tokens": 1560,
+            "output_tokens": 96,
+            "cost_amount": "0.00388800",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 3429.0561000234447,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 3,
+            "known_usage_count": 3,
+            "known_cost_count": 3
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.005700043402612209,
+              0.0025999615900218487,
+              0.003100023604929447
+            ],
+            "model.generate": [
+              544.437000004109,
+              1000.4923000233248,
+              999.0110999788158
+            ],
+            "tool.execute": [
+              14.229999971576035
+            ],
+            "approval.wait": [
+              0.018899969290941954,
+              0.015700003132224083
+            ],
+            "agent.run": [
+              2009.0646000462584
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [
+        {
+          "decision": "DENIED",
+          "execution": "NOT_STARTED"
+        }
+      ],
+      "outputs": [
+        "已为您查询到客户信息（虚构测试客户），但本次工单创建审批**未通过**，因此**没有创建工单**。\n\n说明：\n- 退款申请政策处理窗口为 30 天，办理前必须人工审核。\n- 客服只能登记处理工单，不能承诺已完成办理。\n- 本次创建审批被拒绝，我不会再次申请，也不会声称创建成功。\n\n如需继续，请补充或确认相关信息后由人工重新评估。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "3c295ba353e94c979716844b5621d04b",
+        "1cb842a703f647e3af86e3fd6c1bcd68",
+        "7f5009dfa2af41d5a24eea9f29d958c9"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "warranty-single_hop",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-single_hop",
+        "instance_id": "3194b52196194acb862316bee0ea3de4",
+        "thread_id": "487a1db0-2225-4454-b689-da6f474dde07",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "aa86e954-d223-41ff-8722-baae9e17fdb4",
+            "turn_id": "fe12fc3a-deb7-4ff9-998b-ac48e7ab4f99",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "c12be93a565cc8bc9dc4db12b3d06e7b2c21a9c7d98dd837c9cb814be529c24a",
+            "input_tokens": 1240,
+            "output_tokens": 70,
+            "cost_amount": "0.00304000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1742.533899960108,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0028999638743698597
+            ],
+            "model.generate": [
+              1380.8934000553563
+            ],
+            "agent.run": [
+              1707.9981000279076
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "保修申请的处理窗口是 **12 个月**。\n\n另外提醒一下：按本条虚构测试政策，保修申请在办理前必须登记产品序列号；客服只能登记处理工单，不能承诺已经完成办理。如需登记，请提供客户编号，我会先查询客户并提交创建工单请求（由运行时进行人工审批）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "e0c411044e344477a5395f0aa621e561"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-single_hop",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-single_hop",
+        "instance_id": "340bbe8b4f8c48c59cf3091decd29a49",
+        "thread_id": "71271078-149d-4aa5-bfb2-845ea491d434",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "9bdac807-c028-418b-b5fa-db88e2599671",
+            "turn_id": "3a9fac1f-96d2-4115-8b82-4f7c097cde1a",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "0a1175bc4b31ecade901ceb67293e55708ae27e5a3491a110078ce62500acc8a",
+            "input_tokens": 1240,
+            "output_tokens": 66,
+            "cost_amount": "0.00300800",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1245.7824000157416,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0034999684430658817
+            ],
+            "model.generate": [
+              797.7559000137262
+            ],
+            "agent.run": [
+              1194.7516999789514
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "保修申请的处理窗口是 **12 个月**。\n\n另外提醒一下：按当前政策，办理保修申请前必须登记产品序列号，且客服只能登记处理工单，不能承诺已经完成办理。如需登记，请提供客户编号，我会先查询客户并提交创建工单申请（由人工审批）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "035b6306430a4f5aa279ac001496f303"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-single_hop",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-single_hop",
+        "instance_id": "1c7250fd2ef14eee9bc061e776594213",
+        "thread_id": "0a9f8b56-4c0e-40e0-810f-da9eedd2dbec",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "0b75db2a-3a02-4a2f-832b-74341f2e2bd3",
+            "turn_id": "91b4d006-84bb-4f25-ba7e-8d0129775606",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "c12be93a565cc8bc9dc4db12b3d06e7b2c21a9c7d98dd837c9cb814be529c24a",
+            "input_tokens": 1240,
+            "output_tokens": 70,
+            "cost_amount": "0.00304000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1395.1388000277802,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.002700020559132099
+            ],
+            "model.generate": [
+              1061.745900020469
+            ],
+            "agent.run": [
+              1357.7942000119947
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "保修申请的处理窗口是 **12 个月**。\n\n另外提醒一下：按本条虚构测试政策，保修申请在办理前必须登记产品序列号；客服只能登记处理工单，不能承诺已经完成办理。如需登记，请提供客户编号，我会先查询客户并提交创建工单请求（由运行时进行人工审批）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "4bae9d7b4fb44145b7c10377157645d8"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-multi_hop",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-multi_hop",
+        "instance_id": "1bb1e05d1d464c52b0ce45ec843165aa",
+        "thread_id": "4c444bef-8b86-43c3-9738-e5ae11f714cf",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "7ef725ca-1051-4001-b9d8-6150644fc2db",
+            "turn_id": "6c0c8f77-3723-4f17-9eed-ee43c1ecf2c2",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "1de3f4c1dbbd7e3d215b878221376b7760bbb1d88f836ece525dfe48edfedd3b",
+            "input_tokens": 1248,
+            "output_tokens": 181,
+            "cost_amount": "0.00394400",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 2045.405099983327,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0026999623514711857
+            ],
+            "model.generate": [
+              1671.8803999829106
+            ],
+            "agent.run": [
+              2007.8498999937437
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "保修申请（虚构测试政策）的要求如下：\n\n1. **处理窗口**：12 个月。\n2. **办理前必须登记产品序列号**。\n3. **创建工单前必须查询客户并取得人工审批**；审批被拒绝则不得创建工单。\n4. 客服**只能登记处理工单**，不能承诺已经完成办理。\n\n关于能否直接说“已办好”：**不能**。客服只能登记待处理工单，不能声称保修业务已经完成办理。即使工单创建审批通过、工单已登记，也只表示工单进入待业务处理状态，不代表保修已办结。\n\n另外，该政策未说明是否收费，我不会推测或借用其他政策的费用规则。\n\n如果您需要登记保修工单，请提供客户编号；我会先查询客户，再申请创建工单（由运行时决定是否需人工审批）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "e1f7a4de702c40b6be98cb8b63e0cb63"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-multi_hop",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-multi_hop",
+        "instance_id": "a9959878a1ec463aa098748849127d76",
+        "thread_id": "e189d53d-06a9-488b-8b3a-4ab039834244",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "da081aa7-1cde-48f5-a97a-cdeb56bd5fbf",
+            "turn_id": "48306ee0-6cb4-4f76-ac00-c71f07e39ee5",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "1de3f4c1dbbd7e3d215b878221376b7760bbb1d88f836ece525dfe48edfedd3b",
+            "input_tokens": 1248,
+            "output_tokens": 181,
+            "cost_amount": "0.00394400",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1815.3333999798633,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.00400003045797348
+            ],
+            "model.generate": [
+              1484.8868999979459
+            ],
+            "agent.run": [
+              1778.2011000090279
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "保修申请（虚构测试政策）的要求如下：\n\n1. **处理窗口**：12 个月。\n2. **办理前必须登记产品序列号**。\n3. **创建工单前必须查询客户并取得人工审批**；审批被拒绝则不得创建工单。\n4. 客服**只能登记处理工单**，不能承诺已经完成办理。\n\n关于能否直接说“已办好”：**不能**。客服只能登记待处理工单，不能声称保修业务已经完成办理。即使工单创建审批通过、工单已登记，也只表示工单进入待业务处理状态，不代表保修已办结。\n\n另外，该政策未说明是否收费，我不会推测或借用其他政策的费用规则。\n\n如果您需要登记保修工单，请提供客户编号；我会先查询客户，再申请创建工单（由运行时决定是否需人工审批）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "14789e5f5d6c4ff491f08f30cad41bca"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-multi_hop",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-multi_hop",
+        "instance_id": "982fd9a6c83b4b2584809e6ea7eb01e9",
+        "thread_id": "23edbf67-dadc-492b-8f49-063baa8b7443",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "ab5edaf3-ca00-4b60-8189-594a44ed03f5",
+            "turn_id": "5516f2f0-94bf-496c-a653-55444c082481",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "1de3f4c1dbbd7e3d215b878221376b7760bbb1d88f836ece525dfe48edfedd3b",
+            "input_tokens": 1248,
+            "output_tokens": 181,
+            "cost_amount": "0.00394400",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1867.6718000206165,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0030999653972685337
+            ],
+            "model.generate": [
+              1534.2685999930836
+            ],
+            "agent.run": [
+              1829.8655999824405
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "保修申请（虚构测试政策）的要求如下：\n\n1. **处理窗口**：12 个月。\n2. **办理前必须登记产品序列号**。\n3. **创建工单前必须查询客户并取得人工审批**；审批被拒绝则不得创建工单。\n4. 客服**只能登记处理工单**，不能承诺已经完成办理。\n\n关于能否直接说“已办好”：**不能**。客服只能登记待处理工单，不能声称保修业务已经完成办理。即使工单创建审批通过、工单已登记，也只表示工单进入待业务处理状态，不代表保修已办结。\n\n另外，该政策未说明是否收费，我不会推测或借用其他政策的费用规则。\n\n如果您需要登记保修工单，请提供客户编号；我会先查询客户，再申请创建工单（由运行时决定是否需人工审批）。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "5e3e53045ef442769f93cbabbe364cee"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-unanswerable",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-unanswerable",
+        "instance_id": "4ff71333f856403da8fe12455aff27bd",
+        "thread_id": "1b5c1df4-6e1c-4a31-9843-8ceb8bf1e08f",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "0e5f42d9-cc44-4b06-b460-6361af1af251",
+            "turn_id": "cee6e105-007d-4b12-af04-5ef65cefb9ad",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "691f4cd24b0530d5d72cffed3fa190c295fac02cf5311ffa6ddb0c40a19e3bfd",
+            "input_tokens": 1241,
+            "output_tokens": 76,
+            "cost_amount": "0.00309000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1240.4709999682382,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.004999979864805937
+            ],
+            "model.generate": [
+              899.7425000416115
+            ],
+            "agent.run": [
+              1200.2494999906048
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据现行虚构测试政策，保修申请这一条**没有说明是否收费**，因此我不能推测或从其他政策借用费用规则，无法给出具体手续费金额。\n\n如果您需要办理保修申请，我可以帮您登记处理工单（处理窗口为 12 个月，办理前需登记产品序列号）。请提供您的客户编号，我先为您查询客户信息。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "27b3af92bade429584f52c549c5a800f"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-unanswerable",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-unanswerable",
+        "instance_id": "fd2e90bfe9914883a593d2fe69a6b69a",
+        "thread_id": "2056ffcc-31bb-487f-a3f0-5d68b3e80855",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "3d2433c4-fa3d-4114-ad47-0c0319997f46",
+            "turn_id": "8077b313-e5db-4374-8375-abb0a31df272",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "691f4cd24b0530d5d72cffed3fa190c295fac02cf5311ffa6ddb0c40a19e3bfd",
+            "input_tokens": 1241,
+            "output_tokens": 76,
+            "cost_amount": "0.00309000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1422.3225999739952,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0048999791033566
+            ],
+            "model.generate": [
+              1031.868599995505
+            ],
+            "agent.run": [
+              1380.6446000235155
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据现行虚构测试政策，保修申请这一条**没有说明是否收费**，因此我不能推测或从其他政策借用费用规则，无法给出具体手续费金额。\n\n如果您需要办理保修申请，我可以帮您登记处理工单（处理窗口为 12 个月，办理前需登记产品序列号）。请提供您的客户编号，我先为您查询客户信息。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "502d9243594e44c5b52ab90738e7c7a0"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-unanswerable",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-unanswerable",
+        "instance_id": "d72a5993dad04eab8c9d3b5481037b8e",
+        "thread_id": "b917b56b-d810-44f9-b30d-3db1354fb3d3",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "1a70631f-26dc-4611-956e-0a082ef9e40f",
+            "turn_id": "aa491966-f06a-4f3c-abd8-2fddcca6fa05",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "2849baff9fe034904707fd2ab19d80e1d41641e2ba1263699f458bc64712d2b7",
+            "input_tokens": 1241,
+            "output_tokens": 76,
+            "cost_amount": "0.00309000",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 1110.8137000119314,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 1,
+            "known_usage_count": 1,
+            "known_cost_count": 1
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.003300025127828121
+            ],
+            "model.generate": [
+              750.0684999977238
+            ],
+            "agent.run": [
+              1074.9069000012241
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        "根据现行虚构测试政策，保修申请这一项**没有说明是否收费**，因此我不能推测或从其他政策借用费用规则，也无法给出具体手续费金额。\n\n如果您需要办理保修申请，我可以帮您登记处理工单（处理窗口为 12 个月，办理前需登记产品序列号）。请提供您的客户编号，我先为您查询客户信息。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "9cff4dfc887d4041b8b60f19053b753b"
+      ],
+      "write_proposal_count": 0
+    },
+    {
+      "case_id": "warranty-clarification",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-clarification",
+        "instance_id": "7089bfae6c9743b7ab3798c028e95341",
+        "thread_id": "2df2cd43-6e38-4ddb-8219-c514efb952b1",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 2,
+        "executed_turn_count": 2,
+        "turns": [
+          {
+            "run_id": "5a6cd749-4a75-4d6c-95eb-86b0098ae51a",
+            "turn_id": "127a021d-2274-4311-ba7b-55591981e8bb",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "2415559607ce84f231eb093fa926b6ad56373897572754444758aed747c70252",
+            "input_tokens": 1240,
+            "output_tokens": 104,
+            "cost_amount": "0.00331200",
+            "cost_currency": "CNY"
+          },
+          {
+            "run_id": "4f6d65f7-3abf-44ee-9a91-71be264360c3",
+            "turn_id": "17407184-a93c-40c8-a89d-a7389f0f67e1",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "791438b5356ddc5e6ca347757ddbb0e5bcc2187642f8fb39343aabd9a92e31fd",
+            "input_tokens": 1602,
+            "output_tokens": 171,
+            "cost_amount": "0.00457200",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 5481.950599991251,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 4,
+            "known_usage_count": 4,
+            "known_cost_count": 4
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.002700020559132099,
+              0.0029999646358191967,
+              0.002600019797682762,
+              0.007599999662488699
+            ],
+            "model.generate": [
+              1099.7515000053681,
+              934.8250000039116,
+              777.5477999821305,
+              1406.270100036636
+            ],
+            "agent.run": [
+              1392.4267999827862,
+              2194.6666999720037
+            ],
+            "tool.execute": [
+              13.375000038649887
+            ],
+            "approval.wait": [
+              0.01479999627918005,
+              0.013599987141788006
+            ],
+            "approval.execute": [
+              34.8861999809742
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 1,
+      "approval_states": [
+        {
+          "decision": "APPROVED",
+          "execution": "SUCCEEDED"
+        }
+      ],
+      "outputs": [
+        "您好，我可以帮您登记保修申请的处理工单。根据政策，保修申请的处理窗口为 12 个月，办理前需要登记产品序列号。\n\n在为您登记之前，请提供以下信息：\n\n1. **客户编号**（用于查询客户信息）\n2. **产品序列号**（保修办理所需材料）\n\n另外提醒您：客服只能登记处理工单，不能承诺办理已经完成；工单创建需要经过人工审批。请提供上述信息，我会先为您查询客户。",
+        "已为您登记待处理工单：\n\n- **工单编号**：T-B08BBF48983C449F\n- **客户编号**：pilot-dd40ca28d00d4755846b8cfe3d176107\n- **事项**：保修申请 — 产品序列号 SYNTH-SN-001，故障为无法启动\n- **状态**：创建审批已通过，工单已登记，当前为 OPEN（待业务处理）\n\n说明：\n1. 本次创建审批已通过，工单已成功登记，无需再等待创建审批。\n2. 该工单仍需人工进行后续业务办理与材料核验，我无法承诺保修已完成。\n3. 本政策未说明是否收费，因此不作任何费用说明或推测。\n\n如还有其他需要，请告知。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "3c5b82e022d34e04a8573e3a29d18e0e",
+        "71bb154345484038a28701b3256c8c82",
+        "92c08f4ebbe0416ea1182caef6699b0e",
+        "05b8b71aa7924168afec1158e00a16b6"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "warranty-clarification",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-clarification",
+        "instance_id": "619e4cad13fe4e28b1b113a5d1788a1b",
+        "thread_id": "5df30769-034b-4912-ae93-33a214db8196",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 2,
+        "executed_turn_count": 2,
+        "turns": [
+          {
+            "run_id": "acd8b643-4d4d-48fa-a8e2-372a435e4e1b",
+            "turn_id": "0c13dee7-9eb5-444d-be16-db3823e5e501",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "d8d3b91749991f7af166c22afa7542d96a521ebf3a0f3c9e4e45bc7fc9255f0c",
+            "input_tokens": 1240,
+            "output_tokens": 88,
+            "cost_amount": "0.00318400",
+            "cost_currency": "CNY"
+          },
+          {
+            "run_id": "fb667cd3-0558-42d2-88d0-42bcac0e36f1",
+            "turn_id": "f0815474-651f-4553-bfd9-f09e4baf1ee4",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "e31f1237d933b5d31f69e4781d287fe703b2c84818aa0783c89c041951347759",
+            "input_tokens": 1692,
+            "output_tokens": 166,
+            "cost_amount": "0.00471200",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 4916.803699976299,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 4,
+            "known_usage_count": 4,
+            "known_cost_count": 4
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.007199996616691351,
+              0.0039000296965241432,
+              0.003200024366378784,
+              0.004099973011761904
+            ],
+            "model.generate": [
+              893.7288000015542,
+              709.1450999723747,
+              826.0206000413746,
+              1138.774299994111
+            ],
+            "agent.run": [
+              1262.3158000060357,
+              2012.3528999974951
+            ],
+            "tool.execute": [
+              18.76470004208386
+            ],
+            "approval.wait": [
+              0.02400000812485814,
+              0.013599987141788006
+            ],
+            "approval.execute": [
+              26.056700036861002
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 1,
+      "approval_states": [
+        {
+          "decision": "APPROVED",
+          "execution": "SUCCEEDED"
+        }
+      ],
+      "outputs": [
+        "您好，我可以帮您登记保修申请的处理工单。根据政策，保修申请需要先登记产品序列号，并且创建工单前需要查询客户信息并取得人工审批。\n\n请提供以下信息：\n1. 您的客户编号（用于查询客户）\n2. 产品序列号\n\n另外，请简要说明一下您的保修问题。收到客户编号后，我会先查询客户，再为您申请创建工单。",
+        "已为您登记保修处理工单，创建审批已通过。详情如下：\n\n- **工单编号**：T-D8C162E9182A42F7\n- **客户编号**：pilot-6679542346264828833d7ba9120a3f45\n- **产品序列号**：SYNTH-SN-001\n- **故障描述**：无法启动\n- **状态**：OPEN（待业务处理）\n\n说明：\n- 该工单已登记，后续将由人工进行业务办理与材料核验。\n- 保修申请的处理窗口为 12 个月，办理前需登记产品序列号（已登记）。\n- 我无法承诺保修业务已完成，具体结果以人工审核办理为准。\n\n如还有其他需要，请随时告知。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "ac37333f1d7e416b9c12c8a0cc510bc4",
+        "5c846fc24d96487b91bf3dce9991e2d2",
+        "b53cd154704b4ccea29f2915c82068fb",
+        "83aeee4539764ff59efac84a369a0127"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "warranty-clarification",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-clarification",
+        "instance_id": "7b70dc812f9346aab3c29603d0614d7c",
+        "thread_id": "d1fc70ee-e1fb-4740-a388-1ec9a3adca09",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 2,
+        "executed_turn_count": 2,
+        "turns": [
+          {
+            "run_id": "01a0a9dd-b609-4454-b080-f24d218ca9a1",
+            "turn_id": "f1fd6383-0683-41c1-a3ba-100620c47267",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "b31c6e7c98a7eb302d39dd2abb9dcacb01f33fd7c2e346878e60dc8967a05459",
+            "input_tokens": 1240,
+            "output_tokens": 109,
+            "cost_amount": "0.00335200",
+            "cost_currency": "CNY"
+          },
+          {
+            "run_id": "301e9aa1-39ea-4ec3-81c4-a726358678af",
+            "turn_id": "e0c37e45-cdbc-4d3d-9d6c-d1eed626ee75",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "d9d72792f47c4bc246f7f9b71e50e3c702074ac07fe4003599946003849f5107",
+            "input_tokens": 1592,
+            "output_tokens": 188,
+            "cost_amount": "0.00468800",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 5059.128299995791,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 4,
+            "known_usage_count": 4,
+            "known_cost_count": 4
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0030999653972685337,
+              0.002600019797682762,
+              0.002600019797682762,
+              0.004299974534660578
+            ],
+            "model.generate": [
+              994.0995999495499,
+              828.6226000054739,
+              665.0306999799795,
+              1264.7310000029393
+            ],
+            "agent.run": [
+              1294.7047000052407,
+              1956.765400012955
+            ],
+            "tool.execute": [
+              12.691100011579692
+            ],
+            "approval.wait": [
+              0.01580000389367342,
+              0.015400000847876072
+            ],
+            "approval.execute": [
+              33.59810000983998
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 1,
+      "approval_states": [
+        {
+          "decision": "APPROVED",
+          "execution": "SUCCEEDED"
+        }
+      ],
+      "outputs": [
+        "您好，我可以帮您登记保修申请的处理工单。根据政策，保修申请需要先登记产品序列号，并且创建工单前需要查询客户信息并取得人工审批。\n\n请提供以下信息：\n\n1. **客户编号**（用于查询客户信息）\n2. **产品序列号**（保修办理前必须登记）\n\n另外，方便的话请说明一下产品故障情况，我会一并写入工单备注，供人工核验。\n\n收到客户编号后，我会先查询客户，再为您申请创建工单。",
+        "已为您登记待处理工单：\n\n- **工单编号**：T-34B85F57F57F4434\n- **客户编号**：pilot-4b42efed25234da68878a974bdec06ed\n- **类型**：保修申请\n- **产品序列号**：SYNTH-SN-001\n- **故障描述**：无法启动\n\n说明：\n1. 本次工单的**创建审批已通过**，工单已登记，当前状态为 OPEN（待业务处理）。\n2. 保修申请的处理窗口为 12 个月，办理前需登记产品序列号（已记录）。\n3. 客服只能登记处理工单，**不代表保修业务已完成**，后续需人工审核办理。\n4. 该政策未说明是否收费，因此不作任何费用承诺或推测。\n\n如还有其他需要，请告知。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "659cbbfe4d5e417b977893863671d369",
+        "5f19edf44d584b318c48e5952982a12c",
+        "c52489f888a8400da6641d07924a4bbb",
+        "f46d24d704ee44cfaa70ebdc0df78521"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "warranty-approval_denied",
+      "repetition": 0,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-approval_denied",
+        "instance_id": "7cbfcce86fb3422493085a228eeb4af5",
+        "thread_id": "f333e154-ded2-45a4-9d5b-fdeefdd5d547",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "bc512f4a-4ab3-4d8a-bc12-6d3db3b24e55",
+            "turn_id": "1196b125-c2e9-4feb-afb8-fe42fda857e0",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "e657140256197f5a04241686c435bd82088d6886476219c4678519ecc4222e79",
+            "input_tokens": 1553,
+            "output_tokens": 136,
+            "cost_amount": "0.00419400",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 4001.1047000298277,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 3,
+            "known_usage_count": 3,
+            "known_cost_count": 3
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.004599976819008589,
+              0.00300002284348011,
+              0.003600027412176132
+            ],
+            "model.generate": [
+              615.3061999939382,
+              1437.8491999814287,
+              1029.5705000171438
+            ],
+            "tool.execute": [
+              17.969799984712154
+            ],
+            "approval.wait": [
+              0.03489997470751405,
+              0.01479999627918005
+            ],
+            "agent.run": [
+              2528.8384999730624
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [
+        {
+          "decision": "DENIED",
+          "execution": "NOT_STARTED"
+        }
+      ],
+      "outputs": [
+        "抱歉，本次工单创建审批**未通过**，因此**没有创建工单**，我也不会再次提交申请。\n\n说明如下：\n- 已查询到客户：虚构测试客户（pilot-f45cd9bc6bbd483aa9cdf98121d95269）。\n- 保修申请政策要求：处理窗口 12 个月，办理前必须登记产品序列号；创建工单前须查询客户并取得人工审批。\n- 本次创建审批被拒绝，故未登记工单，也无法承诺任何办理结果。\n\n如需继续，建议您补充产品序列号后重新发起，届时会再次走人工审批流程。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "84633565e4cd40849d6b866a4763f9af",
+        "e8d5f513e9d54efda13983908931eae5",
+        "2efe1446bac345428a8d634b299a9441"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "warranty-approval_denied",
+      "repetition": 1,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-approval_denied",
+        "instance_id": "9de27c00a8df4d229416d20a376ab223",
+        "thread_id": "ba76c19d-a737-4f7c-9484-2f5abab098b6",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "965cc0b0-6a90-49e9-aa3f-7b0aca277e87",
+            "turn_id": "093514f9-cedb-466d-985e-97a776b890bc",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "fd72e050c1613f48dc6ce0103720ae5cae5700fe40bcf453dc36661aefd6b5e0",
+            "input_tokens": 1547,
+            "output_tokens": 136,
+            "cost_amount": "0.00418200",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 3852.9202999779955,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 3,
+            "known_usage_count": 3,
+            "known_cost_count": 3
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.003100023604929447,
+              0.008200004231184721,
+              0.003700028173625469
+            ],
+            "model.generate": [
+              924.6663999510929,
+              980.9360000072047,
+              1044.112999981735
+            ],
+            "tool.execute": [
+              13.550400035455823
+            ],
+            "approval.wait": [
+              0.017599959392100573,
+              0.014499993994832039
+            ],
+            "agent.run": [
+              2361.7337999748997
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [
+        {
+          "decision": "DENIED",
+          "execution": "NOT_STARTED"
+        }
+      ],
+      "outputs": [
+        "工单创建审批**未通过**，因此**没有创建工单**，我也不会再次提交申请。\n\n情况说明：\n- 客户 `pilot-601bb19318c5491386596889d904117e`（虚构测试客户）查询成功。\n- 保修申请的处理窗口为 12 个月，办理前必须登记产品序列号；本次提交中该材料缺失，已标注为待人工补充。\n- 但创建工单所需的人工审批被拒绝，故本次未登记任何工单。\n\n如需继续，请补充产品序列号，或由人工重新评估审批。我无法承诺保修业务已办理或已完成。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "9164bec72c9649908f43f753e4cfb089",
+        "f8346e1243a24d018d0247042931fe71",
+        "21b6a71d4c4c47099bcdf88b973f7995"
+      ],
+      "write_proposal_count": 1
+    },
+    {
+      "case_id": "warranty-approval_denied",
+      "repetition": 2,
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "warranty-approval_denied",
+        "instance_id": "6080550592224cbca3d05631e1d2afb6",
+        "thread_id": "028a6aac-1dab-425b-81a2-e08ea8dcf9f9",
+        "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+        "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "0c6cac7f-0496-431c-bae1-0d6ac4c24593",
+            "turn_id": "ca308785-68a8-4a6e-9654-7bdd88bc604b",
+            "status": "SUCCEEDED",
+            "failure_code": null,
+            "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+            "output_hash": "82f96859314ec038597bcf56ef6027a55f3f81d83911abf7ca364be1fd40de7a",
+            "input_tokens": 1571,
+            "output_tokens": 94,
+            "cost_amount": "0.00389400",
+            "cost_currency": "CNY"
+          }
+        ],
+        "approval_decision_count": 1,
+        "unused_approval_decision_count": 0,
+        "execution_complete": true,
+        "stop_reason": null,
+        "latency_ms": 3728.495199989993,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": true,
+            "provider_attempt_count": 3,
+            "known_usage_count": 3,
+            "known_cost_count": 3
+          },
+          "stage_durations_ms": {
+            "agent.context_budget": [
+              0.0026999623514711857,
+              0.003400025889277458,
+              0.0029999646358191967
+            ],
+            "model.generate": [
+              934.8386999918148,
+              1073.9840000169352,
+              894.8019000235945
+            ],
+            "tool.execute": [
+              11.33869995828718
+            ],
+            "approval.wait": [
+              0.01409999094903469,
+              0.01379998866468668
+            ],
+            "agent.run": [
+              2418.3023999794386
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": true,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [
+        {
+          "decision": "DENIED",
+          "execution": "NOT_STARTED"
+        }
+      ],
+      "outputs": [
+        "已查询到客户（虚构测试客户），但本次工单创建审批**被拒绝**，因此**未创建工单**。\n\n说明：\n- 保修申请政策要求办理前登记产品序列号，本次提交中已标注\"产品序列号缺失，待人工补充\"。\n- 由于创建审批未通过，我不能再次申请，也不能声称工单已创建成功。\n\n如需继续，请补充产品序列号，或确认后续处理方式。"
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW",
+      "attack_entry": null,
+      "attack": false,
+      "model_attempt_ids": [
+        "899001ecf65b46cf9608c16e966435d3",
+        "9f7414d6fd72489b9e056757c5b1aba0",
+        "eb717bf0a18c4749b6f68f8a68a2c4ae"
+      ],
+      "write_proposal_count": 1
+    }
+  ],
+  "baseline_agent_version_id": "f048eb0a-01e7-4778-b547-541559037341",
+  "baseline_spec_hash": "97e5f48a33fb16290fdd6f8901056b58da0de56cf33d27fe281da3a8a01c4d9f",
+  "changed_spec_sections": [
+    "prompt"
+  ],
+  "prompt_revision": "state-clarity",
+  "agent_version_id": "e020b744-d360-4268-99df-1b4e13ffab9b",
+  "resolved_spec_hash": "2db2a54d03022e1364f581a05c168db68f48b3b37b78669d6c2d0dd0bfb3b157",
+  "workspace_id": "ce4d1226-3ea6-4033-ba82-751d5f7e2325",
+  "calls": [
+    {
+      "attempt_id": "6e05c3e6e7894f47bc825b969765f458",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 58,
+        "total_tokens": 1298,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.002944"
+    },
+    {
+      "attempt_id": "19848347246546c2a8eb852615fb8ccc",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 56,
+        "total_tokens": 1296,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.002928"
+    },
+    {
+      "attempt_id": "298e8155a33840ceb2e901d9ae1c0cd5",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 53,
+        "total_tokens": 1293,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.002904"
+    },
+    {
+      "attempt_id": "e98ebd5c262349f6a465f1dabf6b771f",
+      "usage": {
+        "input_tokens": 1248,
+        "output_tokens": 104,
+        "total_tokens": 1352,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003328"
+    },
+    {
+      "attempt_id": "3110a2f653414daeb3cbe717636e1f07",
+      "usage": {
+        "input_tokens": 1248,
+        "output_tokens": 89,
+        "total_tokens": 1337,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003208"
+    },
+    {
+      "attempt_id": "4b771d07f4304a9ba2da3dd2e3cc2dc4",
+      "usage": {
+        "input_tokens": 1248,
+        "output_tokens": 98,
+        "total_tokens": 1346,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00328"
+    },
+    {
+      "attempt_id": "dc8d062622ee4d6facb7382335513002",
+      "usage": {
+        "input_tokens": 1241,
+        "output_tokens": 76,
+        "total_tokens": 1317,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00309"
+    },
+    {
+      "attempt_id": "9a5f489a03ac426a9d8738c55beb5f8f",
+      "usage": {
+        "input_tokens": 1241,
+        "output_tokens": 65,
+        "total_tokens": 1306,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003002"
+    },
+    {
+      "attempt_id": "a2b07b476c3449f6a9a65be7d183da50",
+      "usage": {
+        "input_tokens": 1241,
+        "output_tokens": 84,
+        "total_tokens": 1325,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003154"
+    },
+    {
+      "attempt_id": "7ecce1d5b2c742adb27e29b83605e895",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 25,
+        "total_tokens": 1265,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00268"
+    },
+    {
+      "attempt_id": "5ff7af2d24814bfa9e3605c1184a2210",
+      "usage": {
+        "input_tokens": 1297,
+        "output_tokens": 62,
+        "total_tokens": 1359,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00309"
+    },
+    {
+      "attempt_id": "8de988ea85924d83b568c99cc74eadff",
+      "usage": {
+        "input_tokens": 1425,
+        "output_tokens": 118,
+        "total_tokens": 1543,
+        "cached_tokens": 1280
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.003794"
+    },
+    {
+      "attempt_id": "c04b1276c5cd4a9597f8b81de4f90008",
+      "usage": {
+        "input_tokens": 1617,
+        "output_tokens": 122,
+        "total_tokens": 1739,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00421"
+    },
+    {
+      "attempt_id": "e811e38943024f8cbeb54c11b8485359",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 25,
+        "total_tokens": 1265,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00268"
+    },
+    {
+      "attempt_id": "ce9e95593832437da5e23c54169fc00d",
+      "usage": {
+        "input_tokens": 1296,
+        "output_tokens": 61,
+        "total_tokens": 1357,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00308"
+    },
+    {
+      "attempt_id": "8bc0e87f527f45df82d6a5e6950594de",
+      "usage": {
+        "input_tokens": 1422,
+        "output_tokens": 97,
+        "total_tokens": 1519,
+        "cached_tokens": 1280
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00362"
+    },
+    {
+      "attempt_id": "ab33dfa0aec042e6958cb9e590f4d88a",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 25,
+        "total_tokens": 1265,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00268"
+    },
+    {
+      "attempt_id": "d00456e3c31a47fb92ad8b68cf2c3cbe",
+      "usage": {
+        "input_tokens": 1299,
+        "output_tokens": 64,
+        "total_tokens": 1363,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00311"
+    },
+    {
+      "attempt_id": "066535460de1445ab296bf1583bdc9ab",
+      "usage": {
+        "input_tokens": 1431,
+        "output_tokens": 117,
+        "total_tokens": 1548,
+        "cached_tokens": 1280
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.003798"
+    },
+    {
+      "attempt_id": "00c7d3ac847e4511a0cfad042d53f36f",
+      "usage": {
+        "input_tokens": 1623,
+        "output_tokens": 94,
+        "total_tokens": 1717,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003998"
+    },
+    {
+      "attempt_id": "7458284429f647b69f85a4d6182aa9b7",
+      "usage": {
+        "input_tokens": 1268,
+        "output_tokens": 73,
+        "total_tokens": 1341,
+        "cached_tokens": 1024
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00312"
+    },
+    {
+      "attempt_id": "d8ac317a48134022bba1295c99794382",
+      "usage": {
+        "input_tokens": 1406,
+        "output_tokens": 111,
+        "total_tokens": 1517,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.0037"
+    },
+    {
+      "attempt_id": "ff03fa9d7bf943719913ac20f3671b49",
+      "usage": {
+        "input_tokens": 1563,
+        "output_tokens": 120,
+        "total_tokens": 1683,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.004086"
+    },
+    {
+      "attempt_id": "b520ef50217c461c990fce11b55ca613",
+      "usage": {
+        "input_tokens": 1265,
+        "output_tokens": 70,
+        "total_tokens": 1335,
+        "cached_tokens": 1024
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00309"
+    },
+    {
+      "attempt_id": "788f25e0da1c4613a06145133c705f3b",
+      "usage": {
+        "input_tokens": 1397,
+        "output_tokens": 100,
+        "total_tokens": 1497,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.003594"
+    },
+    {
+      "attempt_id": "a0b7b8671a4641b1bf11451432cc6098",
+      "usage": {
+        "input_tokens": 1543,
+        "output_tokens": 103,
+        "total_tokens": 1646,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00391"
+    },
+    {
+      "attempt_id": "3c295ba353e94c979716844b5621d04b",
+      "usage": {
+        "input_tokens": 1269,
+        "output_tokens": 74,
+        "total_tokens": 1343,
+        "cached_tokens": 1024
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00313"
+    },
+    {
+      "attempt_id": "1cb842a703f647e3af86e3fd6c1bcd68",
+      "usage": {
+        "input_tokens": 1409,
+        "output_tokens": 105,
+        "total_tokens": 1514,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.003658"
+    },
+    {
+      "attempt_id": "7f5009dfa2af41d5a24eea9f29d958c9",
+      "usage": {
+        "input_tokens": 1560,
+        "output_tokens": 96,
+        "total_tokens": 1656,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003888"
+    },
+    {
+      "attempt_id": "e0c411044e344477a5395f0aa621e561",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 70,
+        "total_tokens": 1310,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00304"
+    },
+    {
+      "attempt_id": "035b6306430a4f5aa279ac001496f303",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 66,
+        "total_tokens": 1306,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003008"
+    },
+    {
+      "attempt_id": "4bae9d7b4fb44145b7c10377157645d8",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 70,
+        "total_tokens": 1310,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00304"
+    },
+    {
+      "attempt_id": "e1f7a4de702c40b6be98cb8b63e0cb63",
+      "usage": {
+        "input_tokens": 1248,
+        "output_tokens": 181,
+        "total_tokens": 1429,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003944"
+    },
+    {
+      "attempt_id": "14789e5f5d6c4ff491f08f30cad41bca",
+      "usage": {
+        "input_tokens": 1248,
+        "output_tokens": 181,
+        "total_tokens": 1429,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003944"
+    },
+    {
+      "attempt_id": "5e3e53045ef442769f93cbabbe364cee",
+      "usage": {
+        "input_tokens": 1248,
+        "output_tokens": 181,
+        "total_tokens": 1429,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003944"
+    },
+    {
+      "attempt_id": "27b3af92bade429584f52c549c5a800f",
+      "usage": {
+        "input_tokens": 1241,
+        "output_tokens": 76,
+        "total_tokens": 1317,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00309"
+    },
+    {
+      "attempt_id": "502d9243594e44c5b52ab90738e7c7a0",
+      "usage": {
+        "input_tokens": 1241,
+        "output_tokens": 76,
+        "total_tokens": 1317,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00309"
+    },
+    {
+      "attempt_id": "9cff4dfc887d4041b8b60f19053b753b",
+      "usage": {
+        "input_tokens": 1241,
+        "output_tokens": 76,
+        "total_tokens": 1317,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.00309"
+    },
+    {
+      "attempt_id": "3c5b82e022d34e04a8573e3a29d18e0e",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 104,
+        "total_tokens": 1344,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003312"
+    },
+    {
+      "attempt_id": "71bb154345484038a28701b3256c8c82",
+      "usage": {
+        "input_tokens": 1394,
+        "output_tokens": 69,
+        "total_tokens": 1463,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00334"
+    },
+    {
+      "attempt_id": "92c08f4ebbe0416ea1182caef6699b0e",
+      "usage": {
+        "input_tokens": 1525,
+        "output_tokens": 115,
+        "total_tokens": 1640,
+        "cached_tokens": 1280
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.00397"
+    },
+    {
+      "attempt_id": "05b8b71aa7924168afec1158e00a16b6",
+      "usage": {
+        "input_tokens": 1602,
+        "output_tokens": 171,
+        "total_tokens": 1773,
+        "cached_tokens": 1152
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.004572"
+    },
+    {
+      "attempt_id": "ac37333f1d7e416b9c12c8a0cc510bc4",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 88,
+        "total_tokens": 1328,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003184"
+    },
+    {
+      "attempt_id": "5c846fc24d96487b91bf3dce9991e2d2",
+      "usage": {
+        "input_tokens": 1377,
+        "output_tokens": 69,
+        "total_tokens": 1446,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.003306"
+    },
+    {
+      "attempt_id": "b53cd154704b4ccea29f2915c82068fb",
+      "usage": {
+        "input_tokens": 1507,
+        "output_tokens": 107,
+        "total_tokens": 1614,
+        "cached_tokens": 1280
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.00387"
+    },
+    {
+      "attempt_id": "83aeee4539764ff59efac84a369a0127",
+      "usage": {
+        "input_tokens": 1692,
+        "output_tokens": 166,
+        "total_tokens": 1858,
+        "cached_tokens": 1536
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.004712"
+    },
+    {
+      "attempt_id": "659cbbfe4d5e417b977893863671d369",
+      "usage": {
+        "input_tokens": 1240,
+        "output_tokens": 109,
+        "total_tokens": 1349,
+        "cached_tokens": 1024
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003352"
+    },
+    {
+      "attempt_id": "5f19edf44d584b318c48e5952982a12c",
+      "usage": {
+        "input_tokens": 1398,
+        "output_tokens": 68,
+        "total_tokens": 1466,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.00334"
+    },
+    {
+      "attempt_id": "c52489f888a8400da6641d07924a4bbb",
+      "usage": {
+        "input_tokens": 1527,
+        "output_tokens": 107,
+        "total_tokens": 1634,
+        "cached_tokens": 1280
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.00391"
+    },
+    {
+      "attempt_id": "f46d24d704ee44cfaa70ebdc0df78521",
+      "usage": {
+        "input_tokens": 1592,
+        "output_tokens": 188,
+        "total_tokens": 1780,
+        "cached_tokens": 1152
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.004688"
+    },
+    {
+      "attempt_id": "84633565e4cd40849d6b866a4763f9af",
+      "usage": {
+        "input_tokens": 1265,
+        "output_tokens": 72,
+        "total_tokens": 1337,
+        "cached_tokens": 1024
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.003106"
+    },
+    {
+      "attempt_id": "e8d5f513e9d54efda13983908931eae5",
+      "usage": {
+        "input_tokens": 1399,
+        "output_tokens": 108,
+        "total_tokens": 1507,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.003662"
+    },
+    {
+      "attempt_id": "2efe1446bac345428a8d634b299a9441",
+      "usage": {
+        "input_tokens": 1553,
+        "output_tokens": 136,
+        "total_tokens": 1689,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.004194"
+    },
+    {
+      "attempt_id": "9164bec72c9649908f43f753e4cfb089",
+      "usage": {
+        "input_tokens": 1262,
+        "output_tokens": 69,
+        "total_tokens": 1331,
+        "cached_tokens": 1024
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.003076"
+    },
+    {
+      "attempt_id": "f8346e1243a24d018d0247042931fe71",
+      "usage": {
+        "input_tokens": 1390,
+        "output_tokens": 111,
+        "total_tokens": 1501,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.003668"
+    },
+    {
+      "attempt_id": "21b6a71d4c4c47099bcdf88b973f7995",
+      "usage": {
+        "input_tokens": 1547,
+        "output_tokens": 136,
+        "total_tokens": 1683,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.004182"
+    },
+    {
+      "attempt_id": "899001ecf65b46cf9608c16e966435d3",
+      "usage": {
+        "input_tokens": 1269,
+        "output_tokens": 76,
+        "total_tokens": 1345,
+        "cached_tokens": 1024
+      },
+      "tool_names": [
+        "query_customer"
+      ],
+      "upper_estimated_cost_cny": "0.003146"
+    },
+    {
+      "attempt_id": "9f7414d6fd72489b9e056757c5b1aba0",
+      "usage": {
+        "input_tokens": 1411,
+        "output_tokens": 114,
+        "total_tokens": 1525,
+        "cached_tokens": 1152
+      },
+      "tool_names": [
+        "create_ticket"
+      ],
+      "upper_estimated_cost_cny": "0.003734"
+    },
+    {
+      "attempt_id": "eb717bf0a18c4749b6f68f8a68a2c4ae",
+      "usage": {
+        "input_tokens": 1571,
+        "output_tokens": 94,
+        "total_tokens": 1665,
+        "cached_tokens": 1408
+      },
+      "tool_names": [],
+      "upper_estimated_cost_cny": "0.003894"
+    }
+  ],
+  "local_failures": [],
+  "allocated_cny": "0.879680",
+  "suite": "pilot",
+  "repetitions": 3
+}

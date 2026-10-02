@@ -1,0 +1,54 @@
+{
+  "provider": "controlled",
+  "side_effect": "durable_sqlite_simulation",
+  "recovery_start": "immediately before launching a fresh recovery process",
+  "timeout_seconds_per_process": 60,
+  "cases": [
+    {
+      "window": "before_effect",
+      "run_id": "8a1ef045-e881-47bc-b7fe-7ae3f9174936",
+      "approval_id": "08aeaa31-01c9-469f-b1ec-613dcc17d030",
+      "run_status": "NEEDS_ATTENTION",
+      "failure_code": "ACTION_CLAIM_LOST",
+      "execution_status": "CLAIMED",
+      "execution_attempt_count": 1,
+      "resume_ms": 519.6583999786526,
+      "dispatch_count": 1,
+      "effect_count": 0,
+      "restart_to_terminal_ms": 2691.4795999764465,
+      "crash_exit_code": 73
+    },
+    {
+      "window": "after_effect",
+      "run_id": "00f55ff9-e82e-4ea3-bb64-18800b5bcf62",
+      "approval_id": "fab5a9b2-c241-46d9-bbd3-b9a1aba7172d",
+      "run_status": "NEEDS_ATTENTION",
+      "failure_code": "ACTION_CLAIM_LOST",
+      "execution_status": "CLAIMED",
+      "execution_attempt_count": 1,
+      "resume_ms": 549.3078000145033,
+      "dispatch_count": 1,
+      "effect_count": 1,
+      "restart_to_terminal_ms": 2726.2801000033505,
+      "crash_exit_code": 73
+    },
+    {
+      "window": "after_approval_commit",
+      "run_id": "1ab6e196-09ed-4e84-9938-c8fa1d371ea0",
+      "approval_id": "21bef2e9-e3a4-4aee-aaba-2fb52a5a2bd9",
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "execution_status": "SUCCEEDED",
+      "execution_attempt_count": 1,
+      "resume_ms": 600.2864000038244,
+      "dispatch_count": 1,
+      "effect_count": 1,
+      "restart_to_terminal_ms": 2729.311500035692,
+      "crash_exit_code": 73
+    }
+  ],
+  "safe_terminal_count": 3,
+  "business_recovered_count": 1,
+  "planned_count": 3,
+  "boundary": "CLAIMED without a recorded outcome requires operator reconciliation; no automatic replay"
+}

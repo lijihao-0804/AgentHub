@@ -1,9 +1,10 @@
 {
   "limit_cny": "5",
-  "known_peak_upper_estimated_cny": "0.604118",
+  "known_peak_upper_estimated_cny": "1.685682",
   "unknown_reserved_cny": "0.0704",
-  "allocated_cny": "0.674518",
-  "known_attempt_count": 183,
+  "allocated_cny": "1.756082",
+  "remaining_cny": "3.243918",
+  "known_attempt_count": 482,
   "unknown_attempt_count": 1,
   "actual_invoice_amount_available": false
 }

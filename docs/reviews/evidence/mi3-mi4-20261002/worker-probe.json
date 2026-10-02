@@ -1,0 +1,14 @@
+{
+  "database": "agenthub_mi34_worker_20261002",
+  "redis": "redis://localhost:6384/0",
+  "worker_pool": "solo",
+  "worker_concurrency": 1,
+  "provider": "cached_local_bge",
+  "HF_HUB_OFFLINE": "1",
+  "device": "cpu",
+  "worker_pid": 37976,
+  "worker_stopped": true,
+  "pytest_exit_code": 1,
+  "worker_log": ".scratch\\mi34-20261002\\worker-probe-cases\\worker.log",
+  "boundary": "real broker/worker/indexing; not a distributed worker process crash test"
+}

@@ -1,0 +1,865 @@
+{
+  "benchmark": "m7e-retrieval-ablation",
+  "dataset_version": "support-dev-policy-retrieval-v1",
+  "dataset_hash": "f1bb7d83dda8648bbb927813aaf562c27fcd8151e289083855ff448175ae32c0",
+  "git_commit": "611a5ec90e5e10e131b7fc8855eea1beb5b14c92",
+  "snapshot_id": "7db4b577-1581-494e-b2ad-962fad33c155",
+  "snapshot_hash": "6f36bbf7c188fe6d161891ce4676f9becfe2b92efee7d5dafff9503e3698c8f5",
+  "strategies": {
+    "DENSE": {
+      "benchmark": "m7e-retrieval-ablation",
+      "strategy": "DENSE",
+      "dataset_version": "support-dev-policy-retrieval-v1",
+      "dataset_hash": "f1bb7d83dda8648bbb927813aaf562c27fcd8151e289083855ff448175ae32c0",
+      "git_commit": "611a5ec90e5e10e131b7fc8855eea1beb5b14c92",
+      "snapshot_id": "7db4b577-1581-494e-b2ad-962fad33c155",
+      "snapshot_hash": "6f36bbf7c188fe6d161891ce4676f9becfe2b92efee7d5dafff9503e3698c8f5",
+      "retrieval_config": {
+        "dense_top_k": 30,
+        "sparse_top_k": 30,
+        "candidate_top_k": 20,
+        "final_top_k": 6,
+        "rrf_k": 60
+      },
+      "embedding_model": "BAAI/bge-m3",
+      "reranker_model": "BAAI/bge-reranker-v2-m3",
+      "sparse_encoder": "BAAI/bge-m3",
+      "device": {
+        "embedding": {
+          "requested": "auto",
+          "torch_version": "2.14.0+cu130",
+          "cuda_available": true,
+          "resolved": "cuda",
+          "cuda_device": "NVIDIA GeForce RTX 3060 Laptop GPU"
+        },
+        "reranker": {
+          "requested": "auto",
+          "torch_version": "2.14.0+cu130",
+          "cuda_available": true,
+          "resolved": "cuda",
+          "cuda_device": "NVIDIA GeForce RTX 3060 Laptop GPU"
+        },
+        "HF_HUB_OFFLINE": "1"
+      },
+      "timestamp": "2026-10-02T13:45:46.654086+00:00",
+      "metrics": {
+        "dev": {
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "latency_p50_ms": 53.554,
+          "latency_p95_ms": 85.006,
+          "sample_count": 24
+        },
+        "holdout": {
+          "status": "NOT_AVAILABLE",
+          "sample_count": 0
+        },
+        "overall": {
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "latency_p50_ms": 53.554,
+          "latency_p95_ms": 85.006
+        }
+      },
+      "failure_analysis": {
+        "dev": [],
+        "holdout": [],
+        "overall": []
+      },
+      "case_metrics": [
+        {
+          "case_id": "refund-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "refund-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "refund-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "warranty-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "warranty-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "warranty-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "delivery-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "delivery-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "delivery-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "cancel-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "cancel-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "cancel-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "account-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "account-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "account-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "billing-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "billing-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "billing-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "return-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "return-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "return-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "subscription-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "subscription-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "subscription-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        }
+      ]
+    },
+    "HYBRID_RERANK": {
+      "benchmark": "m3-retrieval-baseline",
+      "strategy": "HYBRID_RERANK",
+      "dataset_version": "support-dev-policy-retrieval-v1",
+      "dataset_hash": "f1bb7d83dda8648bbb927813aaf562c27fcd8151e289083855ff448175ae32c0",
+      "git_commit": "611a5ec90e5e10e131b7fc8855eea1beb5b14c92",
+      "snapshot_id": "7db4b577-1581-494e-b2ad-962fad33c155",
+      "snapshot_hash": "6f36bbf7c188fe6d161891ce4676f9becfe2b92efee7d5dafff9503e3698c8f5",
+      "retrieval_config": {
+        "dense_top_k": 30,
+        "sparse_top_k": 30,
+        "candidate_top_k": 20,
+        "final_top_k": 6,
+        "rrf_k": 60
+      },
+      "embedding_model": "BAAI/bge-m3",
+      "reranker_model": "BAAI/bge-reranker-v2-m3",
+      "sparse_encoder": "BAAI/bge-m3",
+      "device": {
+        "embedding": {
+          "requested": "auto",
+          "torch_version": "2.14.0+cu130",
+          "cuda_available": true,
+          "resolved": "cuda",
+          "cuda_device": "NVIDIA GeForce RTX 3060 Laptop GPU"
+        },
+        "reranker": {
+          "requested": "auto",
+          "torch_version": "2.14.0+cu130",
+          "cuda_available": true,
+          "resolved": "cuda",
+          "cuda_device": "NVIDIA GeForce RTX 3060 Laptop GPU"
+        },
+        "HF_HUB_OFFLINE": "1"
+      },
+      "timestamp": "2026-10-02T13:45:54.573402+00:00",
+      "metrics": {
+        "dev": {
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 0.979167,
+          "latency_p50_ms": 98.422,
+          "latency_p95_ms": 995.675,
+          "sample_count": 24
+        },
+        "holdout": {
+          "status": "NOT_AVAILABLE",
+          "sample_count": 0
+        },
+        "overall": {
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 0.979167,
+          "latency_p50_ms": 98.422,
+          "latency_p95_ms": 995.675
+        }
+      },
+      "failure_analysis": {
+        "dev": [
+          {
+            "case_id": "refund-unanswerable",
+            "split": "dev",
+            "query": "退款申请需要支付多少手续费？",
+            "ground_truth": [
+              {
+                "document_key": "fictional-policy-refund-v1",
+                "revision_key": "fictional-policy-refund-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "relevant_text": "本条为虚构测试政策，仅适用于退款申请。处理窗口为30 天，办理前必须人工审核。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+              }
+            ],
+            "failure_category": "FINAL_RANK_LOW",
+            "candidate_top20": [
+              {
+                "document_key": "fictional-policy-refund-v1",
+                "revision_key": "fictional-policy-refund-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.032787,
+                "chunk_id": "0cda1165c2d3de5357089166e5afe438b286715f8e9a2738ef3f17fe37ea1b60",
+                "rank": 1
+              },
+              {
+                "document_key": "fictional-policy-return-v1",
+                "revision_key": "fictional-policy-return-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.032258,
+                "chunk_id": "4359164b8a90432fabad29361a31941b383955448a621952fd641add9149ee19",
+                "rank": 2
+              },
+              {
+                "document_key": "fictional-policy-billing-v1",
+                "revision_key": "fictional-policy-billing-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.031746,
+                "chunk_id": "706c7f256d4c0d900063efa7da053fc696ad7867f6f84aa14cae6b85ec2c6e4d",
+                "rank": 3
+              },
+              {
+                "document_key": "fictional-policy-warranty-v1",
+                "revision_key": "fictional-policy-warranty-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.030331,
+                "chunk_id": "70848c504805ce345f483b88c0b38ff2601276eaee7ed7742d3e0c895203e525",
+                "rank": 4
+              },
+              {
+                "document_key": "fictional-policy-delivery-v1",
+                "revision_key": "fictional-policy-delivery-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.03031,
+                "chunk_id": "6b7e0309c9cda19a66975d7d738a4022681de7a8d29801a52f56d40c139e5fd3",
+                "rank": 5
+              },
+              {
+                "document_key": "fictional-policy-account-v1",
+                "revision_key": "fictional-policy-account-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.030303,
+                "chunk_id": "dea6bbf64bb59c262c31f473275adfe0b7573027f305cc79bb7aff3b2590021a",
+                "rank": 6
+              },
+              {
+                "document_key": "fictional-policy-cancel-v1",
+                "revision_key": "fictional-policy-cancel-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.015625,
+                "chunk_id": "01cd76d615c9d5a90764838461c5ec047f65cc2887a8213f3542ab6374ec8de4",
+                "rank": 7
+              },
+              {
+                "document_key": "fictional-policy-subscription-v1",
+                "revision_key": "fictional-policy-subscription-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.015385,
+                "chunk_id": "a405f121d2e58481c1b1d639b08936c6c072e39da6106e7bf6768cab96817f79",
+                "rank": 8
+              }
+            ],
+            "final_top5": [
+              {
+                "document_key": "fictional-policy-return-v1",
+                "revision_key": "fictional-policy-return-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -1.52832,
+                "chunk_id": "4359164b8a90432fabad29361a31941b383955448a621952fd641add9149ee19",
+                "rank": 1
+              },
+              {
+                "document_key": "fictional-policy-refund-v1",
+                "revision_key": "fictional-policy-refund-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -1.6875,
+                "chunk_id": "0cda1165c2d3de5357089166e5afe438b286715f8e9a2738ef3f17fe37ea1b60",
+                "rank": 2
+              },
+              {
+                "document_key": "fictional-policy-cancel-v1",
+                "revision_key": "fictional-policy-cancel-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -3.974609,
+                "chunk_id": "01cd76d615c9d5a90764838461c5ec047f65cc2887a8213f3542ab6374ec8de4",
+                "rank": 3
+              },
+              {
+                "document_key": "fictional-policy-warranty-v1",
+                "revision_key": "fictional-policy-warranty-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -4.308594,
+                "chunk_id": "70848c504805ce345f483b88c0b38ff2601276eaee7ed7742d3e0c895203e525",
+                "rank": 4
+              },
+              {
+                "document_key": "fictional-policy-billing-v1",
+                "revision_key": "fictional-policy-billing-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -4.867188,
+                "chunk_id": "706c7f256d4c0d900063efa7da053fc696ad7867f6f84aa14cae6b85ec2c6e4d",
+                "rank": 5
+              }
+            ]
+          }
+        ],
+        "holdout": [],
+        "overall": [
+          {
+            "case_id": "refund-unanswerable",
+            "split": "dev",
+            "query": "退款申请需要支付多少手续费？",
+            "ground_truth": [
+              {
+                "document_key": "fictional-policy-refund-v1",
+                "revision_key": "fictional-policy-refund-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "relevant_text": "本条为虚构测试政策，仅适用于退款申请。处理窗口为30 天，办理前必须人工审核。客服只能登记处理工单，不能承诺已经完成办理。创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。此政策未说明是否收费，不得推测或从其他政策借用费用规则。"
+              }
+            ],
+            "failure_category": "FINAL_RANK_LOW",
+            "candidate_top20": [
+              {
+                "document_key": "fictional-policy-refund-v1",
+                "revision_key": "fictional-policy-refund-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.032787,
+                "chunk_id": "0cda1165c2d3de5357089166e5afe438b286715f8e9a2738ef3f17fe37ea1b60",
+                "rank": 1
+              },
+              {
+                "document_key": "fictional-policy-return-v1",
+                "revision_key": "fictional-policy-return-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.032258,
+                "chunk_id": "4359164b8a90432fabad29361a31941b383955448a621952fd641add9149ee19",
+                "rank": 2
+              },
+              {
+                "document_key": "fictional-policy-billing-v1",
+                "revision_key": "fictional-policy-billing-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.031746,
+                "chunk_id": "706c7f256d4c0d900063efa7da053fc696ad7867f6f84aa14cae6b85ec2c6e4d",
+                "rank": 3
+              },
+              {
+                "document_key": "fictional-policy-warranty-v1",
+                "revision_key": "fictional-policy-warranty-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.030331,
+                "chunk_id": "70848c504805ce345f483b88c0b38ff2601276eaee7ed7742d3e0c895203e525",
+                "rank": 4
+              },
+              {
+                "document_key": "fictional-policy-delivery-v1",
+                "revision_key": "fictional-policy-delivery-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.03031,
+                "chunk_id": "6b7e0309c9cda19a66975d7d738a4022681de7a8d29801a52f56d40c139e5fd3",
+                "rank": 5
+              },
+              {
+                "document_key": "fictional-policy-account-v1",
+                "revision_key": "fictional-policy-account-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.030303,
+                "chunk_id": "dea6bbf64bb59c262c31f473275adfe0b7573027f305cc79bb7aff3b2590021a",
+                "rank": 6
+              },
+              {
+                "document_key": "fictional-policy-cancel-v1",
+                "revision_key": "fictional-policy-cancel-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.015625,
+                "chunk_id": "01cd76d615c9d5a90764838461c5ec047f65cc2887a8213f3542ab6374ec8de4",
+                "rank": 7
+              },
+              {
+                "document_key": "fictional-policy-subscription-v1",
+                "revision_key": "fictional-policy-subscription-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": 0.015385,
+                "chunk_id": "a405f121d2e58481c1b1d639b08936c6c072e39da6106e7bf6768cab96817f79",
+                "rank": 8
+              }
+            ],
+            "final_top5": [
+              {
+                "document_key": "fictional-policy-return-v1",
+                "revision_key": "fictional-policy-return-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -1.52832,
+                "chunk_id": "4359164b8a90432fabad29361a31941b383955448a621952fd641add9149ee19",
+                "rank": 1
+              },
+              {
+                "document_key": "fictional-policy-refund-v1",
+                "revision_key": "fictional-policy-refund-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -1.6875,
+                "chunk_id": "0cda1165c2d3de5357089166e5afe438b286715f8e9a2738ef3f17fe37ea1b60",
+                "rank": 2
+              },
+              {
+                "document_key": "fictional-policy-cancel-v1",
+                "revision_key": "fictional-policy-cancel-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -3.974609,
+                "chunk_id": "01cd76d615c9d5a90764838461c5ec047f65cc2887a8213f3542ab6374ec8de4",
+                "rank": 3
+              },
+              {
+                "document_key": "fictional-policy-warranty-v1",
+                "revision_key": "fictional-policy-warranty-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -4.308594,
+                "chunk_id": "70848c504805ce345f483b88c0b38ff2601276eaee7ed7742d3e0c895203e525",
+                "rank": 4
+              },
+              {
+                "document_key": "fictional-policy-billing-v1",
+                "revision_key": "fictional-policy-billing-v1-revision",
+                "locator": {
+                  "type": "section",
+                  "section_key": "policy"
+                },
+                "score": -4.867188,
+                "chunk_id": "706c7f256d4c0d900063efa7da053fc696ad7867f6f84aa14cae6b85ec2c6e4d",
+                "rank": 5
+              }
+            ]
+          }
+        ]
+      },
+      "case_metrics": [
+        {
+          "case_id": "refund-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "refund-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "refund-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 0.5,
+          "failure_category": "FINAL_RANK_LOW"
+        },
+        {
+          "case_id": "warranty-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "warranty-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "warranty-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "delivery-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "delivery-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "delivery-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "cancel-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "cancel-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "cancel-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "account-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "account-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "account-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "billing-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "billing-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "billing-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "return-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "return-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "return-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "subscription-single_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "subscription-multi_hop",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        },
+        {
+          "case_id": "subscription-unanswerable",
+          "split": "dev",
+          "candidate_recall_at_20": 1.0,
+          "final_recall_at_5": 1.0,
+          "mrr_at_5": 1.0,
+          "failure_category": null
+        }
+      ]
+    }
+  },
+  "scope": {
+    "purpose": "DEVELOPMENT",
+    "formal_experiment": false,
+    "holdout_consumed": 0,
+    "case_count": 24,
+    "source_count": 8,
+    "collection": "agenthub_mi34_41b02e59e1e14e73876b8cbee0d08244",
+    "source_draft_hash": "bf611d22e5a20fa28aa1d9186e0be120ebee84a6c8684deea214a4faa7b93ca3",
+    "annotation_kind": "authored_source_identity",
+    "boundary": "policy retrieval relevance, not answer correctness or refusal scoring"
+  }
+}
