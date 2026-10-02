@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { latestHandoff } from "@/components/support/context-pane";
+import HandoffControls from "@/components/support/handoff-controls";
 import { EmptyState, InlineError } from "@/components/ui/states";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceMutation, type WorkspaceQuery } from "@/hooks/use-workspace-data";
@@ -33,7 +34,7 @@ export default function HandoffPane({
   artifacts: WorkspaceQuery<Artifact[]>;
 }) {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId } = useFrontendSession();
+  const { workspaceId, sessionId } = useFrontendSession();
   const mutation = useWorkspaceMutation(`support-handoff:${workspaceId}:${threadId}`);
 
   const [customerRef, setCustomerRef] = useState("");
@@ -63,7 +64,7 @@ export default function HandoffPane({
     setFindingsDraft("");
     setRecommendedAction("");
     setReason("");
-  }, [threadId]);
+  }, [threadId, workspaceId, sessionId]);
 
   const artifactList = artifacts.data ?? [];
   const handoffs = artifactList
@@ -325,6 +326,7 @@ export default function HandoffPane({
                   </ul>
                 </>
               )}
+              <HandoffControls artifactId={artifact.id} />
               {handoff.findings.length > 0 && (
                 <>
                   <p className="artifact-card-meta">{t("support.handoff.findings")}</p>

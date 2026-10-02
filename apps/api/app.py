@@ -21,6 +21,7 @@ from apps.api.routes.auth import router as auth_router
 from apps.api.routes.citation_qa import router as citation_qa_router
 from apps.api.routes.evaluation import router as evaluation_router
 from apps.api.routes.feedback import router as feedback_router
+from apps.api.routes.handoffs import router as handoffs_router
 from apps.api.routes.knowledge import router as knowledge_router
 from apps.api.routes.mcp_connections import router as mcp_connections_router
 from apps.api.routes.observability import router as observability_router
@@ -103,6 +104,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(citation_qa_router)
     app.include_router(evaluation_router)
     app.include_router(feedback_router)
+    app.include_router(handoffs_router)
     app.include_router(knowledge_router)
     app.include_router(mcp_connections_router)
     app.include_router(observability_router)

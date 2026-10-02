@@ -4,6 +4,14 @@
  * locales must always expose the same key set.
  */
 export const enUS = {
+  handoffLifecycle: {
+    title: "Human handoff", hint: "The original summary is retained. Closing a handoff does not approve or resume agent actions.",
+    open: "Open", assigned: "Assigned", inProgress: "In progress", closed: "Closed",
+    start: "Open handoff", assignee: "Assigned member", choose: "Select a member…", assign: "Assign / reassign", claim: "Take over", close: "Close handoff",
+    reason: "What was done and why", unresolved: "Unresolved items (one per line)",
+    permission: "Handling requires an active operator role. Permissions may still be loading.", unavailable: "Handoff state is unavailable; refresh to retry.",
+    conflict: "This handoff changed. Review the refreshed state before retrying.",
+  },
   feedback: {
     historyLimit: "Up to the latest 100 feedback submissions are shown.",
     title: "Feedback and correction", hint: "A rating is feedback, not a fact check. Corrections require review before regression import.",

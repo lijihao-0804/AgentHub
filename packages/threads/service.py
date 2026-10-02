@@ -186,7 +186,26 @@ class ThreadService:
     async def delete_thread(self, context: WorkspaceExecutionContext, thread_id: UUID) -> None:
         workspace_id = _require(context, AGENT_RUN)
         async with self.session_factory() as session:
-            thread = await self._load(session, workspace_id, thread_id)
+            from packages.handoffs.models import HandoffCase
+
+            thread = await session.scalar(
+                select(AgentThread)
+                .where(AgentThread.workspace_id == workspace_id, AgentThread.id == thread_id)
+                .with_for_update()
+            )
+            if thread is None:
+                raise AgentHubError("THREAD_NOT_FOUND", "The thread was not found.", 404)
+            retained = await session.scalar(
+                select(HandoffCase.id).where(
+                    HandoffCase.workspace_id == workspace_id, HandoffCase.thread_id == thread_id
+                )
+            )
+            if retained is not None:
+                raise AgentHubError(
+                    "HANDOFF_EVIDENCE_RETAINED",
+                    "The thread contains retained human handoff evidence.",
+                    409,
+                )
             await session.delete(thread)
             await session.commit()
 

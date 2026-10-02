@@ -14,6 +14,7 @@ from packages.artifacts.schemas import validate_artifact_content
 from packages.control_plane.rbac import WORKSPACE_READ
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.handoffs.models import HandoffCase
 from packages.threads.models import AgentThread
 
 AGENT_RUN = "agent_run"
@@ -135,6 +136,7 @@ class ArtifactService:
         workspace_id = _require(context, AGENT_RUN)
         async with self.session_factory() as session:
             artifact = await self._load(session, workspace_id, artifact_id)
+            await self._retain_handoff_evidence(session, artifact)
             if artifact.run_id is not None:
                 # An agent-produced artifact is the record of one execution.
                 # Editing it would make it no longer a record. The user saves
@@ -157,18 +159,33 @@ class ArtifactService:
         workspace_id = _require(context, AGENT_RUN)
         async with self.session_factory() as session:
             artifact = await self._load(session, workspace_id, artifact_id)
+            await self._retain_handoff_evidence(session, artifact)
             await session.delete(artifact)
             await session.commit()
 
     async def _load(self, session: AsyncSession, workspace_id: UUID, artifact_id: UUID) -> Artifact:
         artifact = await session.scalar(
-            select(Artifact).where(
-                Artifact.workspace_id == workspace_id, Artifact.id == artifact_id
-            )
+            select(Artifact)
+            .where(Artifact.workspace_id == workspace_id, Artifact.id == artifact_id)
+            .with_for_update()
         )
         if artifact is None:
             _not_found()
         return artifact
+
+    async def _retain_handoff_evidence(self, session: AsyncSession, artifact: Artifact) -> None:
+        existing = await session.scalar(
+            select(HandoffCase.id).where(
+                HandoffCase.workspace_id == artifact.workspace_id,
+                HandoffCase.source_artifact_id == artifact.id,
+            )
+        )
+        if existing is not None:
+            raise AgentHubError(
+                "HANDOFF_EVIDENCE_RETAINED",
+                "The source of a human handoff must be retained unchanged.",
+                409,
+            )
 
     async def _require_thread(
         self, session: AsyncSession, workspace_id: UUID, thread_id: UUID

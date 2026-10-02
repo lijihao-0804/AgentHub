@@ -2,6 +2,14 @@ import type { MessageSchema } from "@/i18n/locales/en-US";
 
 /** Simplified Chinese dictionary. Must mirror the en-US key set exactly. */
 export const zhCN: MessageSchema = {
+  handoffLifecycle: {
+    title: "人工接管", hint: "原始摘要会保留。关闭接管不会批准或恢复智能体动作。",
+    open: "待接管", assigned: "已分配", inProgress: "处理中", closed: "已关闭",
+    start: "开启接管", assignee: "被分配成员", choose: "选择成员…", assign: "分配 / 重分配", claim: "接手处理", close: "关闭接管",
+    reason: "处理内容与原因", unresolved: "未解决事项（每行一项）",
+    permission: "接管需要有效操作成员权限；权限也可能仍在加载。", unavailable: "接管状态暂不可用，请刷新重试。",
+    conflict: "接管记录已变化，请核对刷新后的状态再重试。",
+  },
   feedback: {
     historyLimit: "最多展示最近 100 条反馈。",
     title: "反馈与人工纠正", hint: "评分不等于事实核验。纠正内容须经审核后才能导入回归数据集。",

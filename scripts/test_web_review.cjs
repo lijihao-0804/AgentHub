@@ -179,5 +179,52 @@ async function main() {
   const excerpt = (node) => elements(node, (el) => typeof el.type === 'function' && el.props.selected)[0];
   assert.notEqual(excerpt(a).key, excerpt(b).key, 'evidence selection must remount fetched excerpt');
   console.log('PASS historical summary fallback, content denial and evidence selection identity');
+
+  const lifecycle = { id: 'handoff-a', workspace_id: 'workspace-a', thread_id: 'thread-a', source_artifact_id: 'artifact-a', source_hash: 'abc', status: 'OPEN', version: 1,
+    created_by: 'self', assignee_id: null, claimed_by: null, closed_by: null, closure_reason: null, unresolved_items: [], created_at: 'now', updated_at: 'now', claimed_at: null, closed_at: null };
+  let handoffData = null, handoffLoaded = true;
+  const operations = [];
+  const handoffHarness = harness({ '@/hooks/use-workspace-data': {
+    useWorkspaceData: (_fn, key) => ({ data: key.startsWith('handoff-assignees:') ? [] : handoffData, loaded: handoffLoaded, loading: false, error: null, reload() {} }),
+    useWorkspaceMutation: () => ({ pending: false, error: null, run: fn => fn(handoffHarness.session) }),
+  }, '@/lib/api/handoffs': { getArtifactHandoff() {}, listHandoffAssignees() {}, openHandoff: async () => lifecycle,
+    changeHandoff: async (_auth, id, action, payload) => { operations.push({ id, action, payload }); return { ...lifecycle, status: 'IN_PROGRESS' }; } },
+  });
+  const Handoff = load('components/support/handoff-controls.tsx', handoffHarness.mocks).default;
+  const wrapper = handoffHarness.render(Handoff, { artifactId: 'artifact-a' });
+  const pane = () => handoffHarness.render(wrapper.type, wrapper.props);
+  const handoffButton = (key) => elements(pane(), el => el.type === 'button' && el.props.children === key)[0];
+  handoffHarness.session.permissions = null;
+  assert.equal(handoffButton('handoffLifecycle.start').props.disabled, true);
+  handoffLoaded = false;
+  assert.equal(handoffButton('handoffLifecycle.start'), undefined, 'failed/unknown reads must not imply unopened');
+  handoffLoaded = true; handoffData = lifecycle;
+  handoffHarness.session.permissions = ['handoff_handle'];
+  await handoffButton('handoffLifecycle.claim').props.onClick();
+  assert.deepEqual(operations[0], { id: 'handoff-a', action: 'claim', payload: { expected_version: 1 } });
+  handoffData = { ...lifecycle, status: 'ASSIGNED', assignee_id: 'other' };
+  assert.equal(handoffButton('handoffLifecycle.claim'), undefined);
+  handoffData = { ...lifecycle, status: 'CLOSED', closure_reason: 'inspected', unresolved_items: ['unknown effect'] };
+  assert.equal(handoffButton('handoffLifecycle.close'), undefined);
+  assert.ok(JSON.stringify(pane()).includes('unknown effect'));
+  handoffHarness.session.sessionId += 1;
+  const switchedHandoff = handoffHarness.render(Handoff, { artifactId: 'artifact-a' });
+  assert.notEqual(wrapper.key, switchedHandoff.key);
+  console.log('PASS handoff unknown permission, failed read, assignment, version payload, retained unresolved items and session remount');
+
+  let apiValue = lifecycle;
+  const clientApi = load('lib/api/handoffs.ts', { '@/lib/api/client': {
+    apiRequest: async () => apiValue, isRecord: v => v !== null && typeof v === 'object' && !Array.isArray(v),
+    ApiError: class extends Error {},
+  } });
+  const auth = { workspaceId: 'workspace-a', accessToken: 'token' };
+  assert.equal((await clientApi.getArtifactHandoff(auth, 'artifact-a')).id, 'handoff-a');
+  apiValue = { ...lifecycle, workspace_id: 'workspace-b' };
+  await assert.rejects(clientApi.getArtifactHandoff(auth, 'artifact-a'));
+  apiValue = { ...lifecycle, version: true };
+  await assert.rejects(clientApi.getArtifactHandoff(auth, 'artifact-a'));
+  apiValue = { ...lifecycle, source_artifact_id: 'other' };
+  await assert.rejects(clientApi.getArtifactHandoff(auth, 'artifact-a'));
+  console.log('PASS handoff client strict response and workspace/artifact identity');
 }
 main().catch((error) => { console.error(error); process.exitCode = 1; });
