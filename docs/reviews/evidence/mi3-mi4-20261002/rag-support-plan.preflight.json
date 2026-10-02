@@ -1,0 +1,392 @@
+{
+  "status": "PASS",
+  "plan_hash": "4c399edb9156141816b37049daa0d76ba4c5391c9832b14c8bf60b8725f84625",
+  "paid_calls": 0,
+  "scope": "actual_retrieval_and_post_tool_context_admission",
+  "cases": [
+    {
+      "case_id": "refund-single_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "refund-multi_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "refund-unanswerable",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "warranty-single_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "warranty-multi_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "warranty-unanswerable",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "delivery-single_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "delivery-multi_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "delivery-unanswerable",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "cancel-single_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "cancel-multi_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "cancel-unanswerable",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "account-single_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "account-multi_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "account-unanswerable",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "billing-single_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "billing-multi_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "billing-unanswerable",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "return-single_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "return-multi_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "return-unanswerable",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "subscription-single_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "subscription-multi_hop",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "subscription-unanswerable",
+      "agent_version_id": "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "refund-single_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "refund-multi_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "refund-unanswerable",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "warranty-single_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "warranty-multi_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "warranty-unanswerable",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "delivery-single_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "delivery-multi_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "delivery-unanswerable",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "cancel-single_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "cancel-multi_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "cancel-unanswerable",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "account-single_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "account-multi_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "account-unanswerable",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "billing-single_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "billing-multi_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "billing-unanswerable",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "return-single_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "return-multi_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "return-unanswerable",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "subscription-single_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "subscription-multi_hop",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    },
+    {
+      "case_id": "subscription-unanswerable",
+      "agent_version_id": "e10a38bb-3947-4cb6-8f36-1af04a06cf7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "retrieval_calls": 1,
+      "returned_chunks": 5
+    }
+  ]
+}

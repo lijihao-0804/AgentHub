@@ -1,0 +1,66 @@
+{
+  "status": "FROZEN_RAG_DEV_PLAN",
+  "build_sha": "d5094683f1b3b1272e53d35d77824f3cd7d75cb3",
+  "workspace_id": "ee79ba54-93e3-4dd7-bcea-65137e3624ee",
+  "user_id": "053b529f-5cff-4df7-815d-50d5f172d73d",
+  "dataset_version_id": "e191617d-4a68-4dba-b5d4-43b7102017e9",
+  "dataset_content_hash": "4219745972a9480108338754c20d3e2e61f66c22cf97020c089c2776677267c0",
+  "experiment_id": "b442c07b-e874-4419-ab6b-5b586afb7a97",
+  "run_id": "f73be55e-f4ac-46dc-804b-de831877ddfd",
+  "agent_version_ids": [
+    "26802f24-81a1-49c1-b4b1-eb4b19b733e3",
+    "e10a38bb-3947-4cb6-8f36-1af04a06cf7a"
+  ],
+  "collection": "agenthub_mi34_rag_d6f00925ec7847eea67eea6508046257",
+  "snapshot_id": "748a63e4-c1d0-4663-9590-c7898dffd5f5",
+  "snapshot_hash": "22f430d8cd176ac9ba9af4511da441930e0316fe71aef0ec9b8f9e876dcc7d36",
+  "source_content_hash": "50632e5c303b5feb5db0a233e6fc170af460a69fce09860355b88a8f3bec22a3",
+  "corpus_source_to_chunk_ids": {
+    "fictional-policy-refund-v1": [
+      "e06a940345618e7dfe0173fd39c6827017b4ea7f84e7bb75e9a81dea59705ec5"
+    ],
+    "fictional-policy-warranty-v1": [
+      "5818924f20c80da5e57e4d92782399ad3ad71f27e910652a97ea6975f06d348c"
+    ],
+    "fictional-policy-delivery-v1": [
+      "f3ada0bf17709f87cfbc24141f10289cde8bf1807fd57af5064d895cb3bc424f"
+    ],
+    "fictional-policy-cancel-v1": [
+      "36d0eb0802c9301cdc6fbb33424e51dbeba3664b58e1ae541fb9bc030d28ac77"
+    ],
+    "fictional-policy-account-v1": [
+      "e681cdc0addc3c2429d481677a910a020eac9f7256a653521014babd810724cf"
+    ],
+    "fictional-policy-billing-v1": [
+      "1f935fac7aaeff115ce6f3dc69c901cbc6260a2cb7c61c06bb6738cc68968685"
+    ],
+    "fictional-policy-return-v1": [
+      "1d7daf41c28bd0280d3a7d012245b67b682cfa3dd6426c5c28e0f6d44ea36126"
+    ],
+    "fictional-policy-subscription-v1": [
+      "1703f7d5c7e5ee2664b85b2376f039078a6314735c27bc30c53720cdbb3e6928"
+    ]
+  },
+  "planned_cases": 144,
+  "holdout_consumed": false,
+  "evaluator_manifest": {
+    "evaluation_schema_version": 1,
+    "observation_schema_version": 2,
+    "evaluator_versions": {
+      "answer-quality-judge": "disabled",
+      "approval-evaluator": "v2",
+      "citation-evaluator": "v2",
+      "dataset-validator": "v1",
+      "failure-evaluator": "v2",
+      "retrieval-evaluator": "v2",
+      "support-postcondition-evaluator": "support-postcondition-v1",
+      "tool-evaluator": "v2"
+    }
+  },
+  "limitations": [
+    "8 synthetic policies",
+    "assistant labels not human",
+    "DEV-only retrieval comparison",
+    "exact-match answer score separate from semantic review"
+  ]
+}

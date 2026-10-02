@@ -1,0 +1,5274 @@
+{
+  "version": "rag-assistant-sampled-audit-v1",
+  "raw_report_hash": "25ceaf990af225af0c42170c81a31ffe686d8feb149a7cda8ff4cafcf689b39c",
+  "source_content_hash": "50632e5c303b5feb5db0a233e6fc170af460a69fce09860355b88a8f3bec22a3",
+  "rows": [
+    {
+      "case_result_id": "88c9693e-9e59-416d-9945-dbaa5df99499",
+      "case_id": "return-unanswerable",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "38a8a186421624d046115f43eee1eadf15c6dcdf4c12c85c2bdfb07ba6d060a8",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2130,
+      "cost_cny": "0.00667800",
+      "retrieval_stage_ms": {
+        "dense": 88.699,
+        "sparse": 29.482,
+        "fusion": 0.076,
+        "rerank": 268.167
+      }
+    },
+    {
+      "case_result_id": "cc1373d0-e4a3-4fb6-8c6f-9276b565c2f5",
+      "case_id": "return-unanswerable",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "dddae119982c49240a719c2756dcf4139eb67565b5de9918a8ea38c3a9b581db",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2169,
+      "cost_cny": "0.00677400",
+      "retrieval_stage_ms": {
+        "dense": 43.105,
+        "sparse": 29.525,
+        "fusion": 0.044,
+        "rerank": 114.281
+      }
+    },
+    {
+      "case_result_id": "c0015c19-efcb-4952-88d3-2386d74ef629",
+      "case_id": "subscription-single_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "32fb8dbc1bbc6837f568063a6a6c0740a10a470c9d29f3a6d2df24203ff8e8e7",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2812,
+      "cost_cny": "0.00867200",
+      "retrieval_stage_ms": {
+        "dense": 150.22199999999998,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "0443e873-7b06-4b46-ab4b-998a15fc0408",
+      "case_id": "subscription-single_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "af4b6fbc28871de24fd755f468336d09c1e6508924cb3ef06e951843c44e3c4b",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3102,
+      "cost_cny": "0.00900000",
+      "retrieval_stage_ms": {
+        "dense": 310.092,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "b1e4c6b1-7d0a-4735-bf52-26d75830bb23",
+      "case_id": "subscription-single_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "3dea56ec0b1ab9b232cd5792808b0c057889fe6b08268597dfcc88ec672dc6bf",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2589,
+      "cost_cny": "0.00801800",
+      "retrieval_stage_ms": {
+        "dense": 275.60400000000004,
+        "sparse": 28.732,
+        "fusion": 0.08299999999999999,
+        "rerank": 239.952
+      }
+    },
+    {
+      "case_result_id": "f4903d36-982e-4d08-8695-ca3dba17717e",
+      "case_id": "subscription-single_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "7babde1ac5750e8b5f49c4fc1203f450171b86677937da018a6b82fc260adff7",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2977,
+      "cost_cny": "0.00832600",
+      "retrieval_stage_ms": {
+        "dense": 194.20600000000002,
+        "sparse": 62.842,
+        "fusion": 0.067,
+        "rerank": 540.148
+      }
+    },
+    {
+      "case_result_id": "d53394e1-ea56-4e47-a414-493cc8457662",
+      "case_id": "subscription-multi_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "07d4df80c832de20b172efb46ba6ef35a0ce444715a25d2d782463b923792681",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3289,
+      "cost_cny": "0.00939400",
+      "retrieval_stage_ms": {
+        "dense": 302.11,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "389d68fe-1b98-40de-b1eb-af40ee527d82",
+      "case_id": "subscription-multi_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "238b398c818cea16410dffc24eac2225744ae5663826401b089afc2bc2607023",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3011,
+      "cost_cny": "0.00936200",
+      "retrieval_stage_ms": {
+        "dense": 306.63199999999995,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "59695f97-291e-4049-97cc-dfe50138bb75",
+      "case_id": "subscription-multi_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "1dd60f719c7399d2ebb3004c26ee4723a8d0d91f53d245f03ba3c896710898b3",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2872,
+      "cost_cny": "0.00919400",
+      "retrieval_stage_ms": {
+        "dense": 198.615,
+        "sparse": 46.914,
+        "fusion": 0.123,
+        "rerank": 445.51
+      }
+    },
+    {
+      "case_result_id": "10eb0f9d-d2e2-44d3-b84d-c61cf211aa4b",
+      "case_id": "subscription-unanswerable",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "d1898f20880a68119795f6c30a544c80bc1435ab71f0d9daad154e1332892314",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2789,
+      "cost_cny": "0.00853400",
+      "retrieval_stage_ms": {
+        "dense": 183.777,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "d7b738a5-c0e5-4a7b-aba6-b998bf7ecea3",
+      "case_id": "refund-single_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "3bffe92a41a7fbdb6209d79f1866c93573c225cb2ab8144f8450517bc2199a15",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2758,
+      "cost_cny": "0.00866200",
+      "retrieval_stage_ms": {
+        "dense": 45.525,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "90c5ae25-65d5-4605-9a95-cefdd495a6b0",
+      "case_id": "refund-multi_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "97223bccd9e3ca554d1e04bae11944bb810bfa00dfaa5940e7886fe40ae77746",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3060,
+      "cost_cny": "0.00912400",
+      "retrieval_stage_ms": {
+        "dense": 188.398,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "95ba2bf5-b1ce-47fe-9ac1-8645beb27f3f",
+      "case_id": "refund-multi_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "da96f9586831838a5c2d78ff6a6b40a3bb6d54ce3defe4e17adf7d2749343f5c",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 0.5,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3462,
+      "cost_cny": "0.00934200",
+      "retrieval_stage_ms": {
+        "dense": 193.937,
+        "sparse": 37.367000000000004,
+        "fusion": 0.097,
+        "rerank": 364.947
+      }
+    },
+    {
+      "case_result_id": "15557a50-7f96-43ee-b2ec-6be02bcc66d6",
+      "case_id": "refund-unanswerable",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "7afb12aad199c2ad9912fa6fe57ecc26036d72dde4d4849b65c6545cf58c424b",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2834,
+      "cost_cny": "0.00857800",
+      "retrieval_stage_ms": {
+        "dense": 84.916,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "8f171094-8197-4603-8352-fd03beba395b",
+      "case_id": "warranty-single_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "33148cdd884db37514c8057474a283b29bee98d83a4b9d0f021f307cca5a02ba",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2809,
+      "cost_cny": "0.00836200",
+      "retrieval_stage_ms": {
+        "dense": 52.551,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "26e75162-daf5-45e1-8816-e0df7647d9eb",
+      "case_id": "warranty-single_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "5c4fcbe8ff2b8a0e92077ea9761155931a44b70bbc725464c6700dc1e428dd33",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2768,
+      "cost_cny": "0.00820200",
+      "retrieval_stage_ms": {
+        "dense": 47.181,
+        "sparse": 31.131,
+        "fusion": 0.067,
+        "rerank": 184.43
+      }
+    },
+    {
+      "case_result_id": "26b96aba-8f45-4e0f-8c60-4ff1ca5eca8d",
+      "case_id": "warranty-single_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "203040a8b85e013c342e68d098aa8b31e41f6072067532afd48af7d1f0ecdb7b",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2685,
+      "cost_cny": "0.00818600",
+      "retrieval_stage_ms": {
+        "dense": 47.108,
+        "sparse": 30.576,
+        "fusion": 0.064,
+        "rerank": 264.19
+      }
+    },
+    {
+      "case_result_id": "f1d9560e-17dd-4d82-a806-466edf5d5f94",
+      "case_id": "warranty-multi_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "11d80d3d460a51e19cf226d6d1b266095798ae0302b65345e80cfff7ab009913",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3118,
+      "cost_cny": "0.00946200",
+      "retrieval_stage_ms": {
+        "dense": 206.05,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "cbe8382c-b339-4e92-b484-97a587daee83",
+      "case_id": "warranty-multi_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "22ad436a37d491f0523fee0b5bdab6c5e5847dd5a42e47053b9798017da9120c",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3398,
+      "cost_cny": "0.00955600",
+      "retrieval_stage_ms": {
+        "dense": 287.96799999999996,
+        "sparse": 56.271,
+        "fusion": 0.088,
+        "rerank": 194.281
+      }
+    },
+    {
+      "case_result_id": "88ad3f61-bf1d-4a50-82bd-833a762c05ff",
+      "case_id": "warranty-multi_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "0472c9e28bf8d64ee4879c85d04f9988b5bf388403f762d1f05ed22d8cb057a0",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3442,
+      "cost_cny": "0.00962000",
+      "retrieval_stage_ms": {
+        "dense": 201.829,
+        "sparse": 12.285,
+        "fusion": 0.064,
+        "rerank": 330.616
+      }
+    },
+    {
+      "case_result_id": "e900e046-b8a9-4e80-aebd-2eb9ed91ef1f",
+      "case_id": "warranty-unanswerable",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "fed22eaa47ce0c6f8a00392f87d0ff4f59f383d876aa7b7dc55279801ea66604",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2589,
+      "cost_cny": "0.00700000",
+      "retrieval_stage_ms": {
+        "dense": 58.509,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "6d0b4825-8822-4815-a5a1-3124f3422e58",
+      "case_id": "warranty-unanswerable",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "787d81b99c7e02aaccd661efb97a245c335531852a36febc2a5c1a9985830102",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2900,
+      "cost_cny": "0.00750400",
+      "retrieval_stage_ms": {
+        "dense": 98.066,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "8453fa81-11b1-4592-9fae-942aa1b106cf",
+      "case_id": "warranty-unanswerable",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "99f3f22c556f4182e6d3ccf063086596893d96c952332e6a7237bb3440228f39",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2367,
+      "cost_cny": "0.00716400",
+      "retrieval_stage_ms": {
+        "dense": 95.919,
+        "sparse": 30.277,
+        "fusion": 0.047,
+        "rerank": 195.706
+      }
+    },
+    {
+      "case_result_id": "7a7daafb-9b21-4889-9923-fff3fe0633a4",
+      "case_id": "warranty-unanswerable",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "fe58a771c80753a26ce5fc21647e82962ec07bf0b2ac67318fe69bcb0ed479ee",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2103,
+      "cost_cny": "0.00698000",
+      "retrieval_stage_ms": {
+        "dense": 86.186,
+        "sparse": 4.954,
+        "fusion": 0.034,
+        "rerank": 122.236
+      }
+    },
+    {
+      "case_result_id": "4fcd88c5-1032-43c7-9d79-077f2ccf667c",
+      "case_id": "delivery-single_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "c0aa298bab36be067a4d66f0d5a2af9bdafec4c30a7e74ef9ba78f95e6b42a8e",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2722,
+      "cost_cny": "0.00903000",
+      "retrieval_stage_ms": {
+        "dense": 312.06899999999996,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "05805daa-696d-4f86-8e59-1ca792192afe",
+      "case_id": "delivery-single_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "3d0326e4fe1788b59920cd7459fb8270f81be1679943cef7ab55a14c0fdffafe",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3558,
+      "cost_cny": "0.00980200",
+      "retrieval_stage_ms": {
+        "dense": 298.20799999999997,
+        "sparse": 23.5,
+        "fusion": 0.08,
+        "rerank": 370.85299999999995
+      }
+    },
+    {
+      "case_result_id": "7e7bbef6-b155-4d92-865c-fd6221c833b5",
+      "case_id": "delivery-single_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "95a2a7c82812320c3ea878071222f9da86124b9aa7770a9241c9999db3d637c3",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3092,
+      "cost_cny": "0.00945000",
+      "retrieval_stage_ms": {
+        "dense": 165.766,
+        "sparse": 14.099,
+        "fusion": 0.08099999999999999,
+        "rerank": 567.102
+      }
+    },
+    {
+      "case_result_id": "82f4c919-a27f-46c4-94e0-42d783c34582",
+      "case_id": "delivery-multi_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "2d86740b0bb3feb86f670d2f0811d0c7a86d4441f5c51fcd5b919fd0fa18333c",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2271,
+      "cost_cny": "0.00841400",
+      "retrieval_stage_ms": {
+        "dense": 89.639,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "b6be2090-9c82-479b-a6b2-77e7a55655b5",
+      "case_id": "delivery-unanswerable",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "efb98919eaf747d9ad70232ab7ff206ba85794b21d1eeae64b085656e1e621d6",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2594,
+      "cost_cny": "0.00780000",
+      "retrieval_stage_ms": {
+        "dense": 61.242,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "ab586b48-3210-41d9-9f74-90494b4b0b59",
+      "case_id": "cancel-single_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "6cb870b84f38d1cefd4624c235194dd51503d6d5e59673db39b3d3a73ddac2ca",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3515,
+      "cost_cny": "0.00834600",
+      "retrieval_stage_ms": {
+        "dense": 287.29499999999996,
+        "sparse": 38.092,
+        "fusion": 0.06,
+        "rerank": 345.53999999999996
+      }
+    },
+    {
+      "case_result_id": "fff3942c-715b-4df8-91e5-9b21f565aa95",
+      "case_id": "cancel-multi_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "4db1ec4f71f0708165f1e0532e5cef5d81eda2eaab9df4d3358520b030adee71",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3918,
+      "cost_cny": "0.00957200",
+      "retrieval_stage_ms": {
+        "dense": 199.719,
+        "sparse": 29.849,
+        "fusion": 0.079,
+        "rerank": 482.894
+      }
+    },
+    {
+      "case_result_id": "2d0def41-da0e-44cc-861f-2582978399fc",
+      "case_id": "cancel-unanswerable",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "b6cb282fb81ada08710765bf253c14968faa3e99cda4dfbdb2daa88f788746a5",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3788,
+      "cost_cny": "0.00924600",
+      "retrieval_stage_ms": {
+        "dense": 284.07,
+        "sparse": 34.122,
+        "fusion": 0.1,
+        "rerank": 298.076
+      }
+    },
+    {
+      "case_result_id": "193ebf46-8a8c-42ea-86e9-debf10337ab4",
+      "case_id": "account-single_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "74c83168bb9ddccb5458fa78765ee1303c6a3a19deff51a0566038c2d250dd92",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 1989,
+      "cost_cny": "0.00724800",
+      "retrieval_stage_ms": {
+        "dense": 50.308,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "2b41de9a-f404-40da-b13f-21641311463e",
+      "case_id": "account-multi_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "f745f9a0cb828ae7e0a3ba332024e1368b27f2bb4f7a181e9ac7bebc81a7956b",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3098,
+      "cost_cny": "0.00843800",
+      "retrieval_stage_ms": {
+        "dense": 314.847,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "32b5f754-f3a6-4efb-acee-8b96d117f6d8",
+      "case_id": "account-multi_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "09b5fb75d87ec6209ac6955dfe5ad4a91c808441d50d6bea1ab70fb59881e6fe",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2858,
+      "cost_cny": "0.00843000",
+      "retrieval_stage_ms": {
+        "dense": 186.975,
+        "sparse": 35.894,
+        "fusion": 0.07,
+        "rerank": 354.425
+      }
+    },
+    {
+      "case_result_id": "99ec5a7d-c999-47a2-8e85-3d30e1daaaaf",
+      "case_id": "account-unanswerable",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "70cf0621317640d677a995b24d8fc551c69c32028729fb7ffd7c3f4f2d3e0477",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2089,
+      "cost_cny": "0.00690400",
+      "retrieval_stage_ms": {
+        "dense": 42.353,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "14f9867c-9363-4aa2-b70d-9f856688b679",
+      "case_id": "account-unanswerable",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "18803b7dbcbe4925bc60497aa09ba682b93e6b86a36b60f531659a11a81d5912",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 1979,
+      "cost_cny": "0.00684800",
+      "retrieval_stage_ms": {
+        "dense": 86.017,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "3a4ec188-296d-4003-bebf-22c06e9b1912",
+      "case_id": "account-unanswerable",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "e64f097badfd7c54ba0ab2c20281ac1091c257131fe5e467ade4d09ae0d7fa74",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2639,
+      "cost_cny": "0.00729400",
+      "retrieval_stage_ms": {
+        "dense": 103.566,
+        "sparse": 14.005,
+        "fusion": 0.04,
+        "rerank": 269.168
+      }
+    },
+    {
+      "case_result_id": "a06db605-1db3-444d-a877-ab2cfc7b9d91",
+      "case_id": "account-unanswerable",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "5c61150ef57129b89a527fc153ffaae7e1e4411b2b4fff7d0a6aa6b7f6d0640b",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2958,
+      "cost_cny": "0.00755800",
+      "retrieval_stage_ms": {
+        "dense": 58.921,
+        "sparse": 30.683,
+        "fusion": 0.042,
+        "rerank": 208.813
+      }
+    },
+    {
+      "case_result_id": "2b22f6e2-c979-4cfc-bb86-34bf17e8f633",
+      "case_id": "billing-single_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "9ac646cd853b629a5b14e153eab9e02ae7b9fb74c8a576e041ad5d572640cf4b",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2328,
+      "cost_cny": "0.00820000",
+      "retrieval_stage_ms": {
+        "dense": 93.197,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "20646199-7d9f-41ed-af1f-7df2e5db8d26",
+      "case_id": "billing-single_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "09dd165786d8f999e154140a93016d45ba945cc3ed53951aba77ff01c995df91",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2368,
+      "cost_cny": "0.00819200",
+      "retrieval_stage_ms": {
+        "dense": 100.532,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "f0ee7912-2180-45bc-bca9-eaf279f2f924",
+      "case_id": "billing-single_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "637602a25e00d14253ff628ef3840b75f3c2b2f6117ba8d02e25913575388ee0",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2800,
+      "cost_cny": "0.00773200",
+      "retrieval_stage_ms": {
+        "dense": 60.633,
+        "sparse": 5.502,
+        "fusion": 0.082,
+        "rerank": 177.43
+      }
+    },
+    {
+      "case_result_id": "57d07aa6-73ea-41c4-8a6b-4b3e9b6458cc",
+      "case_id": "billing-multi_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "c28c8491c17ec7b82799ad6c27f65664e48303e8e2a827c64afde7799e3d9874",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3229,
+      "cost_cny": "0.00931800",
+      "retrieval_stage_ms": {
+        "dense": 216.952,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "a3ab2229-51ca-4b1e-aa15-c8b1a4568cf2",
+      "case_id": "billing-multi_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "569a7b9438e79af521833f71b85c87fa4bcf0bb631a5eec2fa03574f526c6911",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3191,
+      "cost_cny": "0.00944400",
+      "retrieval_stage_ms": {
+        "dense": 289.83799999999997,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "1c4caa19-3d93-490d-b8f8-6556c4d8ae58",
+      "case_id": "refund-single_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "148c11a7e2457ee9b65ff6e0b27c7ae874575aeca500a8a22cf8ddc8460b2e8b",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 0.5,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 20319,
+      "cost_cny": "0.00835000",
+      "retrieval_stage_ms": {
+        "dense": 25441.22,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "e2b4b045-c11c-41f4-b5f5-69c144da17d0",
+      "case_id": "refund-multi_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "25380de4fc8e53451a7e96a69d6974384dc65567faceb322c1ddf21059d5aeb6",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 2,
+      "returned_citation_count": 2,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3136,
+      "cost_cny": "0.00927800",
+      "retrieval_stage_ms": {
+        "dense": 193.833,
+        "sparse": 10.678,
+        "fusion": 0.08199999999999999,
+        "rerank": 351.68899999999996
+      }
+    },
+    {
+      "case_result_id": "25f4475d-b17d-4249-83ad-374e89267257",
+      "case_id": "refund-single_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "5d1eac2ab91ba756915659a44d5ae5f1d23ca090df429a23c4f60c691af7131d",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2360,
+      "cost_cny": "0.00829400",
+      "retrieval_stage_ms": {
+        "dense": 27.265,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "3936acf1-1760-4b85-99e8-a3699777016f",
+      "case_id": "refund-single_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "3d1daaaa6e27ae861095ca12ef5fec102ea037cd416fc8bc6cd032988ca21fdc",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 6533,
+      "cost_cny": "0.00809200",
+      "retrieval_stage_ms": {
+        "dense": 90.977,
+        "sparse": 899.296,
+        "fusion": 0.047,
+        "rerank": 3511.138
+      }
+    },
+    {
+      "case_result_id": "3b9e16c1-7d23-405f-a4e5-2a399c722d43",
+      "case_id": "refund-single_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "d7b54d6b59796f0a0c62e6326f05c5b6c8b17c9dd49c57d3b7c140f46a227ad0",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2908,
+      "cost_cny": "0.00834000",
+      "retrieval_stage_ms": {
+        "dense": 62.558,
+        "sparse": 30.27,
+        "fusion": 0.043,
+        "rerank": 152.88
+      }
+    },
+    {
+      "case_result_id": "58a0622b-2b4a-4733-8c78-0d5445de0c62",
+      "case_id": "refund-single_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "efc88376cf09f71670a10f87cc7f615661b89574e64ab29f6dd737f3bdc3f5a0",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3372,
+      "cost_cny": "0.00900600",
+      "retrieval_stage_ms": {
+        "dense": 312.58299999999997,
+        "sparse": 14.489,
+        "fusion": 0.08399999999999999,
+        "rerank": 256.147
+      }
+    },
+    {
+      "case_result_id": "65dab159-46f5-4b80-8efe-93b9262e7f01",
+      "case_id": "refund-multi_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "d77f799d886932759761d0f2ba34e63055d19151d3a18e1fbac51e6eae46febb",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3543,
+      "cost_cny": "0.00960400",
+      "retrieval_stage_ms": {
+        "dense": 313.61699999999996,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "58c4ecbf-f63d-4591-bc7c-bf80f24d571c",
+      "case_id": "refund-unanswerable",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "2f7ad365a6efcec0a2f645441ecd263b3e236ccd514b770024f987abc1e266cc",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2460,
+      "cost_cny": "0.00701000",
+      "retrieval_stage_ms": {
+        "dense": 61.946,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "54ee6a4b-c717-4288-891b-5d9beb99888c",
+      "case_id": "refund-multi_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "fb6e784008ee9ae221a89cdfaf918f81839bcf3086db03ddb8d4f0bb895ba926",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3333,
+      "cost_cny": "0.00962800",
+      "retrieval_stage_ms": {
+        "dense": 285.83500000000004,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "6b756426-6190-47d8-aa61-a4055f1422f5",
+      "case_id": "refund-multi_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "24a1d23f41ab6e37f443a60e7c5c2430ceefeb383d314f9ebeeee096d3a0ea66",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3718,
+      "cost_cny": "0.00931000",
+      "retrieval_stage_ms": {
+        "dense": 309.422,
+        "sparse": 36.327,
+        "fusion": 0.07300000000000001,
+        "rerank": 220.41500000000002
+      }
+    },
+    {
+      "case_result_id": "7e619959-d104-4977-8887-88831ae7ac53",
+      "case_id": "warranty-single_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "aec04fee1f07c3b5c238b4c9bd6c6608cfa395d3c953d821c9d19aa23a2e7df8",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2389,
+      "cost_cny": "0.00828200",
+      "retrieval_stage_ms": {
+        "dense": 99.195,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "427b2ae5-eb78-4af6-8456-5f85551647a1",
+      "case_id": "refund-unanswerable",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "dff44abfc875ef9228ff703d8174e1e906c6e312e567e17ecd762d7c1f8c4d31",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2316,
+      "cost_cny": "0.00757000",
+      "retrieval_stage_ms": {
+        "dense": 90.531,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "4cac54dc-c189-427f-b4f7-aca6b20cc057",
+      "case_id": "refund-unanswerable",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "276bc17868d6d27edb7a6a89a7901cad66f7d207648717f1ecb8156190259a52",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2823,
+      "cost_cny": "0.00779800",
+      "retrieval_stage_ms": {
+        "dense": 86.08,
+        "sparse": 5.636,
+        "fusion": 0.044,
+        "rerank": 269.672
+      }
+    },
+    {
+      "case_result_id": "1913f676-912e-4ffa-a52b-28b9c84d0d77",
+      "case_id": "refund-unanswerable",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "5f8939e951fc883e8a9785050ae2d401669b0e47c3af17622237721b94501d1d",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2611,
+      "cost_cny": "0.00768600",
+      "retrieval_stage_ms": {
+        "dense": 97.762,
+        "sparse": 29.786,
+        "fusion": 0.048,
+        "rerank": 232.851
+      }
+    },
+    {
+      "case_result_id": "2c130c41-a893-4b80-b3fb-0f8d8c1c25be",
+      "case_id": "refund-unanswerable",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "55e7fd28ea8f36af7f2ee9f662f63a55ed11953a32d8b1a72634dadeb666d93f",
+      "relevant_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2776,
+      "cost_cny": "0.00718200",
+      "retrieval_stage_ms": {
+        "dense": 62.019,
+        "sparse": 29.987,
+        "fusion": 0.05,
+        "rerank": 177.656
+      }
+    },
+    {
+      "case_result_id": "c6f7a3e8-322d-4e0d-9aa9-1f57c17fbfe6",
+      "case_id": "warranty-single_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "d97bcda3fc72f340be795b3526cef9074bc13eace797db486fc3201ebaa41b91",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2442,
+      "cost_cny": "0.00827400",
+      "retrieval_stage_ms": {
+        "dense": 57.871,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "bc5a228b-a0f5-49a0-9cbd-dd272aa973e8",
+      "case_id": "warranty-multi_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "bb9e9b71e95c0e2ec89375cd5c70bba28aca2c6e3d27c8abd275977b155ce1e0",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2552,
+      "cost_cny": "0.00845600",
+      "retrieval_stage_ms": {
+        "dense": 156.279,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "dbc9dd74-e586-4b8e-88f1-7be2b1f7f859",
+      "case_id": "warranty-single_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "34e61688840ee99340a7af2a5075dfd9bc4c36b1500bf20b24b66f5bedaf3f73",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2483,
+      "cost_cny": "0.00812200",
+      "retrieval_stage_ms": {
+        "dense": 92.088,
+        "sparse": 30.36,
+        "fusion": 0.056,
+        "rerank": 201.848
+      }
+    },
+    {
+      "case_result_id": "0caec547-e3bf-456d-9691-40bf9634fd2e",
+      "case_id": "warranty-multi_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "bdd1f1f4a29d507ddeee7954c09d022b4ee81a1f5aa8b9ff2e3fb74a3d5a831a",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2988,
+      "cost_cny": "0.00950200",
+      "retrieval_stage_ms": {
+        "dense": 282.115,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "7d5e530d-9ab9-4a65-b2da-d75c978786ba",
+      "case_id": "warranty-multi_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "1765d5d6516cb00c156454e8893ce9e9b1cf07785729abebc344b18d92e60b00",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3356,
+      "cost_cny": "0.00952600",
+      "retrieval_stage_ms": {
+        "dense": 184.69,
+        "sparse": 49.647000000000006,
+        "fusion": 0.077,
+        "rerank": 319.26300000000003
+      }
+    },
+    {
+      "case_result_id": "365007fe-a4ee-4142-af8f-1a51b8614405",
+      "case_id": "subscription-unanswerable",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "698c6b7e660af7a06651ffb8a8c12a0f856595321e210e4e46d7d0c152e34a33",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3756,
+      "cost_cny": "0.00878800",
+      "retrieval_stage_ms": {
+        "dense": 278.817,
+        "sparse": 11.916,
+        "fusion": 0.088,
+        "rerank": 460.454
+      }
+    },
+    {
+      "case_result_id": "0ed60532-3264-4d46-8575-4214953548b8",
+      "case_id": "subscription-unanswerable",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "a5ee3603fd7ca5be475e55e9ed06520ad5068b2d1cdb62b599b5f3af8ab33425",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2401,
+      "cost_cny": "0.00783000",
+      "retrieval_stage_ms": {
+        "dense": 42.443,
+        "sparse": 30.593,
+        "fusion": 0.043,
+        "rerank": 153.92
+      }
+    },
+    {
+      "case_result_id": "37a6d3d9-70fa-4c7c-94bf-bc995fd52d2b",
+      "case_id": "warranty-unanswerable",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "47800a21596ff217c55d9792fb6f10d89d000c3fa09e3b4840cb504516797faf",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2556,
+      "cost_cny": "0.00735200",
+      "retrieval_stage_ms": {
+        "dense": 75.38,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "490c8632-3179-4bc6-8ad1-923d6858ba85",
+      "case_id": "delivery-single_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "3e308eb3f7ecbe6dcddd3c348752c157e21e334a52c90c6098b9d5997f27bc46",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2874,
+      "cost_cny": "0.00908000",
+      "retrieval_stage_ms": {
+        "dense": 132.973,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "3ac7ffa2-d72a-43dd-9c5d-163c1193f4fb",
+      "case_id": "delivery-single_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "85033b476b880937e58c63a7781e6b1c5f192c4dc0756d45775e7ae9d258bbfa",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2817,
+      "cost_cny": "0.00907800",
+      "retrieval_stage_ms": {
+        "dense": 278.884,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "5d41f508-f502-465e-aff9-e110259cf6e7",
+      "case_id": "delivery-multi_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "2a075e0a42e2f08333165e73011c0c3ca6fad70a7e1e3d22f2d74df9364c330c",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3179,
+      "cost_cny": "0.00911800",
+      "retrieval_stage_ms": {
+        "dense": 291.135,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "dd55af8e-f13e-431d-8c14-1b566db5b152",
+      "case_id": "delivery-multi_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "0d921d8be8c10696881a6849ac5287b034e05ca0f87e26ccc22d396bc3336705",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3583,
+      "cost_cny": "0.00944400",
+      "retrieval_stage_ms": {
+        "dense": 263.709,
+        "sparse": 22.165,
+        "fusion": 0.08099999999999999,
+        "rerank": 421.992
+      }
+    },
+    {
+      "case_result_id": "1540115f-16cc-4107-9019-2093f00247c8",
+      "case_id": "delivery-unanswerable",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "f10513059b84a335f252c9901ea3d384015ae76803a1a7b3e07cee9fca488fd7",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2407,
+      "cost_cny": "0.00703200",
+      "retrieval_stage_ms": {
+        "dense": 97.395,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "669dcf1e-ed2e-4316-afda-4b665d1dd26d",
+      "case_id": "cancel-unanswerable",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "675387f56a0c334eb683190938227632fae543e57bbe3f42a3dd855e1d6af882",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2636,
+      "cost_cny": "0.00830200",
+      "retrieval_stage_ms": {
+        "dense": 176.38,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "923c3f66-86e7-4adb-8b8e-91cd63c0d139",
+      "case_id": "delivery-unanswerable",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "f10513059b84a335f252c9901ea3d384015ae76803a1a7b3e07cee9fca488fd7",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2631,
+      "cost_cny": "0.00703200",
+      "retrieval_stage_ms": {
+        "dense": 74.826,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "6ae7d038-ecbf-4f5f-8783-8d7198c205f1",
+      "case_id": "cancel-single_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "afd0783fcdced5eeb24520cecf4bdb3a1aa7b4f423d9571b213b2c065b6981ff",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 2,
+      "returned_citation_count": 2,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2554,
+      "cost_cny": "0.00879800",
+      "retrieval_stage_ms": {
+        "dense": 320.594,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "9688f7a1-f76d-4414-84e2-2c058e38dfdd",
+      "case_id": "delivery-unanswerable",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "74cbe2a6d4ecdaee5c8b006e6dddb8dfcde7250764d512f3ffdab6da1f9e477a",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2872,
+      "cost_cny": "0.00781200",
+      "retrieval_stage_ms": {
+        "dense": 90.384,
+        "sparse": 4.875,
+        "fusion": 0.036,
+        "rerank": 270.872
+      }
+    },
+    {
+      "case_result_id": "d39276d8-198a-47f5-8356-6511f0627b89",
+      "case_id": "delivery-unanswerable",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "45381b85343ee906b8c18504667a02fece8b58972980a444a3d1b20caeb3611e",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2506,
+      "cost_cny": "0.00827600",
+      "retrieval_stage_ms": {
+        "dense": 51.981,
+        "sparse": 29.723,
+        "fusion": 0.052,
+        "rerank": 183.366
+      }
+    },
+    {
+      "case_result_id": "6b2f6e35-bca3-4ce2-89b2-b367631d2209",
+      "case_id": "cancel-multi_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "554c3dff11c035de35796c6ce74ad4e1fee7630dd416777269e76fecbf5cff3a",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2928,
+      "cost_cny": "0.00922800",
+      "retrieval_stage_ms": {
+        "dense": 275.347,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "90725961-5ee0-47a7-a4aa-f933fa5fa631",
+      "case_id": "delivery-unanswerable",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "2394f336226eed150a74c9de00ab8a3b596a4bf4a47a8665b4f3bec174f99059",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2267,
+      "cost_cny": "0.00776400",
+      "retrieval_stage_ms": {
+        "dense": 61.268,
+        "sparse": 28.775,
+        "fusion": 0.052,
+        "rerank": 164.688
+      }
+    },
+    {
+      "case_result_id": "07b98afc-b84c-47a8-901a-e0849bd5a2f1",
+      "case_id": "cancel-single_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "085eeb7df3f0674e6b64cdce5959f85d8de6f56bd49d2fe7a6b11ccd2fed8aa6",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 0.5,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2269,
+      "cost_cny": "0.00753600",
+      "retrieval_stage_ms": {
+        "dense": 83.792,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "b199a82e-b92b-47fd-b3e8-1fb438e6c8b6",
+      "case_id": "cancel-single_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "db4cde2b279979dcebcb941a0736de5751d159dfac17307ee1bcf37ccadee389",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 0.5,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2672,
+      "cost_cny": "0.00743000",
+      "retrieval_stage_ms": {
+        "dense": 86.602,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "d74d3160-05fe-4718-b343-ba2f3192771c",
+      "case_id": "cancel-single_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "e85e7224e7dee3813912a39aa82cc9d96e87f1ea7768167f922a96a5c261877f",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 2,
+      "returned_citation_count": 2,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2523,
+      "cost_cny": "0.00791200",
+      "retrieval_stage_ms": {
+        "dense": 51.271,
+        "sparse": 16.237,
+        "fusion": 0.045,
+        "rerank": 160.186
+      }
+    },
+    {
+      "case_result_id": "a06f89bc-f144-4af9-9984-46c259043130",
+      "case_id": "cancel-multi_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "5b56660e2692d8d175d182d18e6e07b38496c139a90107c0e98fa3d000455e9a",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3498,
+      "cost_cny": "0.00957200",
+      "retrieval_stage_ms": {
+        "dense": 138.875,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "83a41281-e4da-4fb5-895f-fc1065d34482",
+      "case_id": "cancel-multi_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "790c33c3b77ac4bba8a60666a5d1605bb8bcbe1885062337955d330ae87b779b",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3914,
+      "cost_cny": "0.00953200",
+      "retrieval_stage_ms": {
+        "dense": 121.408,
+        "sparse": 47.766,
+        "fusion": 0.111,
+        "rerank": 413.879
+      }
+    },
+    {
+      "case_result_id": "63b1bc80-e9e2-4cf3-b3d8-0b36c3b57a11",
+      "case_id": "cancel-unanswerable",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "8865c0d1dfd934044f0462edcd22c7d668c37eda867ddf52f835cb552dcb8499",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3209,
+      "cost_cny": "0.00843800",
+      "retrieval_stage_ms": {
+        "dense": 284.63599999999997,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "eae8f292-ad3e-49e4-8254-0efc360b5a60",
+      "case_id": "cancel-unanswerable",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "e05aa399a0d3236862eff9d99d6348cca47d55d3814c1acd8f6deb110df9a8c9",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2924,
+      "cost_cny": "0.00835800",
+      "retrieval_stage_ms": {
+        "dense": 177.177,
+        "sparse": 47.458,
+        "fusion": 0.11099999999999999,
+        "rerank": 366.257
+      }
+    },
+    {
+      "case_result_id": "007b436f-eb87-4222-8a21-072bd3770b08",
+      "case_id": "account-single_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "06946a316d7dd1678397bb6fdc1e1f5e48061664c0f948b50edbba31d1230351",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2583,
+      "cost_cny": "0.00766800",
+      "retrieval_stage_ms": {
+        "dense": 89.574,
+        "sparse": 14.525,
+        "fusion": 0.05,
+        "rerank": 257.444
+      }
+    },
+    {
+      "case_result_id": "4e8b8ae9-ae78-4a4c-8d57-5fb95a313c14",
+      "case_id": "account-single_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "11b1ab2805cf86e161dacae4b806a29376ab6a30ec303110d021495773ea28fe",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2845,
+      "cost_cny": "0.00841600",
+      "retrieval_stage_ms": {
+        "dense": 129.325,
+        "sparse": 53.739000000000004,
+        "fusion": 0.075,
+        "rerank": 338.985
+      }
+    },
+    {
+      "case_result_id": "37533305-db11-44ef-af84-0df9782ed1a0",
+      "case_id": "warranty-unanswerable",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "282cfcd47dd2c2150e2112950c79d9ae9b932696ee59336e7ba4326b36cbcbf4",
+      "relevant_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2140,
+      "cost_cny": "0.00728400",
+      "retrieval_stage_ms": {
+        "dense": 97.215,
+        "sparse": 29.952,
+        "fusion": 0.05,
+        "rerank": 153.624
+      }
+    },
+    {
+      "case_result_id": "ca7cb092-14ce-4bdd-a90f-3c36723d12a1",
+      "case_id": "delivery-single_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "c9f08612a63e9be6a88be022e6be4100c08b6ad9233901cb9fc07ff505c89ed3",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3401,
+      "cost_cny": "0.00974600",
+      "retrieval_stage_ms": {
+        "dense": 195.47899999999998,
+        "sparse": 29.906999999999996,
+        "fusion": 0.07200000000000001,
+        "rerank": 254.55900000000003
+      }
+    },
+    {
+      "case_result_id": "094ccccb-0a88-4ce5-8bd1-95df55fc6e3f",
+      "case_id": "account-single_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "bcba64459a39cb8890360afc0032c6e65e7a4e33208a038c50b3ae78396ab1c0",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 1943,
+      "cost_cny": "0.00751200",
+      "retrieval_stage_ms": {
+        "dense": 47.502,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "c04810cf-b92b-4ad3-9051-fd4ce58d13fc",
+      "case_id": "delivery-multi_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "33397f899f5f7e56822cb756ad645d5e573aca06f1262e88ad4c0245b8d19232",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3075,
+      "cost_cny": "0.00911800",
+      "retrieval_stage_ms": {
+        "dense": 185.48399999999998,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "bec0c1d5-6a92-49ae-b257-7f3c746f7ff6",
+      "case_id": "delivery-multi_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "8cb5adee4414898c743af3b7f0e2f71975d7a48d135e377327cdbe93e245baa1",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3205,
+      "cost_cny": "0.00918600",
+      "retrieval_stage_ms": {
+        "dense": 133.00799999999998,
+        "sparse": 10.363,
+        "fusion": 0.07500000000000001,
+        "rerank": 426.528
+      }
+    },
+    {
+      "case_result_id": "5f81d30d-16ae-4993-883c-71ce953062dc",
+      "case_id": "delivery-multi_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "5637b55044b5021b7900adfcc791a9eaae004112881723499d38ba7c3d6b422a",
+      "relevant_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3406,
+      "cost_cny": "0.00894600",
+      "retrieval_stage_ms": {
+        "dense": 196.63400000000001,
+        "sparse": 20.54,
+        "fusion": 0.078,
+        "rerank": 284.179
+      }
+    },
+    {
+      "case_result_id": "37ffe0fe-0138-4a24-8c27-49a83b857916",
+      "case_id": "account-multi_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "cf46e0f0c00dc3e6ac08c99e39c0f1a8f325c4e1dff7d0803cc0393e3f43bf03",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3078,
+      "cost_cny": "0.00905400",
+      "retrieval_stage_ms": {
+        "dense": 182.411,
+        "sparse": 34.414,
+        "fusion": 0.07200000000000001,
+        "rerank": 434.707
+      }
+    },
+    {
+      "case_result_id": "e6010f5e-dd54-4c2e-8266-4d6296272674",
+      "case_id": "cancel-single_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "cd29bda8c08e098f48db121a424247cdeebb08f7622e2f63982febd30a000e2b",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2579,
+      "cost_cny": "0.00833600",
+      "retrieval_stage_ms": {
+        "dense": 178.344,
+        "sparse": 27.067999999999998,
+        "fusion": 0.09,
+        "rerank": 390.16700000000003
+      }
+    },
+    {
+      "case_result_id": "bfaf4f3b-67f7-4107-ac6d-f70ab28aa359",
+      "case_id": "cancel-multi_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "36314533bc492a40993a47f297ceb073f9ca125f662ceb1fa4a2ae5439ea286f",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3155,
+      "cost_cny": "0.00910000",
+      "retrieval_stage_ms": {
+        "dense": 280.451,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "792cdda2-b0e5-4384-94c8-28da453104ee",
+      "case_id": "account-single_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "4031b1c430dc642c685800681318c9518e3b7a5e73ee4f503ee622fa228f488f",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2422,
+      "cost_cny": "0.00729600",
+      "retrieval_stage_ms": {
+        "dense": 89.415,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "c6615d74-454c-42b7-b81b-18bbcc5427ab",
+      "case_id": "cancel-multi_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "221da557b35d4b0d178c32646e747485db360b70148ae7c91a5fa9aa730235b6",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 2,
+      "returned_citation_count": 2,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3187,
+      "cost_cny": "0.00954800",
+      "retrieval_stage_ms": {
+        "dense": 301.82500000000005,
+        "sparse": 19.217,
+        "fusion": 0.076,
+        "rerank": 371.144
+      }
+    },
+    {
+      "case_result_id": "e8b12615-258b-430f-a044-bf66f13e1b9c",
+      "case_id": "cancel-unanswerable",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "305c91749a68a2467332ee8a515ad4c3c10e0b394990d6f36ed03bb36f0c94e0",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2843,
+      "cost_cny": "0.00847800",
+      "retrieval_stage_ms": {
+        "dense": 300.804,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "5005e5be-3601-41d4-ad10-0af811f1e03c",
+      "case_id": "cancel-unanswerable",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "53897ed7289f9f42065ca000218bdad5bdb3a25174e6e039211466ec88a3226f",
+      "relevant_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2823,
+      "cost_cny": "0.00850200",
+      "retrieval_stage_ms": {
+        "dense": 172.659,
+        "sparse": 40.757000000000005,
+        "fusion": 0.07,
+        "rerank": 501.558
+      }
+    },
+    {
+      "case_result_id": "49f8f506-863e-4bff-b72d-750ce635388c",
+      "case_id": "account-unanswerable",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "71f91a3a5b192b50dffb7252fbc08e46ab0264ffdc226938acfe813984572925",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2234,
+      "cost_cny": "0.00685600",
+      "retrieval_stage_ms": {
+        "dense": 96.085,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "0bb32a67-e94f-4bba-b891-baac5a31807e",
+      "case_id": "account-single_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "5639d24b5a840f341883a280d8e660dc076fe1811384a2047f6cab937d094e7c",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2911,
+      "cost_cny": "0.00798800",
+      "retrieval_stage_ms": {
+        "dense": 98.643,
+        "sparse": 30.171,
+        "fusion": 0.051,
+        "rerank": 277.261
+      }
+    },
+    {
+      "case_result_id": "463515d1-9a58-421c-a5bf-bd8e53660a65",
+      "case_id": "account-multi_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "b3acabbd7f08c1d0987f5519d38d76efc6abe615b5c447675ae1365b832fc5c5",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2869,
+      "cost_cny": "0.00913400",
+      "retrieval_stage_ms": {
+        "dense": 171.594,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "9d43acdc-6a88-4bac-a91a-ee6f186c9dd7",
+      "case_id": "account-multi_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "f731d4f7f1123c666dc4954e2b38567ccb3282b287606d0342ce4f74205b940b",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3006,
+      "cost_cny": "0.00905600",
+      "retrieval_stage_ms": {
+        "dense": 287.034,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "12f1bd48-9899-4eff-b873-f6001bbd27bd",
+      "case_id": "account-multi_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "a33f9ca9ba1966c0a381c4e8ea5bb5d9130b482bd24028d3f13ca46f3793820d",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3055,
+      "cost_cny": "0.00839000",
+      "retrieval_stage_ms": {
+        "dense": 325.105,
+        "sparse": 62.556,
+        "fusion": 0.07100000000000001,
+        "rerank": 616.614
+      }
+    },
+    {
+      "case_result_id": "35a8ede5-a3e1-4090-862e-80f2d37a1876",
+      "case_id": "account-unanswerable",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "6865bc3a803e803aa3dfcb26c27b558df88afd406d171f3c81947b8a5d440e8a",
+      "relevant_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2591,
+      "cost_cny": "0.00788600",
+      "retrieval_stage_ms": {
+        "dense": 46.728,
+        "sparse": 5.406,
+        "fusion": 0.047,
+        "rerank": 145.229
+      }
+    },
+    {
+      "case_result_id": "06edec12-5a5e-4f79-bdd2-d25105acba03",
+      "case_id": "billing-single_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "18f1a8a1b0bc3e9c95141a9e0c65fe38e3ef7864a565b4d67df747d4de90330e",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2401,
+      "cost_cny": "0.00833600",
+      "retrieval_stage_ms": {
+        "dense": 52.96,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "d054cf52-221b-4483-b39d-ad97eea6ebb3",
+      "case_id": "billing-single_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "da4e91ff0cfaa4cb47721c19923512f631f1c115071a224994a09f7698b1cbf3",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2656,
+      "cost_cny": "0.00768400",
+      "retrieval_stage_ms": {
+        "dense": 90.088,
+        "sparse": 5.463,
+        "fusion": 0.042,
+        "rerank": 267.218
+      }
+    },
+    {
+      "case_result_id": "f6d79626-c62e-4d24-85fb-b0d939aace09",
+      "case_id": "billing-single_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "f98af682bb8db0e1d894c79ee594de2ffae9ffec9d2cd09fa20039a55fe837aa",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2498,
+      "cost_cny": "0.00830000",
+      "retrieval_stage_ms": {
+        "dense": 73.325,
+        "sparse": 29.06,
+        "fusion": 0.045,
+        "rerank": 226.753
+      }
+    },
+    {
+      "case_result_id": "a6029961-d1e7-493e-8694-f25e7b29b123",
+      "case_id": "billing-multi_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "814b1dad80fbdf8805c358a8fc4d2dafb8467f997859669d745172caa7bdd01f",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3461,
+      "cost_cny": "0.00935800",
+      "retrieval_stage_ms": {
+        "dense": 284.286,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "9c9e789a-0cca-46c9-b397-33fe66acbe38",
+      "case_id": "billing-multi_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "0364e659ac97ec9842def4163985a6c32e510ab0204fb9b9944aeb953be16050",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3394,
+      "cost_cny": "0.00881600",
+      "retrieval_stage_ms": {
+        "dense": 303.366,
+        "sparse": 37.915,
+        "fusion": 0.07300000000000001,
+        "rerank": 262.259
+      }
+    },
+    {
+      "case_result_id": "3a530bfa-1adf-4669-9a2c-724632c648b9",
+      "case_id": "billing-multi_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "621ab233214b8c74f40cadb0cddaa1d8718a06c6a9a28727ab5b367ed5e4f260",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3430,
+      "cost_cny": "0.00880600",
+      "retrieval_stage_ms": {
+        "dense": 184.14800000000002,
+        "sparse": 34.18,
+        "fusion": 0.07300000000000001,
+        "rerank": 464.296
+      }
+    },
+    {
+      "case_result_id": "cd0c81b6-b91f-45f7-8603-56389113abf2",
+      "case_id": "return-single_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "3298fcbd1a54dbecee723d6ca0e9dd43d0c4910c2ccfc51d4b184b7ed8c2dce0",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 2,
+      "returned_citation_count": 2,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2227,
+      "cost_cny": "0.00777400",
+      "retrieval_stage_ms": {
+        "dense": 44.88,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "2d720c53-12ef-4162-a9f1-42107a08a36d",
+      "case_id": "billing-multi_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "6aba4fdf5317e3021b09fb97cbae4488e6f9f08cdd8f88f49be6bd60828b8413",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2959,
+      "cost_cny": "0.00926600",
+      "retrieval_stage_ms": {
+        "dense": 175.888,
+        "sparse": 27.876,
+        "fusion": 0.07,
+        "rerank": 455.24
+      }
+    },
+    {
+      "case_result_id": "fccaabc4-b971-4609-a822-f1d47d5cf535",
+      "case_id": "billing-unanswerable",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "ef3c0a2e62b0dfa10b4c4a7d7cef948fe033f9615e5c0a3fbbb5f31b671d3a0c",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2761,
+      "cost_cny": "0.00828600",
+      "retrieval_stage_ms": {
+        "dense": 313.35900000000004,
+        "sparse": 19.987,
+        "fusion": 0.076,
+        "rerank": 379.094
+      }
+    },
+    {
+      "case_result_id": "9a990681-0713-46fe-8cb2-c91c07698896",
+      "case_id": "billing-unanswerable",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "65f84b44af41c1d6d414296e923f13676e36baff89b3487876ce875ccae100e0",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3255,
+      "cost_cny": "0.00913000",
+      "retrieval_stage_ms": {
+        "dense": 198.619,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "bb88469a-96a3-42d4-9b34-467f007364a7",
+      "case_id": "billing-unanswerable",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "0a080e503a26a5ec2a599ee638db01b68cf4b9862a098d0de88e0e6fbc3b154f",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2791,
+      "cost_cny": "0.00806600",
+      "retrieval_stage_ms": {
+        "dense": 295.418,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "fac8fcf5-6bbd-41db-a053-14864b918515",
+      "case_id": "billing-unanswerable",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "49f0ba4eed75b8cf4e1fb384be04cd1374987f6de81664a25a741eaadcbfee42",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3197,
+      "cost_cny": "0.00805800",
+      "retrieval_stage_ms": {
+        "dense": 300.56899999999996,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "8fbef38d-3a0d-42d8-b199-563fb4dd18cc",
+      "case_id": "billing-unanswerable",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "56a76e53e680926082b5ead86f60ac8bc528688c141dd6134b58e4a6751bf257",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3013,
+      "cost_cny": "0.00789400",
+      "retrieval_stage_ms": {
+        "dense": 149.764,
+        "sparse": 31.921,
+        "fusion": 0.065,
+        "rerank": 447.909
+      }
+    },
+    {
+      "case_result_id": "6c89ef62-bac7-41dd-8f38-23d439cf9569",
+      "case_id": "return-single_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "0263c3e7c5bc3398ab40a9742b12d3d52ed78f8c19aa33ec99579c3784c8265f",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2974,
+      "cost_cny": "0.00898000",
+      "retrieval_stage_ms": {
+        "dense": 217.25400000000002,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "2832bbd9-160f-4a62-894c-c5c1e298b4d5",
+      "case_id": "billing-unanswerable",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "adffd7ca4a72a711f45d45c62029f14079f1e8e2ae255a88e9238bcfeed6689e",
+      "relevant_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3045,
+      "cost_cny": "0.00781400",
+      "retrieval_stage_ms": {
+        "dense": 171.683,
+        "sparse": 23.264,
+        "fusion": 0.091,
+        "rerank": 435.674
+      }
+    },
+    {
+      "case_result_id": "5b56cc37-fc9b-44d0-9530-f229888cca0d",
+      "case_id": "return-single_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "fe8b509cfd5c2494919c9968923d29c7ff1b4377eba9f11e681c03dcd05db55b",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2890,
+      "cost_cny": "0.00815800",
+      "retrieval_stage_ms": {
+        "dense": 97.746,
+        "sparse": 15.463,
+        "fusion": 0.042,
+        "rerank": 274.046
+      }
+    },
+    {
+      "case_result_id": "594a764d-54ab-47a5-adca-b99de830c214",
+      "case_id": "return-single_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "c16b31d880b0ab0b781f882e4281c50fc4a8b68efd4296fd6263618f7e6bec0a",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 2,
+      "returned_citation_count": 2,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2333,
+      "cost_cny": "0.00789400",
+      "retrieval_stage_ms": {
+        "dense": 86.219,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "53b360e1-f133-4a0b-9af2-da37c37ddf7d",
+      "case_id": "return-single_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "dfa680711fffe1fb4f9fe0399011539ef30d471365deeb246e7ee017ce8bebe9",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3249,
+      "cost_cny": "0.00758200",
+      "retrieval_stage_ms": {
+        "dense": 85.312,
+        "sparse": 15.543,
+        "fusion": 0.063,
+        "rerank": 182.954
+      }
+    },
+    {
+      "case_result_id": "04a1d7a9-e17c-4536-86c1-8801e290d3ce",
+      "case_id": "return-single_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "14f89b8631894d6ea685edb94e6d44573b1358fac9967e47403f633a33f085fe",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2993,
+      "cost_cny": "0.00827800",
+      "retrieval_stage_ms": {
+        "dense": 58.852,
+        "sparse": 29.459,
+        "fusion": 0.058,
+        "rerank": 226.119
+      }
+    },
+    {
+      "case_result_id": "5ebe7788-14bf-4c17-a7d4-6075b19c1164",
+      "case_id": "return-multi_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "cd9e424ca9076a62870d053614fc5b7ad7d8385086f01d57944e3e2c4930e6a4",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3214,
+      "cost_cny": "0.00970800",
+      "retrieval_stage_ms": {
+        "dense": 314.78499999999997,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "72fda90e-3236-4c0f-bc09-b1be4043351d",
+      "case_id": "return-multi_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "75b9a310a0d86123286f26d07c139ef54d4b7085657cca8726254313ee7626f9",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2979,
+      "cost_cny": "0.00880200",
+      "retrieval_stage_ms": {
+        "dense": 161.231,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "1cd9217f-68a8-427b-a301-1935a03fcd37",
+      "case_id": "return-multi_hop",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "c8d4900afa3c6345fb751f0549c9b55bb378b4b7719808e113122e2d9250b77d",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 0.5,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2979,
+      "cost_cny": "0.00933000",
+      "retrieval_stage_ms": {
+        "dense": 286.072,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "7019678c-12c2-47c3-9db3-61a544bcf8a2",
+      "case_id": "return-multi_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "1a0fde880120c584832f47837feefcb352fccf6cc764fe7fdac169fa1effc4ec",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3522,
+      "cost_cny": "0.00932800",
+      "retrieval_stage_ms": {
+        "dense": 318.972,
+        "sparse": 46.28,
+        "fusion": 0.089,
+        "rerank": 708.008
+      }
+    },
+    {
+      "case_result_id": "441dd238-bb0c-4287-a911-ce57b93d2450",
+      "case_id": "return-multi_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "7020795417a5e69cb3d4c5d7eb81bfe8a1301b9a7d0efb6c33226f740b0201a8",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3559,
+      "cost_cny": "0.00924000",
+      "retrieval_stage_ms": {
+        "dense": 188.523,
+        "sparse": 25.182,
+        "fusion": 0.077,
+        "rerank": 257.662
+      }
+    },
+    {
+      "case_result_id": "47dbd339-a7cd-4cff-ad4d-72aa5eb5d5a0",
+      "case_id": "return-unanswerable",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "c399ef468b68e100a63df87f0dccf9c7a07496aa58f51acb4073a252b7b32c6b",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 2,
+      "returned_citation_count": 2,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2556,
+      "cost_cny": "0.00714800",
+      "retrieval_stage_ms": {
+        "dense": 97.388,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "57f4432f-6bc7-4a34-9b3a-9430bdba74f0",
+      "case_id": "return-unanswerable",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "6635041b960d9bba7035f0e538a29ac6a1739ad6ea09684338aa10f3a5c7e181",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2373,
+      "cost_cny": "0.00681400",
+      "retrieval_stage_ms": {
+        "dense": 56.738,
+        "sparse": 14.991,
+        "fusion": 0.039,
+        "rerank": 185.721
+      }
+    },
+    {
+      "case_result_id": "a523a4e1-d3fe-4685-ba76-5a4697355f32",
+      "case_id": "subscription-single_hop",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "ea495b61a48ee3e39234284e2fbfd665b9081ec41f5ab69ba4713094fc1e37fc",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2641,
+      "cost_cny": "0.00900800",
+      "retrieval_stage_ms": {
+        "dense": 314.67,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "b5e60d34-3c9a-4d57-b942-044e8d4f7ead",
+      "case_id": "subscription-multi_hop",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "553871969ed3468bdf0cb74eb8773a80c5560e51d98be87eb5558a44b88c1dcc",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3347,
+      "cost_cny": "0.00917800",
+      "retrieval_stage_ms": {
+        "dense": 160.41899999999998,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "06f01e7a-3a7f-4e55-be2e-293f3139d4ac",
+      "case_id": "return-multi_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "236ec521922ed0465d83dab3d37dc26446a851369f8d8da8fc98f785a7d254e6",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3310,
+      "cost_cny": "0.00952800",
+      "retrieval_stage_ms": {
+        "dense": 130.64499999999998,
+        "sparse": 55.655,
+        "fusion": 0.086,
+        "rerank": 386.69899999999996
+      }
+    },
+    {
+      "case_result_id": "b97b3a95-ab7e-42df-8f86-a1239ed1c99c",
+      "case_id": "return-unanswerable",
+      "repetition": 0,
+      "strategy": "DENSE",
+      "output_hash": "c4fb77cb697827b0d4d28086fb7f68f344e698c9fbc2b2169dbb3bed5d754399",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 2443,
+      "cost_cny": "0.00674000",
+      "retrieval_stage_ms": {
+        "dense": 63.751,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "c9fd474c-ad5e-4372-92f4-8f9c363161b9",
+      "case_id": "return-unanswerable",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "155c6ad166679a8d6b02afcfbe08a62fd8fb3f7d56661dac66bc4f2b06aa7c25",
+      "relevant_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3048,
+      "cost_cny": "0.00780400",
+      "retrieval_stage_ms": {
+        "dense": 101.791,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "131982d7-5e7b-4005-b92b-a8da7969cb45",
+      "case_id": "subscription-single_hop",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "7cb479a0d0ee78eb09ca7018499a4b260da11262c3fcb1f9835bfecba410fede",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2957,
+      "cost_cny": "0.00803800",
+      "retrieval_stage_ms": {
+        "dense": 152.185,
+        "sparse": 35.761,
+        "fusion": 0.068,
+        "rerank": 307.953
+      }
+    },
+    {
+      "case_result_id": "bf48ebe8-1344-4dcc-a8db-a52746bc087b",
+      "case_id": "subscription-multi_hop",
+      "repetition": 0,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "d5f99de0f34261b55699d91043c707863dc696cad704d935145b3999b7c6c903",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": true,
+      "reviewer_kind": "assistant",
+      "review_reason": "required_policy_facts_and_unknown_fee_answer_verified",
+      "latency_ms": 3420,
+      "cost_cny": "0.00945600",
+      "retrieval_stage_ms": {
+        "dense": 317.90099999999995,
+        "sparse": 22.180999999999997,
+        "fusion": 0.11699999999999999,
+        "rerank": 329.28200000000004
+      }
+    },
+    {
+      "case_result_id": "268bf103-4a52-4bc4-9a54-eb7764bdffc4",
+      "case_id": "subscription-multi_hop",
+      "repetition": 2,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "ef772609fe54f7a14b852ea2b43ad14bfcd266a778068e7b3c067ab417e0d1a1",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 3438,
+      "cost_cny": "0.00948000",
+      "retrieval_stage_ms": {
+        "dense": 162.251,
+        "sparse": 24.626,
+        "fusion": 0.077,
+        "rerank": 438.933
+      }
+    },
+    {
+      "case_result_id": "d58c11fe-95e6-4bc4-9322-07724303f434",
+      "case_id": "subscription-unanswerable",
+      "repetition": 1,
+      "strategy": "DENSE",
+      "output_hash": "6281eaf4ce6555a59c4e12054dbeeaeb4b1133a0d205b80969036ff3c0a1a98f",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 1,
+      "returned_citation_count": 1,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2388,
+      "cost_cny": "0.00783800",
+      "retrieval_stage_ms": {
+        "dense": 87.409,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "4cf6d242-a899-46a8-a84f-d4c651cb2ef1",
+      "case_id": "subscription-unanswerable",
+      "repetition": 2,
+      "strategy": "DENSE",
+      "output_hash": "9416869f186cce99817747abc6c5865291e6899bdacec68ab75a5b4dd02ac538",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": null,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2830,
+      "cost_cny": "0.00910000",
+      "retrieval_stage_ms": {
+        "dense": 275.004,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      }
+    },
+    {
+      "case_result_id": "08abc990-b730-4a7a-824c-a30e93ebbe0d",
+      "case_id": "subscription-unanswerable",
+      "repetition": 1,
+      "strategy": "HYBRID_RERANK",
+      "output_hash": "e1308943f600dd2fb1e638e2ca81a39f5007f8faac61d03fa0205b7f3ae1c946",
+      "relevant_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "candidate_recall": 1.0,
+      "final_recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "citation_count": 3,
+      "returned_citation_count": 3,
+      "relevant_citation_count": 1,
+      "required_source_cited": true,
+      "semantic_correct": null,
+      "reviewer_kind": null,
+      "review_reason": "not_sampled",
+      "latency_ms": 2948,
+      "cost_cny": "0.00880400",
+      "retrieval_stage_ms": {
+        "dense": 164.031,
+        "sparse": 11.600999999999999,
+        "fusion": 0.057999999999999996,
+        "rerank": 325.38599999999997
+      }
+    }
+  ],
+  "claims": [
+    {
+      "case_result_id": "90c5ae25-65d5-4605-9a95-cefdd495a6b0",
+      "kind": "window",
+      "text": "- 处理窗口为 30 天，办理前必须人工审核。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "97223bccd9e3ca554d1e04bae11944bb810bfa00dfaa5940e7886fe40ae77746"
+    },
+    {
+      "case_result_id": "90c5ae25-65d5-4605-9a95-cefdd495a6b0",
+      "kind": "requirement",
+      "text": "- 处理窗口为 30 天，办理前必须人工审核。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "97223bccd9e3ca554d1e04bae11944bb810bfa00dfaa5940e7886fe40ae77746"
+    },
+    {
+      "case_result_id": "90c5ae25-65d5-4605-9a95-cefdd495a6b0",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "97223bccd9e3ca554d1e04bae11944bb810bfa00dfaa5940e7886fe40ae77746"
+    },
+    {
+      "case_result_id": "90c5ae25-65d5-4605-9a95-cefdd495a6b0",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "97223bccd9e3ca554d1e04bae11944bb810bfa00dfaa5940e7886fe40ae77746"
+    },
+    {
+      "case_result_id": "90c5ae25-65d5-4605-9a95-cefdd495a6b0",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "97223bccd9e3ca554d1e04bae11944bb810bfa00dfaa5940e7886fe40ae77746"
+    },
+    {
+      "case_result_id": "90c5ae25-65d5-4605-9a95-cefdd495a6b0",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3] 因此退款是否涉及费用，我无法给出确定答案，属于未知，不能视为免费。",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "97223bccd9e3ca554d1e04bae11944bb810bfa00dfaa5940e7886fe40ae77746"
+    },
+    {
+      "case_result_id": "cbe8382c-b339-4e92-b484-97a587daee83",
+      "kind": "window",
+      "text": "- 处理窗口为 12 个月 [cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "22ad436a37d491f0523fee0b5bdab6c5e5847dd5a42e47053b9798017da9120c"
+    },
+    {
+      "case_result_id": "cbe8382c-b339-4e92-b484-97a587daee83",
+      "kind": "requirement",
+      "text": "- 办理前必须登记产品序列号 [cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "22ad436a37d491f0523fee0b5bdab6c5e5847dd5a42e47053b9798017da9120c"
+    },
+    {
+      "case_result_id": "cbe8382c-b339-4e92-b484-97a587daee83",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理 [cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]。",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "22ad436a37d491f0523fee0b5bdab6c5e5847dd5a42e47053b9798017da9120c"
+    },
+    {
+      "case_result_id": "cbe8382c-b339-4e92-b484-97a587daee83",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单 [cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "22ad436a37d491f0523fee0b5bdab6c5e5847dd5a42e47053b9798017da9120c"
+    },
+    {
+      "case_result_id": "cbe8382c-b339-4e92-b484-97a587daee83",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单 [cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "22ad436a37d491f0523fee0b5bdab6c5e5847dd5a42e47053b9798017da9120c"
+    },
+    {
+      "case_result_id": "cbe8382c-b339-4e92-b484-97a587daee83",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则 [cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]。因此保修是否收费属于**未知**，我不能给出免费或收费的结论。",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "22ad436a37d491f0523fee0b5bdab6c5e5847dd5a42e47053b9798017da9120c"
+    },
+    {
+      "case_result_id": "57d07aa6-73ea-41c4-8a6b-4b3e9b6458cc",
+      "kind": "window",
+      "text": "- 处理窗口为 7 天，办理前必须核对两笔账单编号。[ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "c28c8491c17ec7b82799ad6c27f65664e48303e8e2a827c64afde7799e3d9874"
+    },
+    {
+      "case_result_id": "57d07aa6-73ea-41c4-8a6b-4b3e9b6458cc",
+      "kind": "requirement",
+      "text": "- 处理窗口为 7 天，办理前必须核对两笔账单编号。[ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "c28c8491c17ec7b82799ad6c27f65664e48303e8e2a827c64afde7799e3d9874"
+    },
+    {
+      "case_result_id": "57d07aa6-73ea-41c4-8a6b-4b3e9b6458cc",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理。[ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "c28c8491c17ec7b82799ad6c27f65664e48303e8e2a827c64afde7799e3d9874"
+    },
+    {
+      "case_result_id": "57d07aa6-73ea-41c4-8a6b-4b3e9b6458cc",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "c28c8491c17ec7b82799ad6c27f65664e48303e8e2a827c64afde7799e3d9874"
+    },
+    {
+      "case_result_id": "57d07aa6-73ea-41c4-8a6b-4b3e9b6458cc",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "c28c8491c17ec7b82799ad6c27f65664e48303e8e2a827c64afde7799e3d9874"
+    },
+    {
+      "case_result_id": "57d07aa6-73ea-41c4-8a6b-4b3e9b6458cc",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则。[ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426] 因此重复扣费是否收费，我无法给出确定答案，属于未知，不能视为免费。",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "c28c8491c17ec7b82799ad6c27f65664e48303e8e2a827c64afde7799e3d9874"
+    },
+    {
+      "case_result_id": "6b756426-6190-47d8-aa61-a4055f1422f5",
+      "kind": "window",
+      "text": "- 退款申请的处理窗口为 30 天，办理前必须人工审核。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "24a1d23f41ab6e37f443a60e7c5c2430ceefeb383d314f9ebeeee096d3a0ea66"
+    },
+    {
+      "case_result_id": "6b756426-6190-47d8-aa61-a4055f1422f5",
+      "kind": "requirement",
+      "text": "- 退款申请的处理窗口为 30 天，办理前必须人工审核。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "24a1d23f41ab6e37f443a60e7c5c2430ceefeb383d314f9ebeeee096d3a0ea66"
+    },
+    {
+      "case_result_id": "6b756426-6190-47d8-aa61-a4055f1422f5",
+      "kind": "no_completed_business",
+      "text": "不能。客服只能登记处理工单，不能承诺已经完成办理。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "24a1d23f41ab6e37f443a60e7c5c2430ceefeb383d314f9ebeeee096d3a0ea66"
+    },
+    {
+      "case_result_id": "6b756426-6190-47d8-aa61-a4055f1422f5",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "24a1d23f41ab6e37f443a60e7c5c2430ceefeb383d314f9ebeeee096d3a0ea66"
+    },
+    {
+      "case_result_id": "6b756426-6190-47d8-aa61-a4055f1422f5",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "24a1d23f41ab6e37f443a60e7c5c2430ceefeb383d314f9ebeeee096d3a0ea66"
+    },
+    {
+      "case_result_id": "6b756426-6190-47d8-aa61-a4055f1422f5",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则。[ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3]",
+      "source_chunk_ids": [
+        "ea931d28f34ded7a2f8383eadc949cd94e18989a68f183d7be570b44df7950f3"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "24a1d23f41ab6e37f443a60e7c5c2430ceefeb383d314f9ebeeee096d3a0ea66"
+    },
+    {
+      "case_result_id": "bc5a228b-a0f5-49a0-9cbd-dd272aa973e8",
+      "kind": "window",
+      "text": "- 处理窗口为 12 个月，办理前必须登记产品序列号。[cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "bb9e9b71e95c0e2ec89375cd5c70bba28aca2c6e3d27c8abd275977b155ce1e0"
+    },
+    {
+      "case_result_id": "bc5a228b-a0f5-49a0-9cbd-dd272aa973e8",
+      "kind": "requirement",
+      "text": "- 处理窗口为 12 个月，办理前必须登记产品序列号。[cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "bb9e9b71e95c0e2ec89375cd5c70bba28aca2c6e3d27c8abd275977b155ce1e0"
+    },
+    {
+      "case_result_id": "bc5a228b-a0f5-49a0-9cbd-dd272aa973e8",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理。[cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "bb9e9b71e95c0e2ec89375cd5c70bba28aca2c6e3d27c8abd275977b155ce1e0"
+    },
+    {
+      "case_result_id": "bc5a228b-a0f5-49a0-9cbd-dd272aa973e8",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "bb9e9b71e95c0e2ec89375cd5c70bba28aca2c6e3d27c8abd275977b155ce1e0"
+    },
+    {
+      "case_result_id": "bc5a228b-a0f5-49a0-9cbd-dd272aa973e8",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1]",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "bb9e9b71e95c0e2ec89375cd5c70bba28aca2c6e3d27c8abd275977b155ce1e0"
+    },
+    {
+      "case_result_id": "bc5a228b-a0f5-49a0-9cbd-dd272aa973e8",
+      "kind": "fee_unspecified",
+      "text": "该保修政策未说明是否收费，不得推测或从其他政策借用费用规则。[cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1] 因此保修是否收费属于**未知**，我不能据此判断为免费。",
+      "source_chunk_ids": [
+        "cfbf7eb522f3c71177df7e8f2d939c96828eac21a275b051edf118dd580c9dc1"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "bb9e9b71e95c0e2ec89375cd5c70bba28aca2c6e3d27c8abd275977b155ce1e0"
+    },
+    {
+      "case_result_id": "dd55af8e-f13e-431d-8c14-1b566db5b152",
+      "kind": "window",
+      "text": "- 处理窗口为 3 个工作日，办理前必须查询配送记录。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0d921d8be8c10696881a6849ac5287b034e05ca0f87e26ccc22d396bc3336705"
+    },
+    {
+      "case_result_id": "dd55af8e-f13e-431d-8c14-1b566db5b152",
+      "kind": "requirement",
+      "text": "- 处理窗口为 3 个工作日，办理前必须查询配送记录。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0d921d8be8c10696881a6849ac5287b034e05ca0f87e26ccc22d396bc3336705"
+    },
+    {
+      "case_result_id": "dd55af8e-f13e-431d-8c14-1b566db5b152",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0d921d8be8c10696881a6849ac5287b034e05ca0f87e26ccc22d396bc3336705"
+    },
+    {
+      "case_result_id": "dd55af8e-f13e-431d-8c14-1b566db5b152",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0d921d8be8c10696881a6849ac5287b034e05ca0f87e26ccc22d396bc3336705"
+    },
+    {
+      "case_result_id": "dd55af8e-f13e-431d-8c14-1b566db5b152",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0d921d8be8c10696881a6849ac5287b034e05ca0f87e26ccc22d396bc3336705"
+    },
+    {
+      "case_result_id": "dd55af8e-f13e-431d-8c14-1b566db5b152",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf] 因此费用问题属于未知，不能视为免费。",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0d921d8be8c10696881a6849ac5287b034e05ca0f87e26ccc22d396bc3336705"
+    },
+    {
+      "case_result_id": "a06f89bc-f144-4af9-9984-46c259043130",
+      "kind": "window",
+      "text": "- 处理窗口为**发货前**，办理前**必须核对订单状态**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "5b56660e2692d8d175d182d18e6e07b38496c139a90107c0e98fa3d000455e9a"
+    },
+    {
+      "case_result_id": "a06f89bc-f144-4af9-9984-46c259043130",
+      "kind": "requirement",
+      "text": "- 处理窗口为**发货前**，办理前**必须核对订单状态**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "5b56660e2692d8d175d182d18e6e07b38496c139a90107c0e98fa3d000455e9a"
+    },
+    {
+      "case_result_id": "a06f89bc-f144-4af9-9984-46c259043130",
+      "kind": "no_completed_business",
+      "text": "- 客服**只能登记处理工单，不能承诺已经完成办理**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "5b56660e2692d8d175d182d18e6e07b38496c139a90107c0e98fa3d000455e9a"
+    },
+    {
+      "case_result_id": "a06f89bc-f144-4af9-9984-46c259043130",
+      "kind": "approval_required",
+      "text": "- 创建工单前**必须查询客户并取得人工审批**；**审批被拒绝不得创建工单**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "5b56660e2692d8d175d182d18e6e07b38496c139a90107c0e98fa3d000455e9a"
+    },
+    {
+      "case_result_id": "a06f89bc-f144-4af9-9984-46c259043130",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前**必须查询客户并取得人工审批**；**审批被拒绝不得创建工单**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "5b56660e2692d8d175d182d18e6e07b38496c139a90107c0e98fa3d000455e9a"
+    },
+    {
+      "case_result_id": "a06f89bc-f144-4af9-9984-46c259043130",
+      "kind": "fee_unspecified",
+      "text": "该政策**未说明是否收费**，不得推测或从其他政策借用费用规则。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0] 因此取消订单是否产生费用，我无法给出确定答案，属于**未知**，不能视为免费。",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "5b56660e2692d8d175d182d18e6e07b38496c139a90107c0e98fa3d000455e9a"
+    },
+    {
+      "case_result_id": "c04810cf-b92b-4ad3-9051-fd4ce58d13fc",
+      "kind": "window",
+      "text": "- 处理窗口为 3 个工作日，办理前必须查询配送记录。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "33397f899f5f7e56822cb756ad645d5e573aca06f1262e88ad4c0245b8d19232"
+    },
+    {
+      "case_result_id": "c04810cf-b92b-4ad3-9051-fd4ce58d13fc",
+      "kind": "requirement",
+      "text": "- 处理窗口为 3 个工作日，办理前必须查询配送记录。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "33397f899f5f7e56822cb756ad645d5e573aca06f1262e88ad4c0245b8d19232"
+    },
+    {
+      "case_result_id": "c04810cf-b92b-4ad3-9051-fd4ce58d13fc",
+      "kind": "no_completed_business",
+      "text": "- 不能。客服只能登记处理工单，不能承诺已经完成办理。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "33397f899f5f7e56822cb756ad645d5e573aca06f1262e88ad4c0245b8d19232"
+    },
+    {
+      "case_result_id": "c04810cf-b92b-4ad3-9051-fd4ce58d13fc",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "33397f899f5f7e56822cb756ad645d5e573aca06f1262e88ad4c0245b8d19232"
+    },
+    {
+      "case_result_id": "c04810cf-b92b-4ad3-9051-fd4ce58d13fc",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "33397f899f5f7e56822cb756ad645d5e573aca06f1262e88ad4c0245b8d19232"
+    },
+    {
+      "case_result_id": "c04810cf-b92b-4ad3-9051-fd4ce58d13fc",
+      "kind": "fee_unspecified",
+      "text": "- 该政策未说明是否收费，不得推测或从其他政策借用费用规则。[e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf]",
+      "source_chunk_ids": [
+        "e8490bc5329e89d921b33136f2970cea9f6431115330ea59ab86cb8b6e9a6faf"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "33397f899f5f7e56822cb756ad645d5e573aca06f1262e88ad4c0245b8d19232"
+    },
+    {
+      "case_result_id": "c6615d74-454c-42b7-b81b-18bbcc5427ab",
+      "kind": "window",
+      "text": "- 处理窗口为**发货前**，办理前**必须核对订单状态**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "221da557b35d4b0d178c32646e747485db360b70148ae7c91a5fa9aa730235b6"
+    },
+    {
+      "case_result_id": "c6615d74-454c-42b7-b81b-18bbcc5427ab",
+      "kind": "requirement",
+      "text": "- 处理窗口为**发货前**，办理前**必须核对订单状态**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "221da557b35d4b0d178c32646e747485db360b70148ae7c91a5fa9aa730235b6"
+    },
+    {
+      "case_result_id": "c6615d74-454c-42b7-b81b-18bbcc5427ab",
+      "kind": "no_completed_business",
+      "text": "- 客服**只能登记处理工单**，**不能承诺已经完成办理**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "221da557b35d4b0d178c32646e747485db360b70148ae7c91a5fa9aa730235b6"
+    },
+    {
+      "case_result_id": "c6615d74-454c-42b7-b81b-18bbcc5427ab",
+      "kind": "approval_required",
+      "text": "- 创建工单前**必须查询客户并取得人工审批**；**审批被拒绝不得创建工单**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "221da557b35d4b0d178c32646e747485db360b70148ae7c91a5fa9aa730235b6"
+    },
+    {
+      "case_result_id": "c6615d74-454c-42b7-b81b-18bbcc5427ab",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前**必须查询客户并取得人工审批**；**审批被拒绝不得创建工单**。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "221da557b35d4b0d178c32646e747485db360b70148ae7c91a5fa9aa730235b6"
+    },
+    {
+      "case_result_id": "c6615d74-454c-42b7-b81b-18bbcc5427ab",
+      "kind": "fee_unspecified",
+      "text": "- 该政策**未说明是否收费**，不得推测或从其他政策借用费用规则。[c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0]",
+      "source_chunk_ids": [
+        "c9bce0429deba5d98c3aa3fab0715340ba751633b2608f78330964d3624c4ed0"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "221da557b35d4b0d178c32646e747485db360b70148ae7c91a5fa9aa730235b6"
+    },
+    {
+      "case_result_id": "463515d1-9a58-421c-a5bf-bd8e53660a65",
+      "kind": "window",
+      "text": "- 处理窗口为 24 小时，办理前必须核验账户归属。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "b3acabbd7f08c1d0987f5519d38d76efc6abe615b5c447675ae1365b832fc5c5"
+    },
+    {
+      "case_result_id": "463515d1-9a58-421c-a5bf-bd8e53660a65",
+      "kind": "requirement",
+      "text": "- 处理窗口为 24 小时，办理前必须核验账户归属。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "b3acabbd7f08c1d0987f5519d38d76efc6abe615b5c447675ae1365b832fc5c5"
+    },
+    {
+      "case_result_id": "463515d1-9a58-421c-a5bf-bd8e53660a65",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "b3acabbd7f08c1d0987f5519d38d76efc6abe615b5c447675ae1365b832fc5c5"
+    },
+    {
+      "case_result_id": "463515d1-9a58-421c-a5bf-bd8e53660a65",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "b3acabbd7f08c1d0987f5519d38d76efc6abe615b5c447675ae1365b832fc5c5"
+    },
+    {
+      "case_result_id": "463515d1-9a58-421c-a5bf-bd8e53660a65",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "b3acabbd7f08c1d0987f5519d38d76efc6abe615b5c447675ae1365b832fc5c5"
+    },
+    {
+      "case_result_id": "463515d1-9a58-421c-a5bf-bd8e53660a65",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9] 因此费用问题我无法给出确定答案，属于未知，不能视为免费。",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "b3acabbd7f08c1d0987f5519d38d76efc6abe615b5c447675ae1365b832fc5c5"
+    },
+    {
+      "case_result_id": "12f1bd48-9899-4eff-b873-f6001bbd27bd",
+      "kind": "window",
+      "text": "- 处理窗口为 24 小时，办理前必须核验账户归属。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "a33f9ca9ba1966c0a381c4e8ea5bb5d9130b482bd24028d3f13ca46f3793820d"
+    },
+    {
+      "case_result_id": "12f1bd48-9899-4eff-b873-f6001bbd27bd",
+      "kind": "requirement",
+      "text": "- 处理窗口为 24 小时，办理前必须核验账户归属。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "a33f9ca9ba1966c0a381c4e8ea5bb5d9130b482bd24028d3f13ca46f3793820d"
+    },
+    {
+      "case_result_id": "12f1bd48-9899-4eff-b873-f6001bbd27bd",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "a33f9ca9ba1966c0a381c4e8ea5bb5d9130b482bd24028d3f13ca46f3793820d"
+    },
+    {
+      "case_result_id": "12f1bd48-9899-4eff-b873-f6001bbd27bd",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "a33f9ca9ba1966c0a381c4e8ea5bb5d9130b482bd24028d3f13ca46f3793820d"
+    },
+    {
+      "case_result_id": "12f1bd48-9899-4eff-b873-f6001bbd27bd",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9]",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "a33f9ca9ba1966c0a381c4e8ea5bb5d9130b482bd24028d3f13ca46f3793820d"
+    },
+    {
+      "case_result_id": "12f1bd48-9899-4eff-b873-f6001bbd27bd",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则。[45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9] 因此费用问题属于未知，不能视为免费。",
+      "source_chunk_ids": [
+        "45967e7b0c6296221edd61545ce6cf10dc8d15c93e3abe0b5d8a9106dd2446a9"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "a33f9ca9ba1966c0a381c4e8ea5bb5d9130b482bd24028d3f13ca46f3793820d"
+    },
+    {
+      "case_result_id": "9c9e789a-0cca-46c9-b397-33fe66acbe38",
+      "kind": "window",
+      "text": "- 处理窗口为 7 天 [ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0364e659ac97ec9842def4163985a6c32e510ab0204fb9b9944aeb953be16050"
+    },
+    {
+      "case_result_id": "9c9e789a-0cca-46c9-b397-33fe66acbe38",
+      "kind": "requirement",
+      "text": "- 办理前必须核对两笔账单编号 [ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0364e659ac97ec9842def4163985a6c32e510ab0204fb9b9944aeb953be16050"
+    },
+    {
+      "case_result_id": "9c9e789a-0cca-46c9-b397-33fe66acbe38",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理 [ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]。因此我无法声称重复扣费已经办好或退款已完成。",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0364e659ac97ec9842def4163985a6c32e510ab0204fb9b9944aeb953be16050"
+    },
+    {
+      "case_result_id": "9c9e789a-0cca-46c9-b397-33fe66acbe38",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单 [ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0364e659ac97ec9842def4163985a6c32e510ab0204fb9b9944aeb953be16050"
+    },
+    {
+      "case_result_id": "9c9e789a-0cca-46c9-b397-33fe66acbe38",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单 [ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0364e659ac97ec9842def4163985a6c32e510ab0204fb9b9944aeb953be16050"
+    },
+    {
+      "case_result_id": "9c9e789a-0cca-46c9-b397-33fe66acbe38",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则 [ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426]。所以是否收费属于未知，我不能当作免费，也不能给出具体金额。",
+      "source_chunk_ids": [
+        "ee89826df7d01d62a651d84751b3e2565e89d98189a69b528272648d81cc3426"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "0364e659ac97ec9842def4163985a6c32e510ab0204fb9b9944aeb953be16050"
+    },
+    {
+      "case_result_id": "72fda90e-3236-4c0f-bc09-b1be4043351d",
+      "kind": "window",
+      "text": "- 处理窗口为 14 天 [b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "75b9a310a0d86123286f26d07c139ef54d4b7085657cca8726254313ee7626f9"
+    },
+    {
+      "case_result_id": "72fda90e-3236-4c0f-bc09-b1be4043351d",
+      "kind": "requirement",
+      "text": "- 办理前必须核对商品完整性 [b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "75b9a310a0d86123286f26d07c139ef54d4b7085657cca8726254313ee7626f9"
+    },
+    {
+      "case_result_id": "72fda90e-3236-4c0f-bc09-b1be4043351d",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理 [b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]。因此我无法声称退货申请\"已办好\"或已完成办理。",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "75b9a310a0d86123286f26d07c139ef54d4b7085657cca8726254313ee7626f9"
+    },
+    {
+      "case_result_id": "72fda90e-3236-4c0f-bc09-b1be4043351d",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单 [b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "75b9a310a0d86123286f26d07c139ef54d4b7085657cca8726254313ee7626f9"
+    },
+    {
+      "case_result_id": "72fda90e-3236-4c0f-bc09-b1be4043351d",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单 [b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "75b9a310a0d86123286f26d07c139ef54d4b7085657cca8726254313ee7626f9"
+    },
+    {
+      "case_result_id": "72fda90e-3236-4c0f-bc09-b1be4043351d",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则 [b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]。所以退货是否产生费用，我无法给出确定答案，属于未知，不能视为免费。",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "75b9a310a0d86123286f26d07c139ef54d4b7085657cca8726254313ee7626f9"
+    },
+    {
+      "case_result_id": "7019678c-12c2-47c3-9db3-61a544bcf8a2",
+      "kind": "window",
+      "text": "- 处理窗口为 14 天，办理前必须核对商品完整性。[b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "1a0fde880120c584832f47837feefcb352fccf6cc764fe7fdac169fa1effc4ec"
+    },
+    {
+      "case_result_id": "7019678c-12c2-47c3-9db3-61a544bcf8a2",
+      "kind": "requirement",
+      "text": "- 处理窗口为 14 天，办理前必须核对商品完整性。[b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "1a0fde880120c584832f47837feefcb352fccf6cc764fe7fdac169fa1effc4ec"
+    },
+    {
+      "case_result_id": "7019678c-12c2-47c3-9db3-61a544bcf8a2",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理。[b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "1a0fde880120c584832f47837feefcb352fccf6cc764fe7fdac169fa1effc4ec"
+    },
+    {
+      "case_result_id": "7019678c-12c2-47c3-9db3-61a544bcf8a2",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "1a0fde880120c584832f47837feefcb352fccf6cc764fe7fdac169fa1effc4ec"
+    },
+    {
+      "case_result_id": "7019678c-12c2-47c3-9db3-61a544bcf8a2",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8]",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "1a0fde880120c584832f47837feefcb352fccf6cc764fe7fdac169fa1effc4ec"
+    },
+    {
+      "case_result_id": "7019678c-12c2-47c3-9db3-61a544bcf8a2",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明是否收费，不得推测或从其他政策借用费用规则。[b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8] 因此退货是否收费属于**未知**，我不能给出任何费用结论。",
+      "source_chunk_ids": [
+        "b1986b68361c73a4567ae89fc3194502eaa59019e5b588a7958963c898e783b8"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "1a0fde880120c584832f47837feefcb352fccf6cc764fe7fdac169fa1effc4ec"
+    },
+    {
+      "case_result_id": "b5e60d34-3c9a-4d57-b942-044e8d4f7ead",
+      "kind": "window",
+      "text": "- 处理窗口为下个账期，办理前必须核对当前套餐。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "553871969ed3468bdf0cb74eb8773a80c5560e51d98be87eb5558a44b88c1dcc"
+    },
+    {
+      "case_result_id": "b5e60d34-3c9a-4d57-b942-044e8d4f7ead",
+      "kind": "requirement",
+      "text": "- 处理窗口为下个账期，办理前必须核对当前套餐。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "553871969ed3468bdf0cb74eb8773a80c5560e51d98be87eb5558a44b88c1dcc"
+    },
+    {
+      "case_result_id": "b5e60d34-3c9a-4d57-b942-044e8d4f7ead",
+      "kind": "no_completed_business",
+      "text": "不能。政策明确规定：客服只能登记处理工单，不能承诺已经完成办理。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "553871969ed3468bdf0cb74eb8773a80c5560e51d98be87eb5558a44b88c1dcc"
+    },
+    {
+      "case_result_id": "b5e60d34-3c9a-4d57-b942-044e8d4f7ead",
+      "kind": "approval_required",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "553871969ed3468bdf0cb74eb8773a80c5560e51d98be87eb5558a44b88c1dcc"
+    },
+    {
+      "case_result_id": "b5e60d34-3c9a-4d57-b942-044e8d4f7ead",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前必须查询客户并取得人工审批；审批被拒绝不得创建工单。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "553871969ed3468bdf0cb74eb8773a80c5560e51d98be87eb5558a44b88c1dcc"
+    },
+    {
+      "case_result_id": "b5e60d34-3c9a-4d57-b942-044e8d4f7ead",
+      "kind": "fee_unspecified",
+      "text": "该政策未说明订阅变更是否收费，因此不得推测或从其他政策借用费用规则——费用问题属于未知，不能当作免费。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "553871969ed3468bdf0cb74eb8773a80c5560e51d98be87eb5558a44b88c1dcc"
+    },
+    {
+      "case_result_id": "bf48ebe8-1344-4dcc-a8db-a52746bc087b",
+      "kind": "window",
+      "text": "- 处理窗口为**下个账期**，办理前**必须核对当前套餐**。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "d5f99de0f34261b55699d91043c707863dc696cad704d935145b3999b7c6c903"
+    },
+    {
+      "case_result_id": "bf48ebe8-1344-4dcc-a8db-a52746bc087b",
+      "kind": "requirement",
+      "text": "- 处理窗口为**下个账期**，办理前**必须核对当前套餐**。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "d5f99de0f34261b55699d91043c707863dc696cad704d935145b3999b7c6c903"
+    },
+    {
+      "case_result_id": "bf48ebe8-1344-4dcc-a8db-a52746bc087b",
+      "kind": "no_completed_business",
+      "text": "- 客服**只能登记处理工单，不能承诺已经完成办理**。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "d5f99de0f34261b55699d91043c707863dc696cad704d935145b3999b7c6c903"
+    },
+    {
+      "case_result_id": "bf48ebe8-1344-4dcc-a8db-a52746bc087b",
+      "kind": "approval_required",
+      "text": "- 创建工单前**必须查询客户并取得人工审批**；**审批被拒绝不得创建工单**。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "d5f99de0f34261b55699d91043c707863dc696cad704d935145b3999b7c6c903"
+    },
+    {
+      "case_result_id": "bf48ebe8-1344-4dcc-a8db-a52746bc087b",
+      "kind": "denial_no_ticket",
+      "text": "- 创建工单前**必须查询客户并取得人工审批**；**审批被拒绝不得创建工单**。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "d5f99de0f34261b55699d91043c707863dc696cad704d935145b3999b7c6c903"
+    },
+    {
+      "case_result_id": "bf48ebe8-1344-4dcc-a8db-a52746bc087b",
+      "kind": "fee_unspecified",
+      "text": "该政策**未说明是否收费**，因此不得推测，也不得从其他政策借用费用规则。费用问题属于**未知**，不能当作免费。[d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f]",
+      "source_chunk_ids": [
+        "d1e79092abc560c679f7be6fb38986e8a562879fd98c7021acde2e094a8c161f"
+      ],
+      "supported": true,
+      "inline_citation_support": true,
+      "reviewer_kind": "assistant",
+      "output_hash": "d5f99de0f34261b55699d91043c707863dc696cad704d935145b3999b7c6c903"
+    }
+  ],
+  "summary": {
+    "DENSE": {
+      "planned_trials": 72,
+      "actual_trials": 72,
+      "candidate_recall_mean": null,
+      "candidate_unknown_count": 72,
+      "final_recall_mean": 1.0,
+      "mrr": 0.9722222222222222,
+      "cited_returned_ids": 176,
+      "cited_relevant_ids": 72,
+      "emitted_unique_ids_sum": 176,
+      "required_source_cited_count": 72,
+      "semantic_sample_correct": 24,
+      "semantic_sample_count": 24,
+      "semantic_unknown_count": 48,
+      "primary_claim_sample_count": 48,
+      "unsupported_primary_claims": 0,
+      "inline_cited_primary_claims": 48,
+      "latency_p50_ms": 2810.5,
+      "latency_p95_ms": 3398.3,
+      "stage_p95_ms": {
+        "dense": 314.72175,
+        "sparse": 0.0,
+        "fusion": 0.0,
+        "rerank": 0.0
+      },
+      "upper_total_cny": "0.60525800",
+      "cost_coverage": 1.0,
+      "full_effective_semantic_task_cost": null,
+      "reason": "full semantic success denominator unavailable outside repetition zero sample"
+    },
+    "HYBRID_RERANK": {
+      "planned_trials": 72,
+      "actual_trials": 72,
+      "candidate_recall_mean": 1.0,
+      "candidate_unknown_count": 0,
+      "final_recall_mean": 1.0,
+      "mrr": 0.9930555555555556,
+      "cited_returned_ids": 151,
+      "cited_relevant_ids": 72,
+      "emitted_unique_ids_sum": 151,
+      "required_source_cited_count": 72,
+      "semantic_sample_correct": 24,
+      "semantic_sample_count": 24,
+      "semantic_unknown_count": 48,
+      "primary_claim_sample_count": 48,
+      "unsupported_primary_claims": 0,
+      "inline_cited_primary_claims": 48,
+      "latency_p50_ms": 2957.5,
+      "latency_p95_ms": 3770.4,
+      "stage_p95_ms": {
+        "dense": 312.9322,
+        "sparse": 55.9322,
+        "fusion": 0.10495000000000003,
+        "rerank": 552.2773000000001
+      },
+      "upper_total_cny": "0.60804800",
+      "cost_coverage": 1.0,
+      "full_effective_semantic_task_cost": null,
+      "reason": "full semantic success denominator unavailable outside repetition zero sample"
+    }
+  },
+  "status_counts": {
+    "SUCCEEDED": 144
+  },
+  "adapter_cost_cny": "1.213306",
+  "runtime_cost_cny": "1.21330600",
+  "cost_reconciliation": "PASS",
+  "limitations": [
+    "DEV only, eight short synthetic policies",
+    "assistant labels, no human agreement",
+    "semantic sample: all 24 questions in repetition zero per strategy, 48/144",
+    "claim corpus: six primary-policy claims in each multi_hop repetition-zero answer, 16/144 outputs; no exhaustive hallucination rate",
+    "citation relevance is question source matching; citation existence does not prove entailment",
+    "Dense candidate fusion trace absent: candidate recall unavailable, not zero",
+    "same-policy multi-fact questions, not cross-document reasoning"
+  ],
+  "Q08": {
+    "status": "NOT_AVAILABLE",
+    "reason": "no independent human labels"
+  }
+}
