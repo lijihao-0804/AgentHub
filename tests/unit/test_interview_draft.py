@@ -5,6 +5,14 @@ import pytest
 from benchmarks.evaluation.interview_draft import build_draft, validate_draft
 
 
+def test_v2_warranty_clarification_supplies_required_serial_without_changing_holdout():
+    draft = build_draft()
+    case = next(c for c in draft["cases"] if c["case_id"] == "warranty-clarification")
+    assert "SYNTH-SN-001" in case["user_turns"][1]
+    assert case["expected_ticket_count"] == 1 and case["split"] == "DEV"
+    assert draft["dataset_version"] == "support-interview-draft-v2"
+
+
 def test_draft_is_reproducible_unapproved_and_pilot_is_dev_only():
     first = build_draft()
     assert first == build_draft()

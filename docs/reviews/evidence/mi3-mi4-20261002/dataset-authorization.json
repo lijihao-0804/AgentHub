@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "status": "AUTHORIZED_FOR_DEVELOPMENT_USE",
+  "dataset_version": "support-interview-draft-v2",
+  "dataset_hash": "bf611d22e5a20fa28aa1d9186e0be120ebee84a6c8684deea214a4faa7b93ca3",
+  "case_count": 60,
+  "dev_count": 40,
+  "holdout_count": 20,
+  "user_authorization_date": "2026-10-02",
+  "user_authorization": "数据直接用就行，数据量不够的话你自己生成增加",
+  "annotation_origin": "assistant_authored_fictional_reference_answers",
+  "independent_human_labels_available": false,
+  "published_dataset_version_id": null,
+  "model": "deepseek-flash",
+  "model_scope": "isolated_evaluation_configuration_only",
+  "limit_cny": "5",
+  "changes_since_v1": [
+    "warranty clarification supplies fictional product serial"
+  ],
+  "content_hash": "8acf9ea87f859ef0fc93a685c835be86ed64c755211de1b7259a538be8510738"
+}

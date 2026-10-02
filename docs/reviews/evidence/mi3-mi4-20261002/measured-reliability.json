@@ -1,0 +1,81 @@
+{
+  "provider": "controlled",
+  "side_effect": "durable_sqlite_simulation",
+  "cases": [
+    {
+      "case": "approved",
+      "run_id": "f7900f42-6d46-44f1-92e6-1cd73dfa2a9d",
+      "approval_id": "6c5812fa-b096-45b8-a517-3bd48c3e4e3e",
+      "decision_status": "APPROVED",
+      "execution_status": "SUCCEEDED",
+      "run_status": "SUCCEEDED",
+      "resume_ms": 593.1578999734484,
+      "dispatch_count": 1,
+      "effect_count": 1
+    },
+    {
+      "case": "denied",
+      "run_id": "c0478516-5866-46d9-8d4f-648dd9cc0a14",
+      "approval_id": "71f7f243-a1d3-4423-8681-2c02c2ca5854",
+      "decision_status": "DENIED",
+      "execution_status": "NOT_STARTED",
+      "run_status": "SUCCEEDED",
+      "resume_ms": 605.4210999864154,
+      "dispatch_count": 0,
+      "effect_count": 0
+    },
+    {
+      "case": "unauthorized",
+      "run_id": "88c2ab06-3816-4c8e-a948-b62d9d4184ab",
+      "approval_id": "02f6b73b-d3b5-4e9a-9938-544a4de061b5",
+      "decision_status": "DENIED",
+      "execution_status": "NOT_STARTED",
+      "run_status": "SUCCEEDED",
+      "resume_ms": 670.2287000371143,
+      "dispatch_count": 0,
+      "effect_count": 0
+    },
+    {
+      "case": "response_lost",
+      "run_id": "95f651e9-a60f-421e-b9cc-3cd5f249dc91",
+      "approval_id": "bb913cd5-341f-4aa1-a803-938d980db401",
+      "decision_status": "APPROVED",
+      "execution_status": "UNKNOWN_OUTCOME",
+      "run_status": "NEEDS_ATTENTION",
+      "resume_ms": 521.0865999688394,
+      "dispatch_count": 1,
+      "effect_count": 1
+    },
+    {
+      "case": "definite_failure",
+      "run_id": "1aca943f-6fdf-461e-a658-2b441cd51c99",
+      "approval_id": "b7a09381-497c-45a8-87d6-04da04b47af6",
+      "decision_status": "APPROVED",
+      "execution_status": "FAILED",
+      "run_status": "SUCCEEDED",
+      "resume_ms": 617.2179999994114,
+      "dispatch_count": 1,
+      "effect_count": 0
+    }
+  ],
+  "R01": {
+    "duplicate_effect_actions": 0,
+    "tested_actions": 5
+  },
+  "R02": {
+    "denied_effects": 0,
+    "denied_cases": 1,
+    "unauthorized_effects": 0,
+    "unauthorized_cases": 1
+  },
+  "R04": {
+    "unknown_correct": 1,
+    "unknown_cases": 1,
+    "definite_failure_false_unknown": 0,
+    "definite_failure_cases": 1
+  },
+  "R03": {
+    "status": "NOT_AVAILABLE",
+    "reason": "no_real_process_crash_or_reconciliation_window_in_this_matrix"
+  }
+}

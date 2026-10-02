@@ -1,0 +1,22 @@
+{
+  "observed_date": "2026-10-02",
+  "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing",
+  "models_endpoint_status": 200,
+  "configured_legacy_model": "deepseek-chat",
+  "listed_models": [
+    "deepseek-flash",
+    "deepseek-v4-pro"
+  ],
+  "selected_by_user": "deepseek-flash",
+  "currency": "CNY",
+  "peak_input_cache_miss_per_1m": "2",
+  "peak_input_cache_hit_per_1m": "0.04",
+  "peak_output_per_1m": "8",
+  "budget_estimation": "ignore_cache_and_off_peak_discounts",
+  "thinking": "disabled",
+  "per_call_max_output_tokens": 800,
+  "per_call_reserved_input_tokens": 32000,
+  "request_serialized_payload_max_utf8_bytes": 16000,
+  "per_call_reservation_cny": "0.0704",
+  "invoice_amount_available": false
+}

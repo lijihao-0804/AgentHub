@@ -325,7 +325,10 @@ async def test_qdrant_unavailable_keeps_indexing_retryable_then_recovers(
         await session.commit()
         result = await reconcile_ingestion_jobs(session, queue=queue, settings=settings)
     assert job_id in result.requeued_job_ids
-    assert queue.job_ids == [job_id]
+    # Reconciliation is global: a reused test DB may contain other due jobs.
+    # Verify this fixture is queued once and every reported requeue was dispatched.
+    assert queue.job_ids.count(job_id) == 1
+    assert queue.job_ids == list(result.requeued_job_ids)
 
     await _process_knowledge_ingestion(
         job_id,

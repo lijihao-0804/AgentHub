@@ -1,0 +1,92 @@
+{
+  "status": "STOPPED_INSPECT_FAILURE",
+  "formal_experiment": false,
+  "build_sha": "2472a9a53af8b57e9f95b79e785666a8067be68b",
+  "working_tree_changes_present": true,
+  "dataset_hash": "5b6a9fb9cd607d824b15b05ebb9a1e57614e9c126f5fcda1660281b18260fee2",
+  "model": "deepseek-flash",
+  "thinking": "disabled",
+  "price_identity": "deepseek-flash-20261002-peak-upper-cny-input2-output8",
+  "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing",
+  "cost_method": "peak_full_input_upper_estimate_not_provider_invoice",
+  "data_use_authorization": "user_20261002_use_synthetic_data_directly",
+  "limitations": [
+    "inline_policy_not_retrieval",
+    "single_trial_not_three_repetitions",
+    "no_independent_human_quality_labels",
+    "not_published_dataset_or_formal_experiment"
+  ],
+  "cases": [
+    {
+      "case_id": "refund-single_hop",
+      "observation": {
+        "observation_schema_version": 2,
+        "driver_kind": "runtime",
+        "field_sources": {
+          "turns": "persisted_thread_agent_runs"
+        },
+        "scenario_driver_version": "scripted-scenario-v1",
+        "case_id": "refund-single_hop",
+        "instance_id": "0e604061fa9e45bea34a1f0f23b423bb",
+        "thread_id": "7dd18e80-675c-43d9-80e1-559a004641bc",
+        "agent_version_id": "2ea3a085-5d81-4d4a-8fb2-1e74b7b722f7",
+        "resolved_spec_hash": "41338ff82b0c6851cd0634ede5057b8f181df772589a1589d33aa4b8c2cac277",
+        "knowledge_snapshots_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "planned_turn_count": 1,
+        "executed_turn_count": 1,
+        "turns": [
+          {
+            "run_id": "6276ac58-3142-4fcb-b1b9-fffcae2f9b29",
+            "turn_id": "9e21740b-0af4-4f60-9768-63e82d1dd484",
+            "status": "FAILED",
+            "failure_code": "AGENT_RUN_FAILED",
+            "resolved_spec_hash": "41338ff82b0c6851cd0634ede5057b8f181df772589a1589d33aa4b8c2cac277",
+            "output_hash": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126",
+            "input_tokens": null,
+            "output_tokens": null,
+            "cost_amount": null,
+            "cost_currency": null
+          }
+        ],
+        "approval_decision_count": 0,
+        "unused_approval_decision_count": 0,
+        "execution_complete": false,
+        "stop_reason": "run_failed",
+        "latency_ms": 82.92559999972582,
+        "timing": {
+          "clock": "process_monotonic",
+          "origin": "evaluation_execution_start",
+          "server_ttft_ms": null,
+          "server_ttft_missing_reason": "no_streamed_visible_text",
+          "billing": {
+            "collection_complete": false,
+            "provider_attempt_count": 0,
+            "known_usage_count": 0,
+            "known_cost_count": 0
+          },
+          "stage_durations_ms": {
+            "agent.run": [
+              27.610899996943772
+            ]
+          }
+        }
+      },
+      "persistent_checks": {
+        "execution_complete": false,
+        "ticket_count": true,
+        "approval_decision": true
+      },
+      "ticket_count": 0,
+      "approval_states": [],
+      "outputs": [
+        null
+      ],
+      "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW"
+    }
+  ],
+  "agent_version_id": "2ea3a085-5d81-4d4a-8fb2-1e74b7b722f7",
+  "resolved_spec_hash": "41338ff82b0c6851cd0634ede5057b8f181df772589a1589d33aa4b8c2cac277",
+  "workspace_id": "1dbaf110-4abe-4f1c-9f8f-1770fb26d89d",
+  "calls": [],
+  "allocated_cny": "0"
+}

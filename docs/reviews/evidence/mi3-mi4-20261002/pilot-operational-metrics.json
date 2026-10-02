@@ -1,0 +1,121 @@
+{
+  "scope": "DEV pilot operational postconditions only, not full answer correctness",
+  "formal_experiment": false,
+  "source_report": "live-pilot-v2-three-trials-recovery.json",
+  "dataset_hash": "bf611d22e5a20fa28aa1d9186e0be120ebee84a6c8684deea214a4faa7b93ca3",
+  "agent_version_id": "f048eb0a-01e7-4778-b547-541559037341",
+  "metrics": {
+    "candidate": {
+      "all_3_trials_success_rate": {
+        "name": "all_3_trials_success_rate",
+        "status": "AVAILABLE",
+        "value": 1.0,
+        "sample_count": 10,
+        "numerator": 10,
+        "denominator": 10,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_task_count": 10,
+          "complete_task_count": 10,
+          "incomplete_task_count": 0,
+          "all_planned_trials_present": true
+        }
+      },
+      "business_trial_success_rate": {
+        "name": "business_trial_success_rate",
+        "status": "AVAILABLE",
+        "value": 1.0,
+        "sample_count": 30,
+        "numerator": 30,
+        "denominator": 30,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "unknown_count": 0
+        }
+      },
+      "all_trial_latency_p50_ms": {
+        "name": "all_trial_latency_p50_ms",
+        "status": "AVAILABLE",
+        "value": 1643.4777499816846,
+        "sample_count": 30,
+        "numerator": null,
+        "denominator": null,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_trial_count": 30
+        }
+      },
+      "all_trial_latency_p95_ms": {
+        "name": "all_trial_latency_p95_ms",
+        "status": "AVAILABLE",
+        "value": 6294.192159982048,
+        "sample_count": 30,
+        "numerator": null,
+        "denominator": null,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_trial_count": 30
+        }
+      },
+      "successful_trial_latency_p50_ms": {
+        "name": "successful_trial_latency_p50_ms",
+        "status": "AVAILABLE",
+        "value": 1643.4777499816846,
+        "sample_count": 30,
+        "numerator": null,
+        "denominator": null,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_trial_count": 30
+        }
+      },
+      "successful_trial_latency_p95_ms": {
+        "name": "successful_trial_latency_p95_ms",
+        "status": "AVAILABLE",
+        "value": 6294.192159982048,
+        "sample_count": 30,
+        "numerator": null,
+        "denominator": null,
+        "reason": null,
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "planned_trial_count": 30
+        }
+      },
+      "correct_refusal_rate": {
+        "name": "correct_refusal_rate",
+        "status": "NOT_AVAILABLE",
+        "value": null,
+        "sample_count": 0,
+        "numerator": 0,
+        "denominator": 6,
+        "reason": "no_observed_denominator",
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "unknown_count": 6,
+          "missing_answer_label_case_count": 0
+        }
+      },
+      "incorrect_refusal_rate": {
+        "name": "incorrect_refusal_rate",
+        "status": "NOT_AVAILABLE",
+        "value": null,
+        "sample_count": 0,
+        "numerator": 0,
+        "denominator": 24,
+        "reason": "no_observed_denominator",
+        "evaluator_version": "quality-audit-v1",
+        "details": {
+          "unknown_count": 24,
+          "missing_answer_label_case_count": 0
+        }
+      }
+    }
+  },
+  "answer_quality": "NOT_AVAILABLE_PENDING_INDEPENDENT_REVIEW"
+}

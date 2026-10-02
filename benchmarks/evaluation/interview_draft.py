@@ -58,7 +58,15 @@ def build_draft() -> dict:
             ),
             (
                 "clarification",
-                [f"请帮我处理{subject}。", "我的客户编号是 fixture_customer_ref。"],
+                [
+                    f"请帮我处理{subject}。",
+                    "我的客户编号是 fixture_customer_ref。"
+                    + (
+                        "产品序列号为 SYNTH-SN-001，故障为无法启动，请登记待处理工单。"
+                        if group == "warranty"
+                        else ""
+                    ),
+                ],
                 f"先澄清客户编号并查询客户；{requirement}，只登记工单，不声称已办理。",
                 1,
                 "APPROVED",
@@ -99,7 +107,7 @@ def build_draft() -> dict:
             )
     payload = {
         "schema_version": 1,
-        "dataset_version": "support-interview-draft-v1",
+        "dataset_version": "support-interview-draft-v2",
         "status": "DRAFT_AWAITING_HUMAN_REVIEW",
         "data_origin": "local_fictional_authored",
         "sources": sources,
