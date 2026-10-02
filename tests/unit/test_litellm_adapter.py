@@ -67,6 +67,32 @@ class FakeStreamClient:
 
 
 @pytest.mark.asyncio
+async def test_closing_adapter_stream_closes_retained_provider_iterator():
+    class RetainedStream:
+        def __init__(self):
+            self.closed = False
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            return {"choices": [{"delta": {"content": "visible"}}]}
+
+        async def aclose(self):
+            self.closed = True
+
+    raw = RetainedStream()
+    client = FakeCompletionClient(response=raw)
+    model_profile, credential = profile()
+    stream = LiteLLMProviderAdapter(client).stream(
+        model_profile, credential, ModelRequest(messages=(ModelMessage("user", "fixture"),))
+    )
+    assert (await anext(stream)).message_delta == "visible"
+    await stream.aclose()
+    assert raw.closed
+
+
+@pytest.mark.asyncio
 async def test_deepseek_request_is_mapped_and_response_is_normalized() -> None:
     client = FakeCompletionClient(
         response={

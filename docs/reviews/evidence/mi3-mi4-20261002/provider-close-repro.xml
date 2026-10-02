@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="8" time="5.341" timestamp="2026-10-02T23:09:42.776782+08:00" hostname="DESKTOP-PVA3D0V"><testcase classname="tests.unit.test_litellm_adapter" name="test_closing_adapter_stream_closes_retained_provider_iterator" time="0.007"><failure message="assert False&#10; +  where False = &lt;tests.unit.test_litellm_adapter.test_closing_adapter_stream_closes_retained_provider_iterator.&lt;locals&gt;.RetainedStream object at 0x000001A72F19CFB0&gt;.closed">@pytest.mark.asyncio
+    async def test_closing_adapter_stream_closes_retained_provider_iterator():
+        class RetainedStream:
+            def __init__(self):
+                self.closed = False
+    
+            def __aiter__(self):
+                return self
+    
+            async def __anext__(self):
+                return {"choices": [{"delta": {"content": "visible"}}]}
+    
+            async def aclose(self):
+                self.closed = True
+    
+        raw = RetainedStream()
+        client = FakeCompletionClient(response=raw)
+        model_profile, credential = profile()
+        stream = LiteLLMProviderAdapter(client).stream(
+            model_profile, credential, ModelRequest(messages=(ModelMessage("user", "fixture"),))
+        )
+        assert (await anext(stream)).message_delta == "visible"
+        await stream.aclose()
+&gt;       assert raw.closed
+E       assert False
+E        +  where False = &lt;tests.unit.test_litellm_adapter.test_closing_adapter_stream_closes_retained_provider_iterator.&lt;locals&gt;.RetainedStream object at 0x000001A72F19CFB0&gt;.closed
+
+tests\unit\test_litellm_adapter.py:92: AssertionError</failure></testcase><testcase classname="tests.unit.test_litellm_adapter" name="test_deepseek_request_is_mapped_and_response_is_normalized" time="0.002" /><testcase classname="tests.unit.test_litellm_adapter" name="test_tool_result_message_preserves_provider_tool_call_id" time="0.003" /><testcase classname="tests.unit.test_litellm_adapter" name="test_openai_compatible_stream_is_typed_and_single_attempt" time="4.743" /><testcase classname="tests.unit.test_litellm_adapter" name="test_stream_cost_is_attached_to_completed_response" time="0.002" /><testcase classname="tests.unit.test_litellm_adapter" name="test_provider_exception_traceback_does_not_expose_raw_secret" time="0.003" /><testcase classname="tests.unit.test_litellm_adapter" name="test_provider_cancellation_is_not_normalized" time="0.002" /><testcase classname="tests.unit.test_litellm_adapter" name="test_provider_error_is_normalized_without_raw_secret" time="0.002" /></testsuite></testsuites>

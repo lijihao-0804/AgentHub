@@ -1,0 +1,12 @@
+{
+  "collection": "agenthub_mi34_crash_7b5aa8e766df",
+  "count": 1,
+  "point_ids": [
+    "3ac69ec8-da61-5a8e-8079-f22ea6b19573"
+  ],
+  "chunk_ids": [
+    "2854f4f636fe1f68297212d26513b078346f4933e875c42819ea899b3d6dd587"
+  ],
+  "owned_redis_removed": true,
+  "owned_redis_id": "87c19a616c58819137c4c42cb361c3a75076b504bef52b1911064cbb0339ba43"
+}

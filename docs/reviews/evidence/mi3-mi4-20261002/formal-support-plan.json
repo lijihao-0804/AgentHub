@@ -1,0 +1,43 @@
+{
+  "status": "FROZEN_DEV_PLAN",
+  "build_sha": "4d7c615c2f783a45f3611ed772cd05806e57150c",
+  "workspace_id": "ce4d1226-3ea6-4033-ba82-751d5f7e2325",
+  "user_id": "023972bb-fca8-44b1-97f4-6399e404dbf8",
+  "dataset_version_id": "a457483f-1416-498c-b55b-799bc738f735",
+  "dataset_content_hash": "2c842e93e0fd70239ade27ec5d5fc7d3a864e1ec68cd9251a5b80e225204ac23",
+  "source_content_hash": "50632e5c303b5feb5db0a233e6fc170af460a69fce09860355b88a8f3bec22a3",
+  "agent_version_ids": [
+    "9d9d1575-cc9e-4e2f-9a48-725c3ba296be",
+    "26c3378e-5474-4b89-951f-9f1f8a5b0e8c"
+  ],
+  "pricing_snapshot_id": "4f74ad89-060f-41f8-a622-007802c7fb1b",
+  "experiment_id": "66e68687-f95a-4d3e-9629-1fff035a3c5b",
+  "run_id": "ef3df83c-b592-4460-b6c0-1919afdbfbe4",
+  "planned_cases": 240,
+  "evaluator_manifest": {
+    "evaluation_schema_version": 1,
+    "observation_schema_version": 2,
+    "evaluator_versions": {
+      "answer-quality-judge": "disabled",
+      "approval-evaluator": "v2",
+      "citation-evaluator": "v2",
+      "dataset-validator": "v1",
+      "failure-evaluator": "v2",
+      "retrieval-evaluator": "v2",
+      "support-postcondition-evaluator": "support-postcondition-v1",
+      "tool-evaluator": "v2"
+    },
+    "scenario": {
+      "input_schema_version": 1,
+      "driver_version": "scripted-scenario-v2",
+      "postcondition_version": "support-scenario-postcondition-v2",
+      "recovery_policy": "fail_closed_no_fixture_replay"
+    }
+  },
+  "holdout_consumed": false,
+  "limitations": [
+    "inline_policy_not_RAG",
+    "assistant_labels_not_human",
+    "synthetic_correlated_tasks"
+  ]
+}

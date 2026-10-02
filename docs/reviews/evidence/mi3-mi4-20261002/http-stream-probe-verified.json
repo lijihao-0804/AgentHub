@@ -1,0 +1,67 @@
+{
+  "status": "FAIL",
+  "provider": "controlled",
+  "transport": "real_loopback_tcp_http_sse",
+  "limitations": [
+    "fixture_identity_injected_not_auth_test",
+    "same_process_two_services_not_OS_restart",
+    "no_business_write_in_this_probe",
+    "message_delta_not_durably_replayed_by_design"
+  ],
+  "cases": [
+    {
+      "mode": "reconnect_same_service",
+      "run_id": "a4e04a5d-d846-409b-bcca-1ba015e7048a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "provider_calls": 1,
+      "provider_closed": true,
+      "grace_seconds": 0.5,
+      "initial_event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta"
+      ],
+      "replayed_event_types": [
+        "message.completed",
+        "run.completed"
+      ],
+      "replay_sequences": [
+        6,
+        7
+      ],
+      "after_sequence": 4,
+      "fixture_scope": "new_workspace_per_case",
+      "business_writes": 0
+    },
+    {
+      "mode": "follow_other_service",
+      "run_id": "a7ae00d2-25d1-4cc2-b873-5740acc3734e",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "provider_calls": 1,
+      "provider_closed": true,
+      "grace_seconds": 0.5,
+      "initial_event_types": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta"
+      ],
+      "replayed_event_types": [
+        "message.completed",
+        "run.completed"
+      ],
+      "replay_sequences": [
+        6,
+        7
+      ],
+      "after_sequence": 4,
+      "fixture_scope": "new_workspace_per_case",
+      "business_writes": 0
+    }
+  ],
+  "failure_class": "RuntimeError",
+  "failure_code": "HTTP_PROBE_STATE_OR_REEXECUTION_MISMATCH"
+}

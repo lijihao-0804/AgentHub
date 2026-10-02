@@ -1,0 +1,14 @@
+{
+  "status": "FAIL",
+  "provider": "controlled",
+  "transport": "real_loopback_tcp_http_sse",
+  "limitations": [
+    "fixture_identity_injected_not_auth_test",
+    "same_process_two_services_not_OS_restart",
+    "no_business_write_in_this_probe",
+    "message_delta_not_durably_replayed_by_design"
+  ],
+  "cases": [],
+  "failure_class": "RemoteProtocolError",
+  "failure_code": "peer closed connection without sending complete message body (incomplete chunked read)"
+}

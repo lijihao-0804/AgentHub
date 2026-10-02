@@ -1,0 +1,32 @@
+{
+  "status": "FAIL",
+  "database": "agenthub_mi34_crash_b025bfa2cb23",
+  "collection": "agenthub_mi34_crash_b025bfa2cb23",
+  "job_id": "ae1baccf-429b-423d-b1cc-2d30c7d7aea9",
+  "revision_id": "3fc1ca74-d65f-401d-bc12-090688b9b0c3",
+  "provider": "cached_local_bge_cpu",
+  "lease_seconds": 10,
+  "periodic_reconciliation_seconds": 60,
+  "limitations": [
+    "solo_worker_not_multi_host_partition",
+    "repeatable_indexing_not_external_business_write"
+  ],
+  "crashed_worker_exit_code": 73,
+  "before_recovery": {
+    "status": "PROCESSING",
+    "stage": "INDEXING",
+    "attempt_count": 1,
+    "lease_expires_at": "2026-10-02T15:24:06.203477+00:00",
+    "chunk_ids": [
+      "c2f43fcc7da8e7d2bac3e6c8c6ee7db44f38498aaffc78bf0e90c06b0db4ce89"
+    ]
+  },
+  "failure_class": "TimeoutError",
+  "failure_code": "PROBE_PERIODIC_RECOVERY_TIMEOUT",
+  "owned_processes_stopped": true,
+  "process_exit_codes": [
+    73,
+    1,
+    1
+  ]
+}

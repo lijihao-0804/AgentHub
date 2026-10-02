@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "database": "agenthub_mi34_crash_7b5aa8e766df",
+  "collection": "agenthub_mi34_crash_7b5aa8e766df",
+  "job_id": "59902641-94a7-411d-85c0-d83e4de512bf",
+  "revision_id": "d8ed2a94-5f9f-43bb-80a4-ae6a2bde1d9a",
+  "provider": "cached_local_bge_cpu",
+  "lease_seconds": 10,
+  "periodic_reconciliation_seconds": 60,
+  "limitations": [
+    "solo_worker_not_multi_host_partition",
+    "repeatable_indexing_not_external_business_write"
+  ],
+  "crashed_worker_exit_code": 73,
+  "before_recovery": {
+    "status": "PROCESSING",
+    "revision_status": "PROCESSING",
+    "stage": "INDEXING",
+    "attempt_count": 1,
+    "lease_expires_at": "2026-10-02T15:29:33.218270+00:00",
+    "chunk_ids": [
+      "2854f4f636fe1f68297212d26513b078346f4933e875c42819ea899b3d6dd587"
+    ]
+  },
+  "after_recovery": {
+    "status": "SUCCEEDED",
+    "revision_status": "READY",
+    "stage": "INDEXING",
+    "attempt_count": 2,
+    "lease_expires_at": null,
+    "chunk_ids": [
+      "2854f4f636fe1f68297212d26513b078346f4933e875c42819ea899b3d6dd587"
+    ]
+  },
+  "restart_to_indexed_ms": 93608.99999999674,
+  "first_dispatch_to_indexed_ms": 99672.00000002049,
+  "owned_processes_stopped": true,
+  "process_exit_codes": [
+    73,
+    1,
+    1
+  ]
+}

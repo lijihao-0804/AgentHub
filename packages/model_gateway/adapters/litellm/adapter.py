@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import logging
 from collections.abc import AsyncIterator, Mapping
 from decimal import Decimal
 from typing import Any, Protocol
@@ -21,6 +22,8 @@ from packages.model_gateway.contracts import (
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.models import ModelProfile, ProviderCredential
+
+logger = logging.getLogger(__name__)
 
 
 class LiteLLMClient(Protocol):
@@ -295,6 +298,7 @@ class LiteLLMProviderAdapter:
         finish_reason: str | None = None
         usage: ModelUsage | None = None
         cost_estimate: CostEstimate | None = None
+        raw_stream = None
         try:
             raw_stream = await _await_if_needed(self.client.acompletion(**payload))
             if hasattr(raw_stream, "__aiter__"):
@@ -319,6 +323,18 @@ class LiteLLMProviderAdapter:
             raise
         except Exception as error:
             raise _normalize_error(error) from None
+        finally:
+            close = getattr(raw_stream, "aclose", None) or getattr(raw_stream, "close", None)
+            if close is not None:
+                try:
+                    await _await_if_needed(close())
+                except Exception as error:
+                    # Preserve the original cancellation/provider error and do
+                    # not expose SDK exception text (which can contain secrets).
+                    logger.warning(
+                        "model_provider_stream_close_failed",
+                        extra={"failure_type": type(error).__name__},
+                    )
         tool_calls = tuple(_complete_tool_call(parts) for parts in tool_parts.values())
         if cost_estimate is None:
             # A streamed response carries no computed cost: the provider reports
