@@ -83,6 +83,7 @@ from packages.observability.timing import mark_visible_text, timed_span
 from packages.tools.actions import ActionExecutionStatus, ActionRuntime
 from packages.tools.contracts import ToolDefinition, ToolResult, ToolResultStatus
 from packages.tools.policy import ToolPolicy, ToolPolicyDecision
+from packages.tools.projections import argument_summary
 from packages.tools.runtime import PublishedToolCatalog, ToolRuntime
 
 logger = logging.getLogger(__name__)
@@ -2046,7 +2047,8 @@ class _AgentRunGraph:
             calls.append(item)
             await self._emit(
                 AgentEventType.TOOL_REQUESTED,
-                {"tool_call_id": stable_id, "tool_identity": name},
+                {"tool_call_id": stable_id, "tool_identity": name,
+                 "arguments_summary": argument_summary(normalized_arguments)},
             )
             if valid:
                 signature = canonical_json_hash({"tool": name, "arguments": normalized_arguments})
@@ -2471,6 +2473,7 @@ class _AgentRunGraph:
                         "status": result.status.value,
                         "error_code": result.error_code,
                         "duration_ms": round((time.perf_counter() - started) * 1000, 3),
+                        "evidence_refs": json.dumps(list(result.evidence_refs)),
                     },
                 )
                 if result.status is ToolResultStatus.ERROR:

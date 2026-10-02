@@ -112,6 +112,7 @@ class EvaluationDatasetService:
         dataset_id: UUID,
         items: Sequence[Mapping[str, Any]],
         schema_version: int = 1,
+        commit: bool = True,
     ) -> EvaluationDatasetVersion:
         self._require_permission(context, "evaluation_manage")
         if schema_version < 1:
@@ -166,7 +167,10 @@ class EvaluationDatasetService:
             ]
         )
         try:
-            await session.commit()
+            if commit:
+                await session.commit()
+            else:
+                await session.flush()
         except IntegrityError as exc:
             await session.rollback()
             raise AgentHubError(
@@ -189,6 +193,8 @@ class EvaluationDatasetService:
         category: str,
         expected: Mapping[str, Any],
         tags: Sequence[str],
+        provenance_extra: Mapping[str, Any] | None = None,
+        commit: bool = True,
     ) -> EvaluationDatasetVersion:
         """Create a draft version by importing one observed AgentRun safely.
 
@@ -268,6 +274,12 @@ class EvaluationDatasetService:
             "observed_status": run.status,
             "observed_failure_code": run.failure_code,
         }
+        if provenance_extra:
+            if set(provenance_extra) & set(source_provenance):
+                raise AgentHubError(
+                    "EVALUATION_DATASET_INVALID", "Provenance cannot replace run identity.", 422
+                )
+            source_provenance.update(provenance_extra)
         imported_item = {
             "case_key": case_key,
             "split": split,
@@ -284,6 +296,7 @@ class EvaluationDatasetService:
             dataset_id=dataset_id,
             items=[*base_items, imported_item],
             schema_version=base_version.schema_version,
+            commit=commit,
         )
 
     async def list_versions(

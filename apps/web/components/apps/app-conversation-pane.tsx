@@ -16,6 +16,7 @@ import {
 import type { ThreadTurn } from "@/lib/api/threads";
 import { useI18n } from "@/i18n/provider";
 import { Markdown } from "@/components/ui/markdown";
+import FeedbackPanel from "@/components/feedback/feedback-panel";
 import { useAutoScroll } from "@/components/ui/use-auto-scroll";
 
 const PENDING_STATUSES = new Set(["RUNNING", "WAITING_APPROVAL", "CANCEL_REQUESTED"]);
@@ -279,6 +280,7 @@ export default function AppConversationPane({
                     </div>
                   )}
 
+                  {turn.agent_run_id && turn.status && !PENDING_STATUSES.has(turn.status) && <FeedbackPanel runId={turn.agent_run_id} turnId={turn.id} />}
                   {turn.failure_code && (
                     <p className="conversation-meta">
                       {t("appThread.conversation.failure")}: <code>{turn.failure_code}</code>

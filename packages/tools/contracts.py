@@ -108,6 +108,7 @@ class ToolResult:
     safe_message: str | None = None
     data_trust: str = "UNTRUSTED"
     duration_ms: float = 0.0
+    evidence_refs: tuple[dict[str, str], ...] = ()
 
     @classmethod
     def success(cls, data: Any, *, duration_ms: float = 0.0) -> ToolResult:

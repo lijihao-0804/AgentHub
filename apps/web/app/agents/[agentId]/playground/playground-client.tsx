@@ -257,7 +257,11 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
       };
       const toolMeta = () => {
         const identity = payloadString(payload, "tool_identity");
-        return identity ? [identity] : [];
+        const summary = payloadString(payload, "arguments_summary");
+        return [
+          ...(identity ? [identity] : []),
+          ...(summary ? [`${t("runEvidence.arguments")}: ${summary}`] : []),
+        ];
       };
 
       switch (event.type) {

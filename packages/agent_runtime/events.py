@@ -9,6 +9,8 @@ from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
+from packages.tools.projections import validate_evidence, validate_summary
+
 
 class AgentEventType(StrEnum):
     RUN_STARTED = "run.started"
@@ -51,10 +53,12 @@ _ALLOWED_FIELDS: dict[AgentEventType, frozenset[str]] = {
     AgentEventType.RETRIEVAL_STARTED: frozenset(),
     AgentEventType.RETRIEVAL_COMPLETED: frozenset({"duration_ms", "result_count"}),
     AgentEventType.RERANK_COMPLETED: frozenset({"duration_ms", "result_count"}),
-    AgentEventType.TOOL_REQUESTED: frozenset({"tool_call_id", "tool_identity"}),
+    AgentEventType.TOOL_REQUESTED: frozenset(
+        {"tool_call_id", "tool_identity", "arguments_summary"}
+    ),
     AgentEventType.TOOL_STARTED: frozenset({"tool_call_id", "tool_identity"}),
     AgentEventType.TOOL_COMPLETED: frozenset(
-        {"tool_call_id", "tool_identity", "status", "error_code", "duration_ms"}
+        {"tool_call_id", "tool_identity", "status", "error_code", "duration_ms", "evidence_refs"}
     ),
     AgentEventType.TOOL_FAILED: frozenset(
         {"tool_call_id", "tool_identity", "error_code", "duration_ms"}
@@ -82,9 +86,7 @@ _ALLOWED_FIELDS: dict[AgentEventType, frozenset[str]] = {
     AgentEventType.RUN_FAILED: frozenset(
         {"status", "failure_code", "model_step_count", "tool_call_count"}
     ),
-    AgentEventType.RUN_CANCELLED: frozenset(
-        {"status", "model_step_count", "tool_call_count"}
-    ),
+    AgentEventType.RUN_CANCELLED: frozenset({"status", "model_step_count", "tool_call_count"}),
 }
 
 _NUMERIC_FIELDS = frozenset(
@@ -116,6 +118,14 @@ def _validated_data(event_type: AgentEventType, data: Mapping[str, Any]) -> dict
         raise ValueError(f"unsafe event fields: {', '.join(sorted(unknown))}")
     result = dict(data)
     for key, value in result.items():
+        if key == "arguments_summary":
+            if not isinstance(value, str):
+                raise ValueError("unsafe argument summary")
+            validate_summary(value)
+        if key == "evidence_refs":
+            if not isinstance(value, str):
+                raise ValueError("unsafe evidence references")
+            validate_evidence(value)
         if key in _NUMERIC_FIELDS:
             if isinstance(value, bool) or not isinstance(value, (int, float)):
                 raise ValueError(f"event field {key} must be numeric")
@@ -209,9 +219,7 @@ class AgentEventEmitter:
         self._sequence = 0
         self._lock = asyncio.Lock()
 
-    async def emit(
-        self, event_type: AgentEventType | str, data: Mapping[str, Any]
-    ) -> AgentEvent:
+    async def emit(self, event_type: AgentEventType | str, data: Mapping[str, Any]) -> AgentEvent:
         async with self._lock:
             self._sequence += 1
             return AgentEvent(

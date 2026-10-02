@@ -4,6 +4,24 @@
  * locales must always expose the same key set.
  */
 export const enUS = {
+  feedback: {
+    historyLimit: "Up to the latest 100 feedback submissions are shown.",
+    title: "Feedback and correction", hint: "A rating is feedback, not a fact check. Corrections require review before regression import.",
+    rating: "Rating", positive: "Helpful", negative: "Needs improvement", category: "Category", comment: "Comment", correction: "Human correction (optional)",
+    submit: "Submit feedback", empty: "No feedback yet", approve: "Approve correction", reject: "Reject", reviewPermission: "Review and import require evaluation management permission.",
+    importToDev: "Import to DEV draft", imported: "Imported into a new draft version", openDraft: "Open draft version",
+    devHint: "Choose a DEV-only base. Import creates a new Knowledge QA version; publication and regression execution remain manual.",
+    dataset: "Dataset", baseVersion: "Base version", choose: "Choose…", datasetLimit: "The first 200 datasets are shown.",
+    categories: { FACTUAL: "Factual error", RETRIEVAL: "Missing retrieval", TOOL: "Tool error", LATENCY: "Latency", EXPRESSION: "Expression", OTHER: "Other" },
+    status: { PENDING: "Awaiting review", APPROVED: "Approved", REJECTED: "Rejected" },
+  },
+  runEvidence: {
+    title: "Tool calls and fixed evidence", replayHint: "Recorded events may be incomplete. Argument summaries show field types only; sensitive values are omitted.",
+    empty: "No recorded tool events", arguments: "Argument structure", summaryUnavailable: "No summary in historical data", evidence: "Retrieved evidence",
+    noEvidence: "No fixed evidence references were recorded. Historical runs are not re-resolved against LATEST.",
+    permission: "Knowledge content permission is required to read excerpts.", open: "Read fixed excerpt", excerpt: "Excerpt limited to 4096 characters.",
+    truncated: "Showing the first 200 recorded tool events.", events: { requested: "Requested", started: "Started", completed: "Completed", failed: "Failed" },
+  },
   common: {
     loading: "Loading…",
     retry: "Retry",
@@ -223,6 +241,17 @@ export const enUS = {
      * back to the safe message the server sent.
      */
     code: {
+      FEEDBACK_INVALID: "Check the rating, category and text length.",
+      FEEDBACK_RUN_NOT_TERMINAL: "Wait for the run to finish before giving feedback.",
+      FEEDBACK_TURN_MISMATCH: "This turn does not belong to the run. Reload the conversation.",
+      FEEDBACK_IDEMPOTENCY_CONFLICT: "This submission key was already used for other content.",
+      FEEDBACK_NOT_FOUND: "Feedback is unavailable in this workspace.",
+      FEEDBACK_REVIEW_CONFLICT: "The review changed. Reload before reviewing again.",
+      FEEDBACK_REVIEW_REQUIRED: "Import requires the current approved review.",
+      FEEDBACK_CORRECTION_REQUIRED: "Add a human correction before importing.",
+      FEEDBACK_DEV_ONLY: "Choose a base version containing DEV items only.",
+      FEEDBACK_IMPORT_CONFLICT: "This feedback was already imported into another target.",
+      HISTORICAL_EVIDENCE_NOT_FOUND: "The recorded evidence is unavailable. It will not be replaced by current content.",
       REQUEST_FAILED: "The request could not be completed. The service may be unreachable — check your connection and try again.",
       SESSION_REQUIRED: "Connect a workspace session before making this request.",
       VALIDATION_ERROR: "Some of the submitted fields are not valid. Check the form and try again.",

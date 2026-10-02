@@ -149,5 +149,35 @@ async function main() {
   shellHarness.render(Shell, { copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' }, threadId: 'thread-b', children: () => null });
   await assert.rejects(shellHarness.queries[0].fn(shellHarness.session), /not found/);
   console.log('PASS mismatched agent deep link cannot mount a conversation');
+
+  for (const file of ['feedback/feedback-panel', 'runs/tool-evidence-panel']) {
+    const scoped = harness();
+    const Panel = load(`components/${file}.tsx`, scoped.mocks).default;
+    const first = scoped.render(Panel, { runId: 'run-a', turnId: 'turn-a' });
+    scoped.session.sessionId = 2;
+    const switched = scoped.render(Panel, { runId: 'run-a', turnId: 'turn-a' });
+    assert.notEqual(first.key, switched.key, 'workspace switch must remount local form/evidence');
+    const nextRun = scoped.render(Panel, { runId: 'run-b', turnId: 'turn-b' });
+    assert.notEqual(switched.key, nextRun.key, 'run switch must remount local state');
+    console.log(`PASS ${file} identity boundaries remount on workspace and run switch`);
+  }
+  const evidenceHarness = harness({ '@/hooks/use-workspace-data': {
+    useWorkspaceData: () => ({ loaded: true, data: {
+      events: [{ sequence: 1, type: 'tool.requested', payload: { tool_identity: 'legacy-tool' } }],
+      evidence_refs: [], content_allowed: false, truncated: false,
+    } }),
+  } });
+  const Evidence = load('components/runs/tool-evidence-panel.tsx', evidenceHarness.mocks).default;
+  const body = evidenceHarness.render(Evidence, { runId: 'run-a' });
+  const tree = evidenceHarness.render(body.type, body.props);
+  assert.ok(JSON.stringify(tree).includes('runEvidence.summaryUnavailable'));
+  assert.ok(JSON.stringify(tree).includes('runEvidence.permission'));
+  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', chunk_id: 'chunk-a' };
+  const a = evidenceHarness.render(body.type, body.props);
+  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', chunk_id: 'chunk-b' };
+  const b = evidenceHarness.render(body.type, body.props);
+  const excerpt = (node) => elements(node, (el) => typeof el.type === 'function' && el.props.selected)[0];
+  assert.notEqual(excerpt(a).key, excerpt(b).key, 'evidence selection must remount fetched excerpt');
+  console.log('PASS historical summary fallback, content denial and evidence selection identity');
 }
 main().catch((error) => { console.error(error); process.exitCode = 1; });

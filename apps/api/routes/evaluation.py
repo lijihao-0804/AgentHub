@@ -254,7 +254,7 @@ async def get_dataset_version(
         projected_items.append(item_response)
     response = EvaluationDatasetVersionResponse.model_validate(version, from_attributes=True)
     return EvaluationDatasetVersionDetailResponse(
-        **response.model_dump(),
+        **response.model_dump(exclude={"item_count"}),
         item_count=len(items),
         items=projected_items,
     )

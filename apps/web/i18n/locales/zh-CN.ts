@@ -2,6 +2,24 @@ import type { MessageSchema } from "@/i18n/locales/en-US";
 
 /** Simplified Chinese dictionary. Must mirror the en-US key set exactly. */
 export const zhCN: MessageSchema = {
+  feedback: {
+    historyLimit: "最多展示最近 100 条反馈。",
+    title: "反馈与人工纠正", hint: "评分不等于事实核验。纠正内容须经审核后才能导入回归数据集。",
+    rating: "评分", positive: "有帮助", negative: "需要改进", category: "分类", comment: "说明", correction: "人工纠正（可选）",
+    submit: "提交反馈", empty: "暂无反馈", approve: "批准纠正", reject: "拒绝", reviewPermission: "审核与导入需要评测管理权限。",
+    importToDev: "导入开发集草稿", imported: "已导入新草稿版本", openDraft: "查看草稿版本",
+    devHint: "请选择仅含开发集条目的基础版本。导入生成新的知识问答版本，发布与回归执行仍由人工确认。",
+    dataset: "数据集", baseVersion: "基础版本", choose: "请选择…", datasetLimit: "当前展示前 200 个数据集。",
+    categories: { FACTUAL: "事实错误", RETRIEVAL: "检索遗漏", TOOL: "工具错误", LATENCY: "时延", EXPRESSION: "表达", OTHER: "其他" },
+    status: { PENDING: "待审核", APPROVED: "已批准", REJECTED: "已拒绝" },
+  },
+  runEvidence: {
+    title: "工具调用与固定证据", replayHint: "已记录事件可能不完整。参数摘要仅展示字段类型，敏感值不进入摘要。",
+    empty: "暂无已记录工具事件", arguments: "参数结构", summaryUnavailable: "历史数据无摘要", evidence: "检索证据",
+    noEvidence: "没有已记录的固定证据引用，不会用最新快照替代历史证据。",
+    permission: "读取证据正文需要知识内容权限。", open: "读取固定片段", excerpt: "片段最多展示 4096 字符。",
+    truncated: "当前展示前 200 条已记录工具事件。", events: { requested: "请求", started: "开始", completed: "完成", failed: "失败" },
+  },
   common: {
     loading: "加载中…",
     retry: "重试",
@@ -220,6 +238,17 @@ export const zhCN: MessageSchema = {
      * back to the safe message the server sent.
      */
     code: {
+      FEEDBACK_INVALID: "请检查评分、分类和文本长度。",
+      FEEDBACK_RUN_NOT_TERMINAL: "运行结束后才能提交反馈。",
+      FEEDBACK_TURN_MISMATCH: "该轮次不属于此运行，请重新加载会话。",
+      FEEDBACK_IDEMPOTENCY_CONFLICT: "该提交标识已用于其他内容。",
+      FEEDBACK_NOT_FOUND: "当前工作区无法读取此反馈。",
+      FEEDBACK_REVIEW_CONFLICT: "审核状态已变化，请重新加载后操作。",
+      FEEDBACK_REVIEW_REQUIRED: "导入需要当前版本已批准的审核结果。",
+      FEEDBACK_CORRECTION_REQUIRED: "导入前需要人工纠正内容。",
+      FEEDBACK_DEV_ONLY: "请选择仅包含开发集条目的基础版本。",
+      FEEDBACK_IMPORT_CONFLICT: "该反馈已导入其他目标。",
+      HISTORICAL_EVIDENCE_NOT_FOUND: "历史证据已缺失，不会用当前正文替代。",
       REQUEST_FAILED: "请求未能完成。可能是网络不通或服务暂时不可用，请检查后重试。",
       SESSION_REQUIRED: "请先在顶栏连接工作区会话，再执行该操作。",
       VALIDATION_ERROR: "有字段填写有误，请检查表单后重试。",

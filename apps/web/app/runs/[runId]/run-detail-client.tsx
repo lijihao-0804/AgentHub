@@ -9,6 +9,8 @@ import Breadcrumbs from "@/components/layout/breadcrumbs";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import TechnicalDetails from "@/components/ui/technical-details";
 import AddRunToDatasetPanel from "@/components/evaluation/add-run-to-dataset-panel";
+import FeedbackPanel from "@/components/feedback/feedback-panel";
+import ToolEvidencePanel from "@/components/runs/tool-evidence-panel";
 import { ApiError, errorHintKey, type AuthInput } from "@/lib/api/client";
 import { createAgentRun, getAgentRun, type AgentRun } from "@/lib/api/agent-runtime";
 import { getRunDetail, getRunTimeline, RunDetail, RunTimelineEntry } from "@/lib/api/runs";
@@ -462,6 +464,8 @@ export default function RunDetailClient({ runId }: { runId: string }) {
             open={addToEvaluationOpen}
             onClose={() => setAddToEvaluationOpen(false)}
           />
+          {(TERMINAL_RUN_STATUSES.has(run.status) || run.status === "NEEDS_ATTENTION") && <FeedbackPanel runId={runId} />}
+          <ToolEvidencePanel runId={runId} />
 
           <Panel title={t("run.context.title")} eyebrow={t("run.context.eyebrow")}>
             {!context.sawAdmission ? (

@@ -34,6 +34,7 @@ from packages.tools.contracts import (
 )
 from packages.tools.errors import ToolHandlerError
 from packages.tools.policy import ToolPolicy, ToolPolicyDecision
+from packages.tools.projections import evidence_refs
 from packages.tools.registry import ToolHandler, ToolRegistry
 from packages.tools.validation import (
     validate_executable_tool_spec as _validate_executable_tool_spec,
@@ -459,6 +460,13 @@ class ToolRuntime:
             safe_message=result.safe_message,
             data_trust="UNTRUSTED",
             duration_ms=duration_ms,
+            evidence_refs=(
+                evidence_refs(result.data)
+                if definition is not None
+                and definition.source_kind is ToolSourceKind.BUILTIN
+                and definition.identity == "search_knowledge"
+                else ()
+            ),
         )
         audit = ToolAudit(
             tool_identity=tool_identity,

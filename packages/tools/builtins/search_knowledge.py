@@ -128,16 +128,28 @@ async def search_knowledge(
             raise ToolHandlerError(
                 "TOOL_EXECUTION_FAILED", "The knowledge search returned an invalid result."
             )
-        evidence.extend(result.evidence)
+        for item in result.evidence:
+            reference = {
+                "snapshot_id": query.knowledge_snapshot_id,
+                "knowledge_base_id": query.knowledge_base_id,
+                "document_revision_id": item.document_revision_id,
+                "chunk_id": item.chunk_id,
+            }
+            evidence.append((item, reference))
     evidence.sort(
         key=lambda item: (
-            -(item.rerank_score if item.rerank_score is not None else item.retrieval_score),
-            -item.retrieval_score,
-            item.document_revision_id,
-            item.chunk_id,
+            -(
+                item[0].rerank_score
+                if item[0].rerank_score is not None
+                else item[0].retrieval_score
+            ),
+            -item[0].retrieval_score,
+            item[0].document_revision_id,
+            item[0].chunk_id,
         )
     )
     return {
+        "evidence_refs": [reference for _, reference in evidence[:limit]],
         "results": [
             {
                 "chunk_id": item.chunk_id,
@@ -157,8 +169,8 @@ async def search_knowledge(
                 "effective_date": item.metadata.get("effective_date"),
                 "superseded": bool(item.metadata.get("superseded", False)),
             }
-            for item in evidence[:limit]
-        ]
+            for item, _ in evidence[:limit]
+        ],
     }
 
 

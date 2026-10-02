@@ -4,15 +4,19 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_agent_run_workspace_context
 from apps.api.schemas.runs import RunDetail, RunListResponse, RunTimelineResponse
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.observability.evidence import RunEvidenceService
 from packages.observability.runs import RunQueryService
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}", tags=["runs"])
 context_dependency = Depends(get_agent_run_workspace_context)
+db_session_dependency = Depends(get_db_session)
 
 
 def _service(request: Request) -> RunQueryService:
@@ -67,3 +71,27 @@ async def get_run_timeline(
 
 
 __all__ = ["router"]
+
+
+@router.get("/runs/{run_id}/tools")
+async def get_run_tools(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+):
+    return await RunEvidenceService().tools(session, context, run_id)
+
+
+@router.get("/runs/{run_id}/evidence/{snapshot_id}/{chunk_id}")
+async def get_run_evidence(
+    workspace_id: UUID,
+    run_id: UUID,
+    snapshot_id: UUID,
+    chunk_id: str,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+):
+    return await RunEvidenceService().content(
+        session, context, run_id, snapshot_id=snapshot_id, chunk_id=chunk_id
+    )
