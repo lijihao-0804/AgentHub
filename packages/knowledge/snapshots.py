@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +14,7 @@ from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.models import (
+    DocumentChunk,
     DocumentRevision,
     KnowledgeBase,
     KnowledgeSnapshot,
@@ -70,6 +71,67 @@ def _content_hash(
 
 
 class KnowledgeSnapshotService:
+    async def preview_chunks(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        knowledge_base_id: UUID,
+        snapshot_id: UUID,
+        *,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> dict[str, object]:
+        if not 1 <= limit <= 20 or offset < 0:
+            raise AgentHubError("INVALID_PAGINATION", "Invalid preview pagination.", 400)
+        snapshot = await self.resolve_snapshot(session, context, knowledge_base_id, snapshot_id)
+        query = (
+            select(DocumentChunk)
+            .join(
+                KnowledgeSnapshotItem,
+                (KnowledgeSnapshotItem.workspace_id == DocumentChunk.workspace_id)
+                & (KnowledgeSnapshotItem.knowledge_base_id == DocumentChunk.knowledge_base_id)
+                & (KnowledgeSnapshotItem.document_id == DocumentChunk.document_id)
+                & (
+                    KnowledgeSnapshotItem.document_revision_id == DocumentChunk.document_revision_id
+                ),
+            )
+            .where(
+                KnowledgeSnapshotItem.workspace_id == snapshot.workspace_id,
+                KnowledgeSnapshotItem.knowledge_base_id == knowledge_base_id,
+                KnowledgeSnapshotItem.snapshot_id == snapshot_id,
+            )
+        )
+        total = await session.scalar(select(func.count()).select_from(query.subquery())) or 0
+        rows = (
+            await session.scalars(
+                query.order_by(
+                    DocumentChunk.document_revision_id,
+                    DocumentChunk.ordinal,
+                    DocumentChunk.id,
+                )
+                .offset(offset)
+                .limit(limit)
+            )
+        ).all()
+        return {
+            "workspace_id": snapshot.workspace_id,
+            "knowledge_base_id": knowledge_base_id,
+            "snapshot_id": snapshot_id,
+            "total": total,
+            "offset": offset,
+            "limit": limit,
+            "items": [
+                {
+                    "chunk_id": row.chunk_id,
+                    "document_revision_id": row.document_revision_id,
+                    "ordinal": row.ordinal,
+                    "text": row.text[:4096],
+                    "truncated": len(row.text) > 4096,
+                }
+                for row in rows
+            ],
+        }
+
     async def create_current_snapshot(
         self,
         session: AsyncSession,

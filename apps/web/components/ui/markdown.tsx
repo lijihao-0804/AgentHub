@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
+import { useI18n } from "@/i18n/provider";
 
 /**
  * A deliberately small, dependency-free markdown renderer for model output.
@@ -63,9 +64,31 @@ function renderInline(escaped: string, keyPrefix: string): ReactNode[] {
 }
 
 /** Fenced code is rendered verbatim in a text node. */
-function CodeBlock({ code }: { code: string }) {
+export function CodeBlock({ code }: { code: string }) {
+  const { t } = useI18n();
+  const [status, setStatus] = useState<"idle" | "pending" | "copied" | "failed">("idle");
+  const generation = useRef(0);
+  useEffect(() => {
+    generation.current += 1;
+    setStatus("idle");
+    return () => { generation.current += 1; };
+  }, [code]);
+  async function copy() {
+    const request = ++generation.current;
+    setStatus("pending");
+    try {
+      await navigator.clipboard.writeText(code);
+      if (request === generation.current) setStatus("copied");
+    } catch {
+      if (request === generation.current) setStatus("failed");
+    }
+  }
   return (
-    <div className="md-code">
+    <div className="md-code" style={{ contain: "inline-size", minWidth: 0, maxWidth: "100%" }}>
+      <button type="button" className="button secondary" disabled={status === "pending"} onClick={copy}>
+        {t(status === "pending" ? "common.loading" : status === "copied" ? "common.copied" : "common.copy")}
+      </button>
+      {status === "failed" && <span role="status">{t("run.copyFailed")}</span>}
       <pre>
         <code>{code}</code>
       </pre>

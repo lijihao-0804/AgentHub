@@ -78,6 +78,90 @@ async function main() {
   assert.ok(html.includes('<ul><li>bullet</li></ul><ol><li>numbered</li></ol><ul><li>last</li></ul>'));
   console.log('PASS Markdown text, link query, XSS protocol and mixed lists');
 
+  let previewResult = { data: null, loaded: false, loading: false, error: null, reload() {} };
+  const previewHarness = harness({ '@/hooks/use-workspace-data': { useWorkspaceData: () => previewResult } });
+  const { SnapshotChunkPreview } = load('components/knowledge/snapshot-preview.tsx', previewHarness.mocks);
+  const previewProps = { knowledgeBaseId: 'kb', snapshotId: 'snapshot' };
+  previewHarness.session.permissions = null;
+  let previewTree = previewHarness.render(SnapshotChunkPreview, previewProps);
+  assert.equal(elements(previewTree, (node) => node.type === 'button')[0].props.disabled, true);
+  previewHarness.session.permissions = ['knowledge_run'];
+  previewTree = previewHarness.render(SnapshotChunkPreview, previewProps);
+  elements(previewTree, (node) => node.type === 'button')[0].props.onClick();
+  previewResult = { ...previewResult, loaded: true, data: { offset: 0, total: 12, items: [{ chunk_id: 'old', document_revision_id: 'revision', text: 'frozen', truncated: true }] } };
+  previewTree = previewHarness.render(SnapshotChunkPreview, previewProps);
+  assert.equal(elements(previewTree, (node) => node.type === 'pre').length, 1);
+  elements(previewTree, (node) => node.type === 'button' && node.props.children === 'snapshotPreview.next')[0].props.onClick();
+  previewTree = previewHarness.render(SnapshotChunkPreview, previewProps);
+  assert.equal(elements(previewTree, (node) => node.type === 'pre').length, 0, 'old page cannot flash under a new offset');
+  previewHarness.session.permissions = [];
+  previewTree = previewHarness.render(SnapshotChunkPreview, previewProps);
+  assert.equal(elements(previewTree, (node) => node.type === 'section').length, 0, 'permission loss removes content');
+  console.log('PASS snapshot permission loading, pagination stale data and permission loss');
+
+  let snapshotPayload = { workspace_id: 'workspace-a', knowledge_base_id: 'kb', snapshot_id: 'snapshot', total: 1, offset: 0, limit: 10, items: [{ chunk_id: 'chunk', document_revision_id: 'revision', ordinal: 0, text: 'frozen', truncated: false }] };
+  const snapshotApi = load('lib/api/knowledge.ts', { '@/lib/api/client': {
+    apiRequest: async () => snapshotPayload,
+    isRecord: (value) => value !== null && typeof value === 'object' && !Array.isArray(value),
+    ApiError: class extends Error {},
+  } });
+  const previewAuth = { workspaceId: 'workspace-a', accessToken: 'token' };
+  assert.equal((await snapshotApi.previewSnapshotChunks(previewAuth, 'kb', 'snapshot', 0)).items[0].text, 'frozen');
+  const validSnapshot = snapshotPayload;
+  for (const bad of [
+    { ...validSnapshot, workspace_id: 'other' },
+    { ...validSnapshot, snapshot_id: 'other' },
+    { ...validSnapshot, offset: 10 },
+    { ...validSnapshot, items: [{ ...validSnapshot.items[0], text: 'x'.repeat(4097) }] },
+  ]) {
+    snapshotPayload = bad;
+    await assert.rejects(snapshotApi.previewSnapshotChunks(previewAuth, 'kb', 'snapshot', 0));
+  }
+  console.log('PASS snapshot response workspace, frozen identity, offset and content bounds');
+
+  const knowledgeHarness = harness();
+  const KnowledgeDetail = load('app/knowledge/[knowledgeBaseId]/knowledge-detail-client.tsx', knowledgeHarness.mocks).default;
+  knowledgeHarness.session.connected = false;
+  knowledgeHarness.render(KnowledgeDetail, { knowledgeBaseId: 'kb' });
+  const disconnectedEffects = knowledgeHarness.effects.length;
+  knowledgeHarness.session.connected = true;
+  knowledgeHarness.render(KnowledgeDetail, { knowledgeBaseId: 'kb' });
+  assert.equal(knowledgeHarness.effects.length, disconnectedEffects, 'login hydration must not change hook order');
+  console.log('PASS knowledge detail hook order across login hydration');
+
+  const copyHarness = harness();
+  const { CodeBlock } = load('components/ui/markdown.tsx', copyHarness.mocks);
+  const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  try {
+    let copied;
+    Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { clipboard: { writeText: async (text) => { copied = text; } } } });
+    const code = '<script>unsafe()</script>\n\tconst x = 1;';
+    const { Markdown: SafeMarkdown } = load('components/ui/markdown.tsx', { '@/i18n/provider': copyHarness.mocks['@/i18n/provider'] });
+    const fencedHtml = renderToStaticMarkup(React.createElement(SafeMarkdown, { text: '```\n' + code + '\n```' }));
+    assert.ok(!fencedHtml.includes('<script>'));
+    assert.ok(fencedHtml.includes('&lt;script&gt;'));
+    assert.ok(fencedHtml.includes('contain:inline-size'));
+    let tree = copyHarness.render(CodeBlock, { code });
+    await elements(tree, (node) => node.type === 'button')[0].props.onClick();
+    assert.equal(copied, code);
+    assert.equal(copyHarness.states[0], 'copied');
+    navigator.clipboard.writeText = async () => { throw new Error('denied'); };
+    tree = copyHarness.render(CodeBlock, { code });
+    await elements(tree, (node) => node.type === 'button')[0].props.onClick();
+    assert.equal(copyHarness.states[0], 'failed');
+    let resolve;
+    navigator.clipboard.writeText = () => new Promise((done) => { resolve = done; });
+    const pending = elements(copyHarness.render(CodeBlock, { code }), (node) => node.type === 'button')[0].props.onClick();
+    const cleanup = copyHarness.effects[0]();
+    cleanup();
+    resolve(); await pending;
+    assert.equal(copyHarness.states[0], 'idle', 'stale copy cannot update after content change/unmount');
+    console.log('PASS fenced code exact copy, permission failure and stale completion');
+  } finally {
+    if (originalNavigator) Object.defineProperty(globalThis, 'navigator', originalNavigator);
+    else delete globalThis.navigator;
+  }
+
   for (const kind of ['datasets', 'experiments']) {
     const calls = [];
     let pending;

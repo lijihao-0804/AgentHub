@@ -1,0 +1,168 @@
+[
+  {
+    "locale": "zh",
+    "width": 375,
+    "route": "snapshot",
+    "check": {
+      "applicationError": false,
+      "chunkCount": 10,
+      "code": [],
+      "pageWidth": 371,
+      "width": 375
+    },
+    "screenshot": "snapshot-375-zh.png"
+  },
+  {
+    "locale": "zh",
+    "width": 375,
+    "route": "binding",
+    "check": {
+      "applicationError": false,
+      "chunkCount": 10,
+      "code": [],
+      "pageWidth": 360,
+      "width": 375
+    },
+    "screenshot": "binding-375-zh.png"
+  },
+  {
+    "locale": "zh",
+    "width": 375,
+    "route": "code",
+    "check": {
+      "applicationError": false,
+      "chunkCount": 0,
+      "code": [
+        {
+          "client": 275,
+          "scroll": 3456
+        }
+      ],
+      "pageWidth": 360,
+      "width": 375
+    },
+    "screenshot": "code-375-zh.png"
+  },
+  {
+    "locale": "zh",
+    "width": 1440,
+    "route": "snapshot",
+    "check": {
+      "applicationError": false,
+      "chunkCount": 10,
+      "code": [],
+      "pageWidth": 1425,
+      "width": 1440
+    },
+    "screenshot": "snapshot-1440-zh.png"
+  },
+  {
+    "locale": "zh",
+    "width": 1440,
+    "route": "binding",
+    "check": {
+      "applicationError": false,
+      "chunkCount": 10,
+      "code": [],
+      "pageWidth": 1425,
+      "width": 1440
+    },
+    "screenshot": "binding-1440-zh.png"
+  },
+  {
+    "locale": "zh",
+    "width": 1440,
+    "route": "code",
+    "check": {
+      "applicationError": false,
+      "chunkCount": 0,
+      "code": [
+        {
+          "client": 319,
+          "scroll": 3456
+        }
+      ],
+      "pageWidth": 1440,
+      "width": 1440
+    },
+    "screenshot": "code-1440-zh.png"
+  },
+  {
+    "locale": "en",
+    "width": 375,
+    "route": "snapshot",
+    "check": {
+      "applicationError": false,
+      "chunkCount": 10,
+      "code": [],
+      "pageWidth": 371,
+      "width": 375
+    },
+    "screenshot": "snapshot-375-en.png"
+  },
+  {
+    "locale": "en",
+    "width": 375,
+    "route": "binding",
+    "check": {
+      "chunkCount": 10,
+      "pageWidth": 360,
+      "width": 375
+    },
+    "screenshot": "binding-375-en.png"
+  },
+  {
+    "locale": "en",
+    "width": 375,
+    "route": "code",
+    "check": {
+      "code": [
+        {
+          "client": 275,
+          "scroll": 3456
+        }
+      ],
+      "pageWidth": 360,
+      "width": 375
+    },
+    "screenshot": "code-375-en.png"
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "route": "code",
+    "check": {
+      "code": [
+        {
+          "client": 319,
+          "scroll": 3456
+        }
+      ],
+      "pageWidth": 1440,
+      "width": 1440
+    },
+    "screenshot": "code-1440-en.png"
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "route": "snapshot",
+    "check": {
+      "chunkCount": 10,
+      "pageWidth": 1425,
+      "width": 1440
+    },
+    "screenshot": "snapshot-1440-en.png"
+  },
+  {
+    "locale": "en",
+    "width": 1440,
+    "route": "binding",
+    "check": {
+      "chunkCount": 10,
+      "pageWidth": 1425,
+      "width": 1440
+    },
+    "screenshot": "binding-1440-en.png"
+  }
+]

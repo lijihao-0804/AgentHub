@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Query, Request, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,6 +27,7 @@ from apps.api.schemas.knowledge import (
     RetrievalPlaygroundEvidence,
     RetrievalPlaygroundRequest,
     RetrievalPlaygroundResponse,
+    SnapshotChunkPage,
 )
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
@@ -216,8 +217,7 @@ async def list_knowledge_bases(
     del workspace_id
     knowledge_bases = await KnowledgeService().list_knowledge_bases(session, context=context)
     return [
-        KnowledgeBaseResponse.model_validate(item, from_attributes=True)
-        for item in knowledge_bases
+        KnowledgeBaseResponse.model_validate(item, from_attributes=True) for item in knowledge_bases
     ]
 
 
@@ -246,6 +246,32 @@ async def create_knowledge_snapshot(
         snapshot_schema_version=snapshot.snapshot_schema_version,
         item_count=snapshot.item_count,
         created_at=snapshot.created_at,
+    )
+
+
+@router.get(
+    "/api/v1/workspaces/{workspace_id}/knowledge-bases/{knowledge_base_id}/snapshots/{snapshot_id}/chunks",
+    response_model=SnapshotChunkPage,
+)
+async def preview_snapshot_chunks(
+    workspace_id: UUID,
+    knowledge_base_id: UUID,
+    snapshot_id: UUID,
+    limit: int = Query(default=10, ge=1, le=20),
+    offset: int = Query(default=0, ge=0),
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> SnapshotChunkPage:
+    del workspace_id
+    return SnapshotChunkPage.model_validate(
+        await KnowledgeSnapshotService().preview_chunks(
+            session,
+            context,
+            knowledge_base_id,
+            snapshot_id,
+            limit=limit,
+            offset=offset,
+        )
     )
 
 

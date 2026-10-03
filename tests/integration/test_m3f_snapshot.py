@@ -30,6 +30,7 @@ from packages.core.execution_context.models import (
 )
 from packages.knowledge.models import (
     Document,
+    DocumentChunk,
     DocumentRevision,
     KnowledgeBase,
     KnowledgeSnapshotItem,
@@ -260,6 +261,58 @@ async def test_snapshot_api_materializes_and_reuses_current_snapshot(
     assert first.json()["id"] == second.json()["id"]
     assert first.json()["item_count"] == 1
     assert first.json()["snapshot_schema_version"] == 1
+
+
+@pytest.mark.asyncio
+async def test_frozen_chunk_preview_retains_retired_content_and_scopes_pages(db_factory):
+    bundle = await _seed_bundle(db_factory)
+    service = KnowledgeSnapshotService()
+    async with db_factory() as session:
+        session.add_all(
+            [
+                DocumentChunk(
+                    workspace_id=bundle.workspace_id,
+                    knowledge_base_id=bundle.knowledge_base_id,
+                    document_id=bundle.document_id,
+                    document_revision_id=bundle.revision_id,
+                    chunk_id=f"preview-{uuid4()}",
+                    ordinal=i,
+                    normalized_content_hash="a" * 64,
+                    text=f"frozen-{i}",
+                    locator={},
+                )
+                for i in range(12)
+            ]
+        )
+        await session.commit()
+        snapshot = await service.create_current_snapshot(
+            session, _context(bundle), bundle.knowledge_base_id
+        )
+    await _set_revision_state(
+        db_factory,
+        bundle.revision_id,
+        status=RevisionIngestionStatus.READY,
+        lifecycle=RevisionLifecycleStatus.RETIRED,
+    )
+    async with db_factory() as session:
+        first = await service.preview_chunks(
+            session, _context(bundle), bundle.knowledge_base_id, snapshot.snapshot_id, limit=10
+        )
+        second = await service.preview_chunks(
+            session,
+            _context(bundle),
+            bundle.knowledge_base_id,
+            snapshot.snapshot_id,
+            limit=10,
+            offset=10,
+        )
+        assert first["total"] == 12
+        assert [item["text"] for item in first["items"] + second["items"]] == [
+            f"frozen-{i}" for i in range(12)
+        ]
+        with pytest.raises(AgentHubError) as error:
+            await service.preview_chunks(session, _context(bundle), uuid4(), snapshot.snapshot_id)
+        assert error.value.status_code == 404
 
 
 @pytest.mark.asyncio

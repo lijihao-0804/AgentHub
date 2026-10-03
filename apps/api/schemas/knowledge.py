@@ -107,6 +107,24 @@ class KnowledgeSnapshotResponse(BaseModel):
     created_at: datetime
 
 
+class SnapshotChunkResponse(BaseModel):
+    chunk_id: str
+    document_revision_id: UUID
+    ordinal: int
+    text: str
+    truncated: bool
+
+
+class SnapshotChunkPage(BaseModel):
+    workspace_id: UUID
+    knowledge_base_id: UUID
+    snapshot_id: UUID
+    total: int
+    offset: int
+    limit: int
+    items: list[SnapshotChunkResponse]
+
+
 class RetrievalPlaygroundRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

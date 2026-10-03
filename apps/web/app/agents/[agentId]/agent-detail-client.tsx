@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import Breadcrumbs from "@/components/layout/breadcrumbs";
+import SnapshotPreview from "@/components/knowledge/snapshot-preview";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import StatusBadge from "@/components/ui/status-badge";
 import TechnicalDetails from "@/components/ui/technical-details";
@@ -1408,6 +1409,7 @@ function KnowledgeBindingRow({
       <button type="button" className="button button-ghost" onClick={onRemove}>
         {t("common.remove")}
       </button>
+      {pinned && binding.snapshot_id && <SnapshotPreview knowledgeBaseId={knowledgeBaseId} snapshotId={binding.snapshot_id} />}
     </div>
   );
 }

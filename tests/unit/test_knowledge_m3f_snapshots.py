@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from unittest.mock import AsyncMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -33,6 +34,64 @@ def _context(*, permissions: frozenset[str] = frozenset({"knowledge_run"})):
         workspace_role="DEVELOPER",
         permissions=permissions,
     )
+
+
+@pytest.mark.asyncio
+async def test_snapshot_preview_requires_content_permission_before_query():
+    session = AsyncMock()
+    with pytest.raises(AgentHubError) as error:
+        await KnowledgeSnapshotService().preview_chunks(
+            session,
+            _context(permissions=frozenset()),
+            uuid4(),
+            uuid4(),
+        )
+    assert error.value.status_code == 403
+    session.scalar.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_snapshot_preview_is_frozen_paginated_and_bounded():
+    context = _context()
+    kb, snapshot = uuid4(), uuid4()
+    service = KnowledgeSnapshotService()
+    service.resolve_snapshot = AsyncMock(
+        return_value=SimpleNamespace(workspace_id=UUID(context.workspace_id))
+    )
+    session = AsyncMock()
+    session.scalar.return_value = 12
+    session.scalars.return_value = SimpleNamespace(
+        all=lambda: [
+            SimpleNamespace(
+                chunk_id="frozen",
+                document_revision_id=uuid4(),
+                ordinal=0,
+                text="a" * 5000,
+            )
+        ]
+    )
+    result = await service.preview_chunks(session, context, kb, snapshot, limit=1, offset=10)
+    service.resolve_snapshot.assert_awaited_once_with(session, context, kb, snapshot)
+    assert result["offset"] == 10 and result["total"] == 12
+    assert len(result["items"][0]["text"]) == 4096
+    assert result["items"][0]["truncated"] is True
+    query = str(session.scalars.call_args.args[0])
+    assert "document_revision_id" in query and "snapshot_id" in query
+    assert "lifecycle_status" not in query  # Retired historical revisions remain readable.
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("limit,offset", [(0, 0), (21, 0), (10, -1)])
+async def test_snapshot_preview_rejects_invalid_pagination(limit, offset):
+    with pytest.raises(AgentHubError):
+        await KnowledgeSnapshotService().preview_chunks(
+            AsyncMock(),
+            _context(),
+            uuid4(),
+            uuid4(),
+            limit=limit,
+            offset=offset,
+        )
 
 
 def _revision(document_id, *, status="READY", lifecycle="ACTIVE"):

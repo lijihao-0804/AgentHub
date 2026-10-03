@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import Breadcrumbs from "@/components/layout/breadcrumbs";
+import SnapshotPreview from "@/components/knowledge/snapshot-preview";
 import HashValue from "@/components/evaluation/hash-value";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import StatusBadge from "@/components/ui/status-badge";
@@ -121,18 +122,6 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
     if (revisionInputRef.current) revisionInputRef.current.value = "";
   }, [sessionId, knowledgeBaseId]);
 
-  if (!connected) {
-    return (
-      <div className="page">
-        <header className="page-header">
-          <p className="eyebrow">{t("knowledge.eyebrow")}</p>
-          <h1>{t("knowledge.baseDetail")}</h1>
-        </header>
-        <SessionRequired contextKey="session.context.knowledge" />
-      </div>
-    );
-  }
-
   const base = (bases.data ?? []).find((item) => item.id === knowledgeBaseId) ?? null;
   const documentList = documents.data ?? [];
   const snapshotList = snapshots.data ?? [];
@@ -147,12 +136,24 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
   );
   const reloadDocuments = documents.reload;
   useEffect(() => {
-    if (!ingestionInFlight) return;
+    if (!connected || !ingestionInFlight) return;
     const interval = window.setInterval(() => {
       if (!document.hidden) reloadDocuments();
     }, INGESTION_POLL_MS);
     return () => window.clearInterval(interval);
-  }, [ingestionInFlight, reloadDocuments]);
+  }, [connected, ingestionInFlight, reloadDocuments]);
+
+  if (!connected) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <p className="eyebrow">{t("knowledge.eyebrow")}</p>
+          <h1>{t("knowledge.baseDetail")}</h1>
+        </header>
+        <SessionRequired contextKey="session.context.knowledge" />
+      </div>
+    );
+  }
 
   async function retryIngestion(documentId: string) {
     setNotice(null);
@@ -491,6 +492,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
                         >
                           {t("knowledge.testSnapshot")}
                         </Link>
+                        <SnapshotPreview knowledgeBaseId={knowledgeBaseId} snapshotId={snapshot.id} />
                       </td>
                     </tr>
                   ))}

@@ -2,6 +2,7 @@ import type { MessageSchema } from "@/i18n/locales/en-US";
 
 /** Simplified Chinese dictionary. Must mirror the en-US key set exactly. */
 export const zhCN: MessageSchema = {
+  snapshotPreview: { open: "预览冻结分片", permission: "需要知识正文读取权限。", error: "无法加载快照分片。", retry: "重试", total: "分片数", empty: "此快照没有分片。", truncated: "预览最多显示 4096 个字符。", previous: "上一页", next: "下一页" },
   handoffLifecycle: {
     title: "人工接管", hint: "原始摘要会保留。关闭接管不会批准或恢复智能体动作。",
     open: "待接管", assigned: "已分配", inProgress: "处理中", closed: "已关闭",

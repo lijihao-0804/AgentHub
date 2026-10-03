@@ -1,4 +1,4 @@
-import { apiRequest, apiUpload, type AuthInput } from "@/lib/api/client";
+import { ApiError, isRecord, apiRequest, apiUpload, type AuthInput } from "@/lib/api/client";
 import { listItems } from "@/lib/api/tenancy";
 
 /**
@@ -78,6 +78,24 @@ export type KnowledgeSnapshot = {
   item_count: number;
   created_at: string;
 };
+
+export type SnapshotChunkPage = {
+  workspace_id: string; knowledge_base_id: string; snapshot_id: string;
+  total: number; offset: number; limit: number;
+  items: { chunk_id: string; document_revision_id: string; ordinal: number; text: string; truncated: boolean }[];
+};
+
+export async function previewSnapshotChunks(input: AuthInput, kb: string, snapshot: string, offset: number): Promise<SnapshotChunkPage> {
+  const payload = await apiRequest<unknown>(`${kbPath(input.workspaceId, kb)}/snapshots/${encodeURIComponent(snapshot)}/chunks?limit=10&offset=${offset}`, input.accessToken);
+  if (!isRecord(payload) || payload.workspace_id !== input.workspaceId || payload.knowledge_base_id !== kb || payload.snapshot_id !== snapshot ||
+      payload.offset !== offset || payload.limit !== 10 || !Number.isInteger(payload.total) || (payload.total as number) < 0 ||
+      !Array.isArray(payload.items) || payload.items.length > 10 || !payload.items.every((item: unknown) => isRecord(item) &&
+        typeof item.chunk_id === "string" && typeof item.document_revision_id === "string" && Number.isInteger(item.ordinal) &&
+        typeof item.text === "string" && item.text.length <= 4096 && typeof item.truncated === "boolean")) {
+    throw new ApiError("INVALID_RESPONSE", "Invalid snapshot preview response.", 502);
+  }
+  return payload as SnapshotChunkPage;
+}
 
 function knowledgeBase(workspaceId: string): string {
   return `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/knowledge-bases`;

@@ -4,6 +4,7 @@
  * locales must always expose the same key set.
  */
 export const enUS = {
+  snapshotPreview: { open: "Preview frozen chunks", permission: "Knowledge content permission is required.", error: "Could not load snapshot chunks.", retry: "Retry", total: "Chunks", empty: "No chunks in this snapshot.", truncated: "Preview limited to 4096 characters.", previous: "Previous", next: "Next" },
   handoffLifecycle: {
     title: "Human handoff", hint: "The original summary is retained. Closing a handoff does not approve or resume agent actions.",
     open: "Open", assigned: "Assigned", inProgress: "In progress", closed: "Closed",
