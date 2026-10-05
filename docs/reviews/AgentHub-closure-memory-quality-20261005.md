@@ -15,6 +15,8 @@
 
 验证摘要：[validation.json](evidence/closure-memory-quality-20261005/validation.json)。临时日志/数据库不提交。初次探针工具 fixture 漏填 `kind` 导致运行失败，补齐 fixture 后通过；没有修改生产代码来让质量指标变好。
 
+最终隔离复核补上既有 Memory PostgreSQL fixture 切换/恢复环境变量时的 `get_settings.cache_clear()`，避免模块提前加载配置后 Alembic 沿用旧数据库目标。仅修改测试 fixture，相关 5 项 PG 测试再验通过；runner 文件及已绑定 `a866a7f` 的质量结果未变。
+
 T25/T26/T29/T30、Memory TTL/衰减/容量淘汰/清理、副作用自动对账、邀请流程、部署加固统一 **DEFERRED / FUTURE WORK**。旧 S1–S8 未执行，旧大规模 S4 未关闭；两份施工计划已标归档延期，历史报告保留原时间点。
 
 ## 2. Existing evidence reused

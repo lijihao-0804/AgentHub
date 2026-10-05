@@ -89,6 +89,8 @@
     "production_runtime_changed": false,
     "initial_harness_failure": "Missing kind in new tool fixture; fixed only fixture.",
     "quality_failures_preserved": true,
+    "final_fixture_isolation_fix": "Clear Settings cache on database environment switch and restore; production Memory unchanged.",
+    "fixture_fix_pg_recheck": {"passed": 5, "exit_code": 0},
     "final_ci_rule": "Final evidence commit must have matching checkout SHA and green CI before merge."
   },
   "historical_paid_benchmarks_repeated": false,

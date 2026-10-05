@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import Agent
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
+from packages.core.config.settings import get_settings
 from packages.core.database import create_database
 from packages.memory.contracts import MemoryCandidate, MemorySnapshotIntegrityError
 from packages.memory.models import WorkspaceMemory
@@ -45,6 +46,7 @@ def async_database_url(database_url: str) -> str:
 def migrated_database() -> None:
     previous = os.environ.get("AGENTHUB_DATABASE_URL")
     os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
+    get_settings.cache_clear()
     try:
         command.upgrade(Config(str(Path("alembic.ini"))), "head")
         yield
@@ -53,6 +55,7 @@ def migrated_database() -> None:
             os.environ.pop("AGENTHUB_DATABASE_URL", None)
         else:
             os.environ["AGENTHUB_DATABASE_URL"] = previous
+        get_settings.cache_clear()
 
 
 @pytest_asyncio.fixture
