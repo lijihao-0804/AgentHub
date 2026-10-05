@@ -1,0 +1,96 @@
+{
+  "repository_initial": {
+    "status_short": "",
+    "user_untracked_files": [],
+    "branch": "codex/frontend-memory-completion",
+    "head": "0a91564263001817fccd31a177baca34dc487cd3",
+    "origin_main_after_fetch": "1f2fc047598ed47237374ae6a74886cddf83c3c7",
+    "ahead": 2,
+    "behind": 0,
+    "log_15": "0a91564 (origin/main, origin/codex/frontend-memory-completion, origin/HEAD, main, codex/frontend-memory-completion) docs: plan remaining reliability memory and frontend work\n4df4d7d feat(web): preview frozen snapshot chunks and copy code blocks\n1f2fc04 (origin/codex/interview-m-i3-i4, codex/interview-m-i3-i4) docs: audit roadmap implementation and remaining scope\nb45b5ac fix: normalize line endings in layout evidence hashes\nea41491 fix: prevent frontend text overflow and narrow workbench layouts\ne064c36 feat: add audited human handoff lifecycle and retention\n0c773a6 docs(evaluation): accept M-I3 M-I4 with frozen RAG and reliability evidence\n4a0f02b fix(benchmarks): preflight frozen RAG through formal driver\nd509468 fix(benchmarks): include pinned knowledge binding in RAG experiment\nfe91a1d fix(runtime): preserve cumulative approval usage and record formal evidence\n6b953db fix(runtime): close provider streams and validate isolated experiment context\n4d7c615 feat(eval): freeze formal multi-turn scenarios and extend authorized budget\n9e40d1c feat(eval): add assistant audits and isolated recovery evidence\n611a5ec feat(evaluation): run budgeted live pilots and safety evidence\n2472a9a feat(evaluation): prepare M-I3 trials and controlled M-I4 evidence",
+    "diff_stat": "apps/api/routes/knowledge.py                       |  32 +-\n apps/api/schemas/knowledge.py                      |  18 ++\n .../app/agents/[agentId]/agent-detail-client.tsx   |   2 +\n .../[knowledgeBaseId]/knowledge-detail-client.tsx  |  30 +-\n apps/web/components/knowledge/snapshot-preview.tsx |  43 +++\n apps/web/components/ui/markdown.tsx                |  29 +-\n apps/web/i18n/locales/en-US.ts                     |   1 +\n apps/web/i18n/locales/zh-CN.ts                     |   1 +\n apps/web/lib/api/knowledge.ts                      |  20 +-\n ...AgentHub-前端六项与记忆运营实施计划-20261003.md |  35 +++\n .../AgentHub-前端补缺批次一验收报告-20261003.md    |  58 ++++\n .../AgentHub-待做事项详细推进计划-20261005.md      | 347 +++++++++++++++++++++\n .../frontend-batch1-20261003/binding-1440-en.png   | Bin 0 -> 245410 bytes\n .../frontend-batch1-20261003/binding-1440-zh.png   | Bin 0 -> 234315 bytes\n .../frontend-batch1-20261003/binding-375-en.png    | Bin 0 -> 187999 bytes\n .../frontend-batch1-20261003/binding-375-zh.png    | Bin 0 -> 175676 bytes\n .../frontend-batch1-20261003/build/raw-logs.zip    | Bin 0 -> 1624 bytes\n .../frontend-batch1-20261003/build/status.json     |  15 +\n .../frontend-batch1-20261003/code-1440-en.png      | Bin 0 -> 94450 bytes\n .../frontend-batch1-20261003/code-1440-zh.png      | Bin 0 -> 84468 bytes\n .../frontend-batch1-20261003/code-375-en.png       | Bin 0 -> 64342 bytes\n .../frontend-batch1-20261003/code-375-zh.png       | Bin 0 -> 58398 bytes\n .../evidence/frontend-batch1-20261003/matrix.json  | 168 ++++++++++\n .../frontend-batch1-20261003/snapshot-1440-en.png  | Bin 0 -> 256297 bytes\n .../frontend-batch1-20261003/snapshot-1440-zh.png  | Bin 0 -> 254752 bytes\n .../frontend-batch1-20261003/snapshot-375-en.png   | Bin 0 -> 167499 bytes\n .../frontend-batch1-20261003/snapshot-375-zh.png   | Bin 0 -> 161370 bytes\n packages/knowledge/snapshots.py                    |  64 +++-\n scripts/test_web_review.cjs                        |  84 +++++\n tests/integration/test_m3f_snapshot.py             |  53 ++++\n tests/unit/test_knowledge_m3f_snapshots.py         |  61 +++-\n 31 files changed, 1038 insertions(+), 23 deletions(-)",
+    "diff_check_exit_code": 0
+  },
+  "p0": {
+    "checks": [
+      {
+        "name": "snapshot_unit",
+        "exit_code": 0
+      },
+      {
+        "name": "snapshot_pg",
+        "exit_code": 0
+      },
+      {
+        "name": "frontend_review",
+        "exit_code": 0
+      },
+      {
+        "name": "typescript",
+        "exit_code": 0
+      },
+      {
+        "name": "frontend_build",
+        "exit_code": 0
+      },
+      {
+        "name": "ruff_changed",
+        "exit_code": 0
+      },
+      {
+        "name": "diff_check",
+        "exit_code": 0
+      }
+    ],
+    "snapshot_unit_passed": 11,
+    "snapshot_pg_passed": 11,
+    "frontend_review_groups_passed": 16,
+    "main_after_merge": "0a91564263001817fccd31a177baca34dc487cd3",
+    "merge_method": "fast-forward",
+    "pushed": true,
+    "ci": {
+      "run_id": 37290403254,
+      "conclusion": "success",
+      "checkout_sha_backend": "0a91564263001817fccd31a177baca34dc487cd3",
+      "checkout_sha_frontend": "0a91564263001817fccd31a177baca34dc487cd3",
+      "reused_exact_head_completed_run": true
+    }
+  },
+  "p1": {
+    "checks": [
+      {
+        "name": "ruff_all",
+        "exit_code": 0
+      },
+      {
+        "name": "memory_unit",
+        "exit_code": 0
+      },
+      {
+        "name": "memory_pg",
+        "exit_code": 0
+      },
+      {
+        "name": "diff_check",
+        "exit_code": 0
+      }
+    ],
+    "memory_unit_passed": 65,
+    "new_unit_passed": 14,
+    "memory_pg_passed": 5,
+    "new_pg_suite_passed": 1,
+    "dataset_scenarios": 11,
+    "off_controls": 1,
+    "paid_calls": 0,
+    "runner_exit_code": 0,
+    "code_commit": "a866a7fb81f4a19bfd298dad2dbc91eab6517efe",
+    "test_database": "agenthub_memory_quality_20261005",
+    "schema": "0031_handoff_cases",
+    "production_runtime_changed": false,
+    "initial_harness_failure": "Missing kind in new tool fixture; fixed only fixture.",
+    "quality_failures_preserved": true,
+    "final_ci_rule": "Final evidence commit must have matching checkout SHA and green CI before merge."
+  },
+  "historical_paid_benchmarks_repeated": false,
+  "feature_development": "STOP"
+}
