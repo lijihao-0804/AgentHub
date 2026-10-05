@@ -25,7 +25,7 @@ T25/T26/T29/T30、Memory TTL/衰减/容量淘汰/清理、副作用自动对账�
 
 ## 3. New quality dataset
 
-scenario count: **11**；categories: 9。内容是隔离合成团队政策，不是企业真实样本。
+scenario count: **11**；categories: **10**（TEMPORARY 有两个不同门禁探针）。内容是隔离合成团队政策，不是企业真实样本。
 
 | scenario_id | category |
 | --- | --- |
