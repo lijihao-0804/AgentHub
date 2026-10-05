@@ -1,5 +1,7 @@
 # AgentHub 拓展计划 —— Agent Applications Phase
 
+> **2026-10-05 状态补充**：本文保留产品要求与历史阶段设计，不能据此认定全部条目已完成或继续开工。当前能力、证据与 DEFERRED / FUTURE WORK 见 [状态页](../docs/current-state.md)；FEATURE DEVELOPMENT: STOP。
+
 > 本文档与 `plan/plan.md`（AgentHub 开发总计划 v3.1）**并列**，不替代它。
 > `plan.md` 定义的是 **平台**：AgentVersion / ModelGateway / Tool Governance / Approval /
 > Context Budget / MCP / Trace / Evaluation。

@@ -1,5 +1,7 @@
 # API contracts
 
+> **2026-10-05 当前状态**：[功能与证据口径](current-state.md)。T12/T28 已关闭，MCP/Auth UI、反馈、人工接管和专项前端脚本已存在；功能开发已收口，旧计划未完成项为 DEFERRED / FUTURE WORK。历史验收数字按各自日期/SHA 解读。
+
 All versioned routes use `/api/v1`. Every request receives an `X-Request-ID` response
 header. Errors use this shape:
 
@@ -195,3 +197,37 @@ experiment's `evaluator_manifest`, reduced to an `evaluator_version` of the form
 and the existing `evaluator_version_mismatch` / `NOT_COMPARABLE` guard refuses to
 compare experiments scored by different judges. No new permission is involved:
 choosing a judge is part of `evaluation_manage`.
+
+## Frozen snapshot chunk preview (T12)
+
+`GET /api/v1/workspaces/{workspace_id}/knowledge-bases/{knowledge_base_id}/snapshots/{snapshot_id}/chunks`
+
+- Requires knowledge-content access (`knowledge_run`); workspace/KB/snapshot scope and frozen membership integrity are validated by the existing snapshot service.
+- `limit`: default 10, range 1–20; `offset`: nonnegative. Returns snapshot identity/hash, pagination total and chunk revision/ordinal/content.
+- Each text is capped at 4096 characters with an explicit `truncated` flag. Preview uses the frozen snapshot members, including retained historical revisions; it does not re-resolve LATEST.
+- The web binding and KB snapshot rows share the preview component; unknown permission and stale page/session identities do not display prior content.
+
+## Feedback and human handoff
+
+All paths below have the prefix `/api/v1/workspaces/{workspace_id}`; the runtime OpenAPI is the field-level reference.
+
+| Path | Behavior |
+| --- | --- |
+| POST/GET `/runs/{run_id}/feedback` | Submit/read retained ratings, problem labels and proposed correction under content permission |
+| POST `/feedback/{feedback_id}/review` | Explicit authorized review with version/concurrency checks |
+| POST `/feedback/{feedback_id}/import-dev` | Atomically import reviewed correction into a new DEV dataset draft; does not mutate a published dataset or auto-accept holdout |
+| GET/POST `/artifacts/{artifact_id}/handoff` | Read/open a retained case tied to immutable source artifact |
+| GET `/threads/{thread_id}/handoffs`, GET `/handoffs/assignees` | Workspace-scoped projections and eligible operator list |
+| POST `/handoffs/{case_id}/assign`, `/claim`, `/close` | Assignment/claim/closure enforce actor role, membership and expected version |
+
+Handoff states are OPEN/ASSIGNED/IN_PROGRESS/CLOSED, independent of Run and Approval states.
+Closing cannot authorize or repeat a tool, clear UNKNOWN_OUTCOME, or delete source evidence. Historical handoff artifacts/threads are retained.
+Detailed contracts: [feedback](reviews/AgentHub-面试增强M-I2契约与设计-20261002.md), [handoff](reviews/AgentHub-人工接管首版契约-20261003.md).
+
+## Memory quality is narrower than storage guarantees
+
+Memory reads require `agent_run` or `agent_edit`; overrides require `agent_edit`. Workspace metadata permission alone does not grant memory content access.
+Exact evidence, bounded candidates, scope and de-duplication are code gates; durable/shared/private/hostile semantic acceptance is not a deterministic code guarantee.
+The small [quality probes](reviews/AgentHub-closure-memory-quality-20261005.md) retained inappropriate grounded writes and irrelevant admissions.
+Two contradictory ACTIVE facts can coexist; SUPERSEDED is reserved, not automatically generated. No TTL/decay/capacity cleanup contract is implemented.
+New injected Memory remains UNTRUSTED and cannot rewrite published ToolPolicy or caller identity; the new probe did not exercise an actual refund.

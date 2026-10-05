@@ -1,9 +1,11 @@
 # 09 · 数据模型与 API 契约
 
+> **2026-10-05 阅读提示**：[当前状态及新证据](../current-state.md)已更新。本文保留原基线的规模、测试、截图与失败记录；49 张表/29 个迁移/890 单测等旧数字不是当前统计。当前新增反馈/接管、MCP UI、前端专项脚本、T12/T28 与 Memory 质量边界见状态页；不重写历史结果。
+
 面试官问「你数据库怎么设计的」时，不要背表名。
 **按「每一组表回答什么问题」来讲。**
 
-**49 张 ORM 映射表**（含演示用的 `customers` / `tickets`；不含 Alembic 自己维护的 `alembic_version`），
+**历史 0029 基线：49 张 ORM 映射表**（含演示用的 `customers` / `tickets`；不含 Alembic 自己维护的 `alembic_version`），
 **29 个迁移，单一 head（`0029_set_null_columns`）**。
 
 迁移的构成比表的数量更能说明问题：**29 个里有 10 个不新建任何表**
@@ -450,3 +452,10 @@ body: {type, title, content}
 > 因为它们对中间状态的假设已经分叉了。
 >
 > 这是我给自己立的第一条规矩，从 0001 就没破过。
+
+## 2026-10-05 模型/API 补充
+
+当前为 51 个 Base 映射类、31 个迁移文件，head `0031_handoff_cases`；上面的 49/29 是历史记录。
+新增 `run_feedback` / `handoff_cases` 分别负责反馈审核/回归来源和人工接管状态/版本/分配/关闭；不是把这些状态塞进 Run 或 Approval。
+快照分片只读预览已提供有界分页/内容权限/固定历史成员；MCP 导入 UI、工具摘要和反馈/接管 API 已存在。
+最新外部契约见 [api-contracts](../api-contracts.md#feedback-and-human-handoff)，状态见 [current-state](../current-state.md)。

@@ -1,5 +1,7 @@
 # AgentHub 学习文档（`docs/learning/`）
 
+> **2026-10-05 当前状态**：[功能与证据口径](../current-state.md)。T12/T28 已关闭，MCP/Auth UI、反馈、人工接管和专项前端脚本已存在；功能开发已收口，旧计划未完成项为 DEFERRED / FUTURE WORK。历史验收数字按各自日期/SHA 解读。
+
 这个目录和 `docs/report/` 是**两种东西**，不要混着读。
 
 | | `docs/report/`（20 章 + 两份附录） | `docs/learning/`（本目录） |

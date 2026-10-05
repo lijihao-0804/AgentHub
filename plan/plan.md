@@ -1,5 +1,7 @@
 # AgentHub 开发总计划 v3.1
 
+> **2026-10-05 状态补充**：本文保留产品要求与历史阶段设计，不能据此认定全部条目已完成或继续开工。当前能力、证据与 DEFERRED / FUTURE WORK 见 [状态页](../docs/current-state.md)；FEATURE DEVELOPMENT: STOP。
+
 > **项目定位**：Enterprise Agent Runtime & Control Plane  
 > **核心原则**：**缩功能，不缩语义。**  
 > **目标**：做一个真实可运行、可部署、可评测、可解释技术取舍的企业 Agent 平台；不做聊天机器人、PDF Chat、不做 Dify UI 克隆，不通过堆功能制造“企业级”错觉。  

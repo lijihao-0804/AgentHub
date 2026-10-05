@@ -1,5 +1,7 @@
 # 03 · RAG、记忆与评测拷打（14 问）
 
+> **2026-10-05 更新口径**：以 [当前状态](../../current-state.md) 和 [收口报告](../../reviews/AgentHub-closure-memory-quality-20261005.md)解释已完成、未知与延期。原始调研/案例保留；功能开发已停止，建议不构成开工计划。
+
 这一篇把“检索到内容”“回答正确”“实验有效”分开。混合检索的通用背景可参考 [Qdrant 官方文档](https://qdrant.tech/documentation/search/hybrid-queries/)，但 AgentHub 的 RRF 在自己的检索器中实现，不应照着新版 Qdrant 示例描述本仓库 API。
 
 ## C01｜为什么用 RAG？微调不是更好吗？
@@ -113,3 +115,14 @@
 **继续追问：隐藏 expected 就绝不泄漏了吗？** 不是绝对保证。还要看导出、日志、评测结果、权限和人工使用流程；暴露次数也是可审计事实。项目给出数据和权限边界，没有提供“用户永远无法过拟合”的保证。
 
 **证据：** [evaluation 路由](../../../apps/api/routes/evaluation.py)、[数据集服务](../../../packages/evaluation/service.py)、[数据集集成测试](../../../tests/integration/test_m7a_evaluation_datasets.py)。
+
+
+## C15｜Memory 能跑通，就能说它提升了质量吗？
+
+**可这样回答：** 不能。WRITE 是条目落库，RECALL 要同时检查有效快照和最终上下文准入，USE 要看回答实际依赖哪些记忆。2026-10-05 的 11 个生产路径确定性探针分别记录这些步骤；应写场景 5/5、必须召回 2/2，但禁止召回 5/8 仍被准入，冲突两条 ACTIVE 共存。
+
+**继续追问：6/9 precision、10/10 task 说明什么？** 前者是故意强制临时/私人/恶意候选的写入边界，不是真实 extractor 准确率；后者是脚本消费者后置条件，不是真实 LLM 成功率。精确引文与长度门禁有效，适合长期共享的语义拒写仍靠提示词。真实复杂 USE 未测，不用脚本 PASS 自动判 BENEFICIAL。
+
+**继续追问：为什么不顺手加 TTL？** 这次没有长期时间跨度证据，已确认的是 selector 相关性准入偏宽。唯一建议的未来方向是相关性拒绝；当前功能开发 STOP，不同时启动 TTL/衰减或冲突引擎。
+
+**证据：** [收口报告](../../reviews/AgentHub-closure-memory-quality-20261005.md)、[结果](../../../benchmarks/evaluation/memory_quality/result.json)、[runner](../../../benchmarks/evaluation/memory_quality/runner.py)。既有真机 Memory ON/OFF 小实验保留，本轮无新增付费调用。
