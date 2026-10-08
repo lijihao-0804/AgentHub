@@ -1,5 +1,7 @@
 # AgentHub 项目报告（面试向）
 
+2026-10-09 展示入口：[求职材料](../portfolio/README.md)、[Hero Demo](07-现场演示脚本.md)、[当前架构图](../architecture.md)。
+
 > **2026-10-05 当前状态**：[功能与证据口径](../current-state.md)。T12/T28 已关闭，MCP/Auth UI、反馈、人工接管和专项前端脚本已存在；功能开发已收口，旧计划未完成项为 DEFERRED / FUTURE WORK。历史验收数字按各自日期/SHA 解读。
 
 这一组文档的目的只有一个：**让你在面试里能把 AgentHub 讲清楚，并且经得住追问。**

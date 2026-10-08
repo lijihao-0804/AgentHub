@@ -1,58 +1,106 @@
 # AgentHub
 
-**Governed Agent Runtime & Control Plane** — 面向工具执行、审批、审计与评测的 Agent 平台。
+**Enterprise Agent Runtime & Control Plane** — 一个围绕工具执行、人工审批与可复现评测构建的 Agent 工程项目。
 
-AgentHub 把模型调用、RAG、工具治理、持久审批、多轮会话和评测放在同一条可追溯链路里。
-发布版本冻结完整运行规格；一次 Run 记录实际使用的知识和记忆快照；外部写入结果不确定时
-保留 `UNKNOWN_OUTCOME / NEEDS_ATTENTION`，交由人工处理。
+AgentHub 让一次请求经历上下文准备、模型推理、工具治理、持久审批和执行观测。模型提出操作，运行时决定是否执行；审批等待与恢复共享同一 Run，历史配置、知识和记忆输入可追溯。
 
-**当前阶段：核心平台与选定应用增强已交付，功能开发已收口。**
-T12 冻结快照分片预览、T28 代码块复制和 Memory 小规模质量边界验证已合入 main。
-这不代表全部历史计划完成，也不代表已经通过真实企业生产规模或 M8 公网部署验收。
+架构是 **Modular Monolith + Worker**：Next.js、FastAPI、LangGraph 适配器、PostgreSQL、Redis 和 Qdrant。Enterprise 描述治理场景；真实企业生产规模和完整公网部署尚未证明。功能开发已收口。
 
-## 已实现什么
+[核心 Demo](docs/report/07-现场演示脚本.md) · [架构与运行生命周期](docs/architecture.md) · [求职与面试](docs/portfolio/README.md) · [代码学习](docs/learning/README.md) · [证据与边界](docs/current-state.md)
 
-| 领域 | 当前能力 |
+## Why AgentHub
+
+| 执行中遇到的问题 | 本项目的处理 |
 | --- | --- |
-| 控制平面 | 登录/注册、Organization 与 Workspace 隔离、RBAC、供应商凭据加密、模型档案与能力校验 |
-| 版本与运行时 | 不可变 AgentVersion、规范 JSON 哈希、LangGraph 执行、上下文预算、取消、SSE 流式与持久事件重连、首个可见 token 前 fallback |
-| 知识与 RAG | 文档修订/生命周期、异步入库与恢复、Dense/Hybrid-Rerank、引用证据、冻结知识快照及有界分片预览 |
-| 工具与审批 | READ/WRITE 和风险分离、工具版本治理、审批决策/动作执行双状态、持久中断恢复、幂等身份与不确定结果保留 |
-| MCP 与应用 | MCP 连接/发现/治理导入 UI；Research、Incident、Analyst、Support 共用 Thread/Artifact/运行时，多轮会话支持流式与停止 |
-| 评测与反馈 | 发布数据集、DEV/HOLDOUT、冻结实验身份、成对比较/消融/发布门禁 UI；人工反馈、审核、纠正及 DEV 回归草稿导入 |
-| 运营与接管 | Run 详情/时间线、工具参数摘要和固定证据、时延/失败/用量/费用指标；分配→接手→关闭的人工接管，保留原始证据 |
-| 共享记忆 | 默认关闭的会话检索/长期记忆、异步抽取、引文门禁、去重、管理/停用/启用、按 Run 冻结 ID/hash、UNTRUSTED 准入 |
-| 前端 | 中英 i18n、权限提示、专项回归脚本、排版专项实测、Markdown 代码块复制 |
+| 模型提出危险工具操作，谁决定能否执行？ | 发布 ToolRevision + ToolPolicy；READ/WRITE 与风险分开，READ + NEVER 才自动执行，其余进入审批 |
+| 长时间等待审批，服务重启后怎么继续？ | PostgreSQL checkpoint、独立审批决策/执行状态、same-run resume，计数预算不重置 |
+| 配置与知识变化后如何解释历史结果？ | 不可变 AgentVersion 和规范哈希；Run 保存有效知识/Memory 快照，正式实验冻结输入身份 |
+| 如何知道一次修改是否有效？ | Run steps / 生命周期事件 / 脱敏 trace；发布数据集、成对比较、消融、独立指标与失败记录 |
 
-## 已有什么证据
+## Architecture Overview
 
-| 证据 | 结果与解释边界 |
+```mermaid
+flowchart TB
+    Web["Next.js - Applications / Thread / Run UI"] --> API["FastAPI - /api/v1"]
+    subgraph Control["Control plane - API application services"]
+        API --> Config["AgentPublishService - immutable AgentVersion"]
+        API --> Thread["ThreadService - turns / run identity"]
+        API --> Eval["Evaluation - frozen variants / datasets / metrics"]
+    end
+    Config --> Runtime["AgentRunService - LangGraph adapter"]
+    Thread --> Runtime
+    Eval --> Runtime
+    Runtime --> Context["ContextBudgetPolicy - frozen knowledge / memory"]
+    Context --> Model["Model Gateway - provider adapters"]
+    Runtime --> Tool["ToolRuntime / ToolPolicy / ActionRuntime"]
+    Tool --> Approval["ApprovalService - decision / execution"]
+    Tool --> MCP["Builtin / REST / MCP adapters"]
+    Runtime --> PG[("PostgreSQL - runs / events / snapshots / checkpoints")]
+    Approval --> PG
+    Eval --> PG
+    API --> Redis[("Redis - Celery broker")]
+    Redis --> Worker["Celery worker - ingestion / evaluation / extraction"]
+    Beat["Celery beat - ingestion reconciliation"] --> Redis
+    Worker --> PG
+    Worker --> Qdrant[("Qdrant - retrieval index")]
+    Context --> Qdrant
+```
+
+模块箭头是职责/数据流，不表示独立微服务。Knowledge 经适配器检索 Qdrant 并校验 PostgreSQL 快照；Memory 从 PostgreSQL 加载。Redis 不承载审批权威状态。[第二张图：治理执行与恢复](docs/architecture.md#governed-agent-run-lifecycle)。
+
+## Key Engineering Decisions
+
+| 设计 | 为什么这样做 | 代码入口 |
+| --- | --- | --- |
+| Immutable AgentVersion | 发布后规格不可变；LATEST 是绑定策略，有效知识另冻结到 Run/实验 | [publish](packages/agent_runtime/publish.py) |
+| Governed Tool Runtime | 模型只能提议工具；发布修订、参数校验和策略决定执行 | [policy](packages/tools/policy.py)、[runtime](packages/tools/runtime.py) |
+| Durable Approval & Resume | 决策与动作执行分开持久化；批准不等于动作成功 | [approvals](packages/approvals/service.py)、[resume](packages/agent_runtime/runtime.py) |
+| Side-effect Safety | 逻辑身份约束重复执行；已派发但无法确认的写入标记 UNKNOWN_OUTCOME → NEEDS_ATTENTION | [actions](packages/tools/actions.py)、[MCP](packages/mcp/runtime.py) |
+| Context Budget & Snapshot | 所有模型上下文经预算准入，历史知识/记忆校验冻结身份 | [context_budget](packages/agent_runtime/context_budget.py) |
+| Knowledge / RAG | 修订与快照保留、异步入库恢复、Dense/Hybrid、固定引用与有界分片预览 | [knowledge](packages/knowledge) |
+| Run Observability | Run 详情/步骤、持久生命周期事件与脱敏 trace，各自职责分开 | [event_store](packages/agent_runtime/event_store.py) |
+| Evaluation & Evidence | 发布数据集/holdout 暴露、实验冻结、成对/消融与门禁，保留失败而非只展示成功 | [evaluation](packages/evaluation) |
+
+共享 Memory 默认关闭，提供异步抽取、去重、停用/启用、快照与 UNTRUSTED 准入。精确引文不能证明应写入共享记忆；相关性与冲突质量仍有不足，见下方证据。
+
+## Applications
+
+Research（文献证据）、Incident（调查与受控回滚）、Data Analyst（只读分析）、Customer Support（政策与受控工单）共用 Thread / Turn / Artifact / Runtime。每个应用提供 prompt、工具与产物投影；审批与运行预算由共同运行时处理。
+
+## Hero Demo：调查 → 提议回滚 → 审批 → 同一 Run 恢复
+
+[5–8 分钟演示脚本](docs/report/07-现场演示脚本.md)使用仓库 Ops MCP 固定数据与回滚模拟，不连接生产部署系统。包含隔离环境、MCP 导入/工具策略、数据库与事件检查、失败排查和代码入口。
+
+本轮状态：**DOCUMENTED_ONLY**（已核对源码与历史证据，未重新启动服务/调用模型）。模型工具顺序与次数不保证；审批与执行结果以实际 Run 为准。[既有真实截图](docs/report/18-截图演示.md)保留原时点，不当作本轮运行结果。
+
+## Engineering Evidence
+
+| 证据 | 已验证内容与限制 |
 | --- | --- |
-| [正式客服评测](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 60 条合成任务，两个变体、各三次；HOLDOUT 业务成功 47/60 → 60/60，结合助手语义 41/60 → 57/60；不是企业线上成功率 |
-| [RAG 对照与可靠性演练](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 24 DEV 问题、144 次实际检索生成；Dense/Hybrid 最终目标召回均 72/72。含注入、隔离、worker crash、重连、受控负载，保留失败与未知 |
-| [人工接管与反馈](docs/reviews/AgentHub-面试增强M-I5验收报告-20261003.md) | 状态/权限/并发/审计/证据留存有验收；关闭接管不等于确认副作用或自动重试 |
-| [前端交付](docs/reviews/AgentHub-前端补缺批次一验收报告-20261003.md) | T12/T28、Hook 顺序和长代码撑宽修复；专项浏览器证据与脚本，不是覆盖所有交互的持续 E2E |
-| [最终收口与 Memory 质量](docs/reviews/AgentHub-closure-memory-quality-20261005.md) | 11 个确定性场景，WRITE/RECALL/USE 分开；5/8 禁止召回场景仍被准入，冲突事实共存。脚本任务 10/10 不是 LLM 成功率；本轮新增模型费用 0 |
+| [基线 CI](https://github.com/lijihao-0804/AgentHub/actions/runs/37327384930) | `a12e8abf7e1f55d07fe6429d5a618737f782efe0` success；不是后续文档提交的 CI 声明 |
+| [持久审批验收](docs/reviews/post-M5-independent-review-closure.md) | PostgreSQL/checkpoint、并发与 crash 窗口的历史集成证据；不能泛化为跨机 exactly-once |
+| [正式客服评测](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 60 条合成任务、两个变体各三次；HOLDOUT 业务 47/60→60/60，结合助手语义 41/60→57/60；非线上成功率/真人一致性 |
+| [RAG / 安全 / 故障 / 负载](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 24 DEV 问题、144 次检索生成；最终目标召回两策略均 72/72。含隔离/注入/worker crash/重连/1、4、8 并发受控负载，非资源饱和容量 |
+| [Memory 质量收口](docs/reviews/AgentHub-closure-memory-quality-20261005.md) | 11 确定性场景，强制候选 Write precision 6/9，禁止召回 5/8；脚本任务 10/10 不是 LLM 成功率，复杂真实 USE 未测 |
+| [前端排版](docs/reviews/AgentHub-前端文字排版修正报告-20261003.md)、[快照预览/复制](docs/reviews/AgentHub-前端补缺批次一验收报告-20261003.md) | 专项浏览器与脚本证据，非所有交互持续 E2E |
 
-测试通过、机制可用与真实业务有效分别记录。历史报告固定各自的日期/提交，不能把不同轮次的测试数量
-拼成“当前覆盖率”，也不能把脚本或助手审阅说成真人评审一致性。
+已实现不等于本轮复测、正式里程碑验收或生产可用。历史记录固定各自 SHA，不汇总成“当前测试覆盖率”。
 
-## 当前边界
+## Known Limits
 
-- **DEFERRED / FUTURE WORK**：逐轮参数热调、新建派生草稿及关系持久化、完整 Dashboard 双轴/p95 布局、成员添加/邀请/角色修改 UI。
-- **DEFERRED / FUTURE WORK**：Memory TTL/衰减/容量淘汰/清理、自动副作用对账、邀请流程、部署加固；旧 S1–S8 不继续施工。
-- Memory 的临时/个人/恶意语义拒写依赖 extractor 提示词，精确引文不等于适合共享记忆；selector 可能准入无关事实，没有自动冲突替换。
-- 未证明真实企业用户、数百条记忆、长期生产使用、资源饱和容量或跨机器故障恢复。M8 完整公网交付仍延期。
+未完成项已归档延期：逐轮参数、新派生草稿/关系、完整 Dashboard、成员邀请/角色 UI、Memory TTL/衰减/容量清理、自动副作用对账、M8 公网部署。M7-G UI 存在，不补造独立验收记录。Memory 冲突事实可共存，临时/私人/恶意语义拒写仍依赖 prompt。
 
-**FEATURE DEVELOPMENT: STOP。** 后续方向是项目学习、演示、架构讲解、简历和面试准备。
+[当前状态与证据口径](docs/current-state.md)区分已验证、未知和延期；真实企业收益、长期大规模 Memory、跨机故障与全面 E2E 未证明。**FEATURE DEVELOPMENT: STOP**。
 
-## 文档怎么读
+## Quick Start & Documentation
 
-- [当前状态与证据口径](docs/current-state.md)：功能、已验证/新验证/未知、延期清单。
-- [全部文档导航](docs/README.md)：架构、契约、ADR、历史验收、学习与面试资料。
-- [学习路线](docs/learning/README.md)：按一次 Run 阅读代码和动手实验。
-- [项目讲述与历史报告](docs/report/README.md)、[面试拷打手册](docs/report/interview/README.md)。
-- [架构](docs/architecture.md)、[API 契约](docs/api-contracts.md)、[评测索引](docs/benchmark/README.md)、[验收索引](docs/reviews/README.md)。
+- 最小展示：阅读 [Demo](docs/report/07-现场演示脚本.md)与历史截图、运行源码走读，无需模型密钥。
+- 本机业务运行：以下完整依赖启动；模型凭据、发布 Agent、工具导入仍须配置。
+- Hero Demo：独立 lab 数据库/Redis namespace/blob、显式 checkpoint bootstrap、Ops MCP 与有效工具调用模型；不自动建立所有配置。
+- CI：工作流使用自己的集成依赖，见 [workflow](.github/workflows/ci.yml)，与付费业务实验分开。
+- 真实模型验证：已有冻结证据，复现可能产生费用，本轮不重复。
+
+[文档导航](docs/README.md) · [架构](docs/architecture.md) · [求职材料](docs/portfolio/README.md) · [学习顺序](docs/learning/README.md) · [验收索引](docs/reviews/README.md)
 
 ## 本地启动
 

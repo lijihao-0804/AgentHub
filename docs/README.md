@@ -14,6 +14,8 @@
 | 安全与交付约束 | [安全基线](security/baseline.md)、[版本交付](versioning.md)、[凭据迁移](deployment/provider-credential-migration.md) |
 | 原始需求及未来范围 | [产品总计划](../plan/plan.md)、[应用拓展](../plan/extend-plan.md)、[归档延期计划](reviews/AgentHub-待做事项详细推进计划-20261005.md) |
 
+求职/展示优先入口：[紧凑项目介绍、简历和 12 道追问](portfolio/README.md)、[核心 Demo](report/07-现场演示脚本.md)、[两张架构图](architecture.md)。
+
 ## 阅读口径
 
 当前状态页是汇总，不覆盖产品不变量、源码或 OpenAPI。验收报告固定历史时点，旧的“缺 MCP UI/无前端脚本/0029 head”不能当作当前结论。

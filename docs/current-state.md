@@ -70,8 +70,8 @@ M7-G UI 实现存在；不因后续功能落地补造旧里程碑的独立验收
 - 说明文档中的代码行号/规模数字有基线时点；现场面试优先看函数名、当前源码和新证据。
 - 本轮只更新 Markdown/GitHub About，检查链接/路径与 diff，不重跑已充分验证的模型、负载、构建或浏览器矩阵。
 
-GitHub About（仅项目简介）：
+GitHub About（2026-10-09 展示收口同步；功能/质量基线不变）：
 
-> Governed Agent runtime and control plane with immutable versions, RAG snapshots, durable approvals, reproducible evaluation, streaming apps and auditable workspace memory.
+> Governed AI Agent runtime with durable execution, human approval, RAG, and reproducible evaluation.
 
 **NEXT：PROJECT LEARNING / README / ARCHITECTURE DIAGRAM / DEMO / RESUME / INTERVIEW PREPARATION。**

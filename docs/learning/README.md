@@ -1,120 +1,44 @@
-# AgentHub 学习文档（`docs/learning/`）
+# AgentHub 学习入口：沿一次 Run 理解系统
 
-> **2026-10-05 当前状态**：[功能与证据口径](../current-state.md)。T12/T28 已关闭，MCP/Auth UI、反馈、人工接管和专项前端脚本已存在；功能开发已收口，旧计划未完成项为 DEFERRED / FUTURE WORK。历史验收数字按各自日期/SHA 解读。
+2026-10-09；当前源码基线 `a12e8ab`。只整理已有四份教材，不新增学习系列。
+[系统工程证据](../reviews/README.md)已经存在；下面是**用户未来亲自执行的学习任务，尚未执行、未标 PASS**。读完材料也不能替代实际掌握。个人记录放在自己的 `.scratch`/笔记，不改业务实现或正式证据。
 
-这个目录和 `docs/report/` 是**两种东西**，不要混着读。
+## 先做什么
 
-| | `docs/report/`（20 章 + 两份附录） | `docs/learning/`（本目录） |
-|---|---|---|
-| 视角 | **结果视角**：做了什么、为什么这么设计 | **学习视角**：怎么一层一层把代码吃透 |
-| 回答的问题 | 「这个项目是什么，凭什么成立」 | 「我今天只懂 30%，下一步该打开哪个文件」 |
-| 读法 | 读完能讲 | 读完能**改**，并且知道改完会发生什么 |
-| 谁写的 | 我写完之后的总结 | 你自己边读边填的实验记录 |
+先打开 [01 代码导航](01-codebase-navigation.md)，再按 [02 一次 Run](02-one-run-end-to-end.md)跟 Incident。旧章节行号是历史基线，用当前函数名定位；流式 UI 入口还需看 `turns/stream`，不要只看同步 `submit_turn`。
 
-报告已经够多了。**这个目录不再写第二套总结。**
-每一章都要求你先猜、再读、再动手改一个变量、再观察真实行为。
-不参与就没有效果——看文档都懂，面试官打开 `runtime.py` 随便指一段就开始陌生，
-那是因为你从来没有亲手让那段代码**变过**。
+学习主线：**一次 Run → Runtime → Policy → Approval → Durability → Domain Model → RAG / Memory → Evaluation**。
 
----
+## 执行顺序与理解标准
 
-## 目录
+所有修改只作用于独立 lab 工作区的新草稿/版本、测试 fixture 或临时配置，不修改生产、历史发布版、业务源码或测试断言。先预测，再读函数，最后记录实际结果；没有运行的项写“未执行”。
 
-| 文件 | 讲什么 | 什么时候读 |
-|---|---|---|
-| [01-codebase-navigation.md](01-codebase-navigation.md) | **代码地图**：我想理解 X → 第一入口是谁 → 然后看谁 → 最后看谁。十条主线，每条标明入口函数、核心数据结构、**不应该看什么**、最值得打断点的位置 | 最先读。这是整个目录的索引 |
-| [02-one-run-end-to-end.md](02-one-run-end-to-end.md) | **只跟一次 Run**：故障排查 Agent 查日志 → 提议 rollback → 卡在审批 → 批准 → 恢复。每一步写清楚输入/输出/写了哪张表/下一步为什么去那里 | 读完 01 立刻读 |
-| [03-domain-model-lifecycle.md](03-domain-model-lifecycle.md) | **9 个核心对象的生命周期**（不是字段表）。重点回答：为什么有些东西可变，有些东西必须不可变，以及「不可变」到底是谁在拦 | 02 读完，想把表结构串起来时 |
-| [04-runtime-labs.md](04-runtime-labs.md) | **13 个实验**，没有理论。改一个变量 → 预测 → 跑 → 记录真实行为 → 解释。覆盖预算、审批、失败、知识、记忆和正式评测 | 03 之后。也可以在 02 卡住的地方随时插进来 |
+| 阶段 / 教材 | 首读真实函数与调用链 | 改哪个非生产变量 | 应观察什么 | 如何恢复 | 理解标准 |
+| --- | --- | --- | --- | --- | --- |
+| 1 一次 Run / [01](01-codebase-navigation.md)、[02](02-one-run-end-to-end.md) | [ThreadService.submit_turn](../../packages/threads/service.py)→prepare_run→execute_prepared_run；流式查 [routes](../../apps/api/routes/threads.py) | 新 lab Turn 的 client_token，重复同一 token | Turn/Run 关联与复用；未关联时可能 409 in-progress | 用新 token 做下一条，保留前次 Run | 能说出 Thread/Turn/Run 的区别与分段提交窗口 |
+| 2 Runtime / [02](02-one-run-end-to-end.md)、[04](04-runtime-labs.md) | [AgentRunService.run / _AgentRunGraph.model](../../packages/agent_runtime/runtime.py)→tool_proposal→policy→observation | 新 lab 草稿 max_tool_calls，发布新版本 | 工具预算或循环停止，Run 步骤/失败码 | 发布另一 lab 版本恢复原值，不修改旧版 | 能画循环与无工具/预算/取消退出，不能只背节点名 |
+| 3 Policy / [04 Lab 1/2](04-runtime-labs.md) | [ToolPolicy.decide](../../packages/tools/policy.py)→ToolRuntime/ActionRuntime | 新 lab ToolRevision 的 approval_policy；READ/NEVER→ALWAYS | READ 也可进入审批 | 新建修订恢复 NEVER，再发布新 AgentVersion | 明确 effect/risk/policy 三者及当前 auto 条件 |
+| 4 Approval / [02](02-one-run-end-to-end.md) | [create_or_get / decide / claim_execution](../../packages/approvals/service.py)→[resume](../../packages/agent_runtime/runtime.py) | lab 同一审批选择 approve/deny，分别在不同 Run 做 | 两种决策、执行状态和 observation；同一个 run_id | 不改已决审批，下一 Run 新建提议 | 能区分批准/成功，解释拒绝不是必然 Run FAILED |
+| 5 Durability / [04](04-runtime-labs.md) | [checkpoint adapter](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)→resume；[MCP execute_write](../../packages/mcp/runtime.py) | lab WAITING 时重启 API；另轮 Ops rollback_mode=hang | 原 Run 恢复；已派发未知结果进入 NEEDS_ATTENTION | 停 lab 进程，移除 hang/私网进程变量；保留未知记录，不重试确认 | 解释 checkpoint 与副作用的两个持久化窗口，不承诺 exactly-once |
+| 6 Domain Model / [03](03-domain-model-lifecycle.md) | [AgentPublishService.publish](../../packages/agent_runtime/publish.py)→[models](../../packages/agent_runtime/models.py) | lab 草稿 prompt，发布两版本 | spec/hash 不同；旧版和旧 Run 保持原输入身份 | 保留两版，用原版创建新 Run 对照 | 说清可变草稿/不可变版本/有效快照，LATEST 何时解析 |
+| 7 RAG / Memory / [04 Lab 8/11/12](04-runtime-labs.md) | [_AgentRunGraph.prepare](../../packages/agent_runtime/runtime.py)→[Memory store.select/load](../../packages/memory/store.py)→[admit_context](../../packages/agent_runtime/context_budget.py) | lab 新版开/关长期记忆；停用一条 lab memory；绑定新的知识快照 | 新 Run 输入变化，旧快照回放；selected 与 admitted 分开 | 新 lab 版本关记忆，reactivate 仅已停用条目；不删除历史 | 能解释 UNTRUSTED/hash/预算、两 ACTIVE 冲突与相关性不足 |
+| 8 Evaluation / [04 Lab 13](04-runtime-labs.md) | [publish_version](../../packages/evaluation/service.py)→[finalize_experiment](../../packages/evaluation/experiments.py)→runner | 隔离小型 DEV fixture 的草稿/变体（不用 HOLDOUT 调参） | 发布不可变数据与冻结输入身份、失败记录 | 不改冻结实验，下一实验新草稿；停 worker 后移除临时配置 | 解释合成业务实验、脚本消费者、真实 LLM/真人证据的区别 |
 
----
+## 隔离与成本
 
-## 每章的固定骨架
+完整启动参考 [Hero Demo §0](../report/07-现场演示脚本.md#0-实际启动条件与安全范围)。必须先准备独立数据库、Redis namespace、blob 路径和 lab 工作区，再运行迁移/checkpoint setup。API/worker 使用同一 lab 配置，测试目标也单独命名；不能把默认开发库“可以随便改坏”作为安全依据。
 
-前三章负责建立代码和领域模型；第四章中的**每个实验**按下面的结构执行，读的时候不要跳：
+不覆盖共享 `.env`，使用专属终端的环境覆盖/临时启动配置。学完关闭自己创建的进程、移除临时配置/私网开关；保持用户原服务、原配置与历史证据。不要删除共享数据。第一次只做不产生费用的代码/fixture核查；真实模型实验需自行确认预算与凭据。当前任务未运行这些实验。
 
-```
-Before reading   先不看代码，写下你猜它是怎么实现的
-Code reading     打开文件，看实际怎么实现
-Lab              改一个变量
-Observation      记录真实发生了什么（不是你以为会发生什么）
-Explain          为什么要这样设计
-Interview        用两分钟把这件事讲出来
-```
+| 已有教材 | 用法 |
+| --- | --- |
+| [01-codebase-navigation](01-codebase-navigation.md) | 文件地图与断点；按函数名找当前代码 |
+| [02-one-run-end-to-end](02-one-run-end-to-end.md) | 单次调查/审批链，补查流式入口 |
+| [03-domain-model-lifecycle](03-domain-model-lifecycle.md) | 对象可变/不可变与保留语义 |
+| [04-runtime-labs](04-runtime-labs.md) | 具体实验步骤；应用本页隔离要求与当前边界，旧时间/行号仅参考 |
 
-**Before reading 那一步不能跳。**
-它的价值不在于猜对，而在于猜错时你会记住落差在哪。
-直接看答案的记忆留存率，和看完一篇博客差不多——大约一周。
+## 如何证明自己理解了
 
-**Observation 那一步要写真实结果。**
-如果你改了 `effect=WRITE` 但 Run 没有停下来，
-那说明你改的位置不对（很可能改了 `Tool` 而不是新建 `ToolRevision`），
-这个「没停下来」比「停下来了」信息量更大。
+每个阶段写六行：预测、实际调用链、变量、观察、恢复、剩余疑问。能在不读答案的情况下解释一个失败分支，并找到函数与历史证据，才开始用 [求职讲述](../portfolio/README.md)。未完成的实验保持未执行；不因教材齐全就说“已掌握全部代码”。
 
----
-
-## 推荐学习顺序（七阶段）
-
-```
-阶段 1  01 全文 + 02 §1~§4          建立「一次 Run 走过哪些函数」的骨架
-阶段 2  02 §5~§9 + 04 Lab 1 / Lab 2  把审批那一段亲手打断一次
-阶段 3  03 全文                      把骨架挂到数据库上
-阶段 4  04 Lab 3 ~ Lab 6             预算、失败、恢复三类边界
-阶段 5  04 Lab 7 ~ Lab 10            知识与 MCP（不是正式评测）
-阶段 6  04 Lab 11 ~ Lab 12           记忆的选择与冻结、检索模型的预热
-阶段 7  04 Lab 13                    数据集 → 变体 → 实验冻结 → Run → 指标
-阶段 8  回到 docs/report/03 和 08     此时那两章会变得很好读
-```
-
-阶段 6 配套读 [`docs/report/19-长期记忆与上下文管理实施报告.md`](../report/19-长期记忆与上下文管理实施报告.md)
-和 [`docs/adr/ADR-011-memory-must-be-snapshotted.md`](../adr/ADR-011-memory-must-be-snapshotted.md)。
-这两份解释的是同一件事：记忆是 Run 的**输入**，输入必须在第一次 PREPARE 时冻结。
-
-阶段 8 不是凑数。`docs/report/03-核心机制详解.md` 里有 15 个技术机制，
-第一次读的时候它们是 11 条并列的结论；
-走完前六个阶段之后再读，它们会变成 11 个你已经亲手碰过的位置。
-
----
-
-## 环境准备
-
-四章的所有实验都需要服务起着。启动清单在
-[`docs/report/07-现场演示脚本.md` §0](../report/07-现场演示脚本.md)，
-这里只补两条实验专用的：
-
-1. **准备一个可以随便改坏的 Agent。** 不要拿 `Research Assistant` 做实验——
-   它有 8 个版本、被截图文档引用过。新建一个，名字里带 `lab-`。
-2. **实验的产物是 Run 记录，不要删。** 04 章多个实验要求你回头对比
-   「改之前那次 Run」和「改之后那次 Run」，删了就没得比。
-
-实验会写数据库。这是本机开发库，没关系——
-但不要在实验里去动 `.env`，几乎所有可调的东西都能从界面或 API 改——
-只有两个进程级开关是例外，04 章 §0 列了它们。
-
----
-
-## 明确**没有**写的部分，以及为什么
-
-学习文档最容易犯的错误就是一口气铺十章然后没人读完。
-下面七份是想清楚了但**故意押后**的：
-
-| 计划中的文件 | 覆盖什么 | 为什么现在不写 |
-|---|---|---|
-| `05-knowledge-pipeline-lab.md` | 上传 → 解析 → 分块 → 嵌入 → 索引 → 快照 → 检索四阶段 | 依赖 01/02 建立的「工具怎么被调用」骨架；`search_knowledge` 只是一个普通 READ 工具，不先懂工具就会把 RAG 学成孤岛。**04 章 Lab 8 先给了一个入口** |
-| `06-mcp-and-tool-governance.md` | 连接生命周期、凭据加密、SSRF、发现与导入 | 01 章已给出全部入口和行号，够查了。单独成章要等真正去改 `client.py` 的时候 |
-| `07-evaluation-from-production.md` | 从 Run 导入评估集、实验、消融、发布门禁 | 评估平台目前 0 条门禁策略在跑，写实验手册会变成写使用说明书 |
-| `08-applications-as-proof.md` | 四个应用如何证明「加一个应用改 0 行运行时」 | 这是**论证**不是**学习**，属于 `docs/report/04`，重写一遍是冗余 |
-| `09-failure-casebook.md` | 失败码逐条：怎么复现、怎么读、该怎么处理 | 04 章已经用实验覆盖了最重要的五类（成本、上下文、UNKNOWN_OUTCOME、断流，以及**未预热的冷进程**第一次 `search_knowledge` 超时——本机 BGE-M3 + cross-encoder 冷加载约 35s，工具预算 30s；`knowledge_warm_models_on_start` 默认 False。开关定义在 `packages/core/config/settings.py`，成因见 `packages/knowledge/composition.py` 的 docstring）。剩下的等实验里真撞到再补，凭想象编案例没有价值 |
-| `10-resume-extraction.md` | 从项目里提炼简历条目 | **现在不该写。** 简历句子是学习的副产品，不是学习的目标；先写它会让人去背结论而不是读代码 |
-| `11-long-term-memory.md` | 长期记忆：抽取 → 写入闸门 → 选择 → 冻结 → 注入 | **不单独成章，故意的。** 长期记忆已经是上线子系统，它不是一条并行支线，而是一次 Run 的组成部分——单独成章会让人以为「记忆」是可以脱离 Run 学的。它被**内联**进了：01 章 §11（代码地图）、02 章 §4（prepare 的第 4 件事）、03 章 §9（`WorkspaceMemory` 与 `effective_memory_snapshot` 的生命周期）、04 章 Lab 11（在审批中途把记忆作废） |
-
-如果某一天要补，优先级是 `05 → 09 → 06`：
-`05` 排第一没变；`09` 提前，是因为记忆和检索预热各自贡献了一类新的真实失败，
-失败码手册现在有足够的真实素材了，而 MCP 那一章仍然缺「真的去改 `client.py`」这个触发条件。
-触发条件应该是「我在做那件事的时候发现缺手册」，不是「目录看起来不齐」。
-
----
-
-## 一句话
-
-**报告证明这个项目成立；这个目录让你成立。**
+[Memory 最新质量边界](../reviews/AgentHub-closure-memory-quality-20261005.md)：默认关闭与冻结机制已存在，但临时/私人/恶意语义拒写仍依赖 prompt，5/8 禁止召回场景准入，真实复杂 USE 未测。不要把教材中的预期当作保证。
