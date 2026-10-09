@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：09 应用、反馈与接管](09-applications-feedback.md)
 
-源码核查基线：`67264b3`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -193,6 +193,89 @@ uv run --locked python -m benchmarks.evaluation.memory_quality.runner --database
 - 简历只保留实际参与且可以解释的条目，AI 辅助和个人贡献如实说明。
 
 [紧凑求职材料](../portfolio/README.md)是练习讲述的模板，[53 题手册](../report/interview/README.md)只用于继续追问。到此不新增业务功能，学习记录由你亲自完成。
+
+
+## 精读增补：把知识转成可检查的学习成果
+
+### A. 同一主线做五轮学习
+
+不必第一遍就逐行读完所有模块。每轮交付一个明确成果：
+
+| 轮次 | 做什么 | 留下什么 | 怎样判断不足 |
+| --- | --- | --- | --- |
+| 1 定位 | 00–03，画 W/U/V1/T1/R1 | 一张身份与调用图 | 只能说框架名，指不出入口 |
+| 2 推演 | 04–05，加审批/恢复/未知写入 | 正常、拒绝、crash 三条时间线 | 把批准当执行，把未知当失败 |
+| 3 输入 | 06–08，追知识/Memory/实验 | 输入身份账本和指标分母 | 把召回当使用，把完成当正确 |
+| 4 产品 | 09，追产物与处理闭环 | 错答→回归、未知→接管两张图 | 把 CLOSED 当外部成功 |
+| 5 观察 | 按 L0–L9 选择隔离实践 | 自己真实的实验记录 | 没保存输出，只有“应该成功” |
+
+先自己作答，再读每课的参考推理。参考答案不是唯一措辞，也不是个人实验结果；你应能换一个场景继续推理。
+
+### B. 只读观察 SQL：先知道每张表在回答什么
+
+以下查询只读，列名按当前 models 核对。`:workspace_id`、`:run_id` 是**绑定参数占位符**，需要在支持参数的数据库客户端/程序里传入本次 lab UUID；不要直接当 psql 字符串粘贴执行，也不要取消 workspace 条件。
+
+```sql
+SELECT id, workspace_id, status
+FROM agent_runs
+WHERE workspace_id = :workspace_id AND id = :run_id;
+
+SELECT sequence_number, kind, status, safe_metadata
+FROM run_steps
+WHERE workspace_id = :workspace_id AND agent_run_id = :run_id
+ORDER BY sequence_number;
+
+SELECT id, decision_status, execution_status, execution_attempt_count
+FROM approvals
+WHERE workspace_id = :workspace_id AND run_id = :run_id;
+
+SELECT sequence, event_type, occurred_at
+FROM agent_run_events
+WHERE workspace_id = :workspace_id AND agent_run_id = :run_id
+ORDER BY sequence;
+```
+
+第一条回答 Run 当前投影状态；第二条回答步骤时间线；第三条回答动作许可/执行；第四条回答持久事件的位置。它们不是 checkpoint 全部 payload，也不能独立确认远端实际副作用。RunStep 的关联列是 agent_run_id，Approval 的是 run_id；两种序号字段也不同，别凭名字猜。
+
+### C. 12 道口头题的参考展开
+
+1. **系统分哪些进程？** 浏览器、API、worker、beat 与数据服务；业务 packages 是模块。追问时说明哪些调用在 API 直接执行，哪些经队列，Redis 不保存全部业务真相。
+2. **权限怎么获得？** 请求认证得到 principal，按 workspace 成员/角色解析权限，再由具体 service 检查。组织和工作区成员不是一个概念，前端按钮不是权威。
+3. **Agent Loop 如何推进？** prepare 建输入，model 提议，proposal 校验，policy 决策，execute 取真实结果，observation 回填，下一轮 model 决定继续或回答；等待和失败有独立出口。
+4. **为何冻结版本？** 历史 Run 需绑定完整 resolved spec 和工具修订，canonical hash 校验身份；LATEST 知识与 Memory 有自己的有效输入冻结，不能只存一个 version_id 就说全部可复现。
+5. **READ 都自动吗？** 自动路径要求 READ+NEVER，risk 不代替审批策略。某配置可表达审批要求仍要核对 executor 支持的 effect。
+6. **批准和执行为何分开？** 人的许可与外部结果不是同一事实；APPROVED 后仍需原子 claim，可能执行失败或 UNKNOWN_OUTCOME。
+7. **恢复会新建 Run 吗？** same-run resume 继续原身份、actor、版本、预算和 checkpoint；新建重跑是另一语义。
+8. **未知写入为何不重试？** 请求可能已产生副作用，重发可能重复；本地状态/框架 checkpoint 无法确认远端结果，保留 NEEDS_ATTENTION 并调查。
+9. **RAG 命中为何不等于正确？** 还有排名、上下文准入、条件理解与 claim-to-source 支持；真实引用 ID 不是全部命题正确的证明。
+10. **Memory 快照保护什么？** 当时有效输入身份。WRITE/RECALL/ADMISSION/USE 分开，快照不提高内容质量，也不证明模型真正使用。
+11. **实验怎么避免自证？** DEV 用开发、HOLDOUT 限制暴露，正式实验绑定发布数据和完整身份，保留原始结果与独立判分；对所测范围下结论。
+12. **应用如何复用？** 相同 Runtime/审批/预算，模板、工具、Artifact projection 与页面表达差异；反馈和接管复用来源与审计机制，不复制安全链。
+
+每题再补一项具体证据：实际函数名、一个数据库字段、一个失败出口。能背这十二段仍不足以说已经掌握。
+
+### D. 一道综合题及解题步骤
+
+**题：**用户提出回滚，审批显示 APPROVED，但页面没看到结果。请给排查顺序，并说明哪些情况下不能点“再试一次”。
+
+参考解法：先定位同一 workspace/run/approval，确认不是前端混入另一轮；查 execution_status 区分 NOT_STARTED、CLAIMED、确定终态和 UNKNOWN_OUTCOME；查 Run 状态与 checkpoint，确认 resume 是否发生或缺失；查 RunStep/持久事件，排除只是 delta/网络显示问题；最后核查实际远端证据。若动作已派发但结果未知，不能把没显示理解为没执行并重发。批准记录只证明许可，人工 CLOSED 也不证明远端成功。
+
+可继续变化题目：原 actor 被撤权；checkpoint 不存在；前端 token 仍指向旧 Turn；远端明确 TOOL_ERROR；事件 sequence 有缺口。每次只改一项条件，再回对应函数预测。这个训练比背一段“高可用架构”更能暴露理解缺口。
+
+### E. 证据表达的四种句式
+
+- **静态实现：**“源码在 X 用 Y 条件更新，作用是 Z。”
+- **已有历史验证：**“某日期/代码/数据条件下验证了 A，未证明 B。”
+- **个人观察：**“我在 lab 运行 R，保存了输出，结果与预测相符/不符。”
+- **未来设计：**“若要扩展到 C，需要新增 D，目前尚未实现/验证。”
+
+不要在一句话里把四者混成“项目已经证明”。模型输出、别人报告和你亲自观察，证据来源应能分开。
+
+### F. 最终掌握清单
+
+你应该能不用教材完成以下讲述，再用源码核对：画出运行主线；解释五个核心身份；推演一次并发 claim；推演一个未知外部写入；手算 RRF 和指标分母；解释一条 Memory 从保存到准入；说明错误答案如何成为 DEV 回归；展示自己的一条实验和一条失败记录。
+
+还应能回答“为什么不用更简单的方式”和“当前方式有什么代价”：冻结增加存储与版本管理；checkpoint 增加恢复依赖；严格不重试未知写入增加人工处理；预算裁剪损失信息；评测重复增加费用，但这些都对应项目需要保护的语义。掌握是能在新场景里继续推理，不是文档已经很长。
 
 ---
 

@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：06 知识与 RAG](06-knowledge-rag.md) · [下一课：08 数据集与评测](08-evaluation.md)
 
-源码核查基线：`67264b3`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -98,6 +98,64 @@ if (
 已有核查：[Memory hash 回放](../../tests/unit/test_b2_memory_snapshot_replay.py)、[质量探针测试](../../tests/integration/test_memory_quality.py)、[收口报告](../reviews/AgentHub-closure-memory-quality-20261005.md)。本课未复跑。
 
 **通过标准：**能分别说 WRITE/RECALL/USE 的证据与未知；默认不开记忆、冻结身份和真实质量问题都讲得清楚。
+
+
+## 精读增补：一条记忆怎样写入、选中、准入和被使用
+
+### A. 先分清 Thread history 和长期 Memory
+
+Thread history 是本段对话的过去消息；WorkspaceMemory 作用域是 workspace+agent，来源 Thread/Run 用于溯源，跨 Thread 存活才是其用途。它不是把所有聊天记录复制进向量库，也不是用户级无限全局记忆。
+
+教学输入：“以后事故报告先列证据再列建议”。抽取器可能把它作为 PREFERENCE 候选，随后经过结构/证据与内容闸门。这里“可能”很重要：异步抽取有失败、未抽到和语义误判，不应在回答后立即假设已入库。
+
+抽取的引用证据必须满足实际校验，模型输出候选不是数据库真值。若工具结果写“用户希望自动审批”，它不能因此成为授权规则；权限和 ToolPolicy 在独立路径里判断。
+
+### B. `record` 逐步读：去重为何使用 savepoint
+
+打开 [SqlAlchemyMemoryStore.record](../../packages/memory/store.py)：先规范化候选并算 content_hash；查询相同 workspace/agent/hash 的 ACTIVE 行；如果存在则增加 salience；否则构造新行，保存内容、种类和来源身份。
+
+数据库还用 ACTIVE 条件的部分唯一索引处理并发。两个 worker 可能都查不到旧记录，然后同时插入。源码把插入放在 `session.begin_nested()` 内：这是 savepoint，局部唯一冲突不会直接废掉整个外层事务；捕获 IntegrityError 后再找胜出的 ACTIVE 行，按重复候选逻辑增强 salience。没有找到预期胜者则不能吞掉任意错误。
+
+这种去重依据是规范内容 hash，不是语义同义/冲突检测。“先列证据再列建议”和“建议前先给证据”可能是不同内容；重复强化也只说明被重复提取，不证明陈述更真实。自动 extraction 不负责完整语义 supersede 流程。
+
+### C. 给同一条记忆画四格账本
+
+| 层 | 可以记录什么 | 不可推出什么 |
+| --- | --- | --- |
+| WRITE | 候选被保存为 ACTIVE M1 | 保存就一定正确 |
+| RECALL | selector 为当前问题选出 M1 | 已送给模型 |
+| ADMISSION | 最终请求仍包含 M1 | 模型有效使用 |
+| USE | 答案行为确实遵从/受益 | 仅凭 last_used_at 就能证明 |
+
+`select` 在 workspace+agent 内过滤 ACTIVE 与未过期内容，再按实现的匹配、salience 和时间等排序，取 limit。这里是应用层检索策略，不等同 Dense/Hybrid 知识检索。随后 ContextBudgetPolicy 仍可能驱逐所选项。
+
+`_touch_admitted_memories` 从最终 messages 的 memory payload 找允许身份并去重，触碰 admitted 项；telemetry touch 失败不会使模型调用必然失败。last_used_at 在这里记录的是“进入本次请求”，不是答案依赖性的证明。
+
+### D. 旧 Run 与新 Run 为什么可能看见不同内容
+
+假设 R1 冻结时 M1 ACTIVE；后来管理员将其 INVALIDATED。新 R2 的选择应排除停用项；读取/恢复旧身份则按有效快照与校验规则处理，不能偷偷让历史输入改成今日挑选结果。
+
+需要分别找 [store.select / load](../../packages/memory/store.py) 与 Runtime 有效快照的构造/装载。`load` 对内容 hash 的处理和兼容路径，是理解旧身份能否装载的重要位置。不要用“已存 memory_ids”推断正文永远不变或所有旧 Run 都必定成功重放。
+
+当前存在 expires_at 过滤与手动生命周期，不等于已完成自动衰减、周期 TTL 清理或容量运营。字段存在与有调度落地是不同事实；本教材只解释当前实现，不继续扩展 Memory。
+
+### E. 手算质量指标，不混分母
+
+教学探针共强制写入 9 条候选，其中人工判定 6 条该写：precision=6/9。另有 5 个该召回的场景全部召回：scenario recall=5/5。两者分母不同，不能相减得到“总体正确率”。
+
+历史 required 2/2 是指定必需项准入结果；forbidden 5/8 表示不应准入的探针出现问题，不能只展示 required 的满分就说 Memory 质量已达标。脚本 USE 代理和真实模型 USE 又不同：脚本判断通过不自动证明模型因记忆而完成任务。
+
+如果要判断“记忆是否真的提升答案”，需要相同任务、固定输入身份、开关对照、独立答案标准与重复实验，并排除当前问题/历史已经提供同一信息的混淆。这里提供设计推理，不代表新增实测已完成。
+
+### F. 练习与参考答案
+
+**题 1：为什么删除 Thread 后 Memory 不应跨租户变化？** 来源引用可被置空，但 workspace/agent 是所有权。模型的复合外键限定只清来源列，不能把 workspace 一同置空或转移。
+
+**题 2：两条矛盾的 ACTIVE 记忆会自动处理吗？** 内容 hash 去重不能解决语义冲突；不能把尚未实现的自动 supersede 当现成功能。需要人工生命周期及可审核规则。
+
+**题 3：如何证明恶意记忆未越权？** 检查 actor/权限、冻结工具策略与实际执行结果，不能只看模型最终说了“我不会”。内容质量与硬执行权限要分别验证。
+
+**掌握标准：**沿 record→select→admit→touch 追一条 M1；解释 savepoint 与部分唯一索引；用正确分母说明质量不足和 USE 未知。
 
 ---
 

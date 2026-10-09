@@ -95,6 +95,7 @@ Research（文献证据）、Incident（调查与受控回滚）、Data Analyst�
 ## Quick Start & Documentation
 
 - 最小展示：阅读 [Demo](docs/report/07-现场演示脚本.md)与历史截图、运行源码走读，无需模型密钥。
+- 系统学习：从 [00 · 架构](docs/learning/00-architecture-first.md)顺读 11 课，结合源码拆解、状态推演、手算例题与参考答案；最后按隔离实验指南留下自己的观察记录。
 - 本机业务运行：以下完整依赖启动；模型凭据、发布 Agent、工具导入仍须配置。
 - Hero Demo：独立 lab 数据库/Redis namespace/blob、显式 checkpoint bootstrap、Ops MCP 与有效工具调用模型；不自动建立所有配置。
 - CI：工作流使用自己的集成依赖，见 [workflow](.github/workflows/ci.yml)，与付费业务实验分开。

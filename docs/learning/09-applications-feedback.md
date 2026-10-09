@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：08 数据集与评测](08-evaluation.md) · [下一课：10 实践与面试验收](10-runtime-labs.md)
 
-源码核查基线：`67264b3`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -108,6 +108,63 @@ SSE 客户端处理 run.started、message.delta、停止与错误；流式文本
 已有核查：[feedback/evidence 集成](../../tests/integration/test_mi2_feedback_evidence.py)、[handoff 生命周期](../../tests/integration/test_handoff_lifecycle.py)、[M-I5 报告](../reviews/AgentHub-面试增强M-I5验收报告-20261003.md)。本课未执行。
 
 **通过标准：**说明应用复用、产物来源、反馈回归与接管闭环，并区分用户可见状态与真实执行结果。
+
+
+## 精读增补：从一次执行结果走到用户处理闭环
+
+### A. 应用复用具体复用哪些东西
+
+Research、Incident、Data Analyst、Customer Support 使用相同的运行时执行、工具治理、审批恢复和预算接口；模板与工具组合决定任务差异，Artifact projection 和页面决定结果如何呈现。复用的是稳定机制，不是要求四种任务必须有同样的工具/卡片。
+
+加入一个新应用时，先问已有模板、工具契约、投影和会话组件能否表达它。若每个应用复制审批代码，就会出现某处修复并发、其他处仍有漏洞。共用机制使安全修复有统一入口，也要求契约稳定、应用差异不要硬塞进通用 Runtime 条件分支。
+
+### B. Artifact 为什么不是模型一句总结
+
+教学场景：指标 READ 返回服务、时间窗、错误率序列。模型解释“发布后出现异常”；projection 可以把合法的结构结果转换为来源可追踪的事故证据卡。卡片的具体字段必须来自合法记录与投影契约，不能因为文案说有证据就伪造一份图表。
+
+`ToolResultArtifactRecorder._build` 依次调用 projections，首个非 None 结果胜出。增加投影时要考虑匹配范围和顺序；两个投影认领同一工具会让先后顺序改变产物。未识别、结构不合格或记录失败的路径应按实际实现解释，不假设全部结果都生成卡片。
+
+Artifact 记录来源 Run/Thread；内容 hash 用于识别证据版本。用户操作和生命周期因类型而异，因此“产物来源受控”不等于“所有产物从来不能修改”。阅读对应服务，区分原始证据、投影与用户整理层。
+
+### C. 错答案怎样变成 DEV 回归
+
+设客服 R1 错答退款期限。人工提交纠正→审核批准→导入新的 DEV 草稿→发布新的 DatasetVersion→构造比较实验。这条链保存的是错误、纠正与审核来源，不是直接修改 R1 的历史输出或已经发布的参考答案。
+
+打开 [FeedbackService.import_dev](../../packages/feedback/service.py) 逐项检查：
+
+1. 锁定反馈，确保 review version 与 content revision 的状态可信。
+2. request hash 绑定导入目标、基版本、预期审核版本和内容修订；已导入且 hash 相同可以复用结果，变更目标则冲突。
+3. 状态必须 APPROVED、审核版本匹配，并且 corrected_answer 存在。
+4. 基数据版本要属于当前 workspace/dataset；其 split 集合必须恰好是 DEV，混入 HOLDOUT 也不允许。
+5. 创建新数据草稿，原发布版保留。后续发布和正式评测是另外的动作。
+
+这解释了为什么“审核通过”还不等于“已成为正式回归”：中间还有导入、发布和实验冻结。
+
+### D. expected_version 与行锁怎样配合
+
+Handoff 面向人工案件，版本用于防止过期页面覆盖他人操作。教学时间线：甲打开案件版本 1，乙将其分配后版本变 2；甲仍提交 expected_version=1，正常状态变更会收到版本冲突，应刷新而不是强行覆盖。
+
+在 [HandoffService.change](../../packages/handoffs/service.py) 中，先检查对应权限，再按 workspace 锁定行，比较 expected_version，验证状态与操作者。行锁序列化同一行的并发更新，expected_version 则表达客户端是否基于最新信息，两者不是重复设计。
+
+当前 close 有特殊幂等分支：同一 actor、expected_version 与 payload 形成的关闭请求 hash 若已成功保存，重发相同请求可返回原 CLOSED 记录，检查顺序在普通版本冲突之前。不能概括为“任何旧版本都必定冲突”；其他操作或变更 payload 仍按实际状态/版本约束处理。
+
+关闭还要求案件已 IN_PROGRESS 且由当前 claimant 处理，保留关闭理由与未解决项。CLOSED 是人工流程结束，不改变原 Approval 的执行证据，不确认 UNKNOWN_OUTCOME，不自动重试外部动作。
+
+### E. 前端要读两层事实
+
+message.delta 是临时流式文本，Run 最终输出是持久结果；审批卡的 APPROVED 是决定，execution_status 是实际动作结果；Handoff CLOSED 是运营状态，原 Run 仍可能 NEEDS_ATTENTION。把两层事实合并成一个绿色“成功”会误导用户。
+
+遇到停止生成，前端要发送取消请求/中断本地流并正确处理 token；网络失败需要保存可重试关联信息。遇到角色变化，UI 提示方便用户理解，但最终操作仍由后端即时判断。
+
+### F. 练习与参考答案
+
+**题 1：纠正直接改历史输出不是更方便吗？** 会丢失原错误证据，影响评分、审计和故障复盘；应该追加反馈并建立新的回归身份。
+
+**题 2：两次关闭按钮请求为何有时不冲突？** 完全相同且已完成的 close 可走幂等 hash 分支；不同请求不能据此复用旧结果。
+
+**题 3：为什么评测改进还要保留原错误 case？** 需要证明修改前后的可比性，并持续防止回归；但用它开发后不再将其当全新 HOLDOUT。
+
+**掌握标准：**解释一次 Run 怎样形成 Artifact、Feedback、DEV 和 Handoff；说清每份记录的状态、来源与不可替代的职责。
 
 ---
 

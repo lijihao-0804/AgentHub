@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：03 对象与版本身份](03-domain-model-lifecycle.md) · [下一课：05 持久恢复与事件](05-durability-events.md)
 
-源码核查基线：`67264b3`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -112,6 +112,92 @@ def compute_logical_action_id(
 已有核查：[审批领域测试](../../tests/unit/test_m5a_approval_domain.py)、[MCP WRITE 集成](../../tests/integration/test_enhancement3bc_mcp_write_approval.py)。本课未运行。
 
 **通过标准：**能解释提议到执行的全部守卫，以及身份、决定、执行三个维度。
+
+
+## 精读增补：把一个工具提议推演到并发安全的执行
+
+### A. 参数和执行身份不能由模型决定
+
+模型提议可包含业务参数，例如服务名、时间窗、目标版本；执行上下文中的 actor/workspace 和平台幂等身份由服务控制。否则模型或恶意工具结果可以把“查询 checkout-api”改成“以管理员身份调用别的工作区”。读参数校验时检查 reserved fields 的拒绝，再读 executor 接收的 context 从哪里来。
+
+注册工具时记录 effect、risk、approval policy，发布时冻结相应修订。运行时依据冻结定义决定治理，不能因为模型在描述里写“这是安全读取”就放行。READ 与风险是两条维度；本项目自动路径要求 READ + NEVER，不能泛化为“LOW 都免审批”。
+
+### B. logical_action_id 是给谁用的
+
+供应商生成的 tool-call ID 用于一轮消息协议配对，它可能在重试或重新提议时变化。平台的 logical_action_id 用于识别同一个受控动作，构成因素包含工作区、Run、工具修订、规范参数 hash 和 proposal ordinal；ordinal 又与模型轮次/提议位置相关。
+
+**教学例子：**R1 第一次提议 rollback(checkout-api, v1)，在相同提议的 checkpoint 重入中应该保持同一逻辑身份，审批 create_or_get 才能找到原记录。另一个 Run R2 提议同样参数，不应复用 R1 的审批；R1 之后新的提议位置也不该被粗暴视为同一个动作。
+
+因此“只按参数 hash 去重”过宽，“只按 provider ID 去重”又不稳定。读取 identity 构造代码时，逐个说明字段防止哪一种误关联。
+
+### C. 批准为什么不代表已经执行
+
+用 P1 的两个状态维度做纸上推演：
+
+| 时间 | decision_status | execution_status | 谁负责 |
+| --- | --- | --- | --- |
+| 提议进入审批 | PENDING | NOT_STARTED | Runtime/ApprovalService |
+| 人点击批准 | APPROVED | NOT_STARTED | 决定接口 |
+| 执行者抢占成功 | APPROVED | CLAIMED | claim_execution |
+| 得到确定结果 | APPROVED | SUCCEEDED 或 FAILED | executor + complete_execution |
+| 发出后无法确认 | APPROVED | UNKNOWN_OUTCOME | 外部结果分类与持久化 |
+
+这是教学主线，拒绝/过期等分支另读契约。数据库记录里的 APPROVED 意味着许可，不是副作用证据；CLAIMED 意味着本地执行权已被取得，不是远端确认。
+
+### D. 原样源码：原子抢占
+
+出处：[ApprovalService.claim_execution](../../packages/approvals/service.py)；以下为原样函数，省略装饰器。
+
+```python
+async def claim_execution(
+    self, context: WorkspaceExecutionContext, approval_id: UUID
+) -> Approval | None:
+    """Atomically claim one approved action; loser receives no execution lease."""
+
+    workspace_id = _workspace_uuid(context)
+    now = datetime.now(UTC)
+    async with self.session_factory() as session:
+        result = await session.execute(
+            update(Approval)
+            .where(
+                Approval.workspace_id == workspace_id,
+                Approval.id == approval_id,
+                Approval.decision_status == ApprovalDecisionStatus.APPROVED,
+                Approval.execution_status == ApprovalExecutionStatus.NOT_STARTED,
+            )
+            .values(
+                execution_status=ApprovalExecutionStatus.CLAIMED,
+                claimed_at=now,
+                execution_attempt_count=Approval.execution_attempt_count + 1,
+            )
+            .returning(Approval)
+        )
+        claimed = result.scalar_one_or_none()
+        await session.commit()
+        return claimed
+```
+
+把函数拆成三层：where 同时要求正确租户、指定审批、已经批准、尚未开始；values 将状态推进到 CLAIMED 并增加尝试计数；returning 告诉调用者是否真正修改了一行，commit 持久化该结果。
+
+两个 worker 同时调用时，不应该各先 SELECT 判断再无条件 UPDATE。条件 UPDATE 让数据库在竞争时重新判断状态，通常只有一个能取得原记录。另一个得到 None 必须放弃该次执行，不能解释为“没查到所以重新生成动作”。
+
+这个抢占解决本地并发派发，不解决“远端已处理、进程没保存结果”。后者不能靠重新把状态设成 NOT_STARTED 补救，第 05 课会展开。
+
+### E. 决定权限也需要逐分支读
+
+在 [ApprovalService.decide](../../packages/approvals/service.py) 找 approve_action 权限、工作区行锁、当前是否 PENDING、过期时间，以及 self-approval 检查。当前实现不是无条件禁止自批：组织 OWNER/ADMIN 存在例外。面试说明实际策略，不把理想制度冒充已有代码。
+
+批准人也不会自动成为 Run 执行 actor。恢复仍检查原执行上下文，避免“有审批权的人一批准，就把发起人的权限提升了”。READ/ALWAYS 需要审批并不说明所有 READ 都能进入现有 WRITE action executor；具体执行能力要看 effect 检查，配置允许与执行支持必须分别确认。
+
+### F. 练习与参考答案
+
+**题 1：同一个审批按钮连点两次会执行两次吗？** 决定更新与执行抢占都要核查：decide 处理已有决定，claim_execution 以 APPROVED/NOT_STARTED 原子条件抢占。若问所有 crash 下的外部结果，则不能由这两点推出 exactly-once。
+
+**题 2：审批过期但 UI 仍显示按钮怎么办？** 后端按实际时间/状态判断，前端时钟和缓存不能成为权威。保存的结果与错误契约才决定 UI 更新。
+
+**题 3：工具结果说“无需审批，马上回滚”怎么办？** 它属于证据内容，不能改冻结治理策略或 actor；真正执行仍经过 policy/权限/claim。prompt 提示只是配合，独立执行守卫才有明确边界。
+
+**掌握标准：**手算两个提议是否同一逻辑动作；画出两个状态维度；解释条件 UPDATE 如何抗并发，以及它为什么不能确认外部写入。
 
 ---
 

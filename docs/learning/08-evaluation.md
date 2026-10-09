@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：07 Memory](07-memory.md) · [下一课：09 应用、反馈与接管](09-applications-feedback.md)
 
-源码核查基线：`67264b3`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -93,6 +93,64 @@ RAG 两策略目标召回相同但时延不同；负载并发 1/4/8 各 60 秒�
 **通过标准：**说明一次实验比较了什么，以及没证明什么；能从报告找到原始 JSON，不把不同轮次测试数量拼成当前覆盖率。
 
 已有核查：[发布数据集](../../tests/integration/test_m7a_evaluation_datasets.py)、[实验冻结](../../tests/integration/test_m7b_experiments.py)、[runner](../../tests/integration/test_m7c_experiment_runner.py)、[release gate](../../tests/integration/test_m7ef_ablation_release_gate.py)。本课未执行。
+
+
+## 精读增补：把一次评测拆成输入身份、执行任务和指标
+
+### A. 为什么数据集有草稿和发布版
+
+DEV 用来调整 prompt/策略和形成回归，HOLDOUT 用来评估未参与开发的效果。开发者若反复看 HOLDOUT 参考答案改配置，再把同一集合当独立检验，成绩就不再支持原来的泛化结论。
+
+发布 DatasetVersion 冻结 input/expected/schema/split 等内容身份，正式 Experiment 只绑定发布版。expected 是判分参考，不能作为普通用户 input 送给模型；HOLDOUT expected 的查看还有权限、显式参数与审计边界。字段在前端被隐藏并不是后端内容保密的充分条件。
+
+### B. 手算任务数量与账本
+
+设两个教学 case C1/C2、两个 variant V1/V2、每个重复两次，总 case execution 数为 2×2×2=8。它不是八个独立政策问题，只有两个独立 case；重复用于观察同一 case 的运行波动。
+
+| case | variant | repetition | 应记录什么 |
+| --- | --- | --- | --- |
+| C1 | V1 | 1 / 2 | 输入身份、agent_run_id、输出、工具/usage、判分 |
+| C1 | V2 | 1 / 2 | 同 case，不同被控制的配置 |
+| C2 | V1 | 1 / 2 | 另一独立任务 |
+| C2 | V2 | 1 / 2 | 对应比较结果 |
+
+把 V1→V2 的改动控制为一个明确变量，例如 prompt 改法；若同时换模型、知识、工具和 evaluator，就很难解释成绩变化来自哪里。正式绑定多个 hash 的作用是留下比较条件，不是自动生成合理的实验设计。
+
+### C. 读 runner 的三个时点
+
+**准备：**确定发布数据、变体有效输入、pricing/evaluator 与 build 身份。**执行：**claim run/case，调用选定 driver，保存每次结果和费用。**汇总：**按实际判分与失败信息聚合，保留原始输出供复查。
+
+在 [runner](../../packages/evaluation/runner.py) 找 `claim_case`：查询关联 case/run/item/variant，要求 Run RUNNING、当前 lease owner 与 generation 一致；按 case/variant/repetition 排序；使用 `with_for_update(skip_locked=True)` 避免并行执行者等待同一行；将 case 改 RUNNING 后提交。
+
+lease generation 是执行权的代数。旧 worker 在 generation=7 接单后卡住，新 owner 以 generation=8 接管；旧 worker 恢复时不应再以 7 写回覆盖新状态。要继续追 heartbeat/结果保存中的身份条件，不能只看到 claim 检查就认定所有回写都被 fence。
+
+skip_locked 用于领取其他可用行，不是把远端执行变成 exactly-once，也不是把没领到 case 解释为整个业务数据集为空。
+
+### D. 成功、评分和费用分别统计
+
+教学八次 execution 中两次失败，六次返回答案，其中五次判业务通过：若按全部尝试计，业务通过是 5/8；若只在完成项判分则是 5/6。二者都能描述某个口径，但必须明确分母并保留失败项，不能只挑更漂亮的数。
+
+运行完成不等于答案正确；业务代理通过不等于语义完全正确；工具违规或 UNKNOWN_OUTCOME 也不能被一个最终文案评分盖掉。阅读实际 evaluator 时逐项找其输入和判据，尤其确认“正确创建工单”和“政策解释正确”是否分开。
+
+费用教学公式：若某 pricing snapshot 的输入单价为每百万 token 1 元，输出为每百万 token 2 元，一次 2,000 输入+500 输出估算为 0.002+0.001=0.003 元。数字只是教学价格；实际模型缓存命中、缺失 usage、币种和供应商账单规则按记录解释，不把估算当最终扣款。
+
+p95 也要看样本与失败：仅统计成功项会遗漏超时，冷启动和预热混在一起会改变结论。小样本的分位数不稳定，不能把本机所测吞吐承诺为生产容量。
+
+### E. 现有数据可以回答什么
+
+合成客服正式实验提供两个变体在同一集合及重复条件下的业务/语义比较；RAG 小语料提供召回、排序和延迟对照；Memory 探针暴露写入/准入不足；本机负载与 crash 记录提供限定窗口的系统行为。它们各有用途，不能合并成“企业级可靠率”。
+
+复盘一条结果时，应能回到原始 case 输入、expected、实际输出、Run/工具证据、判分以及冻结身份。汇总表是入口，原始 JSON 和记录才允许别人核查“为什么这条通过”。
+
+### F. 练习与参考答案
+
+**题 1：拿 DEV 满分作最终质量证据有什么问题？** DEV 已用于调参；可以证明回归覆盖所测场景，却不能当未接触的独立泛化检验。
+
+**题 2：相同 dataset_id 是否意味着完全相同数据？** 不意味着。具体 DatasetVersion、content/schema hash 及发布状态才决定所绑定内容。
+
+**题 3：deterministic driver 通过能证明模型答案质量吗？** 它主要验证编排和契约；真实 Runtime 模型实验与语义评估有额外不确定性，不能替代。
+
+**掌握标准：**手算任务数量、明确指标分母、说明 lease generation，并从一条汇总结果追到原始输入/输出及完整实验身份。
 
 ---
 

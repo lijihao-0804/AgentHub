@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：01 HTTP 与执行入口](01-codebase-navigation.md) · [下一课：03 对象与版本身份](03-domain-model-lifecycle.md)
 
-源码核查基线：`67264b3`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -133,6 +133,69 @@ READ 结果和 Memory 都属于不可信输入证据；它们不能覆盖 actor�
 已有证据：[上下文预算测试](../../tests/unit/test_m4d_context_budget.py)、[流式预算集成](../../tests/integration/test_m4d_streaming_budget.py)、[失败与流式修复](../reviews/AgentHub-上下文失败与流式修复记录-20261002.md)。本课未重跑。
 
 **通过标准：**找到 `_AgentRunGraph.model` 的最终 ModelRequest，讲出循环停止条件、输入分类和 fallback 边界。下一课学习这些输入身份为何能固定。
+
+
+## 精读增补：跟着一轮模型执行理解每份输入
+
+### A. `prepare` 为什么有三次规格检查
+
+打开 [_AgentRunGraph.prepare](../../packages/agent_runtime/runtime.py)，从查询 AgentVersion 开始读。查询同时带 workspace 和 version ID，先确保拿到当前租户的版本。随后分别检查：
+
+1. **内容自洽：**对 `version.resolved_spec` 重新计算规范 hash，与 `resolved_spec_hash` 比较。hash 字段存在不等于内容没有变化。
+2. **Run 绑定一致：**如果 Run 已有规格 hash，它必须等于该版本的 hash，避免原执行身份与被装载内容错配。
+3. **schema 标记一致：**版本字段 `spec_schema_version` 与规格 JSON 内的 marker 一致，解析还需符合 FrozenAgentSpec 契约。
+
+三者不能互相替代：内容正确却绑定错 Run，仍不能运行；hash 相符但 schema 不符合支持契约，也不能把它当合法规格。错误会记录 PREPARE 失败并进入失败出口，而不是悄悄用最新草稿继续。
+
+查询工具定义的 session 结束后，再准备 Memory 和历史。源码构造的 messages 顺序是运行时策略、冻结 system prompt、记忆消息、历史、当前 user input。开启 thread_history_search 时还会装配内建工具和提示；读代码要留意该功能没有随意新增一个改变系统消息分类的位置。
+
+### B. 用一份消息账本理解 model
+
+以下是**教学账本，不是供应商请求抓包**：
+
+| 初始顺序 | 内容 | 信任/预算含义 |
+| --- | --- | --- |
+| 1 | Runtime 的工具和治理规则 | 项目定义的控制规则 |
+| 2 | V1 冻结的事故调查 prompt | 已发布配置 |
+| 3 | “偏好先给证据，再给结论”记忆 | 低信任证据，不自动提高权限 |
+| 4…n | T 的历史问答 | 有限历史，可以受预算影响 |
+| 最后 | “调查本次错误率升高” | 当前任务输入 |
+
+第一轮模型返回指标查询 call 后，执行得到真实结果；`observation` 将工具结果放回消息链。第二轮模型才能根据结果决定查日志、提出回滚或直接回答。模型自己的“已经回滚”一句话不是工具成功证据；必须以实际 action result 为依据。
+
+在 `_AgentRunGraph.model` 找最终 `ModelRequest`，向上追 `admission`。这是最值得停下来的一处：候选 messages 不等于发送 messages，工具定义也占上下文。只看 prepare 的列表还没有知道模型最终看见什么。
+
+### C. 预算的纸上推演
+
+设某模型上下文容量为 8,000 token，输出预留 1,500，其他策略预留和估算依据以实际配置为准。即使为了讲解暂按可用输入 6,500 算，6,000 token 历史加 2,000 token 工具结果也已经放不下。系统必须按类别/交换组裁剪、驱逐或拒绝，不能等供应商返回超长错误才处理。
+
+这里的数值只是教学假设；估算器不一定等于供应商 tokenizer，输入/输出计费还要看真实 usage。不要把“预算没超”说成实际费用已经精确受控，也不要把驱逐成功说成信息没有损失。
+
+为什么要有 exchange group？工具调用与对应结果需要在协议上配对。如果只删结果而保留调用，可能形成不合法或缺证据的对话。打开 [ContextBudgetPolicy](../../packages/agent_runtime/context_budget.py)，核对组处理和类别策略，再解释具体裁剪行为。
+
+### D. 循环为什么会停
+
+`after_model` 用 `final_output is not None` 判断结束，所以合法的空字符串与完全没有 final_output 不是同一状态。遇到 failure_code 同样走 finish。工具提议则继续进入 proposal/policy。
+
+接下来把守卫按资源分类：模型轮次/调用数、工具调用数、重复提议、执行时间、上下文和费用分别限制不同风险。重复提议守卫防止模型一直重复无效动作；工具数上限防止无限 fan-out；上下文准入防止输入失控。它们不是可以只保留一个的同义字段。
+
+等待审批也是暂停，不是模型已经完成最终回答；取消是用户要求停止，不是供应商失败；未知写入是无法确认副作用，不是普通可重试失败。读 finish 时按这些来源追状态，别把所有非成功都记成 FAILED。
+
+### E. Gateway 与 adapter 的分工
+
+[Gateway](../../packages/model_gateway/gateway.py) 负责执行计划、能力、凭据与重试/fallback 语义；adapter 负责实际供应商协议转换。这样的分工允许 Runtime 只依赖 ModelRequest/Response，但不会自动使不同模型的上下文容量、工具能力和 usage 相同。
+
+流式例子：连接失败且尚未展示内容，可以按策略尝试 fallback；已经展示“错误主要来自…”后断线，再换模型续写会混合两个来源的内容，因此不能透明重来。客户端停止还需要关闭上游资源，不能只隐藏打字动画。
+
+### F. 练习与参考答案
+
+**题 1：返回一个合法 tool call 后，Runtime 可以直接宣布任务成功吗？** 不可以。提议还要经过工具定义、参数、策略、权限、执行和 observation；提议只是模型希望做什么。
+
+**题 2：Memory 选出五条但只准入两条，last_used_at 能否证明用了五条？** 不能。先看最终 ModelRequest 及 `_touch_admitted_memories`，它只追踪实际准入身份；准入两条也不证明模型在答案里有效使用了两条。
+
+**题 3：如何排查“模型明明看到日志却回答错”？** 先确认检索/工具实际结果，再确认准入内容和截断，最后核查 prompt、模型输出与独立语义判定。不要从工具有输出直接跳到“模型已完整看到”。
+
+**掌握标准：**能画出两轮消息变化，指出模型输入最终确定的位置，解释至少三种预算，以及首 token 前后的重试边界。
 
 ---
 

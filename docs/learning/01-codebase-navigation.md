@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：00 架构](00-architecture-first.md) · [下一课：02 Runtime 与模型上下文](02-one-run-end-to-end.md)
 
-源码核查基线：`67264b3`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -103,6 +103,74 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 **通过标准：**从 `stream_turn` 定位真实业务调用；解释工作区权限；画出 Turn/Run 的提交窗口。不能只背“FastAPI + Celery”。
 
 已有核查入口：[租户隔离测试](../../tests/integration/test_interview_tenant_matrix.py)、[ThreadService](../../packages/threads/service.py)。文件存在不等于本轮执行这些测试。
+
+
+## 精读增补：把 HTTP 请求追到一个可恢复的 Turn
+
+### A. 阅读前需要理解的 Python 和数据库语法
+
+`async def` 表示函数返回可等待的协程；`await` 在 I/O 等待时让出执行机会，不代表这一操作自动有事务保护。`async with session_factory() as session` 管理数据库 session 的生命周期；`await session.commit()` 才是提交当前事务。上下文退出不等于业务动作肯定成功。
+
+`select(Model).where(...)` 构造查询，`session.scalar(...)` 执行并取一个标量对象；`update(...).where(...).returning(...)` 可把状态条件与更新合为一个数据库操作。`with_for_update()` 是行锁；唯一约束是数据库对并发写入的最终防线。这些机制解决的问题不同，后面的审批和任务租约会重复用到。
+
+FastAPI 的 dependency 用来解析调用者和装配服务。读函数参数时，不只看请求 body：调用上下文、workspace、service 往往从依赖注入而来。客户端给出的 `workspace_id` 只是请求定位信息，不能自己证明成员资格。
+
+### B. 用五个问题追踪路由
+
+打开 [threads 路由](../../apps/api/routes/threads.py) 与 [ThreadService](../../packages/threads/service.py)，依次找：
+
+| 要找什么 | 看代码中的什么 | 解释给别人听时应说什么 |
+| --- | --- | --- |
+| 请求身份 | principal / context 依赖 | 请求代表哪个主体 |
+| 工作区权限 | `_require` / scoped load | 在哪个 workspace 允许什么操作 |
+| 发布版本 | `resolve_agent_version` | 本轮跑哪份冻结规格 |
+| 重复提交 | `open_turn` / `client_token` | 重发时关联已有 Turn，或识别尚未完成的提交 |
+| 开始与跟读 | `prepare_stream` / `attach_run` / `attach_stream` | 创建新执行和跟读旧执行不是同一件事 |
+
+建议在源码旁写“输入→校验→落库→返回”。遇到函数跳转就记录所交付的对象，不用马上通读整个被调用文件。
+
+### C. `open_turn` 按操作拆解
+
+真实函数在 [ThreadService.open_turn](../../packages/threads/service.py)。按以下顺序逐项核对，而不是只背“有幂等键”：
+
+1. 要求 AGENT_RUN 权限，取得当前工作区身份。权限不够时不会因 token 相同而绕过检查。
+2. 校验输入文本，规范化 token 并限制长度。格式合法和业务允许是两类检查。
+3. 按工作区加载 Thread，避免拿别的租户的 thread_id 直接写入。
+4. 如果 token 已存在，返回既有提交需要复用的信号，路由再找 Turn/Run。
+5. 查询当前 Thread 的最大序号，计算下一序号，构造 ThreadTurn 并提交。
+6. 捕获 `IntegrityError`、rollback 并返回空结果。数据库约束会拦截前置检查之后发生的竞争；调用方仍需区分已存在与尚未完成。
+
+这里有重要的并发细节：两个请求都可能在第 4 步看不到旧 Turn。前置查询只能减少常见重复，不能代替唯一约束。不同 token 也可能竞争同一个下一序号，因此不能把所有 IntegrityError 都解释成“同 token 已完美去重”。定位竞态要同时查看 route 如何处理返回值和 models 的约束。
+
+### D. 一个重发请求的时间线
+
+下面是**教学推演，不是新执行日志**。设 token 为 `submit-1`，第一次请求已经创建 T1 并关联 R1，但客户端还没有收到响应就断线。
+
+| 时间 | 客户端/服务器操作 | 应读出的语义 |
+| --- | --- | --- |
+| t0 | 第一次提交 token=submit-1 | 新 Turn 的提交身份 |
+| t1 | T1 保存，随后关联 R1 | Turn 和 Run 是不同持久对象 |
+| t2 | 客户端没收到完整响应 | 不能推断服务端没开始 |
+| t3 | 用同 token 重发 | 查询已有提交，避免把网络重发当新问题 |
+| t4 | 已有关联 Run | stream 分支可附着旧 R1 |
+
+再把断线点提前到 T1 保存但 Run 尚未关联：stream 分支发现旧 Turn 没有 agent_run_id，会给出 `THREAD_TURN_IN_PROGRESS`，而不是立即承诺新开一个 Run。同步提交和流式提交的恢复逻辑要分别读，不把某入口的处理扩展到所有入口。
+
+因此 token 的前端生命周期也属于正确性：对同一次网络重试保留 token；开始新的语义提交应产生新的 token；取消分支不能让下一次问题误附着旧执行。
+
+### E. 为什么数据库 session 不应包住慢模型调用
+
+一条数据库查询通常很短，模型/远端工具可能等待数秒甚至超时。如果在等待期间保持事务或行锁，其他请求会被锁竞争阻塞，连接池也更容易耗尽。读依赖装配和 Gateway 时观察“先读取必要配置并关闭 session，再访问远端”的边界。它降低资源占用，但也意味着不能假装数据库和外部调用是同一个原子事务；第 05 课专门处理这个后果。
+
+### F. 练习与参考答案
+
+**题 1：HTTP 200 能证明什么？** 先看该接口的响应契约。返回 Run 身份、打开事件流、完成最终执行是不同阶段。流式响应已经开始后，业务错误可能出现在事件中，不能只看 HTTP 状态码。
+
+**题 2：隐藏“发布”按钮能否完成权限控制？** 不能。前端用于解释可用操作；后端必须按实际 principal、workspace 和 permission 检查。攻击者可直接调用 API，UI 也可能缓存旧角色。
+
+**题 3：两人同时提交同一个 token，如何证明不重复？** 找前置查询、唯一约束、IntegrityError 分支和后续关联/附着处理，列出崩溃点；不能只指出一行 token 查询就宣称所有竞争都已覆盖。
+
+**掌握标准：**能从路由画出“鉴权→工作区→版本→Turn→Run→流”的调用链；解释 await、事务与唯一约束的区别；预测重发发生在 Run 关联前后各会怎样。
 
 ---
 
