@@ -1,5 +1,7 @@
 # AgentHub Architecture
 
+首次学习请从 [架构入门课](learning/00-architecture-first.md)顺着读。本页保留为架构参考，不要求先读全部模块表。
+
 2026-10-09，源码基线 `a12e8ab`。项目定位是 **Enterprise Agent Runtime & Control Plane**：围绕 Agent 执行提供治理、审批、持久化和可复现评测。这是设计范围，生产规模和企业成熟度尚未证明。业务功能保持冻结，见 [当前状态](current-state.md)。
 
 ## System Architecture
