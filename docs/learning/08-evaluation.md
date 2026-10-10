@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：07 Memory](07-memory.md) · [下一课：09 应用、反馈与接管](09-applications-feedback.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -90,6 +90,19 @@ RAG 两策略目标召回相同但时延不同；负载并发 1/4/8 各 60 秒�
 
 纸上设计一个实验：只改变工单登记提示，其余版本/知识/数据/价格/evaluator 固定。列出冻结字段、DEV 调试规则、HOLDOUT 暴露规则、失败记录、语义抽检与费用分母。
 
+**设计题参考答案：**创建两个发布版本，模型执行计划、工具修订、知识 snapshot、预算和 Memory 规则相同，仅工单 prompt 不同。这里“版本固定”指各 variant 固定各自版本，**不是两个不同 prompt 共用同一个 spec hash**；改变 prompt 必然改变规格身份。
+
+| 设计项 | 应写入的答案 | 原因 |
+| --- | --- | --- |
+| 冻结字段 | build SHA、各 variant AgentVersion/spec hash、有效知识/Memory 输入身份、发布 DatasetVersion/schema/content hash、pricing snapshot、evaluator 版本 | 防止比较期间偷换输入或评分规则 |
+| DEV | 用于查错/修改；改后新建实验身份并记录尝试 | 调过的数据不能冒充独立样本 |
+| HOLDOUT | 不用于开发调参；答案暴露遵循权限/显式请求与持久审计 | 暴露会改变独立性，需如实报告 |
+| 重复与失败 | 每个 case/variant 的重复次数一致；失败、取消、未知和缺 usage 保留 | 防止只统计成功调用 |
+| 语义抽检 | 定义政策正确、条件遗漏、工单动作等判据，记录样本与纠正 | 工具代理通过不等于叙述正确 |
+| 费用口径 | 汇总全部所记录尝试的 usage×冻结价格，单列缺失/估算及币种 | 单个成功样本费用不代表总投入 |
+
+可以支持“在这批合成 case 与所测模型条件下，两 prompt 的差异”，不能直接推出真实客服线上收益或所有行业适用。依据：[experiments](../../packages/evaluation/experiments.py)、[runner](../../packages/evaluation/runner.py) 与 [benchmark 索引](../benchmark/README.md)。
+
 **通过标准：**说明一次实验比较了什么，以及没证明什么；能从报告找到原始 JSON，不把不同轮次测试数量拼成当前覆盖率。
 
 已有核查：[发布数据集](../../tests/integration/test_m7a_evaluation_datasets.py)、[实验冻结](../../tests/integration/test_m7b_experiments.py)、[runner](../../tests/integration/test_m7c_experiment_runner.py)、[release gate](../../tests/integration/test_m7ef_ablation_release_gate.py)。本课未执行。
@@ -144,11 +157,35 @@ p95 也要看样本与失败：仅统计成功项会遗漏超时，冷启动和�
 
 ### F. 练习与参考答案
 
-**题 1：拿 DEV 满分作最终质量证据有什么问题？** DEV 已用于调参；可以证明回归覆盖所测场景，却不能当未接触的独立泛化检验。
+### Q08-01 · 拿 DEV 满分作最终质量证据有什么问题？
 
-**题 2：相同 dataset_id 是否意味着完全相同数据？** 不意味着。具体 DatasetVersion、content/schema hash 及发布状态才决定所绑定内容。
+**答案：**DEV 已用于调参；可以证明回归覆盖所测场景，却不能当未接触的独立泛化检验。
 
-**题 3：deterministic driver 通过能证明模型答案质量吗？** 它主要验证编排和契约；真实 Runtime 模型实验与语义评估有额外不确定性，不能替代。
+**解读：**DEV 已被用于发现错误和调整配置，成绩同时反映对这批样本的适应。它可证明回归改善；要支持独立效果，需要未用于开发的 HOLDOUT 或新数据，并控制暴露及评估口径。
+
+**核查依据：**[对应源码/证据](../../packages/evaluation/service.py)，重点看 `EvaluationDatasetService` 的发布与分组契约。
+
+**常见误解：**将开发集满分改名为泛化准确率。
+
+### Q08-02 · 相同 dataset_id 是否意味着完全相同数据？
+
+**答案：**不意味着。具体 DatasetVersion、content/schema hash 及发布状态才决定所绑定内容。
+
+**解读：**dataset_id 是逻辑数据集，多个草稿/发布版本可以属于它。正式执行绑定具体版本、schema/content hash；仅报逻辑 ID 无法判断参考答案和分组是否被改。
+
+**核查依据：**[对应源码/证据](../../packages/evaluation/experiments.py)，重点看 `正式实验对数据版本的绑定`。
+
+**常见误解：**用一个逻辑 ID 替代完整冻结身份。
+
+### Q08-03 · deterministic driver 通过能证明模型答案质量吗？
+
+**答案：**它主要验证编排和契约；真实 Runtime 模型实验与语义评估有额外不确定性，不能替代。
+
+**解读：**确定性 driver 用受控响应验证 runner 的领取、记录和聚合路径，不承担真实供应商的推理表现。要证明答案质量，需要实际 Runtime 调用、原始输出与语义标准。
+
+**核查依据：**[对应源码/证据](../../packages/evaluation/runner.py)，重点看 `AgentRuntimeEvaluationDriver 与 driver 调用`。
+
+**常见误解：**把编排测试成功率当业务模型成功率。
 
 **掌握标准：**手算任务数量、明确指标分母、说明 lease generation，并从一条汇总结果追到原始输入/输出及完整实验身份。
 

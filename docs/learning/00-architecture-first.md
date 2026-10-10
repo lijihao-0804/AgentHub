@@ -18,6 +18,12 @@
 2. Redis 停了、PostgreSQL 停了，影响是否一样？
 3. 模型调用了回滚工具，谁有权决定真正执行？
 
+### 开篇三问的答案与解读
+
+1. **第二句话通常创建新 Turn 和新 Run；审批批准继续原 Run。** Thread 聚合对话，每轮提交分别解析已发布版本并建立执行；重复相同 client_token 是重发已有提交，不是新问题。审批恢复使用原 run_id/checkpoint，不能清零原预算。依据：[ThreadService.resolve_agent_version / submit_turn](../../packages/threads/service.py) 与 [AgentRunService.resume](../../packages/agent_runtime/runtime.py)。
+2. **两种故障影响不同。** Redis 故障主要影响依赖它的派发/消费/调度，已有 PostgreSQL 记录不会因此消失；PostgreSQL 故障会影响成员权限、版本、Run/审批和恢复状态的读写。两者都可能阻断任务，只是故障点不同。不能简化成“Redis 停了整个系统仍可用”。依据：[worker 配置](../../apps/worker/celery_app.py) 与 [审批服务](../../packages/approvals/service.py)。
+3. **模型只提议，服务根据冻结工具策略、权限和审批决定执行资格，executor 才真正派发。** 用户文字或模型 call 不是外部副作用证据；批准后仍需 claim，无法确认远端结果要保持未知。依据：[ToolPolicy.decide](../../packages/tools/policy.py)、[ApprovalService.claim_execution](../../packages/approvals/service.py) 和 [MCP execute_write](../../packages/mcp/runtime.py)。
+
 
 
 ---
@@ -328,6 +334,8 @@ Memory 已有冻结/停用/回放机制，但质量探针发现无关和矛盾�
 
 完成后不用看图，自己画一遍：浏览器、API、worker/beat、PostgreSQL、Redis、Qdrant；再在 API 旁写出 Runtime、Policy、Approval。分不清时回到 §2–3，不继续盲读目录。
 
+**六个源码定位练习的参考答案：**`create_app` 注册 HTTP router，不包含模型循环；`stream_turn` 校验/记录 Turn、准备并关联 Run 后返回流；依赖装配函数把具体 Gateway、工具、审批、checkpoint、Memory/Artifact 等注入 Runtime；`invoke/after_policy` 连接节点并按数据决定 READ、action 或结束；`ToolPolicy.decide` 只有 READ+NEVER 放到自动路径；`create_celery_app` 注册异步任务与入库/审批运行/评测的 beat 调度。自己的图应把 API/worker 画成进程，把 Runtime/Policy/Approval 画为被进程使用的模块，把 PostgreSQL/Redis/Qdrant 画为存储/服务；不能把 package 都画成独立网络服务。
+
 ## 11. 转成面试表达：先解释，再回答追问
 
 ### 90 秒讲述骨架
@@ -345,9 +353,9 @@ Memory 已有冻结/停用/回放机制，但质量探针发现无关和矛盾�
 1. **为什么不用微服务？** 当前选择让业务状态协作、调用追踪和故障验证集中；拆分有独立扩展的价值，也增加一致性/运维成本。不能说微服务永远不适合。
 2. **为什么要 worker？** 耗时/异步处理与交互分开，可重复/对账任务用队列执行；API 与 worker 仍复用服务。
 3. **为什么 PostgreSQL 之外还有 Redis 和 Qdrant？** 数据真相、任务调度和检索索引职责不同。
-4. **LangGraph 替你做了什么？** 说出 interrupt/checkpoint，再举一个框架没有替项目解决的副作用问题。
+4. **LangGraph 替你做了什么？** 提供图节点执行、中断与 checkpoint 恢复基础。AgentHub 定义 workspace+Run 的 checkpoint 身份，并自己实现权限、审批抢占和外部结果分类。远端接受回滚后响应丢失，框架仍不能证明是否已回滚；项目需要 UNKNOWN_OUTCOME，而不是直接重试。核查 `_AgentRunGraph.invoke`、`checkpoint_thread_id` 和 `execute_write`。
 5. **应用有四个，Runtime 是四套吗？** 应用差异在任务模板、工具组合和产物投影，共用执行和治理机制。
-6. **最容易说错的边界是什么？** 从 READ/NEVER、批准≠成功、同 Run 恢复、未知写入和 Memory 质量中选一个，指出真实函数。
+6. **最容易说错的边界是什么？** 一个明确示例是“批准不等于执行成功”：`decide` 只记录许可，`claim_execution` 取得执行权，executor 得到结果后才更新 execution_status。APPROVED 可以同时对应 NOT_STARTED、CLAIMED 或 UNKNOWN_OUTCOME。其他边界同样成立：自动路径为 READ+NEVER，审批 resume 沿原 Run，Memory 准入不等于答案受益。
 
 ### 本课通过标准
 
@@ -404,11 +412,35 @@ Memory 已有冻结/停用/回放机制，但质量探针发现无关和矛盾�
 
 ### E. 练习、参考推理与掌握标准
 
-**题 1：Redis 暂时不可用，已经保存的审批决定会消失吗？** 参考推理：决定属于 PostgreSQL 业务记录；Redis 不可用可能阻断任务派发或调度，不能据此推断决定被删除。能否及时继续执行还要看入口、恢复调度和 checkpoint，不能只回答“数据库没丢就没影响”。
+### Q00-01 · Redis 暂时不可用，已经保存的审批决定会消失吗？
 
-**题 2：为什么只备份 Qdrant 不能恢复项目？** 它没有完整用户/权限、AgentVersion、Run、Approval、数据集与文件身份。索引是检索链的一部分，业务与原始内容仍需要对应备份和一致性策略。
+**答案：**参考推理：决定属于 PostgreSQL 业务记录；Redis 不可用可能阻断任务派发或调度，不能据此推断决定被删除。能否及时继续执行还要看入口、恢复调度和 checkpoint，不能只回答“数据库没丢就没影响”。
 
-**题 3：面试官让你删掉 LangGraph，哪些约束仍必须保留？** 同 Run 身份、稳定逻辑动作身份、审批/执行分离、上下文预算、未知副作用处理、租户边界都仍存在。框架提供图和 checkpoint 的实现便利，业务语义由项目自己负责。
+**解读：**PostgreSQL 保存审批决定，Redis 提供队列/调度连接，两者职责分离。已提交的决定不会因为 Redis 故障自动撤销；但需要队列的后续恢复任务可能无法及时投递或消费。先查业务记录，再查具体入口和恢复调度，不能用存储未丢失推断系统全部正常。
+
+**核查依据：**[对应源码/证据](../../packages/approvals/service.py)，重点看 `decide / claim_execution`。
+
+**常见误解：**把“数据没丢”说成“业务没受影响”。
+
+### Q00-02 · 为什么只备份 Qdrant 不能恢复项目？
+
+**答案：**它没有完整用户/权限、AgentVersion、Run、Approval、数据集与文件身份。索引是检索链的一部分，业务与原始内容仍需要对应备份和一致性策略。
+
+**解读：**向量索引主要保存检索表示和过滤身份，无法代替版本、成员权限、审批决定、实验输入以及原始文档。只有索引却没有对应数据库成员或文件，就不能重建可授权、可追溯的证据链。
+
+**核查依据：**[对应源码/证据](../../packages/knowledge/retrieval.py)，重点看 `_snapshot_scope / _load_chunks`。
+
+**常见误解：**把恢复检索服务与恢复全部业务系统混为一谈。
+
+### Q00-03 · 面试官让你删掉 LangGraph，哪些约束仍必须保留？
+
+**答案：**同 Run 身份、稳定逻辑动作身份、审批/执行分离、上下文预算、未知副作用处理、租户边界都仍存在。框架提供图和 checkpoint 的实现便利，业务语义由项目自己负责。
+
+**解读：**替换框架只改变图执行/checkpoint 实现，不会消除业务的并发、权限和外部网络不确定性。需要另一个实现保存相同恢复身份，并确保中断前可重入；供应商工具 ID 仍不能充当平台逻辑动作 ID。
+
+**核查依据：**[对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `resume / _AgentRunGraph.invoke`。
+
+**常见误解：**把框架提供的持久状态等同业务正确性。
 
 **掌握标准：**不看图，能在纸上画出进程、模块、存储三个层次；给 R1 的每一步找到负责模块；指出一个框架提供的能力和一个框架无法保证的结果。然后进入第 01 课，沿真实 HTTP 入口追踪。
 

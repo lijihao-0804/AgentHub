@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：04 工具治理与审批](04-tools-approval.md) · [下一课：06 知识与 RAG](06-knowledge-rag.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -133,6 +133,10 @@ def should_persist(event: AgentEvent) -> bool:
 
 **面试追问：**为什么队列重投不能让已经 CLAIMED 的未知动作自动再发？为什么审批恢复不能新建 Run？为什么 SSE 重放不一定包含完整打字动画？
 
+**逐问答案：**CLAIMED 只证明本地抢占，远端可能已经完成；队列重复投递不提供远端结果证据，因此不能自动重新派发未知 WRITE。审批恢复必须延续原动作/checkpoint/actor/预算，新建 Run 会改变执行与去重身份，属于重跑。SSE 的 message.delta 不落库，重放结构事件和最终输出而非完整 token 动画，sequence 也可以有缺口。分别核查 [claim_execution](../../packages/approvals/service.py)、[resume](../../packages/agent_runtime/runtime.py)、[should_persist](../../packages/agent_runtime/event_store.py)。
+
+**两个预测题的答案：**WAITING 重启后，若原数据、checkpoint、当前原 actor 权限和配置有效，应恢复同一 Run；缺 checkpoint 则 NEEDS_ATTENTION / APPROVAL_CHECKPOINT_MISSING，不伪造继续成功。远端接受写入但不回答时，若无法确认结果，执行 UNKNOWN_OUTCOME、Run NEEDS_ATTENTION；需保留远端调查线索，不能靠再次调用“试出”结果。这是条件性预期，实际实验还需记录观察。
+
 已有证据：[checkpoint 集成](../../tests/integration/test_m5a_checkpoint_runtime.py)、[审批预算恢复](../../tests/integration/test_approval_usage_resume.py)、[durable stream 单测](../../tests/unit/test_durable_run_stream.py)、[故障报告](../reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md)。历史 OS 退出三窗口安全终态 3/3，业务恢复仅 1/3，不能都叫自动恢复成功。
 
 **通过标准：**区分数据库状态/图状态/外部结果/事件；说明一个已验证窗口与一个未知限制。
@@ -184,11 +188,35 @@ def should_persist(event: AgentEvent) -> bool:
 
 ### F. 练习与参考答案
 
-**题 1：给未知动作增加三次网络重试能提高稳健性吗？** 对 READ 和明确未派发失败可能有可重试空间；对已派发但未知 WRITE 会扩大重复副作用风险，不能共用一套盲重试逻辑。
+### Q05-01 · 给未知动作增加三次网络重试能提高稳健性吗？
 
-**题 2：trace sink 写失败要终止 Run 吗？** 当前 trace 是观测路径，失败不阻断业务；这不等于业务状态/checkpoint 持久化失败也可忽略。按记录职责区分。
+**答案：**对 READ 和明确未派发失败可能有可重试空间；对已派发但未知 WRITE 会扩大重复副作用风险，不能共用一套盲重试逻辑。
 
-**题 3：历史 crash 测试安全终态 3/3，业务恢复 1/3，怎么讲？** “三个所测窗口都没有错误自动重写，只有一个自动恢复业务完成”。安全落到待关注也可能符合验收，不能把它算业务恢复成功。
+**解读：**同一个超时可能发生在派发前或派发后。前者可确认没有副作用，后者可能已经完成；不区分 dispatch 就统一重试，会把不确定性变成重复写入风险。
+
+**核查依据：**[对应源码/证据](../../packages/mcp/runtime.py)，重点看 `execute_write`。
+
+**常见误解：**把请求没有返回等同于远端没有处理。
+
+### Q05-02 · trace sink 写失败要终止 Run 吗？
+
+**答案：**当前 trace 是观测路径，失败不阻断业务；这不等于业务状态/checkpoint 持久化失败也可忽略。按记录职责区分。
+
+**解读：**trace 是观测的辅助路径，项目采取失败不阻断业务；Run/Approval/checkpoint 是正确性和恢复依赖，丢失它们的结果不能用相同策略忽略。区分信息用途后再决定失败处理。
+
+**核查依据：**[对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `trace 与 Run/恢复持久化调用`。
+
+**常见误解：**把“观测 fail-open”推广成“所有数据库错误都可继续”。
+
+### Q05-03 · 历史 crash 测试安全终态 3/3，业务恢复 1/3，怎么讲？
+
+**答案：**“三个所测窗口都没有错误自动重写，只有一个自动恢复业务完成”。安全落到待关注也可能符合验收，不能把它算业务恢复成功。
+
+**解读：**安全终态统计的是没有危险的盲目续写或错误副作用，业务恢复统计的是任务自动完成。NEEDS_ATTENTION 可以是安全落点，却不是业务成功；两个指标回答不同问题。
+
+**核查依据：**[对应源码/证据](../reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md)，重点看 `所记录的故障窗口与结果`。
+
+**常见误解：**把两项分母相同当作两项含义相同。
 
 **掌握标准：**在纸上任意放一个 crash 点，说明最后可证明的事实、下一步能做什么、不能做什么，并找到对应实际分支。
 

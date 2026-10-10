@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：08 数据集与评测](08-evaluation.md) · [下一课：10 实践与面试验收](10-runtime-labs.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -99,11 +99,20 @@ SSE 客户端处理 run.started、message.delta、停止与错误；流式文本
 
 例如“远端已收写但响应丢失”的故事，必须说 NEEDS_ATTENTION，不说所有 crash 都自动业务恢复。Memory 故事必须说质量不足，不只说跨会话记住了。
 
+**四个故事问题的完整参考示例：**触发场景是回滚提议获批准，远端接收后响应丢失；代码机制是 Approval 条件抢占、MCP execute_write 的 dispatch/结果分类及 Runtime 的 NEEDS_ATTENTION 投影；设计原因是无确认重试可能重复副作用，本地事务不能包住远端服务；证据来自第 05 课链接的 MCP/故障记录，证明特定窗口安全处理，不证明全部外部服务 exactly-once 或业务总能自动完成。照此四层组织，既回答“做了什么”，也说明“为什么”和“证明到哪里”。
+
 个人贡献、AI 帮助范围、开发时长与团队背景只写真实事实；本课不替你认定独立完成全部项目。
 
 ## 8. 自测
 
 把一个错误客服回答画成 Run→Feedback→Review→DEV draft→Experiment；再把一个 UNKNOWN_OUTCOME 画成需要人工调查的案件。指出哪个节点可以关闭运营处理，哪个节点不能凭关闭宣称外部动作确定。
+
+**两条链的参考答案：**
+
+- 错误 R1→提交带 corrected_answer 的 Feedback→审核当前修订→import_dev 生成新 DEV draft→发布 DatasetVersion→冻结新 Experiment→执行与判分。原 R1、原发布数据和原实验不被改写；导入要求 DEV-only 基版本、正确 review_version，并按 request hash 处理重发。
+- 未知 R2/P2→保留 UNKNOWN_OUTCOME/NEEDS_ATTENTION 的证据→从合适来源 Artifact 建 Handoff→分配或接手→人工调查→记录理由/未解决项后 CLOSED。关闭的是案件处理流程，原 Approval 的结果不因它自动变 SUCCEEDED；没有远端证据就仍不能确认外部动作。
+
+依据：[FeedbackService.import_dev](../../packages/feedback/service.py)、[HandoffService.change](../../packages/handoffs/service.py)。常见错误是漏掉“发布数据集”就直接正式评测，或把 CLOSED 当作 Run 成功。
 
 已有核查：[feedback/evidence 集成](../../tests/integration/test_mi2_feedback_evidence.py)、[handoff 生命周期](../../tests/integration/test_handoff_lifecycle.py)、[M-I5 报告](../reviews/AgentHub-面试增强M-I5验收报告-20261003.md)。本课未执行。
 
@@ -158,11 +167,35 @@ message.delta 是临时流式文本，Run 最终输出是持久结果；审批�
 
 ### F. 练习与参考答案
 
-**题 1：纠正直接改历史输出不是更方便吗？** 会丢失原错误证据，影响评分、审计和故障复盘；应该追加反馈并建立新的回归身份。
+### Q09-01 · 纠正直接改历史输出不是更方便吗？
 
-**题 2：两次关闭按钮请求为何有时不冲突？** 完全相同且已完成的 close 可走幂等 hash 分支；不同请求不能据此复用旧结果。
+**答案：**会丢失原错误证据，影响评分、审计和故障复盘；应该追加反馈并建立新的回归身份。
 
-**题 3：为什么评测改进还要保留原错误 case？** 需要证明修改前后的可比性，并持续防止回归；但用它开发后不再将其当全新 HOLDOUT。
+**解读：**R1 是当时产生的原始输出，评分/故障分析依赖该事实。追加 Feedback 保存纠正内容与审核身份，导入新 DEV 草稿再评测，使原错误和修正都能追溯。
+
+**核查依据：**[对应源码/证据](../../packages/feedback/service.py)，重点看 `submit / review / import_dev`。
+
+**常见误解：**回写旧答案后再声称原版本没有出错。
+
+### Q09-02 · 两次关闭按钮请求为何有时不冲突？
+
+**答案：**完全相同且已完成的 close 可走幂等 hash 分支；不同请求不能据此复用旧结果。
+
+**解读：**close_request_hash 包含 actor、expected_version 和 payload。已经 CLOSED 且同 hash 的重发先返回旧结果，普通版本校验随后才执行；改变理由/actor等会走冲突路径。
+
+**核查依据：**[对应源码/证据](../../packages/handoffs/service.py)，重点看 `change 的 close 幂等分支`。
+
+**常见误解：**说所有旧 expected_version 都一律 409。
+
+### Q09-03 · 为什么评测改进还要保留原错误 case？
+
+**答案：**需要证明修改前后的可比性，并持续防止回归；但用它开发后不再将其当全新 HOLDOUT。
+
+**解读：**新版本要继续面对已知错误，避免修复后再退化；但这个 case 已参加开发，所以只能作为回归，不能再声称它从未暴露、可作为独立 HOLDOUT。
+
+**核查依据：**[对应源码/证据](../../packages/feedback/service.py)，重点看 `import_dev`。
+
+**常见误解：**为了展示新版本好而删除原错误案例。
 
 **掌握标准：**解释一次 Run 怎样形成 Artifact、Feedback、DEV 和 Handoff；说清每份记录的状态、来源与不可替代的职责。
 

@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：00 架构](00-architecture-first.md) · [下一课：02 Runtime 与模型上下文](02-one-run-end-to-end.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -89,16 +89,27 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 
 ## 6. 只读练习：画一个提交窗口
 
-不启动服务。顺序打开上述三个核心文件，画出 `open_turn → prepare_stream → attach_run → stream`，在每条箭头旁写：若进程在此退出，哪些记录已经存在？本课只需要列问题，不假造测试结果。
+不启动服务。顺序打开上述三个核心文件，画出 `open_turn → prepare_stream → attach_run → stream`，在每条箭头旁写：若进程在此退出，哪些记录已经存在？每个窗口的参考答案如下；这是源码推演，不是新故障实测。
 
 再比较同步 `submit_turn`。记录两条路径各在哪里附着 Run、怎样处理重试。学习产物是你的调用链笔记，不是修改 Runtime。
 
+**提交窗口参考答案：**
+
+| 退出位置（该步已成功提交） | 已存在的记录 | 同 token 流式重发的行为 |
+| --- | --- | --- |
+| open_turn 后、prepare_stream 前 | Turn；还没有本次新 Run | 旧 Turn 无关联，返回 THREAD_TURN_IN_PROGRESS（409） |
+| prepare_stream 后、attach_run 前 | Turn 和 Run；尚未建立 Turn 的 run 关联 | 仍因旧 Turn 未关联而返回 409；该入口没有同步路径的 orphan 修复分支 |
+| attach_run 后、开始消费 stream 前 | Turn→Run 已关联 | 附着已有 Run；关联不证明执行已推进或事件已产生 |
+| stream 正在推进或结束后 | 关联、已写步骤/持久事件，完成时有终态 | 附着原 Run 跟读/重放结构事件，不能保证完整 delta 重放 |
+
+**同步路径对照：**`submit_turn` 调用 run_service.run 后才 attach_run，所以未关联不必然代表没执行。重发在启动宽限内返回 409；超过宽限后 `_turn_run` 在同 Thread 内按创建时间寻找候选 Run。仍 RUNNING/CANCEL_REQUESTED 则继续 409；已等待/终结则补关联并复用；没找到 Run 才重新执行记录的问题。这个恢复查询基于范围与时间，不是直接持久的 Turn→Run 外键证明，不能泛化为所有并发情形都完全确定。依据：[submit_turn / _turn_run](../../packages/threads/service.py)、[stream_turn](../../apps/api/routes/threads.py)。
+
 ## 7. 自测与面试追问
 
-1. 前端已有权限判断，为什么 API 还要鉴权？提示方向：客户端不可信，后端是权威。
-2. `client_token`、`run_id`、`logical_action_id` 有何不同？分别是提交、执行和动作身份；第 4 课展开第三个。
-3. 为什么 Turn 可能存在但 Run 没关联？提示方向：分段持久化与启动/执行窗口。
-4. 使用 Celery 是否意味着全部 Run 都在 worker？提示方向：打开具体 route 验证，不用框架名字推断。
+1. **为什么前端判断权限后 API 还要鉴权？** 客户端可被绕过且状态可能过期；后端认证主体、解析当前 workspace 权限并在 service 限定范围。否则一个伪造请求就能避开 UI。核查 get_workspace_context 和具体 service 的 `_require`。
+2. **三种 ID 有何不同？** client_token 关联一次提交重发；run_id 标识整个执行，等待恢复不换 ID；logical_action_id 标识执行中的特定受控动作，用于审批/执行关联。一个 Run 可包含多个动作，所以不能用 run_id 替代全部动作 ID；provider call ID 也不能替代平台动作身份。
+3. **为什么 Turn 存在却没关联 Run？** open_turn、准备/运行、attach_run 不是同一事务，进程可能在中间退出；同步路径甚至在执行返回后才关联。上面的窗口表给出各步已保存什么，不能只看一个空字段就重跑。
+4. **Celery 意味着全部 Run 在 worker 吗？** 不意味。`stream_turn` 直接调用准备/流式 Runtime；入库、评测及部分恢复/异步入口使用 worker。执行位置由具体 route/queue 调用决定，框架存在不等于全链路自动派队列。
 
 **通过标准：**从 `stream_turn` 定位真实业务调用；解释工作区权限；画出 Turn/Run 的提交窗口。不能只背“FastAPI + Celery”。
 
@@ -164,11 +175,35 @@ FastAPI 的 dependency 用来解析调用者和装配服务。读函数参数时
 
 ### F. 练习与参考答案
 
-**题 1：HTTP 200 能证明什么？** 先看该接口的响应契约。返回 Run 身份、打开事件流、完成最终执行是不同阶段。流式响应已经开始后，业务错误可能出现在事件中，不能只看 HTTP 状态码。
+### Q01-01 · HTTP 200 能证明什么？
 
-**题 2：隐藏“发布”按钮能否完成权限控制？** 不能。前端用于解释可用操作；后端必须按实际 principal、workspace 和 permission 检查。攻击者可直接调用 API，UI 也可能缓存旧角色。
+**答案：**先看该接口的响应契约。返回 Run 身份、打开事件流、完成最终执行是不同阶段。流式响应已经开始后，业务错误可能出现在事件中，不能只看 HTTP 状态码。
 
-**题 3：两人同时提交同一个 token，如何证明不重复？** 找前置查询、唯一约束、IntegrityError 分支和后续关联/附着处理，列出崩溃点；不能只指出一行 token 查询就宣称所有竞争都已覆盖。
+**解读：**HTTP 状态描述传输/接口接受情况。流式响应开始后，服务器可能用事件报告失败；返回 Run ID 的接口也可能尚未完成执行。因此要把接口契约、最终 Run 状态、错误事件及动作结果一起看。
+
+**核查依据：**[对应源码/证据](../../apps/api/routes/threads.py)，重点看 `stream_turn`。
+
+**常见误解：**只看到 200 就认定模型、工具和审批都成功。
+
+### Q01-02 · 隐藏“发布”按钮能否完成权限控制？
+
+**答案：**不能。前端用于解释可用操作；后端必须按实际 principal、workspace 和 permission 检查。攻击者可直接调用 API，UI 也可能缓存旧角色。
+
+**解读：**客户端可以绕过页面直接发 HTTP，前端还可能缓存过期角色。服务端读取当前上下文并在具体操作中要求对应权限、限定 workspace，才能保证请求不能靠隐藏按钮绕过。
+
+**核查依据：**[对应源码/证据](../../packages/threads/service.py)，重点看 `_require / resolve_agent_version`。
+
+**常见误解：**把界面可见性当作授权边界。
+
+### Q01-03 · 两人同时提交同一个 token，如何证明不重复？
+
+**答案：**找前置查询、唯一约束、IntegrityError 分支和后续关联/附着处理，列出崩溃点；不能只指出一行 token 查询就宣称所有竞争都已覆盖。
+
+**解读：**相同 token 的前置查询减少重复，唯一约束处理查询后竞争，IntegrityError 分支回滚后由路由寻找已有 Turn。若 Run 尚未关联，流式入口返回 409；若已关联则附着已有 Run。这证明各层处理意图，全部崩溃/竞争覆盖还必须查相应测试。
+
+**核查依据：**[对应源码/证据](../../packages/threads/service.py)，重点看 `open_turn / token_turn；配合 threads route`。
+
+**常见误解：**说“一次 SELECT 就保证了并发幂等”，或把任何唯一冲突都当同 token。
 
 **掌握标准：**能从路由画出“鉴权→工作区→版本→Turn→Run→流”的调用链；解释 await、事务与唯一约束的区别；预测重发发生在 Run 关联前后各会怎样。
 

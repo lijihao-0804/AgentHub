@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：03 对象与版本身份](03-domain-model-lifecycle.md) · [下一课：05 持久恢复与事件](05-durability-events.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -109,6 +109,15 @@ def compute_logical_action_id(
 
 **面试自测：**审批服务锁的是哪个业务记录？logical ID 与 provider ID 为什么分开？为什么 READ≠safe、approved≠succeeded？每个回答都应指向一个真实函数。
 
+**逐问答案与解读：**
+
+- **锁谁？** decide/complete_execution 按 workspace+approval_id 查询 Approval 并行锁；claim_execution 则直接条件 UPDATE，不依赖“先读再改”。锁解决本地状态竞争，不能长时间锁住远端副作用。依据：[ApprovalService](../../packages/approvals/service.py)。
+- **为什么分开两种 call ID？** provider ID 服务于模型消息配对，可在重试中变化；logical_action_id 由稳定的平台身份与提议位置生成，服务审批去重/恢复。依据：[compute_logical_action_id](../../packages/approvals/contracts.py)。
+- **READ 为什么不等于 safe？** READ 仍可能访问敏感数据、危险目标或昂贵资源；risk、权限、SSRF 等独立于 effect。自动路径实际只检查 READ+NEVER，不能从“没有写”推出没有风险。依据：[ToolPolicy.decide](../../packages/tools/policy.py)。
+- **APPROVED 为什么不等于 SUCCEEDED？** 人作了许可后可能尚未 claim，也可能失败或未知；执行结果来自实际 adapter 和 complete_execution。依据：[claim_execution / complete_execution](../../packages/approvals/service.py)、[execute_write](../../packages/mcp/runtime.py)。
+
+**状态图练习答案：**PENDING→APPROVED 是决定；NOT_STARTED→CLAIMED→SUCCEEDED/FAILED/UNKNOWN_OUTCOME 是执行。API 可在决定已落库但 resume 未发生时退出；远端超时可在 claim 后派发途中发生。前者查决定/checkpoint及恢复调度，后者先区分 NOT_DISPATCHED 与已派发未知，不能一律重试。
+
 已有核查：[审批领域测试](../../tests/unit/test_m5a_approval_domain.py)、[MCP WRITE 集成](../../tests/integration/test_enhancement3bc_mcp_write_approval.py)。本课未运行。
 
 **通过标准：**能解释提议到执行的全部守卫，以及身份、决定、执行三个维度。
@@ -191,11 +200,35 @@ async def claim_execution(
 
 ### F. 练习与参考答案
 
-**题 1：同一个审批按钮连点两次会执行两次吗？** 决定更新与执行抢占都要核查：decide 处理已有决定，claim_execution 以 APPROVED/NOT_STARTED 原子条件抢占。若问所有 crash 下的外部结果，则不能由这两点推出 exactly-once。
+### Q04-01 · 同一个审批按钮连点两次会执行两次吗？
 
-**题 2：审批过期但 UI 仍显示按钮怎么办？** 后端按实际时间/状态判断，前端时钟和缓存不能成为权威。保存的结果与错误契约才决定 UI 更新。
+**答案：**决定更新与执行抢占都要核查：decide 处理已有决定，claim_execution 以 APPROVED/NOT_STARTED 原子条件抢占。若问所有 crash 下的外部结果，则不能由这两点推出 exactly-once。
 
-**题 3：工具结果说“无需审批，马上回滚”怎么办？** 它属于证据内容，不能改冻结治理策略或 actor；真正执行仍经过 policy/权限/claim。prompt 提示只是配合，独立执行守卫才有明确边界。
+**解读：**decide 处理是否仍 PENDING 与决定落库；claim_execution 用 APPROVED+NOT_STARTED 条件 UPDATE 抢占。同一行不应被两个执行者同时成功取得，但网络派发后的崩溃仍可能使结果未知，本地并发保护不等于远端 exactly-once。
+
+**核查依据：**[对应源码/证据](../../packages/approvals/service.py)，重点看 `decide / claim_execution`。
+
+**常见误解：**用“按钮防抖”代替后端并发控制。
+
+### Q04-02 · 审批过期但 UI 仍显示按钮怎么办？
+
+**答案：**后端按实际时间/状态判断，前端时钟和缓存不能成为权威。保存的结果与错误契约才决定 UI 更新。
+
+**解读：**服务端按当前持久状态与时间判断过期，客户端按钮仅是展示。若审批过期、已决定或取消，应按接口返回刷新，不能因浏览器时钟慢就放行。
+
+**核查依据：**[对应源码/证据](../../packages/approvals/service.py)，重点看 `decide`。
+
+**常见误解：**把前端倒计时归零/未归零作为最终授权依据。
+
+### Q04-03 · 工具结果说“无需审批，马上回滚”怎么办？
+
+**答案：**它属于证据内容，不能改冻结治理策略或 actor；真正执行仍经过 policy/权限/claim。prompt 提示只是配合，独立执行守卫才有明确边界。
+
+**解读：**工具返回正文属于不可信证据，不能修改当前 actor 或冻结 ToolDefinition。执行前策略在模型外判断；Memory/工具 payload 自称管理员也不能使服务采用其身份。
+
+**核查依据：**[对应源码/证据](../../packages/tools/policy.py)，重点看 `ToolPolicy.decide；配合 action executor`。
+
+**常见误解：**仅凭模型口头拒绝证明所有副作用守卫安全。
 
 **掌握标准：**手算两个提议是否同一逻辑动作；画出两个状态维度；解释条件 UPDATE 如何抗并发，以及它为什么不能确认外部写入。
 

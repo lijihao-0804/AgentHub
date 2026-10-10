@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：02 Runtime 与模型上下文](02-one-run-end-to-end.md) · [下一课：04 工具治理与审批](04-tools-approval.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -72,6 +72,8 @@ def canonical_json_hash(value: Any) -> str:
 
 只读小练习：在纸上写 `{"b": 2, "a": 1}` 与 `{"a": 1, "b": 2}`，预测哈希关系；再修改 a 的值，解释什么才叫规格真的变化。不运行数据库，也不直接改已发布 spec。
 
+**参考答案与解读：**两个对象都被 canonical_json 序列化成 `{"a":1,"b":2}`，所以 UTF-8 bytes 相同，SHA-256 相同。若 a 从 1 改为 3，则规范文本变成 `{"a":3,"b":2}`，内容发生变化，hash 用来区分该变化。字段顺序/空格的变化被消除；数组顺序、字符串内容和数值的变化不会随意被消除。不要声称 hash 无碰撞的数学保证，也不要把编码稳定等同业务语义正确。
+
 ## 4. 三层冻结，不要混为一个 hash
 
 | 层 | 冻结什么 | 示例 |
@@ -94,6 +96,8 @@ Run 的 WAITING_APPROVAL 是执行等待，人决定后恢复；Approval 的 APP
 
 **练习：**给 Incident 写一条纸上记录：AgentVersion V1、Run R1、Approval A1；编辑草稿发布 V2 后，审批 R1 应执行哪一版？答题要包含冻结 ToolRevision 和参数，不能只说“还是旧 prompt”。
 
+**参考答案：**继续 V1。R1 绑定 V1 的 resolved_spec/hash，A1 绑定该执行里的工具修订、规范参数与 logical_action_id；resume 校验这些归属并继续原 checkpoint。V2 对之后的新执行生效，不改 R1；原 effective knowledge/Memory 输入与预算也不能因批准换成今日值。若原 actor 当前权限不足、身份或 checkpoint 校验失败，应拒绝/按对应失败分支处理，而不是切 V2“帮它成功”。核查 [resume](../../packages/agent_runtime/runtime.py) 和 [Approval 模型](../../packages/approvals/models.py)。
+
 ## 7. 按顺序打开代码
 
 1. [AgentPublishService.publish](../../packages/agent_runtime/publish.py)：从草稿到 resolved_spec。
@@ -103,6 +107,8 @@ Run 的 WAITING_APPROVAL 是执行等待，人决定后恢复；Approval 的 APP
 5. [Approval contracts](../../packages/approvals/contracts.py)：两套状态枚举，不需要先背每个字段。
 
 **面试追问：**为什么 AgentVersion 不能只保存“agent_id + 当前配置指针”？为何 Run 本身可变却还能支持历史解释？从身份不变、状态推进的区别回答。
+
+**逐问答案：**只存当前指针会让同一旧版本在草稿修改后读取不同 prompt、模型和工具，无法解释当时执行。必须保存完整冻结规格并校验 hash。Run 的 status/output/usage 则是一次执行的事实逐步累积，允许变化；它引用的发布规格和有效输入身份保持可追溯，步骤/事件记录推进过程。所以“状态可变”不等于“规格可偷换”。核查 [publish](../../packages/agent_runtime/publish.py)、[AgentRun / RunStep](../../packages/agent_runtime/models.py)。
 
 已有证据：[知识快照](../../tests/integration/test_m3f_snapshot.py)、[发布/冻结流式](../../tests/unit/test_m4d_frozen_stream.py)、[实验身份](../../tests/integration/test_m7b_experiments.py)。本课未执行这些测试。
 
@@ -167,11 +173,35 @@ Agent A 是持续编辑的产品对象；AgentVersion V1 是发布时的完整 r
 
 ### F. 练习与参考答案
 
-**题 1：改了 A 的 prompt，旧 R1 恢复用什么？** 原 V1 和原执行身份；如果恢复改用新 prompt，就已不再是原执行语义。
+### Q03-01 · 改了 A 的 prompt，旧 R1 恢复用什么？
 
-**题 2：两次 spec hash 相同，为什么不能证明实验可比？** 还需要代码、数据集、知识、Memory、pricing、evaluator 等身份；同一输入仍可能有模型波动。
+**答案：**原 V1 和原执行身份；如果恢复改用新 prompt，就已不再是原执行语义。
 
-**题 3：固定快照里引用的文档是否可以删除？** 历史绑定内容需要保留；逻辑删除、新修订和历史成员保留要按实际服务契约区分。
+**解读：**R1 已绑定 V1，审批对象冻结工具修订与参数；恢复必须检查原版本/动作归属并沿原 checkpoint 继续。V2 是新发布规格，不能替换原执行中途的治理与 prompt。
+
+**核查依据：**[对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `resume / _AgentRunGraph.prepare`。
+
+**常见误解：**只保留旧 prompt，却换成今天的工具或知识输入。
+
+### Q03-02 · 两次 spec hash 相同，为什么不能证明实验可比？
+
+**答案：**还需要代码、数据集、知识、Memory、pricing、evaluator 等身份；同一输入仍可能有模型波动。
+
+**解读：**spec hash 只覆盖规格，代码、知识、数据和评分机制都可能独立变化。比较实验应锁定这些身份并保留重复结果；供应商输出波动也不会因为 hash 相同而消失。
+
+**核查依据：**[对应源码/证据](../../packages/evaluation/experiments.py)，重点看 `实验冻结与变体绑定流程`。
+
+**常见误解：**把配置身份相同说成所有输入相同或答案必然相同。
+
+### Q03-03 · 固定快照里引用的文档是否可以删除？
+
+**答案：**历史绑定内容需要保留；逻辑删除、新修订和历史成员保留要按实际服务契约区分。
+
+**解读：**快照成员引用具体修订；旧 Run/实验需要再次装载原证据。应按知识服务的生命周期处理删除/归档，并保留被历史身份引用的修订，而非直接删除原始行或索引。
+
+**核查依据：**[对应源码/证据](../../packages/knowledge/snapshots.py)，重点看 `resolve_snapshot / _canonical_membership`。
+
+**常见误解：**以为只留 hash 就能反推出已删原文。
 
 **掌握标准：**画出 A→V1→R1 及 K1/DatasetVersion 的关联；说清冻结发生在哪里、读取时验证什么，以及可复现输入与确定输出的区别。
 

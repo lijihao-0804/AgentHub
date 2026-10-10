@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：01 HTTP 与执行入口](01-codebase-navigation.md) · [下一课：03 对象与版本身份](03-domain-model-lifecycle.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -128,6 +128,12 @@ READ 结果和 Memory 都属于不可信输入证据；它们不能覆盖 actor�
 2. 写一轮 messages 的类别：策略/prompt、当前问题、历史、工具结果、Memory；指出为什么 system role 不等于必留类别。
 3. 比较预算估算和供应商 usage，说明为何不能把 token 估算说成实际账单。
 
+**三张纸的参考答案：**
+
+1. 主线为 prepare→model→tool_proposal→policy→read_execute/action_execute→observation→model。两个明确失败出口可画“prepare 规格完整性失败→finish”和“model 设置 failure_code→after_model→finish”；policy 产生 failure_code/run_status 也会结束。审批等待画 interrupt，不伪装成 final_output；未知 action 画 NEEDS_ATTENTION。核查 [_AgentRunGraph 的节点与 after_*](../../packages/agent_runtime/runtime.py)。
+2. 分类为 RUNTIME_POLICY（策略）、SYSTEM_PROMPT（冻结 prompt）、CURRENT_USER_TASK（当前任务）、CONVERSATION（历史）、TOOL_RESULT（工具结果）、MEMORY（长期记忆）；知识证据与工具定义另有 RAG_EVIDENCE/TOOL_DEFINITIONS。角色回答协议身份，类别回答预算优先级；system role 的 Memory 仍可被驱逐并按不可信证据处理。核查 [ContextCategory / mandatory/untrusted 集合](../../packages/agent_runtime/context_budget.py)。
+3. estimator 在请求前为准入提供可预测单位，当前默认是保守的 UTF-8-byte 单位，不是供应商精确 tokenizer。真实 usage 在调用后由供应商响应产生，再与 pricing snapshot 得出估计费用；缺失 usage、缓存与最终账单仍需单独说明。预留输出不是实际已生成输出，不能拿预算直接报实际扣款。
+
 **自测：**为什么 observation 后还要调用模型？因为模型需根据实际结果修正推理。为什么不能无限重试工具？预算/重复守卫与副作用边界共同限制。
 
 已有证据：[上下文预算测试](../../tests/unit/test_m4d_context_budget.py)、[流式预算集成](../../tests/integration/test_m4d_streaming_budget.py)、[失败与流式修复](../reviews/AgentHub-上下文失败与流式修复记录-20261002.md)。本课未重跑。
@@ -189,11 +195,35 @@ READ 结果和 Memory 都属于不可信输入证据；它们不能覆盖 actor�
 
 ### F. 练习与参考答案
 
-**题 1：返回一个合法 tool call 后，Runtime 可以直接宣布任务成功吗？** 不可以。提议还要经过工具定义、参数、策略、权限、执行和 observation；提议只是模型希望做什么。
+### Q02-01 · 返回一个合法 tool call 后，Runtime 可以直接宣布任务成功吗？
 
-**题 2：Memory 选出五条但只准入两条，last_used_at 能否证明用了五条？** 不能。先看最终 ModelRequest 及 `_touch_admitted_memories`，它只追踪实际准入身份；准入两条也不证明模型在答案里有效使用了两条。
+**答案：**不可以。提议还要经过工具定义、参数、策略、权限、执行和 observation；提议只是模型希望做什么。
 
-**题 3：如何排查“模型明明看到日志却回答错”？** 先确认检索/工具实际结果，再确认准入内容和截断，最后核查 prompt、模型输出与独立语义判定。不要从工具有输出直接跳到“模型已完整看到”。
+**解读：**合法 call 仅表示协议与参数可解析。实际工具还必须存在于已发布目录，满足策略和权限，通过执行守卫后才派发；observation 将真实返回值交给下一轮模型。业务成功须看结果而非提议。
+
+**核查依据：**[对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `tool_proposal / policy / action_execute / observation`。
+
+**常见误解：**模型说“我将回滚”就当作回滚已经完成。
+
+### Q02-02 · Memory 选出五条但只准入两条，last_used_at 能否证明用了五条？
+
+**答案：**不能。先看最终 ModelRequest 及 `_touch_admitted_memories`，它只追踪实际准入身份；准入两条也不证明模型在答案里有效使用了两条。
+
+**解读：**selector 产出的是候选，预算会改变最终 messages；touch 从最终 memory payload 提取 admitted ID。即使 touch 成功，它记录可见输入而非答案对该记忆的依赖，真正 USE 需要单独对照与语义判据。
+
+**核查依据：**[对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `_touch_admitted_memories / model`。
+
+**常见误解：**把 selected、admitted、used 三个数字互换。
+
+### Q02-03 · 如何排查“模型明明看到日志却回答错”？
+
+**答案：**先确认检索/工具实际结果，再确认准入内容和截断，最后核查 prompt、模型输出与独立语义判定。不要从工具有输出直接跳到“模型已完整看到”。
+
+**解读：**先确认日志真实返回，再检查该正文是否进入最终 ModelRequest及是否截断；在输入确认后才判断规则遗漏或模型推理错误。若准入之前就丢掉关键内容，优先解决输入链而不是凭感觉调 prompt。
+
+**核查依据：**[对应源码/证据](../../packages/agent_runtime/context_budget.py)，重点看 `ContextBudgetPolicy.admit`。
+
+**常见误解：**从“工具返回过日志”推导“模型看到了全部日志”。
 
 **掌握标准：**能画出两轮消息变化，指出模型输入最终确定的位置，解释至少三种预算，以及首 token 前后的重试边界。
 

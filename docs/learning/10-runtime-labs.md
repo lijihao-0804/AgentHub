@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：09 应用、反馈与接管](09-applications-feedback.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -62,6 +62,13 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 - 恢复：无环境变化；保存笔记。
 - 验收：解释 Run/Approval/checkpoint/事件的区别，并指出两个失败分支。
 
+
+**L0 参考答案（条件性预期）：**正常：prepare→model→proposal→policy→READ→observation→model→finish；审批：policy 创建/复用 Approval 后 interrupt，APPROVED 再 resume/claim/action；已派发未知：execute_write→UNKNOWN_OUTCOME→Run NEEDS_ATTENTION。
+
+**如何确认：**分别指出 route、Runtime、ApprovalService 和 MCP adapter；图里的等待不是最终答案。
+
+**解读边界：**没有新实验结果，源码图准确不等于运行通过。
+
 ### L1 · 一条安全 READ→WRITE→Approval→Resume
 
 1. 按 Hero Demo 导入现有 Ops MCP 固定工具/数据，READ 配 READ/NEVER，回滚配 WRITE/HIGH/ALWAYS，发布 lab Agent。
@@ -72,6 +79,13 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 
 预期依据：第 04–05 课；没进入审批先核对模型提议、选中版本、工具修订和权限，不篡改 Runtime。
 
+
+**L1 参考答案（条件性预期）：**确实提出 WRITE 后，批准前 Run WAITING_APPROVAL、decision PENDING、execution NOT_STARTED；批准后沿原 run_id 抢占再得到执行结果。拒绝意味着该提议没有获得许可，不必把整个 Run 预判为 FAILED。
+
+**如何确认：**查冻结 ToolRevision、参数、Approval 和实际 action result；模型有没有提出写调用也要查。
+
+**解读边界：**未触发提议/审批就不能验收这条主线；模型输出“回滚成功”不是动作证据。
+
 ### L2 · 审批等待时重启
 
 1. 再跑一个确实 WAITING_APPROVAL 的 lab Run，保存 run_id/approval_id、版本/hash。
@@ -80,6 +94,13 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 4. 对照 [checkpoint 集成源码](../../tests/integration/test_m5a_checkpoint_runtime.py) 的故障窗口。
 
 恢复：重新启动原 lab 服务，不改 DB 里的状态让演示继续。目标是验证同 Run 恢复，不是证明所有 crash 都自动业务恢复。
+
+
+**L2 参考答案（条件性预期）：**等待状态与 checkpoint、权限、配置完整时，重启后批准继续同一 Run，原 usage/预算继续保留；缺 checkpoint 时 NEEDS_ATTENTION / APPROVAL_CHECKPOINT_MISSING。
+
+**如何确认：**比较重启前后 run_id/spec hash/approval，查恢复与 checkpoint。
+
+**解读边界：**仅同 Run 恢复成功能支持本窗口；不能推广到所有进程退出点。
 
 ### L3 · 已接收写入但不回答
 
@@ -90,6 +111,13 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 
 恢复：将模拟器恢复 `succeed`，只影响后续新调用；不能据此把原未知动作改成失败/成功。本场景无真实生产副作用，也不证明真实外部服务 exactly-once。
 
+
+**L3 参考答案（条件性预期）：**模拟器已接受但不回答，无法确认副作用时，execution UNKNOWN_OUTCOME、Run NEEDS_ATTENTION，不自动再次发该写入。
+
+**如何确认：**查 dispatch/timeout 分类和执行尝试；恢复模拟器只影响后续调用。
+
+**解读边界：**不能把原未知状态改成“没成功”，也不能用再调一次确认。
+
 ### L4 · 预算驱逐与模型循环
 
 1. lab 新草稿降低工具结果上下文预算，发布新版本；原版本保持不变。
@@ -99,6 +127,13 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 
 恢复：使用原 lab 版本创建新 Run。真实调用可能收费；第一次可只看 [context budget 测试](../../tests/unit/test_m4d_context_budget.py) 的 fixture 与断言。
 
+
+**L4 参考答案（条件性预期）：**较小预算可能使长工具结果投影/截断/驱逐；必需项也放不下时应失败而非超长发给模型。工具数守卫与上下文准入分别生效。
+
+**如何确认：**对比实际 context.budget、最终准入、usage 与守卫步骤。
+
+**解读边界：**模型若没产生长结果就未验证截断；max_tool_calls 触发后也不能保证同一最终措辞。
+
 ### L5 · SSE 断线与附着
 
 1. 新 lab Run 记录响应中的真实 Run ID 和事件游标。
@@ -106,6 +141,13 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 3. 不把 message.delta 缺失当成全部执行丢失，也不保证所有断线都 detached 继续。
 
 恢复：关闭自己的客户端/流；需要取消时使用产品既有取消接口。核查 [durable stream 测试](../../tests/unit/test_durable_run_stream.py)，不手工填充事件表。
+
+
+**L5 参考答案（条件性预期）：**已有身份的附着可跟读持久结构事件与最终输出，delta 缺失和 sequence 缺口可预期；执行是否继续取决于启动路径/宽限/取消。
+
+**如何确认：**记录断线入口、参数、Run 状态与持久游标；重连用事件实际序号。
+
+**解读边界：**不把行数当游标，也不从一次 detached 观察推出所有入口断线继续。
 
 ### L6 · 固定知识 snapshot 与新修订
 
@@ -115,6 +157,13 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 4. 限定 DEV，别用 HOLDOUT 调检索策略。模型/嵌入预热耗时单列。
 
 恢复：保留 S1/S2 和比较 Run，使用原 lab 版本；不删共享索引。验收是成员/输入身份变化，不自动等于答案质量提升。
+
+
+**L6 参考答案（条件性预期）：**V1 固定 S1 成员不因新修订 READY 自动变化；S2/V2 才能绑定新增内容。
+
+**如何确认：**比对返回的 revision/chunk/snapshot/hash；政策的实际召回需另核查。
+
+**解读边界：**身份变化证明绑定机制，不必然证明答案质量提升。
 
 ### L7 · Memory 写入、停用、回放
 
@@ -131,6 +180,13 @@ uv run --locked python -m benchmarks.evaluation.memory_quality.runner --database
 
 恢复：lab 新版关闭 Memory；reactivate 仅用于对应已停用条目；不删除历史来源。自动 TTL/衰减/容量运营不在此实验范围。
 
+
+**L7 参考答案（条件性预期）：**停用项从新 select 排除，旧严格冻结输入可按原 ID/hash load；异步抽取结果需查 job/行。脚本探针应按 WRITE/RECALL/ADMISSION/USE 分开读。
+
+**如何确认：**比较新/旧 Run 快照、条目状态、selected/admitted ID，模型 USE 单独评。
+
+**解读边界：**自动 TTL/衰减未完成；脚本 task_correct 不是 LLM 准确率。
+
 ### L8 · 小型 DEV 实验
 
 1. 从第 08 课已提交合成数据中选择少量 DEV case，建立新的 lab 数据草稿。
@@ -140,6 +196,13 @@ uv run --locked python -m benchmarks.evaluation.memory_quality.runner --database
 
 恢复：保留冻结实验，下一次从新草稿开始，不调 HOLDOUT，不修改历史 JSON。模型实验先确认预算；仅读原始结果也可以先完成“理解实验身份”的练习。
 
+
+**L8 参考答案（条件性预期）：**发布 DEV DatasetVersion，两个变体固定各自规格及输入，finalize 后按绑定身份执行；每个 case/variant/repetition 保存结果和失败。
+
+**如何确认：**核对内容/schema、build、pricing/evaluator、knowledge 及 Run 关联，再检查指标分母。
+
+**解读边界：**deterministic 编排成功不等于真实模型效果；不触碰 HOLDOUT 调参。
+
 ### L9 · 反馈与人工接管
 
 1. 在 lab Run 上提交一条可核查纠正，审核后导入 DEV 草稿，确认没有回写发布数据。
@@ -148,6 +211,13 @@ uv run --locked python -m benchmarks.evaluation.memory_quality.runner --database
 4. 说明为什么 CLOSED 没有批准工具或确认 UNKNOWN_OUTCOME。
 
 恢复：使用正常业务流程结束自己的 lab 案件，保留审计；不直接 SQL 删除。
+
+
+**L9 参考答案（条件性预期）：**反馈需当前批准审核后导入新 DEV 草稿；案件按权限和 expected_version 接手/关闭。旧普通请求会冲突，但相同已完成 close hash 的重发可复用。
+
+**如何确认：**核对导入新版本与原证据保留，记录案件每次 version，查 close 的幂等条件。
+
+**解读边界：**CLOSED 不批准动作、不确认未知写入；不能将相同 close 的复用误判为版本守卫失效。
 
 ## 4. 每个实验只用一份记录模板
 
@@ -240,19 +310,43 @@ ORDER BY sequence;
 ### C. 12 道口头题的参考展开
 
 1. **系统分哪些进程？** 浏览器、API、worker、beat 与数据服务；业务 packages 是模块。追问时说明哪些调用在 API 直接执行，哪些经队列，Redis 不保存全部业务真相。
+
+   **代码/字段例子：**apps/api/app.py 的 create_app；apps/worker/celery_app.py 的 create_celery_app。**失败或边界：**worker 调度断开不等于数据库记录删除。
 2. **权限怎么获得？** 请求认证得到 principal，按 workspace 成员/角色解析权限，再由具体 service 检查。组织和工作区成员不是一个概念，前端按钮不是权威。
+
+   **代码/字段例子：**get_workspace_context；WorkspaceExecutionContext.permissions。**失败或边界：**无 workspace 访问权时不能靠 UI 通过。
 3. **Agent Loop 如何推进？** prepare 建输入，model 提议，proposal 校验，policy 决策，execute 取真实结果，observation 回填，下一轮 model 决定继续或回答；等待和失败有独立出口。
+
+   **代码/字段例子：**_AgentRunGraph.model/after_model/observation；failure_code/final_output。**失败或边界：**模型失败走 finish，不进入工具派发。
 4. **为何冻结版本？** 历史 Run 需绑定完整 resolved spec 和工具修订，canonical hash 校验身份；LATEST 知识与 Memory 有自己的有效输入冻结，不能只存一个 version_id 就说全部可复现。
+
+   **代码/字段例子：**AgentPublishService.publish；AgentVersion.resolved_spec_hash。**失败或边界：**规格内容错配不能切草稿继续。
 5. **READ 都自动吗？** 自动路径要求 READ+NEVER，risk 不代替审批策略。某配置可表达审批要求仍要核对 executor 支持的 effect。
+
+   **代码/字段例子：**ToolPolicy.decide；effect/approval_policy。**失败或边界：**READ/ALWAYS 不走 ALLOW_AUTO。
 6. **批准和执行为何分开？** 人的许可与外部结果不是同一事实；APPROVED 后仍需原子 claim，可能执行失败或 UNKNOWN_OUTCOME。
+
+   **代码/字段例子：**ApprovalService.claim_execution；decision_status/execution_status。**失败或边界：**APPROVED 仍可为 UNKNOWN_OUTCOME。
 7. **恢复会新建 Run 吗？** same-run resume 继续原身份、actor、版本、预算和 checkpoint；新建重跑是另一语义。
+
+   **代码/字段例子：**AgentRunService.resume；checkpoint_thread_id/workspace+run。**失败或边界：**缺 checkpoint 为 APPROVAL_CHECKPOINT_MISSING。
 8. **未知写入为何不重试？** 请求可能已产生副作用，重发可能重复；本地状态/框架 checkpoint 无法确认远端结果，保留 NEEDS_ATTENTION 并调查。
+
+   **代码/字段例子：**McpToolExecutor.execute_write；dispatch。**失败或边界：**已派发无法确认不重试。
 9. **RAG 命中为何不等于正确？** 还有排名、上下文准入、条件理解与 claim-to-source 支持；真实引用 ID 不是全部命题正确的证明。
+
+   **代码/字段例子：**retrieve_with_trace；revision/chunk 身份。**失败或边界：**引用来源真实但命题仍可错误。
 10. **Memory 快照保护什么？** 当时有效输入身份。WRITE/RECALL/ADMISSION/USE 分开，快照不提高内容质量，也不证明模型真正使用。
+
+   **代码/字段例子：**SqlAlchemyMemoryStore.load；memory_content_hashes。**失败或边界：**strict snapshot 缺失/错 hash 失败，旧 ID-only 兼容另看。
 11. **实验怎么避免自证？** DEV 用开发、HOLDOUT 限制暴露，正式实验绑定发布数据和完整身份，保留原始结果与独立判分；对所测范围下结论。
+
+   **代码/字段例子：**实验 finalize/runner；DatasetVersion/content/schema/pricing/build。**失败或边界：**暴露后不再按未接触 HOLDOUT 宣称。
 12. **应用如何复用？** 相同 Runtime/审批/预算，模板、工具、Artifact projection 与页面表达差异；反馈和接管复用来源与审计机制，不复制安全链。
 
-每题再补一项具体证据：实际函数名、一个数据库字段、一个失败出口。能背这十二段仍不足以说已经掌握。
+   **代码/字段例子：**ToolResultArtifactRecorder._build；source Run 与 projection。**失败或边界：**未匹配结果不自动变成合法 Artifact。
+
+以上每题已给出核查位置与边界；可以再用自己的实验记录验证。能背这十二段仍不足以说已经掌握。
 
 ### D. 一道综合题及解题步骤
 
@@ -261,6 +355,18 @@ ORDER BY sequence;
 参考解法：先定位同一 workspace/run/approval，确认不是前端混入另一轮；查 execution_status 区分 NOT_STARTED、CLAIMED、确定终态和 UNKNOWN_OUTCOME；查 Run 状态与 checkpoint，确认 resume 是否发生或缺失；查 RunStep/持久事件，排除只是 delta/网络显示问题；最后核查实际远端证据。若动作已派发但结果未知，不能把没显示理解为没执行并重发。批准记录只证明许可，人工 CLOSED 也不证明远端成功。
 
 可继续变化题目：原 actor 被撤权；checkpoint 不存在；前端 token 仍指向旧 Turn；远端明确 TOOL_ERROR；事件 sequence 有缺口。每次只改一项条件，再回对应函数预测。这个训练比背一段“高可用架构”更能暴露理解缺口。
+
+**五种变式的逐项答案：**
+
+| 改变的条件 | 正确推理 | 核查位置 |
+| --- | --- | --- |
+| 原 actor 被撤权 | resume 重解析原创建者的当前成员/权限，不能借审批者身份升权；是否在访问解析或后续权限守卫拒绝，要看撤销的是哪项权限 | Runtime._authoritative_run_context / resume |
+| checkpoint 不存在 | 不能继续原图，NEEDS_ATTENTION / APPROVAL_CHECKPOINT_MISSING；不新建图假装成功恢复 | Runtime.resume |
+| token 指向旧 Turn | 同 token 被视为重发，会复用旧提交/Run或在未关联时返回 409；真正新问题需新 token | ThreadService.open_turn；threads.stream_turn |
+| 远端明确 TOOL_ERROR | 确定返回失败，ActionExecutionResult.failed，不归未知；整 Run 的后续状态按 Runtime 路由处理 | McpToolExecutor.execute_write |
+| sequence 有缺口 | delta 不持久化可造成正常缺口，按实际序号重连；需另查是否慢消费者丢帧，不能凭缺口认定结构事件丢失 | event_store.should_persist / attach_stream |
+
+答案指出条件和处理位置，不虚构所有权限撤销都会返回同一个失败码，也不把动作 FAILED 一律等同整个 Run FAILED。
 
 ### E. 证据表达的四种句式
 

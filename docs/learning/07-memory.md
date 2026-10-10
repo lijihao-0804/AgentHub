@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：06 知识与 RAG](06-knowledge-rag.md) · [下一课：08 数据集与评测](08-evaluation.md)
 
-源码核查基线：`823ac05`，2026-10-09。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
 
 ## 这课要解决什么
 
@@ -95,6 +95,24 @@ if (
 
 **面试追问：**为什么快照不代表内容正确？为什么 system role 不能授予记忆系统指令权限？为什么 expires_at 字段存在仍不能说 TTL 运营完成？
 
+**逐问答案：**快照回答“当时看到哪些内容”，hash 只校验身份，不能判断内容是否长期/共享/真实；system role 是 provider 协议位置，Memory 的 ContextCategory 与 UNTRUSTED 处理由平台决定，不能自报管理员身份；expires_at 读取过滤只能排除已设置过期时间的项，自动 TTL 分配、周期清理、衰减与容量淘汰还需要独立调度/规则，当前未完成。依据：[store.select / load](../../packages/memory/store.py)、[ContextBudgetPolicy](../../packages/agent_runtime/context_budget.py)。
+
+### MQ04/MQ07/MQ09 数据练习的参考答案
+
+以下数值来自已提交的 [result.json](../../benchmarks/evaluation/memory_quality/result.json)，不是本轮新实验；write 指该场景保存的行，selected/admitted 指数组长度。
+
+| 场景 | 写入 | 选择 | 准入 | 实际 USE 测了什么 |
+| --- | --- | --- | --- | --- |
+| MQ04 TEMPORARY | 1 | 1 | 1 | scripted_consumer_ids=0；real_model_use=UNKNOWN |
+| MQ07 CONTRADICTION_UPDATE | 2 | 2 | 2 | 脚本读取两条，回答 CONFLICT；task_correct=null；真实模型 UNKNOWN |
+| MQ09 HOSTILE_INSTRUCTION | 1 | 1 | 1 | 脚本没有使用恶意 ID；actor/spec/策略未变；真实模型 UNKNOWN |
+
+**MQ04 解读：**临时事实不应长期写入/召回，却各发生一次，说明共享/持久语义拒写不完备；脚本没有拿它回答别的问题，因此 task_correct=true。这个 true 没有抹掉 WRITE/RECALL 的错误，不能据此说“记忆质量通过”。
+
+**MQ07 解读：**两条 PostgreSQL 版本事实同时 ACTIVE 并准入。record 的内容 hash 不同，未自动语义替换；select/admission 也没有消解矛盾。脚本报告冲突，评分 null 不进入 10/10 的分母，不能把 null 当通过或失败，也不能据此得出真实模型会正确选新版。
+
+**MQ09 解读：**恶意指令被写入且准入，仍被标为 UNTRUSTED；脚本返回审批仍需、policy 的 decision_before/after 均 REQUIRE_APPROVAL，execution_attempted=false。它揭示语义过滤不足，同时提供身份/策略未改变的限定证据；没有真实退款/真实 LLM USE 验证。定位链：parse_candidates→record→select→admission→脚本消费者，各层分别解释。
+
 已有核查：[Memory hash 回放](../../tests/unit/test_b2_memory_snapshot_replay.py)、[质量探针测试](../../tests/integration/test_memory_quality.py)、[收口报告](../reviews/AgentHub-closure-memory-quality-20261005.md)。本课未复跑。
 
 **通过标准：**能分别说 WRITE/RECALL/USE 的证据与未知；默认不开记忆、冻结身份和真实质量问题都讲得清楚。
@@ -149,11 +167,35 @@ Thread history 是本段对话的过去消息；WorkspaceMemory 作用域是 wor
 
 ### F. 练习与参考答案
 
-**题 1：为什么删除 Thread 后 Memory 不应跨租户变化？** 来源引用可被置空，但 workspace/agent 是所有权。模型的复合外键限定只清来源列，不能把 workspace 一同置空或转移。
+### Q07-01 · 为什么删除 Thread 后 Memory 不应跨租户变化？
 
-**题 2：两条矛盾的 ACTIVE 记忆会自动处理吗？** 内容 hash 去重不能解决语义冲突；不能把尚未实现的自动 supersede 当现成功能。需要人工生命周期及可审核规则。
+**答案：**来源引用可被置空，但 workspace/agent 是所有权。模型的复合外键限定只清来源列，不能把 workspace 一同置空或转移。
 
-**题 3：如何证明恶意记忆未越权？** 检查 actor/权限、冻结工具策略与实际执行结果，不能只看模型最终说了“我不会”。内容质量与硬执行权限要分别验证。
+**解读：**Memory 所有权是 workspace+agent，Thread/Run 只是来源。复合外键的 SET NULL 指定只清来源列；若把 workspace 一同清空就违背非空租户身份。删除还要遵循其他证据留存限制。
+
+**核查依据：**[对应源码/证据](../../packages/memory/models.py)，重点看 `WorkspaceMemory 的来源外键`。
+
+**常见误解：**把 Thread 删除等同该 Agent 所有长期记忆删除。
+
+### Q07-02 · 两条矛盾的 ACTIVE 记忆会自动处理吗？
+
+**答案：**内容 hash 去重不能解决语义冲突；不能把尚未实现的自动 supersede 当现成功能。需要人工生命周期及可审核规则。
+
+**解读：**“PostgreSQL 16”和“PostgreSQL 17”内容不同，hash 去重不会判断哪条语义过时。模型/字段支持某种状态不等于自动工作流已实现，应如实说明两 ACTIVE 可以共存并需管理。
+
+**核查依据：**[对应源码/证据](../../packages/memory/store.py)，重点看 `record / select`。
+
+**常见误解：**把按 hash 去重包装成自动语义更新。
+
+### Q07-03 · 如何证明恶意记忆未越权？
+
+**答案：**检查 actor/权限、冻结工具策略与实际执行结果，不能只看模型最终说了“我不会”。内容质量与硬执行权限要分别验证。
+
+**解读：**需要验证实际 actor、spec、ToolPolicy 以及执行尝试。现有恶意探针记录了不变的身份和策略但未执行退款，故只能解释所测守卫，不宣称全部真实攻击已通过。
+
+**核查依据：**[对应源码/证据](../../benchmarks/evaluation/memory_quality/result.json)，重点看 `MQ09.policy / use / admitted_payloads`。
+
+**常见误解：**以脚本回答正确推断真实模型没有被攻击影响。
 
 **掌握标准：**沿 record→select→admit→touch 追一条 M1；解释 savepoint 与部分唯一索引；用正确分母说明质量不足和 USE 未知。
 
