@@ -14,10 +14,10 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [ToolPolicy.decide](../../packages/tools/policy.py)<br><br>只决定自动放行还是要求审批；不会调用工具网络。 | 冻结 ToolDefinition→ALLOW_AUTO / REQUIRE_APPROVAL。 | 看 READ 与 NEVER 的 conjunction；risk 没有作为第三个自动放行条件。 |
-| [compute_logical_action_id](../../packages/approvals/contracts.py)<br><br>为本次受控提议建立不依赖 provider tool-call ID 的身份。 | workspace/Run/tool revision/参数 hash/ordinal→确定性 UUID 字符串。 | 先解释每个身份字段，再看固定 namespace；去重范围不能只按参数。 |
-| [create_or_get](../../packages/approvals/service.py)<br>[decide](../../packages/approvals/service.py)<br>[claim_execution](../../packages/approvals/service.py)<br>[complete_execution](../../packages/approvals/service.py)<br><br>分别保存/复用提议、记录人决定、抢占执行权、保存确定/未知结果。 | context 与动作/审批身份→Approval；claim 可能 None。 | 先把 decision/execution 两个状态画开，再看锁与条件 UPDATE；网络写入不在 decide 内。 |
-| [policy](../../packages/agent_runtime/runtime.py)<br>[action_execute](../../packages/agent_runtime/runtime.py)<br><br>policy 将提议与审批连接；action_execute 对许可动作 claim 后调用执行器并投影结果。 | 图状态中的调用及批准信息→审批等待/工具结果/Run 状态更新。 | 找到 interrupt 和 claim；确认 UNKNOWN_OUTCOME 怎样进入 NEEDS_ATTENTION。 |
+| [ToolPolicy.decide](../../packages/tools/policy.py)：只决定自动放行还是要求审批；不会调用工具网络。 | 冻结 ToolDefinition→ALLOW_AUTO / REQUIRE_APPROVAL。 | 看 READ 与 NEVER 的 conjunction；risk 没有作为第三个自动放行条件。 |
+| [compute_logical_action_id](../../packages/approvals/contracts.py)：为本次受控提议建立不依赖 provider tool-call ID 的身份。 | workspace/Run/tool revision/参数 hash/ordinal→确定性 UUID 字符串。 | 先解释每个身份字段，再看固定 namespace；去重范围不能只按参数。 |
+| [create_or_get](../../packages/approvals/service.py) / [decide](../../packages/approvals/service.py) / [claim_execution](../../packages/approvals/service.py) / [complete_execution](../../packages/approvals/service.py)：分别保存/复用提议、记录人决定、抢占执行权、保存确定/未知结果。 | context 与动作/审批身份→Approval；claim 可能 None。 | 先把 decision/execution 两个状态画开，再看锁与条件 UPDATE；网络写入不在 decide 内。 |
+| [policy](../../packages/agent_runtime/runtime.py) / [action_execute](../../packages/agent_runtime/runtime.py)：policy 将提议与审批连接；action_execute 对许可动作 claim 后调用执行器并投影结果。 | 图状态中的调用及批准信息→审批等待/工具结果/Run 状态更新。 | 找到 interrupt 和 claim；确认 UNKNOWN_OUTCOME 怎样进入 NEEDS_ATTENTION。 |
 
 ## 1. MCP 不是治理的替代品
 
@@ -75,8 +75,7 @@ flowchart TB
 
 > **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
-<details>
-<summary>展开 compute_logical_action_id 的带注释代码</summary>
+**带注释源码：compute_logical_action_id**
 
 ```python
 def compute_logical_action_id(
@@ -108,8 +107,6 @@ def compute_logical_action_id(
     # 学习：exactly-once。
     return str(uuid5(UUID("7f2e2f1e-0f1b-5df3-9d8f-5a3bbf1b3c31"), canonical_json_hash(identity)))
 ```
-
-</details>
 
 它绑定 workspace、run、工具修订、规范参数 hash 和提议序号；序号区分同 Run 中不同的逻辑提议。相同参数在不同 Run/序号仍可能形成新动作，这不是跨业务无限去重。
 
@@ -185,8 +182,7 @@ def compute_logical_action_id(
 
 > **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
-<details>
-<summary>展开 claim_execution 的带注释代码</summary>
+**带注释源码：claim_execution**
 
 ```python
 async def claim_execution(
@@ -227,8 +223,6 @@ async def claim_execution(
         await session.commit()
         return claimed
 ```
-
-</details>
 
 把函数拆成三层：where 同时要求正确租户、指定审批、已经批准、尚未开始；values 将状态推进到 CLAIMED 并增加尝试计数；returning 告诉调用者是否真正修改了一行，commit 持久化该结果。
 

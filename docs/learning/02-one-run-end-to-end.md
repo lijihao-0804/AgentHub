@@ -14,10 +14,10 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [AgentRunService.run](../../packages/agent_runtime/runtime.py)<br>[prepare_run](../../packages/agent_runtime/runtime.py)<br>[execute_prepared_run](../../packages/agent_runtime/runtime.py)<br><br>run 是组合入口，prepare_run 保存执行身份，execute_prepared_run 实际执行并汇总结果。 | 执行 context、version、input 与可选覆盖→AgentRun，再到 AgentRunResult。 | 按创建→图调用→结果保存读；找同一 run_id 在各步怎样传递。 |
-| [_AgentRunGraph.prepare](../../packages/agent_runtime/runtime.py)<br>[model](../../packages/agent_runtime/runtime.py)<br><br>prepare 建消息/规格/工具状态；model 准入后调用供应商，返回下一步状态更新。 | AgentRunState 与原 Run→准备状态，随后模型输出/提议/usage 或失败。 | prepare 看 workspace/spec hash/schema；model 看 admission→最终 ModelRequest→Gateway→状态计数。 |
-| [admit_context](../../packages/agent_runtime/context_budget.py)<br>[ContextBudgetPolicy.admit](../../packages/agent_runtime/context_budget.py)<br><br>前者是函数式入口，后者执行预算分类、投影/驱逐并给出准入结果。 | 候选 messages、categories、exchange_groups、tools 与预算/estimator→ContextAdmissionResult。 | 长参数表是输入契约；实际算法在 admit。分清估算、保留类别和 exchange 配对。 |
-| [模型计划准备与生成/流式路径](../../packages/model_gateway/gateway.py)<br><br>解析能力/凭据并经 adapter 调供应商，承担重试/fallback 和观测边界。 | ModelRequest、执行计划→统一响应或 stream events。 | 先看 public 方法的计划与 adapter 调用，再看可见 token 标记；不一开始钻进 SDK。 |
+| [AgentRunService.run](../../packages/agent_runtime/runtime.py) / [prepare_run](../../packages/agent_runtime/runtime.py) / [execute_prepared_run](../../packages/agent_runtime/runtime.py)：run 是组合入口，prepare_run 保存执行身份，execute_prepared_run 实际执行并汇总结果。 | 执行 context、version、input 与可选覆盖→AgentRun，再到 AgentRunResult。 | 按创建→图调用→结果保存读；找同一 run_id 在各步怎样传递。 |
+| [_AgentRunGraph.prepare](../../packages/agent_runtime/runtime.py) / [model](../../packages/agent_runtime/runtime.py)：prepare 建消息/规格/工具状态；model 准入后调用供应商，返回下一步状态更新。 | AgentRunState 与原 Run→准备状态，随后模型输出/提议/usage 或失败。 | prepare 看 workspace/spec hash/schema；model 看 admission→最终 ModelRequest→Gateway→状态计数。 |
+| [admit_context](../../packages/agent_runtime/context_budget.py) / [ContextBudgetPolicy.admit](../../packages/agent_runtime/context_budget.py)：前者是函数式入口，后者执行预算分类、投影/驱逐并给出准入结果。 | 候选 messages、categories、exchange_groups、tools 与预算/estimator→ContextAdmissionResult。 | 长参数表是输入契约；实际算法在 admit。分清估算、保留类别和 exchange 配对。 |
+| [模型计划准备与生成/流式路径](../../packages/model_gateway/gateway.py)：解析能力/凭据并经 adapter 调供应商，承担重试/fallback 和观测边界。 | ModelRequest、执行计划→统一响应或 stream events。 | 先看 public 方法的计划与 adapter 调用，再看可见 token 标记；不一开始钻进 SDK。 |
 
 ## 1. Run 的开始不是一次裸模型调用
 
@@ -94,8 +94,7 @@ def after_model(self, state: AgentRunState) -> str:
 
 > **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
-<details>
-<summary>展开 admit_context 的带注释代码</summary>
+**带注释源码：admit_context**
 
 ```python
 def admit_context(
@@ -126,8 +125,6 @@ def admit_context(
     # 学习：返回 ContextAdmissionResult，调用者从它取得最终输入与预算信息。
     ).admit(messages, categories, exchange_groups, tool_definitions)
 ```
-
-</details>
 
 读 `_AgentRunGraph.model` 时按这个顺序圈词：`budget_policy`、`admission`、`_touch_admitted_memories`、`ModelRequest`、`prepare_resolved`、模型生成/流式。
 

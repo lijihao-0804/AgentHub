@@ -14,9 +14,9 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [load_dataset](../../benchmarks/evaluation/memory_quality/runner.py)<br>[memory_payloads](../../benchmarks/evaluation/memory_quality/runner.py)<br>[consume_evidence](../../benchmarks/evaluation/memory_quality/runner.py)<br>[run_quality](../../benchmarks/evaluation/memory_quality/runner.py)<br><br>验证合成场景、读取真实准入 payload，并用脚本消费者判代理任务。 | dataset、独立数据库与结果输出路径→探针 result/summary。 | 先看 seed 创建隔离场景数据，再看 run_scenario 的 worker/runtime 委托和脚本评分，最后看 run_quality 聚合结果。finally 仅 dispose 数据库 engine，没有自动删除数据库里的场景记录；探针不是付费 LLM USE 证明。 |
-| [AgentRun](../../packages/agent_runtime/models.py)<br>[RunStep](../../packages/agent_runtime/models.py)<br>[AgentRunEvent](../../packages/agent_runtime/models.py)<br><br>定义第 10 课只读 SQL 查询的表、列和身份关系。 | ORM 定义，没有运行时执行结果。 | 核对 agent_run_id、sequence_number/sequence，查自己 lab 的真实 UUID；不凭列名猜。 |
-| [Approval](../../packages/approvals/models.py)<br><br>定义决定/执行记录以及运行归属，供 SQL 与恢复核查。 | ORM 定义，没有审批动作副作用。 | 核对 run_id、decision_status/execution_status；查询结果配合 checkpoint/远端证据解释。 |
+| [load_dataset](../../benchmarks/evaluation/memory_quality/runner.py) / [memory_payloads](../../benchmarks/evaluation/memory_quality/runner.py) / [consume_evidence](../../benchmarks/evaluation/memory_quality/runner.py) / [run_quality](../../benchmarks/evaluation/memory_quality/runner.py)：验证合成场景、读取真实准入 payload，并用脚本消费者判代理任务。 | dataset、独立数据库与结果输出路径→探针 result/summary。 | 先看 seed 创建隔离场景数据，再看 run_scenario 的 worker/runtime 委托和脚本评分，最后看 run_quality 聚合结果。finally 仅 dispose 数据库 engine，没有自动删除数据库里的场景记录；探针不是付费 LLM USE 证明。 |
+| [AgentRun](../../packages/agent_runtime/models.py) / [RunStep](../../packages/agent_runtime/models.py) / [AgentRunEvent](../../packages/agent_runtime/models.py)：定义第 10 课只读 SQL 查询的表、列和身份关系。 | ORM 定义，没有运行时执行结果。 | 核对 agent_run_id、sequence_number/sequence，查自己 lab 的真实 UUID；不凭列名猜。 |
+| [Approval](../../packages/approvals/models.py)：定义决定/执行记录以及运行归属，供 SQL 与恢复核查。 | ORM 定义，没有审批动作副作用。 | 核对 run_id、decision_status/execution_status；查询结果配合 checkpoint/远端证据解释。 |
 
 ## 1. 两条学习路线
 

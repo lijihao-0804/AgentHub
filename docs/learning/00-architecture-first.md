@@ -33,10 +33,10 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [create_app](../../apps/api/app.py)<br><br>把 API 应用、依赖和路由接起来；不是模型推理函数。 | 应用 settings/配置→FastAPI app。 | 先看 lifespan/状态依赖与 router 注册，再追 threads 路由；确认 API 暴露了什么入口。 |
-| [get_production_agent_run_service](../../apps/api/agent_runtime_dependencies.py)<br><br>生产运行时的装配点，将接口背后的具体实现交给同一个 service。 | Request/app.state 中的配置与 session factory→AgentRunService。 | 看缓存/工厂来源，再看 Gateway、ToolRuntime、Approval/Action、checkpoint、Memory/Artifact 的注入；读完能说出每个对象负责哪一步。 |
-| [AgentPublishService.publish](../../packages/agent_runtime/publish.py)<br><br>把可编辑草稿解析为不可变执行版本，供之后 Run 绑定。 | session、workspace context、agent_id→保存 AgentVersion 行，返回 PublishedAgentVersion 摘要（版本 ID、版本号、规格 hash 等）。 | 权限/草稿→解析模型、工具、知识→resolved_spec/hash→保存版本；不要把版本当草稿指针。 |
-| [_AgentRunGraph.invoke](../../packages/agent_runtime/runtime.py)<br><br>注册图节点和条件路由，再执行图；字典只是注册表。 | 初始状态或 resume 指令，加 checkpoint/config→图的最终/中断状态。 | 看 nodes、after_* 与编译调用；先看连接关系，再读单节点实现。 |
+| [create_app](../../apps/api/app.py)：把 API 应用、依赖和路由接起来；不是模型推理函数。 | 应用 settings/配置→FastAPI app。 | 先看 lifespan/状态依赖与 router 注册，再追 threads 路由；确认 API 暴露了什么入口。 |
+| [get_production_agent_run_service](../../apps/api/agent_runtime_dependencies.py)：生产运行时的装配点，将接口背后的具体实现交给同一个 service。 | Request/app.state 中的配置与 session factory→AgentRunService。 | 看缓存/工厂来源，再看 Gateway、ToolRuntime、Approval/Action、checkpoint、Memory/Artifact 的注入；读完能说出每个对象负责哪一步。 |
+| [AgentPublishService.publish](../../packages/agent_runtime/publish.py)：把可编辑草稿解析为不可变执行版本，供之后 Run 绑定。 | session、workspace context、agent_id→保存 AgentVersion 行，返回 PublishedAgentVersion 摘要（版本 ID、版本号、规格 hash 等）。 | 权限/草稿→解析模型、工具、知识→resolved_spec/hash→保存版本；不要把版本当草稿指针。 |
+| [_AgentRunGraph.invoke](../../packages/agent_runtime/runtime.py)：注册图节点和条件路由，再执行图；字典只是注册表。 | 初始状态或 resume 指令，加 checkpoint/config→图的最终/中断状态。 | 看 nodes、after_* 与编译调用；先看连接关系，再读单节点实现。 |
 
 ## 1. 从一个具体问题理解项目
 
@@ -223,8 +223,7 @@ worker 还处理知识入库、评测、Memory 抽取及对账。任务队列传
 
 > **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
-<details>
-<summary>展开 节点注册表 的带注释代码</summary>
+**带注释源码：节点注册表**
 
 ```python
 # 学习：此处是节点注册表，不是按字典顺序执行；实际连线和 after_* 决定路径。
@@ -247,8 +246,6 @@ nodes={
     "finish": self.finish,
 }
 ```
-
-</details>
 
 八个节点的作用依次理解：
 

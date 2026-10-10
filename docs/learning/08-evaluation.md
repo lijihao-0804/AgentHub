@@ -14,10 +14,10 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [ExperimentService.finalize_experiment](../../packages/evaluation/experiments.py)<br><br>校验数据和变体后固定实验规格/身份，将草稿推进到冻结状态。 | session/context/experiment_id→冻结 Experiment。 | 先发布数据 hash/schema，再 _validate_stored_variant，后 spec/hash/status/commit；不在此运行全部 case。 |
-| [prepare_run](../../packages/evaluation/runner.py)<br>[claim_run](../../packages/evaluation/runner.py)<br>[claim_case](../../packages/evaluation/runner.py)<br><br>生成执行任务与领取租约，然后按条件领取可执行 case。 | run_id、owner/generation 与 session→任务数、Run 或 case/None。 | 先理解 case×variant×repetition；claim_case 看行锁 skip_locked 和代数条件。 |
-| [bind_case_agent_run](../../packages/evaluation/runner.py)<br>[complete_case](../../packages/evaluation/runner.py)<br>[fail_case](../../packages/evaluation/runner.py)<br>[recover_inflight_cases](../../packages/evaluation/runner.py)<br><br>记录真实执行关联，保存评分/失败，依据旧 Run 对账中断执行。 | case/Run/lease 与结果→持久结果状态。 | 看绑定时点与 generation 检查；不要在缺证据时盲重跑副作用。 |
-| [AgentRuntimeEvaluationDriver](../../packages/evaluation/runner.py)<br><br>把冻结 case/variant 接入真实 Runtime；与确定性 driver 的证据级别不同。 | 已冻结变体与 case→执行结果和 judge 输入/输出。 | 先看 prepare/execute 的委托与绑定，再看评分；expected 不该变模型任务答案。 |
+| [ExperimentService.finalize_experiment](../../packages/evaluation/experiments.py)：校验数据和变体后固定实验规格/身份，将草稿推进到冻结状态。 | session/context/experiment_id→冻结 Experiment。 | 先发布数据 hash/schema，再 _validate_stored_variant，后 spec/hash/status/commit；不在此运行全部 case。 |
+| [prepare_run](../../packages/evaluation/runner.py) / [claim_run](../../packages/evaluation/runner.py) / [claim_case](../../packages/evaluation/runner.py)：生成执行任务与领取租约，然后按条件领取可执行 case。 | run_id、owner/generation 与 session→任务数、Run 或 case/None。 | 先理解 case×variant×repetition；claim_case 看行锁 skip_locked 和代数条件。 |
+| [bind_case_agent_run](../../packages/evaluation/runner.py) / [complete_case](../../packages/evaluation/runner.py) / [fail_case](../../packages/evaluation/runner.py) / [recover_inflight_cases](../../packages/evaluation/runner.py)：记录真实执行关联，保存评分/失败，依据旧 Run 对账中断执行。 | case/Run/lease 与结果→持久结果状态。 | 看绑定时点与 generation 检查；不要在缺证据时盲重跑副作用。 |
+| [AgentRuntimeEvaluationDriver](../../packages/evaluation/runner.py)：把冻结 case/variant 接入真实 Runtime；与确定性 driver 的证据级别不同。 | 已冻结变体与 case→执行结果和 judge 输入/输出。 | 先看 prepare/execute 的委托与绑定，再看评分；expected 不该变模型任务答案。 |
 
 ## 1. 数据集到实验的链条
 

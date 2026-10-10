@@ -10,11 +10,11 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [ModelMessage / ModelToolCall / ModelToolDefinition](../../packages/model_gateway/contracts.py)<br><br>定义模型消息与工具协议 | 消息、工具描述与参数 → 与 provider 无关的结构 | 描述工具、提议调用、反馈结果是不同对象；tool 消息需要调用 ID |
-| [model / after_model](../../packages/agent_runtime/runtime.py)<br><br>组织一次模型回合并选择下一节点 | 图状态、准入上下文 → 模型响应、轮次、下一节点 | 调用前检查步数、费用、取消；有工具调用时不能直接当最终回答 |
-| [tool_proposal](../../packages/agent_runtime/runtime.py)<br><br>规范化模型提议并检查循环上限 | ModelResponse → 待治理工具集合 | 重复计数、总调用计数、消息配对 ID；这里尚未执行工具 |
-| [read_execute / observation / after_observation](../../packages/agent_runtime/runtime.py)<br><br>受限并发读、回写结果、决定再推理或结束 | 已获准调用及其结果 → tool 消息与下一轮状态 | 并发有上限；反馈按 ID 对齐；既有失败不能被清空 |
-| [compute_logical_action_id](../../packages/approvals/contracts.py)<br><br>为治理动作建立稳定身份 | workspace/run/revision/参数/序号 → 动作 ID | 区别于 provider ID，供审批与执行身份使用 |
+| [ModelMessage / ModelToolCall / ModelToolDefinition](../../packages/model_gateway/contracts.py)：定义模型消息与工具协议 | 消息、工具描述与参数 → 与 provider 无关的结构 | 描述工具、提议调用、反馈结果是不同对象；tool 消息需要调用 ID |
+| [model / after_model](../../packages/agent_runtime/runtime.py)：组织一次模型回合并选择下一节点 | 图状态、准入上下文 → 模型响应、轮次、下一节点 | 调用前检查步数、费用、取消；有工具调用时不能直接当最终回答 |
+| [tool_proposal](../../packages/agent_runtime/runtime.py)：规范化模型提议并检查循环上限 | ModelResponse → 待治理工具集合 | 重复计数、总调用计数、消息配对 ID；这里尚未执行工具 |
+| [read_execute / observation / after_observation](../../packages/agent_runtime/runtime.py)：受限并发读、回写结果、决定再推理或结束 | 已获准调用及其结果 → tool 消息与下一轮状态 | 并发有上限；反馈按 ID 对齐；既有失败不能被清空 |
+| [compute_logical_action_id](../../packages/approvals/contracts.py)：为治理动作建立稳定身份 | workspace/run/revision/参数/序号 → 动作 ID | 区别于 provider ID，供审批与执行身份使用 |
 
 建议先读 02 的图，再读本课两段源码；涉及审批和恢复时回 04/05。不要一开始把 Runtime 文件从头背到尾。
 
@@ -75,8 +75,7 @@ assistant 消息可以携带多个 tool_calls；对应 tool 消息用 `tool_call
 
 **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；类、导入和调用上下文省略。
 
-<details>
-<summary>展开 tool_proposal 的带注释代码</summary>
+**带注释源码：tool_proposal**
 
 ```python
 async def tool_proposal(self, state: AgentRunState) -> dict[str, Any]:
@@ -161,8 +160,6 @@ async def tool_proposal(self, state: AgentRunState) -> dict[str, Any]:
     }
 ```
 
-</details>
-
 **读完必须理解三点：** 第一，`TOOL_REQUESTED` 事件记录“提议产生”，不能拿它当动作完成率分子。第二，基础参数形状通过后仍要做具体工具契约和策略检查。第三，重复守卫检查相同规范签名，改参数的连续失败还需靠总调用和轮次守卫约束。
 
 代价是合理重复也会消耗限额，例如查同一个服务等待状态变化。因此限额是产品执行策略，要按工具用途设计，不能无限放宽来掩盖模型循环问题。
@@ -173,8 +170,7 @@ async def tool_proposal(self, state: AgentRunState) -> dict[str, Any]:
 
 **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；类、导入和调用上下文省略。
 
-<details>
-<summary>展开 observation 的带注释代码</summary>
+**带注释源码：observation**
 
 ```python
 async def observation(self, state: AgentRunState) -> dict[str, Any]:
@@ -238,8 +234,6 @@ async def observation(self, state: AgentRunState) -> dict[str, Any]:
         "failure_code": terminal_code or state.get("failure_code"),
     }
 ```
-
-</details>
 
 `after_observation` 在有 `failure_code` 时走 finish，否则回 model。普通工具失败可以作为反馈让模型换方案；`TOOL_APPROVAL_NOT_AVAILABLE`、工具/AgentVersion 完整性错误、模型绑定无效等指定终止错误会结束循环。已有的未知结果等失败也必须保留，不能用一次观察清空。
 

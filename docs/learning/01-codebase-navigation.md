@@ -14,11 +14,11 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [get_current_principal](../../apps/api/auth_dependencies.py)<br><br>把请求认证结果变为可信主体，回答是谁。 | HTTP Request/认证材料→PrincipalContext；不合法时错误。 | 找认证来源和校验，再确认 user_id/request 身份从哪里来；不要从 body 或模型读取 actor。 |
-| [get_workspace_context](../../apps/api/knowledge_dependencies.py)<br>[get_agent_run_workspace_context](../../apps/api/knowledge_dependencies.py)<br><br>检查工作区访问权；后者是本课 Thread 路由实际注入的版本。 | 普通依赖取 principal/session；运行依赖从 Request 装配短 session→WorkspaceExecutionContext。 | 两者都调用 TenantService；运行依赖在 SSE 前关闭权限查询的 session，不让长流一直占用连接。 |
-| [stream_turn](../../apps/api/routes/threads.py)<br><br>协调版本、Turn、Run 和 StreamingResponse；把 HTTP 与业务执行连接起来。 | 路由 UUID、文本/client_token、可信 context 与服务→SSE response，或明确错误。 | 新 token 看准备/关联；重复 token 看旧 Run 附着和未关联 409；此函数不实现 Agent Loop。 |
-| [resolve_agent_version](../../packages/threads/service.py)<br>[open_turn](../../packages/threads/service.py)<br>[attach_run](../../packages/threads/service.py)<br>[submit_turn](../../packages/threads/service.py)<br><br>前三者选版本、记录提交、保存关联；submit_turn 是同步执行编排。 | workspace context + thread/input/token→版本/Turn，关联写入或 SubmittedTurn。 | 分清每次 commit；同步重点看宽限窗口与 _turn_run，流式路径没有同样的 orphan 修复。 |
-| [prepare_stream](../../packages/agent_runtime/runtime.py)<br>[stream](../../packages/agent_runtime/runtime.py)<br><br>准备阶段先创建 Run，stream 才推进执行并产生事件。 | context、发布 version、input/thread 或 prepared_run→Run / 异步事件流。 | Run 已存在≠模型已执行；辨认图启动、事件发布与取消/断线守卫。 |
+| [get_current_principal](../../apps/api/auth_dependencies.py)：把请求认证结果变为可信主体，回答是谁。 | HTTP Request/认证材料→PrincipalContext；不合法时错误。 | 找认证来源和校验，再确认 user_id/request 身份从哪里来；不要从 body 或模型读取 actor。 |
+| [get_workspace_context](../../apps/api/knowledge_dependencies.py) / [get_agent_run_workspace_context](../../apps/api/knowledge_dependencies.py)：检查工作区访问权；后者是本课 Thread 路由实际注入的版本。 | 普通依赖取 principal/session；运行依赖从 Request 装配短 session→WorkspaceExecutionContext。 | 两者都调用 TenantService；运行依赖在 SSE 前关闭权限查询的 session，不让长流一直占用连接。 |
+| [stream_turn](../../apps/api/routes/threads.py)：协调版本、Turn、Run 和 StreamingResponse；把 HTTP 与业务执行连接起来。 | 路由 UUID、文本/client_token、可信 context 与服务→SSE response，或明确错误。 | 新 token 看准备/关联；重复 token 看旧 Run 附着和未关联 409；此函数不实现 Agent Loop。 |
+| [resolve_agent_version](../../packages/threads/service.py) / [open_turn](../../packages/threads/service.py) / [attach_run](../../packages/threads/service.py) / [submit_turn](../../packages/threads/service.py)：前三者选版本、记录提交、保存关联；submit_turn 是同步执行编排。 | workspace context + thread/input/token→版本/Turn，关联写入或 SubmittedTurn。 | 分清每次 commit；同步重点看宽限窗口与 _turn_run，流式路径没有同样的 orphan 修复。 |
+| [prepare_stream](../../packages/agent_runtime/runtime.py) / [stream](../../packages/agent_runtime/runtime.py)：准备阶段先创建 Run，stream 才推进执行并产生事件。 | context、发布 version、input/thread 或 prepared_run→Run / 异步事件流。 | Run 已存在≠模型已执行；辨认图启动、事件发布与取消/断线守卫。 |
 
 ## 1. 输入先落在哪一层
 

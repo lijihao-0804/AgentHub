@@ -14,10 +14,10 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [AgentRunService.resume](../../packages/agent_runtime/runtime.py)<br><br>以原 Run 继续图执行，不重新开始一次问题。 | request context、run_id、approval_id→AgentRunResult 或明确恢复错误。 | 原 Run 状态→原 actor 当前权限→审批归属→checkpoint→Command resume→结果。 |
-| [checkpoint_thread_id](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)<br>[config_for_run](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)<br>[has_checkpoint](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)<br><br>生成同 Run 图身份、交给框架配置，并探测恢复状态是否存在。 | workspace+Run→标识/config；探测→bool。 | 业务 Thread 与 checkpoint thread_id 不同；配置存在也不证明远端写入结果。 |
-| [McpToolExecutor.execute_write](../../packages/mcp/runtime.py)<br><br>派发一次批准的 WRITE，将远端/派发证据转换成三类动作结果。 | context、ToolDefinition、arguments→ActionExecutionResult。 | 依次看 OK、TOOL_ERROR、NOT_DISPATCHED、未知兜底；不要先统一加 retry。 |
-| [should_persist](../../packages/agent_runtime/event_store.py)<br><br>判断事件是否进入持久重放记录，本身不执行 INSERT。 | AgentEvent→bool。 | 读 NON_PERSISTED_EVENT_TYPES，再读实际写入与队列边界；序号是游标不是行数。 |
+| [AgentRunService.resume](../../packages/agent_runtime/runtime.py)：以原 Run 继续图执行，不重新开始一次问题。 | request context、run_id、approval_id→AgentRunResult 或明确恢复错误。 | 原 Run 状态→原 actor 当前权限→审批归属→checkpoint→Command resume→结果。 |
+| [checkpoint_thread_id](../../packages/agent_runtime/adapters/langgraph/checkpoint.py) / [config_for_run](../../packages/agent_runtime/adapters/langgraph/checkpoint.py) / [has_checkpoint](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)：生成同 Run 图身份、交给框架配置，并探测恢复状态是否存在。 | workspace+Run→标识/config；探测→bool。 | 业务 Thread 与 checkpoint thread_id 不同；配置存在也不证明远端写入结果。 |
+| [McpToolExecutor.execute_write](../../packages/mcp/runtime.py)：派发一次批准的 WRITE，将远端/派发证据转换成三类动作结果。 | context、ToolDefinition、arguments→ActionExecutionResult。 | 依次看 OK、TOOL_ERROR、NOT_DISPATCHED、未知兜底；不要先统一加 retry。 |
+| [should_persist](../../packages/agent_runtime/event_store.py)：判断事件是否进入持久重放记录，本身不执行 INSERT。 | AgentEvent→bool。 | 读 NON_PERSISTED_EVENT_TYPES，再读实际写入与队列边界；序号是游标不是行数。 |
 
 ## 1. 恢复需要稳定的图身份
 
@@ -82,8 +82,7 @@ sequenceDiagram
 
 > **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
-<details>
-<summary>展开 execute_write 的带注释代码</summary>
+**带注释源码：execute_write**
 
 ```python
 async def execute_write(
@@ -124,8 +123,6 @@ async def execute_write(
         outcome.failure_code or "MCP_TOOL_CALL_FAILED"
     )
 ```
-
-</details>
 
 读法：OK 是确认成功；TOOL_ERROR 是远端明确返回失败；NOT_DISPATCHED 是未发请求；其他无法确认的已派发情况归未知。不要把所有超时都写成“失败，可重试”。
 

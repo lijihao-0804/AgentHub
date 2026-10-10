@@ -14,10 +14,10 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [_extract_run_memories](../../apps/worker/tasks/memories.py)<br><br>异步重读成功 Thread Run/规格/权限，调用抽取，再保存候选。 | workspace/run/request 身份与依赖→记忆写入副作用或跳过/错误处理。 | 先看是否有资格写，再看模型请求和 record；队列里有 ID 不等于被授权。 |
-| [extraction_request](../../packages/memory/extraction.py)<br>[parse_candidates](../../packages/memory/extraction.py)<br><br>前者构造抽取模型请求，后者把模型文本解析为合法结构/引文候选。 | TurnForExtraction→ModelRequest；模型输出+user_input→候选集合。 | 看 user_input 与 evidence 校验；硬结构检查不等同共享/持久语义拒写。 |
-| [normalize_candidate](../../packages/memory/store.py)<br>[record](../../packages/memory/store.py)<br>[select](../../packages/memory/store.py)<br>[load](../../packages/memory/store.py)<br><br>规范候选、去重保存、为新问题挑当前有效项、按冻结身份回读。 | 内容/范围/来源→新 IDs；query→候选；冻结 IDs/hash→原内容或错误。 | record 看 ACTIVE hash/savepoint；select 看过滤与排序；load 看严格 hash 与旧 ID-only 兼容。 |
-| [_touch_admitted_memories](../../packages/agent_runtime/runtime.py)<br><br>从最终请求消息识别 admitted Memory IDs，更新使用时间观测。 | 最终 state.messages 与允许的 memory_ids→touch 副作用。 | 先看是否在最终 payload，再看允许范围和去重；它不是答案 USE 评估器。 |
+| [_extract_run_memories](../../apps/worker/tasks/memories.py)：异步重读成功 Thread Run/规格/权限，调用抽取，再保存候选。 | workspace/run/request 身份与依赖→记忆写入副作用或跳过/错误处理。 | 先看是否有资格写，再看模型请求和 record；队列里有 ID 不等于被授权。 |
+| [extraction_request](../../packages/memory/extraction.py) / [parse_candidates](../../packages/memory/extraction.py)：前者构造抽取模型请求，后者把模型文本解析为合法结构/引文候选。 | TurnForExtraction→ModelRequest；模型输出+user_input→候选集合。 | 看 user_input 与 evidence 校验；硬结构检查不等同共享/持久语义拒写。 |
+| [normalize_candidate](../../packages/memory/store.py) / [record](../../packages/memory/store.py) / [select](../../packages/memory/store.py) / [load](../../packages/memory/store.py)：规范候选、去重保存、为新问题挑当前有效项、按冻结身份回读。 | 内容/范围/来源→新 IDs；query→候选；冻结 IDs/hash→原内容或错误。 | record 看 ACTIVE hash/savepoint；select 看过滤与排序；load 看严格 hash 与旧 ID-only 兼容。 |
+| [_touch_admitted_memories](../../packages/agent_runtime/runtime.py)：从最终请求消息识别 admitted Memory IDs，更新使用时间观测。 | 最终 state.messages 与允许的 memory_ids→touch 副作用。 | 先看是否在最终 payload，再看允许范围和去重；它不是答案 USE 评估器。 |
 
 ## 1. Memory 在哪里，范围是什么
 

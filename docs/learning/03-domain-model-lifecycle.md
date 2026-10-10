@@ -14,11 +14,11 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [publish](../../packages/agent_runtime/publish.py)<br>[_resolve_draft_spec](../../packages/agent_runtime/publish.py)<br><br>发布入口调用规格解析，再创建版本；解析不是运行模型。 | 草稿配置、工具/知识/模型绑定→`_resolve_draft_spec` 产生 resolved_spec 与 hash；publish 保存 AgentVersion 行，返回 PublishedAgentVersion 摘要。 | 先看每种绑定怎样固化，再看 canonical hash 和 commit；区分草稿与冻结值。 |
-| [canonical_json](../../packages/core/canonical/json_hash.py)<br>[canonical_json_hash](../../packages/core/canonical/json_hash.py)<br><br>把结构稳定编码，再计算摘要，用于内容身份比较。 | JSON-compatible value→规范 str→64 个十六进制字符的 SHA-256 摘要（256 bit）。 | 逐个看 dumps 选项、UTF-8 编码与 hash；别把规范化当业务语义校验。 |
-| [AgentVersion](../../packages/agent_runtime/models.py)<br>[AgentRun](../../packages/agent_runtime/models.py)<br><br>前者描述冻结规格，后者描述一次执行的身份与变化状态。 | 这是 ORM 映射定义，没有发起一次运行的函数输出。 | 先找 resolved_spec/hash 与 Run 的 version/status/usage；看约束及关联，再看服务如何更新。 |
-| [create_current_snapshot](../../packages/knowledge/snapshots.py)<br>[resolve_snapshot](../../packages/knowledge/snapshots.py)<br><br>创建当前合格修订集合的身份，或装载/解析指定 snapshot。 | 工作区/知识库、明确 ID 或 LATEST→snapshot 身份及成员依据。 | 看 _canonical_membership，再看固定 ID/LATEST 的分支；不要把 snapshot 当原文件 hash。 |
-| [_validate_frozen_execution_snapshots](../../packages/agent_runtime/runtime.py)<br><br>在正式冻结覆盖进入执行前检查数量、绑定、范围和内容摘要。 | context、FrozenAgentSpec、knowledge overrides→通过校验或完整性错误。 | 看每个比较在防哪种错配；失败不自动替换成最新快照。 |
+| [publish](../../packages/agent_runtime/publish.py) / [_resolve_draft_spec](../../packages/agent_runtime/publish.py)：发布入口调用规格解析，再创建版本；解析不是运行模型。 | 草稿配置、工具/知识/模型绑定→`_resolve_draft_spec` 产生 resolved_spec 与 hash；publish 保存 AgentVersion 行，返回 PublishedAgentVersion 摘要。 | 先看每种绑定怎样固化，再看 canonical hash 和 commit；区分草稿与冻结值。 |
+| [canonical_json](../../packages/core/canonical/json_hash.py) / [canonical_json_hash](../../packages/core/canonical/json_hash.py)：把结构稳定编码，再计算摘要，用于内容身份比较。 | JSON-compatible value→规范 str→64 个十六进制字符的 SHA-256 摘要（256 bit）。 | 逐个看 dumps 选项、UTF-8 编码与 hash；别把规范化当业务语义校验。 |
+| [AgentVersion](../../packages/agent_runtime/models.py) / [AgentRun](../../packages/agent_runtime/models.py)：前者描述冻结规格，后者描述一次执行的身份与变化状态。 | 这是 ORM 映射定义，没有发起一次运行的函数输出。 | 先找 resolved_spec/hash 与 Run 的 version/status/usage；看约束及关联，再看服务如何更新。 |
+| [create_current_snapshot](../../packages/knowledge/snapshots.py) / [resolve_snapshot](../../packages/knowledge/snapshots.py)：创建当前合格修订集合的身份，或装载/解析指定 snapshot。 | 工作区/知识库、明确 ID 或 LATEST→snapshot 身份及成员依据。 | 看 _canonical_membership，再看固定 ID/LATEST 的分支；不要把 snapshot 当原文件 hash。 |
+| [_validate_frozen_execution_snapshots](../../packages/agent_runtime/runtime.py)：在正式冻结覆盖进入执行前检查数量、绑定、范围和内容摘要。 | context、FrozenAgentSpec、knowledge overrides→通过校验或完整性错误。 | 看每个比较在防哪种错配；失败不自动替换成最新快照。 |
 
 ## 1. 先画关系，再看表
 

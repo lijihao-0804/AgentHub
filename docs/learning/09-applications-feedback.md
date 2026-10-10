@@ -14,9 +14,9 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [ToolResultArtifactRecorder._build](../../packages/artifacts/recorder.py)<br><br>选择匹配投影，将真实工具调用转成可保存产物结构。 | RecordedToolCall、run_id→BuiltArtifact 或 None。 | 按投影顺序看匹配，首个结果胜出；此函数选择/构建，不等于完整保存流程。 |
-| [submit](../../packages/feedback/service.py)<br>[review](../../packages/feedback/service.py)<br>[import_dev](../../packages/feedback/service.py)<br><br>记录纠正、审核当前内容、按幂等条件导入新 DEV 草稿。 | workspace、Run、纠正/审核版本与目标数据→反馈/新数据版本。 | 先状态/审核修订，再 request hash 与 DEV-only base，最后新草稿/审计/commit。 |
-| [HandoffService.change](../../packages/handoffs/service.py)<br><br>按操作者权限、客户端版本和案件状态更新分配/接手/关闭。 | context、case、action、expected_version/payload→新版本案件或冲突。 | 行锁→相同 close hash 复用→版本比较→状态/actor→审计保存；CLOSED 不是外部成功。 |
+| [ToolResultArtifactRecorder._build](../../packages/artifacts/recorder.py)：选择匹配投影，将真实工具调用转成可保存产物结构。 | RecordedToolCall、run_id→BuiltArtifact 或 None。 | 按投影顺序看匹配，首个结果胜出；此函数选择/构建，不等于完整保存流程。 |
+| [submit](../../packages/feedback/service.py) / [review](../../packages/feedback/service.py) / [import_dev](../../packages/feedback/service.py)：记录纠正、审核当前内容、按幂等条件导入新 DEV 草稿。 | workspace、Run、纠正/审核版本与目标数据→反馈/新数据版本。 | 先状态/审核修订，再 request hash 与 DEV-only base，最后新草稿/审计/commit。 |
+| [HandoffService.change](../../packages/handoffs/service.py)：按操作者权限、客户端版本和案件状态更新分配/接手/关闭。 | context、case、action、expected_version/payload→新版本案件或冲突。 | 行锁→相同 close hash 复用→版本比较→状态/actor→审计保存；CLOSED 不是外部成功。 |
 
 ## 1. 四类应用共用什么，差异在哪里
 

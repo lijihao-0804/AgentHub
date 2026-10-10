@@ -14,11 +14,11 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [KnowledgeService.upload_document](../../packages/knowledge/services.py)<br><br>接受上传并建立文档/修订/入库任务身份，不等于同步完成嵌入。 | 工作区、知识库、文件名/类型、异步内容流和 blob/queue 依赖→`(Document, DocumentRevision, IngestionJob)` 三个对象。 | 先定位内容保存和 job/队列交接，再查 worker 处理；确认 READY 在哪产生。 |
-| [claim_ingestion_job](../../packages/knowledge/ingestion.py)<br>[persist_chunks_and_advance](../../packages/knowledge/ingestion.py)<br>[finalize_ingestion_ready](../../packages/knowledge/ingestion.py)<br>[reconcile_ingestion_jobs](../../packages/knowledge/ingestion.py)<br><br>依次抢占任务、保存分片/阶段、确认就绪、对账异常中间态。 | job/lease 身份、chunks/阶段信息→持久状态更新与结果。 | 这是状态协作函数，不是一个 embedding SDK；看 lease_token、阶段、attempt 和提交条件。 |
-| [retrieve_with_trace](../../packages/knowledge/retrieval.py)<br>[_snapshot_scope](../../packages/knowledge/retrieval.py)<br>[_load_chunks](../../packages/knowledge/retrieval.py)<br><br>限定范围，召回/融合/重排，再装载真实分片构造证据。 | 检索请求与 snapshot→结果/evidence/trace；范围或内容不合法时拒绝。 | 先 scope，再 Dense/Sparse/RRF，最后数据库 chunk 与 evidence；不要只看 Qdrant 返回。 |
-| [fuse_reciprocal_rank](../../packages/knowledge/retrieval.py)<br><br>纯排名融合，不写库也不调用模型。 | 两路 ranked hits、rrf_k、candidate_top_k→排序后的候选 tuple。 | 看 1/(k+rank) 累加和 tie-break，再用正文例子手算。 |
-| [search_knowledge 内建工具入口](../../packages/tools/builtins/search_knowledge.py)<br><br>把 Runtime 的知识查询接到 retriever，返回可进入 observation 的证据。 | 受控工具参数与当前知识绑定/上下文→结构化检索结果。 | 确认绑定身份从执行上下文来，而非模型任意指定另一租户。 |
+| [KnowledgeService.upload_document](../../packages/knowledge/services.py)：接受上传并建立文档/修订/入库任务身份，不等于同步完成嵌入。 | 工作区、知识库、文件名/类型、异步内容流和 blob/queue 依赖→`(Document, DocumentRevision, IngestionJob)` 三个对象。 | 先定位内容保存和 job/队列交接，再查 worker 处理；确认 READY 在哪产生。 |
+| [claim_ingestion_job](../../packages/knowledge/ingestion.py) / [persist_chunks_and_advance](../../packages/knowledge/ingestion.py) / [finalize_ingestion_ready](../../packages/knowledge/ingestion.py) / [reconcile_ingestion_jobs](../../packages/knowledge/ingestion.py)：依次抢占任务、保存分片/阶段、确认就绪、对账异常中间态。 | job/lease 身份、chunks/阶段信息→持久状态更新与结果。 | 这是状态协作函数，不是一个 embedding SDK；看 lease_token、阶段、attempt 和提交条件。 |
+| [retrieve_with_trace](../../packages/knowledge/retrieval.py) / [_snapshot_scope](../../packages/knowledge/retrieval.py) / [_load_chunks](../../packages/knowledge/retrieval.py)：限定范围，召回/融合/重排，再装载真实分片构造证据。 | 检索请求与 snapshot→结果/evidence/trace；范围或内容不合法时拒绝。 | 先 scope，再 Dense/Sparse/RRF，最后数据库 chunk 与 evidence；不要只看 Qdrant 返回。 |
+| [fuse_reciprocal_rank](../../packages/knowledge/retrieval.py)：纯排名融合，不写库也不调用模型。 | 两路 ranked hits、rrf_k、candidate_top_k→排序后的候选 tuple。 | 看 1/(k+rank) 累加和 tie-break，再用正文例子手算。 |
+| [search_knowledge 内建工具入口](../../packages/tools/builtins/search_knowledge.py)：把 Runtime 的知识查询接到 retriever，返回可进入 observation 的证据。 | 受控工具参数与当前知识绑定/上下文→结构化检索结果。 | 确认绑定身份从执行上下文来，而非模型任意指定另一租户。 |
 
 ## 1. 写入链与读取链分开
 
