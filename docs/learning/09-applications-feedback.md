@@ -8,6 +8,16 @@
 
 把“运行时机制”连接回用户实际看到的应用、Artifact、反馈和人工接管，形成完整业务闭环，并准备面试时可解释的设计取舍。
 
+## 源码导读：产物、纠正与接管的来源链
+
+先看下表，弄清代码的职责与交接，再按阅读重点进入源码。表中的入口不是全部都要第一遍逐行读完。
+
+| 入口与职责 | 输入 → 产出 | 阅读重点 |
+| --- | --- | --- |
+| [ToolResultArtifactRecorder._build](../../packages/artifacts/recorder.py)<br><br>选择匹配投影，将真实工具调用转成可保存产物结构。 | RecordedToolCall、run_id→BuiltArtifact 或 None。 | 按投影顺序看匹配，首个结果胜出；此函数选择/构建，不等于完整保存流程。 |
+| [submit](../../packages/feedback/service.py)<br>[review](../../packages/feedback/service.py)<br>[import_dev](../../packages/feedback/service.py)<br><br>记录纠正、审核当前内容、按幂等条件导入新 DEV 草稿。 | workspace、Run、纠正/审核版本与目标数据→反馈/新数据版本。 | 先状态/审核修订，再 request hash 与 DEV-only base，最后新草稿/审计/commit。 |
+| [HandoffService.change](../../packages/handoffs/service.py)<br><br>按操作者权限、客户端版本和案件状态更新分配/接手/关闭。 | context、case、action、expected_version/payload→新版本案件或冲突。 | 行锁→相同 close hash 复用→版本比较→状态/actor→审计保存；CLOSED 不是外部成功。 |
+
 ## 1. 四类应用共用什么，差异在哪里
 
 | 应用 | 任务与工具侧重点 | 展示产物 |
@@ -25,18 +35,25 @@
 
 真实投影选择函数：
 
-出处：[packages/artifacts/recorder.py](../../packages/artifacts/recorder.py)，`_build`；原样函数（省略装饰器）。
+出处：[packages/artifacts/recorder.py](../../packages/artifacts/recorder.py)，`_build`；源码函数（省略装饰器，学习注释见下）。
+
+> **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
 ```python
 def _build(self, call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    # 学习：按注册顺序尝试投影；它们负责工具匹配与结构转换。
     for projection in self.projections:
+        # 学习：输入实际 RecordedToolCall 与来源 Run，返回 BuiltArtifact
+        # 学习：或 None。
         built = projection(call, run_id)
+        # 学习：第一个匹配结果胜出，因此投影顺序属于契约。
         if built is not None:
             # First match wins, and the order in PROJECTIONS is therefore
             # part of the contract. In practice they match on disjoint tool
             # names, so the ordering only decides what happens if two
             # applications ever claim the same one -- which they should not.
             return built
+    # 学习：没有匹配则不构建产物；不是伪造一张卡，也不在此函数内判整个 Run 失败。
     return None
 ```
 
@@ -99,7 +116,7 @@ SSE 客户端处理 run.started、message.delta、停止与错误；流式文本
 
 例如“远端已收写但响应丢失”的故事，必须说 NEEDS_ATTENTION，不说所有 crash 都自动业务恢复。Memory 故事必须说质量不足，不只说跨会话记住了。
 
-**四个故事问题的完整参考示例：**触发场景是回滚提议获批准，远端接收后响应丢失；代码机制是 Approval 条件抢占、MCP execute_write 的 dispatch/结果分类及 Runtime 的 NEEDS_ATTENTION 投影；设计原因是无确认重试可能重复副作用，本地事务不能包住远端服务；证据来自第 05 课链接的 MCP/故障记录，证明特定窗口安全处理，不证明全部外部服务 exactly-once 或业务总能自动完成。照此四层组织，既回答“做了什么”，也说明“为什么”和“证明到哪里”。
+**四个故事问题的完整参考示例：** 触发场景是回滚提议获批准，远端接收后响应丢失；代码机制是 Approval 条件抢占、MCP execute_write 的 dispatch/结果分类及 Runtime 的 NEEDS_ATTENTION 投影；设计原因是无确认重试可能重复副作用，本地事务不能包住远端服务；证据来自第 05 课链接的 MCP/故障记录，证明特定窗口安全处理，不证明全部外部服务 exactly-once 或业务总能自动完成。照此四层组织，既回答“做了什么”，也说明“为什么”和“证明到哪里”。
 
 个人贡献、AI 帮助范围、开发时长与团队背景只写真实事实；本课不替你认定独立完成全部项目。
 
@@ -116,7 +133,7 @@ SSE 客户端处理 run.started、message.delta、停止与错误；流式文本
 
 已有核查：[feedback/evidence 集成](../../tests/integration/test_mi2_feedback_evidence.py)、[handoff 生命周期](../../tests/integration/test_handoff_lifecycle.py)、[M-I5 报告](../reviews/AgentHub-面试增强M-I5验收报告-20261003.md)。本课未执行。
 
-**通过标准：**说明应用复用、产物来源、反馈回归与接管闭环，并区分用户可见状态与真实执行结果。
+**通过标准：** 说明应用复用、产物来源、反馈回归与接管闭环，并区分用户可见状态与真实执行结果。
 
 
 ## 精读增补：从一次执行结果走到用户处理闭环
@@ -167,37 +184,37 @@ message.delta 是临时流式文本，Run 最终输出是持久结果；审批�
 
 ### F. 练习与参考答案
 
-### Q09-01 · 纠正直接改历史输出不是更方便吗？
+#### Q09-01 · 纠正直接改历史输出不是更方便吗？
 
-**答案：**会丢失原错误证据，影响评分、审计和故障复盘；应该追加反馈并建立新的回归身份。
+**答案：** 会丢失原错误证据，影响评分、审计和故障复盘；应该追加反馈并建立新的回归身份。
 
-**解读：**R1 是当时产生的原始输出，评分/故障分析依赖该事实。追加 Feedback 保存纠正内容与审核身份，导入新 DEV 草稿再评测，使原错误和修正都能追溯。
+**解读：** R1 是当时产生的原始输出，评分/故障分析依赖该事实。追加 Feedback 保存纠正内容与审核身份，导入新 DEV 草稿再评测，使原错误和修正都能追溯。
 
-**核查依据：**[对应源码/证据](../../packages/feedback/service.py)，重点看 `submit / review / import_dev`。
+**核查依据：** [对应源码/证据](../../packages/feedback/service.py)，重点看 `submit / review / import_dev`。
 
-**常见误解：**回写旧答案后再声称原版本没有出错。
+**常见误解：** 回写旧答案后再声称原版本没有出错。
 
-### Q09-02 · 两次关闭按钮请求为何有时不冲突？
+#### Q09-02 · 两次关闭按钮请求为何有时不冲突？
 
-**答案：**完全相同且已完成的 close 可走幂等 hash 分支；不同请求不能据此复用旧结果。
+**答案：** 完全相同且已完成的 close 可走幂等 hash 分支；不同请求不能据此复用旧结果。
 
-**解读：**close_request_hash 包含 actor、expected_version 和 payload。已经 CLOSED 且同 hash 的重发先返回旧结果，普通版本校验随后才执行；改变理由/actor等会走冲突路径。
+**解读：** close_request_hash 包含 actor、expected_version 和 payload。已经 CLOSED 且同 hash 的重发先返回旧结果，普通版本校验随后才执行；改变理由/actor等会走冲突路径。
 
-**核查依据：**[对应源码/证据](../../packages/handoffs/service.py)，重点看 `change 的 close 幂等分支`。
+**核查依据：** [对应源码/证据](../../packages/handoffs/service.py)，重点看 `change 的 close 幂等分支`。
 
-**常见误解：**说所有旧 expected_version 都一律 409。
+**常见误解：** 说所有旧 expected_version 都一律 409。
 
-### Q09-03 · 为什么评测改进还要保留原错误 case？
+#### Q09-03 · 为什么评测改进还要保留原错误 case？
 
-**答案：**需要证明修改前后的可比性，并持续防止回归；但用它开发后不再将其当全新 HOLDOUT。
+**答案：** 需要证明修改前后的可比性，并持续防止回归；但用它开发后不再将其当全新 HOLDOUT。
 
-**解读：**新版本要继续面对已知错误，避免修复后再退化；但这个 case 已参加开发，所以只能作为回归，不能再声称它从未暴露、可作为独立 HOLDOUT。
+**解读：** 新版本要继续面对已知错误，避免修复后再退化；但这个 case 已参加开发，所以只能作为回归，不能再声称它从未暴露、可作为独立 HOLDOUT。
 
-**核查依据：**[对应源码/证据](../../packages/feedback/service.py)，重点看 `import_dev`。
+**核查依据：** [对应源码/证据](../../packages/feedback/service.py)，重点看 `import_dev`。
 
-**常见误解：**为了展示新版本好而删除原错误案例。
+**常见误解：** 为了展示新版本好而删除原错误案例。
 
-**掌握标准：**解释一次 Run 怎样形成 Artifact、Feedback、DEV 和 Handoff；说清每份记录的状态、来源与不可替代的职责。
+**掌握标准：** 解释一次 Run 怎样形成 Artifact、Feedback、DEV 和 Handoff；说清每份记录的状态、来源与不可替代的职责。
 
 ---
 

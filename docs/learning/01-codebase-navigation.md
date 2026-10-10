@@ -8,6 +8,18 @@
 
 你已经知道系统有哪些模块，现在要回答：**一条 HTTP 请求怎样变成有权限、有版本、有身份的执行？** 第一遍只跟流式 Thread 请求，不同时追所有 API。读完能从 route 找到业务服务，并解释鉴权、提交幂等与依赖装配。
 
+## 源码导读：鉴权、提交与执行的交接
+
+先看下表，弄清代码的职责与交接，再按阅读重点进入源码。表中的入口不是全部都要第一遍逐行读完。
+
+| 入口与职责 | 输入 → 产出 | 阅读重点 |
+| --- | --- | --- |
+| [get_current_principal](../../apps/api/auth_dependencies.py)<br><br>把请求认证结果变为可信主体，回答是谁。 | HTTP Request/认证材料→PrincipalContext；不合法时错误。 | 找认证来源和校验，再确认 user_id/request 身份从哪里来；不要从 body 或模型读取 actor。 |
+| [get_workspace_context](../../apps/api/knowledge_dependencies.py)<br>[get_agent_run_workspace_context](../../apps/api/knowledge_dependencies.py)<br><br>检查工作区访问权；后者是本课 Thread 路由实际注入的版本。 | 普通依赖取 principal/session；运行依赖从 Request 装配短 session→WorkspaceExecutionContext。 | 两者都调用 TenantService；运行依赖在 SSE 前关闭权限查询的 session，不让长流一直占用连接。 |
+| [stream_turn](../../apps/api/routes/threads.py)<br><br>协调版本、Turn、Run 和 StreamingResponse；把 HTTP 与业务执行连接起来。 | 路由 UUID、文本/client_token、可信 context 与服务→SSE response，或明确错误。 | 新 token 看准备/关联；重复 token 看旧 Run 附着和未关联 409；此函数不实现 Agent Loop。 |
+| [resolve_agent_version](../../packages/threads/service.py)<br>[open_turn](../../packages/threads/service.py)<br>[attach_run](../../packages/threads/service.py)<br>[submit_turn](../../packages/threads/service.py)<br><br>前三者选版本、记录提交、保存关联；submit_turn 是同步执行编排。 | workspace context + thread/input/token→版本/Turn，关联写入或 SubmittedTurn。 | 分清每次 commit；同步重点看宽限窗口与 _turn_run，流式路径没有同样的 orphan 修复。 |
+| [prepare_stream](../../packages/agent_runtime/runtime.py)<br>[stream](../../packages/agent_runtime/runtime.py)<br><br>准备阶段先创建 Run，stream 才推进执行并产生事件。 | context、发布 version、input/thread 或 prepared_run→Run / 异步事件流。 | Run 已存在≠模型已执行；辨认图启动、事件发布与取消/断线守卫。 |
+
 ## 1. 输入先落在哪一层
 
 Incident 页面的一轮提交包含用户文本和 `client_token`，目标是：
@@ -33,26 +45,34 @@ flowchart TB
 
 ## 2. 鉴权与工作区权限为何要分两步
 
-先查 [auth_dependencies](../../apps/api/auth_dependencies.py) 的 `get_current_principal`，再查下面的真实依赖：
+先查 [auth_dependencies](../../apps/api/auth_dependencies.py) 的 `get_current_principal`，再用下面的普通工作区依赖理解“身份→权限上下文”。实际 Thread 路由注入同文件的 `get_agent_run_workspace_context`，它在独立短 session 内解析权限并在长流开始前关闭 session；不要把教学示例误读为所有路由都持有同一个请求级 session。
 
-出处：[apps/api/knowledge_dependencies.py](../../apps/api/knowledge_dependencies.py)，`get_workspace_context`；原样函数（省略装饰器）。
+出处：[apps/api/knowledge_dependencies.py](../../apps/api/knowledge_dependencies.py)，`get_workspace_context`；源码函数（省略装饰器，学习注释见下）。
+
+> **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
 ```python
 async def get_workspace_context(
+    # 学习：路由定位的工作区身份，不是客户端已被授权的证明。
     workspace_id: UUID,
+    # 学习：FastAPI 注入认证主体；不是从模型回答里解析用户身份。
     principal: PrincipalContext = principal_dependency,
+    # 学习：注入数据库 session，用于查询成员/角色关系。
     session: AsyncSession = db_session_dependency,
 ) -> WorkspaceExecutionContext:
     return (
+        # 学习：由租户服务验证关系与访问权；失败时抛错误，不生成可用权限上下文。
         await TenantService().get_workspace_access(
             session, principal=principal, workspace_id=workspace_id
         )
+    # 学习：访问结果还含其他数据；这里提取 WorkspaceExecutionContext
+    # 学习：供后续服务使用。
     ).context
 ```
 
 `PrincipalContext` 回答“是谁”，`WorkspaceExecutionContext` 回答“在哪个工作区，能做什么”。`TenantService.get_workspace_access` 根据数据库的组织/工作区关系解析权限。组织成员不等于自动有某工作区全部权限。
 
-**读法：**在函数中依次圈出 `principal`、`workspace_id`、`get_workspace_access`。先不要展开所有角色常量；只要能说清权限不是模型文本/客户端参数赋予的。
+**读法：** 在函数中依次圈出 `principal`、`workspace_id`、`get_workspace_access`。先不要展开所有角色常量；只要能说清权限不是模型文本/客户端参数赋予的。
 
 Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/状态可见也可能是不同权限，因此看到 Run 列表不等于可以读 prompt、答案或知识分片。
 
@@ -65,7 +85,7 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 | [apps/api/agent_runtime_dependencies.py](../../apps/api/agent_runtime_dependencies.py) `get_production_agent_run_service` | Runtime 依赖怎样组装 | 测试或生产可以注入不同适配器，核心链不绑死 SDK |
 | [packages/agent_runtime/runtime.py](../../packages/agent_runtime/runtime.py) `prepare_stream` / `stream` | 实际 Run 怎样创建、执行 | HTTP route 不自己实现模型循环 |
 
-**Composition 是装配点。**在 `get_production_agent_run_service` 找到 `ToolRuntime`、`ApprovalService`、`ActionRuntime`、`LangGraphCheckpointAdapter`、`memory_selector` 和 `artifact_recorder`。这些构造器解释了系统如何连起来，不要求本课读完每个实现。
+**Composition 是装配点。** 在 `get_production_agent_run_service` 找到 `ToolRuntime`、`ApprovalService`、`ActionRuntime`、`LangGraphCheckpointAdapter`、`memory_selector` 和 `artifact_recorder`。这些构造器解释了系统如何连起来，不要求本课读完每个实现。
 
 ## 4. 相同输入为何仍需要 client_token
 
@@ -79,7 +99,7 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 
 同步 `ThreadService.submit_turn` 还包含孤儿 Turn 过期后的查找/修复路径，不能把同步和流式实现混成完全相同。详细比较时打开这个函数，先看 `_orphan_turn_expired` 和 `_turn_run`。
 
-**数据库角度：**Turn 和 Run 先后保存/关联，不是持有事务跨过完整模型请求。长事务会占用连接和锁，也不能把网络调用变成数据库原子操作。项目用显式中间状态和重试语义处理窗口，而非宣称不存在窗口。
+**数据库角度：** Turn 和 Run 先后保存/关联，不是持有事务跨过完整模型请求。长事务会占用连接和锁，也不能把网络调用变成数据库原子操作。项目用显式中间状态和重试语义处理窗口，而非宣称不存在窗口。
 
 ## 5. API 路径与 worker 路径如何复用
 
@@ -102,7 +122,7 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 | attach_run 后、开始消费 stream 前 | Turn→Run 已关联 | 附着已有 Run；关联不证明执行已推进或事件已产生 |
 | stream 正在推进或结束后 | 关联、已写步骤/持久事件，完成时有终态 | 附着原 Run 跟读/重放结构事件，不能保证完整 delta 重放 |
 
-**同步路径对照：**`submit_turn` 调用 run_service.run 后才 attach_run，所以未关联不必然代表没执行。重发在启动宽限内返回 409；超过宽限后 `_turn_run` 在同 Thread 内按创建时间寻找候选 Run。仍 RUNNING/CANCEL_REQUESTED 则继续 409；已等待/终结则补关联并复用；没找到 Run 才重新执行记录的问题。这个恢复查询基于范围与时间，不是直接持久的 Turn→Run 外键证明，不能泛化为所有并发情形都完全确定。依据：[submit_turn / _turn_run](../../packages/threads/service.py)、[stream_turn](../../apps/api/routes/threads.py)。
+**同步路径对照：** `submit_turn` 调用 run_service.run 后才 attach_run，所以未关联不必然代表没执行。重发在启动宽限内返回 409；超过宽限后 `_turn_run` 在同 Thread 内按创建时间寻找候选 Run。仍 RUNNING/CANCEL_REQUESTED 则继续 409；已等待/终结则补关联并复用；没找到 Run 才重新执行记录的问题。这个恢复查询基于范围与时间，不是直接持久的 Turn→Run 外键证明，不能泛化为所有并发情形都完全确定。依据：[submit_turn / _turn_run](../../packages/threads/service.py)、[stream_turn](../../apps/api/routes/threads.py)。
 
 ## 7. 自测与面试追问
 
@@ -111,7 +131,7 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 3. **为什么 Turn 存在却没关联 Run？** open_turn、准备/运行、attach_run 不是同一事务，进程可能在中间退出；同步路径甚至在执行返回后才关联。上面的窗口表给出各步已保存什么，不能只看一个空字段就重跑。
 4. **Celery 意味着全部 Run 在 worker 吗？** 不意味。`stream_turn` 直接调用准备/流式 Runtime；入库、评测及部分恢复/异步入口使用 worker。执行位置由具体 route/queue 调用决定，框架存在不等于全链路自动派队列。
 
-**通过标准：**从 `stream_turn` 定位真实业务调用；解释工作区权限；画出 Turn/Run 的提交窗口。不能只背“FastAPI + Celery”。
+**通过标准：** 从 `stream_turn` 定位真实业务调用；解释工作区权限；画出 Turn/Run 的提交窗口。不能只背“FastAPI + Celery”。
 
 已有核查入口：[租户隔离测试](../../tests/integration/test_interview_tenant_matrix.py)、[ThreadService](../../packages/threads/service.py)。文件存在不等于本轮执行这些测试。
 
@@ -175,37 +195,37 @@ FastAPI 的 dependency 用来解析调用者和装配服务。读函数参数时
 
 ### F. 练习与参考答案
 
-### Q01-01 · HTTP 200 能证明什么？
+#### Q01-01 · HTTP 200 能证明什么？
 
-**答案：**先看该接口的响应契约。返回 Run 身份、打开事件流、完成最终执行是不同阶段。流式响应已经开始后，业务错误可能出现在事件中，不能只看 HTTP 状态码。
+**答案：** 先看该接口的响应契约。返回 Run 身份、打开事件流、完成最终执行是不同阶段。流式响应已经开始后，业务错误可能出现在事件中，不能只看 HTTP 状态码。
 
-**解读：**HTTP 状态描述传输/接口接受情况。流式响应开始后，服务器可能用事件报告失败；返回 Run ID 的接口也可能尚未完成执行。因此要把接口契约、最终 Run 状态、错误事件及动作结果一起看。
+**解读：** HTTP 状态描述传输/接口接受情况。流式响应开始后，服务器可能用事件报告失败；返回 Run ID 的接口也可能尚未完成执行。因此要把接口契约、最终 Run 状态、错误事件及动作结果一起看。
 
-**核查依据：**[对应源码/证据](../../apps/api/routes/threads.py)，重点看 `stream_turn`。
+**核查依据：** [对应源码/证据](../../apps/api/routes/threads.py)，重点看 `stream_turn`。
 
-**常见误解：**只看到 200 就认定模型、工具和审批都成功。
+**常见误解：** 只看到 200 就认定模型、工具和审批都成功。
 
-### Q01-02 · 隐藏“发布”按钮能否完成权限控制？
+#### Q01-02 · 隐藏“发布”按钮能否完成权限控制？
 
-**答案：**不能。前端用于解释可用操作；后端必须按实际 principal、workspace 和 permission 检查。攻击者可直接调用 API，UI 也可能缓存旧角色。
+**答案：** 不能。前端用于解释可用操作；后端必须按实际 principal、workspace 和 permission 检查。攻击者可直接调用 API，UI 也可能缓存旧角色。
 
-**解读：**客户端可以绕过页面直接发 HTTP，前端还可能缓存过期角色。服务端读取当前上下文并在具体操作中要求对应权限、限定 workspace，才能保证请求不能靠隐藏按钮绕过。
+**解读：** 客户端可以绕过页面直接发 HTTP，前端还可能缓存过期角色。服务端读取当前上下文并在具体操作中要求对应权限、限定 workspace，才能保证请求不能靠隐藏按钮绕过。
 
-**核查依据：**[对应源码/证据](../../packages/threads/service.py)，重点看 `_require / resolve_agent_version`。
+**核查依据：** [对应源码/证据](../../packages/threads/service.py)，重点看 `_require / resolve_agent_version`。
 
-**常见误解：**把界面可见性当作授权边界。
+**常见误解：** 把界面可见性当作授权边界。
 
-### Q01-03 · 两人同时提交同一个 token，如何证明不重复？
+#### Q01-03 · 两人同时提交同一个 token，如何证明不重复？
 
-**答案：**找前置查询、唯一约束、IntegrityError 分支和后续关联/附着处理，列出崩溃点；不能只指出一行 token 查询就宣称所有竞争都已覆盖。
+**答案：** 找前置查询、唯一约束、IntegrityError 分支和后续关联/附着处理，列出崩溃点；不能只指出一行 token 查询就宣称所有竞争都已覆盖。
 
-**解读：**相同 token 的前置查询减少重复，唯一约束处理查询后竞争，IntegrityError 分支回滚后由路由寻找已有 Turn。若 Run 尚未关联，流式入口返回 409；若已关联则附着已有 Run。这证明各层处理意图，全部崩溃/竞争覆盖还必须查相应测试。
+**解读：** 相同 token 的前置查询减少重复，唯一约束处理查询后竞争，IntegrityError 分支回滚后由路由寻找已有 Turn。若 Run 尚未关联，流式入口返回 409；若已关联则附着已有 Run。这证明各层处理意图，全部崩溃/竞争覆盖还必须查相应测试。
 
-**核查依据：**[对应源码/证据](../../packages/threads/service.py)，重点看 `open_turn / token_turn；配合 threads route`。
+**核查依据：** [对应源码/证据](../../packages/threads/service.py)，重点看 `open_turn / token_turn；配合 threads route`。
 
-**常见误解：**说“一次 SELECT 就保证了并发幂等”，或把任何唯一冲突都当同 token。
+**常见误解：** 说“一次 SELECT 就保证了并发幂等”，或把任何唯一冲突都当同 token。
 
-**掌握标准：**能从路由画出“鉴权→工作区→版本→Turn→Run→流”的调用链；解释 await、事务与唯一约束的区别；预测重发发生在 Run 关联前后各会怎样。
+**掌握标准：** 能从路由画出“鉴权→工作区→版本→Turn→Run→流”的调用链；解释 await、事务与唯一约束的区别；预测重发发生在 Run 关联前后各会怎样。
 
 ---
 

@@ -8,6 +8,17 @@
 
 读懂从**模型提议**到**工具真正执行**的检查链，并解释审批为何有两套状态。贯穿例子：查部署是 READ，回滚是 WRITE；READ 也可能需要审批。
 
+## 源码导读：模型提议如何变成一次受控动作
+
+先看下表，弄清代码的职责与交接，再按阅读重点进入源码。表中的入口不是全部都要第一遍逐行读完。
+
+| 入口与职责 | 输入 → 产出 | 阅读重点 |
+| --- | --- | --- |
+| [ToolPolicy.decide](../../packages/tools/policy.py)<br><br>只决定自动放行还是要求审批；不会调用工具网络。 | 冻结 ToolDefinition→ALLOW_AUTO / REQUIRE_APPROVAL。 | 看 READ 与 NEVER 的 conjunction；risk 没有作为第三个自动放行条件。 |
+| [compute_logical_action_id](../../packages/approvals/contracts.py)<br><br>为本次受控提议建立不依赖 provider tool-call ID 的身份。 | workspace/Run/tool revision/参数 hash/ordinal→确定性 UUID 字符串。 | 先解释每个身份字段，再看固定 namespace；去重范围不能只按参数。 |
+| [create_or_get](../../packages/approvals/service.py)<br>[decide](../../packages/approvals/service.py)<br>[claim_execution](../../packages/approvals/service.py)<br>[complete_execution](../../packages/approvals/service.py)<br><br>分别保存/复用提议、记录人决定、抢占执行权、保存确定/未知结果。 | context 与动作/审批身份→Approval；claim 可能 None。 | 先把 decision/execution 两个状态画开，再看锁与条件 UPDATE；网络写入不在 decide 内。 |
+| [policy](../../packages/agent_runtime/runtime.py)<br>[action_execute](../../packages/agent_runtime/runtime.py)<br><br>policy 将提议与审批连接；action_execute 对许可动作 claim 后调用执行器并投影结果。 | 图状态中的调用及批准信息→审批等待/工具结果/Run 状态更新。 | 找到 interrupt 和 claim；确认 UNKNOWN_OUTCOME 怎样进入 NEEDS_ATTENTION。 |
+
 ## 1. MCP 不是治理的替代品
 
 MCP 提供远端目录与调用协议；工作区仍要决定工具的 effect、risk、approval_policy、版本和权限。导入时不盲信远端 annotation。`/tools/mcp` 的连接/发现/导入是控制平面，实际调用经冻结工具修订和 runtime adapter。
@@ -60,7 +71,12 @@ flowchart TB
 
 模型提供的 tool_call_id 可能在重试/恢复时改变，所以不能当稳定动作身份。真实计算：
 
-出处：[packages/approvals/contracts.py](../../packages/approvals/contracts.py)，`compute_logical_action_id`；原样函数（省略装饰器）。
+出处：[packages/approvals/contracts.py](../../packages/approvals/contracts.py)，`compute_logical_action_id`；源码函数（省略装饰器，学习注释见下）。
+
+> **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
+
+<details>
+<summary>展开 compute_logical_action_id 的带注释代码</summary>
 
 ```python
 def compute_logical_action_id(
@@ -73,17 +89,27 @@ def compute_logical_action_id(
 ) -> str:
     """Return a deterministic identity independent of provider tool-call IDs."""
 
+    # 学习：ordinal 区分提议位置，必须合法；不是 provider 生成的 tool-call
+    # 学习：ID。
     if proposal_ordinal < 0:
         raise ValueError("proposal ordinal must be non-negative")
+    # 学习：身份输入组合；相同参数在不同 Run/提议位置不应合并。
     identity = {
+        # 学习：租户边界必须进入逻辑身份。
         "workspace_id": str(workspace_id),
         "run_id": str(run_id),
+        # 学习：固定工具修订，防止同名工具升级后被当旧动作。
         "tool_revision_id": str(tool_revision_id) if tool_revision_id is not None else None,
+        # 学习：规范参数摘要，避免仅凭参数 JSON 的排版差异改变身份。
         "canonical_args_hash": canonical_args_hash,
         "proposal_ordinal": proposal_ordinal,
     }
+    # 学习：固定 namespace + 确定性摘要产生 UUID；不承诺远端服务
+    # 学习：exactly-once。
     return str(uuid5(UUID("7f2e2f1e-0f1b-5df3-9d8f-5a3bbf1b3c31"), canonical_json_hash(identity)))
 ```
+
+</details>
 
 它绑定 workspace、run、工具修订、规范参数 hash 和提议序号；序号区分同 Run 中不同的逻辑提议。相同参数在不同 Run/序号仍可能形成新动作，这不是跨业务无限去重。
 
@@ -107,7 +133,7 @@ def compute_logical_action_id(
 
 接着画 `decision=PENDING → APPROVED` 和 `execution=NOT_STARTED → CLAIMED → ...` 两条线，标出 API 崩溃和远端超时可能发生的位置。下一课会验证这些窗口的恢复边界。
 
-**面试自测：**审批服务锁的是哪个业务记录？logical ID 与 provider ID 为什么分开？为什么 READ≠safe、approved≠succeeded？每个回答都应指向一个真实函数。
+**面试自测：** 审批服务锁的是哪个业务记录？logical ID 与 provider ID 为什么分开？为什么 READ≠safe、approved≠succeeded？每个回答都应指向一个真实函数。
 
 **逐问答案与解读：**
 
@@ -116,11 +142,11 @@ def compute_logical_action_id(
 - **READ 为什么不等于 safe？** READ 仍可能访问敏感数据、危险目标或昂贵资源；risk、权限、SSRF 等独立于 effect。自动路径实际只检查 READ+NEVER，不能从“没有写”推出没有风险。依据：[ToolPolicy.decide](../../packages/tools/policy.py)。
 - **APPROVED 为什么不等于 SUCCEEDED？** 人作了许可后可能尚未 claim，也可能失败或未知；执行结果来自实际 adapter 和 complete_execution。依据：[claim_execution / complete_execution](../../packages/approvals/service.py)、[execute_write](../../packages/mcp/runtime.py)。
 
-**状态图练习答案：**PENDING→APPROVED 是决定；NOT_STARTED→CLAIMED→SUCCEEDED/FAILED/UNKNOWN_OUTCOME 是执行。API 可在决定已落库但 resume 未发生时退出；远端超时可在 claim 后派发途中发生。前者查决定/checkpoint及恢复调度，后者先区分 NOT_DISPATCHED 与已派发未知，不能一律重试。
+**状态图练习答案：** PENDING→APPROVED 是决定；NOT_STARTED→CLAIMED→SUCCEEDED/FAILED/UNKNOWN_OUTCOME 是执行。API 可在决定已落库但 resume 未发生时退出；远端超时可在 claim 后派发途中发生。前者查决定/checkpoint及恢复调度，后者先区分 NOT_DISPATCHED 与已派发未知，不能一律重试。
 
 已有核查：[审批领域测试](../../tests/unit/test_m5a_approval_domain.py)、[MCP WRITE 集成](../../tests/integration/test_enhancement3bc_mcp_write_approval.py)。本课未运行。
 
-**通过标准：**能解释提议到执行的全部守卫，以及身份、决定、执行三个维度。
+**通过标准：** 能解释提议到执行的全部守卫，以及身份、决定、执行三个维度。
 
 
 ## 精读增补：把一个工具提议推演到并发安全的执行
@@ -135,7 +161,7 @@ def compute_logical_action_id(
 
 供应商生成的 tool-call ID 用于一轮消息协议配对，它可能在重试或重新提议时变化。平台的 logical_action_id 用于识别同一个受控动作，构成因素包含工作区、Run、工具修订、规范参数 hash 和 proposal ordinal；ordinal 又与模型轮次/提议位置相关。
 
-**教学例子：**R1 第一次提议 rollback(checkout-api, v1)，在相同提议的 checkpoint 重入中应该保持同一逻辑身份，审批 create_or_get 才能找到原记录。另一个 Run R2 提议同样参数，不应复用 R1 的审批；R1 之后新的提议位置也不该被粗暴视为同一个动作。
+**教学例子：** R1 第一次提议 rollback(checkout-api, v1)，在相同提议的 checkpoint 重入中应该保持同一逻辑身份，审批 create_or_get 才能找到原记录。另一个 Run R2 提议同样参数，不应复用 R1 的审批；R1 之后新的提议位置也不该被粗暴视为同一个动作。
 
 因此“只按参数 hash 去重”过宽，“只按 provider ID 去重”又不稳定。读取 identity 构造代码时，逐个说明字段防止哪一种误关联。
 
@@ -153,9 +179,14 @@ def compute_logical_action_id(
 
 这是教学主线，拒绝/过期等分支另读契约。数据库记录里的 APPROVED 意味着许可，不是副作用证据；CLAIMED 意味着本地执行权已被取得，不是远端确认。
 
-### D. 原样源码：原子抢占
+### D. 源码注释精读：原子抢占
 
-出处：[ApprovalService.claim_execution](../../packages/approvals/service.py)；以下为原样函数，省略装饰器。
+出处：[ApprovalService.claim_execution](../../packages/approvals/service.py)；以下保留原函数执行语句，省略装饰器并加入学习注释。
+
+> **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
+
+<details>
+<summary>展开 claim_execution 的带注释代码</summary>
 
 ```python
 async def claim_execution(
@@ -163,28 +194,41 @@ async def claim_execution(
 ) -> Approval | None:
     """Atomically claim one approved action; loser receives no execution lease."""
 
+    # 学习：从执行上下文取工作区，不能由模型参数覆盖。
     workspace_id = _workspace_uuid(context)
     now = datetime.now(UTC)
+    # 学习：短数据库事务范围；这里没有远端网络写入。
     async with self.session_factory() as session:
         result = await session.execute(
+            # 学习：把条件判断与更新合为一次 SQL；避免两个 worker 先读都以为能执行。
             update(Approval)
             .where(
+                # 学习：租户与审批 ID 一起限定目标行。
                 Approval.workspace_id == workspace_id,
                 Approval.id == approval_id,
+                # 学习：只有已批准才有资格。
                 Approval.decision_status == ApprovalDecisionStatus.APPROVED,
+                # 学习：只有尚未开始才可抢占；已经 CLAIMED 的不再取得一次执行权。
                 Approval.execution_status == ApprovalExecutionStatus.NOT_STARTED,
             )
             .values(
+                # 学习：写入本地抢占标记；不表示远端已经确认。
                 execution_status=ApprovalExecutionStatus.CLAIMED,
                 claimed_at=now,
+                # 学习：在数据库内递增，而非用先前读到的旧值覆盖。
                 execution_attempt_count=Approval.execution_attempt_count + 1,
             )
+            # 学习：拿回被更新的行；没满足条件就没有返回对象。
             .returning(Approval)
         )
+        # 学习：竞争失败等无匹配情形返回 None；调用者不能继续执行该动作。
         claimed = result.scalar_one_or_none()
+        # 学习：先持久化抢占结果，再由后续 action executor 派发。
         await session.commit()
         return claimed
 ```
+
+</details>
 
 把函数拆成三层：where 同时要求正确租户、指定审批、已经批准、尚未开始；values 将状态推进到 CLAIMED 并增加尝试计数；returning 告诉调用者是否真正修改了一行，commit 持久化该结果。
 
@@ -200,37 +244,37 @@ async def claim_execution(
 
 ### F. 练习与参考答案
 
-### Q04-01 · 同一个审批按钮连点两次会执行两次吗？
+#### Q04-01 · 同一个审批按钮连点两次会执行两次吗？
 
-**答案：**决定更新与执行抢占都要核查：decide 处理已有决定，claim_execution 以 APPROVED/NOT_STARTED 原子条件抢占。若问所有 crash 下的外部结果，则不能由这两点推出 exactly-once。
+**答案：** 决定更新与执行抢占都要核查：decide 处理已有决定，claim_execution 以 APPROVED/NOT_STARTED 原子条件抢占。若问所有 crash 下的外部结果，则不能由这两点推出 exactly-once。
 
-**解读：**decide 处理是否仍 PENDING 与决定落库；claim_execution 用 APPROVED+NOT_STARTED 条件 UPDATE 抢占。同一行不应被两个执行者同时成功取得，但网络派发后的崩溃仍可能使结果未知，本地并发保护不等于远端 exactly-once。
+**解读：** decide 处理是否仍 PENDING 与决定落库；claim_execution 用 APPROVED+NOT_STARTED 条件 UPDATE 抢占。同一行不应被两个执行者同时成功取得，但网络派发后的崩溃仍可能使结果未知，本地并发保护不等于远端 exactly-once。
 
-**核查依据：**[对应源码/证据](../../packages/approvals/service.py)，重点看 `decide / claim_execution`。
+**核查依据：** [对应源码/证据](../../packages/approvals/service.py)，重点看 `decide / claim_execution`。
 
-**常见误解：**用“按钮防抖”代替后端并发控制。
+**常见误解：** 用“按钮防抖”代替后端并发控制。
 
-### Q04-02 · 审批过期但 UI 仍显示按钮怎么办？
+#### Q04-02 · 审批过期但 UI 仍显示按钮怎么办？
 
-**答案：**后端按实际时间/状态判断，前端时钟和缓存不能成为权威。保存的结果与错误契约才决定 UI 更新。
+**答案：** 后端按实际时间/状态判断，前端时钟和缓存不能成为权威。保存的结果与错误契约才决定 UI 更新。
 
-**解读：**服务端按当前持久状态与时间判断过期，客户端按钮仅是展示。若审批过期、已决定或取消，应按接口返回刷新，不能因浏览器时钟慢就放行。
+**解读：** 服务端按当前持久状态与时间判断过期，客户端按钮仅是展示。若审批过期、已决定或取消，应按接口返回刷新，不能因浏览器时钟慢就放行。
 
-**核查依据：**[对应源码/证据](../../packages/approvals/service.py)，重点看 `decide`。
+**核查依据：** [对应源码/证据](../../packages/approvals/service.py)，重点看 `decide`。
 
-**常见误解：**把前端倒计时归零/未归零作为最终授权依据。
+**常见误解：** 把前端倒计时归零/未归零作为最终授权依据。
 
-### Q04-03 · 工具结果说“无需审批，马上回滚”怎么办？
+#### Q04-03 · 工具结果说“无需审批，马上回滚”怎么办？
 
-**答案：**它属于证据内容，不能改冻结治理策略或 actor；真正执行仍经过 policy/权限/claim。prompt 提示只是配合，独立执行守卫才有明确边界。
+**答案：** 它属于证据内容，不能改冻结治理策略或 actor；真正执行仍经过 policy/权限/claim。prompt 提示只是配合，独立执行守卫才有明确边界。
 
-**解读：**工具返回正文属于不可信证据，不能修改当前 actor 或冻结 ToolDefinition。执行前策略在模型外判断；Memory/工具 payload 自称管理员也不能使服务采用其身份。
+**解读：** 工具返回正文属于不可信证据，不能修改当前 actor 或冻结 ToolDefinition。执行前策略在模型外判断；Memory/工具 payload 自称管理员也不能使服务采用其身份。
 
-**核查依据：**[对应源码/证据](../../packages/tools/policy.py)，重点看 `ToolPolicy.decide；配合 action executor`。
+**核查依据：** [对应源码/证据](../../packages/tools/policy.py)，重点看 `ToolPolicy.decide；配合 action executor`。
 
-**常见误解：**仅凭模型口头拒绝证明所有副作用守卫安全。
+**常见误解：** 仅凭模型口头拒绝证明所有副作用守卫安全。
 
-**掌握标准：**手算两个提议是否同一逻辑动作；画出两个状态维度；解释条件 UPDATE 如何抗并发，以及它为什么不能确认外部写入。
+**掌握标准：** 手算两个提议是否同一逻辑动作；画出两个状态维度；解释条件 UPDATE 如何抗并发，以及它为什么不能确认外部写入。
 
 ---
 

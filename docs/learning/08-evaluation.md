@@ -8,6 +8,17 @@
 
 学习如何把“这次看起来更好”变成**有冻结身份、有对照、有失败记录的实验**，并区分测试、模拟、真实模型、语义抽检和生产收益。
 
+## 源码导读：实验定义、执行与指标不是一个函数
+
+先看下表，弄清代码的职责与交接，再按阅读重点进入源码。表中的入口不是全部都要第一遍逐行读完。
+
+| 入口与职责 | 输入 → 产出 | 阅读重点 |
+| --- | --- | --- |
+| [ExperimentService.finalize_experiment](../../packages/evaluation/experiments.py)<br><br>校验数据和变体后固定实验规格/身份，将草稿推进到冻结状态。 | session/context/experiment_id→冻结 Experiment。 | 先发布数据 hash/schema，再 _validate_stored_variant，后 spec/hash/status/commit；不在此运行全部 case。 |
+| [prepare_run](../../packages/evaluation/runner.py)<br>[claim_run](../../packages/evaluation/runner.py)<br>[claim_case](../../packages/evaluation/runner.py)<br><br>生成执行任务与领取租约，然后按条件领取可执行 case。 | run_id、owner/generation 与 session→任务数、Run 或 case/None。 | 先理解 case×variant×repetition；claim_case 看行锁 skip_locked 和代数条件。 |
+| [bind_case_agent_run](../../packages/evaluation/runner.py)<br>[complete_case](../../packages/evaluation/runner.py)<br>[fail_case](../../packages/evaluation/runner.py)<br>[recover_inflight_cases](../../packages/evaluation/runner.py)<br><br>记录真实执行关联，保存评分/失败，依据旧 Run 对账中断执行。 | case/Run/lease 与结果→持久结果状态。 | 看绑定时点与 generation 检查；不要在缺证据时盲重跑副作用。 |
+| [AgentRuntimeEvaluationDriver](../../packages/evaluation/runner.py)<br><br>把冻结 case/variant 接入真实 Runtime；与确定性 driver 的证据级别不同。 | 已冻结变体与 case→执行结果和 judge 输入/输出。 | 先看 prepare/execute 的委托与绑定，再看评分；expected 不该变模型任务答案。 |
+
 ## 1. 数据集到实验的链条
 
 ```mermaid
@@ -90,7 +101,7 @@ RAG 两策略目标召回相同但时延不同；负载并发 1/4/8 各 60 秒�
 
 纸上设计一个实验：只改变工单登记提示，其余版本/知识/数据/价格/evaluator 固定。列出冻结字段、DEV 调试规则、HOLDOUT 暴露规则、失败记录、语义抽检与费用分母。
 
-**设计题参考答案：**创建两个发布版本，模型执行计划、工具修订、知识 snapshot、预算和 Memory 规则相同，仅工单 prompt 不同。这里“版本固定”指各 variant 固定各自版本，**不是两个不同 prompt 共用同一个 spec hash**；改变 prompt 必然改变规格身份。
+**设计题参考答案：** 创建两个发布版本，模型执行计划、工具修订、知识 snapshot、预算和 Memory 规则相同，仅工单 prompt 不同。这里“版本固定”指各 variant 固定各自版本，**不是两个不同 prompt 共用同一个 spec hash**；改变 prompt 必然改变规格身份。
 
 | 设计项 | 应写入的答案 | 原因 |
 | --- | --- | --- |
@@ -103,7 +114,7 @@ RAG 两策略目标召回相同但时延不同；负载并发 1/4/8 各 60 秒�
 
 可以支持“在这批合成 case 与所测模型条件下，两 prompt 的差异”，不能直接推出真实客服线上收益或所有行业适用。依据：[experiments](../../packages/evaluation/experiments.py)、[runner](../../packages/evaluation/runner.py) 与 [benchmark 索引](../benchmark/README.md)。
 
-**通过标准：**说明一次实验比较了什么，以及没证明什么；能从报告找到原始 JSON，不把不同轮次测试数量拼成当前覆盖率。
+**通过标准：** 说明一次实验比较了什么，以及没证明什么；能从报告找到原始 JSON，不把不同轮次测试数量拼成当前覆盖率。
 
 已有核查：[发布数据集](../../tests/integration/test_m7a_evaluation_datasets.py)、[实验冻结](../../tests/integration/test_m7b_experiments.py)、[runner](../../tests/integration/test_m7c_experiment_runner.py)、[release gate](../../tests/integration/test_m7ef_ablation_release_gate.py)。本课未执行。
 
@@ -131,7 +142,7 @@ DEV 用来调整 prompt/策略和形成回归，HOLDOUT 用来评估未参与开
 
 ### C. 读 runner 的三个时点
 
-**准备：**确定发布数据、变体有效输入、pricing/evaluator 与 build 身份。**执行：**claim run/case，调用选定 driver，保存每次结果和费用。**汇总：**按实际判分与失败信息聚合，保留原始输出供复查。
+**准备：** 确定发布数据、变体有效输入、pricing/evaluator 与 build 身份。 **执行：** claim run/case，调用选定 driver，保存每次结果和费用。 **汇总：** 按实际判分与失败信息聚合，保留原始输出供复查。
 
 在 [runner](../../packages/evaluation/runner.py) 找 `claim_case`：查询关联 case/run/item/variant，要求 Run RUNNING、当前 lease owner 与 generation 一致；按 case/variant/repetition 排序；使用 `with_for_update(skip_locked=True)` 避免并行执行者等待同一行；将 case 改 RUNNING 后提交。
 
@@ -157,37 +168,37 @@ p95 也要看样本与失败：仅统计成功项会遗漏超时，冷启动和�
 
 ### F. 练习与参考答案
 
-### Q08-01 · 拿 DEV 满分作最终质量证据有什么问题？
+#### Q08-01 · 拿 DEV 满分作最终质量证据有什么问题？
 
-**答案：**DEV 已用于调参；可以证明回归覆盖所测场景，却不能当未接触的独立泛化检验。
+**答案：** DEV 已用于调参；可以证明回归覆盖所测场景，却不能当未接触的独立泛化检验。
 
-**解读：**DEV 已被用于发现错误和调整配置，成绩同时反映对这批样本的适应。它可证明回归改善；要支持独立效果，需要未用于开发的 HOLDOUT 或新数据，并控制暴露及评估口径。
+**解读：** DEV 已被用于发现错误和调整配置，成绩同时反映对这批样本的适应。它可证明回归改善；要支持独立效果，需要未用于开发的 HOLDOUT 或新数据，并控制暴露及评估口径。
 
-**核查依据：**[对应源码/证据](../../packages/evaluation/service.py)，重点看 `EvaluationDatasetService` 的发布与分组契约。
+**核查依据：** [对应源码/证据](../../packages/evaluation/service.py)，重点看 `EvaluationDatasetService` 的发布与分组契约。
 
-**常见误解：**将开发集满分改名为泛化准确率。
+**常见误解：** 将开发集满分改名为泛化准确率。
 
-### Q08-02 · 相同 dataset_id 是否意味着完全相同数据？
+#### Q08-02 · 相同 dataset_id 是否意味着完全相同数据？
 
-**答案：**不意味着。具体 DatasetVersion、content/schema hash 及发布状态才决定所绑定内容。
+**答案：** 不意味着。具体 DatasetVersion、content/schema hash 及发布状态才决定所绑定内容。
 
-**解读：**dataset_id 是逻辑数据集，多个草稿/发布版本可以属于它。正式执行绑定具体版本、schema/content hash；仅报逻辑 ID 无法判断参考答案和分组是否被改。
+**解读：** dataset_id 是逻辑数据集，多个草稿/发布版本可以属于它。正式执行绑定具体版本、schema/content hash；仅报逻辑 ID 无法判断参考答案和分组是否被改。
 
-**核查依据：**[对应源码/证据](../../packages/evaluation/experiments.py)，重点看 `正式实验对数据版本的绑定`。
+**核查依据：** [对应源码/证据](../../packages/evaluation/experiments.py)，重点看 `正式实验对数据版本的绑定`。
 
-**常见误解：**用一个逻辑 ID 替代完整冻结身份。
+**常见误解：** 用一个逻辑 ID 替代完整冻结身份。
 
-### Q08-03 · deterministic driver 通过能证明模型答案质量吗？
+#### Q08-03 · deterministic driver 通过能证明模型答案质量吗？
 
-**答案：**它主要验证编排和契约；真实 Runtime 模型实验与语义评估有额外不确定性，不能替代。
+**答案：** 它主要验证编排和契约；真实 Runtime 模型实验与语义评估有额外不确定性，不能替代。
 
-**解读：**确定性 driver 用受控响应验证 runner 的领取、记录和聚合路径，不承担真实供应商的推理表现。要证明答案质量，需要实际 Runtime 调用、原始输出与语义标准。
+**解读：** 确定性 driver 用受控响应验证 runner 的领取、记录和聚合路径，不承担真实供应商的推理表现。要证明答案质量，需要实际 Runtime 调用、原始输出与语义标准。
 
-**核查依据：**[对应源码/证据](../../packages/evaluation/runner.py)，重点看 `AgentRuntimeEvaluationDriver 与 driver 调用`。
+**核查依据：** [对应源码/证据](../../packages/evaluation/runner.py)，重点看 `AgentRuntimeEvaluationDriver 与 driver 调用`。
 
-**常见误解：**把编排测试成功率当业务模型成功率。
+**常见误解：** 把编排测试成功率当业务模型成功率。
 
-**掌握标准：**手算任务数量、明确指标分母、说明 lease generation，并从一条汇总结果追到原始输入/输出及完整实验身份。
+**掌握标准：** 手算任务数量、明确指标分母、说明 lease generation，并从一条汇总结果追到原始输入/输出及完整实验身份。
 
 ---
 

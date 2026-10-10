@@ -8,6 +8,18 @@
 
 把 RAG 学成 Run 的一条证据链：文档如何进索引，检索为何限定快照，结果怎样进入模型预算，引用能证明到什么程度。
 
+## 源码导读：入库与检索各读一条线
+
+先看下表，弄清代码的职责与交接，再按阅读重点进入源码。表中的入口不是全部都要第一遍逐行读完。
+
+| 入口与职责 | 输入 → 产出 | 阅读重点 |
+| --- | --- | --- |
+| [KnowledgeService.upload_document](../../packages/knowledge/services.py)<br><br>接受上传并建立文档/修订/入库任务身份，不等于同步完成嵌入。 | 工作区、知识库、文件名/类型、异步内容流和 blob/queue 依赖→`(Document, DocumentRevision, IngestionJob)` 三个对象。 | 先定位内容保存和 job/队列交接，再查 worker 处理；确认 READY 在哪产生。 |
+| [claim_ingestion_job](../../packages/knowledge/ingestion.py)<br>[persist_chunks_and_advance](../../packages/knowledge/ingestion.py)<br>[finalize_ingestion_ready](../../packages/knowledge/ingestion.py)<br>[reconcile_ingestion_jobs](../../packages/knowledge/ingestion.py)<br><br>依次抢占任务、保存分片/阶段、确认就绪、对账异常中间态。 | job/lease 身份、chunks/阶段信息→持久状态更新与结果。 | 这是状态协作函数，不是一个 embedding SDK；看 lease_token、阶段、attempt 和提交条件。 |
+| [retrieve_with_trace](../../packages/knowledge/retrieval.py)<br>[_snapshot_scope](../../packages/knowledge/retrieval.py)<br>[_load_chunks](../../packages/knowledge/retrieval.py)<br><br>限定范围，召回/融合/重排，再装载真实分片构造证据。 | 检索请求与 snapshot→结果/evidence/trace；范围或内容不合法时拒绝。 | 先 scope，再 Dense/Sparse/RRF，最后数据库 chunk 与 evidence；不要只看 Qdrant 返回。 |
+| [fuse_reciprocal_rank](../../packages/knowledge/retrieval.py)<br><br>纯排名融合，不写库也不调用模型。 | 两路 ranked hits、rrf_k、candidate_top_k→排序后的候选 tuple。 | 看 1/(k+rank) 累加和 tie-break，再用正文例子手算。 |
+| [search_knowledge 内建工具入口](../../packages/tools/builtins/search_knowledge.py)<br><br>把 Runtime 的知识查询接到 retriever，返回可进入 observation 的证据。 | 受控工具参数与当前知识绑定/上下文→结构化检索结果。 | 确认绑定身份从执行上下文来，而非模型任意指定另一租户。 |
+
 ## 1. 写入链与读取链分开
 
 ```mermaid
@@ -81,17 +93,17 @@ beat 的入库对账能发现中间状态，重新推进到可确认的 READY。
 
 纸上预测：只上传新文档、不更新固定 snapshot，旧 Run 能否看见它？答案要包含 snapshot 成员、LATEST 策略和实际解析时点，不能简单说“知识库有就能用”。
 
-**面试追问：**Qdrant 的结果为何还查数据库？快照 hash 与文件 bytes hash 是否同一件事？检索 recall=1 能否说明任务成功率=1？
+**面试追问：** Qdrant 的结果为何还查数据库？快照 hash 与文件 bytes hash 是否同一件事？检索 recall=1 能否说明任务成功率=1？
 
-**逐问答案：**索引是候选召回层，数据库装载真实 chunk 并核对 workspace/snapshot 成员，避免把陈旧或范围不符的命中当有效证据。snapshot hash 摘要的是 schema、知识库和文档/修订成员集合；文件 bytes hash 摘要的是某文件内容，二者输入不同，不能互代。Recall=1 只证明标注的目标在规定检索范围找到，不证明准入未丢信息或答案规则正确，任务还需执行/语义标准。依据：[retrieval](../../packages/knowledge/retrieval.py)、[_canonical_membership](../../packages/knowledge/snapshots.py)。
+**逐问答案：** 索引是候选召回层，数据库装载真实 chunk 并核对 workspace/snapshot 成员，避免把陈旧或范围不符的命中当有效证据。snapshot hash 摘要的是 schema、知识库和文档/修订成员集合；文件 bytes hash 摘要的是某文件内容，二者输入不同，不能互代。Recall=1 只证明标注的目标在规定检索范围找到，不证明准入未丢信息或答案规则正确，任务还需执行/语义标准。依据：[retrieval](../../packages/knowledge/retrieval.py)、[_canonical_membership](../../packages/knowledge/snapshots.py)。
 
-**固定 snapshot 预测答案：**仅上传不改变 K1 的成员，固定 K1 的旧执行不会看到新文档。LATEST 需要在特定解析时点解析出具体 snapshot；新 Run 若解析为新 K2 可能看到新内容，已冻结实验仍用原 K1。不能将“LATEST”理解成每读历史记录就随时重新解析。
+**固定 snapshot 预测答案：** 仅上传不改变 K1 的成员，固定 K1 的旧执行不会看到新文档。LATEST 需要在特定解析时点解析出具体 snapshot；新 Run 若解析为新 K2 可能看到新内容，已冻结实验仍用原 K1。不能将“LATEST”理解成每读历史记录就随时重新解析。
 
-**证据链画图答案：**Document 是逻辑身份→Revision 是内容版本→Chunk 是分片→Snapshot 固定修订集合→Evidence 携带检索到的分片/修订身份。前三者由入库生成/确认，Snapshot 在服务里物化成员，Evidence 在检索读取链构造；Snapshot 不是把所有文档拼成一个字符串。
+**证据链画图答案：** Document 是逻辑身份→Revision 是内容版本→Chunk 是分片→Snapshot 固定修订集合→Evidence 携带检索到的分片/修订身份。前三者由入库生成/确认，Snapshot 在服务里物化成员，Evidence 在检索读取链构造；Snapshot 不是把所有文档拼成一个字符串。
 
 已有核查：[snapshot 测试](../../tests/integration/test_m3f_snapshot.py)、[检索策略单测](../../tests/unit/test_knowledge_m7e_strategy.py)。本课未运行。
 
-**通过标准：**画完整写入/读取链，解释范围隔离、冻结与引用边界，而不只说“embedding+vector DB”。
+**通过标准：** 画完整写入/读取链，解释范围隔离、冻结与引用边界，而不只说“embedding+vector DB”。
 
 
 ## 精读增补：从一条政策到模型能够引用的证据
@@ -140,37 +152,37 @@ claim/lease 防止多个活跃 worker 同时无约束推进同一 job；稳定 r
 
 ### F. 练习与参考答案
 
-### Q06-01 · 回答引用了真实 chunk，却仍错了，可能为什么？
+#### Q06-01 · 回答引用了真实 chunk，却仍错了，可能为什么？
 
-**答案：**chunk 不支持具体命题、规则条件遗漏、相邻政策混入、准入截断或模型推理错误；真实来源 ID 只是第一层证据。
+**答案：** chunk 不支持具体命题、规则条件遗漏、相邻政策混入、准入截断或模型推理错误；真实来源 ID 只是第一层证据。
 
-**解读：**证据 ID 验证来源，命题支持还需查正文和条件。“七天”真实存在，却可能只适用于普通退款；答案若用于另一业务、漏掉条件或扩大结论，仍然错误。
+**解读：** 证据 ID 验证来源，命题支持还需查正文和条件。“七天”真实存在，却可能只适用于普通退款；答案若用于另一业务、漏掉条件或扩大结论，仍然错误。
 
-**核查依据：**[对应源码/证据](../../packages/knowledge/retrieval.py)，重点看 `retrieve_with_trace / _load_chunks`。
+**核查依据：** [对应源码/证据](../../packages/knowledge/retrieval.py)，重点看 `retrieve_with_trace / _load_chunks`。
 
-**常见误解：**有引用就判零幻觉。
+**常见误解：** 有引用就判零幻觉。
 
-### Q06-02 · 新文档 READY 后，固定 K1 会自动看到吗？
+#### Q06-02 · 新文档 READY 后，固定 K1 会自动看到吗？
 
-**答案：**不会因为 READY 就进入已冻结成员；要看绑定/解析的新 snapshot，LATEST 也有明确解析时点。
+**答案：** 不会因为 READY 就进入已冻结成员；要看绑定/解析的新 snapshot，LATEST 也有明确解析时点。
 
-**解读：**READY 是某修订可用的入库状态，K1 是已经物化的成员集合。新的可用修订进入新 snapshot 后才可能被新绑定/新解析使用；历史固定身份不会因上传而变化。
+**解读：** READY 是某修订可用的入库状态，K1 是已经物化的成员集合。新的可用修订进入新 snapshot 后才可能被新绑定/新解析使用；历史固定身份不会因上传而变化。
 
-**核查依据：**[对应源码/证据](../../packages/knowledge/snapshots.py)，重点看 `create_current_snapshot / resolve_snapshot`。
+**核查依据：** [对应源码/证据](../../packages/knowledge/snapshots.py)，重点看 `create_current_snapshot / resolve_snapshot`。
 
-**常见误解：**把索引更新与旧快照成员更新混为一谈。
+**常见误解：** 把索引更新与旧快照成员更新混为一谈。
 
-### Q06-03 · 索引不可用是否等于知识原文丢了？
+#### Q06-03 · 索引不可用是否等于知识原文丢了？
 
-**答案：**原文、关系数据、索引属于不同存储。检索链可能失效，但不能据此推断 blob 和数据库成员已消失。
+**答案：** 原文、关系数据、索引属于不同存储。检索链可能失效，但不能据此推断 blob 和数据库成员已消失。
 
-**解读：**索引、原文 blob 与成员关系处在不同存储层。索引故障会破坏检索可用性；是否丢原文必须独立查 blob 与 Revision。重建也需依据完整原文和身份，而非只重启索引。
+**解读：** 索引、原文 blob 与成员关系处在不同存储层。索引故障会破坏检索可用性；是否丢原文必须独立查 blob 与 Revision。重建也需依据完整原文和身份，而非只重启索引。
 
-**核查依据：**[对应源码/证据](../../packages/knowledge/ingestion.py)，重点看 `入库阶段与确认/对账逻辑`。
+**核查依据：** [对应源码/证据](../../packages/knowledge/ingestion.py)，重点看 `入库阶段与确认/对账逻辑`。
 
-**常见误解：**把一个存储层不可用推断成所有数据被删除。
+**常见误解：** 把一个存储层不可用推断成所有数据被删除。
 
-**掌握标准：**手算 RRF/MRR；画上传和检索两条链；在源码指出 scope、候选融合、真实 chunk 与预算四个位置。
+**掌握标准：** 手算 RRF/MRR；画上传和检索两条链；在源码指出 scope、候选融合、真实 chunk 与预算四个位置。
 
 ---
 

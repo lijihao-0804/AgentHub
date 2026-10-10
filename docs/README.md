@@ -1,8 +1,8 @@
 # AgentHub 文档导航
 
-学习项目请走 [00–10 完整课程](learning/README.md)，按架构→请求→运行时→版本→治理→恢复→RAG→Memory→评测→业务闭环→实验顺序。
+学习项目请走 [00–11 完整课程](learning/README.md)，按架构→请求→运行时→版本→治理→恢复→RAG→Memory→评测→业务闭环→实验→Agent 强化顺序。
 
-课程每课包含主线说明和精读增补：真实函数拆解、教学数据账本、并发与失败时间线、练习与参考答案。先从 [00 · 架构](learning/00-architecture-first.md)建立全景，再顺序学习；第 10 课提供只读观察 SQL、综合排障题和隔离实验步骤。
+课程每课包含主线说明和精读增补：真实函数拆解、教学数据账本、并发与失败时间线、练习与参考答案。先从 [00 · 架构](learning/00-architecture-first.md)建立全景，再顺序学习；第 10 课提供只读观察 SQL、综合排障题和隔离实验步骤。[第 11 课](learning/11-agent-engineering.md)面向 Agent 岗位，逐行解释工具提议与观察回写，配十道有答案的追问。
 
 先看 [当前状态与证据口径](current-state.md) 和 [根 README](../README.md)。功能收口基线为 main `e7dc1f6`；功能开发已停止，旧计划未全部实现。
 

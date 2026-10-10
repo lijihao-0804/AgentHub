@@ -8,16 +8,30 @@
 
 解释等待审批后如何恢复，为什么 checkpoint 不等于外部 exactly-once，以及 SSE、持久事件、RunStep 和 trace 各解决什么。不是只背“用了 LangGraph”。
 
+## 源码导读：恢复条件与外部结果分类
+
+先看下表，弄清代码的职责与交接，再按阅读重点进入源码。表中的入口不是全部都要第一遍逐行读完。
+
+| 入口与职责 | 输入 → 产出 | 阅读重点 |
+| --- | --- | --- |
+| [AgentRunService.resume](../../packages/agent_runtime/runtime.py)<br><br>以原 Run 继续图执行，不重新开始一次问题。 | request context、run_id、approval_id→AgentRunResult 或明确恢复错误。 | 原 Run 状态→原 actor 当前权限→审批归属→checkpoint→Command resume→结果。 |
+| [checkpoint_thread_id](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)<br>[config_for_run](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)<br>[has_checkpoint](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)<br><br>生成同 Run 图身份、交给框架配置，并探测恢复状态是否存在。 | workspace+Run→标识/config；探测→bool。 | 业务 Thread 与 checkpoint thread_id 不同；配置存在也不证明远端写入结果。 |
+| [McpToolExecutor.execute_write](../../packages/mcp/runtime.py)<br><br>派发一次批准的 WRITE，将远端/派发证据转换成三类动作结果。 | context、ToolDefinition、arguments→ActionExecutionResult。 | 依次看 OK、TOOL_ERROR、NOT_DISPATCHED、未知兜底；不要先统一加 retry。 |
+| [should_persist](../../packages/agent_runtime/event_store.py)<br><br>判断事件是否进入持久重放记录，本身不执行 INSERT。 | AgentEvent→bool。 | 读 NON_PERSISTED_EVENT_TYPES，再读实际写入与队列边界；序号是游标不是行数。 |
+
 ## 1. 恢复需要稳定的图身份
 
 真实 checkpoint 标识：
 
-出处：[packages/agent_runtime/adapters/langgraph/checkpoint.py](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)，`checkpoint_thread_id`；原样函数（省略装饰器）。
+出处：[packages/agent_runtime/adapters/langgraph/checkpoint.py](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)，`checkpoint_thread_id`；源码函数（省略装饰器，学习注释见下）。
+
+> **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
 ```python
 def checkpoint_thread_id(workspace_id: UUID | str, run_id: UUID | str) -> str:
     """Stable tenant-safe identity used by every graph invocation for a Run."""
 
+    # 学习：用 workspace+Run 定位图状态；不是业务会话 Thread 的 ID。
     return f"agenthub:{workspace_id}:{run_id}"
 ```
 
@@ -64,7 +78,12 @@ sequenceDiagram
 
 [McpToolExecutor.execute_write](../../packages/mcp/runtime.py) 是非常值得逐行读的短函数：
 
-出处：[packages/mcp/runtime.py](../../packages/mcp/runtime.py)，`execute_write`；原样函数（省略装饰器）。
+出处：[packages/mcp/runtime.py](../../packages/mcp/runtime.py)，`execute_write`；源码函数（省略装饰器，学习注释见下）。
+
+> **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
+
+<details>
+<summary>展开 execute_write 的带注释代码</summary>
 
 ```python
 async def execute_write(
@@ -81,9 +100,12 @@ async def execute_write(
     claimed or available here.
     """
 
+    # 学习：本次调用一次并得到状态/派发证据；这里没有不确定写入重试循环。
     outcome = await self._call(context, definition, arguments)
+    # 学习：收到远端确定成功结果，返回成功分类。
     if outcome.status is McpCallStatus.OK:
         return ActionExecutionResult.succeeded(outcome.data or {})
+    # 学习：远端明确报告工具失败，与“请求没回音”不同。
     if outcome.status is McpCallStatus.TOOL_ERROR:
         # The server said the tool failed. That is a definite answer about a
         # completed round trip, so it is a failure, not a mystery.
@@ -91,15 +113,19 @@ async def execute_write(
             outcome.failure_code or "MCP_TOOL_CALL_FAILED",
             "The remote MCP tool reported a failure.",
         )
+    # 学习：有证据表明未派发，属于确定未执行，不需要猜远端状态。
     if outcome.dispatch is DispatchState.NOT_DISPATCHED:
         return ActionExecutionResult.failed(
             outcome.failure_code or "MCP_TOOL_CALL_FAILED",
             "The remote MCP tool was not called.",
         )
+    # 学习：其余情况无法确认副作用；保存未知，不能擅自按 FAILED 重试。
     return ActionExecutionResult.unknown_outcome(
         outcome.failure_code or "MCP_TOOL_CALL_FAILED"
     )
 ```
+
+</details>
 
 读法：OK 是确认成功；TOOL_ERROR 是远端明确返回失败；NOT_DISPATCHED 是未发请求；其他无法确认的已派发情况归未知。不要把所有超时都写成“失败，可重试”。
 
@@ -116,10 +142,13 @@ async def execute_write(
 
 [真实事件筛选](../../packages/agent_runtime/event_store.py)：
 
-出处：[packages/agent_runtime/event_store.py](../../packages/agent_runtime/event_store.py)，`should_persist`；原样函数（省略装饰器）。
+出处：[packages/agent_runtime/event_store.py](../../packages/agent_runtime/event_store.py)，`should_persist`；源码函数（省略装饰器，学习注释见下）。
+
+> **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
 ```python
 def should_persist(event: AgentEvent) -> bool:
+    # 学习：按事件类型过滤；message.delta 不持久化，所以重放游标允许有缺口。
     return event.type not in NON_PERSISTED_EVENT_TYPES
 ```
 
@@ -131,15 +160,15 @@ def should_persist(event: AgentEvent) -> bool:
 
 纸上画两个故障点：WAITING 时 API 重启、远端接受写入但不返回。写出预期状态与证据，再在第 10 课的隔离实验中验证。此处没有新实测记录。
 
-**面试追问：**为什么队列重投不能让已经 CLAIMED 的未知动作自动再发？为什么审批恢复不能新建 Run？为什么 SSE 重放不一定包含完整打字动画？
+**面试追问：** 为什么队列重投不能让已经 CLAIMED 的未知动作自动再发？为什么审批恢复不能新建 Run？为什么 SSE 重放不一定包含完整打字动画？
 
-**逐问答案：**CLAIMED 只证明本地抢占，远端可能已经完成；队列重复投递不提供远端结果证据，因此不能自动重新派发未知 WRITE。审批恢复必须延续原动作/checkpoint/actor/预算，新建 Run 会改变执行与去重身份，属于重跑。SSE 的 message.delta 不落库，重放结构事件和最终输出而非完整 token 动画，sequence 也可以有缺口。分别核查 [claim_execution](../../packages/approvals/service.py)、[resume](../../packages/agent_runtime/runtime.py)、[should_persist](../../packages/agent_runtime/event_store.py)。
+**逐问答案：** CLAIMED 只证明本地抢占，远端可能已经完成；队列重复投递不提供远端结果证据，因此不能自动重新派发未知 WRITE。审批恢复必须延续原动作/checkpoint/actor/预算，新建 Run 会改变执行与去重身份，属于重跑。SSE 的 message.delta 不落库，重放结构事件和最终输出而非完整 token 动画，sequence 也可以有缺口。分别核查 [claim_execution](../../packages/approvals/service.py)、[resume](../../packages/agent_runtime/runtime.py)、[should_persist](../../packages/agent_runtime/event_store.py)。
 
-**两个预测题的答案：**WAITING 重启后，若原数据、checkpoint、当前原 actor 权限和配置有效，应恢复同一 Run；缺 checkpoint 则 NEEDS_ATTENTION / APPROVAL_CHECKPOINT_MISSING，不伪造继续成功。远端接受写入但不回答时，若无法确认结果，执行 UNKNOWN_OUTCOME、Run NEEDS_ATTENTION；需保留远端调查线索，不能靠再次调用“试出”结果。这是条件性预期，实际实验还需记录观察。
+**两个预测题的答案：** WAITING 重启后，若原数据、checkpoint、当前原 actor 权限和配置有效，应恢复同一 Run；缺 checkpoint 则 NEEDS_ATTENTION / APPROVAL_CHECKPOINT_MISSING，不伪造继续成功。远端接受写入但不回答时，若无法确认结果，执行 UNKNOWN_OUTCOME、Run NEEDS_ATTENTION；需保留远端调查线索，不能靠再次调用“试出”结果。这是条件性预期，实际实验还需记录观察。
 
 已有证据：[checkpoint 集成](../../tests/integration/test_m5a_checkpoint_runtime.py)、[审批预算恢复](../../tests/integration/test_approval_usage_resume.py)、[durable stream 单测](../../tests/unit/test_durable_run_stream.py)、[故障报告](../reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md)。历史 OS 退出三窗口安全终态 3/3，业务恢复仅 1/3，不能都叫自动恢复成功。
 
-**通过标准：**区分数据库状态/图状态/外部结果/事件；说明一个已验证窗口与一个未知限制。
+**通过标准：** 区分数据库状态/图状态/外部结果/事件；说明一个已验证窗口与一个未知限制。
 
 
 ## 精读增补：按崩溃时间点推理，而不是背“支持恢复”
@@ -188,37 +217,37 @@ def should_persist(event: AgentEvent) -> bool:
 
 ### F. 练习与参考答案
 
-### Q05-01 · 给未知动作增加三次网络重试能提高稳健性吗？
+#### Q05-01 · 给未知动作增加三次网络重试能提高稳健性吗？
 
-**答案：**对 READ 和明确未派发失败可能有可重试空间；对已派发但未知 WRITE 会扩大重复副作用风险，不能共用一套盲重试逻辑。
+**答案：** 对 READ 和明确未派发失败可能有可重试空间；对已派发但未知 WRITE 会扩大重复副作用风险，不能共用一套盲重试逻辑。
 
-**解读：**同一个超时可能发生在派发前或派发后。前者可确认没有副作用，后者可能已经完成；不区分 dispatch 就统一重试，会把不确定性变成重复写入风险。
+**解读：** 同一个超时可能发生在派发前或派发后。前者可确认没有副作用，后者可能已经完成；不区分 dispatch 就统一重试，会把不确定性变成重复写入风险。
 
-**核查依据：**[对应源码/证据](../../packages/mcp/runtime.py)，重点看 `execute_write`。
+**核查依据：** [对应源码/证据](../../packages/mcp/runtime.py)，重点看 `execute_write`。
 
-**常见误解：**把请求没有返回等同于远端没有处理。
+**常见误解：** 把请求没有返回等同于远端没有处理。
 
-### Q05-02 · trace sink 写失败要终止 Run 吗？
+#### Q05-02 · trace sink 写失败要终止 Run 吗？
 
-**答案：**当前 trace 是观测路径，失败不阻断业务；这不等于业务状态/checkpoint 持久化失败也可忽略。按记录职责区分。
+**答案：** 当前 trace 是观测路径，失败不阻断业务；这不等于业务状态/checkpoint 持久化失败也可忽略。按记录职责区分。
 
-**解读：**trace 是观测的辅助路径，项目采取失败不阻断业务；Run/Approval/checkpoint 是正确性和恢复依赖，丢失它们的结果不能用相同策略忽略。区分信息用途后再决定失败处理。
+**解读：** trace 是观测的辅助路径，项目采取失败不阻断业务；Run/Approval/checkpoint 是正确性和恢复依赖，丢失它们的结果不能用相同策略忽略。区分信息用途后再决定失败处理。
 
-**核查依据：**[对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `trace 与 Run/恢复持久化调用`。
+**核查依据：** [对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `trace 与 Run/恢复持久化调用`。
 
-**常见误解：**把“观测 fail-open”推广成“所有数据库错误都可继续”。
+**常见误解：** 把“观测 fail-open”推广成“所有数据库错误都可继续”。
 
-### Q05-03 · 历史 crash 测试安全终态 3/3，业务恢复 1/3，怎么讲？
+#### Q05-03 · 历史 crash 测试安全终态 3/3，业务恢复 1/3，怎么讲？
 
-**答案：**“三个所测窗口都没有错误自动重写，只有一个自动恢复业务完成”。安全落到待关注也可能符合验收，不能把它算业务恢复成功。
+**答案：** “三个所测窗口都没有错误自动重写，只有一个自动恢复业务完成”。安全落到待关注也可能符合验收，不能把它算业务恢复成功。
 
-**解读：**安全终态统计的是没有危险的盲目续写或错误副作用，业务恢复统计的是任务自动完成。NEEDS_ATTENTION 可以是安全落点，却不是业务成功；两个指标回答不同问题。
+**解读：** 安全终态统计的是没有危险的盲目续写或错误副作用，业务恢复统计的是任务自动完成。NEEDS_ATTENTION 可以是安全落点，却不是业务成功；两个指标回答不同问题。
 
-**核查依据：**[对应源码/证据](../reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md)，重点看 `所记录的故障窗口与结果`。
+**核查依据：** [对应源码/证据](../reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md)，重点看 `所记录的故障窗口与结果`。
 
-**常见误解：**把两项分母相同当作两项含义相同。
+**常见误解：** 把两项分母相同当作两项含义相同。
 
-**掌握标准：**在纸上任意放一个 crash 点，说明最后可证明的事实、下一步能做什么、不能做什么，并找到对应实际分支。
+**掌握标准：** 在纸上任意放一个 crash 点，说明最后可证明的事实、下一步能做什么、不能做什么，并找到对应实际分支。
 
 ---
 
