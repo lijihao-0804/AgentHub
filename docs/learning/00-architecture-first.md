@@ -20,9 +20,9 @@
 
 ### 开篇三问的答案与解读
 
-1. **第二句话通常创建新 Turn 和新 Run；审批批准继续原 Run。 **Thread 聚合对话，每轮提交分别解析已发布版本并建立执行；重复相同 client_token 是重发已有提交，不是新问题。审批恢复使用原 run_id/checkpoint，不能清零原预算。依据：[ThreadService.resolve_agent_version / submit_turn](../../packages/threads/service.py) 与 [AgentRunService.resume](../../packages/agent_runtime/runtime.py)。
-2. **两种故障影响不同。 **Redis 故障主要影响依赖它的派发/消费/调度，已有 PostgreSQL 记录不会因此消失；PostgreSQL 故障会影响成员权限、版本、Run/审批和恢复状态的读写。两者都可能阻断任务，只是故障点不同。不能简化成“Redis 停了整个系统仍可用”。依据：[worker 配置](../../apps/worker/celery_app.py) 与 [审批服务](../../packages/approvals/service.py)。
-3. **模型只提议，服务根据冻结工具策略、权限和审批决定执行资格，executor 才真正派发。 **用户文字或模型 call 不是外部副作用证据；批准后仍需 claim，无法确认远端结果要保持未知。依据：[ToolPolicy.decide](../../packages/tools/policy.py)、[ApprovalService.claim_execution](../../packages/approvals/service.py) 和 [MCP execute_write](../../packages/mcp/runtime.py)。
+1. **第二句话通常创建新 Turn 和新 Run；审批批准继续原 Run。** Thread 聚合对话，每轮提交分别解析已发布版本并建立执行；重复相同 client_token 是重发已有提交，不是新问题。审批恢复使用原 run_id/checkpoint，不能清零原预算。依据：[ThreadService.resolve_agent_version / submit_turn](../../packages/threads/service.py) 与 [AgentRunService.resume](../../packages/agent_runtime/runtime.py)。
+2. **两种故障影响不同。** Redis 故障主要影响依赖它的派发/消费/调度，已有 PostgreSQL 记录不会因此消失；PostgreSQL 故障会影响成员权限、版本、Run/审批和恢复状态的读写。两者都可能阻断任务，只是故障点不同。不能简化成“Redis 停了整个系统仍可用”。依据：[worker 配置](../../apps/worker/celery_app.py) 与 [审批服务](../../packages/approvals/service.py)。
+3. **模型只提议，服务根据冻结工具策略、权限和审批决定执行资格，executor 才真正派发。** 用户文字或模型 call 不是外部副作用证据；批准后仍需 claim，无法确认远端结果要保持未知。依据：[ToolPolicy.decide](../../packages/tools/policy.py)、[ApprovalService.claim_execution](../../packages/approvals/service.py) 和 [MCP execute_write](../../packages/mcp/runtime.py)。
 
 
 ---
@@ -55,7 +55,7 @@
 | 等待审批时服务重启怎么办？ | PostgreSQL checkpoint 与审批记录，同 Run 恢复 | 状态只在内存中时会丢失上下文/身份 |
 | 回滚超时，究竟发生了没有？ | UNKNOWN_OUTCOME → NEEDS_ATTENTION，保留证据 | 静默重试可能再次执行外部写入 |
 
-**项目定位：Agent Runtime & Control Plane。 **Runtime 管一次执行，Control Plane 管执行所依赖的版本、权限、工具和配置。项目面向企业治理场景，但“Enterprise”不能当作已证明生产成熟度的标签。
+**项目定位：Agent Runtime & Control Plane。** Runtime 管一次执行，Control Plane 管执行所依赖的版本、权限、工具和配置。项目面向企业治理场景，但“Enterprise”不能当作已证明生产成熟度的标签。
 
 贯穿本课的 Incident 是仓库已有模拟场景：固定指标、日志、部署和提交记录；回滚返回模拟结果，不连接真实部署系统。下面讨论的是源码路径，不是宣称本课已经跑出成功结果。
 
@@ -495,3 +495,7 @@ Memory 已有冻结/停用/回放机制，但质量探针发现无关和矛盾�
 - [Memory 质量证据](../reviews/AgentHub-closure-memory-quality-20261005.md)：核查质量而非机制宣传。
 
 **本课到此结束。先把架构说清楚，再学执行细节。**
+
+---
+
+[学习首页](README.md) · [下一课：01 HTTP 与执行入口](01-codebase-navigation.md)

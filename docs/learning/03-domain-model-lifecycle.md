@@ -53,7 +53,7 @@ flowchart LR
 | WorkspaceMemory | 停用/启用等运营状态可变 | 原始内容身份与历史快照回放 |
 | DatasetVersion / Experiment | 数据草稿可改；发布数据和冻结实验不可改 | 内容/schema/变体/知识/价格/build/evaluator 身份 |
 
-**不可变不是“表没有 UPDATE 语句”。 **要看应用服务校验、数据库约束/触发器和 Runtime hash 复核各保护什么。[models](../../packages/agent_runtime/models.py)、[migrations](../../migrations)与 [publish](../../packages/agent_runtime/publish.py)共同核查；不能把仅服务层保护说成数据库绝对禁止修改。
+**不可变不是“表没有 UPDATE 语句”。** 要看应用服务校验、数据库约束/触发器和 Runtime hash 复核各保护什么。[models](../../packages/agent_runtime/models.py)、[migrations](../../migrations)与 [publish](../../packages/agent_runtime/publish.py)共同核查；不能把仅服务层保护说成数据库绝对禁止修改。
 
 ## 3. 为什么规范 JSON 才能作为身份
 
