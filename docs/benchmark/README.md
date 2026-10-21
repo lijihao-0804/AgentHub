@@ -2,6 +2,8 @@
 
 当前口径见 [状态页](../current-state.md)。本目录包含各阶段 benchmark 报告；不同数据/评估器/基线不能混算。本轮文档同步不重跑付费或大规模历史实验。
 
+后续研究见 [公开数据、RAG 评测与复杂任务调研（2026-10-21）](../reviews/AgentHub-RAG公开数据与复杂任务调研-20261021.md)：比较公开数据、定位现有评分缺口、提出复杂任务与接入顺序。该报告是调研建议，没有新增实测成绩。
+
 | 范围 | 报告/产物 | 指标边界 |
 | --- | --- | --- |
 | M3 retrieval-only | [M3 baseline](m3-retrieval-baseline.md)、[runner](../../benchmarks/retrieval/runner.py) | 候选/最终召回与 MRR，不测生成答案质量 |
