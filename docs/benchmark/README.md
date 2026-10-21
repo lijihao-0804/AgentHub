@@ -4,6 +4,8 @@
 
 后续研究见 [公开数据、RAG 评测与复杂任务调研（2026-10-21）](../reviews/AgentHub-RAG公开数据与复杂任务调研-20261021.md)：比较公开数据、定位现有评分缺口、提出复杂任务与接入顺序。该报告是调研建议，没有新增实测成绩。
 
+公开资源现已完成本地获取：[SciFact / QASPER / MuSiQue + RAGChecker 获取清单](../../benchmarks/public_rag/README.md)。仅下载与文件检查，未开展实验；原始资源位于被 Git 忽略的 `data/external/`，来源、版本、哈希和结构盘点已提交。
+
 | 范围 | 报告/产物 | 指标边界 |
 | --- | --- | --- |
 | M3 retrieval-only | [M3 baseline](m3-retrieval-baseline.md)、[runner](../../benchmarks/retrieval/runner.py) | 候选/最终召回与 MRR，不测生成答案质量 |

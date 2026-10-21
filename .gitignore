@@ -23,6 +23,7 @@ npm-debug.log*
 # Local infrastructure data
 infra/data/
 data/blobs/
+data/external/
 docker-compose.override.yml
 
 # Celery runtime artifacts

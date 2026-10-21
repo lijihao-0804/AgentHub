@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "prepared_on": "2026-10-21",
+  "local_root": "data/external/rag-public-20261021",
+  "upstream_revisions": {
+    "ragchecker": "6091f08c00e676e87a970f2aeb4a23a484746348",
+    "musique": "922ac98f19a201998dbdae6d7f2887a5258dbdeb",
+    "qasper": "fdc9d8214fbab5dd782958601db4d678e6934a54",
+    "scifact_card": "b3b5335604bf5ee3c4447671af975ea25143d4f5"
+  },
+  "assets": [
+    {
+      "path": "scifact/scifact.zip",
+      "url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
+      "archive": "zip",
+      "extract_to": "scifact/extracted",
+      "md5": "5f7d1de60b170fc8027bb7898e2efca1"
+    },
+    {
+      "path": "scifact/DATASET_CARD.md",
+      "url": "https://huggingface.co/datasets/BeIR/scifact/resolve/b3b5335604bf5ee3c4447671af975ea25143d4f5/README.md"
+    },
+    {
+      "path": "qasper/qasper-train-dev-v0.3.tgz",
+      "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz",
+      "archive": "tar",
+      "extract_to": "qasper/extracted"
+    },
+    {
+      "path": "qasper/qasper-test-and-evaluator-v0.3.tgz",
+      "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-test-and-evaluator-v0.3.tgz",
+      "archive": "tar",
+      "extract_to": "qasper/extracted"
+    },
+    {
+      "path": "qasper/DATASET_CARD.md",
+      "url": "https://huggingface.co/datasets/allenai/qasper/resolve/fdc9d8214fbab5dd782958601db4d678e6934a54/README.md"
+    },
+    {
+      "path": "qasper/upstream-loader.py",
+      "url": "https://huggingface.co/datasets/allenai/qasper/resolve/fdc9d8214fbab5dd782958601db4d678e6934a54/qasper.py"
+    },
+    {
+      "path": "musique/musique_v1.0.zip",
+      "url": "https://drive.usercontent.google.com/download?id=1tGdADlNjWFaHLeZZGShh2IRcpO6Lv24h&export=download&confirm=t",
+      "archive": "zip",
+      "extract_to": "musique/extracted",
+      "official_download_script": "https://github.com/StonyBrookNLP/musique/blob/922ac98f19a201998dbdae6d7f2887a5258dbdeb/download_data.sh"
+    },
+    {
+      "path": "musique/upstream-source.zip",
+      "url": "https://codeload.github.com/StonyBrookNLP/musique/zip/922ac98f19a201998dbdae6d7f2887a5258dbdeb",
+      "archive": "zip",
+      "extract_to": "musique/source"
+    },
+    {
+      "path": "ragchecker/ragchecker-source.zip",
+      "url": "https://codeload.github.com/amazon-science/RAGChecker/zip/6091f08c00e676e87a970f2aeb4a23a484746348",
+      "archive": "zip",
+      "extract_to": "ragchecker/source"
+    }
+  ]
+}

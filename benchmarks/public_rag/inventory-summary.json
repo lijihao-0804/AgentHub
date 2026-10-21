@@ -1,0 +1,115 @@
+{
+  "status": "ACQUIRED_AND_FILE_CHECKED",
+  "counts": {
+    "scifact": {
+      "corpus.jsonl": {
+        "records": 5183
+      },
+      "qrels/test.tsv": {
+        "qrel_rows": 339
+      },
+      "qrels/train.tsv": {
+        "qrel_rows": 919
+      },
+      "queries.jsonl": {
+        "records": 1109
+      }
+    },
+    "qasper": {
+      "qasper-dev-v0.3.json": {
+        "papers": 281,
+        "questions": 1005
+      },
+      "qasper-test-v0.3.json": {
+        "papers": 416,
+        "questions": 1451
+      },
+      "qasper-train-v0.3.json": {
+        "papers": 888,
+        "questions": 2593
+      }
+    },
+    "musique": {
+      "musique_ans_v1.0_dev.jsonl": {
+        "records": 2417,
+        "field_names": [
+          "answer",
+          "answer_aliases",
+          "answerable",
+          "id",
+          "paragraphs",
+          "question",
+          "question_decomposition"
+        ]
+      },
+      "musique_ans_v1.0_test.jsonl": {
+        "records": 2459,
+        "field_names": [
+          "id",
+          "paragraphs",
+          "question"
+        ]
+      },
+      "musique_ans_v1.0_train.jsonl": {
+        "records": 19938,
+        "field_names": [
+          "answer",
+          "answer_aliases",
+          "answerable",
+          "id",
+          "paragraphs",
+          "question",
+          "question_decomposition"
+        ]
+      },
+      "musique_full_v1.0_dev.jsonl": {
+        "records": 4834,
+        "field_names": [
+          "answer",
+          "answer_aliases",
+          "answerable",
+          "id",
+          "paragraphs",
+          "question",
+          "question_decomposition"
+        ]
+      },
+      "musique_full_v1.0_test.jsonl": {
+        "records": 4918,
+        "field_names": [
+          "id",
+          "paragraphs",
+          "question"
+        ]
+      },
+      "musique_full_v1.0_train.jsonl": {
+        "records": 39876,
+        "field_names": [
+          "answer",
+          "answer_aliases",
+          "answerable",
+          "id",
+          "paragraphs",
+          "question",
+          "question_decomposition"
+        ]
+      }
+    }
+  },
+  "ragchecker": {
+    "version": "0.1.9",
+    "commit": "6091f08c00e676e87a970f2aeb4a23a484746348",
+    "license": "Apache-2.0",
+    "state": "SOURCE_ACQUIRED",
+    "dependencies_installed": false,
+    "model_configured": false
+  },
+  "inventory_files": 183,
+  "local_total_bytes": 1410997832,
+  "archive_bytes": 322963267,
+  "all_inventory_sha256_verified": true,
+  "experiments_run": false,
+  "model_calls": 0,
+  "business_database_imported": false,
+  "content_inspection": "Structural counts and field names only; no semantic review or sampling of answers."
+}

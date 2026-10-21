@@ -1,0 +1,1005 @@
+{
+  "schema_version": 1,
+  "acquired_at_utc": "2026-10-21T14:38:42.886780+00:00",
+  "local_root": "data/external/rag-public-20261021",
+  "upstream_revisions": {
+    "ragchecker": "6091f08c00e676e87a970f2aeb4a23a484746348",
+    "musique": "922ac98f19a201998dbdae6d7f2887a5258dbdeb",
+    "qasper": "fdc9d8214fbab5dd782958601db4d678e6934a54",
+    "scifact_card": "b3b5335604bf5ee3c4447671af975ea25143d4f5"
+  },
+  "status": "ACQUIRED",
+  "experiments_run": false,
+  "tool_dependencies_installed": false,
+  "assets": [
+    {
+      "path": "musique/musique_v1.0.zip",
+      "url": "https://drive.usercontent.google.com/download?id=1tGdADlNjWFaHLeZZGShh2IRcpO6Lv24h&export=download&confirm=t",
+      "effective_host": "drive.usercontent.google.com",
+      "bytes": 272049578,
+      "sha256": "98f839bf2fd5319f5c688aed77901a6d5c30b3b9f9f691ab9a8ecafb045ee0cd",
+      "status": "ACQUIRED"
+    },
+    {
+      "path": "musique/upstream-source.zip",
+      "url": "https://codeload.github.com/StonyBrookNLP/musique/zip/922ac98f19a201998dbdae6d7f2887a5258dbdeb",
+      "effective_host": "codeload.github.com",
+      "bytes": 1339954,
+      "sha256": "d0bce5861920d47654b068e4e9280b219d0e9a651489930794ff0f7c371df468",
+      "status": "ACQUIRED"
+    },
+    {
+      "path": "qasper/DATASET_CARD.md",
+      "url": "https://huggingface.co/datasets/allenai/qasper/resolve/fdc9d8214fbab5dd782958601db4d678e6934a54/README.md",
+      "effective_host": "huggingface.co",
+      "bytes": 9639,
+      "sha256": "da348d3f8277f8a93ca397941f6a525433e282858b1c0562aed3f667d8e55b05",
+      "status": "ACQUIRED"
+    },
+    {
+      "path": "qasper/qasper-test-and-evaluator-v0.3.tgz",
+      "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-test-and-evaluator-v0.3.tgz",
+      "effective_host": "qasper-dataset.s3.us-west-2.amazonaws.com",
+      "bytes": 3865061,
+      "sha256": "72a52a41193e2838b8074f80ac074b94f956b84886c36a61c58a7df4171bdd72",
+      "status": "ACQUIRED"
+    },
+    {
+      "path": "qasper/qasper-train-dev-v0.3.tgz",
+      "url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz",
+      "effective_host": "qasper-dataset.s3.us-west-2.amazonaws.com",
+      "bytes": 10835856,
+      "sha256": "a28fdf966db827bcee3d873107d6b6669864fb7ca8fbf73a192f5e39191bdb5a",
+      "status": "ACQUIRED"
+    },
+    {
+      "path": "qasper/upstream-loader.py",
+      "url": "https://huggingface.co/datasets/allenai/qasper/resolve/fdc9d8214fbab5dd782958601db4d678e6934a54/qasper.py",
+      "effective_host": "huggingface.co",
+      "bytes": 5950,
+      "sha256": "381d623d4992118738c0a17b9c8219136f493eda381125716ab32b814d0b3c0a",
+      "status": "ACQUIRED"
+    },
+    {
+      "path": "ragchecker/ragchecker-source.zip",
+      "url": "https://codeload.github.com/amazon-science/RAGChecker/zip/6091f08c00e676e87a970f2aeb4a23a484746348",
+      "effective_host": "codeload.github.com",
+      "bytes": 32030743,
+      "sha256": "3ac8274d9ad081fdae3b8ce30318912762f16a5f3a26f118bf12241de80620d5",
+      "status": "ACQUIRED"
+    },
+    {
+      "path": "scifact/DATASET_CARD.md",
+      "url": "https://huggingface.co/datasets/BeIR/scifact/resolve/b3b5335604bf5ee3c4447671af975ea25143d4f5/README.md",
+      "effective_host": "huggingface.co",
+      "bytes": 10407,
+      "sha256": "b5f57be1839fdb75867073986a019a78afe0a149950f79d1165509efc5e5cf2f",
+      "status": "ACQUIRED"
+    },
+    {
+      "path": "scifact/scifact.zip",
+      "url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
+      "effective_host": "public.ukp.informatik.tu-darmstadt.de",
+      "bytes": 2816079,
+      "sha256": "536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165",
+      "status": "ACQUIRED"
+    }
+  ],
+  "inventory": [
+    {
+      "path": "musique/extracted/data/.DS_Store",
+      "bytes": 6148,
+      "sha256": "d65165279105ca6773180500688df4bdc69a2c7b771752f0a46ef120b7fd8ec3"
+    },
+    {
+      "path": "musique/extracted/data/dev_test_singlehop_questions_v1.0.json",
+      "bytes": 915921,
+      "sha256": "013be00ab914799891e5ae40de6cdc1baf03aaffd1f3ce4bf0de796020069613"
+    },
+    {
+      "path": "musique/extracted/data/musique_ans_v1.0_dev.jsonl",
+      "bytes": 30439728,
+      "sha256": "15fa63794d18a94ce12411aca6e2327e65b6e83b0b1490efab3f1962e48abf3b"
+    },
+    {
+      "path": "musique/extracted/data/musique_ans_v1.0_test.jsonl",
+      "bytes": 28366572,
+      "sha256": "92ee3067957b8ebce885baa71156a7c0c29f3bc72cca04510aef506911dd768f"
+    },
+    {
+      "path": "musique/extracted/data/musique_ans_v1.0_train.jsonl",
+      "bytes": 241046755,
+      "sha256": "83a75b1e11e4e9bb8f8308e72ac40ca617ae4431b3a0d955b61cab259248490a"
+    },
+    {
+      "path": "musique/extracted/data/musique_full_v1.0_dev.jsonl",
+      "bytes": 59422562,
+      "sha256": "8cab31d56a3a1c4ef491b205a8dab3f1ac9c66e472098c6cf1de4e20294f7a4a"
+    },
+    {
+      "path": "musique/extracted/data/musique_full_v1.0_test.jsonl",
+      "bytes": 55558292,
+      "sha256": "01d7b0f752bdc1fc98856d605560e021a89be903baeb9daff11adeb7fac61328"
+    },
+    {
+      "path": "musique/extracted/data/musique_full_v1.0_train.jsonl",
+      "bytes": 476696984,
+      "sha256": "b1cd998f7e0e2838d6fda024e4ad1eb0e7fc3edefdadb0bd9b5b10b0907f2034"
+    },
+    {
+      "path": "musique/musique_v1.0.zip",
+      "bytes": 272049578,
+      "sha256": "98f839bf2fd5319f5c688aed77901a6d5c30b3b9f9f691ab9a8ecafb045ee0cd"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/.all_data_information.json",
+      "bytes": 1408,
+      "sha256": "74f5b5a6a47a5a4331509011d60dca866059ff01c4d0af09762db66654b5f43e"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/.all_experiment_information.json",
+      "bytes": 22980,
+      "sha256": "6ce7cecdf07d3f55854fe2e47aabbea72de4f2aefa6bf32a95ce93c4d0a33457"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/.answer_aliases.json",
+      "bytes": 4883219,
+      "sha256": "4cf3863daf437d7de43e9f8723b3c2c2923ffbef44737c3fd383d26291bb3e1e"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/.dockerignore",
+      "bytes": 15,
+      "sha256": "d2e0de75022414192d09b8a4ee0e0c233f67766cacdf8be80710116042263d8a"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/.gitignore",
+      "bytes": 1907,
+      "sha256": "53f6bbe1a7dbb26f2d99ba8341dcce0f0cda6b2e71f924e6c108185d1b0817ae"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp.diff",
+      "bytes": 3210,
+      "sha256": "5c23921ed156e5d1a711436b26f253a45b454c2b076762e3b3a8a1c14d08a2d5"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/data/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/data/dataset_readers/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/data/dataset_readers/question_translator.py",
+      "bytes": 5787,
+      "sha256": "3cfde71307042aafcf464da05e5f2c865342a5a5fd36e129fa84a00dbc1626d2"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/data/dataset_readers/text_ranker.py",
+      "bytes": 7114,
+      "sha256": "6cbd7a3e1d3ce4826a3e762c608b9f221ffca283c7d2682e9368135fd9e3467d"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/data/dataset_readers/transformer_rc.py",
+      "bytes": 23126,
+      "sha256": "485ce12f61b4a22ce68c21b0d7fd27a8b910d862a47d156d2179fe184f0264e2"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/data/dataset_readers/utils.py",
+      "bytes": 7551,
+      "sha256": "1cb2fd0d5c1abfc0f94118dfc6504203e4a7fb02feb53997313d534e39fc733e"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/models/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/models/bart.py",
+      "bytes": 16415,
+      "sha256": "9216e251584da50f7790b3ea7bdcdf0da43d2037a7d9aa98da61e966a688a363"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/models/text_ranker.py",
+      "bytes": 6663,
+      "sha256": "9134affba47c8b2f511eabc7d066f30242411d0b7de217cdfae4c68d720fcfe9"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/models/transformer_rc.py",
+      "bytes": 22454,
+      "sha256": "95200664e95023f2ddff71a3e77d9cb9bc8322e338a2582df37664a1bf043226"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/models/utils.py",
+      "bytes": 3653,
+      "sha256": "838da3476d521770b47afe8ac6165599d3a19a1b45f944279acc08afd16652e2"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/nn/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/nn/utils.py",
+      "bytes": 1177,
+      "sha256": "9602751374bed35f89834bec22187d972e9f5b4e09f0d59fddb6167d3f2bdd08"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/predictors/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/predictors/inplace_text_ranker.py",
+      "bytes": 2454,
+      "sha256": "e3ae5366b896b7e6c7d01d2b8153e0d065c4923e346b1c1fc7bc462db6b97bd2"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/predictors/multi_step_end2end_transformer_rc.py",
+      "bytes": 4995,
+      "sha256": "df5f9f01d1073f50eb177467ad5396cef6a05109b1180bb80b7cf385c137629d"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/predictors/multi_step_select_and_answer_transformer_rc.py",
+      "bytes": 6690,
+      "sha256": "20e00d8ed233dc0673f1b1ac2e79968f27a81cd988120e02b492e4ff4447f092"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/predictors/multi_step_transformer_rc.py",
+      "bytes": 8619,
+      "sha256": "1ec2c5b6d716a4ae23b2f792ad098848e720fa6c858106cbb0a67e976bcb68d6"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/predictors/question_translator.py",
+      "bytes": 2963,
+      "sha256": "e32a74b64b8bad99b3786746ac28680b6f6f659773f4bf2417a90e3c59b08237"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/predictors/transformer_rc.py",
+      "bytes": 4792,
+      "sha256": "09050e97f614cb0bce73bfd0abb018d25640e0079dc8a99bb2305cc7fa02db87"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/tools/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/tools/squad.py",
+      "bytes": 2360,
+      "sha256": "deef4d97deeac4fb4edd3d34dfd8367dcbd604d177b5b492bb1e174563e97b12"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/metrics/__init__.py",
+      "bytes": 462,
+      "sha256": "1a789c300c331a7f741664050d4a8216fd807b09ba9507c0b3f4d3fc95659937"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/metrics/answer_with_sufficiency.py",
+      "bytes": 2797,
+      "sha256": "bbd0100a5fa23f2899a6455bee77aeaca15146a6b86767b80f4125af982f2542"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/metrics/full_recall_rank.py",
+      "bytes": 1393,
+      "sha256": "85c1d6efc77e672cd1ae14cc1c4bae60ed843f1ca092b69bb34bc53453ee983c"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/metrics/group.py",
+      "bytes": 1171,
+      "sha256": "4e26341b4fb2faf4a7358c6a5f7ad0ef15cfbbc240a58c048a3d6c95bfd34803"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/metrics/hotpotqa_eval.py",
+      "bytes": 2627,
+      "sha256": "439a4ca1f6867fc7e4284bce066c04e6ebae5904d430c57ae51141e10a9cb425"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/metrics/list_compare_em_and_f1.py",
+      "bytes": 2536,
+      "sha256": "3898ffa77911a43eb878db5d3f4eaca0d98bf0f209ad55b5a8961f331c5eb458"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/metrics/squad_em_and_f1.py",
+      "bytes": 2624,
+      "sha256": "275ebb214d65bb533e4231ef3210a734b283af225c5ba6b4e231d3a9494b9cba"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/allennlp_lib/training/metrics/support_with_sufficiency.py",
+      "bytes": 2967,
+      "sha256": "34b3f7e0f2f98a9c4efb7257e9a86951a2efde2a72817e46de19ec0c4c8a1476"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/Dockerfile",
+      "bytes": 154,
+      "sha256": "4c29a6eacfc2b08fd3f83edce4b25ce9a21a4641328d277bdb2ba3d4f57b6481"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/download_data.sh",
+      "bytes": 445,
+      "sha256": "3242f928d7c0f8db885296872397af33ce19014e6edab62bbd44bab3d73a09d2"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/download_models.py",
+      "bytes": 2371,
+      "sha256": "146f8c8fd3ccedb5ed9698f8f44b27b4ffc4a19f5800ec57bbe36e7135e7b193"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/download_predictions.sh",
+      "bytes": 457,
+      "sha256": "d4f055affc381917e0ae5197493371cefa669b2e49859ddc9fb36adf357fd22d"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/download_raw_data.py",
+      "bytes": 1106,
+      "sha256": "cc949372c7b15ff24612b8c5e397a8cef8c7aa1ed0400d2788654d35aea3034e"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/download_raw_predictions.py",
+      "bytes": 2810,
+      "sha256": "96d12b220b40a8c534f377fa062a038ac8902da06044f8927a1f3e5caf4eabfc"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/evaluate_v1.0.py",
+      "bytes": 4606,
+      "sha256": "f5fe66ae61dbea5172cba9d428d9924a5811f3457edc945fc1d81369c30e74b7"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/end2end_model_for_2wikimultihopqa_20k_dataset.jsonnet",
+      "bytes": 3742,
+      "sha256": "ea649ba0f47496c993e55809c9d6a8eb117a2c5d2f2206351bfb55b1113c617b"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/end2end_model_for_hotpotqa_20k_dataset.jsonnet",
+      "bytes": 3697,
+      "sha256": "b932defc521a8d097725ff14dd886a17fb0e0433382d66c9fad999032bf86bb1"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/end2end_model_for_musique_ans_dataset.jsonnet",
+      "bytes": 3388,
+      "sha256": "137b18dfe941feef9deb0f3f416eab8e9a3d823c9a5fb80dd9134c631e009104"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/end2end_model_for_musique_full_dataset.jsonnet",
+      "bytes": 3413,
+      "sha256": "aab78a4648d9e4f0eca25dfc29c253b455fa7f994774c10ab5a04bd41cc5dac3"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_end2end_model_for_2wikimultihopqa.jsonnet",
+      "bytes": 3777,
+      "sha256": "48de3342cae3692f2986b29a41e21ebb45314e9adfa2226a6f734dbdac09f6d5"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_end2end_model_for_musique_ans.jsonnet",
+      "bytes": 3468,
+      "sha256": "3bee33f31a1fe85d353decaa1c7dc569fd97b8909ea0c199925878518b442b31"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_end2end_model_for_musique_full.jsonnet",
+      "bytes": 3538,
+      "sha256": "89c4b1fe8b17ddb8e32248c7b6a9ec8cd5d48007ea517608ee5e61749f27e336"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_select_and_answer_model_answerer_for_2wikimultihopqa.jsonnet",
+      "bytes": 3794,
+      "sha256": "5025613c6c68acba6dec545d58c2a9dda62549de0705246fe61750980ce8cd2f"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_select_and_answer_model_answerer_for_musique_ans.jsonnet",
+      "bytes": 3692,
+      "sha256": "4e95f65a9f8db6d1b40065ebb2521231c16a2b90afd76854e085cdf5ac7e940c"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_select_and_answer_model_answerer_for_musique_full.jsonnet",
+      "bytes": 3763,
+      "sha256": "bc44fcc38988b4fc99f6eb74f598c93e5a83980be7a0c1394eeedb1f8fc307a6"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_select_and_answer_model_selector_for_2wikimultihopqa.jsonnet",
+      "bytes": 3146,
+      "sha256": "5306a26c3cf388b25ab7f6d08e4185fbeb5892088a5728a018cde6aeb1bf73c8"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_select_and_answer_model_selector_for_musique_ans.jsonnet",
+      "bytes": 3210,
+      "sha256": "501f0622e15d93531484d41c3fbfc01c2742882503651cc4e131244f0c275b42"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_by_select_and_answer_model_selector_for_musique_full.jsonnet",
+      "bytes": 3229,
+      "sha256": "b9f815710ae409fa90179939fea9dd6915dd45e90ad5a9c89e63bb73f042a084"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_model_decomposer_for_2wikimultihopqa.jsonnet",
+      "bytes": 1872,
+      "sha256": "96e8b9c05c4a9fda37ab6bdcd7d52b3fbddf064b2235caabf34b35d5508dc672"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/execution_model_decomposer_for_musique_ans_and_full.jsonnet",
+      "bytes": 1741,
+      "sha256": "ec01d1c301c31e441bf66ab6b008a31d0f52fc5496d388320bfc0fe69fdf3ca7"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/select_and_answer_model_answerer_for_2wikimultihopqa_20k_dataset.jsonnet",
+      "bytes": 3759,
+      "sha256": "39b1aff92da5e782ee68355e07ef9966c5a514216bae359efd5601665da7c83b"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/select_and_answer_model_answerer_for_hotpotqa_20k.jsonnet",
+      "bytes": 3708,
+      "sha256": "2f1f72f82d69b7be643cc09e1d8e4cf353ca13320693b79468fd238409de1512"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/select_and_answer_model_answerer_for_musique_ans.jsonnet",
+      "bytes": 3637,
+      "sha256": "f24f79cc26b669acd5472afe7e688353a0d7dd5f1a709aa2b188ff72e4e2622f"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/select_and_answer_model_answerer_for_musique_full.jsonnet",
+      "bytes": 3664,
+      "sha256": "c8cf49a9af9e8437110df594f735dd4e310907428482ecb58db460efce6a232f"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/select_and_answer_model_selector_for_2wikimultihopqa_20k_dataset.jsonnet",
+      "bytes": 3094,
+      "sha256": "d62ae826b1fdbb44137a741106f237cc7068f2aa5e7e561968213810916111bd"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/select_and_answer_model_selector_for_hotpotqa_20k.jsonnet",
+      "bytes": 3073,
+      "sha256": "054b670eae81f7be7d4558829cb431dbc778acc8d9780eea553af6744174c5e0"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/select_and_answer_model_selector_for_musique_ans.jsonnet",
+      "bytes": 3180,
+      "sha256": "ac8ca80799a6d6d2fbde103d745d79240a8388aa259073e47ffdda553f5b6f58"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/experiment_configs/select_and_answer_model_selector_for_musique_full.jsonnet",
+      "bytes": 3199,
+      "sha256": "3d0023639f967932be516f1c1697a7789dac8e588e302ccbbc0115b6f7936231"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/LICENSE",
+      "bytes": 18652,
+      "sha256": "cce5d01fa4a83b794271bd2c28cffdf99afd43c803e6ddefddae39b591ea7448"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/metrics/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/metrics/answer.py",
+      "bytes": 2837,
+      "sha256": "10368f619b4d5ef5d83748c05a96c0afd332a14ab5c010740c98d58dfaefe974"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/metrics/group.py",
+      "bytes": 1152,
+      "sha256": "b7bff5d19b426a353e50ad07db125fdb6fdd2660a229e1b11752b63e4ebd9087"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/metrics/group_answer_sufficiency.py",
+      "bytes": 2320,
+      "sha256": "6fd72646055b736cfae474eba58f7d4823ee8f539c0746bb87dd5c8208d7abcc"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/metrics/group_support_sufficiency.py",
+      "bytes": 2546,
+      "sha256": "ab6f9aa92243190b891d28a1787781029bd808616e347cbf325526bffcc10820"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/metrics/metric.py",
+      "bytes": 628,
+      "sha256": "c858d1bfda2f0b005065e87a402cd2f82154eb7eed5916845ae130759cc3a299"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/metrics/support.py",
+      "bytes": 2315,
+      "sha256": "ac16c0daf458a6a4d6db97682c2340fe5b5936a947bf32c04dc3bf16406077c6"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/raw_data_to_official_format.py",
+      "bytes": 6466,
+      "sha256": "8c2dbb07efbf2c71a739a29406d5e5cae1c53a6609df5d411140cc82925c66aa"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/raw_predictions_to_official_format.py",
+      "bytes": 2278,
+      "sha256": "a26db4a2ea8b95ab3078dc6d6ddef68f4997c908ee4511a7dc1e3886a536e22a"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/README.md",
+      "bytes": 48623,
+      "sha256": "7a3fb6a960f3fa122d2a1a81b73b9cf5a39ac983b11735d158490947960b9359"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/run.py",
+      "bytes": 1580,
+      "sha256": "88535ffd8c53893b7ce06523ce8b31d72db0b2029da870515be80b91fe2819a5"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/utils/common.py",
+      "bytes": 2174,
+      "sha256": "9fb027594a0288354c5a2c83b8b850e9141b741764091441606636bede552c88"
+    },
+    {
+      "path": "musique/source/musique-922ac98f19a201998dbdae6d7f2887a5258dbdeb/utils/constants.py",
+      "bytes": 425,
+      "sha256": "828e4d706c3b2b84d39da219f18ae2ff12a6e379b985c1fd65f8931bd12a719c"
+    },
+    {
+      "path": "musique/upstream-source.zip",
+      "bytes": 1339954,
+      "sha256": "d0bce5861920d47654b068e4e9280b219d0e9a651489930794ff0f7c371df468"
+    },
+    {
+      "path": "qasper/DATASET_CARD.md",
+      "bytes": 9639,
+      "sha256": "da348d3f8277f8a93ca397941f6a525433e282858b1c0562aed3f667d8e55b05"
+    },
+    {
+      "path": "qasper/extracted/qasper-dev-v0.3.json",
+      "bytes": 11398686,
+      "sha256": "2ae7ee62a65b1c4225791c70de80c2aad4e8998cf1fd4f09a53103db4f21af93"
+    },
+    {
+      "path": "qasper/extracted/qasper-test-v0.3.json",
+      "bytes": 18078957,
+      "sha256": "6e29ad410e6e39aa1936017fb965b30a20eb2e7751997f55b97c9d281aa884e5"
+    },
+    {
+      "path": "qasper/extracted/qasper-train-v0.3.json",
+      "bytes": 31969387,
+      "sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4"
+    },
+    {
+      "path": "qasper/extracted/qasper_evaluator.py",
+      "bytes": 6345,
+      "sha256": "781aba7cd8e524bef4f0a1b4bf3504e5b02cb1d8d5bf32a8f0a89dfa83e86bfe"
+    },
+    {
+      "path": "qasper/extracted/README-test.md",
+      "bytes": 916,
+      "sha256": "64616ee7ee72494afe5cd8296ab8d1f30b134c8a3aafa556d035ec7c9b97414c"
+    },
+    {
+      "path": "qasper/extracted/README.md",
+      "bytes": 4099,
+      "sha256": "199ab78533b6155efd0af39614e61fb24c1d5ef6d907a5990dede570fd629b75"
+    },
+    {
+      "path": "qasper/qasper-test-and-evaluator-v0.3.tgz",
+      "bytes": 3865061,
+      "sha256": "72a52a41193e2838b8074f80ac074b94f956b84886c36a61c58a7df4171bdd72"
+    },
+    {
+      "path": "qasper/qasper-train-dev-v0.3.tgz",
+      "bytes": 10835856,
+      "sha256": "a28fdf966db827bcee3d873107d6b6669864fb7ca8fbf73a192f5e39191bdb5a"
+    },
+    {
+      "path": "qasper/upstream-loader.py",
+      "bytes": 5950,
+      "sha256": "381d623d4992118738c0a17b9c8219136f493eda381125716ab32b814d0b3c0a"
+    },
+    {
+      "path": "ragchecker/ragchecker-source.zip",
+      "bytes": 32030743,
+      "sha256": "3ac8274d9ad081fdae3b8ce30318912762f16a5f3a26f118bf12241de80620d5"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/.github/workflows/release.yml",
+      "bytes": 500,
+      "sha256": "8d5e3a295a296fbc64798b6bbb2c13c38b52c05fc51c087facaa68c3ee8f0464"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/.gitignore",
+      "bytes": 63,
+      "sha256": "b6428b5fc1e3006e2408d4eb20490c566d44ddf8ba1fbfe73ff7ecb3adc6e5d1"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/CODE_OF_CONDUCT.md",
+      "bytes": 309,
+      "sha256": "34b6c98d5c23127ae6769e95e483e5bf6d3704ae1f0d3ae4e69d15f4ede118b6"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/CONTRIBUTING.md",
+      "bytes": 3160,
+      "sha256": "1a0aa2d21024f96df78e8b8be5e3bac8c91e83ef8960b72d58bd978d301f5345"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/data_process.sh",
+      "bytes": 1112,
+      "sha256": "f28fe29ec977e327e74065b115181b97dcacf8a5398677ea311314700dd6e579"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/bioasq_doc_indices.json",
+      "bytes": 1716239,
+      "sha256": "4a4e6fc37dca8179eda757c4c369be7f75273fae80f652b057ed501758d66b9d"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/bioasq_queries_metadata.json",
+      "bytes": 43855,
+      "sha256": "b6817675447bd720966613a21e04ea66280957ffa3400b2dc999f845c0442faf"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/clapnq_ids.json",
+      "bytes": 7021,
+      "sha256": "5f23603d4387bf2834f9a20cb78f7cf886a4ef7127408fb725acf5eee9eaeed2"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/fiqa_metadata.json",
+      "bytes": 456527,
+      "sha256": "bf054448c84697aefc3f468d945b9675fb9856d0d48a52d11cc468b0914656f9"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/kiwi_question_ids.json",
+      "bytes": 314,
+      "sha256": "fed9a181a2d341bd639cb77833c911b48bfc16b6d30cc4a2546958c0126a3355"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/lifestyle_doc_indices.json",
+      "bytes": 955610,
+      "sha256": "926f703af9972bc40ba626cf3831ffebd106ef2920679f2fa27f188fb364096f"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/lifestyle_qid2gt.json",
+      "bytes": 481030,
+      "sha256": "a1e49e679e50847f778c1971e3dc469af119d2da1f987b0efdde13ca3382d8b0"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/recreation_doc_indices.json",
+      "bytes": 1335646,
+      "sha256": "aff4af4a1ffe593f56480e6a9e560bca96d283eab320dcddd7aeb3d16a057b1c"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/recreation_qid2gt.json",
+      "bytes": 404822,
+      "sha256": "2a2c5751baccad012c756b3fcbc0af2567b74a193a4ca922594028b8b1174bf1"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/science_doc_indices.json",
+      "bytes": 1083081,
+      "sha256": "0645a1e2b27e7f221e047aeb5e1fe1fb745cf0a956ebb5662634b585ef6afdac"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/science_qid2gt.json",
+      "bytes": 511777,
+      "sha256": "c991a4d8176950f182641bee046a41853ee02aaa54970990e057a6926786773a"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/technology_doc_indices.json",
+      "bytes": 5125632,
+      "sha256": "5cc6ebff10ac7293d91b1f056f51828ff92440c6ecfc7aadac295c6d99829177"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/technology_qid2gt.json",
+      "bytes": 494859,
+      "sha256": "2c03360228534acb14bb482896aee31cfabe99b39ed6dd74ed2a4f7371166ecf"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/writing_doc_indices.json",
+      "bytes": 1599902,
+      "sha256": "3e5a7c018a4d8d9694fd22d776d6b41284372b2961e3ee710ea082674374abf3"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/metadata/writing_qid2gt.json",
+      "bytes": 437955,
+      "sha256": "e711298bd185a3af0d2940cd3a4d829f156eed917fe9894b523f948ed671b3f1"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/process_bioasq.py",
+      "bytes": 2154,
+      "sha256": "09033b80fdcb849b67ae4aacdd03386eb57a1e15add3f5a498ba2a9f4b0a2407"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/process_clapnq.py",
+      "bytes": 2576,
+      "sha256": "d59ab8ce23c7ff9f2f4ed00f82c130921b839cad375e59a346ffd7f4360817bc"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/process_fiqa.py",
+      "bytes": 1121,
+      "sha256": "7c82f3794c6b4db8e8766d4b760e78e448cba3ce1dcd3f72788e2d17cf112437"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/process_kiwi.py",
+      "bytes": 744,
+      "sha256": "7a2d22a2a47bc74adeb1f2fb1a8159f1aa2cbee1298a092f6a24351747b84837"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/process_lotte.py",
+      "bytes": 2581,
+      "sha256": "df3a483411a873c5cce32d0c736eb414ceb08871df9473b0e62c8732f934c4a6"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/process_novelqa.py",
+      "bytes": 1245,
+      "sha256": "81d7590814bb126a190e27e097c3181496077c518ed1ed171d94825ecdefadf4"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/processed_data/kiwi/corpus.jsonl",
+      "bytes": 27124596,
+      "sha256": "74565026c3dc3bd915b92b4e991e3f073fc090daa2ae61134467b6684b5a0d6a"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/processed_data/novelqa/novelqa_queries.json",
+      "bytes": 253002,
+      "sha256": "a90f9c35681e15decbf1849d93d6b788290cd23c33781b01f4d7c819de5d6d67"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/benchmark/README.md",
+      "bytes": 1258,
+      "sha256": "e4b7416c549045397760fe3ece7ce5eb6a94b61572d8800df89f0cfce25edb6f"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/baseline_ares_llama3.json",
+      "bytes": 10488594,
+      "sha256": "ce5b8d8aa060f4fc54e136017f9692bb6bdc6cf72b1829fc6fc0795f1d4f2aea"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/baseline_crud.json",
+      "bytes": 10635408,
+      "sha256": "30811c9418687932e76f8aa5a043d1b2b1969374667b9680cb223ffd06515bf7"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/baseline_crud_llama3.json",
+      "bytes": 10641514,
+      "sha256": "9f65dd37cee1568db61aabda3b10bef4087ded00bc3c631ef98c21b4461525e8"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/baseline_ragas.json",
+      "bytes": 10542916,
+      "sha256": "7d1ebd18c383c8a5b61adbc0ec19d76f7477578abba8a1fb52589bb195cbb7cc"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/baseline_ragas_llama3.json",
+      "bytes": 10543166,
+      "sha256": "a883d45db10da59d0ad1ad7da1adcbe8f94fa5c110edc5306170496052411f91"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/baseline_ragchecker.json",
+      "bytes": 1238661,
+      "sha256": "1fce14cc54bf276c3ed2bb48976ba42e85159651b64c181bc19795152db6e3d6"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/baseline_trulens.json",
+      "bytes": 10480657,
+      "sha256": "449038015122f3bf0d969dfc490fb59e4e799b0f046f0e32f3c91dcd3662a13f"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/baseline_trulens_llama3.json",
+      "bytes": 10481466,
+      "sha256": "4a1a830c780b301e1fa634c0cfb37743111743df51d26ea58ff8421885b1c57a"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/human_labeled_data.json",
+      "bytes": 2347698,
+      "sha256": "42651629afc007396a709c89e89ada3b587e0bcc26246c951225866715e265ce"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/meta_eval.py",
+      "bytes": 6438,
+      "sha256": "062a24b51271c501d0c022aabf9694e99aedc48fc49c176b317039f3c8128061"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/data/meta_evaluation/README.md",
+      "bytes": 1206,
+      "sha256": "0a117bacbbc0622f5edeada444dccde50e2f44cbfa0ea528f2ac4c21121f1394"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/examples/checking_inputs.json",
+      "bytes": 4338,
+      "sha256": "9615b1c70c0ad05070d5a12c86eab5a8425b0d1cb001c72f44c5188a58fd96f7"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/examples/checking_outputs.json",
+      "bytes": 16642,
+      "sha256": "225906c9883d8b79613935256f04579758559bacf26edf50b5b8121c36ec5bc2"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/examples/run.sh",
+      "bytes": 335,
+      "sha256": "0aaea56b71a357ce5cdb4960b04fcd30faed90387ea56a0c190d975aa2950779"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/imgs/ragchecker_metrics.png",
+      "bytes": 484777,
+      "sha256": "ee008b1c467268728211be2e83d31330a28f8db5e1687799d54693f64b9eaa6f"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/LICENSE",
+      "bytes": 10142,
+      "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/NOTICE",
+      "bytes": 67,
+      "sha256": "d4290ed64c2edd0fce1d84e3f9dfb2881240fe534def76b8cd29ed6af683e287"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/pyproject.toml",
+      "bytes": 716,
+      "sha256": "6dd18f69ffc49c1449c58597473b30d1e120af666ffeaa89d5cd9da4b901bc49"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/chunking.py",
+      "bytes": 2635,
+      "sha256": "dbcff78afb23a26801038b20109d424122afa58cb818460794242b35ff3a5728"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/embedding.py",
+      "bytes": 11712,
+      "sha256": "9387037d69609839dd2c4fc8e5352e2ad9dffeaa9e22a1081a56f337e9effda8"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/format_bedrock_corpus.py",
+      "bytes": 1338,
+      "sha256": "2f188f895dd103145ed6100d88d74d2170adb73dde97b156f775fe51dd51f892"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/generation.py",
+      "bytes": 6208,
+      "sha256": "fb0f917fcb4791a7069298eef1c6f345946826eadbc8721af2959b5746678571"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/indexing.py",
+      "bytes": 2462,
+      "sha256": "d81fba2a380911b8432b467d41e3db45a72927893c8f83dafbba04d5e3cf6e13"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/opensearch_client.py",
+      "bytes": 7979,
+      "sha256": "c1f36e42ae4c58407f58f1e8bbf3954bb59ef8b88c83fae9d04f9242459a3f32"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/retrieval.py",
+      "bytes": 1966,
+      "sha256": "4c190c89d4b63bac935ac3050c4bdf3abe179654395841b055a4873a0c95b3a0"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/scripts/run_chunking.sh",
+      "bytes": 237,
+      "sha256": "bf4a2b5f7f46117c069277f5e979284cb4851eebefc01c92774a00f10640865c"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/scripts/run_generation.sh",
+      "bytes": 488,
+      "sha256": "2cc3bc3ed484b4a96d477a2bf21b9fb521144f6fe19dfe3a0b3cf1aad3efc686"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/scripts/run_indexing.sh",
+      "bytes": 345,
+      "sha256": "e9fa931d1ba37559356688dd6130151b8dd150384e050cd1e8cf1af362a50f07"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/rag_baselines/scripts/run_retrieval.sh",
+      "bytes": 362,
+      "sha256": "7aff0e8a34186fd841b72579a46d5a1fadb5197f66609a7b8d2d330303d6f53c"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/ragchecker/__init__.py",
+      "bytes": 78,
+      "sha256": "9b8a5c82f25f412b7b01bcd7271c3c08912bb9d3344b7c5c5a59ef0f4e405ff6"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/ragchecker/cli.py",
+      "bytes": 3203,
+      "sha256": "3c1f7afc69ecdb234a9236660edb587d219c6c44915b4cf6b172c6e30f7b5a90"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/ragchecker/computation.py",
+      "bytes": 7166,
+      "sha256": "18a92c5ef9e5a1d4a1e70d1203cbc281a3061908a247ab6c21411ea4ffa6d574"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/ragchecker/container.py",
+      "bytes": 1862,
+      "sha256": "dd87f5503f4dcba4ccc00ce651d4f0c78b6a2a562448f62025e498fbe956fefd"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/ragchecker/evaluator.py",
+      "bytes": 10524,
+      "sha256": "ffe74c4e8551bdeb52a505d85f2edc6571c84ec56c6ed5e2fd7108ae0c52a016"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/ragchecker/integrations/llama_index.py",
+      "bytes": 856,
+      "sha256": "731da701e06f05638ee4db206665e161fe85c27120b04711b5f26667358cf4f9"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/ragchecker/metrics.py",
+      "bytes": 1811,
+      "sha256": "e72cfc28a83268df6c32177fb3dac6f9f7fd52363a3e57031d5292a476c05171"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/README.md",
+      "bytes": 6954,
+      "sha256": "405ed94cb649be390ccab4d2a3c923d8f0930e536ea239d7ca19eafe5faad11e"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/scripts/synthesize_benchmark.py",
+      "bytes": 2031,
+      "sha256": "ba24ae5f5dbe506804ca9475e34f6b1aaabfbce6fc53bf7cad1e6266ead907f9"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/tutorial/figures/claim_checking.png",
+      "bytes": 123524,
+      "sha256": "eb5423e56b7f252d2e7baaa55112ca6a647b06c84f4306154204f3bf750a1b80"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/tutorial/figures/generator_metrics.png",
+      "bytes": 160482,
+      "sha256": "2f93883c805b5201c8538e106febaf3a0e87f15b882cc1eab62ef780610eb330"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/tutorial/figures/overall_metrics.png",
+      "bytes": 63134,
+      "sha256": "c4cc0c302c3cd62d62433e477e36403f82ac197b1465714bec3dba0da63ff388"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/tutorial/figures/rag_pipeline.png",
+      "bytes": 59363,
+      "sha256": "23d8627aeab5630f1ec4dfe959785f9a9c436b69f1f58da71ccf711918504f1e"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/tutorial/figures/retriever_metrics.png",
+      "bytes": 71993,
+      "sha256": "c3055cddf9b22c910f9a704cdf39832a0459d32e9fed28e4a21e6fa11513b20c"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/tutorial/ragchecker_tutorial_en.md",
+      "bytes": 14552,
+      "sha256": "5d6c28c485e388f6da9ec0b764141c13251e176f3b4d47be9338c0c5fd77f5d8"
+    },
+    {
+      "path": "ragchecker/source/RAGChecker-6091f08c00e676e87a970f2aeb4a23a484746348/tutorial/ragchecker_tutorial_zh.md",
+      "bytes": 13470,
+      "sha256": "19c45a74d477622a5fe8425c0bab9bba21fe23443aed4aab8965fcb8a37934af"
+    },
+    {
+      "path": "scifact/DATASET_CARD.md",
+      "bytes": 10407,
+      "sha256": "b5f57be1839fdb75867073986a019a78afe0a149950f79d1165509efc5e5cf2f"
+    },
+    {
+      "path": "scifact/extracted/scifact/corpus.jsonl",
+      "bytes": 8106566,
+      "sha256": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6"
+    },
+    {
+      "path": "scifact/extracted/scifact/qrels/test.tsv",
+      "bytes": 5389,
+      "sha256": "0864bb985e0ca2367ba217977e72004d549054b2b06666ed9d4825ac7c21284c"
+    },
+    {
+      "path": "scifact/extracted/scifact/qrels/train.tsv",
+      "bytes": 14502,
+      "sha256": "a53f2114831916c096b6c37d9e54da68cef4efdcdbd5ed46533601af972acf1d"
+    },
+    {
+      "path": "scifact/extracted/scifact/queries.jsonl",
+      "bytes": 209731,
+      "sha256": "8ff84a7c903f722981cd8d595c022660140c51867b27608a6d4910db86080313"
+    },
+    {
+      "path": "scifact/scifact.zip",
+      "bytes": 2816079,
+      "sha256": "536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165"
+    }
+  ]
+}
