@@ -1,0 +1,94 @@
+{
+  "checked_at_utc": "2026-10-21T14:51:47.196547+00:00",
+  "model": "deepseek-v4.1-flash-1017",
+  "provider": "openai-compatible",
+  "request_max_tokens": 512,
+  "automatic_retries": 0,
+  "fallback_model": null,
+  "database_profile_registered": false,
+  "rag_experiments_run": false,
+  "results": [
+    {
+      "test": "chat_completion",
+      "passed": true,
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 34,
+        "output_tokens": 3,
+        "total_tokens": 37,
+        "cached_tokens": 0
+      },
+      "response_characters": 2,
+      "latency_ms": 2046.28
+    },
+    {
+      "test": "streaming",
+      "passed": true,
+      "message_delta_events": 1,
+      "finish_reason": "stop",
+      "usage": {
+        "input_tokens": 34,
+        "output_tokens": 12,
+        "total_tokens": 46,
+        "cached_tokens": 0
+      },
+      "response_characters": 2,
+      "latency_ms": 711.75
+    },
+    {
+      "test": "tool_calling",
+      "passed": true,
+      "finish_reason": "tool_calls",
+      "usage": {
+        "input_tokens": 310,
+        "output_tokens": 69,
+        "total_tokens": 379,
+        "cached_tokens": 0
+      },
+      "response_characters": 0,
+      "latency_ms": 1199.11
+    },
+    {
+      "test": "structured_output",
+      "passed": false,
+      "failure_code": "MODEL_BAD_RESPONSE",
+      "latency_ms": 118.59
+    }
+  ],
+  "note": "Smoke checks only; strict schema enforcement, arbitrary tools, pricing, context limits and quality are not certified.",
+  "format_diagnostics": [
+    {
+      "format": "json_schema",
+      "http_status": 400,
+      "latency_ms": 318.45,
+      "error_code": "invalid_parameter_error",
+      "mentions_response_format": true,
+      "mentions_json_schema": false,
+      "mentions_json_object": false,
+      "mentions_supported_or_invalid": false
+    },
+    {
+      "format": "json_object",
+      "http_status": 200,
+      "latency_ms": 1095.62,
+      "expected_json_returned": true,
+      "usage": {
+        "prompt_tokens": 40,
+        "total_tokens": 68,
+        "completion_tokens": 28,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "text_tokens": 40
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 21,
+          "text_tokens": 6
+        }
+      }
+    }
+  ],
+  "successful_requests": 4,
+  "total_requests": 6,
+  "reported_total_tokens": 530,
+  "billing_amount": "UNKNOWN"
+}

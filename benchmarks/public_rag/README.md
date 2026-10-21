@@ -55,6 +55,36 @@ MuSiQue 两个 test 文件均没有 `answer`、`answerable` 或 `question_decomp
 
 本次是 **SOURCE_ACQUIRED**，不是已安装、已配置模型或可离线完成评分。后续使用需要准备 RefChecker、spaCy 等依赖，以及 extractor/checker 模型；届时单独处理环境兼容、模型费用与评测输入。
 
+## 后续模型配置
+
+按用户指定，后续公共 RAG 工作使用 [model.json](model.json) 中的 `deepseek-v4.1-flash-1017`，provider 为 `openai-compatible`。Key 和 API base 保存在项目 Git 忽略的 `.env`，变量名为 `AGENTHUB_RAG_API_KEY`、`AGENTHUB_RAG_BASE_URL`；不在版本库保存实际值。
+
+显式执行一次小规模在线连通性检查：
+
+```powershell
+& .venv/Scripts/python.exe -m benchmarks.public_rag.probe_model --output .scratch/model-probe.json
+```
+
+脚本复用生产 `LiteLLMProviderAdapter`，只使用无业务数据的短提示，最多检查普通回答、流式、工具调用提议、JSON schema 请求四项；没有自动重试和模型降级，不执行被提议的工具。它会调用付费模型，不属于下载命令，也不是 RAG 准确率实验。缺少配置时失败，绝不回退到其他 Key 或模型。
+
+这是后续 RAG 工具使用的本地配置，不会自动修改工作区数据库中的 ModelProfile、已发布 AgentVersion 或历史实验。工作区模型档案的注册需要本地数据库启动后，走现有凭据加密和模型管理服务。
+
+### 2026-10-21 连通性结果
+
+实际结果见 [脱敏探测记录](model-probe-20261021.json)：
+
+| 项目 | 结果 |
+| --- | --- |
+| 普通回答 | 通过项目适配器，返回 OK |
+| SSE 流式 | 通过项目适配器，收到增量及完成事件，并取得 usage |
+| 工具调用 | 通过项目适配器，返回正确 echo_probe 参数；未实际执行工具 |
+| 严格 JSON schema | 失败，原始接口复核为 HTTP 400 / invalid_parameter_error，涉及 response_format |
+| JSON object | 直接 OpenAI 兼容请求通过，返回可解析的预期 JSON；不等于严格 schema 支持 |
+
+共 6 次小请求，4 次成功；成功响应报告用量合计 530 tokens，实际账单金额未知。普通文本、流式和工具提议已确认可用；`structured_output` 保持 false，`vision` 未验证，价格和上下文上限未配置。严格 schema 失败不会触发自动降级，也不会据此修改生产适配器或已有能力守卫。
+
+项目本地 `.env` 已保存用户指定来源的 Key/API base。当前 Docker 引擎未启动，数据库连接不可用，因此尚未在工作区创建持久模型档案。现有入口已能独立复用项目适配器验证模型；RAGChecker 仍为源码获取状态，没有安装、配置或执行评测。
+
 ## 数据边界
 
 - 保留官方 train/dev/test 原始划分，不在本轮抽样、冻结或审核问题答案。

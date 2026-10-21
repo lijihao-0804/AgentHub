@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "provider": "openai-compatible",
+  "model": "deepseek-v4.1-flash-1017",
+  "api_key_env": "AGENTHUB_RAG_API_KEY",
+  "base_url_env": "AGENTHUB_RAG_BASE_URL",
+  "temperature": "0",
+  "max_tokens": 2048,
+  "timeout_seconds": "120",
+  "fallback_model": null,
+  "capabilities": {
+    "tool_calling": true,
+    "streaming": true,
+    "structured_output": false,
+    "vision": false
+  },
+  "capability_status": "SMOKE_CHECKED_2026-10-21",
+  "scope": "Future public RAG work; not an edit to published AgentVersions or historical experiments.",
+  "wire_format_observations": {
+    "json_object": "SMOKE_PASSED",
+    "json_schema": "HTTP_400_REJECTED"
+  },
+  "pricing_status": "NOT_CONFIGURED"
+}
