@@ -1,4 +1,10 @@
-from benchmarks.public_rag.root_cause_dataset import paper_ids, source_audit, source_keys
+from benchmarks.public_rag.root_cause_dataset import (
+    EXPOSURE_RECEIPT,
+    paper_ids,
+    scan_exposure,
+    source_audit,
+    source_keys,
+)
 
 
 def test_exposure_scan_finds_nested_real_ids_without_treating_scores_as_sources():
@@ -56,3 +62,16 @@ def test_conflicting_yes_no_gold_cannot_be_certified_by_source_alignment(monkeyp
     assert result["registered"] == 1
     assert result["issue_counts"]["CONTRADICTORY_YES_NO_ANNOTATIONS"] == 1
     assert result["cases"][0]["semantic_sufficiency"] == "UNKNOWN"
+
+
+def test_clean_clone_without_raw_results_cannot_forget_historical_exposure():
+    import json
+
+    class MissingHistory:
+        def exists(self):
+            return False
+
+    ids = set(json.loads(EXPOSURE_RECEIPT.read_text(encoding="utf-8"))["paper_ids"])
+    excluded, ledger, unresolved = scan_exposure(ids, MissingHistory())
+    assert excluded == ids and excluded
+    assert ledger[0]["artifact"] == EXPOSURE_RECEIPT.as_posix() and not unresolved

@@ -21,6 +21,7 @@ from benchmarks.public_rag.paper_qa_data import (
 
 ROOT = Path("benchmarks/public_rag/results")
 SEED = 2026102410
+EXPOSURE_RECEIPT = Path("benchmarks/public_rag/root-cause-exposure-20261024.json")
 
 
 def source_keys(paper):
@@ -62,7 +63,16 @@ def paper_ids(value, train_ids):
 
 
 def scan_exposure(train_ids, results_root=ROOT):
-    excluded, ledger, unresolved = set(), [], []
+    # A fresh clone has only public aggregates. Absence of local raw ledgers
+    # must not silently turn known historical papers into "unexposed" samples.
+    receipt = json.loads(EXPOSURE_RECEIPT.read_text(encoding="utf-8"))
+    excluded = set(receipt["paper_ids"])
+    if not excluded or excluded - train_ids:
+        raise ValueError("historical exposure receipt is empty or incompatible with TRAIN")
+    ledger = [{"artifact": EXPOSURE_RECEIPT.as_posix(), "paper_ids": sorted(excluded)}]
+    unresolved = []
+    if not results_root.exists():
+        return excluded, ledger, unresolved
     for group in sorted(results_root.iterdir()):
         if not group.is_dir() or group.name in {"published", "rag-root-cause-20261024"}:
             continue
@@ -138,6 +148,10 @@ def prepare(train_path, output):
             "available_papers": len(available),
             "label_blind": True,
             "answers_used_for_selection": False,
+            "sampling_scope": (
+                "Replays this study's original source selection. After the first study run, "
+                "these development papers are exposed and cannot be called a fresh confirmation."
+            ),
             "additional_overlap_exclusions": overlap_exclusions,
             "overlap_rule": "Exact normalized title/question or paragraph >=200 chars; "
             "checked against known exposed papers and across development/reserved papers. "
