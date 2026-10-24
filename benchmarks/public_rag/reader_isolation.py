@@ -43,6 +43,7 @@ SOURCE = Path("benchmarks/public_rag/results/answer-path-20261024/frozen-dataset
 ARMS = ("disabled", "enabled")
 SEED = 2026102407
 MAX_TOKENS = 4096
+EFFORTS = {"disabled": "none", "enabled": "high"}
 
 
 def clean_build():
@@ -149,6 +150,12 @@ async def freeze():
             "model_route": projection(route),
             "prompt": PROMPT,
             "max_tokens": MAX_TOKENS,
+            "reasoning_effort": EFFORTS,
+            "wire_correction": (
+                "First registration sent thinking only and stopped after one unobservable "
+                "response. New registration uses the Chat field required by Magpie source; "
+                "same model, question, evidence, scorer and total ceiling. Old result retained."
+            ),
             "budget_note": "Equal total output ceiling, shared by reasoning and final output; "
             "no claim of equal final-answer tokens or a separately controllable reasoning cap.",
             "planned_logical_requests": len(requests) * len(ARMS),
@@ -261,6 +268,8 @@ async def execute():
         raise ValueError("frozen code commit or source dataset changed")
     if protocol["prompt"] != PROMPT or protocol["model_route"] != projection(route):
         raise ValueError("frozen model route or prompt changed")
+    if protocol.get("reasoning_effort") != EFFORTS or protocol["max_tokens"] != MAX_TOKENS:
+        raise ValueError("frozen reasoning controls changed")
     requests = await prepared(data, route)
     wire = [{"key": list(k), "messages": to_wire(v.messages)} for k, v in requests.items()]
     if wire != read(ROOT / "prepared-requests.json"):
@@ -285,6 +294,7 @@ async def execute():
                 max_tokens=MAX_TOKENS,
                 thinking=arm,
                 strict_primary=True,
+                reasoning_effort=protocol["reasoning_effort"][arm],
             )
             gateway, pid = build_gateway(
                 route, CONTEXT, adapter=LiteLLMProviderAdapter(client=client)
@@ -389,4 +399,12 @@ async def execute():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("freeze", "execute"))
-    asyncio.run(freeze() if parser.parse_args().action == "freeze" else execute())
+    parser.add_argument("--registration-name", default="reader-isolation-1")
+    args = parser.parse_args()
+    if (
+        not args.registration_name.startswith("reader-isolation-")
+        or Path(args.registration_name).name != args.registration_name
+    ):
+        parser.error("a fresh experiment-local reader-isolation name is required")
+    ROOT = ROOT.parent / args.registration_name
+    asyncio.run(freeze() if args.action == "freeze" else execute())

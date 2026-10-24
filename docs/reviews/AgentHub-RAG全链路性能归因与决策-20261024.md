@@ -85,3 +85,13 @@ trace子代理报告曾误执行一次只读`Get-FileHash`，违反本轮明确�
 [阅读隔离预执行审查](evidence/rag-root-cause-20261024/reader-isolation-preflight-review.md)在真实请求前指出thinking可观测性、未确认响应、源码绑定和缓存用量边界。实现已增加：严格主端点单次派发、未确认即停止并禁止该诊断后续fallback；enabled缺少推理可观测量或disabled反而暴露推理则停止；源码提交且干净后冻结、执行必须同HEAD和同源数据；不完整/不可观测比较不输出配对CI。原始provider usage保留，金额及未知缓存身份不猜测。项目正常主备路由的默认行为未因该实验严格选项而取消。预审报告原文保留，修正不回改其当时结论。
 
 本轮P0核心门槛已满足：至少一个真实失败链可逐阶段核查，并具备可重用trace和坐标测量入口。51题语义来源审核仍未完成，因此不宣布P0数据建设全部验收；下一项同材料阅读控制作为归因延伸，不能替代新来源确认，也不推进算法默认切换。
+
+## 阅读隔离首轮：止损生效，接口差异有源码依据
+
+首次登记58次，实际只完成1次派发便停止，监督作业退出2；没有续跑原登记、没有补齐57次。首个enabled条件返回DeepSeek预期模型身份，消耗输入802/输出107/总909 tokens，其中cached640；但reasoning_tokens=0且未返回reasoning_content。停止原因为THINKING_CONTROL_UNOBSERVABLE_OR_CONTRADICTED，比较为INELIGIBLE，无配对CI，不得称thinking无效或有效。该回答只作为原始失败记录，不计入后续修正比较。
+
+随后核查[Magpie网关源码requestEffort/withEffort](https://github.com/yetone/magpie/blob/main/internal/gateway/decide.go)：Chat路径读取reasoning_effort，Anthropic路径才读取thinking。首轮只传thinking，未形成Chat推理控制。本机/v1/models也明确列出该DeepSeek别名的reasoning=true及low/high/max等级。故修正为Chat的none/high，保持DeepSeek别名、三材料、问题、提示、评分和4096总上限，另建reader-isolation-2登记；第一轮全部文件保留。安装版本与上游main不自动视为相同，实际新调用仍须通过推理可观测门槛。
+
+51题新来源机械审查也在新题回答调用前完成：6题存在证据无法唯一对齐或缺失，6题为未经过专家充分性复核的原不可回答标签，5题可答标签没有标注正向证据，1题同时有Yes/No标注，1题参考答案明确注明内容缺失；问题可能重叠，不能相加充当错误率。32题没有这些机械告警，也不能自动当作充分语义金标。全部51题保留，未通过删难题提高分数。关系需求、数值单位与歧义审核继续保留UNKNOWN。
+
+机械标注审查复现入口：`.venv/Scripts/python.exe -m benchmarks.public_rag.root_cause_dataset --review-input benchmarks/public_rag/results/rag-root-cause-20261024/development-proposal-v2.json --output benchmarks/public_rag/results/<新的目录>/source-review-mechanical-report.json`。已核对该函数与已保存审查结果完全一致，不重写原文件。

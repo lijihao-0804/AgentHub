@@ -1,0 +1,23 @@
+{
+  "state": "P0_DATA_QUALITY_AUDIT_BEFORE_NEW_SAMPLE_ANSWERS",
+  "source": "development-proposal-v2.json",
+  "registered": 51,
+  "papers": 20,
+  "issue_counts": {
+    "UNALIGNED_OR_AMBIGUOUS_ANNOTATED_EVIDENCE": 6,
+    "PUBLIC_UNANSWERABLE_LABEL_NOT_EXPERT_REVIEWED": 6,
+    "NO_POSITIVE_ANNOTATED_EVIDENCE": 5,
+    "CONTRADICTORY_YES_NO_ANNOTATIONS": 1,
+    "REFERENCE_CONTAINS_MISSING_CONTENT_NOTICE": 1
+  },
+  "no_mechanical_issue": 32,
+  "all_registered_cases_retained": true,
+  "new_sample_answer_requests": 0,
+  "not_a_semantic_accuracy_score": true,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/source-review-mechanical-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

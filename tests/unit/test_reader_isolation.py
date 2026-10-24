@@ -41,7 +41,9 @@ async def test_thinking_controls_preserve_identity_and_record_usage_without_reas
             }
         ]
     }
-    client = RouteClient(events, {}, budget, route, [], max_tokens=4096, thinking="enabled")
+    client = RouteClient(
+        events, {}, budget, route, [], max_tokens=4096, thinking="enabled", reasoning_effort="high"
+    )
     kwargs = dict(
         api_base="http://localhost/v1",
         api_key="never-log-this",
@@ -51,7 +53,8 @@ async def test_thinking_controls_preserve_identity_and_record_usage_without_reas
         temperature=0,
     )
     await client.acompletion(**kwargs)
-    assert seen[0]["extra_body"] == {"thinking": {"type": "enabled"}}
+    assert seen[0]["reasoning_effort"] == "high"
+    assert "extra_body" not in seen[0]
     assert client.raw_calls[0]["provider_usage"] == {"completion_tokens": 23}
     assert client.raw_calls[0]["reasoning_content_chars"] == len("private reasoning")
     assert (

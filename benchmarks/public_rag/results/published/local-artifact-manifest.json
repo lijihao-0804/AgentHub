@@ -111,9 +111,9 @@
     },
     {
       "name": "rag-root-cause-20261024",
-      "local_files": 10,
-      "local_bytes": 43882034,
-      "aggregate_files": 3
+      "local_files": 19,
+      "local_bytes": 44330698,
+      "aggregate_files": 7
     },
     {
       "name": "relation-reader-20261023",
@@ -3137,6 +3137,49 @@
       "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/protocol.json"
     },
     {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/execution-1/answers.jsonl",
+      "bytes": 1781,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/execution-1/api-events.jsonl",
+      "bytes": 4901,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/execution-1/completed.json",
+      "bytes": 1337,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-1/execution-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/execution-1/report.json",
+      "bytes": 40668,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-1/execution-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/execution-1/run.json",
+      "bytes": 20444,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/frozen-dataset.json",
+      "bytes": 197712,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/prepared-requests.json",
+      "bytes": 144835,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/protocol.json",
+      "bytes": 3551,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-1/protocol.json"
+    },
+    {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/resource-discovery.json",
       "bytes": 671,
       "storage": "LOCAL_ONLY"
@@ -3145,6 +3188,12 @@
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/sampling-correction.json",
       "bytes": 749,
       "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/source-review-mechanical-report.json",
+      "bytes": 33435,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/source-review-mechanical-report.json"
     },
     {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/summary.json",

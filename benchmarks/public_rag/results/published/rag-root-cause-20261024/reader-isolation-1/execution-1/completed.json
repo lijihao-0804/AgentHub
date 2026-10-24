@@ -1,0 +1,16 @@
+{
+  "state": "NEEDS_ATTENTION",
+  "planned": 58,
+  "completed": 1,
+  "physical_dispatches": 1,
+  "stop_reason": "THINKING_CONTROL_UNOBSERVABLE_OR_CONTRADICTED",
+  "cost": null,
+  "finished_at_utc": "2026-10-24T07:26:15.874837+00:00",
+  "production_promoted": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-1/execution-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

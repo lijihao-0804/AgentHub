@@ -451,6 +451,7 @@ class RouteClient:
         max_tokens=1024,
         thinking="disabled",
         strict_primary=False,
+        reasoning_effort=None,
     ):
         if (
             type(max_tokens) is not int
@@ -462,6 +463,9 @@ class RouteClient:
         self.route, self.calls = route, calls
         self.max_tokens, self.thinking = max_tokens, thinking
         self.strict_primary = strict_primary
+        if reasoning_effort not in {None, "none", "low", "high", "max"}:
+            raise ValueError("invalid frozen reasoning effort")
+        self.reasoning_effort = reasoning_effort
         self.raw_calls, self.halted = [], False
 
     async def acompletion(self, **kwargs):
@@ -482,7 +486,12 @@ class RouteClient:
         ):
             self.halted = True
             raise ValueError("frozen route or request constraints changed")
-        kwargs["extra_body"] = {"thinking": {"type": self.thinking}}
+        if self.reasoning_effort is None:
+            kwargs["extra_body"] = {"thinking": {"type": self.thinking}}
+        else:
+            # Magpie reads the Chat Completions protocol's reasoning_effort.
+            # Anthropic's thinking field alone does not request Chat reasoning.
+            kwargs["reasoning_effort"] = self.reasoning_effort
         self.budget["dispatched"] += 1
         record = {
             **self.labels,

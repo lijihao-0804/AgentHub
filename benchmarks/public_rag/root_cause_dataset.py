@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+from collections import Counter
 from pathlib import Path
 
 from benchmarks.public_rag.paper_qa_data import (
@@ -187,6 +188,58 @@ def prepare(train_path, output):
     )
 
 
+def source_audit(data, source_name="development-proposal-v2.json"):
+    """Flag annotation quality mechanically; never certify a semantic gold set."""
+    from benchmarks.public_rag.paragraph_qa_live import article_and_spans
+    from benchmarks.public_rag.source_range_coverage import locate_unique
+
+    articles = {p["paper_id"]: article_and_spans(p)[0] for p in data["corpus"]}
+    rows = []
+    for case in data["cases"]:
+        issues, alignments = [], []
+        annotations = case["annotations"]
+        if case["consensus"] == "unanswerable":
+            issues.append("PUBLIC_UNANSWERABLE_LABEL_NOT_EXPERT_REVIEWED")
+        positive = [a for a in annotations if a["answer_type"] != "unanswerable"]
+        if positive and not any(a["evidence"] for a in positive):
+            issues.append("NO_POSITIVE_ANNOTATED_EVIDENCE")
+        polar = {a["answer"].strip().casefold() for a in positive if a["answer_type"] == "yes_no"}
+        if len(polar) > 1:
+            issues.append("CONTRADICTORY_YES_NO_ANNOTATIONS")
+        for annotation in annotations:
+            spans = [locate_unique(articles[case["paper_id"]], e) for e in annotation["evidence"]]
+            if any(span is None for span in spans):
+                issues.append("UNALIGNED_OR_AMBIGUOUS_ANNOTATED_EVIDENCE")
+            if "content missing" in annotation["answer"].casefold():
+                issues.append("REFERENCE_CONTAINS_MISSING_CONTENT_NOTICE")
+            alignments.append({"answer_type": annotation["answer_type"], "source_ranges": spans})
+        rows.append(
+            {
+                "query_id": case["query_id"],
+                "paper_id": case["paper_id"],
+                "question": case["question"],
+                "issues": sorted(set(issues)),
+                "annotation_alignment": alignments,
+                "review_status": "MECHANICAL_SOURCE_ALIGNMENT_ONLY",
+                "semantic_sufficiency": "UNKNOWN",
+                "facts_and_relations": "PENDING_REVIEW",
+                "expert_gold": False,
+            }
+        )
+    return {
+        "state": "P0_DATA_QUALITY_AUDIT_BEFORE_NEW_SAMPLE_ANSWERS",
+        "source": source_name,
+        "registered": len(data["cases"]),
+        "papers": len(data["corpus"]),
+        "issue_counts": dict(Counter(issue for row in rows for issue in row["issues"])),
+        "no_mechanical_issue": sum(not row["issues"] for row in rows),
+        "all_registered_cases_retained": True,
+        "new_sample_answer_requests": 0,
+        "not_a_semantic_accuracy_score": True,
+        "cases": rows,
+    }
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -195,5 +248,18 @@ if __name__ == "__main__":
         default=Path("data/external/rag-public-20261021/qasper/extracted/qasper-train-v0.3.json"),
     )
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--review-input", type=Path)
     args = parser.parse_args()
-    prepare(args.train_path, args.output)
+    if args.review_input:
+        if args.output.exists():
+            raise FileExistsError("refusing to overwrite a source audit")
+        report = source_audit(
+            json.loads(args.review_input.read_text(encoding="utf-8")), args.review_input.name
+        )
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        with args.output.open("x", encoding="utf-8") as stream:
+            json.dump(report, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+        print(json.dumps({k: v for k, v in report.items() if k != "cases"}))
+    else:
+        prepare(args.train_path, args.output)

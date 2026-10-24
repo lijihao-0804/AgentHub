@@ -1,4 +1,4 @@
-from benchmarks.public_rag.root_cause_dataset import paper_ids, source_keys
+from benchmarks.public_rag.root_cause_dataset import paper_ids, source_audit, source_keys
 
 
 def test_exposure_scan_finds_nested_real_ids_without_treating_scores_as_sources():
@@ -31,3 +31,28 @@ def test_source_overlap_check_uses_question_and_source_content_not_answer_labels
     keys = source_keys(paper)
     assert ("paragraph", " ".join(paragraph.casefold().split())) in keys
     assert ("question", "which data?") in keys
+
+
+def test_conflicting_yes_no_gold_cannot_be_certified_by_source_alignment(monkeypatch):
+    from benchmarks.public_rag import paragraph_qa_live
+
+    monkeypatch.setattr(paragraph_qa_live, "article_and_spans", lambda paper: ("Visible.", []))
+    data = {
+        "corpus": [{"paper_id": "p"}],
+        "cases": [
+            {
+                "query_id": "q",
+                "paper_id": "p",
+                "question": "Was it compared?",
+                "consensus": "answerable",
+                "annotations": [
+                    {"answer_type": "yes_no", "answer": "Yes", "evidence": ["Visible."]},
+                    {"answer_type": "yes_no", "answer": "No", "evidence": []},
+                ],
+            }
+        ],
+    }
+    result = source_audit(data)
+    assert result["registered"] == 1
+    assert result["issue_counts"]["CONTRADICTORY_YES_NO_ANNOTATIONS"] == 1
+    assert result["cases"][0]["semantic_sufficiency"] == "UNKNOWN"
