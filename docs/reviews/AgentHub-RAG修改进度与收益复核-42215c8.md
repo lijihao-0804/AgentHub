@@ -66,6 +66,15 @@
 3. 按纪律申请提交批准（两批可合并为一个提交或分两个：交付链修复 / 机制修正）；
 4. （可选）发布前重跑 200 题 A/B 刷新端到端数字口径。
 
+## 五、收尾记录（2026-10-24 当日补）
+
+- 提交完成：`c843874`（两批代码+测试）、`2aa0f15`（八份审阅/复核报告）。
+- G-01 已修并入 `aa12ef9`：settings 校验 `knowledge_chunk_size_chars ≤ MAX_EVIDENCE_EXCERPT_CHARS`，默认 1200 通过、3000 被拒（本人验证）。
+- 集成测试已在本地 Docker 全新库执行：`pytest -m integration` **exit=0**（PG 16 + Qdrant v1.13.6 + Redis；先 alembic 迁移后须另行执行 `scripts/bootstrap_checkpoint.py` 建 LangGraph 检查点表——首跑 24 个失败全部源于缺该 bootstrap，属环境步骤而非代码回归，补跑后全绿）。
+- G-01 后全量非集成单测 exit=0、ruff 全过。
+- 附带发现：`scripts/bootstrap_langgraph_checkpoint.py` 包装脚本损坏（无 `scripts/__init__.py` 时 `ModuleNotFoundError`），直接用 `scripts/bootstrap_checkpoint.py` 即可；未在本轮修复。
+- 仍未做（可选/另行决策）：二批 A/B 重跑刷新 41.35% 口径、推送远端与 PR、R-08/09/10/21 立项。
+
 ## 声明
 
 只读复核；测试/ruff/模拟/重放聚合均为本人独立执行；A/B 与重放原始工件未改动；未修改任何代码。
