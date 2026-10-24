@@ -6,7 +6,9 @@ recovery, not a claim of a general hierarchical index or neighboring concatenati
 
 from __future__ import annotations
 
-from benchmarks.public_rag.source_range_coverage import locate_unique
+import json
+
+from benchmarks.public_rag.source_range_coverage import covered_characters, locate_unique
 
 
 def leaf_view(anchor, article, paper_id, revision_id):
@@ -76,3 +78,78 @@ def recover_paragraphs(anchors, article, spans, paper_id, revision_id, *, max_ch
             }
         )
     return views
+
+
+def preserve_then_expand(
+    baseline, anchors, article, spans, paper_id, revision_id, *, max_chars=1800, max_bytes=8000
+):
+    """Retain all admitted baseline intervals; only accept feasible supersets.
+
+    Unlike parent re-selection, a shorter parent cannot discard part of a hit.
+    The common baseline budget is reserved first. No gold/question is consulted.
+    """
+    result = list(baseline)
+    if any(v["paper_id"] != paper_id or v["revision_id"] != revision_id for v in baseline):
+        raise ValueError("baseline view belongs to a different source revision")
+    original = [
+        tuple(r["source_ranges"][0][k] for k in ("char_start", "char_end")) for r in baseline
+    ]
+    by_id = {a["chunk_id"]: a for a in anchors}
+
+    def wire_size(records):
+        return len(
+            json.dumps(
+                [{"source_id": r["source_id"], "text": r["text"]} for r in records],
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        )
+
+    if wire_size(result) > max_bytes:
+        raise ValueError("baseline already exceeds registered budget")
+    expanded, skipped = 0, 0
+    for i, view in enumerate(baseline):
+        a, b = original[i]
+        if b - a > max_chars:
+            raise ValueError("reading cap cannot preserve the original leaf")
+        candidate = recover_paragraphs(
+            [by_id[view["source_chunk_ids"][0]]],
+            article,
+            spans,
+            paper_id,
+            revision_id,
+            max_chars=max_chars,
+        )[0]
+        p = candidate["source_ranges"][0]
+        left, right = min(a, p["char_start"]), max(b, p["char_end"])
+        if right - left > max_chars:
+            center = (p["char_start"] + p["char_end"]) // 2
+            left = max(left, b - max_chars, min(center - max_chars // 2, a))
+            right = left + max_chars
+        if (left, right) == (a, b):
+            continue
+        if not 0 <= left <= a < b <= right <= len(article):
+            raise ValueError("expanded view cannot preserve the original source interval")
+        replacement = {
+            **view,
+            "source_id": f"rv2:{revision_id}:{left}-{right}",
+            "text": article[left:right],
+            "source_ranges": [{"char_start": left, "char_end": right}],
+            "view_kind": "ANCHOR_PRESERVING_EXPANSION",
+        }
+        proposal = [*result[:i], replacement, *result[i + 1 :]]
+        if wire_size(proposal) <= max_bytes:
+            result, expanded = proposal, expanded + 1
+        else:
+            skipped += 1
+    actual = [tuple(r["source_ranges"][0][k] for k in ("char_start", "char_end")) for r in result]
+    if original and not covered_characters(original, actual)["complete"]:
+        raise ValueError("candidate discarded admitted baseline information")
+    return {
+        "records": result,
+        "wire_bytes": wire_size(result),
+        "expanded_records": expanded,
+        "expansions_skipped_for_budget": skipped,
+        "baseline_coordinates_preserved": True,
+        "semantic_sufficiency": "UNKNOWN",
+    }

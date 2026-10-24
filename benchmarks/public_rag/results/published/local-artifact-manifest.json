@@ -111,9 +111,9 @@
     },
     {
       "name": "rag-root-cause-20261024",
-      "local_files": 40,
-      "local_bytes": 45226631,
-      "aggregate_files": 15
+      "local_files": 47,
+      "local_bytes": 50225268,
+      "aggregate_files": 19
     },
     {
       "name": "relation-reader-20261023",
@@ -3121,6 +3121,12 @@
       "storage": "LOCAL_ONLY"
     },
     {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/gateway-and-model-metadata-report.json",
+      "bytes": 2397,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/gateway-and-model-metadata-report.json"
+    },
+    {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/maml-coordinate-case.json",
       "bytes": 2970,
       "storage": "LOCAL_ONLY"
@@ -3135,6 +3141,39 @@
       "bytes": 509,
       "storage": "LOCAL_ONLY",
       "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/model-control-summary.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-recovery-1/pilot-1/completed.json",
+      "bytes": 146,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/paragraph-recovery-1/pilot-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-recovery-1/pilot-1/report.json",
+      "bytes": 24613,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/paragraph-recovery-1/pilot-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-recovery-1/pilot-1/retrievals.jsonl",
+      "bytes": 1975640,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-recovery-1/pilot-1/started.json",
+      "bytes": 85,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-recovery-1/prepared.json",
+      "bytes": 2991296,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-recovery-1/protocol.json",
+      "bytes": 4460,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/paragraph-recovery-1/protocol.json"
     },
     {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/protocol.json",

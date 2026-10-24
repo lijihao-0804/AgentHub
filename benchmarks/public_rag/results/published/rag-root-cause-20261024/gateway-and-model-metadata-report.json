@@ -1,0 +1,60 @@
+{
+  "observed_at_utc": "2026-10-24T07:55:44.761746+00:00",
+  "scope": "read-only gateway/checkpoint metadata, not new model generation",
+  "gateway_version": {
+    "name": "magpie",
+    "version": "0.1.1364"
+  },
+  "checkpoint_configs": {
+    "BAAI/bge-m3": {
+      "revision": "5617a9f61b028005a4858fdac845db406aefb181",
+      "checkpoint_files": {
+        "config.json": {
+          "architectures": [
+            "XLMRobertaModel"
+          ],
+          "hidden_size": 1024,
+          "max_position_embeddings": 8194,
+          "torch_dtype": "float32"
+        },
+        "sentence_bert_config.json": {
+          "max_seq_length": 8192
+        },
+        "tokenizer_config.json": {
+          "model_max_length": 8192
+        },
+        "1_Pooling/config.json": {
+          "word_embedding_dimension": 1024,
+          "pooling_mode_cls_token": true,
+          "pooling_mode_mean_tokens": false
+        }
+      },
+      "runtime_dtype_source": "adapter requests FP16 on CUDA; active dtype not measured by this metadata read",
+      "query_document_normalization": "Dense adapter shares encode and normalize_embeddings=True"
+    },
+    "BAAI/bge-reranker-v2-m3": {
+      "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+      "checkpoint_files": {
+        "config.json": {
+          "architectures": [
+            "XLMRobertaForSequenceClassification"
+          ],
+          "hidden_size": 1024,
+          "max_position_embeddings": 8194,
+          "torch_dtype": "float32"
+        },
+        "tokenizer_config.json": {
+          "model_max_length": 8192
+        }
+      },
+      "runtime_dtype_source": "adapter requests FP16 on CUDA; active dtype not measured by this metadata read",
+      "query_document_normalization": "Dense adapter shares encode and normalize_embeddings=True"
+    }
+  },
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/gateway-and-model-metadata-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

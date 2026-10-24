@@ -44,6 +44,9 @@ ARMS = ("disabled", "enabled")
 SEED = 2026102407
 MAX_TOKENS = 4096
 EFFORTS = {"disabled": "none", "enabled": "high"}
+COMPARISON = "thinking"
+UPSTREAM = {"disabled": "disabled", "enabled": "enabled"}
+RESPONSE_MODELS = {"auto/deepseek-v4.1-flash": "deepseek-v4.1-flash", "zai/glm-5.3": "glm-5.3"}
 
 
 def clean_build():
@@ -84,8 +87,10 @@ def write_new(path, value):
         stream.write("\n")
 
 
-def route_for():
+def route_for(arm=None):
     route = configured_route()
+    if arm == "glm_high":
+        route = replace(route, primary=replace(route.primary, model="zai/glm-5.3"))
     return replace(
         route,
         primary=replace(route.primary, max_tokens=MAX_TOKENS, timeout_seconds=60),
@@ -147,22 +152,30 @@ async def freeze():
         {
             "state": "FROZEN_DEVELOPMENT_MODEL_ISOLATION",
             "registered_at_utc": datetime.now(UTC).isoformat(),
-            "hypothesis": "Extra thinking may reduce relation errors under identical evidence.",
+            "hypothesis": (
+                "A different deployed reader route may handle the same relation evidence better."
+                if COMPARISON == "models"
+                else "Extra thinking may reduce relation errors under identical evidence."
+            ),
+            "comparison": COMPARISON,
             "source_dataset": SOURCE.as_posix(),
             "data_status": "Previously exposed development; machine-assisted source review.",
             "arms": list(ARMS),
             "seed": SEED,
             "model_route": projection(route),
+            "arm_routes": {a: projection(route_for(a)) for a in ARMS},
+            "expected_response_models": RESPONSE_MODELS,
             "prompt": PROMPT,
             "max_tokens": MAX_TOKENS,
             "reasoning_effort": EFFORTS,
-            "upstream_thinking": {"disabled": "disabled", "enabled": "enabled"},
+            "upstream_thinking": UPSTREAM,
             "wire_correction": (
-                "First registration sent thinking only and stopped after one unobservable "
-                "response. Second registration added the Chat field but dropped the existing "
-                "upstream switch; disabled still exposed reasoning. This registration preserves "
-                "both controls; same model, question, evidence, scorer and total ceiling. "
-                "Both stopped registrations remain unchanged; no further parameter variants."
+                "Primary model/provider routes are predeclared; same questions, evidence, "
+                "scorer and total ceiling. Both request high reasoning. Prior failed mode probes "
+                "remain separate; no off/on or underlying-weight causal claim."
+                if COMPARISON == "models"
+                else "Prior mode registrations stopped on absent or contradictory reasoning. "
+                "Both control fields are retained; no further parameter variants."
             ),
             "budget_note": "Equal total output ceiling, shared by reasoning and final output; "
             "no claim of equal final-answer tokens or a separately controllable reasoning cap.",
@@ -183,18 +196,26 @@ async def freeze():
                 "Do not infer thinking effectiveness unless provider observability supports it.",
             ],
             "promotion": "Forbidden from this exposed small diagnostic, regardless of score.",
-            "stronger_model": "NOT_RUN; first isolate a controlled change within one alias.",
+            "stronger_model": (
+                "Registered GLM-5.3 candidate; quality superiority not assumed. "
+                "This compares deployed model/provider routes, not verified underlying weights."
+                if COMPARISON == "models"
+                else "NOT_RUN; same alias control diagnosis only."
+            ),
             "build_commit": build_commit,
             "source_binding": (
                 "clean tracked code and identical HEAD required at execution; no added hashes"
             ),
             "thinking_observability_gate": (
-                "Stop if enabled exposes neither reasoning content nor reasoning tokens, "
+                "Record reasoning observations without an off/on attribution; "
+                "both deployed routes request high. Backend weights remain unverified."
+                if COMPARISON == "models"
+                else "Stop if enabled exposes neither reasoning content nor reasoning tokens, "
                 "or disabled exposes reasoning. Absence is not proof of private backend behavior."
             ),
             "paired_inference_gate": (
-                "All registered results valid, one primary dispatch each and enabled reasoning "
-                "observed; otherwise no paired CI."
+                "All registered results valid and one exact-identity primary dispatch each; "
+                "mode isolation additionally requires observed enabled reasoning. Otherwise no CI."
             ),
             "cached_token_policy": (
                 "Retain raw provider usage including cache details; canonical cached_tokens "
@@ -218,12 +239,14 @@ def paired_report(data, rows):
     ]
     eligible = all(
         r["status"] == "VALID" and len(r.get("physical_outcomes", [])) == 1 for r in all_results
-    ) and all(
-        thinking_observed(r["physical_outcomes"])
-        for stratum in rows["enabled"].values()
-        for row in stratum
-        for r in row["conditions"].values()
     )
+    if COMPARISON == "thinking":
+        eligible = eligible and all(
+            thinking_observed(r["physical_outcomes"])
+            for stratum in rows["enabled"].values()
+            for row in stratum
+            for r in row["conditions"].values()
+        )
     if not eligible:
         return {
             "arms": reports,
@@ -252,13 +275,13 @@ def paired_report(data, rows):
                     else 0.0
                 )
                 scores[arm][case["query_id"]] = score
-        raw = grouped_difference(scores["disabled"], scores["enabled"], groups, seed=SEED)
+        raw = grouped_difference(scores[ARMS[0]], scores[ARMS[1]], groups, seed=SEED)
         differences[condition] = {
             "metric": "correct_refusal" if condition == "removed" else "token_f1",
             "estimate": raw["estimate_ms"],
             "ci95": [raw["ci95_low_ms"], raw["ci95_high_ms"]],
             "groups": raw["groups"],
-            "interpretation": "enabled minus disabled; descriptive exposed development",
+            "interpretation": f"{ARMS[1]} minus {ARMS[0]}; descriptive exposed development",
         }
     return {"arms": reports, "paired_differences": differences, "production_promoted": False}
 
@@ -276,9 +299,16 @@ async def execute():
         raise ValueError("frozen code commit or source dataset changed")
     if protocol["prompt"] != PROMPT or protocol["model_route"] != projection(route):
         raise ValueError("frozen model route or prompt changed")
+    if (
+        protocol.get("comparison") != COMPARISON
+        or protocol.get("arms") != list(ARMS)
+        or protocol.get("arm_routes") != {a: projection(route_for(a)) for a in ARMS}
+        or protocol.get("expected_response_models") != RESPONSE_MODELS
+    ):
+        raise ValueError("registered comparison routes or raw identities changed")
     if protocol.get("reasoning_effort") != EFFORTS or protocol["max_tokens"] != MAX_TOKENS:
         raise ValueError("frozen reasoning controls changed")
-    if protocol.get("upstream_thinking") != {"disabled": "disabled", "enabled": "enabled"}:
+    if protocol.get("upstream_thinking") != UPSTREAM:
         raise ValueError("frozen upstream thinking switch changed")
     requests = await prepared(data, route)
     wire = [{"key": list(k), "messages": to_wire(v.messages)} for k, v in requests.items()]
@@ -295,16 +325,18 @@ async def execute():
     with (out / "api-events.jsonl").open("x", encoding="utf-8") as events:
         for stratum, case, condition, arm in jobs:
             key = (stratum, case["query_id"], condition)
+            route = route_for(arm)
             client = RouteClient(
                 events,
                 {"query_id": key[1], "condition": condition, "arm": arm},
                 budget,
-                protocol["model_route"],
+                protocol["arm_routes"][arm],
                 [],
                 max_tokens=MAX_TOKENS,
-                thinking=arm,
+                thinking=UPSTREAM[arm],
                 strict_primary=True,
                 reasoning_effort=protocol["reasoning_effort"][arm],
+                response_models=RESPONSE_MODELS,
             )
             gateway, pid = build_gateway(
                 route, CONTEXT, adapter=LiteLLMProviderAdapter(client=client)
@@ -333,9 +365,13 @@ async def execute():
             physical = [{k: v for k, v in r.items() if k != "request"} for r in client.raw_calls]
             result["physical_outcomes"] = physical
             outcomes.extend(physical)
-            if result["status"] == "VALID" and (
-                (arm == "enabled" and not thinking_observed(physical))
-                or (arm == "disabled" and thinking_observed(physical))
+            if (
+                COMPARISON == "thinking"
+                and result["status"] == "VALID"
+                and (
+                    (arm == "enabled" and not thinking_observed(physical))
+                    or (arm == "disabled" and thinking_observed(physical))
+                )
             ):
                 stop = "THINKING_CONTROL_UNOBSERVABLE_OR_CONTRADICTED"
             if any(
@@ -343,7 +379,9 @@ async def execute():
                 for r in physical
             ):
                 result["status"], stop = "UNKNOWN_OUTCOME", "UNKNOWN_TRANSPORT_OR_IDENTITY"
-            if any(r["endpoint"] != protocol["model_route"]["chain"][0]["name"] for r in physical):
+            if any(
+                r["endpoint"] != protocol["arm_routes"][arm]["chain"][0]["name"] for r in physical
+            ):
                 stop = stop or "FALLBACK_SINGLE_MODEL_COMPARISON_STOPPED"
             if (
                 client.halted
@@ -410,11 +448,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("freeze", "execute"))
     parser.add_argument("--registration-name", default="reader-isolation-1")
+    parser.add_argument("--comparison", choices=("thinking", "models"), default="thinking")
     args = parser.parse_args()
     if (
-        not args.registration_name.startswith("reader-isolation-")
+        not args.registration_name.startswith(("reader-isolation-", "reader-models-"))
         or Path(args.registration_name).name != args.registration_name
     ):
         parser.error("a fresh experiment-local reader-isolation name is required")
     ROOT = ROOT.parent / args.registration_name
+    COMPARISON = args.comparison
+    if COMPARISON == "models":
+        ARMS = ("deepseek_high", "glm_high")
+        EFFORTS = {a: "high" for a in ARMS}
+        UPSTREAM = {a: "enabled" for a in ARMS}
     asyncio.run(freeze() if args.action == "freeze" else execute())

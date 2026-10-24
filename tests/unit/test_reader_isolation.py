@@ -124,3 +124,38 @@ async def test_uncertain_dispatch_stops_and_cannot_dispatch_fallback(monkeypatch
     assert thinking_observed(
         [{"provider_usage": {"completion_tokens_details": {"reasoning_tokens": 7}}}]
     )
+
+
+@pytest.mark.asyncio
+async def test_alternate_route_requires_the_exact_registered_raw_model_identity(monkeypatch):
+    import litellm
+
+    responses = iter(["glm-5.3", "different-model"])
+
+    async def provider(**kwargs):
+        return SimpleNamespace(model=next(responses))
+
+    monkeypatch.setattr(litellm, "acompletion", provider)
+    route = {
+        "chain": [{"base_url": "http://localhost/v1", "model": "zai/glm-5.3", "name": "primary"}]
+    }
+    client = RouteClient(
+        StringIO(),
+        {},
+        {"dispatched": 0, "limit": 2},
+        route,
+        [],
+        response_models={"zai/glm-5.3": "glm-5.3"},
+    )
+    kwargs = dict(
+        api_base="http://localhost/v1",
+        model="openai/zai/glm-5.3",
+        max_tokens=1024,
+        num_retries=0,
+        temperature=0,
+    )
+    await client.acompletion(**kwargs)
+    assert client.raw_calls[0]["raw_response_model"] == "glm-5.3"
+    with pytest.raises(ValueError, match="unexpected raw provider model identity"):
+        await client.acompletion(**kwargs)
+    assert client.halted and client.raw_calls[-1]["status"] == "MODEL_IDENTITY_ERROR"

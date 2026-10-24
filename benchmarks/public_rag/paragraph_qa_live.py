@@ -452,6 +452,7 @@ class RouteClient:
         thinking="disabled",
         strict_primary=False,
         reasoning_effort=None,
+        response_models=None,
     ):
         if (
             type(max_tokens) is not int
@@ -466,6 +467,7 @@ class RouteClient:
         if reasoning_effort not in {None, "none", "low", "high", "max"}:
             raise ValueError("invalid frozen reasoning effort")
         self.reasoning_effort = reasoning_effort
+        self.response_models = dict(response_models or {})
         self.raw_calls, self.halted = [], False
 
     async def acompletion(self, **kwargs):
@@ -509,6 +511,7 @@ class RouteClient:
                 if endpoint["model"] == "auto/deepseek-v4.1-flash"
                 else endpoint["model"]
             )
+            expected = self.response_models.get(endpoint["model"], expected)
             record["raw_response_model"] = response.model
             if response.model != expected:
                 self.halted = True

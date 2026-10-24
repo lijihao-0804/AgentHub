@@ -1,0 +1,37 @@
+{
+  "state": "COMPLETE",
+  "registered": 51,
+  "completed": 51,
+  "coordinate_evaluable": 34,
+  "unknown_or_no_positive_annotation": 17,
+  "complete_counts": {
+    "leaf": 16,
+    "paragraph": 18
+  },
+  "paired_coordinate_difference": {
+    "delta": 0.058823529411764705,
+    "ci95": [
+      -0.15151515151515152,
+      0.2619047619047619
+    ],
+    "queries": 34,
+    "paper_groups": 17,
+    "bootstrap_samples": 10000,
+    "units": "fraction"
+  },
+  "metric_units": "Dimensionless coverage fractions; latency is reported separately in ms.",
+  "advance_to_answers": false,
+  "decision": "STOP_NO_ANSWER_EXPERIMENT",
+  "model_load_ms": 25436.111700000765,
+  "new_answer_model_calls": 0,
+  "source_validation": "all returned views checked against exact immutable article ranges",
+  "max_record_array_bytes": 7963,
+  "semantic_sufficiency": "UNKNOWN",
+  "production_promoted": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-recovery-1/pilot-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}
