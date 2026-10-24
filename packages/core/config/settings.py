@@ -85,6 +85,14 @@ class Settings(BaseSettings):
     # Deployments that serve `search_knowledge` should turn it on -- see
     # `warm_retrieval_components` for what the first query costs without it.
     knowledge_warm_models_on_start: bool = False
+    # Opt-in Onyx source-section selection (retrieval_config key
+    # `evidence_set_selector: "onyx_v1"`). Both values must be set for the
+    # selector to exist; otherwise every opt-in version degrades to the
+    # original ranking with a trace marker instead of erroring.
+    knowledge_onyx_selector_base_url: str | None = None
+    knowledge_onyx_selector_api_key: str | None = None
+    knowledge_onyx_selector_model: str = "deepseek-v4.1-flash-1017"
+    knowledge_onyx_selector_timeout_seconds: float = Field(default=30, gt=0, le=300)
     approval_ttl_seconds: int = Field(default=3_600, ge=60, le=31_536_000)
     approval_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
     approval_reconciliation_stale_seconds: int = Field(default=300, ge=30, le=86_400)

@@ -74,6 +74,32 @@ def production_retrieval_components(settings: Settings) -> RetrievalComponents:
         return components
 
 
+def onyx_section_selector_from_settings(settings: Settings):
+    """Build the opt-in section selector, or None when unconfigured.
+
+    Partial configuration is treated as unconfigured on purpose: a selector
+    that exists but cannot authenticate would turn every opt-in retrieval
+    into a doomed call followed by a fallback. The tool-level wrapper marks
+    the degradation in the trace either way.
+    """
+    from packages.knowledge.adapters.onyx_selection import OpenAICompatibleSectionSelector
+
+    # getattr rather than attribute access: worker/API unit tests build fake
+    # settings objects that predate these keys and must keep working.
+    base_url = (getattr(settings, "knowledge_onyx_selector_base_url", None) or "").strip()
+    api_key = (getattr(settings, "knowledge_onyx_selector_api_key", None) or "").strip()
+    model = getattr(settings, "knowledge_onyx_selector_model", None) or "deepseek-v4.1-flash-1017"
+    timeout = getattr(settings, "knowledge_onyx_selector_timeout_seconds", None) or 30.0
+    if not base_url or not api_key:
+        return None
+    return OpenAICompatibleSectionSelector(
+        base_url=base_url,
+        api_key=api_key,
+        model=model,
+        timeout_seconds=timeout,
+    )
+
+
 def warm_retrieval_components(settings: Settings) -> None:
     """Load the retrieval models before anything asks a question of them.
 
@@ -124,6 +150,7 @@ def close_production_retrieval_components() -> None:
 __all__ = [
     "RetrievalComponents",
     "RetrievalComponentsFactory",
+    "onyx_section_selector_from_settings",
     "production_retrieval_components",
     "warm_retrieval_components",
     "close_production_retrieval_components",

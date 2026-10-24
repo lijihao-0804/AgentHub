@@ -9,7 +9,10 @@ from packages.agent_runtime.runtime import AgentRunService
 from packages.approvals import ApprovalService
 from packages.artifacts.recorder import ToolResultArtifactRecorder
 from packages.core.errors.exceptions import AgentHubError
-from packages.knowledge.composition import production_retrieval_components
+from packages.knowledge.composition import (
+    onyx_section_selector_from_settings,
+    production_retrieval_components,
+)
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.memory.queue import CeleryMemoryWriteQueue
@@ -52,7 +55,10 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
             credential_cipher=ProviderCredentialCipher.from_settings(settings),
             tool_runtime=ToolRuntime(
                 session_factory=factory,
-                registry=ToolRegistry(retriever=retriever),
+                registry=ToolRegistry(
+                    retriever=retriever,
+                    section_selector=onyx_section_selector_from_settings(settings),
+                ),
                 audit_sink=SqlAlchemyToolAuditSink(factory),
                 trace_sink=trace_sink,
                 mcp_handler=mcp_executor.execute_read,

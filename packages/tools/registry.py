@@ -6,7 +6,7 @@ from collections.abc import Awaitable, Callable, Mapping
 from functools import partial
 from typing import Any
 
-from packages.knowledge.contracts import KnowledgeRetriever
+from packages.knowledge.contracts import KnowledgeRetriever, SectionSelector
 from packages.tools.builtins import calculate, query_customer, search_knowledge
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 
@@ -23,12 +23,15 @@ class ToolRegistry:
         self,
         *,
         retriever: KnowledgeRetriever | None = None,
+        section_selector: SectionSelector | None = None,
         handler_overrides: Mapping[str, ToolHandler] | None = None,
     ) -> None:
         handlers: dict[str, ToolHandler] = {
             "calculator": calculate,
             "query_customer": query_customer,
-            "search_knowledge": partial(search_knowledge, retriever=retriever),
+            "search_knowledge": partial(
+                search_knowledge, retriever=retriever, section_selector=section_selector
+            ),
         }
         if handler_overrides:
             # This hook is for deterministic tests only; production composition does not

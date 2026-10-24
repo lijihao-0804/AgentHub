@@ -15,6 +15,7 @@ from packages.knowledge.contracts import (
     RetrievalQuery,
     RetrievalResult,
     RetrievalStrategy,
+    SectionSelector,
 )
 from packages.knowledge.evidence_records import (
     drop_overlapping_evidence,
@@ -22,6 +23,7 @@ from packages.knowledge.evidence_records import (
     evidence_reference,
 )
 from packages.knowledge.models import KnowledgeSnapshot
+from packages.knowledge.onyx_retriever import OnyxSelectionKnowledgeRetriever
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 from packages.tools.errors import ToolHandlerError
 
@@ -122,6 +124,7 @@ async def search_knowledge(
     session_factory: ToolSessionFactory | None,
     *,
     retriever: KnowledgeRetriever | None,
+    section_selector: SectionSelector | None = None,
 ) -> dict[str, Any]:
     if session_factory is None or retriever is None:
         raise ToolHandlerError("TOOL_EXECUTION_FAILED", "The knowledge search is unavailable.")
@@ -131,6 +134,14 @@ async def search_knowledge(
     limit = arguments.get("limit", 5)
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= _MAX_RESULTS:
         raise ToolHandlerError("SEARCH_INVALID_ARGUMENT", "The result limit is invalid.")
+    if getattr(definition, "retrieval_config", None) and definition.retrieval_config.get(
+        "evidence_set_selector"
+    ) == "onyx_v1":
+        # Version-level opt-in: the wrapped retriever owns the fail-closed
+        # fallback to the original ranking when the selector is missing or
+        # fails, so an unconfigured deployment degrades to baseline, never
+        # to an error the agent would read as "nothing found".
+        retriever = OnyxSelectionKnowledgeRetriever(retriever, section_selector)
 
     async with session_factory() as session:
         queries = await _snapshot_queries(session, context, definition, text=text, limit=limit)

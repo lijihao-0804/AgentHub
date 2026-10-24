@@ -72,7 +72,9 @@ _RETRIEVAL_OPTIONAL_KEYS = frozenset(
     {"rerank_top_k", "max_chunks_per_document", "context_budget_bytes"}
 )
 _RETRIEVAL_KEYS = (
-    frozenset(DEFAULT_RETRIEVAL_CONFIG) | _RETRIEVAL_OPTIONAL_KEYS | {"evidence_projection"}
+    frozenset(DEFAULT_RETRIEVAL_CONFIG)
+    | _RETRIEVAL_OPTIONAL_KEYS
+    | {"evidence_projection", "evidence_set_selector"}
 )
 
 
@@ -738,6 +740,17 @@ def _validate_retrieval_config(value: Mapping[str, Any]) -> dict[str, Any]:
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     if projection is None:
         result.pop("evidence_projection", None)
+    selector = result.get("evidence_set_selector")
+    if selector is not None and (
+        selector != "onyx_v1"
+        or result.get("context_budget_bytes") is None
+        or projection is not None
+        or result["final_top_k"] > 10
+        or result["candidate_top_k"] > 20
+    ):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
+    if selector is None:
+        result.pop("evidence_set_selector", None)
     if result["final_top_k"] > result["candidate_top_k"]:
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     if result.get("rerank_top_k") is not None and (

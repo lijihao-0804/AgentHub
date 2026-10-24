@@ -29,7 +29,10 @@ from packages.evaluation.runner import (
     ExperimentRunner,
     reconcile_experiment_runs,
 )
-from packages.knowledge.composition import production_retrieval_components
+from packages.knowledge.composition import (
+    onyx_section_selector_from_settings,
+    production_retrieval_components,
+)
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.memory.store import SqlAlchemyMemoryStore
@@ -160,7 +163,10 @@ async def _build_driver(settings, factory, *, judge: AnswerQualityJudge | None =
         credential_cipher=ProviderCredentialCipher.from_settings(settings),
         tool_runtime=ToolRuntime(
             session_factory=factory,
-            registry=ToolRegistry(retriever=retriever),
+            registry=ToolRegistry(
+                    retriever=retriever,
+                    section_selector=onyx_section_selector_from_settings(settings),
+                ),
             audit_sink=SqlAlchemyToolAuditSink(factory),
             trace_sink=trace_sink,
             mcp_handler=mcp_executor.execute_read,

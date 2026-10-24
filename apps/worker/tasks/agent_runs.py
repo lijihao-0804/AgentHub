@@ -40,7 +40,10 @@ from packages.control_plane.services import TenantService
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.core.execution_context.models import PrincipalContext
-from packages.knowledge.composition import production_retrieval_components
+from packages.knowledge.composition import (
+    onyx_section_selector_from_settings,
+    production_retrieval_components,
+)
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.memory.queue import CeleryMemoryWriteQueue
@@ -146,7 +149,10 @@ def _build_service(settings: Settings, factory) -> AgentRunService:
         credential_cipher=ProviderCredentialCipher.from_settings(settings),
         tool_runtime=ToolRuntime(
             session_factory=factory,
-            registry=ToolRegistry(retriever=retriever),
+            registry=ToolRegistry(
+                    retriever=retriever,
+                    section_selector=onyx_section_selector_from_settings(settings),
+                ),
             audit_sink=SqlAlchemyToolAuditSink(factory),
             trace_sink=trace_sink,
             mcp_handler=mcp_executor.execute_read,
