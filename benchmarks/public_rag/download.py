@@ -158,7 +158,9 @@ def main() -> int:
         "assets": sorted(results, key=lambda item: item["path"]),
         "inventory": inventory,
     }
-    args.manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    args.manifest.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     return 1 if failed else 0
 
 
