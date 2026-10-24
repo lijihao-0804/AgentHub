@@ -131,6 +131,16 @@ class Settings(BaseSettings):
     def validate_knowledge_ingestion_settings(self) -> Settings:
         if self.knowledge_chunk_overlap_chars >= self.knowledge_chunk_size_chars:
             raise ValueError("knowledge chunk overlap must be smaller than chunk size")
+        # Imported here so core config carries no module-level dependency on
+        # the knowledge package.
+        from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
+
+        if self.knowledge_chunk_size_chars > MAX_EVIDENCE_EXCERPT_CHARS:
+            raise ValueError(
+                "knowledge chunk size must not exceed the evidence excerpt cap "
+                f"({MAX_EVIDENCE_EXCERPT_CHARS} chars), or every chunk silently "
+                "loses its tail in the tool return and evidence registry"
+            )
         if self.knowledge_ingestion_lease_renewal_seconds >= self.knowledge_ingestion_lease_seconds:
             raise ValueError("knowledge lease renewal must be shorter than lease duration")
         if self.knowledge_embedding_device not in {"auto", "cpu", "cuda"}:
