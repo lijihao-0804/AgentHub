@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
@@ -20,6 +21,7 @@ from packages.knowledge.contracts import (
     RetrievedEvidence,
 )
 from packages.knowledge.evidence_plan import assemble_evidence_plan
+from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.model_gateway.contracts import (
     CapabilityRequirements,
@@ -34,6 +36,23 @@ from packages.observability.contracts import TraceSink
 _INSUFFICIENT_EVIDENCE = "Insufficient evidence to answer from the selected knowledge snapshot."
 _CITATION_MARKER = re.compile(r"\[(-?\d+)\]")
 _MAX_ANSWER_CHARS = 8_000
+
+# Single source of truth for this entrance's retrieval shape. The agent tool
+# entrance reads the same knobs from ``retrieval_config`` (see
+# search_knowledge defaults: dense 30 / sparse 30 / candidate 20). Change both
+# deliberately rather than letting the two entrances drift apart.
+CITATION_QA_RETRIEVAL_PROFILE: dict[str, int] = {
+    "dense_top_k": 30,
+    "sparse_top_k": 30,
+    "candidate_top_k": 20,
+    "final_top_k": 6,
+}
+
+_CITATION_CORRECTION = (
+    "Your previous answer cited evidence ids that are not in the supplied "
+    "evidence list. Return the same JSON object citing only ids shown in the "
+    "evidence list, or state that the evidence is insufficient."
+)
 
 _SYSTEM_PROMPT = """You are AgentHub's evidence-grounded question answering component.
 Only answer using the supplied evidence.
@@ -121,14 +140,19 @@ def _select_evidence(
     *,
     max_chars: int,
 ) -> tuple[_NumberedEvidence, ...]:
-    remaining = max_chars
+    """Admit whole records in rank order; never cut a record mid-string.
+
+    A record that cannot fit whole is skipped and later, smaller records are
+    still tried — the same skip-continue semantics the observation projection
+    uses, so both entrances treat "does not fit" identically.
+    """
     selected: list[_NumberedEvidence] = []
+    used = 0
     for item in evidence:
-        if remaining <= 0:
-            break
-        bounded_text = item.text[:remaining]
-        selected.append(_NumberedEvidence(len(selected) + 1, item, bounded_text))
-        remaining -= len(bounded_text)
+        if used + len(item.text) > max_chars:
+            continue
+        selected.append(_NumberedEvidence(len(selected) + 1, item, item.text))
+        used += len(item.text)
     return tuple(selected)
 
 
@@ -214,9 +238,18 @@ class CitationQaService:
         min_rerank_score: float | None = None,
         superseded_rank_penalty: float = 0.0,
         evidence_projection: str | None = None,
+        retrieval_profile: Mapping[str, int] | None = None,
     ) -> None:
         if evidence_projection not in (None, "compact_v1"):
             raise ValueError("invalid evidence projection")
+        profile = dict(retrieval_profile or CITATION_QA_RETRIEVAL_PROFILE)
+        try:
+            self.retrieval_profile = {
+                key: int(profile[key])
+                for key in ("dense_top_k", "sparse_top_k", "candidate_top_k", "final_top_k")
+            }
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("invalid retrieval profile") from exc
         self.session = session
         self.retrieval_components = retrieval_components
         self.model_gateway = model_gateway
@@ -254,10 +287,10 @@ class CitationQaService:
                 text=query,
                 knowledge_base_id=str(knowledge_base_id),
                 knowledge_snapshot_id=str(knowledge_snapshot_id),
-                dense_top_k=30,
-                sparse_top_k=30,
-                candidate_top_k=20,
-                final_top_k=6,
+                dense_top_k=self.retrieval_profile["dense_top_k"],
+                sparse_top_k=self.retrieval_profile["sparse_top_k"],
+                candidate_top_k=self.retrieval_profile["candidate_top_k"],
+                final_top_k=self.retrieval_profile["final_top_k"],
             ),
         )
         selected = _select_evidence(retrieval.evidence, max_chars=self.max_evidence_chars)
@@ -316,18 +349,22 @@ class CitationQaService:
                 retrieval_trace=retrieval.trace,
             )
 
-        request = ModelRequest(
-            messages=(
-                ModelMessage(role="system", content=_SYSTEM_PROMPT),
-                ModelMessage(
-                    role="user", content=evidence_prompt or _evidence_prompt(query, selected)
-                ),
+        request_messages = (
+            ModelMessage(role="system", content=_SYSTEM_PROMPT),
+            ModelMessage(
+                role="user", content=evidence_prompt or _evidence_prompt(query, selected)
             ),
-            response_schema=_OUTPUT_SCHEMA,
-            required_capabilities=CapabilityRequirements(required=frozenset({"structured_output"})),
         )
         try:
-            response = await self.model_gateway.generate(context, model_profile_id, request)
+            response = await self.model_gateway.generate(
+                context, model_profile_id, ModelRequest(
+                    messages=request_messages,
+                    response_schema=_OUTPUT_SCHEMA,
+                    required_capabilities=CapabilityRequirements(
+                        required=frozenset({"structured_output"})
+                    ),
+                )
+            )
         except ModelGatewayError as exc:
             raise _model_gateway_error(exc) from None
         except Exception:
@@ -337,18 +374,58 @@ class CitationQaService:
                 503,
             ) from None
 
-        try:
-            payload = json.loads(response.content)
-            output = _CitationQaModelOutput.model_validate(payload, strict=True)
-            citation_ids = _validate_model_output(
-                output,
-                evidence_count=len(selected),
-                visible_ids=frozenset(item.id for item in selected),
-            )
-        except AgentHubError:
-            raise
-        except (TypeError, ValueError):
-            raise _invalid_model_output() from None
+        allowed_ids = frozenset(item.id for item in selected)
+        output: _CitationQaModelOutput | None = None
+        citation_ids: tuple[int, ...] | None = None
+        for attempt in range(2):
+            try:
+                payload = json.loads(response.content)
+                output = _CitationQaModelOutput.model_validate(payload, strict=True)
+                citation_ids = _validate_model_output(
+                    output,
+                    evidence_count=len(selected),
+                    visible_ids=allowed_ids,
+                )
+                break
+            except AgentHubError:
+                out_of_range = output is not None and any(
+                    int(identifier) not in allowed_ids
+                    for identifier in _CITATION_MARKER.findall(output.answer)
+                )
+                if attempt == 0 and out_of_range:
+                    # One corrective retry for a hallucinated citation id:
+                    # validation still fails closed afterwards, but a single
+                    # invented [n] should not discard a grounded answer.
+                    try:
+                        response = await self.model_gateway.generate(
+                            context,
+                            model_profile_id,
+                            ModelRequest(
+                                messages=(
+                                    *request_messages,
+                                    ModelMessage(role="user", content=_CITATION_CORRECTION),
+                                ),
+                                response_schema=_OUTPUT_SCHEMA,
+                                required_capabilities=CapabilityRequirements(
+                                    required=frozenset({"structured_output"})
+                                ),
+                            ),
+                        )
+                    except ModelGatewayError as exc:
+                        raise _model_gateway_error(exc) from None
+                    except Exception:
+                        raise AgentHubError(
+                            "MODEL_PROVIDER_UNAVAILABLE",
+                            "The model provider is unavailable.",
+                            503,
+                        ) from None
+                    output = None
+                    continue
+                raise
+            except (TypeError, ValueError):
+                raise _invalid_model_output() from None
+        if output is None or citation_ids is None:
+            raise _invalid_model_output()
 
         by_id = {item.id: item for item in selected}
         citations = tuple(
@@ -359,7 +436,7 @@ class CitationQaService:
                 chunk_id=by_id[identifier].evidence.chunk_id,
                 source=by_id[identifier].evidence.source,
                 locator=dict(by_id[identifier].evidence.locator),
-                excerpt=by_id[identifier].text[:1_000],
+                excerpt=by_id[identifier].text[:MAX_EVIDENCE_EXCERPT_CHARS],
                 retrieval_score=by_id[identifier].evidence.retrieval_score,
                 rerank_score=by_id[identifier].evidence.rerank_score,
             )

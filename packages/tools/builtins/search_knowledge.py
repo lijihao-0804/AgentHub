@@ -16,7 +16,11 @@ from packages.knowledge.contracts import (
     RetrievalResult,
     RetrievalStrategy,
 )
-from packages.knowledge.evidence_records import evidence_record, evidence_reference
+from packages.knowledge.evidence_records import (
+    drop_overlapping_evidence,
+    evidence_record,
+    evidence_reference,
+)
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 from packages.tools.errors import ToolHandlerError
@@ -157,16 +161,21 @@ async def search_knowledge(
             item[0].chunk_id,
         )
     )
+    # Multi-snapshot unions can re-admit fixed-window neighbours whose overlap
+    # a higher-ranked record already delivers; dropping them here frees result
+    # slots for complementary passages. chunk_id hashes the revision id and
+    # content, so one chunk_id always identifies the same passage.
+    kept = drop_overlapping_evidence([item for item, _ in evidence])
+    keep_ids = {item.chunk_id for item in kept}
+    evidence = [pair for pair in evidence if pair[0].chunk_id in keep_ids]
+    retrieval_config = getattr(definition, "retrieval_config", None) or {}
+    include_snapshot_ids = retrieval_config.get("evidence_projection") == "compact_v1"
     return {
         "evidence_refs": [reference for _, reference in evidence[:limit]],
         "results": [
             evidence_record(
                 item,
-                snapshot_id=(
-                    reference["snapshot_id"]
-                    if definition.retrieval_config.get("evidence_projection") == "compact_v1"
-                    else None
-                ),
+                snapshot_id=reference["snapshot_id"] if include_snapshot_ids else None,
             )
             for item, reference in evidence[:limit]
         ],

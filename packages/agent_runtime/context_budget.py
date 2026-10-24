@@ -555,10 +555,14 @@ class ContextBudgetPolicy:
         for category, pool in allocations:
             remaining = pools[pool]
             category_items = [item for item in items if item.category is category]
-            if category is ContextCategory.TOOL_RESULT:
+            if category in (ContextCategory.TOOL_RESULT, ContextCategory.RAG_EVIDENCE):
                 # Newer observations belong to the newest exchange more often
                 # than older observations do.  Allocate this independent cap
                 # newest-first so an old result cannot starve the current turn.
+                # The same holds for retrieval evidence: a second, refined
+                # search in a later round is the one the model is acting on,
+                # and allocating old-first let a stale first search consume the
+                # shared evidence pool down to a bare truncation marker.
                 category_items.reverse()
             for item in category_items:
                 message = item.item.message

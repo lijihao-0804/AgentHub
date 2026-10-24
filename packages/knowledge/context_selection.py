@@ -7,10 +7,10 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 
-def _list_json_bytes(records: Sequence[Mapping[str, Any]]) -> int:
+def _record_json_bytes(record: Mapping[str, Any]) -> int:
     try:
         encoded = json.dumps(
-            list(records),
+            record,
             ensure_ascii=False,
             separators=(",", ":"),
             allow_nan=False,
@@ -39,15 +39,19 @@ def select_budgeted_records(
     if isinstance(max_items, bool) or not isinstance(max_items, int) or max_items <= 0:
         raise ValueError("max_items must be a positive integer")
 
-    _list_json_bytes(records)
+    # A compact JSON list is exactly "[" + ",".join(items) + "]", so the list
+    # size grows incrementally instead of re-serializing the whole selection
+    # for every candidate.
+    item_bytes = [_record_json_bytes(record) for record in records]
     selected: list[Mapping[str, Any]] = []
-    for record in records:
+    used_bytes = 2
+    for record, cost in zip(records, item_bytes, strict=True):
         if len(selected) >= max_items:
             break
-        candidate = [*selected, record]
-        candidate_bytes = _list_json_bytes(candidate)
-        if candidate_bytes <= max_bytes:
+        separator = 1 if selected else 0
+        if used_bytes + separator + cost <= max_bytes:
             selected.append(record)
+            used_bytes += separator + cost
 
     return tuple(selected)
 

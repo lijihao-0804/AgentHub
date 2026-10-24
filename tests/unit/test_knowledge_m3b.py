@@ -142,3 +142,37 @@ def test_chunk_ids_and_content_are_deterministic() -> None:
     assert [chunk.ordinal for chunk in first] == list(range(len(first)))
     assert all(len(chunk.normalized_content_hash) == 64 for chunk in first)
     assert all(chunk.chunk_id for chunk in first)
+
+
+def test_fixed_window_locators_add_block_base_offset() -> None:
+    # Two blocks of one document, each with its own text_range base: the
+    # second block's chunk windows must be offset by its base, or chunks of
+    # different blocks collide on overlapping coordinate ranges.
+    document = ParsedDocument(
+        blocks=(
+            ParsedBlock(
+                text="a" * 1_500,
+                locator={"type": "text_range", "char_start": 0, "char_end": 1_500},
+            ),
+            ParsedBlock(
+                text="b" * 1_500,
+                locator={"type": "text_range", "char_start": 1_500, "char_end": 3_000},
+            ),
+        )
+    )
+
+    chunks = build_deterministic_chunks(
+        uuid4(),
+        document,
+        chunk_size_chars=1_200,
+        chunk_overlap_chars=200,
+    )
+
+    spans = [(chunk.locator["char_start"], chunk.locator["char_end"]) for chunk in chunks]
+    first_block = [span for span in spans if span[1] <= 1_500]
+    second_block = [span for span in spans if span[0] >= 1_500]
+    assert first_block and second_block
+    assert all(span[0] < 1_500 for span in first_block)
+    assert all(span[0] >= 1_500 for span in second_block)
+    # Windows stay inside their own block's base range.
+    assert all(span[1] <= 3_000 for span in second_block)

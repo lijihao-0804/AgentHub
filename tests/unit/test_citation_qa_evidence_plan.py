@@ -13,7 +13,9 @@ from tests.unit.test_knowledge_m3e_citation_qa import (
 
 @pytest.mark.asyncio
 async def test_explicit_qa_view_uses_shared_plan_without_expanding_body_or_losing_reference():
-    session = _FakeSession(evidence_text="e" * 2_000)
+    # Whole-record admission: the evidence must fit the 100-char budget
+    # entirely, because records are never cut mid-string any more.
+    session = _FakeSession(evidence_text="e" * 100)
     gateway = _FakeModelGateway()
     legacy = _service(session, gateway, max_evidence_chars=100)
     service = CitationQaService(

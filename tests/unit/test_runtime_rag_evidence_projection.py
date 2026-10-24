@@ -225,7 +225,7 @@ async def test_observation_uses_category_budget_and_skips_oversized_record() -> 
     graph = _graph(
         runtime_context_budget={
             "reserved_output_tokens": 1,
-            "max_retrieval_tokens": 900,
+            "max_retrieval_tokens": 1_000,
             "max_tool_result_tokens": 80,
         }
     )
@@ -257,7 +257,55 @@ async def test_observation_uses_category_budget_and_skips_oversized_record() -> 
 
 
 @pytest.mark.asyncio
-async def test_observation_keeps_legacy_preview_without_explicit_budget() -> None:
+async def test_observation_without_explicit_budget_uses_projection() -> None:
+    graph = _graph()
+    definition = _definition(context_budget_bytes=None)
+    references = [_identifiers(1), _identifiers(2)]
+    records = [_record(1, "正文一"), _record(2, "正文二")]
+
+    state = _observation_state(
+        graph,
+        definition=definition,
+        payload=_payload(records, references),
+    )
+    update = await graph.observation(state)
+
+    payload = json.loads(update["messages"][-1].content)
+    assert payload["evidence_format"] == "rag_records_v1"
+    assert payload["data"]["results"] == records
+    assert payload["data"]["evidence_refs"] == references
+    assert payload["truncated"] is False
+
+
+@pytest.mark.asyncio
+async def test_observation_default_budget_measures_real_record_delivery() -> None:
+    # Production-shaped system assertion: five 1200-char (2400-byte UTF-8)
+    # chunks through the unconfigured default path must deliver whole paired
+    # records under the 5000-byte evidence pool, never a JSON preview prefix.
+    graph = _graph()
+    definition = _definition(context_budget_bytes=None)
+    references = [_identifiers(index) for index in range(1, 6)]
+    records = [_record(index, "证" * 1_200) for index in range(1, 6)]
+
+    state = _observation_state(
+        graph,
+        definition=definition,
+        payload=_payload(records, references),
+    )
+    update = await graph.observation(state)
+
+    payload = json.loads(update["messages"][-1].content)
+    assert payload["evidence_format"] == "rag_records_v1"
+    delivered = payload["data"]["results"]
+    assert delivered, "at least one complete record must survive the default budget"
+    assert delivered == records[: len(delivered)]
+    assert payload["data"]["evidence_refs"] == references[: len(delivered)]
+    assert payload["truncated"] is True
+    assert len(update["messages"][-1].content.encode("utf-8")) <= 5_000
+
+
+@pytest.mark.asyncio
+async def test_observation_all_oversized_records_yield_empty_envelope_not_preview() -> None:
     graph = _graph()
     definition = _definition(context_budget_bytes=None)
     references = [_identifiers(1)]
@@ -271,8 +319,13 @@ async def test_observation_keeps_legacy_preview_without_explicit_budget() -> Non
     update = await graph.observation(state)
 
     payload = json.loads(update["messages"][-1].content)
-    assert "evidence_format" not in payload
-    assert payload["data"]["preview"]
+    assert payload == {
+        "evidence_format": "rag_records_v1",
+        "status": "SUCCESS",
+        "trust": "UNTRUSTED",
+        "truncated": True,
+        "data": {"results": [], "evidence_refs": []},
+    }
 
 
 @pytest.mark.asyncio
@@ -305,7 +358,7 @@ async def test_observation_leaves_unknown_tool_and_error_results_on_legacy_path(
 
 
 @pytest.mark.asyncio
-async def test_observation_opt_in_invalid_refs_returns_safe_truncated_marker() -> None:
+async def test_observation_projection_failure_is_distinguishable_marker() -> None:
     graph = _graph()
     definition = _definition()
     records = [_record(1)]
@@ -318,7 +371,12 @@ async def test_observation_opt_in_invalid_refs_returns_safe_truncated_marker() -
     update = await graph.observation(state)
 
     payload = json.loads(update["messages"][-1].content)
-    assert payload == {"status": "SUCCESS", "trust": "UNTRUSTED", "truncated": True}
+    assert payload == {
+        "status": "SUCCESS",
+        "trust": "UNTRUSTED",
+        "truncated": True,
+        "evidence_projection": "FAILED",
+    }
     assert "data" not in payload
 
 
@@ -361,7 +419,7 @@ async def test_observation_definition_identity_must_match_call_name() -> None:
 
 
 @pytest.mark.asyncio
-async def test_observation_rejects_non_integer_and_out_of_range_opt_in() -> None:
+async def test_observation_invalid_budget_values_fall_back_to_pool_projection() -> None:
     payload = _payload([_record(1)], [_identifiers(1)])
 
     for configured_bytes in (True, 1, 64_001, 8_000.0, "8000"):
@@ -375,8 +433,40 @@ async def test_observation_rejects_non_integer_and_out_of_range_opt_in() -> None
         update = await graph.observation(state)
 
         content = json.loads(update["messages"][-1].content)
-        assert "evidence_format" not in content
+        assert content["evidence_format"] == "rag_records_v1"
         assert content["data"]["results"] == [_record(1)]
+
+
+@pytest.mark.asyncio
+async def test_observation_clamped_budget_logs_two_layer_mismatch(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    graph = _graph(
+        runtime_context_budget={
+            "reserved_output_tokens": 1,
+            "max_retrieval_tokens": 1_500,
+            "max_tool_result_tokens": 4_000,
+        }
+    )
+    definition = _definition(context_budget_bytes=8_000)
+    references = [_identifiers(1), _identifiers(2)]
+    records = [_record(1, "a" * 400), _record(2, "b" * 400)]
+
+    state = _observation_state(
+        graph,
+        definition=definition,
+        payload=_payload(records, references),
+    )
+    with caplog.at_level("WARNING", logger="packages.agent_runtime.runtime"):
+        update = await graph.observation(state)
+
+    assert any(
+        record.message == "search_evidence_budget_clamped_to_runtime_pool"
+        for record in caplog.records
+    )
+    payload = json.loads(update["messages"][-1].content)
+    # The clamp is real: only what fits the 1500-byte pool is delivered.
+    assert len(payload["data"]["results"]) == 1
 
 
 @pytest.mark.asyncio

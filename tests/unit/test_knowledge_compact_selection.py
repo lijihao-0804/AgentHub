@@ -18,8 +18,9 @@ from packages.tools.contracts import ToolExecutionContext
 
 @pytest.mark.asyncio
 async def test_selection_budgets_reading_view_and_preserves_rank_and_excerpt() -> None:
-    # Retrieval stores 1,300 source characters, while the builtin can expose
-    # only 1,000. The source DTO must not consume the model's reading budget.
+    # Retrieval stores 1,300 source characters; the source DTO keeps identity
+    # metadata off the model's reading budget while the excerpt cap (2000)
+    # still bounds the tool return and private registry.
     units = [{"document_id": f"unit-{i}", "title": f"Title {i}"} for i in range(7)]
     ranked = [
         {
@@ -66,6 +67,6 @@ async def test_selection_budgets_reading_view_and_preserves_rank_and_excerpt() -
     for record, reference, source in zip(
         payload["results"], payload["evidence_refs"], ranked[:5], strict=True
     ):
-        assert record["snippet"] == source["body"][:1_000]
+        assert record["snippet"] == source["body"][:2_000]
         assert record["snapshot_id"] == reference["snapshot_id"] == str(SNAPSHOT)
         assert record["chunk_id"] == reference["chunk_id"] == source["chunk_id"]

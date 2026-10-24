@@ -71,7 +71,9 @@ async def test_actual_consumer_path_retains_text_records_and_paired_refs_after_o
     )
     _, old_final, _, _ = await admit_result("question", payload, legacy)
     _, new_final, _, usage = await admit_result("question", payload, configured)
-    assert len(recover_records(old_final)) < 5
+    # The default (unconfigured) path now projects complete paired records
+    # too; the JSON preview prefix cut no longer applies to search_knowledge.
+    assert len(recover_records(old_final)) == 5
     assert len(recover_records(new_final)) == 5
     data = new_final["data"]
     assert [r["chunk_id"] for r in data["results"]] == [

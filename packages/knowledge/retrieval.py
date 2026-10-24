@@ -38,7 +38,11 @@ from packages.knowledge.contracts import (
     VectorSearchHit,
 )
 from packages.knowledge.evidence_plan import assemble_evidence_plan
-from packages.knowledge.evidence_records import evidence_record, evidence_reference
+from packages.knowledge.evidence_records import (
+    drop_overlapping_evidence,
+    evidence_record,
+    evidence_reference,
+)
 from packages.knowledge.models import (
     Document,
     DocumentChunk,
@@ -189,8 +193,10 @@ def select_rerank_candidates(
 
     Candidates missing from ``document_ids`` are not hydrated and therefore
     neither selected nor counted against any document's quota. The first pass
-    enforces the optional soft per-document cap. The second pass admits
-    deferred chunks in their original fusion order until ``limit`` is full.
+    enforces the optional per-document cap. ``max_chunks_per_document`` is a
+    diversity quota for that first pass, not a hard ceiling: the second pass
+    admits deferred chunks in their original fusion order until ``limit`` is
+    full, so one document may still dominate when alternatives are missing.
     """
 
     if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
@@ -571,27 +577,28 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         item[0].chunk_id,
                     ),
                 )
-                # An opted-in byte budget needs the full sorted pool so an
-                # oversized high-ranked record can be skipped and a later
-                # record can fill the count-limited result. Without the budget,
-                # retain the historical cut before floor and trace projection.
-                if query.context_budget_bytes is None:
-                    ranked = ranked[: query.final_top_k]
+                # The trace keeps its historical shape: the full ranked pool
+                # with an opted-in byte budget (so the trace shows everything
+                # considered for backfill), the final_top_k-sized cut without
+                # one. The evidence pool below always starts from the full
+                # ranked list so dedup can backfill deferred records.
+                trace_pool = (
+                    ranked
+                    if query.context_budget_bytes is not None
+                    else ranked[: query.final_top_k]
+                )
                 rerank_trace_results = tuple(
                     RetrievalTraceResult(candidate.chunk_id, rank, float(rerank_score))
-                    for rank, (candidate, rerank_score) in enumerate(ranked, start=1)
+                    for rank, (candidate, rerank_score) in enumerate(trace_pool, start=1)
                 )
             else:
                 ranked = [(candidate, None) for candidate in candidates]
-                if query.context_budget_bytes is None:
-                    ranked = ranked[: query.final_top_k]
             # The floor is applied *after* ranking, and only where a rerank
             # score exists: the fusion score is an RRF rank statistic on an
             # unrelated scale, so the same number would mean nothing there.
             # ``rerank_trace_results`` above is deliberately left pre-floor.
-            # With a byte budget it is also pre-budget and pre-count-ceiling so
-            # the trace shows the full ranked pool considered for backfill;
-            # without one it retains the historical final_top_k-sized trace.
+            # It is also pre-budget, pre-dedup and pre-count-ceiling so the
+            # trace shows the full ranked pool considered for backfill.
             floor = (
                 query.min_rerank_score
                 if query.min_rerank_score is not None
@@ -637,14 +644,23 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         },
                     )
                 )
-            evidence = ranked_evidence
+            # Dedup runs on the full ranked pool BEFORE any count cut, so a
+            # dropped re-delivery frees its slot for the next ranked record.
+            # Cutting first (the old default-path order) starved the result:
+            # deferred rank-6+ records were never reconsidered.
+            deduped_pool = drop_overlapping_evidence(ranked_evidence)
+            deduped_count = len(deduped_pool)
+            if query.context_budget_bytes is None:
+                evidence = list(deduped_pool[: query.final_top_k])
+            else:
+                evidence = list(deduped_pool)
             context_selection_metadata: dict[str, Any] | None = None
             if query.context_budget_bytes is not None:
                 if query.evidence_projection == "compact_v1":
                     plan = assemble_evidence_plan(
                         [
                             evidence_record(item, snapshot_id=query.knowledge_snapshot_id)
-                            for item in ranked_evidence
+                            for item in evidence
                         ],
                         [
                             evidence_reference(
@@ -652,7 +668,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                                 snapshot_id=query.knowledge_snapshot_id,
                                 knowledge_base_id=query.knowledge_base_id,
                             )
-                            for item in ranked_evidence
+                            for item in evidence
                         ],
                         budget=query.context_budget_bytes,
                         estimator=lambda text: len(text.encode("utf-8")),
@@ -677,7 +693,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         )
                 else:
                     selected_records = select_budgeted_records(
-                        [asdict(item) for item in ranked_evidence],
+                        [asdict(item) for item in evidence],
                         max_bytes=query.context_budget_bytes,
                         max_items=query.final_top_k,
                     )
@@ -691,10 +707,11 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     )
                 selected_ids = [record["chunk_id"] for record in selected_records]
                 selected_id_set = set(selected_ids)
-                evidence = [item for item in ranked_evidence if item.chunk_id in selected_id_set]
+                evidence = [item for item in evidence if item.chunk_id in selected_id_set]
                 context_selection_metadata = {
                     "limit": query.context_budget_bytes,
                     "before": len(ranked_evidence),
+                    "after_overlap_dedup": deduped_count,
                     "after": len(evidence),
                     "bytes": selected_bytes,
                 }

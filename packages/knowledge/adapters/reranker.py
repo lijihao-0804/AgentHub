@@ -11,16 +11,26 @@ from packages.knowledge.contracts import KnowledgeProviderError, RerankCandidate
 
 
 class BgeReranker:
+    # bge-reranker-v2-m3's supported window. An explicit value keeps the
+    # effective input length from drifting with tokenizer defaults; anything
+    # smaller would silently truncate the 1200-char chunks plus the 4000-char
+    # query cap that share this input.
+    DEFAULT_MAX_LENGTH = 8_192
+
     def __init__(
         self,
         *,
         model_name: str = "BAAI/bge-reranker-v2-m3",
         device: str = "auto",
         batch_size: int = 8,
+        max_length: int = 8_192,
     ) -> None:
         self.model_name = model_name
         self.device_request = device
         self.batch_size = batch_size
+        if isinstance(max_length, bool) or not isinstance(max_length, int) or max_length < 32:
+            raise ValueError("max_length must be an integer of at least 32")
+        self.max_length = max_length
         self._tokenizer: Any | None = None
         self._model: Any | None = None
         self._torch: Any | None = None
@@ -75,6 +85,7 @@ class BgeReranker:
                     [candidate.text for candidate in batch],
                     padding=True,
                     truncation=True,
+                    max_length=self.max_length,
                     return_tensors="pt",
                 )
                 encoded = {key: value.to(self._device) for key, value in encoded.items()}

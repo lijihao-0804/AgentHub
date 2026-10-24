@@ -2631,13 +2631,36 @@ class _AgentRunGraph:
                 and definition.identity == "search_knowledge"
                 and definition.source_kind is ToolSourceKind.BUILTIN
                 and result.status is ToolResultStatus.SUCCESS
-                and isinstance(configured_bytes, int)
-                and not isinstance(configured_bytes, bool)
-                and 2 <= configured_bytes <= 64_000
             ):
+                # Retrieval observations are bounded by the evidence pool and
+                # the lossless pair-preserving projection. An unconfigured tool
+                # used to fall through to the generic JSON prefix preview,
+                # which spends most of the budget on reference metadata and
+                # cuts records mid-string (the measured worst delivery tier).
+                # The admission layer later re-projects this payload against
+                # the same pool minus the tool message's own metadata (name +
+                # tool_call_id, ~25-35 bytes); reserving that overhead here
+                # keeps a last record that just fits from being re-cut there.
+                _metadata_headroom = 64
+                if type(configured_bytes) is int and 2 <= configured_bytes <= 64_000:
+                    evidence_budget = min(configured_bytes, budget.max_retrieval_tokens)
+                    if configured_bytes > budget.max_retrieval_tokens:
+                        # Two-layer budget trap: a tool-level budget above the
+                        # runtime evidence pool is silently clamped. Surface it
+                        # so the misconfiguration is diagnosable in production.
+                        logger.warning(
+                            "search_evidence_budget_clamped_to_runtime_pool",
+                            extra={
+                                "configured_bytes": configured_bytes,
+                                "max_retrieval_tokens": budget.max_retrieval_tokens,
+                            },
+                        )
+                else:
+                    evidence_budget = budget.max_retrieval_tokens
+                evidence_budget = max(2, evidence_budget - _metadata_headroom)
+                projected = None
                 if definition.retrieval_config.get("evidence_projection") == "compact_v1":
                     compact_updated = True
-                    projected = None
                     if (
                         type(rag_sequence) is int
                         and 0 <= rag_sequence < 99_999
@@ -2650,7 +2673,7 @@ class _AgentRunGraph:
                         plan = assemble_evidence_plan(
                             result.data["results"],
                             result.data["evidence_refs"],
-                            budget=min(configured_bytes, budget.max_retrieval_tokens),
+                            budget=evidence_budget,
                             estimator=Utf8ByteTokenEstimator().estimate,
                             citation_prefix=f"R{rag_sequence:05d}E",
                         )
@@ -2664,19 +2687,23 @@ class _AgentRunGraph:
                             "trust": "UNTRUSTED",
                             "data": result.data,
                         },
-                        budget.max_retrieval_tokens,
+                        evidence_budget,
                         Utf8ByteTokenEstimator(),
                     )
                 rag_evidence_projected = True
-                payload = (
-                    projected
-                    if projected is not None
-                    else {
+                if projected is not None:
+                    payload = projected
+                else:
+                    # Distinguish a payload the projection rejected from a
+                    # legitimate empty result: both used to surface as the
+                    # same truncated SUCCESS marker, which reads to the model
+                    # as "nothing found" even when the tool did return data.
+                    payload = {
                         "status": "SUCCESS",
                         "trust": "UNTRUSTED",
                         "truncated": True,
+                        "evidence_projection": "FAILED",
                     }
-                )
             if payload is None:
                 payload = _bounded_tool_result(
                     result, max_tool_result_tokens=budget.max_tool_result_tokens

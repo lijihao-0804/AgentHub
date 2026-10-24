@@ -171,6 +171,7 @@ async def test_budget_uses_actual_utf8_bytes_and_skips_oversized_records(
     assert selected.trace.rerank.metadata == {
         "limit": budget,
         "before": 3,
+        "after_overlap_dedup": 3,
         "after": 1,
         "bytes": budget,
     }
@@ -223,6 +224,7 @@ async def test_budget_backfills_beyond_final_top_k_from_ranked_pool(
     assert selected.trace.rerank.metadata == {
         "limit": budget,
         "before": 2,
+        "after_overlap_dedup": 2,
         "after": 1,
         "bytes": budget,
     }
@@ -257,6 +259,7 @@ async def test_floor_runs_before_budget_and_permission_runs_before_both(
     assert result.trace.rerank.metadata == {
         "limit": 2,
         "before": 1,
+        "after_overlap_dedup": 1,
         "after": 0,
         "bytes": 2,
     }
@@ -298,6 +301,7 @@ async def test_playground_projection_exposes_only_safe_budget_metadata(
     assert projection.rerank.metadata == {
         "limit": 8_000,
         "before": 1,
+        "after_overlap_dedup": 1,
         "after": 1,
         "bytes": projection.rerank.metadata["bytes"],
     }

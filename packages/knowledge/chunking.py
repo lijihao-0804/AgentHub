@@ -48,8 +48,18 @@ def build_deterministic_chunks(
             if text:
                 locator = dict(block.locator)
                 if locator.get("type") == "text_range":
-                    locator["char_start"] = start
-                    locator["char_end"] = end
+                    # Window coordinates are block-relative; without the block's
+                    # own base, chunks of different blocks in one document would
+                    # collide on overlapping coordinate ranges (the structural
+                    # splitter already adds this base; see _candidate_locator).
+                    existing_start = locator.get("char_start", 0)
+                    base = (
+                        existing_start
+                        if type(existing_start) is int and existing_start >= 0
+                        else 0
+                    )
+                    locator["char_start"] = base + start
+                    locator["char_end"] = base + end
                 content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
                 ordinal = len(candidates)
                 chunk_id = canonical_json_hash(

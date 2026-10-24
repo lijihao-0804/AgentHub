@@ -271,15 +271,74 @@ async def test_insufficient_model_answer_has_no_citations() -> None:
 
 
 @pytest.mark.asyncio
-async def test_evidence_budget_and_citation_excerpt_are_bounded() -> None:
+async def test_evidence_budget_admits_whole_records_only() -> None:
+    # A record that cannot fit the evidence budget whole is dropped, never
+    # cut mid-string.
     session = _FakeSession(evidence_text="e" * 2_000)
     gateway = _FakeModelGateway()
     result = await _answer(_service(session, gateway, max_evidence_chars=100), session, gateway)
 
-    user_prompt = gateway.requests[0].messages[1].content
+    assert result.citations == ()
+    assert result.answer.startswith("Insufficient evidence")
+
+    session_two = _FakeSession(evidence_text="f" * 90)
+    gateway_two = _FakeModelGateway()
+    result_two = await _answer(
+        _service(session_two, gateway_two, max_evidence_chars=100), session_two, gateway_two
+    )
+
+    user_prompt = gateway_two.requests[0].messages[1].content
     assert user_prompt is not None
-    assert "e" * 101 not in user_prompt
-    assert len(result.citations[0].excerpt) <= 1_000
+    assert "f" * 90 in user_prompt
+    assert "f" * 91 not in user_prompt
+    assert len(result_two.citations[0].excerpt) <= 2_000
+
+
+@pytest.mark.asyncio
+async def test_out_of_range_citation_gets_one_corrective_retry() -> None:
+    class _SequenceGateway:
+        def __init__(self, responses: tuple[str, ...]) -> None:
+            self.responses = list(responses)
+            self.requests: list[ModelRequest] = []
+
+        async def generate(self, _context, _profile_id, request: ModelRequest) -> ModelResponse:
+            self.requests.append(request)
+            return ModelResponse(self.responses.pop(0), provider="fake", model="fake-model")
+
+    session = _FakeSession(chunks=1, evidence_text="handbook evidence")
+    gateway = _SequenceGateway(
+        (
+            '{"answer":"Supported [3]","citation_ids":[3],'
+            '"insufficient_evidence":false}',
+            '{"answer":"Supported [1]","citation_ids":[1],'
+            '"insufficient_evidence":false}',
+        )
+    )
+    result = await _answer(_service(session, gateway), session, gateway)
+
+    assert result.citations[0].id == 1
+    assert len(gateway.requests) == 2
+    retry_messages = gateway.requests[1].messages
+    assert any(
+        message.role == "user" and "not in the supplied evidence list" in (message.content or "")
+        for message in retry_messages
+    )
+
+
+@pytest.mark.asyncio
+async def test_schema_invalid_output_does_not_retry() -> None:
+    class _SingleGateway(_FakeModelGateway):
+        async def generate(self, _context, _profile_id, request: ModelRequest) -> ModelResponse:
+            self.requests.append(request)
+            return ModelResponse('{"answer":"ok"}', provider="fake", model="fake-model")
+
+    session = _FakeSession(chunks=1)
+    gateway = _SingleGateway()
+    with pytest.raises(AgentHubError) as rejected:
+        await _answer(_service(session, gateway), session, gateway)
+
+    assert rejected.value.code == "CITATION_QA_INVALID_MODEL_OUTPUT"
+    assert len(gateway.requests) == 1
 
 
 @pytest.mark.asyncio

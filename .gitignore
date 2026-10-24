@@ -45,3 +45,9 @@ Desktop.ini
 /benchmarks/public_rag/results/*
 !/benchmarks/public_rag/results/published/
 /tests/unit/.entity-delivery-fixture/
+
+# Root-level review probe scratch (kept local, never committed)
+/fiqa-*/
+/.pytest-*/
+/.pythonpath-*
+/pytest-cache-files-*/

@@ -18,6 +18,7 @@ from packages.agent_runtime.context_budget import (
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievedEvidence
 from packages.knowledge.evidence_plan import model_evidence_locator
+from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 from packages.model_gateway.contracts import (
     ModelGateway,
     ModelMessage,
@@ -86,7 +87,7 @@ def selection_messages(
             {
                 "id": i,
                 "title": title,
-                "text": item.text[:1000],
+                "text": item.text[:MAX_EVIDENCE_EXCERPT_CHARS],
                 "locator": model_evidence_locator(item.locator),
                 "effective_date": date,
                 "superseded": superseded,
