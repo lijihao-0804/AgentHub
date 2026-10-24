@@ -134,6 +134,9 @@ class RetrievalPlaygroundRequest(BaseModel):
     sparse_top_k: int = Field(default=30, ge=1, le=100)
     candidate_top_k: int = Field(default=20, ge=1, le=100)
     final_top_k: int = Field(default=6, ge=1, le=20)
+    rerank_top_k: int | None = Field(default=None, ge=1, le=100, strict=True)
+    max_chunks_per_document: int | None = Field(default=None, ge=1, le=100, strict=True)
+    context_budget_bytes: int | None = Field(default=None, ge=2, le=64_000, strict=True)
     # The playground is where the floor gets calibrated, so it is the one
     # caller allowed to override it. Omitting the field keeps the configured
     # value; it does not mean "no floor".
@@ -143,6 +146,8 @@ class RetrievalPlaygroundRequest(BaseModel):
     def validate_final_limit(self) -> RetrievalPlaygroundRequest:
         if self.final_top_k > self.candidate_top_k:
             raise ValueError("final_top_k must be less than or equal to candidate_top_k")
+        if self.rerank_top_k is not None and self.rerank_top_k > self.candidate_top_k:
+            raise ValueError("rerank_top_k must be less than or equal to candidate_top_k")
         return self
 
 
@@ -161,6 +166,7 @@ class RetrievalPlaygroundStage(BaseModel):
 
     latency_ms: float
     results: list[RetrievalPlaygroundStageResult]
+    metadata: dict[str, object] | None = None
 
 
 class RetrievalPlaygroundStages(BaseModel):
@@ -170,6 +176,7 @@ class RetrievalPlaygroundStages(BaseModel):
     sparse: RetrievalPlaygroundStage
     fused: RetrievalPlaygroundStage
     rerank: RetrievalPlaygroundStage
+    selection: RetrievalPlaygroundStage | None = None
 
 
 class RetrievalPlaygroundEvidence(BaseModel):

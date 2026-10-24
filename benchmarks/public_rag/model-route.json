@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "name": "local-rag",
+  "retry_policy": {
+    "max_attempts": 1
+  },
+  "primary": {
+    "name": "local-magpie",
+    "provider": "openai-compatible",
+    "model": "auto/deepseek-v4.1-flash",
+    "base_url": "http://127.0.0.1:3425/v1",
+    "base_url_env": null,
+    "api_key": null,
+    "api_key_env": "AGENTHUB_MAGPIE_API_KEY",
+    "timeout_seconds": "20",
+    "max_tokens": 2048,
+    "temperature": "0",
+    "capabilities": {
+      "tool_calling": true,
+      "streaming": true,
+      "structured_output": false,
+      "vision": false,
+      "max_context_tokens": 32768
+    }
+  },
+  "fallbacks": [
+    {
+      "name": "aliyun-rag",
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "base_url": null,
+      "base_url_env": "AGENTHUB_RAG_BASE_URL",
+      "api_key": null,
+      "api_key_env": "AGENTHUB_RAG_API_KEY",
+      "timeout_seconds": "60",
+      "max_tokens": 2048,
+      "temperature": "0",
+      "capabilities": {
+        "tool_calling": true,
+        "streaming": true,
+        "structured_output": false,
+        "vision": false,
+        "max_context_tokens": 32768
+      }
+    }
+  ]
+}

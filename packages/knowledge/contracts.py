@@ -27,6 +27,20 @@ class RetrievalQuery:
     # Per-query override of the configured relevance floor. ``None`` means
     # "use the retriever's configured value"; it does not mean "no floor".
     min_rerank_score: float | None = None
+    # ``candidate_top_k`` bounds the RRF fusion pool. ``rerank_top_k``
+    # separately bounds how many of those hydrated candidates reach the
+    # reranker; ``None`` preserves the historical full-pool behaviour.
+    rerank_top_k: int | None = None
+    # A soft per-document cap during rerank candidate selection. Remaining
+    # candidates are admitted in fusion order if the budget would otherwise
+    # go unused; ``None`` disables the cap.
+    max_chunks_per_document: int | None = None
+    # Optional compact-JSON UTF-8 byte budget for the final evidence records.
+    # ``None`` preserves the historical final_top_k-only output.
+    context_budget_bytes: int | None = None
+    # Explicit published opt-in. Selection measures the actual compact model
+    # view; callers still receive full source records for citation resolution.
+    evidence_projection: str | None = None
 
 
 @dataclass(frozen=True)
@@ -55,6 +69,7 @@ class RetrievalTraceResult:
 class RetrievalTraceStage:
     latency_ms: float
     results: tuple[RetrievalTraceResult, ...]
+    metadata: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -71,6 +86,11 @@ class RetrievalTrace:
     # empty evidence set is indistinguishable from an empty index, which is
     # the one question someone looking at a trace will actually have.
     dropped_below_floor: int = 0
+    # Present only for HYBRID_RERANK. Scores are fusion scores, so this stage
+    # identifies exactly which hydrated chunks the reranker actually received.
+    selection: RetrievalTraceStage | None = None
+    # Optional post-rerank joint subset selection, distinct from rerank input selection.
+    evidence_set: RetrievalTraceStage | None = None
 
 
 @dataclass(frozen=True)

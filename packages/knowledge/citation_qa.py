@@ -19,6 +19,7 @@ from packages.knowledge.contracts import (
     RetrievalTrace,
     RetrievedEvidence,
 )
+from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.model_gateway.contracts import (
     CapabilityRequirements,
@@ -170,9 +171,11 @@ def _validate_model_output(
     output: _CitationQaModelOutput,
     *,
     evidence_count: int,
+    visible_ids: frozenset[int] | None = None,
 ) -> tuple[int, ...]:
     marker_ids = tuple(int(match.group(1)) for match in _CITATION_MARKER.finditer(output.answer))
-    if any(identifier < 1 or identifier > evidence_count for identifier in marker_ids):
+    allowed = visible_ids if visible_ids is not None else frozenset(range(1, evidence_count + 1))
+    if any(identifier not in allowed for identifier in marker_ids):
         raise _invalid_model_output()
     marker_set = set(marker_ids)
     if output.insufficient_evidence:
@@ -210,7 +213,10 @@ class CitationQaService:
         trace_sink: TraceSink | None = None,
         min_rerank_score: float | None = None,
         superseded_rank_penalty: float = 0.0,
+        evidence_projection: str | None = None,
     ) -> None:
+        if evidence_projection not in (None, "compact_v1"):
+            raise ValueError("invalid evidence projection")
         self.session = session
         self.retrieval_components = retrieval_components
         self.model_gateway = model_gateway
@@ -218,6 +224,7 @@ class CitationQaService:
         self.trace_sink = trace_sink
         self.min_rerank_score = min_rerank_score
         self.superseded_rank_penalty = superseded_rank_penalty
+        self.evidence_projection = evidence_projection
 
     async def answer(
         self,
@@ -254,6 +261,54 @@ class CitationQaService:
             ),
         )
         selected = _select_evidence(retrieval.evidence, max_chars=self.max_evidence_chars)
+        evidence_prompt = None
+        if selected and self.evidence_projection == "compact_v1":
+            records, references = [], []
+            for item in selected:
+                record = {
+                    "chunk_id": item.evidence.chunk_id,
+                    "document_revision_id": item.evidence.document_revision_id,
+                    "snapshot_id": str(knowledge_snapshot_id),
+                    "snippet": item.text,
+                    "document_name": item.evidence.metadata.get("document_name"),
+                    "effective_date": item.evidence.metadata.get("effective_date"),
+                    "superseded": bool(item.evidence.metadata.get("superseded", False)),
+                    "locator": dict(item.evidence.locator),
+                }
+                records.append(record)
+                references.append(
+                    {
+                        "snapshot_id": str(knowledge_snapshot_id),
+                        "knowledge_base_id": str(knowledge_base_id),
+                        "document_revision_id": item.evidence.document_revision_id,
+                        "chunk_id": item.evidence.chunk_id,
+                    }
+                )
+            # Keep the existing body-character contract; this bound includes
+            # serialization overhead rather than silently reducing its text.
+            source_bytes = len(
+                json.dumps(
+                    {"records": records, "references": references},
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                    allow_nan=False,
+                ).encode("utf-8")
+            )
+            plan = assemble_evidence_plan(
+                records,
+                references,
+                budget=source_bytes + 1_024,
+                estimator=lambda text: len(text.encode("utf-8")),
+                citation_prefix="",
+            )
+            if plan is None:
+                selected = ()
+            else:
+                visible = {int(item["id"]) for item in plan.payload["results"]}
+                selected = tuple(item for item in selected if item.id in visible)
+                evidence_prompt = f"Question:\n{query}\n\nUntrusted reference data:\n" + json.dumps(
+                    plan.payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+                )
         if not selected:
             return CitationQaResult(
                 answer=_INSUFFICIENT_EVIDENCE,
@@ -264,12 +319,12 @@ class CitationQaService:
         request = ModelRequest(
             messages=(
                 ModelMessage(role="system", content=_SYSTEM_PROMPT),
-                ModelMessage(role="user", content=_evidence_prompt(query, selected)),
+                ModelMessage(
+                    role="user", content=evidence_prompt or _evidence_prompt(query, selected)
+                ),
             ),
             response_schema=_OUTPUT_SCHEMA,
-            required_capabilities=CapabilityRequirements(
-                required=frozenset({"structured_output"})
-            ),
+            required_capabilities=CapabilityRequirements(required=frozenset({"structured_output"})),
         )
         try:
             response = await self.model_gateway.generate(context, model_profile_id, request)
@@ -285,7 +340,11 @@ class CitationQaService:
         try:
             payload = json.loads(response.content)
             output = _CitationQaModelOutput.model_validate(payload, strict=True)
-            citation_ids = _validate_model_output(output, evidence_count=len(selected))
+            citation_ids = _validate_model_output(
+                output,
+                evidence_count=len(selected),
+                visible_ids=frozenset(item.id for item in selected),
+            )
         except AgentHubError:
             raise
         except (TypeError, ValueError):

@@ -40,3 +40,8 @@ Desktop.ini
 
 # Local scratch (never committed)
 .scratch/
+
+# Public RAG raw runs stay local; publish aggregate-only projections explicitly.
+/benchmarks/public_rag/results/*
+!/benchmarks/public_rag/results/published/
+/tests/unit/.entity-delivery-fixture/

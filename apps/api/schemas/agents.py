@@ -27,6 +27,10 @@ class RetrievalConfigRequest(BaseModel):
     sparse_top_k: int | None = Field(default=None, ge=1)
     candidate_top_k: int | None = Field(default=None, ge=1)
     final_top_k: int | None = Field(default=None, ge=1)
+    rerank_top_k: int | None = Field(default=None, ge=1, le=100, strict=True)
+    max_chunks_per_document: int | None = Field(default=None, ge=1, le=100, strict=True)
+    context_budget_bytes: int | None = Field(default=None, ge=2, le=64_000, strict=True)
+    evidence_projection: Literal["compact_v1"] | None = None
 
 
 class ContextBudgetRequest(BaseModel):
@@ -55,9 +59,7 @@ class RuntimeConfigRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     max_steps: int | None = Field(default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_steps"])
-    max_tool_calls: int | None = Field(
-        default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_tool_calls"]
-    )
+    max_tool_calls: int | None = Field(default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_tool_calls"])
     max_identical_calls: int | None = Field(
         default=None, ge=1, le=MAX_RUNTIME_LIMITS["max_identical_calls"]
     )
@@ -67,9 +69,7 @@ class RuntimeConfigRequest(BaseModel):
     # Per-run spend ceiling in micro-USD (1_000_000 == USD 1.00). ``None``
     # leaves the run uncapped, which is what every agent published before this
     # field existed has.
-    max_cost_micro_usd: int | None = Field(
-        default=None, ge=1, le=MAX_RUN_COST_LIMIT_MICRO_USD
-    )
+    max_cost_micro_usd: int | None = Field(default=None, ge=1, le=MAX_RUN_COST_LIMIT_MICRO_USD)
     context_budget: ContextBudgetRequest | None = None
     memory: MemoryConfigRequest | None = None
 

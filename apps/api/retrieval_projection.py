@@ -23,6 +23,7 @@ def project_retrieval_stage(
     metadata = metadata or {}
     return RetrievalPlaygroundStage(
         latency_ms=stage.latency_ms,
+        metadata=stage.metadata,
         results=[
             RetrievalPlaygroundStageResult(
                 chunk_id=item.chunk_id,
@@ -49,6 +50,11 @@ def project_retrieval_trace(
         sparse=project_retrieval_stage(trace.sparse, metadata),
         fused=project_retrieval_stage(trace.fusion, metadata),
         rerank=project_retrieval_stage(trace.rerank, metadata),
+        selection=(
+            project_retrieval_stage(trace.selection, metadata)
+            if trace.selection is not None
+            else None
+        ),
     )
 
 

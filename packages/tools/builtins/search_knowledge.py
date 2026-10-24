@@ -16,13 +16,17 @@ from packages.knowledge.contracts import (
     RetrievalResult,
     RetrievalStrategy,
 )
+from packages.knowledge.evidence_records import evidence_record, evidence_reference
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 from packages.tools.errors import ToolHandlerError
 
 _MAX_QUERY_LENGTH = 4_000
 _MAX_RESULTS = 10
-_MAX_EXCERPT_LENGTH = 1_000
+
+
+def _optional_retrieval_limit(value: Any) -> int | None:
+    return None if value is None else min(int(value), 100)
 
 
 def _retrieval_context(context: ToolExecutionContext) -> WorkspaceExecutionContext:
@@ -96,6 +100,12 @@ async def _snapshot_queries(
                 sparse_top_k=min(int(config.get("sparse_top_k", 30)), 100),
                 candidate_top_k=min(int(config.get("candidate_top_k", 20)), 100),
                 final_top_k=min(limit, int(config.get("final_top_k", limit)), _MAX_RESULTS),
+                rerank_top_k=_optional_retrieval_limit(config.get("rerank_top_k")),
+                max_chunks_per_document=_optional_retrieval_limit(
+                    config.get("max_chunks_per_document")
+                ),
+                context_budget_bytes=config.get("context_budget_bytes"),
+                evidence_projection=config.get("evidence_projection"),
             )
         )
     return queries
@@ -129,12 +139,11 @@ async def search_knowledge(
                 "TOOL_EXECUTION_FAILED", "The knowledge search returned an invalid result."
             )
         for item in result.evidence:
-            reference = {
-                "snapshot_id": query.knowledge_snapshot_id,
-                "knowledge_base_id": query.knowledge_base_id,
-                "document_revision_id": item.document_revision_id,
-                "chunk_id": item.chunk_id,
-            }
+            reference = evidence_reference(
+                item,
+                snapshot_id=query.knowledge_snapshot_id,
+                knowledge_base_id=query.knowledge_base_id,
+            )
             evidence.append((item, reference))
     evidence.sort(
         key=lambda item: (
@@ -151,25 +160,15 @@ async def search_knowledge(
     return {
         "evidence_refs": [reference for _, reference in evidence[:limit]],
         "results": [
-            {
-                "chunk_id": item.chunk_id,
-                "document_id": item.document_id,
-                "document_revision_id": item.document_revision_id,
-                "source": item.source,
-                "locator": dict(item.locator),
-                "snippet": item.text[:_MAX_EXCERPT_LENGTH],
-                "retrieval_score": item.retrieval_score,
-                "rerank_score": item.rerank_score,
-                # Until now a result was a UUID and a snippet, so the model had
-                # no way to tell a live policy from the one it replaced -- it
-                # could only answer from whatever ranked highest. ``.get`` with
-                # defaults because a retriever is an injected protocol: one that
-                # does not populate lifecycle metadata stays valid.
-                "document_name": item.metadata.get("document_name"),
-                "effective_date": item.metadata.get("effective_date"),
-                "superseded": bool(item.metadata.get("superseded", False)),
-            }
-            for item, _ in evidence[:limit]
+            evidence_record(
+                item,
+                snapshot_id=(
+                    reference["snapshot_id"]
+                    if definition.retrieval_config.get("evidence_projection") == "compact_v1"
+                    else None
+                ),
+            )
+            for item, reference in evidence[:limit]
         ],
     }
 

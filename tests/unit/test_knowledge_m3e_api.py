@@ -93,7 +93,13 @@ async def test_query_returns_citations_and_safe_trace_projection() -> None:
     body = response.json()
     assert body["answer"] == "Supported [1]"
     assert body["citations"][0]["id"] == 1
-    assert set(body["retrieval_trace"]["stages"]) == {"dense", "sparse", "fused", "rerank"}
+    assert set(body["retrieval_trace"]["stages"]) == {
+        "dense",
+        "sparse",
+        "fused",
+        "rerank",
+        "selection",
+    }
     assert "internal-point" not in response.text
     assert "credential" not in response.text.lower()
     assert "provider" not in response.text.lower()

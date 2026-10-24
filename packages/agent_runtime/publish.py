@@ -68,7 +68,12 @@ _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG)
 _RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {"context_budget", "max_cost_micro_usd", "memory"}
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
 _MEMORY_KEYS = frozenset((*DEFAULT_MEMORY_CONFIG, "max_memory_tokens"))
-_RETRIEVAL_KEYS = frozenset(DEFAULT_RETRIEVAL_CONFIG)
+_RETRIEVAL_OPTIONAL_KEYS = frozenset(
+    {"rerank_top_k", "max_chunks_per_document", "context_budget_bytes"}
+)
+_RETRIEVAL_KEYS = (
+    frozenset(DEFAULT_RETRIEVAL_CONFIG) | _RETRIEVAL_OPTIONAL_KEYS | {"evidence_projection"}
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -212,9 +217,7 @@ class AgentPublishService:
         agent = await self._load_agent(session, context, agent_id, for_update=True)
         if agent is None:
             raise AgentHubError("AGENT_NOT_FOUND", "The agent was not found.", 404)
-        resolved_spec, resolved_spec_hash = await self._resolve_draft_spec(
-            session, context, agent
-        )
+        resolved_spec, resolved_spec_hash = await self._resolve_draft_spec(session, context, agent)
         version_number = (
             await session.scalar(
                 select(func.max(AgentVersion.version_number)).where(
@@ -260,9 +263,7 @@ class AgentPublishService:
         agent = await self._load_agent(session, context, agent_id)
         if agent is None:
             raise AgentHubError("AGENT_NOT_FOUND", "The agent was not found.", 404)
-        resolved_spec, resolved_spec_hash = await self._resolve_draft_spec(
-            session, context, agent
-        )
+        resolved_spec, resolved_spec_hash = await self._resolve_draft_spec(session, context, agent)
         return {
             "status": "READY",
             "agent_id": agent.id,
@@ -564,9 +565,7 @@ class AgentPublishService:
                 "MCP_CONNECTION_NOT_FOUND", "The MCP connection was not found.", 404
             )
         if not row.enabled:
-            raise AgentHubError(
-                "MCP_CONNECTION_DISABLED", "The MCP connection is disabled.", 409
-            )
+            raise AgentHubError("MCP_CONNECTION_DISABLED", "The MCP connection is disabled.", 409)
 
     @staticmethod
     async def _load_agent(
@@ -716,6 +715,7 @@ def _validate_retry_policy(value: Mapping[str, Any]) -> dict[str, Any]:
 def _validate_retrieval_config(value: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(value, Mapping) or not set(value).issubset(_RETRIEVAL_KEYS):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
+    explicitly_none = {key for key, item in value.items() if item is None}
     result = {**DEFAULT_RETRIEVAL_CONFIG, **dict(value)}
     if result["retrieval_strategy"] not in {item.value for item in RetrievalStrategy}:
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
@@ -723,8 +723,29 @@ def _validate_retrieval_config(value: Mapping[str, Any]) -> dict[str, Any]:
         item = result[key]
         if isinstance(item, bool) or not isinstance(item, int) or item < 1:
             raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
+    for key in _RETRIEVAL_OPTIONAL_KEYS:
+        item = value.get(key)
+        upper = 64_000 if key == "context_budget_bytes" else 100
+        lower = 2 if key == "context_budget_bytes" else 1
+        if item is not None and (
+            isinstance(item, bool) or not isinstance(item, int) or not lower <= item <= upper
+        ):
+            raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
+    projection = result.get("evidence_projection")
+    if projection is not None and (
+        projection != "compact_v1" or result.get("context_budget_bytes") is None
+    ):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
+    if projection is None:
+        result.pop("evidence_projection", None)
     if result["final_top_k"] > result["candidate_top_k"]:
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
+    if result.get("rerank_top_k") is not None and (
+        result["rerank_top_k"] > result["candidate_top_k"]
+    ):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
+    if "context_budget_bytes" in explicitly_none:
+        result.pop("context_budget_bytes", None)
     return result
 
 
@@ -767,9 +788,7 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
     memory = {**DEFAULT_MEMORY_CONFIG, **dict(memory)}
     if any(
-        not isinstance(item, bool)
-        for key, item in memory.items()
-        if key in DEFAULT_MEMORY_CONFIG
+        not isinstance(item, bool) for key, item in memory.items() if key in DEFAULT_MEMORY_CONFIG
     ):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
     if "max_memory_tokens" in memory and (
@@ -805,9 +824,7 @@ def _validate_published_context_budget(
         if not isinstance(max_context, int):
             continue
         if any(
-            isinstance(value, bool)
-            or not isinstance(value, int)
-            or value >= max_context
+            isinstance(value, bool) or not isinstance(value, int) or value >= max_context
             for value in budget.values()
         ):
             raise AgentHubError(

@@ -23,7 +23,12 @@ from types import MappingProxyType
 from typing import Any, Protocol, cast
 
 from packages.agent_runtime.frozen import FrozenAgentSpec
+from packages.agent_runtime.rag_evidence import (
+    EVIDENCE_FORMAT,
+    reproject_rag_evidence_payload,
+)
 from packages.core.errors.exceptions import AgentHubError
+from packages.knowledge.evidence_plan import EVIDENCE_VIEW_FORMAT, reproject_evidence_view
 from packages.model_gateway.contracts import (
     ModelMessage,
     ModelToolDefinition,
@@ -63,9 +68,7 @@ _PROJECTABLE_CATEGORIES = frozenset(
 # Tool output is untrusted because a remote system produced it; memory is
 # untrusted because a model wrote it.  Neither may promote itself by putting a
 # friendlier ``trust`` value in its own payload.
-_UNTRUSTED_CATEGORIES = frozenset(
-    {ContextCategory.TOOL_RESULT, ContextCategory.MEMORY}
-)
+_UNTRUSTED_CATEGORIES = frozenset({ContextCategory.TOOL_RESULT, ContextCategory.MEMORY})
 _ALL_CATEGORIES = frozenset(ContextCategory)
 _PROJECTION_UNAVAILABLE = object()
 
@@ -184,8 +187,7 @@ class ContextBudgetUsage:
             self.dropped_exchange_count,
         )
         if any(
-            isinstance(value, bool) or not isinstance(value, int) or value < 0
-            for value in numeric
+            isinstance(value, bool) or not isinstance(value, int) or value < 0 for value in numeric
         ):
             raise ValueError("context usage counts must be non-negative integers")
         if self.reserved_output > self.context_limit:
@@ -344,9 +346,7 @@ class ContextBudgetPolicy:
         self,
         messages: Sequence[ModelMessage | ContextMessage] = (),
         categories: Sequence[ContextCategory] | Mapping[int, ContextCategory] | None = None,
-        exchange_groups: Sequence[Hashable | None]
-        | Mapping[int, Hashable | None]
-        | None = None,
+        exchange_groups: Sequence[Hashable | None] | Mapping[int, Hashable | None] | None = None,
         tool_definitions: Sequence[ModelToolDefinition] = (),
     ) -> ContextAdmissionResult:
         """Return the admitted messages and tools.
@@ -368,9 +368,7 @@ class ContextBudgetPolicy:
         self,
         messages: Sequence[ModelMessage | ContextMessage] = (),
         categories: Sequence[ContextCategory] | Mapping[int, ContextCategory] | None = None,
-        exchange_groups: Sequence[Hashable | None]
-        | Mapping[int, Hashable | None]
-        | None = None,
+        exchange_groups: Sequence[Hashable | None] | Mapping[int, Hashable | None] | None = None,
         tool_definitions: Sequence[ModelToolDefinition] = (),
     ) -> ContextAdmissionResult:
         """Descriptive alias for :meth:`admit` used by runtime integrations."""
@@ -381,9 +379,7 @@ class ContextBudgetPolicy:
         self,
         messages: Sequence[ModelMessage | ContextMessage],
         categories: Sequence[ContextCategory] | Mapping[int, ContextCategory] | None,
-        exchange_groups: Sequence[Hashable | None]
-        | Mapping[int, Hashable | None]
-        | None,
+        exchange_groups: Sequence[Hashable | None] | Mapping[int, Hashable | None] | None,
     ) -> tuple[ContextMessage, ...]:
         if isinstance(messages, (str, bytes)):
             raise TypeError("messages must be a sequence of ModelMessage values")
@@ -666,9 +662,7 @@ class ContextBudgetPolicy:
         while conversation_tokens > budget and selected_conversation_groups:
             oldest = min(selected_conversation_groups, key=lambda key: first_index[key])
             selected_conversation_groups.remove(oldest)
-            conversation_tokens -= sum(
-                item.admitted_tokens for item in groups[oldest]
-            )
+            conversation_tokens -= sum(item.admitted_tokens for item in groups[oldest])
         selected_groups.update(selected_conversation_groups)
         remaining = budget - conversation_tokens
 
@@ -690,9 +684,7 @@ class ContextBudgetPolicy:
             if item.category in _MANDATORY_CATEGORIES or item.group in selected_groups
         )
         dropped_exchange_count = sum(
-            1
-            for group in conversation_groups
-            if group not in selected_groups
+            1 for group in conversation_groups if group not in selected_groups
         )
         return selected, dropped_exchange_count
 
@@ -713,9 +705,19 @@ class ContextBudgetPolicy:
                 parsed = json.loads(raw_content)
             except (TypeError, ValueError):
                 parsed = raw_content
+        projection_budget = budget
+        if (
+            category is ContextCategory.RAG_EVIDENCE
+            and isinstance(parsed, Mapping)
+            and parsed.get("evidence_format") in {EVIDENCE_FORMAT, EVIDENCE_VIEW_FORMAT}
+        ):
+            metadata_tokens = self._estimate_message(replace(item.message, content=""))
+            projection_budget = budget - metadata_tokens
+            if projection_budget <= 0:
+                return None, 0
         projected, was_truncated = _project_json_value(
             parsed,
-            budget=budget,
+            budget=projection_budget,
             category=category,
             estimator=self.estimator,
         )
@@ -832,9 +834,7 @@ def admit_context(
     frozen_spec: FrozenAgentSpec | ResolvedModelExecutionPlan | Iterable[Any],
     messages: Sequence[ModelMessage | ContextMessage] = (),
     categories: Sequence[ContextCategory] | Mapping[int, ContextCategory] | None = None,
-    exchange_groups: Sequence[Hashable | None]
-    | Mapping[int, Hashable | None]
-    | None = None,
+    exchange_groups: Sequence[Hashable | None] | Mapping[int, Hashable | None] | None = None,
     tool_definitions: Sequence[ModelToolDefinition] = (),
     *,
     config: ContextBudgetConfig | None = None,
@@ -959,6 +959,28 @@ def _project_json_value(
     if budget <= 0:
         return _PROJECTION_UNAVAILABLE, True
     normalized = _json_safe(value)
+    if (
+        category is ContextCategory.RAG_EVIDENCE
+        and isinstance(normalized, Mapping)
+        and normalized.get("evidence_format") == EVIDENCE_VIEW_FORMAT
+    ):
+        projected = reproject_evidence_view(normalized, budget=budget, estimator=estimator.estimate)
+        if projected is None:
+            return _PROJECTION_UNAVAILABLE, True
+        return projected, bool(normalized.get("truncated") or projected.get("truncated"))
+    if (
+        category is ContextCategory.RAG_EVIDENCE
+        and isinstance(normalized, Mapping)
+        and normalized.get("evidence_format") == "rag_records_v1"
+    ):
+        projected = reproject_rag_evidence_payload(
+            normalized,
+            budget,
+            estimator,
+        )
+        if projected is None:
+            return _PROJECTION_UNAVAILABLE, True
+        return projected, bool(normalized.get("truncated") or projected.get("truncated"))
     trust_fields: dict[str, Any] = {}
     if category in _UNTRUSTED_CATEGORIES:
         # Tool output and recalled memory are untrusted boundaries regardless

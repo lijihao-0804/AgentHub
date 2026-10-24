@@ -166,6 +166,13 @@ async def retrieval_playground(
             candidate_top_k=payload.candidate_top_k,
             final_top_k=payload.final_top_k,
             min_rerank_score=payload.min_rerank_score,
+            rerank_top_k=payload.rerank_top_k,
+            max_chunks_per_document=payload.max_chunks_per_document,
+            context_budget_bytes=(
+                payload.context_budget_bytes
+                if "context_budget_bytes" in payload.model_fields_set
+                else None
+            ),
         ),
     )
     metadata = await _load_trace_metadata(
@@ -180,7 +187,9 @@ async def retrieval_playground(
                 result.trace.sparse,
                 result.trace.fusion,
                 result.trace.rerank,
+                result.trace.selection,
             )
+            if stage is not None
             for item in stage.results
         },
     )

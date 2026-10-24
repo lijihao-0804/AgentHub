@@ -214,10 +214,8 @@ async def test_playground_returns_enriched_stages_and_bounded_evidence() -> None
     assert response.status_code == 200
     body = response.json()
     assert body["snapshot_id"] == str(session.snapshot_id)
-    assert set(body["stages"]) == {"dense", "sparse", "fused", "rerank"}
-    assert body["stages"]["dense"]["results"][0]["document_revision_id"] == str(
-        session.revision_id
-    )
+    assert set(body["stages"]) == {"dense", "sparse", "fused", "rerank", "selection"}
+    assert body["stages"]["dense"]["results"][0]["document_revision_id"] == str(session.revision_id)
     assert body["stages"]["dense"]["results"][0]["locator"]["type"] == "text_range"
     assert len(body["evidence"][0]["snippet"]) == 1_000
     assert "qdrant-internal-point" not in response.text
@@ -290,12 +288,35 @@ async def test_playground_accepts_custom_bounded_top_k() -> None:
             "sparse_top_k": 8,
             "candidate_top_k": 9,
             "final_top_k": 4,
+            "rerank_top_k": 2,
+            "max_chunks_per_document": 1,
         },
     )
 
     assert response.status_code == 200
     assert index.dense_limit == 7
     assert index.sparse_limit == 8
+    selected = response.json()["stages"]["selection"]["results"]
+    assert [item["chunk_id"] for item in selected] == [session.chunk.chunk_id]
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"candidate_top_k": 20, "rerank_top_k": 21},
+        {"rerank_top_k": 0},
+        {"max_chunks_per_document": 0},
+        {"rerank_top_k": True},
+        {"max_chunks_per_document": 1.5},
+    ],
+)
+def test_playground_rejects_invalid_selection_policy(overrides: dict) -> None:
+    from pydantic import ValidationError
+
+    from apps.api.schemas.knowledge import RetrievalPlaygroundRequest
+
+    with pytest.raises(ValidationError):
+        RetrievalPlaygroundRequest(query="question", knowledge_snapshot_id=uuid4(), **overrides)
 
 
 @pytest.mark.asyncio
