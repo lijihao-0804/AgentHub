@@ -1,0 +1,20 @@
+{
+  "state": "MACHINE_ASSISTED_REVIEW_AUDIT_NOT_EXPERT_GOLD",
+  "subagent_reviewed": 41,
+  "statuses": {
+    "PARTIAL": 3,
+    "SUPPORTED": 19,
+    "INSUFFICIENT": 18,
+    "CONTRADICTORY": 1
+  },
+  "parent_reviewed": 10,
+  "total_registered_covered": 51,
+  "claims_semantic_accuracy": false,
+  "new_sample_answers_generated": 0,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/source-review-audit-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

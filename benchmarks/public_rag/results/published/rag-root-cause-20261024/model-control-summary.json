@@ -1,0 +1,23 @@
+{
+  "state": "NOT_IDENTIFIABLE_CONTROL_CONTRADICTION",
+  "registrations": 3,
+  "physical_dispatches": 5,
+  "received": 5,
+  "unknown_transport": 0,
+  "fallback_dispatches": 0,
+  "observed_usage": {
+    "prompt_tokens": 3868,
+    "completion_tokens": 2138,
+    "total_tokens": 6006
+  },
+  "pairwise_effects": null,
+  "decision": "STOP_MODE_PARAMETER_VARIANTS",
+  "production_promoted": false,
+  "scope": "Only failed control registrations, not a quality benchmark; original ledgers retained.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/model-control-summary.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

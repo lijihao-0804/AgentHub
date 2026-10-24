@@ -54,6 +54,11 @@ def clean_build():
     )
     if changed.strip():
         raise ValueError("commit changed source before registering or executing")
+    untracked = subprocess.check_output(
+        ["git", "ls-files", "--others", "--exclude-standard", "--", *code_paths], text=True
+    )
+    if untracked.strip():
+        raise ValueError("commit untracked experiment source before registering or executing")
     source = Path(__file__).resolve().relative_to(Path.cwd().resolve()).as_posix()
     subprocess.run(["git", "ls-files", "--error-unmatch", source], check=True, capture_output=True)
     return subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()

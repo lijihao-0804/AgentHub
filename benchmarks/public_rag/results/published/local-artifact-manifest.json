@@ -111,9 +111,9 @@
     },
     {
       "name": "rag-root-cause-20261024",
-      "local_files": 27,
-      "local_bytes": 44754486,
-      "aggregate_files": 10
+      "local_files": 40,
+      "local_bytes": 45226631,
+      "aggregate_files": 15
     },
     {
       "name": "relation-reader-20261023",
@@ -3131,6 +3131,12 @@
       "storage": "LOCAL_ONLY"
     },
     {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/model-control-summary.json",
+      "bytes": 509,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/model-control-summary.json"
+    },
+    {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/protocol.json",
       "bytes": 866,
       "storage": "LOCAL_ONLY",
@@ -3223,6 +3229,49 @@
       "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-2/protocol.json"
     },
     {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-3/execution-1/answers.jsonl",
+      "bytes": 2494,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-3/execution-1/api-events.jsonl",
+      "bytes": 9348,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-3/execution-1/completed.json",
+      "bytes": 2387,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-3/execution-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-3/execution-1/report.json",
+      "bytes": 40927,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-3/execution-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-3/execution-1/run.json",
+      "bytes": 21679,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-3/frozen-dataset.json",
+      "bytes": 197712,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-3/prepared-requests.json",
+      "bytes": 144835,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-3/protocol.json",
+      "bytes": 4119,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-3/protocol.json"
+    },
+    {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/resource-discovery.json",
       "bytes": 671,
       "storage": "LOCAL_ONLY"
@@ -3233,10 +3282,31 @@
       "storage": "LOCAL_ONLY"
     },
     {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/source-review-A.json",
+      "bytes": 17394,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/source-review-audit-report.json",
+      "bytes": 496,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/source-review-audit-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/source-review-B.json",
+      "bytes": 17768,
+      "storage": "LOCAL_ONLY"
+    },
+    {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/source-review-mechanical-report.json",
       "bytes": 33435,
       "storage": "LOCAL_ONLY",
       "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/source-review-mechanical-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/source-review-parent.json",
+      "bytes": 12477,
+      "storage": "LOCAL_ONLY"
     },
     {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/summary.json",
