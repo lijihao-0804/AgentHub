@@ -1,0 +1,79 @@
+{
+  "scope": "Curated exposed source-only deletion diagnostic; no population estimate or method adoption.",
+  "pairs": 4,
+  "planned_requests": 8,
+  "ledger_cases": 32,
+  "unadjudicated_ledger_cases": 28,
+  "supported": {
+    "token_f1": 0.75,
+    "exact_match": 0.75,
+    "valid": 4,
+    "abstained": 0
+  },
+  "answer_evidence_removed": {
+    "valid": 4,
+    "correct_refusals": 4,
+    "correct_refusal_rate": 1.0,
+    "unsupported_answers": 0,
+    "unsupported_answer_rate": 0.0
+  },
+  "both_correct": 3,
+  "limitations": [
+    "Failures score0 and are not treated as correct refusals.",
+    "Unsupported-answer rate counts only structurally valid delivered answers; invalid/provider outcomes reported separately.",
+    "Small selected exposed set, deliberately ablated context; no representative accuracy or semantic-judge score.",
+    "Labels describe sufficiency of supplied historical text, not answerability from the real world."
+  ],
+  "execution_complete": true,
+  "physical_api": {
+    "requests": 8,
+    "statuses": {
+      "VALID": 8
+    },
+    "observed_total_tokens": 7417,
+    "usage_observed": 8,
+    "usage_unknown": 0,
+    "currency_cost": null
+  },
+  "per_condition_cost": {
+    "supported": {
+      "request_ms": [
+        1049.812800003565,
+        745.9901999973226,
+        844.7726000013063,
+        777.6095000008354
+      ],
+      "mean_request_ms": 854.5462750007573,
+      "observed_tokens": {
+        "prompt_tokens": 4327,
+        "completion_tokens": 183,
+        "total_tokens": 4510
+      }
+    },
+    "answer_evidence_removed": {
+      "request_ms": [
+        573.4513999996125,
+        595.96849999798,
+        665.8720999985235,
+        679.8100000014529
+      ],
+      "mean_request_ms": 628.7754999993922,
+      "observed_tokens": {
+        "prompt_tokens": 2835,
+        "completion_tokens": 72,
+        "total_tokens": 2907
+      }
+    }
+  },
+  "production_accepted": false,
+  "default_changed": false,
+  "new_reader_tested": false,
+  "semantic_judge_used": false,
+  "interpretation": "Diagnostic calibration only; tiny exposed curated sample. Fresh requests in both conditions control request-time drift within this diagnostic, not an optimization comparison.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

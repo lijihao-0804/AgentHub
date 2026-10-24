@@ -1,0 +1,95 @@
+{
+  "arms": {
+    "baseline": {
+      "distinct_parent_revision_ids": 4095,
+      "distinct_source_document_ids": 4095,
+      "full_context_qualified": false,
+      "lengths": {
+        "encoded_tokens": {
+          "max": 889,
+          "mean": 286.0733003708282,
+          "p50": 310.0,
+          "p95": 373.0,
+          "total": 4628666
+        },
+        "input_characters": {
+          "max": 1200,
+          "mean": 1022.0071693448702,
+          "p50": 1199.0,
+          "p95": 1200.0,
+          "total": 16536076
+        },
+        "padded_tokens": {
+          "max": 889,
+          "mean": 358.85710754017305,
+          "p50": 358.0,
+          "p95": 404.0,
+          "total": 5806308
+        },
+        "untruncated_tokens": {
+          "max": 889,
+          "mean": 286.0733003708282,
+          "p50": 310.0,
+          "p95": 373.0,
+          "total": 4628666
+        }
+      },
+      "pairs": 16180,
+      "parent_truncation_zero": true,
+      "query_count": 809,
+      "truncated_pairs": 0
+    },
+    "parent": {
+      "distinct_parent_revision_ids": 4095,
+      "distinct_source_document_ids": 4095,
+      "full_context_qualified": true,
+      "lengths": {
+        "encoded_tokens": {
+          "max": 2281,
+          "mean": 435.1686405580179,
+          "p50": 408.0,
+          "p95": 697.7999999999993,
+          "total": 5989226
+        },
+        "input_characters": {
+          "max": 10128,
+          "mean": 1618.994695923854,
+          "p50": 1511.0,
+          "p95": 2634.0,
+          "total": 22282224
+        },
+        "padded_tokens": {
+          "max": 2281,
+          "mean": 648.1505485722589,
+          "p50": 598.0,
+          "p95": 1057.0,
+          "total": 8920496
+        },
+        "untruncated_tokens": {
+          "max": 2281,
+          "mean": 435.1686405580179,
+          "p50": 408.0,
+          "p95": 697.7999999999993,
+          "total": 5989226
+        }
+      },
+      "pairs": 13763,
+      "parent_truncation_zero": true,
+      "query_count": 809,
+      "truncated_pairs": 0
+    }
+  },
+  "historical_compute_exact_match": true,
+  "percentile_method": "linear interpolation",
+  "query_arm_counts_agree": true,
+  "query_count": 809,
+  "schema_version": 1,
+  "scope": "POST-RUN CPU-only token audit; no latency, quality, or selection claim",
+  "split": "train",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/parent-context-20261022/pair-token-summary.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

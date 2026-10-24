@@ -1,0 +1,20 @@
+{
+  "scope": "User-authorized local Magpie primary with Aliyun fallback; connectivity/tool/failover checks only. No new RAG quality score.",
+  "primary": {
+    "base_url": "http://127.0.0.1:3425/v1",
+    "model": "auto/deepseek-v4.1-flash"
+  },
+  "fallback_model": "deepseek-v4.1-flash-1017",
+  "reuse": "ModelGatewayService and LiteLLMProviderAdapter; no new retry loop.",
+  "request_cap": 6,
+  "per_request_output_cap": 128,
+  "stream_boundary": "Existing gateway forbids fallback after first visible text or tool delta; relevant deterministic tests checked.",
+  "isolation": "Install new profiles in the actual paper-QA development workspace. Preserve24 published experiment versions and all earlier results. Main database contains fixture workspaces; no batch mutation.",
+  "price": "Monetary price unavailable; preserve observed usage, never invent cost.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/model-route-20261023/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

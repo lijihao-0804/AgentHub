@@ -1,0 +1,147 @@
+{
+  "status": "DIAGNOSTIC_FEASIBILITY_NOT_MET_RESEARCH_REDIRECTED",
+  "scope": "Completed fixed-sample diagnostic milestone; no answer-quality experiment launched.",
+  "validation": {
+    "at_utc": "2026-10-23T13:13:52.613807+00:00",
+    "fixed_questions": 32,
+    "non_em": 24,
+    "em": 8,
+    "initial_reviewer_categories": {
+      "overall": {
+        "correct": 11,
+        "relation_attribute_error": 5,
+        "missing_visible_fact": 7,
+        "alias_or_format": 4,
+        "annotation_ambiguity": 3,
+        "provider_failure": 1,
+        "uncertain": 1
+      },
+      "non_em": {
+        "correct": 3,
+        "relation_attribute_error": 5,
+        "missing_visible_fact": 7,
+        "alias_or_format": 4,
+        "annotation_ambiguity": 3,
+        "provider_failure": 1,
+        "uncertain": 1
+      },
+      "em": {
+        "correct": 8,
+        "relation_attribute_error": 0,
+        "missing_visible_fact": 0,
+        "alias_or_format": 0,
+        "annotation_ambiguity": 0,
+        "provider_failure": 0,
+        "uncertain": 0
+      }
+    },
+    "initial_model_qualifying_count": 5,
+    "initial_model_threshold_met": false,
+    "parent_clear_qualifying_count": 1,
+    "parent_upper_bound_including_disputed": 5,
+    "feasibility_threshold": 6,
+    "proceed": false,
+    "decision_reason": "Small count alone is heuristic, not statistical rejection of a method. More importantly, four initial qualifying cases have incomplete links or ambiguous target/scope; evidence does not justify a universal relation-reader API experiment before assessment is corrected.",
+    "verbatim_review_quotes_validated": 68,
+    "source_range_views_verified": 733,
+    "new_model_requests": 0,
+    "default_changed": false,
+    "new_holdout_or_confirmation_exposure": false,
+    "review_limit": "Parent and independent DeepSeek model review; not human expert ground truth or a calibrated semantic judge."
+  },
+  "visibility_summary": {
+    "all": {
+      "questions": 32,
+      "annotated_steps": 78,
+      "support_step_paragraphs_in_selector": 77,
+      "support_step_paragraphs_in_answer": 70,
+      "steps_with_answer_literal_in_original_support": 78,
+      "scope": "Counts per annotated step, not unique paragraphs; lexical/identity observation, no entailment score."
+    },
+    "non_em": {
+      "questions": 24,
+      "annotated_steps": 60,
+      "support_step_paragraphs_in_selector": 59,
+      "support_step_paragraphs_in_answer": 54,
+      "steps_with_answer_literal_in_original_support": 60,
+      "scope": "Counts per annotated step, not unique paragraphs; lexical/identity observation, no entailment score."
+    },
+    "em": {
+      "questions": 8,
+      "annotated_steps": 18,
+      "support_step_paragraphs_in_selector": 18,
+      "support_step_paragraphs_in_answer": 16,
+      "steps_with_answer_literal_in_original_support": 18,
+      "scope": "Counts per annotated step, not unique paragraphs; lexical/identity observation, no entailment score."
+    }
+  },
+  "prototype": "Unrun source and19 passing boundary tests archived, removed from active code. Diagnostic tool plus3 tests remain.",
+  "new_answer_quality_score": null,
+  "production_accepted": false,
+  "default_changed": false,
+  "confirmation_opened": false,
+  "formal_experiment": false,
+  "decision": "Separate question interpretation, source evidence coverage, and answer support. First repair diagnostic ground truth/attribute original visibility losses; do not optimize lexical F1 by encouraging unsupported answers.",
+  "historical_scores": "All prior official F1/EM and accepted complementary selection unchanged; no deletion/relabeling or posthoc winner selection.",
+  "next_milestone": "A separately frozen evidence-support diagnostic set with explicit ambiguity/unanswerable/alias handling, then one mechanism targeted at a verified loss. No automatic continuation/new API calls in this milestone.",
+  "delivery_validation": {
+    "at_utc": "2026-10-23T13:29:05.424079+00:00",
+    "active_diagnostic_tests_passed": 3,
+    "archived_prototype_boundary_tests_passed": 19,
+    "quality_tests_or_experiment_performed": false,
+    "active_python_files_linted_and_formatted": 2,
+    "fixed_audit_cases": 32,
+    "unique_raw_source_question_bindings": 32,
+    "actual_original_source_views_verified": 733,
+    "initial_review_quotes_exact": 68,
+    "source_followup_quotes_exact": 80,
+    "source_followup_quotes_invalid": [],
+    "new_answer_experiment_requests": 0,
+    "review_process": "One DeepSeek subagent initial review plus same-agent source followup, parent source/ambiguity review. Followup knows earlier concerns; NOT independent blinded dual annotation; no human calibration.",
+    "semantic_support_score": null,
+    "no_new_holdout_or_confirmation": true,
+    "unrun_prototype_removed_from_active_code": true,
+    "source_followup_labels_overlap": true,
+    "source_followup_label_counts_all32": {
+      "no_issue": 5,
+      "omitted_support": 8,
+      "original_support_gap": 16,
+      "question_ambiguity": 12,
+      "alias_format": 6,
+      "selected_text": 5,
+      "provider_failure": 1
+    },
+    "source_followup_label_counts_nonem24": {
+      "original_support_gap": 14,
+      "question_ambiguity": 12,
+      "omitted_support": 6,
+      "alias_format": 6,
+      "selected_text": 5,
+      "provider_failure": 1
+    }
+  },
+  "source_followup": "source-review.json, model review only; original records and all prior lexical scores retained",
+  "source_followup_reconciliation": {
+    "source": "source-review.json/md preserved as raw model review, not accepted labels",
+    "review_process": "Same DeepSeek agent followup, prior context and parent concerns known; not blinded dual annotation.",
+    "gate_substitution_rejected": true,
+    "reason": "20/24 any substantive source issue does not satisfy original>=6 clear relation errors with all relevant facts actually visible. Source-gap/ambiguity/omission is not an answer-reader failure.",
+    "accepted_diagnostic_gate": "audit-validation.json remains proceed=false; no paid reader experiment",
+    "selected_text_label": "Model risk annotation only, not necessarily an observed wrong answer. Several listed baselines abstained; do not count abstention as hallucination or relation misread.",
+    "omission_stage_correction": {
+      "query_id": "4hop3__502691_544708_661360_54023",
+      "paragraph_idx": 17,
+      "actual_stage": "missing already from selector input, not solely selection-to-answer loss",
+      "evidence": "source-visibility-trace.json"
+    },
+    "semantic_labels_calibrated": false,
+    "historical_official_scores_changed": false
+  },
+  "new_answer_experiment_requests": 0,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/relation-reader-20261023/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

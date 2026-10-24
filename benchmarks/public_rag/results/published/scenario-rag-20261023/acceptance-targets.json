@@ -1,0 +1,19 @@
+{
+  "declared_at_utc": "2026-10-23T06:10:06.232304+00:00",
+  "scope": "Provisional engineering quality targets; declared before any development aggregate score or confirmation access, not universal dataset standards. Relative improvements may pass scientific gates yet fail these absolute targets.",
+  "qasper": {
+    "evidence_recall": 0.8,
+    "complete_evidence_set": 0.65
+  },
+  "musique": {
+    "complete_evidence_set": 0.7,
+    "support_recall": 0.85
+  },
+  "metrics_note": "QASPER full_text_evidence_recall in initial runner is a secondary90%-character-coverage proxy, not an exact support-span metric; primary is paragraph hit recall. No generated-answer quality claim.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/acceptance-targets.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

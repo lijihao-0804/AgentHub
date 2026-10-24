@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "milestone": "Official BGE-M3 learned lexical retrieval mechanism comparison",
+  "declared_at": "2026-10-22",
+  "seed": 20261023,
+  "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+  "dev": "All 809 official SciFact train queries, full existing corpus and chunks",
+  "regression": "All 300 official SciFact test queries; already exposed, not blind",
+  "arms": {
+    "baseline": {
+      "encoder": "TOKENIZER_LOG_TF_IDF",
+      "modifier": "idf",
+      "collection": "rag_scifact_20261021"
+    },
+    "learned": {
+      "encoder": "BGE_M3_LEARNED_V1",
+      "modifier": "none",
+      "collection": "rag_scifact_learned_20261022"
+    }
+  },
+  "dense_top_k": 30,
+  "sparse_top_k": 30,
+  "candidate_top_k": 20,
+  "rerank_top_k": 20,
+  "final_top_k": 20,
+  "rrf_k": 60,
+  "model_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+  "source": "https://bge-model.com/bge/bge_m3",
+  "reference_implementation": "https://github.com/FlagOpen/FlagEmbedding/blob/fd1a2bdf69488ffebe0327999d4400d8c8058a0b/FlagEmbedding/finetune/embedder/encoder_only/m3/modeling.py",
+  "mechanism": "ReLU sparse linear over backbone token hidden states, repeated token max, exclude cls/eos/pad/unk and attention padding; query/doc sparse dot product without extra IDF",
+  "controls": "Copy existing dense vectors and payload into separate isolated collection; same DB snapshot membership, query dense adapter, reranker, RRF, budgets and output; no production factory/schema/snapshot changes",
+  "runtime_policy": "Share existing SentenceTransformer model weights; separate sparse forward per query is measured as actual extra work, not claimed free; no cross-request text or hidden-state cache",
+  "selection_rule": {
+    "min_ndcg10_gain": 0.005,
+    "max_recall5_loss": 0.005,
+    "max_recall20_loss": 0.005,
+    "require_primary_ci_above_zero": true
+  },
+  "primary": "Single nDCG@10 comparison; 10000 paired bootstrap over shared-positive-document connected groups, 95% percentile interval",
+  "secondary": "Exploratory Recall@5/10/20, MRR@5/10, per-stage candidate coverage, sparse nnz, actual latency/cost",
+  "latency": "Actual per-query randomized two-arm interleaving, shared warm models, concurrency 1, omit first query from both arms, no concurrent GPU/DB experiments",
+  "adoption": "Passing DEV qualifies for further evaluation only; no change to production default or historical snapshot semantics",
+  "limits": "Local retrieval benchmark, not platform Formal Experiment; no generated-answer/faithfulness claim or fabricated dollar cost",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

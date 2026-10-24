@@ -1,0 +1,62 @@
+{
+  "declared_at_utc": "2026-10-23T09:07:11.855707+00:00",
+  "id": "shared-evidence-plan-v1",
+  "scope": "One explicit compact evidence projection, same frozen BGE candidates and atomic cap5. Controlled retrieval I/O, real tool/runtime/admission and real answer API. Not live production E2E or Formal Experiment.",
+  "seed": 20261025,
+  "development": "all160 already exposed official train questions from scenario-rag-20261023/musique-dev-1",
+  "confirmation": "Only if development accepts quality or efficiency:200 seeded official dev question IDs excluding previously exposed300+200. Register source overlap limits; no method reselection.",
+  "profiles": {
+    "legacy5": "Prior accepted rag_records_v1 at8000, NOT historical generic4000 baseline",
+    "compact5": "Only new frozen evidence_projection=compact_v1; same rank scores, max5 atoms, snippet1000, budget8000; actual model-view bytes instead of full DTO selection",
+    "compact5_matched": "Diagnostic only: compact projection of exactly legacy5 tool records, verify final source fragments equal, never method selection"
+  },
+  "retrieval": {
+    "profile": "heading_fill",
+    "cached_candidates": 20,
+    "record_budget_bytes": 8000,
+    "min_rerank_score": null,
+    "floor_note": "fixed benchmark replay floor, not calibration of production relevance threshold"
+  },
+  "runtime": {
+    "context_limit": 16384,
+    "reserved_output_tokens": 256,
+    "max_retrieval_tokens": 8000,
+    "max_tool_result_tokens": 4000,
+    "estimator": "existing conservative UTF8-byte token-unit estimator, not provider actual tokens",
+    "history": false,
+    "memory": false
+  },
+  "comparison": {
+    "primary": "compact5 vs legacy5",
+    "metric": "answer token F1 over official aliases, all failures zero",
+    "groups": "shared supporting source groups, question-weighted paired bootstrap",
+    "bootstrap_samples": 5000,
+    "confidence": 0.95,
+    "min_quality_f1_gain": 0.03,
+    "quality_ci_lower_above_zero": true,
+    "min_valid_fraction_each_arm": 0.95,
+    "unknown_outcomes": 0,
+    "max_evidence_recall_loss": 0.01,
+    "efficiency_alternative": {
+      "purpose": "Independent predeclared engineering acceptance, not quality improvement claim",
+      "f1_noninferiority_margin": 0.03,
+      "f1_delta_ci_lower_above": -0.03,
+      "minimum_observed_mean_input_token_reduction": 0.15,
+      "maximum_request_p95_ratio": 1.2,
+      "input_usage_required_fraction_each_arm": 0.95
+    },
+    "decision": "Quality gate or efficiency gate plus all common gates. One fixed candidate; no grid search or reselection. If neither passes DEV, stop without confirmation.",
+    "diagnostic": "matched evidence arm reports source-fragment equality, tokens and F1 descriptively; no further candidate selected from it."
+  },
+  "budget_controls": "Same configured budget comparison plus exact-evidence-matched compact arm. Actual tokens are measured, not assumed equal. Matched source sets are not token-matched; no claim of isolated algorithmic gain at identical actual tokens.",
+  "identifier_policy": "Question/hop IDs absent in model input; use opaque source identities in baseline, short run-scoped citations in compact; gold labels only scoring.",
+  "api_policy": "Single attempt per pair, no retry, knownHTTP400 retained0; stop unknown/wrong-model/other provider errors or invalid>5%; all in-flight results retained.",
+  "stop": "One implementation,160 DEV selection,at most one200 confirmation. No parameter sweeps. Negative results retained. No unchanged passing tests repeated without relevant change.",
+  "formal_experiment": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

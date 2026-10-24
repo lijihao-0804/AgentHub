@@ -1,0 +1,15 @@
+{
+  "expected": 160,
+  "queries": 160,
+  "run_state": "COMPLETE",
+  "completed_profiles": 320,
+  "physical_calls": 474,
+  "prior_control_reuses": 160,
+  "candidate_fallback_reuses": 6,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

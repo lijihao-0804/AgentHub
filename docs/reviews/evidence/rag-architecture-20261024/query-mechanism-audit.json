@@ -1,0 +1,78 @@
+{
+  "scope": "Exact query-string compliance audit from frozen exposed development captures; different strings are not automatically effective semantic rewrites. No independent rewrite quality experiment.",
+  "source": "paragraph-qa-20261023/live-run-2",
+  "per_arm_recorded": 69,
+  "exact_original": {
+    "fixed": 65,
+    "structural": 66
+  },
+  "changed_searches": [
+    {
+      "query_id": "64ab2b92e986e0b5058bf4f1758e849f6a41168b",
+      "arm": "fixed",
+      "original_question": "What is the performance difference in performance in unsupervised feature learning between adverserial training and FHVAE-based disentangled speech represenation learning?",
+      "actual_search_text": "What is the performance difference in unsupervised feature learning between adversarial training and FHVAE-based disentangled speech representation learning?"
+    },
+    {
+      "query_id": "64ab2b92e986e0b5058bf4f1758e849f6a41168b",
+      "arm": "structural",
+      "original_question": "What is the performance difference in performance in unsupervised feature learning between adverserial training and FHVAE-based disentangled speech represenation learning?",
+      "actual_search_text": "What is the performance difference in unsupervised feature learning between adversarial training and FHVAE-based disentangled speech representation learning?"
+    },
+    {
+      "query_id": "e4024db40f4b8c1ce593f53b28718e52d5007cd2",
+      "arm": "fixed",
+      "original_question": "How they compare varioius mechanisms in terms of naturalness?",
+      "actual_search_text": "How they compare various mechanisms in terms of naturalness?"
+    },
+    {
+      "query_id": "e4024db40f4b8c1ce593f53b28718e52d5007cd2",
+      "arm": "structural",
+      "original_question": "How they compare varioius mechanisms in terms of naturalness?",
+      "actual_search_text": "How they compare varioUs mechanisms in terms of naturalness?"
+    },
+    {
+      "query_id": "a725246bac4625e6fe99ea236a96ccb21b5f30c6",
+      "arm": "fixed",
+      "original_question": "What the system designs introduced?",
+      "actual_search_text": "What system designs are introduced?"
+    },
+    {
+      "query_id": "a725246bac4625e6fe99ea236a96ccb21b5f30c6",
+      "arm": "structural",
+      "original_question": "What the system designs introduced?",
+      "actual_search_text": "What system designs were introduced?"
+    },
+    {
+      "query_id": "6da2cb3187d3f28b75ac0a61f6562a8adf716109",
+      "arm": "fixed",
+      "original_question": "What are previous state-of-the-art document summarization methods used?",
+      "actual_search_text": "previous state-of-the-art document summarization methods used"
+    }
+  ],
+  "implementation": "Tool accepts arbitrary query text; no dedicated rewrite/decomposition planner identified in production packages/apps.",
+  "unique_original_questions_with_changed_search": 4,
+  "paired_actual_query_differences": [
+    {
+      "query_id": "e4024db40f4b8c1ce593f53b28718e52d5007cd2",
+      "queries": {
+        "fixed": "How they compare various mechanisms in terms of naturalness?",
+        "structural": "How they compare varioUs mechanisms in terms of naturalness?"
+      }
+    },
+    {
+      "query_id": "a725246bac4625e6fe99ea236a96ccb21b5f30c6",
+      "queries": {
+        "fixed": "What system designs are introduced?",
+        "structural": "What system designs were introduced?"
+      }
+    },
+    {
+      "query_id": "6da2cb3187d3f28b75ac0a61f6562a8adf716109",
+      "queries": {
+        "fixed": "previous state-of-the-art document summarization methods used",
+        "structural": "What are previous state-of-the-art document summarization methods used?"
+      }
+    }
+  ]
+}

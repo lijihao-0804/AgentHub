@@ -1,0 +1,109 @@
+{
+  "recorded_at_utc": "2026-10-23T11:35:34.328758+00:00",
+  "status": "CONFIRMED_CONTROLLED_MUSIQUE_EXPLICIT_COMPOSITION",
+  "selected_profile": "set_rank5",
+  "development_passed": true,
+  "confirmation_passed": true,
+  "default_changed": false,
+  "business_agent_version_published": false,
+  "reading_order_adopted": false,
+  "formal_experiment": false,
+  "new_official_test_access": false,
+  "confirmation_sampling": {
+    "registered_at_utc": "2026-10-23T11:24:14.541635+00:00",
+    "frozen": "<local-path>",
+    "scope": "200 official dev questions, disjoint from old160train+500dev question IDs and gold-support normalized title OR exact normalized text families. Filter uses labels ONLY for exclusion, never source selection. Does not guarantee unobserved web/model pretraining or distractor-source separation.",
+    "seed": 20261028,
+    "prior_counts": {
+      "train": 160,
+      "dev": 500
+    },
+    "removed": {
+      "prior_question": 500,
+      "support_family": 1383
+    },
+    "eligible_questions": 534,
+    "selected_questions": 200,
+    "unlabelled_test_access": false,
+    "score_access_before_sampling": false
+  },
+  "confirmation_primary_f1": {
+    "baseline_mean": 0.36341647241647246,
+    "candidate_mean": 0.5249194957089695,
+    "difference": 0.16150302329249697,
+    "delta": 0.16150302329249697,
+    "ci_low": 0.10161862483311081,
+    "ci_high": 0.22819786150416446,
+    "confidence": 0.95,
+    "ci95_low": 0.10161862483311081,
+    "ci95_high": 0.22819786150416446,
+    "queries": 200,
+    "groups": 134,
+    "inference_valid": true
+  },
+  "confirmation_gates": {
+    "run_complete": true,
+    "structure_gate": true,
+    "ordering_exact_fragments": true,
+    "primary_f1_gain": true,
+    "primary_positive_ci": true,
+    "both_valid": true,
+    "unknown_zero": true,
+    "correct_model": true,
+    "recall_noninferior": true,
+    "usage_coverage": true,
+    "pipeline_input_budget": true,
+    "incremental_pipeline_p95": true,
+    "groups_valid": true
+  },
+  "api_ledger": {
+    "scope": "ALL actual HTTP requests in this milestone, including160 format rejections; logical reused outcomes excluded",
+    "requests": 1293,
+    "statuses": {
+      "PROVIDER_ERROR": 168,
+      "VALID": 1125
+    },
+    "http_statuses": {
+      "400": 168
+    },
+    "observed_total_tokens": 2548214,
+    "observed_usage_requests": 1125,
+    "unknown_usage_requests": 168,
+    "pricing_snapshot": null,
+    "currency_cost": null,
+    "successful_request_retries": 0,
+    "format_rejection_batch_included": 160
+  },
+  "validation": {
+    "development": {
+      "questions": 160,
+      "frozen_score_equivalent": true,
+      "physical_answer_dispatches": 374,
+      "reused_outcomes": 106,
+      "unique_dispatch_outcomes": true,
+      "atoms_within5": true
+    },
+    "confirmation": {
+      "questions": 200,
+      "frozen_score_equivalent": true,
+      "physical_answer_dispatches": 399,
+      "reused_outcomes": 1,
+      "unique_dispatch_outcomes": true,
+      "atoms_within5": true
+    }
+  },
+  "known_limits": [
+    "provided-passage English MuSiQue, one forced search, controlled snapshot/vector I/O",
+    "confirmation source-disjoint filtering shifts hop mix;177/200 are2-hop",
+    "DEV4-hop evidence regression and small confirmation3/4-hop strata; no universal multi-hop claim",
+    "citation ID validity only, not semantic support; no live auth/checkpoint/full Run SLO validation",
+    "application service+composition present, no public/global registration; benchmark JSON-object adapter is not every production Gateway",
+    "selector adds inference cost/latency; no monetary estimate without pricing snapshot"
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/evidence-set-20261023/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "status": "PASS_QUALITY_SCREEN_BASELINE_RETAINED",
+  "selected_arm": "baseline",
+  "queries": 809,
+  "actual_retrieval_run": false,
+  "latency_evaluated": false,
+  "generation_api_calls": 0,
+  "production_default_changed": false,
+  "ndcg10_delta": 7.692838176309323e-05,
+  "ndcg10_ci95": [
+    -0.0021522525642873862,
+    0.002316747670250033
+  ],
+  "fusion_order_changed_queries": 809,
+  "selected_chunk_set_changed_queries": 460,
+  "job": {
+    "exit_code": 0,
+    "elapsed_seconds": 16.657
+  },
+  "evidence": [
+    "protocol.json",
+    "screening-source.zip",
+    "screen-report.json",
+    "frozen-selection.json",
+    "screen-baseline.jsonl",
+    "screen-dbsf.jsonl"
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

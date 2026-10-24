@@ -1,0 +1,14 @@
+{
+  "run_state": "COMPLETE_WITH_EXECUTION_AMENDMENT",
+  "new_physical_requests": 63,
+  "total_physical_requests": 342,
+  "planned_physical_requests": 342,
+  "original_acceptance_passed": false,
+  "finished_at_utc": "2026-10-23T14:15:48.379553+00:00",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

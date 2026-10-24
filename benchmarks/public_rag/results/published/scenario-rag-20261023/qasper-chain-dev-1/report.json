@@ -1,0 +1,403 @@
+{
+  "scope": {
+    "dataset": "qasper",
+    "split": "train",
+    "phase": "development",
+    "groups": 80,
+    "queries": 235,
+    "profiles": [
+      "plain_small",
+      "heading_small",
+      "heading_fill",
+      "heading_neighbor",
+      "chain_selection"
+    ],
+    "protocol": {
+      "declared_at_utc": "2026-10-23T05:59:14.513983+00:00",
+      "scope": "scenario-specific retrieval development and confirmation, not platform Formal Experiment",
+      "seed": 20261023,
+      "qasper": {
+        "task": "retrieval within the specified paper, not corpus-wide paper discovery",
+        "development_split": "train",
+        "development_papers": 80,
+        "selection": "sorted paper IDs then seeded shuffle; all questions for selected papers retained",
+        "confirmation_split": "dev",
+        "confirmation_papers": "all281",
+        "test_split_access": false,
+        "primary": "best annotator evidence-paragraph recall after context budget",
+        "secondary": [
+          "complete evidence set",
+          "full evidence text coverage",
+          "precision",
+          "latency",
+          "context bytes"
+        ],
+        "profiles": [
+          "plain_small",
+          "heading_small",
+          "heading_fill",
+          "heading_neighbor"
+        ],
+        "chunk_chars": 900,
+        "overlap_chars": 150,
+        "dense_candidates": 20,
+        "rerank_candidates": 20,
+        "context_byte_budget": 8000,
+        "retrieval_anchor_chunks": 5,
+        "neighbor_policy": "at most previous and next paragraph within SAME section, budget constrained, no additional documents",
+        "gate": {
+          "min_evidence_recall_gain": 0.03,
+          "paired_group_ci_lower_above_zero": true,
+          "max_complete_set_loss": 0.01
+        },
+        "matched_volume_control": "heading_fill adds next BGE-ranked chunks within same8000byte cap; compare with neighbor expansion to distinguish extra context volume from structural selection. Same cap is not equal actual tokens; report actual bytes.",
+        "development_multiple_comparisons": "Three fixed alternatives versus baseline, paired group CI98.333% for selection; final one frozen comparison CI95%.",
+        "eligibility": "Keep all selected-paper questions. Primary evidence score only answerable questions with at least one nonempty and completely aligned annotation; report unanswerable/unaligned and all-source denominators separately; do not treat partial gold as complete.",
+        "annotation_normalization": "Remove only explicit FLOAT SELECTED: UI prefix; require exact unique caption/text occurrence. Heading-only/unavailable/ambiguous evidence remains unresolved, with denominators disclosed. Captions are text-only and do not prove figure/table cell understanding."
+      },
+      "musique": {
+        "task": "question-provided candidate paragraphs, not open full-corpus retrieval",
+        "development_split": "train",
+        "development_cases": 160,
+        "confirmation_split": "dev",
+        "confirmation_cases": 300,
+        "test_access": false,
+        "variant": "ans",
+        "selection": "seeded deterministic sample, complete distractors retained",
+        "primary": "complete supporting-paragraph set rate",
+        "secondary": [
+          "support paragraph recall",
+          "hop2/3/4 strata",
+          "latency",
+          "context bytes",
+          "API usage"
+        ],
+        "gate": {
+          "min_complete_set_gain": 0.03,
+          "paired_ci_lower_above_zero": true,
+          "max_recall_loss": 0.01
+        }
+      },
+      "comparison_policy": "Dataset-specific settings. Finite mechanism profiles before confirmation; development may revise with explicit new protocol receipts. Once method selected, no confirmation-based reselection. No score until full planned split/capture complete; failed/unanswerable/unaligned cases retained with explicit denominators.",
+      "models": {
+        "dense": "BAAI/bge-m3",
+        "reranker": "BAAI/bge-reranker-v2-m3",
+        "device": "cuda",
+        "batch_size": 8,
+        "generation_if_needed": "deepseek-v4.1-flash-1017"
+      },
+      "execution": "Reuse production model adapters; initial exact dot-product candidate retrieval within benchmark-scoped paper/case. Does not claim production tenant/snapshot path until real integration tested.",
+      "safety": "Original support flags, evidence labels, answers and question decomposition never enter retrieval input or model evidence. Existing snapshots, model allowlists, budgets, vision and fallback gates retained.",
+      "source_basis": [
+        "LangChain ParentDocumentRetriever small-to-large context",
+        "Onyx source relevance selection"
+      ],
+      "no_useless_hash_tests": true
+    },
+    "group_ids": [
+      "2003.12738",
+      "1908.08419",
+      "1702.06589",
+      "1912.00423",
+      "1910.05608",
+      "1612.05270",
+      "1902.09393",
+      "1910.14254",
+      "1911.05343",
+      "1601.06081",
+      "1910.05154",
+      "2003.02639",
+      "1804.08139",
+      "1909.01515",
+      "2003.11529",
+      "1908.10383",
+      "1804.04225",
+      "2001.02943",
+      "2004.02083",
+      "1909.12642",
+      "1911.06192",
+      "1710.06700",
+      "1910.00912",
+      "2003.07996",
+      "1801.07537",
+      "1909.08824",
+      "1907.00854",
+      "1711.04457",
+      "1912.05066",
+      "1904.12087",
+      "1905.06566",
+      "1712.03556",
+      "1909.05246",
+      "1708.06022",
+      "1908.11365",
+      "1707.04662",
+      "1911.01799",
+      "1709.08299",
+      "1911.02821",
+      "1909.12440",
+      "2001.05970",
+      "1905.10247",
+      "1607.01759",
+      "2002.10361",
+      "1911.03705",
+      "1807.09000",
+      "1706.04115",
+      "1710.09589",
+      "2004.03762",
+      "1911.01680",
+      "1811.08048",
+      "1905.13413",
+      "1610.08597",
+      "1908.06083",
+      "1911.08370",
+      "1811.09786",
+      "1805.04033",
+      "1810.09774",
+      "1910.02339",
+      "1706.03610",
+      "1809.08731",
+      "1603.04513",
+      "1909.11189",
+      "1906.01910",
+      "2001.11268",
+      "1805.11189",
+      "1706.09147",
+      "2002.00652",
+      "1611.09441",
+      "1704.04539",
+      "1911.03154",
+      "1703.04617",
+      "1803.03786",
+      "1705.03151",
+      "2001.05672",
+      "1803.09745",
+      "1809.05752",
+      "1909.01247",
+      "1812.01704",
+      "1906.03538"
+    ],
+    "model": {
+      "dense": "BAAI/bge-m3",
+      "reranker": "BAAI/bge-reranker-v2-m3",
+      "device": "cuda",
+      "batch_size": 8,
+      "generation_if_needed": "deepseek-v4.1-flash-1017"
+    },
+    "scope": "retrieval within the specified paper, not corpus-wide paper discovery",
+    "timing": "shared cached profile inference; not paired E2E",
+    "profile": "chain_selection",
+    "baseline": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-dev-1",
+    "selection_only": true,
+    "pool": "same cached BGE20 children; show their complete source paragraphs"
+  },
+  "primary": "best_evidence_recall",
+  "metrics": {
+    "plain_small": {
+      "best_evidence_recall": 0.5437765205091938,
+      "complete_evidence_set": 0.45544554455445546,
+      "evidence_precision": 0.15536303630363035,
+      "full_text_evidence_recall": 0.4609735973597359,
+      "selected_paragraphs": 4.811881188118812,
+      "evidence_bytes": 3449.8564356435645
+    },
+    "heading_small": {
+      "best_evidence_recall": 0.5784299858557285,
+      "complete_evidence_set": 0.504950495049505,
+      "evidence_precision": 0.1655940594059406,
+      "full_text_evidence_recall": 0.5055280528052805,
+      "selected_paragraphs": 4.772277227722772,
+      "evidence_bytes": 3422.168316831683
+    },
+    "heading_fill": {
+      "best_evidence_recall": 0.7704148986327204,
+      "complete_evidence_set": 0.693069306930693,
+      "evidence_precision": 0.09735177477874349,
+      "full_text_evidence_recall": 0.706058462989156,
+      "selected_paragraphs": 12.118811881188119,
+      "evidence_bytes": 7849.777227722772
+    },
+    "heading_neighbor": {
+      "best_evidence_recall": 0.6384134842055633,
+      "complete_evidence_set": 0.5643564356435643,
+      "evidence_precision": 0.12062669179005812,
+      "full_text_evidence_recall": 0.6334629891560585,
+      "selected_paragraphs": 8.227722772277227,
+      "evidence_bytes": 6130.935643564357
+    },
+    "chain_selection": {
+      "best_evidence_recall": 0.7950848656294202,
+      "complete_evidence_set": 0.7178217821782178,
+      "evidence_precision": 0.1027842665573331,
+      "full_text_evidence_recall": 0.7356789250353607,
+      "selected_paragraphs": 12.03960396039604,
+      "evidence_bytes": 7849.881188118812
+    }
+  },
+  "comparisons": {
+    "heading_small": {
+      "primary_ci": {
+        "baseline_mean": 0.5437765205091938,
+        "candidate_mean": 0.5784299858557285,
+        "difference": 0.034653465346534656,
+        "delta": 0.034653465346534656,
+        "ci_low": -0.003102723324810252,
+        "ci_high": 0.0803175276520865,
+        "confidence": 0.99,
+        "ci95_low": -0.003102723324810252,
+        "ci95_high": 0.0803175276520865,
+        "queries": 202,
+        "groups": 74,
+        "inference_valid": true
+      },
+      "gates": {
+        "minimum_primary_gain": true,
+        "cluster_ci_above_zero": false,
+        "maximum_secondary_loss": true,
+        "adequate_questions_and_groups": true
+      },
+      "passed": false
+    },
+    "heading_fill": {
+      "primary_ci": {
+        "baseline_mean": 0.5437765205091938,
+        "candidate_mean": 0.7704148986327204,
+        "difference": 0.22663837812352663,
+        "delta": 0.22663837812352663,
+        "ci_low": 0.1521220651997351,
+        "ci_high": 0.3065629817634894,
+        "confidence": 0.99,
+        "ci95_low": 0.1521220651997351,
+        "ci95_high": 0.3065629817634894,
+        "queries": 202,
+        "groups": 74,
+        "inference_valid": true
+      },
+      "gates": {
+        "minimum_primary_gain": true,
+        "cluster_ci_above_zero": true,
+        "maximum_secondary_loss": true,
+        "adequate_questions_and_groups": true
+      },
+      "passed": true
+    },
+    "heading_neighbor": {
+      "primary_ci": {
+        "baseline_mean": 0.5437765205091938,
+        "candidate_mean": 0.6384134842055633,
+        "difference": 0.09463696369636963,
+        "delta": 0.09463696369636963,
+        "ci_low": 0.04716456060454409,
+        "ci_high": 0.1503092050643422,
+        "confidence": 0.99,
+        "ci95_low": 0.04716456060454409,
+        "ci95_high": 0.1503092050643422,
+        "queries": 202,
+        "groups": 74,
+        "inference_valid": true
+      },
+      "gates": {
+        "minimum_primary_gain": true,
+        "cluster_ci_above_zero": true,
+        "maximum_secondary_loss": true,
+        "adequate_questions_and_groups": true
+      },
+      "passed": true
+    },
+    "chain_selection": {
+      "primary_ci": {
+        "baseline_mean": 0.5437765205091938,
+        "candidate_mean": 0.7950848656294202,
+        "difference": 0.2513083451202263,
+        "delta": 0.2513083451202263,
+        "ci_low": 0.17740791208524315,
+        "ci_high": 0.33140396966448504,
+        "confidence": 0.99,
+        "ci95_low": 0.17740791208524315,
+        "ci95_high": 0.33140396966448504,
+        "queries": 202,
+        "groups": 74,
+        "inference_valid": true
+      },
+      "gates": {
+        "minimum_primary_gain": true,
+        "cluster_ci_above_zero": true,
+        "maximum_secondary_loss": true,
+        "adequate_questions_and_groups": true,
+        "valid_api_fraction": true,
+        "unknown_outcomes_zero": true,
+        "incremental_gain_over_budget_fill": false,
+        "incremental_ci_above_zero": false
+      },
+      "passed": false,
+      "versus_heading_fill": {
+        "baseline_mean": 0.7704148986327204,
+        "candidate_mean": 0.7950848656294202,
+        "difference": 0.02466996699669967,
+        "delta": 0.02466996699669967,
+        "ci_low": -0.015051190418109955,
+        "ci_high": 0.06699740799551655,
+        "confidence": 0.99,
+        "ci95_low": -0.015051190418109955,
+        "ci95_high": 0.06699740799551655,
+        "queries": 202,
+        "groups": 74,
+        "inference_valid": true
+      }
+    }
+  },
+  "denominators": {
+    "all_questions": 235,
+    "evidence_evaluable": 202,
+    "unanswerable": 20,
+    "unaligned": 13
+  },
+  "budget_outcomes": {
+    "plain_small": {
+      "ADMITTED": 235
+    },
+    "heading_small": {
+      "ADMITTED": 235
+    },
+    "heading_fill": {
+      "ADMITTED": 235
+    },
+    "heading_neighbor": {
+      "ADMITTED": 235
+    },
+    "chain_selection": {
+      "ADMITTED": 235
+    }
+  },
+  "cost_note": "same maximum context budget, not equal actual input bytes; shared cached profile inference, no paired E2E latency claim; no pricing snapshot, no currency cost claim",
+  "generated_answer_evaluated": false,
+  "production_integrated": false,
+  "selected_profile": "heading_fill",
+  "api_outcomes": {
+    "VALID": 235
+  },
+  "provider_usage": {
+    "prompt_tokens": {
+      "sum": 642520,
+      "observed_count": 235,
+      "unknown_count": 0
+    },
+    "completion_tokens": {
+      "sum": 2900,
+      "observed_count": 235,
+      "unknown_count": 0
+    },
+    "total_tokens": {
+      "sum": 645420,
+      "observed_count": 235,
+      "unknown_count": 0
+    }
+  },
+  "incremental_request_mean_ms": 920.9509178724011,
+  "reasoning_tokens_note": "Preserved in raw provider usage when reported; absent is unknown.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

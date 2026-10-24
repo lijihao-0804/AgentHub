@@ -1,0 +1,67 @@
+{
+  "scenario": "Specified real research paper QA",
+  "experiment_executed": true,
+  "required_real_workflows_completed": true,
+  "promotion_gates": {
+    "all_required_real_workflows": true,
+    "f1_minimum_gain": false,
+    "f1_positive_group_ci": false,
+    "em_noninferior": true,
+    "valid_each": true,
+    "unanswerable_answer_nonincrease": true,
+    "warm_p95": true,
+    "complete_usage": true,
+    "input_overhead": true,
+    "unknown_zero": true,
+    "model_identity": true,
+    "citation_scope": true
+  },
+  "promotion_gates_passed": false,
+  "global_default_changed": false,
+  "formal_experiment": false,
+  "independent_confirmation": false,
+  "scope": "12-paper/42-question development scenario with41 primary and1 mixed; passing gates permits further confirmation, not general production readiness.",
+  "paired_input_coverage": 42,
+  "planned_pairs": 42,
+  "observed_input_ratio": 1.3045784195674353,
+  "warm_run_p95_ms": {
+    "generic5": 4625.93470000138,
+    "paper10": 4730.961000001116
+  },
+  "warm_p95_ratio": 1.0227038008123428,
+  "quality_summary": {
+    "status": "AVAILABLE",
+    "difference": 0.028651407896735637,
+    "ci_low": -0.003474878036976656,
+    "ci_high": 0.07184746069870382,
+    "baseline_mean": 0.21155057793604132,
+    "candidate_mean": 0.24020198583277697,
+    "queries": 41,
+    "groups": 12,
+    "inference_valid": true,
+    "confidence": 0.95,
+    "samples": 5000
+  },
+  "startup_repair": "startup-repair.json",
+  "request_persistence_validation": "validation.json",
+  "measurement_repair": "rescoring-validation.json",
+  "answer_only_supplement": {
+    "status": "AVAILABLE",
+    "difference": 0.028651407896735637,
+    "ci_low": -0.003474878036976656,
+    "ci_high": 0.07184746069870382,
+    "baseline_mean": 0.21155057793604132,
+    "candidate_mean": 0.24020198583277697,
+    "queries": 41,
+    "groups": 12,
+    "inference_valid": true,
+    "confidence": 0.95,
+    "samples": 5000
+  },
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

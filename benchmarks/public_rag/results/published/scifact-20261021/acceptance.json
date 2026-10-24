@@ -1,0 +1,108 @@
+{
+  "status": "PASS",
+  "completed_at": "2026-10-21T16:01:58.820178+00:00",
+  "milestone": "SciFact full-corpus retrieval SQL hydration optimization",
+  "corpus_documents": 5183,
+  "indexed_chunks": 9189,
+  "dev_queries": 809,
+  "test_queries": 300,
+  "test_quality": {
+    "Recall@5": 0.8015555555555556,
+    "Recall@10": 0.8617777777777779,
+    "Recall@20": 0.8751111111111112,
+    "MRR@5": 0.7096111111111111,
+    "MRR@10": 0.7174603174603175,
+    "nDCG@5": 0.7269985310482191,
+    "nDCG@10": 0.7486343103503844,
+    "nDCG@20": 0.7524579990493384
+  },
+  "ranking_mismatches": {
+    "dense": [],
+    "sparse": [],
+    "fusion": [],
+    "rerank": []
+  },
+  "max_score_differences": {
+    "dense": 0.0,
+    "sparse": 0.0,
+    "fusion": 0.0,
+    "rerank": 0.0
+  },
+  "test_total_latency": {
+    "baseline_mean_ms": 488.22269397993017,
+    "optimized_mean_ms": 439.64980501671056,
+    "baseline_p50_ms": 466.8277000000671,
+    "optimized_p50_ms": 423.93129999982193,
+    "baseline_p95_ms": 658.6094600002069,
+    "optimized_p95_ms": 600.3116300000328,
+    "estimate_ms": -48.57288896321956,
+    "ci95_low_ms": -60.356150485793414,
+    "ci95_high_ms": -37.383554889268865,
+    "queries": 299,
+    "groups": 246,
+    "bootstrap_samples": 10000,
+    "sign": "optimized minus baseline; negative is faster"
+  },
+  "test_chunk_load": {
+    "baseline_mean_ms": 51.754169565231564,
+    "optimized_mean_ms": 7.328507357828051,
+    "baseline_p50_ms": 44.502400000055786,
+    "optimized_p50_ms": 6.009299999277573,
+    "baseline_p95_ms": 82.46317000002816,
+    "optimized_p95_ms": 7.6181400001587445,
+    "estimate_ms": -44.42566220740351,
+    "ci95_low_ms": -48.53440066327829,
+    "ci95_high_ms": -40.65303484729735,
+    "queries": 299,
+    "groups": 246,
+    "bootstrap_samples": 10000,
+    "sign": "optimized minus baseline; negative is faster"
+  },
+  "mean_latency_reduction_percent": 9.948920761396712,
+  "p95_latency_reduction_percent": 8.85165390733316,
+  "quality_evaluated_count": 300,
+  "missing_rankings": 0,
+  "unjudged_skipped": 0,
+  "no_positive_skipped": 0,
+  "jobs": {
+    "prepare-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-10-21T15:21:12.717139+00:00",
+      "finished_at": "2026-10-21T15:23:48.166771+00:00",
+      "elapsed_seconds": 155.453
+    },
+    "dev60-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-10-21T15:24:35.205780+00:00",
+      "finished_at": "2026-10-21T15:31:15.804840+00:00",
+      "elapsed_seconds": 400.593
+    },
+    "dev-paired-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-10-21T15:41:22.751752+00:00",
+      "finished_at": "2026-10-21T15:53:22.211750+00:00",
+      "elapsed_seconds": 719.454
+    },
+    "test-paired-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-10-21T15:54:52.241508+00:00",
+      "finished_at": "2026-10-21T15:59:53.115978+00:00",
+      "elapsed_seconds": 300.875
+    }
+  },
+  "experiment_model_api_calls": 0,
+  "billing": "Native subagents, GPU/electricity and service costs unknown",
+  "source_snapshot": "source-20261021.zip",
+  "frozen_selection": "frozen-selection.json",
+  "limitations": "One serial randomized session; CI reflects query/source mix, not variation across sessions or hardware. DB hydration optimization retains full Qdrant revision filter.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/scifact-20261021/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

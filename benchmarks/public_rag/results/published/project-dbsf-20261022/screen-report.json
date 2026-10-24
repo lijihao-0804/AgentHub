@@ -1,0 +1,240 @@
+{
+  "protocol": {
+    "schema_version": 1,
+    "milestone": "Qdrant-source distribution-based score fusion quality screen",
+    "declared_at": "2026-10-22",
+    "seed": 20261025,
+    "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+    "project_source": "https://github.com/qdrant/qdrant/blob/222b2e44ab1c3f17e8246396ead6558e45041df7/lib/segment/src/common/score_fusion.rs",
+    "arms": [
+      "baseline",
+      "dbsf"
+    ],
+    "mechanism": "Per lane Welford sample variance; normalize by mean +/-3 sample standard deviations; empty lane empty; single or constant lane 0.5; sum scores of shared chunk IDs; equal lane weights 1. No clipping, no weight or sigma sweep.",
+    "adaptations": "Python float64 arithmetic rather than Rust f32; deterministic fusion ties use chunk_id ascending. Neural rerank ties use fusion score descending then chunk_id ascending as existing production.",
+    "controls": {
+      "dense_top_k": 30,
+      "sparse_top_k": 30,
+      "candidate_top_k": 20,
+      "rerank_top_k": 20,
+      "final_top_k": 20,
+      "baseline_rrf_k": 60
+    },
+    "screen_source": "benchmarks/public_rag/results/budget-diversity-20261022/screen-superset.jsonl",
+    "screen_source_metadata": "screen-superset.meta.json",
+    "screen_policy": "All 809 official SciFact train queries. Reuse every actual full-union BGE cross-encoder score once for quality-only candidate replay. Strictly require all dense/sparse union IDs scored and source mappings consistent. No cached latency claim; changed batch packing can require a later actual run.",
+    "selection_rule": {
+      "min_ndcg10_gain": 0.005,
+      "max_recall5_loss": 0.005,
+      "max_recall20_loss": 0.005,
+      "require_primary_ci_above_zero": true
+    },
+    "primary": "One nDCG@10 comparison; 10000 paired bootstrap over shared-positive-document connected components, 95% interval",
+    "secondary": "Exploratory Recall@5/20 and MRR@10; fusion candidate source-document coverage",
+    "decision": "Only a passing screen qualifies for real paired retrieval and latency evaluation; otherwise preserve baseline and close this mechanism without parameter tuning",
+    "limits": "Repeated DEV labels and reuse of earlier measured candidate scores make this exploratory screening, not independent confirmation or a platform Formal Experiment. No generated-answer claim, no test or NFCorpus label access, no production default change."
+  },
+  "scope": "Exploratory cached quality screening; no latency claim",
+  "queries": 809,
+  "source_metadata": {
+    "schema_version": 3,
+    "phase": "screen",
+    "split": "train",
+    "queries": 809,
+    "arm": "superset",
+    "controls": {
+      "candidate_top_k": 60,
+      "rerank_top_k": 60,
+      "max_chunks_per_document": null
+    },
+    "final_top_k": 60,
+    "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+    "retrieval_identity": {
+      "embedding_model": "BAAI/bge-m3",
+      "reranker_model": "BAAI/bge-reranker-v2-m3",
+      "dense_dimension": 1024,
+      "embedding_batch_size": 8,
+      "reranker_batch_size": 8,
+      "qdrant_url": "http://localhost:6333",
+      "collection": "rag_scifact_20261021",
+      "chunk_size_chars": 1200,
+      "chunk_overlap_chars": 200,
+      "text_policy": "stripped title + two newlines + stripped abstract",
+      "dense_top_k": 30,
+      "sparse_top_k": 30,
+      "candidate_top_k": 20,
+      "final_top_k": 20,
+      "rrf_k": 60
+    },
+    "protocol": {
+      "schema_version": 1,
+      "milestone": "RAG fusion budget separation and source diversity",
+      "declared_at": "2026-10-22",
+      "seed": 20261022,
+      "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+      "dataset": "BEIR SciFact, full 5183-document corpus, existing 9189 production chunks",
+      "dev": "All 809 official train queries; independent cross-encoder candidate score reuse for quality screening only",
+      "confirmation": "All 300 official test queries, previously exposed; regression only, not a fresh blind holdout",
+      "dense_top_k": 30,
+      "sparse_top_k": 30,
+      "rrf_k": 60,
+      "final_top_k": 20,
+      "arms": {
+        "baseline": {
+          "candidate_top_k": 20,
+          "rerank_top_k": 20,
+          "max_chunks_per_document": null
+        },
+        "diversity20": {
+          "candidate_top_k": 60,
+          "rerank_top_k": 20,
+          "max_chunks_per_document": 2
+        },
+        "budget40": {
+          "candidate_top_k": 60,
+          "rerank_top_k": 40,
+          "max_chunks_per_document": null
+        },
+        "combined40": {
+          "candidate_top_k": 60,
+          "rerank_top_k": 40,
+          "max_chunks_per_document": 2
+        },
+        "budget60": {
+          "candidate_top_k": 60,
+          "rerank_top_k": 60,
+          "max_chunks_per_document": null
+        }
+      },
+      "selection_rule": {
+        "ndcg10_noninferiority_margin": 0.002,
+        "recall5_noninferiority_margin": 0.005,
+        "minimum_ndcg10_or_recall20_gain": 0.005,
+        "near_best_ndcg10_margin": 0.002,
+        "choice": "Eligible arms within 0.002 of best nDCG@10: prefer smaller rerank budget, then higher nDCG@10; otherwise baseline"
+      },
+      "scoring": "Document dedup before metric cutoffs, using the fixed final 20 raw chunks; raw first-five-chunk gold availability is separately named",
+      "primary": "nDCG@10: four paired comparisons vs baseline, 10000 gold-overlap cluster bootstrap, 98.75% Bonferroni intervals",
+      "secondary": "Recall@5/10/20 and MRR@5/10; exploratory 95% paired cluster intervals",
+      "latency": "Actual five-arm per-query randomized interleaving, shared warm models, concurrency 1; omit every arm of first query; mean/p50/p95 and paired cluster mean CI",
+      "runtime": "Existing offline BGE-M3 dense, tokenizer log-TF plus Qdrant IDF sparse, BGE reranker-v2-m3; CUDA batch8; snapshot SQL join",
+      "limits": "Retrieval only, no answer generation or ContextBudgetPolicy admission measurement, no API generation charges or fabricated token/dollar cost",
+      "compatibility": "New budgets and soft source quota opt-in; old snapshots and default retrieval behavior preserved"
+    },
+    "cold_load_ms": {
+      "dense": 12120.547600001373,
+      "sparse": 962.4144999997952,
+      "reranker": 3022.238899999138
+    },
+    "git_commit": "23f1a384826c185c5eac2c4bf82c44408328286f",
+    "git_dirty": true,
+    "device": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "torch": "2.14.0+cu130",
+    "started_at": "2026-10-21T17:39:06.703196+00:00",
+    "scope": "retrieval only; test already exposed; not a platform Formal Experiment",
+    "paired_interleaved": false
+  },
+  "metric_projection": "First20 raw chunks, deduplicate source documents before metric ranks",
+  "metrics": {
+    "baseline": {
+      "Recall@5": 0.811578079934075,
+      "Recall@10": 0.857972805933251,
+      "Recall@20": 0.8761021837659662,
+      "MRR@5": 0.7215904408735063,
+      "MRR@10": 0.7263042753154001,
+      "nDCG@5": 0.7372471383589972,
+      "nDCG@10": 0.7533138151825969,
+      "nDCG@20": 0.7582998379887141
+    },
+    "dbsf": {
+      "Recall@5": 0.8095179233621755,
+      "Recall@10": 0.8559126493613514,
+      "Recall@20": 0.8740420271940668,
+      "MRR@5": 0.7224763081994232,
+      "MRR@10": 0.7272696058233759,
+      "nDCG@5": 0.7372472669618694,
+      "nDCG@10": 0.75339074356436,
+      "nDCG@20": 0.7583996471391939
+    }
+  },
+  "comparisons": {
+    "nDCG@10": {
+      "estimate": 7.692838176309323e-05,
+      "ci_low": -0.0021522525642873862,
+      "ci_high": 0.002316747670250033,
+      "sample_count": 10000,
+      "group_count": 490,
+      "confidence": 0.95
+    },
+    "Recall@5": {
+      "estimate": -0.002060156571899464,
+      "ci_low": -0.006386485372888339,
+      "ci_high": 0.001282051282051282,
+      "sample_count": 10000,
+      "group_count": 490,
+      "confidence": 0.95
+    },
+    "Recall@20": {
+      "estimate": -0.002060156571899464,
+      "ci_low": -0.00642620232172471,
+      "ci_high": 0.001410721483272874,
+      "sample_count": 10000,
+      "group_count": 490,
+      "confidence": 0.95
+    },
+    "MRR@10": {
+      "estimate": 0.0009653305079757491,
+      "ci_low": -0.0012010136505224186,
+      "ci_high": 0.004024188306808067,
+      "sample_count": 10000,
+      "group_count": 490,
+      "confidence": 0.95
+    }
+  },
+  "fusion_metrics": {
+    "baseline": {
+      "Recall@5": 0.784177997527812,
+      "Recall@10": 0.834693036670787,
+      "Recall@20": 0.8761021837659662,
+      "MRR@5": 0.6752781211372064,
+      "MRR@10": 0.6814541762316794,
+      "nDCG@5": 0.6953164930280846,
+      "nDCG@10": 0.713479983331738,
+      "nDCG@20": 0.7246026400321746
+    },
+    "dbsf": {
+      "Recall@5": 0.7873712402142563,
+      "Recall@10": 0.8387103419859909,
+      "Recall@20": 0.8740420271940668,
+      "MRR@5": 0.6908529048207663,
+      "MRR@10": 0.6966944297290404,
+      "nDCG@5": 0.7075404913291283,
+      "nDCG@10": 0.7253290522327356,
+      "nDCG@20": 0.735029494329848
+    }
+  },
+  "selection": {
+    "selected_arm": "baseline",
+    "gates": {
+      "min_ndcg10_gain": false,
+      "primary_ci_above_zero": false,
+      "max_recall5_loss": true,
+      "max_recall20_loss": true
+    },
+    "qualifies_for_actual_run": false
+  },
+  "fusion_changed_queries": 809,
+  "mean_selected_source_documents": {
+    "baseline": 17.012360939431396,
+    "dbsf": 16.990111248454884
+  },
+  "latency_evaluated": false,
+  "generation_api_calls": 0,
+  "production_default_changed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/screen-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

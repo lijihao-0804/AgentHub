@@ -1,0 +1,15 @@
+{
+  "expected": 200,
+  "queries": 200,
+  "planned_calls": 399,
+  "observed_calls": 399,
+  "logical_outcomes": 400,
+  "reused_outcomes": 1,
+  "run_state": "COMPLETE",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

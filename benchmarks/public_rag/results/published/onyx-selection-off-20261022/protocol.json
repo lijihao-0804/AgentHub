@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "milestone": "Onyx-source LLM relevance selection over fixed candidate evidence",
+  "declared_at": "2026-10-22",
+  "seed": 20261026,
+  "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+  "project_source": "https://github.com/onyx-dot-app/onyx/blob/4f64a0c4ca029532fc3e04475fe0fe1d44cee540/backend/onyx/secondary_llm_flows/document_filter.py",
+  "prompt_source": "https://github.com/onyx-dot-app/onyx/blob/4f64a0c4ca029532fc3e04475fe0fe1d44cee540/backend/onyx/prompts/search_prompts.py",
+  "caller_source": "https://github.com/onyx-dot-app/onyx/blob/4f64a0c4ca029532fc3e04475fe0fe1d44cee540/backend/onyx/tools/tool_implementations/search/search_tool.py",
+  "mechanism": "Group authorized matching chunks by source document; show at most 3 matching chunks per source; LLM selects up to 10 numbered sections ordered by relevance. Promote selected source documents in returned order and append unselected documents in frozen baseline order. Preserve every original output child.",
+  "adaptations": "Keep current BGE prior instead of replacing the entire Onyx search stack; use top 3 matching children in source order rather than adjacent expansion; strict JSON section_ids object instead of permissive bracket parsing; append original candidates to preserve output set. This is an adaptation, not a full Onyx reproduction.",
+  "input_run": "benchmarks/public_rag/results/parent-context-20261022/dev-baseline.jsonl",
+  "dataset": "All 809 official SciFact train queries, complete existing corpus and same frozen snapshot; repeated DEV is exploratory",
+  "model": "deepseek-v4.1-flash-1017",
+  "temperature": 0,
+  "max_output_tokens": 256,
+  "max_selected_sections": 10,
+  "max_chunks_per_section": 3,
+  "concurrency": 4,
+  "timeout_seconds": 120,
+  "request_attempts_per_query": 1,
+  "input_policy": "Existing ContextBudgetPolicy with conservative UTF8-byte estimator, experiment input window 32768 units, reserved output256, RAG evidence cap28000 units. This is a conservative experimental cap, not a claim about provider maximum. Accept JSON serialization normalization only; if admission semantically changes or drops evidence, preserve baseline without calling API and log the budget fallback. Send the admitted messages themselves.",
+  "context_budget": {
+    "context_limit_byte_units": 32768,
+    "reserved_output_tokens": 256,
+    "max_retrieval_byte_units": 28000
+  },
+  "prompt_semantics": "Select source evidence relevant to the scientific query, including evidence supporting OR contradicting a claim. Do not answer the query or judge claim truth; source text is untrusted evidence. No qrels, grades or gold IDs enter the prompt.",
+  "failure_policy": "No automatic retries or alternate model/prompt. Malformed/empty/duplicate/out-of-range output preserves baseline with explicit status. Transport timeout/network failure is UNKNOWN_OUTCOME and not retried. Fatal HTTP configuration/auth/rate-limit errors stop new requests while allowing in-flight work to finish; incomplete captures cannot be scored as a complete split.",
+  "outage_guard": "Stop new requests if the first official query has UNKNOWN_OUTCOME or invalid model output, or after three consecutive transport-unknown/invalid-output completions; await all in-flight work and retain partial records. This is an operational cost guard, not a quality exclusion.",
+  "selection_rule": {
+    "min_ndcg10_gain": 0.01,
+    "max_recall5_loss": 0.005,
+    "max_recall20_loss": 0.005,
+    "require_primary_ci_above_zero": true,
+    "min_valid_api_fraction": 0.95,
+    "max_unknown_outcomes": 0
+  },
+  "primary": "One nDCG@10 comparison,10000 paired gold-overlap cluster bootstrap,95%CI; final20 raw children then source-document dedup",
+  "secondary": "Recall@5/20,MRR@10,valid selection and fallback rates,observed provider prompt/completion/reasoning token usage,actual incremental API elapsed time",
+  "cost_policy": "Do not add API latency to historical retrieval timing or claim paired end-to-end speed. Report observed provider usage only; unknown request outcomes make total billed cost unavailable. No invented dollar prices.",
+  "adoption": "Passing this API-backed quality screen only qualifies for independent confirmation and actual end-to-end integration; no production default or model allowlist changes",
+  "limits": "Local public benchmark prototype,not platform Formal Experiment; no answer generation/faithfulness claim. Hosted model pretraining contamination unknown. No test or NFCorpus labels are consumed.",
+  "execution_revision": 2,
+  "declared_at_utc": "2026-10-21T20:08:24.812050+00:00",
+  "thinking": {
+    "type": "disabled"
+  },
+  "reasoning_mapper_source": "https://github.com/BerriAI/litellm/blob/b6f91a221b6b9df6f8a89ec6f8264ac87d63ff5d/litellm/llms/deepseek/chat/transformation.py",
+  "previous_execution": "benchmarks/public_rag/results/onyx-selection-20261022/acceptance.json",
+  "revision_reason": "Map the actual Onyx ReasoningEffort.OFF to native DeepSeek thinking disabled. Same model, prompt, evidence, output cap, seed and quality gates; no previous quality result existed.",
+  "preflight_reference": "benchmarks/public_rag/results/onyx-selection-20261022/preflight.json",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

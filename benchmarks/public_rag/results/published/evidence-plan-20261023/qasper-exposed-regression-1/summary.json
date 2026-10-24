@@ -1,0 +1,30 @@
+{
+  "captured": 1005,
+  "eligible": 854,
+  "profiles": {
+    "legacy5": {
+      "best_evidence_recall": 0.6483402948859623,
+      "complete_evidence_set": 0.5749414519906323,
+      "full_text_evidence_recall": 0.5774093815370162,
+      "payload_bytes": 6808.603044496487
+    },
+    "compact5": {
+      "best_evidence_recall": 0.6512676953543465,
+      "complete_evidence_set": 0.5772833723653396,
+      "full_text_evidence_recall": 0.5785803417243698,
+      "payload_bytes": 4229.084309133489
+    },
+    "compact5_matched": {
+      "best_evidence_recall": 0.6483402948859623,
+      "complete_evidence_set": 0.5749414519906323,
+      "full_text_evidence_recall": 0.5774093815370162,
+      "payload_bytes": 4184.891100702576
+    }
+  },
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/qasper-exposed-regression-1/summary.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

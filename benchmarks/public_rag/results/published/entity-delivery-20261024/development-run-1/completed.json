@@ -1,0 +1,17 @@
+{
+  "run_state": "NEEDS_ATTENTION",
+  "planned_requests": 32,
+  "completed_requests": 1,
+  "physical_dispatches": 0,
+  "stop_reason": "PROVIDER_OR_LOCAL_GUARD_ERROR",
+  "source_records_checked": 62,
+  "finished_at_utc": "2026-10-24T04:17:13.268749+00:00",
+  "currency_cost": null,
+  "production_promoted": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

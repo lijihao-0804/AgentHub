@@ -1,0 +1,18 @@
+{
+  "status": "STOPPED_AFTER_ONE_KNOWN_INVALID_OUTPUT_CARRIED_FORWARD_UNCHANGED",
+  "quality_score_created": false,
+  "api_calls": 1,
+  "observed_total_tokens": 4925,
+  "api_job": {
+    "exit_code": 1,
+    "elapsed_seconds": 8.219
+  },
+  "failure_retried": false,
+  "continued_acceptance": "../fiqa-confirmation-continued-20261022/acceptance.json",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "milestone": "RAG fusion budget separation and source diversity",
+  "declared_at": "2026-10-22",
+  "seed": 20261022,
+  "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+  "dataset": "BEIR SciFact, full 5183-document corpus, existing 9189 production chunks",
+  "dev": "All 809 official train queries; independent cross-encoder candidate score reuse for quality screening only",
+  "confirmation": "All 300 official test queries, previously exposed; regression only, not a fresh blind holdout",
+  "dense_top_k": 30,
+  "sparse_top_k": 30,
+  "rrf_k": 60,
+  "final_top_k": 20,
+  "arms": {
+    "baseline": {
+      "candidate_top_k": 20,
+      "rerank_top_k": 20,
+      "max_chunks_per_document": null
+    },
+    "diversity20": {
+      "candidate_top_k": 60,
+      "rerank_top_k": 20,
+      "max_chunks_per_document": 2
+    },
+    "budget40": {
+      "candidate_top_k": 60,
+      "rerank_top_k": 40,
+      "max_chunks_per_document": null
+    },
+    "combined40": {
+      "candidate_top_k": 60,
+      "rerank_top_k": 40,
+      "max_chunks_per_document": 2
+    },
+    "budget60": {
+      "candidate_top_k": 60,
+      "rerank_top_k": 60,
+      "max_chunks_per_document": null
+    }
+  },
+  "selection_rule": {
+    "ndcg10_noninferiority_margin": 0.002,
+    "recall5_noninferiority_margin": 0.005,
+    "minimum_ndcg10_or_recall20_gain": 0.005,
+    "near_best_ndcg10_margin": 0.002,
+    "choice": "Eligible arms within 0.002 of best nDCG@10: prefer smaller rerank budget, then higher nDCG@10; otherwise baseline"
+  },
+  "scoring": "Document dedup before metric cutoffs, using the fixed final 20 raw chunks; raw first-five-chunk gold availability is separately named",
+  "primary": "nDCG@10: four paired comparisons vs baseline, 10000 gold-overlap cluster bootstrap, 98.75% Bonferroni intervals",
+  "secondary": "Recall@5/10/20 and MRR@5/10; exploratory 95% paired cluster intervals",
+  "latency": "Actual five-arm per-query randomized interleaving, shared warm models, concurrency 1; omit every arm of first query; mean/p50/p95 and paired cluster mean CI",
+  "runtime": "Existing offline BGE-M3 dense, tokenizer log-TF plus Qdrant IDF sparse, BGE reranker-v2-m3; CUDA batch8; snapshot SQL join",
+  "limits": "Retrieval only, no answer generation or ContextBudgetPolicy admission measurement, no API generation charges or fabricated token/dollar cost",
+  "compatibility": "New budgets and soft source quota opt-in; old snapshots and default retrieval behavior preserved",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

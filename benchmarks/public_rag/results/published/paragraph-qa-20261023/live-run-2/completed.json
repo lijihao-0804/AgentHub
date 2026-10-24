@@ -1,0 +1,30 @@
+{
+  "run_state": "COMPLETE_UNTOUCHED_REMAINDER",
+  "execution_complete": true,
+  "all_required_workflows_complete": true,
+  "stop_reason": null,
+  "expected_runs": 140,
+  "executed_runs": 138,
+  "continuation_from": "live-run-1",
+  "skipped_exposed_queries": [
+    "f398587b9a0008628278a5ea858e01d3f5559f65"
+  ],
+  "full_original_execution_complete": false,
+  "physical_requests": 276,
+  "physical_budget_dispatches": 276,
+  "physical_outcomes": {
+    "RECEIVED": 276,
+    "PROVIDER_ERROR": 0,
+    "TRANSPORT_UNCONFIRMED": 0,
+    "MODEL_IDENTITY_ERROR": 0
+  },
+  "fallback_attempts": 0,
+  "finished_at_utc": "2026-10-23T16:29:33.823005+00:00",
+  "remainder_execution_complete": true,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

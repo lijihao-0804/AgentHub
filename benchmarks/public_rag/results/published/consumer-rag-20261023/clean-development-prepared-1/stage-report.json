@@ -1,0 +1,220 @@
+{
+  "questions": 160,
+  "denominators": {
+    "all_questions": 160,
+    "evidence_evaluable": 160,
+    "unanswerable": 0,
+    "unaligned": 0
+  },
+  "profile_average_population": "evidence-evaluable subset; all capture retained separately",
+  "profiles": {
+    "legacy5": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.9864583333333334,
+          "complete_evidence_set": 0.9625,
+          "full_text_evidence_recall": 0.9864583333333334
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.6322916666666667,
+          "complete_evidence_set": 0.31875,
+          "full_text_evidence_recall": 0.5979166666666667
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.6322916666666667,
+          "complete_evidence_set": 0.31875,
+          "full_text_evidence_recall": 0.5979166666666667
+        }
+      },
+      "observation_bytes": 3999.975,
+      "final_evidence_bytes": 3999.975,
+      "dropped_exchanges": 0,
+      "admitted_questions": 160
+    },
+    "legacy5_aligned": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.9864583333333334,
+          "complete_evidence_set": 0.9625,
+          "full_text_evidence_recall": 0.9864583333333334
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        }
+      },
+      "observation_bytes": 6193.8375,
+      "final_evidence_bytes": 6193.8375,
+      "dropped_exchanges": 0,
+      "admitted_questions": 160
+    },
+    "structured5": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.9864583333333334,
+          "complete_evidence_set": 0.9625,
+          "full_text_evidence_recall": 0.9864583333333334
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333
+        }
+      },
+      "observation_bytes": 6246.8375,
+      "final_evidence_bytes": 6246.8375,
+      "dropped_exchanges": 0,
+      "admitted_questions": 160
+    },
+    "structured10": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.9864583333333334,
+          "complete_evidence_set": 0.9625,
+          "full_text_evidence_recall": 0.9864583333333334
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.878125,
+          "complete_evidence_set": 0.71875,
+          "full_text_evidence_recall": 0.8421875
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.878125,
+          "complete_evidence_set": 0.71875,
+          "full_text_evidence_recall": 0.8421875
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.8515625,
+          "complete_evidence_set": 0.69375,
+          "full_text_evidence_recall": 0.815625
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.8515625,
+          "complete_evidence_set": 0.69375,
+          "full_text_evidence_recall": 0.815625
+        }
+      },
+      "observation_bytes": 7370.9375,
+      "final_evidence_bytes": 7314.91875,
+      "dropped_exchanges": 0,
+      "admitted_questions": 160
+    },
+    "no_rag": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.9864583333333334,
+          "complete_evidence_set": 0.9625,
+          "full_text_evidence_recall": 0.9864583333333334
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.0,
+          "complete_evidence_set": 0.0,
+          "full_text_evidence_recall": 0.0
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.0,
+          "complete_evidence_set": 0.0,
+          "full_text_evidence_recall": 0.0
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.0,
+          "complete_evidence_set": 0.0,
+          "full_text_evidence_recall": 0.0
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.0,
+          "complete_evidence_set": 0.0,
+          "full_text_evidence_recall": 0.0
+        }
+      },
+      "observation_bytes": 4.0,
+      "final_evidence_bytes": 4.0,
+      "dropped_exchanges": 0,
+      "admitted_questions": 0
+    },
+    "gold_budgeted": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.9864583333333334,
+          "complete_evidence_set": 0.9625,
+          "full_text_evidence_recall": 0.9864583333333334
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 1.0,
+          "complete_evidence_set": 1.0,
+          "full_text_evidence_recall": 1.0
+        },
+        "tool_return": {
+          "best_evidence_recall": 1.0,
+          "complete_evidence_set": 1.0,
+          "full_text_evidence_recall": 1.0
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 1.0,
+          "complete_evidence_set": 1.0,
+          "full_text_evidence_recall": 1.0
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 1.0,
+          "complete_evidence_set": 1.0,
+          "full_text_evidence_recall": 1.0
+        }
+      },
+      "observation_bytes": 2636.825,
+      "final_evidence_bytes": 2636.825,
+      "dropped_exchanges": 0,
+      "admitted_questions": 160
+    }
+  },
+  "scope": "Actual consumer methods, controlled snapshot/vector/score I/O; complete recoverable text records only. Legacy preview trailing partial text may be visible to the answer model but is not credited as a complete record. Not live database/authorization/checkpoint validation or generated answer score.",
+  "same_budget_not_equal_actual_input": true,
+  "full_text_metric": "Secondary90% source-character coverage proxy, not support spans",
+  "no_rag_gold": "Diagnostic controls excluded from method adoption",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-prepared-1/stage-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "run_state": "NEEDS_ATTENTION",
+  "physical_requests": 279,
+  "planned_physical_requests": 342,
+  "logical_answers": 364,
+  "finished_at_utc": "2026-10-23T14:13:30.611101+00:00",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

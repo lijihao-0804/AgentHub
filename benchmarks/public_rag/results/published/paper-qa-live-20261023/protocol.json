@@ -1,0 +1,94 @@
+{
+  "id": "paper-local-real-agent-run-v1",
+  "registered_at_utc": "2026-10-23T14:38:05.346398+00:00",
+  "scenario": "Researcher asks about methods, datasets and experimental results in a selected real paper.",
+  "source": "Official QASPER v0.3 train, original article text/abstract/captions and independent human question/answer/evidence annotations.",
+  "seed": 20261031,
+  "papers": 12,
+  "planned_questions": 42,
+  "sample_role": "Non-formal development scenario; sampled train data, no new holdout claim. All selected questions retained including mixed annotation case.",
+  "primary_population": "scorable consensus answerable/unanswerable; mixed annotation question reported separately and in official-style descriptive all-question score.",
+  "primary": "Best human-reference answer token F1, invalid/provider/workflow errors retained as0; group-paired95 percentile bootstrap by paper,5000 draws.",
+  "secondary": [
+    "EM",
+    "consensus unanswerable refusal count",
+    "answerable refusal count",
+    "human evidence paragraph overlap and exact-visible-text coverage",
+    "valid source identities",
+    "real Run completion and persisted model/tool counts",
+    "cold vs warm Run latency",
+    "all observed usage, missing usage, unknown currency cost"
+  ],
+  "arms": {
+    "generic5": {
+      "final_top_k": 5,
+      "retrieval_budget": 5000,
+      "context_budget_bytes": null
+    },
+    "paper10": {
+      "final_top_k": 10,
+      "retrieval_budget": 8000,
+      "context_budget_bytes": 8000
+    }
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "max_output_tokens": 1024,
+  "thinking": "disabled",
+  "temperature": 0,
+  "attempts": 1,
+  "fallbacks": 0,
+  "max_model_steps_per_run": 3,
+  "max_tool_calls_per_run": 1,
+  "maximum_physical_requests": 251,
+  "comparison": "One frozen compound existing production scene preset: generic final5/default RAG5000 versus final10/RAG8000/full-evidence byte filling8000. Same chunking/index/model/prompt. No prompt/LLM-selector variants or parameter sweep.",
+  "ingestion": "KnowledgeService upload of faithful paper Markdown -> production ingestion worker entry point, invoked inline -> real BGE embeddings and tokenizer sparse adapter -> isolated Qdrant; no supplied candidate or gold chunk indexing.",
+  "runtime": "Normal AgentPublishService creates2 immutable PINNED versions per paper, then AgentRunService invokes actual model-tool-model with production ToolRuntime and SQL/Qdrant retriever; record final admitted model messages.",
+  "run_order": "Round-robin fixed source questions; for each question random seeded arm order, sequential real runs. First pair remains part of planned score and is used for interface inspection only.",
+  "stop": "Unknown outcome, wrong model, non400 provider error or cross-paper source violation stop future runs, no retry. Eight failed runs stop dispatch. All planned cases retained. No automatic completion amendment. A SUCCEEDED Run missing the mandatory single real search also stops the experiment.",
+  "promotion_gates": {
+    "minimum_f1_gain": 0.05,
+    "f1_group95_ci_low_above": 0,
+    "maximum_em_loss": 0,
+    "minimum_valid_each": 0.95,
+    "maximum_unanswerable_answer_increase": 0,
+    "maximum_warm_p95_ratio": 1.5,
+    "maximum_observed_mean_input_ratio": 1.8,
+    "unknown_outcomes": 0,
+    "cross_paper_citations": 0
+  },
+  "gate_basis": "Engineering usefulness thresholds, not a powered general claim.12 papers/42questions and only3 consensus unanswerables cannot certify population faithfulness, refusal or business readiness.",
+  "pricing": "Provider quote unavailable; keep observed usage and missing usage explicitly. Unknown amounts remain null, never0; request/output ceilings bound the experiment. No invented monetary costs.",
+  "limitations": [
+    "Text dataset captures, not original PDF/OCR/figure/table-cell comprehension",
+    "Inline actual ingestion worker function, no Celery broker scheduling acceptance",
+    "Service-layer real Run, not public HTTP/browser UI/full deployment/checkpoint-resume acceptance",
+    "Evidence paragraph matching is not semantic entailment or calibrated claim faithfulness",
+    "Different scene and answer types from previous MuSiQue, no score trend splicing"
+  ],
+  "production_defaults_changed": false,
+  "formal_platform_experiment": false,
+  "source_urls": [
+    "https://huggingface.co/datasets/allenai/qasper",
+    "https://aclanthology.org/2021.naacl-main.365/"
+  ],
+  "pre_answer_clarifications": {
+    "at_utc": "2026-10-23T14:46:27.716155+00:00",
+    "answer_requests_so_far": 0,
+    "source": "integration-review.json and actual dataset scorer preflight",
+    "notes": [
+      "Strict global dispatch counter shared across runs",
+      "Missing required real search halts after the recorded invalid workflow; no final-answer credit",
+      "Non-refusal requires visible citations; refusal requires no citations",
+      "Preserve raw wrong-model versus transport-unknown outcomes independently of production normalized failures",
+      "Caption-origin and whitespace-only metadata preparation are offline only; uploaded source text unchanged",
+      "Mixed case is descriptive even when scorable=false"
+    ]
+  },
+  "network_repair": "network-repair.json",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

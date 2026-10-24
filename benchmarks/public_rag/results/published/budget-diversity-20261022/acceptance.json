@@ -1,0 +1,31 @@
+{
+  "status": "PASS_IMPLEMENTATION_AND_EVALUATION",
+  "at": "2026-10-21T18:14:31.708431+00:00",
+  "default_selection": "baseline",
+  "adopt_new_default": false,
+  "reason": "No candidate passed predeclared DEV point-estimate gates; regression does not reselect. All primary regression 98.75% CIs include zero.",
+  "coverage": {
+    "dev_queries": 809,
+    "regression_queries_each_arm": 300,
+    "actual_regression_arms": 5,
+    "warm_latency_pairs": 299
+  },
+  "checks": [
+    "main API/runner/selection focused tests: 38 passed",
+    "snapshot/integration/lifecycle/session regression: 21 passed",
+    "DeepSeek worker configuration and related tests: 75 passed (overlaps related suites)",
+    "DeepSeek report fixtures: 16 passed",
+    "Ruff check passed; publish.py subsequently received nonsemantic Ruff formatting",
+    "git diff --check passed"
+  ],
+  "generation_api_calls": 0,
+  "source": "measured-source.zip; scoring-source.zip",
+  "measurement_note": "During regression there were two short CPU-only DEV diagnostics (~4.6s and ~3.6s), documentation edits and source reads; no competing GPU/DB experiment or regression-test suite. No queries excluded based on timings.",
+  "cost_claim": "Actual rerank chunks and timings only; GPU/subagent dollar costs unknown.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "questions": 1005,
+  "denominators": {
+    "all_questions": 1005,
+    "evidence_evaluable": 854,
+    "unanswerable": 60,
+    "unaligned": 91
+  },
+  "profile_average_population": "evidence-evaluable subset; all capture retained separately",
+  "profiles": {
+    "legacy5": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.8917417737089869,
+          "complete_evidence_set": 0.84192037470726,
+          "full_text_evidence_recall": 0.8489626948643342
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.6512676953543465,
+          "complete_evidence_set": 0.5772833723653396,
+          "full_text_evidence_recall": 0.5785803417243698
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.6512676953543465,
+          "complete_evidence_set": 0.5772833723653396,
+          "full_text_evidence_recall": 0.5785803417243698
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.38471622379702003,
+          "complete_evidence_set": 0.33138173302107726,
+          "full_text_evidence_recall": 0.3344137257486204
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.38471622379702003,
+          "complete_evidence_set": 0.33138173302107726,
+          "full_text_evidence_recall": 0.3344137257486204
+        }
+      },
+      "observation_bytes": 3999.9555035128806,
+      "final_evidence_bytes": 3999.9555035128806,
+      "dropped_exchanges": 0,
+      "admitted_questions": 854
+    },
+    "legacy5_aligned": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.8917417737089869,
+          "complete_evidence_set": 0.84192037470726,
+          "full_text_evidence_recall": 0.8489626948643342
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.6512676953543465,
+          "complete_evidence_set": 0.5772833723653396,
+          "full_text_evidence_recall": 0.5785803417243698
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.6512676953543465,
+          "complete_evidence_set": 0.5772833723653396,
+          "full_text_evidence_recall": 0.5785803417243698
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.6500967351669928,
+          "complete_evidence_set": 0.5761124121779859,
+          "full_text_evidence_recall": 0.5785803417243698
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.6348742527313956,
+          "complete_evidence_set": 0.5608899297423887,
+          "full_text_evidence_recall": 0.5680417000381872
+        }
+      },
+      "observation_bytes": 6775.524590163935,
+      "final_evidence_bytes": 6551.274004683841,
+      "dropped_exchanges": 0,
+      "admitted_questions": 830
+    },
+    "structured5": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.8917417737089869,
+          "complete_evidence_set": 0.84192037470726,
+          "full_text_evidence_recall": 0.8489626948643342
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.6512676953543465,
+          "complete_evidence_set": 0.5772833723653396,
+          "full_text_evidence_recall": 0.5785803417243698
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.6512676953543465,
+          "complete_evidence_set": 0.5772833723653396,
+          "full_text_evidence_recall": 0.5785803417243698
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.6500967351669928,
+          "complete_evidence_set": 0.5761124121779859,
+          "full_text_evidence_recall": 0.5785803417243698
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.649511255073316,
+          "complete_evidence_set": 0.5761124121779859,
+          "full_text_evidence_recall": 0.5785803417243698
+        }
+      },
+      "observation_bytes": 6785.923887587822,
+      "final_evidence_bytes": 6774.223653395785,
+      "dropped_exchanges": 0,
+      "admitted_questions": 854
+    },
+    "structured10": {
+      "stages": {
+        "cached_candidate_pool": {
+          "best_evidence_recall": 0.8917417737089869,
+          "complete_evidence_set": 0.84192037470726,
+          "full_text_evidence_recall": 0.8489626948643342
+        },
+        "production_retriever_evidence": {
+          "best_evidence_recall": 0.6995981899963165,
+          "complete_evidence_set": 0.6252927400468384,
+          "full_text_evidence_recall": 0.6280817965536934
+        },
+        "tool_return": {
+          "best_evidence_recall": 0.6995981899963165,
+          "complete_evidence_set": 0.6252927400468384,
+          "full_text_evidence_recall": 0.6280817965536934
+        },
+        "runtime_observation": {
+          "best_evidence_recall": 0.6647927924274528,
+          "complete_evidence_set": 0.5889929742388759,
+          "full_text_evidence_recall": 0.5928860789223787
+        },
+        "final_admitted_context": {
+          "best_evidence_recall": 0.6636218322400992,
+          "complete_evidence_set": 0.5889929742388759,
+          "full_text_evidence_recall": 0.5923005988287019
+        }
+      },
+      "observation_bytes": 7353.923887587822,
+      "final_evidence_bytes": 7320.12412177986,
+      "dropped_exchanges": 0,
+      "admitted_questions": 854
+    }
+  },
+  "scope": "Actual consumer methods, controlled snapshot/vector/score I/O; complete recoverable text records only. Legacy preview trailing partial text may be visible to the answer model but is not credited as a complete record. Not live database/authorization/checkpoint validation or generated answer score.",
+  "same_budget_not_equal_actual_input": true,
+  "full_text_metric": "Secondary90% source-character coverage proxy, not support spans",
+  "no_rag_gold": "Diagnostic controls excluded from method adoption",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-2/stage-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

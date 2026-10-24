@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "scope": "Configuration-backed primary/fallback using existing gateway and persisted development-workspace ModelProfiles. Not a new RAG quality experiment.",
+  "primary": {
+    "name": "local-magpie",
+    "provider": "openai-compatible",
+    "base_url": "http://127.0.0.1:3425/v1",
+    "model": "auto/deepseek-v4.1-flash",
+    "timeout_seconds": "20"
+  },
+  "fallback": {
+    "name": "aliyun-rag",
+    "provider": "openai-compatible",
+    "base_url": "https://ws-actclc2u6282ierx.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+    "model": "deepseek-v4.1-flash-1017",
+    "timeout_seconds": "60"
+  },
+  "installed_workspace_id": "b93f67f3-b693-4f53-975b-c620b1704271",
+  "primary_profile_id": "862ba47b-2d21-4647-b31e-5ff4f4f7f6bd",
+  "profile_install_idempotent": true,
+  "credentials_encrypted": true,
+  "existing_published_versions_unchanged": 24,
+  "historical_rag_scores_unchanged": true,
+  "new_unit_cases_passed": 14,
+  "existing_targeted_gateway_cases_passed": 5,
+  "physical_model_dispatch_attempts": 4,
+  "successful_model_responses": 3,
+  "injected_refused_connection": 1,
+  "observed_usage": {
+    "prompt_tokens": 316,
+    "completion_tokens": 41,
+    "total_tokens": 357
+  },
+  "currency_cost": null,
+  "job_exit_code": 0,
+  "job_elapsed_seconds": 22.156,
+  "stream_protection_scope": "Deterministic before/after-visible text and tool-delta checks; not a network streaming chaos experiment.",
+  "activation": "New calls may use configured_route. New/published agents select primary_profile_id and publish the frozen fallback chain; old published versions remain unchanged.",
+  "model_identity_observation": {
+    "magpie_requested": "auto/deepseek-v4.1-flash",
+    "magpie_raw_returned": "deepseek-v4.1-flash",
+    "aliyun_raw_returned": "deepseek-v4.1-flash-1017"
+  },
+  "subagent_model": "auto/deepseek-v4.1-flash",
+  "no_new_hash_tests": true,
+  "credential_not_present_in_result_logs": true,
+  "checked_result_and_log_files": 9,
+  "production_gateway_contract_and_adapter_unchanged": true,
+  "lint_and_scoped_whitespace_checks": "PASS",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/model-route-20261023/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "run_state": "COMPLETE",
+  "execution_complete": true,
+  "all_required_workflows_complete": true,
+  "expected_runs": 84,
+  "executed_runs": 84,
+  "physical_requests": 168,
+  "physical_budget_dispatches": 168,
+  "physical_outcomes": {
+    "RECEIVED": 168,
+    "PROVIDER_ERROR": 0,
+    "UNKNOWN_OUTCOME": 0,
+    "MODEL_IDENTITY_ERROR": 0
+  },
+  "finished_at_utc": "2026-10-23T15:07:24.457662+00:00",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-3/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

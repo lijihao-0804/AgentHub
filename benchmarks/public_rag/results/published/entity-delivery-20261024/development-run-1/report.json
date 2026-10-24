@@ -1,0 +1,339 @@
+{
+  "scope": "Frozen entity-delivery development scoring. Alias and delivery-contract checks only; no semantic relation or completeness verification.",
+  "state": "FROZEN_DEVELOPMENT",
+  "aggregate": {
+    "planned_cases": 8,
+    "ledger_proposals": 14,
+    "conditions": {
+      "full": {
+        "planned": 8,
+        "arms": {
+          "baseline": {
+            "planned": 8,
+            "observed": 8,
+            "observed_denominator": 8,
+            "attempted": 1,
+            "valid": 0,
+            "invalid_or_unobserved": 8,
+            "scoring_denominator": 8,
+            "status_counts": {
+              "NOT_ATTEMPTED": 7,
+              "PROVIDER_ERROR": 1
+            },
+            "reported_status_counts": {
+              "NOT_ATTEMPTED": 7,
+              "PROVIDER_ERROR": 1
+            },
+            "delivery_status_counts": {
+              "NONE": 8
+            },
+            "formatting_invalid_valid_status": 0,
+            "answer_exact_match": 0.0,
+            "answer_token_f1": 0.0,
+            "entity_precision": 0.0,
+            "entity_recall": 0.0,
+            "entity_f1": 0.0,
+            "entity_precision_macro": 0.0,
+            "entity_recall_macro": 0.0,
+            "entity_f1_macro": 0.0,
+            "entity_set_exact_rate": 0.0,
+            "strict_primary_success_rate": 0.0,
+            "strict_primary_successes": 0,
+            "unexpected_value_count": 0
+          },
+          "typed": {
+            "planned": 8,
+            "observed": 8,
+            "observed_denominator": 8,
+            "attempted": 0,
+            "valid": 0,
+            "invalid_or_unobserved": 8,
+            "scoring_denominator": 8,
+            "status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "reported_status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "delivery_status_counts": {
+              "NONE": 8
+            },
+            "formatting_invalid_valid_status": 0,
+            "answer_exact_match": 0.0,
+            "answer_token_f1": 0.0,
+            "entity_precision": 0.0,
+            "entity_recall": 0.0,
+            "entity_f1": 0.0,
+            "entity_precision_macro": 0.0,
+            "entity_recall_macro": 0.0,
+            "entity_f1_macro": 0.0,
+            "entity_set_exact_rate": 0.0,
+            "strict_primary_success_rate": 0.0,
+            "strict_primary_successes": 0,
+            "unexpected_value_count": 0
+          }
+        },
+        "paper_cluster_diagnostics": {
+          "status": "DESCRIPTIVE_ONLY",
+          "paper_groups": 8,
+          "minimum_paper_groups": 8,
+          "metric": "typed minus baseline full entity-set exact success",
+          "estimate": 0.0,
+          "ci95_low": 0.0,
+          "ci95_high": 0.0,
+          "bootstrap_samples": 5000,
+          "no_p_values": true,
+          "not_automatic_promotion": true
+        }
+      },
+      "removed": {
+        "planned": 8,
+        "arms": {
+          "baseline": {
+            "planned": 8,
+            "observed": 8,
+            "observed_denominator": 8,
+            "attempted": 0,
+            "valid": 0,
+            "invalid_or_unobserved": 8,
+            "scoring_denominator": 8,
+            "status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "reported_status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "delivery_status_counts": {
+              "NONE": 8
+            },
+            "formatting_invalid_valid_status": 0,
+            "safe_delivery_rate": 0.0,
+            "safe_refusal_rate": 0.0,
+            "safe_partial_delivery_rate": 0.0,
+            "wrong_full_delivery_rate": 0.0,
+            "wrong_full_deliveries": 0,
+            "value_coverage_macro": 0.0,
+            "value_coverage_micro": 0.0,
+            "coverage_planned_case_count": 3,
+            "coverage_matched_values": 0,
+            "coverage_supported_values": 5
+          },
+          "typed": {
+            "planned": 8,
+            "observed": 8,
+            "observed_denominator": 8,
+            "attempted": 0,
+            "valid": 0,
+            "invalid_or_unobserved": 8,
+            "scoring_denominator": 8,
+            "status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "reported_status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "delivery_status_counts": {
+              "NONE": 8
+            },
+            "formatting_invalid_valid_status": 0,
+            "safe_delivery_rate": 0.0,
+            "safe_refusal_rate": 0.0,
+            "safe_partial_delivery_rate": 0.0,
+            "wrong_full_delivery_rate": 0.0,
+            "wrong_full_deliveries": 0,
+            "value_coverage_macro": 0.0,
+            "value_coverage_micro": 0.0,
+            "coverage_planned_case_count": 3,
+            "coverage_matched_values": 0,
+            "coverage_supported_values": 5
+          }
+        }
+      }
+    },
+    "usage": {
+      "pooled": {
+        "observed_results": 32,
+        "known_subtotals": {
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "total_tokens": 0
+        },
+        "totals": {
+          "input_tokens": null,
+          "output_tokens": null,
+          "total_tokens": null
+        },
+        "unknown_counts": {
+          "input_tokens": 32,
+          "output_tokens": 32,
+          "total_tokens": 32
+        },
+        "known_counts": {
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "total_tokens": 0
+        },
+        "latency_ms": {
+          "observed": 1,
+          "unknown": 31,
+          "total": 0.25279999999838765,
+          "mean": 0.25279999999838765,
+          "p50": 0.25279999999838765,
+          "p95": 0.25279999999838765
+        },
+        "money": null
+      },
+      "conditions": {
+        "full": {
+          "baseline": {
+            "observed_results": 8,
+            "known_subtotals": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0
+            },
+            "totals": {
+              "input_tokens": null,
+              "output_tokens": null,
+              "total_tokens": null
+            },
+            "unknown_counts": {
+              "input_tokens": 8,
+              "output_tokens": 8,
+              "total_tokens": 8
+            },
+            "known_counts": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0
+            },
+            "latency_ms": {
+              "observed": 1,
+              "unknown": 7,
+              "total": 0.25279999999838765,
+              "mean": 0.25279999999838765,
+              "p50": 0.25279999999838765,
+              "p95": 0.25279999999838765
+            },
+            "money": null
+          },
+          "typed": {
+            "observed_results": 8,
+            "known_subtotals": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0
+            },
+            "totals": {
+              "input_tokens": null,
+              "output_tokens": null,
+              "total_tokens": null
+            },
+            "unknown_counts": {
+              "input_tokens": 8,
+              "output_tokens": 8,
+              "total_tokens": 8
+            },
+            "known_counts": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0
+            },
+            "latency_ms": {
+              "observed": 0,
+              "unknown": 8,
+              "total": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            },
+            "money": null
+          }
+        },
+        "removed": {
+          "baseline": {
+            "observed_results": 8,
+            "known_subtotals": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0
+            },
+            "totals": {
+              "input_tokens": null,
+              "output_tokens": null,
+              "total_tokens": null
+            },
+            "unknown_counts": {
+              "input_tokens": 8,
+              "output_tokens": 8,
+              "total_tokens": 8
+            },
+            "known_counts": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0
+            },
+            "latency_ms": {
+              "observed": 0,
+              "unknown": 8,
+              "total": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            },
+            "money": null
+          },
+          "typed": {
+            "observed_results": 8,
+            "known_subtotals": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0
+            },
+            "totals": {
+              "input_tokens": null,
+              "output_tokens": null,
+              "total_tokens": null
+            },
+            "unknown_counts": {
+              "input_tokens": 8,
+              "output_tokens": 8,
+              "total_tokens": 8
+            },
+            "known_counts": {
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "total_tokens": 0
+            },
+            "latency_ms": {
+              "observed": 0,
+              "unknown": 8,
+              "total": 0,
+              "mean": null,
+              "p50": null,
+              "p95": null
+            },
+            "money": null
+          }
+        }
+      },
+      "currency_cost": null
+    },
+    "limitations": [
+      "Entity aliases are scored by casefold, NFC, and whitespace normalization only.",
+      "Entity values must match one complete canonical alias; unexpected values are false positives.",
+      "The full primary metric verifies only exact alias-set delivery and reported ANSWERED status.",
+      "Model-reported relation and completeness are not verified semantic judgments.",
+      "Short-value exact match and token F1 join answer_values in provided order and use the original references; explanations are excluded.",
+      "The paper-cluster interval is descriptive and cannot promote a method automatically."
+    ],
+    "automatic_promotion": false,
+    "semantic_entailment_verified": false
+  },
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "queries": 235,
+  "expected": 235,
+  "statuses": {
+    "VALID": 235
+  },
+  "stopped": false,
+  "run_state": "COMPLETED",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

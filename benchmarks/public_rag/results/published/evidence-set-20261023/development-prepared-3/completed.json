@@ -1,0 +1,12 @@
+{
+  "expected": 160,
+  "queries": 160,
+  "run_state": "COMPLETE",
+  "selection_calls": 160,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

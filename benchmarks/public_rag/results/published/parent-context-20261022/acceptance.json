@@ -1,0 +1,60 @@
+{
+  "status": "PASS_FIXED_EXPERIMENT_BASELINE_RETAINED",
+  "implementation_and_scoring_complete": true,
+  "quality_candidate_accepted": false,
+  "selected_arm": "baseline",
+  "production_default_changed": false,
+  "queries": 809,
+  "pre_rerank_control": "All query pairs passed matching dense, sparse, fusion and selection traces",
+  "ndcg10_delta": 0.0012638051904982407,
+  "ndcg10_ci95": [
+    -0.009147252895721958,
+    0.011724885195414767
+  ],
+  "warm_latency_delta_ms": 182.8510435643468,
+  "warm_latency_delta_ci95_ms": [
+    168.95087450626858,
+    197.8592616491284
+  ],
+  "parent_truncated_pairs_recorded": 0,
+  "production_sort_validation": "PASS: model score DESC, fusion score DESC, chunk_id ASC",
+  "real_run": {
+    "exit_code": 0,
+    "elapsed_seconds": 1010.422
+  },
+  "scoring_run": {
+    "exit_code": 0,
+    "elapsed_seconds": 34.828
+  },
+  "regression_run": false,
+  "nfcorpus_labels_read": false,
+  "generation_api_calls": 0,
+  "supplementary_audit": {
+    "status": "PASS",
+    "exit_code": 0,
+    "elapsed_seconds": 89.844,
+    "historical_compute_exact_match": true,
+    "query_arm_counts_agree": true,
+    "parent_full_context_qualified": true,
+    "summary": "pair-token-summary.json",
+    "pairs": "pair-token-audit.jsonl"
+  },
+  "evidence": [
+    "protocol.json",
+    "review-qualification.json",
+    "dev-report.json",
+    "frozen-selection.json",
+    "measured-source.zip",
+    "scoring-source.zip",
+    "scoring-review-source.zip",
+    "pair-token-summary.json",
+    "pair-token-audit.jsonl",
+    "post-run-audit-source.zip"
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/parent-context-20261022/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "expected": 200,
+  "queries": 200,
+  "planned_calls": 1000,
+  "observed_calls": 1000,
+  "new_calls": 1000,
+  "run_state": "COMPLETE",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-answers-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

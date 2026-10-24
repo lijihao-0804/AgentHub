@@ -1,0 +1,55 @@
+{
+  "request_messages_match_registration": 29,
+  "single_dispatch_per_registered_request": true,
+  "received_primary_raw_model": "deepseek-v4.1-flash",
+  "fallback_dispatches": 0,
+  "unknown_transport": 0,
+  "source_slices": {
+    "records_checked": 104
+  },
+  "actual_views_match_original_visible_snippets": true,
+  "all_conditions_admitted_without_clipping": true,
+  "by_condition": {
+    "actual": {
+      "n": 8,
+      "input_tokens": 9469,
+      "output_tokens": 618,
+      "mean_input_tokens": 1183.625,
+      "p50_ms": 2493.879700000093,
+      "p95_ms": 2780.8812849998844
+    },
+    "sufficient": {
+      "n": 8,
+      "input_tokens": 8387,
+      "output_tokens": 618,
+      "mean_input_tokens": 1048.375,
+      "p50_ms": 2525.8680000000595,
+      "p95_ms": 4802.2069499999
+    },
+    "removed": {
+      "n": 8,
+      "input_tokens": 6021,
+      "output_tokens": 392,
+      "mean_input_tokens": 752.625,
+      "p50_ms": 2262.0267499999045,
+      "p95_ms": 2654.5098700000153
+    },
+    "natural_controls": {
+      "n": 5,
+      "input_tokens": 5639,
+      "output_tokens": 238,
+      "mean_input_tokens": 1127.8,
+      "p50_ms": 2193.985200000043,
+      "p95_ms": 2352.3037799998747
+    }
+  },
+  "job_exit_code": 0,
+  "production_promoted": false,
+  "scope": "Offline evidence/dispatch verification, not a semantic accuracy score",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/answer-path-20261024/diagnostic-run-1/verification.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

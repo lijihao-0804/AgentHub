@@ -1,0 +1,53 @@
+{
+  "registered_at_utc": "2026-10-24T03:41:59.765288+00:00",
+  "scope": "Bounded, same-reader evidence-condition diagnostic on exposed paper QA.\n\nThis replays source views through the production model gateway and context\npolicy. It is not a new retrieval algorithm, AgentRun or formal Experiment.\n",
+  "seed": 20261024,
+  "model_route": {
+    "name": "local-rag"
+  },
+  "max_tokens": 1024,
+  "temperature": 0,
+  "thinking": "disabled",
+  "max_attempts_per_profile": 1,
+  "rag_budget_units": 8000,
+  "triplets": 8,
+  "natural_controls": 5,
+  "planned_requests": 29,
+  "maximum_physical_requests": 30,
+  "case_ids": [
+    "6dfad97356b6e82009ee442d7fd2b97b5dcabfe2",
+    "1083ec9a2a33f7fe2b6b51bbcebd2d9aec4b4de2",
+    "4c822bbb06141433d04bbc472f08c48bc8378865",
+    "5871d258f66b00fb716065086f757ef745645bfe",
+    "b44ce9aae8b1479820555b99ce234443168dc1fe",
+    "2b78052314cb730824836ea69bc968df7964b4e4",
+    "f46a907360d75ad566620e7f6bf7746497b6e4a9",
+    "5c4a2a3d6e02bcbeae784e439441524535916e85"
+  ],
+  "control_ids": [
+    "42812113ec720b560eb9463ff5e74df8764d1bff",
+    "64ab2b92e986e0b5058bf4f1758e849f6a41168b",
+    "4f4892f753b1d9c5e5e74c7c94d8c9b6ef523e7b",
+    "58f3bfbd01ba9768172be45a819faaa0de2ddfa4",
+    "6407dae0c095c2c8e15e6769f03925aa4f0e902e"
+  ],
+  "quality_scope": "Source-reviewed development diagnostic, not a new method comparison or human-expert semantic accuracy score.",
+  "scoring": "All frozen rows retained; invalid/failed/missing = zero, never successful refusal. Official max-reference EM/F1 unchanged. Constructed negatives and natural controls separate.",
+  "stop_rules": [
+    "Stop further dispatch after any fallback, unknown transport, model identity mismatch, or non-400 provider failure.",
+    "Stop at three known HTTP400 rejections; keep all planned denominators. No retries or continuation.",
+    "Formatting failures remain zero; do not change prompt or schema after inspecting answers."
+  ],
+  "acceptance": "Diagnostic completion and valid source contrasts only; no production promotion from this experiment.",
+  "review_limit": "Machine-assisted source review is not human-expert calibration. Sufficiency disputes excluded before requests and retained in full ledger.",
+  "build_sha": "23f1a384826c185c5eac2c4bf82c44408328286f",
+  "workspace_dirty": true,
+  "formal_experiment": false,
+  "holdout_exposed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/answer-path-20261024/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

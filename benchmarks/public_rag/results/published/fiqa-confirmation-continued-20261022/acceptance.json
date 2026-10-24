@@ -1,0 +1,118 @@
+{
+  "status": "PASS_FROZEN_METHOD_INDEPENDENT_CONFIRMATION_WITH_DISCLOSED_ADAPTER_REPAIR",
+  "evaluated_at_utc": "2026-10-21T21:28:16.118518+00:00",
+  "queries": 648,
+  "all_six_gates_passed": true,
+  "frozen_arm": "onyx_selection",
+  "test_reselection": false,
+  "ndcg10_baseline": 0.4133693132973034,
+  "ndcg10_candidate": 0.453196126184505,
+  "ndcg10_delta": 0.039826812887201544,
+  "ndcg10_ci95": [
+    0.028953734785393384,
+    0.051075346499200966
+  ],
+  "bootstrap_groups": 648,
+  "status_counts": {
+    "VALID": 646,
+    "INVALID_OUTPUT": 2,
+    "BUDGET_FALLBACK": 0,
+    "UNKNOWN_OUTCOME": 0,
+    "HTTP_ERROR": 0
+  },
+  "actual_unique_query_api_calls": 648,
+  "new_continuation_calls": 647,
+  "first_failed_query_retried": false,
+  "carried_failure_matches_original": true,
+  "all_fallbacks_scored": true,
+  "response_model_verified_count": 648,
+  "observed_usage": {
+    "prompt_tokens": {
+      "sum": 2962335,
+      "observed_query_count": 648,
+      "unknown_query_count": 0
+    },
+    "completion_tokens": {
+      "sum": 20511,
+      "observed_query_count": 648,
+      "unknown_query_count": 0
+    },
+    "total_tokens": {
+      "sum": 2982846,
+      "observed_query_count": 648,
+      "unknown_query_count": 0
+    },
+    "reasoning_tokens": {
+      "sum": null,
+      "provider_reported_query_count": 0,
+      "not_reported_query_count": 648
+    }
+  },
+  "incremental_api_timing_ms": {
+    "n": 648,
+    "mean_ms": 743.9843174383053,
+    "p50_ms": 727.52015000151,
+    "p95_ms": 893.9276950000931
+  },
+  "baseline_warm647_ms": {
+    "mean": 689.5709737248255,
+    "p50": 668.8871000005747,
+    "p95": 846.851439997772
+  },
+  "jobs": {
+    "prepare": {
+      "exit_code": 0,
+      "elapsed_seconds": 1049.937
+    },
+    "baseline": {
+      "exit_code": 0,
+      "elapsed_seconds": 472.312
+    },
+    "first_api": {
+      "exit_code": 1,
+      "elapsed_seconds": 8.219
+    },
+    "continued_api": {
+      "exit_code": 0,
+      "elapsed_seconds": 127.563
+    },
+    "score": {
+      "exit_code": 0,
+      "elapsed_seconds": 19.093
+    }
+  },
+  "execution_repair": {
+    "previous_run": "benchmarks/public_rag/results/fiqa-confirmation-20261022",
+    "retained_failed_query": "3875",
+    "retained_response_count": 1,
+    "new_request_count": 647,
+    "failed_query_retried": false,
+    "recipe_changed": false
+  },
+  "report_field_note": "provider_fallback_count denotes fallback to the baseline ranking on a bad response; no alternate provider/model request was made. timing success refers to confirmed HTTP responses, not valid selection JSON.",
+  "production_default_changed": false,
+  "production_onyx_selector_integrated": false,
+  "model_allowlist_changed": false,
+  "formal_experiment": false,
+  "paired_end_to_end_measured": false,
+  "generated_answer_quality_measured": false,
+  "nfcorpus_labels_read": false,
+  "evidence": [
+    "protocol.json",
+    "confirmation-source.zip",
+    "scoring-source-final.zip",
+    "run.jsonl",
+    "run.meta.json",
+    "request-events.jsonl",
+    "adapter-repair.json",
+    "confirmation-report.json",
+    "consumer-budget-diagnostic.json"
+  ],
+  "prior_indexing_and_baseline_source": "benchmarks/public_rag/results/fiqa-confirmation-20261022",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

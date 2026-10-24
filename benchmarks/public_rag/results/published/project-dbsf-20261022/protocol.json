@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "milestone": "Qdrant-source distribution-based score fusion quality screen",
+  "declared_at": "2026-10-22",
+  "seed": 20261025,
+  "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+  "project_source": "https://github.com/qdrant/qdrant/blob/222b2e44ab1c3f17e8246396ead6558e45041df7/lib/segment/src/common/score_fusion.rs",
+  "arms": [
+    "baseline",
+    "dbsf"
+  ],
+  "mechanism": "Per lane Welford sample variance; normalize by mean +/-3 sample standard deviations; empty lane empty; single or constant lane 0.5; sum scores of shared chunk IDs; equal lane weights 1. No clipping, no weight or sigma sweep.",
+  "adaptations": "Python float64 arithmetic rather than Rust f32; deterministic fusion ties use chunk_id ascending. Neural rerank ties use fusion score descending then chunk_id ascending as existing production.",
+  "controls": {
+    "dense_top_k": 30,
+    "sparse_top_k": 30,
+    "candidate_top_k": 20,
+    "rerank_top_k": 20,
+    "final_top_k": 20,
+    "baseline_rrf_k": 60
+  },
+  "screen_source": "benchmarks/public_rag/results/budget-diversity-20261022/screen-superset.jsonl",
+  "screen_source_metadata": "screen-superset.meta.json",
+  "screen_policy": "All 809 official SciFact train queries. Reuse every actual full-union BGE cross-encoder score once for quality-only candidate replay. Strictly require all dense/sparse union IDs scored and source mappings consistent. No cached latency claim; changed batch packing can require a later actual run.",
+  "selection_rule": {
+    "min_ndcg10_gain": 0.005,
+    "max_recall5_loss": 0.005,
+    "max_recall20_loss": 0.005,
+    "require_primary_ci_above_zero": true
+  },
+  "primary": "One nDCG@10 comparison; 10000 paired bootstrap over shared-positive-document connected components, 95% interval",
+  "secondary": "Exploratory Recall@5/20 and MRR@10; fusion candidate source-document coverage",
+  "decision": "Only a passing screen qualifies for real paired retrieval and latency evaluation; otherwise preserve baseline and close this mechanism without parameter tuning",
+  "limits": "Repeated DEV labels and reuse of earlier measured candidate scores make this exploratory screening, not independent confirmation or a platform Formal Experiment. No generated-answer claim, no test or NFCorpus label access, no production default change.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

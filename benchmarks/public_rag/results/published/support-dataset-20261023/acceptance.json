@@ -1,0 +1,78 @@
+{
+  "status": "DIAGNOSTIC_DATASET_AND_BASELINE_COMPLETE_NO_STRATEGY_ADOPTION",
+  "milestone_accepted": true,
+  "meaning": "Frozen reviewed source-deletion data, preservation boundaries, complete baseline measurement and explicit scoring limits accepted. NOT new reader/quality acceptance.",
+  "dataset": "frozen-dataset-v2.json",
+  "protocol": "protocol-v2.json",
+  "ledger_cases": 32,
+  "reviewed_pairs": 4,
+  "unresolved_cases": 28,
+  "request_conditions": 8,
+  "supported": {
+    "token_f1": 0.75,
+    "exact_match": 0.75,
+    "valid": 4,
+    "abstained": 0
+  },
+  "answer_evidence_removed": {
+    "valid": 4,
+    "correct_refusals": 4,
+    "correct_refusal_rate": 1.0,
+    "unsupported_answers": 0,
+    "unsupported_answer_rate": 0.0
+  },
+  "both_correct": 3,
+  "physical_api": {
+    "scope": "Actual answer-experiment requests only; subagent review usage unavailable and excluded.",
+    "requests": 8,
+    "statuses": {
+      "VALID": 8
+    },
+    "observed_total_tokens": 7417,
+    "usage_observed": 8,
+    "usage_unknown": 0,
+    "currency_cost": null,
+    "unknown_outcomes": 0,
+    "retries": 0,
+    "historical_response_reuses": 0,
+    "provider_usage_basis": "Returned prompt/completion/total token usage; no price snapshot."
+  },
+  "validation": {
+    "at_utc": "2026-10-23T13:45:14.821244+00:00",
+    "unique_targeted_tests_passed": 8,
+    "python_files_linted_and_formatted": 3,
+    "new_hash_tests": 0,
+    "reviewed_pairs": 4,
+    "review_quotes_exact": 8,
+    "request_preflights_admitted_unchanged": 8,
+    "actual_dispatches_and_outcomes_validated": 8,
+    "score_recomputed_identically": true,
+    "metadata_revision2_precedes_first_request": true,
+    "unresolved_ledger_cases_retained": 28,
+    "default_changed": false,
+    "new_holdout_or_confirmation_exposure": false,
+    "job_exit_code": 0,
+    "job_elapsed_seconds": 6.141
+  },
+  "production_accepted": false,
+  "default_changed": false,
+  "new_reader_tested": false,
+  "semantic_judge_used": false,
+  "human_expert_calibrated": false,
+  "formal_experiment": false,
+  "confirmation_opened": false,
+  "historical_scores_changed": false,
+  "decision": "Keep accepted complementary selection and direct answer. No evidence here to add universal refusal/reading calls. Census execution-vs-release error remains a verified target for further independent-source relation diagnostics, not a one-case prompt fix.",
+  "limitations": [
+    "4 selected exposed questions, not population accuracy or significance evidence.",
+    "Deliberate complete removal of final-answer sources; does not cover hard mixed-evidence insufficiency.",
+    "Source snapshot interpretation; no present-day political/population factual claim.",
+    "One independent DeepSeek review aware of proposed labels plus parent review, not human gold or blinded annotation."
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/support-dataset-20261023/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

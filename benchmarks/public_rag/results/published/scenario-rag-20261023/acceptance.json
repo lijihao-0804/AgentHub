@@ -1,0 +1,403 @@
+{
+  "recorded_at_utc": "2026-10-23T06:49:00.164216+00:00",
+  "status": "PASS_SCOPED_RETRIEVAL_MILESTONE",
+  "formal_experiment": false,
+  "code_evidence": "Stage source ZIP snapshots plus final integration-source-1.zip; shared working checkout has pre-existing uncommitted changes. No clean-commit or Formal Experiment claim.",
+  "datasets": {
+    "qasper": {
+      "scope": "retrieval within the specified paper, not corpus-wide paper discovery",
+      "split": "dev",
+      "denominators": {
+        "all_questions": 1005,
+        "evidence_evaluable": 854,
+        "unanswerable": 60,
+        "unaligned": 91
+      },
+      "frozen_profile": "heading_fill",
+      "primary": "best_evidence_recall",
+      "metrics": {
+        "plain_small": {
+          "best_evidence_recall": 0.6223821098235618,
+          "complete_evidence_set": 0.5526932084309133,
+          "evidence_precision": 0.18571428571428572,
+          "full_text_evidence_recall": 0.5420835149757867,
+          "selected_paragraphs": 4.809133489461359,
+          "evidence_bytes": 3509.4086651053863
+        },
+        "heading_fill": {
+          "best_evidence_recall": 0.8439387180604979,
+          "complete_evidence_set": 0.7868852459016393,
+          "evidence_precision": 0.12404913779228603,
+          "full_text_evidence_recall": 0.7796530037747836,
+          "selected_paragraphs": 11.831381733021077,
+          "evidence_bytes": 7874.160421545667
+        }
+      },
+      "comparison": {
+        "primary_ci": {
+          "baseline_mean": 0.6223821098235618,
+          "candidate_mean": 0.8439387180604979,
+          "difference": 0.2215566082369361,
+          "delta": 0.2215566082369361,
+          "ci_low": 0.19785798974007748,
+          "ci_high": 0.24636381241973346,
+          "confidence": 0.95,
+          "ci95_low": 0.19785798974007748,
+          "ci95_high": 0.24636381241973346,
+          "queries": 854,
+          "groups": 275,
+          "inference_valid": true
+        },
+        "gates": {
+          "minimum_primary_gain": true,
+          "cluster_ci_above_zero": true,
+          "maximum_secondary_loss": true,
+          "adequate_questions_and_groups": true
+        },
+        "passed": true
+      },
+      "relative_gates_passed": true,
+      "absolute_targets": {
+        "evidence_recall": 0.8,
+        "complete_evidence_set": 0.65
+      },
+      "absolute_gates": {
+        "evidence_recall": true,
+        "complete_evidence_set": true
+      },
+      "shared_selector_replay": {
+        "status": "PASS",
+        "exact_contexts_matched": 2010,
+        "model_calls": 0,
+        "gpu_inference": false,
+        "scope": "Compatibility regression on exposed results, not new confirmation; same record projection, not complete production API or answer path"
+      },
+      "hop_strata": {},
+      "complete_set_attribution": {
+        "plain_small": {
+          "no_complete_evidence_set_in_candidate_pool": 149,
+          "complete_after_budget": 472,
+          "complete_in_pool_but_lost_during_context_selection": 233
+        },
+        "heading_fill": {
+          "no_complete_evidence_set_in_candidate_pool": 135,
+          "complete_after_budget": 672,
+          "complete_in_pool_but_lost_during_context_selection": 47
+        }
+      },
+      "report": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirm-1/report.json"
+    },
+    "musique": {
+      "scope": "question-provided candidate paragraphs, not open full-corpus retrieval",
+      "split": "dev",
+      "denominators": {
+        "all_questions": 300,
+        "evidence_evaluable": 300,
+        "unanswerable": 0,
+        "unaligned": 0
+      },
+      "frozen_profile": "heading_fill",
+      "primary": "complete_evidence_set",
+      "metrics": {
+        "plain_small": {
+          "best_evidence_recall": 0.7397222222222222,
+          "complete_evidence_set": 0.45,
+          "evidence_precision": 0.4003333333333334,
+          "full_text_evidence_recall": 0.6941666666666667,
+          "selected_paragraphs": 4.863333333333333,
+          "evidence_bytes": 3396.13
+        },
+        "heading_fill": {
+          "best_evidence_recall": 0.9111111111111111,
+          "complete_evidence_set": 0.7633333333333333,
+          "evidence_precision": 0.21749701113013803,
+          "full_text_evidence_recall": 0.8827777777777777,
+          "selected_paragraphs": 11.766666666666667,
+          "evidence_bytes": 7854.25
+        }
+      },
+      "comparison": {
+        "primary_ci": {
+          "baseline_mean": 0.45,
+          "candidate_mean": 0.7633333333333333,
+          "difference": 0.31333333333333335,
+          "delta": 0.31333333333333335,
+          "ci_low": 0.25435540069686413,
+          "ci_high": 0.37722755657020074,
+          "confidence": 0.95,
+          "ci95_low": 0.25435540069686413,
+          "ci95_high": 0.37722755657020074,
+          "queries": 300,
+          "groups": 173,
+          "inference_valid": true
+        },
+        "gates": {
+          "minimum_primary_gain": true,
+          "cluster_ci_above_zero": true,
+          "maximum_secondary_loss": true,
+          "adequate_questions_and_groups": true
+        },
+        "passed": true
+      },
+      "relative_gates_passed": true,
+      "absolute_targets": {
+        "complete_evidence_set": 0.7,
+        "support_recall": 0.85
+      },
+      "absolute_gates": {
+        "complete_evidence_set": true,
+        "support_recall": true
+      },
+      "shared_selector_replay": {
+        "status": "PASS",
+        "exact_contexts_matched": 600,
+        "model_calls": 0,
+        "gpu_inference": false,
+        "scope": "Compatibility regression on exposed results, not new confirmation; same record projection, not complete production API or answer path"
+      },
+      "hop_strata": {
+        "2": {
+          "questions": 140,
+          "profiles": {
+            "plain_small": {
+              "best_evidence_recall": 0.8,
+              "complete_evidence_set": 0.6285714285714286,
+              "evidence_bytes": 3266.65
+            },
+            "heading_fill": {
+              "best_evidence_recall": 0.9607142857142857,
+              "complete_evidence_set": 0.9214285714285714,
+              "evidence_bytes": 7848.478571428572
+            }
+          }
+        },
+        "3": {
+          "questions": 110,
+          "profiles": {
+            "plain_small": {
+              "best_evidence_recall": 0.7424242424242424,
+              "complete_evidence_set": 0.39090909090909093,
+              "evidence_bytes": 3509.681818181818
+            },
+            "heading_fill": {
+              "best_evidence_recall": 0.9212121212121211,
+              "complete_evidence_set": 0.7727272727272727,
+              "evidence_bytes": 7866.572727272727
+            }
+          }
+        },
+        "4": {
+          "questions": 50,
+          "profiles": {
+            "plain_small": {
+              "best_evidence_recall": 0.565,
+              "complete_evidence_set": 0.08,
+              "evidence_bytes": 3508.86
+            },
+            "heading_fill": {
+              "best_evidence_recall": 0.75,
+              "complete_evidence_set": 0.3,
+              "evidence_bytes": 7843.3
+            }
+          }
+        }
+      },
+      "complete_set_attribution": {
+        "plain_small": {
+          "complete_after_budget": 135,
+          "complete_in_pool_but_lost_during_context_selection": 144,
+          "no_complete_evidence_set_in_candidate_pool": 21
+        },
+        "heading_fill": {
+          "complete_after_budget": 229,
+          "no_complete_evidence_set_in_candidate_pool": 21,
+          "complete_in_pool_but_lost_during_context_selection": 50
+        }
+      },
+      "report": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/report.json"
+    }
+  },
+  "api_exploration": {
+    "scope": "QASPER train only, exploratory branch, not adopted",
+    "model": "deepseek-v4.1-flash-1017",
+    "observed_provider_usage": {
+      "prompt_tokens": {
+        "sum": 642520,
+        "observed_count": 235,
+        "unknown_count": 0
+      },
+      "completion_tokens": {
+        "sum": 2900,
+        "observed_count": 235,
+        "unknown_count": 0
+      },
+      "total_tokens": {
+        "sum": 645420,
+        "observed_count": 235,
+        "unknown_count": 0
+      }
+    },
+    "incremental_request_mean_ms": 920.9509178724011,
+    "versus_budget_fill": {
+      "baseline_mean": 0.7704148986327204,
+      "candidate_mean": 0.7950848656294202,
+      "difference": 0.02466996699669967,
+      "delta": 0.02466996699669967,
+      "ci_low": -0.015051190418109955,
+      "ci_high": 0.06699740799551655,
+      "confidence": 0.99,
+      "ci95_low": -0.015051190418109955,
+      "ci95_high": 0.06699740799551655,
+      "queries": 202,
+      "groups": 74,
+      "inference_valid": true
+    },
+    "adopted": false,
+    "late_cost_gate_note": "Extra conservative incremental gate clarified after collection and before aggregate scoring; exploratory, not confirmatory.",
+    "currency_cost": null
+  },
+  "production_opt_in": {
+    "status": "PASS",
+    "scope": "Local optional byte-budget wiring, focused controlled-fixture validation and review; not production dataset end-to-end quality confirmation",
+    "parameter": "context_budget_bytes",
+    "range": [
+      2,
+      64000
+    ],
+    "default": null,
+    "public_api": "/api/v1 knowledge retrieval playground",
+    "wired_layers": [
+      "RetrievalQuery",
+      "knowledge request and route",
+      "Agent retrieval configuration and publication",
+      "search_knowledge",
+      "retrieval trace projection",
+      "evaluation observation"
+    ],
+    "selection_order": [
+      "authenticated snapshot hydration",
+      "BGE ranking where configured",
+      "relevance floor",
+      "whole-record byte selection with oversized-record skip",
+      "final_top_k count ceiling"
+    ],
+    "none_behavior": "Historical count truncation and trace semantics preserved; missing or explicit null budget adds no frozen-spec key",
+    "review_corrections": [
+      "Removed premature count truncation from budget-enabled branch so ranks beyond final_top_k can backfill oversized records, both reranked and non-reranked paths.",
+      "Observation provenance maps actual context_selection metadata key; no nonexistent result key.",
+      "Removed a pure field-position assertion; retained behavioral compatibility, validation and permission/floor tests."
+    ],
+    "focused_tests": {
+      "files": [
+        "tests/unit/test_rag_context_budget_configuration.py",
+        "tests/unit/test_knowledge_context_budget_selection.py"
+      ],
+      "passed": 19,
+      "elapsed_seconds": 1.12,
+      "exit_code": 0,
+      "provenance": "Native DeepSeek integration agent final verification delivered to parent, after review corrections"
+    },
+    "related_existing_tests_before_review_corrections": {
+      "passed": 56,
+      "elapsed_seconds": 5.25,
+      "exit_code": 0,
+      "provenance": "Native DeepSeek integration agent initial validation; corrections then independently checked by19 focused behavioral tests"
+    },
+    "shared_selector_unit_tests": {
+      "passed": 26,
+      "exit_code": 0
+    },
+    "parent_final_source_ruff": {
+      "status": "PASS",
+      "exit_code": 0
+    },
+    "agent_final_diff_check": {
+      "status": "PASS",
+      "exit_code": 0
+    },
+    "gpu_or_api_in_unit_tests": false,
+    "hash_tests_added_or_run": false,
+    "global_default_changed": false,
+    "published_versions_changed": false,
+    "business_index_changed": false,
+    "tool_limit_default": 5,
+    "tool_limit_max": 10,
+    "tool_excerpt_chars_max": 1000,
+    "prompt_context_budget_policy_preserved": true,
+    "production_dataset_e2e_evaluated": false,
+    "generated_answer_evaluated": false
+  },
+  "job_exits": {
+    "musique-confirm-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 228.187
+    },
+    "musique-confirm-score-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 3.234
+    },
+    "musique-dev-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 138.656
+    },
+    "musique-score-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 3.594
+    },
+    "qasper-chain-dev-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 61.937
+    },
+    "qasper-chain-score-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 3.344
+    },
+    "qasper-confirm-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 660.593
+    },
+    "qasper-confirm-score-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 5.125
+    },
+    "qasper-dev-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 272.157
+    },
+    "qasper-score-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 8.688
+    }
+  },
+  "limitations": [
+    "No generated answers, answer accuracy, faithfulness, refusal quality or business result evaluated.",
+    "Specified paper/case exact dense retrieval, not corpus-wide production SQL/Qdrant end-to-end.",
+    "Same maximum8000byte budget is not equal actual tokens or compute: context input increased.",
+    "Evidence paragraph hit is not exact supporting span coverage;90% source character metric is a secondary proxy.",
+    "QASPER unanswerable and incompletely aligned questions retained but excluded from evidence metric denominator.",
+    "MuSiQue Ans sample only; four-hop complete evidence rate0.30. Not a solved multi-hop system.",
+    "Shared cached profile inference does not establish paired end-to-end latency or P95.",
+    "Tool default5/max10 and snippet1000chars, production full-record metadata and relevance floor differ from benchmark.",
+    "Offline heading and paper/case scope are not automatically supplied by the new production byte-budget field.",
+    "Published AgentVersions, business indexes, global defaults and model allowlists were not changed.",
+    "No pricing snapshot, clean commit binding, published DatasetVersion or platform Formal Experiment guarantee.",
+    "No QASPER test or MuSiQue test consumed; confirmation dev results are now exposed and cannot be reused as fresh blind selection."
+  ],
+  "next_milestone": "Evaluate actual consumer admitted evidence and generated answers, and separately develop bridge-aware four-hop retrieval on training data. Do not tune against exposed confirmation scores.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

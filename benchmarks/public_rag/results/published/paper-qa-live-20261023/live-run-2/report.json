@@ -1,0 +1,864 @@
+{
+  "scope": "Offline scoring for the planned QASPER-based paper QA comparison.\n\nThis module is deliberately pure: it consumes recorded AgentRun rows and a\npaper paragraph source map without making API calls.  Full paper paragraphs\nand annotation evidence are used only for offline diagnostics.  Paragraph-ID\noverlap is a coarse source diagnostic, not a semantic faithfulness score.\n",
+  "dataset": {
+    "planned_cases": 42,
+    "papers": 12
+  },
+  "protocol": {
+    "baseline_arm": "generic5",
+    "candidate_arm": "paper10",
+    "direction": "paper10 minus generic5",
+    "primary": "scorable=true and consensus != mixed",
+    "mixed_scope": "descriptive only",
+    "group_key": "paper_id",
+    "seed": 20261031,
+    "bootstrap_samples": 5000,
+    "confidence": 0.95
+  },
+  "denominators": {
+    "planned_rows": 42,
+    "primary_rows": 41,
+    "answerable_rows": 38,
+    "unanswerable_rows": 3,
+    "mixed_rows": 1,
+    "unscorable_rows": 1,
+    "papers": 12
+  },
+  "arms": {
+    "generic5": {
+      "planned": {
+        "planned_queries": 42,
+        "token_f1": 0.0,
+        "exact_match": 0.0,
+        "valid_response_fraction": 0.0,
+        "failure_count": 42,
+        "not_attempted_count": 41,
+        "invalid_output_count": 42,
+        "invalid_citation_count": 0,
+        "source_integrity_failure_count": 0,
+        "refusal_rate": 0.0,
+        "false_refusal_rate": null,
+        "unsupported_answer_rate": null,
+        "correct_refusal_rate": null,
+        "annotation_paragraph_overlap": 0.0,
+        "annotation_paragraph_overlap_denominator": 39,
+        "exact_evidence_visible": 0.0,
+        "exact_evidence_visible_denominator": 39,
+        "citations": {
+          "cited_ids": 0,
+          "valid_cited_ids": 0,
+          "invalid_cited_ids": 0,
+          "unknown_id_count": 0,
+          "cross_paper_id_count": 0,
+          "duplicate_id_count": 0,
+          "responses_with_citations": 0,
+          "scope": "Visible-source identity and ownership only; not semantic support."
+        },
+        "model_usage": {
+          "input_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 1
+          },
+          "output_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 1
+          },
+          "total_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 1
+          }
+        },
+        "run_usage": {
+          "input_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 42
+          },
+          "output_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 42
+          },
+          "total_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 42
+          }
+        },
+        "model_calls": 1,
+        "tool_calls": 0,
+        "end_to_end_latency_ms": {
+          "observed_count": 1,
+          "unknown_count": 41,
+          "p50": 22665.571100005764,
+          "p95": 22665.571100005764,
+          "basis": "Recorded end-to-end latency_ms only."
+        },
+        "currency_cost": null
+      },
+      "primary": {
+        "planned_queries": 41,
+        "token_f1": 0.0,
+        "exact_match": 0.0,
+        "valid_response_fraction": 0.0,
+        "failure_count": 41,
+        "not_attempted_count": 40,
+        "invalid_output_count": 41,
+        "invalid_citation_count": 0,
+        "source_integrity_failure_count": 0,
+        "refusal_rate": 0.0,
+        "false_refusal_rate": null,
+        "unsupported_answer_rate": null,
+        "correct_refusal_rate": null,
+        "annotation_paragraph_overlap": 0.0,
+        "annotation_paragraph_overlap_denominator": 38,
+        "exact_evidence_visible": 0.0,
+        "exact_evidence_visible_denominator": 38,
+        "citations": {
+          "cited_ids": 0,
+          "valid_cited_ids": 0,
+          "invalid_cited_ids": 0,
+          "unknown_id_count": 0,
+          "cross_paper_id_count": 0,
+          "duplicate_id_count": 0,
+          "responses_with_citations": 0,
+          "scope": "Visible-source identity and ownership only; not semantic support."
+        },
+        "model_usage": {
+          "input_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 1
+          },
+          "output_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 1
+          },
+          "total_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 1
+          }
+        },
+        "run_usage": {
+          "input_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 41
+          },
+          "output_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 41
+          },
+          "total_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 41
+          }
+        },
+        "model_calls": 1,
+        "tool_calls": 0,
+        "end_to_end_latency_ms": {
+          "observed_count": 1,
+          "unknown_count": 40,
+          "p50": 22665.571100005764,
+          "p95": 22665.571100005764,
+          "basis": "Recorded end-to-end latency_ms only."
+        },
+        "currency_cost": null
+      },
+      "strata": {
+        "answerable": {
+          "planned_queries": 38,
+          "token_f1": 0.0,
+          "exact_match": 0.0,
+          "valid_response_fraction": 0.0,
+          "failure_count": 38,
+          "not_attempted_count": 37,
+          "invalid_output_count": 38,
+          "invalid_citation_count": 0,
+          "source_integrity_failure_count": 0,
+          "refusal_rate": 0.0,
+          "false_refusal_rate": 0.0,
+          "unsupported_answer_rate": null,
+          "correct_refusal_rate": null,
+          "annotation_paragraph_overlap": 0.0,
+          "annotation_paragraph_overlap_denominator": 38,
+          "exact_evidence_visible": 0.0,
+          "exact_evidence_visible_denominator": 38,
+          "citations": {
+            "cited_ids": 0,
+            "valid_cited_ids": 0,
+            "invalid_cited_ids": 0,
+            "unknown_id_count": 0,
+            "cross_paper_id_count": 0,
+            "duplicate_id_count": 0,
+            "responses_with_citations": 0,
+            "scope": "Visible-source identity and ownership only; not semantic support."
+          },
+          "model_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            }
+          },
+          "run_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 38
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 38
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 38
+            }
+          },
+          "model_calls": 1,
+          "tool_calls": 0,
+          "end_to_end_latency_ms": {
+            "observed_count": 1,
+            "unknown_count": 37,
+            "p50": 22665.571100005764,
+            "p95": 22665.571100005764,
+            "basis": "Recorded end-to-end latency_ms only."
+          },
+          "currency_cost": null
+        },
+        "unanswerable": {
+          "planned_queries": 3,
+          "token_f1": 0.0,
+          "exact_match": 0.0,
+          "valid_response_fraction": 0.0,
+          "failure_count": 3,
+          "not_attempted_count": 3,
+          "invalid_output_count": 3,
+          "invalid_citation_count": 0,
+          "source_integrity_failure_count": 0,
+          "refusal_rate": 0.0,
+          "false_refusal_rate": null,
+          "unsupported_answer_rate": 0.0,
+          "correct_refusal_rate": 0.0,
+          "annotation_paragraph_overlap": null,
+          "annotation_paragraph_overlap_denominator": 0,
+          "exact_evidence_visible": null,
+          "exact_evidence_visible_denominator": 0,
+          "citations": {
+            "cited_ids": 0,
+            "valid_cited_ids": 0,
+            "invalid_cited_ids": 0,
+            "unknown_id_count": 0,
+            "cross_paper_id_count": 0,
+            "duplicate_id_count": 0,
+            "responses_with_citations": 0,
+            "scope": "Visible-source identity and ownership only; not semantic support."
+          },
+          "model_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            }
+          },
+          "run_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 3
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 3
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 3
+            }
+          },
+          "model_calls": 0,
+          "tool_calls": 0,
+          "end_to_end_latency_ms": {
+            "observed_count": 0,
+            "unknown_count": 3,
+            "p50": null,
+            "p95": null,
+            "basis": "Recorded end-to-end latency_ms only."
+          },
+          "currency_cost": null
+        },
+        "mixed": {
+          "planned_queries": 1,
+          "token_f1": 0.0,
+          "exact_match": 0.0,
+          "valid_response_fraction": 0.0,
+          "failure_count": 1,
+          "not_attempted_count": 1,
+          "invalid_output_count": 1,
+          "invalid_citation_count": 0,
+          "source_integrity_failure_count": 0,
+          "refusal_rate": 0.0,
+          "false_refusal_rate": null,
+          "unsupported_answer_rate": null,
+          "correct_refusal_rate": null,
+          "annotation_paragraph_overlap": 0.0,
+          "annotation_paragraph_overlap_denominator": 1,
+          "exact_evidence_visible": 0.0,
+          "exact_evidence_visible_denominator": 1,
+          "citations": {
+            "cited_ids": 0,
+            "valid_cited_ids": 0,
+            "invalid_cited_ids": 0,
+            "unknown_id_count": 0,
+            "cross_paper_id_count": 0,
+            "duplicate_id_count": 0,
+            "responses_with_citations": 0,
+            "scope": "Visible-source identity and ownership only; not semantic support."
+          },
+          "model_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            }
+          },
+          "run_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            }
+          },
+          "model_calls": 0,
+          "tool_calls": 0,
+          "end_to_end_latency_ms": {
+            "observed_count": 0,
+            "unknown_count": 1,
+            "p50": null,
+            "p95": null,
+            "basis": "Recorded end-to-end latency_ms only."
+          },
+          "currency_cost": null
+        }
+      },
+      "unscorable": {
+        "planned_queries": 1,
+        "papers": 1
+      }
+    },
+    "paper10": {
+      "planned": {
+        "planned_queries": 42,
+        "token_f1": 0.0,
+        "exact_match": 0.0,
+        "valid_response_fraction": 0.0,
+        "failure_count": 42,
+        "not_attempted_count": 42,
+        "invalid_output_count": 42,
+        "invalid_citation_count": 0,
+        "source_integrity_failure_count": 0,
+        "refusal_rate": 0.0,
+        "false_refusal_rate": null,
+        "unsupported_answer_rate": null,
+        "correct_refusal_rate": null,
+        "annotation_paragraph_overlap": 0.0,
+        "annotation_paragraph_overlap_denominator": 39,
+        "exact_evidence_visible": 0.0,
+        "exact_evidence_visible_denominator": 39,
+        "citations": {
+          "cited_ids": 0,
+          "valid_cited_ids": 0,
+          "invalid_cited_ids": 0,
+          "unknown_id_count": 0,
+          "cross_paper_id_count": 0,
+          "duplicate_id_count": 0,
+          "responses_with_citations": 0,
+          "scope": "Visible-source identity and ownership only; not semantic support."
+        },
+        "model_usage": {
+          "input_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 0
+          },
+          "output_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 0
+          },
+          "total_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 0
+          }
+        },
+        "run_usage": {
+          "input_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 42
+          },
+          "output_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 42
+          },
+          "total_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 42
+          }
+        },
+        "model_calls": 0,
+        "tool_calls": 0,
+        "end_to_end_latency_ms": {
+          "observed_count": 0,
+          "unknown_count": 42,
+          "p50": null,
+          "p95": null,
+          "basis": "Recorded end-to-end latency_ms only."
+        },
+        "currency_cost": null
+      },
+      "primary": {
+        "planned_queries": 41,
+        "token_f1": 0.0,
+        "exact_match": 0.0,
+        "valid_response_fraction": 0.0,
+        "failure_count": 41,
+        "not_attempted_count": 41,
+        "invalid_output_count": 41,
+        "invalid_citation_count": 0,
+        "source_integrity_failure_count": 0,
+        "refusal_rate": 0.0,
+        "false_refusal_rate": null,
+        "unsupported_answer_rate": null,
+        "correct_refusal_rate": null,
+        "annotation_paragraph_overlap": 0.0,
+        "annotation_paragraph_overlap_denominator": 38,
+        "exact_evidence_visible": 0.0,
+        "exact_evidence_visible_denominator": 38,
+        "citations": {
+          "cited_ids": 0,
+          "valid_cited_ids": 0,
+          "invalid_cited_ids": 0,
+          "unknown_id_count": 0,
+          "cross_paper_id_count": 0,
+          "duplicate_id_count": 0,
+          "responses_with_citations": 0,
+          "scope": "Visible-source identity and ownership only; not semantic support."
+        },
+        "model_usage": {
+          "input_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 0
+          },
+          "output_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 0
+          },
+          "total_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 0
+          }
+        },
+        "run_usage": {
+          "input_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 41
+          },
+          "output_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 41
+          },
+          "total_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 41
+          }
+        },
+        "model_calls": 0,
+        "tool_calls": 0,
+        "end_to_end_latency_ms": {
+          "observed_count": 0,
+          "unknown_count": 41,
+          "p50": null,
+          "p95": null,
+          "basis": "Recorded end-to-end latency_ms only."
+        },
+        "currency_cost": null
+      },
+      "strata": {
+        "answerable": {
+          "planned_queries": 38,
+          "token_f1": 0.0,
+          "exact_match": 0.0,
+          "valid_response_fraction": 0.0,
+          "failure_count": 38,
+          "not_attempted_count": 38,
+          "invalid_output_count": 38,
+          "invalid_citation_count": 0,
+          "source_integrity_failure_count": 0,
+          "refusal_rate": 0.0,
+          "false_refusal_rate": 0.0,
+          "unsupported_answer_rate": null,
+          "correct_refusal_rate": null,
+          "annotation_paragraph_overlap": 0.0,
+          "annotation_paragraph_overlap_denominator": 38,
+          "exact_evidence_visible": 0.0,
+          "exact_evidence_visible_denominator": 38,
+          "citations": {
+            "cited_ids": 0,
+            "valid_cited_ids": 0,
+            "invalid_cited_ids": 0,
+            "unknown_id_count": 0,
+            "cross_paper_id_count": 0,
+            "duplicate_id_count": 0,
+            "responses_with_citations": 0,
+            "scope": "Visible-source identity and ownership only; not semantic support."
+          },
+          "model_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            }
+          },
+          "run_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 38
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 38
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 38
+            }
+          },
+          "model_calls": 0,
+          "tool_calls": 0,
+          "end_to_end_latency_ms": {
+            "observed_count": 0,
+            "unknown_count": 38,
+            "p50": null,
+            "p95": null,
+            "basis": "Recorded end-to-end latency_ms only."
+          },
+          "currency_cost": null
+        },
+        "unanswerable": {
+          "planned_queries": 3,
+          "token_f1": 0.0,
+          "exact_match": 0.0,
+          "valid_response_fraction": 0.0,
+          "failure_count": 3,
+          "not_attempted_count": 3,
+          "invalid_output_count": 3,
+          "invalid_citation_count": 0,
+          "source_integrity_failure_count": 0,
+          "refusal_rate": 0.0,
+          "false_refusal_rate": null,
+          "unsupported_answer_rate": 0.0,
+          "correct_refusal_rate": 0.0,
+          "annotation_paragraph_overlap": null,
+          "annotation_paragraph_overlap_denominator": 0,
+          "exact_evidence_visible": null,
+          "exact_evidence_visible_denominator": 0,
+          "citations": {
+            "cited_ids": 0,
+            "valid_cited_ids": 0,
+            "invalid_cited_ids": 0,
+            "unknown_id_count": 0,
+            "cross_paper_id_count": 0,
+            "duplicate_id_count": 0,
+            "responses_with_citations": 0,
+            "scope": "Visible-source identity and ownership only; not semantic support."
+          },
+          "model_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            }
+          },
+          "run_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 3
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 3
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 3
+            }
+          },
+          "model_calls": 0,
+          "tool_calls": 0,
+          "end_to_end_latency_ms": {
+            "observed_count": 0,
+            "unknown_count": 3,
+            "p50": null,
+            "p95": null,
+            "basis": "Recorded end-to-end latency_ms only."
+          },
+          "currency_cost": null
+        },
+        "mixed": {
+          "planned_queries": 1,
+          "token_f1": 0.0,
+          "exact_match": 0.0,
+          "valid_response_fraction": 0.0,
+          "failure_count": 1,
+          "not_attempted_count": 1,
+          "invalid_output_count": 1,
+          "invalid_citation_count": 0,
+          "source_integrity_failure_count": 0,
+          "refusal_rate": 0.0,
+          "false_refusal_rate": null,
+          "unsupported_answer_rate": null,
+          "correct_refusal_rate": null,
+          "annotation_paragraph_overlap": 0.0,
+          "annotation_paragraph_overlap_denominator": 1,
+          "exact_evidence_visible": 0.0,
+          "exact_evidence_visible_denominator": 1,
+          "citations": {
+            "cited_ids": 0,
+            "valid_cited_ids": 0,
+            "invalid_cited_ids": 0,
+            "unknown_id_count": 0,
+            "cross_paper_id_count": 0,
+            "duplicate_id_count": 0,
+            "responses_with_citations": 0,
+            "scope": "Visible-source identity and ownership only; not semantic support."
+          },
+          "model_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 0
+            }
+          },
+          "run_usage": {
+            "input_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            },
+            "output_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            },
+            "total_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 1
+            }
+          },
+          "model_calls": 0,
+          "tool_calls": 0,
+          "end_to_end_latency_ms": {
+            "observed_count": 0,
+            "unknown_count": 1,
+            "p50": null,
+            "p95": null,
+            "basis": "Recorded end-to-end latency_ms only."
+          },
+          "currency_cost": null
+        }
+      },
+      "unscorable": {
+        "planned_queries": 1,
+        "papers": 1
+      }
+    }
+  },
+  "paired_95ci": {
+    "answer_token_f1": {
+      "status": "AVAILABLE",
+      "difference": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "baseline_mean": 0.0,
+      "candidate_mean": 0.0,
+      "queries": 41,
+      "groups": 12,
+      "inference_valid": true,
+      "confidence": 0.95,
+      "samples": 5000
+    },
+    "exact_match": {
+      "status": "AVAILABLE",
+      "difference": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "baseline_mean": 0.0,
+      "candidate_mean": 0.0,
+      "queries": 41,
+      "groups": 12,
+      "inference_valid": true,
+      "confidence": 0.95,
+      "samples": 5000
+    },
+    "valid_response": {
+      "status": "AVAILABLE",
+      "difference": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "baseline_mean": 0.0,
+      "candidate_mean": 0.0,
+      "queries": 41,
+      "groups": 12,
+      "inference_valid": true,
+      "confidence": 0.95,
+      "samples": 5000
+    },
+    "annotation_paragraph_overlap": {
+      "status": "AVAILABLE",
+      "difference": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "baseline_mean": 0.0,
+      "candidate_mean": 0.0,
+      "queries": 38,
+      "groups": 12,
+      "inference_valid": true,
+      "confidence": 0.95,
+      "samples": 5000
+    },
+    "exact_evidence_visible": {
+      "status": "AVAILABLE",
+      "difference": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "baseline_mean": 0.0,
+      "candidate_mean": 0.0,
+      "queries": 38,
+      "groups": 12,
+      "inference_valid": true,
+      "confidence": 0.95,
+      "samples": 5000
+    }
+  },
+  "invalid_citation_cases": [],
+  "source_integrity_cases": [],
+  "currency_cost": null,
+  "pricing_snapshot_bound": false,
+  "semantic_judge_used": false,
+  "limitations": [
+    "Failures, NOT_ATTEMPTED rows, empty non-refusals, invalid citations, and source integrity failures remain in their planned denominator with zero answer quality.",
+    "A valid refusal maps to the official answer token 'Unanswerable'. Empty output without SUCCEEDED/unanswerable=true is not refusal credit.",
+    "Annotation answer alternatives are scored independently and take the best token F1 and exact match; annotations are never merged into one mandatory answer set.",
+    "Annotation paragraph overlap is a coarse paragraph-ID/visible-chunk diagnostic, not semantic faithfulness.",
+    "exact_evidence_visible checks normalized annotation evidence as an exact substring of the concatenated snippets actually admitted to the final answer request. Visible paragraph IDs or short snippets do not establish that the complete evidence is visible.",
+    "Citation diagnostics validate identity and paper ownership only. They do not measure whether the cited record entails the answer.",
+    "Mixed-consensus and unscorable cases are retained but excluded from the primary F1/EM comparison.",
+    "Token usage reports only observed values; unknown usage remains unknown. No token count or currency cost is inferred when a pricing snapshot is not bound.",
+    "End-to-end latency uses the recorded arm latency_ms only. Missing latency is not replaced by summed model-call time."
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-2/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

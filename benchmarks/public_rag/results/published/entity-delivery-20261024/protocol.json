@@ -1,0 +1,57 @@
+{
+  "registered_at_utc": "2026-10-24T04:16:49.128791+00:00",
+  "scope": "Development delivery prototype; supplied original evidence, not retrieval E2E",
+  "seed_for_dispatch_order": 2026102402,
+  "model_route": {
+    "name": "local-rag"
+  },
+  "max_tokens": 1024,
+  "temperature": 0,
+  "thinking": "disabled",
+  "source_budget_units": 8000,
+  "case_ids": [
+    "a8e4a67dd67ae4a9ebf983a90b0d256f4b9ff6c6",
+    "a49832c89a2d7f95c1fe6132902d74e4e7a3f2d0",
+    "955ca31999309685c1daa5cb03867971ca99ec52",
+    "a9c5252173d3df1c06c770c180a77520de68531b",
+    "2555ca85ff6b56bd09c3919aa6b277eb7a4d4631",
+    "12d77ac09c659d2e04b5e3955a283101c3ad1058",
+    "4056ee2fd7a0a0f444275e627bb881134a1c2a10",
+    "2ff3898fbb5954aa82dd2f60b37dd303449c81ba"
+  ],
+  "planned_requests": 32,
+  "maximum_physical_requests": 33,
+  "source_records_checked": 62,
+  "stop_rules": [
+    "fallback or unknown outcome or wrong raw model: stop after current request",
+    "non-400 provider error or 3 known 400s: stop; no retries or continuation"
+  ],
+  "development_gates": [
+    "full entity-set exact rate no worse than shared-value baseline",
+    "wrong complete negative delivery no worse; invalid output never safe delivery",
+    "at least one strict gain in full set exact, wrong complete negatives or safe partial coverage",
+    "typed valid format >=95%; combined recorded tokens <=1.6x baseline",
+    "complete registered batch, one raw primary model, all source slices and request messages verified",
+    "any claimed quality gain must persist on the predeclared unambiguous core"
+  ],
+  "sensitivity_excluded_query_ids": [
+    "a8e4a67dd67ae4a9ebf983a90b0d256f4b9ff6c6",
+    "2ff3898fbb5954aa82dd2f60b37dd303449c81ba"
+  ],
+  "sensitivity_reason": "SST corpus-family/variant granularity and char-level subset/global dataset scope are disputed before answer calls; retain all eight primary rows and inspect six-case core.",
+  "limits": [
+    "aliases and self-reported states do not prove semantic role or exhaustive coverage",
+    "no expert calibrated semantic accuracy; no automatic production promotion",
+    "new shared entity-value baseline is not historical long-form F1"
+  ],
+  "build_sha": "23f1a384826c185c5eac2c4bf82c44408328286f",
+  "workspace_dirty": true,
+  "formal_experiment": false,
+  "holdout_exposed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

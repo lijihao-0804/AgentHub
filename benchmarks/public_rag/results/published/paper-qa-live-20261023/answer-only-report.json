@@ -1,0 +1,36 @@
+{
+  "scope": "Supplementary official-style answer-only metric; invalid JSON/failed Runs zero, citation validity not a gate. Not promotion endpoint. Added after discovering preview visibility scorer flaw; no new model requests.",
+  "primary_questions": 41,
+  "f1": {
+    "status": "AVAILABLE",
+    "difference": 0.028651407896735637,
+    "ci_low": -0.003474878036976656,
+    "ci_high": 0.07184746069870382,
+    "baseline_mean": 0.21155057793604132,
+    "candidate_mean": 0.24020198583277697,
+    "queries": 41,
+    "groups": 12,
+    "inference_valid": true,
+    "confidence": 0.95,
+    "samples": 5000
+  },
+  "em": {
+    "status": "AVAILABLE",
+    "difference": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "baseline_mean": 0.04878048780487805,
+    "candidate_mean": 0.04878048780487805,
+    "queries": 41,
+    "groups": 12,
+    "inference_valid": true,
+    "confidence": 0.95,
+    "samples": 5000
+  },
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/answer-only-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

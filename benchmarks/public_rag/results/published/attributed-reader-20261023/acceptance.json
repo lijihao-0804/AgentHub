@@ -1,0 +1,99 @@
+{
+  "at_utc": "2026-10-23T12:34:29.627277+00:00",
+  "status": "DEVELOPMENT_NOT_ACCEPTED_DIRECT_READER_RETAINED",
+  "default_changed": false,
+  "experimental_reader_present": true,
+  "experimental_reader_location": "benchmarks/public_rag/experimental/attributed_reader.py",
+  "production_reader_registered": false,
+  "public_route_or_business_version_changed": false,
+  "confirmation_opened": false,
+  "new_holdout_exposure": false,
+  "formal_experiment": false,
+  "primary_f1": {
+    "baseline_mean": 0.6078356886169386,
+    "candidate_mean": 0.6306495414307914,
+    "difference": 0.022813852813852814,
+    "delta": 0.022813852813852814,
+    "ci_low": -0.011106814754921293,
+    "ci_high": 0.06004127976875654,
+    "confidence": 0.95,
+    "ci95_low": -0.011106814754921293,
+    "ci95_high": 0.06004127976875654,
+    "queries": 160,
+    "groups": 143,
+    "inference_valid": true
+  },
+  "gates": {
+    "complete": true,
+    "physical_count": true,
+    "f1_minimum_gain": false,
+    "f1_positive_group_ci": false,
+    "em_noninferior": true,
+    "both_valid": true,
+    "attribution_valid": true,
+    "unknown_zero": true,
+    "correct_model": true,
+    "original_sources_unchanged": true,
+    "candidate_citations_known": false,
+    "paired_usage_coverage": true,
+    "input_overhead": true,
+    "pipeline_p95": true,
+    "inference_valid": true
+  },
+  "physical_api": {
+    "requests": 474,
+    "statuses": {
+      "VALID": 465,
+      "PROVIDER_ERROR": 6,
+      "INVALID_SPANS": 3
+    },
+    "observed_total_tokens": 710026,
+    "usage_observed": 468,
+    "usage_unknown": 6,
+    "currency_cost": null,
+    "historical_control_reuses": 160,
+    "fallback_reuses": 6
+  },
+  "pipeline": {
+    "paired_usage_questions": 157,
+    "mean_input_ratio": 2.2164153529814943,
+    "p95_ms": {
+      "direct768": 1008.371354997507,
+      "attribute512_answer256": 3008.3177500026063
+    },
+    "p95_ratio": 2.9833431256186804,
+    "fallback_basis": "historical direct256 cost/time included for logical deployment pipeline; excluded from new paid requests"
+  },
+  "citation_failure_source": "one historical direct256 fallback,2unknown IDs;154 successfully prepared current answers all IDs valid",
+  "final_identity_guard": "implemented and tested; retained unmodified preregistered primary score, strict guarded diagnosis separate",
+  "validation": {
+    "unique_tests_passed": 22,
+    "reader_tests": 19,
+    "scoring_tests": 3,
+    "ruff_checked_files": 5,
+    "new_hash_tests": 0,
+    "paid_validation_calls": 0,
+    "relocated_experimental_test_imports_collected": 22,
+    "unchanged_physical_request_source_payloads": 474,
+    "current_two_stage_requests_and_final_guard_replayed": 154,
+    "both_gateway_calls_verified": 154,
+    "control_messages_identical": 160,
+    "physical_dispatches_outcomes_unique": 474,
+    "saved_score_recomputed_identically": true,
+    "unknown_outcomes": 0
+  },
+  "limitations": [
+    "Exposed English provided-passage DEV, frozen upstream evidence; not full Run/auth/checkpoint E2E",
+    "Exact span validation proves source existence only; not relevance/entailment or complete reasoning",
+    "Equal maximum output caps are not matched actual compute; actual total model input/latency reported",
+    "Raw final_evidence_bytes is original source footprint; annotated actual tool bytes reported separately",
+    "Direct256 is historical exact-input diagnostic; only live direct768 is the primary comparator",
+    "No unanswerable negative dataset or human-calibrated semantic citation score; no monetary pricing snapshot"
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

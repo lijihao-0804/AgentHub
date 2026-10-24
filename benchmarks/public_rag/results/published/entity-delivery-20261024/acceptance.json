@@ -1,0 +1,74 @@
+{
+  "scope": "Development gates only; alias/task-state metrics are not calibrated semantic accuracy",
+  "decision": "DO_NOT_PROMOTE",
+  "gates": {
+    "full_entity_set_not_worse": false,
+    "wrong_complete_not_worse": true,
+    "at_least_one_strict_gain": true,
+    "typed_valid_at_least_95_percent": false,
+    "token_ratio_at_most_1_6": true,
+    "gain_on_six_case_core": true,
+    "all_messages_single_dispatch_raw_model_verified": true
+  },
+  "primary": {
+    "baseline": {
+      "full_exact": 7,
+      "wrong_removed": 3,
+      "safe_removed_rate": 0.625,
+      "safe_partial_rate": 0.0
+    },
+    "typed": {
+      "full_exact": 6,
+      "wrong_removed": 3,
+      "safe_removed_rate": 0.5,
+      "safe_partial_rate": 0.25
+    }
+  },
+  "predeclared_core": {
+    "baseline": {
+      "full_exact": 5,
+      "wrong_removed": 2,
+      "safe_removed_rate": 0.6666666666666666,
+      "safe_partial_rate": 0.0
+    },
+    "typed": {
+      "full_exact": 4,
+      "wrong_removed": 1,
+      "safe_removed_rate": 0.6666666666666666,
+      "safe_partial_rate": 0.3333333333333333
+    }
+  },
+  "valid_results": {
+    "baseline": 16,
+    "typed": 14
+  },
+  "tokens": {
+    "baseline": {
+      "input_tokens": 13980,
+      "output_tokens": 1653,
+      "total_tokens": 15633
+    },
+    "typed": {
+      "input_tokens": 16668,
+      "output_tokens": 2850,
+      "total_tokens": 19518
+    }
+  },
+  "combined_token_ratio": 1.2485127614661293,
+  "physical_dispatches": 32,
+  "received": 32,
+  "fallback": 0,
+  "unknown_transport": 0,
+  "scoring_repair": "Gateway cached_tokens metadata accepted; original all-zero report retained; no answer/alias/prompt/metric definition changed",
+  "initial_batch_exit_code": 2,
+  "initial_batch_physical_dispatches": 0,
+  "repaired_batch_exit_code": 0,
+  "currency_cost": null,
+  "production_promoted": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

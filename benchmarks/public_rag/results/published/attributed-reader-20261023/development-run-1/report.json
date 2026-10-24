@@ -1,0 +1,369 @@
+{
+  "scope": "One preregistered reader comparison; source alignment is not semantic faithfulness.",
+  "queries": 160,
+  "groups": 143,
+  "arms": {
+    "direct256_prior": {
+      "metrics": {
+        "token_f1": 0.6122106886169386,
+        "exact_match": 0.49375,
+        "evidence_recall": 0.9098958333333333,
+        "complete_evidence_set": 0.76875,
+        "full_text_evidence_recall": 0.86875,
+        "final_evidence_bytes": 3357.9375
+      },
+      "api": {
+        "status_counts": {
+          "VALID": 157,
+          "PROVIDER_ERROR": 3
+        },
+        "attempted_count": 160,
+        "not_attempted_count": 0,
+        "valid_count": 157,
+        "valid_fraction": 0.98125,
+        "unknown_outcome_count": 0,
+        "request_latency_ms": {
+          "n": 160,
+          "p50": 740.2909499996895,
+          "p95": 1078.5650549994896,
+          "basis": "Incremental provider request only; excludes retrieval, runtime, and overall consumer flow."
+        },
+        "usage": {
+          "prompt_tokens": {
+            "sum": 210096,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "completion_tokens": {
+            "sum": 7300,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "total_tokens": {
+            "sum": 217396,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "reasoning_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 160
+          }
+        },
+        "usage_note": "Observed provider usage only; missing values remain unknown and no pricing or currency cost is inferred."
+      },
+      "citation": {
+        "mean_id_validity": 0.74375,
+        "unknown_id_count": 2,
+        "duplicate_id_count": 0,
+        "responses_with_citations": 120,
+        "scope": "Admitted chunk-ID validity only; semantic support and faithfulness are not evaluated."
+      }
+    },
+    "direct768": {
+      "metrics": {
+        "token_f1": 0.6078356886169386,
+        "exact_match": 0.4875,
+        "evidence_recall": 0.9098958333333333,
+        "complete_evidence_set": 0.76875,
+        "full_text_evidence_recall": 0.86875,
+        "final_evidence_bytes": 3357.9375
+      },
+      "api": {
+        "status_counts": {
+          "VALID": 157,
+          "PROVIDER_ERROR": 3
+        },
+        "attempted_count": 160,
+        "not_attempted_count": 0,
+        "valid_count": 157,
+        "valid_fraction": 0.98125,
+        "unknown_outcome_count": 0,
+        "request_latency_ms": {
+          "n": 160,
+          "p50": 743.731549999211,
+          "p95": 1007.151154995881,
+          "basis": "Incremental provider request only; excludes retrieval, runtime, and overall consumer flow."
+        },
+        "usage": {
+          "prompt_tokens": {
+            "sum": 210096,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "completion_tokens": {
+            "sum": 7238,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "total_tokens": {
+            "sum": 217334,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "reasoning_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 160
+          }
+        },
+        "usage_note": "Observed provider usage only; missing values remain unknown and no pricing or currency cost is inferred."
+      },
+      "citation": {
+        "mean_id_validity": 0.73125,
+        "unknown_id_count": 2,
+        "duplicate_id_count": 0,
+        "responses_with_citations": 118,
+        "scope": "Admitted chunk-ID validity only; semantic support and faithfulness are not evaluated."
+      }
+    },
+    "attribute512_answer256": {
+      "metrics": {
+        "token_f1": 0.6306495414307914,
+        "exact_match": 0.525,
+        "evidence_recall": 0.9098958333333333,
+        "complete_evidence_set": 0.76875,
+        "full_text_evidence_recall": 0.86875,
+        "final_evidence_bytes": 3357.9375
+      },
+      "api": {
+        "status_counts": {
+          "VALID": 157,
+          "PROVIDER_ERROR": 3
+        },
+        "attempted_count": 160,
+        "not_attempted_count": 0,
+        "valid_count": 157,
+        "valid_fraction": 0.98125,
+        "unknown_outcome_count": 0,
+        "request_latency_ms": {
+          "n": 160,
+          "p50": 748.9052499986428,
+          "p95": 1010.237365003195,
+          "basis": "Incremental provider request only; excludes retrieval, runtime, and overall consumer flow."
+        },
+        "usage": {
+          "prompt_tokens": {
+            "sum": 242376,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "completion_tokens": {
+            "sum": 7911,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "total_tokens": {
+            "sum": 250287,
+            "observed_count": 157,
+            "unknown_count": 3
+          },
+          "reasoning_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 160
+          }
+        },
+        "usage_note": "Observed provider usage only; missing values remain unknown and no pricing or currency cost is inferred."
+      },
+      "citation": {
+        "mean_id_validity": 0.7875,
+        "unknown_id_count": 2,
+        "duplicate_id_count": 0,
+        "responses_with_citations": 127,
+        "scope": "Admitted chunk-ID validity only; semantic support and faithfulness are not evaluated."
+      }
+    }
+  },
+  "primary_f1": {
+    "baseline_mean": 0.6078356886169386,
+    "candidate_mean": 0.6306495414307914,
+    "difference": 0.022813852813852814,
+    "delta": 0.022813852813852814,
+    "ci_low": -0.011106814754921293,
+    "ci_high": 0.06004127976875654,
+    "confidence": 0.95,
+    "ci95_low": -0.011106814754921293,
+    "ci95_high": 0.06004127976875654,
+    "queries": 160,
+    "groups": 143,
+    "inference_valid": true
+  },
+  "gates": {
+    "complete": true,
+    "physical_count": true,
+    "f1_minimum_gain": false,
+    "f1_positive_group_ci": false,
+    "em_noninferior": true,
+    "both_valid": true,
+    "attribution_valid": true,
+    "unknown_zero": true,
+    "correct_model": true,
+    "original_sources_unchanged": true,
+    "candidate_citations_known": false,
+    "paired_usage_coverage": true,
+    "input_overhead": true,
+    "pipeline_p95": true,
+    "inference_valid": true
+  },
+  "passed": false,
+  "selected_profile": "direct256_prior",
+  "attribution_statuses": {
+    "VALID": 154,
+    "PROVIDER_ERROR": 3,
+    "INVALID_SPANS": 3
+  },
+  "pipeline": {
+    "paired_usage_questions": 157,
+    "mean_input_ratio": 2.2164153529814943,
+    "p95_ms": {
+      "direct768": 1008.371354997507,
+      "attribute512_answer256": 3008.3177500026063
+    },
+    "p95_ratio": 2.9833431256186804,
+    "fallback_basis": "historical direct256 cost/time included for logical deployment pipeline; excluded from new paid requests"
+  },
+  "actual_answer_tool_payload_bytes": {
+    "direct256_prior": {
+      "observed": 0,
+      "mean": null
+    },
+    "direct768": {
+      "observed": 160,
+      "mean": 3357.9375
+    },
+    "attribute512_answer256": {
+      "observed": 160,
+      "mean": 3855.01875
+    }
+  },
+  "physical_api": {
+    "requests": 474,
+    "statuses": {
+      "VALID": 465,
+      "PROVIDER_ERROR": 6,
+      "INVALID_SPANS": 3
+    },
+    "observed_total_tokens": 710026,
+    "usage_observed": 468,
+    "usage_unknown": 6,
+    "currency_cost": null,
+    "historical_control_reuses": 160,
+    "fallback_reuses": 6
+  },
+  "complete_paragraph_support_subset": {
+    "questions": 123,
+    "exact_match_by_profile": {
+      "direct256_prior": 65,
+      "direct768": 64,
+      "attribute512_answer256": 70
+    },
+    "scope": "descriptive, paragraph-ID completeness does not guarantee gold-fact span coverage"
+  },
+  "strata": {
+    "scope": "Descriptive only; no significance test, model routing, or hop-conditioned method selection.",
+    "by_hops": {
+      "2": {
+        "questions": 112,
+        "profiles": {
+          "direct256_prior": {
+            "token_f1": 0.6184381590631591,
+            "exact_match": 0.48214285714285715,
+            "evidence_recall": 0.9375,
+            "complete_evidence_set": 0.8839285714285714,
+            "full_text_evidence_recall": 0.8973214285714286,
+            "final_evidence_bytes": 3049.4375
+          },
+          "direct768": {
+            "token_f1": 0.612188159063159,
+            "exact_match": 0.4732142857142857,
+            "evidence_recall": 0.9375,
+            "complete_evidence_set": 0.8839285714285714,
+            "full_text_evidence_recall": 0.8973214285714286,
+            "final_evidence_bytes": 3049.4375
+          },
+          "attribute512_answer256": {
+            "token_f1": 0.6358508059400917,
+            "exact_match": 0.5178571428571429,
+            "evidence_recall": 0.9375,
+            "complete_evidence_set": 0.8839285714285714,
+            "full_text_evidence_recall": 0.8973214285714286,
+            "final_evidence_bytes": 3049.4375
+          }
+        }
+      },
+      "3": {
+        "questions": 35,
+        "profiles": {
+          "direct256_prior": {
+            "token_f1": 0.6196753246753246,
+            "exact_match": 0.5428571428571428,
+            "evidence_recall": 0.8952380952380952,
+            "complete_evidence_set": 0.6857142857142857,
+            "full_text_evidence_recall": 0.8571428571428571,
+            "final_evidence_bytes": 3871.1428571428573
+          },
+          "direct768": {
+            "token_f1": 0.6196753246753246,
+            "exact_match": 0.5428571428571428,
+            "evidence_recall": 0.8952380952380952,
+            "complete_evidence_set": 0.6857142857142857,
+            "full_text_evidence_recall": 0.8571428571428571,
+            "final_evidence_bytes": 3871.1428571428573
+          },
+          "attribute512_answer256": {
+            "token_f1": 0.6482467532467532,
+            "exact_match": 0.5714285714285714,
+            "evidence_recall": 0.8952380952380952,
+            "complete_evidence_set": 0.6857142857142857,
+            "full_text_evidence_recall": 0.8571428571428571,
+            "final_evidence_bytes": 3871.1428571428573
+          }
+        }
+      },
+      "4": {
+        "questions": 13,
+        "profiles": {
+          "direct256_prior": {
+            "token_f1": 0.5384615384615384,
+            "exact_match": 0.46153846153846156,
+            "evidence_recall": 0.7115384615384616,
+            "complete_evidence_set": 0.0,
+            "full_text_evidence_recall": 0.6538461538461539,
+            "final_evidence_bytes": 4634.076923076923
+          },
+          "direct768": {
+            "token_f1": 0.5384615384615384,
+            "exact_match": 0.46153846153846156,
+            "evidence_recall": 0.7115384615384616,
+            "complete_evidence_set": 0.0,
+            "full_text_evidence_recall": 0.6538461538461539,
+            "final_evidence_bytes": 4634.076923076923
+          },
+          "attribute512_answer256": {
+            "token_f1": 0.5384615384615384,
+            "exact_match": 0.46153846153846156,
+            "evidence_recall": 0.7115384615384616,
+            "complete_evidence_set": 0.0,
+            "full_text_evidence_recall": 0.6538461538461539,
+            "final_evidence_bytes": 4634.076923076923
+          }
+        }
+      }
+    }
+  },
+  "limits": [
+    "Exposed English provided-passage DEV, frozen upstream evidence; not full Run/auth/checkpoint E2E",
+    "Exact span validation proves source existence only; not relevance/entailment or complete reasoning",
+    "Equal maximum output caps are not matched actual compute; actual total model input/latency reported",
+    "Raw final_evidence_bytes is original source footprint; annotated actual tool bytes reported separately",
+    "Direct256 is historical exact-input diagnostic; only live direct768 is the primary comparator",
+    "No unanswerable negative dataset or human-calibrated semantic citation score; no monetary pricing snapshot"
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

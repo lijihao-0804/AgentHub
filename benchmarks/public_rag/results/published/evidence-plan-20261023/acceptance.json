@@ -1,0 +1,410 @@
+{
+  "recorded_at_utc": "2026-10-23T09:30:54.748777+00:00",
+  "status": "DEVELOPMENT_NOT_ACCEPTED_BASELINE_RETAINED",
+  "implementation": "Explicit compact_v1 path implemented; mechanical checks pass; not promoted",
+  "formal_experiment": false,
+  "default_changed": false,
+  "business_versions_changed": false,
+  "development": {
+    "recorded_at_utc": "2026-10-23T09:29:39.513539+00:00",
+    "scope": "Score the single preregistered compact evidence projection; never call a model.",
+    "queries": 160,
+    "groups": 143,
+    "arms": {
+      "legacy5": {
+        "metrics": {
+          "token_f1": 0.4785823810183441,
+          "exact_match": 0.39375,
+          "evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333,
+          "final_evidence_bytes": 6246.8375
+        },
+        "api": {
+          "status_counts": {
+            "VALID": 157,
+            "PROVIDER_ERROR": 3
+          },
+          "attempted_count": 160,
+          "not_attempted_count": 0,
+          "valid_count": 157,
+          "valid_fraction": 0.98125,
+          "unknown_outcome_count": 0,
+          "request_latency_ms": {
+            "n": 160,
+            "p50": 803.1862000007095,
+            "p95": 1337.1028999996267,
+            "basis": "Incremental provider request only; excludes retrieval, runtime, and overall consumer flow."
+          },
+          "usage": {
+            "prompt_tokens": {
+              "sum": 356461,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "completion_tokens": {
+              "sum": 6302,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "total_tokens": {
+              "sum": 362763,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "reasoning_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 160
+            }
+          },
+          "usage_note": "Observed provider usage only; missing values remain unknown and no pricing or currency cost is inferred."
+        },
+        "citation": {
+          "mean_id_validity": 0.5875,
+          "unknown_id_count": 0,
+          "duplicate_id_count": 0,
+          "responses_with_citations": 94,
+          "scope": "Admitted chunk-ID validity only; semantic support and faithfulness are not evaluated."
+        }
+      },
+      "compact5": {
+        "metrics": {
+          "token_f1": 0.4568925845396434,
+          "exact_match": 0.38125,
+          "evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333,
+          "final_evidence_bytes": 3602.15
+        },
+        "api": {
+          "status_counts": {
+            "VALID": 157,
+            "PROVIDER_ERROR": 3
+          },
+          "attempted_count": 160,
+          "not_attempted_count": 0,
+          "valid_count": 157,
+          "valid_fraction": 0.98125,
+          "unknown_outcome_count": 0,
+          "request_latency_ms": {
+            "n": 160,
+            "p50": 702.7425000014773,
+            "p95": 1297.0883100002532,
+            "basis": "Incremental provider request only; excludes retrieval, runtime, and overall consumer flow."
+          },
+          "usage": {
+            "prompt_tokens": {
+              "sum": 182221,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "completion_tokens": {
+              "sum": 4250,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "total_tokens": {
+              "sum": 186471,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "reasoning_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 160
+            }
+          },
+          "usage_note": "Observed provider usage only; missing values remain unknown and no pricing or currency cost is inferred."
+        },
+        "citation": {
+          "mean_id_validity": 0.55625,
+          "unknown_id_count": 0,
+          "duplicate_id_count": 0,
+          "responses_with_citations": 89,
+          "scope": "Admitted chunk-ID validity only; semantic support and faithfulness are not evaluated."
+        }
+      },
+      "compact5_matched": {
+        "metrics": {
+          "token_f1": 0.4531662587820676,
+          "exact_match": 0.36875,
+          "evidence_recall": 0.8114583333333334,
+          "complete_evidence_set": 0.61875,
+          "full_text_evidence_recall": 0.7755208333333333,
+          "final_evidence_bytes": 3602.15
+        },
+        "api": {
+          "status_counts": {
+            "VALID": 157,
+            "PROVIDER_ERROR": 3
+          },
+          "attempted_count": 160,
+          "not_attempted_count": 0,
+          "valid_count": 157,
+          "valid_fraction": 0.98125,
+          "unknown_outcome_count": 0,
+          "request_latency_ms": {
+            "n": 160,
+            "p50": 732.6118500004668,
+            "p95": 1156.3410099992318,
+            "basis": "Incremental provider request only; excludes retrieval, runtime, and overall consumer flow."
+          },
+          "usage": {
+            "prompt_tokens": {
+              "sum": 182221,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "completion_tokens": {
+              "sum": 4374,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "total_tokens": {
+              "sum": 186595,
+              "observed_count": 157,
+              "unknown_count": 3
+            },
+            "reasoning_tokens": {
+              "sum": null,
+              "observed_count": 0,
+              "unknown_count": 160
+            }
+          },
+          "usage_note": "Observed provider usage only; missing values remain unknown and no pricing or currency cost is inferred."
+        },
+        "citation": {
+          "mean_id_validity": 0.6,
+          "unknown_id_count": 0,
+          "duplicate_id_count": 0,
+          "responses_with_citations": 96,
+          "scope": "Admitted chunk-ID validity only; semantic support and faithfulness are not evaluated."
+        }
+      }
+    },
+    "primary_f1_comparison": {
+      "baseline_mean": 0.4785823810183441,
+      "candidate_mean": 0.4568925845396434,
+      "difference": -0.02168979647870077,
+      "delta": -0.02168979647870077,
+      "ci_low": -0.06096598355426893,
+      "ci_high": 0.016813993586968813,
+      "confidence": 0.95,
+      "ci95_low": -0.06096598355426893,
+      "ci95_high": 0.016813993586968813,
+      "queries": 160,
+      "groups": 143,
+      "inference_valid": true
+    },
+    "common_gates": {
+      "run_complete": true,
+      "all_pairs_observed": true,
+      "both_valid": true,
+      "unknown_zero": true,
+      "correct_model": true,
+      "support_loss_within_limit": true,
+      "group_inference_valid": true
+    },
+    "quality_gates": {
+      "minimum_f1_gain": false,
+      "positive_ci": false
+    },
+    "efficiency_gates": {
+      "f1_noninferiority": false,
+      "input_reduction": true,
+      "request_p95": true,
+      "usage_coverage": true
+    },
+    "quality_passed": false,
+    "efficiency_passed": false,
+    "passed": false,
+    "support_recall_loss": 0.0,
+    "observed_input_usage": {
+      "legacy5": {
+        "sum": 356461,
+        "observed_count": 157,
+        "unknown_count": 3,
+        "mean_observed": 2270.452229299363
+      },
+      "compact5": {
+        "sum": 182221,
+        "observed_count": 157,
+        "unknown_count": 3,
+        "mean_observed": 1160.6433121019109
+      },
+      "compact5_matched": {
+        "sum": 182221,
+        "observed_count": 157,
+        "unknown_count": 3,
+        "mean_observed": 1160.6433121019109
+      }
+    },
+    "mean_input_token_reduction": 0.4888052269392724,
+    "request_p95_ratio": 0.9700736644880624,
+    "strata": {
+      "scope": "Descriptive only; no significance test, model routing, or hop-conditioned method selection.",
+      "by_hops": {
+        "2": {
+          "questions": 112,
+          "profiles": {
+            "legacy5": {
+              "token_f1": 0.5200730443119201,
+              "exact_match": 0.41964285714285715,
+              "evidence_recall": 0.8616071428571429,
+              "complete_evidence_set": 0.75,
+              "full_text_evidence_recall": 0.8303571428571429,
+              "final_evidence_bytes": 6264.785714285715
+            },
+            "compact5": {
+              "token_f1": 0.49466797791377626,
+              "exact_match": 0.4017857142857143,
+              "evidence_recall": 0.8616071428571429,
+              "complete_evidence_set": 0.75,
+              "full_text_evidence_recall": 0.8303571428571429,
+              "final_evidence_bytes": 3620.098214285714
+            },
+            "compact5_matched": {
+              "token_f1": 0.49269286968866804,
+              "exact_match": 0.39285714285714285,
+              "evidence_recall": 0.8616071428571429,
+              "complete_evidence_set": 0.75,
+              "full_text_evidence_recall": 0.8303571428571429,
+              "final_evidence_bytes": 3620.098214285714
+            }
+          }
+        },
+        "3": {
+          "questions": 35,
+          "profiles": {
+            "legacy5": {
+              "token_f1": 0.42357142857142854,
+              "exact_match": 0.37142857142857144,
+              "evidence_recall": 0.7238095238095238,
+              "complete_evidence_set": 0.34285714285714286,
+              "full_text_evidence_recall": 0.6952380952380952,
+              "final_evidence_bytes": 6074.028571428571
+            },
+            "compact5": {
+              "token_f1": 0.4057142857142857,
+              "exact_match": 0.37142857142857144,
+              "evidence_recall": 0.7238095238095238,
+              "complete_evidence_set": 0.34285714285714286,
+              "full_text_evidence_recall": 0.6952380952380952,
+              "final_evidence_bytes": 3429.0285714285715
+            },
+            "compact5_matched": {
+              "token_f1": 0.39499999999999996,
+              "exact_match": 0.34285714285714286,
+              "evidence_recall": 0.7238095238095238,
+              "complete_evidence_set": 0.34285714285714286,
+              "full_text_evidence_recall": 0.6952380952380952,
+              "final_evidence_bytes": 3429.0285714285715
+            }
+          }
+        },
+        "4": {
+          "questions": 13,
+          "profiles": {
+            "legacy5": {
+              "token_f1": 0.2692307692307692,
+              "exact_match": 0.23076923076923078,
+              "evidence_recall": 0.6153846153846154,
+              "complete_evidence_set": 0.23076923076923078,
+              "full_text_evidence_recall": 0.5192307692307693,
+              "final_evidence_bytes": 6557.461538461538
+            },
+            "compact5": {
+              "token_f1": 0.2692307692307692,
+              "exact_match": 0.23076923076923078,
+              "evidence_recall": 0.6153846153846154,
+              "complete_evidence_set": 0.23076923076923078,
+              "full_text_evidence_recall": 0.5192307692307693,
+              "final_evidence_bytes": 3913.6153846153848
+            },
+            "compact5_matched": {
+              "token_f1": 0.2692307692307692,
+              "exact_match": 0.23076923076923078,
+              "evidence_recall": 0.6153846153846154,
+              "complete_evidence_set": 0.23076923076923078,
+              "full_text_evidence_recall": 0.5192307692307693,
+              "final_evidence_bytes": 3913.6153846153848
+            }
+          }
+        }
+      }
+    },
+    "matched_f1_descriptive_delta": -0.02541612223627653,
+    "limitations": "Controlled retrieval I/O, provided MuSiQue passages, forced single search, English short answers; no live SQL/Qdrant/checkpoint E2E, semantic citation judging, actual-token-matched algorithm claim or pricing snapshot.",
+    "mode": "development",
+    "matched_fragments_verified": 160
+  },
+  "qasper_exposed_structural_regression": {
+    "captured": 1005,
+    "eligible": 854,
+    "profiles": {
+      "legacy5": {
+        "best_evidence_recall": 0.6483402948859623,
+        "complete_evidence_set": 0.5749414519906323,
+        "full_text_evidence_recall": 0.5774093815370162,
+        "payload_bytes": 6808.603044496487
+      },
+      "compact5": {
+        "best_evidence_recall": 0.6512676953543465,
+        "complete_evidence_set": 0.5772833723653396,
+        "full_text_evidence_recall": 0.5785803417243698,
+        "payload_bytes": 4229.084309133489
+      },
+      "compact5_matched": {
+        "best_evidence_recall": 0.6483402948859623,
+        "complete_evidence_set": 0.5749414519906323,
+        "full_text_evidence_recall": 0.5774093815370162,
+        "payload_bytes": 4184.891100702576
+      }
+    }
+  },
+  "diagnostic_input_equality": {
+    "compact_and_matched_identical_messages": 160,
+    "compact_same_source_ids_as_baseline": 160,
+    "interpretation": "In this DEV sample both compact arms coincide, so their160 repeated requests describe generation variability, not a second algorithm or additional independent questions. The planned diagnostic incurred160 duplicate-input requests; all retained in cost ledger."
+  },
+  "api": {
+    "requests": 480,
+    "statuses": {
+      "VALID": 471,
+      "PROVIDER_ERROR": 9
+    },
+    "observed_total_tokens": 735829,
+    "usage_observed": 471,
+    "usage_unknown": 9,
+    "attempts_per_pair": 1,
+    "pricing_snapshot": null
+  },
+  "confirmation": {
+    "status": "NOT_RUN_PER_PREDECLARED_STOP_RULE",
+    "new_holdout_exposure": false
+  },
+  "future_direction": "The five-atom selection still loses complementary support; do not repeat format/budget tuning or claim compact representation fixes multi-hop evidence selection.",
+  "final_validation": {
+    "at_utc": "2026-10-23T09:34:29.669718+00:00",
+    "distinct_targeted_tests_passed": 69,
+    "ruff": "PASS for all17 relevant Python files",
+    "git_diff_check": "PASS",
+    "hardening": {
+      "empty_body": "reject blank evidence",
+      "locator": "only scalar positional whitelist enters model; full locator remains private",
+      "malformed_search_payload": "safe mapping failure instead of silent skip",
+      "actual_generation_inputs_unchanged": 480,
+      "expected_generation_inputs": 480,
+      "qasper_existing_compact_views_validated": 2010,
+      "new_model_calls": 0
+    },
+    "subagents": "Native DeepSeek; two implementation tasks stopped after tool-call failures; completed independent audit findings handled by parent."
+  },
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

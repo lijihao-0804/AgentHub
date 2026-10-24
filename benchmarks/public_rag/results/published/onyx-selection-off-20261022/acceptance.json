@@ -1,0 +1,51 @@
+{
+  "status": "PASS_DEV_QUALITY_SCREEN_REQUIRES_INDEPENDENT_CONFIRMATION",
+  "selected_arm": "onyx_selection",
+  "all_gates_passed": true,
+  "queries": 809,
+  "ndcg10_delta": 0.044121043448640915,
+  "ndcg10_ci95": [
+    0.03180754608653603,
+    0.057235658249137206
+  ],
+  "valid_api_calls": 809,
+  "unknown_outcomes": 0,
+  "observed_prompt_tokens": 3930475,
+  "observed_completion_tokens": 15469,
+  "observed_total_tokens": 3945944,
+  "reasoning_tokens": "NOT_REPORTED_BY_PROVIDER",
+  "initial_mapping_failure": {
+    "api_calls": 1,
+    "observed_total_tokens": 4975,
+    "path": "../onyx-selection-20261022/acceptance.json"
+  },
+  "combined_observed_total_tokens": 3950919,
+  "api_run": {
+    "exit_code": 0,
+    "elapsed_seconds": 151.985
+  },
+  "score_run": {
+    "exit_code": 0,
+    "elapsed_seconds": 15.656
+  },
+  "incremental_request_mean_ms": 727.1178174290063,
+  "paired_end_to_end_latency_evaluated": false,
+  "production_default_changed": false,
+  "model_allowlist_changed": false,
+  "nfcorpus_labels_read": false,
+  "evidence": [
+    "protocol.json",
+    "measured-source.zip",
+    "run.jsonl",
+    "run.meta.json",
+    "request-events.jsonl",
+    "report.json",
+    "frozen-selection.json"
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

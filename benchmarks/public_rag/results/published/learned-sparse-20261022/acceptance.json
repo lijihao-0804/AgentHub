@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "status": "PASS_PROTOTYPE_AND_EVALUATION_BASELINE_RETAINED",
+  "accepted_at": "2026-10-22T03:00:00+08:00",
+  "milestone": "Official BGE-M3 learned-sparse retrieval mechanism comparison",
+  "scope": {
+    "benchmark": "SciFact retrieval-only",
+    "dev_split": "train",
+    "dev_queries": 809,
+    "dev_groups": 490,
+    "formal_experiment": false,
+    "blind": false,
+    "production_default_changed": false,
+    "test_or_nfcorpus_run": false,
+    "generation_api_calls": 0
+  },
+  "default_selection": {
+    "selected_arm": "baseline",
+    "adopt_learned_sparse": false,
+    "reason": "All four predeclared DEV selection gates failed; the primary nDCG@10 CI crosses zero."
+  },
+  "numerical_gate": {
+    "status": "PASS",
+    "fixtures": 3,
+    "device": "cuda:0",
+    "dtype": "torch.float16",
+    "token_max_abs_error": 0.0,
+    "sparse_max_abs_error": 0.0,
+    "dense_min_cosine": 1.0,
+    "evidence": "numerical-gate.json"
+  },
+  "prepared_index": {
+    "chunks": 9189,
+    "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+    "sparse_modifier": "none",
+    "mean_sparse_nnz": 101.0851017520949,
+    "max_sparse_nnz": 202,
+    "indexing_seconds": 155.07894029999989,
+    "evidence": "prepared-index.json"
+  },
+  "dense_control": {
+    "matched": true,
+    "queries_checked": 809,
+    "chunk_rankings_compared": 809,
+    "chunks_compared": 24270,
+    "score_abs_tolerance": 1e-06,
+    "score_rel_tolerance": 1e-09
+  },
+  "quality": {
+    "baseline_ndcg10": 0.7533138151825969,
+    "learned_ndcg10": 0.7441228716676818,
+    "delta_ndcg10": -0.009190943514915173,
+    "delta_ndcg10_ci95": [
+      -0.019877975985483395,
+      0.0011165390454544325
+    ],
+    "baseline_recall5": 0.811578079934075,
+    "learned_recall5": 0.7951998351874743,
+    "baseline_recall20": 0.8761021837659662,
+    "learned_recall20": 0.8629171817058097,
+    "significant_decrease_claim": false,
+    "evidence": "dev-report.json"
+  },
+  "selection_checks": {
+    "min_ndcg10_gain": {
+      "observed": -0.009190943514915118,
+      "threshold": 0.005,
+      "passed": false
+    },
+    "primary_ci_above_zero": {
+      "observed_ci95_low": -0.019877975985483395,
+      "required": true,
+      "passed": false
+    },
+    "max_recall5_loss": {
+      "observed_loss": 0.016378244746600767,
+      "threshold": 0.005,
+      "passed": false
+    },
+    "max_recall20_loss": {
+      "observed_loss": 0.013185002060156492,
+      "threshold": 0.005,
+      "passed": false
+    }
+  },
+  "latency": {
+    "warm_samples": 808,
+    "baseline_mean_ms": 497.8041737623482,
+    "learned_mean_ms": 525.4528356435372,
+    "paired_delta_ms": 27.648661881188996,
+    "paired_delta_ci95_ms": [
+      18.216351767571073,
+      37.39788382593783
+    ],
+    "sign": "learned minus baseline; positive is slower"
+  },
+  "jobs": {
+    "prepare-run-1": {
+      "state": "failed",
+      "exit_code": 1,
+      "elapsed_seconds": 16.421,
+      "reason": "String route metadata from ST tokenize was treated as a tensor; the failed run remains preserved."
+    },
+    "prepare-run-2": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 174.422
+    },
+    "dev-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 856.969
+    },
+    "score-dev-run-1": {
+      "state": "completed",
+      "exit_code": 0,
+      "elapsed_seconds": 46.234
+    }
+  },
+  "evidence": {
+    "protocol": "protocol.json",
+    "dev_runs": [
+      "dev-baseline.jsonl",
+      "dev-learned.jsonl"
+    ],
+    "run_metadata": [
+      "dev-baseline.meta.json",
+      "dev-learned.meta.json"
+    ],
+    "report": "dev-report.json",
+    "frozen_selection": "frozen-selection.json",
+    "label_access": "label-access.jsonl",
+    "measured_source": "measured-source.zip",
+    "scoring_source": "scoring-source.zip"
+  },
+  "limitations": "One randomized paired session on one local machine; intervals describe query/source mix. Retrieval-only results do not support generated-answer or faithfulness claims. The exposed SciFact test regression and NFcorpus were intentionally not run.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

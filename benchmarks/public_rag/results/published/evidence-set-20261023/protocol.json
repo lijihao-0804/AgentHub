@@ -1,0 +1,54 @@
+{
+  "id": "complementary-original-evidence-set-v1",
+  "registered_at_utc": "2026-10-23T11:15:06.373012+00:00",
+  "scope": "One fixed architecture experiment: joint subset selection from frozen authorized post-floor candidates, original atomic text only, then separate reading-order diagnostic. Controlled retrieval I/O; no live SQL/Qdrant/auth/checkpoint E2E or Formal Experiment.",
+  "development": "Fixed160 already exposed official MuSiQue ans train questions, same cached candidates. NOT blind.",
+  "candidate": "One bounded DeepSeek call over at most20 original excerpts1000 chars/title/lifecycle/safe positions. Select<=5 distinct original atoms jointly; dependency reading order. No generated answer/reasoning forwarded to reader. No external lookup or extra retrieval. No prompt/model/parameter alternatives.",
+  "profiles": {
+    "legacy5": "Accepted rag_records_v1 at8000 with BGE relevance order; common ANSWER_PROMPT from evidence_plan_replay.",
+    "set_rank5": "Joint selected set, original BGE order and full DTO byte selection at8000, unchanged rag_records_v1 and original excerpts.",
+    "set_read5": "Diagnostic only: reorder exactly the actually admitted set_rank5 fragments using selector reading order, same rendering and question. No new evidence, explanations, generated facts or different answer prompt."
+  },
+  "seed": 20261027,
+  "selection_workers": 8,
+  "runtime": {
+    "context_limit": 16384,
+    "reserved_output_tokens": 256,
+    "max_retrieval_tokens": 8000,
+    "max_tool_result_tokens": 4000,
+    "estimator": "existing conservative UTF8-byte token-unit estimator, not provider actual tokens",
+    "history": false,
+    "memory": false
+  },
+  "stage1": {
+    "metric": "complete supporting paragraph set in final admitted context",
+    "min_gain": 0.05,
+    "paired_group95_ci_low_above": 0,
+    "max_mean_support_recall_loss": 0.01,
+    "min_selector_valid_fraction": 0.95,
+    "require_same_final_fragments_for_order_diagnostic": true,
+    "decision": "Only if ALL pass, issue answer API calls. Otherwise stop this method without more answer calls or confirmation."
+  },
+  "stage2": {
+    "primary": "set_rank5 minus legacy5 answer token F1, all planned failures zero",
+    "min_f1_gain": 0.03,
+    "ci_low_above": 0,
+    "min_valid_fraction": 0.95,
+    "unknown_outcomes": 0,
+    "max_recall_loss": 0.01,
+    "minimum_usage_coverage": 0.95,
+    "maximum_mean_pipeline_input_token_ratio": 4.0,
+    "maximum_incremental_pipeline_p95_ratio": 3.0,
+    "diagnostic": "set_read5 vs set_rank5 descriptive only; cannot replace primary or choose a winner after results.",
+    "interval": "Question-weighted paired bootstrap5000 over shared supporting-source components,95%; correlation beyond provided support titles is a limitation."
+  },
+  "api_policy": "Single attempt, fixed deepseek-v4.1-flash-1017,temp0,max256,no retries or fallback models. Known HTTP400/invalid selection use explicitly reported baseline evidence fallback. Unknown/wrong model/other provider error stops, no silent retry. Invalid>5% stops. Identical answer messages within the SAME question reuse one outcome, including errors; no duplicate paid diagnostics.",
+  "confirmation": "Only if stage2 accepts: one new200 official dev questions excluding all prior exposed500 question IDs. Freeze candidate/protocol before labels; disclose any source-family overlap. No confirmation reselection. No new exposure if DEV fails.",
+  "stop": "One candidate/one DEV run/at most one frozen confirmation. Negative result retained; no parameter scan. Default stays accepted baseline unless independent acceptance.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/evidence-set-20261023/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,3641 @@
+{
+  "policy": "Original artifacts remain LOCAL_ONLY; aggregate projections do not replace them",
+  "groups": [
+    {
+      "name": "answer-path-20261024",
+      "local_files": 26,
+      "local_bytes": 1677864,
+      "aggregate_files": 4
+    },
+    {
+      "name": "attributed-reader-20261023",
+      "local_files": 14,
+      "local_bytes": 5968086,
+      "aggregate_files": 4
+    },
+    {
+      "name": "budget-diversity-20261022",
+      "local_files": 21,
+      "local_bytes": 63913778,
+      "aggregate_files": 2
+    },
+    {
+      "name": "consumer-rag-20261023",
+      "local_files": 78,
+      "local_bytes": 100057218,
+      "aggregate_files": 19
+    },
+    {
+      "name": "entity-delivery-20261024",
+      "local_files": 30,
+      "local_bytes": 3051029,
+      "aggregate_files": 8
+    },
+    {
+      "name": "evidence-plan-20261023",
+      "local_files": 25,
+      "local_bytes": 51986017,
+      "aggregate_files": 8
+    },
+    {
+      "name": "evidence-set-20261023",
+      "local_files": 56,
+      "local_bytes": 34282804,
+      "aggregate_files": 11
+    },
+    {
+      "name": "fiqa-confirmation-20261022",
+      "local_files": 15,
+      "local_bytes": 10109128,
+      "aggregate_files": 2
+    },
+    {
+      "name": "fiqa-confirmation-continued-20261022",
+      "local_files": 17,
+      "local_bytes": 15068878,
+      "aggregate_files": 3
+    },
+    {
+      "name": "learned-sparse-20261022",
+      "local_files": 13,
+      "local_bytes": 31355487,
+      "aggregate_files": 2
+    },
+    {
+      "name": "model-route-20261023",
+      "local_files": 9,
+      "local_bytes": 12000,
+      "aggregate_files": 2
+    },
+    {
+      "name": "onyx-selection-20261022",
+      "local_files": 8,
+      "local_bytes": 78845,
+      "aggregate_files": 2
+    },
+    {
+      "name": "onyx-selection-off-20261022",
+      "local_files": 10,
+      "local_bytes": 6582808,
+      "aggregate_files": 3
+    },
+    {
+      "name": "paper-qa-live-20261023",
+      "local_files": 98,
+      "local_bytes": 19272597,
+      "aggregate_files": 8
+    },
+    {
+      "name": "paragraph-qa-20261023",
+      "local_files": 104,
+      "local_bytes": 25347627,
+      "aggregate_files": 7
+    },
+    {
+      "name": "parent-context-20261022",
+      "local_files": 16,
+      "local_bytes": 34368048,
+      "aggregate_files": 4
+    },
+    {
+      "name": "project-dbsf-20261022",
+      "local_files": 8,
+      "local_bytes": 8859428,
+      "aggregate_files": 3
+    },
+    {
+      "name": "prompt-trial-20261023",
+      "local_files": 25,
+      "local_bytes": 4381932,
+      "aggregate_files": 6
+    },
+    {
+      "name": "relation-reader-20261023",
+      "local_files": 14,
+      "local_bytes": 1241696,
+      "aggregate_files": 1
+    },
+    {
+      "name": "scenario-rag-20261023",
+      "local_files": 51,
+      "local_bytes": 16743470,
+      "aggregate_files": 13
+    },
+    {
+      "name": "scifact-20261021",
+      "local_files": 20,
+      "local_bytes": 54106519,
+      "aggregate_files": 1
+    },
+    {
+      "name": "support-dataset-20261023",
+      "local_files": 19,
+      "local_bytes": 415776,
+      "aggregate_files": 4
+    }
+  ],
+  "artifacts": [
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/adapter-draft-before-source-review.json",
+      "bytes": 399089,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/adjudicated-source-review.json",
+      "bytes": 14222,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/answer-case-review.json",
+      "bytes": 7175,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/answer-review-audit.json",
+      "bytes": 2690,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/answer-review-key.json",
+      "bytes": 1228,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/answer-review-packets.json",
+      "bytes": 34130,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/candidate-dataset.json",
+      "bytes": 363066,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/curation-amendments.json",
+      "bytes": 5652,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/diagnostic-run-1/answers.jsonl",
+      "bytes": 29901,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/diagnostic-run-1/api-events.jsonl",
+      "bytes": 155162,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/diagnostic-run-1/completed.json",
+      "bytes": 8331,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/answer-path-20261024/diagnostic-run-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/diagnostic-run-1/report.json",
+      "bytes": 22480,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/answer-path-20261024/diagnostic-run-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/diagnostic-run-1/run.json",
+      "bytes": 39753,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/diagnostic-run-1/verification.json",
+      "bytes": 1388,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/answer-path-20261024/diagnostic-run-1/verification.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/execution-sources.zip",
+      "bytes": 140669,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/frozen-dataset.json",
+      "bytes": 197710,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/negative-only-review-packets.json",
+      "bytes": 57340,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/negative-source-review.json",
+      "bytes": 10046,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/parent-source-review.json",
+      "bytes": 5397,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/prepared-requests.json",
+      "bytes": 145096,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/protocol.json",
+      "bytes": 3751,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/answer-path-20261024/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/README.md",
+      "bytes": 2023,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/registration-draft-1.json",
+      "bytes": 3751,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/review-condition-audit.json",
+      "bytes": 4731,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/runtime.json",
+      "bytes": 102,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/source-review.json",
+      "bytes": 22981,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/acceptance.json",
+      "bytes": 3644,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/attributed-reader-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/api-ledger.json",
+      "bytes": 290,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-diagnostics.json",
+      "bytes": 4752,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/api-events.jsonl",
+      "bytes": 3327187,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/completed.json",
+      "bytes": 195,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/attributed-reader-20261023/development-run-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/frozen-selection.json",
+      "bytes": 4085,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/label-access.json",
+      "bytes": 123,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/meta.json",
+      "bytes": 4642,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/report.json",
+      "bytes": 12431,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/attributed-reader-20261023/development-run-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/run.jsonl",
+      "bytes": 2539214,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/final-source-1.zip",
+      "bytes": 33380,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/final-source-2.zip",
+      "bytes": 33700,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/protocol.json",
+      "bytes": 3909,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/attributed-reader-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/validation.json",
+      "bytes": 534,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/acceptance.json",
+      "bytes": 1301,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/budget-diversity-20261022/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/dev-loss-diagnostics.json",
+      "bytes": 5687,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/dev-quality.json",
+      "bytes": 5049900,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/frozen-selection.json",
+      "bytes": 5291,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/label-access.jsonl",
+      "bytes": 851,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/measured-source.zip",
+      "bytes": 45426,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/protocol.json",
+      "bytes": 2370,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/budget-diversity-20261022/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-baseline.jsonl",
+      "bytes": 4920969,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-baseline.meta.json",
+      "bytes": 3995,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-budget40.jsonl",
+      "bytes": 7097835,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-budget40.meta.json",
+      "bytes": 3995,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-budget60.jsonl",
+      "bytes": 7616820,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-budget60.meta.json",
+      "bytes": 3995,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-combined40.jsonl",
+      "bytes": 7097997,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-combined40.meta.json",
+      "bytes": 3994,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-diversity20.jsonl",
+      "bytes": 6267905,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-diversity20.meta.json",
+      "bytes": 3995,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/regression-report.json",
+      "bytes": 1930548,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/scoring-source.zip",
+      "bytes": 27494,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/screen-superset.jsonl",
+      "bytes": 23819416,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/budget-diversity-20261022/screen-superset.meta.json",
+      "bytes": 3994,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/acceptance.json",
+      "bytes": 39935,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-answers-1/api-events.jsonl",
+      "bytes": 361105,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-answers-1/completed.json",
+      "bytes": 144,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/clean-development-answers-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-answers-1/frozen-selection.json",
+      "bytes": 5990,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-answers-1/meta.json",
+      "bytes": 6379,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-answers-1/report.json",
+      "bytes": 26011,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/clean-development-answers-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-answers-1/run.jsonl",
+      "bytes": 532208,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-execution-source-1.zip",
+      "bytes": 61778,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-prepared-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/clean-development-prepared-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-prepared-1/identifier-leakage-check.json",
+      "bytes": 182,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-prepared-1/label-access.json",
+      "bytes": 140,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-prepared-1/meta.json",
+      "bytes": 6255,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-prepared-1/prepared.jsonl",
+      "bytes": 6984609,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-prepared-1/stage-report.json",
+      "bytes": 8679,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/clean-development-prepared-1/stage-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-scoring-source-1.zip",
+      "bytes": 10867,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-answers-1/api-events.jsonl",
+      "bytes": 435355,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-answers-1/completed.json",
+      "bytes": 147,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/confirmation-answers-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-answers-1/meta.json",
+      "bytes": 6366,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-answers-1/report.json",
+      "bytes": 23888,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/confirmation-answers-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-answers-1/run.jsonl",
+      "bytes": 647449,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidate-frozen.json",
+      "bytes": 15930,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidate-protocol.json",
+      "bytes": 14817,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidates-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/confirmation-candidates-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidates-1/label-access.json",
+      "bytes": 15742,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidates-1/meta.json",
+      "bytes": 22360,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidates-1/run.jsonl",
+      "bytes": 1547406,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-execution-source-1.zip",
+      "bytes": 75432,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-execution-source-2.zip",
+      "bytes": 75442,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-prepared-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/confirmation-prepared-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-prepared-1/identifier-leakage-check.json",
+      "bytes": 98,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-prepared-1/label-access.json",
+      "bytes": 138,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-prepared-1/loss-attribution.json",
+      "bytes": 493,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-prepared-1/meta.json",
+      "bytes": 6244,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-prepared-1/prepared.jsonl",
+      "bytes": 6756581,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-prepared-1/stage-report.json",
+      "bytes": 7316,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/confirmation-prepared-1/stage-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-sampling-receipt.json",
+      "bytes": 9939,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-scope-check.json",
+      "bytes": 320,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-1/api-events.jsonl",
+      "bytes": 44514,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-1/completed.json",
+      "bytes": 129,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/development-answers-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-1/meta.json",
+      "bytes": 5769,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-1/run.jsonl",
+      "bytes": 360857,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-continued-1/api-events.jsonl",
+      "bytes": 381926,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-continued-1/completed.json",
+      "bytes": 144,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/development-answers-continued-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-continued-1/meta.json",
+      "bytes": 6088,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-continued-1/run.jsonl",
+      "bytes": 627311,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-continuation-receipt.json",
+      "bytes": 775,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-continuation-source-1.zip",
+      "bytes": 4946,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-execution-source-1.zip",
+      "bytes": 76191,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-prepared-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/development-prepared-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-prepared-1/label-access.json",
+      "bytes": 140,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-prepared-1/meta.json",
+      "bytes": 5849,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-prepared-1/prepared.jsonl",
+      "bytes": 7056713,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/development-prepared-1/stage-report.json",
+      "bytes": 8686,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/development-prepared-1/stage-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/final-source-1.zip",
+      "bytes": 91173,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/gold-title-clarification.json",
+      "bytes": 579,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/identifier-correction-receipt.json",
+      "bytes": 660,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/no-rag-control-reuse-receipt.json",
+      "bytes": 303,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/parent-validation.json",
+      "bytes": 1655,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/protocol-opaque-v2.json",
+      "bytes": 5357,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/protocol.json",
+      "bytes": 4489,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-clean-exposed-regression-1/completed.json",
+      "bytes": 46,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/qasper-clean-exposed-regression-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-clean-exposed-regression-1/label-access.json",
+      "bytes": 137,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-clean-exposed-regression-1/loss-attribution.json",
+      "bytes": 496,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-clean-exposed-regression-1/meta.json",
+      "bytes": 6092,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-clean-exposed-regression-1/prepared.jsonl",
+      "bytes": 36923477,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-clean-exposed-regression-1/stage-report.json",
+      "bytes": 6750,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/qasper-clean-exposed-regression-1/stage-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-clean-stage-protocol.json",
+      "bytes": 5226,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-1/label-access.json",
+      "bytes": 137,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-1/meta.json",
+      "bytes": 5681,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-1/prepared.jsonl",
+      "bytes": 0,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-2/completed.json",
+      "bytes": 46,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/qasper-exposed-regression-2/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-2/label-access.json",
+      "bytes": 137,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-2/meta.json",
+      "bytes": 5681,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-2/prepared.jsonl",
+      "bytes": 36698066,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-exposed-regression-2/stage-report.json",
+      "bytes": 6753,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/consumer-rag-20261023/qasper-exposed-regression-2/stage-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/qasper-stage-protocol.json",
+      "bytes": 4823,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/runtime-validation.json",
+      "bytes": 3134,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/scoring-clarification-opaque-v2.json",
+      "bytes": 361,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/acceptance.json",
+      "bytes": 2335,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/entity-delivery-20261024/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/candidate-dataset.json",
+      "bytes": 455556,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-1/answers.jsonl",
+      "bytes": 334,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-1/api-events.jsonl",
+      "bytes": 0,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-1/completed.json",
+      "bytes": 344,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/entity-delivery-20261024/development-run-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-1/report.json",
+      "bytes": 60797,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/entity-delivery-20261024/development-run-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-1/run.json",
+      "bytes": 9916,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-2/answers.jsonl",
+      "bytes": 55340,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-2/api-events.jsonl",
+      "bytes": 174344,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-2/completed.json",
+      "bytes": 8987,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/entity-delivery-20261024/development-run-2/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-2/core-report-v2.json",
+      "bytes": 63674,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/entity-delivery-20261024/development-run-2/core-report-v2.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-2/report-v2.json",
+      "bytes": 84250,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/entity-delivery-20261024/development-run-2/report-v2.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-2/report.json",
+      "bytes": 78020,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/entity-delivery-20261024/development-run-2/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/development-run-2/run.json",
+      "bytes": 67992,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/execution-amendment-1.json",
+      "bytes": 867,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/execution-sources-repaired-1.zip",
+      "bytes": 200233,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/execution-sources.zip",
+      "bytes": 197839,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/frozen-dataset.json",
+      "bytes": 455503,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/granularity-amendment.json",
+      "bytes": 1371,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/negative-only-review-packets.json",
+      "bytes": 23912,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/parent-source-review.json",
+      "bytes": 4058,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/prepared-requests.json",
+      "bytes": 163437,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/proposed-dataset-v2.json",
+      "bytes": 455366,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/proposed-dataset.json",
+      "bytes": 455126,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/protocol.json",
+      "bytes": 5996,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/entity-delivery-20261024/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/README.md",
+      "bytes": 2278,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/scoring-repair-1.json",
+      "bytes": 532,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/scoring-repair-sources-1.zip",
+      "bytes": 12922,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/source-review-audit.json",
+      "bytes": 2144,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/entity-delivery-20261024/source-review.json",
+      "bytes": 7556,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/acceptance.json",
+      "bytes": 15929,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-plan-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-answers-1/api-events.jsonl",
+      "bytes": 203888,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-answers-1/completed.json",
+      "bytes": 144,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-plan-20261023/development-answers-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-answers-1/frozen-selection.json",
+      "bytes": 4630,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-answers-1/meta.json",
+      "bytes": 5152,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-answers-1/report.json",
+      "bytes": 11442,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-plan-20261023/development-answers-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-answers-1/run.jsonl",
+      "bytes": 312543,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-execution-source-1.zip",
+      "bytes": 97591,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-hardened-replay-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-plan-20261023/development-hardened-replay-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-hardened-replay-1/label-access.json",
+      "bytes": 125,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-hardened-replay-1/meta.json",
+      "bytes": 5455,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-hardened-replay-1/prepared.jsonl",
+      "bytes": 5835900,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-prepared-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-plan-20261023/development-prepared-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-prepared-1/label-access.json",
+      "bytes": 125,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-prepared-1/meta.json",
+      "bytes": 5485,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-prepared-1/prepared.jsonl",
+      "bytes": 5835900,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/development-scoring-source-1.zip",
+      "bytes": 97597,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/final-implementation-source-1.zip",
+      "bytes": 97901,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/protocol.json",
+      "bytes": 4246,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-plan-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/qasper-exposed-regression-1/completed.json",
+      "bytes": 46,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-plan-20261023/qasper-exposed-regression-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/qasper-exposed-regression-1/label-access.json",
+      "bytes": 122,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/qasper-exposed-regression-1/meta.json",
+      "bytes": 5486,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/qasper-exposed-regression-1/prepared.jsonl",
+      "bytes": 39443951,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/qasper-exposed-regression-1/summary.json",
+      "bytes": 759,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-plan-20261023/qasper-exposed-regression-1/summary.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-plan-20261023/validation.json",
+      "bytes": 1512,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/acceptance.json",
+      "bytes": 9954,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/api-ledger.json",
+      "bytes": 503,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/capture-validation.json",
+      "bytes": 235,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/composition-validation.json",
+      "bytes": 223,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/api-events.jsonl",
+      "bytes": 201613,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/completed.json",
+      "bytes": 176,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/confirmation-answers-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/meta.json",
+      "bytes": 5293,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/report.json",
+      "bytes": 7985,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/confirmation-answers-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/run.jsonl",
+      "bytes": 339916,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidate-frozen.json",
+      "bytes": 84374,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidate-protocol.json",
+      "bytes": 79668,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidates-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/confirmation-candidates-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidates-1/label-access.json",
+      "bytes": 84429,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidates-1/meta.json",
+      "bytes": 90546,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidates-1/run.jsonl",
+      "bytes": 1497083,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-diagnostics.json",
+      "bytes": 1226,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/completed.json",
+      "bytes": 99,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/confirmation-prepared-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/input-snapshot.json",
+      "bytes": 5042320,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/label-access.json",
+      "bytes": 59,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/meta.json",
+      "bytes": 5390,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/prepared.jsonl",
+      "bytes": 6168085,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/selection-events.jsonl",
+      "bytes": 2977766,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/structure.json",
+      "bytes": 1048,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-sampling.json",
+      "bytes": 6507,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-answers-1/api-events.jsonl",
+      "bytes": 193929,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-answers-1/completed.json",
+      "bytes": 178,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/development-answers-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-answers-1/frozen-selection.json",
+      "bytes": 4985,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-answers-1/meta.json",
+      "bytes": 5312,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-answers-1/report.json",
+      "bytes": 11833,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/development-answers-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-answers-1/run.jsonl",
+      "bytes": 376651,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-diagnostics.json",
+      "bytes": 2510,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-1/completed.json",
+      "bytes": 102,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/development-prepared-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-1/label-access.json",
+      "bytes": 59,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-1/meta.json",
+      "bytes": 4843,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-1/prepared.jsonl",
+      "bytes": 43554,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-1/selection-events.jsonl",
+      "bytes": 14615,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-1/structure.json",
+      "bytes": 857,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-2/completed.json",
+      "bytes": 99,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/development-prepared-2/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-2/label-access.json",
+      "bytes": 59,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-2/meta.json",
+      "bytes": 4971,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-2/prepared.jsonl",
+      "bytes": 6901489,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-2/selection-events.jsonl",
+      "bytes": 2345945,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-2/structure.json",
+      "bytes": 876,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/completed.json",
+      "bytes": 99,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/development-prepared-3/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/label-access.json",
+      "bytes": 59,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/meta.json",
+      "bytes": 5380,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/prepared.jsonl",
+      "bytes": 5170421,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/selection-events.jsonl",
+      "bytes": 2445315,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/structure.json",
+      "bytes": 1032,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/final-source-2.zip",
+      "bytes": 36018,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/final-source-3.zip",
+      "bytes": 64372,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/frozen-source-1.zip",
+      "bytes": 31798,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/posthoc-consumer-attribution.json",
+      "bytes": 625,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/protocol-request-repair.json",
+      "bytes": 4752,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/protocol.json",
+      "bytes": 4253,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/evidence-set-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/evidence-set-20261023/validation.json",
+      "bytes": 1271,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/acceptance.json",
+      "bytes": 362,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/fiqa-confirmation-20261022/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/adapter-repair.json",
+      "bytes": 933,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/baseline.jsonl",
+      "bytes": 9865648,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/baseline.meta.json",
+      "bytes": 9517,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/confirmation-source.zip",
+      "bytes": 72265,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/indexing-source.zip",
+      "bytes": 42113,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/label-access.jsonl",
+      "bytes": 7323,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/measured-source.zip",
+      "bytes": 73257,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/method-protocol.json",
+      "bytes": 6396,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/protocol.json",
+      "bytes": 7465,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/fiqa-confirmation-20261022/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/request-events.jsonl",
+      "bytes": 88,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/run.jsonl",
+      "bytes": 7604,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/run.meta.json",
+      "bytes": 8290,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/secondary-exposure-protocol.json",
+      "bytes": 614,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-20261022/test-exposures.jsonl",
+      "bytes": 7253,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/acceptance.json",
+      "bytes": 3312,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/fiqa-confirmation-continued-20261022/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/adapter-repair.json",
+      "bytes": 933,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/baseline.jsonl",
+      "bytes": 9865648,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/baseline.meta.json",
+      "bytes": 9517,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/confirmation-report.json",
+      "bytes": 22608,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/fiqa-confirmation-continued-20261022/confirmation-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/confirmation-source.zip",
+      "bytes": 74973,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/consumer-budget-diagnostic.json",
+      "bytes": 1935,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/label-access.jsonl",
+      "bytes": 15961,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/method-protocol.json",
+      "bytes": 6396,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/posthoc-stage-loss-diagnostic.json",
+      "bytes": 2032,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/protocol.json",
+      "bytes": 7465,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/fiqa-confirmation-continued-20261022/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/request-events.jsonl",
+      "bytes": 56927,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/run.jsonl",
+      "bytes": 4946463,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/run.meta.json",
+      "bytes": 8567,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/scoring-source-final.zip",
+      "bytes": 22767,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/scoring-source.zip",
+      "bytes": 22760,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/fiqa-confirmation-continued-20261022/secondary-exposure-protocol.json",
+      "bytes": 614,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/acceptance.json",
+      "bytes": 4078,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/learned-sparse-20261022/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/dev-baseline.jsonl",
+      "bytes": 13238489,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/dev-baseline.meta.json",
+      "bytes": 4061,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/dev-learned.jsonl",
+      "bytes": 13272176,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/dev-learned.meta.json",
+      "bytes": 4066,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/dev-report.json",
+      "bytes": 4752980,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/frozen-selection.json",
+      "bytes": 4013,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/label-access.jsonl",
+      "bytes": 422,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/measured-source.zip",
+      "bytes": 41747,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/numerical-gate.json",
+      "bytes": 523,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/prepared-index.json",
+      "bytes": 3902,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/protocol.json",
+      "bytes": 2513,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/learned-sparse-20261022/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/learned-sparse-20261022/scoring-source.zip",
+      "bytes": 26517,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/acceptance.json",
+      "bytes": 2551,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/model-route-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/installed-repeated.json",
+      "bytes": 1416,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/installed.json",
+      "bytes": 1416,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/job-records/events.jsonl",
+      "bytes": 82,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/job-records/status.json",
+      "bytes": 619,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/job-records/stderr.log",
+      "bytes": 1056,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/job-records/stdout.log",
+      "bytes": 1848,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/live-smoke.json",
+      "bytes": 2137,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/model-route-20261023/protocol.json",
+      "bytes": 875,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/model-route-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/acceptance.json",
+      "bytes": 834,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/onyx-selection-20261022/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/label-access.jsonl",
+      "bytes": 362,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/measured-source.zip",
+      "bytes": 55045,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/preflight.json",
+      "bytes": 4889,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/protocol.json",
+      "bytes": 4478,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/onyx-selection-20261022/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/request-events.jsonl",
+      "bytes": 352,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/run.jsonl",
+      "bytes": 7769,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/run.meta.json",
+      "bytes": 5116,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/acceptance.json",
+      "bytes": 1256,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/onyx-selection-off-20261022/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/consumer-budget-diagnostic.json",
+      "bytes": 1940,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/frozen-selection.json",
+      "bytes": 6140,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/label-access.jsonl",
+      "bytes": 492,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/measured-source.zip",
+      "bytes": 55372,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/protocol.json",
+      "bytes": 5259,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/onyx-selection-off-20261022/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/report.json",
+      "bytes": 12632,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/onyx-selection-off-20261022/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/request-events.jsonl",
+      "bytes": 275546,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/run.jsonl",
+      "bytes": 6218340,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/run.meta.json",
+      "bytes": 5831,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/acceptance.json",
+      "bytes": 1997,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paper-qa-live-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/answer-only-report.json",
+      "bytes": 934,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paper-qa-live-20261023/answer-only-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/answer-support-review-v2.json",
+      "bytes": 143261,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/answer-support-review.json",
+      "bytes": 39187,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/api-ledger.json",
+      "bytes": 1104,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/api-model-confirmation.json",
+      "bytes": 1225,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/audit-selection.json",
+      "bytes": 942,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/1880ed3996964650bf15ed5dc2daa0fa",
+      "bytes": 7339,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/201c034766e54976a7f648604f1cdc43",
+      "bytes": 23245,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/2932f6e93669452786f507be90edc4f1",
+      "bytes": 19583,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/2a0ed4a25f9e465aafab5590f6935221",
+      "bytes": 5920,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/2be9e249419c4178b29de1008388ba93",
+      "bytes": 6678,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/38af0f54e4d14e3dacce785c53e8c882",
+      "bytes": 29233,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/c0f63ac412824d70ac7d0a806f704edc",
+      "bytes": 36137,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/c35c154f36554718ab78805a9914263f",
+      "bytes": 22662,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/dd4559bb20784be5aefb72ae3ec570cb",
+      "bytes": 35799,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/eb88b6c700094eb9bf3fe8655a3bdaa6",
+      "bytes": 21753,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/f3e3da6cf299422f8dbcec62690b3605",
+      "bytes": 38959,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/blobs/f4e889bcdb814b9a98bf06563e2e02f7",
+      "bytes": 39633,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/case-review-validation.json",
+      "bytes": 333,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/connectivity.json",
+      "bytes": 162,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/dataset-audit.json",
+      "bytes": 9723,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/error-diagnostics.json",
+      "bytes": 290239,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/final-source.zip",
+      "bytes": 92324,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/final-verification.json",
+      "bytes": 1060,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/frozen-dataset.json",
+      "bytes": 408973,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/frozen-source-1.zip",
+      "bytes": 32883,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/frozen-source-2.zip",
+      "bytes": 35736,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/frozen-source-3.zip",
+      "bytes": 38744,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/frozen-source-4.zip",
+      "bytes": 31543,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/frozen-source-5.zip",
+      "bytes": 32201,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/heading-map-repair.json",
+      "bytes": 456,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/infrastructure.json",
+      "bytes": 315,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/ingestion-progress.json",
+      "bytes": 5471,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/integration-review-final.json",
+      "bytes": 2229,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/integration-review-followup.json",
+      "bytes": 6100,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/integration-review.json",
+      "bytes": 10709,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-1/events.jsonl",
+      "bytes": 79,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-1/status.json",
+      "bytes": 624,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-1/stderr.log",
+      "bytes": 1546,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-1/stdout.log",
+      "bytes": 0,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-2/events.jsonl",
+      "bytes": 79,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-2/status.json",
+      "bytes": 624,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-2/stderr.log",
+      "bytes": 1402,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-2/stdout.log",
+      "bytes": 183083,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-3/events.jsonl",
+      "bytes": 82,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-3/status.json",
+      "bytes": 628,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-3/stderr.log",
+      "bytes": 1402,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/execute-job-3/stdout.log",
+      "bytes": 194940,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/prepare-job-1/events.jsonl",
+      "bytes": 82,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/prepare-job-1/status.json",
+      "bytes": 627,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/prepare-job-1/stderr.log",
+      "bytes": 295,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/job-records/prepare-job-1/stdout.log",
+      "bytes": 74,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-1/api-events.jsonl",
+      "bytes": 0,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-2/api-events.jsonl",
+      "bytes": 2051,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-2/arms.jsonl",
+      "bytes": 2515,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-2/completed-arms.json",
+      "bytes": 46,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-2/completed.json",
+      "bytes": 421,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paper-qa-live-20261023/live-run-2/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-2/report.json",
+      "bytes": 307290,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paper-qa-live-20261023/live-run-2/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-2/run.json",
+      "bytes": 32592,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-3/api-events.jsonl",
+      "bytes": 875667,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-3/arms.jsonl",
+      "bytes": 2846946,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-3/completed-arms.json",
+      "bytes": 49,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-3/completed.json",
+      "bytes": 419,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paper-qa-live-20261023/live-run-3/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-3/README.md",
+      "bytes": 631,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-3/report.json",
+      "bytes": 321432,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paper-qa-live-20261023/live-run-3/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/live-run-3/run.json",
+      "bytes": 3971003,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/migration.log",
+      "bytes": 5165,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/network-repair.json",
+      "bytes": 1249,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/preflight.json",
+      "bytes": 267,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/prepared.json",
+      "bytes": 100123,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/protocol-before-network-repair.json",
+      "bytes": 6141,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/protocol-initial-registration.json",
+      "bytes": 5296,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/protocol.json",
+      "bytes": 6185,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paper-qa-live-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/README.md",
+      "bytes": 3795,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/diagnose.py",
+      "bytes": 2773,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/final_verify.py",
+      "bytes": 3489,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/finalize.py",
+      "bytes": 15829,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/heading_map.py",
+      "bytes": 2790,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/README.md",
+      "bytes": 1196,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/rescore.py",
+      "bytes": 2548,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/setup.py",
+      "bytes": 1519,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/stages.py",
+      "bytes": 2441,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/reproduce/verify.py",
+      "bytes": 5716,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/rescoring-validation.json",
+      "bytes": 6595,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/scoring-preflight.json",
+      "bytes": 409,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/selected-papers.md",
+      "bytes": 2120,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/source-map-ingested.json",
+      "bytes": 1435539,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/source-map-preparation.json",
+      "bytes": 334,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/source-map-with-headings.json",
+      "bytes": 1515781,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/source-map.json",
+      "bytes": 1467463,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/stage-coverage.json",
+      "bytes": 81107,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/startup-repair.json",
+      "bytes": 458,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/validation.json",
+      "bytes": 1309,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/visibility-pre-repair-diagnostic.json",
+      "bytes": 729,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/visibility-rescore-1/report.json",
+      "bytes": 295471,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paper-qa-live-20261023/visibility-rescore-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/visibility-rescore-1/run.json",
+      "bytes": 4074323,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paper-qa-live-20261023/yes-no-format-diagnostic.json",
+      "bytes": 3016,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/.gitignore",
+      "bytes": 127,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/acceptance.json",
+      "bytes": 1942,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paragraph-qa-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/analysis-sources.zip",
+      "bytes": 31400,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/api-ledger.json",
+      "bytes": 728,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/19bebb6bba7241c99867f2ae0162fe6a",
+      "bytes": 38100,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/1e6dea8783c041a3b75492d9b59765d1",
+      "bytes": 33218,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/239c9473ad2c4b8cbd6b400a24ef2a94",
+      "bytes": 26159,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/24b103c6477a4dff8f89c5edfecadd6b",
+      "bytes": 18896,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/287c17932f2b411da45de54354c77def",
+      "bytes": 26159,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/2d4204b9b25842089cbf1c18f46ce9c6",
+      "bytes": 59645,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/2ed9da175e2048c4b721b02e55335d6d",
+      "bytes": 33218,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/31563f6d9e7a45a4898b032df59bc30b",
+      "bytes": 32335,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/31a4a43fd6be49aea5fd0c6dd50e3d2e",
+      "bytes": 15709,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/36438a6f305e4aeb8ca1c1c9e135ebf8",
+      "bytes": 15793,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/478c3a4ece0f47f490ce2bbde7da2f34",
+      "bytes": 20523,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/4794e58b8ae644cf89a7a3d852ba61e6",
+      "bytes": 32053,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/4a403fc0e99d4a5aa376df5db5660c0e",
+      "bytes": 14089,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/4bdbc59f49d94e699e0af3e3213819c9",
+      "bytes": 32934,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/512f25cf0dbf41b9bd029e1b6d92ce99",
+      "bytes": 27495,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/519282978f8d431aad9c5e168889e55d",
+      "bytes": 8381,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/538eb713b5d14f67b5760add79c7c2b4",
+      "bytes": 18896,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/58566c4b873a49948c94bfbafd3434ef",
+      "bytes": 32265,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/5ad9404a25b4452687129135e57db5e1",
+      "bytes": 18175,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/5c627f4511504702b407fa340d2b24e7",
+      "bytes": 32265,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/5cee3bb3f9dd442d873b6387739c14fa",
+      "bytes": 24639,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/6e8011c6c09f44aa9908f9ccfd63f4af",
+      "bytes": 48176,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/768f476bab8343a6bca9fb62ac1285ba",
+      "bytes": 25219,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/7df8b850a6284af2a02c3cd747594c15",
+      "bytes": 59645,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/87390cca5ad941a1b90e7309a36ed451",
+      "bytes": 17443,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/8ab58334a7d14fe4b6501538b7abbb02",
+      "bytes": 32934,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/8c9c934647c0449084ff64efcc238fee",
+      "bytes": 17443,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/8dc49a3308a843598baab0614542f98b",
+      "bytes": 8381,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/93806cdc02734869b11f97c7a97de881",
+      "bytes": 48176,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/93b1e98c44244179a0dffb2b6f2ace40",
+      "bytes": 27495,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/99bf606f0f6c4b38baa721ef6deecf96",
+      "bytes": 14089,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/af84c9b6fb6c4170a5336c03fdbdcdf8",
+      "bytes": 20523,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/b2926fc4a82c4cc685a4284a54a16a24",
+      "bytes": 18175,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/c1ecc00285854e51a94731a9ab717b59",
+      "bytes": 24477,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/cf99af6519814e5b8f36d2c81cc3cca0",
+      "bytes": 17515,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/d3b4baeaf19440a2822e2e206a77e246",
+      "bytes": 15793,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/d3f700ce52bb474e965920075b64da40",
+      "bytes": 28390,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/da2f765c79e3495d8d856719748055ff",
+      "bytes": 24477,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/dab7fec39f0f4412936b9efe5a448224",
+      "bytes": 21505,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/dbdd3412e1274c59893668c82028ed9c",
+      "bytes": 21505,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/de26e7819e7a48429894a80d547db154",
+      "bytes": 32053,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/e970917684a64d42a6826359c7127e9a",
+      "bytes": 25219,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/ebe5f8fc80c042138505257ace019d40",
+      "bytes": 15709,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/f0813a383e374b71b69e2a10ee12169c",
+      "bytes": 28390,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/f3a8bfa6fca3401b84b0e03e008a3900",
+      "bytes": 38100,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/f76212e733d649b4a194b5fe7bc2687a",
+      "bytes": 32335,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/fc87947716cd403295a5c4c6f2b3fa31",
+      "bytes": 24639,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/blobs/fe0866cd35bf40ffa92363d056e43c4a",
+      "bytes": 17515,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/bootstrap-state.json",
+      "bytes": 532,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/continuation-review-resolution.json",
+      "bytes": 1021,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/continuation-review.json",
+      "bytes": 9295,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/continuation-sources.zip",
+      "bytes": 117301,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/execution-sources.zip",
+      "bytes": 110093,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/frozen-dataset.json",
+      "bytes": 839930,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/index-unit-diagnostics.json",
+      "bytes": 615,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/infrastructure.json",
+      "bytes": 289,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/ingestion-progress.json",
+      "bytes": 37020,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/ingestion-timings.json",
+      "bytes": 6113,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/installed-route.json",
+      "bytes": 1359,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/integration-review-resolution.json",
+      "bytes": 288,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/integration-review.json",
+      "bytes": 646,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/execute-job-1/events.jsonl",
+      "bytes": 79,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/execute-job-1/status.json",
+      "bytes": 620,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/execute-job-1/stderr.log",
+      "bytes": 1666,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/execute-job-1/stdout.log",
+      "bytes": 824,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/execute-job-2/events.jsonl",
+      "bytes": 79,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/execute-job-2/status.json",
+      "bytes": 623,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/execute-job-2/stderr.log",
+      "bytes": 346,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/execute-job-2/stdout.log",
+      "bytes": 1105,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/prepare-job-1/events.jsonl",
+      "bytes": 82,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/prepare-job-1/status.json",
+      "bytes": 622,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/prepare-job-1/stderr.log",
+      "bytes": 295,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/jobs/prepare-job-1/stdout.log",
+      "bytes": 65,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-1/api-events.jsonl",
+      "bytes": 14532,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-1/arms.jsonl",
+      "bytes": 41627,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-1/completed.json",
+      "bytes": 524,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paragraph-qa-20261023/live-run-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-1/report.json",
+      "bytes": 507948,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paragraph-qa-20261023/live-run-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-1/run.json",
+      "bytes": 120903,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-1/verification-v2.json",
+      "bytes": 839,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-1/verification.json",
+      "bytes": 703,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paragraph-qa-20261023/live-run-1/verification.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/answer-form-diagnostics.json",
+      "bytes": 3430,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/api-events.jsonl",
+      "bytes": 1684471,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/arms.jsonl",
+      "bytes": 5505740,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/completed.json",
+      "bytes": 709,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paragraph-qa-20261023/live-run-2/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/report.json",
+      "bytes": 479943,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paragraph-qa-20261023/live-run-2/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/run.json",
+      "bytes": 7697247,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/stage-coverage.json",
+      "bytes": 290302,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-2/verification-v2.json",
+      "bytes": 905,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/migration.log",
+      "bytes": 5165,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/operational-amendment.json",
+      "bytes": 1499,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/persisted-preflight.json",
+      "bytes": 343,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/prepared.json",
+      "bytes": 257517,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/protocol.json",
+      "bytes": 5502,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/paragraph-qa-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/README.md",
+      "bytes": 2329,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/runtime-versions.json",
+      "bytes": 226,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/sampling-audit.json",
+      "bytes": 154020,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/scoring-preflight.json",
+      "bytes": 377,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/source-map.json",
+      "bytes": 6138360,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/text-preflight.json",
+      "bytes": 323,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/validation.json",
+      "bytes": 770,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/acceptance.json",
+      "bytes": 1616,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/parent-context-20261022/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/dev-baseline.jsonl",
+      "bytes": 13383358,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/dev-baseline.meta.json",
+      "bytes": 3935,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/dev-parent.jsonl",
+      "bytes": 13386212,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/dev-parent.meta.json",
+      "bytes": 3933,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/dev-report.json",
+      "bytes": 435858,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/parent-context-20261022/dev-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/frozen-selection.json",
+      "bytes": 3429,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/label-access.jsonl",
+      "bytes": 560,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/measured-source.zip",
+      "bytes": 33304,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/pair-token-audit.jsonl",
+      "bytes": 7061282,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/pair-token-summary.json",
+      "bytes": 2306,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/parent-context-20261022/pair-token-summary.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/post-run-audit-source.zip",
+      "bytes": 11367,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/protocol.json",
+      "bytes": 2690,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/parent-context-20261022/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/review-qualification.json",
+      "bytes": 1196,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/scoring-review-source.zip",
+      "bytes": 12754,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/parent-context-20261022/scoring-source.zip",
+      "bytes": 24248,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/acceptance.json",
+      "bytes": 709,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/project-dbsf-20261022/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/frozen-selection.json",
+      "bytes": 2663,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/label-access.jsonl",
+      "bytes": 186,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/protocol.json",
+      "bytes": 2267,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/project-dbsf-20261022/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/screen-baseline.jsonl",
+      "bytes": 4420456,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/screen-dbsf.jsonl",
+      "bytes": 4401102,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/screen-report.json",
+      "bytes": 9661,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/project-dbsf-20261022/screen-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/project-dbsf-20261022/screening-source.zip",
+      "bytes": 22384,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/acceptance.json",
+      "bytes": 1894,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/prompt-trial-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/api-ledger.json",
+      "bytes": 1118,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/amendment.json",
+      "bytes": 5135,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/api-events.jsonl",
+      "bytes": 413157,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/completed.json",
+      "bytes": 260,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/prompt-trial-20261023/completion-run-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/report.json",
+      "bytes": 82074,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/prompt-trial-20261023/completion-run-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/run.json",
+      "bytes": 360562,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/completion-validation.json",
+      "bytes": 650,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-diagnostics.json",
+      "bytes": 30943,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/api-events.jsonl",
+      "bytes": 1780457,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/completed.json",
+      "bytes": 191,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/prompt-trial-20261023/development-run-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/label-access.json",
+      "bytes": 138,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/meta.json",
+      "bytes": 5293,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/report.json",
+      "bytes": 82225,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/prompt-trial-20261023/development-run-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/run.json",
+      "bytes": 310603,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/execution-records.json",
+      "bytes": 1389,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/final-source-1.zip",
+      "bytes": 42565,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/frozen-dataset.json",
+      "bytes": 1189327,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/frozen-source-1.zip",
+      "bytes": 25871,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/parent-contrast-review.json",
+      "bytes": 3722,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/proposed-extra-contrasts.json",
+      "bytes": 25625,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/protocol.json",
+      "bytes": 4814,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/prompt-trial-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/request-review.json",
+      "bytes": 844,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/result-review.json",
+      "bytes": 12532,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/validation.json",
+      "bytes": 543,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/acceptance.json",
+      "bytes": 8504,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/relation-reader-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/audit-packet.json",
+      "bytes": 129791,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/audit-review.json",
+      "bytes": 28620,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/audit-review.md",
+      "bytes": 8324,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/audit-validation.json",
+      "bytes": 3338,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/diagnostic-delivery-source-1.zip",
+      "bytes": 241627,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/prototype-status.json",
+      "bytes": 753,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/source-review-reconciliation.json",
+      "bytes": 1117,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/source-review.json",
+      "bytes": 33668,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/source-review.md",
+      "bytes": 26198,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/source-trace-packet.json",
+      "bytes": 645061,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/source-visibility-trace.json",
+      "bytes": 97826,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/unrun-prototype-source-1.zip",
+      "bytes": 15494,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/relation-reader-20261023/validation.json",
+      "bytes": 1375,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/acceptance-targets.json",
+      "bytes": 694,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/acceptance-targets.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/acceptance.json",
+      "bytes": 14959,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/integration-source-1.zip",
+      "bytes": 66000,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/integration-validation.json",
+      "bytes": 2469,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/musique-confirm-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/diagnostics.json",
+      "bytes": 2389,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/hop-stage-diagnostics-20261023.json",
+      "bytes": 1334,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/label-access.json",
+      "bytes": 4940,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/meta.json",
+      "bytes": 14983,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/report.json",
+      "bytes": 17864,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/musique-confirm-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/run.jsonl",
+      "bytes": 2353041,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/shared-selector-replay.json",
+      "bytes": 257,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirmation-scoring-source-1.zip",
+      "bytes": 4635,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirmation-source-1.zip",
+      "bytes": 11295,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/musique-dev-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/frozen-selection.json",
+      "bytes": 4978,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/label-access.json",
+      "bytes": 4941,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/meta.json",
+      "bytes": 10158,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/report.json",
+      "bytes": 13641,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/musique-dev-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/run.jsonl",
+      "bytes": 1766239,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-development-scoring-source-1.zip",
+      "bytes": 4635,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-development-source-1.zip",
+      "bytes": 11186,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-protocol.json",
+      "bytes": 4617,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/protocol.json",
+      "bytes": 4223,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/completed.json",
+      "bytes": 135,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/qasper-chain-dev-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/frozen-selection.json",
+      "bytes": 4564,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/label-access.json",
+      "bytes": 136,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/meta.json",
+      "bytes": 6756,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/report.json",
+      "bytes": 13804,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/qasper-chain-dev-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/request-events.jsonl",
+      "bytes": 234746,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-dev-1/run.jsonl",
+      "bytes": 3119108,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-development-receipt.json",
+      "bytes": 1890,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-development-source-1.zip",
+      "bytes": 17297,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-scoring-clarification.json",
+      "bytes": 413,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-chain-scoring-source-1.zip",
+      "bytes": 4635,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirm-1/completed.json",
+      "bytes": 46,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/qasper-confirm-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirm-1/diagnostics.json",
+      "bytes": 1114,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirm-1/label-access.json",
+      "bytes": 4521,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirm-1/meta.json",
+      "bytes": 10311,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirm-1/report.json",
+      "bytes": 13182,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/qasper-confirm-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirm-1/run.jsonl",
+      "bytes": 6148836,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirm-1/shared-selector-replay.json",
+      "bytes": 258,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-confirmation-source-1.zip",
+      "bytes": 11069,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-dev-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/qasper-dev-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-dev-1/frozen-selection.json",
+      "bytes": 4558,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-dev-1/label-access.json",
+      "bytes": 4522,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-dev-1/meta.json",
+      "bytes": 6509,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-dev-1/report.json",
+      "bytes": 11197,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scenario-rag-20261023/qasper-dev-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-dev-1/run.jsonl",
+      "bytes": 2785944,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-dev-scoring-source-1.zip",
+      "bytes": 4094,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/qasper-development-source-1.zip",
+      "bytes": 14215,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/acceptance.json",
+      "bytes": 3478,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/scifact-20261021/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-opportunity-reviewed-20261022.json",
+      "bytes": 17200,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-paired-baseline.jsonl",
+      "bytes": 10933859,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-paired-baseline.meta.json",
+      "bytes": 1751,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-paired-optimized.jsonl",
+      "bytes": 10933727,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-paired-optimized.meta.json",
+      "bytes": 1757,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-performance.json",
+      "bytes": 5123,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-quality.json",
+      "bytes": 9619713,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-rrf60.jsonl",
+      "bytes": 10834414,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/dev-rrf60.meta.json",
+      "bytes": 1132,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/frozen-selection.json",
+      "bytes": 1544,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/production-sql-change.patch",
+      "bytes": 3646,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/source-20261021.zip",
+      "bytes": 43911,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/test-exposures.jsonl",
+      "bytes": 2243,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/test-paired-baseline.jsonl",
+      "bytes": 4053831,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/test-paired-baseline.meta.json",
+      "bytes": 1750,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/test-paired-optimized.jsonl",
+      "bytes": 4053824,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/test-paired-optimized.meta.json",
+      "bytes": 1756,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/test-performance.json",
+      "bytes": 5094,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/scifact-20261021/test-quality.json",
+      "bytes": 3586766,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/acceptance.json",
+      "bytes": 2888,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/support-dataset-20261023/acceptance.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/api-ledger.json",
+      "bytes": 444,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/api-events.jsonl",
+      "bytes": 37656,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/completed.json",
+      "bytes": 86,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/support-dataset-20261023/baseline-run-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/label-access.json",
+      "bytes": 194,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/meta.json",
+      "bytes": 2940,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/report.json",
+      "bytes": 3744,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/support-dataset-20261023/baseline-run-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/run.json",
+      "bytes": 38201,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/final-source-1.zip",
+      "bytes": 41974,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/frozen-dataset-v2.json",
+      "bytes": 87520,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/frozen-dataset.json",
+      "bytes": 87281,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/frozen-source-1.zip",
+      "bytes": 21629,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/frozen-source-2.zip",
+      "bytes": 21886,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/pair-review.json",
+      "bytes": 4894,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/pair-review.md",
+      "bytes": 3640,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/proposed-dataset.json",
+      "bytes": 55286,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/protocol-v2.json",
+      "bytes": 2613,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/protocol.json",
+      "bytes": 2320,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/support-dataset-20261023/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/support-dataset-20261023/validation.json",
+      "bytes": 580,
+      "storage": "LOCAL_ONLY"
+    }
+  ]
+}

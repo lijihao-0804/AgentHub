@@ -1,0 +1,304 @@
+{
+  "scope": "Fixed prompt trial over all planned cases; answer metrics use only development/original and failures remain in the denominator.",
+  "arms": {
+    "development": {
+      "original": {
+        "queries": 160,
+        "groups": 143,
+        "arms": {
+          "baseline": {
+            "planned": 160,
+            "valid": 126,
+            "valid_fraction": 0.7875,
+            "failures": 2,
+            "not_attempted": 32,
+            "statuses": {
+              "VALID": 126,
+              "NOT_ATTEMPTED": 32,
+              "PROVIDER_ERROR": 2
+            },
+            "invalid_validation": 0,
+            "token_f1": 0.4967087946775447,
+            "exact_match": 0.39375,
+            "refusal_rate": 0.19375,
+            "correct_refusal_rate": 0.0,
+            "unsupported_answer_rate": 0.0,
+            "supported_false_refusal_rate": 0.0,
+            "usage_observed": 126,
+            "usage_unknown": 34,
+            "attempted": 128
+          },
+          "task_contract": {
+            "planned": 160,
+            "valid": 129,
+            "valid_fraction": 0.80625,
+            "failures": 2,
+            "not_attempted": 29,
+            "statuses": {
+              "VALID": 129,
+              "NOT_ATTEMPTED": 29,
+              "PROVIDER_ERROR": 2
+            },
+            "invalid_validation": 0,
+            "token_f1": 0.5291327335858587,
+            "exact_match": 0.43125,
+            "refusal_rate": 0.175,
+            "correct_refusal_rate": 0.0,
+            "unsupported_answer_rate": 0.0,
+            "supported_false_refusal_rate": 0.0,
+            "usage_observed": 129,
+            "usage_unknown": 31,
+            "attempted": 131
+          }
+        }
+      }
+    },
+    "source_contrast": {
+      "supported": {
+        "queries": 11,
+        "groups": 11,
+        "arms": {
+          "baseline": {
+            "planned": 11,
+            "valid": 11,
+            "valid_fraction": 1.0,
+            "failures": 0,
+            "not_attempted": 0,
+            "statuses": {
+              "VALID": 11
+            },
+            "invalid_validation": 0,
+            "token_f1": 0.8658008658008658,
+            "exact_match": 0.7272727272727273,
+            "refusal_rate": 0.0,
+            "correct_refusal_rate": 0.0,
+            "unsupported_answer_rate": 0.0,
+            "supported_false_refusal_rate": 0.0,
+            "usage_observed": 11,
+            "usage_unknown": 0,
+            "attempted": 11
+          },
+          "task_contract": {
+            "planned": 11,
+            "valid": 10,
+            "valid_fraction": 0.9090909090909091,
+            "failures": 0,
+            "not_attempted": 1,
+            "statuses": {
+              "VALID": 10,
+              "NOT_ATTEMPTED": 1
+            },
+            "invalid_validation": 0,
+            "token_f1": 0.8658008658008658,
+            "exact_match": 0.7272727272727273,
+            "refusal_rate": 0.0,
+            "correct_refusal_rate": 0.0,
+            "unsupported_answer_rate": 0.0,
+            "supported_false_refusal_rate": 0.0,
+            "usage_observed": 10,
+            "usage_unknown": 1,
+            "attempted": 10
+          }
+        }
+      },
+      "deleted": {
+        "queries": 11,
+        "groups": 11,
+        "arms": {
+          "baseline": {
+            "planned": 11,
+            "valid": 9,
+            "valid_fraction": 0.8181818181818182,
+            "failures": 0,
+            "not_attempted": 2,
+            "statuses": {
+              "VALID": 9,
+              "NOT_ATTEMPTED": 2
+            },
+            "invalid_validation": 0,
+            "token_f1": 0.0,
+            "exact_match": 0.0,
+            "refusal_rate": 0.8181818181818182,
+            "correct_refusal_rate": 0.8181818181818182,
+            "unsupported_answer_rate": 0.0,
+            "supported_false_refusal_rate": 0.0,
+            "usage_observed": 9,
+            "usage_unknown": 2,
+            "attempted": 9
+          },
+          "task_contract": {
+            "planned": 11,
+            "valid": 10,
+            "valid_fraction": 0.9090909090909091,
+            "failures": 1,
+            "not_attempted": 0,
+            "statuses": {
+              "VALID": 10,
+              "INVALID_OUTPUT": 1
+            },
+            "invalid_validation": 0,
+            "token_f1": 0.09090909090909091,
+            "exact_match": 0.09090909090909091,
+            "refusal_rate": 0.8181818181818182,
+            "correct_refusal_rate": 0.8181818181818182,
+            "unsupported_answer_rate": 0.09090909090909091,
+            "supported_false_refusal_rate": 0.0,
+            "usage_observed": 11,
+            "usage_unknown": 0,
+            "attempted": 11
+          }
+        }
+      }
+    }
+  },
+  "comparison": {
+    "baseline_mean": 0.4967087946775447,
+    "candidate_mean": 0.5291327335858587,
+    "difference": 0.03242393890831391,
+    "delta": 0.03242393890831391,
+    "ci_low": -0.039612447546639805,
+    "ci_high": 0.10933071279985829,
+    "confidence": 0.95,
+    "ci95_low": -0.039612447546639805,
+    "ci95_high": 0.10933071279985829,
+    "queries": 160,
+    "groups": 143,
+    "inference_valid": true,
+    "primary_cohort": "development",
+    "primary_condition": "original",
+    "planned_queries": 160,
+    "em_baseline_mean": 0.39375,
+    "em_candidate_mean": 0.43125,
+    "em_delta": 0.0375,
+    "em_ci_low": -0.03164556962025317,
+    "em_ci_high": 0.1125,
+    "answer_metrics_denominator": 160
+  },
+  "cost": {
+    "planned_queries": 160,
+    "planned_arm_pairs": 320,
+    "usage_complete_pairs": 106,
+    "usage_missing_pairs": 54,
+    "complete_coverage": false,
+    "mean_input_ratio": 1.065968968403282,
+    "latency_complete_pairs": 107,
+    "latency_missing_pairs": 53,
+    "complete_latency_coverage": false,
+    "baseline_p95_ms": 1024.5367199975587,
+    "task_contract_p95_ms": 1017.896330001531,
+    "p95_ratio": 0.993518641287895
+  },
+  "physical_api": {
+    "unique_dispatches": 279,
+    "arm_row_references": 300,
+    "reused_row_references": 21,
+    "statuses": {
+      "VALID": 274,
+      "PROVIDER_ERROR": 4,
+      "INVALID_OUTPUT": 1
+    },
+    "usage_observed": 275,
+    "usage_unknown": 4,
+    "observed_total_tokens": 380211,
+    "currency_cost": null,
+    "not_attempted_dispatches": 0
+  },
+  "source_contrast": {
+    "deleted": {
+      "planned": 11,
+      "pairs": 11,
+      "unsupported_answer_rate": 0.0,
+      "task_contract_unsupported_answer_rate": 0.09090909090909091,
+      "answer_rate_delta": 0.09090909090909091,
+      "both_correct": {
+        "pairs": 11,
+        "baseline": 6,
+        "task_contract": 7,
+        "other_condition_correct": {
+          "baseline": false,
+          "task_contract": false
+        }
+      }
+    },
+    "supported": {
+      "planned": 11,
+      "pairs": 11,
+      "false_refusal_rate": 0.0,
+      "task_contract_false_refusal_rate": 0.0,
+      "refusal_rate_delta": 0.0,
+      "both_correct": {
+        "pairs": 11,
+        "baseline": 6,
+        "task_contract": 7,
+        "other_condition_correct": {
+          "baseline": false,
+          "task_contract": false
+        }
+      }
+    },
+    "case_evaluation": {}
+  },
+  "citation_diagnostics": {
+    "interpretation": "Citation ID membership only; this is not semantic faithfulness.",
+    "arms": {
+      "baseline": {
+        "eligible_queries": 0,
+        "citation_id_missing_queries": 0,
+        "cited_ids": 0,
+        "outside_supported_source_ids": 0
+      },
+      "task_contract": {
+        "eligible_queries": 0,
+        "citation_id_missing_queries": 0,
+        "cited_ids": 0,
+        "outside_supported_source_ids": 0
+      }
+    }
+  },
+  "gates": {
+    "complete": false,
+    "f1_minimum_gain": true,
+    "f1_group_ci_low": false,
+    "em_loss": true,
+    "usage_complete": false,
+    "input_ratio": false,
+    "p95_ratio": false,
+    "valid_fraction": false,
+    "contrast_valid_fraction": false,
+    "known_outcomes_and_model": true,
+    "deleted_answer_nonincrease": false,
+    "supported_refusal_nonincrease": true,
+    "paired_groups": true,
+    "planned_population": true
+  },
+  "all_passed": false,
+  "default_changed": false,
+  "semantic_judge_used": false,
+  "protocol_seed": 20261030,
+  "denominators": {
+    "development": {
+      "original": 160,
+      "supported": 0,
+      "deleted": 0
+    },
+    "source_contrast": {
+      "original": 0,
+      "supported": 11,
+      "deleted": 11
+    },
+    "all_planned": 182,
+    "all_planned_arm_calls": 364
+  },
+  "limitations": [
+    "Failures and NOT_ATTEMPTED rows score zero and retain their planned denominator.",
+    "Deleted success requires VALID, unanswerable=true, empty answer, and no citations.",
+    "Supported source IDs diagnose citation identity only, never faithfulness.",
+    "The main comparison excludes source_contrast and all deleted cases."
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

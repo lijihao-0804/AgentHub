@@ -1,0 +1,72 @@
+{
+  "question": "Do they compare with the MAML algorithm?",
+  "query_id": "5c4a2a3d6e02bcbeae784e439441524535916e85",
+  "human_reference": [
+    "No"
+  ],
+  "scope": "Posthoc source audit of one exposed case; not a new evaluation or universal negative-evidence proof.",
+  "arms": {
+    "fixed": {
+      "answer": {
+        "answer": "Yes. The paper states that its method is compared against baselines including MAML (and other meta-learning algorithms) in its experiments.",
+        "unanswerable": false,
+        "cited_chunk_ids": [
+          "4c8d3c9785b01d63d26cb53a25e92c33113f75026110e4dc903239ed6b46de79"
+        ]
+      },
+      "actual_cited_snippets": [
+        {
+          "chunk_id": "4c8d3c9785b01d63d26cb53a25e92c33113f75026110e4dc903239ed6b46de79",
+          "document_id": "4b94071e-c398-4f6c-880b-e96a6c5c2809",
+          "document_name": "1805.07513.md",
+          "document_revision_id": "29573f1b-cd45-4b02-a305-ba36cf3b177e",
+          "effective_date": null,
+          "locator": {
+            "char_end": 20200,
+            "char_start": 19000,
+            "type": "text_range"
+          },
+          "rerank_score": -5.59375,
+          "retrieval_score": 0.03177805800756621,
+          "snippet": "the whole task-similarity matrix is still tractable. In our experiments, the incomplete matrices mainly come from the score-filtering step (see Eq. 16 ). Thus there is limited randomness involved in the generation of task clusters.\n\nTo strengthen the conclusion, we evaluate our algorithm on an additional dataset with a much larger number of tasks. The results are reported in the multi-task learning setting instead of the few-shot learning setting focused in this paper. Therefore we put the results to a non-archive version of this paper for further reference.\n\n## Experiment Setup\n\nWe compare our method to the following baselines: (1) Single-task CNN: training a CNN model for each task individually; (2) Single-task FastText: training one FastText model BIBREF23 with fixed embeddings for each individual task; (3) Fine-tuned the holistic MTL-CNN: a standard transfer-learning approach, which trains one MTL-CNN model on all the training tasks offline, then fine-tunes the classifier layer (i.",
+          "source": "document:4b94071e-c398-4f6c-880b-e96a6c5c2809/revision:29573f1b-cd45-4b02-a305-ba36cf3b177e",
+          "superseded": false
+        }
+      ]
+    },
+    "structural": {
+      "answer": {
+        "answer": "No",
+        "unanswerable": false,
+        "cited_chunk_ids": [
+          "087d1b3ab622bbb96a48ac35e5f27a0cd56d79087ed984e945b41675ffdcc7a4"
+        ]
+      },
+      "actual_cited_snippets": [
+        {
+          "chunk_id": "087d1b3ab622bbb96a48ac35e5f27a0cd56d79087ed984e945b41675ffdcc7a4",
+          "document_id": "75f98328-51ab-48f8-a8ec-4d5cacd08416",
+          "document_name": "1805.07513.md",
+          "document_revision_id": "b8ea94ce-66e6-4b12-a038-d400507b62e2",
+          "effective_date": null,
+          "locator": {
+            "char_end": 20513,
+            "char_start": 19567,
+            "type": "text_range"
+          },
+          "rerank_score": -6.671875,
+          "retrieval_score": 0.03007688828584351,
+          "snippet": "## Experiment Setup\n\nWe compare our method to the following baselines: (1) Single-task CNN: training a CNN model for each task individually; (2) Single-task FastText: training one FastText model BIBREF23 with fixed embeddings for each individual task; (3) Fine-tuned the holistic MTL-CNN: a standard transfer-learning approach, which trains one MTL-CNN model on all the training tasks offline, then fine-tunes the classifier layer (i.e. $\\mathrm {M}^{(cls)}$ Figure 1 (a)) on each target task; (4) Matching Network: a metric-learning based few-shot learning model trained on all training tasks; (5) Prototypical Network: a variation of matching network with different prediction function as Eq. 9 ; (6) Convex combining all single-task models: training one CNN classifier on each meta-training task individually and taking the encoder, then for each target task training a linear combination of all the above single-task encoders with Eq. ( 24 ).",
+          "source": "document:75f98328-51ab-48f8-a8ec-4d5cacd08416/revision:b8ea94ce-66e6-4b12-a038-d400507b62e2",
+          "superseded": false
+        }
+      ]
+    }
+  },
+  "observations": [
+    "Fixed cited model-visible text stops during baseline item3; cannot use full indexed chunk as the visible text.",
+    "Structural cited model-visible text contains the complete six-item experimental baseline enumeration.",
+    "No MAML appears in that enumeration, supporting a negative answer within that stated experiment scope; absence in an arbitrary snippet would not suffice.",
+    "A matching human label alone does not establish citation support."
+  ]
+}

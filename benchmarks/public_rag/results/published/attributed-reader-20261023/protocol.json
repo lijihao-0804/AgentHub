@@ -1,0 +1,47 @@
+{
+  "id": "visible-source-spans-then-answer-v1",
+  "registered_at_utc": "2026-10-23T12:21:00.677004+00:00",
+  "scope": "One reader architecture after fixed accepted joint evidence selection. Same final admitted original sources; no new retrieval, candidate selection, model substitution, context expansion or source rewriting.",
+  "source": {
+    "project": "https://github.com/lovodkin93/attribute-first-then-generate",
+    "mechanism": "content_selection followed by fusion_in_context or sentence generation; adapt to English short answers with exact source-substring validation. Not a full reproduction or a claim that their LFQA results transfer."
+  },
+  "development": "all160 exposed official MuSiQue train questions in evidence-set-20261023/development-prepared-3; shared support text groups143",
+  "seed": 20261029,
+  "workers": 4,
+  "model": "deepseek-v4.1-flash-1017",
+  "profiles": {
+    "direct256_prior": "Historical diagnostic only: reuse exact unchanged message/config outcomes from prior set_rank5; not the primary contemporaneous control.",
+    "direct768": "Current live control, original messages,768 maximum output tokens, JSON short-answer output, no span preparation.",
+    "attribute512_answer256": "Fixed candidate:512-token exact source quotation selection, local span check, annotate existing records,256-token answer; total768 maximum output. Keep ALL original sources/refs/snippets/metadata unchanged and same8000 evidence cap."
+  },
+  "prompt_policy": "One source-based span-selection instruction and one fixed answer suffix; no few-shot dataset examples or prompt sweep. No gold answer/decomposition/hop IDs sent to reader.",
+  "budget": "Same8000 RAG units and16384 context, conservative byte estimator, each request admitted. Candidate two requests can consume more actual tokens/latency; equal output caps are not equal realized compute.",
+  "primary": "attribute512_answer256 minus direct768 official aliases token F1, all planned failures retained0",
+  "gates": {
+    "minimum_f1_gain": 0.03,
+    "paired95_ci_low_above": 0,
+    "maximum_em_loss": 0.01,
+    "bootstrap_samples": 5000,
+    "confidence": 0.95,
+    "min_valid_each": 0.95,
+    "min_valid_attribution": 0.9,
+    "unknown_outcomes": 0,
+    "candidate_unknown_citation_ids": 0,
+    "minimum_paired_usage_coverage": 0.95,
+    "maximum_mean_pipeline_input_ratio": 3.0,
+    "maximum_pipeline_p95_ratio": 3.0
+  },
+  "api_policy": "One attempt per stage, fixed model,temp0,thinking disabled,JSON-object mode. Wrong model/unknown/non400 provider error stops. First candidate pair must fully succeed before batch. Invalid>5% answers stops. Known400/invalid spans/budget fallback explicitly reuse identical original direct256 outcome, including failures; no successful request is retried. Keep separate actual paid and logical pipeline cost accounts.",
+  "span_validation": "up to8 quotations,8..600 characters each,total<=2000; original snippet exact substring, original chunk_id, server-computed offsets. Existence is not entailment or relevance. Empty/invalid quotes do not become factual notes.",
+  "statistics": "One fixed primary, question-weighted paired5000 bootstrap over prior shared support text groups; strata descriptive, no method selection by hops or gold labels.",
+  "confirmation": "Only if allDEV gates pass:freeze one method, sample at most200 never-exposed official dev questions excluding prior700dev IDs and160train support-title/text families. Require>=120 eligible or report confirmation unavailable. Sampling size/eligibility not by outcomes; no reusing old200 as blind and no method reselection. If DEV fails, no new confirmation exposure.",
+  "stop": "One candidate/one DEV/at most one frozen confirmation; no prompt or budget reselection. Preserve negative outcomes. No default/business AgentVersion change on DEV alone.",
+  "formal_experiment": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/attributed-reader-20261023/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

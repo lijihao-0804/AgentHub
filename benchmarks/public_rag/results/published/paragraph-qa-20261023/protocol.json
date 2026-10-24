@@ -1,0 +1,90 @@
+{
+  "registered_at_utc": "2026-10-23T16:05:21.260775+00:00",
+  "status": "FROZEN_BEFORE_ANSWER_REQUESTS",
+  "hypothesis": "Align source reading units to the existing 1000-character excerpt ceiling using native paragraphs/sentences, reducing clipped facts under the same retrieval/read budgets.",
+  "scope": "QASPER TRAIN development; fresh paper IDs relative to 92 known exposed TRAIN papers; not independent confirmation, holdout, or formal Experiment.",
+  "papers": 24,
+  "questions": 70,
+  "answerable": 65,
+  "unanswerable": 5,
+  "seed": 20261101,
+  "arms": {
+    "fixed": {
+      "chunk_size_chars": 1200,
+      "chunk_overlap_chars": 200,
+      "builder": "fixed_v1"
+    },
+    "structural": {
+      "chunk_size_chars": 1000,
+      "chunk_overlap_chars": 0,
+      "builder": "structural_v1"
+    }
+  },
+  "retrieval": {
+    "retrieval_strategy": "HYBRID_RERANK",
+    "dense_top_k": 20,
+    "sparse_top_k": 20,
+    "candidate_top_k": 20,
+    "final_top_k": 10,
+    "context_budget_bytes": 8000
+  },
+  "model_route": {
+    "name": "local-rag"
+  },
+  "model_controls": {
+    "temperature": 0,
+    "max_tokens": 1024,
+    "thinking": "disabled",
+    "max_steps": 3,
+    "max_tool_calls": 1,
+    "max_attempts_per_profile": 1,
+    "rag_context_tokens": 8000,
+    "tool_result_tokens": 4000
+  },
+  "normal_physical_requests": 280,
+  "maximum_physical_requests": 420,
+  "planned_runs": 140,
+  "primary": "Answer token F1, max across human reference answers, all 70 planned questions per arm; failed/invalid/not-attempted = 0. Paper-clustered 5000 bootstrap paired difference, seed fixed.",
+  "secondary": [
+    "exact_match",
+    "valid_response_fraction",
+    "5 human-unanswerable refusal/error counts",
+    "original human evidence paragraph visibility (strict substring proxy, not semantic sufficiency)",
+    "actual selected records/bytes",
+    "input/output tokens and warm end-to-end p95",
+    "per-arm ingestion/index cost and chunk count"
+  ],
+  "usefulness_gates": {
+    "minimum_f1_gain": 0.05,
+    "f1_ci_low_positive": true,
+    "exact_match_no_loss": true,
+    "minimum_each_valid_response_fraction": 0.95,
+    "unsupported_answers_on_unanswerable_no_increase": true,
+    "maximum_warm_p95_ratio": 1.5,
+    "maximum_input_tokens_ratio": 1.5,
+    "all_140_workflows_complete": true,
+    "fallback_attempts": 0,
+    "unconfirmed_transport": 0,
+    "identity_or_cross_source_errors": 0
+  },
+  "stop_rules": [
+    "After current AgentRun if fallback is attempted: retain outcomes and stop further batch; no single-model quality claim.",
+    "Stop after current run for unconfirmed transport, wrong raw model, source/arm/snapshot mismatch, non-400 provider error, invalid frozen request or budget ceiling.",
+    "Stop at eight failed Runs. Never silently retry/resume unknown outcomes.",
+    "No prompt/parameter rescue after seeing scores; preserve all planned missing rows as zero."
+  ],
+  "causal_limit": "Compound chunk-policy comparison: boundary, maximum size, and overlap differ together. No boundary-only causal claim.",
+  "anticipated_cost": {
+    "fixed_chunks": 635,
+    "structural_chunks": 1558,
+    "ratio": 2.453543307086614,
+    "monetary_price": "unknown; do not invent price"
+  },
+  "deployment": "Structural builder is internal opt-in only. Existing worker and production default remain fixed. Stop this milestone after acceptance outcome.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

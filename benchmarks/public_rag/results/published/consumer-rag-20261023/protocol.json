@@ -1,0 +1,93 @@
+{
+  "declared_at_utc": "2026-10-23T07:24:54Z",
+  "amended_at_utc": "2026-10-23T07:41:55Z",
+  "amendment": "Before any consumer development aggregate or API call, add legacy5_aligned diagnostic to separate budget allocation from record projection. Selection candidates and gates unchanged.",
+  "scope": "One consumer-evidence milestone: cached BGE candidates through real retriever selection, search_knowledge, runtime observation and context admission, then short-answer evaluation. Controlled I/O adapters; not live SQL/Qdrant/checkpoint E2E or platform Formal Experiment.",
+  "dataset": "musique-ans",
+  "development": "all160 cached train cases from scenario-rag-20261023/musique-dev-1, including all distractors",
+  "confirmation": "200 seeded official dev cases excluding the300 previously exposed confirmation query IDs; selected before new method scores; fresh candidates computed only after consumer method is frozen",
+  "seed": 20261024,
+  "retrieval": {
+    "profile": "heading_fill",
+    "cached_candidates": 20,
+    "record_budget_bytes": 8000,
+    "min_rerank_score": null,
+    "floor_note": "fixed benchmark replay floor, not calibration of production relevance threshold"
+  },
+  "runtime": {
+    "context_limit": 16384,
+    "reserved_output_tokens": 256,
+    "max_retrieval_tokens": 8000,
+    "max_tool_result_tokens": 4000,
+    "estimator": "existing conservative UTF8-byte token-unit estimator, not provider actual tokens",
+    "history": false,
+    "memory": false
+  },
+  "profiles": {
+    "legacy5": {
+      "tool_limit": 5,
+      "projection": "historical generic JSON preview",
+      "purpose": "equal-budget main baseline"
+    },
+    "legacy5_aligned": {
+      "tool_limit": 5,
+      "projection": "historical generic projection with tool cap also8000",
+      "purpose": "diagnostic control separating corrected category-budget allocation from structured whole-record projection; not method-selection arm"
+    },
+    "structured5": {
+      "tool_limit": 5,
+      "projection": "opt-in whole records with paired references",
+      "purpose": "isolate observation projection correction"
+    },
+    "structured10": {
+      "tool_limit": 10,
+      "projection": "same opt-in projection",
+      "purpose": "explicit high-evidence scene within existing tool cap; not default change"
+    },
+    "no_rag": {
+      "purpose": "offline generation diagnostic with no tool exchange"
+    },
+    "gold_budgeted": {
+      "purpose": "offline gold supporting passages within same final budget, never a deployable retriever or guaranteed full-evidence upper bound"
+    }
+  },
+  "offline_stages": [
+    "cached_candidate_pool",
+    "production_retriever_evidence",
+    "tool_return",
+    "runtime_observation",
+    "final_admitted_context"
+  ],
+  "evidence_scoring": "Evidence only credited for recoverable source records with source text, never IDs alone. Historical JSON previews may contain partial trailing text; complete recoverable-record metric is a conservative structural measure, not all model-visible span coverage. Report paragraph-hit,90% source-character proxy and payload bytes.",
+  "development_selection": {
+    "alternatives": [
+      "structured5",
+      "structured10"
+    ],
+    "versus": "legacy5",
+    "grouped_bootstrap_samples": 5000,
+    "confidence": 0.975,
+    "minimum_answer_f1_gain": 0.03,
+    "ci_lower_above_zero": true,
+    "min_valid_fraction": 0.95,
+    "unknown_outcomes": 0,
+    "max_record_recall_loss": 0.01,
+    "selection": "prefer structured5 if both pass, otherwise highest passing F1; none passes retain legacy baseline for quality adoption, preserve validated opt-in repair"
+  },
+  "confirmation_policy": "Only baseline plus one frozen consumer profile and diagnostic no_rag/gold_budgeted. Grouped95%CI; no confirmation reselection. Confirmation failure remains negative. Do not report MuSiQue answerability performance from Ans-only data.",
+  "preserved": [
+    "tenant and snapshot contracts",
+    "tool default5/max10",
+    "excerpt1000chars",
+    "ContextBudgetPolicy",
+    "model allowlist",
+    "existing published versions and defaults"
+  ],
+  "code_evidence": "Stage source archives, actual job exits and raw public-data rows; no hash tests. Existing working checkout includes unrelated uncommitted changes.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/consumer-rag-20261023/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

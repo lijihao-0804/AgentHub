@@ -1,0 +1,16 @@
+{
+  "run_state": "COMPLETE",
+  "planned_requests": 29,
+  "completed_logical_requests": 29,
+  "physical_dispatches": 29,
+  "stop_reason": null,
+  "finished_at_utc": "2026-10-24T03:43:24.975661+00:00",
+  "currency_cost": null,
+  "production_promoted": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/answer-path-20261024/diagnostic-run-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

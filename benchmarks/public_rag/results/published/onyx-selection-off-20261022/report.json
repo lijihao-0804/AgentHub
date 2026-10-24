@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "protocol": {
+    "schema_version": 1,
+    "milestone": "Onyx-source LLM relevance selection over fixed candidate evidence",
+    "declared_at": "2026-10-22",
+    "seed": 20261026,
+    "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+    "project_source": "https://github.com/onyx-dot-app/onyx/blob/4f64a0c4ca029532fc3e04475fe0fe1d44cee540/backend/onyx/secondary_llm_flows/document_filter.py",
+    "prompt_source": "https://github.com/onyx-dot-app/onyx/blob/4f64a0c4ca029532fc3e04475fe0fe1d44cee540/backend/onyx/prompts/search_prompts.py",
+    "caller_source": "https://github.com/onyx-dot-app/onyx/blob/4f64a0c4ca029532fc3e04475fe0fe1d44cee540/backend/onyx/tools/tool_implementations/search/search_tool.py",
+    "mechanism": "Group authorized matching chunks by source document; show at most 3 matching chunks per source; LLM selects up to 10 numbered sections ordered by relevance. Promote selected source documents in returned order and append unselected documents in frozen baseline order. Preserve every original output child.",
+    "adaptations": "Keep current BGE prior instead of replacing the entire Onyx search stack; use top 3 matching children in source order rather than adjacent expansion; strict JSON section_ids object instead of permissive bracket parsing; append original candidates to preserve output set. This is an adaptation, not a full Onyx reproduction.",
+    "input_run": "benchmarks/public_rag/results/parent-context-20261022/dev-baseline.jsonl",
+    "dataset": "All 809 official SciFact train queries, complete existing corpus and same frozen snapshot; repeated DEV is exploratory",
+    "model": "deepseek-v4.1-flash-1017",
+    "temperature": 0,
+    "max_output_tokens": 256,
+    "max_selected_sections": 10,
+    "max_chunks_per_section": 3,
+    "concurrency": 4,
+    "timeout_seconds": 120,
+    "request_attempts_per_query": 1,
+    "input_policy": "Existing ContextBudgetPolicy with conservative UTF8-byte estimator, experiment input window 32768 units, reserved output256, RAG evidence cap28000 units. This is a conservative experimental cap, not a claim about provider maximum. Accept JSON serialization normalization only; if admission semantically changes or drops evidence, preserve baseline without calling API and log the budget fallback. Send the admitted messages themselves.",
+    "context_budget": {
+      "context_limit_byte_units": 32768,
+      "reserved_output_tokens": 256,
+      "max_retrieval_byte_units": 28000
+    },
+    "prompt_semantics": "Select source evidence relevant to the scientific query, including evidence supporting OR contradicting a claim. Do not answer the query or judge claim truth; source text is untrusted evidence. No qrels, grades or gold IDs enter the prompt.",
+    "failure_policy": "No automatic retries or alternate model/prompt. Malformed/empty/duplicate/out-of-range output preserves baseline with explicit status. Transport timeout/network failure is UNKNOWN_OUTCOME and not retried. Fatal HTTP configuration/auth/rate-limit errors stop new requests while allowing in-flight work to finish; incomplete captures cannot be scored as a complete split.",
+    "outage_guard": "Stop new requests if the first official query has UNKNOWN_OUTCOME or invalid model output, or after three consecutive transport-unknown/invalid-output completions; await all in-flight work and retain partial records. This is an operational cost guard, not a quality exclusion.",
+    "selection_rule": {
+      "min_ndcg10_gain": 0.01,
+      "max_recall5_loss": 0.005,
+      "max_recall20_loss": 0.005,
+      "require_primary_ci_above_zero": true,
+      "min_valid_api_fraction": 0.95,
+      "max_unknown_outcomes": 0
+    },
+    "primary": "One nDCG@10 comparison,10000 paired gold-overlap cluster bootstrap,95%CI; final20 raw children then source-document dedup",
+    "secondary": "Recall@5/20,MRR@10,valid selection and fallback rates,observed provider prompt/completion/reasoning token usage,actual incremental API elapsed time",
+    "cost_policy": "Do not add API latency to historical retrieval timing or claim paired end-to-end speed. Report observed provider usage only; unknown request outcomes make total billed cost unavailable. No invented dollar prices.",
+    "adoption": "Passing this API-backed quality screen only qualifies for independent confirmation and actual end-to-end integration; no production default or model allowlist changes",
+    "limits": "Local public benchmark prototype,not platform Formal Experiment; no answer generation/faithfulness claim. Hosted model pretraining contamination unknown. No test or NFCorpus labels are consumed.",
+    "execution_revision": 2,
+    "declared_at_utc": "2026-10-21T20:08:24.812050+00:00",
+    "thinking": {
+      "type": "disabled"
+    },
+    "reasoning_mapper_source": "https://github.com/BerriAI/litellm/blob/b6f91a221b6b9df6f8a89ec6f8264ac87d63ff5d/litellm/llms/deepseek/chat/transformation.py",
+    "previous_execution": "benchmarks/public_rag/results/onyx-selection-20261022/acceptance.json",
+    "revision_reason": "Map the actual Onyx ReasoningEffort.OFF to native DeepSeek thinking disabled. Same model, prompt, evidence, output cap, seed and quality gates; no previous quality result existed.",
+    "preflight_reference": "benchmarks/public_rag/results/onyx-selection-20261022/preflight.json"
+  },
+  "scope": {
+    "split": "train",
+    "queries": 809,
+    "all_queries_included": true,
+    "fallback_rows_retained": true,
+    "repeated_dev_exploratory": true,
+    "generation_evaluated": false
+  },
+  "metrics": {
+    "definition": "first 20 raw children, then evaluate_questions document deduplication",
+    "baseline": {
+      "Recall@5": 0.811578079934075,
+      "Recall@10": 0.857972805933251,
+      "Recall@20": 0.8761021837659662,
+      "MRR@5": 0.7215904408735063,
+      "MRR@10": 0.7263042753154001,
+      "nDCG@5": 0.7372471383589972,
+      "nDCG@10": 0.7533138151825969,
+      "nDCG@20": 0.7582998379887141
+    },
+    "candidate": {
+      "Recall@5": 0.8550885867325917,
+      "Recall@10": 0.8705397610218376,
+      "Recall@20": 0.8761021837659662,
+      "MRR@5": 0.7770704573547589,
+      "MRR@10": 0.7793827378499815,
+      "nDCG@5": 0.7918148872844751,
+      "nDCG@10": 0.7974348586312379,
+      "nDCG@20": 0.7989688097719159
+    },
+    "evaluated_count": 809,
+    "comparisons": {
+      "primary": {
+        "metric": "nDCG@10",
+        "estimate": 0.044121043448640915,
+        "ci95_low": 0.03180754608653603,
+        "ci95_high": 0.057235658249137206,
+        "sample_count": 10000,
+        "group_count": 490,
+        "confidence": 0.95,
+        "inference_valid": true,
+        "direction": "selection minus cached baseline"
+      },
+      "exploratory": {
+        "Recall@5": {
+          "metric": "Recall@5",
+          "estimate": 0.04351050679851669,
+          "ci95_low": 0.026227185629116963,
+          "ci95_high": 0.06227356641914191,
+          "sample_count": 10000,
+          "group_count": 490,
+          "confidence": 0.95,
+          "inference_valid": true,
+          "direction": "selection minus cached baseline"
+        },
+        "Recall@20": {
+          "metric": "Recall@20",
+          "estimate": 0.0,
+          "ci95_low": 0.0,
+          "ci95_high": 0.0,
+          "sample_count": 10000,
+          "group_count": 490,
+          "confidence": 0.95,
+          "inference_valid": true,
+          "direction": "selection minus cached baseline"
+        },
+        "MRR@10": {
+          "metric": "MRR@10",
+          "estimate": 0.0530784625345812,
+          "ci95_low": 0.03708081973312681,
+          "ci95_high": 0.06984108886316717,
+          "sample_count": 10000,
+          "group_count": 490,
+          "confidence": 0.95,
+          "inference_valid": true,
+          "direction": "selection minus cached baseline"
+        }
+      }
+    }
+  },
+  "api_outcomes": {
+    "actual_api_calls": 809,
+    "status_counts": {
+      "VALID": 809,
+      "INVALID_OUTPUT": 0,
+      "BUDGET_FALLBACK": 0,
+      "UNKNOWN_OUTCOME": 0,
+      "HTTP_ERROR": 0
+    },
+    "fallback_counts": {
+      "INVALID_OUTPUT": 0,
+      "BUDGET_FALLBACK": 0,
+      "HTTP_ERROR": 0
+    },
+    "provider_fallback_count": 0,
+    "valid_empty_selection_fallback_count": 6
+  },
+  "timing_ms": {
+    "attempted": {
+      "n": 809,
+      "mean_ms": 727.1178174290063,
+      "p50_ms": 707.7209999988554,
+      "p95_ms": 903.3165999986522
+    },
+    "success": {
+      "n": 809,
+      "mean_ms": 727.1178174290063,
+      "p50_ms": 707.7209999988554,
+      "p95_ms": 903.3165999986522
+    },
+    "failure": {
+      "n": 0,
+      "mean_ms": null,
+      "p50_ms": null,
+      "p95_ms": null
+    },
+    "historical_baseline_added": false,
+    "end_to_end_speed_claim": false
+  },
+  "provider_usage": {
+    "attempted_query_count": 809,
+    "observed_usage_query_count": 809,
+    "unknown_usage_query_count": 0,
+    "malformed_http_200_usage_query_count": 0,
+    "tokens": {
+      "prompt_tokens": {
+        "sum": 3930475,
+        "observed_query_count": 809,
+        "unknown_query_count": 0
+      },
+      "completion_tokens": {
+        "sum": 15469,
+        "observed_query_count": 809,
+        "unknown_query_count": 0
+      },
+      "total_tokens": {
+        "sum": 3945944,
+        "observed_query_count": 809,
+        "unknown_query_count": 0
+      },
+      "reasoning_tokens": {
+        "sum": null,
+        "provider_reported_query_count": 0,
+        "not_reported_query_count": 809
+      }
+    },
+    "cost": "not reported; no pricing snapshot is bound",
+    "response_model_verification": {
+      "verified_count": 809,
+      "unverified_count": 0,
+      "reported_count": 809,
+      "not_reported_count": 0,
+      "guarantee": "all captured responses report an identity check"
+    }
+  },
+  "context_budget": {
+    "fallback_count": 0,
+    "truncated_count": 0,
+    "dropped_exchange_count": 0,
+    "evidence_semantically_preserved_count": 809,
+    "estimated_input_before_total": 19021880,
+    "estimated_input_after_total": 19021880
+  },
+  "selection": {
+    "selected_arm": "onyx_selection",
+    "all_gates_passed": true,
+    "gates": {
+      "nDCG@10_gain": {
+        "observed": 0.044121043448640984,
+        "threshold": 0.01,
+        "passed": true
+      },
+      "primary_ci_above_zero": {
+        "observed_ci95_low": 0.03180754608653603,
+        "inference_valid": true,
+        "passed": true
+      },
+      "Recall@5_loss": {
+        "observed": -0.043510506798516646,
+        "threshold": 0.005,
+        "passed": true
+      },
+      "Recall@20_loss": {
+        "observed": 0.0,
+        "threshold": 0.005,
+        "passed": true
+      },
+      "valid_api_fraction": {
+        "observed": 1.0,
+        "threshold": 0.95,
+        "passed": true
+      },
+      "unknown_outcomes": {
+        "observed": 0,
+        "maximum": 0,
+        "passed": true
+      }
+    },
+    "frozen_selection": "frozen-selection.json",
+    "scope": "quality screen only; independent confirmation remains required",
+    "production_default_changed": false,
+    "model_allowlist_changed": false
+  },
+  "source": {
+    "project": "https://github.com/onyx-dot-app/onyx/blob/4f64a0c4ca029532fc3e04475fe0fe1d44cee540/backend/onyx/secondary_llm_flows/document_filter.py",
+    "mechanism": "Group authorized matching chunks by source document; show at most 3 matching chunks per source; LLM selects up to 10 numbered sections ordered by relevance. Promote selected source documents in returned order and append unselected documents in frozen baseline order. Preserve every original output child.",
+    "adaptation": "Keep current BGE prior instead of replacing the entire Onyx search stack; use top 3 matching children in source order rather than adjacent expansion; strict JSON section_ids object instead of permissive bracket parsing; append original candidates to preserve output set. This is an adaptation, not a full Onyx reproduction."
+  },
+  "limitations": [
+    "Local public benchmark prototype,not platform Formal Experiment; no answer generation/faithfulness claim. Hosted model pretraining contamination unknown. No test or NFCorpus labels are consumed.",
+    "This is not a production default, model allowlist, or independent-confirmation claim.",
+    "The bootstrap resamples gold-overlap query groups from this repeated DEV split.",
+    "Every captured response includes a provider identity check."
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/onyx-selection-off-20261022/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

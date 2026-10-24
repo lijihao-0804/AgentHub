@@ -1,0 +1,241 @@
+{
+  "scope": "Score the preregistered evidence-set primary; reading order is diagnostic only.",
+  "queries": 200,
+  "groups": 134,
+  "arms": {
+    "legacy5": {
+      "metrics": {
+        "token_f1": 0.36341647241647246,
+        "exact_match": 0.29,
+        "evidence_recall": 0.8258333333333333,
+        "complete_evidence_set": 0.635,
+        "full_text_evidence_recall": 0.7966666666666667,
+        "final_evidence_bytes": 6185.19
+      },
+      "api": {
+        "status_counts": {
+          "VALID": 200
+        },
+        "attempted_count": 200,
+        "not_attempted_count": 0,
+        "valid_count": 200,
+        "valid_fraction": 1.0,
+        "unknown_outcome_count": 0,
+        "request_latency_ms": {
+          "n": 200,
+          "p50": 684.1863999979978,
+          "p95": 998.9401400001951,
+          "basis": "Incremental provider request only; excludes retrieval, runtime, and overall consumer flow."
+        },
+        "usage": {
+          "prompt_tokens": {
+            "sum": 451999,
+            "observed_count": 200,
+            "unknown_count": 0
+          },
+          "completion_tokens": {
+            "sum": 7118,
+            "observed_count": 200,
+            "unknown_count": 0
+          },
+          "total_tokens": {
+            "sum": 459117,
+            "observed_count": 200,
+            "unknown_count": 0
+          },
+          "reasoning_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 200
+          }
+        },
+        "usage_note": "Observed provider usage only; missing values remain unknown and no pricing or currency cost is inferred."
+      },
+      "citation": {
+        "mean_id_validity": 0.53,
+        "unknown_id_count": 0,
+        "duplicate_id_count": 0,
+        "responses_with_citations": 106,
+        "scope": "Admitted chunk-ID validity only; semantic support and faithfulness are not evaluated."
+      }
+    },
+    "set_rank5": {
+      "metrics": {
+        "token_f1": 0.5249194957089695,
+        "exact_match": 0.45,
+        "evidence_recall": 0.9066666666666667,
+        "complete_evidence_set": 0.8,
+        "full_text_evidence_recall": 0.8791666666666668,
+        "final_evidence_bytes": 3034.105
+      },
+      "api": {
+        "status_counts": {
+          "VALID": 200
+        },
+        "attempted_count": 200,
+        "not_attempted_count": 0,
+        "valid_count": 200,
+        "valid_fraction": 1.0,
+        "unknown_outcome_count": 0,
+        "request_latency_ms": {
+          "n": 200,
+          "p50": 720.9544500001357,
+          "p95": 1010.8963799968474,
+          "basis": "Incremental provider request only; excludes retrieval, runtime, and overall consumer flow."
+        },
+        "usage": {
+          "prompt_tokens": {
+            "sum": 249978,
+            "observed_count": 200,
+            "unknown_count": 0
+          },
+          "completion_tokens": {
+            "sum": 8024,
+            "observed_count": 200,
+            "unknown_count": 0
+          },
+          "total_tokens": {
+            "sum": 258002,
+            "observed_count": 200,
+            "unknown_count": 0
+          },
+          "reasoning_tokens": {
+            "sum": null,
+            "observed_count": 0,
+            "unknown_count": 200
+          }
+        },
+        "usage_note": "Observed provider usage only; missing values remain unknown and no pricing or currency cost is inferred."
+      },
+      "citation": {
+        "mean_id_validity": 0.69,
+        "unknown_id_count": 0,
+        "duplicate_id_count": 0,
+        "responses_with_citations": 138,
+        "scope": "Admitted chunk-ID validity only; semantic support and faithfulness are not evaluated."
+      }
+    }
+  },
+  "primary_f1": {
+    "baseline_mean": 0.36341647241647246,
+    "candidate_mean": 0.5249194957089695,
+    "difference": 0.16150302329249697,
+    "delta": 0.16150302329249697,
+    "ci_low": 0.10161862483311081,
+    "ci_high": 0.22819786150416446,
+    "confidence": 0.95,
+    "ci95_low": 0.10161862483311081,
+    "ci95_high": 0.22819786150416446,
+    "queries": 200,
+    "groups": 134,
+    "inference_valid": true
+  },
+  "reading_order_diagnostic": null,
+  "full_reading_vs_baseline_diagnostic": null,
+  "gates": {
+    "run_complete": true,
+    "structure_gate": true,
+    "ordering_exact_fragments": true,
+    "primary_f1_gain": true,
+    "primary_positive_ci": true,
+    "both_valid": true,
+    "unknown_zero": true,
+    "correct_model": true,
+    "recall_noninferior": true,
+    "usage_coverage": true,
+    "pipeline_input_budget": true,
+    "incremental_pipeline_p95": true,
+    "groups_valid": true
+  },
+  "passed": true,
+  "selected_profile": "set_rank5",
+  "pipeline": {
+    "paired_usage_questions": 199,
+    "mean_input_ratio": 1.978608043944802,
+    "p95_ratio": 1.6191689273840122,
+    "baseline_request_p95_ms": 998.9401400001951,
+    "selector_plus_answer_p95_ms": 1617.4528350049509
+  },
+  "physical_api": {
+    "selections": 200,
+    "answer_outcomes_reused": 1,
+    "observed_total_tokens": 1358779,
+    "unknown_usage_requests": 1
+  },
+  "strata": {
+    "scope": "Descriptive only; no significance test, model routing, or hop-conditioned method selection.",
+    "by_hops": {
+      "2": {
+        "questions": 177,
+        "profiles": {
+          "legacy5": {
+            "token_f1": 0.3778717202446016,
+            "exact_match": 0.2994350282485876,
+            "evidence_recall": 0.8418079096045198,
+            "complete_evidence_set": 0.6836158192090396,
+            "full_text_evidence_recall": 0.8107344632768362,
+            "final_evidence_bytes": 6160.005649717514
+          },
+          "set_rank5": {
+            "token_f1": 0.5555183970884239,
+            "exact_match": 0.480225988700565,
+            "evidence_recall": 0.9180790960451978,
+            "complete_evidence_set": 0.847457627118644,
+            "full_text_evidence_recall": 0.8870056497175142,
+            "final_evidence_bytes": 2938.9830508474574
+          }
+        }
+      },
+      "3": {
+        "questions": 16,
+        "profiles": {
+          "legacy5": {
+            "token_f1": 0.3,
+            "exact_match": 0.25,
+            "evidence_recall": 0.7916666666666666,
+            "complete_evidence_set": 0.375,
+            "full_text_evidence_recall": 0.7708333333333333,
+            "final_evidence_bytes": 6434.4375
+          },
+          "set_rank5": {
+            "token_f1": 0.3535714285714286,
+            "exact_match": 0.25,
+            "evidence_recall": 0.7708333333333333,
+            "complete_evidence_set": 0.3125,
+            "full_text_evidence_recall": 0.7708333333333333,
+            "final_evidence_bytes": 3662.125
+          }
+        }
+      },
+      "4": {
+        "questions": 7,
+        "profiles": {
+          "legacy5": {
+            "token_f1": 0.14285714285714285,
+            "exact_match": 0.14285714285714285,
+            "evidence_recall": 0.5,
+            "complete_evidence_set": 0.0,
+            "full_text_evidence_recall": 0.5,
+            "final_evidence_bytes": 6252.285714285715
+          },
+          "set_rank5": {
+            "token_f1": 0.14285714285714285,
+            "exact_match": 0.14285714285714285,
+            "evidence_recall": 0.9285714285714286,
+            "complete_evidence_set": 0.7142857142857143,
+            "full_text_evidence_recall": 0.9285714285714286,
+            "final_evidence_bytes": 4003.8571428571427
+          }
+        }
+      }
+    }
+  },
+  "limits": "Exposed DEV/provided candidates/English short answers; selector overhead included only incremental model pipeline, not full live Run P95. ID validity is not semantic citation support. No price snapshot or independent confirmation inferred. Reading diagnostic cannot replace primary.",
+  "mode": "confirmation",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

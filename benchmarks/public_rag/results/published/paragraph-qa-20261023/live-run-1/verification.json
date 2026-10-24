@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "checks": {
+    "official_f1_parity": 140,
+    "exact_source_substrings": 5,
+    "persisted_runs_verified": 1
+  },
+  "actual_raw_models": {
+    "DISPATCHED": 1,
+    "deepseek-v4.1-flash-1017": 1,
+    "deepseek-v4.1-flash": 1
+  },
+  "persisted_observed_usage": {
+    "input_tokens": 3548,
+    "output_tokens": 322,
+    "total_tokens": 3870
+  },
+  "visibility": {
+    "fixed": {},
+    "structural": {
+      "visible_records": 5,
+      "visible_characters": 3214,
+      "complete_indexed_chunk": 5
+    }
+  },
+  "scope": "Official lexical F1 parity, exact source ownership/substrings and SQL Run usage; not semantic support or transport delivery proof.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/paragraph-qa-20261023/live-run-1/verification.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

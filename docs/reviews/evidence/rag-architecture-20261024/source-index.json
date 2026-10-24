@@ -1,0 +1,95 @@
+{
+  "review_date": "2026-10-24",
+  "timezone": "Asia/Shanghai",
+  "scope": "Actual source-path review; no comparative performance claims or new RAG generation evaluation",
+  "sources": [
+    {
+      "project": "PaperQA",
+      "revision": "57e89f7223b0960d5ee5ea048c69e3c47e088572",
+      "file": "src/paperqa/docs.py",
+      "url": "https://github.com/Future-House/paper-qa/blob/57e89f7223b0960d5ee5ea048c69e3c47e088572/src/paperqa/docs.py",
+      "observed": "aget_evidence uses question-conditioned evidence processing; aquery serializes contexts and handles empty context.",
+      "limit": "Generated summaries and model relevance scores do not establish entailment or factual correctness."
+    },
+    {
+      "project": "PaperQA",
+      "revision": "57e89f7223b0960d5ee5ea048c69e3c47e088572",
+      "file": "src/paperqa/agents/tools.py",
+      "url": "https://github.com/Future-House/paper-qa/blob/57e89f7223b0960d5ee5ea048c69e3c47e088572/src/paperqa/agents/tools.py",
+      "observed": "GenerateAnswer and Complete are distinct tools; successful-answer flag is supplied by the agent.",
+      "limit": "Completion flag is not an independent semantic verifier."
+    },
+    {
+      "project": "PaperQA",
+      "revision": "57e89f7223b0960d5ee5ea048c69e3c47e088572",
+      "file": "src/paperqa/agents/main.py",
+      "url": "https://github.com/Future-House/paper-qa/blob/57e89f7223b0960d5ee5ea048c69e3c47e088572/src/paperqa/agents/main.py",
+      "observed": "Agent loop has configured timeout/timestep handling and distinguishes UNSURE/TRUNCATED.",
+      "limit": "Availability of a loop is not evidence of superior accuracy for our short-answer task."
+    },
+    {
+      "project": "RAGFlow",
+      "revision": "4cb2e5abfe0c490ccbb05c9278e2d42b8b395996",
+      "file": "internal/service/chat_pipeline.go",
+      "url": "https://github.com/infiniflow/ragflow/blob/4cb2e5abfe0c490ccbb05c9278e2d42b8b395996/internal/service/chat_pipeline.go",
+      "observed": "Mode dispatch separates standard retrieval from agentic execution; standard path builds context and decorates citations.",
+      "limit": "Citation decoration and vector similarity do not prove semantic support. Overview comments may describe legacy branches."
+    },
+    {
+      "project": "RAGFlow",
+      "revision": "4cb2e5abfe0c490ccbb05c9278e2d42b8b395996",
+      "file": "internal/agentic_rag/agent.go",
+      "url": "https://github.com/infiniflow/ragflow/blob/4cb2e5abfe0c490ccbb05c9278e2d42b8b395996/internal/agentic_rag/agent.go",
+      "observed": "Per-run tools, session scope, iteration cap and final synthesis; conditional compiled-claims route can bypass the loop.",
+      "limit": "Conditional compiled-knowledge path is not universal; do not copy large loop limits or force-answer behavior as a quality guarantee."
+    },
+    {
+      "project": "RAGFlow",
+      "revision": "4cb2e5abfe0c490ccbb05c9278e2d42b8b395996",
+      "file": "internal/agentic_rag/evidence_registry.go",
+      "url": "https://github.com/infiniflow/ragflow/blob/4cb2e5abfe0c490ccbb05c9278e2d42b8b395996/internal/agentic_rag/evidence_registry.go",
+      "observed": "Citation handles are associated with served evidence; repeated source snippets retain identity.",
+      "limit": "Served identity is not semantic answer verification."
+    },
+    {
+      "project": "RAGFlow",
+      "revision": "4cb2e5abfe0c490ccbb05c9278e2d42b8b395996",
+      "file": "internal/agentic_rag/decision_judge.go",
+      "url": "https://github.com/infiniflow/ragflow/blob/4cb2e5abfe0c490ccbb05c9278e2d42b8b395996/internal/agentic_rag/decision_judge.go",
+      "observed": "Retrieval relevance filtering is explicitly distinct from answer sufficiency; step intent matters for bridge evidence.",
+      "limit": "Commented experimental numbers were not independently reproduced and are not imported as performance evidence."
+    },
+    {
+      "project": "RAGChecker",
+      "revision": "6091f08c00e676e87a970f2aeb4a23a484746348",
+      "file": "ragchecker/metrics.py",
+      "url": "https://github.com/amazon-science/RAGChecker/blob/6091f08c00e676e87a970f2aeb4a23a484746348/ragchecker/metrics.py",
+      "observed": "Different checking directions underpin answer, retriever and generator metric groups.",
+      "limit": "Read downloaded code only; no extractor/checker calibration or new scoring execution."
+    },
+    {
+      "project": "Onyx",
+      "revision": "f1fa7005725263df1bbdc6278b62ed804225a75d",
+      "file": "backend/onyx/chat/llm_loop.py",
+      "url": "https://github.com/onyx-dot-app/onyx/blob/f1fa7005725263df1bbdc6278b62ed804225a75d/backend/onyx/chat/llm_loop.py",
+      "observed": "Ordinary chat loops over tool calls and disables tools at the last cycle.",
+      "limit": "No universal independent claim-level verification established by these paths."
+    },
+    {
+      "project": "Onyx",
+      "revision": "f1fa7005725263df1bbdc6278b62ed804225a75d",
+      "file": "backend/onyx/deep_research/dr_loop.py",
+      "url": "https://github.com/onyx-dot-app/onyx/blob/f1fa7005725263df1bbdc6278b62ed804225a75d/backend/onyx/deep_research/dr_loop.py",
+      "observed": "Deep Research has a separate clarification/planning/orchestration/report path.",
+      "limit": "No universal independent claim-level verification established by these paths."
+    },
+    {
+      "project": "Onyx",
+      "revision": "f1fa7005725263df1bbdc6278b62ed804225a75d",
+      "file": "backend/onyx/chat/citation_processor.py",
+      "url": "https://github.com/onyx-dot-app/onyx/blob/f1fa7005725263df1bbdc6278b62ed804225a75d/backend/onyx/chat/citation_processor.py",
+      "observed": "Citation markers resolve to source objects; identity mapping is not semantic entailment.",
+      "limit": "No universal independent claim-level verification established by these paths."
+    }
+  ]
+}

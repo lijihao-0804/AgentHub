@@ -1,0 +1,30 @@
+{
+  "status": "STOPPED_API_REASONING_MAPPING_FAILURE",
+  "quality_evaluated": false,
+  "complete_queries": 1,
+  "generation_api_calls": 1,
+  "http_status": 200,
+  "response_model_verified": true,
+  "observed_usage": {
+    "prompt_tokens": 4719,
+    "completion_tokens": 256,
+    "total_tokens": 4975,
+    "reasoning_tokens": 256,
+    "text_tokens": 0
+  },
+  "unknown_outcomes": 0,
+  "automatic_retries": 0,
+  "job": {
+    "exit_code": 1,
+    "elapsed_seconds": 6.766
+  },
+  "cause": "Default provider thinking consumed the output cap. The intended Onyx selection path uses ReasoningEffort.OFF; wire mapping was missing. No relevance output was delivered and no primary quality estimate was computed.",
+  "next_execution": "../onyx-selection-off-20261022/protocol.json",
+  "production_default_changed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/onyx-selection-20261022/acceptance.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

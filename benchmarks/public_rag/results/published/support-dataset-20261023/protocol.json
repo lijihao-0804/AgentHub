@@ -1,0 +1,27 @@
+{
+  "id": "source-evidence-deletion-baseline-diagnostic-v1",
+  "registered_at_utc": "2026-10-23T13:41:30.544163+00:00",
+  "scope": "One frozen diagnostic dataset milestone. No new answer strategy or optimization comparison.",
+  "model": "deepseek-v4.1-flash-1017",
+  "max_output_tokens": 256,
+  "temperature": 0,
+  "thinking": "disabled",
+  "response_format": "json_object",
+  "pairs": 4,
+  "planned_requests": 8,
+  "seed": 20261101,
+  "workers": 4,
+  "selection": "Four already exposed, explicitly supported source-snapshot questions, including known census failure; all32 ledger cases retained,28 unresolved. Not random, representative, heldout or human gold.",
+  "ablation": "Remove exactly curated final-answer source records and their refs; remaining texts/order/metadata, question, system instructions and other messages identical. No fabricated facts or extra prompts.",
+  "scoring": "All4 planned pairs retained. Supported official-alias F1/EM; missing-evidence valid structured refusal, unsupported delivered answer, and both-correct pair count. Failures0, not valid refusal. No population CI or significance claim on4 chosen pairs.",
+  "contemporaneous_control": "Fresh requests in both source conditions are necessary for this paired evidence-ablation measurement; historical positives are not used to claim causal context effects.",
+  "api_policy": "One attempt/no retry/no model fallback. First pair both structurally VALID before remaining6 requests. Unknown/wrongmodel/non400 provider error or>=2 invalid outcomes stops; in-flight awaited; preserve failures/notattempted.",
+  "adoption": "Never adopt/change default from this diagnostic. Stop after frozen dataset, boundary checks, complete baseline measurement and recorded findings. No prompt sweep or new confirmation exposure.",
+  "formal_experiment": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/support-dataset-20261023/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "scope": {
+    "dataset": "musique",
+    "split": "train",
+    "phase": "development",
+    "groups": 160,
+    "queries": 160,
+    "resampling_groups": 143,
+    "profiles": [
+      "plain_small",
+      "heading_small",
+      "heading_fill"
+    ],
+    "protocol": {
+      "declared_at_utc": "2026-10-23T05:59:14.513983+00:00",
+      "scope": "scenario-specific retrieval development and confirmation, not platform Formal Experiment",
+      "seed": 20261023,
+      "qasper": {
+        "task": "retrieval within the specified paper, not corpus-wide paper discovery",
+        "development_split": "train",
+        "development_papers": 80,
+        "selection": "sorted paper IDs then seeded shuffle; all questions for selected papers retained",
+        "confirmation_split": "dev",
+        "confirmation_papers": "all281",
+        "test_split_access": false,
+        "primary": "best annotator evidence-paragraph recall after context budget",
+        "secondary": [
+          "complete evidence set",
+          "full evidence text coverage",
+          "precision",
+          "latency",
+          "context bytes"
+        ],
+        "profiles": [
+          "plain_small",
+          "heading_small",
+          "heading_fill",
+          "heading_neighbor"
+        ],
+        "chunk_chars": 900,
+        "overlap_chars": 150,
+        "dense_candidates": 20,
+        "rerank_candidates": 20,
+        "context_byte_budget": 8000,
+        "retrieval_anchor_chunks": 5,
+        "neighbor_policy": "at most previous and next paragraph within SAME section, budget constrained, no additional documents",
+        "gate": {
+          "min_evidence_recall_gain": 0.03,
+          "paired_group_ci_lower_above_zero": true,
+          "max_complete_set_loss": 0.01
+        },
+        "matched_volume_control": "heading_fill adds next BGE-ranked chunks within same8000byte cap; compare with neighbor expansion to distinguish extra context volume from structural selection. Same cap is not equal actual tokens; report actual bytes.",
+        "development_multiple_comparisons": "Three fixed alternatives versus baseline, paired group CI98.333% for selection; final one frozen comparison CI95%.",
+        "eligibility": "Keep all selected-paper questions. Primary evidence score only answerable questions with at least one nonempty and completely aligned annotation; report unanswerable/unaligned and all-source denominators separately; do not treat partial gold as complete.",
+        "annotation_normalization": "Remove only explicit FLOAT SELECTED: UI prefix; require exact unique caption/text occurrence. Heading-only/unavailable/ambiguous evidence remains unresolved, with denominators disclosed. Captions are text-only and do not prove figure/table cell understanding."
+      },
+      "musique": {
+        "task": "question-provided candidate paragraphs, not open full-corpus retrieval",
+        "development_split": "train",
+        "development_cases": 160,
+        "confirmation_split": "dev",
+        "confirmation_cases": 300,
+        "test_access": false,
+        "variant": "ans",
+        "selection": "seeded deterministic sample, complete distractors retained",
+        "primary": "complete supporting-paragraph set rate",
+        "secondary": [
+          "support paragraph recall",
+          "hop2/3/4 strata",
+          "latency",
+          "context bytes",
+          "API usage"
+        ],
+        "gate": {
+          "min_complete_set_gain": 0.03,
+          "paired_ci_lower_above_zero": true,
+          "max_recall_loss": 0.01
+        },
+        "profiles": [
+          "plain_small",
+          "heading_small",
+          "heading_fill"
+        ],
+        "context_byte_budget": 8000,
+        "retrieval_anchor_chunks": 5,
+        "chunk_chars": 900,
+        "overlap_chars": 150,
+        "dense_candidates": 20,
+        "rerank_candidates": 20,
+        "neighbor_policy": "disabled: provided passages are unrelated documents, not adjacent paragraphs of one section"
+      },
+      "comparison_policy": "Dataset-specific settings. Finite mechanism profiles before confirmation; development may revise with explicit new protocol receipts. Once method selected, no confirmation-based reselection. No score until full planned split/capture complete; failed/unanswerable/unaligned cases retained with explicit denominators.",
+      "models": {
+        "dense": "BAAI/bge-m3",
+        "reranker": "BAAI/bge-reranker-v2-m3",
+        "device": "cuda",
+        "batch_size": 8,
+        "generation_if_needed": "deepseek-v4.1-flash-1017"
+      },
+      "execution": "Reuse production model adapters; initial exact dot-product candidate retrieval within benchmark-scoped paper/case. Does not claim production tenant/snapshot path until real integration tested.",
+      "safety": "Original support flags, evidence labels, answers and question decomposition never enter retrieval input or model evidence. Existing snapshots, model allowlists, budgets, vision and fallback gates retained.",
+      "source_basis": [
+        "LangChain ParentDocumentRetriever small-to-large context",
+        "Onyx source relevance selection"
+      ],
+      "no_useless_hash_tests": true
+    },
+    "model": {
+      "dense": "BAAI/bge-m3",
+      "reranker": "BAAI/bge-reranker-v2-m3",
+      "device": "cuda",
+      "batch_size": 8,
+      "generation_if_needed": "deepseek-v4.1-flash-1017"
+    },
+    "scope": "question-provided candidate paragraphs, not open full-corpus retrieval",
+    "timing": "shared cached profile inference; not paired E2E"
+  },
+  "primary": "complete_evidence_set",
+  "metrics": {
+    "plain_small": {
+      "best_evidence_recall": 0.7796875,
+      "complete_evidence_set": 0.54375,
+      "evidence_precision": 0.37312500000000004,
+      "full_text_evidence_recall": 0.7489583333333333,
+      "selected_paragraphs": 4.86875,
+      "evidence_bytes": 3236.51875
+    },
+    "heading_small": {
+      "best_evidence_recall": 0.8114583333333334,
+      "complete_evidence_set": 0.61875,
+      "evidence_precision": 0.38645833333333335,
+      "full_text_evidence_recall": 0.7755208333333333,
+      "selected_paragraphs": 4.875,
+      "evidence_bytes": 3264.225
+    },
+    "heading_fill": {
+      "best_evidence_recall": 0.921875,
+      "complete_evidence_set": 0.80625,
+      "evidence_precision": 0.18594963550918467,
+      "full_text_evidence_recall": 0.9015625,
+      "selected_paragraphs": 12.24375,
+      "evidence_bytes": 7847.1625
+    }
+  },
+  "comparisons": {
+    "heading_small": {
+      "primary_ci": {
+        "baseline_mean": 0.54375,
+        "candidate_mean": 0.61875,
+        "difference": 0.075,
+        "delta": 0.075,
+        "ci_low": 0.00641025641025641,
+        "ci_high": 0.14199402805172034,
+        "confidence": 0.975,
+        "ci95_low": 0.00641025641025641,
+        "ci95_high": 0.14199402805172034,
+        "queries": 160,
+        "groups": 143,
+        "inference_valid": true
+      },
+      "gates": {
+        "minimum_primary_gain": true,
+        "cluster_ci_above_zero": true,
+        "maximum_secondary_loss": true,
+        "adequate_questions_and_groups": true
+      },
+      "passed": true
+    },
+    "heading_fill": {
+      "primary_ci": {
+        "baseline_mean": 0.54375,
+        "candidate_mean": 0.80625,
+        "difference": 0.2625,
+        "delta": 0.2625,
+        "ci_low": 0.18238993710691823,
+        "ci_high": 0.34591194968553457,
+        "confidence": 0.975,
+        "ci95_low": 0.18238993710691823,
+        "ci95_high": 0.34591194968553457,
+        "queries": 160,
+        "groups": 143,
+        "inference_valid": true
+      },
+      "gates": {
+        "minimum_primary_gain": true,
+        "cluster_ci_above_zero": true,
+        "maximum_secondary_loss": true,
+        "adequate_questions_and_groups": true
+      },
+      "passed": true
+    }
+  },
+  "denominators": {
+    "all_questions": 160,
+    "evidence_evaluable": 160,
+    "unanswerable": 0,
+    "unaligned": 0
+  },
+  "budget_outcomes": {
+    "plain_small": {
+      "ADMITTED": 160
+    },
+    "heading_small": {
+      "ADMITTED": 160
+    },
+    "heading_fill": {
+      "ADMITTED": 160
+    }
+  },
+  "cost_note": "same maximum context budget, not equal actual input bytes; shared cached profile inference, no paired E2E latency claim",
+  "generated_answer_evaluated": false,
+  "production_integrated": false,
+  "selected_profile": "heading_fill",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

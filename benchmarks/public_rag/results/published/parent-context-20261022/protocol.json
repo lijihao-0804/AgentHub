@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "milestone": "Child retrieval with parent-context cross-encoder reranking",
+  "declared_at": "2026-10-22",
+  "seed": 20261024,
+  "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+  "arms": {
+    "baseline": "chunk",
+    "parent": "parent"
+  },
+  "dense_top_k": 30,
+  "sparse_top_k": 30,
+  "candidate_top_k": 20,
+  "rerank_top_k": 20,
+  "final_top_k": 20,
+  "rrf_k": 60,
+  "selection_rule": {
+    "min_ndcg10_gain": 0.005,
+    "max_recall5_loss": 0.005,
+    "max_recall20_loss": 0.005,
+    "require_primary_ci_above_zero": true
+  },
+  "project_source": "https://github.com/infiniflow/ragflow/blob/392ec99651da78f6a8e1a2f60fe4818a95a8651d/rag/nlp/search.py",
+  "second_project_source": "https://github.com/langchain-ai/langchain/blob/langchain%3D%3D0.3.27/libs/langchain/langchain/retrievers/multi_vector.py",
+  "source_function": "Dealer.retrieval_by_children: group child hits by mom_id and retrieve parent content",
+  "adaptation": "In this short-abstract corpus, one document revision is the parent. Rerank each unique candidate parent once, broadcast scores to its original children. This deliberately tests parent context BEFORE reranking, unlike RAGFlow postrank expansion; it is not an exact reproduction.",
+  "controls": "Same snapshot-authorized child candidates, unchanged dense/sparse ANN graph and RRF, same BGE-v2-m3 scorer, child output budget 20, no new retrieval or document candidates",
+  "parent_scope": "Before inference, scope all child rows through workspace/kb/snapshot membership JOIN. Verify every child text and range against the normalized upstream source and complete parent coverage. Full corpus text in RAM is benchmark-only and not a production caching design.",
+  "dev": "All 809 official SciFact train queries; labels already exposed by earlier development; repeated DEV selection is exploratory",
+  "regression": "All 300 already-exposed SciFact test queries only if DEV passes; no blind test claim",
+  "primary": "One nDCG@10 comparison, 10000 paired gold-overlap-cluster bootstrap, 95% percentile CI",
+  "secondary": "Recall@5/20, MRR@10, actual model pair/token/character counts, parent-context truncation rate, paired latency",
+  "latency": "Two actual retriever calls in randomized order per query, concurrency1, warm shared models, exclude first query both arms. Token audit runs after both timed calls and is excluded from latency.",
+  "adoption": "DEV pass only qualifies for further independent evaluation; production default unchanged",
+  "limits": "Retrieval only; no answer quality claim, no parameter sweep, not a platform Formal Experiment. One session cannot establish hardware-independent latency. Unread NFCorpus labels remain untouched.",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/parent-context-20261022/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}
