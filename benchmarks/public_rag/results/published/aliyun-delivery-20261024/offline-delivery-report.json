@@ -1,0 +1,57 @@
+{
+  "scope": "Offline delivery diagnostics on all200 already exposed questions; not answer correctness",
+  "registered": 200,
+  "groups": 139,
+  "paired": {
+    "record_recall": {
+      "baseline_mean": 0.5904166666666666,
+      "candidate_mean": 0.7829166666666667,
+      "difference": 0.1925,
+      "delta": 0.1925,
+      "ci_low": 0.1596474780701754,
+      "ci_high": 0.2255988074383506,
+      "confidence": 0.95,
+      "ci95_low": 0.1596474780701754,
+      "ci95_high": 0.2255988074383506,
+      "queries": 200,
+      "groups": 139,
+      "inference_valid": true
+    },
+    "full_text_recall": {
+      "baseline_mean": 0.5654166666666667,
+      "candidate_mean": 0.7433333333333333,
+      "difference": 0.17791666666666667,
+      "delta": 0.17791666666666667,
+      "ci_low": 0.1445206699928724,
+      "ci_high": 0.2105496453900709,
+      "confidence": 0.95,
+      "ci95_low": 0.1445206699928724,
+      "ci95_high": 0.2105496453900709,
+      "queries": 200,
+      "groups": 139,
+      "inference_valid": true
+    },
+    "complete_set": {
+      "baseline_mean": 0.255,
+      "candidate_mean": 0.54,
+      "difference": 0.285,
+      "delta": 0.285,
+      "ci_low": 0.2135330742385787,
+      "ci_high": 0.36269557045616174,
+      "confidence": 0.95,
+      "ci95_low": 0.2135330742385787,
+      "ci95_high": 0.36269557045616174,
+      "queries": 200,
+      "groups": 139,
+      "inference_valid": true
+    }
+  },
+  "api_calls": 0,
+  "ranking_or_embedding_quality_gain_claimed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/offline-delivery-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

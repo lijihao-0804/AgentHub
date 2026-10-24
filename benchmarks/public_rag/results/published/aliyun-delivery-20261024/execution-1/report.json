@@ -1,0 +1,114 @@
+{
+  "state": "COMPLETE",
+  "arms": {
+    "before": {
+      "registered": 200,
+      "status_counts": {
+        "VALID": 200
+      },
+      "token_f1_failure_zero": 0.29754164578111947,
+      "exact_match_failure_zero": 0.215,
+      "valid_fraction": 1.0,
+      "valid_refusals": 109,
+      "usage": {
+        "prompt_tokens": {
+          "known_total": 330852,
+          "unknown_count": 0
+        },
+        "completion_tokens": {
+          "known_total": 6747,
+          "unknown_count": 0
+        },
+        "total_tokens": {
+          "known_total": 337599,
+          "unknown_count": 0
+        }
+      },
+      "latency_ms": {
+        "observed": 200,
+        "p50": 974.6059499993862,
+        "p95": 3154.4631000015193
+      }
+    },
+    "current": {
+      "registered": 200,
+      "status_counts": {
+        "VALID": 198,
+        "PROVIDER_ERROR": 2
+      },
+      "token_f1_failure_zero": 0.40158563541721437,
+      "exact_match_failure_zero": 0.325,
+      "valid_fraction": 0.99,
+      "valid_refusals": 88,
+      "usage": {
+        "prompt_tokens": {
+          "known_total": 379771,
+          "unknown_count": 2
+        },
+        "completion_tokens": {
+          "known_total": 8287,
+          "unknown_count": 2
+        },
+        "total_tokens": {
+          "known_total": 388058,
+          "unknown_count": 2
+        }
+      },
+      "latency_ms": {
+        "observed": 200,
+        "p50": 1074.9057499961054,
+        "p95": 2085.9999099990087
+      }
+    }
+  },
+  "unknown": 0,
+  "identity_errors": 0,
+  "primary_ci_eligible": true,
+  "paired_cluster_ci": {
+    "token_f1": {
+      "baseline_mean": 0.29754164578111947,
+      "candidate_mean": 0.40158563541721437,
+      "difference": 0.1040439896360949,
+      "delta": 0.1040439896360949,
+      "ci_low": 0.04986975786975787,
+      "ci_high": 0.16487095831025259,
+      "confidence": 0.95,
+      "ci95_low": 0.04986975786975787,
+      "ci95_high": 0.16487095831025259,
+      "queries": 200,
+      "groups": 139,
+      "inference_valid": true
+    },
+    "exact_match": {
+      "baseline_mean": 0.215,
+      "candidate_mean": 0.325,
+      "difference": 0.11,
+      "delta": 0.11,
+      "ci_low": 0.05641025641025641,
+      "ci_high": 0.16822429906542055,
+      "confidence": 0.95,
+      "ci95_low": 0.05641025641025641,
+      "ci95_high": 0.16822429906542055,
+      "queries": 200,
+      "groups": 139,
+      "inference_valid": true
+    }
+  },
+  "local_regression_gate_passed": true,
+  "promotion": false,
+  "pricing_snapshot": null,
+  "monetary_cost": null,
+  "limitations": [
+    "Already exposed question-local English MuSiQue Ans regression",
+    "F1/EM are lexical; citation validity is not entailment",
+    "Failures zero measure delivered quality, not factual accuracy",
+    "Requested thinking off is not independently verified",
+    "No live index/database, platform Formal Experiment or fresh holdout"
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

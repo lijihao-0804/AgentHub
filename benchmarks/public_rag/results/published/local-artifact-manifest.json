@@ -2,6 +2,12 @@
   "policy": "Original artifacts remain LOCAL_ONLY; aggregate projections do not replace them",
   "groups": [
     {
+      "name": "aliyun-delivery-20261024",
+      "local_files": 19,
+      "local_bytes": 7788300,
+      "aggregate_files": 9
+    },
+    {
       "name": "answer-path-20261024",
       "local_files": 26,
       "local_bytes": 1677864,
@@ -141,6 +147,110 @@
     }
   ],
   "artifacts": [
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/current-replay-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/current-replay-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/current-replay-1/label-access.json",
+      "bytes": 138,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/current-replay-1/meta.json",
+      "bytes": 6133,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/current-replay-1/prepared.jsonl",
+      "bytes": 1737711,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/completed.json",
+      "bytes": 1508,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/execution-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/events.jsonl",
+      "bytes": 50534,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/report.json",
+      "bytes": 419362,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/execution-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/responses.jsonl",
+      "bytes": 288764,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/results.jsonl",
+      "bytes": 205146,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/frozen-inputs.json",
+      "bytes": 3605471,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/historical-replay-1/completed.json",
+      "bytes": 44,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/historical-replay-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/historical-replay-1/label-access.json",
+      "bytes": 138,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/historical-replay-1/meta.json",
+      "bytes": 6163,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/historical-replay-1/prepared.jsonl",
+      "bytes": 1454325,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/offline-delivery-report.json",
+      "bytes": 1925,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/offline-delivery-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/posthoc-diagnostics-report.json",
+      "bytes": 7820,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/posthoc-diagnostics-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/protocol.json",
+      "bytes": 2067,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/provenance-report.json",
+      "bytes": 310,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/provenance-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/remaining-gap-report.json",
+      "bytes": 697,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/aliyun-delivery-20261024/remaining-gap-report.json"
+    },
     {
       "local_artifact": "benchmarks/public_rag/results/answer-path-20261024/adapter-draft-before-source-review.json",
       "bytes": 399089,

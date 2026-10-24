@@ -1,0 +1,16 @@
+{
+  "scope": "Source provenance audit only; no model API calls",
+  "historical_source_commit": "42215c8",
+  "current_source_commit": "96587c3",
+  "historical_messages_exact_matches": 200,
+  "current_vs_batch2_exact_matches": 200,
+  "registered": 200,
+  "api_calls": 0,
+  "uses_content_hashes": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/provenance-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

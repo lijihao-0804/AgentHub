@@ -6,6 +6,7 @@ Git保存代码、研究报告和本目录的聚合投影。完整语料、逐�
 
 | 实验组 | 本地文件数 | 本地MiB | 公开聚合JSON |
 |---|---:|---:|---:|
+| [aliyun-delivery-20261024](aliyun-delivery-20261024/README.md) | 19 | 7.43 | 9 |
 | [answer-path-20261024](answer-path-20261024/README.md) | 26 | 1.60 | 4 |
 | [attributed-reader-20261023](attributed-reader-20261023/README.md) | 14 | 5.69 | 4 |
 | [budget-diversity-20261022](budget-diversity-20261022/README.md) | 21 | 60.95 | 2 |

@@ -1,0 +1,32 @@
+{
+  "scope": "Remaining delivery bottleneck, not generation accuracy",
+  "registered": 200,
+  "stages": {
+    "cached_candidate_pool": {
+      "record_recall": 0.9916666666666667,
+      "complete_set_count": 195
+    },
+    "production_retriever_evidence": {
+      "record_recall": 0.7829166666666667,
+      "complete_set_count": 108
+    },
+    "tool_return": {
+      "record_recall": 0.7829166666666667,
+      "complete_set_count": 108
+    },
+    "runtime_observation": {
+      "record_recall": 0.7829166666666667,
+      "complete_set_count": 108
+    },
+    "final_admitted_context": {
+      "record_recall": 0.7829166666666667,
+      "complete_set_count": 108
+    }
+  },
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/remaining-gap-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

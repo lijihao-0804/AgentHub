@@ -1,0 +1,116 @@
+{
+  "scope": "Posthoc descriptive slices, not new gates or semantic adjudication",
+  "registered": 200,
+  "hop_slices": {
+    "2": {
+      "n": 114,
+      "groups": 100,
+      "token_f1": {
+        "before": 0.3417466912896276,
+        "current": 0.4389150789704806
+      },
+      "paired_ci_descriptive_only": {
+        "baseline_mean": 0.3417466912896276,
+        "candidate_mean": 0.4389150789704806,
+        "difference": 0.09716838768085305,
+        "delta": 0.09716838768085305,
+        "ci_low": 0.0403753267621172,
+        "ci_high": 0.1600501275033823,
+        "confidence": 0.95,
+        "ci95_low": 0.0403753267621172,
+        "ci95_high": 0.1600501275033823,
+        "queries": 114,
+        "groups": 100,
+        "inference_valid": true
+      }
+    },
+    "3": {
+      "n": 59,
+      "groups": 33,
+      "token_f1": {
+        "before": 0.30648372343287594,
+        "current": 0.37702448210922784
+      },
+      "paired_ci_descriptive_only": {
+        "baseline_mean": 0.30648372343287594,
+        "candidate_mean": 0.37702448210922784,
+        "difference": 0.0705407586763519,
+        "delta": 0.0705407586763519,
+        "ci_low": -0.05934818422318417,
+        "ci_high": 0.22077971836592522,
+        "confidence": 0.95,
+        "ci95_low": -0.05934818422318417,
+        "ci95_high": 0.22077971836592522,
+        "queries": 59,
+        "groups": 33,
+        "inference_valid": true
+      }
+    },
+    "4": {
+      "n": 27,
+      "groups": 12,
+      "token_f1": {
+        "before": 0.09135802469135802,
+        "current": 0.29764309764309765
+      },
+      "paired_ci_descriptive_only": {
+        "baseline_mean": 0.09135802469135802,
+        "candidate_mean": 0.29764309764309765,
+        "difference": 0.20628507295173962,
+        "delta": 0.20628507295173962,
+        "ci_low": 0.07841864018334613,
+        "ci_high": 0.35130411255411254,
+        "confidence": 0.95,
+        "ci95_low": 0.07841864018334613,
+        "ci95_high": 0.35130411255411254,
+        "queries": 27,
+        "groups": 12,
+        "inference_valid": true
+      }
+    }
+  },
+  "citation_identifier_diagnostics": {
+    "before": {
+      "valid_results": 200,
+      "nonrefused_results": 91,
+      "nonrefused_with_citations": 91,
+      "nonrefused_with_unknown_citation_ids": 9,
+      "nonrefused_with_duplicate_citation_ids": 0,
+      "semantic_support": "UNKNOWN; IDs do not establish entailment"
+    },
+    "current": {
+      "valid_results": 198,
+      "nonrefused_results": 110,
+      "nonrefused_with_citations": 110,
+      "nonrefused_with_unknown_citation_ids": 0,
+      "nonrefused_with_duplicate_citation_ids": 0,
+      "semantic_support": "UNKNOWN; IDs do not establish entailment"
+    }
+  },
+  "direction_counts": {
+    "improved": 35,
+    "regressed": 14,
+    "tied": 151,
+    "not_a_significance_test": true
+  },
+  "examples": {},
+  "new_api_calls": 0,
+  "historical_batch2_context_only": {
+    "before": {
+      "n": 200,
+      "token_f1_failure_zero": 0.30018161692109063,
+      "actual_route_identity": "NOT_RECORDED_BY_OLD_RUNNER"
+    },
+    "after": {
+      "n": 200,
+      "token_f1_failure_zero": 0.4144363569179359,
+      "actual_route_identity": "NOT_RECORDED_BY_OLD_RUNNER"
+    }
+  },
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/aliyun-delivery-20261024/posthoc-diagnostics-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}
