@@ -1,0 +1,323 @@
+{
+  "arms": {
+    "disabled": {
+      "scope": "Frozen QASPER TRAIN answer-path development diagnostic; descriptive only, with no semantic entailment score or method promotion.",
+      "population": {
+        "active_cases": 8,
+        "natural_controls": 5,
+        "main_planned_requests": 24,
+        "control_planned_requests": 5,
+        "planned_requests": 29,
+        "valid_results": 1,
+        "invalid_or_error_results": 28,
+        "missing_or_rejected_rows": 0,
+        "ledger_cases": 18,
+        "proposed_ledger_cases": 0,
+        "pending_ledger_cases": 0,
+        "ineligible_ledger_cases": 10,
+        "active_ledger_cases": 8
+      },
+      "identifier_metrics": {
+        "valid": 1,
+        "invalid_or_error": 28,
+        "validity_is_not_entailment": true,
+        "status_counts": {
+          "NOT_ATTEMPTED": 28,
+          "VALID": 1
+        },
+        "structure_invalid_valid_status": 0
+      },
+      "answer_path_main": {
+        "denominator": 8,
+        "conditions": {
+          "actual": {
+            "planned": 8,
+            "valid": 0,
+            "invalid_or_error": 8,
+            "status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "token_f1": 0.0,
+            "exact_match": 0.0,
+            "valid_refusals": 0,
+            "valid_refusal_rate": 0.0
+          },
+          "sufficient": {
+            "planned": 8,
+            "valid": 0,
+            "invalid_or_error": 8,
+            "status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "token_f1": 0.0,
+            "exact_match": 0.0,
+            "valid_refusals": 0,
+            "valid_refusal_rate": 0.0
+          },
+          "removed": {
+            "planned": 8,
+            "valid": 1,
+            "invalid_or_error": 7,
+            "status_counts": {
+              "NOT_ATTEMPTED": 7,
+              "VALID": 1
+            },
+            "correct_refusals": 1,
+            "correct_refusal_rate": 0.125,
+            "unsupported_nonrefusals": 0,
+            "unsupported_nonrefusal_rate": 0.0,
+            "invalid_or_error_rate": 0.875
+          }
+        },
+        "paired": {
+          "denominator": 8,
+          "actual_exact_and_removed_correct_refusal": 0,
+          "actual_exact_and_removed_correct_refusal_rate": 0.0,
+          "sufficient_exact_and_removed_correct_refusal": 0,
+          "sufficient_exact_and_removed_correct_refusal_rate": 0.0,
+          "positive_exact_actual": 0,
+          "positive_exact_sufficient": 0,
+          "removed_correct_refusals": 1,
+          "positive_actual_exact_rate": 0.0,
+          "positive_sufficient_exact_rate": 0.0,
+          "removed_correct_refusal_rate": 0.125
+        }
+      },
+      "natural_controls": {
+        "denominator": 5,
+        "valid": 0,
+        "valid_correct_refusals": 0,
+        "valid_correct_refusal_rate": 0.0,
+        "valid_nonrefusals": 0,
+        "valid_nonrefusal_rate": 0.0,
+        "invalid_or_error": 5,
+        "invalid_or_error_rate": 1.0,
+        "status_counts": {
+          "NOT_ATTEMPTED": 5
+        },
+        "never_combined_with_constructed_negatives_or_answerable_f1": true
+      },
+      "paper_cluster_diagnostics": {
+        "status": "INCOMPLETE_INPUTS",
+        "paper_groups": 8,
+        "sufficient_minus_actual_token_f1": {
+          "status": "INCOMPLETE_INPUTS",
+          "estimate": 0.0,
+          "ci95_low": null,
+          "ci95_high": null,
+          "papers": 8
+        },
+        "sufficient_minus_actual_exact_match": {
+          "status": "INCOMPLETE_INPUTS",
+          "estimate": 0.0,
+          "ci95_low": null,
+          "ci95_high": null,
+          "papers": 8
+        },
+        "no_p_values": true,
+        "not_method_promotion": true
+      },
+      "usage": {
+        "totals": {
+          "input_tokens": null,
+          "output_tokens": null,
+          "total_tokens": null
+        },
+        "known_totals": {
+          "input_tokens": 706,
+          "output_tokens": 138,
+          "total_tokens": 844
+        },
+        "unknown_counts": {
+          "input_tokens": 28,
+          "output_tokens": 28,
+          "total_tokens": 28
+        },
+        "known_counts": {
+          "input_tokens": 1,
+          "output_tokens": 1,
+          "total_tokens": 1
+        },
+        "latency_ms": {
+          "n": 1,
+          "p50": 3111.1717999992834,
+          "p95": 3111.1717999992834
+        },
+        "cost": null
+      },
+      "cost": null,
+      "limitations": [
+        "Official max-reference exact-match and token F1 measure answer fact overlap.",
+        "Citation IDs are checked only for uniqueness and visibility; validity does not measure semantic support or entailment.",
+        "Removed-condition gold-answer overlap receives zero credit; only a complete source-only refusal counts as correct.",
+        "Constructed negatives and natural human-unanswerable controls remain separate and are never added to answerable F1 denominators.",
+        "Paper-cluster intervals are descriptive diagnostics, not significance tests or evidence for method promotion.",
+        "Semantic support requires later external annotation; no semantic score is emitted."
+      ]
+    },
+    "enabled": {
+      "scope": "Frozen QASPER TRAIN answer-path development diagnostic; descriptive only, with no semantic entailment score or method promotion.",
+      "population": {
+        "active_cases": 8,
+        "natural_controls": 5,
+        "main_planned_requests": 24,
+        "control_planned_requests": 5,
+        "planned_requests": 29,
+        "valid_results": 1,
+        "invalid_or_error_results": 28,
+        "missing_or_rejected_rows": 0,
+        "ledger_cases": 18,
+        "proposed_ledger_cases": 0,
+        "pending_ledger_cases": 0,
+        "ineligible_ledger_cases": 10,
+        "active_ledger_cases": 8
+      },
+      "identifier_metrics": {
+        "valid": 1,
+        "invalid_or_error": 28,
+        "validity_is_not_entailment": true,
+        "status_counts": {
+          "NOT_ATTEMPTED": 28,
+          "VALID": 1
+        },
+        "structure_invalid_valid_status": 0
+      },
+      "answer_path_main": {
+        "denominator": 8,
+        "conditions": {
+          "actual": {
+            "planned": 8,
+            "valid": 0,
+            "invalid_or_error": 8,
+            "status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "token_f1": 0.0,
+            "exact_match": 0.0,
+            "valid_refusals": 0,
+            "valid_refusal_rate": 0.0
+          },
+          "sufficient": {
+            "planned": 8,
+            "valid": 0,
+            "invalid_or_error": 8,
+            "status_counts": {
+              "NOT_ATTEMPTED": 8
+            },
+            "token_f1": 0.0,
+            "exact_match": 0.0,
+            "valid_refusals": 0,
+            "valid_refusal_rate": 0.0
+          },
+          "removed": {
+            "planned": 8,
+            "valid": 1,
+            "invalid_or_error": 7,
+            "status_counts": {
+              "NOT_ATTEMPTED": 7,
+              "VALID": 1
+            },
+            "correct_refusals": 0,
+            "correct_refusal_rate": 0.0,
+            "unsupported_nonrefusals": 1,
+            "unsupported_nonrefusal_rate": 0.125,
+            "invalid_or_error_rate": 0.875
+          }
+        },
+        "paired": {
+          "denominator": 8,
+          "actual_exact_and_removed_correct_refusal": 0,
+          "actual_exact_and_removed_correct_refusal_rate": 0.0,
+          "sufficient_exact_and_removed_correct_refusal": 0,
+          "sufficient_exact_and_removed_correct_refusal_rate": 0.0,
+          "positive_exact_actual": 0,
+          "positive_exact_sufficient": 0,
+          "removed_correct_refusals": 0,
+          "positive_actual_exact_rate": 0.0,
+          "positive_sufficient_exact_rate": 0.0,
+          "removed_correct_refusal_rate": 0.0
+        }
+      },
+      "natural_controls": {
+        "denominator": 5,
+        "valid": 0,
+        "valid_correct_refusals": 0,
+        "valid_correct_refusal_rate": 0.0,
+        "valid_nonrefusals": 0,
+        "valid_nonrefusal_rate": 0.0,
+        "invalid_or_error": 5,
+        "invalid_or_error_rate": 1.0,
+        "status_counts": {
+          "NOT_ATTEMPTED": 5
+        },
+        "never_combined_with_constructed_negatives_or_answerable_f1": true
+      },
+      "paper_cluster_diagnostics": {
+        "status": "INCOMPLETE_INPUTS",
+        "paper_groups": 8,
+        "sufficient_minus_actual_token_f1": {
+          "status": "INCOMPLETE_INPUTS",
+          "estimate": 0.0,
+          "ci95_low": null,
+          "ci95_high": null,
+          "papers": 8
+        },
+        "sufficient_minus_actual_exact_match": {
+          "status": "INCOMPLETE_INPUTS",
+          "estimate": 0.0,
+          "ci95_low": null,
+          "ci95_high": null,
+          "papers": 8
+        },
+        "no_p_values": true,
+        "not_method_promotion": true
+      },
+      "usage": {
+        "totals": {
+          "input_tokens": null,
+          "output_tokens": null,
+          "total_tokens": null
+        },
+        "known_totals": {
+          "input_tokens": 827,
+          "output_tokens": 1284,
+          "total_tokens": 2111
+        },
+        "unknown_counts": {
+          "input_tokens": 28,
+          "output_tokens": 28,
+          "total_tokens": 28
+        },
+        "known_counts": {
+          "input_tokens": 1,
+          "output_tokens": 1,
+          "total_tokens": 1
+        },
+        "latency_ms": {
+          "n": 1,
+          "p50": 11159.538899999461,
+          "p95": 11159.538899999461
+        },
+        "cost": null
+      },
+      "cost": null,
+      "limitations": [
+        "Official max-reference exact-match and token F1 measure answer fact overlap.",
+        "Citation IDs are checked only for uniqueness and visibility; validity does not measure semantic support or entailment.",
+        "Removed-condition gold-answer overlap receives zero credit; only a complete source-only refusal counts as correct.",
+        "Constructed negatives and natural human-unanswerable controls remain separate and are never added to answerable F1 denominators.",
+        "Paper-cluster intervals are descriptive diagnostics, not significance tests or evidence for method promotion.",
+        "Semantic support requires later external annotation; no semantic score is emitted."
+      ]
+    }
+  },
+  "paired_differences": null,
+  "comparison_status": "INELIGIBLE_INCOMPLETE_OR_UNOBSERVABLE",
+  "production_promoted": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/execution-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

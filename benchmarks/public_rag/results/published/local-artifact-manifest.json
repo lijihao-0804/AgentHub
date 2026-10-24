@@ -111,9 +111,9 @@
     },
     {
       "name": "rag-root-cause-20261024",
-      "local_files": 19,
-      "local_bytes": 44330698,
-      "aggregate_files": 7
+      "local_files": 27,
+      "local_bytes": 44754486,
+      "aggregate_files": 10
     },
     {
       "name": "relation-reader-20261023",
@@ -3178,6 +3178,49 @@
       "bytes": 3551,
       "storage": "LOCAL_ONLY",
       "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-1/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/execution-1/answers.jsonl",
+      "bytes": 2785,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/execution-1/api-events.jsonl",
+      "bytes": 9246,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/execution-1/completed.json",
+      "bytes": 2384,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-2/execution-1/completed.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/execution-1/report.json",
+      "bytes": 40930,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-2/execution-1/report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/execution-1/run.json",
+      "bytes": 22015,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/frozen-dataset.json",
+      "bytes": 197712,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/prepared-requests.json",
+      "bytes": 144835,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/protocol.json",
+      "bytes": 3881,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/reader-isolation-2/protocol.json"
     },
     {
       "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/resource-discovery.json",

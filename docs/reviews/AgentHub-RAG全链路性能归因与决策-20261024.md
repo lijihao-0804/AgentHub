@@ -95,3 +95,9 @@ trace子代理报告曾误执行一次只读`Get-FileHash`，违反本轮明确�
 51题新来源机械审查也在新题回答调用前完成：6题存在证据无法唯一对齐或缺失，6题为未经过专家充分性复核的原不可回答标签，5题可答标签没有标注正向证据，1题同时有Yes/No标注，1题参考答案明确注明内容缺失；问题可能重叠，不能相加充当错误率。32题没有这些机械告警，也不能自动当作充分语义金标。全部51题保留，未通过删难题提高分数。关系需求、数值单位与歧义审核继续保留UNKNOWN。
 
 机械标注审查复现入口：`.venv/Scripts/python.exe -m benchmarks.public_rag.root_cause_dataset --review-input benchmarks/public_rag/results/rag-root-cause-20261024/development-proposal-v2.json --output benchmarks/public_rag/results/<新的目录>/source-review-mechanical-report.json`。已核对该函数与已保存审查结果完全一致，不重写原文件。
+
+### 第二次登记及控制修复
+
+reader-isolation-2实际派发2次后停止，退出2。high分支返回1204 reasoning tokens；none分支却仍返回121 reasoning tokens和推理内容，违反关闭分支门槛。因此没有有效配对CI，不使用2条结果比较质量。两次失效登记合计3次已确认响应、3864总tokens，未知传输0，无备用；保留各自冻结登记和账本。
+
+第二次修正添加Chat reasoning_effort时，我错误移除了原来发送的上游thinking开关。恢复该开关，与Magpie标准字段同时固定，兼容网关识别和DeepSeek兼容后端的透传。第三次登记只修复这个接口控制，模型/问题/材料/提示/评分/总预算仍相同，原两组不被回改或合并成成功运行。若第三次仍出现模式不可观测/矛盾，停止此方向，不继续试参数组合。即使有效，8题开发来源的结果也只支持有限范围诊断。

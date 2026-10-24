@@ -1,0 +1,53 @@
+{
+  "state": "FROZEN_DEVELOPMENT_MODEL_ISOLATION",
+  "registered_at_utc": "2026-10-24T07:33:48.750203+00:00",
+  "hypothesis": "Extra thinking may reduce relation errors under identical evidence.",
+  "source_dataset": "benchmarks/public_rag/results/answer-path-20261024/frozen-dataset.json",
+  "data_status": "Previously exposed development; machine-assisted source review.",
+  "arms": [
+    "disabled",
+    "enabled"
+  ],
+  "seed": 2026102407,
+  "model_route": {
+    "name": "local-rag"
+  },
+  "max_tokens": 4096,
+  "reasoning_effort": {
+    "disabled": "none",
+    "enabled": "high"
+  },
+  "wire_correction": "First registration sent thinking only and stopped after one unobservable response. New registration uses the Chat field required by Magpie source; same model, question, evidence, scorer and total ceiling. Old result retained.",
+  "budget_note": "Equal total output ceiling, shared by reasoning and final output; no claim of equal final-answer tokens or a separately controllable reasoning cap.",
+  "planned_logical_requests": 58,
+  "maximum_physical_requests": 59,
+  "metrics": [
+    "unchanged EM/F1",
+    "removed refusal",
+    "natural refusal",
+    "usage",
+    "latency"
+  ],
+  "statistics": "paired paper-cluster percentile bootstrap; descriptive only",
+  "scorer_version": "answer_path_report from build_commit plus committed source",
+  "stop_rules": [
+    "Any fallback, unknown transport, identity mismatch or non-400 provider error.",
+    "Three HTTP400 rejections; no prompt repair, retries or continuation.",
+    "Do not infer thinking effectiveness unless provider observability supports it."
+  ],
+  "promotion": "Forbidden from this exposed small diagnostic, regardless of score.",
+  "stronger_model": "NOT_RUN; first isolate a controlled change within one alias.",
+  "build_commit": "415cdb84ed587424190d650e62b787ce40969d25",
+  "source_binding": "clean tracked code and identical HEAD required at execution; no added hashes",
+  "thinking_observability_gate": "Stop if enabled exposes neither reasoning content nor reasoning tokens, or disabled exposes reasoning. Absence is not proof of private backend behavior.",
+  "paired_inference_gate": "All registered results valid, one primary dispatch each and enabled reasoning observed; otherwise no paired CI.",
+  "cached_token_policy": "Retain raw provider usage including cache details; canonical cached_tokens may be unknown. No monetary cache-cost inference.",
+  "formal_experiment": false,
+  "holdout_exposed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-isolation-2/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

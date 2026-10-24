@@ -486,11 +486,10 @@ class RouteClient:
         ):
             self.halted = True
             raise ValueError("frozen route or request constraints changed")
-        if self.reasoning_effort is None:
-            kwargs["extra_body"] = {"thinking": {"type": self.thinking}}
-        else:
-            # Magpie reads the Chat Completions protocol's reasoning_effort.
-            # Anthropic's thinking field alone does not request Chat reasoning.
+        # Preserve the existing upstream switch as well as Magpie's Chat field.
+        # Some routes pass the Chat body through to a DeepSeek-compatible backend.
+        kwargs["extra_body"] = {"thinking": {"type": self.thinking}}
+        if self.reasoning_effort is not None:
             kwargs["reasoning_effort"] = self.reasoning_effort
         self.budget["dispatched"] += 1
         record = {

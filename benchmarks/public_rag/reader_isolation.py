@@ -151,10 +151,13 @@ async def freeze():
             "prompt": PROMPT,
             "max_tokens": MAX_TOKENS,
             "reasoning_effort": EFFORTS,
+            "upstream_thinking": {"disabled": "disabled", "enabled": "enabled"},
             "wire_correction": (
                 "First registration sent thinking only and stopped after one unobservable "
-                "response. New registration uses the Chat field required by Magpie source; "
-                "same model, question, evidence, scorer and total ceiling. Old result retained."
+                "response. Second registration added the Chat field but dropped the existing "
+                "upstream switch; disabled still exposed reasoning. This registration preserves "
+                "both controls; same model, question, evidence, scorer and total ceiling. "
+                "Both stopped registrations remain unchanged; no further parameter variants."
             ),
             "budget_note": "Equal total output ceiling, shared by reasoning and final output; "
             "no claim of equal final-answer tokens or a separately controllable reasoning cap.",
@@ -270,6 +273,8 @@ async def execute():
         raise ValueError("frozen model route or prompt changed")
     if protocol.get("reasoning_effort") != EFFORTS or protocol["max_tokens"] != MAX_TOKENS:
         raise ValueError("frozen reasoning controls changed")
+    if protocol.get("upstream_thinking") != {"disabled": "disabled", "enabled": "enabled"}:
+        raise ValueError("frozen upstream thinking switch changed")
     requests = await prepared(data, route)
     wire = [{"key": list(k), "messages": to_wire(v.messages)} for k, v in requests.items()]
     if wire != read(ROOT / "prepared-requests.json"):
