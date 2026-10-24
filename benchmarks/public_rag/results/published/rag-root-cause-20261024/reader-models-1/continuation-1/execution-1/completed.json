@@ -1,0 +1,16 @@
+{
+  "state": "REMAINING_DISPATCHES_COMPLETE_WITH_PRIOR_UNKNOWN",
+  "original_planned": 58,
+  "new_dispatches": 42,
+  "maximum_new_dispatches": 42,
+  "prior_unknown_not_retried": 1,
+  "stop_reason": null,
+  "production_promoted": false,
+  "cost": null,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-models-1/continuation-1/execution-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

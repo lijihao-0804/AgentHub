@@ -1,0 +1,70 @@
+{
+  "state": "FROZEN_DEVELOPMENT_MODEL_ISOLATION",
+  "registered_at_utc": "2026-10-24T08:08:35.155074+00:00",
+  "hypothesis": "A different deployed reader route may handle the same relation evidence better.",
+  "comparison": "models",
+  "source_dataset": "benchmarks/public_rag/results/answer-path-20261024/frozen-dataset.json",
+  "data_status": "Previously exposed development; machine-assisted source review.",
+  "arms": [
+    "deepseek_high",
+    "glm_high"
+  ],
+  "seed": 2026102407,
+  "model_route": {
+    "name": "local-rag"
+  },
+  "arm_routes": {
+    "deepseek_high": {
+      "name": "local-rag"
+    },
+    "glm_high": {
+      "name": "local-rag"
+    }
+  },
+  "expected_response_models": {
+    "auto/deepseek-v4.1-flash": "deepseek-v4.1-flash",
+    "zai/glm-5.3": "glm-5.3"
+  },
+  "max_tokens": 4096,
+  "reasoning_effort": {
+    "deepseek_high": "high",
+    "glm_high": "high"
+  },
+  "upstream_thinking": {
+    "deepseek_high": "enabled",
+    "glm_high": "enabled"
+  },
+  "wire_correction": "Primary model/provider routes are predeclared; same questions, evidence, scorer and total ceiling. Both request high reasoning. Prior failed mode probes remain separate; no off/on or underlying-weight causal claim.",
+  "budget_note": "Equal total output ceiling, shared by reasoning and final output; no claim of equal final-answer tokens or a separately controllable reasoning cap.",
+  "planned_logical_requests": 58,
+  "maximum_physical_requests": 59,
+  "metrics": [
+    "unchanged EM/F1",
+    "removed refusal",
+    "natural refusal",
+    "usage",
+    "latency"
+  ],
+  "statistics": "paired paper-cluster percentile bootstrap; descriptive only",
+  "scorer_version": "answer_path_report from build_commit plus committed source",
+  "stop_rules": [
+    "Any fallback, unknown transport, identity mismatch or non-400 provider error.",
+    "Three HTTP400 rejections; no prompt repair, retries or continuation.",
+    "Do not infer thinking effectiveness unless provider observability supports it."
+  ],
+  "promotion": "Forbidden from this exposed small diagnostic, regardless of score.",
+  "stronger_model": "Registered GLM-5.3 candidate; quality superiority not assumed. This compares deployed model/provider routes, not verified underlying weights.",
+  "build_commit": "7b3b828f4b6a63fb63bfd99bfd4f45ce870d04fe",
+  "source_binding": "clean tracked code and identical HEAD required at execution; no added hashes",
+  "thinking_observability_gate": "Record reasoning observations without an off/on attribution; both deployed routes request high. Backend weights remain unverified.",
+  "paired_inference_gate": "All registered results valid and one exact-identity primary dispatch each; mode isolation additionally requires observed enabled reasoning. Otherwise no CI.",
+  "cached_token_policy": "Retain raw provider usage including cache details; canonical cached_tokens may be unknown. No monetary cache-cost inference.",
+  "formal_experiment": false,
+  "holdout_exposed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-models-1/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "state": "BOUNDED_ATTRIBUTION_MILESTONE_CLOSED_NO_NEW_ALGORITHM_PROMOTION",
+  "earlier_summary_scope": "summary.json is historical P0 only, not final execution status",
+  "baseline_commit": "4495beea4eb15632ec62d2870a9c884259e3f285",
+  "gpu_execution_commit": "d266db7",
+  "original_model_registration_commit": "7b3b828",
+  "continuation_commit": "95b8876",
+  "model_requests": {
+    "mode_control_known": 5,
+    "model_comparison_attempts": 58,
+    "model_comparison_known": 57,
+    "model_comparison_unknown_no_retry": 1,
+    "continuation_new_dispatches": 42
+  },
+  "usage": {
+    "known_tokens": 85217,
+    "unknown_request_usage": 1,
+    "subagent_usage": "UNKNOWN",
+    "monetary_cost": null,
+    "pricing_snapshot": "NOT_FROZEN"
+  },
+  "comparison_status": "INELIGIBLE_INCOMPLETE_OR_UNOBSERVABLE",
+  "secondary_complete_conditions": {
+    "actual": {
+      "status": "NOT_IDENTIFIABLE_INCOMPLETE_CONDITION",
+      "delta": null,
+      "ci95": null,
+      "registered_pairs": 8
+    },
+    "sufficient": {
+      "status": "AMENDED_DESCRIPTIVE_ONLY",
+      "delta": -0.2672887817564661,
+      "ci95": [
+        -0.546615617162228,
+        -0.03969878329146073
+      ],
+      "registered_pairs": 8,
+      "paper_groups": 8,
+      "metric": "official_token_f1"
+    },
+    "removed": {
+      "status": "AMENDED_DESCRIPTIVE_ONLY",
+      "delta": -0.125,
+      "ci95": [
+        -0.375,
+        0.0
+      ],
+      "registered_pairs": 8,
+      "paper_groups": 8,
+      "metric": "registered_removed_refusal"
+    }
+  },
+  "paragraph_preserving": {
+    "state": "COMPLETE",
+    "registered": 51,
+    "completed": 51,
+    "evaluable": 34,
+    "unknown_or_no_positive_annotation": 17,
+    "complete_counts": {
+      "leaf": 16,
+      "preserving": 19
+    },
+    "paired_coordinate_difference": {
+      "delta": 0.08823529411764706,
+      "ci95": [
+        0.0,
+        0.21436335403726595
+      ],
+      "queries": 34,
+      "paper_groups": 17,
+      "units": "fraction"
+    },
+    "advance_to_answers": false,
+    "decision": "STOP_READING_RECOVERY_DIRECTION",
+    "baseline_coordinates_preserved_rows": 51,
+    "expanded_records": 81,
+    "budget_skipped_expansions": 75,
+    "max_record_array_bytes": 7999,
+    "new_gpu_inferences": 0,
+    "new_answer_model_calls": 0,
+    "production_promoted": false,
+    "semantic_sufficiency": "UNKNOWN"
+  },
+  "lexical_gap_audit": {
+    "scope": "Posthoc attribution of the complete sufficient-evidence development condition; not a new benchmark or replacement score.",
+    "registered_queries": 8,
+    "polarity_cases": 2,
+    "original_macro_f1_delta_pp": -26.72887817564661,
+    "polarity_cases_macro_contribution_pp": -22.184065934065934,
+    "signed_share_of_observed_lexical_delta": 0.8299662181212837,
+    "warning": "This is NOT a fraction of factual errors or all RAG errors. Value correctness and compliance with the no-explanation instruction differ. Do not treat a matched leading token as source entailment.",
+    "official_scores_changed": false,
+    "new_model_calls": 0,
+    "promotion": false
+  },
+  "data": {
+    "development_papers": 20,
+    "development_questions": 51,
+    "expert_gold": false,
+    "reserved_papers": 10,
+    "reserved_questions": 28,
+    "reserved_answers_generated": 0,
+    "reserved_answers_scored": 0
+  },
+  "not_tested": [
+    "embedding/reranker replacement",
+    "controlled query rewrite/decomposition",
+    "bounded gap retrieval",
+    "production AgentRun E2E"
+  ],
+  "production_default_changed": false,
+  "new_algorithm_promoted": false,
+  "semantic_accuracy": "UNKNOWN; not inferred from F1, source coverage, or citation validity",
+  "source_documents": [
+    "reader-models-1/continuation-1/execution-1/report.json",
+    "paragraph-preserving-1/pilot-1/report.json",
+    "reader-value-audit-report.json"
+  ],
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/final-summary-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "state": "COMPLETE",
+  "registered": 51,
+  "completed": 51,
+  "decision": "STOP_READING_RECOVERY_DIRECTION",
+  "new_answer_model_calls": 0,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-preserving-1/pilot-1/completed.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

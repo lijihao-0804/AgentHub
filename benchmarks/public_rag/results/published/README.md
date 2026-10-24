@@ -24,7 +24,7 @@ Git保存代码、研究报告和本目录的聚合投影。完整语料、逐�
 | [parent-context-20261022](parent-context-20261022/README.md) | 16 | 32.78 | 4 |
 | [project-dbsf-20261022](project-dbsf-20261022/README.md) | 8 | 8.45 | 3 |
 | [prompt-trial-20261023](prompt-trial-20261023/README.md) | 25 | 4.18 | 6 |
-| [rag-root-cause-20261024](rag-root-cause-20261024/README.md) | 47 | 47.90 | 19 |
+| [rag-root-cause-20261024](rag-root-cause-20261024/README.md) | 66 | 49.79 | 27 |
 | [relation-reader-20261023](relation-reader-20261023/README.md) | 14 | 1.18 | 1 |
 | [scenario-rag-20261023](scenario-rag-20261023/README.md) | 51 | 15.97 | 13 |
 | [scifact-20261021](scifact-20261021/README.md) | 20 | 51.60 | 1 |

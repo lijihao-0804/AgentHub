@@ -1,0 +1,18 @@
+{
+  "scope": "Posthoc attribution of the complete sufficient-evidence development condition; not a new benchmark or replacement score.",
+  "registered_queries": 8,
+  "polarity_cases": 2,
+  "original_macro_f1_delta_pp": -26.72887817564661,
+  "polarity_cases_macro_contribution_pp": -22.184065934065934,
+  "signed_share_of_observed_lexical_delta": 0.8299662181212837,
+  "warning": "This is NOT a fraction of factual errors or all RAG errors. Value correctness and compliance with the no-explanation instruction differ. Do not treat a matched leading token as source entailment.",
+  "official_scores_changed": false,
+  "new_model_calls": 0,
+  "promotion": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/reader-value-audit-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "state": "COMPLETE",
+  "registered": 51,
+  "completed": 51,
+  "evaluable": 34,
+  "unknown_or_no_positive_annotation": 17,
+  "complete_counts": {
+    "leaf": 16,
+    "preserving": 19
+  },
+  "paired_coordinate_difference": {
+    "delta": 0.08823529411764706,
+    "ci95": [
+      0.0,
+      0.21436335403726595
+    ],
+    "queries": 34,
+    "paper_groups": 17,
+    "units": "fraction"
+  },
+  "advance_to_answers": false,
+  "decision": "STOP_READING_RECOVERY_DIRECTION",
+  "baseline_coordinates_preserved_rows": 51,
+  "expanded_records": 81,
+  "budget_skipped_expansions": 75,
+  "max_record_array_bytes": 7999,
+  "new_gpu_inferences": 0,
+  "new_answer_model_calls": 0,
+  "production_promoted": false,
+  "semantic_sufficiency": "UNKNOWN",
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/paragraph-preserving-1/pilot-1/report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}
