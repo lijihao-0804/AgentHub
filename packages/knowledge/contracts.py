@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, Protocol
@@ -97,6 +97,22 @@ class RetrievalTrace:
 class RetrievalResult:
     evidence: tuple[RetrievedEvidence, ...]
     trace: RetrievalTrace
+
+
+class SectionSelector(Protocol):
+    """One bounded model call that picks relevant source sections.
+
+    Implementations must be single-attempt and fail by raising; the calling
+    combinator owns the fallback policy. Sections are the validated mappings
+    produced by the Onyx selection adapter.
+    """
+
+    async def select_sections(
+        self,
+        context: WorkspaceExecutionContext,
+        query: str,
+        sections: Sequence[Mapping[str, object]],
+    ) -> tuple[int, ...]: ...
 
 
 @dataclass(frozen=True)
