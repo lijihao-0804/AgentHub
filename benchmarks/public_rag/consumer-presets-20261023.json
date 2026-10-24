@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "frozen_profile": "structured5",
+  "status": "Confirmed consumer profile on200 new MuSiQue-Ans dev questions, not a global default",
+  "agent_draft_overrides": {
+    "retrieval_config": {
+      "retrieval_strategy": "HYBRID_RERANK",
+      "candidate_top_k": 20,
+      "final_top_k": 5,
+      "context_budget_bytes": 8000
+    },
+    "runtime_config": {
+      "context_budget": {
+        "max_retrieval_tokens": 8000,
+        "max_tool_result_tokens": 4000
+      }
+    }
+  },
+  "evaluation_model_settings": {
+    "model": "deepseek-v4.1-flash-1017",
+    "temperature": 0,
+    "max_output_tokens": 256,
+    "declared_experiment_context_ceiling": 16384,
+    "provider_maximum_context_verified": false,
+    "note": "The16k ceiling is a conservative experiment configuration, not provider capability certification. Business model profiles must retain existing verified capability and output-reservation validation."
+  },
+  "mechanism": "Explicit byte-budget opt-in causes builtin RAG observations to use their retrieval category budget and preserve whole evidence records with paired citations. Other tools keep their4000 result budget.",
+  "confirmed_metrics": {
+    "answer_f1": {"legacy5": 0.2791570010141218, "structured5": 0.3938735331919543},
+    "exact_match": {"legacy5": 0.2, "structured5": 0.315},
+    "evidence_record_recall": {"legacy5": 0.5904166666666666, "structured5": 0.7829166666666667},
+    "complete_evidence_set": {"legacy5": 0.255, "structured5": 0.54},
+    "answer_f1_gain_95ci": [0.0575649341512567, 0.1768684567524726]
+  },
+  "development_only_high_evidence_option": {
+    "profile": "structured10",
+    "retrieval_final_top_k": 10,
+    "tool_requested_limit": 10,
+    "status": "Development positive, not independently confirmed or adopted in this milestone"
+  },
+  "application_limits": [
+    "Requires an explicitly configured agent and a new normally validated publication; no existing AgentVersion or business index was modified.",
+    "Evidence passed through actual retriever selection, builtin, runtime observation, admission and wire-message conversion with controlled I/O and cached BGE ranks.",
+    "Not live SQL/Qdrant, RBAC, checkpoint, autonomous tool choice, multi-call, history or memory E2E validation.",
+    "The benchmark case/paper source scope and heading-aware BGE inputs are not created automatically by this preset.",
+    "Production relevance-floor and model context guards remain active; this benchmark does not calibrate them.",
+    "Same configured upper budget is not equal actual input tokens; the improvement used more source text.",
+    "EM/F1 measure short-answer matching; citation ID validity does not prove semantic support or faithfulness."
+  ],
+  "evidence": "results/consumer-rag-20261023/confirmation-answers-1/report.json"
+}

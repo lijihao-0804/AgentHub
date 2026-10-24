@@ -1,0 +1,31 @@
+{
+  "status": "CONFIRMED_CONTROLLED_SCOPE_EXPLICIT_COMPOSITION_ONLY",
+  "default_enabled": false,
+  "composition": "EvidenceSetKnowledgeRetriever(base_retriever, EvidenceSetSelector(gateway, frozen_model_plan))",
+  "retrieval": {
+    "candidate_top_k": 20,
+    "final_top_k": 5,
+    "context_budget_bytes": 8000
+  },
+  "selector": {
+    "model": "deepseek-v4.1-flash-1017",
+    "max_candidates": 20,
+    "excerpt_chars": 1000,
+    "max_output_tokens": 256,
+    "selector_context_units": 32768,
+    "candidate_budget_units": 28000,
+    "retry_attempts": 1,
+    "model_fallbacks": []
+  },
+  "reading_order": "original relevance, experimental dependency order not adopted",
+  "public_api_configuration_field": null,
+  "limits": [
+    "provided-passage English MuSiQue, one forced search, controlled snapshot/vector I/O",
+    "confirmation source-disjoint filtering shifts hop mix;177/200 are2-hop",
+    "DEV4-hop evidence regression and small confirmation3/4-hop strata; no universal multi-hop claim",
+    "citation ID validity only, not semantic support; no live auth/checkpoint/full Run SLO validation",
+    "application service+composition present, no public/global registration; benchmark JSON-object adapter is not every production Gateway",
+    "selector adds inference cost/latency; no monetary estimate without pricing snapshot"
+  ],
+  "acceptance": "results/evidence-set-20261023/acceptance.json"
+}

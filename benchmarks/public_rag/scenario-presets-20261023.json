@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "status": "Frozen offline scenario profiles with production opt-in mapping; no automatic routing",
+  "shared": {
+    "dense_model": "BAAI/bge-m3",
+    "reranker_model": "BAAI/bge-reranker-v2-m3",
+    "chunk_chars": 900,
+    "overlap_chars": 150,
+    "dense_candidates": 20,
+    "rerank_candidates": 20,
+    "context_byte_budget": 8000,
+    "profile": "heading_fill",
+    "output_selection": "BGE order, skip oversized complete records, fill within byte and count ceilings",
+    "heading": "title + section + source chunk text",
+    "llm_selector": false
+  },
+  "qasper": {
+    "scope": "specified paper only",
+    "primary": "best alternate annotator evidence-paragraph recall",
+    "neighbors": false,
+    "provisional_targets": {"evidence_recall": 0.8, "complete_evidence_set": 0.65},
+    "protocol": "results/scenario-rag-20261023/protocol.json",
+    "frozen_selection": "results/scenario-rag-20261023/qasper-dev-1/frozen-selection.json",
+    "confirmation": "results/scenario-rag-20261023/qasper-confirm-1/report.json"
+  },
+  "musique": {
+    "scope": "answerable Ans questions with all provided distractor paragraphs, not global corpus search",
+    "primary": "complete supporting-paragraph set rate",
+    "neighbors": false,
+    "neighbor_reason": "passages are separate documents, not adjacent sections",
+    "provisional_targets": {"support_recall": 0.85, "complete_evidence_set": 0.7},
+    "protocol": "results/scenario-rag-20261023/musique-protocol.json",
+    "frozen_selection": "results/scenario-rag-20261023/musique-dev-1/frozen-selection.json",
+    "confirmation": "results/scenario-rag-20261023/musique-confirm-1/report.json",
+    "limitation": "four-hop complete support only 0.30; no multi-hop answer accuracy claim"
+  },
+  "production_playground_request_overrides": {
+    "candidate_top_k": 20,
+    "rerank_top_k": 20,
+    "final_top_k": 20,
+    "context_budget_bytes": 8000
+  },
+  "production_boundary": [
+    "These request overrides enable budget filling only; existing authenticated workspace and snapshot IDs are required.",
+    "Offline benchmark record projection differs from full RetrievedEvidence JSON used by production byte accounting.",
+    "Benchmark heading-aware text and paper/case scope are not automatically created by this request.",
+    "Production relevance floor and ContextBudgetPolicy remain active; benchmark does not calibrate that floor.",
+    "search_knowledge default5/max10 and excerpt1000chars remain; setting final_top_k20 does not bypass tool caps.",
+    "No live AgentVersion, business index, default strategy or model allowlist is modified.",
+    "Scientific retrieval scores do not establish production end-to-end or generated-answer quality."
+  ]
+}

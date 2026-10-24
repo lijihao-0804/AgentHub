@@ -1,0 +1,25 @@
+{
+  "status": "DEVELOPMENT_NOT_ACCEPTED_EXPERIMENT_ONLY",
+  "default_enabled": false,
+  "composition": "AttributedEvidenceReader(gateway, attribution_plan, answer_plan)",
+  "source_contract": "1..5 already admitted rag_records_v1 atomic records; unchanged snippets/references/lifecycle",
+  "plans": {
+    "same_model": "deepseek-v4.1-flash-1017",
+    "attribution_output_tokens": 512,
+    "answer_output_tokens": 256,
+    "attempts_each": 1,
+    "model_fallbacks": []
+  },
+  "quotation_limits": {
+    "max_items": 8,
+    "chars_each": [
+      8,
+      600
+    ],
+    "total_chars": 2000,
+    "alignment": "exact visible substring only"
+  },
+  "public_api_field": null,
+  "acceptance": "results/attributed-reader-20261023/acceptance.json",
+  "warning": "No demonstrated stable answer-quality gain. Not recommended default or semantic faithfulness guarantee."
+}

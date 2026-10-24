@@ -1,0 +1,27 @@
+{
+  "status": "DEVELOPMENT_NOT_ACCEPTED_EXPERIMENTAL_OPT_IN_ONLY",
+  "scope": "Local shared-evidence-plan milestone; no business AgentVersion or index changed",
+  "retrieval_config": {
+    "retrieval_strategy": "HYBRID_RERANK",
+    "dense_top_k": 20,
+    "sparse_top_k": 20,
+    "candidate_top_k": 20,
+    "final_top_k": 5,
+    "context_budget_bytes": 8000,
+    "evidence_projection": "compact_v1"
+  },
+  "runtime_context_budget": {
+    "reserved_output_tokens": 256,
+    "max_retrieval_tokens": 8000,
+    "max_tool_result_tokens": 4000
+  },
+  "fixed_tool_contract": {
+    "default_limit": 5,
+    "maximum_limit": 10,
+    "maximum_excerpt_characters": 1000
+  },
+  "model_constraints": "Use the existing published allowlisted model profile and its verified capabilities; the benchmark's experimental context limit is not a new provider capability declaration.",
+  "source_registry": "Run checkpoint sidecar, keyed by short citation identifier; final admission determines which entries are visible. It is not a new public citation-resolution API.",
+  "citation_qa": "Internal CitationQaService(evidence_projection='compact_v1') explicitly opts in; default stays unchanged. This constructor option is not exposed as a new route field.",
+  "evaluation_protocol": "results/evidence-plan-20261023/protocol.json"
+}
