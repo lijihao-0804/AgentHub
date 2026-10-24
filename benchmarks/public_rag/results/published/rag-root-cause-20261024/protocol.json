@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "state": "FROZEN_P0_DIAGNOSTIC",
+  "build_commit": "4495beea4eb15632ec62d2870a9c884259e3f285",
+  "branch": "codex/rag-root-cause-20261024",
+  "scope": "exposed development; historical replay; no model API dispatch",
+  "source_group": "paragraph-qa-20261023",
+  "run": "live-run-2",
+  "registered_cases": 70,
+  "arms": [
+    "fixed",
+    "structural"
+  ],
+  "planned_new_model_requests": 0,
+  "gold_usage": "offline coverage and scoring only; never online retrieval",
+  "semantic_support": "UNKNOWN unless explicitly source-reviewed; exact visibility is not entailment",
+  "stop": "P0 must establish at least one source-to-visible-to-answer failure chain before comparing new algorithms",
+  "protocol_document": "docs/reviews/AgentHub-RAG全链路归因执行协议-20261024.md",
+  "production_default_changed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/protocol.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

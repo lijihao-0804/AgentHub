@@ -440,9 +440,28 @@ async def prepare():
 class RouteClient:
     """Record every provider attempt; the production gateway alone owns fallback."""
 
-    def __init__(self, events, labels, budget, route, calls):
+    def __init__(
+        self,
+        events,
+        labels,
+        budget,
+        route,
+        calls,
+        *,
+        max_tokens=1024,
+        thinking="disabled",
+        strict_primary=False,
+    ):
+        if (
+            type(max_tokens) is not int
+            or max_tokens <= 0
+            or thinking not in {"disabled", "enabled"}
+        ):
+            raise ValueError("invalid frozen model controls")
         self.events, self.labels, self.budget = events, labels, budget
         self.route, self.calls = route, calls
+        self.max_tokens, self.thinking = max_tokens, thinking
+        self.strict_primary = strict_primary
         self.raw_calls, self.halted = [], False
 
     async def acompletion(self, **kwargs):
@@ -456,13 +475,14 @@ class RouteClient:
         if (
             endpoint is None
             or kwargs.get("model") != "openai/" + endpoint["model"]
-            or kwargs.get("max_tokens") != 1024
+            or kwargs.get("max_tokens") != self.max_tokens
             or kwargs.get("num_retries") != 0
             or kwargs.get("temperature") != 0
+            or (self.strict_primary and endpoint["name"] != self.route["chain"][0]["name"])
         ):
             self.halted = True
             raise ValueError("frozen route or request constraints changed")
-        kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
+        kwargs["extra_body"] = {"thinking": {"type": self.thinking}}
         self.budget["dispatched"] += 1
         record = {
             **self.labels,
@@ -486,6 +506,22 @@ class RouteClient:
                 self.halted = True
                 record["status"] = "MODEL_IDENTITY_ERROR"
                 raise ValueError("unexpected raw provider model identity")
+            usage = getattr(response, "usage", None)
+            record["provider_usage"] = usage.model_dump() if hasattr(usage, "model_dump") else None
+            # Observe whether thinking was effective without logging reasoning text.
+            choices = getattr(response, "choices", None) or []
+            choice = choices[0] if choices else None
+            message = (
+                choice.get("message")
+                if isinstance(choice, dict)
+                else getattr(choice, "message", None)
+            )
+            reasoning = (
+                message.get("reasoning_content")
+                if isinstance(message, dict)
+                else getattr(message, "reasoning_content", None)
+            )
+            record["reasoning_content_chars"] = len(reasoning) if isinstance(reasoning, str) else 0
             record["status"] = "RECEIVED"
             return response
         except BaseException as error:
@@ -494,10 +530,13 @@ class RouteClient:
             if record["status"] != "MODEL_IDENTITY_ERROR":
                 record["status"] = (
                     "TRANSPORT_UNCONFIRMED"
-                    if isinstance(error, (litellm.APIConnectionError, litellm.Timeout))
+                    if (self.strict_primary and record["http_status"] != 400)
+                    or isinstance(error, (litellm.APIConnectionError, litellm.Timeout))
                     or record["http_status"] is None
                     else "PROVIDER_ERROR"
                 )
+            if self.strict_primary:
+                self.halted = True
             raise
         finally:
             self.events.write(

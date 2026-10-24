@@ -1,0 +1,129 @@
+{
+  "scope": "posthoc exposed development; additive coordinate diagnostic, not semantic sufficiency",
+  "source_root": "benchmarks/public_rag/results/paragraph-qa-20261023",
+  "run_name": "live-run-2",
+  "planned_cases": 70,
+  "planned_arm_rows": 140,
+  "summary": {
+    "fixed": {
+      "actual_model": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 16,
+        "unknown_or_no_positive_annotation": 11
+      },
+      "all_index_chunks": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 59,
+        "unknown_or_no_positive_annotation": 11
+      },
+      "candidate_union": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 51,
+        "unknown_or_no_positive_annotation": 11
+      },
+      "dense": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 49,
+        "unknown_or_no_positive_annotation": 11
+      },
+      "final": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 19,
+        "unknown_or_no_positive_annotation": 11
+      },
+      "fusion": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 48,
+        "unknown_or_no_positive_annotation": 11
+      },
+      "rerank": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 48,
+        "unknown_or_no_positive_annotation": 11
+      },
+      "selection": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 48,
+        "unknown_or_no_positive_annotation": 11
+      },
+      "sparse": {
+        "registered": 70,
+        "evaluable": 59,
+        "complete_source_coordinate_union": 46,
+        "unknown_or_no_positive_annotation": 11
+      }
+    },
+    "structural": {
+      "actual_model": {
+        "registered": 70,
+        "evaluable": 58,
+        "complete_source_coordinate_union": 20,
+        "unknown_or_no_positive_annotation": 12
+      },
+      "all_index_chunks": {
+        "registered": 70,
+        "evaluable": 49,
+        "complete_source_coordinate_union": 35,
+        "unknown_or_no_positive_annotation": 21
+      },
+      "candidate_union": {
+        "registered": 70,
+        "evaluable": 54,
+        "complete_source_coordinate_union": 35,
+        "unknown_or_no_positive_annotation": 16
+      },
+      "dense": {
+        "registered": 70,
+        "evaluable": 54,
+        "complete_source_coordinate_union": 34,
+        "unknown_or_no_positive_annotation": 16
+      },
+      "final": {
+        "registered": 70,
+        "evaluable": 58,
+        "complete_source_coordinate_union": 22,
+        "unknown_or_no_positive_annotation": 12
+      },
+      "fusion": {
+        "registered": 70,
+        "evaluable": 56,
+        "complete_source_coordinate_union": 36,
+        "unknown_or_no_positive_annotation": 14
+      },
+      "rerank": {
+        "registered": 70,
+        "evaluable": 56,
+        "complete_source_coordinate_union": 36,
+        "unknown_or_no_positive_annotation": 14
+      },
+      "selection": {
+        "registered": 70,
+        "evaluable": 56,
+        "complete_source_coordinate_union": 36,
+        "unknown_or_no_positive_annotation": 14
+      },
+      "sparse": {
+        "registered": 70,
+        "evaluable": 58,
+        "complete_source_coordinate_union": 29,
+        "unknown_or_no_positive_annotation": 12
+      }
+    }
+  },
+  "new_model_requests": 0,
+  "old_scores_changed": false,
+  "_publication": {
+    "kind": "AGGREGATE_ONLY_PROJECTION",
+    "source_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/coordinate-report.json",
+    "not_full_raw_evidence": true,
+    "policy": "case text, source corpus, requests, credentials and per-case objects omitted"
+  }
+}

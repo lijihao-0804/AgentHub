@@ -110,6 +110,12 @@
       "aggregate_files": 6
     },
     {
+      "name": "rag-root-cause-20261024",
+      "local_files": 10,
+      "local_bytes": 43882034,
+      "aggregate_files": 3
+    },
+    {
       "name": "relation-reader-20261023",
       "local_files": 14,
       "local_bytes": 1241696,
@@ -3096,6 +3102,59 @@
     {
       "local_artifact": "benchmarks/public_rag/results/prompt-trial-20261023/validation.json",
       "bytes": 543,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/coordinate-report.json",
+      "bytes": 1924996,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/coordinate-report.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/development-proposal-v2.json",
+      "bytes": 902511,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/development-proposal.json",
+      "bytes": 752171,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/maml-coordinate-case.json",
+      "bytes": 2970,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/maml-coordinate-stages.json",
+      "bytes": 24101,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/protocol.json",
+      "bytes": 866,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/protocol.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/resource-discovery.json",
+      "bytes": 671,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/sampling-correction.json",
+      "bytes": 749,
+      "storage": "LOCAL_ONLY"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/summary.json",
+      "bytes": 4467,
+      "storage": "LOCAL_ONLY",
+      "aggregate_projection": "benchmarks/public_rag/results/published/rag-root-cause-20261024/summary.json"
+    },
+    {
+      "local_artifact": "benchmarks/public_rag/results/rag-root-cause-20261024/trace-replay-1/trace.json",
+      "bytes": 40268532,
       "storage": "LOCAL_ONLY"
     },
     {
