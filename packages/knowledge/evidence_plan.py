@@ -8,9 +8,16 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
+from packages.knowledge.contracts import EvidenceOrigin
+
 EVIDENCE_VIEW_FORMAT = "rag_view_v1"
 _REF_FIELDS = {"snapshot_id", "knowledge_base_id", "document_revision_id", "chunk_id"}
 _READING_FIELDS = {"snippet", "document_name", "effective_date", "superseded", "locator"}
+# Origin-layer markers travel into the model view: a mixed delivery must stay
+# judgeable at the model. ``wiki_page_id`` only ever accompanies a
+# WIKI_DERIVED item; publication identity stays in the private registry.
+_ORIGIN_FIELDS = {"origin", "wiki_page_id"}
+_ITEM_FIELDS = _READING_FIELDS | _ORIGIN_FIELDS
 _PAYLOAD_FIELDS = {
     "evidence_format",
     "status",
@@ -81,11 +88,20 @@ def _payload(items: list[dict], instruction: str, truncated: bool) -> dict:
 def _valid_item(item: Any) -> bool:
     if not isinstance(item, Mapping) or not {"id", "snippet"} <= set(item):
         return False
-    if not set(item) <= _READING_FIELDS | {"id"}:
+    if not set(item) <= _ITEM_FIELDS | {"id"}:
         return False
     if not isinstance(item["id"], str) or not _ID.fullmatch(item["id"]):
         return False
     if not isinstance(item["snippet"], str) or not item["snippet"].strip():
+        return False
+    if "origin" in item:
+        if item["origin"] not in {value.value for value in EvidenceOrigin}:
+            return False
+        if item["origin"] == EvidenceOrigin.WIKI_DERIVED.value and (
+            not isinstance(item.get("wiki_page_id"), str) or not item["wiki_page_id"].strip()
+        ):
+            return False
+    if "wiki_page_id" in item and item.get("origin") != EvidenceOrigin.WIKI_DERIVED.value:
         return False
     for key in ("document_name", "effective_date"):
         if key in item and item[key] is not None and not isinstance(item[key], str):
@@ -176,7 +192,22 @@ def assemble_evidence_plan(
     estimator: Callable[[str], int],
     citation_prefix: str = "E",
     max_items: int = 10,
+    record_validator: Callable[[Mapping], str | None] | None = None,
+    allow_shared_references: bool = False,
 ) -> EvidencePlan | None:
+    """Assemble the model view and its private registry.
+
+    ``record_validator`` optionally enforces a source-layer envelope on every
+    record before anything is registered: a non-None return value is the
+    violation reason and fails the whole plan closed, so an incomplete
+    WIKI_DERIVED record can never reach the model or the registry.
+
+    ``allow_shared_references`` admits several records onto one source
+    reference (a Wiki page may hold two claims quoted from the same chunk).
+    The default stays the strict search_knowledge pairing: one record, one
+    reference, no ambiguity.
+    """
+
     _budget(budget)
     if (
         not isinstance(citation_prefix, str)
@@ -202,12 +233,14 @@ def assemble_evidence_plan(
             ):
                 return None
             identity = (ref["chunk_id"], ref["document_revision_id"], ref["snapshot_id"])
-            if identity in indexed:
+            if identity in indexed and not allow_shared_references:
                 return None
-            indexed[identity] = dict(ref)
+            indexed.setdefault(identity, dict(ref))
         items, registry, seen = [], {}, set()
         for ordinal, record in enumerate(records, start=1):
             if not isinstance(record, Mapping):
+                return None
+            if record_validator is not None and record_validator(record) is not None:
                 return None
             candidates = [
                 key
@@ -220,12 +253,14 @@ def assemble_evidence_plan(
                     or record["knowledge_base_id"] == ref["knowledge_base_id"]
                 )
             ]
-            if len(candidates) != 1 or candidates[0] in seen:
+            if len(candidates) != 1:
                 return None
             identity = candidates[0]
+            if not allow_shared_references and identity in seen:
+                return None
             seen.add(identity)
             identifier = f"{citation_prefix}{ordinal}"
-            item = {"id": identifier, **{k: record[k] for k in _READING_FIELDS if k in record}}
+            item = {"id": identifier, **{k: record[k] for k in _ITEM_FIELDS if k in record}}
             if "locator" in item:
                 if not isinstance(item["locator"], Mapping):
                     return None
@@ -237,7 +272,7 @@ def assemble_evidence_plan(
             _json(record)
             items.append(item)
             registry[identifier] = {"reference": indexed[identity], "record": dict(record)}
-        if seen != set(indexed):
+        if not allow_shared_references and seen != set(indexed):
             return None
     except (TypeError, ValueError):
         return None

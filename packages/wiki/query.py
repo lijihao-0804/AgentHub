@@ -19,6 +19,10 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievalQuery
 from packages.knowledge.models import DocumentChunk, KnowledgeSnapshotItem
+from packages.wiki.evidence_envelope import (
+    EVIDENCE_ORIGIN_RAW,
+    stamp_wiki_derived_evidence,
+)
 from packages.wiki.models import WikiSourceRevocation
 
 _MODES = frozenset({"WIKI", "RAG", "HYBRID", "AUTO"})
@@ -265,6 +269,8 @@ async def _validate_wiki_claims(
     workspace_id: UUID,
     knowledge_base_id: UUID,
     source_snapshot_id: UUID,
+    publication_id: str,
+    publication_hash: str,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     chunk_ids = {
         str(chunk_id)
@@ -281,7 +287,6 @@ async def _validate_wiki_claims(
     )
 
     validated_pages: list[dict[str, Any]] = []
-    evidence: list[dict[str, Any]] = []
     for source_page in pages:
         page = dict(source_page)
         accepted_claims: list[dict[str, Any]] = []
@@ -306,28 +311,21 @@ async def _validate_wiki_claims(
             ):
                 continue
 
-            claim = {
-                "page_key": page.get("page_key", ""),
-                "topic_key": _normalize(str(page.get("title", ""))),
-                "quote": quote,
-                "chunk_id": chunk.chunk_id,
-                "document_id": str(chunk.document_id),
-                "document_revision_id": str(chunk.document_revision_id),
-                "locator": dict(chunk.locator or {}),
-                "predicate": _attribute(claim_value, "predicate"),
-                "value": _attribute(claim_value, "value"),
-                "condition": _attribute(claim_value, "condition"),
-                "conflict": _attribute(claim_value, "conflict", False) is True,
-                "conflict_peers": list(_attribute(claim_value, "conflict_peers", [])),
-                "conflict_origin": _attribute(claim_value, "conflict_origin", "BASIC_OR_MODEL"),
-            }
-            accepted_claims.append(claim)
-            evidence.append(
+            accepted_claims.append(
                 {
-                    **claim,
-                    "source": "wiki_claim",
-                    "retrieval_score": None,
-                    "rerank_score": None,
+                    "page_key": page.get("page_key", ""),
+                    "topic_key": _normalize(str(page.get("title", ""))),
+                    "quote": quote,
+                    "chunk_id": chunk.chunk_id,
+                    "document_id": str(chunk.document_id),
+                    "document_revision_id": str(chunk.document_revision_id),
+                    "locator": dict(chunk.locator or {}),
+                    "predicate": _attribute(claim_value, "predicate"),
+                    "value": _attribute(claim_value, "value"),
+                    "condition": _attribute(claim_value, "condition"),
+                    "conflict": _attribute(claim_value, "conflict", False) is True,
+                    "conflict_peers": list(_attribute(claim_value, "conflict_peers", [])),
+                    "conflict_origin": _attribute(claim_value, "conflict_origin", "BASIC_OR_MODEL"),
                 }
             )
 
@@ -339,9 +337,29 @@ async def _validate_wiki_claims(
                 "title": str(page.get("title", "")),
                 "kind": str(page.get("kind", "")),
                 "markdown": str(page.get("markdown", "")),
-                "claims": accepted_claims,
+                "claims": page["claims"],
                 "relations": page["relations"],
             }
+        )
+
+    # Envelope stamping happens after acceptance: every surviving claim carries
+    # the publication identity, its page, and the page's compiled source
+    # revisions. An unstamped WIKI_DERIVED item must never leave this module.
+    evidence: list[dict[str, Any]] = []
+    for page in validated_pages:
+        page["claims"] = stamp_wiki_derived_evidence(
+            page["claims"],
+            publication_id=publication_id,
+            publication_hash=publication_hash,
+        )
+        evidence.extend(
+            {
+                **claim,
+                "source": "wiki_claim",
+                "retrieval_score": None,
+                "rerank_score": None,
+            }
+            for claim in page["claims"]
         )
     return validated_pages, evidence
 
@@ -440,6 +458,7 @@ async def _validate_raw_evidence(
         seen.add(key)
         evidence.append(
             {
+                "origin": EVIDENCE_ORIGIN_RAW,
                 "quote": quote,
                 "chunk_id": chunk.chunk_id,
                 "document_id": str(chunk.document_id),
@@ -606,6 +625,8 @@ async def query_wiki(
             workspace_id=workspace_id,
             knowledge_base_id=knowledge_base_id,
             source_snapshot_id=source_snapshot_uuid,
+            publication_id=str(binding["compilation_id"]),
+            publication_hash=binding["compilation_hash"],
         )
 
     conflicts = _find_conflicts(wiki_evidence)

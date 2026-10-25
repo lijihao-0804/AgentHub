@@ -15,7 +15,20 @@ from packages.knowledge.evidence_plan import (
 )
 from packages.model_gateway.contracts import ModelMessage
 
-_READING_FIELDS = ("snippet", "document_name", "effective_date", "superseded", "locator")
+# Tool identities whose successful payloads are bound evidence views. Both are
+# projected by the observation layer onto the same private registry, so
+# admission re-validates them identically.
+RAG_EVIDENCE_TOOL_IDENTITIES = frozenset({"search_knowledge", "query_wiki"})
+
+_READING_FIELDS = (
+    "snippet",
+    "document_name",
+    "effective_date",
+    "superseded",
+    "locator",
+    "origin",
+    "wiki_page_id",
+)
 
 
 def visible_evidence_registry(
@@ -29,7 +42,7 @@ def visible_evidence_registry(
     """
     visible: dict[str, dict[str, Any]] = {}
     for message in messages:
-        if message.role != "tool" or message.name != "search_knowledge":
+        if message.role != "tool" or message.name not in RAG_EVIDENCE_TOOL_IDENTITIES:
             continue
         try:
             payload = json.loads(message.content or "null")

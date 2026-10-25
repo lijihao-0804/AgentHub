@@ -14,6 +14,20 @@ class RetrievalStrategy(StrEnum):
     HYBRID_RERANK = "HYBRID_RERANK"
 
 
+class EvidenceOrigin(StrEnum):
+    """Which layer a piece of model-bound evidence came from.
+
+    RAW is an original snapshot chunk; WIKI_DERIVED is a claim compiled into a
+    published Wiki page. The marker travels with the evidence into every model
+    view so a mixed delivery can never pass Wiki-derived text off as a raw
+    source block. It is a judgeable label, not a trust level: both layers stay
+    UNTRUSTED.
+    """
+
+    RAW = "RAW"
+    WIKI_DERIVED = "WIKI_DERIVED"
+
+
 @dataclass(frozen=True)
 class RetrievalQuery:
     text: str
@@ -91,6 +105,9 @@ class RetrievalTrace:
     selection: RetrievalTraceStage | None = None
     # Optional post-rerank joint subset selection, distinct from rerank input selection.
     evidence_set: RetrievalTraceStage | None = None
+    # Optional Wiki page-matching stage populated by Wiki-composed queries; the
+    # raw retriever itself never sets it.
+    wiki: RetrievalTraceStage | None = None
 
 
 @dataclass(frozen=True)

@@ -149,28 +149,42 @@ def _unique_sources(retrieval_result: Mapping[str, Any]) -> list[dict[str, Any]]
         if key in seen:
             continue
         seen.add(key)
-        sources.append(
-            {
-                "id": len(sources) + 1,
-                "quote": quote,
-                "chunk_id": chunk_id,
-                "document_id": document_id,
-                "document_revision_id": revision_id,
-                "locator": dict(locator),
-            }
-        )
+        source = {
+            "id": len(sources) + 1,
+            "quote": quote,
+            "chunk_id": chunk_id,
+            "document_id": document_id,
+            "document_revision_id": revision_id,
+            "locator": dict(locator),
+        }
+        origin = _attribute(item, "origin")
+        if isinstance(origin, str) and origin:
+            # The origin layer travels with the citation so the model and the
+            # API consumer can both tell a compiled Wiki claim from a raw
+            # source block.
+            source["origin"] = origin
+            page_id = _attribute(item, "wiki_page_id")
+            if isinstance(page_id, str) and page_id:
+                source["wiki_page_id"] = page_id
+        sources.append(source)
     return sources
 
 
 def _build_messages(query: str, sources: Sequence[dict[str, Any]]) -> tuple[ModelMessage, ...]:
     evidence = [
         {
-            "id": source["id"],
-            "chunk_id": source["chunk_id"],
-            "document_id": source["document_id"],
-            "document_revision_id": source["document_revision_id"],
-            "locator": source["locator"],
-            "quote": source["quote"],
+            key: source[key]
+            for key in (
+                "id",
+                "chunk_id",
+                "document_id",
+                "document_revision_id",
+                "locator",
+                "quote",
+                "origin",
+                "wiki_page_id",
+            )
+            if key in source
         }
         for source in sources
     ]
@@ -379,17 +393,21 @@ async def answer_from_evidence(
         return _insufficient(telemetry=_telemetry(plan, response, admission, latency_ms=latency_ms))
 
     by_id = {source["id"]: source for source in sources}
-    citations = [
-        {
-            "id": identifier,
-            "quote": by_id[identifier]["quote"],
-            "chunk_id": by_id[identifier]["chunk_id"],
-            "document_id": by_id[identifier]["document_id"],
-            "document_revision_id": by_id[identifier]["document_revision_id"],
-            "locator": dict(by_id[identifier]["locator"]),
-        }
-        for identifier in citation_ids
-    ]
+    _CITATION_FIELDS = (
+        "id",
+        "quote",
+        "chunk_id",
+        "document_id",
+        "document_revision_id",
+        "origin",
+        "wiki_page_id",
+    )
+    citations = []
+    for identifier in citation_ids:
+        source = by_id[identifier]
+        citation = {key: source[key] for key in _CITATION_FIELDS if key in source}
+        citation["locator"] = dict(source["locator"])
+        citations.append(citation)
     return {
         "answer": output.answer,
         "citations": citations,

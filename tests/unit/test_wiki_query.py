@@ -36,6 +36,7 @@ def _binding(context, kb_id, compilation_id, snapshot_id):
         knowledge_base_id=kb_id,
         source_snapshot_id=snapshot_id,
         source_snapshot_hash="a" * 64,
+        content_hash="b" * 64,
         status="PUBLISHED",
     )
 

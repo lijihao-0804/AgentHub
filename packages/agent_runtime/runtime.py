@@ -34,7 +34,10 @@ from packages.agent_runtime.context_budget import (
 )
 from packages.agent_runtime.event_store import RunEventReader, RunEventRecorder
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
-from packages.agent_runtime.evidence_registry import visible_evidence_registry
+from packages.agent_runtime.evidence_registry import (
+    RAG_EVIDENCE_TOOL_IDENTITIES,
+    visible_evidence_registry,
+)
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
 from packages.agent_runtime.memory_tools import (
     MAX_SEARCH_RESULTS,
@@ -93,6 +96,7 @@ from packages.tools.contracts import (
 from packages.tools.policy import ToolPolicy, ToolPolicyDecision
 from packages.tools.projections import argument_summary
 from packages.tools.runtime import PublishedToolCatalog, ToolRuntime
+from packages.wiki.evidence_envelope import envelope_violation
 
 logger = logging.getLogger(__name__)
 
@@ -2626,9 +2630,9 @@ class _AgentRunGraph:
             payload = None
             rag_evidence_projected = False
             if (
-                call["name"] == "search_knowledge"
+                call["name"] in RAG_EVIDENCE_TOOL_IDENTITIES
                 and isinstance(definition, ToolDefinition)
-                and definition.identity == "search_knowledge"
+                and definition.identity in RAG_EVIDENCE_TOOL_IDENTITIES
                 and definition.source_kind is ToolSourceKind.BUILTIN
                 and result.status is ToolResultStatus.SUCCESS
             ):
@@ -2659,7 +2663,14 @@ class _AgentRunGraph:
                     evidence_budget = budget.max_retrieval_tokens
                 evidence_budget = max(2, evidence_budget - _metadata_headroom)
                 projected = None
-                if definition.retrieval_config.get("evidence_projection") == "compact_v1":
+                # query_wiki has no legacy delivery mode to preserve: its
+                # output always goes through the registry projection, where
+                # the envelope validator refuses any WIKI_DERIVED record that
+                # arrives without its full publication identity.
+                wiki_tool = definition.identity == "query_wiki"
+                if wiki_tool or definition.retrieval_config.get(
+                    "evidence_projection"
+                ) == "compact_v1":
                     compact_updated = True
                     if (
                         type(rag_sequence) is int
@@ -2676,6 +2687,8 @@ class _AgentRunGraph:
                             budget=evidence_budget,
                             estimator=ApproxTokenEstimator().estimate,
                             citation_prefix=f"R{rag_sequence:05d}E",
+                            record_validator=envelope_violation if wiki_tool else None,
+                            allow_shared_references=wiki_tool,
                         )
                         if plan is not None and not set(plan.registry).intersection(rag_registry):
                             projected = plan.payload
@@ -3023,7 +3036,7 @@ def _categorize_messages(
         elif message.role == "tool":
             category = (
                 ContextCategory.RAG_EVIDENCE
-                if message.name == "search_knowledge"
+                if message.name in RAG_EVIDENCE_TOOL_IDENTITIES
                 else ContextCategory.TOOL_RESULT
             )
             group = tool_groups.get(message.tool_call_id or "", ("tool", index))
