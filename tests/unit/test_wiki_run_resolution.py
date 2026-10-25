@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from packages.agent_runtime import runtime as runtime_module
+from packages.agent_runtime import runtime_projection as runtime_module
 from packages.agent_runtime.frozen import FrozenWikiBinding
 from packages.agent_runtime.runtime import (
     AgentRunExecutionOverrides,
