@@ -15,7 +15,15 @@ from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.model_gateway.models import ProviderCredential
 from packages.wiki.contracts import thaw_plan
 from packages.wiki.models import WikiCompilation
-from packages.wiki.service import MAX_ATTEMPTS, claim_job, execute_job, renew_job
+from packages.wiki.service import (
+    MAX_ATTEMPTS,
+    WikiService,
+    claim_job,
+    execute_job,
+    fail,
+    renew_job,
+    require,
+)
 
 
 async def run_wiki_job(job_id):
@@ -42,9 +50,18 @@ async def run_wiki_job(job_id):
             context = access.context
             plan = thaw_plan(claim.compiler_spec["plan"])
             if claim.compiler_spec.get("manifest_hash") != compiler_manifest_hash():
-                from packages.wiki.service import fail
-
                 fail("WIKI_COMPILER_VERSION_UNAVAILABLE", "The frozen compiler is unavailable.")
+            if claim.compiler_spec.get("review_manifest"):
+                from packages.core.canonical.json_hash import canonical_json_hash
+                from packages.wiki.conflict_review import review_manifest
+
+                if claim.compiler_spec["review_manifest_hash"] != canonical_json_hash(
+                    review_manifest()
+                ):
+                    fail(
+                        "WIKI_REVIEW_VERSION_UNAVAILABLE",
+                        "The frozen conflict review is unavailable.",
+                    )
 
         async def keep_lease():
             while True:
@@ -67,11 +84,7 @@ async def run_wiki_job(job_id):
                         principal=context.organization.principal,
                         workspace_id=UUID(context.workspace_id),
                     )
-                    from packages.wiki.service import require
-
                     require(current.context, "knowledge_edit")
-                    from packages.wiki.service import WikiService, fail
-
                     await WikiService().sources(session, current.context, claim)
                     for profile in plan.chain:
                         credential = await session.scalar(

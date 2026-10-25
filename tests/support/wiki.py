@@ -346,6 +346,9 @@ def _period(text: str) -> str:
 
 
 class FakeCompiler:
+    async def review(self, context, claims):
+        return [], {"request_count": 0, "cost": "0", "provider": "fake", "model": "fake"}
+
     """Deterministic, evidence-exact compiler used instead of a model provider."""
 
     def __init__(self) -> None:

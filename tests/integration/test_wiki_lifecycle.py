@@ -323,7 +323,7 @@ async def test_update_retires_old_revision_and_compiles_only_change(db_factory) 
 
 
 @pytest.mark.asyncio
-async def test_deleted_source_revokes_pages_history_and_query(db_factory) -> None:
+async def test_withdrawn_source_revokes_pages_history_and_query(db_factory) -> None:
     context, kb_id, profile_id, revision_ids = await seed_wiki(db_factory)
     ready, _ = await _compile(db_factory, context, kb_id, profile_id)
     await _publish(db_factory, context, kb_id, ready.id)
@@ -332,7 +332,7 @@ async def test_deleted_source_revokes_pages_history_and_query(db_factory) -> Non
 
     async with db_factory() as session:
         revision = await session.get(DocumentRevision, revision_ids[0])
-        assert revision.lifecycle_status == RevisionLifecycleStatus.DELETED
+        assert revision.lifecycle_status == RevisionLifecycleStatus.ACTIVE
         assert (
             await session.scalar(
                 select(WikiSourceRevocation.document_revision_id).where(

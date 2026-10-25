@@ -55,7 +55,7 @@ async def revoke_source(
     session: AsyncSession = db,
 ):
     await WikiService().revoke_source(session, context, knowledge_base_id, revision_id)
-    return {"document_revision_id": revision_id, "lifecycle_status": "DELETED"}
+    return {"document_revision_id": revision_id, "scope": "WIKI", "status": "REVOKED"}
 
 
 def compilation_response(row):

@@ -112,7 +112,10 @@ def organize(claims: list[dict]) -> list[dict]:
             )
         relations = set()
         for c in unique:
-            c["conflict"] = len(groups[(c["predicate"].casefold(), c["condition"].casefold())]) > 1
+            c["conflict"] = (
+                c.get("conflict", False)
+                or len(groups[(c["predicate"].casefold(), c["condition"].casefold())]) > 1
+            )
             for related in c.pop("related_topics", []):
                 target = page_key(related)
                 if target in grouped and target != key:
@@ -149,6 +152,16 @@ def organize(claims: list[dict]) -> list[dict]:
                 if q != p and sources.intersection(c["document_revision_id"] for c in q["claims"])
             }
         )
+        peer_chunks = {key for c in p["claims"] for key in c.get("conflict_peers", [])}
+        p["relations"] = sorted(
+            set(p["relations"])
+            | {
+                q["page_key"]
+                for q in pages
+                if q["page_key"] != p["page_key"]
+                and peer_chunks.intersection(c["chunk_id"] for c in q["claims"])
+            }
+        )
     return pages
 
 
@@ -156,6 +169,47 @@ def publication_hash(row, pages):
     return canonical_json_hash(
         {"schema_version": 1, "identity_hash": row.identity_hash, "pages": pages}
     )
+
+
+def extraction_spec_hash(spec):
+    """Source exclusions and global review do not change per-revision extraction."""
+    return canonical_json_hash(
+        {
+            k: v
+            for k, v in spec.items()
+            if k
+            not in {
+                "excluded_revision_ids",
+                "review_manifest",
+                "review_manifest_hash",
+                "workflow_version",
+            }
+        }
+    )
+
+
+def apply_review_groups(claims, groups):
+    """A model may only relate existing authorized evidence, never add claims."""
+    if not isinstance(groups, list) or len(groups) > 50:
+        fail("WIKI_INVALID_CONFLICT_REVIEW", "The conflict review exceeds its group limit.")
+    for group in groups:
+        if (
+            not isinstance(group, list)
+            or not 2 <= len(group) <= 8
+            or any(
+                isinstance(i, bool) or not isinstance(i, int) or not 1 <= i <= len(claims)
+                for i in group
+            )
+            or len(group) != len(set(group))
+        ):
+            fail(
+                "WIKI_INVALID_CONFLICT_REVIEW", "A conflict group has invalid evidence references."
+            )
+        peers = sorted({claims[i - 1]["chunk_id"] for i in group})
+        for index in group:
+            claim = claims[index - 1]
+            claim["conflict"] = True
+            claim["conflict_peers"] = sorted(set(claim.get("conflict_peers", [])) | set(peers))
 
 
 async def resolve_model_plan(session, context, profile_id, *, structured=False):
@@ -210,7 +264,6 @@ class WikiService:
             )
             .on_conflict_do_nothing()
         )
-        revision.lifecycle_status = "DELETED"
         append_audit(
             session,
             action="wiki_source_revoke",
@@ -220,7 +273,7 @@ class WikiService:
             actor_user_id=UUID(context.user_id),
             workspace_id=UUID(context.workspace_id),
             organization_id=UUID(context.organization.organization_id),
-            safe_metadata={"lifecycle_status": "DELETED"},
+            safe_metadata={"scope": "WIKI", "status": "REVOKED"},
         )
         await session.commit()
 
@@ -261,6 +314,33 @@ class WikiService:
             )
             routes[str(profile.provider_credential_id)] = credential.base_url
         spec["provider_routes"] = routes
+        excluded = await session.scalars(
+            select(WikiSourceRevocation.document_revision_id)
+            .join(
+                KnowledgeSnapshotItem,
+                (
+                    KnowledgeSnapshotItem.document_revision_id
+                    == WikiSourceRevocation.document_revision_id
+                )
+                & (KnowledgeSnapshotItem.workspace_id == WikiSourceRevocation.workspace_id)
+                & (
+                    KnowledgeSnapshotItem.knowledge_base_id
+                    == WikiSourceRevocation.knowledge_base_id
+                ),
+            )
+            .where(
+                WikiSourceRevocation.workspace_id == UUID(context.workspace_id),
+                WikiSourceRevocation.knowledge_base_id == kb_id,
+                KnowledgeSnapshotItem.snapshot_id == snapshot.snapshot_id,
+            )
+            .order_by(WikiSourceRevocation.document_revision_id)
+        )
+        spec["excluded_revision_ids"] = [str(value) for value in excluded]
+        from packages.wiki.conflict_review import review_manifest
+
+        spec["workflow_version"] = "wiki-workflow-v2"
+        spec["review_manifest"] = review_manifest()
+        spec["review_manifest_hash"] = canonical_json_hash(spec["review_manifest"])
         identity = canonical_json_hash(
             {
                 "schema_version": 1,
@@ -327,6 +407,21 @@ class WikiService:
                 )
             )
         )
+        all_members = set(items)
+        exclusions = {UUID(value) for value in row.compiler_spec.get("excluded_revision_ids", [])}
+        if not exclusions.issubset(all_members):
+            fail("WIKI_SOURCE_SCOPE_INVALID", "The frozen Wiki source scope is invalid.")
+        revoked = set(
+            await session.scalars(
+                select(WikiSourceRevocation.document_revision_id).where(
+                    WikiSourceRevocation.workspace_id == row.workspace_id,
+                    WikiSourceRevocation.knowledge_base_id == row.knowledge_base_id,
+                )
+            )
+        )
+        if (revoked & all_members) - exclusions:
+            fail("WIKI_SOURCE_REVOKED", "A Wiki source has been permanently revoked.")
+        items = [value for value in items if value not in exclusions]
         revisions = list(
             await session.scalars(
                 select(DocumentRevision)
@@ -338,17 +433,6 @@ class WikiService:
                 .with_for_update(read=True)
             )
         )
-        revoked = await session.scalar(
-            select(WikiSourceRevocation.document_revision_id)
-            .where(
-                WikiSourceRevocation.workspace_id == row.workspace_id,
-                WikiSourceRevocation.knowledge_base_id == row.knowledge_base_id,
-                WikiSourceRevocation.document_revision_id.in_(items),
-            )
-            .limit(1)
-        )
-        if revoked is not None:
-            fail("WIKI_SOURCE_REVOKED", "A Wiki source has been permanently revoked.")
         if len(items) != len(revisions) or any(
             r.lifecycle_status == "DELETED" or r.ingestion_status != "READY" for r in revisions
         ):
@@ -367,7 +451,7 @@ class WikiService:
                 )
                 .limit(1)
             )
-            if set(items) != {r.id for r in current} or superseded:
+            if set(items) != ({r.id for r in current} - revoked) or superseded:
                 fail("WIKI_STALE", "Sources changed; compile and publish a new Wiki version.")
         return revisions
 
@@ -613,7 +697,8 @@ async def execute_job(factory, context, job_id, token, compiler):
         by_revision = defaultdict(list)
         for c in chunks:
             by_revision[c["document_revision_id"]].append(c)
-        spec_hash = canonical_json_hash(row.compiler_spec)
+        # Withdrawal changes the publication source scope, not extraction behavior.
+        spec_hash = extraction_spec_hash(row.compiler_spec)
         all_claims = []
         telemetry = {"reused_revisions": 0, "compiled_revisions": 0, "calls": []}
         for revision in revisions:
@@ -669,6 +754,25 @@ async def execute_job(factory, context, job_id, token, compiler):
                 telemetry["compiled_revisions"] += 1
                 telemetry["calls"].append(usage)
             all_claims.extend(validate_extraction(payload, inputs))
+            if row.compiler_spec.get("review_manifest") and len(all_claims) > 200:
+                fail("WIKI_REVIEW_CAPACITY_EXCEEDED", "This Wiki exceeds the reviewed claim limit.")
+        all_claims.sort(
+            key=lambda c: (
+                c["document_revision_id"],
+                c["chunk_id"],
+                c["quote"],
+                c["topic"],
+                c["predicate"],
+            )
+        )
+        if row.compiler_spec.get("review_manifest"):
+            await session.commit()
+            if not await renew_job(session, job_id, token):
+                return "stale"
+            groups, review_usage = await compiler.review(context, all_claims)
+            apply_review_groups(all_claims, groups)
+            telemetry["conflict_review"] = review_usage
+            telemetry["conflict_group_count"] = len(groups)
         pages = organize(all_claims)
         # Lock and fence before installing output. No partial page set ever becomes READY.
         owned = await session.scalar(

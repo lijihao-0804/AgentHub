@@ -13,6 +13,11 @@ Wiki 的增益是把跨来源的概念/实体归组、证据摘编、潜在冲�
 这不证明模型产生的语义归组正确。第一版以精确引文组成页面，避免把自由生成的总结再作为下一轮事实。
 标题、谓词、值、条件和关系是模型候选；引文存在性可确定性验证，语义蕴含不能由子串检查证明。
 相同主题、谓词、条件出现不同值时标记 POSSIBLE_CONFLICT，保留全部证据，不自动裁定真伪。
+真实 v1 对照发现孤立提取会因标签/条件差异漏掉冲突。最终 `wiki-workflow-v2` 增加一次跨来源复核：
+输入仅为已验证引文与候选归组，输出仅为有限的 claim ID 组。业务逻辑再次验证 ID 范围，
+将候选冲突与对方引文关联，页面不改写事实；查询会一并交付关联证据并拒绝自动裁决。
+复核提示、schema、版本另行冻结，改变复核不使原始 revision 提取缓存失效。
+这增加每次新编译至多一次模型调用，并限于 200 条 claim；未证明其语义冲突召回率。
 代价是摘要不如自由写作流畅，实体别名与隐含矛盾召回有限；这比无来源的自动知识修订更适合当前验收。
 
 Markdown 文件适合个人本地编辑与 Git 版本；在本项目中会重复实现事务、租户与任务恢复。
@@ -28,7 +33,8 @@ flowchart LR
   J --> M[模型网关提出候选]
   M --> V[严格 schema / 精确引文 / 租户验证]
   V --> C[按 revision 的提取缓存]
-  C --> P[原子 READY 页面集]
+  C --> N[有限ID组的跨来源冲突复核]
+  N --> P[原子 READY 页面集]
   P --> L[Lint 与有权限的显式发布]
   L --> W[不可变 Wiki publication]
   W --> Q[Wiki / RAG / Hybrid 路由]
@@ -38,6 +44,7 @@ flowchart LR
 ```
 
 - `packages/wiki/compiler.py`：无工具的模型提案；冻结模型链；ContextBudgetPolicy；拒绝截断导致的假引用。
+- `packages/wiki/conflict_review.py`：只对已验证引文提出候选冲突组，无法新增或改写事实。
 - `packages/wiki/service.py`：鉴权、快照、持久任务、缓存、确定性组织、lint、发布及完整性检查。
 - `packages/wiki/query.py`：独立查询路由，经 KnowledgeRetriever / RetrievalQuery 调用既有 RAG。
 - `apps/api/routes/wiki.py`：现有身份会话与错误 envelope；`/api/v1/.../wiki`。
@@ -65,6 +72,14 @@ flowchart LR
 - 默认 current 查询要求来源集合仍等于当前 ACTIVE/READY 集合，且未被跨文档 supersede，否则 WIKI_STALE。
 - 显式历史模式可读 RETIRED revision；DELETED 是撤销，任何模式都拒绝内容交付。版本身份和审计仍保留。
 - 永久 Wiki 撤销记录可抵御旧 ingestion 对 raw lifecycle 的重算；不能因此复活已撤销来源。
+- **审计后的撤销范围决策**：新增 `/wiki/sources/.../revoke` 只撤销 Wiki 及其 raw fallback 的使用权，
+  不把原始 revision 写成 DELETED，不停止原知识模块的 ingestion。否则会把新 Wiki 功能变成未经统一设计的全局删除入口，
+  并与旧 ingestion 的 lifecycle 重算、历史 RAG 读取发生冲突。
+  全局原始资料撤销仍由原知识模块管理；已经标 DELETED 的原始来源同样阻断 Wiki。
+- 每个新编译把 `excluded_revision_ids` 固定在规格与 identity_hash 中。原始 Snapshot membership/hash 保持原样；
+  有效 Wiki 来源 = 原始 Snapshot 减去固定排除集。之后新增撤销会阻断包含该来源的旧 Wiki。
+  新发布可在同一个原始 Snapshot 上产生不同 Wiki 版本；revision 提取缓存不把排除集合算作模型行为配置，仍可复用。
+  Wiki 中的原始检索适配器在 DB 层再次排除当前 Wiki 撤销集，即使原 retriever 返回被撤销片段也不能交付。
 - 查询/发布读取来源时使用共享行锁，防止同一事务交付中途被撤销；不承诺响应发出后的撤销能召回已交付内容。
 - chunk 必须属于同 workspace/KB/snapshot，quote 必须为精确原文。RAG 适配器输出也重新校验。
 - 模型输入只含原始 chunk，无工具/网络执行权限；不把历史生成页面再次编译为证据。

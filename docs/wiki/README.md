@@ -44,10 +44,12 @@ API 不创建 schema。编译资料来自已入库 READY 的原始 DocumentRevis
    显式 WIKI 是独立阅读/消融模式，证据来自原文摘编，不会偷偷调用原始检索。
 6. 新增/修改资料后再次 `POST B/compilations`，默认当前原始 snapshot。未变化 revision 复用提取缓存，
    新版原子生成完整页面集；旧 publication 保留。没有自动后台订阅，也不会自动花费模型调用来重编译。
-7. `POST B/sources/{document_revision_id}/revoke` 是明确的来源撤销：标记原始 revision 为 DELETED、保留历史实体，
-   并写不可删除的 Wiki 撤销记录。任何 Wiki 历史/当前内容查询都不得交付该来源。
-   该操作需要 knowledge_edit；没有“恢复”端点。新资料应创建新 revision；原始 RAG 历史读取策略仍由原知识模块负责，
-   本分支不声称给其旧端点新增了撤销保证。Wiki raw fallback 会先经过 Wiki 撤销检查。
+7. `POST B/sources/{document_revision_id}/revoke` 明确撤销该来源在 **Wiki 范围** 内的使用权，
+   返回 `scope=WIKI, status=REVOKED`，写入不可删除的 Wiki 撤销记录。
+   原始 revision 的生命周期和普通 RAG 保持由原知识模块管理；这不是全局知识库删除接口。
+   任何旧 Wiki 内容查询都不能交付该来源；新编译冻结排除集合，生成去掉该来源的新发布，原始 Snapshot hash 不变。
+   该操作需要 knowledge_edit，没有恢复端点。Wiki 的 raw fallback 在数据库层过滤撤销集，即使原检索器返回也不交付。
+   另外，原知识模块已标 DELETED 的来源会自动阻断 Wiki，包括显式历史模式。
 
 ## 权限和历史
 
@@ -61,9 +63,12 @@ API 不创建 schema。编译资料来自已入库 READY 的原始 DocumentRevis
 
 ## 容量和质量边界
 
-首版单次最多 2000 个 chunk，单次 revision 提取结果最多 100 个 claim；超限明确失败。
+首版 IO 上限为 2000 个 chunk，单次 revision 提取结果最多 100 个 claim；
+最终跨来源复核上限为整次 200 条 claim，以先到达者为准，超限明确失败。
 单个chunk太大不截断后假称完整编译；窗口不足会失败。生产批量大资料需要后续分批/检查点设计。
 增量节省的是模型提取；页面组装和 lint 仍检查完整来源集，尚未为大图做性能优化。
-候选语义分类、别名与冲突召回依赖模型；确定性冲突仅比较同主题/谓词/条件的不同值。
+候选语义分类、别名与冲突召回依赖模型。确定性规则比较同主题/谓词/条件的不同值；
+跨来源复核只提出既有引文的冲突 ID 组，版本和提示冻结，不裁决哪方为真。
+每次新编译最多增加一次全局复核调用，来源未变的重复请求仍返回同一任务；复核升级不重提取未变 revision。
 精确 quote 不证明概念归组或语义推断正确。所有派生知识保留原始证据和不确定状态，禁止递归提升为权威原始来源。
 来源的 effective_date 暂只随原有原始 evidence 展示，不作自动时效裁决；未实现别名消歧、复杂图推理、自动真伪裁决。

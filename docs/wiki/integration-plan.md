@@ -12,7 +12,7 @@
 | 派生知识 | WikiCompilation、WikiPage、revision extraction cache | RAG 原始候选与固定证据 | Wiki 是派生层；可作为额外候选，不冒充 raw chunk |
 | Context | 复用 ContextBudgetPolicy；证据标为 untrusted | 最终上下文选择/压缩 | 最终准入仍由统一policy；选到 Wiki 不等于已进入模型窗口 |
 | Run 与 Experiment | 本轮保留既有结构，独立 Wiki API 显式 binding | 既有冻结spec、dataset、knowledge、pricing | 统一增加版本化 WikiBinding 并纳入 canonical hash；不能把 raw snapshot hash 当 Wiki hash |
-| 来源撤销 | raw DELETED＋永久 Wiki tombstone，Wiki raw fallback先检查 | 原始 RAG 历史读取策略仍由原模块负责 | 集成时统一撤销策略，并审计 legacy ingestion 重算 lifecycle 的复活窗口 |
+| 来源撤销 | Wiki-only tombstone＋冻结排除集；原模块DELETED也阻断Wiki，raw fallback再过滤 | 原始 RAG 历史读取策略仍由原模块负责 | 集成时另行统一全局撤销策略；不把Wiki维护操作当全局删除入口 |
 | API / worker / migration | 新路由、新task/beat项、0032/0033迁移 | 研究线可能也修改同组合入口或新增迁移 | 手工组合注册；迁移编号有冲突时在集成分支统一重排/创建Alembic合并revision，不改已部署历史 |
 
 这里描述的是边界差异，不宣称读过尚不存在的最终研究线契约。Wiki 不导入未合并模块。

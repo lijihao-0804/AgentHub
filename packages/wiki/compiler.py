@@ -213,6 +213,11 @@ class GatewayWikiCompiler:
                 503,
             ) from None
 
+    async def review(self, context, claims):
+        from packages.wiki.conflict_review import review_conflicts
+
+        return await review_conflicts(self.gateway, self.plan, context, claims)
+
 
 def _admit_context(
     policy: ContextBudgetPolicy,

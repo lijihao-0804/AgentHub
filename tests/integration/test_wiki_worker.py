@@ -2,20 +2,31 @@
 
 import json
 import os
-from uuid import UUID
+from datetime import UTC, datetime, timedelta
+from uuid import UUID, uuid4
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 
 from apps.worker.tasks import wiki as worker
 from packages.control_plane.models import OrganizationMembership
 from packages.core.config.settings import Settings
 from packages.core.database import create_database
+from packages.core.errors.exceptions import AgentHubError
+from packages.knowledge.contracts import RetrievedEvidence
+from packages.knowledge.ingestion import finalize_ingestion_ready
+from packages.knowledge.models import (
+    DocumentChunk,
+    DocumentRevision,
+    IngestionJob,
+    KnowledgeSnapshotItem,
+)
 from packages.model_gateway.contracts import ModelResponse
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.wiki.models import WikiPage
+from packages.wiki.query import query_wiki
 from packages.wiki.service import WikiService, claim_job, execute_job
 from tests.support.wiki import FakeCompiler, seed_wiki
 
@@ -47,14 +58,31 @@ class Adapter:
     def __init__(self):
         self.calls = 0
         self.invalid = False
+        self.review_groups = []
+        self.use_aliases = False
 
     async def complete(self, profile, credential, request):
         self.calls += 1
-        source = json.loads(request.messages[1].content)["untrusted_source"]
+        source = None
+        for message in request.messages[1:]:
+            try:
+                data = json.loads(message.content)
+            except (TypeError, ValueError):
+                continue
+            if isinstance(data, dict) and "untrusted_source" in data:
+                source = data["untrusted_source"]
+        if source is None:
+            return ModelResponse(
+                content=json.dumps({"groups": self.review_groups}),
+                provider="fake",
+                model=profile.model,
+            )
         payload = {
             "claims": [
                 {
-                    "topic": "Records",
+                    "topic": ("Policy alpha" if "7 years" in source["text"] else "Archive beta")
+                    if self.use_aliases
+                    else "Records",
                     "kind": "topic",
                     "predicate": "text",
                     "value": "attributed source",
@@ -76,9 +104,9 @@ class Adapter:
 async def test_actual_worker_composition_is_ready_and_duplicate_is_noop(setup):
     factory, context, kb, _, job, adapter = setup
     assert await worker.run_wiki_job(str(job.id)) == "ready"
-    assert adapter.calls == 2
+    assert adapter.calls == 3
     assert await worker.run_wiki_job(str(job.id)) == "not_claimed"
-    assert adapter.calls == 2
+    assert adapter.calls == 3
     async with factory() as session:
         ready = await WikiService().get(session, context, kb, job.id)
         assert ready.status == "READY"
@@ -143,6 +171,9 @@ async def test_new_publication_after_revocation_drops_only_withdrawn_contributio
         fresh = await service.request(session, context, kb, profile_id)
         claim = await claim_job(session, fresh.id)
     assert fresh.id != job.id
+    assert fresh.source_snapshot_id == job.source_snapshot_id
+    assert fresh.source_snapshot_hash == job.source_snapshot_hash
+    assert fresh.compiler_spec["excluded_revision_ids"] == [str(revoked_id)]
     assert (
         await execute_job(factory, context, fresh.id, claim.lease_token, FakeCompiler()) == "ready"
     )
@@ -153,4 +184,139 @@ async def test_new_publication_after_revocation_drops_only_withdrawn_contributio
         assert published.telemetry["reused_revisions"] == 1
         assert pages
         assert all(c["document_revision_id"] != str(revoked_id) for p in pages for c in p["claims"])
-    assert adapter.calls == 2
+        chunks = list(
+            await session.scalars(
+                select(DocumentChunk).where(
+                    DocumentChunk.workspace_id == UUID(context.workspace_id),
+                    DocumentChunk.knowledge_base_id == kb,
+                )
+            )
+        )
+
+        class Raw:
+            async def retrieve(self, context, query):
+                return tuple(
+                    RetrievedEvidence(
+                        str(c.document_id),
+                        str(c.document_revision_id),
+                        c.chunk_id,
+                        "raw",
+                        c.locator,
+                        c.text,
+                        1.0,
+                        None,
+                        {},
+                    )
+                    for c in chunks
+                )
+
+        result = await query_wiki(
+            session,
+            context,
+            kb,
+            fresh.id,
+            fresh.source_snapshot_id,
+            "records",
+            mode="RAG",
+            raw_retriever=Raw(),
+        )
+        assert result["evidence"]
+        assert all(e["document_revision_id"] != str(revoked_id) for e in result["evidence"])
+        revision = await session.get(DocumentRevision, revoked_id)
+        assert revision.lifecycle_status == "ACTIVE"
+    assert adapter.calls == 3
+
+
+@pytest.mark.asyncio
+async def test_raw_deletion_still_blocks_wiki_history_without_a_wiki_withdrawal(setup):
+    factory, context, kb, _, job, _ = setup
+    assert await worker.run_wiki_job(str(job.id)) == "ready"
+    async with factory() as session:
+        await WikiService().publish(session, context, kb, job.id)
+        revision_id = await session.scalar(
+            select(KnowledgeSnapshotItem.document_revision_id)
+            .where(KnowledgeSnapshotItem.snapshot_id == job.source_snapshot_id)
+            .limit(1)
+        )
+        await session.execute(
+            update(DocumentRevision)
+            .where(DocumentRevision.id == revision_id)
+            .values(lifecycle_status="DELETED")
+        )
+        await session.commit()
+        with pytest.raises(AgentHubError) as error:
+            await WikiService().validate_binding(
+                session, context, kb, job.id, job.source_snapshot_id, require_current=False
+            )
+        assert error.value.code == "WIKI_SOURCE_REVOKED"
+
+
+@pytest.mark.asyncio
+async def test_scoped_withdrawal_survives_inflight_raw_ingestion_completion(setup):
+    factory, context, kb, _, wiki_job, _ = setup
+    assert await worker.run_wiki_job(str(wiki_job.id)) == "ready"
+    async with factory() as session:
+        await WikiService().publish(session, context, kb, wiki_job.id)
+        revision_id = await session.scalar(
+            select(KnowledgeSnapshotItem.document_revision_id)
+            .where(KnowledgeSnapshotItem.snapshot_id == wiki_job.source_snapshot_id)
+            .limit(1)
+        )
+        revision = await session.get(DocumentRevision, revision_id)
+        revision.ingestion_status = "PROCESSING"
+        ingest_id = uuid4()
+        session.add(
+            IngestionJob(
+                id=ingest_id,
+                workspace_id=UUID(context.workspace_id),
+                knowledge_base_id=kb,
+                document_revision_id=revision_id,
+                status="PROCESSING",
+                stage="INDEXING",
+                lease_token="inflight",
+                lease_expires_at=datetime.now(UTC) + timedelta(minutes=2),
+                attempt_count=1,
+            )
+        )
+        await session.commit()
+        await WikiService().revoke_source(session, context, kb, revision_id)
+    async with factory() as session:
+        assert await finalize_ingestion_ready(session, job_id=ingest_id, lease_token="inflight")
+    async with factory() as session:
+        revision = await session.get(DocumentRevision, revision_id)
+        assert (revision.lifecycle_status, revision.ingestion_status) == ("ACTIVE", "READY")
+        with pytest.raises(AgentHubError) as error:
+            await WikiService().pages(session, context, kb, wiki_job.id)
+        assert error.value.code == "WIKI_SOURCE_REVOKED"
+
+
+@pytest.mark.asyncio
+async def test_cross_source_review_preserves_alias_evidence_and_refuses_to_adjudicate(setup):
+    factory, context, kb, _, job, adapter = setup
+    adapter.use_aliases = True
+    adapter.review_groups = [[1, 2]]
+    assert await worker.run_wiki_job(str(job.id)) == "ready"
+    async with factory() as session:
+        row = await WikiService().publish(session, context, kb, job.id)
+        assert row.telemetry["conflict_group_count"] == 1
+        result = await query_wiki(
+            session, context, kb, job.id, row.source_snapshot_id, "Policy alpha", mode="WIKI"
+        )
+        assert result["insufficient_evidence"] is True
+        assert len({e["document_revision_id"] for e in result["conflicts"]}) == 2
+        assert len(result["wiki_pages"]) == 2
+        assert all(e["quote"] for e in result["conflicts"])
+    assert adapter.calls == 3
+
+
+@pytest.mark.asyncio
+async def test_changed_review_manifest_is_rejected_before_any_model_request(setup, monkeypatch):
+    factory, context, kb, _, job, adapter = setup
+    from packages.wiki import conflict_review
+
+    monkeypatch.setattr(conflict_review, "review_manifest", lambda: {"version": "different"})
+    assert await worker.run_wiki_job(str(job.id)) == "failed"
+    assert adapter.calls == 0
+    async with factory() as session:
+        row = await WikiService().get(session, context, kb, job.id)
+        assert row.error_code == "WIKI_REVIEW_VERSION_UNAVAILABLE"

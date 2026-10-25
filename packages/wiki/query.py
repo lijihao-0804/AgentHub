@@ -19,6 +19,7 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievalQuery
 from packages.knowledge.models import DocumentChunk, KnowledgeSnapshotItem
+from packages.wiki.models import WikiSourceRevocation
 
 _MODES = frozenset({"WIKI", "RAG", "HYBRID", "AUTO"})
 _INTENTS = frozenset({"overview", "fact", "synthesis"})
@@ -195,6 +196,9 @@ def _binding(
         "knowledge_base_id": str(knowledge_base_id),
         "compilation_id": str(compilation_id),
         "compilation_hash": _attribute(compilation, "content_hash"),
+        "excluded_revision_ids": _attribute(compilation, "compiler_spec", {}).get(
+            "excluded_revision_ids", []
+        ),
         "source_snapshot_id": str(source_snapshot_id),
         "source_snapshot_hash": _attribute(compilation, "source_snapshot_hash"),
         "compilation_status": str(status).upper(),
@@ -242,6 +246,12 @@ async def _load_snapshot_chunks(
             DocumentChunk.knowledge_base_id == knowledge_base_id,
             KnowledgeSnapshotItem.snapshot_id == source_snapshot_id,
             DocumentChunk.chunk_id.in_(sorted(chunk_ids)),
+            DocumentChunk.document_revision_id.not_in(
+                select(WikiSourceRevocation.document_revision_id).where(
+                    WikiSourceRevocation.workspace_id == workspace_id,
+                    WikiSourceRevocation.knowledge_base_id == knowledge_base_id,
+                )
+            ),
         )
     )
     rows = await session.scalars(statement)
@@ -308,6 +318,7 @@ async def _validate_wiki_claims(
                 "value": _attribute(claim_value, "value"),
                 "condition": _attribute(claim_value, "condition"),
                 "conflict": _attribute(claim_value, "conflict", False) is True,
+                "conflict_peers": list(_attribute(claim_value, "conflict_peers", [])),
             }
             accepted_claims.append(claim)
             evidence.append(
@@ -563,6 +574,16 @@ async def query_wiki(
             compilation_uuid,
         )
         matched_pages = _matched_pages(query, candidate_pages)
+        selected = {p["page_key"] for p in matched_pages}
+        peer_chunks = {
+            key for p in matched_pages for c in p["claims"] for key in c.get("conflict_peers", [])
+        }
+        matched_pages.extend(
+            p
+            for p in candidate_pages
+            if p["page_key"] not in selected
+            and any(c["chunk_id"] in peer_chunks for c in p["claims"])
+        )
         wiki_pages, wiki_evidence = await _validate_wiki_claims(
             session,
             matched_pages,

@@ -2,7 +2,7 @@
 
 Run with --env-file and --output; all output is public/test data. No formal
 Experiment, holdout or production database is modified. Default 5 compile
-requests + at most 18 answers + one incremental compile, no search loop.
+requests + at most 18 answers + one incremental compile + two reviews, no search loop.
 """
 
 from __future__ import annotations
