@@ -105,6 +105,53 @@ def normalize_knowledge_snapshots(value: Any) -> list[dict[str, str]]:
     )
 
 
+def normalize_wiki_publications(value: Any) -> list[dict[str, str]]:
+    if not isinstance(value, list):
+        raise AgentHubError(
+            "EVALUATION_KNOWLEDGE_INVALID",
+            "Effective Wiki publications are invalid.",
+            422,
+        )
+    normalized: list[dict[str, str]] = []
+    for item in value:
+        if not isinstance(item, Mapping):
+            raise AgentHubError(
+                "EVALUATION_KNOWLEDGE_INVALID",
+                "Effective Wiki publications are invalid.",
+                422,
+            )
+        required = {
+            "knowledge_base_id",
+            "binding_mode",
+            "wiki_publication_id",
+            "publication_hash",
+        }
+        if set(item) != required or item["binding_mode"] not in {"PINNED", "LATEST"}:
+            raise AgentHubError(
+                "EVALUATION_KNOWLEDGE_INVALID",
+                "Effective Wiki publications are invalid.",
+                422,
+            )
+        if not all(isinstance(item[key], str) and item[key].strip() for key in required):
+            raise AgentHubError(
+                "EVALUATION_KNOWLEDGE_INVALID",
+                "Effective Wiki publications are invalid.",
+                422,
+            )
+        normalized.append(
+            {
+                "knowledge_base_id": item["knowledge_base_id"],
+                "binding_mode": item["binding_mode"],
+                "wiki_publication_id": item["wiki_publication_id"],
+                "publication_hash": item["publication_hash"],
+            }
+        )
+    return sorted(
+        normalized,
+        key=lambda item: (item["knowledge_base_id"], item["wiki_publication_id"]),
+    )
+
+
 def pricing_snapshot_content_hash(snapshot: PricingSnapshot) -> str:
     return canonical_json_hash(
         {
@@ -133,19 +180,24 @@ def variant_hash(
     pricing_snapshot_id: str,
     pricing_snapshot_hash: str,
     variant_metadata: Mapping[str, Any],
+    effective_wiki_publications: list[dict[str, str]] | None = None,
 ) -> str:
-    return canonical_json_hash(
-        {
-            "agent_version_id": agent_version_id,
-            "resolved_spec_hash": resolved_spec_hash,
-            "effective_knowledge_snapshots": normalize_knowledge_snapshots(
-                effective_knowledge_snapshots
-            ),
-            "pricing_snapshot_id": pricing_snapshot_id,
-            "pricing_snapshot_hash": pricing_snapshot_hash,
-            "variant_metadata": dict(variant_metadata),
-        }
-    )
+    payload: dict[str, Any] = {
+        "agent_version_id": agent_version_id,
+        "resolved_spec_hash": resolved_spec_hash,
+        "effective_knowledge_snapshots": normalize_knowledge_snapshots(
+            effective_knowledge_snapshots
+        ),
+        "pricing_snapshot_id": pricing_snapshot_id,
+        "pricing_snapshot_hash": pricing_snapshot_hash,
+        "variant_metadata": dict(variant_metadata),
+    }
+    wiki = normalize_wiki_publications(list(effective_wiki_publications or []))
+    # Present only when the variant actually binds a Wiki: every variant
+    # created before Wiki binding existed keeps its exact previous hash.
+    if wiki:
+        payload["effective_wiki_publications"] = wiki
+    return canonical_json_hash(payload)
 
 
 def experiment_spec_hash(spec: Mapping[str, Any]) -> str:
@@ -163,6 +215,7 @@ __all__ = [
     "experiment_spec_hash",
     "frozen_judge_version",
     "normalize_knowledge_snapshots",
+    "normalize_wiki_publications",
     "pricing_snapshot_content_hash",
     "variant_hash",
 ]

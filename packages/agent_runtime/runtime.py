@@ -97,6 +97,8 @@ from packages.tools.policy import ToolPolicy, ToolPolicyDecision
 from packages.tools.projections import argument_summary
 from packages.tools.runtime import PublishedToolCatalog, ToolRuntime
 from packages.wiki.evidence_envelope import envelope_violation
+from packages.wiki.models import WikiCompilation
+from packages.wiki.service import WikiService
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +168,9 @@ class AgentRunState(TypedDict, total=False):
     # between the two, and ``search_knowledge`` then resolves against an empty
     # binding and fails closed with TOOL_REVISION_INVALID.
     effective_knowledge_snapshots: list[dict[str, str]]
+    # Same pipeline for the version's Wiki binding: frozen at creation, read
+    # again at TOOL_EXECUTE, never silently substituted.
+    effective_wiki_publications: list[dict[str, str]]
     # Private checkpoint sidecar; source identities are never sent to the
     # provider as part of a compact evidence view.
     rag_evidence_registry: dict[str, dict[str, Any]]
@@ -199,12 +204,19 @@ class AgentRunExecutionOverrides:
     """
 
     effective_knowledge_snapshots: tuple[dict[str, str], ...]
+    effective_wiki_publications: tuple[dict[str, str], ...] = ()
 
     @classmethod
     def for_evaluation(
-        cls, snapshots: list[dict[str, str]] | tuple[dict[str, str], ...]
+        cls,
+        snapshots: list[dict[str, str]] | tuple[dict[str, str], ...],
+        *,
+        wiki_publications: list[dict[str, str]] | tuple[dict[str, str], ...] = (),
     ) -> AgentRunExecutionOverrides:
-        return cls(effective_knowledge_snapshots=tuple(dict(item) for item in snapshots))
+        return cls(
+            effective_knowledge_snapshots=tuple(dict(item) for item in snapshots),
+            effective_wiki_publications=tuple(dict(item) for item in wiki_publications),
+        )
 
 
 class AgentRunService:
@@ -309,6 +321,17 @@ class AgentRunService:
             raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
         if run.status != "RUNNING":
             return _run_result(run)
+        if not await self._frozen_wiki_publications_intact(run):
+            return await self._complete_run(
+                context,
+                run.id,
+                status="NEEDS_ATTENTION",
+                final_output=None,
+                failure_code="WIKI_PUBLICATION_UNAVAILABLE",
+                model_step_count=run.model_step_count,
+                tool_call_count=run.tool_call_count,
+                usage_records=[],
+            )
         agent_version_id = run.agent_version_id
         started = time.perf_counter()
         span = await _safe_start_span(
@@ -463,6 +486,22 @@ class AgentRunService:
             raise AgentHubError(
                 "APPROVAL_CHECKPOINT_MISSING",
                 "The durable approval checkpoint is missing.",
+                409,
+            )
+        if not await self._frozen_wiki_publications_intact(run):
+            await self._complete_run(
+                runtime_context,
+                run.id,
+                status="NEEDS_ATTENTION",
+                final_output=None,
+                failure_code="WIKI_PUBLICATION_UNAVAILABLE",
+                model_step_count=run.model_step_count,
+                tool_call_count=run.tool_call_count,
+                usage_records=[],
+            )
+            raise AgentHubError(
+                "WIKI_PUBLICATION_UNAVAILABLE",
+                "The frozen Wiki publication is no longer available.",
                 409,
             )
         graph = _AgentRunGraph(self, runtime_context, run)
@@ -798,6 +837,7 @@ class AgentRunService:
             "final_output": None,
             "failure_code": None,
             "effective_knowledge_snapshots": list(run.effective_knowledge_snapshots or []),
+            "effective_wiki_publications": list(run.effective_wiki_publications or []),
             "usage_records": [],
         }
 
@@ -1055,13 +1095,20 @@ class AgentRunService:
                 # Preserve durable failed-run history for malformed historical specs; the
                 # prepare phase will return the same safe binding error without executing.
                 effective_snapshots = []
+                effective_wiki_publications = []
             else:
                 if execution_overrides is None:
                     effective_snapshots = await self._resolve_effective_snapshots(
                         session, context, spec
                     )
+                    effective_wiki_publications = await self._resolve_effective_wiki_publications(
+                        session, context, spec
+                    )
                 else:
                     effective_snapshots = await self._validate_frozen_execution_snapshots(
+                        session, context, spec, execution_overrides
+                    )
+                    effective_wiki_publications = await self._validate_frozen_execution_wiki(
                         session, context, spec, execution_overrides
                     )
             run = AgentRun(
@@ -1072,6 +1119,7 @@ class AgentRunService:
                 created_by=created_by,
                 resolved_spec_hash=published_hash,
                 effective_knowledge_snapshots=effective_snapshots,
+                effective_wiki_publications=effective_wiki_publications,
             )
             session.add(run)
             await session.commit()
@@ -1221,6 +1269,167 @@ class AgentRunService:
                 }
             )
         return effective
+
+    @staticmethod
+    async def _resolve_effective_wiki_publications(
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        spec: FrozenAgentSpec,
+    ) -> list[dict[str, str]]:
+        """Freeze the version's Wiki binding onto a new run.
+
+        The published binding is already resolved (publish froze LATEST), so
+        this verifies the publication still exists under its frozen hash and
+        carries no revoked source. A revoked publication refuses the new run
+        outright instead of binding something the run cannot read.
+        """
+
+        binding = spec.wiki_binding
+        if binding is None:
+            return []
+        wiki_context = context.model_copy(
+            update={"permissions": context.permissions | frozenset({"knowledge_run"})}
+        )
+        publication = await session.scalar(
+            select(WikiCompilation).where(
+                WikiCompilation.workspace_id == UUID(context.workspace_id),
+                WikiCompilation.knowledge_base_id == binding.knowledge_base_id,
+                WikiCompilation.id == binding.wiki_publication_id,
+            )
+        )
+        if (
+            publication is None
+            or publication.status != "PUBLISHED"
+            or publication.content_hash != binding.publication_hash
+        ):
+            raise AgentHubError(
+                "AGENT_VERSION_INTEGRITY_ERROR",
+                "The published Wiki binding is invalid.",
+                422,
+            )
+        await _assert_wiki_publication_not_revoked(session, wiki_context, publication)
+        return [
+            {
+                "knowledge_base_id": str(binding.knowledge_base_id),
+                "binding_mode": binding.binding_mode,
+                "wiki_publication_id": str(binding.wiki_publication_id),
+                "publication_hash": binding.publication_hash,
+            }
+        ]
+
+    @staticmethod
+    async def _validate_frozen_execution_wiki(
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        spec: FrozenAgentSpec,
+        overrides: AgentRunExecutionOverrides,
+    ) -> list[dict[str, str]]:
+        """Replay-time validation of the evaluation worker's frozen publications."""
+
+        binding = spec.wiki_binding
+        frozen = [dict(item) for item in overrides.effective_wiki_publications]
+        if binding is None:
+            if frozen:
+                raise AgentHubError(
+                    "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                    "Frozen Wiki bindings do not match the published agent version.",
+                    409,
+                )
+            return []
+        if len(frozen) != 1:
+            raise AgentHubError(
+                "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                "Frozen Wiki bindings do not match the published agent version.",
+                409,
+            )
+        item = frozen[0]
+        workspace_id = UUID(context.workspace_id)
+        try:
+            knowledge_base_id = UUID(str(item["knowledge_base_id"]))
+            publication_id = UUID(str(item["wiki_publication_id"]))
+            publication_hash = str(item["publication_hash"])
+            binding_mode = str(item["binding_mode"])
+        except (KeyError, TypeError, ValueError):
+            raise AgentHubError(
+                "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                "Frozen Wiki publication identity is invalid.",
+                409,
+            ) from None
+        if (
+            knowledge_base_id != binding.knowledge_base_id
+            or publication_id != binding.wiki_publication_id
+            or publication_hash != binding.publication_hash
+            or binding_mode != binding.binding_mode
+        ):
+            raise AgentHubError(
+                "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                "Frozen Wiki publication does not match the published binding.",
+                409,
+            )
+        publication = await session.scalar(
+            select(WikiCompilation).where(
+                WikiCompilation.workspace_id == workspace_id,
+                WikiCompilation.knowledge_base_id == knowledge_base_id,
+                WikiCompilation.id == publication_id,
+            )
+        )
+        if (
+            publication is None
+            or publication.status != "PUBLISHED"
+            or publication.content_hash != publication_hash
+        ):
+            raise AgentHubError(
+                "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
+                "The frozen Wiki publication is no longer valid.",
+                409,
+            )
+        wiki_context = context.model_copy(
+            update={"permissions": context.permissions | frozenset({"knowledge_run"})}
+        )
+        await _assert_wiki_publication_not_revoked(session, wiki_context, publication)
+        return [
+            {
+                "knowledge_base_id": str(knowledge_base_id),
+                "binding_mode": binding_mode,
+                "wiki_publication_id": str(publication_id),
+                "publication_hash": publication_hash,
+            }
+        ]
+
+    async def _frozen_wiki_publications_intact(self, run: AgentRun) -> bool:
+        """Integrity-only replay check: each frozen publication still resolves.
+
+        Source revocation after the run was created is historical semantics and
+        keeps the run going; a publication that no longer matches its frozen
+        hash means the run's binding cannot be honoured at all, which is a
+        NEEDS_ATTENTION condition rather than something to replace silently.
+        """
+
+        publications = list(run.effective_wiki_publications or [])
+        if not publications:
+            return True
+        async with self.session_factory() as session:
+            for item in publications:
+                try:
+                    knowledge_base_id = UUID(str(item["knowledge_base_id"]))
+                    publication_id = UUID(str(item["wiki_publication_id"]))
+                    publication_hash = str(item["publication_hash"])
+                except (KeyError, TypeError, ValueError):
+                    return False
+                publication = await session.scalar(
+                    select(WikiCompilation).where(
+                        WikiCompilation.workspace_id == run.workspace_id,
+                        WikiCompilation.knowledge_base_id == knowledge_base_id,
+                        WikiCompilation.id == publication_id,
+                    )
+                )
+                if (
+                    publication is None
+                    or publication.status != "PUBLISHED"
+                    or publication.content_hash != publication_hash
+                ):
+                    return False
+        return True
 
     async def _append_step(
         self,
@@ -2953,6 +3162,28 @@ def _is_uuid(value: Any) -> bool:
     except ValueError:
         return False
     return True
+
+
+async def _assert_wiki_publication_not_revoked(
+    session: AsyncSession, wiki_context: WorkspaceExecutionContext, publication: Any
+) -> None:
+    """Refuse to bind a publication whose sources contain a revocation tombstone.
+
+    Tombstones are permanent denials, so a new run pinned to a revoked
+    publication is refused with its own error code rather than being allowed to
+    start against evidence the Wiki layer will refuse to serve.
+    """
+
+    try:
+        await WikiService().sources(session, wiki_context, publication, require_current=False)
+    except AgentHubError as error:
+        if error.code == "WIKI_SOURCE_REVOKED":
+            raise AgentHubError(
+                "WIKI_PUBLICATION_REVOKED",
+                "The bound Wiki publication has a revoked source.",
+                409,
+            ) from None
+        raise
 
 
 def _memory_message(selected: tuple[SelectedMemory, ...]) -> ModelMessage:

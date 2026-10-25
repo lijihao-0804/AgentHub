@@ -41,12 +41,14 @@ from packages.evaluation.reproducibility import (
     default_evaluator_manifest,
     experiment_spec_hash,
     normalize_knowledge_snapshots,
+    normalize_wiki_publications,
     pricing_snapshot_content_hash,
     variant_hash,
 )
 from packages.evaluation.validation import validate_variant_metadata
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.knowledge.snapshots import KnowledgeSnapshotService
+from packages.wiki.models import WikiCompilation
 
 
 class ExperimentService:
@@ -287,6 +289,9 @@ class ExperimentService:
         snapshots = await self._freeze_knowledge(
             session, context, experiment.workspace_id, agent_version.resolved_spec
         )
+        wiki_publications = await self._freeze_wiki_publications(
+            session, experiment.workspace_id, agent_version.resolved_spec
+        )
         frozen_variant_hash = variant_hash(
             agent_version_id=str(agent_version.id),
             resolved_spec_hash=agent_version.resolved_spec_hash,
@@ -294,6 +299,7 @@ class ExperimentService:
             pricing_snapshot_id=str(pricing_snapshot.id),
             pricing_snapshot_hash=pricing_hash,
             variant_metadata=metadata,
+            effective_wiki_publications=wiki_publications,
         )
         variant = EvaluationExperimentVariant(
             workspace_id=experiment.workspace_id,
@@ -304,6 +310,7 @@ class ExperimentService:
             pricing_snapshot_id=pricing_snapshot.id,
             pricing_snapshot_hash=pricing_hash,
             effective_knowledge_snapshots=snapshots,
+            effective_wiki_publications=wiki_publications,
             variant_metadata=metadata,
             variant_hash=frozen_variant_hash,
             ordinal=ordinal,
@@ -737,6 +744,64 @@ class ExperimentService:
             )
         return normalize_knowledge_snapshots(frozen)
 
+    async def _freeze_wiki_publications(
+        self,
+        session: AsyncSession,
+        workspace_id: UUID,
+        resolved_spec: Mapping[str, Any],
+    ) -> list[dict[str, str]]:
+        """Freeze the version's Wiki binding into the variant.
+
+        The binding was resolved once at publish; a LATEST intent is never
+        re-resolved here. Freezing verifies the frozen publication still
+        exists under its hash, so an experiment cannot be created against a
+        binding the runtime would refuse.
+        """
+
+        if not isinstance(resolved_spec, Mapping):
+            raise self._agent_integrity_error()
+        binding = resolved_spec.get("wiki_binding")
+        if binding is None:
+            return []
+        if not isinstance(binding, Mapping):
+            raise self._agent_integrity_error()
+        try:
+            knowledge_base_id = UUID(str(binding["knowledge_base_id"]))
+            publication_id = UUID(str(binding["wiki_publication_id"]))
+            publication_hash = str(binding["publication_hash"])
+            binding_mode = str(binding["binding_mode"])
+        except (KeyError, TypeError, ValueError):
+            raise self._agent_integrity_error() from None
+        if binding_mode not in {"PINNED", "LATEST"}:
+            raise self._agent_integrity_error()
+        publication = await session.scalar(
+            select(WikiCompilation).where(
+                WikiCompilation.workspace_id == workspace_id,
+                WikiCompilation.knowledge_base_id == knowledge_base_id,
+                WikiCompilation.id == publication_id,
+            )
+        )
+        if (
+            publication is None
+            or publication.status != "PUBLISHED"
+            or publication.content_hash != publication_hash
+        ):
+            raise AgentHubError(
+                "EVALUATION_WIKI_PUBLICATION_INVALID",
+                "The frozen Wiki publication is invalid.",
+                422,
+            )
+        return normalize_wiki_publications(
+            [
+                {
+                    "knowledge_base_id": str(knowledge_base_id),
+                    "binding_mode": binding_mode,
+                    "wiki_publication_id": str(publication_id),
+                    "publication_hash": publication_hash,
+                }
+            ]
+        )
+
     async def _validate_stored_variant(
         self,
         session: AsyncSession,
@@ -782,6 +847,43 @@ class ExperimentService:
                     "The frozen knowledge snapshot is invalid.",
                     409,
                 )
+        wiki_publications = normalize_wiki_publications(variant.effective_wiki_publications)
+        spec_binding = (agent_version.resolved_spec or {}).get("wiki_binding")
+        if wiki_publications:
+            if not isinstance(spec_binding, Mapping):
+                raise self._agent_integrity_error()
+            try:
+                spec_publication_id = UUID(str(spec_binding["wiki_publication_id"]))
+                spec_publication_hash = str(spec_binding["publication_hash"])
+                spec_knowledge_base_id = UUID(str(spec_binding["knowledge_base_id"]))
+            except (KeyError, TypeError, ValueError):
+                raise self._agent_integrity_error() from None
+            for item in wiki_publications:
+                publication = await session.scalar(
+                    select(WikiCompilation).where(
+                        WikiCompilation.workspace_id == workspace_id,
+                        WikiCompilation.knowledge_base_id == UUID(item["knowledge_base_id"]),
+                        WikiCompilation.id == UUID(item["wiki_publication_id"]),
+                    )
+                )
+                if (
+                    publication is None
+                    or publication.status != "PUBLISHED"
+                    or publication.content_hash != item["publication_hash"]
+                ):
+                    raise AgentHubError(
+                        "EVALUATION_WIKI_PUBLICATION_INVALID",
+                        "The frozen Wiki publication is invalid.",
+                        409,
+                    )
+                if (
+                    UUID(item["wiki_publication_id"]) != spec_publication_id
+                    or item["publication_hash"] != spec_publication_hash
+                    or UUID(item["knowledge_base_id"]) != spec_knowledge_base_id
+                ):
+                    raise self._agent_integrity_error()
+        elif spec_binding is not None:
+            raise self._agent_integrity_error()
         expected_hash = variant_hash(
             agent_version_id=str(variant.agent_version_id),
             resolved_spec_hash=variant.resolved_spec_hash,
@@ -789,6 +891,7 @@ class ExperimentService:
             pricing_snapshot_id=str(variant.pricing_snapshot_id),
             pricing_snapshot_hash=variant.pricing_snapshot_hash,
             variant_metadata=variant.variant_metadata,
+            effective_wiki_publications=wiki_publications,
         )
         if expected_hash != variant.variant_hash:
             raise AgentHubError(

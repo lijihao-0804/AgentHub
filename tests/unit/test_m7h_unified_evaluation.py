@@ -249,6 +249,7 @@ async def test_unified_approval_cases_pass_agent_runtime_decision_preflight() ->
     variant = SimpleNamespace(
         agent_version_id=UUID("00000000-0000-0000-0000-000000000003"),
         effective_knowledge_snapshots=[],
+        effective_wiki_publications=[],
     )
     approvals = [item for item in build_items() if item["category"] == "APPROVAL"]
 

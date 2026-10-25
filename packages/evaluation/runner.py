@@ -280,7 +280,8 @@ class AgentRuntimeEvaluationDriver:
             agent_version_id=variant.agent_version_id,
             input_text=_case_input_text(item),
             execution_overrides=AgentRunExecutionOverrides.for_evaluation(
-                list(variant.effective_knowledge_snapshots)
+                list(variant.effective_knowledge_snapshots),
+                wiki_publications=list(variant.effective_wiki_publications or []),
             ),
         )
 

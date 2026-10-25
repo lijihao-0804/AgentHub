@@ -54,6 +54,7 @@ class ScriptedScenarioDriver:
         agent_version_id: UUID,
         first_input: str,
         knowledge_snapshots: Sequence[dict[str, str]],
+        wiki_publications: Sequence[dict[str, str]] = (),
     ) -> PreparedScenario:
         if "evaluation_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "Evaluation permission is required.", 403)
@@ -82,7 +83,8 @@ class ScriptedScenarioDriver:
             input_text=first_input,
             thread_id=thread.id,
             execution_overrides=AgentRunExecutionOverrides.for_evaluation(
-                list(knowledge_snapshots)
+                list(knowledge_snapshots),
+                wiki_publications=list(wiki_publications),
             ),
         )
         await self.threads.attach_run(context, turn_id=turn.id, run_id=run.id)
@@ -98,6 +100,7 @@ class ScriptedScenarioDriver:
         agent_version_id: UUID,
         user_turns: Sequence[str],
         knowledge_snapshots: Sequence[dict[str, str]],
+        wiki_publications: Sequence[dict[str, str]] = (),
         approval_decisions: Sequence[str] = (),
         approval_context: WorkspaceExecutionContext | None = None,
         prepared_first: PreparedScenario | None = None,
@@ -120,6 +123,7 @@ class ScriptedScenarioDriver:
             agent_version_id=agent_version_id,
             first_input=user_turns[0],
             knowledge_snapshots=knowledge_snapshots,
+            wiki_publications=wiki_publications,
         )
         if handle.workspace_id != context.workspace_id:
             raise AgentHubError("FORBIDDEN", "Scenario belongs to another workspace.", 403)
@@ -147,6 +151,7 @@ class ScriptedScenarioDriver:
                 or first.input_text != user_turns[0]
                 or first.resolved_spec_hash != handle.spec_hash
                 or first.effective_knowledge_snapshots != list(knowledge_snapshots)
+                or first.effective_wiki_publications != list(wiki_publications)
             ):
                 raise RuntimeError("SCENARIO_PREPARED_IDENTITY_MISMATCH")
             started_step = await session.scalar(
@@ -181,7 +186,8 @@ class ScriptedScenarioDriver:
                         input_text=text,
                         thread_id=handle.thread_id,
                         execution_overrides=AgentRunExecutionOverrides.for_evaluation(
-                            list(knowledge_snapshots)
+                            list(knowledge_snapshots),
+                            wiki_publications=list(wiki_publications),
                         ),
                     )
                     await self.threads.attach_run(context, turn_id=turn.id, run_id=prepared.id)
@@ -219,6 +225,7 @@ class ScriptedScenarioDriver:
                         or persisted.resolved_spec_hash != spec_hash
                         or persisted.agent_version_id != agent_version_id
                         or persisted.effective_knowledge_snapshots != list(knowledge_snapshots)
+                        or persisted.effective_wiki_publications != list(wiki_publications)
                     ):
                         raise RuntimeError("SCENARIO_FROZEN_IDENTITY_MISMATCH")
                     runs.append(
