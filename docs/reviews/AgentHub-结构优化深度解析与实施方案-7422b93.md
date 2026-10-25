@@ -104,6 +104,14 @@ packages/agent_runtime/
 全程：四件套 + 重放四臂逐字节一致 + CI 绿；每步独立提交待批准。
 ```
 
+## 七、实施记录（2026-10-26，三步全部完成）
+
+| 步骤 | 提交 | 结果 |
+| --- | --- | --- |
+| ① runtime 三分 | `923fe16` | runtime.py 3571→74 行门面；runtime_service 1408 / runtime_graph 1614 / runtime_projection 700。四门全过：11/11 符号面断言、全量单测 exit 0、集成 exit 0（新库）、四臂重放**逐字节一致 200/200**。实施中发现并修正两处拆分事实：`AgentRunState` 是 LangGraph StateGraph 的**运行时** schema（不得 TYPE_CHECKING，单测不触 invoke 所以单测门没拦住、集成门拦住——门的价值即在此）；一个 monkeypatch 靶点（`WikiService`）随名字解析迁到 runtime_projection。 |
+| ② feedback/handoffs 守卫单测 | `91c452f` | 11 用例（require 权限门 403、幂等冲突 409、封闭词表、fail 包络、source_hash 五字段敏感且确定性）。**修正审计结论**：两包服务行为本有集成覆盖（mi2_feedback_evidence / handoff_lifecycle），"0 单测"仅指 unit 层纯函数守卫无隔离覆盖——本步补的正是这一层。 |
+| ③ 子目录纪律 | `84ea228` | 写入总执行计划 §0 第 7 条：public_rag 顶层为已发布实验档案永不重组，新立项脚本一律进 `<立项名>/` 子目录。 |
+
 ## 声明
 
 本轮只读：未改任何代码；全部数字可由 `wc -l`/`grep` 复现；拆分提案的行区间与方法清单一并列出供独立核对；实施须经用户批准。
