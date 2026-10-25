@@ -161,7 +161,11 @@ async def run(args, output):
             profile.timeout_seconds = 120
             profile.capabilities = {"structured_output": False, "max_context_tokens": 32768}
             await session.commit()
-        sources = await corpus()
+        sources = (
+            json.loads(Path(args.corpus_file).read_text(encoding="utf-8"))["corpus"]
+            if args.corpus_file
+            else await corpus()
+        )
         output["corpus"] = sources
         names = dict(zip(map(str, revision_ids), ("policy", "glossary"), strict=True))
         for source in sources:
@@ -189,13 +193,15 @@ async def run(args, output):
         # Real locally cached embedding model; unchanged main Dense retriever/Qdrant adapter.
         warm = time.perf_counter()
         dense = BgeM3DenseEmbedder(
-            model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+            model_name=args.embedding_path
+            or "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             device="cpu",
             expected_dimension=384,
         )
         vectors = await asyncio.to_thread(dense.embed_documents, [c.text for c in chunks])
         output["embedding"] = {
-            "model": dense.model_name,
+            "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+            "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
             "dimension": 384,
             "local": True,
             "api_cost": "0",
@@ -365,6 +371,8 @@ def main():
     parser.add_argument("--env-file", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--database-url", required=True)
+    parser.add_argument("--embedding-path", help="Local copy of the same pinned MiniLM model")
+    parser.add_argument("--corpus-file", help="Reuse the exact public excerpts of a saved run")
     args = parser.parse_args()
     output = {
         "schema_version": 1,

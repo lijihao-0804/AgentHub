@@ -26,6 +26,29 @@ from packages.model_gateway.contracts import (
 from packages.wiki.answer import _OUTPUT_JSON_SCHEMA, answer_from_evidence
 
 
+@pytest.mark.asyncio
+async def test_insufficient_flag_cannot_deliver_unsupported_model_prose():
+    gateway = _Gateway(
+        ModelResponse(
+            content=json.dumps(
+                {
+                    "answer": "The password is fabricated without evidence.",
+                    "citation_ids": [],
+                    "insufficient_evidence": True,
+                }
+            ),
+            provider="test",
+            model="test",
+        )
+    )
+    result = await answer_from_evidence(gateway, _plan(), _context(), "password?", _retrieval())
+    assert result["insufficient_evidence"] is True
+    assert (
+        result["answer"] == "Insufficient evidence to answer from the selected knowledge binding."
+    )
+    assert not result["citations"]
+
+
 def _context() -> WorkspaceExecutionContext:
     return WorkspaceExecutionContext(
         organization=OrganizationContext(
@@ -390,7 +413,7 @@ async def test_insufficient_model_answer_must_have_no_markers_or_ids() -> None:
         _retrieval(),
     )
 
-    assert result["answer"] == "Insufficient evidence."
+    assert result["answer"] == "Insufficient evidence to answer from the selected knowledge binding."
     assert result["citations"] == []
     assert result["insufficient_evidence"] is True
     assert result["telemetry"]["request_count"] == 1

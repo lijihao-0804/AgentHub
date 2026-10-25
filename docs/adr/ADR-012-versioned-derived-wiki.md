@@ -5,7 +5,7 @@
 
 ## 决策与取舍
 
-采用 PostgreSQL 中的版本化页面、结构化提取缓存、来源关联和类型化关系；Markdown 是阅读投影。
+采用 PostgreSQL 中的版本化页面、结构化提取缓存、来源关联和导航关系；Markdown 是阅读投影。
 继续使用 Document/DocumentRevision/DocumentChunk、KnowledgeSnapshot、Celery、模型网关、RBAC 和审计。
 不引入新服务、图数据库、向量库或第三方 Wiki 运行时。Qdrant 继续属于原始 RAG 的检索适配器。
 

@@ -112,7 +112,15 @@ async def run_wiki_job(job_id):
                         WikiCompilation.lease_token == claim.lease_token,
                     )
                     .values(
-                        status="FAILED", error_code=code, lease_token=None, lease_expires_at=None
+                        status="FAILED",
+                        error_code=code,
+                        lease_token=None,
+                        lease_expires_at=None,
+                        telemetry={
+                            "usage_status": "UNKNOWN",
+                            "cost_status": "UNKNOWN",
+                            "reason": "compilation_failed_before_complete_accounting",
+                        },
                     )
                 )
                 await session.commit()

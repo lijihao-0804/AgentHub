@@ -375,6 +375,9 @@ async def answer_from_evidence(
     except (TypeError, ValueError, json.JSONDecodeError):
         raise _invalid_output() from None
 
+    if output.insufficient_evidence:
+        return _insufficient(telemetry=_telemetry(plan, response, admission, latency_ms=latency_ms))
+
     by_id = {source["id"]: source for source in sources}
     citations = [
         {

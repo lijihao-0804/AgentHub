@@ -16,8 +16,8 @@ from packages.model_gateway.contracts import ModelResponse
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.wiki.models import WikiPage
-from packages.wiki.service import WikiService
-from tests.support.wiki import seed_wiki
+from packages.wiki.service import WikiService, claim_job, execute_job
+from tests.support.wiki import FakeCompiler, seed_wiki
 
 URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "")
 pytestmark = [pytest.mark.integration, pytest.mark.skipif(not URL, reason="PostgreSQL required")]
@@ -128,3 +128,29 @@ async def test_worker_rejects_changed_model_endpoint(setup):
         await session.commit()
     assert await worker.run_wiki_job(str(job.id)) == "failed"
     assert adapter.calls == 0
+
+
+@pytest.mark.asyncio
+async def test_new_publication_after_revocation_drops_only_withdrawn_contribution(setup):
+    factory, context, kb, profile_id, job, adapter = setup
+    assert await worker.run_wiki_job(str(job.id)) == "ready"
+    service = WikiService()
+    async with factory() as session:
+        await service.publish(session, context, kb, job.id)
+        original = await service.pages(session, context, kb, job.id)
+        revoked_id = UUID(original[0]["claims"][0]["document_revision_id"])
+        await service.revoke_source(session, context, kb, revoked_id)
+        fresh = await service.request(session, context, kb, profile_id)
+        claim = await claim_job(session, fresh.id)
+    assert fresh.id != job.id
+    assert (
+        await execute_job(factory, context, fresh.id, claim.lease_token, FakeCompiler()) == "ready"
+    )
+    async with factory() as session:
+        published = await service.publish(session, context, kb, fresh.id)
+        pages = await service.pages(session, context, kb, fresh.id)
+        assert published.telemetry["compiled_revisions"] == 0
+        assert published.telemetry["reused_revisions"] == 1
+        assert pages
+        assert all(c["document_revision_id"] != str(revoked_id) for p in pages for c in p["claims"])
+    assert adapter.calls == 2
