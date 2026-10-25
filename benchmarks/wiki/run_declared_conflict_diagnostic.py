@@ -76,8 +76,10 @@ async def run(args, result):
             kb_id = row.knowledge_base_id
         plan = thaw_plan(row.compiler_spec["plan"])
         compiler = GatewayWikiCompiler(NoModelCalls(), plan, output_mode="PROMPT_JSON")
-        result["execution"] = await execute_job(
-            factory, context, row.id, claim.lease_token, compiler
+        result["execution"] = (
+            await execute_job(factory, context, row.id, claim.lease_token, compiler)
+            if claim is not None
+            else "existing_publication"
         )
         async with factory() as session:
             publication = await service.publish(session, context, kb_id, row.id)

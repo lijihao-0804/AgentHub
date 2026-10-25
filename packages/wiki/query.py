@@ -576,6 +576,21 @@ async def query_wiki(
         )
         matched_pages = _matched_pages(query, candidate_pages)
         selected = {p["page_key"] for p in matched_pages}
+        adjacent = set()
+        for page in matched_pages:
+            for link in page.get("relations", []):
+                target = link if isinstance(link, str) else _attribute(link, "target")
+                if isinstance(target, str):
+                    adjacent.add(target)
+        conflict_neighbors = [
+            p
+            for p in candidate_pages
+            if p["page_key"] in adjacent
+            and p["page_key"] not in selected
+            and any(c.get("conflict") for c in p["claims"])
+        ]
+        matched_pages.extend(conflict_neighbors)
+        selected.update(p["page_key"] for p in conflict_neighbors)
         peer_chunks = {
             key for p in matched_pages for c in p["claims"] for key in c.get("conflict_peers", [])
         }

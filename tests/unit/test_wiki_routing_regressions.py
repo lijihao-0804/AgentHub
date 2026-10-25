@@ -62,3 +62,36 @@ def test_conflicts_are_scoped_to_topic_and_single_marked_claim_survives():
     found = _find_conflicts(evidence)
     assert [c["chunk_id"] for c in found] == ["a"]
     assert evidence[1]["conflict"] is False
+
+
+@pytest.mark.asyncio
+async def test_related_topic_retrieves_both_conflict_sources_before_answering():
+    records = _page(title="Records", chunk_id="record", quote="Records need review.")
+    first = _page(title="Policy alpha", chunk_id="alpha", quote="Keep for 7 years.", conflict=True)
+    second = _page(title="Archive beta", chunk_id="beta", quote="Keep for 5 years.", conflict=True)
+    records["relations"] = [first["page_key"]]
+    for page in (first, second):
+        page["claims"][0]["conflict_peers"] = ["alpha", "beta"]
+    context, kb, compilation, snapshot, service = _setup(pages=[records, first, second])
+    chunks = [
+        _chunk(
+            chunk_id=p["claims"][0]["chunk_id"],
+            text=p["claims"][0]["quote"],
+            document_id=UUID(p["claims"][0]["document_id"]),
+            revision_id=UUID(p["claims"][0]["document_revision_id"]),
+        )
+        for p in (records, first, second)
+    ]
+    result = await query_wiki(
+        _StubSession(chunks),
+        context,
+        kb,
+        compilation,
+        snapshot,
+        "Records",
+        mode="WIKI",
+        service=service,
+    )
+    assert result["insufficient_evidence"] is True
+    assert {e["chunk_id"] for e in result["conflicts"]} == {"alpha", "beta"}
+    assert len(result["wiki_pages"]) == 3

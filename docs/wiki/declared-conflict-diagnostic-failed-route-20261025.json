@@ -1,0 +1,212 @@
+{
+  "scope": "EDITOR_CURATION_ON_REAL_EXTRACTED_EVIDENCE_NOT_AUTOMATIC_DETECTION",
+  "build_sha": "e633111872e0a891744cb763608d8d44ead7d590",
+  "editor_declared_evidence": [
+    {
+      "chunk_id": "wiki-seed-ad235f60186d4c90ad2b837d5b186b8e",
+      "quote": "retention period is 7 years"
+    },
+    {
+      "chunk_id": "wiki-seed-1b32f7cb865545119985057e287fb67c",
+      "quote": "retention period is 5 years."
+    }
+  ],
+  "execution": "ready",
+  "telemetry": {
+    "calls": [],
+    "reused_revisions": 6,
+    "compiled_revisions": 0,
+    "declared_conflict_group_count": 1
+  },
+  "binding": {
+    "compilation_id": "7a806bdb-eb5c-4ad2-af5e-566dacabbc9e",
+    "compilation_hash": "d2029310af2e8b5951865370164e380a51a021fe67aeb8dae0e7b3079177ed30",
+    "source_snapshot_id": "ef4fcc0b-4779-44c2-badb-ed94bd779da1",
+    "source_snapshot_hash": "a6f410e16aabc1a3c1d72b575ccb92d44e2f0778a3a70d2870f545bfa24d82b6"
+  },
+  "query": {
+    "binding": {
+      "schema_version": 1,
+      "workspace_id": "4d8d764d-9a02-4678-9044-45ec9ca0f934",
+      "knowledge_base_id": "15130d26-a9c0-447f-90df-da1810c7446c",
+      "compilation_id": "7a806bdb-eb5c-4ad2-af5e-566dacabbc9e",
+      "compilation_hash": "d2029310af2e8b5951865370164e380a51a021fe67aeb8dae0e7b3079177ed30",
+      "excluded_revision_ids": [],
+      "source_snapshot_id": "ef4fcc0b-4779-44c2-badb-ed94bd779da1",
+      "source_snapshot_hash": "a6f410e16aabc1a3c1d72b575ccb92d44e2f0778a3a70d2870f545bfa24d82b6",
+      "compilation_status": "PUBLISHED",
+      "require_current": true,
+      "validated": true
+    },
+    "wiki_pages": [
+      {
+        "page_key": "341cb85f52de64f115ef944619aacde6679103dcc7321f12b5daf93147435326",
+        "title": "Project records",
+        "kind": "topic",
+        "markdown": "# Project records\n\nEvidence-backed extractive summary.\n\n> Project records include financial records and research notes\\.\n\nSource: `wiki-source-719b8ef0c82a4feb8d1a60c8f6f90f3b`\n",
+        "claims": [
+          {
+            "page_key": "341cb85f52de64f115ef944619aacde6679103dcc7321f12b5daf93147435326",
+            "topic_key": "project records",
+            "quote": "Project records include financial records and research notes.",
+            "chunk_id": "wiki-source-719b8ef0c82a4feb8d1a60c8f6f90f3b",
+            "document_id": "108fc48c-cfb9-410c-93cb-0e9418f8a2e0",
+            "document_revision_id": "8ae86c59-2ff9-4bc1-8da4-b0ee3284a0ca",
+            "locator": {
+              "type": "text_range",
+              "char_end": 153,
+              "char_start": 0
+            },
+            "predicate": "include",
+            "value": "financial records and research notes",
+            "condition": "",
+            "conflict": false,
+            "conflict_peers": [],
+            "conflict_origin": "BASIC_OR_MODEL"
+          }
+        ],
+        "relations": [
+          "54ff973ea4d3796a1b20071b7bd3346400813a3dcc5b0222d79fa969df2b617b"
+        ]
+      },
+      {
+        "page_key": "bd15813684a4b45f730ed2933bcf27f39bb6ad0c44363b6fb7fbf4820de2c076",
+        "title": "Records",
+        "kind": "concept",
+        "markdown": "# Records\n\nEvidence-backed extractive summary.\n\n> Records must be retained for audit\n\nSource: `wiki-seed-ad235f60186d4c90ad2b837d5b186b8e`\n\n> Records stay in the glossary for reference\\.\n\nSource: `wiki-seed-1b32f7cb865545119985057e287fb67c`\n",
+        "claims": [
+          {
+            "page_key": "bd15813684a4b45f730ed2933bcf27f39bb6ad0c44363b6fb7fbf4820de2c076",
+            "topic_key": "records",
+            "quote": "Records must be retained for audit",
+            "chunk_id": "wiki-seed-ad235f60186d4c90ad2b837d5b186b8e",
+            "document_id": "479fec58-d93c-4cad-bd50-b93a199c037e",
+            "document_revision_id": "8926a597-e675-4ae4-89e3-641af88984a1",
+            "locator": {
+              "type": "text_range",
+              "char_end": 82,
+              "char_start": 0
+            },
+            "predicate": "must be retained for",
+            "value": "audit",
+            "condition": "",
+            "conflict": false,
+            "conflict_peers": [],
+            "conflict_origin": "BASIC_OR_MODEL"
+          },
+          {
+            "page_key": "bd15813684a4b45f730ed2933bcf27f39bb6ad0c44363b6fb7fbf4820de2c076",
+            "topic_key": "records",
+            "quote": "Records stay in the glossary for reference.",
+            "chunk_id": "wiki-seed-1b32f7cb865545119985057e287fb67c",
+            "document_id": "b24cfff7-fb18-44d1-a669-7228567deddc",
+            "document_revision_id": "ec3f78f2-be79-4a3b-a370-d7655eea40ae",
+            "locator": {
+              "type": "text_range",
+              "char_end": 92,
+              "char_start": 0
+            },
+            "predicate": "stay in the glossary for reference",
+            "value": "true",
+            "condition": "",
+            "conflict": false,
+            "conflict_peers": [],
+            "conflict_origin": "BASIC_OR_MODEL"
+          }
+        ],
+        "relations": [
+          "ae99a7e6bc25f8a58d513f45369b59a49b86edbf7c0e2cac9ec68f9f5f884013",
+          "f5f7e390fdce4dcd47c3bfc13d5e17665111f056f5365b3f503526dea6bf4744"
+        ]
+      }
+    ],
+    "evidence": [
+      {
+        "page_key": "341cb85f52de64f115ef944619aacde6679103dcc7321f12b5daf93147435326",
+        "topic_key": "project records",
+        "quote": "Project records include financial records and research notes.",
+        "chunk_id": "wiki-source-719b8ef0c82a4feb8d1a60c8f6f90f3b",
+        "document_id": "108fc48c-cfb9-410c-93cb-0e9418f8a2e0",
+        "document_revision_id": "8ae86c59-2ff9-4bc1-8da4-b0ee3284a0ca",
+        "locator": {
+          "type": "text_range",
+          "char_end": 153,
+          "char_start": 0
+        },
+        "predicate": "include",
+        "value": "financial records and research notes",
+        "condition": "",
+        "conflict": false,
+        "conflict_peers": [],
+        "conflict_origin": "BASIC_OR_MODEL",
+        "source": "wiki_claim",
+        "retrieval_score": null,
+        "rerank_score": null
+      },
+      {
+        "page_key": "bd15813684a4b45f730ed2933bcf27f39bb6ad0c44363b6fb7fbf4820de2c076",
+        "topic_key": "records",
+        "quote": "Records must be retained for audit",
+        "chunk_id": "wiki-seed-ad235f60186d4c90ad2b837d5b186b8e",
+        "document_id": "479fec58-d93c-4cad-bd50-b93a199c037e",
+        "document_revision_id": "8926a597-e675-4ae4-89e3-641af88984a1",
+        "locator": {
+          "type": "text_range",
+          "char_end": 82,
+          "char_start": 0
+        },
+        "predicate": "must be retained for",
+        "value": "audit",
+        "condition": "",
+        "conflict": false,
+        "conflict_peers": [],
+        "conflict_origin": "BASIC_OR_MODEL",
+        "source": "wiki_claim",
+        "retrieval_score": null,
+        "rerank_score": null
+      },
+      {
+        "page_key": "bd15813684a4b45f730ed2933bcf27f39bb6ad0c44363b6fb7fbf4820de2c076",
+        "topic_key": "records",
+        "quote": "Records stay in the glossary for reference.",
+        "chunk_id": "wiki-seed-1b32f7cb865545119985057e287fb67c",
+        "document_id": "b24cfff7-fb18-44d1-a669-7228567deddc",
+        "document_revision_id": "ec3f78f2-be79-4a3b-a370-d7655eea40ae",
+        "locator": {
+          "type": "text_range",
+          "char_end": 92,
+          "char_start": 0
+        },
+        "predicate": "stay in the glossary for reference",
+        "value": "true",
+        "condition": "",
+        "conflict": false,
+        "conflict_peers": [],
+        "conflict_origin": "BASIC_OR_MODEL",
+        "source": "wiki_claim",
+        "retrieval_score": null,
+        "rerank_score": null
+      }
+    ],
+    "route": "WIKI",
+    "intent": "fact",
+    "insufficient_evidence": false,
+    "supplemental_required": false,
+    "conflicts": [],
+    "answer": "Project records include financial records and research notes."
+  },
+  "lint": [
+    {
+      "code": "POSSIBLE_CONFLICT",
+      "page_key": "ae99a7e6bc25f8a58d513f45369b59a49b86edbf7c0e2cac9ec68f9f5f884013",
+      "severity": "warning"
+    },
+    {
+      "code": "POSSIBLE_CONFLICT",
+      "page_key": "f5f7e390fdce4dcd47c3bfc13d5e17665111f056f5365b3f503526dea6bf4744",
+      "severity": "warning"
+    }
+  ],
+  "status": "failed",
+  "error_code": "MODEL_PROVIDER_UNAVAILABLE"
+}
