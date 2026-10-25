@@ -60,6 +60,7 @@ class Adapter:
         self.invalid = False
         self.review_groups = []
         self.use_aliases = False
+        self.review_max_tokens = []
 
     async def complete(self, profile, credential, request):
         self.calls += 1
@@ -72,6 +73,7 @@ class Adapter:
             if isinstance(data, dict) and "untrusted_source" in data:
                 source = data["untrusted_source"]
         if source is None:
+            self.review_max_tokens.append(profile.max_tokens)
             return ModelResponse(
                 content=json.dumps({"groups": self.review_groups}),
                 provider="fake",
@@ -320,3 +322,36 @@ async def test_changed_review_manifest_is_rejected_before_any_model_request(setu
     async with factory() as session:
         row = await WikiService().get(session, context, kb, job.id)
         assert row.error_code == "WIKI_REVIEW_VERSION_UNAVAILABLE"
+
+
+@pytest.mark.asyncio
+async def test_independent_review_profile_is_frozen_without_reextracting_sources(setup):
+    factory, context, kb, profile_id, job, adapter = setup
+    assert await worker.run_wiki_job(str(job.id)) == "ready"
+    async with factory() as session:
+        primary = await session.get(ModelProfile, profile_id)
+        review = ModelProfile(
+            workspace_id=primary.workspace_id,
+            provider_credential_id=primary.provider_credential_id,
+            model=primary.model,
+            temperature=primary.temperature,
+            max_tokens=1024,
+            timeout_seconds=30,
+            capabilities=dict(primary.capabilities),
+        )
+        session.add(review)
+        await session.commit()
+        second = await WikiService().request(
+            session, context, kb, profile_id, review_model_profile_id=review.id
+        )
+        assert second.compiler_spec["plan"]["primary"]["max_tokens"] == 512
+        assert second.compiler_spec["review_plan"]["primary"]["max_tokens"] == 1024
+        review.max_tokens = 2048
+        await session.commit()
+    assert await worker.run_wiki_job(str(second.id)) == "ready"
+    assert adapter.calls == 4
+    assert adapter.review_max_tokens == [512, 1024]
+    async with factory() as session:
+        row = await WikiService().get(session, context, kb, second.id)
+        assert row.telemetry["compiled_revisions"] == 0
+        assert row.telemetry["reused_revisions"] == 2

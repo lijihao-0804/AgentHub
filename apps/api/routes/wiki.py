@@ -32,6 +32,7 @@ gateway_dependency = Depends(get_model_gateway)
 class CompileRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     model_profile_id: UUID
+    review_model_profile_id: UUID | None = None
     source_snapshot_id: UUID | Literal["LATEST"] = "LATEST"
     output_mode: Literal["PROMPT_JSON", "JSON_SCHEMA"] = "PROMPT_JSON"
 
@@ -107,6 +108,7 @@ async def compile_source(
         payload.model_profile_id,
         payload.source_snapshot_id,
         output_mode=payload.output_mode,
+        review_model_profile_id=payload.review_model_profile_id,
     )
     enqueue(request, row)
     return compilation_response(row)

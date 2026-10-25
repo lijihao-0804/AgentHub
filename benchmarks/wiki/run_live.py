@@ -122,6 +122,7 @@ class MeasuredGateway:
                     "provider": result.provider,
                     "model": result.model,
                     "usage": asdict(result.usage) if result.usage else None,
+                    "finish_reason": result.finish_reason,
                     "cost": str(result.cost_estimate.amount) if result.cost_estimate else None,
                     "currency": result.cost_estimate.currency if result.cost_estimate else None,
                     "latency_ms": (time.perf_counter() - started) * 1000,

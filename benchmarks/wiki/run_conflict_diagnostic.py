@@ -12,12 +12,14 @@ from pathlib import Path
 from uuid import UUID
 
 from dotenv import load_dotenv
+from sqlalchemy import update
 
 from benchmarks.wiki.run_live import MeasuredGateway
 from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
 from packages.control_plane.services import TenantService
 from packages.core.database import create_database
 from packages.core.execution_context.models import PrincipalContext
+from packages.model_gateway.models import ModelProfile
 from packages.wiki.answer import answer_from_evidence
 from packages.wiki.compiler import GatewayWikiCompiler
 from packages.wiki.contracts import thaw_plan
@@ -33,6 +35,7 @@ async def run(args, result):
     gateway = MeasuredGateway(factory)
     result["calls"] = gateway.calls
     service = WikiService()
+    claim = None
     try:
         async with factory() as session:
             prior = await session.get(WikiCompilation, UUID(original["binding"]["compilation_id"]))
@@ -48,13 +51,43 @@ async def run(args, result):
                 )
             ).context
             profile_id = UUID(prior.compiler_spec["plan"]["primary"]["id"])
-            row = await service.request(session, context, prior.knowledge_base_id, profile_id)
+            review_profile_id = None
+            if args.review_max_tokens:
+                profile = await session.get(ModelProfile, profile_id)
+                review_profile = ModelProfile(
+                    workspace_id=profile.workspace_id,
+                    provider_credential_id=profile.provider_credential_id,
+                    model=profile.model,
+                    temperature=profile.temperature,
+                    max_tokens=args.review_max_tokens,
+                    timeout_seconds=profile.timeout_seconds,
+                    capabilities=dict(profile.capabilities),
+                    fallback_profile_id=profile.fallback_profile_id,
+                )
+                session.add(review_profile)
+                await session.commit()
+                review_profile_id = review_profile.id
+            row = await service.request(
+                session,
+                context,
+                prior.knowledge_base_id,
+                profile_id,
+                review_model_profile_id=review_profile_id,
+            )
             kb_id = row.knowledge_base_id
             claim = await claim_job(session, row.id)
         if claim is None:
             raise RuntimeError("Diagnostic job was already claimed")
         plan = thaw_plan(row.compiler_spec["plan"])
-        compiler = GatewayWikiCompiler(gateway, plan, output_mode="PROMPT_JSON")
+        review_plan = thaw_plan(row.compiler_spec.get("review_plan", row.compiler_spec["plan"]))
+        result["review_config"] = {
+            "model": review_plan.primary.model,
+            "max_tokens": review_plan.primary.max_tokens,
+        }
+        result["job_id"] = str(row.id)
+        compiler = GatewayWikiCompiler(
+            gateway, plan, output_mode="PROMPT_JSON", review_plan=review_plan
+        )
         result["execution"] = await execute_job(
             factory, context, row.id, claim.lease_token, compiler
         )
@@ -103,6 +136,26 @@ async def run(args, result):
             )
             else "failed"
         )
+    except Exception as error:
+        if claim is not None:
+            async with factory() as session:
+                await session.execute(
+                    update(WikiCompilation)
+                    .where(
+                        WikiCompilation.id == claim.id,
+                        WikiCompilation.status == "PROCESSING",
+                        WikiCompilation.lease_token == claim.lease_token,
+                    )
+                    .values(
+                        status="FAILED",
+                        error_code=str(getattr(error, "code", "DIAGNOSTIC_FAILED")),
+                        lease_token=None,
+                        lease_expires_at=None,
+                        telemetry={"usage_status": "UNKNOWN", "cost_status": "UNKNOWN"},
+                    )
+                )
+                await session.commit()
+        raise
     finally:
         await engine.dispose()
 
@@ -111,6 +164,7 @@ def main():
     parser = argparse.ArgumentParser()
     for arg in ("env-file", "original", "output", "database-url"):
         parser.add_argument("--" + arg, required=True)
+    parser.add_argument("--review-max-tokens", type=int)
     args = parser.parse_args()
     result = {
         "scope": "DEV_TARGETED_DIAGNOSTIC_NOT_PAIRED_BENCHMARK",

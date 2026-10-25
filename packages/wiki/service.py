@@ -183,6 +183,8 @@ def extraction_spec_hash(spec):
                 "review_manifest",
                 "review_manifest_hash",
                 "workflow_version",
+                "review_plan",
+                "review_provider_routes",
             }
         }
     )
@@ -285,6 +287,7 @@ class WikiService:
         model_profile_id,
         selector="LATEST",
         output_mode="PROMPT_JSON",
+        review_model_profile_id=None,
     ):
         require(context, "knowledge_edit")
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
@@ -341,6 +344,22 @@ class WikiService:
         spec["workflow_version"] = "wiki-workflow-v2"
         spec["review_manifest"] = review_manifest()
         spec["review_manifest_hash"] = canonical_json_hash(spec["review_manifest"])
+        review_plan = (
+            await resolve_model_plan(session, context, review_model_profile_id)
+            if review_model_profile_id is not None
+            else plan
+        )
+        spec["review_plan"] = freeze_plan(review_plan)
+        review_routes = {}
+        for profile in review_plan.chain:
+            credential = await session.scalar(
+                select(ProviderCredential).where(
+                    ProviderCredential.workspace_id == UUID(context.workspace_id),
+                    ProviderCredential.id == profile.provider_credential_id,
+                )
+            )
+            review_routes[str(profile.provider_credential_id)] = credential.base_url
+        spec["review_provider_routes"] = review_routes
         identity = canonical_json_hash(
             {
                 "schema_version": 1,

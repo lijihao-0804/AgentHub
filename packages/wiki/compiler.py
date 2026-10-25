@@ -145,12 +145,14 @@ class GatewayWikiCompiler:
         gateway: ModelGateway,
         plan: ResolvedModelExecutionPlan,
         output_mode: str = "JSON_SCHEMA",
+        review_plan: ResolvedModelExecutionPlan | None = None,
     ) -> None:
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             raise ValueError("unsupported Wiki output mode")
         self.gateway = gateway
         self.plan = plan
         self.output_mode = output_mode
+        self.review_plan = review_plan or plan
 
     async def extract(
         self,
@@ -216,7 +218,7 @@ class GatewayWikiCompiler:
     async def review(self, context, claims):
         from packages.wiki.conflict_review import review_conflicts
 
-        return await review_conflicts(self.gateway, self.plan, context, claims)
+        return await review_conflicts(self.gateway, self.review_plan, context, claims)
 
 
 def _admit_context(

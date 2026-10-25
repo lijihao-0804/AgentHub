@@ -24,6 +24,8 @@ API 不创建 schema。编译资料来自已入库 READY 的原始 DocumentRevis
    返回 202 与 durable job ID。相同来源和编译规格返回同一个 ID。可以改用显式 source snapshot UUID。
    JSON_SCHEMA 模式要求模型声明原生 structured_output；PROMPT_JSON 使用普通文本生成，但本地严格 schema 与来源检查相同。
    模型必须配置已知 context 上限。提示/输出schema/模型计划/endpoint身份均固定，升级不静默改变旧任务。
+   可选 `review_model_profile_id` 指定独立的跨来源复核配置；默认复用提取配置。
+   两套模型计划和路由分别冻结，复核 profile 的预算变化不重提取未变来源；系统不暗中提高用户的 max_tokens。
 
 2. `GET B/compilations/{id}` 查看 PENDING/PROCESSING/READY/FAILED/PUBLISHED、错误码与用量。
    编译不是自动发布。broker 短暂不可用仍保留 PENDING，beat 恢复投递；失败可 `POST .../{id}/retry`。

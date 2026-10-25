@@ -49,6 +49,9 @@ async def run_wiki_job(job_id):
             )
             context = access.context
             plan = thaw_plan(claim.compiler_spec["plan"])
+            review_plan = thaw_plan(
+                claim.compiler_spec.get("review_plan", claim.compiler_spec["plan"])
+            )
             if claim.compiler_spec.get("manifest_hash") != compiler_manifest_hash():
                 fail("WIKI_COMPILER_VERSION_UNAVAILABLE", "The frozen compiler is unavailable.")
             if claim.compiler_spec.get("review_manifest"):
@@ -93,10 +96,16 @@ async def run_wiki_job(job_id):
                                 ProviderCredential.id == profile.provider_credential_id,
                             )
                         )
-                        expected = claim.compiler_spec["provider_routes"].get(
-                            str(profile.provider_credential_id)
-                        )
-                        if credential is None or credential.base_url != expected:
+                        routes = {
+                            **claim.compiler_spec["provider_routes"],
+                            **claim.compiler_spec.get("review_provider_routes", {}),
+                        }
+                        key = str(profile.provider_credential_id)
+                        if (
+                            credential is None
+                            or key not in routes
+                            or credential.base_url != routes[key]
+                        ):
                             fail("WIKI_MODEL_ROUTE_CHANGED", "The frozen model route changed.")
                     if not await renew_job(session, claim.id, token):
                         fail("WIKI_LEASE_LOST", "The compilation lease is no longer owned.")
@@ -108,7 +117,10 @@ async def run_wiki_job(job_id):
                 return await prepared.generate_resolved(context, plan, request)
 
         compiler = GatewayWikiCompiler(
-            ScopedGateway(), plan, output_mode=claim.compiler_spec["output_mode"]
+            ScopedGateway(),
+            plan,
+            output_mode=claim.compiler_spec["output_mode"],
+            review_plan=review_plan,
         )
         return await execute_job(factory, context, claim.id, token, compiler)
     except Exception as error:
