@@ -16,6 +16,7 @@ from packages.agent_runtime.models import (
     AgentKnowledgeBinding,
     AgentTool,
     AgentVersion,
+    AgentWikiBinding,
     Tool,
     ToolRevision,
 )
@@ -46,8 +47,11 @@ from packages.model_gateway.profile_resolution import (
 )
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
 from packages.tools.validation import validate_executable_tool_spec
+from packages.wiki.models import WikiCompilation
+from packages.wiki.service import WikiService
 
 SPEC_SCHEMA_VERSION = 2
+_WIKI_LATEST_SCAN_LIMIT = 10
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
     "reranker_model": "BAAI/bge-reranker-v2-m3",
@@ -343,11 +347,13 @@ class AgentPublishService:
         )
         bindings = await self._resolve_knowledge(session, context, agent)
         tools = await self._resolve_tools(session, context, agent)
+        wiki_binding = await self._resolve_wiki_binding(session, context, agent)
         resolved_spec = _resolved_spec(
             agent=agent,
             model=resolved_model,
             bindings=bindings,
             tools=tools,
+            wiki_binding=wiki_binding,
         )
         return resolved_spec, canonical_json_hash(resolved_spec)
 
@@ -475,6 +481,104 @@ class AgentPublishService:
             .order_by(AgentKnowledgeBinding.knowledge_base_id)
         )
         return list(result)
+
+    async def _resolve_wiki_binding(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        agent: Agent,
+    ) -> dict[str, Any] | None:
+        """Resolve the draft Wiki binding once, at publish time.
+
+        ``LATEST`` is resolved here and its result frozen into the spec: a
+        published version is read forever after, so the binding it names must
+        not move underneath historical runs or experiments. A publication
+        whose sources include a revoked revision cannot be bound at all.
+        """
+
+        binding = await session.scalar(
+            select(AgentWikiBinding).where(
+                AgentWikiBinding.workspace_id == agent.workspace_id,
+                AgentWikiBinding.agent_id == agent.id,
+            )
+        )
+        if binding is None:
+            return None
+        wiki_context = context.model_copy(
+            update={"permissions": context.permissions | frozenset({"knowledge_run"})}
+        )
+        if binding.binding_mode == "LATEST":
+            compilation = await self._latest_publishable_wiki(
+                session, wiki_context, agent.workspace_id, binding.knowledge_base_id
+            )
+            if compilation is None:
+                raise AgentHubError(
+                    "WIKI_BINDING_UNRESOLVED",
+                    "No publishable Wiki publication exists for the bound knowledge base.",
+                    422,
+                )
+        else:
+            if binding.wiki_publication_id is None or binding.publication_hash is None:
+                raise AgentHubError("INVALID_WIKI_BINDING", "The Wiki binding is invalid.", 422)
+            compilation = await session.scalar(
+                select(WikiCompilation).where(
+                    WikiCompilation.workspace_id == agent.workspace_id,
+                    WikiCompilation.knowledge_base_id == binding.knowledge_base_id,
+                    WikiCompilation.id == binding.wiki_publication_id,
+                )
+            )
+            if (
+                compilation is None
+                or compilation.status != "PUBLISHED"
+                or compilation.content_hash != binding.publication_hash
+            ):
+                raise AgentHubError(
+                    "WIKI_BINDING_INVALID",
+                    "The bound Wiki publication does not match its frozen hash.",
+                    422,
+                )
+        await WikiService().sources(session, wiki_context, compilation, require_current=False)
+        return {
+            "schema_version": 1,
+            "binding_mode": binding.binding_mode,
+            "knowledge_base_id": str(binding.knowledge_base_id),
+            "wiki_publication_id": str(compilation.id),
+            "publication_hash": str(compilation.content_hash),
+        }
+
+    @staticmethod
+    async def _latest_publishable_wiki(
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        workspace_id: UUID,
+        knowledge_base_id: UUID,
+    ) -> WikiCompilation | None:
+        """The newest published compilation whose sources are not revoked.
+
+        Revoked publications are skipped rather than fatal: a LATEST binding
+        names "the current Wiki", and a tombstoned one is no longer it.
+        """
+
+        candidates = await session.scalars(
+            select(WikiCompilation)
+            .where(
+                WikiCompilation.workspace_id == workspace_id,
+                WikiCompilation.knowledge_base_id == knowledge_base_id,
+                WikiCompilation.status == "PUBLISHED",
+            )
+            .order_by(WikiCompilation.published_at.desc(), WikiCompilation.id)
+            .limit(_WIKI_LATEST_SCAN_LIMIT)
+        )
+        service = WikiService()
+        for compilation in candidates:
+            try:
+                await service.sources(session, context, compilation, require_current=False)
+            except AgentHubError as error:
+                if error.code == "WIKI_SOURCE_REVOKED":
+                    continue
+                raise
+            return compilation
+        return None
 
     async def _resolve_tools(
         self,
@@ -621,6 +725,7 @@ def _resolved_spec(
     bindings: tuple[dict[str, Any], ...] | None = None,
     snapshots: tuple[ResolvedKnowledgeSnapshot, ...] | None = None,
     tools: tuple[dict[str, Any], ...],
+    wiki_binding: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     chain, providers = model
     primary = chain[0]
@@ -669,7 +774,7 @@ def _resolved_spec(
             "knowledge_bindings": list(bindings),
         }
     )
-    return {
+    spec: dict[str, Any] = {
         "spec_schema_version": SPEC_SCHEMA_VERSION,
         "model": primary_projection,
         "prompt": {
@@ -680,6 +785,11 @@ def _resolved_spec(
         "tools": list(tools),
         "runtime": _resolved_runtime_config(agent.runtime_config, model),
     }
+    # Absent means "never bound": every version published before Wiki binding
+    # existed, and every agent without one, keeps its exact previous bytes.
+    if wiki_binding is not None:
+        spec["wiki_binding"] = wiki_binding
+    return spec
 
 
 def _profile_projection(profile: ResolvedModelProfile, provider: str) -> dict[str, Any]:
@@ -825,7 +935,6 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
     else:
         result.pop("memory", None)
     return result
-
 
 
 def _resolved_runtime_config(

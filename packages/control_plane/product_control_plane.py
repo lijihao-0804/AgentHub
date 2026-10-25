@@ -21,6 +21,7 @@ from packages.agent_runtime.models import (
     Agent,
     AgentKnowledgeBinding,
     AgentTool,
+    AgentWikiBinding,
     Tool,
     ToolRevision,
 )
@@ -41,6 +42,7 @@ from packages.model_gateway.contracts import ModelGateway
 from packages.model_gateway.credentials import CredentialEncryptionError
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.tools.validation import validate_executable_tool_spec
+from packages.wiki.models import WikiCompilation
 
 _SUPPORTED_LITELLM_PROVIDERS = frozenset({"deepseek", "openai-compatible", "openai"})
 
@@ -778,6 +780,97 @@ class ProductControlPlaneService:
                 if snapshot is None:
                     _not_found("SNAPSHOT_NOT_FOUND", "The knowledge snapshot was not found.")
 
+    async def get_wiki_binding(
+        self, session: AsyncSession, context: WorkspaceExecutionContext, agent_id: UUID
+    ) -> AgentWikiBinding | None:
+        workspace_id = _require(context, "workspace_read")
+        await self._agent(session, workspace_id, agent_id)
+        return await session.scalar(
+            select(AgentWikiBinding).where(
+                AgentWikiBinding.workspace_id == workspace_id,
+                AgentWikiBinding.agent_id == agent_id,
+            )
+        )
+
+    async def replace_wiki_binding(
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        agent_id: UUID,
+        binding: dict[str, Any] | None,
+    ) -> AgentWikiBinding | None:
+        """Replace (or clear) the draft Wiki binding; publish re-validates it.
+
+        A ``PINNED`` binding freezes the publication's content hash as the
+        operator saw it, so publish can detect a publication that no longer
+        matches what was bound.
+        """
+
+        workspace_id = _require(context, "agent_edit")
+        await self._agent(session, workspace_id, agent_id, for_update=True)
+        row = await self._validate_wiki_binding(session, workspace_id, binding)
+        await session.execute(
+            delete(AgentWikiBinding).where(
+                AgentWikiBinding.workspace_id == workspace_id,
+                AgentWikiBinding.agent_id == agent_id,
+            )
+        )
+        if binding is not None:
+            session.add(
+                AgentWikiBinding(
+                    workspace_id=workspace_id,
+                    agent_id=agent_id,
+                    knowledge_base_id=binding["knowledge_base_id"],
+                    binding_mode=binding["binding_mode"],
+                    wiki_publication_id=binding["wiki_publication_id"],
+                    publication_hash=row.content_hash if row is not None else None,
+                )
+            )
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise AgentHubError(
+                "AGENT_WIKI_BINDING_UPDATE_FAILED",
+                "The Wiki binding could not be updated.",
+                409,
+            ) from exc
+        return await self.get_wiki_binding(session, context, agent_id)
+
+    async def _validate_wiki_binding(
+        self, session: AsyncSession, workspace_id: UUID, binding: dict[str, Any] | None
+    ):
+        if binding is None:
+            return None
+        mode = binding["binding_mode"]
+        publication_id = binding["wiki_publication_id"]
+        if (mode == "LATEST" and publication_id is not None) or (
+            mode == "PINNED" and publication_id is None
+        ):
+            raise AgentHubError("INVALID_WIKI_BINDING", "The Wiki binding is invalid.", 422)
+        knowledge_base = await session.scalar(
+            select(KnowledgeBase.id).where(
+                KnowledgeBase.id == binding["knowledge_base_id"],
+                KnowledgeBase.workspace_id == workspace_id,
+            )
+        )
+        if knowledge_base is None:
+            _not_found("KNOWLEDGE_BASE_NOT_FOUND", "The knowledge base was not found.")
+        if publication_id is None:
+            return None
+        compilation = await session.scalar(
+            select(WikiCompilation).where(
+                WikiCompilation.workspace_id == workspace_id,
+                WikiCompilation.knowledge_base_id == binding["knowledge_base_id"],
+                WikiCompilation.id == publication_id,
+            )
+        )
+        if compilation is None:
+            _not_found("WIKI_NOT_FOUND", "The Wiki compilation was not found.")
+        if compilation.status != "PUBLISHED":
+            raise AgentHubError("WIKI_NOT_PUBLISHED", "The Wiki compilation is not published.", 409)
+        return compilation
+
     async def get_tool_bindings(
         self, session: AsyncSession, context: WorkspaceExecutionContext, agent_id: UUID
     ) -> list[AgentTool]:
@@ -837,9 +930,7 @@ class ProductControlPlaneService:
             raise AgentHubError("DUPLICATE_TOOL_BINDING", "Tool bindings must be unique.", 422)
         for item in bindings:
             tool = await session.scalar(
-                select(Tool).where(
-                    Tool.id == item["tool_id"], Tool.workspace_id == workspace_id
-                )
+                select(Tool).where(Tool.id == item["tool_id"], Tool.workspace_id == workspace_id)
             )
             if tool is None:
                 _not_found("TOOL_NOT_FOUND", "The tool was not found.")
@@ -899,8 +990,7 @@ class ProductControlPlaneService:
         for revision in revisions:
             latest.setdefault(revision.document_id, revision)
         return [
-            self._document_projection(document, latest.get(document.id))
-            for document in documents
+            self._document_projection(document, latest.get(document.id)) for document in documents
         ]
 
     async def list_snapshots(
@@ -918,26 +1008,30 @@ class ProductControlPlaneService:
                 .order_by(KnowledgeSnapshot.created_at, KnowledgeSnapshot.id)
             )
         )
-        counts = dict(
-            (
-                snapshot_id,
-                count,
-            )
-            for snapshot_id, count in (
-                await session.execute(
-                    select(
-                        KnowledgeSnapshotItem.snapshot_id,
-                        func.count(KnowledgeSnapshotItem.document_revision_id),
+        counts = (
+            dict(
+                (
+                    snapshot_id,
+                    count,
+                )
+                for snapshot_id, count in (
+                    await session.execute(
+                        select(
+                            KnowledgeSnapshotItem.snapshot_id,
+                            func.count(KnowledgeSnapshotItem.document_revision_id),
+                        )
+                        .where(
+                            KnowledgeSnapshotItem.workspace_id == workspace_id,
+                            KnowledgeSnapshotItem.knowledge_base_id == knowledge_base_id,
+                            KnowledgeSnapshotItem.snapshot_id.in_([item.id for item in snapshots]),
+                        )
+                        .group_by(KnowledgeSnapshotItem.snapshot_id)
                     )
-                    .where(
-                        KnowledgeSnapshotItem.workspace_id == workspace_id,
-                        KnowledgeSnapshotItem.knowledge_base_id == knowledge_base_id,
-                        KnowledgeSnapshotItem.snapshot_id.in_([item.id for item in snapshots]),
-                    )
-                    .group_by(KnowledgeSnapshotItem.snapshot_id)
                 )
             )
-        ) if snapshots else {}
+            if snapshots
+            else {}
+        )
         return [
             self._snapshot_projection(snapshot, int(counts.get(snapshot.id, 0)))
             for snapshot in snapshots
@@ -974,10 +1068,7 @@ class ProductControlPlaneService:
                     Document,
                     (Document.id == KnowledgeSnapshotItem.document_id)
                     & (Document.workspace_id == KnowledgeSnapshotItem.workspace_id)
-                    & (
-                        Document.knowledge_base_id
-                        == KnowledgeSnapshotItem.knowledge_base_id
-                    ),
+                    & (Document.knowledge_base_id == KnowledgeSnapshotItem.knowledge_base_id),
                 )
                 .join(
                     DocumentRevision,

@@ -38,12 +38,28 @@ class FrozenKnowledgeBinding:
 
 
 @dataclass(frozen=True, slots=True)
+class FrozenWikiBinding:
+    """The Wiki publication a version was published against.
+
+    ``binding_mode`` records the original intent (PINNED or LATEST); the
+    publication id and hash are the publish-time resolution itself, frozen
+    once and never re-resolved when the version is read again.
+    """
+
+    knowledge_base_id: UUID
+    binding_mode: str
+    wiki_publication_id: UUID
+    publication_hash: str
+
+
+@dataclass(frozen=True, slots=True)
 class FrozenAgentSpec:
     model_plan: ResolvedModelExecutionPlan
     system_prompt: str
     prompt_version: int
     runtime: dict[str, Any]
     knowledge_bindings: tuple[FrozenKnowledgeBinding, ...] = ()
+    wiki_binding: FrozenWikiBinding | None = None
 
 
 def parse_frozen_agent_spec(
@@ -88,6 +104,7 @@ def parse_frozen_agent_spec(
     if not isinstance(retrieval, Mapping):
         raise _invalid_binding()
     knowledge_bindings = _parse_knowledge_bindings(retrieval, schema_version)
+    wiki_binding = _parse_wiki_binding(resolved_spec)
     runtime_value = resolved_spec.get("runtime", {})
     if not isinstance(runtime_value, Mapping):
         raise _invalid_binding()
@@ -164,6 +181,7 @@ def parse_frozen_agent_spec(
         prompt_version=prompt_version,
         runtime=runtime,
         knowledge_bindings=knowledge_bindings,
+        wiki_binding=wiki_binding,
     )
 
 
@@ -209,8 +227,10 @@ def _parse_knowledge_bindings(
                 raise _invalid_binding()
             bindings.append(FrozenKnowledgeBinding(knowledge_base_id, binding_mode))
             continue
-        if binding_mode != "PINNED" or not value.get("snapshot_id") or not value.get(
-            "snapshot_hash"
+        if (
+            binding_mode != "PINNED"
+            or not value.get("snapshot_id")
+            or not value.get("snapshot_hash")
         ):
             raise _invalid_binding()
         try:
@@ -226,6 +246,31 @@ def _parse_knowledge_bindings(
             )
         )
     return tuple(bindings)
+
+
+def _parse_wiki_binding(resolved_spec: Mapping[str, Any]) -> FrozenWikiBinding | None:
+    value = resolved_spec.get("wiki_binding")
+    if value is None:
+        return None
+    if not isinstance(value, Mapping) or value.get("schema_version") != 1:
+        raise _invalid_binding()
+    binding_mode = value.get("binding_mode")
+    # A published spec always freezes the resolved publication, whatever the
+    # original intent was: an unresolved LATEST section would be a binding the
+    # runtime cannot honour, so it is rejected rather than silently skipped.
+    if binding_mode not in {"PINNED", "LATEST"} or not value.get("publication_hash"):
+        raise _invalid_binding()
+    try:
+        knowledge_base_id = UUID(str(value["knowledge_base_id"]))
+        wiki_publication_id = UUID(str(value["wiki_publication_id"]))
+    except (KeyError, TypeError, ValueError):
+        raise _invalid_binding() from None
+    return FrozenWikiBinding(
+        knowledge_base_id=knowledge_base_id,
+        binding_mode=str(binding_mode),
+        wiki_publication_id=wiki_publication_id,
+        publication_hash=str(value["publication_hash"]),
+    )
 
 
 def _parse_profile(
@@ -292,6 +337,7 @@ def _invalid_binding() -> AgentHubError:
 __all__ = [
     "FrozenAgentSpec",
     "FrozenKnowledgeBinding",
+    "FrozenWikiBinding",
     "SUPPORTED_SPEC_SCHEMA_VERSIONS",
     "parse_frozen_agent_spec",
 ]

@@ -162,6 +162,57 @@ class AgentKnowledgeBinding(Base):
     snapshot_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
 
 
+class AgentWikiBinding(Base):
+    """Draft-level Wiki binding; publication freezes its resolved snapshot into the spec.
+
+    One binding per agent. ``PINNED`` fixes one published compilation together
+    with the content hash the operator saw; ``LATEST`` carries no publication
+    and is resolved exactly once at publish time.
+    """
+
+    __tablename__ = "agent_wiki_bindings"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_id"],
+            ["agents.workspace_id", "agents.id"],
+            name="fk_agent_wiki_bindings_agent_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "knowledge_base_id"],
+            ["knowledge_bases.workspace_id", "knowledge_bases.id"],
+            name="fk_agent_wiki_bindings_kb_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "knowledge_base_id", "wiki_publication_id"],
+            [
+                "wiki_compilations.workspace_id",
+                "wiki_compilations.knowledge_base_id",
+                "wiki_compilations.id",
+            ],
+            name="fk_agent_wiki_bindings_publication_workspace",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("binding_mode IN ('PINNED', 'LATEST')", name="ck_agent_wiki_bindings_mode"),
+        CheckConstraint(
+            "(binding_mode = 'PINNED' AND wiki_publication_id IS NOT NULL "
+            "AND publication_hash IS NOT NULL) OR "
+            "(binding_mode = 'LATEST' AND wiki_publication_id IS NULL "
+            "AND publication_hash IS NULL)",
+            name="ck_agent_wiki_bindings_selector",
+        ),
+        Index("ix_agent_wiki_bindings_agent", "workspace_id", "agent_id"),
+    )
+
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    agent_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    knowledge_base_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    binding_mode: Mapped[str] = mapped_column(String(16), nullable=False)
+    wiki_publication_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    publication_hash: Mapped[str | None] = mapped_column(String(64))
+
+
 class Tool(Base):
     __tablename__ = "tools"
     __table_args__ = (
@@ -316,6 +367,13 @@ class AgentRun(Base):
     failure_code: Mapped[str | None] = mapped_column(String(96))
     resolved_spec_hash: Mapped[str | None] = mapped_column(String(64))
     effective_knowledge_snapshots: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
+    # The Wiki publications this run reads, frozen at creation from the
+    # version's wiki_binding. Shaped like the version's binding (publication
+    # id + hash + knowledge base); an absent publication can never be
+    # silently substituted at run time.
+    effective_wiki_publications: Mapped[list[dict[str, Any]]] = mapped_column(
         JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
     )
     # The long-term memories this run was given, frozen at its first PREPARE:

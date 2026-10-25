@@ -381,6 +381,12 @@ class EvaluationExperimentVariant(Base):
     effective_knowledge_snapshots: Mapped[list[dict[str, Any]]] = mapped_column(
         JSONB, nullable=False, default=list, server_default=sql_text("'[]'::jsonb")
     )
+    # The Wiki publications frozen with this variant, resolved from the
+    # version's already-frozen wiki_binding at experiment creation and never
+    # re-resolved when historical experiment data is read.
+    effective_wiki_publications: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=sql_text("'[]'::jsonb")
+    )
     variant_metadata: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=sql_text("'{}'::jsonb")
     )

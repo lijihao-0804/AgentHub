@@ -75,6 +75,32 @@ class RuntimeConfigRequest(BaseModel):
     memory: MemoryConfigRequest | None = None
 
 
+class WikiBindingRequest(BaseModel):
+    """Draft-level Wiki binding.
+
+    ``null`` (a cleared binding) publishes byte-identically to a version
+    published before Wiki binding existed. ``PINNED`` names one published
+    compilation; ``LATEST`` resolves once at publish time.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    knowledge_base_id: UUID
+    binding_mode: Literal["PINNED", "LATEST"]
+    wiki_publication_id: UUID | None = None
+
+
+class WikiBindingResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    workspace_id: UUID
+    agent_id: UUID
+    knowledge_base_id: UUID
+    binding_mode: Literal["PINNED", "LATEST"]
+    wiki_publication_id: UUID | None
+    publication_hash: str | None
+
+
 class AgentCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

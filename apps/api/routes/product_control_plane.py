@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_model_gateway, get_workspace_context
+from apps.api.schemas.agents import WikiBindingRequest, WikiBindingResponse
 from apps.api.schemas.product_control_plane import (
     AgentKnowledgeBindingRequest,
     AgentKnowledgeBindingResponse,
@@ -243,8 +244,7 @@ async def list_tools(
 ) -> list[ToolResponse]:
     del workspace_id
     return [
-        ToolResponse.model_validate(item)
-        for item in await service.list_tools(session, context)
+        ToolResponse.model_validate(item) for item in await service.list_tools(session, context)
     ]
 
 
@@ -374,6 +374,46 @@ async def replace_agent_knowledge_bindings(
 
 
 @router.get(
+    "/api/v1/workspaces/{workspace_id}/agents/{agent_id}/wiki-binding",
+    response_model=WikiBindingResponse | None,
+)
+async def get_agent_wiki_binding(
+    workspace_id: UUID,
+    agent_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> WikiBindingResponse | None:
+    del workspace_id
+    binding = await service.get_wiki_binding(session, context, agent_id)
+    if binding is None:
+        return None
+    return WikiBindingResponse.model_validate(binding, from_attributes=True)
+
+
+@router.put(
+    "/api/v1/workspaces/{workspace_id}/agents/{agent_id}/wiki-binding",
+    response_model=WikiBindingResponse | None,
+)
+async def replace_agent_wiki_binding(
+    workspace_id: UUID,
+    agent_id: UUID,
+    payload: WikiBindingRequest | None,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> WikiBindingResponse | None:
+    del workspace_id
+    binding = await service.replace_wiki_binding(
+        session,
+        context,
+        agent_id,
+        payload.model_dump() if payload is not None else None,
+    )
+    if binding is None:
+        return None
+    return WikiBindingResponse.model_validate(binding, from_attributes=True)
+
+
+@router.get(
     "/api/v1/workspaces/{workspace_id}/agents/{agent_id}/tool-bindings",
     response_model=list[AgentToolBindingResponse],
 )
@@ -406,8 +446,7 @@ async def replace_agent_tool_bindings(
         session, context, agent_id, [item.model_dump() for item in payload]
     )
     return [
-        AgentToolBindingResponse.model_validate(item, from_attributes=True)
-        for item in bindings
+        AgentToolBindingResponse.model_validate(item, from_attributes=True) for item in bindings
     ]
 
 
