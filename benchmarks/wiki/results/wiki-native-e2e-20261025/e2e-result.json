@@ -1,0 +1,2916 @@
+{
+  "schema_version": 1,
+  "scope": "DEV E2E",
+  "pricing": "UNKNOWN",
+  "build_sha": "318f604283ea6e6f87c0fc8b4fe40fa736fafd84",
+  "calls": [
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 529,
+        "output_tokens": 452,
+        "total_tokens": 981,
+        "cached_tokens": 0
+      },
+      "latency_ms": 8854.036799999449
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 699,
+        "output_tokens": 2072,
+        "total_tokens": 2771,
+        "cached_tokens": 0
+      },
+      "latency_ms": 13371.62470000112
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 668,
+        "output_tokens": 2554,
+        "total_tokens": 3222,
+        "cached_tokens": 0
+      },
+      "latency_ms": 16147.830599998997
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 710,
+        "output_tokens": 2601,
+        "total_tokens": 3311,
+        "cached_tokens": 0
+      },
+      "latency_ms": 17358.70210000212
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 529,
+        "output_tokens": 500,
+        "total_tokens": 1029,
+        "cached_tokens": 0
+      },
+      "latency_ms": 4163.102999998955
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 809,
+        "output_tokens": 1543,
+        "total_tokens": 2352,
+        "cached_tokens": 0
+      },
+      "latency_ms": 9198.540400000638
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 770,
+        "output_tokens": 2874,
+        "total_tokens": 3644,
+        "cached_tokens": 0
+      },
+      "latency_ms": 17913.458099999843
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 932,
+        "output_tokens": 4991,
+        "total_tokens": 5923,
+        "cached_tokens": 0
+      },
+      "latency_ms": 31310.937999998714
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 443,
+        "output_tokens": 63,
+        "total_tokens": 506,
+        "cached_tokens": 0
+      },
+      "latency_ms": 826.7732999993314
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1949,
+        "output_tokens": 97,
+        "total_tokens": 2046,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1139.8050999996485
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 443,
+        "output_tokens": 64,
+        "total_tokens": 507,
+        "cached_tokens": 0
+      },
+      "latency_ms": 920.179000000644
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1914,
+        "output_tokens": 47,
+        "total_tokens": 1961,
+        "cached_tokens": 0
+      },
+      "latency_ms": 718.9041999990877
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 444,
+        "output_tokens": 115,
+        "total_tokens": 559,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1221.5553999994881
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 588,
+        "output_tokens": 105,
+        "total_tokens": 693,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1116.659899998922
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 720,
+        "output_tokens": 92,
+        "total_tokens": 812,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1063.782799999899
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1888,
+        "output_tokens": 140,
+        "total_tokens": 2028,
+        "cached_tokens": 512
+      },
+      "latency_ms": 1513.1800999988627
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 448,
+        "output_tokens": 140,
+        "total_tokens": 588,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1282.4855999970168
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2788,
+        "output_tokens": 132,
+        "total_tokens": 2920,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1422.0451000001049
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 452,
+        "output_tokens": 111,
+        "total_tokens": 563,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1125.2265000002808
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 610,
+        "output_tokens": 95,
+        "total_tokens": 705,
+        "cached_tokens": 0
+      },
+      "latency_ms": 991.5932000003522
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2264,
+        "output_tokens": 268,
+        "total_tokens": 2532,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2338.092800000595
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 445,
+        "output_tokens": 63,
+        "total_tokens": 508,
+        "cached_tokens": 0
+      },
+      "latency_ms": 735.2064999977301
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1592,
+        "output_tokens": 124,
+        "total_tokens": 1716,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1118.6660999992455
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 448,
+        "output_tokens": 125,
+        "total_tokens": 573,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1162.8203000000212
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 590,
+        "output_tokens": 88,
+        "total_tokens": 678,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1088.1636000012804
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1827,
+        "output_tokens": 93,
+        "total_tokens": 1920,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1138.555700003053
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 449,
+        "output_tokens": 253,
+        "total_tokens": 702,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2012.0315999993181
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 713,
+        "output_tokens": 154,
+        "total_tokens": 867,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1398.1208999975934
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 451,
+        "output_tokens": 76,
+        "total_tokens": 527,
+        "cached_tokens": 0
+      },
+      "latency_ms": 783.4634000028018
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1733,
+        "output_tokens": 267,
+        "total_tokens": 2000,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2444.0054000006057
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 450,
+        "output_tokens": 80,
+        "total_tokens": 530,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1120.4472000026726
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1894,
+        "output_tokens": 155,
+        "total_tokens": 2049,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1493.2125999985146
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 442,
+        "output_tokens": 64,
+        "total_tokens": 506,
+        "cached_tokens": 0
+      },
+      "latency_ms": 714.9731999998039
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1376,
+        "output_tokens": 98,
+        "total_tokens": 1474,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1113.7894999992568
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 451,
+        "output_tokens": 105,
+        "total_tokens": 556,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1210.276400001021
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 603,
+        "output_tokens": 103,
+        "total_tokens": 706,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1766.6215999997803
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1616,
+        "output_tokens": 257,
+        "total_tokens": 1873,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2308.5594000003766
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 450,
+        "output_tokens": 76,
+        "total_tokens": 526,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1069.965399998182
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1974,
+        "output_tokens": 261,
+        "total_tokens": 2235,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2309.9779000003764
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 445,
+        "output_tokens": 147,
+        "total_tokens": 592,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1366.4318000010098
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2763,
+        "output_tokens": 319,
+        "total_tokens": 3082,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2871.572500000184
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 444,
+        "output_tokens": 106,
+        "total_tokens": 550,
+        "cached_tokens": 0
+      },
+      "latency_ms": 967.833899998368
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 579,
+        "output_tokens": 89,
+        "total_tokens": 668,
+        "cached_tokens": 0
+      },
+      "latency_ms": 956.572099999903
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2060,
+        "output_tokens": 123,
+        "total_tokens": 2183,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1425.4015000005893
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 442,
+        "output_tokens": 86,
+        "total_tokens": 528,
+        "cached_tokens": 0
+      },
+      "latency_ms": 945.8194000035292
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 575,
+        "output_tokens": 87,
+        "total_tokens": 662,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1084.3591000011656
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1869,
+        "output_tokens": 114,
+        "total_tokens": 1983,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1380.9564000002865
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 444,
+        "output_tokens": 102,
+        "total_tokens": 546,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1121.2148000013258
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 593,
+        "output_tokens": 133,
+        "total_tokens": 726,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1449.778599999263
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2176,
+        "output_tokens": 246,
+        "total_tokens": 2422,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2241.578199998912
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 446,
+        "output_tokens": 99,
+        "total_tokens": 545,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1174.8340000012831
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 592,
+        "output_tokens": 75,
+        "total_tokens": 667,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1324.653200001194
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2285,
+        "output_tokens": 213,
+        "total_tokens": 2498,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1730.4158999977517
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 444,
+        "output_tokens": 99,
+        "total_tokens": 543,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1090.1644000005035
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 590,
+        "output_tokens": 104,
+        "total_tokens": 694,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1245.8869000001869
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1564,
+        "output_tokens": 111,
+        "total_tokens": 1675,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1135.9110999983386
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 445,
+        "output_tokens": 81,
+        "total_tokens": 526,
+        "cached_tokens": 0
+      },
+      "latency_ms": 825.9787000024517
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 573,
+        "output_tokens": 82,
+        "total_tokens": 655,
+        "cached_tokens": 0
+      },
+      "latency_ms": 990.0727000022016
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2059,
+        "output_tokens": 157,
+        "total_tokens": 2216,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1665.70209999918
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 460,
+        "output_tokens": 141,
+        "total_tokens": 601,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1421.98339999959
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 611,
+        "output_tokens": 75,
+        "total_tokens": 686,
+        "cached_tokens": 0
+      },
+      "latency_ms": 905.608500001108
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2220,
+        "output_tokens": 143,
+        "total_tokens": 2363,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1264.03080000091
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 463,
+        "output_tokens": 125,
+        "total_tokens": 588,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1561.1181999993278
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 3041,
+        "output_tokens": 351,
+        "total_tokens": 3392,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2752.5300000015704
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 464,
+        "output_tokens": 176,
+        "total_tokens": 640,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1624.5863999974972
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 725,
+        "output_tokens": 149,
+        "total_tokens": 874,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1457.1552999987034
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 465,
+        "output_tokens": 137,
+        "total_tokens": 602,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1273.21049999955
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 616,
+        "output_tokens": 78,
+        "total_tokens": 694,
+        "cached_tokens": 0
+      },
+      "latency_ms": 830.0108000003092
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2237,
+        "output_tokens": 225,
+        "total_tokens": 2462,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2008.8565000005474
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 460,
+        "output_tokens": 124,
+        "total_tokens": 584,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1353.9045999968948
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 614,
+        "output_tokens": 87,
+        "total_tokens": 701,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1020.9744999992836
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2009,
+        "output_tokens": 98,
+        "total_tokens": 2107,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1220.842700000503
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 458,
+        "output_tokens": 203,
+        "total_tokens": 661,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1627.2392999999283
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 719,
+        "output_tokens": 129,
+        "total_tokens": 848,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1105.7629999995697
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 460,
+        "output_tokens": 172,
+        "total_tokens": 632,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1325.759299998026
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 723,
+        "output_tokens": 156,
+        "total_tokens": 879,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1402.7027000011003
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 456,
+        "output_tokens": 126,
+        "total_tokens": 582,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1172.238600000128
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2729,
+        "output_tokens": 149,
+        "total_tokens": 2878,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1375.4288999989512
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 464,
+        "output_tokens": 131,
+        "total_tokens": 595,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1242.3636999992596
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2759,
+        "output_tokens": 504,
+        "total_tokens": 3263,
+        "cached_tokens": 0
+      },
+      "latency_ms": 4167.272599999706
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 455,
+        "output_tokens": 118,
+        "total_tokens": 573,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1025.9829000024183
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2223,
+        "output_tokens": 178,
+        "total_tokens": 2401,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1541.2218999990728
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 456,
+        "output_tokens": 199,
+        "total_tokens": 655,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1552.1432999994431
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 714,
+        "output_tokens": 136,
+        "total_tokens": 850,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1215.8476000004157
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 457,
+        "output_tokens": 126,
+        "total_tokens": 583,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1410.6879999999364
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 594,
+        "output_tokens": 87,
+        "total_tokens": 681,
+        "cached_tokens": 0
+      },
+      "latency_ms": 947.1523000029265
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1559,
+        "output_tokens": 147,
+        "total_tokens": 1706,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2069.786899999599
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 464,
+        "output_tokens": 119,
+        "total_tokens": 583,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1175.6642000000284
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 613,
+        "output_tokens": 88,
+        "total_tokens": 701,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1098.162099999172
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 2104,
+        "output_tokens": 109,
+        "total_tokens": 2213,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1246.4830999997503
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 3340,
+        "output_tokens": 311,
+        "total_tokens": 3651,
+        "cached_tokens": 2048
+      },
+      "latency_ms": 2751.003400000627
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 462,
+        "output_tokens": 125,
+        "total_tokens": 587,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1358.8705000001937
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 612,
+        "output_tokens": 101,
+        "total_tokens": 713,
+        "cached_tokens": 0
+      },
+      "latency_ms": 995.5894999984594
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1745,
+        "output_tokens": 320,
+        "total_tokens": 2065,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2907.2175000001153
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 459,
+        "output_tokens": 178,
+        "total_tokens": 637,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1417.4779000022681
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 728,
+        "output_tokens": 167,
+        "total_tokens": 895,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1361.5753999984008
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 455,
+        "output_tokens": 186,
+        "total_tokens": 641,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1629.1950000013458
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 732,
+        "output_tokens": 147,
+        "total_tokens": 879,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1239.8541000002297
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 460,
+        "output_tokens": 133,
+        "total_tokens": 593,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1289.4469999991998
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 612,
+        "output_tokens": 87,
+        "total_tokens": 699,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1090.2655999998387
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 1940,
+        "output_tokens": 250,
+        "total_tokens": 2190,
+        "cached_tokens": 0
+      },
+      "latency_ms": 2051.137700000254
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 466,
+        "output_tokens": 213,
+        "total_tokens": 679,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1751.5815000006114
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 729,
+        "output_tokens": 142,
+        "total_tokens": 871,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1216.4166000002297
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 460,
+        "output_tokens": 124,
+        "total_tokens": 584,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1079.0378999990935
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 3254,
+        "output_tokens": 194,
+        "total_tokens": 3448,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1770.4340999989654
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 454,
+        "output_tokens": 191,
+        "total_tokens": 645,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1606.0287999971479
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 4203,
+        "output_tokens": 461,
+        "total_tokens": 4664,
+        "cached_tokens": 0
+      },
+      "latency_ms": 3808.528199999273
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 444,
+        "output_tokens": 104,
+        "total_tokens": 548,
+        "cached_tokens": 0
+      },
+      "latency_ms": 978.211999998166
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 579,
+        "output_tokens": 81,
+        "total_tokens": 660,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1231.1881999994512
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 692,
+        "output_tokens": 149,
+        "total_tokens": 841,
+        "cached_tokens": 0
+      },
+      "latency_ms": 1440.5179000023054
+    },
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 783,
+        "output_tokens": 257,
+        "total_tokens": 1040,
+        "cached_tokens": 512
+      },
+      "latency_ms": 2452.6447000025655
+    }
+  ],
+  "protocol": {
+    "declared_at_utc": "2026-10-25T00:00:00Z",
+    "baseline_commit": "318f604"
+  },
+  "questions_hash": "c8d79daf0e662594cb23aeae00e823e14ca55e8b88379f69e90b0ad1c524e8ef",
+  "embedding": {
+    "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "dimension": 384,
+    "local": true,
+    "api_cost": "0"
+  },
+  "compile": {
+    "status": "ready",
+    "latency_ms": 118804.29410000215,
+    "last_error": null
+  },
+  "pages": [
+    {
+      "page_key": "0069a17e7e75dabd45c41292084f7fcd46458595313d10e3d13f1d7cd6c6bb1f",
+      "title": "SQL standard transaction isolation levels",
+      "claims": 1
+    },
+    {
+      "page_key": "02946758f2e3613a3b7ec7695c31abb676d4fccc05cfab3abaf65772011fa21d",
+      "title": "Unique constraint violation",
+      "claims": 1
+    },
+    {
+      "page_key": "0980d0d5d2ed831aee327bef0fe27ef9800c84dce65edd01d6101c6bde839f27",
+      "title": "Unique constraint and null values",
+      "claims": 1
+    },
+    {
+      "page_key": "09a25aecefc5d8dc267d2096f0f21c6c1294914b0a763f0897e17cd6ea95692e",
+      "title": "PostgreSQL",
+      "claims": 4
+    },
+    {
+      "page_key": "0c5629dc54e2eabd0789bbdf03144f9ce0b21f63dd9c04f6c7a1487426bffd95",
+      "title": "check constraint",
+      "claims": 6
+    },
+    {
+      "page_key": "123183813eea2cc7b041d43af0991af55b7b254604bcd5c74d20ef2fa8acfd6d",
+      "title": "Unique indexes",
+      "claims": 1
+    },
+    {
+      "page_key": "129944fee145fcd349d1dcfff0152fc48f2747b73e95f4d7add0daef076f0ae5",
+      "title": "named constraint",
+      "claims": 1
+    },
+    {
+      "page_key": "12f5cb4a5920aa97f4f7150022cda960b4b569f5992a9c1d515adfe437fdd162",
+      "title": "Indexes on unique columns",
+      "claims": 1
+    },
+    {
+      "page_key": "1926da072a856a2189e4b2cffbfa9c91f663dfcdf1ac7029af44ebfde0f4e33a",
+      "title": "PostgreSQL Read Uncommitted mode",
+      "claims": 1
+    },
+    {
+      "page_key": "26bebb5ea78c5d69109e626e55e21ace8ff39f5c825926537cae77d707cbc2e0",
+      "title": "PostgreSQL CHECK constraint",
+      "claims": 3
+    },
+    {
+      "page_key": "2898e8aa290aa5da3f4ce39f205d8632a0e472d1cc3ce36279b1b95e4750a2e1",
+      "title": "Read Committed",
+      "claims": 2
+    },
+    {
+      "page_key": "319f4390a7c1c7028b8a06a2952fe29e98da08fe734ac9c75f9045fda771f19e",
+      "title": "successive SELECT commands",
+      "claims": 1
+    },
+    {
+      "page_key": "451282a6e5354b3009419d461d3ee104ba83d6553febab5402c2e83568ff6683",
+      "title": "Unique constraint null behavior",
+      "claims": 1
+    },
+    {
+      "page_key": "46a5c0064f930a137b176feaa824a0e8e381a5f988448646737d869aa206636f",
+      "title": "Indexes",
+      "claims": 1
+    },
+    {
+      "page_key": "49f290650fd0fbfaf56cd2d7cc920fb6b183545534565641ddc4dbb52bd48e4c",
+      "title": "Read Committed SELECT query",
+      "claims": 1
+    },
+    {
+      "page_key": "4b43b139942eacff930c28a088771a3e1caff3c5b79c387696a0296ac418e2e9",
+      "title": "Serializable",
+      "claims": 3
+    },
+    {
+      "page_key": "4fda421ab0573672619dc2a33e8e2b2423fc296a1f68998e2fbd9058bce98c85",
+      "title": "discounted price constraint",
+      "claims": 1
+    },
+    {
+      "page_key": "5ade7bb3ca1da91338fb7fdcd3dbb36a90a02d0aa9dbb15f2e11ef117d285044",
+      "title": "Unique column",
+      "claims": 1
+    },
+    {
+      "page_key": "5edc726d1963f2d8b18d8f4aeaaf0e084bbe1c31d3405bd23b399bef0138a479",
+      "title": "PostgreSQL Repeatable Read implementation",
+      "claims": 1
+    },
+    {
+      "page_key": "70fe6c234bc659edcb10c531fb848193de7b8af8a14f48c26e3acff49ed4c00c",
+      "title": "SQL",
+      "claims": 1
+    },
+    {
+      "page_key": "724e8fb2f2fa7d2c5a5640722722858887c1e911d5544a6a91270721e39c9e78",
+      "title": "Automatically created unique index",
+      "claims": 2
+    },
+    {
+      "page_key": "757c7804aab3739f271323eaae66668748f5d098f125c9035c27d08afc1cb582",
+      "title": "SELECT query under Read Committed",
+      "claims": 1
+    },
+    {
+      "page_key": "79009576783145f428df5d9dd98dbe2362de2fc55e7124a09aa4477dcd965e1d",
+      "title": "Unique index",
+      "claims": 1
+    },
+    {
+      "page_key": "7dd625ee85e4bbfcc7e1aa30101678ca2c84c83d70f6177165f126149a6fa46b",
+      "title": "NULLS NOT DISTINCT",
+      "claims": 1
+    },
+    {
+      "page_key": "814587433c5861b2fd84272533f70c0cededc8ef8ec720ff0ef4540b18bed436",
+      "title": "Unique constraint",
+      "claims": 1
+    },
+    {
+      "page_key": "825cda899d047a29aed045928149a6a0e6d8210f667f2eb72c9a59cb55c5cd3d",
+      "title": "data types",
+      "claims": 2
+    },
+    {
+      "page_key": "825feea61ea9434c746a065b645b39fd03f2336d60e085b1bd837566b9019135",
+      "title": "column data constraints",
+      "claims": 1
+    },
+    {
+      "page_key": "98067caac9f77a5f03496287483745b0aafa4df0a0b131c68ca8b514583f658f",
+      "title": "cross-row and cross-table restrictions",
+      "claims": 1
+    },
+    {
+      "page_key": "9bd4dfabc5cee3e1d163fa979a242def99c1ff8bbe7017ac70e3f444d4cddf2d",
+      "title": "not-null constraint",
+      "claims": 6
+    },
+    {
+      "page_key": "a03ac41eae32b535154d37f053d4f510ec2d003028f4da63c2c6c440c8220ba9",
+      "title": "constraint violation",
+      "claims": 2
+    },
+    {
+      "page_key": "a5846bc340f99c5eebfdf7390dfc23d756b6ec4d87f367e9c0e01e2ac37e28ad",
+      "title": "database restore",
+      "claims": 1
+    },
+    {
+      "page_key": "a906052365f5b1ec93ddb553f98e1f2178ffb1703bf151c9fcbd2dfcf3bab7c3",
+      "title": "Available isolation levels",
+      "claims": 1
+    },
+    {
+      "page_key": "a92bdc9963baea31fe7d51499fc4738115babbd36cc8e64927c3b598203fc6d6",
+      "title": "database design",
+      "claims": 1
+    },
+    {
+      "page_key": "ae99a7e6bc25f8a58d513f45369b59a49b86edbf7c0e2cac9ec68f9f5f884013",
+      "title": "Retention glossary",
+      "claims": 1
+    },
+    {
+      "page_key": "b3320a0185649392a3b05402fa78e77b5167721ff2b762979ccea9968184afaf",
+      "title": "SELECT",
+      "claims": 1
+    },
+    {
+      "page_key": "b6275a8ce649d71dc86b547d5c30f4f42ee02b827155d0e814d57c15fc0034ec",
+      "title": "Unique constraint on a group of columns",
+      "claims": 2
+    },
+    {
+      "page_key": "bd15813684a4b45f730ed2933bcf27f39bb6ad0c44363b6fb7fbf4820de2c076",
+      "title": "Records",
+      "claims": 2
+    },
+    {
+      "page_key": "bd3b90a87e2e774336b0f1d8c4b2f02e55a1d21e3331daa2e35b48d4fe280460",
+      "title": "Null comparison under unique constraint",
+      "claims": 1
+    },
+    {
+      "page_key": "c7eada9aaa42ca0eb6e50abc4bd3c5a2412917b62940aaa86ef819042785f6f1",
+      "title": "NOT NULL constraint",
+      "claims": 1
+    },
+    {
+      "page_key": "c855493097cebcd2daceb48a13a068722d9c3f9694c2eb55bf7585a39fc4c2b5",
+      "title": "SQL standard",
+      "claims": 2
+    },
+    {
+      "page_key": "cc4c48c608148ffbbb447cd33ee71d91d3f3839f25a78452b6d39687c933d65d",
+      "title": "product price column",
+      "claims": 1
+    },
+    {
+      "page_key": "d5cc57fdfc0bb8cdd4fc75ceef79e2cdf13a7d9edbb9eb289b04b7f877dcba95",
+      "title": "unnamed constraint",
+      "claims": 1
+    },
+    {
+      "page_key": "d5f3a2b5ba1d93dd277bd6d8492ee8054996de68e6385836c67fa35027e75704",
+      "title": "product information table",
+      "claims": 1
+    },
+    {
+      "page_key": "ed3a4040d18b832bc868a7830f57608a65fbd55e85c5a85feca6db22c13085a1",
+      "title": "positive numbers",
+      "claims": 1
+    },
+    {
+      "page_key": "f4bbee3e7a9929c7c84de095b50a6cd368947591c016eecda828473900490c2d",
+      "title": "Multicolumn unique index",
+      "claims": 1
+    },
+    {
+      "page_key": "f5f7e390fdce4dcd47c3bfc13d5e17665111f056f5365b3f503526dea6bf4744",
+      "title": "Retention policy",
+      "claims": 1
+    },
+    {
+      "page_key": "f7bbad02bfdec92d966edab10a02c9936f5332092406220b9686be8891918cce",
+      "title": "NULL constraint",
+      "claims": 6
+    },
+    {
+      "page_key": "fd602ffdf46c616d30afc293a60707c8fee4c7e93635fd8f2fcc7a190774c6eb",
+      "title": "transaction isolation level",
+      "claims": 1
+    },
+    {
+      "page_key": "fe67b9907f1bb7e6ccea5a77faadc76311828c859e3bafa74bcf1d1e239c71bf",
+      "title": "constraints",
+      "claims": 1
+    }
+  ],
+  "version": {
+    "id": "d8058aec-34f0-4818-86cb-0bbdfe81c3b7",
+    "resolved_spec_hash": "2dcbc9bebb6d6838189774cc403cfcde82f0da6ec3a05a3dc07140d54b9b05c4",
+    "wiki_binding": {
+      "binding_mode": "PINNED",
+      "schema_version": 1,
+      "publication_hash": "f808b02f36511f84def1b53fde3def85e28c95cb08a45ae6a11967ef472a5593",
+      "knowledge_base_id": "7323ccd8-5f03-4c5d-97f1-ff452d54f29f",
+      "wiki_publication_id": "f5f3795a-e516-4d4c-acf3-4d8570e2e202"
+    }
+  },
+  "results": [
+    {
+      "question_id": "A01",
+      "run_id": "0d8b6fa6-730a-4cf2-90b2-ba35cf69e986",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 8,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E6"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "A **check constraint** is the most generic constraint type in PostgreSQL. It lets you specify that the value in a column must satisfy a Boolean (truth-value) expression — for example, requiring product prices to be positive. Check constraints can also refer to several columns at once (e.g., ensuring a discounted price is lower than the regular price) [R00001E6].",
+      "f1": 0.07547169811320754,
+      "latency_ms": 2369.7978999989573,
+      "calls_so_far": 10
+    },
+    {
+      "question_id": "A02",
+      "run_id": "f5c127f3-67f7-4d00-9cab-8290fee0a326",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 9,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "The key word is **`CONSTRAINT`** — to specify a named constraint, you write the key word `CONSTRAINT`, followed by an identifier, followed by the constraint definition [R00001E1].",
+      "f1": 0.24000000000000002,
+      "latency_ms": 1934.5818999972835,
+      "calls_so_far": 12
+    },
+    {
+      "question_id": "A03",
+      "run_id": "c2df54bf-c0e5-4d8c-a182-3074c314b3bd",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 1,
+      "delivered_count": 10,
+      "origins": [
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": null,
+      "f1": 0.0,
+      "latency_ms": 5362.668800000392,
+      "calls_so_far": 16
+    },
+    {
+      "question_id": "A04",
+      "run_id": "b295b20b-3df9-4d41-90b9-a506512129ff",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 2,
+      "delivered_count": 15,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E7",
+        "R00002E1",
+        "R00002E2"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Yes.** In PostgreSQL, a check constraint is satisfied if the check expression evaluates to **true or the null value** [R00001E2][R00002E2].\n\nTwo practical consequences noted in the documentation:\n\n- Because most expressions evaluate to null when any operand is null, check constraints **do not prevent null values** in the constrained columns [R00001E1][R00002E1]. To forbid nulls, use a **NOT NULL** constraint instead (or explicitly write `CHECK (col IS NOT NULL)`) [R00001E7].\n- Only an expression evaluating to **false** violates the constraint.",
+      "f1": 0.0821917808219178,
+      "latency_ms": 3038.8622999998915,
+      "calls_so_far": 18
+    },
+    {
+      "question_id": "A05",
+      "run_id": "13493107-2e1a-4133-b69f-f68df0837ec6",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 9,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3",
+        "R00001E7"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**No.** PostgreSQL does not support CHECK constraints that reference table data other than the new or updated row being checked [R00001E7].\n\nThe documentation explains why this restriction exists [R00001E7]:\n\n- A CHECK constraint violating this rule **may appear to work in simple tests**, but it cannot guarantee the database won't reach a state where the condition is false — because subsequent changes to the *other* rows involved can break it after the fact.\n- This would cause a **database dump and restore to fail**. The restore could fail even when the complete database state is consistent with the constraint, simply because rows are not loaded in an order that satisfies it.\n\nInstead, the recommended approach is to use `UNIQUE`, `EXCLUDE`, or `FOREIGN KEY` constraints to express cross-row and cross-table restrictions [R00001E7].\n\nRelated notes on the scope of CHECK constraints [R00001E3][R00001E1][R00001E2]:\n- A CHECK constraint *can* refer to several columns (of the same row).\n- It is satisfied if the expression evaluates to true **or** the null value, so it will not prevent nulls in the constrained columns — use `NOT NULL` for that.",
+      "f1": 0.0125,
+      "latency_ms": 4822.893699998531,
+      "calls_so_far": 21
+    },
+    {
+      "question_id": "A06",
+      "run_id": "22be3150-7bde-465e-bfa0-fe26c5d36995",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 10,
+      "origins": [
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": false,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3",
+        "R00001E4",
+        "R00001E6"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "A not-null constraint simply specifies that a column must not assume the null value [R00001E3].\n\nA few related details from the PostgreSQL documentation:\n\n- It is always written as a column constraint [R00001E1].\n- It is functionally equivalent to creating a check constraint `CHECK (column_name IS NOT NULL)`, but creating an explicit not-null constraint is more efficient [R00001E2][R00001E6]. The drawback of the `CHECK` approach is that you cannot give explicit names to not-null constraints created that way [R00001E4].",
+      "f1": 0.19178082191780824,
+      "latency_ms": 2132.4008999981743,
+      "calls_so_far": 23
+    },
+    {
+      "question_id": "A07",
+      "run_id": "8ceefde4-daf3-4c6f-ba2c-9f78f00d0272",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 4,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "According to the guidance in the knowledge base, **the majority** of columns should be marked not null [R00001E1].\n\nThe rationale from the underlying SQL documentation: a check constraint is satisfied if the expression evaluates to true *or* null, so it won't prevent null values on its own — to guarantee a column never contains nulls, you must use a NOT NULL constraint [R00001E2].",
+      "f1": 0.10526315789473684,
+      "latency_ms": 3761.8104000030144,
+      "calls_so_far": 26
+    },
+    {
+      "question_id": "A08",
+      "run_id": "76e5b6ad-0836-4b43-b643-fce53dca07d2",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": null,
+      "f1": 0.0,
+      "latency_ms": 3598.482800000056,
+      "calls_so_far": 28
+    },
+    {
+      "question_id": "A09",
+      "run_id": "06b34daf-6320-4e0d-ac33-f2b3ab24a4fb",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 6,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3",
+        "R00001E4",
+        "R00001E6"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Unique constraints ensure that the data contained in a column, or a group of columns, is unique among all the rows in the table** [R00001E1][R00001E4].\n\nAdditional details from the source:\n\n- **Multi-column form:** When written for a group of columns (as a table constraint with names separated by commas), a unique constraint specifies that the *combination* of values in the indicated columns is unique across the whole table — though any one of the columns individually need not be (and ordinarily isn't) unique [R00001E2][R00001E3].\n- **Violation condition:** A unique constraint is violated if more than one row has equal values in *all* the columns included in the constraint [R00001E4].\n- **Null handling:** By default, two null values are *not* considered equal in this comparison, so even with a unique constraint it's possible to store duplicate rows that contain a null in at least one constrained column. This can be changed with the `NULLS NOT DISTINCT` clause [R00001E4].\n- **Enforcement mechanism:** PostgreSQL automatically creates a unique index when a unique constraint or primary key is defined; that index covers the constraint's columns and enforces it [R00001E6].",
+      "f1": 0.10714285714285715,
+      "latency_ms": 3503.208000001905,
+      "calls_so_far": 30
+    },
+    {
+      "question_id": "A10",
+      "run_id": "c48b7ce5-0a14-47ca-b399-782cc23b4d1a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 7,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E2",
+        "R00001E3",
+        "R00001E4",
+        "R00001E6"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "No. By default, two null values are **not** considered equal in the comparison that enforces a unique constraint [R00001E3]. Consequently, even with a unique constraint in place, it's possible to store duplicate rows that contain a null value in at least one of the constrained columns [R00001E2].\n\nThis behavior can be changed by adding the `NULLS NOT DISTINCT` clause, which causes nulls to be treated as equal for uniqueness purposes [R00001E4]. The same default applies to unique indexes: by default, null values in a unique column are not considered equal, allowing multiple nulls in that column [R00001E6].",
+      "f1": 0.16494845360824742,
+      "latency_ms": 2883.7996999973257,
+      "calls_so_far": 32
+    },
+    {
+      "question_id": "A11",
+      "run_id": "cdf04642-4ed0-4dc3-bd5d-d87bfea94a0a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 3,
+      "origins": [
+        "RAW"
+      ],
+      "dual_layer": false,
+      "citations": [
+        "R00001E1"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true
+      ],
+      "final_output": "Only **B-tree** indexes can currently be declared unique [R00001E1].\n\nWhen an index is declared unique, multiple table rows with equal indexed values are not allowed; by default nulls are not considered equal (unless `NULLS NOT DISTINCT` is specified) [R00001E1]. PostgreSQL automatically creates such a unique index when a unique constraint or primary key is defined on a table [R00001E1].",
+      "f1": 0.10344827586206896,
+      "latency_ms": 2081.627200001094,
+      "calls_so_far": 34
+    },
+    {
+      "question_id": "A12",
+      "run_id": "320b9976-ff11-470d-9833-94b4a01ffc2d",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 4,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Multiple rows with equal indexed values are not allowed** — the operation is rejected [R00001E1].\n\nDetails around this rule [R00001E2]:\n\n- **Enforcement mechanism:** Only B-tree indexes can currently be declared unique.\n- **Null handling:** By default, nulls in a unique column are *not* considered equal, so multiple nulls are permitted. The `NULLS NOT DISTINCT` option changes this, making the index treat nulls as equal.\n- **Multicolumn indexes:** A multicolumn unique index rejects only cases where *all* indexed columns are equal across multiple rows — any single column may repeat.\n- **Automatic creation:** PostgreSQL creates a unique index automatically when a unique constraint or primary key is defined, and that index is what actually enforces the constraint. Manually adding an index on unique columns would just duplicate it.\n\nThe related unique-constraint documentation says the same thing in constraint terms: a unique constraint is violated if more than one row has all constrained columns equal, and by default two nulls are not considered equal — so duplicate rows containing a null in at least one constrained column can still be stored, unless `NULLS NOT DISTINCT` is added [R00001E3].",
+      "f1": 0.034682080924855495,
+      "latency_ms": 5627.650700000231,
+      "calls_so_far": 37
+    },
+    {
+      "question_id": "A13",
+      "run_id": "c19e80cc-442b-49b3-ad73-fd6ddd2eb27d",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 10,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E8",
+        "R00001E9"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Yes.** PostgreSQL automatically creates a unique index when a unique constraint or primary key is defined for a table [R00001E1].\n\nAdditional details from the documentation:\n\n- The index covers exactly the columns that make up the primary key or unique constraint (a multicolumn index, if appropriate), and **it is the mechanism that enforces the constraint** [R00001E9].\n- Because of this, **there's no need to manually create indexes on unique columns** — doing so would just duplicate the automatically-created index [R00001E9].\n- Relatedly, only B-tree indexes can currently be declared unique, and unique indexes by default treat nulls as distinct (i.e., multiple nulls are allowed) unless the `NULLS NOT DISTINCT` option is used [R00001E9].\n\nOne caveat worth noting: the automatic index is created for `UNIQUE`/`PRIMARY KEY` *constraints*. Unique constraints are semantically distinct from unique indexes in that they also apply to the data itself — and by default two null values are not considered equal, so duplicate rows containing a null in the constrained column(s) remain possible unless `NULLS NOT DISTINCT` is specified [R00001E8].",
+      "f1": 0.07500000000000001,
+      "latency_ms": 3680.7275999999547,
+      "calls_so_far": 39
+    },
+    {
+      "question_id": "A14",
+      "run_id": "030962e7-bd53-4ec3-b5ed-eb9ab5effc3c",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 2,
+      "delivered_count": 11,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E2",
+        "R00001E4",
+        "R00001E5"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**No.** PostgreSQL automatically creates a unique index whenever you define a unique constraint or a primary key on a table. That index covers exactly the column(s) making up the constraint (a multicolumn index, if appropriate), and it is the mechanism that actually enforces uniqueness — so manually adding another index on the same column would simply duplicate the automatically-created one [R00001E2] [R00001E4].\n\nA few related details worth noting:\n\n- Only B-tree indexes can be declared unique [R00001E4].\n- By default, nulls in a unique column are not considered equal, so multiple null rows are allowed; the `NULLS NOT DISTINCT` option changes this by treating nulls as equal [R00001E4] [R00001E2].\n- With a multicolumn unique index, rows are rejected only when *all* indexed columns match [R00001E4].\n- Similarly, a unique constraint is violated only if all columns in the constraint are equal across rows, and by default two nulls don't count as equal — so duplicate rows containing a null in the constrained columns can still exist unless you add `NULLS NOT DISTINCT` [R00001E5].\n\nSo the only situations where extra index work might be justified are ones the docs don't cover here (e.g., wanting a different index type or additional expression/covering indexes for query performance) — but for the uniqueness requirement itself, no manual index is needed [R00001E4].",
+      "f1": 0.06030150753768843,
+      "latency_ms": 4631.966699998884,
+      "calls_so_far": 41
+    },
+    {
+      "question_id": "A15",
+      "run_id": "1d9fa04b-a0f1-4fc6-a42f-fa9e8e4347df",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 8,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E3",
+        "R00001E4",
+        "R00001E6"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Three.** PostgreSQL accepts any of the four SQL-standard isolation levels as a request, but internally only three distinct levels are implemented — its Read Uncommitted mode actually behaves like Read Committed, since that is the only sensible mapping onto PostgreSQL's multiversion concurrency control architecture [R00001E4] [R00001E6] [R00001E3].\n\nA related nuance from the same source: PostgreSQL's Repeatable Read implementation also disallows phantom reads, which the SQL standard permits (higher guarantees are acceptable) [R00001E6].",
+      "f1": 0.05882352941176471,
+      "latency_ms": 3747.4680000013905,
+      "calls_so_far": 44
+    },
+    {
+      "question_id": "A16",
+      "run_id": "73d4f67e-065e-4fc5-b9c2-02822d19d53a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 9,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E6",
+        "R00001E7",
+        "R00001E8"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Read Committed** is the default isolation level in PostgreSQL [R00001E7].\n\nRelated details from the same material: PostgreSQL accepts all four standard isolation levels, but internally implements only three — its **Read Uncommitted** mode behaves identically to Read Committed [R00001E8]. You can change the level per transaction with `SET TRANSACTION` [R00001E6].",
+      "f1": 0.08163265306122448,
+      "latency_ms": 3839.593299999251,
+      "calls_so_far": 47
+    },
+    {
+      "question_id": "A17",
+      "run_id": "d4e26191-6729-4cc3-a5b5-08897385dea3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 8,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E3",
+        "R00001E7"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**No — PostgreSQL's Repeatable Read level does not permit phantom reads.**\n\nPer the PostgreSQL documentation, the table of isolation levels \"shows that PostgreSQL's Repeatable Read implementation does not allow phantom reads\" [R00001E7]. The docs explain this is acceptable under the SQL standard, since the standard specifies minimum anomalies that must not occur at each level — offering stronger guarantees than required is permitted [R00001E7].\n\nSome related context on how PostgreSQL maps levels:\n\n- You can request any of the four standard levels, but internally only three distinct levels exist: PostgreSQL's Read Uncommitted behaves like Read Committed [R00001E7].\n- This mapping is described as the only sensible way to map the standard isolation levels onto PostgreSQL's multiversion concurrency control architecture [R00001E3][R00001E7].\n\nNote that if you need full serializable behavior (including protection against serialization anomalies beyond phantom reads), you'd use the Serializable level, which guarantees an effect equivalent to running transactions one at a time in some order [R00001E7].",
+      "f1": 0.07947019867549669,
+      "latency_ms": 5189.328500000556,
+      "calls_so_far": 50
+    },
+    {
+      "question_id": "A18",
+      "run_id": "9fc2aa40-bcba-4f72-8b66-21d7762e1797",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 10,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3",
+        "R00001E5",
+        "R00001E6",
+        "R00001E7",
+        "R00001E8"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Serializable** is the most strict isolation level defined by the SQL standard [R00001E1].\n\nThe standard defines four transaction isolation levels [R00001E5], and Serializable is the strictest of them. It is defined by a paragraph stating that any concurrent execution of a set of Serializable transactions is guaranteed to produce the same effect as running them one at a time in some order [R00001E2]. Because of that definition, none of the concurrency anomalies (dirty reads, nonrepeatable reads, phantom reads) are possible at this level [R00001E3]. The other three levels are defined in terms of which of those phenomena must not occur [R00001E7].\n\nOne related note: PostgreSQL accepts all four standard levels but internally implements only three distinct ones — its Read Uncommitted behaves like Read Committed — and its Repeatable Read also prevents phantom reads, which the standard permits since offering higher guarantees is acceptable [R00001E8][R00001E6].",
+      "f1": 0.014814814814814815,
+      "latency_ms": 4608.183399999689,
+      "calls_so_far": 53
+    },
+    {
+      "question_id": "A19",
+      "run_id": "73ae56d4-c413-4d4b-b81f-669f629cb16a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 4,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "The command is **`SET TRANSACTION`** [R00001E1].\n\nFor context, the knowledge base also notes that in PostgreSQL, `Read Committed` is the default isolation level, and the four SQL-standard levels map onto only three distinct implemented behaviors (Read Uncommitted behaves like Read Committed) [R00001E2][R00001E3].\n\nNote: my first query attempt failed because the `intent` argument was rejected as invalid; the retry without it succeeded.",
+      "f1": 0.07017543859649122,
+      "latency_ms": 3806.4781000030052,
+      "calls_so_far": 56
+    },
+    {
+      "question_id": "A20",
+      "run_id": "1e045664-bd34-48da-a86d-f0eb40eb54d8",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 8,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E3",
+        "R00001E6"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "The SQL standard defines **four** levels of transaction isolation [R00001E3] [R00001E6].\n\nThe most strict is **Serializable**, which guarantees that any concurrent execution of a set of Serializable transactions produces the same effect as running them one at a time in some order. The other three levels — Read Uncommitted, Read Committed, and Repeatable Read — are defined in terms of the phenomena (arising from interaction between concurrent transactions) that must not occur at each level [R00001E1] [R00001E6].\n\nNote that in PostgreSQL you can request any of the four standard levels, but internally only three distinct levels are implemented — Read Uncommitted behaves like Read Committed [R00001E6].",
+      "f1": 0.020202020202020204,
+      "latency_ms": 3839.639400001033,
+      "calls_so_far": 59
+    },
+    {
+      "question_id": "B01",
+      "run_id": "9ddfcf89-e1b5-4c91-9430-a388817a74db",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 1,
+      "delivered_count": 9,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 3969.686099997489,
+      "calls_so_far": 62
+    },
+    {
+      "question_id": "B02",
+      "run_id": "b1db6a1e-f6d0-4d24-a124-07d9d15225a7",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 2,
+      "delivered_count": 19,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3",
+        "R00001E4",
+        "R00001E6",
+        "R00001E7",
+        "R00001E8",
+        "R00002E10",
+        "R00002E6",
+        "R00002E8",
+        "R00002E9"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "Both facts come from the same PostgreSQL wiki page:\n\n**1. Default isolation level:** **Read Committed** is the default isolation level in PostgreSQL [R00001E7]. You can change it per-transaction with `SET TRANSACTION` [R00001E6].\n\nNote a related nuance: PostgreSQL accepts all four standard isolation levels, but internally implements only three distinct ones — its \"Read Uncommitted\" mode actually behaves like Read Committed, because that's the only sensible mapping onto PostgreSQL's multiversion concurrency control (MVCC) architecture [R00001E2][R00001E3][R00001E4][R00001E8].\n\n**2. Unique constraint → unique index:** **Yes, automatically.** PostgreSQL automatically creates a unique index when a unique constraint or primary key is defined for a table [R00001E1]. That index covers the column(s) making up the primary key or unique constraint (a multicolumn index, if appropriate) and is the mechanism that enforces the constraint [R00002E8][R00002E9].\n\nSupporting detail: the constraint guarantees that the values in a column (or group of columns) are unique across all rows [R00002E6][R00002E10] — with the caveat that by default two NULLs are not considered equal, so duplicate rows containing NULLs in constrained columns can still exist unless you specify `NULLS NOT DISTINCT` [R00002E10].\n\n**In short:** the two facts are independent — the default isolation level is Read Committed, and defining a unique constraint (or primary key) implicitly creates a unique index that enforces it.",
+      "f1_wiki": 0.020725388601036274,
+      "f1_other": 0.06091370558375635,
+      "latency_ms": 4688.633800000389,
+      "calls_so_far": 64
+    },
+    {
+      "question_id": "B03",
+      "run_id": "83a34fae-632d-40b3-b887-dd5fa458b375",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 3310.9798000004957,
+      "calls_so_far": 66
+    },
+    {
+      "question_id": "B04",
+      "run_id": "ab024d85-11ef-4d4a-bb27-6b8c4169a19b",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 10,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E10",
+        "R00001E2",
+        "R00001E3",
+        "R00001E5",
+        "R00001E7",
+        "R00001E8",
+        "R00001E9"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Strictest isolation level:** **Serializable** — the SQL standard defines four transaction isolation levels, and Serializable is the most strict. It's defined as guaranteeing that any concurrent execution of a set of Serializable transactions produces the same effect as running them one at a time in some order; consequently, none of the concurrency phenomena are possible at that level [R00001E8][R00001E1][R00001E2][R00001E3][R00001E5].\n\n**Manual indexes on unique columns:** **No.** PostgreSQL automatically creates a unique index when a unique constraint or primary key is defined for a table — the index covers the constraint's columns and is the mechanism that enforces it. There's no need to manually create indexes on unique columns; doing so would just duplicate the automatically-created index [R00001E10].\n\nOne related nuance: by default, nulls in a unique column are not considered equal, so multiple nulls are allowed unless you use `NULLS NOT DISTINCT` [R00001E7][R00001E9].",
+      "f1_wiki": 0.015503875968992248,
+      "f1_other": 0.015503875968992248,
+      "latency_ms": 4438.786299997446,
+      "calls_so_far": 69
+    },
+    {
+      "question_id": "B05",
+      "run_id": "88c3a092-fcbd-410b-bb84-8e2829361abc",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 8,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E2",
+        "R00001E6",
+        "R00001E8"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Four** levels of transaction isolation are defined by the SQL standard — the strictest being Serializable, with the other three defined in terms of prohibited phenomena [R00001E2][R00001E6].\n\n**Only B-tree indexes** can currently be declared unique [R00001E8].\n\n(Note: PostgreSQL accepts all four standard levels but internally implements only three distinct ones, since Read Uncommitted behaves like Read Committed [R00001E6].)",
+      "f1_wiki": 0.03571428571428572,
+      "f1_other": 0.10344827586206896,
+      "latency_ms": 3932.2156999987783,
+      "calls_so_far": 72
+    },
+    {
+      "question_id": "B06",
+      "run_id": "4363ca6c-f9bb-49ef-a823-f48db8c4f0ed",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 2937.058100000286,
+      "calls_so_far": 74
+    },
+    {
+      "question_id": "B07",
+      "run_id": "a156e94c-e5b1-4746-8698-74ff6272b95a",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 2955.176700001175,
+      "calls_so_far": 76
+    },
+    {
+      "question_id": "B08",
+      "run_id": "265b8667-24bb-4cb6-ac9c-4844cd41339c",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 2,
+      "delivered_count": 20,
+      "origins": [
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 2896.5868999985105,
+      "calls_so_far": 78
+    },
+    {
+      "question_id": "B09",
+      "run_id": "01e86ca6-7621-4721-a552-9fc711b58fb4",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 2,
+      "delivered_count": 14,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E2",
+        "R00001E3",
+        "R00002E2",
+        "R00002E3",
+        "R00002E4"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Short answer: No to the first, and no to the second.**\n\n**1. CHECK constraints referencing other table data — not supported.** PostgreSQL explicitly states that it \"does not support CHECK constraints that reference table data other than the new or updated row being checked\" [R00002E3]. Such a constraint may appear to work in simple tests, but it cannot guarantee the database won't reach a state where the condition is false (e.g., due to later changes to the other row), which can cause a dump and restore to fail — even when the database state is actually consistent, because rows may be loaded in an order that temporarily violates the constraint [R00002E3]. The recommended alternatives for cross-row and cross-table restrictions are UNIQUE, EXCLUDE, or FOREIGN KEY constraints [R00002E3]. A CHECK constraint can, however, legitimately refer to several columns *within the same row* [R00001E3].\n\nWorth noting: a CHECK constraint is satisfied if the expression evaluates to true **or to the null value**, so it will not prevent nulls in the constrained columns; a NOT NULL constraint is needed for that [R00002E3][R00001E2].\n\n**2. Two nulls in a unique constraint — by default, not considered equal.** \"By default, two null values are not considered equal in this comparison\" [R00002E4]. Consequently, even with a unique constraint in place, you can store duplicate rows that contain a null in at least one of the constrained columns [R00002E4]. The same rule applies at the index level: null values in a unique column are not considered equal, allowing multiple nulls [R00002E2].\n\n**How to change it:** add the clause `NULLS NOT DISTINCT`, which causes nulls to be treated as equal [R00002E4][R00002E2].\n\n**One caveat on combined behavior:** these two rules interact in a way that can surprise people. Because a CHECK constraint passes when the expression yields null [R00002E3], and because unique constraints don't catch null duplicates [R00002E4], a column relying on either alone may still admit multiple null-containing rows — which is exactly the gap that `NOT NULL` (a more efficient equivalent of `CHECK (col IS NOT NULL)`) or `NULLS NOT DISTINCT` is designed to close.",
+      "f1_wiki": 0.006369426751592357,
+      "f1_other": 0.031347962382445145,
+      "latency_ms": 5759.461000001465,
+      "calls_so_far": 80
+    },
+    {
+      "question_id": "B10",
+      "run_id": "814e1b15-2ae1-418f-8e91-d69d7834c4a3",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 2,
+      "delivered_count": 7,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00002E2",
+        "R00002E3",
+        "R00002E4"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "Combining the two wiki facts:\n\n- **Most generic constraint type:** A **check constraint** — it allows you to specify that the value in a column must satisfy a Boolean (truth-value) expression, and it can also refer to several columns [R00001E1].\n- **Default isolation level:** **Read Committed** is the default isolation level in PostgreSQL [R00002E2].\n\nA related note: PostgreSQL accepts all four standard isolation levels but internally implements only three distinct ones, since Read Uncommitted behaves like Read Committed [R00002E3]. (One retrieved snippet about a retention glossary was unrelated to this question and is disregarded [R00002E4].)",
+      "f1_wiki": 0.04597701149425288,
+      "f1_other": 0.04597701149425288,
+      "latency_ms": 3222.1970000027795,
+      "calls_so_far": 82
+    },
+    {
+      "question_id": "B11",
+      "run_id": "54eb7aca-9a94-4fbc-bdd1-c95322e9f13c",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 3026.929600000585,
+      "calls_so_far": 84
+    },
+    {
+      "question_id": "B12",
+      "run_id": "cb8f4832-7825-4fd7-ab09-20aa4428f184",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 4,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Key word:** `CONSTRAINT` — to specify a named constraint, use the key word **CONSTRAINT** followed by an identifier followed by the constraint definition [R00001E1].\n\n**Distinct isolation levels implemented:** **three**. Although PostgreSQL accepts any of the four standard isolation levels, internally only three distinct levels are implemented — Read Uncommitted behaves like Read Committed, since that is the only sensible mapping onto PostgreSQL's multiversion concurrency control architecture [R00001E2]. (Note also that the implementation's Repeatable Read disallows phantom reads, which the standard permits as a stronger guarantee [R00001E2].)",
+      "f1_wiki": 0.07500000000000001,
+      "f1_other": 0.05063291139240507,
+      "latency_ms": 4789.188200000353,
+      "calls_so_far": 87
+    },
+    {
+      "question_id": "B13",
+      "run_id": "5d7a2375-53c3-41c7-8f04-83e56edabf3a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 3,
+      "delivered_count": 28,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E10",
+        "R00001E2",
+        "R00002E3",
+        "R00002E4",
+        "R00002E5",
+        "R00002E6",
+        "R00002E7"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Check constraint with NULL:** Yes — a check constraint is satisfied when its expression evaluates to true **or to the null value** [R00001E2][R00001E10]. This is a notable gap in enforcement: since most expressions evaluate to NULL if any operand is NULL, a check constraint will not prevent null values in the constrained columns [R00001E1][R00001E10]. To forbid NULLs you need a separate NOT NULL constraint, which is functionally equivalent to `CHECK (column_name IS NOT NULL)` [R00001E10].\n\n**Strictest isolation level:** The SQL standard defines four transaction isolation levels, and the most strict is **Serializable** [R00002E3][R00002E7]. It is defined by the guarantee that any concurrent execution of a set of Serializable transactions produces the same effect as running them one at a time in some order [R00002E4][R00002E7]; consequently, none of the phenomena the standard uses to define the weaker levels are possible at that level [R00002E5][R00002E7]. (For context, PostgreSQL implements only three distinct levels internally — its Read Uncommitted behaves like Read Committed — and its Repeatable Read also prevents phantom reads, which the standard permits as a stronger guarantee [R00002E6][R00002E7].)\n\nSo, combining the two: NULL-valued check expressions pass \"silently,\" while Serializable is the highest standard isolation level.",
+      "f1_wiki": 0.01129943502824859,
+      "f1_other": 0.01129943502824859,
+      "latency_ms": 6806.797199998982,
+      "calls_so_far": 91
+    },
+    {
+      "question_id": "B14",
+      "run_id": "e897aec3-1725-4e86-b9b3-5194be847928",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 4,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3",
+        "R00001E4"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Short answer:**\n\n1. **NOT NULL columns:** In most database designs, **the majority of columns** should be marked `NOT NULL` [R00001E1] — i.e., there's no fixed count; the guidance is that most, not a minority, of a table's columns ought to carry the constraint.\n\n2. **Unique indexes:** **Only B-tree indexes** can currently be declared unique [R00001E2].\n\n**Supporting details from the wiki:**\n- A `NOT NULL` constraint is functionally equivalent to `CHECK (column_name IS NOT NULL)`, but an explicit not-null constraint is more efficient in PostgreSQL [R00001E3]. Note that ordinary `CHECK` constraints do *not* prevent nulls, since a check passes when the expression evaluates to null [R00001E3] — hence the need for `NOT NULL`.\n- A unique index enforces that no two rows have equal indexed values; by default nulls are not treated as equal (so multiple nulls are allowed), unless `NULLS NOT DISTINCT` is specified [R00001E2].\n- PostgreSQL automatically creates a unique index when a `UNIQUE` constraint or primary key is defined, so manually indexing unique columns just duplicates that index [R00001E2].\n- A `UNIQUE` constraint may span several columns, in which case only the *combination* must be unique [R00001E4].",
+      "f1_wiki": 0.03488372093023256,
+      "f1_other": 0.03488372093023256,
+      "latency_ms": 5622.598900001321,
+      "calls_so_far": 94
+    },
+    {
+      "question_id": "B15",
+      "run_id": "6ead9cd8-2783-4d2c-a196-2cd94b8a9c58",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 2987.775999998121,
+      "calls_so_far": 96
+    },
+    {
+      "question_id": "B16",
+      "run_id": "00db623c-d410-4081-8c93-9a82217569b0",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 3077.094100000977,
+      "calls_so_far": 98
+    },
+    {
+      "question_id": "B17",
+      "run_id": "416b88c8-80b1-4f95-8159-47db3f3b649b",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 1,
+      "delivered_count": 7,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E1",
+        "R00001E2",
+        "R00001E3",
+        "R00001E5",
+        "R00001E6"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "Both answers come from the PostgreSQL documentation in the wiki:\n\n**1. Manually creating indexes on unique columns — not needed.** PostgreSQL automatically creates a unique index when a unique constraint or primary key is defined for a table; that index covers the constrained columns and is the mechanism that enforces the constraint. As the docs state: \"There's no need to manually create indexes on unique columns; doing so would just duplicate the automatically-created index.\" [R00001E2][R00001E5]\n\n(Related detail: indexes can also be used to enforce uniqueness of a column or of the combined values of multiple columns, but only B-tree indexes can be declared unique [R00001E1][R00001E5].)\n\n**2. Setting the transaction isolation level — use `SET TRANSACTION`.** \"To set the transaction isolation level of a transaction, use the command `SET TRANSACTION`.\" [R00001E3]\n\nNote that while the SQL standard defines four levels (Serializable being the strictest), PostgreSQL internally implements only three distinct levels — its Read Uncommitted behaves like Read Committed, and Repeatable Read does not allow phantom reads [R00001E6].",
+      "f1_wiki": 0.013333333333333332,
+      "f1_other": 0.026490066225165563,
+      "latency_ms": 4775.111099999776,
+      "calls_so_far": 101
+    },
+    {
+      "question_id": "B18",
+      "run_id": "bcd698ee-c302-4317-8bc3-f54fe2175625",
+      "status": "FAILED",
+      "failure_code": "AGENT_MAX_TOOL_CALLS_EXCEEDED",
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": null,
+      "f1_wiki": 0.0,
+      "f1_other": 0.0,
+      "latency_ms": 3170.911499997601,
+      "calls_so_far": 103
+    },
+    {
+      "question_id": "B19",
+      "run_id": "c3f8cb67-6dcc-4b55-8db6-3e38789c06fb",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 2,
+      "delivered_count": 12,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E3",
+        "R00001E8",
+        "R00002E3"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Yes** — a check constraint can refer to several columns. The wiki notes that \"A check constraint can also refer to several columns,\" giving the example of storing a regular price and a discounted price and ensuring the discounted price is lower than the regular price [R00001E3].\n\n**Repeatable Read** — PostgreSQL's Repeatable Read implementation does not allow phantom reads [R00002E3]. The wiki explains this is acceptable under the SQL standard, since the standard specifies which anomalies must not occur at each level, and higher guarantees are permissible [R00002E3].\n\nOne nuance worth adding from the check-constraint material: while a check constraint may span multiple columns of the *same row*, PostgreSQL does not support CHECK constraints that reference table data other than the new or updated row being checked — for cross-row or cross-table restrictions, UNIQUE, EXCLUDE, or FOREIGN KEY constraints should be used [R00001E8].",
+      "f1_wiki": 0.015503875968992248,
+      "f1_other": 0.03076923076923077,
+      "latency_ms": 3126.848100000643,
+      "calls_so_far": 105
+    },
+    {
+      "question_id": "B20",
+      "run_id": "cbecfb25-8c52-4c95-867c-9050a73ea070",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 3,
+      "delivered_count": 25,
+      "origins": [
+        "RAW",
+        "WIKI_DERIVED"
+      ],
+      "dual_layer": true,
+      "citations": [
+        "R00001E2",
+        "R00001E3",
+        "R00001E4",
+        "R00001E6",
+        "R00003E1",
+        "R00003E3",
+        "R00003E4"
+      ],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "final_output": "**Two separate facts from the wiki:**\n\n**1. The NULL constraint** — it is the inverse of the NOT NULL constraint. It does *not* mean the column must contain null (which would be useless); it simply selects the default behavior that the column *might* be null [R00001E6][R00001E2]. It isn't part of the SQL standard and shouldn't be relied on in portable applications — it was added to PostgreSQL only for compatibility with other database systems [R00001E4]. Its practical appeal is that it makes a constraint easy to toggle on/off in a script file [R00001E3].\n\n**2. Default transaction isolation level** — **Read Committed** is the default in PostgreSQL [R00003E3]. At that level, a `SELECT` (without `FOR UPDATE/SHARE`) sees only data committed before the query began — never uncommitted data or concurrent changes made during the query's execution; it sees a snapshot as of when the query starts, plus its own transaction's prior updates, and two successive `SELECT`s in one transaction can see different data [R00003E3]. The level can be changed with `SET TRANSACTION` [R00003E1][R00003E3]. Relatedly, PostgreSQL accepts all four standard levels but internally implements only three, since Read Uncommitted behaves like Read Committed [R00003E4].\n\nNote: one retrieved result (about a 7-year retention policy) was unrelated to either question and is not relevant here.\n\n**In short:** NULL is the permissive default-setting counterpart to NOT NULL (non-standard, non-portable) [R00001E4][R00001E6], and Read Committed is the default isolation level [R00003E3].",
+      "f1_wiki": 0.08071748878923767,
+      "f1_other": 0.018518518518518517,
+      "latency_ms": 5837.559100000362,
+      "calls_so_far": 107
+    },
+    {
+      "question_id": "C01",
+      "run_id": "6f5d9c8c-f6d2-40e9-b661-4f4755f47102",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "tool_calls": 0,
+      "delivered_count": 0,
+      "origins": [],
+      "dual_layer": false,
+      "citations": [],
+      "citations_valid": true,
+      "origin_all_correct": true,
+      "origin_checks": [],
+      "final_output": "I wasn't able to answer this from the published knowledge base — the Wiki tool returned errors on every attempt:\n\n- First call (HYBRID mode): `WIKI_QUERY_INVALID_ARGUMENT` — the request's intent/results were rejected as invalid.\n- Subsequent calls (HYBRID and default mode): `WIKI_BINDING_INVALID` — \"The bound Wiki publication has a revoked source.\"\n\nBecause the publication binding itself is revoked, there is no retrievable evidence for this version, and I can't cite any source ids. I won't answer from memory in place of published evidence, since that would risk stating unsupported facts about PostgreSQL internals.\n\nOptions to move forward:\n1. Have the Wiki publication re-bound to a valid, non-revoked source and retry.\n2. Ask me again with a narrower query if the binding is fixed (e.g., \"PostgreSQL isolation level enum values in source\").\n3. If you're okay with a non-Wiki, unsourced answer, tell me explicitly and I'll answer from general knowledge, clearly flagged as uncited.",
+      "mode": "frozen_run_continuation",
+      "latency_ms": 6408.434500001022
+    }
+  ],
+  "refusals": [
+    {
+      "question_id": "C02",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    },
+    {
+      "question_id": "C03",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    },
+    {
+      "question_id": "C04",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    },
+    {
+      "question_id": "C05",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    },
+    {
+      "question_id": "C06",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    },
+    {
+      "question_id": "C07",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    },
+    {
+      "question_id": "C08",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    },
+    {
+      "question_id": "C09",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    },
+    {
+      "question_id": "C10",
+      "refused": true,
+      "error_code": "WIKI_PUBLICATION_REVOKED"
+    }
+  ],
+  "group_c": {
+    "creation_refusal_rate": 1.0,
+    "frozen_run_tool_error": true,
+    "revoked_source": [
+      "isolation-levels",
+      "isolation-rc"
+    ]
+  },
+  "gates": {
+    "citation_validity": 1.0,
+    "origin_correctness": 1.0,
+    "dual_layer_rate_b": 0.6,
+    "group_c_refusal_rate": 1.0,
+    "total_gateway_calls": 111
+  },
+  "status": "completed"
+}

@@ -1,0 +1,95 @@
+{
+ "declared_at_utc": "2026-10-25T00:00:00Z",
+ "scope": "W5 end-to-end acceptance for the wiki-native work order: AgentVersion-published WikiBinding, run-frozen resolution, and the native query_wiki tool delivering the unified RAW/WIKI_DERIVED evidence envelope through a real agent run.",
+ "work_order": "docs/reviews/AgentHub-Wiki原生绑定施工工作单-269d9b9.md",
+ "baseline_commit": "318f604",
+ "corpus_hash": "38d4fc0f7e5a0cd646d63cb834a96ab869a0d26051a3dd9640c7dd74ea3d4e37",
+ "corpus": {
+  "pre_publication": [
+   "constraints-check",
+   "constraints-notnull",
+   "constraints-unique",
+   "unique-indexes",
+   "isolation-levels",
+   "isolation-rc"
+  ],
+  "note": "All sources are ingested BEFORE wiki compilation; query_wiki's raw retriever is snapshot-scoped by design. Group C revokes both isolation sources."
+ },
+ "sampling_discipline": {
+  "source": "work order W5: engineering milestone, model calls concentrated here, <=200 total",
+  "sample": "50 questions = 20 pure-wiki (group A) + 20 hybrid-required (group B) + 10 post-revocation refusal (group C); ~2 gateway calls per A/B run, 0 calls for structural C refusals, ~6-8 wiki compile calls, 2 calls for the one frozen-run continuation demo",
+  "calls_cap": 200
+ },
+ "groups": {
+  "A_pure_wiki": {
+   "n": 20,
+   "expectation": "agent run calls query_wiki; delivered evidence labelled WIKI_DERIVED; final answer cites delivered short ids",
+   "gates": [
+    "citation validity 100% of [n] markers resolve to delivered view ids",
+    "origin labels 100% correct (structural check)",
+    "descriptive SQuAD token F1 reported against preregistered gold, compared descriptively with the frozen independent-API WIKI-mode answers of docs/wiki/live-result-20261025.json (no new experimental gate)"
+   ]
+  },
+  "B_hybrid_required": {
+   "n": 20,
+   "expectation": "questions combine facts across sources; the harness system prompt instructs the agent to call query_wiki with mode=HYBRID for synthesis questions, which forces both the wiki and the snapshot-scoped raw retriever; every delivered item is origin-labelled",
+   "gates": [
+    "origin labels 100% correct across all delivered items (structural, database adjudication)",
+    "citation validity 100%",
+    "dual-layer delivery rate reported: fraction of B runs whose delivered evidence contains both RAW and WIKI_DERIVED; preregistered expectation >=80%, deviations reported with causes"
+   ]
+  },
+  "C_revoked_refusal": {
+   "n": 10,
+   "expectation": "after tombstoning one source revision, every attempt to answer is refused",
+   "gates": [
+    "refusal rate 100%: 10/10 new runs refused at creation with WIKI_PUBLICATION_REVOKED (work order W3-3); plus one pre-revocation prepared run demonstrated separately as the frozen-run tool-level fail-closed path (WIKI_BINDING_INVALID tool error, answer must not quote the revoked source)"
+   ]
+  }
+ },
+ "comparison": {
+  "baseline": "docs/wiki/live-result-20261025.json (independent Wiki API, 6 cases, WIKI/RAG/HYBRID, 23 gateway calls, build 9beb449) reused frozen as the descriptive historical baseline; no re-run",
+  "usage": "group A descriptive F1 vs that run's WIKI-mode answers; same-corpus, different question sets, therefore descriptive only"
+ },
+ "zero_api_gates": [
+  "fresh-database migration 0001->0034 applies (verified 2026-10-25 on scratch DB agenthub_w2_migration_check / agenthub_w4_native_tool)",
+  "full unit suite green; full integration suite green on a fresh PostgreSQL database (288-targeted + new binding/run/tool groups)",
+  "structural origin check: every delivered item's origin decidable against the database"
+ ],
+ "hard_gates": [
+  "citation validity 100% across groups A and B",
+  "origin-label correctness 100% across groups A and B",
+  "group C refusal rate 100%"
+ ],
+ "questions": "questions.json (50 entries, frozen before first model call; group C reuses A-style questions whose answers live in the to-be-revoked source)",
+ "evaluator_versions": {
+  "citation-check": "structural-v1 (marker in delivered id set)",
+  "origin-check": "structural-v1 (database adjudication)",
+  "f1": "squad-token-v1 (descriptive only)",
+  "refusal-check": "error-code-v1 (WIKI_PUBLICATION_REVOKED / WIKI_BINDING_INVALID)"
+ },
+ "abort_rules": [
+  "gateway calls exceed 200 -> abort, report partial",
+  "compile fails twice -> abort, report"
+ ],
+ "agent_configuration": {
+  "system_prompt": "Answer from the published knowledge using the query_wiki tool. For questions that ask you to combine, compare, or synthesize multiple facts, call query_wiki with mode=HYBRID. Cite evidence using its short id in square brackets.",
+  "runtime": {
+   "max_tool_calls": 3,
+   "max_steps": 13
+  },
+  "disclosure": "the synthesis instruction is harness configuration, preregistered here; it is not a code path"
+ },
+ "amendments": [
+  {
+   "at": "2026-10-25 (before first successful compile; ~10 gateway calls spent on failed compiles)",
+   "change": "corpus v2: split constraints-basics and isolation-basics into smaller sources; group C revokes isolation-levels and isolation-rc; group A/B question text unchanged",
+   "reason": "repeated WIKI_COMPILER_INVALID_OUTPUT with finish_reason=length (model output truncated at the frozen 4096-token ceiling on the large single-source chunks); smaller sources reduce per-chunk output"
+  },
+  {
+   "at": "2026-10-25 (before first successful compile; ~15 gateway calls spent on failed compiles)",
+   "change": "compiler plan max_tokens 4096 -> 8192; corpus unchanged from v2; question set unchanged",
+   "reason": "per-chunk extraction output measured at up to 4069 tokens with finish_reason=stop; the 4096 ceiling truncated long outputs mid-JSON. Environment knob only, no algorithm or contract change."
+  }
+ ]
+}

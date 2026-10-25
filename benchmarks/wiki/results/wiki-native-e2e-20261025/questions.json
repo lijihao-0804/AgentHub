@@ -1,0 +1,366 @@
+{
+ "schema_version": 1,
+ "frozen_at": "2026-10-25",
+ "questions": [
+  {
+   "id": "A01",
+   "group": "A",
+   "question": "What is the most generic constraint type in PostgreSQL?",
+   "gold": "a check constraint"
+  },
+  {
+   "id": "A02",
+   "group": "A",
+   "question": "What key word introduces a named constraint in PostgreSQL?",
+   "gold": "the key word CONSTRAINT"
+  },
+  {
+   "id": "A03",
+   "group": "A",
+   "question": "Can a check constraint in PostgreSQL refer to several columns?",
+   "gold": "yes"
+  },
+  {
+   "id": "A04",
+   "group": "A",
+   "question": "Is a check constraint satisfied if the check expression evaluates to the null value?",
+   "gold": "yes, it is satisfied"
+  },
+  {
+   "id": "A05",
+   "group": "A",
+   "question": "Does PostgreSQL support CHECK constraints that reference table data other than the new or updated row being checked?",
+   "gold": "no"
+  },
+  {
+   "id": "A06",
+   "group": "A",
+   "question": "What does a not-null constraint simply specify in PostgreSQL?",
+   "gold": "that a column must not assume the null value"
+  },
+  {
+   "id": "A07",
+   "group": "A",
+   "question": "According to most database designs, how many columns should be marked not null?",
+   "gold": "the majority of columns"
+  },
+  {
+   "id": "A08",
+   "group": "A",
+   "question": "In PostgreSQL, where does the constraint definition come, just like default value definitions?",
+   "gold": "after the data type"
+  },
+  {
+   "id": "A09",
+   "group": "A",
+   "question": "What do unique constraints ensure about the data contained in a column or a group of columns?",
+   "gold": "that it is unique among all the rows in the table"
+  },
+  {
+   "id": "A10",
+   "group": "A",
+   "question": "By default, are two null values in the columns of a unique constraint considered equal?",
+   "gold": "no, two null values are not considered equal"
+  },
+  {
+   "id": "A11",
+   "group": "A",
+   "question": "Which index type can currently be declared unique?",
+   "gold": "only B-tree indexes"
+  },
+  {
+   "id": "A12",
+   "group": "A",
+   "question": "When an index is declared unique, what happens to multiple table rows with equal indexed values?",
+   "gold": "they are not allowed"
+  },
+  {
+   "id": "A13",
+   "group": "A",
+   "question": "Does PostgreSQL automatically create a unique index when a unique constraint or primary key is defined?",
+   "gold": "yes, it automatically creates a unique index"
+  },
+  {
+   "id": "A14",
+   "group": "A",
+   "question": "Is there any need to manually create indexes on unique columns?",
+   "gold": "no, doing so would just duplicate the automatically-created index"
+  },
+  {
+   "id": "A15",
+   "group": "A",
+   "question": "How many distinct isolation levels are implemented internally in PostgreSQL?",
+   "gold": "only three"
+  },
+  {
+   "id": "A16",
+   "group": "A",
+   "question": "Which isolation level is the default in PostgreSQL?",
+   "gold": "Read Committed"
+  },
+  {
+   "id": "A17",
+   "group": "A",
+   "question": "Does PostgreSQL's Repeatable Read implementation allow phantom reads?",
+   "gold": "no, it does not allow phantom reads"
+  },
+  {
+   "id": "A18",
+   "group": "A",
+   "question": "Which is the most strict isolation level defined by the SQL standard?",
+   "gold": "Serializable"
+  },
+  {
+   "id": "A19",
+   "group": "A",
+   "question": "What command sets the transaction isolation level of a transaction?",
+   "gold": "SET TRANSACTION"
+  },
+  {
+   "id": "A20",
+   "group": "A",
+   "question": "How many levels of transaction isolation does the SQL standard define?",
+   "gold": "four"
+  },
+  {
+   "id": "B01",
+   "group": "B",
+   "question": "Combining the wiki facts: does PostgreSQL's Repeatable Read implementation allow phantom reads, and which index type can currently be declared unique?",
+   "gold_wiki": "it does not allow phantom reads",
+   "gold_other": "only B-tree indexes"
+  },
+  {
+   "id": "B02",
+   "group": "B",
+   "question": "Combining the wiki facts: which isolation level is the default in PostgreSQL, and does PostgreSQL automatically create a unique index when a unique constraint is defined?",
+   "gold_wiki": "Read Committed",
+   "gold_other": "yes, it automatically creates a unique index"
+  },
+  {
+   "id": "B03",
+   "group": "B",
+   "question": "Combining the wiki facts: how many distinct isolation levels are implemented internally, and what happens to multiple table rows with equal indexed values in a unique index?",
+   "gold_wiki": "only three",
+   "gold_other": "they are not allowed"
+  },
+  {
+   "id": "B04",
+   "group": "B",
+   "question": "Combining the wiki facts: which is the most strict isolation level defined by the SQL standard, and is there any need to manually create indexes on unique columns?",
+   "gold_wiki": "Serializable",
+   "gold_other": "no"
+  },
+  {
+   "id": "B05",
+   "group": "B",
+   "question": "Combining the wiki facts: how many levels of transaction isolation does the SQL standard define, and which index type can be declared unique?",
+   "gold_wiki": "four",
+   "gold_other": "only B-tree indexes"
+  },
+  {
+   "id": "B06",
+   "group": "B",
+   "question": "Combining the wiki facts: what command sets the transaction isolation level, and what does PostgreSQL automatically create for a primary key?",
+   "gold_wiki": "SET TRANSACTION",
+   "gold_other": "a unique index"
+  },
+  {
+   "id": "B07",
+   "group": "B",
+   "question": "Combining the wiki facts: which isolation level is the default, and what happens to rows with equal indexed values in a unique index?",
+   "gold_wiki": "Read Committed",
+   "gold_other": "they are not allowed"
+  },
+  {
+   "id": "B08",
+   "group": "B",
+   "question": "Combining the wiki facts: what does a not-null constraint simply specify, and what do unique constraints ensure?",
+   "gold_wiki": "that a column must not assume the null value",
+   "gold_other": "that the data is unique among all the rows in the table"
+  },
+  {
+   "id": "B09",
+   "group": "B",
+   "question": "Combining the wiki facts: does PostgreSQL support CHECK constraints that reference other table data, and by default are two null values in a unique constraint considered equal?",
+   "gold_wiki": "no",
+   "gold_other": "no, they are not considered equal"
+  },
+  {
+   "id": "B10",
+   "group": "B",
+   "question": "Combining the wiki facts: what is the most generic constraint type, and which isolation level is the default?",
+   "gold_wiki": "a check constraint",
+   "gold_other": "Read Committed"
+  },
+  {
+   "id": "B11",
+   "group": "B",
+   "question": "Combining the wiki facts: does PostgreSQL's Repeatable Read allow phantom reads, and what do unique constraints ensure?",
+   "gold_wiki": "no",
+   "gold_other": "that the data is unique among all the rows in the table"
+  },
+  {
+   "id": "B12",
+   "group": "B",
+   "question": "Combining the wiki facts: what key word introduces a named constraint, and how many distinct isolation levels are implemented internally?",
+   "gold_wiki": "the key word CONSTRAINT",
+   "gold_other": "only three"
+  },
+  {
+   "id": "B13",
+   "group": "B",
+   "question": "Combining the wiki facts: is a check constraint satisfied when its expression evaluates to null, and which is the most strict isolation level in the SQL standard?",
+   "gold_wiki": "yes",
+   "gold_other": "Serializable"
+  },
+  {
+   "id": "B14",
+   "group": "B",
+   "question": "Combining the wiki facts: how many columns should be marked not null according to most database designs, and which index type can be declared unique?",
+   "gold_wiki": "the majority of columns",
+   "gold_other": "only B-tree indexes"
+  },
+  {
+   "id": "B15",
+   "group": "B",
+   "question": "Combining the wiki facts: where does the constraint definition come, and how many levels of transaction isolation does the SQL standard define?",
+   "gold_wiki": "after the data type",
+   "gold_other": "four"
+  },
+  {
+   "id": "B16",
+   "group": "B",
+   "question": "Combining the wiki facts: what do unique constraints ensure, and which isolation level does not allow phantom reads?",
+   "gold_wiki": "that the data is unique among all the rows in the table",
+   "gold_other": "Repeatable Read"
+  },
+  {
+   "id": "B17",
+   "group": "B",
+   "question": "Combining the wiki facts: is there a need to manually create indexes on unique columns, and what command sets the transaction isolation level?",
+   "gold_wiki": "no",
+   "gold_other": "SET TRANSACTION"
+  },
+  {
+   "id": "B18",
+   "group": "B",
+   "question": "Combining the wiki facts: what does PostgreSQL automatically create when a unique constraint or primary key is defined, and can you request any of the four standard isolation levels?",
+   "gold_wiki": "a unique index",
+   "gold_other": "yes"
+  },
+  {
+   "id": "B19",
+   "group": "B",
+   "question": "Combining the wiki facts: can a check constraint refer to several columns, and which isolation level's implementation does not allow phantom reads?",
+   "gold_wiki": "yes",
+   "gold_other": "Repeatable Read"
+  },
+  {
+   "id": "B20",
+   "group": "B",
+   "question": "Combining the wiki facts: what does the NULL constraint do, and which isolation level is the default?",
+   "gold_wiki": "it does not mean that the column must be null",
+   "gold_other": "Read Committed"
+  },
+  {
+   "id": "C01",
+   "group": "C",
+   "question": "How many distinct isolation levels are implemented internally in PostgreSQL?",
+   "gold": "only three",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C02",
+   "group": "C",
+   "question": "Which isolation level is the default in PostgreSQL?",
+   "gold": "Read Committed",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C03",
+   "group": "C",
+   "question": "Does PostgreSQL's Repeatable Read implementation allow phantom reads?",
+   "gold": "no",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C04",
+   "group": "C",
+   "question": "Which is the most strict isolation level defined by the SQL standard?",
+   "gold": "Serializable",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C05",
+   "group": "C",
+   "question": "What command sets the transaction isolation level of a transaction?",
+   "gold": "SET TRANSACTION",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C06",
+   "group": "C",
+   "question": "How many levels of transaction isolation does the SQL standard define?",
+   "gold": "four",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C07",
+   "group": "C",
+   "question": "Can you request any of the four standard transaction isolation levels in PostgreSQL?",
+   "gold": "yes",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C08",
+   "group": "C",
+   "question": "In Read Committed mode, what does a SELECT query see according to the wiki?",
+   "gold": "data committed before the query began",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C09",
+   "group": "C",
+   "question": "Are all four standard isolation levels implemented as distinct internal levels in PostgreSQL?",
+   "gold": "no, only three",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  },
+  {
+   "id": "C10",
+   "group": "C",
+   "question": "Which isolation level's implementation does not allow phantom reads?",
+   "gold": "Repeatable Read",
+   "revoked_source": [
+    "isolation-levels",
+    "isolation-rc"
+   ]
+  }
+ ]
+}
