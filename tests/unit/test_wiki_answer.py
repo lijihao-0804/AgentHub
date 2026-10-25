@@ -413,7 +413,10 @@ async def test_insufficient_model_answer_must_have_no_markers_or_ids() -> None:
         _retrieval(),
     )
 
-    assert result["answer"] == "Insufficient evidence to answer from the selected knowledge binding."
+    assert (
+        result["answer"]
+        == "Insufficient evidence to answer from the selected knowledge binding."
+    )
     assert result["citations"] == []
     assert result["insufficient_evidence"] is True
     assert result["telemetry"]["request_count"] == 1
