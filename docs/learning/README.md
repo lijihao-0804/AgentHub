@@ -62,6 +62,8 @@
 
 | 资料 | 作用 |
 | --- | --- |
+| [RAG + Wiki 当前结构与设计理由](13-rag-wiki-architecture-and-rationale.md) | 优先理解并轨后的职责、版本、查询路由与维护边界，再看历史 RAG 复盘；附官方资料与实际源码 |
+| [RAG 开发复盘：开发线与技术心得](12-rag-development-retrospective.md) | 串起 2026-09 至 10 月的提交、实验数据、踩坑与未采用方案；先读开发过程，再看总结和证据索引 |
 | [架构参考](../architecture.md) | 查完整图与边界，不作为第二套主教材 |
 | [当前状态](../current-state.md) / [验收索引](../reviews/README.md) | 查已经证明什么、还有什么未知 |
 | [数据与评测索引](../benchmark/README.md) | 原始数据、结果、runner 和复现边界 |
