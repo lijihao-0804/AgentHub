@@ -205,7 +205,29 @@ def to_wire(messages):
     return [_message_payload(message) for message in messages]
 
 
-async def admit_result(query, payload, tool_definition, *, limit=5, no_rag=False, tool_cap=4000):
+def _expand_compact_view(payload, registry):
+    """Restore chunk ids on compact-view items for funnel scoring only.
+
+    The returned structure is never sent to a model; it exists so the same
+    score_records accounting applies to both projection shapes.
+    """
+    if not isinstance(payload, dict) or payload.get("evidence_format") != "rag_view_v1":
+        return payload
+    expanded = dict(payload)
+    rows = []
+    for item in payload.get("results", []):
+        if not isinstance(item, dict):
+            rows.append(item)
+            continue
+        chunk_id = registry.get(item.get("id"))
+        rows.append({**item, "chunk_id": chunk_id} if chunk_id else item)
+    expanded["results"] = rows
+    return expanded
+
+
+async def admit_result(
+    query, payload, tool_definition, *, limit=5, no_rag=False, tool_cap=4000, extra=None
+):
     runtime = {
         "context_budget": {
             "reserved_output_tokens": 256,
@@ -244,6 +266,14 @@ async def admit_result(query, payload, tool_definition, *, limit=5, no_rag=False
         update = await graph.observation(state)
         state.update(update)
         observation = json.loads(state["messages"][-1].content)
+        if extra is not None:
+            # Compact-view citations carry short ids; the run-private registry
+            # maps them back to chunk ids for funnel scoring without ever
+            # entering the model-visible payload.
+            extra["registry"] = {
+                identifier: entry["reference"]["chunk_id"]
+                for identifier, entry in update.get("rag_evidence_registry", {}).items()
+            }
     admitted = graph._admit_context(state)
     final = next((json.loads(m.content) for m in admitted.messages if m.role == "tool"), None)
     return observation, final, to_wire(admitted.messages), asdict_usage(admitted.usage)
@@ -359,6 +389,7 @@ async def replay(args):
         "legacy5_aligned",
         "structured5",
         "structured10",
+        "compact5",
         "no_rag",
         "gold_budgeted",
     }:
@@ -410,10 +441,24 @@ async def replay(args):
             captures, arms = {}, {}
             for profile in profiles:
                 limit = 10 if profile == "structured10" else 5
-                if profile not in {"no_rag", "gold_budgeted"} and limit not in captures:
+                profile_definition = tool_definition
+                # compact5 shares structured5's two-layer 8000 budget and adds
+                # the compact_v1 projection; it retrieves under its own
+                # definition and never mutates the shared one.
+                if profile == "compact5":
+                    profile_definition = replace(
+                        tool_definition,
+                        retrieval_config={
+                            **tool_definition.retrieval_config,
+                            "final_top_k": 5,
+                            "evidence_projection": "compact_v1",
+                        },
+                    )
+                capture_key = f"{profile}:{limit}" if profile == "compact5" else limit
+                if profile not in {"no_rag", "gold_budgeted"} and capture_key not in captures:
                     payload = await search_knowledge(
                         context,
-                        tool_definition,
+                        profile_definition,
                         {"query": query["query"], "limit": limit},
                         _Session,
                         retriever=retriever,
@@ -421,7 +466,7 @@ async def replay(args):
                     raw = [
                         {"chunk_id": e.chunk_id, "snippet": e.text} for e in retriever.last.evidence
                     ]
-                    captures[limit] = payload, score_records(raw, mapping, units, query)
+                    captures[capture_key] = payload, score_records(raw, mapping, units, query)
                 if profile == "no_rag":
                     payload, retrieval_metric = {}, score_records([], mapping, units, query)
                 elif profile == "gold_budgeted":
@@ -457,8 +502,8 @@ async def replay(args):
                     payload = {"results": results, "evidence_refs": references}
                     retrieval_metric = score_records(results, mapping, units, query)
                 else:
-                    payload, retrieval_metric = captures[limit]
-                observed_definition = tool_definition
+                    payload, retrieval_metric = captures[capture_key]
+                observed_definition = profile_definition
                 if profile in {"legacy5", "legacy5_aligned"}:
                     observed_definition = replace(
                         tool_definition,
@@ -468,6 +513,7 @@ async def replay(args):
                             if k != "context_budget_bytes"
                         },
                     )
+                admit_extra: dict = {}
                 observation, final, messages, usage = await admit_result(
                     query["query"],
                     payload,
@@ -475,7 +521,12 @@ async def replay(args):
                     limit=limit,
                     no_rag=profile == "no_rag",
                     tool_cap=8000 if profile == "legacy5_aligned" else 4000,
+                    extra=admit_extra,
                 )
+                registry = admit_extra.get("registry") or None
+                if registry:
+                    observation = _expand_compact_view(observation, registry)
+                    final = _expand_compact_view(final, registry)
                 final_records = recover_records(final)
                 if row["query_id"] in compact(messages):
                     raise ValueError("dataset question identifier leaked into model messages")
