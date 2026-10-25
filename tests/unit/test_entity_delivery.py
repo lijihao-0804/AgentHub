@@ -127,7 +127,7 @@ async def test_service_uses_frozen_plan_and_aborts_oversized_evidence_before_cal
     result = await reader.read(None, plan, task(), views(), "baseline")
     assert result.delivery["answer_values"] == ["SQuAD"]
     assert gateway.calls[0][1] is plan
-    too_large = [{**views()[0], "text": "original evidence. " * 1000}]
+    too_large = [{**views()[0], "text": "original evidence. " * 4000}]
     with pytest.raises(ValueError, match="context admission"):
         await reader.read(None, plan, task(), too_large, "typed")
     assert len(gateway.calls) == 1

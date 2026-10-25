@@ -391,17 +391,17 @@ def _qa_select_evidence(texts: tuple[str, ...], *, max_chars: int):
 
 
 def test_citation_evidence_selection_never_cuts_a_record_mid_string() -> None:
-    selected = _qa_select_evidence(("a" * 900, "b" * 900), max_chars=1_000)
+    # Approx-token units (FIX-05): 900 ASCII chars cost 225 units, so the
+    # 300-unit bound admits one whole record and skips the second.
+    selected = _qa_select_evidence(("a" * 900, "b" * 900), max_chars=300)
 
-    # The first record fits whole; the second would be cut mid-string and is
-    # dropped entirely instead.
     assert [item.text for item in selected] == ["a" * 900]
 
 
 def test_citation_evidence_selection_skips_oversized_and_admits_later_smaller() -> None:
-    # Skip-continue, matching the observation projection: an oversized early
-    # record never terminates selection.
-    selected = _qa_select_evidence(("x" * 2_000, "y" * 100), max_chars=1_000)
+    # Skip-continue under approx-token units: the 3000-char record costs 750
+    # units and cannot fit the 300-unit bound; the smaller one still enters.
+    selected = _qa_select_evidence(("x" * 3_000, "y" * 100), max_chars=300)
 
     assert [item.text for item in selected] == ["y" * 100]
 

@@ -26,11 +26,11 @@ from packages.agent_runtime.adapters.langgraph import (
     resume_command,
 )
 from packages.agent_runtime.context_budget import (
+    ApproxTokenEstimator,
     ContextBudgetConfig,
     ContextBudgetPolicy,
     ContextCategory,
     ContextMessage,
-    Utf8ByteTokenEstimator,
 )
 from packages.agent_runtime.event_store import RunEventReader, RunEventRecorder
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
@@ -2674,7 +2674,7 @@ class _AgentRunGraph:
                             result.data["results"],
                             result.data["evidence_refs"],
                             budget=evidence_budget,
-                            estimator=Utf8ByteTokenEstimator().estimate,
+                            estimator=ApproxTokenEstimator().estimate,
                             citation_prefix=f"R{rag_sequence:05d}E",
                         )
                         if plan is not None and not set(plan.registry).intersection(rag_registry):
@@ -2688,7 +2688,7 @@ class _AgentRunGraph:
                             "data": result.data,
                         },
                         evidence_budget,
-                        Utf8ByteTokenEstimator(),
+                        ApproxTokenEstimator(),
                     )
                 rag_evidence_projected = True
                 if projected is not None:
@@ -3088,7 +3088,7 @@ def _bounded_tool_result(
             payload["error_code"] = "TOOL_RESULT_NOT_SERIALIZABLE"
             payload["message"] = "The tool returned unsupported data."
             return payload
-    estimator = Utf8ByteTokenEstimator()
+    estimator = ApproxTokenEstimator()
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     if estimator.estimate(encoded) <= max_tool_result_tokens:
         return payload
@@ -3106,6 +3106,37 @@ def _bounded_tool_result(
         "truncated": True,
         "data": {"truncated": True, "preview": ""},
     }
+    # Structured lists keep whole items: take-or-skip from the front instead
+    # of slicing the serialized JSON mid-string, which used to cut the first
+    # record in half and spend the budget on leading metadata (FIX-04).
+    # Non-list JSON (or unserializable shapes) keeps the prefix cut below.
+    bounded_items: list[Any] | None = None
+    inner_results: Any = None
+    if isinstance(result.data, Mapping):
+        inner_results = result.data.get("results")
+    if isinstance(inner_results, list):
+        bounded_items = []
+        for item in inner_results:
+            candidate = dict(projection)
+            candidate["data"] = {"truncated": True, "results": [*bounded_items, item]}
+            if (
+                estimator.estimate(
+                    json.dumps(
+                        candidate, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+                    )
+                )
+                <= max_tool_result_tokens
+            ):
+                bounded_items.append(item)
+            else:
+                break
+    if bounded_items:
+        kept = dict(projection)
+        kept["data"] = {"truncated": True, "results": bounded_items}
+        dropped = len(inner_results) - len(bounded_items)
+        if dropped:
+            kept["dropped_results"] = dropped
+        return kept
     # Keep a deterministic JSON preview of the result.  It is explicitly a
     # projection, not an attempt to preserve the original business shape.
     low, high = 0, len(encoded_data)
@@ -3141,6 +3172,7 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "estimated_input_before",
         "estimated_input_after",
         "truncated",
+        "window_utilization",
         "dropped_exchange_count",
         "tool_count",
         "step_count",

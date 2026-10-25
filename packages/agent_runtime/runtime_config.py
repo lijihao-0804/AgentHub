@@ -34,6 +34,38 @@ DEFAULT_CONTEXT_BUDGET: dict[str, int] = {
     "max_tool_result_tokens": 4_000,
 }
 
+# Shares of the smallest model window allocated to each pool when a newly
+# published version does not customize the pool values. Pre-registered in
+# benchmarks/public_rag/results/budget-unify-20261025/protocol.json; the
+# numbers only change through a new pre-registration. The legacy fixed
+# defaults above stay as the floor baseline for explicitly configured
+# versions (their frozen numbers are never rewritten).
+EVIDENCE_POOL_SHARE = 0.25
+TOOL_RESULT_POOL_SHARE = 0.15
+MEMORY_POOL_SHARE = 0.08
+_MIN_DERIVED_POOL = 500
+
+
+def derive_context_budget(window_tokens: int) -> dict[str, int]:
+    """Derive pool sizes from the model window (approx-token units)."""
+    window = int(window_tokens)
+    if window <= 0:
+        raise ValueError("window_tokens must be positive")
+    return {
+        "reserved_output_tokens": DEFAULT_CONTEXT_BUDGET["reserved_output_tokens"],
+        "max_retrieval_tokens": max(_MIN_DERIVED_POOL, int(window * EVIDENCE_POOL_SHARE)),
+        "max_tool_result_tokens": max(
+            _MIN_DERIVED_POOL, int(window * TOOL_RESULT_POOL_SHARE)
+        ),
+    }
+
+
+def derive_memory_tokens(window_tokens: int) -> int:
+    window = int(window_tokens)
+    if window <= 0:
+        raise ValueError("window_tokens must be positive")
+    return max(_MIN_DERIVED_POOL, int(window * MEMORY_POOL_SHARE))
+
 # Server-owned ceiling for newly published long-term-memory-enabled versions.
 # It is deliberately outside DEFAULT_CONTEXT_BUDGET so memory-off versions keep
 # their historical resolved-spec hash and shared evidence semantics.
@@ -69,7 +101,12 @@ __all__ = [
     "DEFAULT_MEMORY_TOKENS",
     "DEFAULT_RUNTIME_LIMITS",
     "DEFAULT_RUN_COST_LIMIT_MICRO_USD",
+    "EVIDENCE_POOL_SHARE",
     "MAX_CONTEXT_BUDGET",
     "MAX_RUNTIME_LIMITS",
     "MAX_RUN_COST_LIMIT_MICRO_USD",
+    "MEMORY_POOL_SHARE",
+    "TOOL_RESULT_POOL_SHARE",
+    "derive_context_budget",
+    "derive_memory_tokens",
 ]

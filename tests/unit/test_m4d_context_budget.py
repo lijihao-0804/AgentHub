@@ -73,19 +73,25 @@ def _policy(
     return ContextBudgetPolicy(spec, config, estimator=estimator or _CharEstimator())
 
 
-def test_utf8_estimator_is_deterministic_and_offline() -> None:
-    estimator = Utf8ByteTokenEstimator()
+def test_approx_estimator_is_deterministic_offline_and_language_aware() -> None:
+    from packages.agent_runtime.context_budget import ApproxTokenEstimator
 
-    assert estimator.estimate("hello") == len(b"hello")
-    assert estimator.estimate("你好世界") == len("你好世界".encode())
-    assert estimator.estimate("🙂") == len("🙂".encode())
+    estimator = ApproxTokenEstimator()
+
+    # ASCII at roughly 4 chars per token, CJK at roughly 1.6 chars per token,
+    # wide emoji in the CJK bucket: deterministic, offline, and language
+    # neutral in magnitude instead of charging bytes.
+    assert estimator.estimate("hello") == 2
+    assert estimator.estimate("你好世界") == 3
+    assert estimator.estimate("🙂") == 1
     assert estimator.estimate("") == 0
+    assert ApproxTokenEstimator is Utf8ByteTokenEstimator  # deprecated alias
 
 
-def test_utf8_estimator_rejects_mandatory_non_ascii_context_when_bytes_exceed_budget() -> None:
-    mandatory_text = "你好世界"
+def test_estimator_rejects_mandatory_context_when_units_exceed_budget() -> None:
+    mandatory_text = "你好世界"  # 3 approx-token units
     profile = _profile(
-        context=len(mandatory_text.encode("utf-8")),
+        context=3,
         max_tokens=1,
     )
     policy = ContextBudgetPolicy(

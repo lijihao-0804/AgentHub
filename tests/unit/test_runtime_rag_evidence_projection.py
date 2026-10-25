@@ -8,6 +8,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
+from packages.agent_runtime.context_budget import ApproxTokenEstimator
 from packages.agent_runtime.frozen import FrozenAgentSpec
 from packages.agent_runtime.rag_evidence import project_rag_evidence_payload
 from packages.agent_runtime.runtime import _AgentRunGraph
@@ -232,7 +233,7 @@ async def test_observation_uses_category_budget_and_skips_oversized_record() -> 
     definition = _definition()
     references = [_identifiers(1), _identifiers(2), _identifiers(3)]
     records = [
-        _record(1, "x" * 1_000),
+        _record(1, "x" * 4_000),
         _record(2, "small"),
         _record(3, "later"),
     ]
@@ -297,11 +298,12 @@ async def test_observation_default_budget_measures_real_record_delivery() -> Non
     payload = json.loads(update["messages"][-1].content)
     assert payload["evidence_format"] == "rag_records_v1"
     delivered = payload["data"]["results"]
-    assert delivered, "at least one complete record must survive the default budget"
-    assert delivered == records[: len(delivered)]
-    assert payload["data"]["evidence_refs"] == references[: len(delivered)]
-    assert payload["truncated"] is True
-    assert len(update["messages"][-1].content.encode("utf-8")) <= 5_000
+    # Approx-token accounting fits every 1200-char Chinese record (each
+    # ~750 units) into the 5000-unit default evidence pool.
+    assert delivered == records
+    assert payload["data"]["evidence_refs"] == references
+    assert payload["truncated"] is False
+    assert ApproxTokenEstimator().estimate(update["messages"][-1].content) <= 5_000
 
 
 @pytest.mark.asyncio
@@ -309,7 +311,7 @@ async def test_observation_all_oversized_records_yield_empty_envelope_not_previe
     graph = _graph()
     definition = _definition(context_budget_bytes=None)
     references = [_identifiers(1)]
-    records = [_record(1, "x" * 10_000)]
+    records = [_record(1, "x" * 24_000)]
 
     state = _observation_state(
         graph,
@@ -450,7 +452,7 @@ async def test_observation_clamped_budget_logs_two_layer_mismatch(
     )
     definition = _definition(context_budget_bytes=8_000)
     references = [_identifiers(1), _identifiers(2)]
-    records = [_record(1, "a" * 400), _record(2, "b" * 400)]
+    records = [_record(1, "a" * 4_000), _record(2, "b" * 4_000)]
 
     state = _observation_state(
         graph,
@@ -701,7 +703,7 @@ def _admission_state(
 
 def test_final_policy_tightens_rag_pairs_with_estimator() -> None:
     references = [_identifiers(1), _identifiers(2)]
-    records = [_record(1, "a" * 200), _record(2, "b" * 1_000)]
+    records = [_record(1, "a" * 200), _record(2, "b" * 3_200)]
     projected = project_rag_evidence_payload(
         _payload(records, references), 4_000, _CharEstimator()
     )
@@ -726,7 +728,7 @@ def test_final_policy_tightens_rag_pairs_with_estimator() -> None:
 
 def test_final_policy_preserves_existing_truncated_true() -> None:
     references = [_identifiers(1), _identifiers(2)]
-    records = [_record(1, "a" * 200), _record(2, "b" * 1_000)]
+    records = [_record(1, "a" * 200), _record(2, "b" * 3_200)]
     projected = project_rag_evidence_payload(
         _payload(records, references), 4_000, _Utf8ByteEstimator()
     )
@@ -753,19 +755,19 @@ def test_final_policy_reserves_tool_message_metadata_before_rag_projection() -> 
         _payload(records, references), 10_000, _Utf8ByteEstimator()
     )
     assert full is not None
-    body_size = len(
+    body_size = ApproxTokenEstimator().estimate(
         json.dumps(
             full,
             ensure_ascii=False,
             sort_keys=True,
             separators=(",", ":"),
-        ).encode("utf-8")
+        )
     )
-    metadata_size = len("search_knowledge") + len("call-1")
+    metadata_size = ApproxTokenEstimator().estimate("search_knowledge" + "call-1")
     assert body_size + metadata_size > body_size
 
     state = _admission_state(
-        context_limit=20_000,
+        context_limit=200_000,
         max_retrieval_tokens=body_size,
         content=full,
     )

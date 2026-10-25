@@ -131,7 +131,9 @@ async def search_knowledge(
     text = arguments.get("query")
     if not isinstance(text, str) or not text.strip() or len(text) > _MAX_QUERY_LENGTH:
         raise ToolHandlerError("SEARCH_INVALID_ARGUMENT", "The search query is invalid.")
-    limit = arguments.get("limit", 5)
+    # A ceiling, not a target: the projection drops whatever the evidence
+    # budget cannot carry as a complete record (FIX-06).
+    limit = arguments.get("limit", 10)
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= _MAX_RESULTS:
         raise ToolHandlerError("SEARCH_INVALID_ARGUMENT", "The result limit is invalid.")
     if getattr(definition, "retrieval_config", None) and definition.retrieval_config.get(

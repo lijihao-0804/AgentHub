@@ -28,6 +28,8 @@ from packages.agent_runtime.runtime_config import (
     MAX_CONTEXT_BUDGET,
     MAX_RUN_COST_LIMIT_MICRO_USD,
     MAX_RUNTIME_LIMITS,
+    derive_context_budget,
+    derive_memory_tokens,
 )
 from packages.agent_runtime.tool_revisions import validate_tool_spec
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -337,7 +339,7 @@ class AgentPublishService:
         )
         resolved_model = await self._resolve_model(session, context, agent)
         _validate_published_context_budget(
-            _validate_runtime_config(agent.runtime_config), resolved_model
+            _resolved_runtime_config(agent.runtime_config, resolved_model), resolved_model
         )
         bindings = await self._resolve_knowledge(session, context, agent)
         tools = await self._resolve_tools(session, context, agent)
@@ -676,7 +678,7 @@ def _resolved_spec(
         },
         "retrieval": retrieval,
         "tools": list(tools),
-        "runtime": _validate_runtime_config(agent.runtime_config),
+        "runtime": _resolved_runtime_config(agent.runtime_config, model),
     }
 
 
@@ -823,6 +825,53 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
     else:
         result.pop("memory", None)
     return result
+
+
+
+def _resolved_runtime_config(
+    runtime_config: Mapping[str, Any],
+    resolved_model: tuple[tuple[ResolvedModelProfile, ...], dict[UUID, str]],
+) -> dict[str, Any]:
+    """Validate then window-derive pool defaults for a NEW publication.
+
+    A version that never customized its pools gets pools derived from the
+    smallest model window in the resolved chain instead of the legacy fixed
+    byte-sized numbers. Explicitly configured values win untouched (their
+    numbers merely read as approx-token units now); values below the
+    derived share are surfaced as INFO, never blocked. Already-published
+    specs are frozen rows and never pass through here.
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
+    validated = _validate_runtime_config(runtime_config)
+    windows = [
+        profile.capabilities.max_context_tokens
+        for profile in resolved_model[0]
+        if isinstance(profile.capabilities.max_context_tokens, int)
+    ]
+    if not windows:
+        return validated
+    window = min(windows)
+    derived = derive_context_budget(window)
+    budget = validated.get("context_budget", {})
+    if budget == DEFAULT_RUNTIME_CONFIG["context_budget"]:
+        validated["context_budget"] = derived
+    else:
+        for key, derived_value in derived.items():
+            if budget.get(key, 0) < derived_value:
+                logger.info(
+                    "context_pool_below_derived_share",
+                    extra={"key": key, "configured": budget.get(key), "derived": derived_value},
+                )
+    memory = validated.get("memory")
+    if (
+        isinstance(memory, dict)
+        and memory.get("long_term_memory")
+        and memory.get("max_memory_tokens") == DEFAULT_MEMORY_TOKENS
+    ):
+        memory["max_memory_tokens"] = derive_memory_tokens(window)
+    return validated
 
 
 def _validate_published_context_budget(

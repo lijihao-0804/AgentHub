@@ -12,6 +12,8 @@
 | **compact5（③档）** | 0.783 | 0.743 | 0.540 | 5.00 | **3900（−28.6%）** |
 | gold_budgeted（控制） | 1.000 | 1.000 | 1.000 | 2.56 | 3027 |
 
+> 脚注（FIX-10）：compact 臂 `complete_records=0` 为载荷形态错配——该指标按 rag_records 原形态逐字节比较，而 compact 视图以短 ID 组织；内容完整性以 `facts_visible` 与召回列为准（compact 与 structured 全部一致）。
+
 compact5 与 structured5 成员完全一致（短 ID 化不改变预算选择结果），证据质量零差异、零回归；纯效率差 1566B/题。
 
 ## G2-2 中文合成送达量（1200 字符块 × 5，零 API，无门槛）

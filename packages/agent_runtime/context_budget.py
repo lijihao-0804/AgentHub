@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import math
+import unicodedata
 from collections.abc import Hashable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from enum import StrEnum
@@ -110,18 +111,39 @@ class TokenEstimator(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class Utf8ByteTokenEstimator:
-    """Deterministic offline conservative UTF-8-byte token-unit estimator.
+class ApproxTokenEstimator:
+    """Deterministic offline language-aware approx-token estimator.
 
-    This is intentionally not an exact provider tokenizer count.  Treating
-    each UTF-8 byte as one token unit avoids underestimating non-ASCII text
-    without downloading or depending on a provider-specific tokenizer.
+    tokens ~= ceil(CJK_chars / 1.6 + other_chars / 4): a CJK character
+    carries roughly 1.6 token units under common BPE tokenizers and an
+    ASCII-ish character roughly 4 (about 4 characters per token for
+    English prose). The same content therefore costs the same order of
+    units in any language. The previous byte-per-unit accounting charged
+    Chinese roughly 5x English for equivalent content, which is the root
+    cause of "one Chinese record versus five English records" delivery.
+
+    Still intentionally not an exact provider tokenizer count: no network,
+    no tokenizer dependency, byte-for-byte reproducible. Inject a provider
+    estimator through ``ContextBudgetPolicy(estimator=...)`` when one is
+    ever available offline.
     """
 
     def estimate(self, text: str) -> int:
         if not isinstance(text, str):
             raise TypeError("TokenEstimator.estimate expects text")
-        return len(text.encode("utf-8"))
+        if not text:
+            return 0
+        cjk = 0
+        for character in text:
+            if unicodedata.east_asian_width(character) in ("W", "F"):
+                cjk += 1
+        return math.ceil(cjk / 1.6 + (len(text) - cjk) / 4)
+
+
+# Deprecated alias: the old name described byte counting, which this no
+# longer does. Kept so existing imports keep working; new code should use
+# the honest name.
+Utf8ByteTokenEstimator = ApproxTokenEstimator
 
 
 @dataclass(frozen=True, slots=True)
@@ -176,6 +198,11 @@ class ContextBudgetUsage:
     estimated_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
     retained_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
     truncated_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
+    # Share of the model window the admitted context actually uses
+    # (0.0-1.0). With byte-per-unit accounting this collapsed to a few
+    # percent on real Chinese traffic while the window looked "full";
+    # keeping it in the trace makes that failure mode visible forever.
+    window_utilization: float = 0.0
 
     def __post_init__(self) -> None:
         numeric = (
@@ -516,6 +543,9 @@ class ContextBudgetPolicy:
             estimated_by_category=estimated_by_category,
             retained_by_category=retained_by_category,
             truncated_by_category=truncated_by_category,
+            window_utilization=(
+                estimated_input_after / context_limit if context_limit > 0 else 0.0
+            ),
         )
         return ContextAdmissionResult(
             messages=admitted_messages,
@@ -1129,6 +1159,7 @@ __all__ = [
     "ContextItem",
     "ContextMessage",
     "TokenEstimator",
+    "ApproxTokenEstimator",
     "Utf8ByteTokenEstimator",
     "admit_context",
 ]

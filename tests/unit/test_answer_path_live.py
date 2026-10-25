@@ -57,4 +57,4 @@ def test_oversized_evidence_is_rejected_instead_of_silently_clipped():
     small = request_for(fixture_case(), "actual")
     assert admit(small, (profile,)) is small
     with pytest.raises(ValueError, match="would change"):
-        admit(request_for(fixture_case("Evidence. " * 1100), "actual"), (profile,))
+        admit(request_for(fixture_case("Evidence. " * 4400), "actual"), (profile,))

@@ -145,7 +145,7 @@ async def test_timeout_and_transport_are_unknown_without_retry(exception, error_
 
 
 async def test_context_budget_change_does_not_call_api():
-    huge = [{"document_id": "doc", "title": "", "text": "x" * 40000}]
+    huge = [{"document_id": "doc", "title": "", "text": "x" * 160000}]
 
     def handler(request):
         raise AssertionError("API must not be called")

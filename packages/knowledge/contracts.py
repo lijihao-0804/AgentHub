@@ -99,6 +99,13 @@ class RetrievalResult:
     trace: RetrievalTrace
 
 
+# Single source for the bounded selection profile shared by the evidence-set
+# combinator and its callers (FIX-08): a fourth, drifted copy of these caps
+# lived inline before.
+MAX_EVIDENCE_ITEMS = 10
+MAX_SELECTION_CANDIDATES = 20
+
+
 class SectionSelector(Protocol):
     """One bounded model call that picks relevant source sections.
 

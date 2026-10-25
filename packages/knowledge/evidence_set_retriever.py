@@ -12,6 +12,8 @@ from dataclasses import asdict, replace
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.context_selection import select_budgeted_records
 from packages.knowledge.contracts import (
+    MAX_EVIDENCE_ITEMS,
+    MAX_SELECTION_CANDIDATES,
     KnowledgeRetriever,
     RetrievalQuery,
     RetrievalResult,
@@ -36,9 +38,9 @@ class EvidenceSetKnowledgeRetriever:
     ) -> RetrievalResult:
         if (
             type(query.final_top_k) is not int
-            or not 1 <= query.final_top_k <= 10
+            or not 1 <= query.final_top_k <= MAX_EVIDENCE_ITEMS
             or type(query.candidate_top_k) is not int
-            or not 1 <= query.candidate_top_k <= 20
+            or not 1 <= query.candidate_top_k <= MAX_SELECTION_CANDIDATES
             or type(query.context_budget_bytes) is not int
             or not 2 <= query.context_budget_bytes <= 64000
             or query.evidence_projection is not None

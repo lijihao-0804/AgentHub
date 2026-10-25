@@ -146,13 +146,20 @@ def _select_evidence(
     still tried — the same skip-continue semantics the observation projection
     uses, so both entrances treat "does not fit" identically.
     """
+    # One accounting everywhere: the evidence bound counts approx-token
+    # units, not characters, so Chinese capacity equals English capacity
+    # (FIX-05). ``max_chars`` keeps its setting name for compatibility.
+    from packages.agent_runtime.context_budget import ApproxTokenEstimator
+
+    estimator = ApproxTokenEstimator()
     selected: list[_NumberedEvidence] = []
     used = 0
     for item in evidence:
-        if used + len(item.text) > max_chars:
+        cost = estimator.estimate(item.text)
+        if used + cost > max_chars:
             continue
         selected.append(_NumberedEvidence(len(selected) + 1, item, item.text))
-        used += len(item.text)
+        used += cost
     return tuple(selected)
 
 

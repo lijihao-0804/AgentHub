@@ -387,6 +387,7 @@ async def replay(args):
     if set(profiles) - {
         "legacy5",
         "legacy5_aligned",
+        "legacy10",
         "structured5",
         "structured10",
         "compact5",
@@ -440,7 +441,7 @@ async def replay(args):
             context = ToolExecutionContext(CONTEXT, UUID(int=9), "consumer-retrieval")
             captures, arms = {}, {}
             for profile in profiles:
-                limit = 10 if profile == "structured10" else 5
+                limit = 10 if profile in {"structured10", "legacy10"} else 5
                 profile_definition = tool_definition
                 # compact5 shares structured5's two-layer 8000 budget and adds
                 # the compact_v1 projection; it retrieves under its own
@@ -504,7 +505,7 @@ async def replay(args):
                 else:
                     payload, retrieval_metric = captures[capture_key]
                 observed_definition = profile_definition
-                if profile in {"legacy5", "legacy5_aligned"}:
+                if profile in {"legacy5", "legacy5_aligned", "legacy10"}:
                     observed_definition = replace(
                         tool_definition,
                         retrieval_config={

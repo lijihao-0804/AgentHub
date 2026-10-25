@@ -104,7 +104,7 @@ def test_one_attempt_status_and_exact_fallback(case):
 
 def test_budget_changed_evidence_causes_no_request():
     baseline, sections = inputs()
-    sections[0]["content"] = "x" * 70000
+    sections[0]["content"] = "x" * 280000
     request, budget = admitted_request("query", sections)
     assert request is None
     assert budget["estimated_input_after"] <= budget["available_input"]

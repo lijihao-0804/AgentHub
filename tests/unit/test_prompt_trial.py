@@ -52,7 +52,7 @@ def test_changed_or_duplicate_trusted_instruction_cannot_enter_trial():
 
 def test_prompt_budget_cannot_silently_remove_original_sources():
     wire = messages()
-    wire[0]["content"] += "x" * 17000
+    wire[0]["content"] += "x" * 68000
     with pytest.raises(AgentHubError) as caught:
         prompt_request(wire, "task_contract")
     assert caught.value.code == "AGENT_CONTEXT_BUDGET_EXCEEDED"
