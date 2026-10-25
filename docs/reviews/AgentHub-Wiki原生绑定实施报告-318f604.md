@@ -63,4 +63,4 @@
 
 ## 提交与推送
 
-每 W 独立提交（`wiki-native W<n>`），按既有授权本地提交完毕；**推送待用户批准**。
+每 W 独立提交（`wiki-native W<n>`），按既有授权本地提交完毕；已推送（`269d9b9..3cbc34e`），CI success（run 40203150895，frontend+backend 双绿）。
