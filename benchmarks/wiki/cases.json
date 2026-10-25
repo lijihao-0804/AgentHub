@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "scope": "DEV smoke comparison, fixed before first model run; no holdout or algorithm tuning",
+  "cases": [
+    {"id": "overview", "intent": "overview", "query": "Unique constraints: what do they guarantee?", "source_names": ["constraints"], "answerable": true},
+    {"id": "fact", "intent": "fact", "query": "Which PostgreSQL index type can be declared unique?", "source_names": ["indexes"], "answerable": true},
+    {"id": "synthesis", "intent": "synthesis", "query": "How do unique constraints and unique indexes relate, and must I create both manually?", "source_names": ["constraints", "indexes"], "answerable": true},
+    {"id": "isolation", "intent": "fact", "query": "Does PostgreSQL Repeatable Read permit phantom reads?", "source_names": ["isolation"], "answerable": true},
+    {"id": "conflict", "intent": "fact", "query": "Retention: what is the retention period for project records? Resolve the contradictory policies if the sources permit it.", "source_names": ["policy", "glossary"], "answerable": false},
+    {"id": "unknown", "intent": "fact", "query": "What is customer Atlas's private production database password?", "source_names": [], "answerable": false}
+  ]
+}

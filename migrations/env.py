@@ -20,6 +20,7 @@ from packages.memory import models as _memory_models  # noqa: F401
 from packages.model_gateway import models as _model_gateway_models  # noqa: F401
 from packages.threads import models as _thread_models  # noqa: F401
 from packages.tools import models as _tool_models  # noqa: F401
+from packages.wiki import models as _wiki_models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

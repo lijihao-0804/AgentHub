@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "scope": "NON_FORMAL_DEV",
+  "build_sha": "9beb449343670da159445a53704e98b87606a335",
+  "dataset_hash": "74d33305698da6330e346101da79d0608f526c16baeaa0d3ee73ff803bff1c50",
+  "cases": 6,
+  "attempted_mode_cases": 18,
+  "gateway_requests": 23,
+  "pricing": "UNKNOWN",
+  "actual_cost": null,
+  "actual_cost_status": "UNKNOWN",
+  "usage_known_requests": 23,
+  "compile": {
+    "status": "ready",
+    "latency_ms": 68778.68840000019,
+    "telemetry": {
+      "calls": [
+        {
+          "cost": null,
+          "model": "deepseek-v4.1-flash-1017",
+          "currency": null,
+          "provider": "openai-compatible",
+          "latency_ms": 8229.766,
+          "input_tokens": 522,
+          "total_tokens": 701,
+          "output_tokens": 179,
+          "request_count": 1
+        },
+        {
+          "cost": null,
+          "model": "deepseek-v4.1-flash-1017",
+          "currency": null,
+          "provider": "openai-compatible",
+          "latency_ms": 4139.674,
+          "input_tokens": 521,
+          "total_tokens": 997,
+          "output_tokens": 476,
+          "request_count": 1
+        },
+        {
+          "cost": null,
+          "model": "deepseek-v4.1-flash-1017",
+          "currency": null,
+          "provider": "openai-compatible",
+          "latency_ms": 19727.587,
+          "input_tokens": 694,
+          "total_tokens": 3756,
+          "output_tokens": 3062,
+          "request_count": 1
+        },
+        {
+          "cost": null,
+          "model": "deepseek-v4.1-flash-1017",
+          "currency": null,
+          "provider": "openai-compatible",
+          "latency_ms": 18001.829,
+          "input_tokens": 680,
+          "total_tokens": 3520,
+          "output_tokens": 2840,
+          "request_count": 1
+        },
+        {
+          "cost": null,
+          "model": "deepseek-v4.1-flash-1017",
+          "currency": null,
+          "provider": "openai-compatible",
+          "latency_ms": 18458.574,
+          "input_tokens": 712,
+          "total_tokens": 3591,
+          "output_tokens": 2879,
+          "request_count": 1
+        }
+      ],
+      "reused_revisions": 0,
+      "compiled_revisions": 5
+    }
+  },
+  "embedding": {
+    "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+    "dimension": 384,
+    "local": true,
+    "api_cost": "0",
+    "latency_ms": 9945.989199999985
+  },
+  "incremental": {
+    "status": "ready",
+    "new_gateway_calls": 1,
+    "telemetry": {
+      "calls": [
+        {
+          "cost": null,
+          "model": "deepseek-v4.1-flash-1017",
+          "currency": null,
+          "provider": "openai-compatible",
+          "latency_ms": 4187.391,
+          "input_tokens": 541,
+          "total_tokens": 1036,
+          "output_tokens": 495,
+          "request_count": 1
+        }
+      ],
+      "reused_revisions": 5,
+      "compiled_revisions": 1
+    }
+  },
+  "page_count": 23,
+  "claim_count": 31,
+  "navigation_edges": 126,
+  "compile_lint": [],
+  "modes": {
+    "WIKI": {
+      "attempts": 6,
+      "valid_outputs": 3,
+      "answerability_flag_agreement": 3,
+      "flag_agreement_denominator": 6,
+      "gateway_requests": 5,
+      "input_tokens": 3418,
+      "output_tokens": 1431,
+      "total_tokens": 4849,
+      "mean_end_to_end_latency_ms": 2215.0680333333335,
+      "actual_cost": null,
+      "cost_status": "UNKNOWN"
+    },
+    "RAG": {
+      "attempts": 6,
+      "valid_outputs": 5,
+      "answerability_flag_agreement": 5,
+      "flag_agreement_denominator": 6,
+      "gateway_requests": 6,
+      "input_tokens": 6411,
+      "output_tokens": 1804,
+      "total_tokens": 8215,
+      "mean_end_to_end_latency_ms": 2778.9443833332825,
+      "actual_cost": null,
+      "cost_status": "UNKNOWN"
+    },
+    "HYBRID": {
+      "attempts": 6,
+      "valid_outputs": 5,
+      "answerability_flag_agreement": 4,
+      "flag_agreement_denominator": 6,
+      "gateway_requests": 6,
+      "input_tokens": 8249,
+      "output_tokens": 2260,
+      "total_tokens": 10509,
+      "mean_end_to_end_latency_ms": 3470.8245999999385,
+      "actual_cost": null,
+      "cost_status": "UNKNOWN"
+    }
+  },
+  "failures": [
+    {
+      "case_id": "fact",
+      "mode": "WIKI",
+      "error_code": "WIKI_ANSWER_INVALID_OUTPUT"
+    },
+    {
+      "case_id": "isolation",
+      "mode": "WIKI",
+      "error_code": "WIKI_ANSWER_INVALID_OUTPUT"
+    },
+    {
+      "case_id": "conflict",
+      "mode": "WIKI",
+      "error_code": "WIKI_ANSWER_INVALID_OUTPUT"
+    },
+    {
+      "case_id": "isolation",
+      "mode": "RAG",
+      "error_code": "WIKI_ANSWER_INVALID_OUTPUT"
+    },
+    {
+      "case_id": "isolation",
+      "mode": "HYBRID",
+      "error_code": "WIKI_ANSWER_INVALID_OUTPUT"
+    }
+  ],
+  "input_tokens": 21748,
+  "output_tokens": 15426,
+  "total_tokens": 37174
+}

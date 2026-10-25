@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "scope": "DEV",
+  "pricing": "UNKNOWN",
+  "build_sha": "3fe00edb9c3e35cc4e171284cdd416761c12d03f",
+  "strategy": "main DENSE, real MiniLM CPU, in-memory Qdrant, final_top_k=3",
+  "evaluator_version": "existing-retrieval-v2; manual-semantic-review-required",
+  "calls": [],
+  "corpus": [
+    {
+      "name": "constraints",
+      "url": "https://www.postgresql.org/docs/16/ddl-constraints.html",
+      "text": "Unique constraints ensure that the data contained in a column, or a group of columns, is unique among all the rows in the table. The syntax is:\n\nAdding a unique constraint will automatically create a unique B-tree index on the column or group of columns listed in the constraint. A uniqueness restriction covering only some rows cannot be written as a unique constraint, but it is possible to enforce such a restriction by creating a unique partial index.\n\nIn general, a unique constraint is violated if there is more than one row in the table where the values of all of the columns included in the constraint are equal. By default, two null values are not considered equal in this comparison. That means even in the presence of a unique constraint it is possible to store duplicate rows that contain a null value in at least one of the constrained columns. This behavior can be changed by adding the clause NULLS NOT DISTINCT, like"
+    },
+    {
+      "name": "indexes",
+      "url": "https://www.postgresql.org/docs/16/indexes-unique.html",
+      "text": "Currently, only B-tree indexes can be declared unique.\n\nWhen an index is declared unique, multiple table rows with equal indexed values are not allowed. By default, null values in a unique column are not considered equal, allowing multiple nulls in the column. The NULLS NOT DISTINCT option modifies this and causes the index to treat nulls as equal. A multicolumn unique index will only reject cases where all indexed columns are equal in multiple rows.\n\nPostgreSQL automatically creates a unique index when a unique constraint or primary key is defined for a table. The index covers the columns that make up the primary key or unique constraint (a multicolumn index, if appropriate), and is the mechanism that enforces the constraint.\n\nThere's no need to manually create indexes on unique columns; doing so would just duplicate the automatically-created index."
+    },
+    {
+      "name": "isolation",
+      "url": "https://www.postgresql.org/docs/16/transaction-iso.html",
+      "text": "The table also shows that PostgreSQL's Repeatable Read implementation does not allow phantom reads. This is acceptable under the SQL standard because the standard specifies which anomalies must not occur at certain isolation levels; higher guarantees are acceptable. The behavior of the available isolation levels is detailed in the following subsections.\n\nRead Committed is the default isolation level in PostgreSQL. When a transaction uses this isolation level, a SELECT query (without a FOR UPDATE/SHARE clause) sees only data committed before the query began; it never sees either uncommitted data or changes committed by concurrent transactions during the query's execution. In effect, a SELECT query sees a snapshot of the database as of the instant the query begins to run. However, SELECT does see the effects of previous updates executed within its own transaction, even though they are not yet committed. Also note that two successive SELECT commands can see different data, even though they are within a single transaction, if other transactions commit changes after the first SELECT starts and before the second SELECT starts."
+    }
+  ],
+  "dataset_hash": "74d33305698da6330e346101da79d0608f526c16baeaa0d3ee73ff803bff1c50",
+  "cases": {
+    "schema_version": 1,
+    "scope": "DEV smoke comparison, fixed before first model run; no holdout or algorithm tuning",
+    "cases": [
+      {
+        "id": "overview",
+        "intent": "overview",
+        "query": "Unique constraints: what do they guarantee?",
+        "source_names": [
+          "constraints"
+        ],
+        "answerable": true
+      },
+      {
+        "id": "fact",
+        "intent": "fact",
+        "query": "Which PostgreSQL index type can be declared unique?",
+        "source_names": [
+          "indexes"
+        ],
+        "answerable": true
+      },
+      {
+        "id": "synthesis",
+        "intent": "synthesis",
+        "query": "How do unique constraints and unique indexes relate, and must I create both manually?",
+        "source_names": [
+          "constraints",
+          "indexes"
+        ],
+        "answerable": true
+      },
+      {
+        "id": "isolation",
+        "intent": "fact",
+        "query": "Does PostgreSQL Repeatable Read permit phantom reads?",
+        "source_names": [
+          "isolation"
+        ],
+        "answerable": true
+      },
+      {
+        "id": "conflict",
+        "intent": "fact",
+        "query": "Retention: what is the retention period for project records? Resolve the contradictory policies if the sources permit it.",
+        "source_names": [
+          "policy",
+          "glossary"
+        ],
+        "answerable": false
+      },
+      {
+        "id": "unknown",
+        "intent": "fact",
+        "query": "What is customer Atlas's private production database password?",
+        "source_names": [],
+        "answerable": false
+      }
+    ]
+  },
+  "status": "failed",
+  "error_code": "EMBEDDER_LOAD_FAILED"
+}

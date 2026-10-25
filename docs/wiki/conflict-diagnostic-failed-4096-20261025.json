@@ -1,0 +1,23 @@
+{
+  "scope": "DEV_TARGETED_DIAGNOSTIC_NOT_PAIRED_BENCHMARK",
+  "build_sha": "535e5bc25365638913051d2f6b17d84235f42393",
+  "pricing": "UNKNOWN",
+  "source_count": 6,
+  "calls": [
+    {
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "input_tokens": 4880,
+        "output_tokens": 4096,
+        "total_tokens": 8976,
+        "cached_tokens": 0
+      },
+      "cost": null,
+      "currency": null,
+      "latency_ms": 37473.91229999994
+    }
+  ],
+  "status": "failed",
+  "error_code": "WIKI_CONFLICT_REVIEW_INVALID_OUTPUT"
+}
