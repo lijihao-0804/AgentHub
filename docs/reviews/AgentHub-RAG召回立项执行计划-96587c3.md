@@ -14,8 +14,9 @@
 4. **生产接入一律版本级 opt-in**：新能力进 `retrieval_config` / runtime 配置且默认关闭；默认路径行为不变（除非单独通过自己的门槛并获用户批准）。
 5. **第三方隔离（规则 4）**：新依赖只出现在 `benchmarks/`（试点期）或 `packages/knowledge/adapters/` 之后（转正期），契约（Protocol/dataclass）先行定义在 `packages/knowledge/contracts.py` 或独立 contracts 模块。
 6. **成本账本**：所有 LLM 调用记录请求数/tokens/模型名入 results 目录；生产摄入类调用未来须与快照哈希绑定（规则 18/25 语义）。
-7. **每完成一个任务独立提交**（信息格式 `feat(rag): ...` / `feat(benchmarks): ...`），**提交前须用户明确批准**（仓库纪律：审阅-修复分离、提交需批准）。每个立项收口写实施报告到 `docs/reviews/AgentHub-<立项名>实施报告-<短hash>.md` 并更新 `docs/reviews/README.md` 索引。
-8. **测试**：新行为配单测；每批完成跑四件套：`uv run --locked pytest -m "not integration"`（全量 exit 0）、`uv run ruff check packages tests benchmarks`、集成（环境可用时，见 §1）、前端不动。
+7. **实验脚本目录纪律（2026-10-26 追加）**：`benchmarks/public_rag/` 顶层的既有脚本为**已发布实验档案**（路径被报告与协议引用，永不重组）；此后**每个新立项的 runner/报告/试点脚本一律进 `benchmarks/public_rag/<立项名>/` 子目录**（如 `query-decompose-b/`），配套结果仍入 `results/<立项>-<日期>/`。禁止向顶层追加新 `.py`。
+8. **每完成一个任务独立提交**（信息格式 `feat(rag): ...` / `feat(benchmarks): ...`），**提交前须用户明确批准**（仓库纪律：审阅-修复分离、提交需批准）。每个立项收口写实施报告到 `docs/reviews/AgentHub-<立项名>实施报告-<短hash>.md` 并更新 `docs/reviews/README.md` 索引。
+9. **测试**：新行为配单测；每批完成跑四件套：`uv run --locked pytest -m "not integration"`（全量 exit 0）、`uv run ruff check packages tests benchmarks`、集成（环境可用时，见 §1）、前端不动。
 
 ## 1. 环境事实（2026-10-24 核实）
 
