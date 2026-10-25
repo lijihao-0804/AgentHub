@@ -106,6 +106,36 @@ BUILTIN_TOOL_CATALOG: dict[str, dict[str, Any]] = {
         "timeout_seconds": 30,
         "execution_kind": "builtin",
     },
+    "query_wiki": {
+        "description": (
+            "Query the Wiki publication frozen into this agent version and "
+            "return evidence labelled with its origin layer (RAW or "
+            "WIKI_DERIVED). Requires the version to bind a Wiki."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "mode": {
+                    "type": "string",
+                    "enum": ["WIKI", "RAG", "HYBRID", "AUTO"],
+                    "default": "AUTO",
+                },
+                "intent": {
+                    "type": "string",
+                    "enum": ["overview", "fact", "synthesis"],
+                    "default": "overview",
+                },
+            },
+            "required": ["query"],
+            "additionalProperties": False,
+        },
+        "effect": "READ",
+        "risk_level": "LOW",
+        "approval_policy": "NEVER",
+        "timeout_seconds": 30,
+        "execution_kind": "builtin",
+    },
     "create_ticket": {
         "description": "Create a support ticket after the existing approval boundary.",
         "input_schema": {

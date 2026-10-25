@@ -7,7 +7,7 @@ from functools import partial
 from typing import Any
 
 from packages.knowledge.contracts import KnowledgeRetriever, SectionSelector
-from packages.tools.builtins import calculate, query_customer, search_knowledge
+from packages.tools.builtins import calculate, query_customer, query_wiki, search_knowledge
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 
 ToolHandler = Callable[
@@ -17,7 +17,7 @@ ToolHandler = Callable[
 
 
 class ToolRegistry:
-    """The production registry contains only the three M4-B builtin identities."""
+    """The production registry contains only the governed builtin identities."""
 
     def __init__(
         self,
@@ -32,6 +32,7 @@ class ToolRegistry:
             "search_knowledge": partial(
                 search_knowledge, retriever=retriever, section_selector=section_selector
             ),
+            "query_wiki": partial(query_wiki, retriever=retriever),
         }
         if handler_overrides:
             # This hook is for deterministic tests only; production composition does not

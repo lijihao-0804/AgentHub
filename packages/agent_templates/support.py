@@ -79,6 +79,9 @@ SUPPORT_TEMPLATE = AgentTemplate(
         "get_order",
         "get_refund_status",
         "search_knowledge",
+        # Opt-in only: a version published without a Wiki binding has no
+        # query_wiki tool at all, so listing it here changes nothing for them.
+        "query_wiki",
         "create_ticket",
         "issue_refund",
     ),

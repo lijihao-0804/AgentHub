@@ -13,6 +13,7 @@ from jsonschema import Draft202012Validator, SchemaError, ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from packages.agent_runtime.evidence_registry import RAG_EVIDENCE_TOOL_IDENTITIES
 from packages.agent_runtime.models import AgentVersion, ToolRevision
 from packages.control_plane.audit import assert_safe_metadata
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -203,6 +204,7 @@ class PublishedToolResolver:
         agent_version_id: UUID,
         tool_identity: str,
         effective_snapshot_refs: tuple[Mapping[str, Any], ...] | None = None,
+        effective_wiki_publications: tuple[Mapping[str, Any], ...] | None = None,
     ) -> ToolDefinition:
         version = await self.session.scalar(
             select(AgentVersion).where(
@@ -298,9 +300,58 @@ class PublishedToolResolver:
                 timeout_seconds=spec["timeout_seconds"],
                 snapshot_refs=snapshot_refs,
                 retrieval_config=retrieval_config,
+                wiki_binding=self._wiki_binding(
+                    version.resolved_spec, effective_wiki_publications
+                ),
                 **_source_projection(spec),
             )
         raise AgentHubError("UNKNOWN_TOOL", "The published tool was not found.", 404)
+
+    @staticmethod
+    def _wiki_binding(
+        resolved_spec: Mapping[str, Any],
+        effective_wiki_publications: tuple[Mapping[str, Any], ...] | None,
+    ) -> dict[str, str] | None:
+        """The frozen Wiki binding a query_wiki handler verifies against.
+
+        The run's frozen publication wins when provided and must match the
+        published spec exactly; a drift there means the definition would call a
+        publication the run was never frozen to, which is an integrity error
+        rather than a runtime decision.
+        """
+
+        spec_binding = resolved_spec.get("wiki_binding")
+        fields = ("knowledge_base_id", "binding_mode", "wiki_publication_id", "publication_hash")
+        if spec_binding is None:
+            if effective_wiki_publications:
+                raise AgentHubError(
+                    "TOOL_REVISION_INTEGRITY_ERROR",
+                    "The published tool binding is invalid.",
+                    422,
+                )
+            return None
+        if not isinstance(spec_binding, Mapping) or not set(fields) <= set(spec_binding):
+            raise AgentHubError(
+                "TOOL_REVISION_INTEGRITY_ERROR", "The published tool binding is invalid.", 422
+            )
+        if effective_wiki_publications:
+            if len(effective_wiki_publications) != 1:
+                raise AgentHubError(
+                    "TOOL_REVISION_INTEGRITY_ERROR",
+                    "The published tool binding is invalid.",
+                    422,
+                )
+            frozen_item = dict(effective_wiki_publications[0])
+            if not set(fields) <= set(frozen_item) or any(
+                str(frozen_item[key]) != str(spec_binding[key]) for key in fields
+            ):
+                raise AgentHubError(
+                    "TOOL_REVISION_INTEGRITY_ERROR",
+                    "The published tool binding is invalid.",
+                    422,
+                )
+            return {key: str(frozen_item[key]) for key in fields}
+        return {key: str(spec_binding[key]) for key in fields}
 
 
 class PublishedToolCatalog(PublishedToolResolver):
@@ -357,6 +408,7 @@ class ToolRuntime:
         arguments: Mapping[str, Any],
         tool_call_id: str,
         effective_snapshot_refs: tuple[Mapping[str, Any], ...] | None = None,
+        effective_wiki_publications: tuple[Mapping[str, Any], ...] | None = None,
     ) -> ToolResult:
         if "tool_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
@@ -389,6 +441,7 @@ class ToolRuntime:
                             agent_version_id=version_uuid,
                             tool_identity=tool_identity,
                             effective_snapshot_refs=effective_snapshot_refs,
+                            effective_wiki_publications=effective_wiki_publications,
                         )
                         _reject_injected_keys(arguments)
                         validator = Draft202012Validator(
@@ -464,7 +517,7 @@ class ToolRuntime:
                 evidence_refs(result.data)
                 if definition is not None
                 and definition.source_kind is ToolSourceKind.BUILTIN
-                and definition.identity == "search_knowledge"
+                and definition.identity in RAG_EVIDENCE_TOOL_IDENTITIES
                 else ()
             ),
         )

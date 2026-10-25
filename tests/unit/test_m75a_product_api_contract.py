@@ -56,8 +56,12 @@ def test_builtin_catalog_is_server_owned_and_contains_only_runtime_identities() 
         "calculator",
         "query_customer",
         "search_knowledge",
+        "query_wiki",
         "create_ticket",
     }
+    assert BUILTIN_TOOL_CATALOG["query_wiki"]["effect"] == "READ"
+    assert BUILTIN_TOOL_CATALOG["query_wiki"]["approval_policy"] == "NEVER"
+    assert BUILTIN_TOOL_CATALOG["query_wiki"]["execution_kind"] == "builtin"
     assert BUILTIN_TOOL_CATALOG["create_ticket"]["effect"] == "WRITE"
     assert BUILTIN_TOOL_CATALOG["create_ticket"]["approval_policy"] == "ALWAYS"
     assert BUILTIN_TOOL_CATALOG["create_ticket"]["execution_kind"] == "action"

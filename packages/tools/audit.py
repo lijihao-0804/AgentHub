@@ -119,7 +119,14 @@ class SqlAlchemyToolAuditSink:
         async with self.session_factory() as session:
             append_audit(
                 session,
-                action="tool.execute",
+                # The Wiki query is its own audit event so a workspace's Wiki
+                # access is reviewable on its own; every other tool keeps the
+                # shared tool.execute action.
+                action=(
+                    "wiki_query"
+                    if safe_metadata.get("tool_identity") == "query_wiki"
+                    else "tool.execute"
+                ),
                 resource_type="tool",
                 resource_id=str(agent_version_id),
                 request_id=context.request_id,

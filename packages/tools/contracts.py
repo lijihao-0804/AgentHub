@@ -69,6 +69,10 @@ class ToolDefinition:
     mcp_connection_id: UUID | None = None
     mcp_tool_name: str | None = None
     mcp_output_schema: dict[str, Any] | None = None
+    # The version's frozen Wiki binding (publication id + hash + knowledge
+    # base), present only when the version actually binds a Wiki. The handler
+    # verifies the live publication against this and fails closed on drift.
+    wiki_binding: dict[str, str] | None = None
 
 
 @dataclass(frozen=True)
