@@ -185,6 +185,8 @@ def extraction_spec_hash(spec):
                 "workflow_version",
                 "review_plan",
                 "review_provider_routes",
+                "review_mode",
+                "manual_conflict_groups",
             }
         }
     )
@@ -211,6 +213,23 @@ def apply_review_groups(claims, groups):
         for index in group:
             claim = claims[index - 1]
             claim["conflict"] = True
+            claim["conflict_peers"] = sorted(set(claim.get("conflict_peers", [])) | set(peers))
+
+
+def apply_declared_conflicts(claims, groups):
+    for group in groups:
+        anchors = {(r["chunk_id"], r["quote"]) for r in group}
+        matched = [c for c in claims if (c["chunk_id"], c["quote"]) in anchors]
+        if {(c["chunk_id"], c["quote"]) for c in matched} != anchors:
+            fail(
+                "WIKI_DECLARED_EVIDENCE_NOT_COMPILED",
+                "Declared conflict evidence must reference exact compiled quotations.",
+                422,
+            )
+        peers = sorted({c["chunk_id"] for c in matched})
+        for claim in matched:
+            claim["conflict"] = True
+            claim["conflict_origin"] = "EDITOR_DECLARED"
             claim["conflict_peers"] = sorted(set(claim.get("conflict_peers", [])) | set(peers))
 
 
@@ -288,8 +307,13 @@ class WikiService:
         selector="LATEST",
         output_mode="PROMPT_JSON",
         review_model_profile_id=None,
+        review_mode=None,
+        manual_conflict_groups=None,
     ):
         require(context, "knowledge_edit")
+        review_mode = review_mode or ("MODEL" if review_model_profile_id is not None else "BASIC")
+        if review_mode not in {"BASIC", "MODEL"}:
+            fail("WIKI_INVALID_REVIEW_MODE", "Invalid conflict review mode.", 422)
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             fail("WIKI_INVALID_OUTPUT_MODE", "Invalid compiler output mode.", 422)
         snapshot = await KnowledgeSnapshotService().resolve_snapshot(
@@ -360,6 +384,59 @@ class WikiService:
             )
             review_routes[str(profile.provider_credential_id)] = credential.base_url
         spec["review_provider_routes"] = review_routes
+        spec["review_mode"] = review_mode
+        declared = manual_conflict_groups or []
+        if not isinstance(declared, list) or len(declared) > 50:
+            fail("WIKI_INVALID_DECLARED_CONFLICT", "Invalid conflict declarations.", 422)
+        normalized = set()
+        for group in declared:
+            if (
+                not isinstance(group, list)
+                or not 2 <= len(group) <= 8
+                or any(
+                    not isinstance(ref, dict)
+                    or set(ref) != {"chunk_id", "quote"}
+                    or not isinstance(ref["chunk_id"], str)
+                    or not isinstance(ref["quote"], str)
+                    or not ref["quote"].strip()
+                    or len(ref["quote"]) > 2000
+                    for ref in group
+                )
+            ):
+                fail("WIKI_INVALID_DECLARED_CONFLICT", "Invalid conflict evidence references.", 422)
+            anchors = tuple(sorted((r["chunk_id"], r["quote"]) for r in group))
+            if len(set(anchors)) != len(anchors):
+                fail("WIKI_INVALID_DECLARED_CONFLICT", "Conflict references must be distinct.", 422)
+            normalized.add(anchors)
+        spec["manual_conflict_groups"] = [
+            [{"chunk_id": c, "quote": q} for c, q in group] for group in sorted(normalized)
+        ]
+        if declared:
+            source_chunks = await session.scalars(
+                select(DocumentChunk)
+                .join(
+                    KnowledgeSnapshotItem,
+                    (
+                        DocumentChunk.document_revision_id
+                        == KnowledgeSnapshotItem.document_revision_id
+                    )
+                    & (DocumentChunk.workspace_id == KnowledgeSnapshotItem.workspace_id)
+                    & (DocumentChunk.knowledge_base_id == KnowledgeSnapshotItem.knowledge_base_id),
+                )
+                .where(
+                    KnowledgeSnapshotItem.snapshot_id == snapshot.snapshot_id,
+                    DocumentChunk.workspace_id == UUID(context.workspace_id),
+                    DocumentChunk.knowledge_base_id == kb_id,
+                )
+            )
+            available = {c.chunk_id: c.text for c in source_chunks}
+            for group in normalized:
+                if any(c not in available or q not in available[c] for c, q in group):
+                    fail(
+                        "WIKI_INVALID_DECLARED_CONFLICT",
+                        "Conflict evidence is outside the snapshot.",
+                        422,
+                    )
         identity = canonical_json_hash(
             {
                 "schema_version": 1,
@@ -784,7 +861,10 @@ async def execute_job(factory, context, job_id, token, compiler):
                 c["predicate"],
             )
         )
-        if row.compiler_spec.get("review_manifest"):
+        if (
+            row.compiler_spec.get("review_manifest")
+            and row.compiler_spec.get("review_mode", "MODEL") == "MODEL"
+        ):
             await session.commit()
             if not await renew_job(session, job_id, token):
                 return "stale"
@@ -792,6 +872,10 @@ async def execute_job(factory, context, job_id, token, compiler):
             apply_review_groups(all_claims, groups)
             telemetry["conflict_review"] = review_usage
             telemetry["conflict_group_count"] = len(groups)
+        apply_declared_conflicts(all_claims, row.compiler_spec.get("manual_conflict_groups", []))
+        telemetry["declared_conflict_group_count"] = len(
+            row.compiler_spec.get("manual_conflict_groups", [])
+        )
         pages = organize(all_claims)
         # Lock and fence before installing output. No partial page set ever becomes READY.
         owned = await session.scalar(

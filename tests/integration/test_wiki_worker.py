@@ -41,7 +41,7 @@ async def setup(monkeypatch):
     engine, factory = create_database(URL)
     context, kb_id, profile_id, _ = await seed_wiki(factory)
     async with factory() as session:
-        job = await WikiService().request(session, context, kb_id, profile_id)
+        job = await WikiService().request(session, context, kb_id, profile_id, review_mode="MODEL")
     adapter = Adapter()
     monkeypatch.setattr(
         worker,
@@ -355,3 +355,66 @@ async def test_independent_review_profile_is_frozen_without_reextracting_sources
         row = await WikiService().get(session, context, kb, second.id)
         assert row.telemetry["compiled_revisions"] == 0
         assert row.telemetry["reused_revisions"] == 2
+
+
+@pytest.mark.asyncio
+async def test_editor_declared_conflict_creates_new_version_without_new_model_calls(setup):
+    factory, context, kb, profile_id, job, adapter = setup
+    adapter.use_aliases = True
+    assert await worker.run_wiki_job(str(job.id)) == "ready"
+    async with factory() as session:
+        prior = await WikiService().publish(session, context, kb, job.id)
+        pages = await WikiService().pages(session, context, kb, job.id)
+        anchors = [
+            {"chunk_id": p["claims"][0]["chunk_id"], "quote": p["claims"][0]["quote"]}
+            for p in pages
+        ]
+        new = await WikiService().request(
+            session, context, kb, profile_id, review_mode="BASIC", manual_conflict_groups=[anchors]
+        )
+    assert await worker.run_wiki_job(str(new.id)) == "ready"
+    assert adapter.calls == 3
+    async with factory() as session:
+        after = await WikiService().publish(session, context, kb, new.id)
+        assert after.source_snapshot_id == prior.source_snapshot_id
+        assert after.content_hash != prior.content_hash
+        assert after.telemetry["reused_revisions"] == 2
+        assert after.telemetry["compiled_revisions"] == 0
+        assert after.telemetry["declared_conflict_group_count"] == 1
+        result = await query_wiki(
+            session, context, kb, new.id, after.source_snapshot_id, "Policy alpha", mode="WIKI"
+        )
+        assert result["insufficient_evidence"]
+        assert len({e["document_revision_id"] for e in result["conflicts"]}) == 2
+        assert all(e["conflict_origin"] == "EDITOR_DECLARED" for e in result["conflicts"])
+
+
+@pytest.mark.asyncio
+async def test_editor_cannot_declare_foreign_snapshot_evidence(setup):
+    factory, context, kb, profile_id, job, _ = setup
+    assert await worker.run_wiki_job(str(job.id)) == "ready"
+    foreign, foreign_kb, _, _ = await seed_wiki(factory)
+    async with factory() as session:
+        own = await WikiService().pages(session, context, kb, job.id)
+        foreign_chunk = await session.scalar(
+            select(DocumentChunk)
+            .where(
+                DocumentChunk.workspace_id == UUID(foreign.workspace_id),
+                DocumentChunk.knowledge_base_id == foreign_kb,
+            )
+            .limit(1)
+        )
+        refs = [
+            [
+                {
+                    "chunk_id": own[0]["claims"][0]["chunk_id"],
+                    "quote": own[0]["claims"][0]["quote"],
+                },
+                {"chunk_id": foreign_chunk.chunk_id, "quote": foreign_chunk.text},
+            ]
+        ]
+        with pytest.raises(AgentHubError) as error:
+            await WikiService().request(
+                session, context, kb, profile_id, manual_conflict_groups=refs
+            )
+        assert error.value.code == "WIKI_INVALID_DECLARED_CONFLICT"

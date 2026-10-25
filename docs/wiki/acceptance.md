@@ -13,7 +13,8 @@
 - 来源新增/更新后的增量编译；版本历史保留；默认 current 拒绝过期，显式历史允许 RETIRED。
 - lint：断链、重复、无来源、失效来源、过期、内容不一致与候选冲突。
 - Wiki/RAG/Hybrid/AUTO 查询；AUTO fact/synthesis 回原始证据；缺证据/冲突拒绝裁决；可选模型生成带引用回答。
-- 最终 `wiki-workflow-v2` 增加有限 ID 组的跨来源冲突复核；提示/schema/版本冻结，模型不能增加或覆盖事实。
+- 最终 `wiki-workflow-v2` 支持编辑者对既有引文声明冲突；新版本保存声明、双方证据和拒绝裁决状态。
+- 跨来源模型复核保留为显式 MODEL 实验模式；两次真实调用失败，默认关闭，不能宣称自动识别已验收。
 
 基本阅读、查询、来源定位和维护状态通过现有认证 API 使用，入口见 [使用说明](README.md)。没有新增专用 Web 页面。
 
@@ -23,13 +24,13 @@
 
 | 检查 | 通过项数 | 范围 |
 | --- | ---: | --- |
-| Wiki 定向单元 | 80 | compiler 13、query 16、routing 3、answer 28、冲突持久边界 6、跨来源 reviewer 14 |
-| 最终 PostgreSQL/API/worker 集成 | 23 | lifecycle 13、worker 10；隔离测试库 `agenthub_wiki_acceptance_20261025` |
+| Wiki 定向单元 | 82 | compiler 13、query 16、routing 3、answer 28、冲突持久边界 8、跨来源 reviewer 14 |
+| 最终 PostgreSQL/API/worker 集成 | 25 | lifecycle 13、worker 12；隔离测试库 `agenthub_wiki_acceptance_20261025` |
 | 既有快照/发布/实验可复现性兼容单元 | 36 | `test_knowledge_m3f_snapshots`、`test_agent_publish`、`test_m7b_reproducibility` |
 | 迁移 | — | 真实 PostgreSQL 16.15 从空库升级；0032 回滚/升级；0033 升级；API 不建表 |
 | 静态检查 | — | 新增与修改的 Python 通过 Ruff；diff whitespace 检查通过 |
 
-单元及集成共 139 个不同用例通过，包含真实数据库复合外键、并发幂等、过期 worker、失效输出、发布不可变、
+单元及集成共 143 个不同用例通过，包含真实数据库复合外键、并发幂等、过期 worker、失效输出、发布不可变、
 来源新增/替换/撤销、撤销后重新发布、raw fallback 故意返回撤销来源后的阻断、在途 raw ingestion 完成后仍阻断 Wiki、
 跨别名冲突关联、冻结 reviewer 版本变化后禁止调用。API 测试对认证 context/模型/检索组件有显式替身，不冒充浏览器或真实登录 E2E。
 
@@ -93,18 +94,23 @@
 ## 最终跨来源复核诊断
 
 原 v1 对照保持不变；最终 v2 另做一次定向诊断，记录在
-[conflict-diagnostic-20261025.json](conflict-diagnostic-20261025.json)。
+[4096失败记录](conflict-diagnostic-failed-4096-20261025.json) 与
+[8192失败记录](conflict-diagnostic-failed-8192-20261025.json)。
 诊断使用增量后的六份现有来源，不是与 v1 五份来源的成对效果比较；只验证冲突复核、缓存和拒绝裁决的业务链路。
 第一次复核在原冻结 4096 输出预算下未返回合法结构，保留
 [失败记录](conflict-diagnostic-failed-4096-20261025.json)：1 请求，输入 4880、输出 4096、总计 8976 token，费用 UNKNOWN。
 该次没有记录 finish_reason，因此只能确认输出耗尽预算且结构无效，不把“截断”认定为唯一已证实原因。
 后续仅作一次明确配置的预算重试：同一个模型，独立复核 profile 的 max_tokens=8192；提取配置和既有缓存不变。
-最终结果以该记录及后续补充为准，不据此宣布 Hybrid 优于 RAG。
+8192 的重试仍失败，finish_reason=length，输入 4880、输出 8192、总计 13072 token。
+停止该自动方向，不再扩大预算或换题；没有发布不合法复核结果。
+两次复核加原对照共 **25 次 LLM 请求、59,222 token**，usage 全部可知，费用全部 UNKNOWN。
+当前可用的冲突维护为确定性规则＋编辑者显式声明；用既有真实提取缓存验证该路径，记录在
+[编辑者声明诊断](declared-conflict-diagnostic-20261025.json)，不将其算作自动识别收益。
 
 ## 尚未验证与已知限制
 
 - 尚未实测真实 Redis/Celery broker 的完整重启 E2E、网络分区、资源饱和或生产负载；worker 组合和 durable DB 边界已测。
-- 最终 v2 未重新运行整套三模式对照；原 v1 的 5 个输出失败和标志不一致保留，不能据定向诊断宣布全部解决。
+- 最终 v2 未重新运行整套三模式对照；原 v1 的 5 个输出失败和标志不一致保留，自动跨来源复核真实验收失败。
 - 未建立经独立标注的冲突召回率、实体别名归并质量或语义蕴含保证；精确 quote 仅证明来源存在。
 - 页面是证据摘编；标题/关系/条件归组由模型提出，不是权威事实。未实现实体别名消歧、复杂图推理或图数据库。
 - 原生 Agent Wiki 工具、AgentVersion/Run/正式 Experiment 的 WikiBinding 接入尚未实施；本轮通过独立 API 使用。

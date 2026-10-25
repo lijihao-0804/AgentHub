@@ -33,6 +33,8 @@ class CompileRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     model_profile_id: UUID
     review_model_profile_id: UUID | None = None
+    review_mode: Literal["BASIC", "MODEL"] | None = None
+    manual_conflict_groups: list[list[dict[str, str]]] = Field(default_factory=list, max_length=50)
     source_snapshot_id: UUID | Literal["LATEST"] = "LATEST"
     output_mode: Literal["PROMPT_JSON", "JSON_SCHEMA"] = "PROMPT_JSON"
 
@@ -109,6 +111,8 @@ async def compile_source(
         payload.source_snapshot_id,
         output_mode=payload.output_mode,
         review_model_profile_id=payload.review_model_profile_id,
+        review_mode=payload.review_mode,
+        manual_conflict_groups=payload.manual_conflict_groups,
     )
     enqueue(request, row)
     return compilation_response(row)

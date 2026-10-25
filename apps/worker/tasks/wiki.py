@@ -54,7 +54,10 @@ async def run_wiki_job(job_id):
             )
             if claim.compiler_spec.get("manifest_hash") != compiler_manifest_hash():
                 fail("WIKI_COMPILER_VERSION_UNAVAILABLE", "The frozen compiler is unavailable.")
-            if claim.compiler_spec.get("review_manifest"):
+            if (
+                claim.compiler_spec.get("review_manifest")
+                and claim.compiler_spec.get("review_mode", "MODEL") == "MODEL"
+            ):
                 from packages.core.canonical.json_hash import canonical_json_hash
                 from packages.wiki.conflict_review import review_manifest
 

@@ -73,6 +73,7 @@ async def run(args, result):
                 prior.knowledge_base_id,
                 profile_id,
                 review_model_profile_id=review_profile_id,
+                review_mode="MODEL",
             )
             kb_id = row.knowledge_base_id
             claim = await claim_job(session, row.id)

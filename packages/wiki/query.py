@@ -319,6 +319,7 @@ async def _validate_wiki_claims(
                 "condition": _attribute(claim_value, "condition"),
                 "conflict": _attribute(claim_value, "conflict", False) is True,
                 "conflict_peers": list(_attribute(claim_value, "conflict_peers", [])),
+                "conflict_origin": _attribute(claim_value, "conflict_origin", "BASIC_OR_MODEL"),
             }
             accepted_claims.append(claim)
             evidence.append(

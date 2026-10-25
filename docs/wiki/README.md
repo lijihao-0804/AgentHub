@@ -24,7 +24,8 @@ API 不创建 schema。编译资料来自已入库 READY 的原始 DocumentRevis
    返回 202 与 durable job ID。相同来源和编译规格返回同一个 ID。可以改用显式 source snapshot UUID。
    JSON_SCHEMA 模式要求模型声明原生 structured_output；PROMPT_JSON 使用普通文本生成，但本地严格 schema 与来源检查相同。
    模型必须配置已知 context 上限。提示/输出schema/模型计划/endpoint身份均固定，升级不静默改变旧任务。
-   可选 `review_model_profile_id` 指定独立的跨来源复核配置；默认复用提取配置。
+   默认 `review_mode=BASIC`，只运行确定性检查，不自动调用实验性跨来源模型复核。
+   显式 `review_mode=MODEL` 或只指定 `review_model_profile_id` 才启用模型复核；后者可指定独立配置。
    两套模型计划和路由分别冻结，复核 profile 的预算变化不重提取未变来源；系统不暗中提高用户的 max_tokens。
 
 2. `GET B/compilations/{id}` 查看 PENDING/PROCESSING/READY/FAILED/PUBLISHED、错误码与用量。
@@ -46,6 +47,9 @@ API 不创建 schema。编译资料来自已入库 READY 的原始 DocumentRevis
    显式 WIKI 是独立阅读/消融模式，证据来自原文摘编，不会偷偷调用原始检索。
 6. 新增/修改资料后再次 `POST B/compilations`，默认当前原始 snapshot。未变化 revision 复用提取缓存，
    新版原子生成完整页面集；旧 publication 保留。没有自动后台订阅，也不会自动花费模型调用来重编译。
+   若审阅发现跨别名冲突，可在编译请求里追加 `manual_conflict_groups`，每组 2–8 个
+   `{"chunk_id":"从pages复制的ID","quote":"从pages复制的准确引文"}`，最多 50 组。
+   声明必须属于同一来源快照且精确对应已编译引文；形成新版本、复用提取缓存，不能直接修改旧页面。
 7. `POST B/sources/{document_revision_id}/revoke` 明确撤销该来源在 **Wiki 范围** 内的使用权，
    返回 `scope=WIKI, status=REVOKED`，写入不可删除的 Wiki 撤销记录。
    原始 revision 的生命周期和普通 RAG 保持由原知识模块管理；这不是全局知识库删除接口。
@@ -71,6 +75,8 @@ API 不创建 schema。编译资料来自已入库 READY 的原始 DocumentRevis
 增量节省的是模型提取；页面组装和 lint 仍检查完整来源集，尚未为大图做性能优化。
 候选语义分类、别名与冲突召回依赖模型。确定性规则比较同主题/谓词/条件的不同值；
 跨来源复核只提出既有引文的冲突 ID 组，版本和提示冻结，不裁决哪方为真。
-每次新编译最多增加一次全局复核调用，来源未变的重复请求仍返回同一任务；复核升级不重提取未变 revision。
+只有显式 MODEL 模式每次新编译最多增加一次全局复核调用；来源未变的重复请求返回同一任务，复核升级不重提取未变 revision。
+当前 DeepSeek 的两次真实跨来源复核均因无效/截断输出失败，MODEL 路径尚未通过真实验收，默认关闭。
+编辑者声明和确定性冲突检查可用；它们不证明自动语义冲突召回率。
 精确 quote 不证明概念归组或语义推断正确。所有派生知识保留原始证据和不确定状态，禁止递归提升为权威原始来源。
 来源的 effective_date 暂只随原有原始 evidence 展示，不作自动时效裁决；未实现别名消歧、复杂图推理、自动真伪裁决。

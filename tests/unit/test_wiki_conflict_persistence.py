@@ -3,7 +3,7 @@
 import pytest
 
 from packages.core.errors.exceptions import AgentHubError
-from packages.wiki.service import apply_review_groups, organize
+from packages.wiki.service import apply_declared_conflicts, apply_review_groups, organize
 
 
 def claims():
@@ -41,3 +41,20 @@ def test_out_of_scope_or_malformed_review_cannot_reach_publication(groups):
     with pytest.raises(AgentHubError) as error:
         apply_review_groups(claims(), groups)
     assert error.value.code == "WIKI_INVALID_CONFLICT_REVIEW"
+
+
+def test_editor_declaration_keeps_exact_quotes_and_its_distinct_origin():
+    source = claims()
+    apply_declared_conflicts(
+        source, [[{"chunk_id": "1", "quote": "7 years"}, {"chunk_id": "2", "quote": "5 years"}]]
+    )
+    assert {c["quote"] for c in source} == {"7 years", "5 years"}
+    assert all(c["conflict_origin"] == "EDITOR_DECLARED" for c in source)
+
+
+def test_raw_substring_cannot_be_promoted_into_a_new_compiled_claim():
+    with pytest.raises(AgentHubError) as error:
+        apply_declared_conflicts(
+            claims(), [[{"chunk_id": "1", "quote": "7"}, {"chunk_id": "2", "quote": "5 years"}]]
+        )
+    assert error.value.code == "WIKI_DECLARED_EVIDENCE_NOT_COMPILED"
