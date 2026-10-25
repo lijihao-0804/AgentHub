@@ -29,6 +29,7 @@ from apps.api.routes.product_control_plane import router as product_control_plan
 from apps.api.routes.runs import router as runs_router
 from apps.api.routes.tenancy import router as tenancy_router
 from apps.api.routes.threads import router as threads_router
+from apps.api.routes.wiki import router as wiki_router
 from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
@@ -112,6 +113,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(runs_router)
     app.include_router(tenancy_router)
     app.include_router(threads_router)
+    app.include_router(wiki_router)
 
     @app.get("/api/v1/health", tags=["system"])
     async def health(request: Request) -> dict[str, str]:

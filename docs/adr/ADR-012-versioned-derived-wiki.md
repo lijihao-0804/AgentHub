@@ -42,7 +42,8 @@ flowchart LR
 - `packages/wiki/query.py`：独立查询路由，经 KnowledgeRetriever / RetrievalQuery 调用既有 RAG。
 - `apps/api/routes/wiki.py`：现有身份会话与错误 envelope；`/api/v1/.../wiki`。
 - `apps/worker/tasks/wiki.py`：重新检查请求者成员资格、短事务、lease 续期、丢消息 reconciliation。
-- `migrations/versions/0032_wiki.py`：独立部署迁移；API 进程不建表。发布、页面、提取缓存有数据库不可变保护。
+- `migrations/versions/0032_wiki.py` 与 `0033_wiki_source_revocation.py`：独立部署迁移；API 进程不建表。
+  发布、页面、提取缓存与撤销记录有数据库不可变保护。
 
 ## 三层版本身份（合并前不可削弱）
 
@@ -63,6 +64,7 @@ flowchart LR
 
 - 默认 current 查询要求来源集合仍等于当前 ACTIVE/READY 集合，且未被跨文档 supersede，否则 WIKI_STALE。
 - 显式历史模式可读 RETIRED revision；DELETED 是撤销，任何模式都拒绝内容交付。版本身份和审计仍保留。
+- 永久 Wiki 撤销记录可抵御旧 ingestion 对 raw lifecycle 的重算；不能因此复活已撤销来源。
 - 查询/发布读取来源时使用共享行锁，防止同一事务交付中途被撤销；不承诺响应发出后的撤销能召回已交付内容。
 - chunk 必须属于同 workspace/KB/snapshot，quote 必须为精确原文。RAG 适配器输出也重新校验。
 - 模型输入只含原始 chunk，无工具/网络执行权限；不把历史生成页面再次编译为证据。

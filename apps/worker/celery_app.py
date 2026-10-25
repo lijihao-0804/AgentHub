@@ -23,6 +23,7 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
             "apps.worker.tasks.approvals",
             "apps.worker.tasks.evaluation",
             "apps.worker.tasks.memories",
+            "apps.worker.tasks.wiki",
         ],
     )
     app.conf.update(
@@ -34,6 +35,7 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
         enable_utc=True,
         timezone="UTC",
         beat_schedule={
+            "reconcile-wiki": {"task": "agenthub.reconcile_wiki", "schedule": 60.0},
             "reconcile-knowledge-ingestion": {
                 "task": "agenthub.reconcile_knowledge_ingestion",
                 "schedule": 60.0,
