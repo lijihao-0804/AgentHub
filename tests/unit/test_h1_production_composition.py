@@ -60,11 +60,11 @@ def test_production_agent_run_composition_reuses_real_component_graph(monkeypatc
 
 def test_worker_and_beat_do_not_require_api_jwt_secret() -> None:
     for role in ("worker", "beat"):
-        settings = Settings(environment="docker", process_role=role)
+        settings = Settings(environment="docker", process_role=role, _env_file=None)
         assert settings.auth_jwt_secret
 
     with pytest.raises(ValueError, match="AUTH_JWT_SECRET"):
-        Settings(environment="docker", process_role="api")
+        Settings(environment="docker", process_role="api", _env_file=None)
 
 
 def test_development_environment_aliases_share_cookie_semantics() -> None:

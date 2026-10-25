@@ -39,6 +39,10 @@ dev = [
   "pytest-asyncio>=0.25,<1",
   "ruff>=0.9,<1",
 ]
+# Benchmark-only parsing pilot (T1); never imported by packages/ or apps/.
+bench = [
+  "pdfplumber>=0.11,<0.12",
+]
 
 [tool.pytest.ini_options]
 addopts = "-q"

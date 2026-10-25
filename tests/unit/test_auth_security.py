@@ -79,13 +79,17 @@ def test_email_normalization_is_stable() -> None:
 
 @pytest.mark.parametrize("environment", ["local", "test", "development"])
 def test_default_jwt_secret_is_allowed_only_for_dev_environments(environment: str) -> None:
-    assert Settings(environment=environment).auth_jwt_secret == DEFAULT_AUTH_JWT_SECRET
+    # Hermetic: the developer's .env must not influence secret-default tests.
+    assert (
+        Settings(environment=environment, _env_file=None).auth_jwt_secret
+        == DEFAULT_AUTH_JWT_SECRET
+    )
 
 
 @pytest.mark.parametrize("environment", ["docker", "staging", "production"])
 def test_default_jwt_secret_fails_fast_outside_dev_environments(environment: str) -> None:
     with pytest.raises(ValueError, match="AUTH_JWT_SECRET"):
-        Settings(environment=environment)
+        Settings(environment=environment, _env_file=None)
 
 
 def test_custom_production_jwt_secret_is_accepted() -> None:
