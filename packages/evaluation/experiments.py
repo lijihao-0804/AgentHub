@@ -17,6 +17,7 @@ from packages.control_plane.rbac import EVALUATION_MANAGE, EVALUATION_READ, EVAL
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.evaluation import reproducibility as reproducibility_module
 from packages.evaluation.build_identity import (
     BuildIdentityProvider,
     EnvironmentBuildIdentityProvider,
@@ -36,19 +37,27 @@ from packages.evaluation.models import (
     EvaluationExperimentVariant,
     PricingSnapshot,
 )
+from packages.evaluation.pricing import (
+    PricingChainError,
+    build_frozen_pricing_chain,
+    consume_fallback_pricing_request,
+    load_pricing_snapshots,
+    pricing_snapshot_ids_from_metadata,
+    validate_frozen_pricing_chain,
+)
 from packages.evaluation.reproducibility import (
     EVALUATION_SCHEMA_VERSION,
     default_evaluator_manifest,
     experiment_spec_hash,
     normalize_knowledge_snapshots,
     normalize_wiki_publications,
-    pricing_snapshot_content_hash,
     variant_hash,
 )
 from packages.evaluation.validation import validate_variant_metadata
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.knowledge.snapshots import KnowledgeSnapshotService
 from packages.wiki.models import WikiCompilation
+from packages.wiki.service import WikiService
 
 
 class ExperimentService:
@@ -278,7 +287,7 @@ class ExperimentService:
                 "The pricing snapshot was not found.",
                 404,
             )
-        pricing_hash = pricing_snapshot_content_hash(pricing_snapshot)
+        pricing_hash = reproducibility_module.pricing_snapshot_content_hash(pricing_snapshot)
         if pricing_hash != pricing_snapshot.content_hash:
             raise AgentHubError(
                 "EVALUATION_PRICING_INTEGRITY_ERROR",
@@ -286,11 +295,36 @@ class ExperimentService:
                 422,
             )
         self._validate_pricing_model(agent_version.resolved_spec, pricing_snapshot)
+        try:
+            parsed = parse_frozen_agent_spec(
+                agent_version.resolved_spec,
+                workspace_id=experiment.workspace_id,
+            )
+            metadata, fallback_snapshot_ids = consume_fallback_pricing_request(
+                metadata,
+                parsed.model_plan,
+                primary_snapshot_id=pricing_snapshot.id,
+            )
+            pricing_snapshots = await load_pricing_snapshots(
+                session,
+                workspace_id=experiment.workspace_id,
+                snapshot_ids=(pricing_snapshot.id, *fallback_snapshot_ids),
+            )
+            metadata = build_frozen_pricing_chain(
+                metadata,
+                parsed.model_plan,
+                pricing_snapshots,
+            )
+        except (AgentHubError, PricingChainError) as error:
+            raise self._pricing_chain_error(error) from None
         snapshots = await self._freeze_knowledge(
             session, context, experiment.workspace_id, agent_version.resolved_spec
         )
         wiki_publications = await self._freeze_wiki_publications(
-            session, experiment.workspace_id, agent_version.resolved_spec
+            session,
+            context,
+            experiment.workspace_id,
+            agent_version.resolved_spec,
         )
         frozen_variant_hash = variant_hash(
             agent_version_id=str(agent_version.id),
@@ -373,7 +407,12 @@ class ExperimentService:
                 422,
             )
         for variant in variants:
-            await self._validate_stored_variant(session, variant, experiment.workspace_id)
+            await self._validate_stored_variant(
+                session,
+                context,
+                variant,
+                experiment.workspace_id,
+            )
         spec = {
             "schema_version": EVALUATION_SCHEMA_VERSION,
             "dataset": {
@@ -747,6 +786,7 @@ class ExperimentService:
     async def _freeze_wiki_publications(
         self,
         session: AsyncSession,
+        context: WorkspaceExecutionContext,
         workspace_id: UUID,
         resolved_spec: Mapping[str, Any],
     ) -> list[dict[str, str]]:
@@ -791,6 +831,24 @@ class ExperimentService:
                 "The frozen Wiki publication is invalid.",
                 422,
             )
+        wiki_context = context.model_copy(
+            update={"permissions": context.permissions | frozenset({"knowledge_run"})}
+        )
+        try:
+            await WikiService().sources(
+                session,
+                wiki_context,
+                publication,
+                require_current=False,
+            )
+        except AgentHubError as error:
+            if error.code == "WIKI_SOURCE_REVOKED":
+                raise AgentHubError(
+                    "EVALUATION_WIKI_PUBLICATION_INVALID",
+                    "The frozen Wiki publication includes a revoked source.",
+                    422,
+                ) from None
+            raise
         return normalize_wiki_publications(
             [
                 {
@@ -805,6 +863,7 @@ class ExperimentService:
     async def _validate_stored_variant(
         self,
         session: AsyncSession,
+        context: WorkspaceExecutionContext,
         variant: EvaluationExperimentVariant,
         workspace_id: UUID,
     ) -> None:
@@ -825,13 +884,38 @@ class ExperimentService:
                 "The pricing snapshot was not found.",
                 404,
             )
-        if pricing_snapshot_content_hash(pricing_snapshot) != variant.pricing_snapshot_hash:
+        snapshot_hash = reproducibility_module.pricing_snapshot_content_hash(pricing_snapshot)
+        if snapshot_hash != variant.pricing_snapshot_hash:
             raise AgentHubError(
                 "EVALUATION_PRICING_INTEGRITY_ERROR",
                 "The pricing snapshot changed after variant creation.",
                 409,
             )
         self._validate_pricing_model(agent_version.resolved_spec, pricing_snapshot)
+        try:
+            parsed = parse_frozen_agent_spec(
+                agent_version.resolved_spec,
+                workspace_id=workspace_id,
+            )
+            snapshot_ids = pricing_snapshot_ids_from_metadata(
+                variant.variant_metadata,
+                model_count=len(parsed.model_plan.chain),
+                primary_snapshot_id=variant.pricing_snapshot_id,
+            )
+            pricing_snapshots = await load_pricing_snapshots(
+                session,
+                workspace_id=workspace_id,
+                snapshot_ids=snapshot_ids,
+            )
+            validate_frozen_pricing_chain(
+                variant.variant_metadata,
+                parsed.model_plan,
+                pricing_snapshots,
+                primary_snapshot_id=variant.pricing_snapshot_id,
+                primary_snapshot_hash=variant.pricing_snapshot_hash,
+            )
+        except (AgentHubError, PricingChainError) as error:
+            raise self._pricing_chain_error(error, status_code=409) from None
         snapshots = normalize_knowledge_snapshots(variant.effective_knowledge_snapshots)
         for item in snapshots:
             snapshot = await session.scalar(
@@ -876,6 +960,24 @@ class ExperimentService:
                         "The frozen Wiki publication is invalid.",
                         409,
                     )
+                wiki_context = context.model_copy(
+                    update={"permissions": context.permissions | frozenset({"knowledge_run"})}
+                )
+                try:
+                    await WikiService().sources(
+                        session,
+                        wiki_context,
+                        publication,
+                        require_current=False,
+                    )
+                except AgentHubError as error:
+                    if error.code == "WIKI_SOURCE_REVOKED":
+                        raise AgentHubError(
+                            "EVALUATION_WIKI_PUBLICATION_INVALID",
+                            "The frozen Wiki publication includes a revoked source.",
+                            409,
+                        ) from None
+                    raise
                 if (
                     UUID(item["wiki_publication_id"]) != spec_publication_id
                     or item["publication_hash"] != spec_publication_hash
@@ -948,6 +1050,16 @@ class ExperimentService:
                 "The pricing provider/model does not match the AgentVersion.",
                 422,
             )
+
+    @staticmethod
+    def _pricing_chain_error(error: Exception, *, status_code: int = 422) -> AgentHubError:
+        if isinstance(error, AgentHubError):
+            return error
+        return AgentHubError(
+            "EVALUATION_PRICING_CHAIN_INVALID",
+            str(error) or "The frozen pricing chain is invalid.",
+            status_code,
+        )
 
     @staticmethod
     def _validate_definition(split: str, purpose: str, repetitions: int) -> None:

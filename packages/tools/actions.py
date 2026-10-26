@@ -65,6 +65,14 @@ class CreateTicketActionExecutor:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self.session_factory = session_factory
 
+    async def reconcile(self, context, *, idempotency_key):
+        async with self.session_factory() as session:
+            existing = await _find_ticket(session, UUID(context.workspace_id), idempotency_key)
+            if existing is not None:
+                return _ticket_result(existing)
+        # A negative read is not proof that a lost COMMIT never reached the server.
+        return ActionExecutionResult.unknown_outcome()
+
     async def execute(
         self,
         context: WorkspaceExecutionContext,
@@ -195,13 +203,22 @@ class ActionRuntime:
                     idempotency_key=idempotency_key,
                 )
         except TimeoutError:
-            # Safe for a local action: the work runs in this process, so
-            # cancelling it is the same as it not having happened.
-            return ActionExecutionResult.failed("ACTION_TIMEOUT", "The action timed out.")
+            return await self._reconcile_local(executor, context, idempotency_key)
         except AgentHubError as exc:
             return ActionExecutionResult.failed(exc.code, exc.message)
         except Exception:
-            return ActionExecutionResult.failed("ACTION_EXECUTION_FAILED", "The action failed.")
+            return await self._reconcile_local(executor, context, idempotency_key)
+
+    @staticmethod
+    async def _reconcile_local(executor, context, key):
+        reconcile = getattr(executor, "reconcile", None)
+        if reconcile is not None:
+            try:
+                async with asyncio.timeout(5):
+                    return await reconcile(context, idempotency_key=key)
+            except Exception:
+                pass
+        return ActionExecutionResult.unknown_outcome()
 
     @staticmethod
     async def _execute_remote(

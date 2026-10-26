@@ -20,6 +20,7 @@ from packages.agent_runtime.adapters.langgraph import (
 )
 from packages.agent_runtime.event_store import RunEventReader, RunEventRecorder
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
+from packages.agent_runtime.execution_lease import run_execution_lease
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.agent_runtime.runtime_graph import _AgentRunGraph
@@ -46,6 +47,7 @@ from packages.agent_runtime.work_layer import (
     ThreadContextProvider,
 )
 from packages.approvals import ApprovalService
+from packages.approvals.models import Approval
 from packages.control_plane.services import TenantService
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
@@ -127,6 +129,7 @@ class AgentRunService:
         agent_version_id: UUID,
         input_text: str,
         thread_id: UUID | None = None,
+        thread_turn_id: UUID | None = None,
     ) -> AgentRunResult:
         self._require_permission(context, "agent_run")
         run = await self.prepare_run(
@@ -134,6 +137,7 @@ class AgentRunService:
             agent_version_id=agent_version_id,
             input_text=input_text,
             thread_id=thread_id,
+            thread_turn_id=thread_turn_id,
         )
         return await self.execute_prepared_run(context, run_id=run.id)
 
@@ -145,6 +149,7 @@ class AgentRunService:
         input_text: str,
         execution_overrides: AgentRunExecutionOverrides | None = None,
         thread_id: UUID | None = None,
+        thread_turn_id: UUID | None = None,
     ) -> AgentRun:
         """Persist a durable AgentRun before any external model/tool work begins."""
 
@@ -155,9 +160,24 @@ class AgentRunService:
             input_text,
             execution_overrides=execution_overrides,
             thread_id=thread_id,
+            thread_turn_id=thread_turn_id,
         )
 
     async def execute_prepared_run(
+        self, context: WorkspaceExecutionContext, *, run_id: UUID
+    ) -> AgentRunResult:
+        self._require_permission(context, "agent_run")
+        async with run_execution_lease(
+            self.session_factory,
+            UUID(context.workspace_id),
+            run_id,
+            allowed_statuses={"RUNNING", "CANCEL_REQUESTED"},
+        ) as owner:
+            if owner is None:
+                return _run_result(await self.get_run(context, run_id))
+            return await self._execute_prepared_run_owned(context, run_id=run_id)
+
+    async def _execute_prepared_run_owned(
         self, context: WorkspaceExecutionContext, *, run_id: UUID
     ) -> AgentRunResult:
         """Execute an already persisted run; terminal runs are never duplicated."""
@@ -171,6 +191,17 @@ class AgentRunService:
             )
         if run is None:
             raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
+        if run.status == "CANCEL_REQUESTED":
+            return await self._complete_run(
+                context,
+                run.id,
+                status="CANCELLED",
+                final_output=None,
+                failure_code=None,
+                model_step_count=run.model_step_count,
+                tool_call_count=run.tool_call_count,
+                usage_records=[],
+            )
         if run.status != "RUNNING":
             return _run_result(run)
         if not await self._frozen_wiki_publications_intact(run):
@@ -209,6 +240,7 @@ class AgentRunService:
                     model_step_count=int(state.get("model_round_count", 0)),
                     tool_call_count=int(state.get("tool_call_count", 0)),
                     usage_records=state.get("usage_records", []),
+                    waiting_approval_id=UUID(str(approval_payload["approval_id"])),
                 )
                 await _safe_end_span(
                     span,
@@ -287,6 +319,20 @@ class AgentRunService:
         run_id: UUID,
         approval_id: UUID,
     ) -> AgentRunResult:
+        self._require_permission(context, "agent_run")
+        async with run_execution_lease(
+            self.session_factory,
+            UUID(context.workspace_id),
+            run_id,
+            allowed_statuses={"WAITING_APPROVAL"},
+        ) as owner:
+            if owner is None:
+                return _run_result(await self.get_run(context, run_id))
+            return await self._resume_owned(context, run_id=run_id, approval_id=approval_id)
+
+    async def _resume_owned(
+        self, context: WorkspaceExecutionContext, *, run_id: UUID, approval_id: UUID
+    ) -> AgentRunResult:
         """Resume the same durable Run after a decision has been persisted."""
 
         self._require_permission(context, "agent_run")
@@ -300,7 +346,23 @@ class AgentRunService:
                 raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
             if run.status != "WAITING_APPROVAL":
                 return _run_result(run)
-        runtime_context = await self._authoritative_run_context(context, run)
+        runtime_context = None
+        try:
+            runtime_context = await self._authoritative_run_context(context, run)
+        except AgentHubError as error:
+            if error.status_code not in {403, 404}:
+                raise
+        if runtime_context is None or "agent_run" not in runtime_context.permissions:
+            return await self._complete_run(
+                context,
+                run.id,
+                status="NEEDS_ATTENTION",
+                final_output=None,
+                failure_code="RUN_ACTOR_ACCESS_REVOKED",
+                model_step_count=run.model_step_count,
+                tool_call_count=run.tool_call_count,
+                usage_records=[],
+            )
         if self.approval_service is None or self.checkpoint_adapter is None:
             raise AgentHubError(
                 "CHECKPOINT_NOT_CONFIGURED", "Durable approval resume is not configured.", 503
@@ -320,6 +382,10 @@ class AgentRunService:
                 "APPROVAL_RESUME_MISMATCH",
                 "The approval does not belong to this durable run.",
                 409,
+            )
+        if run.waiting_approval_id is not None and run.waiting_approval_id != approval_id:
+            raise AgentHubError(
+                "APPROVAL_RESUME_MISMATCH", "The approval is not the active durable interrupt.", 409
             )
         checkpoint_exists = await PostgresCheckpointProbe(self.checkpoint_adapter).has_checkpoint(
             run.workspace_id, run.id
@@ -356,24 +422,58 @@ class AgentRunService:
                 "The frozen Wiki publication is no longer available.",
                 409,
             )
-        graph = _AgentRunGraph(self, runtime_context, run)
-        async with self.checkpoint_adapter.checkpointer() as checkpointer:
-            final_state = await graph.invoke(
-                resume_command({"approval_id": str(approval_id)}),
-                checkpointer=checkpointer,
-                config=self.checkpoint_adapter.config_for_run(run.workspace_id, run.id),
+        async with self.session_factory() as session:
+            current = await session.scalar(
+                select(AgentRun)
+                .where(
+                    AgentRun.workspace_id == run.workspace_id,
+                    AgentRun.id == run.id,
+                )
+                .with_for_update()
             )
-        if _approval_interrupt_payload(final_state) is not None:
-            return await self._waiting_result(
+            if current.status != "WAITING_APPROVAL":
+                return _run_result(current)
+            current.status = "RUNNING"
+            current.event_log_complete = False
+            await session.commit()
+        recorder = RunEventRecorder(
+            self.session_factory, workspace_id=run.workspace_id, run_id=run.id
+        )
+        emitter = AgentEventEmitter(
+            run_id=str(run.id),
+            agent_version_id=str(run.agent_version_id),
+            request_id=runtime_context.request_id,
+            initial_sequence=await self.event_reader.latest_sequence(
+                workspace_id=run.workspace_id, run_id=run.id
+            ),
+        )
+        graph = _AgentRunGraph(self, runtime_context, run, emitter=emitter, event_recorder=recorder)
+        try:
+            async with self.checkpoint_adapter.checkpointer() as checkpointer:
+                final_state = await graph.invoke(
+                    resume_command({"approval_id": str(approval_id)}),
+                    checkpointer=checkpointer,
+                    config=self.checkpoint_adapter.config_for_run(run.workspace_id, run.id),
+                )
+        except BaseException:
+            recorder._failed = True
+            await recorder.aclose()
+            raise
+        approval_payload = _approval_interrupt_payload(final_state)
+        if approval_payload is not None:
+            waiting = await self._waiting_result(
                 runtime_context,
                 run,
                 model_step_count=int(final_state.get("model_round_count", 0)),
                 tool_call_count=int(final_state.get("tool_call_count", 0)),
                 usage_records=final_state.get("usage_records", []),
+                waiting_approval_id=UUID(str(approval_payload["approval_id"])),
             )
+            await recorder.aclose()
+            return waiting
         failure_code = final_state.get("failure_code")
         status = final_state.get("run_status") or ("FAILED" if failure_code else "SUCCEEDED")
-        return await self._complete_run(
+        result = await self._complete_run(
             runtime_context,
             run.id,
             status=status,
@@ -383,6 +483,27 @@ class AgentRunService:
             tool_call_count=graph.tool_call_count,
             usage_records=graph.usage_records,
         )
+        event_type = (
+            AgentEventType.RUN_COMPLETED
+            if result.status == "SUCCEEDED"
+            else AgentEventType.RUN_CANCELLED
+            if result.status == "CANCELLED"
+            else AgentEventType.RUN_FAILED
+        )
+        data = {
+            "status": result.status,
+            "model_step_count": result.model_step_count,
+            "tool_call_count": result.tool_call_count,
+        }
+        if event_type is AgentEventType.RUN_COMPLETED:
+            data["output"] = result.final_output or ""
+        elif event_type is AgentEventType.RUN_FAILED:
+            data["failure_code"] = result.failure_code or "AGENT_RUN_FAILED"
+        try:
+            await graph._emit(event_type, data)
+        finally:
+            await recorder.aclose()
+        return result
 
     async def _authoritative_run_context(
         self, request_context: WorkspaceExecutionContext, run: AgentRun
@@ -418,11 +539,34 @@ class AgentRunService:
             )
             if run is None:
                 raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
-            if run.status == "WAITING_APPROVAL":
+            previous_status = run.status
+            claimed_action = await session.scalar(
+                select(Approval.id)
+                .where(
+                    Approval.workspace_id == run.workspace_id,
+                    Approval.run_id == run.id,
+                    Approval.execution_status.in_({"CLAIMED", "UNKNOWN_OUTCOME"}),
+                )
+                .limit(1)
+            )
+            if run.status == "NEEDS_ATTENTION":
+                pass
+            elif isinstance(claimed_action, UUID) and run.status in {
+                "SUCCEEDED",
+                "FAILED",
+                "CANCELLED",
+            }:
+                run.status = "NEEDS_ATTENTION"
+                run.failure_code = "ACTION_RECONCILIATION_REQUIRED"
+            elif isinstance(claimed_action, UUID):
+                run.status = "CANCEL_REQUESTED"
+            elif run.status == "WAITING_APPROVAL" and not run.execution_owner:
                 run.status = "CANCELLED"
                 run.completed_at = datetime.now(UTC)
-            elif run.status == "RUNNING":
+            elif run.status in {"RUNNING", "WAITING_APPROVAL"}:
                 run.status = "CANCEL_REQUESTED"
+            if previous_status != run.status:
+                run.event_log_complete = False
             await session.commit()
             result = _run_result(run)
         if result.status == "CANCELLED" and self.approval_service is not None:
@@ -438,6 +582,7 @@ class AgentRunService:
             )
             if run is not None and run.status == "RUNNING":
                 run.status = "WAITING_APPROVAL"
+                run.event_log_complete = False
                 await session.commit()
 
     async def _waiting_result(
@@ -448,17 +593,36 @@ class AgentRunService:
         model_step_count: int,
         tool_call_count: int,
         usage_records: list[dict[str, Any]],
+        waiting_approval_id: UUID | None = None,
     ) -> AgentRunResult:
         async with self.session_factory() as session:
             persisted = await session.scalar(
-                select(AgentRun).where(
-                    AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run.id
-                )
+                select(AgentRun)
+                .where(AgentRun.workspace_id == UUID(context.workspace_id), AgentRun.id == run.id)
+                .with_for_update()
             )
             if persisted is None:
                 raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
             persisted.model_step_count = model_step_count
             persisted.tool_call_count = tool_call_count
+            if persisted.status == "RUNNING":
+                persisted.status = "WAITING_APPROVAL"
+            persisted.event_log_complete = False
+            persisted.waiting_approval_id = waiting_approval_id
+            # A decision can commit while the graph is reaching its interrupt.
+            # Recompute under the same Run lock used by the decision endpoint.
+            decided = await session.scalar(
+                select(Approval.id)
+                .where(
+                    Approval.workspace_id == persisted.workspace_id,
+                    Approval.run_id == persisted.id,
+                    Approval.decision_status != "PENDING",
+                    Approval.execution_status == "NOT_STARTED",
+                    *([] if waiting_approval_id is None else [Approval.id == waiting_approval_id]),
+                )
+                .limit(1)
+            )
+            persisted.resume_pending = isinstance(decided, UUID)
             for key, value in _aggregate_usage(usage_records).items():
                 setattr(persisted, key, value)
             await session.commit()
@@ -505,11 +669,20 @@ class AgentRunService:
             run = await self._create_run(context, agent_version_id, input_text)
         else:
             run = prepared_run
+        existing_hub = self.stream_registry.get(run.id)
+        if existing_hub is not None:
+            return existing_hub
         queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue(maxsize=256)
+        recorder = RunEventRecorder(
+            self.session_factory, workspace_id=UUID(context.workspace_id), run_id=run.id
+        )
         emitter = AgentEventEmitter(
             run_id=str(run.id),
             agent_version_id=str(agent_version_id),
             request_id=context.request_id,
+            # Persist before the execution lease is released, rather than
+            # waiting for the hub pump; resume may begin in another process.
+            before_publish=recorder.arecord,
         )
         graph_holder: dict[str, _AgentRunGraph] = {}
         producer = asyncio.create_task(
@@ -552,11 +725,8 @@ class AgentRunService:
             source=queue,
             abort=abort_if_active,
             grace_seconds=None if detached else self.stream_grace_seconds,
-            recorder=RunEventRecorder(
-                self.session_factory,
-                workspace_id=UUID(context.workspace_id),
-                run_id=run.id,
-            ),
+            recorder=recorder,
+            source_persisted=True,
             on_closed=self.stream_registry.discard,
         )
         self.stream_registry.register(hub)
@@ -641,6 +811,11 @@ class AgentRunService:
         hub = self.stream_registry.get(run_id)
         if hub is not None:
             async for event in hub.subscribe():
+                # Durable events may land between the initial replay and the
+                # subscription. Never advance past that gap using a live cursor.
+                if event.sequence > cursor + 1:
+                    async for persisted in replay():
+                        yield persisted
                 if event.sequence <= cursor:
                     continue
                 cursor = event.sequence
@@ -649,7 +824,8 @@ class AgentRunService:
             # subscribe, so drain whatever landed in the gap.
             async for event in replay():
                 yield event
-            return
+            if hub.closed:
+                return
 
         while True:
             if await self._run_stopped_publishing(context, run_id):
@@ -711,10 +887,45 @@ class AgentRunService:
         """
 
         try:
+            async with run_execution_lease(
+                self.session_factory,
+                UUID(context.workspace_id),
+                run.id,
+                allowed_statuses={"RUNNING", "CANCEL_REQUESTED"},
+            ) as owner:
+                if owner is None:
+                    return
+                await self._produce_stream_owned(
+                    context, run, agent_version_id, queue, emitter, graph_holder
+                )
+        finally:
+            _close_event_queue(queue)
+
+    async def _produce_stream_owned(
+        self, context, run, agent_version_id, queue, emitter, graph_holder
+    ) -> None:
+        try:
             await self._produce_stream_body(
                 context, run, agent_version_id, queue, emitter, graph_holder
             )
         except asyncio.CancelledError:
+            # Close out cancellation while ownership is still held. The lease
+            # fences an unfinished graph conservatively; a known model-stream
+            # close can be terminal, while _complete_run still gives claimed
+            # or unknown actions precedence over ordinary cancellation.
+            graph = graph_holder.get("graph")
+            await asyncio.shield(
+                self._complete_run(
+                    context,
+                    run.id,
+                    status="FAILED",
+                    final_output=None,
+                    failure_code="AGENT_STREAM_CANCELLED",
+                    model_step_count=graph.model_round_count if graph else 0,
+                    tool_call_count=graph.tool_call_count if graph else 0,
+                    usage_records=graph.usage_records if graph else [],
+                )
+            )
             raise
         except Exception:
             logger.warning("agent_stream_producer_failed", exc_info=True)
@@ -787,6 +998,7 @@ class AgentRunService:
                     model_step_count=int(final_state.get("model_round_count", 0)),
                     tool_call_count=int(final_state.get("tool_call_count", 0)),
                     usage_records=final_state.get("usage_records", []),
+                    waiting_approval_id=UUID(str(approval_payload["approval_id"])),
                 )
                 return
             failure_code = final_state.get("failure_code")
@@ -821,15 +1033,19 @@ class AgentRunService:
         if result.status == "CANCELLED":
             event_type = AgentEventType.RUN_CANCELLED
         else:
-            event_type = AgentEventType.RUN_FAILED if failure_code else AgentEventType.RUN_COMPLETED
+            event_type = (
+                AgentEventType.RUN_COMPLETED
+                if result.status == "SUCCEEDED"
+                else AgentEventType.RUN_FAILED
+            )
         data: dict[str, Any] = {
             "status": result.status,
             "model_step_count": result.model_step_count,
             "tool_call_count": result.tool_call_count,
         }
-        if failure_code:
-            data["failure_code"] = failure_code
-        else:
+        if event_type is AgentEventType.RUN_FAILED:
+            data["failure_code"] = result.failure_code or "AGENT_RUN_FAILED"
+        elif event_type is AgentEventType.RUN_COMPLETED:
             data["output"] = result.final_output or ""
         await _queue_event(queue, await emitter.emit(event_type, data))
 
@@ -880,11 +1096,18 @@ class AgentRunService:
         agent_version_id: UUID,
         input_text: str,
         thread_id: UUID | None = None,
+        thread_turn_id: UUID | None = None,
     ) -> AgentRun:
         """Validate and persist the Run before the HTTP streaming response starts."""
 
         await self.preflight_stream(context, agent_version_id=agent_version_id)
-        return await self._create_run(context, agent_version_id, input_text, thread_id=thread_id)
+        return await self._create_run(
+            context,
+            agent_version_id,
+            input_text,
+            thread_id=thread_id,
+            thread_turn_id=thread_turn_id,
+        )
 
     async def list_steps(self, context: WorkspaceExecutionContext, run_id: UUID) -> list[RunStep]:
         await self.get_run(context, run_id)
@@ -907,6 +1130,7 @@ class AgentRunService:
         *,
         execution_overrides: AgentRunExecutionOverrides | None = None,
         thread_id: UUID | None = None,
+        thread_turn_id: UUID | None = None,
     ) -> AgentRun:
         try:
             workspace_id = UUID(context.workspace_id)
@@ -967,6 +1191,7 @@ class AgentRunService:
                 workspace_id=workspace_id,
                 agent_version_id=agent_version_id,
                 thread_id=thread_id,
+                thread_turn_id=thread_turn_id,
                 input_text=input_text,
                 created_by=created_by,
                 resolved_spec_hash=published_hash,
@@ -1329,7 +1554,25 @@ class AgentRunService:
             effective_status = status
             effective_output = final_output
             effective_failure = failure_code
-            if run.status in {"CANCELLED", "NEEDS_ATTENTION"}:
+            claim = await session.scalar(
+                select(Approval.id)
+                .where(
+                    Approval.workspace_id == run.workspace_id,
+                    Approval.run_id == run.id,
+                    Approval.execution_status.in_({"CLAIMED", "UNKNOWN_OUTCOME"}),
+                )
+                .limit(1)
+            )
+            uncertain = (
+                status == "NEEDS_ATTENTION"
+                or _is_uncertain_action_failure(failure_code)
+                or isinstance(claim, UUID)
+            )
+            if uncertain:
+                effective_status = "NEEDS_ATTENTION"
+                effective_output = None
+                effective_failure = failure_code or "ACTION_RECONCILIATION_REQUIRED"
+            elif run.status in {"CANCELLED", "NEEDS_ATTENTION"}:
                 effective_status = run.status
                 effective_output = run.final_output
                 effective_failure = run.failure_code
@@ -1343,12 +1586,19 @@ class AgentRunService:
                     effective_output = None
                     effective_failure = None
             run.status = effective_status
+            run.event_log_complete = False
+            run.resume_pending = False
+            run.waiting_approval_id = None
             run.final_output = effective_output
             run.failure_code = effective_failure
-            run.model_step_count = model_step_count
-            run.tool_call_count = tool_call_count
-            for key, value in _aggregate_usage(usage_records).items():
-                setattr(run, key, value)
+            previous_rounds = getattr(run, "model_step_count", 0) or 0
+            run.model_step_count = max(model_step_count, previous_rounds)
+            run.tool_call_count = max(tool_call_count, getattr(run, "tool_call_count", 0) or 0)
+            # Abort before restoring the checkpoint has no new usage evidence;
+            # it must not erase spend already persisted by an earlier segment.
+            if usage_records or previous_rounds == 0:
+                for key, value in _aggregate_usage(usage_records).items():
+                    setattr(run, key, value)
             run.completed_at = datetime.now(UTC)
             await session.commit()
             await session.refresh(run)
@@ -1404,5 +1654,3 @@ class AgentRunService:
     def _require_permission(context: WorkspaceExecutionContext, permission: str) -> None:
         if permission not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
-
-

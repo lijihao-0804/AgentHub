@@ -205,9 +205,7 @@ def test_rag_and_tool_results_are_projected_as_legal_bounded_json() -> None:
     result = ModelMessage(
         role="tool",
         tool_call_id="call-1",
-        content=json.dumps(
-            {"status": "SUCCESS", "trust": "TRUSTED", "data": {"value": "y" * 200}}
-        ),
+        content=json.dumps({"status": "SUCCESS", "trust": "TRUSTED", "data": {"value": "y" * 200}}),
     )
     assistant = ModelMessage(
         role="assistant",
@@ -351,3 +349,88 @@ def test_usage_contains_numeric_category_counts_but_no_business_text() -> None:
     usage_text = repr(result.usage)
     assert "secret business text" not in usage_text
     assert result.usage.retained_by_category[ContextCategory.RUNTIME_POLICY] > 0
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {
+            "status": "SUCCESS",
+            "trust": "TRUSTED",
+            "data": {"value": "v" * 20_000},
+        },
+        {
+            "status": "FAILED",
+            "error_code": "REMOTE_TOOL_FAILED",
+            "data": {"value": "v" * 20_000},
+        },
+        {
+            "status": "SUCCESS",
+            "trust": "TRUSTED",
+            "data": {"value": "v" * 20_000},
+            "evidence_refs": [{"chunk_id": "chunk-1"}],
+        },
+    ],
+)
+def test_default_tool_pool_keeps_legal_usable_payload_under_envelope_pressure(
+    payload: dict[str, object],
+) -> None:
+    policy = ContextBudgetPolicy(
+        ResolvedModelExecutionPlan(
+            primary=_profile(context=20_000, max_tokens=1_000),
+        ),
+        ContextBudgetConfig(
+            reserved_output_tokens=1_000,
+            max_tool_result_tokens=4_000,
+        ),
+        estimator=_CharEstimator(),
+    )
+    tool_result = ModelMessage(
+        role="tool",
+        name="remote_lookup",
+        tool_call_id="provider-call-id",
+        content=json.dumps(payload),
+    )
+    assistant = ModelMessage(
+        role="assistant",
+        content=None,
+        tool_calls=(ModelToolCall(name="remote_lookup", arguments={}),),
+    )
+
+    result = policy.admit(
+        (
+            ModelMessage(role="user", content="task"),
+            assistant,
+            tool_result,
+        ),
+        [
+            ContextCategory.CURRENT_USER_TASK,
+            ContextCategory.CONVERSATION,
+            ContextCategory.TOOL_RESULT,
+        ],
+        [None, "turn-1", "turn-1"],
+    )
+
+    projected = result.messages[-1]
+    decoded = json.loads(projected.content or "")
+    assert projected.name == "remote_lookup"
+    assert projected.tool_call_id == "provider-call-id"
+    expected_fields = {"data", "status", "truncated", "trust"}
+    if "error_code" in payload:
+        expected_fields.add("error_code")
+    if "evidence_refs" in payload:
+        expected_fields.add("evidence_refs")
+    assert set(decoded) == expected_fields
+    assert decoded["status"] == payload["status"]
+    assert decoded["trust"] == "UNTRUSTED"
+    assert decoded["truncated"] is True
+    assert set(decoded["data"]) == {"value"}
+    assert isinstance(decoded["data"]["value"], str)
+    if "error_code" in payload:
+        assert decoded["error_code"] == "REMOTE_TOOL_FAILED"
+        assert decoded["data"]["value"]
+    else:
+        assert decoded["data"]["value"]
+    if "evidence_refs" in payload:
+        assert decoded["evidence_refs"] == [{"chunk_id": "chunk-1"}]
+    assert result.usage.estimated_input_after <= result.usage.available_input

@@ -26,6 +26,7 @@ Two deliberate decisions:
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -35,10 +36,12 @@ from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
 from packages.agent_runtime.models import AgentRun
 from packages.agent_runtime.runtime import AgentRunService
 from packages.approvals import ApprovalService
+from packages.approvals.models import Approval
 from packages.artifacts.recorder import ToolResultArtifactRecorder
 from packages.control_plane.services import TenantService
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
+from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import PrincipalContext
 from packages.knowledge.composition import (
     onyx_section_selector_from_settings,
@@ -80,6 +83,54 @@ def execute_agent_run(_task, workspace_id: str, run_id: str, request_id: str) ->
     )
 
 
+@celery_app.task(
+    name="agenthub.resume_agent_run", ignore_result=True, acks_late=True, reject_on_worker_lost=True
+)
+def resume_agent_run(run_id: str, approval_id: str) -> None:
+    asyncio.run(_resume_agent_run(get_settings(), UUID(run_id), UUID(approval_id)))
+
+
+async def _resume_agent_run(settings, run_id, approval_id):
+    engine, factory = create_database(settings.database_url)
+    try:
+        async with factory() as session:
+            run = await session.scalar(
+                select(AgentRun).where(AgentRun.id == run_id).with_for_update()
+            )
+            if run is None or run.status != "WAITING_APPROVAL":
+                return
+            principal = PrincipalContext(
+                request_id=f"resume:{run_id}",
+                trace_id=f"resume:{run_id}",
+                user_id=str(run.created_by),
+            )
+            context = None
+            try:
+                context = (
+                    await TenantService().get_workspace_access(
+                        session,
+                        principal=principal,
+                        workspace_id=run.workspace_id,
+                    )
+                ).context
+            except AgentHubError as error:
+                if error.status_code not in {403, 404}:
+                    raise
+            if context is None or "agent_run" not in context.permissions:
+                run.status = "NEEDS_ATTENTION"
+                run.failure_code = "RUN_ACTOR_ACCESS_REVOKED"
+                run.resume_pending = False
+                run.event_log_complete = False
+                run.completed_at = datetime.now(UTC)
+                await session.commit()
+                return
+        await _build_service(settings, factory).resume(
+            context, run_id=run_id, approval_id=approval_id
+        )
+    finally:
+        await engine.dispose()
+
+
 async def _execute_agent_run(
     settings: Settings,
     *,
@@ -91,10 +142,29 @@ async def _execute_agent_run(
     try:
         async with factory() as session:
             run = await session.scalar(
-                select(AgentRun).where(
-                    AgentRun.workspace_id == workspace_id, AgentRun.id == run_id
-                )
+                select(AgentRun)
+                .where(AgentRun.workspace_id == workspace_id, AgentRun.id == run_id)
+                .with_for_update()
             )
+            if run is not None and run.status == "CANCEL_REQUESTED":
+                if not run.execution_owner:
+                    claim = await session.scalar(
+                        select(Approval.id)
+                        .where(
+                            Approval.workspace_id == workspace_id,
+                            Approval.run_id == run_id,
+                            Approval.execution_status.in_({"CLAIMED", "UNKNOWN_OUTCOME"}),
+                        )
+                        .limit(1)
+                    )
+                    run.status = "NEEDS_ATTENTION" if isinstance(claim, UUID) else "CANCELLED"
+                    run.event_log_complete = False
+                    run.failure_code = (
+                        "ACTION_RECONCILIATION_REQUIRED" if isinstance(claim, UUID) else None
+                    )
+                    run.completed_at = datetime.now(UTC)
+                    await session.commit()
+                return
             if run is None or run.status != "RUNNING":
                 # Already executed, cancelled, or reconciled away. Re-running
                 # would duplicate side effects that the run may already have
@@ -150,9 +220,9 @@ def _build_service(settings: Settings, factory) -> AgentRunService:
         tool_runtime=ToolRuntime(
             session_factory=factory,
             registry=ToolRegistry(
-                    retriever=retriever,
-                    section_selector=onyx_section_selector_from_settings(settings),
-                ),
+                retriever=retriever,
+                section_selector=onyx_section_selector_from_settings(settings),
+            ),
             audit_sink=SqlAlchemyToolAuditSink(factory),
             trace_sink=trace_sink,
             mcp_handler=mcp_executor.execute_read,

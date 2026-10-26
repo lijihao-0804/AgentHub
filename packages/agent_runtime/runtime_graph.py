@@ -23,6 +23,7 @@ from packages.agent_runtime.context_budget import (
     ApproxTokenEstimator,
     ContextBudgetConfig,
     ContextBudgetPolicy,
+    ContextCategory,
 )
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
 from packages.agent_runtime.evidence_registry import (
@@ -62,6 +63,7 @@ from packages.agent_runtime.work_layer import (
 from packages.approvals import ApprovalDecisionStatus, ApprovalExecutionStatus
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
+from packages.core.execution_context.call_scope import capture_auxiliary_model_calls
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.memory.contracts import (
@@ -99,6 +101,22 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
+def _retain_admission(state, admission):
+    """Keep position metadata in the same checkpoint update as its messages."""
+    state["messages"] = list(admission.messages)
+    categories = getattr(admission, "message_categories", ())
+    if categories:
+        memory_count = sum(c is ContextCategory.MEMORY for c in categories)
+        history_count = 0
+        for category in categories[2 + memory_count :]:
+            if category is not ContextCategory.CONVERSATION:
+                break
+            history_count += 1
+        state["memory_message_count"] = memory_count
+        state["history_message_count"] = history_count
+
+
 class _AgentRunGraph:
     def __init__(
         self,
@@ -109,6 +127,7 @@ class _AgentRunGraph:
         mode: str = "sync",
         emitter: AgentEventEmitter | None = None,
         event_queue: asyncio.Queue[AgentEvent | None] | None = None,
+        event_recorder=None,
     ) -> None:
         self.service = service
         self.context = context
@@ -117,6 +136,7 @@ class _AgentRunGraph:
         self.mode = mode
         self.emitter = emitter
         self.event_queue = event_queue
+        self.event_recorder = event_recorder
         self.active_model_stream: AsyncIterator[ModelStreamEvent] | None = None
         self._cancel_requested_emitted = False
         self.model_round_count = 0
@@ -497,11 +517,15 @@ class _AgentRunGraph:
             return {"failure_code": "AGENT_PREPARE_FAILED"}
 
     async def _emit(self, event_type: AgentEventType, data: Mapping[str, Any]) -> None:
-        if self.emitter is None or self.event_queue is None:
+        if self.emitter is None or (self.event_queue is None and self.event_recorder is None):
             return
         if event_type is AgentEventType.MESSAGE_DELTA and data.get("delta"):
             mark_visible_text()
-        await _queue_event(self.event_queue, await self.emitter.emit(event_type, data))
+        event = await self.emitter.emit(event_type, data)
+        if self.event_recorder is not None:
+            await self.event_recorder.arecord(event)
+        if self.event_queue is not None:
+            await _queue_event(self.event_queue, event)
 
     async def close_active_model_stream(self) -> None:
         stream = self.active_model_stream
@@ -555,13 +579,16 @@ class _AgentRunGraph:
             )
             return {"model_round_count": next_round, "failure_code": error.code}
 
-        state["messages"] = list(admission.messages)
-        evidence_update = {}
+        _retain_admission(state, admission)
+        evidence_update = {
+            "memory_message_count": int(state.get("memory_message_count", 0)),
+            "history_message_count": int(state.get("history_message_count", 0)),
+        }
         if "rag_evidence_registry" in state:
             state["rag_evidence_registry"] = visible_evidence_registry(
                 admission.messages, state["rag_evidence_registry"]
             )
-            evidence_update = {"rag_evidence_registry": state["rag_evidence_registry"]}
+            evidence_update["rag_evidence_registry"] = state["rag_evidence_registry"]
         state["tool_definitions"] = {
             definition.identity: definition for definition in state["tool_definitions"].values()
         }
@@ -575,6 +602,7 @@ class _AgentRunGraph:
             "estimated_input_after": usage.estimated_input_after,
             "truncated": usage.truncated,
             "dropped_exchange_count": usage.dropped_exchange_count,
+            "window_utilization": usage.window_utilization,
         }
         await self._emit(AgentEventType.CONTEXT_BUDGET, budget_data)
         trace_data = {
@@ -661,16 +689,21 @@ class _AgentRunGraph:
         )
         messages.append(assistant)
         if not response.tool_calls and not response.content.strip():
+            empty_code = (
+                "MODEL_PROVIDER_REFUSED"
+                if response.finish_reason in {"content_filter", "refusal"}
+                else "AGENT_MODEL_EMPTY_RESPONSE"
+            )
             await self.step(
                 "MODEL",
                 "FAILED",
-                {"model_round": next_round, "error_code": "AGENT_MODEL_EMPTY_RESPONSE"},
+                {"model_round": next_round, "error_code": empty_code},
             )
             return {
                 "messages": messages,
                 "model_round_count": next_round,
                 "usage_records": list(self.usage_records),
-                "failure_code": "AGENT_MODEL_EMPTY_RESPONSE",
+                "failure_code": empty_code,
                 **evidence_update,
             }
         await self._emit(
@@ -689,6 +722,9 @@ class _AgentRunGraph:
                 "truncated": usage.truncated,
                 "dropped_exchange_count": usage.dropped_exchange_count,
                 **_usage_step_metadata(response),
+                "provider": response.provider,
+                "model": response.model,
+                "usage_source": "generation",
             },
         )
         return {
@@ -862,6 +898,7 @@ class _AgentRunGraph:
                 "arguments": normalized_arguments,
                 "tool_call_id": stable_id,
                 "invalid_code": None if valid else "TOOL_ARGUMENT_INVALID",
+                "proposal_ordinal": index,
             }
             calls.append(item)
             await self._emit(
@@ -1313,18 +1350,52 @@ class _AgentRunGraph:
                     )
                 return call["tool_call_id"], result
 
-        pairs = await asyncio.gather(*(execute_one(call) for call in calls))
+        with capture_auxiliary_model_calls(
+            allow_unpriced=state["runtime"].get("max_cost_micro_usd") is None
+        ) as auxiliary:
+            tasks = [asyncio.create_task(execute_one(call)) for call in calls]
+            try:
+                pairs = await asyncio.gather(*tasks)
+            except BaseException:
+                # No sibling may keep making unaccounted model calls after
+                # this execution segment has released its lease and ledger.
+                for task in tasks:
+                    if not task.done():
+                        task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
+                raise
+            finally:
+                self.usage_records = [*state.get("usage_records", []), *auxiliary.records]
+        for attempt in auxiliary.records:
+            await self.step(
+                "AUXILIARY_MODEL",
+                "SUCCEEDED" if attempt["attempt_status"] == "SUCCEEDED" else "FAILED",
+                {
+                    "provider": attempt["provider"],
+                    "model": attempt["model"],
+                    "usage_source": attempt["source"],
+                    "attempt_status": attempt["attempt_status"],
+                    "cost_status": "UNKNOWN",
+                    **(attempt["usage"] or {}),
+                },
+            )
         await self.step(
             "TOOL_EXECUTE",
             "SUCCEEDED",
             {"tool_count": len(calls), "tool_identities": [call["name"] for call in calls]},
         )
         observations = dict(pairs)
-        await self._record_artifacts(calls, observations)
-        return {"executed_observations": observations}
+        await self._record_artifacts(
+            calls, observations, model_round=state.get("model_round_count", 0)
+        )
+        return {"executed_observations": observations, "usage_records": self.usage_records}
 
     async def _record_artifacts(
-        self, calls: list[dict[str, Any]], observations: dict[str, ToolResult]
+        self,
+        calls: list[dict[str, Any]],
+        observations: dict[str, ToolResult],
+        *,
+        model_round: int = 0,
     ) -> None:
         """Offer the successful read results to the work layer.
 
@@ -1339,7 +1410,7 @@ class _AgentRunGraph:
         if thread_id is None or recorder is None:
             return
         recorded: list[RecordedToolCall] = []
-        for call in calls:
+        for ordinal, call in enumerate(calls):
             # Looking something up in the thread produced nothing new; the turn
             # it found is already in the thread.
             if call["name"] == THREAD_HISTORY_SEARCH:
@@ -1356,6 +1427,14 @@ class _AgentRunGraph:
                     step_sequence=self.sequence,
                     arguments=dict(call.get("arguments") or {}),
                     data=result.data,
+                    logical_call_id=canonical_json_hash(
+                        {
+                            "schema": 1,
+                            "model_round": model_round,
+                            "proposal_ordinal": call.get("proposal_ordinal", ordinal),
+                            "tool_identity": call["name"],
+                        }
+                    ),
                 )
             )
         if not recorded:
@@ -1457,6 +1536,22 @@ class _AgentRunGraph:
                             citation_prefix=f"R{rag_sequence:05d}E",
                             record_validator=envelope_violation if wiki_tool else None,
                             allow_shared_references=wiki_tool,
+                            server_state=(
+                                {
+                                    key: result.data[key]
+                                    for key in (
+                                        "route",
+                                        "insufficient_evidence",
+                                        "supplemental_required",
+                                        "conflict_count",
+                                        "degraded",
+                                        "degraded_reason",
+                                    )
+                                    if key in result.data
+                                }
+                                if wiki_tool
+                                else None
+                            ),
                         )
                         if plan is not None and not set(plan.registry).intersection(rag_registry):
                             projected = plan.payload
@@ -1608,5 +1703,3 @@ class _AgentRunGraph:
             status=status,
             safe_metadata=_safe_step_metadata(metadata),
         )
-
-

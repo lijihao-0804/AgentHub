@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.knowledge.composition import retrieval_model_identity_mismatches
 from packages.knowledge.contracts import (
     KnowledgeRetriever,
     RetrievalQuery,
@@ -136,9 +137,16 @@ async def search_knowledge(
     limit = arguments.get("limit", 10)
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= _MAX_RESULTS:
         raise ToolHandlerError("SEARCH_INVALID_ARGUMENT", "The result limit is invalid.")
-    if getattr(definition, "retrieval_config", None) and definition.retrieval_config.get(
-        "evidence_set_selector"
-    ) == "onyx_v1":
+    mismatches = retrieval_model_identity_mismatches(definition.retrieval_config, retriever)
+    if mismatches:
+        raise ToolHandlerError(
+            "KNOWLEDGE_MODEL_IDENTITY_DRIFT",
+            "The published retrieval model is not the deployed model.",
+        )
+    if (
+        getattr(definition, "retrieval_config", None)
+        and definition.retrieval_config.get("evidence_set_selector") == "onyx_v1"
+    ):
         # Version-level opt-in: the wrapped retriever owns the fail-closed
         # fallback to the original ranking when the selector is missing or
         # fails, so an unconfigured deployment degrades to baseline, never

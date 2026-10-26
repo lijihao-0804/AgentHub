@@ -8,10 +8,12 @@ exercising the protocol rather than a hand-rolled stand-in for it.
 
 from __future__ import annotations
 
+import ssl
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
+import httpcore2
 import httpx2
 import pytest
 from mcp import Client
@@ -28,11 +30,16 @@ from packages.mcp.client import (
     MCP_PROTOCOL_ERROR,
     MCP_TARGET_FORBIDDEN,
     MCP_TOOL_SCHEMA_TOO_LARGE,
+    GuardedAsyncTransport,
     McpClientAdapter,
     McpConnectionTarget,
     McpRemoteError,
+    _Observation,
+    _PinnedAsyncHTTPTransport,
+    _PinnedNetworkBackend,
 )
 from packages.mcp.models import McpAuthType
+from packages.mcp.security import parse_endpoint_url
 from tests.support.settings import declared_settings
 
 pytestmark = pytest.mark.asyncio
@@ -60,8 +67,12 @@ def tool(
     annotations: ToolAnnotations | None = None,
     description: str | None = None,
 ):
-    return Tool(name=name, description=description or f"{name} tool",
-                inputSchema=schema or SCHEMA, annotations=annotations)
+    return Tool(
+        name=name,
+        description=description or f"{name} tool",
+        inputSchema=schema or SCHEMA,
+        annotations=annotations,
+    )
 
 
 def server_with(pages: list[tuple[list[Tool], str | None]]) -> Server:
@@ -287,3 +298,299 @@ async def test_default_client_refuses_a_private_endpoint_before_connecting() -> 
     assert outcome.status == "unavailable"
     assert outcome.failure is not None
     assert outcome.failure.failure_code == MCP_TARGET_FORBIDDEN
+
+
+class _NetworkStream(httpcore2.AsyncNetworkStream):
+    def __init__(self, peer: str | None) -> None:
+        self.peer = peer
+        self.closed = False
+        self.tls_server_name: str | None = None
+
+    async def read(self, max_bytes: int, timeout: float | None = None) -> bytes:
+        del max_bytes, timeout
+        return b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n"
+
+    async def write(self, buffer: bytes, timeout: float | None = None) -> None:
+        del buffer, timeout
+
+    async def aclose(self) -> None:
+        self.closed = True
+
+    async def start_tls(
+        self,
+        ssl_context: ssl.SSLContext,
+        server_hostname: str | None = None,
+        timeout: float | None = None,
+    ) -> httpcore2.AsyncNetworkStream:
+        del ssl_context, timeout
+        self.tls_server_name = server_hostname
+        return self
+
+    def get_extra_info(self, info: str) -> object:
+        if info == "server_addr" and self.peer is not None:
+            return (self.peer, 443)
+        return None
+
+
+class _NetworkBackend(httpcore2.AsyncNetworkBackend):
+    def __init__(self, peer: str | None) -> None:
+        self.peer = peer
+        self.connected: list[tuple[str, int]] = []
+        self.streams: list[_NetworkStream] = []
+
+    async def connect_tcp(
+        self,
+        host: str,
+        port: int,
+        timeout: float | None = None,
+        local_address: str | None = None,
+        socket_options: object = None,
+    ) -> httpcore2.AsyncNetworkStream:
+        del timeout, local_address, socket_options
+        self.connected.append((host, port))
+        stream = _NetworkStream(self.peer)
+        self.streams.append(stream)
+        return stream
+
+    async def connect_unix_socket(
+        self,
+        path: str,
+        timeout: float | None = None,
+        socket_options: object = None,
+    ) -> httpcore2.AsyncNetworkStream:
+        del path, timeout, socket_options
+        raise AssertionError("Unix sockets are not valid MCP network targets.")
+
+    async def sleep(self, seconds: float) -> None:
+        del seconds
+
+
+class _UnsafeInner(httpx2.AsyncBaseTransport):
+    def __init__(self) -> None:
+        self.requests_sent = 0
+        self.authorization_seen: str | None = None
+
+    async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+        self.requests_sent += 1
+        self.authorization_seen = request.headers.get("Authorization")
+        return httpx2.Response(200, request=request, content=b"sent")
+
+    async def aclose(self) -> None:
+        pass
+
+
+async def test_guard_refuses_a_transport_without_presend_authorization() -> None:
+    sentinel = "Bearer probe-secret-sentinel"
+    inner = _UnsafeInner()
+    guard = GuardedAsyncTransport(
+        inner,
+        allow_private_targets=False,
+        observation=_Observation(),
+    )
+    request = httpx2.Request(
+        "POST",
+        "https://public.example/mcp",
+        headers={"Authorization": sentinel},
+    )
+
+    with pytest.raises(McpRemoteError) as excinfo:
+        await guard.handle_async_request(request)
+
+    assert excinfo.value.failure_code == MCP_TARGET_FORBIDDEN
+    assert inner.requests_sent == 0
+    assert inner.authorization_seen is None
+
+
+@pytest.mark.parametrize("peer", ["169.254.169.254", None])
+async def test_backend_rejects_forbidden_or_missing_peer_before_tls(peer: str | None) -> None:
+    endpoint = parse_endpoint_url("https://mcp.example.com/mcp")
+    delegate = _NetworkBackend(peer)
+
+    async def resolver(_host: str, _port: int) -> tuple[str, ...]:
+        return ("93.184.216.34",)
+
+    backend = _PinnedNetworkBackend(
+        endpoint,
+        observation=_Observation(),
+        allow_private_targets=False,
+        resolver=resolver,
+        delegate=delegate,
+    )
+
+    with pytest.raises(McpRemoteError) as excinfo:
+        await backend.connect_tcp("mcp.example.com", 443)
+
+    assert excinfo.value.failure_code == MCP_TARGET_FORBIDDEN
+    assert delegate.connected == [("93.184.216.34", 443)]
+    assert delegate.streams[0].closed is True
+    assert delegate.streams[0].tls_server_name is None
+
+
+async def test_backend_refuses_a_connection_that_lands_on_an_authorized_but_unpinned_peer() -> None:
+    endpoint = parse_endpoint_url("https://mcp.example.com/mcp")
+    delegate = _NetworkBackend("8.8.8.8")
+
+    async def resolver(_host: str, _port: int) -> tuple[str, ...]:
+        return ("93.184.216.34",)
+
+    backend = _PinnedNetworkBackend(
+        endpoint,
+        observation=_Observation(),
+        allow_private_targets=False,
+        resolver=resolver,
+        delegate=delegate,
+    )
+
+    with pytest.raises(McpRemoteError) as excinfo:
+        await backend.connect_tcp("mcp.example.com", 443)
+
+    assert excinfo.value.failure_code == MCP_TARGET_FORBIDDEN
+    assert delegate.connected == [("93.184.216.34", 443)]
+    assert delegate.streams[0].closed is True
+    assert backend.last_peer is None
+
+
+async def test_backend_reauthorizes_on_each_new_connection() -> None:
+    endpoint = parse_endpoint_url("https://mcp.example.com/mcp")
+    delegate = _NetworkBackend("93.184.216.34")
+    answers = iter(
+        [
+            ("93.184.216.34",),
+            ("169.254.169.254",),
+        ]
+    )
+    resolution_calls = 0
+
+    async def resolver(_host: str, _port: int) -> tuple[str, ...]:
+        nonlocal resolution_calls
+        resolution_calls += 1
+        return next(answers)
+
+    backend = _PinnedNetworkBackend(
+        endpoint,
+        observation=_Observation(),
+        allow_private_targets=False,
+        resolver=resolver,
+        delegate=delegate,
+    )
+
+    await backend.connect_tcp("mcp.example.com", 443)
+    with pytest.raises(McpRemoteError) as excinfo:
+        await backend.connect_tcp("mcp.example.com", 443)
+
+    assert excinfo.value.failure_code == MCP_TARGET_FORBIDDEN
+    assert resolution_calls == 2
+    assert delegate.connected == [("93.184.216.34", 443)]
+    assert backend.last_peer is None
+
+
+async def test_pinned_transport_preserves_origin_hostname_for_sni_and_verification() -> None:
+    endpoint = parse_endpoint_url("https://mcp.example.com/mcp")
+    delegate = _NetworkBackend("93.184.216.34")
+
+    async def resolver(_host: str, _port: int) -> tuple[str, ...]:
+        return ("93.184.216.34",)
+
+    transport = _PinnedAsyncHTTPTransport(
+        endpoint,
+        observation=_Observation(),
+        allow_private_targets=False,
+        resolver=resolver,
+        network_backend=delegate,
+    )
+    request = httpx2.Request("GET", endpoint.url)
+    try:
+        response = await transport.handle_async_request(request)
+        await response.aclose()
+    finally:
+        await transport.aclose()
+
+    assert delegate.connected == [("93.184.216.34", 443)]
+    assert delegate.streams[0].tls_server_name == "mcp.example.com"
+    assert transport.authorize_request_peer() == "93.184.216.34"
+
+
+async def test_default_client_uses_the_pinned_transport() -> None:
+    transport = _PinnedAsyncHTTPTransport(
+        parse_endpoint_url("https://mcp.example.com/mcp"),
+        observation=_Observation(),
+        allow_private_targets=False,
+    )
+
+    assert callable(transport.authorize_request_peer)
+    await transport.aclose()
+
+
+async def test_guard_uses_the_peer_pinned_by_the_safe_transport() -> None:
+    endpoint = parse_endpoint_url("https://mcp.example.com/mcp")
+    delegate = _NetworkBackend("93.184.216.34")
+
+    async def resolver(_host: str, _port: int) -> tuple[str, ...]:
+        return ("93.184.216.34",)
+
+    transport = _PinnedAsyncHTTPTransport(
+        endpoint,
+        observation=_Observation(),
+        allow_private_targets=False,
+        resolver=resolver,
+        network_backend=delegate,
+    )
+    guard = GuardedAsyncTransport(
+        transport,
+        allow_private_targets=False,
+        observation=_Observation(),
+    )
+    try:
+        response = await guard.handle_async_request(httpx2.Request("GET", endpoint.url))
+        await response.aclose()
+    finally:
+        await guard.aclose()
+
+    assert delegate.connected == [("93.184.216.34", 443)]
+
+
+async def test_rebinding_to_a_forbidden_address_sends_no_request_or_bearer() -> None:
+    endpoint = parse_endpoint_url("https://mcp.example.com/mcp")
+    delegate = _NetworkBackend("93.184.216.34")
+    answers = iter(
+        [
+            ("93.184.216.34",),
+            ("169.254.169.254",),
+        ]
+    )
+
+    async def resolver(_host: str, _port: int) -> tuple[str, ...]:
+        return next(answers)
+
+    observation = _Observation()
+    transport = _PinnedAsyncHTTPTransport(
+        endpoint,
+        observation=observation,
+        allow_private_targets=False,
+        resolver=resolver,
+        network_backend=delegate,
+    )
+    guard = GuardedAsyncTransport(
+        transport,
+        allow_private_targets=False,
+        observation=observation,
+    )
+    headers = {"Authorization": "Bearer rebinding-probe-secret"}
+    try:
+        first = await guard.handle_async_request(
+            httpx2.Request("POST", endpoint.url, headers=headers)
+        )
+        await first.aclose()
+        observation.in_call_phase = True
+        observation.call_dispatched = False
+        second = httpx2.Request("POST", endpoint.url, headers=headers)
+        with pytest.raises(McpRemoteError) as excinfo:
+            await guard.handle_async_request(second)
+    finally:
+        await guard.aclose()
+
+    assert excinfo.value.failure_code == MCP_TARGET_FORBIDDEN
+    assert delegate.connected == [("93.184.216.34", 443)]
+    assert len(delegate.streams) == 1
+    assert delegate.streams[0].tls_server_name == "mcp.example.com"
+    assert observation.call_dispatched is False

@@ -75,13 +75,12 @@ class ScriptedScenarioDriver:
         turn = await self.threads.open_turn(
             context, thread.id, user_input=first_input, client_token=f"{instance_id}:0"
         )
-        if turn is None:
-            raise RuntimeError("NEW_SCENARIO_TURN_CONFLICT")
         run = await self.runtime.prepare_run(
             context,
             agent_version_id=agent_version_id,
             input_text=first_input,
             thread_id=thread.id,
+            thread_turn_id=turn.id,
             execution_overrides=AgentRunExecutionOverrides.for_evaluation(
                 list(knowledge_snapshots),
                 wiki_publications=list(wiki_publications),
@@ -178,13 +177,12 @@ class ScriptedScenarioDriver:
                         user_input=text,
                         client_token=f"{instance_id}:{ordinal}",
                     )
-                    if turn is None:
-                        raise RuntimeError("NEW_SCENARIO_TURN_CONFLICT")
                     prepared = await self.runtime.prepare_run(
                         context,
                         agent_version_id=agent_version_id,
                         input_text=text,
                         thread_id=handle.thread_id,
+                        thread_turn_id=turn.id,
                         execution_overrides=AgentRunExecutionOverrides.for_evaluation(
                             list(knowledge_snapshots),
                             wiki_publications=list(wiki_publications),

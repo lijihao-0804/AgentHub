@@ -16,11 +16,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.knowledge.composition import retrieval_model_identity_mismatches
 from packages.knowledge.contracts import KnowledgeRetriever
 from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 from packages.tools.errors import ToolHandlerError
 from packages.wiki.evidence_envelope import (
+    EVIDENCE_ORIGIN_RAW,
     EVIDENCE_ORIGIN_WIKI_DERIVED,
     envelope_violation,
 )
@@ -127,11 +129,9 @@ def _project(result: Mapping[str, Any], compilation: WikiCompilation) -> dict[st
     payload.
     """
 
-    records: list[dict[str, Any]] = []
-    references: list[dict[str, str]] = []
+    projected: dict[tuple[str, str, str], tuple[dict[str, Any], dict[str, str]]] = {}
+    ordered: list[tuple[str, str, str]] = []
     for item in result.get("evidence") or []:
-        if len(records) >= _MAX_RESULTS:
-            break
         try:
             record = _record(item)
         except (KeyError, TypeError):
@@ -143,15 +143,54 @@ def _project(result: Mapping[str, Any], compilation: WikiCompilation) -> dict[st
             raise ToolHandlerError(
                 "WIKI_ENVELOPE_INVALID", "The Wiki evidence record is missing its envelope."
             ) from None
-        records.append(record)
-        references.append(
+        identity = (
+            str(record["origin"]),
+            str(record["document_revision_id"]),
+            str(record["chunk_id"]),
+        )
+        if identity in projected:
+            continue
+        projected[identity] = (
+            record,
             {
                 "snapshot_id": str(compilation.source_snapshot_id),
                 "knowledge_base_id": str(compilation.knowledge_base_id),
-                "document_revision_id": record["document_revision_id"],
-                "chunk_id": record["chunk_id"],
-            }
+                "document_revision_id": str(record["document_revision_id"]),
+                "chunk_id": str(record["chunk_id"]),
+            },
         )
+        ordered.append(identity)
+
+    route = result.get("route")
+    selected: list[tuple[str, str, str]] = []
+    if route == "HYBRID":
+        # The extractor may return all Wiki claims before any RAW hit. Reserve
+        # one count slot per origin before filling the remaining rank order;
+        # otherwise ten useful claims can silently hide the raw passage that
+        # made this a HYBRID answer.
+        for origin in (EVIDENCE_ORIGIN_WIKI_DERIVED, EVIDENCE_ORIGIN_RAW):
+            match = next((key for key in ordered if key[0] == origin), None)
+            if match is not None:
+                selected.append(match)
+    for key in ordered:
+        if len(selected) >= _MAX_RESULTS:
+            break
+        if key not in selected:
+            selected.append(key)
+
+    records = [projected[key][0] for key in selected[:_MAX_RESULTS]]
+    references = [projected[key][1] for key in selected[:_MAX_RESULTS]]
+    delivered_origins = sorted({record["origin"] for record in records})
+    degraded = False
+    degraded_reason = None
+    if route == "HYBRID":
+        expected_origins = {EVIDENCE_ORIGIN_WIKI_DERIVED, EVIDENCE_ORIGIN_RAW}
+        if set(delivered_origins) != expected_origins:
+            degraded = True
+            degraded_reason = "HYBRID_PARTIAL_DELIVERY"
+    if len(records) < len(ordered):
+        degraded = True
+        degraded_reason = degraded_reason or "EVIDENCE_COUNT_LIMIT"
     return {
         "binding": {
             "knowledge_base_id": str(compilation.knowledge_base_id),
@@ -159,10 +198,13 @@ def _project(result: Mapping[str, Any], compilation: WikiCompilation) -> dict[st
             "publication_hash": str(compilation.content_hash),
             "source_snapshot_id": str(compilation.source_snapshot_id),
         },
-        "route": result.get("route"),
+        "route": route,
         "insufficient_evidence": bool(result.get("insufficient_evidence")),
         "supplemental_required": bool(result.get("supplemental_required")),
         "conflict_count": len(result.get("conflicts") or []),
+        "degraded": degraded,
+        "degraded_reason": degraded_reason,
+        "delivered_origins": delivered_origins,
         "results": records,
         "evidence_refs": references,
     }
@@ -195,6 +237,15 @@ async def query_wiki(
         raise ToolHandlerError("WIKI_QUERY_INVALID_ARGUMENT", "The Wiki query intent is invalid.")
 
     binding = _frozen_binding(definition)
+    mismatches = retrieval_model_identity_mismatches(
+        getattr(definition, "retrieval_config", None),
+        retriever,
+    )
+    if mismatches:
+        raise ToolHandlerError(
+            "KNOWLEDGE_MODEL_IDENTITY_DRIFT",
+            "The published retrieval model is not the deployed model.",
+        )
     try:
         workspace_id = UUID(context.workspace_id)
     except ValueError:

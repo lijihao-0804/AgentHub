@@ -25,7 +25,6 @@ from typing import Any, Protocol, cast
 
 from packages.agent_runtime.frozen import FrozenAgentSpec
 from packages.agent_runtime.rag_evidence import (
-    EVIDENCE_FORMAT,
     reproject_rag_evidence_payload,
 )
 from packages.core.errors.exceptions import AgentHubError
@@ -72,6 +71,25 @@ _PROJECTABLE_CATEGORIES = frozenset(
 _UNTRUSTED_CATEGORIES = frozenset({ContextCategory.TOOL_RESULT, ContextCategory.MEMORY})
 _ALL_CATEGORIES = frozenset(ContextCategory)
 _PROJECTION_UNAVAILABLE = object()
+_PRIORITY_JSON_KEYS = frozenset(
+    {
+        "status",
+        "error_code",
+        "error",
+        "code",
+        "evidence_refs",
+        "trust",
+        "truncated",
+    }
+)
+_PRESERVED_SCALAR_KEYS = frozenset(
+    {
+        "status",
+        "error_code",
+        "error",
+        "code",
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -269,18 +287,27 @@ class ContextAdmissionResult:
     messages: tuple[ModelMessage, ...]
     tool_definitions: tuple[ModelToolDefinition, ...]
     usage: ContextBudgetUsage
+    # Stable semantic metadata for callers that must recompute conversation
+    # telemetry after projection. An empty tuple keeps pre-existing callers
+    # source-compatible.
+    message_categories: tuple[ContextCategory, ...] = ()
 
     def __post_init__(self) -> None:
         messages = tuple(self.messages)
         tools = tuple(self.tool_definitions)
+        categories = tuple(self.message_categories)
         if any(not isinstance(message, ModelMessage) for message in messages):
             raise TypeError("messages must contain ModelMessage values")
         if any(not isinstance(tool, ModelToolDefinition) for tool in tools):
             raise TypeError("tool_definitions must contain ModelToolDefinition values")
         if not isinstance(self.usage, ContextBudgetUsage):
             raise TypeError("usage must be ContextBudgetUsage")
+        if categories and len(categories) != len(messages):
+            raise ValueError("message_categories must contain one category per message")
+        normalized_categories = tuple(_coerce_category(category) for category in categories)
         object.__setattr__(self, "messages", messages)
         object.__setattr__(self, "tool_definitions", tools)
+        object.__setattr__(self, "message_categories", normalized_categories)
 
     @property
     def admitted_messages(self) -> tuple[ModelMessage, ...]:
@@ -518,11 +545,13 @@ class ContextBudgetPolicy:
         )
         truncated_by_category[ContextCategory.TOOL_DEFINITIONS] = 0
 
-        admitted_messages = tuple(
-            item.admitted_message
+        admitted = tuple(
+            item
             for item in sorted(selected, key=lambda item: item.index)
             if item.admitted_message is not None
         )
+        admitted_messages = tuple(item.admitted_message for item in admitted)
+        message_categories = tuple(item.category for item in admitted)
         estimated_input_after = mandatory_tool_tokens + sum(
             item.admitted_tokens for item in selected
         )
@@ -551,6 +580,7 @@ class ContextBudgetPolicy:
             messages=admitted_messages,
             tool_definitions=tools,
             usage=usage,
+            message_categories=message_categories,
         )
 
     def _project_optional_items(
@@ -739,16 +769,14 @@ class ContextBudgetPolicy:
                 parsed = json.loads(raw_content)
             except (TypeError, ValueError):
                 parsed = raw_content
-        projection_budget = budget
-        if (
-            category is ContextCategory.RAG_EVIDENCE
-            and isinstance(parsed, Mapping)
-            and parsed.get("evidence_format") in {EVIDENCE_FORMAT, EVIDENCE_VIEW_FORMAT}
-        ):
-            metadata_tokens = self._estimate_message(replace(item.message, content=""))
-            projection_budget = budget - metadata_tokens
-            if projection_budget <= 0:
-                return None, 0
+        # Every projected message pays for its envelope metadata before the
+        # content can use the remaining pool. This keeps a 4,000-token tool
+        # result from being replaced by a marker solely because its name or
+        # tool_call_id was omitted from the caller's pre-projection bound.
+        metadata_tokens = self._estimate_message(replace(item.message, content=""))
+        projection_budget = budget - metadata_tokens
+        if projection_budget <= 0:
+            return None, 0
         projected, was_truncated = _project_json_value(
             parsed,
             budget=projection_budget,
@@ -768,17 +796,22 @@ class ContextBudgetPolicy:
         message = replace(item.message, content=content)
         estimated = self._estimate_message(message)
         if estimated > budget:
-            # A final legal marker is preferable to a sliced JSON string.  It
-            # may still be too large for an intentionally pathological custom
-            # estimator, in which case the item is omitted safely.
-            marker: dict[str, Any] = {"truncated": True}
-            if category in _UNTRUSTED_CATEGORIES:
-                marker["trust"] = "UNTRUSTED"
-            marker_message = replace(item.message, content=_json_dumps(marker))
-            marker_estimated = self._estimate_message(marker_message)
-            if marker_estimated > budget:
+            # Redistribute any envelope-imposed overshoot into the content
+            # projection itself. A legal, partially usable payload is better
+            # than erasing a successful observation.
+            residual = max(projection_budget - (estimated - budget), 0)
+            projected, was_truncated = _project_json_value(
+                parsed,
+                budget=residual,
+                category=category,
+                estimator=self.estimator,
+            )
+            if projected is _PROJECTION_UNAVAILABLE:
                 return None, 0
-            return marker_message, marker_estimated
+            message = replace(item.message, content=_json_dumps(projected))
+            estimated = self._estimate_message(message)
+            if estimated > budget:
+                return None, 0
         return message, estimated
 
     def _estimate_message(self, message: ModelMessage) -> int:
@@ -987,8 +1020,15 @@ def _project_json_value(
     budget: int,
     category: ContextCategory,
     estimator: TokenEstimator,
+    _root: bool = True,
 ) -> tuple[Any, bool]:
-    """Return a legal bounded JSON projection and whether it was truncated."""
+    """Return a legal bounded JSON projection and whether it was truncated.
+
+    The trust/truncation metadata belongs to the provider-facing envelope at
+    the root of an admitted message. Recursive projection only shortens business
+    values and must preserve their JSON type; otherwise a scalar such as
+    ``status`` or ``error_code`` turns into a nested metadata object.
+    """
 
     if budget <= 0:
         return _PROJECTION_UNAVAILABLE, True
@@ -1016,12 +1056,12 @@ def _project_json_value(
             return _PROJECTION_UNAVAILABLE, True
         return projected, bool(normalized.get("truncated") or projected.get("truncated"))
     trust_fields: dict[str, Any] = {}
-    if category in _UNTRUSTED_CATEGORIES:
+    if _root and category in _UNTRUSTED_CATEGORIES:
         # Tool output and recalled memory are untrusted boundaries regardless
         # of labels supplied by the payload itself.  Never allow a payload to
         # promote itself.
         trust_fields["trust"] = "UNTRUSTED"
-    if isinstance(normalized, Mapping) and category not in _UNTRUSTED_CATEGORIES:
+    if _root and isinstance(normalized, Mapping) and category not in _UNTRUSTED_CATEGORIES:
         for key in ("trust", "data_trust"):
             if key in normalized:
                 trust_fields[key] = normalized[key]
@@ -1040,19 +1080,107 @@ def _project_json_value(
             if _json_estimate(candidate, estimator) <= budget:
                 return candidate, False
 
+    if _root:
+        original_truncated = isinstance(normalized, Mapping) and normalized.get("truncated") is True
+        if isinstance(normalized, Mapping):
+            business_value = {
+                key: item
+                for key, item in normalized.items()
+                if key not in {"trust", "data_trust", "truncated"}
+            }
+        else:
+            business_value = normalized
+
+        def project_with_root_envelope(
+            reserve_truncated: bool,
+        ) -> tuple[dict[str, Any], bool] | None:
+            envelope = dict(trust_fields)
+            if reserve_truncated:
+                envelope["truncated"] = True
+            inner_budget = budget - _json_estimate(envelope, estimator)
+            if inner_budget <= 0:
+                return None
+            projected, child_truncated = _project_json_value(
+                business_value,
+                budget=inner_budget,
+                category=category,
+                estimator=estimator,
+                _root=False,
+            )
+            if projected is _PROJECTION_UNAVAILABLE:
+                return None
+
+            if isinstance(business_value, Mapping):
+                candidate = {**projected, **trust_fields}
+                was_truncated = (
+                    child_truncated or original_truncated or len(projected) < len(business_value)
+                )
+            elif isinstance(business_value, list):
+                candidate = {"items": projected, **trust_fields}
+                was_truncated = child_truncated
+            else:
+                candidate = {"value": projected, **trust_fields}
+                was_truncated = child_truncated
+            if was_truncated:
+                candidate["truncated"] = True
+            if _json_estimate(candidate, estimator) <= budget:
+                return candidate, was_truncated
+            return None
+
+        projected = project_with_root_envelope(reserve_truncated=False)
+        if projected is not None and not projected[1]:
+            return projected
+        projected = project_with_root_envelope(reserve_truncated=True)
+        if projected is not None:
+            return projected
+        marker: dict[str, Any] = {"truncated": True}
+        marker.update(trust_fields)
+        if _json_estimate(marker, estimator) <= budget:
+            return marker, True
+        return _PROJECTION_UNAVAILABLE, True
+
     if isinstance(normalized, Mapping):
         result: dict[str, Any] = {}
         truncated = False
-        for key in sorted(normalized, key=str):
+        for key in sorted(
+            normalized,
+            key=lambda item: (
+                0 if str(item) in _PRIORITY_JSON_KEYS else 1,
+                str(item),
+            ),
+        ):
             key_string = str(key)
             if key_string in trust_fields:
                 result[key_string] = trust_fields[key_string]
                 continue
+            if key_string in _PRESERVED_SCALAR_KEYS and (
+                normalized[key] is None or isinstance(normalized[key], (str, int, float, bool))
+            ):
+                # Control-plane fields have provider-facing semantics. A
+                # budget projection may shorten surrounding business data, but
+                # it must not turn SUCCESS or an error code into a nested
+                # truncation object.
+                child = normalized[key]
+                candidate = {**result, key_string: child}
+                if _json_estimate(candidate, estimator) <= budget:
+                    result[key_string] = child
+                else:
+                    truncated = True
+                continue
+            remaining = budget - _json_estimate(result, estimator)
+            if remaining <= 0:
+                truncated = True
+                continue
+            child_budget = max(
+                remaining - _json_estimate({key_string: {}}, estimator),
+                0,
+            )
             child, child_truncated = _project_json_value(
                 normalized[key],
-                budget=budget,
+                budget=child_budget,
                 category=category,
                 estimator=estimator,
+                _root=False,
             )
             if child is _PROJECTION_UNAVAILABLE:
                 truncated = True
@@ -1065,8 +1193,6 @@ def _project_json_value(
             else:
                 truncated = True
         truncated = truncated or len(result) < len(normalized) or bool(trust_fields)
-        if truncated:
-            result["truncated"] = True
         for key, trust in trust_fields.items():
             result.setdefault(key, trust)
         result = _fit_mapping_to_budget(result, budget, estimator, trust_fields)
@@ -1076,11 +1202,16 @@ def _project_json_value(
         values: list[Any] = []
         truncated = False
         for child_value in normalized:
+            remaining = budget - _json_estimate({"items": values, "truncated": True}, estimator)
+            if remaining <= 0:
+                truncated = True
+                break
             child, child_truncated = _project_json_value(
                 child_value,
-                budget=budget,
+                budget=remaining,
                 category=category,
                 estimator=estimator,
+                _root=False,
             )
             if child is _PROJECTION_UNAVAILABLE:
                 truncated = True
@@ -1094,22 +1225,22 @@ def _project_json_value(
             else:
                 truncated = True
                 break
-        result = {"items": values, "truncated": True}
-        result.update(trust_fields)
-        result = _fit_mapping_to_budget(result, budget, estimator, trust_fields)
+        result: Any = values
+        if truncated and _root:
+            result = {"items": values, "truncated": True}
+        if isinstance(result, dict):
+            result.update(trust_fields)
+            result = _fit_mapping_to_budget(result, budget, estimator, trust_fields)
         if result is not None:
-            return result, True
+            return result, truncated
     else:
-        result = {"value": normalized, "truncated": True}
-        result.update(trust_fields)
-        result = _fit_mapping_to_budget(result, budget, estimator, trust_fields)
-        if result is not None:
-            return result, True
+        projected_scalar = normalized
+        if isinstance(normalized, str):
+            prefix_length = _string_prefix_length(normalized, budget, estimator)
+            projected_scalar = normalized[:prefix_length]
+        if _json_estimate(projected_scalar, estimator) <= budget:
+            return projected_scalar, projected_scalar != normalized
 
-    marker: dict[str, Any] = {"truncated": True}
-    marker.update(trust_fields)
-    if _json_estimate(marker, estimator) <= budget:
-        return marker, True
     return _PROJECTION_UNAVAILABLE, True
 
 
@@ -1122,15 +1253,35 @@ def _fit_mapping_to_budget(
     if _json_estimate(value, estimator) <= budget:
         return value
     result = dict(value)
-    for key in sorted(tuple(result), key=str, reverse=True):
-        if key in trust_fields or key == "truncated":
+    for key in sorted(
+        tuple(result),
+        key=lambda item: (
+            1 if str(item) in _PRIORITY_JSON_KEYS else 0,
+            str(item),
+        ),
+    ):
+        if key in trust_fields or key in _PRIORITY_JSON_KEYS or key == "truncated":
             continue
         result.pop(key, None)
         if _json_estimate(result, estimator) <= budget:
             return result
-    marker: dict[str, Any] = {"truncated": True}
-    marker.update(trust_fields)
-    return marker if _json_estimate(marker, estimator) <= budget else None
+    # Metadata markers are an outer-envelope concern. Returning None here lets
+    # the root projector add exactly one marker without polluting a nested
+    # business object.
+    return None
+
+
+def _string_prefix_length(value: str, budget: int, estimator: TokenEstimator) -> int:
+    """Find the longest JSON-safe UTF-8 prefix that fits the payload envelope."""
+
+    low, high = 0, len(value)
+    while low < high:
+        middle = (low + high + 1) // 2
+        if _json_estimate(value[:middle], estimator) <= budget:
+            low = middle
+        else:
+            high = middle - 1
+    return low
 
 
 def _json_safe(value: Any) -> Any:

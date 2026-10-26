@@ -2,11 +2,14 @@ import json
 
 import pytest
 
+from apps.api.schemas.citation_qa import CitationQaCitationResponse
 from packages.knowledge.citation_qa import CitationQaService
+from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 from tests.unit.test_knowledge_m3e_citation_qa import (
     _answer,
     _FakeModelGateway,
     _FakeSession,
+    _resolve_plan,
     _service,
 )
 
@@ -24,6 +27,7 @@ async def test_explicit_qa_view_uses_shared_plan_without_expanding_body_or_losin
         model_gateway=gateway,
         max_evidence_chars=100,
         evidence_projection="compact_v1",
+        model_plan_resolver=_resolve_plan,
     )
     result = await _answer(service, session, gateway)
     content = gateway.requests[0].messages[1].content
@@ -36,3 +40,20 @@ async def test_explicit_qa_view_uses_shared_plan_without_expanding_body_or_losin
     assert result.citations[0].chunk_id == session.chunks[0].chunk_id
     assert result.citations[0].excerpt == "e" * 100
     assert gateway.requests[0].required_capabilities.required == frozenset({"structured_output"})
+
+
+def test_api_schema_and_citation_projection_share_one_excerpt_contract() -> None:
+    assert CitationQaCitationResponse.model_fields["excerpt"].metadata
+    assert CitationQaCitationResponse.model_validate(
+        {
+            "id": 1,
+            "document_id": "00000000-0000-0000-0000-000000000001",
+            "document_revision_id": "00000000-0000-0000-0000-000000000002",
+            "chunk_id": "chunk-1",
+            "source": "handbook.txt",
+            "locator": {},
+            "excerpt": "e" * MAX_EVIDENCE_EXCERPT_CHARS,
+            "retrieval_score": 1.0,
+            "rerank_score": None,
+        }
+    )

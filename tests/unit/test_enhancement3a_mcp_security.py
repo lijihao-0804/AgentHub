@@ -165,9 +165,7 @@ async def test_resolution_failure_is_reported_without_naming_the_host() -> None:
     endpoint = parse_endpoint_url("https://internal-host.corp/mcp")
 
     with pytest.raises(McpTargetError) as excinfo:
-        await authorize_endpoint(
-            endpoint, allow_private_targets=False, resolver=failing_resolver
-        )
+        await authorize_endpoint(endpoint, allow_private_targets=False, resolver=failing_resolver)
 
     assert excinfo.value.failure_code == DNS_FAILED
     assert str(excinfo.value) == DNS_FAILED
@@ -209,20 +207,21 @@ def test_the_opt_in_defaults_to_off_and_is_not_inferred_from_the_environment() -
     # Read from the declared defaults, not from this machine's .env: the point
     # of the assertion is that nothing turns the opt-in on implicitly.
     assert declared_settings(testing=True, environment="local").mcp_allow_private_targets is False
-    production = declared_settings(
-        testing=True, environment="production", auth_jwt_secret="x" * 32
-    )
+    production = declared_settings(testing=True, environment="production", auth_jwt_secret="x" * 32)
     assert production.mcp_allow_private_targets is False
 
 
 def test_peer_address_is_rechecked_after_the_connection_is_made() -> None:
     authorize_peer_address(PUBLIC, allow_private_targets=False)
-    authorize_peer_address(None, allow_private_targets=False)
     authorize_peer_address("10.0.0.5", allow_private_targets=True)
 
-    with pytest.raises(McpTargetError) as excinfo:
-        authorize_peer_address("169.254.169.254", allow_private_targets=False)
+    for missing_or_forbidden in (None, "169.254.169.254"):
+        with pytest.raises(McpTargetError) as excinfo:
+            authorize_peer_address(missing_or_forbidden, allow_private_targets=False)
+        assert excinfo.value.failure_code == TARGET_FORBIDDEN
 
+    with pytest.raises(McpTargetError) as excinfo:
+        authorize_peer_address(None, allow_private_targets=True)
     assert excinfo.value.failure_code == TARGET_FORBIDDEN
 
 

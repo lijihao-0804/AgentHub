@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
@@ -46,6 +46,7 @@ _ALLOWED_FIELDS: dict[AgentEventType, frozenset[str]] = {
             "estimated_input_after",
             "truncated",
             "dropped_exchange_count",
+            "window_utilization",
         }
     ),
     AgentEventType.MESSAGE_DELTA: frozenset({"delta"}),
@@ -91,6 +92,7 @@ _ALLOWED_FIELDS: dict[AgentEventType, frozenset[str]] = {
 
 _NUMERIC_FIELDS = frozenset(
     {
+        "window_utilization",
         "model_round",
         "context_limit",
         "reserved_output",
@@ -211,18 +213,25 @@ class AgentEventEmitter:
     """Concurrency-safe per-run event sequencer."""
 
     def __init__(
-        self, *, run_id: str, agent_version_id: str, request_id: str | None = None
+        self,
+        *,
+        run_id: str,
+        agent_version_id: str,
+        request_id: str | None = None,
+        initial_sequence: int = 0,
+        before_publish: Callable[[AgentEvent], Awaitable[None]] | None = None,
     ) -> None:
         self.run_id = str(run_id)
         self.agent_version_id = str(agent_version_id)
         self.request_id = str(request_id or f"event:{uuid4()}")
-        self._sequence = 0
+        self._sequence = initial_sequence
         self._lock = asyncio.Lock()
+        self._before_publish = before_publish
 
     async def emit(self, event_type: AgentEventType | str, data: Mapping[str, Any]) -> AgentEvent:
         async with self._lock:
             self._sequence += 1
-            return AgentEvent(
+            event = AgentEvent(
                 sequence=self._sequence,
                 type=event_type,
                 request_id=self.request_id,
@@ -231,6 +240,9 @@ class AgentEventEmitter:
                 timestamp=datetime.now(UTC),
                 payload=data,
             )
+            if self._before_publish is not None:
+                await self._before_publish(event)
+            return event
 
 
 __all__ = ["AgentEvent", "AgentEventEmitter", "AgentEventType"]

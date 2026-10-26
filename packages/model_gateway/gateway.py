@@ -251,6 +251,7 @@ class ModelGatewayService(ModelGateway):
                     try:
                         async with asyncio.timeout(float(profile.timeout_seconds)):
                             response = await self.adapter.complete(profile, credential, request)
+                            _validate_usable_response(response)
                         await _end_trace_span(
                             span,
                             attributes=_response_trace_attributes(
@@ -355,9 +356,7 @@ class ModelGatewayService(ModelGateway):
         plan: ResolvedModelExecutionPlan,
         request: ModelRequest,
     ) -> tuple[tuple[ResolvedModelProfile, ...], dict[UUID, ProviderCredential]]:
-        return await self._prepare_frozen_execution(
-            context, plan, request, operation="stream"
-        )
+        return await self._prepare_frozen_execution(context, plan, request, operation="stream")
 
     async def _stream(
         self,
@@ -366,9 +365,8 @@ class ModelGatewayService(ModelGateway):
         request: ModelRequest,
         *,
         frozen_plan: ResolvedModelExecutionPlan | None = None,
-        prepared: tuple[
-            tuple[ResolvedModelProfile, ...], Mapping[UUID, ProviderCredential]
-        ] | None = None,
+        prepared: tuple[tuple[ResolvedModelProfile, ...], Mapping[UUID, ProviderCredential]]
+        | None = None,
     ) -> AsyncIterator[ModelStreamEvent]:
         started = time.perf_counter()
         span = await _start_trace_span(
@@ -414,6 +412,7 @@ class ModelGatewayService(ModelGateway):
                             async for event in self.adapter.stream(profile, credential, request):
                                 if event.response is not None:
                                     final_response = event.response
+                                    _validate_usable_response(final_response)
                                 if event.event_type in {
                                     ModelStreamEventType.MESSAGE_DELTA,
                                     ModelStreamEventType.TOOL_CALL_DELTA,
@@ -427,6 +426,8 @@ class ModelGatewayService(ModelGateway):
                                     yield event
                                 else:
                                     buffered.append(event)
+                            if final_response is None:
+                                raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
                     except TimeoutError:
                         if visible:
                             raise ModelGatewayError(
@@ -592,6 +593,15 @@ class SqlAlchemyModelGateway(ModelGatewayService):
             adapter or LiteLLMProviderAdapter(),
             trace_sink=trace_sink,
         )
+
+
+def _validate_usable_response(response: ModelResponse) -> None:
+    if not response.content.strip() and not response.tool_calls:
+        # A provider refusal is a semantic outcome, never a reason to route
+        # around the provider's safety decision.
+        if response.finish_reason in {"content_filter", "refusal"}:
+            return
+        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
 
 
 def _initial_trace_attributes(

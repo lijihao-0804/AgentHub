@@ -24,7 +24,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.frozen import parse_frozen_agent_spec
-from packages.agent_runtime.models import AgentRun
+from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.agent_runtime.runtime import (
     AgentRunExecutionOverrides,
     AgentRunService,
@@ -53,10 +53,18 @@ from packages.evaluation.models import (
     PricingSnapshot,
 )
 from packages.evaluation.observations import observation_identity, retrieval_observation
+from packages.evaluation.pricing import (
+    FROZEN_PRICING_CHAIN_KEY,
+    ModelCallAttempt,
+    PricingChainError,
+    load_pricing_snapshots,
+    pricing_snapshot_ids_from_metadata,
+    resolve_case_pricing,
+    validate_frozen_pricing_chain,
+)
 from packages.evaluation.reproducibility import (
     experiment_spec_hash,
     normalize_knowledge_snapshots,
-    pricing_snapshot_content_hash,
     variant_hash,
 )
 from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery
@@ -79,6 +87,9 @@ class CaseExecutionObservation:
     cached_tokens: int | None = None
     cost_amount: Decimal | None = None
     cost_currency: str | None = None
+    model_attempts: tuple[dict[str, Any], ...] = ()
+    model_attempts_complete: bool = False
+    aggregate_billing_complete: bool = True
     failure_code: str | None = None
     safe_failure_message: str | None = None
 
@@ -327,6 +338,44 @@ class AgentRuntimeEvaluationDriver:
                         AgentRun.id == result.run_id,
                     )
                 )
+                step_rows = list(
+                    await session.scalars(
+                        select(RunStep)
+                        .where(
+                            RunStep.workspace_id == run.workspace_id,
+                            RunStep.agent_run_id == result.run_id,
+                            RunStep.kind.in_(("MODEL", "AUXILIARY_MODEL")),
+                        )
+                        .order_by(RunStep.sequence_number, RunStep.id)
+                    )
+                )
+                version = await session.scalar(
+                    select(AgentVersion).where(
+                        AgentVersion.workspace_id == run.workspace_id,
+                        AgentVersion.id == variant.agent_version_id,
+                    )
+                )
+            frozen_fallback_chain = FROZEN_PRICING_CHAIN_KEY in variant.variant_metadata
+            try:
+                frozen_model_plan = parse_frozen_agent_spec(
+                    version.resolved_spec if version is not None else None,
+                    workspace_id=run.workspace_id,
+                ).model_plan
+            except (AgentHubError, TypeError):
+                frozen_model_plan = None
+            model_attempts, _ = _model_attempts_from_steps(
+                step_rows,
+                require_complete_receipt=frozen_fallback_chain,
+            )
+            model_attempts_complete = _pricing_receipt_complete(
+                step_rows,
+                frozen_fallback_chain=frozen_fallback_chain,
+                max_attempts=(
+                    frozen_model_plan.retry_policy.max_attempts
+                    if frozen_model_plan is not None
+                    else 0
+                ),
+            )
             observation: dict[str, Any] = {
                 **observation_identity("runtime", {"status": "agent_run", "usage": "agent_run"}),
                 "category": item.category,
@@ -366,6 +415,9 @@ class AgentRuntimeEvaluationDriver:
                 ),
                 cost_amount=persisted.total_cost_amount if persisted else result.total_cost_amount,
                 cost_currency=persisted.cost_currency if persisted else result.cost_currency,
+                model_attempts=model_attempts,
+                model_attempts_complete=model_attempts_complete,
+                aggregate_billing_complete=model_attempts_complete,
             )
 
         return PreparedCaseExecution(
@@ -413,6 +465,116 @@ def _case_input_text(item: EvaluationDatasetItem) -> str:
         if isinstance(value, str):
             return value
     raise RuntimeError("EVALUATION_CASE_INPUT_INVALID")
+
+
+def _model_attempts_from_steps(
+    steps: list[RunStep],
+    *,
+    require_complete_receipt: bool,
+) -> tuple[tuple[dict[str, Any], ...], bool]:
+    """Project persisted model attempts without trusting aggregate billing columns.
+
+    Older runs have MODEL rows with no actual provider/model metadata. Their
+    aggregate tokens remain usable only for a primary-only variant.
+    """
+
+    attempts: list[dict[str, Any]] = []
+    # Current persisted RunSteps do not carry a provider receipt proving that
+    # pre-success retries/failures were captured. A frozen fallback chain must
+    # therefore remain NOT_AVAILABLE until such receipts are bridged by core.
+    complete = bool(steps) and not require_complete_receipt
+    for step in steps:
+        metadata = step.safe_metadata if isinstance(step.safe_metadata, dict) else {}
+        provider = metadata.get("provider")
+        model = metadata.get("model")
+        source = metadata.get("usage_source")
+        if source is None and step.kind == "MODEL":
+            source = "generation"
+        attempt_status = metadata.get("attempt_status") or step.status
+        cost_status = metadata.get("cost_status")
+        attempts.append(
+            {
+                "source": source,
+                "provider": provider,
+                "model": model,
+                "input_tokens": metadata.get("input_tokens"),
+                "output_tokens": metadata.get("output_tokens"),
+                "total_tokens": metadata.get("total_tokens"),
+                "cached_tokens": metadata.get("cached_tokens"),
+                "attempt_status": attempt_status,
+                "cost_status": cost_status,
+            }
+        )
+        if (
+            not isinstance(source, str)
+            or not source
+            or not isinstance(provider, str)
+            or not provider
+            or not isinstance(model, str)
+            or not model
+            or not isinstance(attempt_status, str)
+            or not attempt_status
+        ):
+            complete = False
+    return tuple(attempts), complete
+
+
+def _pricing_receipt_complete(
+    steps: list[RunStep],
+    *,
+    frozen_fallback_chain: bool,
+    max_attempts: int = 1,
+) -> bool:
+    """Return true only when the persisted attempt set is provably exhaustive.
+
+    Current RunSteps expose successful generation calls and selector attempts,
+    but failed provider calls that precede a fallback have no durable receipt.
+    Fallback variants therefore stay NOT_AVAILABLE. A primary-only run may use
+    its aggregate billing columns only when it has no auxiliary model activity.
+    """
+
+    if max_attempts != 1:
+        return False
+    if not steps or any(step.kind != "MODEL" for step in steps):
+        return False
+    if frozen_fallback_chain:
+        return False
+    _, complete = _model_attempts_from_steps(
+        steps,
+        require_complete_receipt=False,
+    )
+    return complete
+
+
+def _model_attempt(attempt: dict[str, Any]) -> ModelCallAttempt:
+    return ModelCallAttempt(
+        source=attempt.get("source"),
+        provider=attempt.get("provider"),
+        model=attempt.get("model"),
+        input_tokens=attempt.get("input_tokens"),
+        output_tokens=attempt.get("output_tokens"),
+        total_tokens=attempt.get("total_tokens"),
+        cached_tokens=attempt.get("cached_tokens"),
+        attempt_status=attempt.get("attempt_status"),
+        cost_status=attempt.get("cost_status"),
+    )
+
+
+def _safe_model_attempt_projection(attempt: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: attempt.get(key)
+        for key in (
+            "source",
+            "provider",
+            "model",
+            "input_tokens",
+            "output_tokens",
+            "total_tokens",
+            "cached_tokens",
+            "attempt_status",
+            "cost_status",
+        )
+    }
 
 
 @dataclass(frozen=True)
@@ -760,52 +922,76 @@ class ExperimentRunner:
         owner: str | None = None,
         generation: int | None = None,
     ) -> bool:
+        variant_id = await session.scalar(
+            select(EvaluationExperimentCaseResult.experiment_variant_id).where(
+                EvaluationExperimentCaseResult.id == case_id
+            )
+        )
+        variant = await session.scalar(
+            select(EvaluationExperimentVariant).where(EvaluationExperimentVariant.id == variant_id)
+        )
+        pricing_status = "PRICING_BINDING_MISSING"
         cost_amount = None
         cost_currency = None
-        if (
-            observation.input_tokens is not None
-            and observation.output_tokens is not None
-            and observation.cached_tokens is not None
-        ):
-            variant_id = await session.scalar(
-                select(EvaluationExperimentCaseResult.experiment_variant_id).where(
-                    EvaluationExperimentCaseResult.id == case_id
-                )
-            )
-            variant = await session.scalar(
-                select(EvaluationExperimentVariant).where(
-                    EvaluationExperimentVariant.id == variant_id
-                )
-            )
-            pricing = (
-                await session.scalar(
-                    select(PricingSnapshot).where(
-                        PricingSnapshot.workspace_id == variant.workspace_id,
-                        PricingSnapshot.id == variant.pricing_snapshot_id,
+        if variant is not None:
+            try:
+                version = await session.scalar(
+                    select(AgentVersion).where(
+                        AgentVersion.workspace_id == variant.workspace_id,
+                        AgentVersion.id == variant.agent_version_id,
                     )
                 )
-                if variant is not None
-                else None
-            )
-            if pricing is not None:
-                cached_tokens = observation.cached_tokens
-                assert cached_tokens is not None
-                normal_input_tokens = max(0, observation.input_tokens - cached_tokens)
-                input_cost = Decimal(normal_input_tokens) / Decimal(1_000_000)
-                cached_cost = Decimal(cached_tokens) / Decimal(1_000_000)
-                output_cost = Decimal(observation.output_tokens) / Decimal(1_000_000)
-                cached_price = pricing.cached_input_price_per_1m
-                effective_cached_price = (
-                    Decimal(cached_price)
-                    if cached_price is not None
-                    else Decimal(pricing.input_price_per_1m)
+                if version is None:
+                    raise PricingChainError("The frozen AgentVersion is missing.")
+                parsed = parse_frozen_agent_spec(
+                    version.resolved_spec,
+                    workspace_id=variant.workspace_id,
                 )
-                cost_amount = (
-                    input_cost * Decimal(pricing.input_price_per_1m)
-                    + cached_cost * effective_cached_price
-                    + output_cost * Decimal(pricing.output_price_per_1m)
-                ).quantize(Decimal("0.00000001"))
-                cost_currency = pricing.currency
+                snapshot_ids = pricing_snapshot_ids_from_metadata(
+                    variant.variant_metadata,
+                    model_count=len(parsed.model_plan.chain),
+                    primary_snapshot_id=variant.pricing_snapshot_id,
+                )
+                snapshots = await load_pricing_snapshots(
+                    session,
+                    workspace_id=variant.workspace_id,
+                    snapshot_ids=snapshot_ids,
+                )
+                validate_frozen_pricing_chain(
+                    variant.variant_metadata,
+                    parsed.model_plan,
+                    snapshots,
+                    primary_snapshot_id=variant.pricing_snapshot_id,
+                    primary_snapshot_hash=variant.pricing_snapshot_hash,
+                )
+
+                computation = resolve_case_pricing(
+                    model_plan=parsed.model_plan,
+                    snapshots=snapshots,
+                    model_attempts=tuple(
+                        _model_attempt(attempt) for attempt in observation.model_attempts
+                    ),
+                    model_attempts_complete=observation.model_attempts_complete,
+                    aggregate_billing_complete=observation.aggregate_billing_complete,
+                    input_tokens=observation.input_tokens,
+                    output_tokens=observation.output_tokens,
+                    cached_tokens=observation.cached_tokens,
+                )
+                pricing_status = computation.unavailable_reason or "KNOWN"
+                cost_amount = computation.amount
+                cost_currency = computation.currency
+            except (AgentHubError, PricingChainError, TypeError, ValueError):
+                pricing_status = "PRICING_CHAIN_UNAVAILABLE"
+
+        observation_projection = {
+            **observation.observation,
+            "model_attempts": [
+                _safe_model_attempt_projection(attempt) for attempt in observation.model_attempts
+            ],
+            "model_attempt_collection_complete": observation.model_attempts_complete,
+            "aggregate_billing_complete": observation.aggregate_billing_complete,
+            "cost_status": pricing_status,
+        }
         predicates = [
             EvaluationExperimentCaseResult.id == case_id,
             EvaluationExperimentCaseResult.status == EvaluationCaseResultStatus.RUNNING,
@@ -839,7 +1025,7 @@ class ExperimentRunner:
                     "observed_agent_failure_code"
                 )
                 or observation.failure_code,
-                observation=observation.observation,
+                observation=observation_projection,
                 completed_at=_now(),
             )
         )
@@ -1234,19 +1420,30 @@ class ExperimentRunner:
                 "The frozen AgentVersion is invalid.",
                 409,
             ) from exc
-        model = parsed.model_plan.primary
-        if model.provider != pricing.provider or model.model != pricing.model:
+        try:
+            snapshot_ids = pricing_snapshot_ids_from_metadata(
+                variant.variant_metadata,
+                model_count=len(parsed.model_plan.chain),
+                primary_snapshot_id=variant.pricing_snapshot_id,
+            )
+            pricing_snapshots = await load_pricing_snapshots(
+                session,
+                workspace_id=workspace_id,
+                snapshot_ids=snapshot_ids,
+            )
+            validate_frozen_pricing_chain(
+                variant.variant_metadata,
+                parsed.model_plan,
+                pricing_snapshots,
+                primary_snapshot_id=variant.pricing_snapshot_id,
+                primary_snapshot_hash=variant.pricing_snapshot_hash,
+            )
+        except (AgentHubError, PricingChainError) as exc:
             raise AgentHubError(
                 "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
-                "The frozen pricing model no longer matches the AgentVersion.",
+                "The frozen pricing chain no longer matches the AgentVersion.",
                 409,
-            )
-        if pricing_snapshot_content_hash(pricing) != variant.pricing_snapshot_hash:
-            raise AgentHubError(
-                "EXPERIMENT_REPRODUCIBILITY_VIOLATION",
-                "The frozen pricing snapshot changed.",
-                409,
-            )
+            ) from exc
         snapshots = normalize_knowledge_snapshots(variant.effective_knowledge_snapshots)
         for binding in snapshots:
             snapshot = await session.scalar(

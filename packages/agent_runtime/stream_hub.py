@@ -53,6 +53,7 @@ class RunStreamHub:
         abort: Callable[[], Awaitable[None]],
         grace_seconds: float | None,
         recorder: RunEventRecorder | None = None,
+        source_persisted: bool = False,
         on_closed: Callable[[UUID], None] | None = None,
     ) -> None:
         self._run_id = run_id
@@ -62,6 +63,7 @@ class RunStreamHub:
         # executes rather than watches.
         self._grace_seconds = grace_seconds
         self._recorder = recorder
+        self._source_persisted = source_persisted
         self._on_closed = on_closed
         self._subscribers: set[asyncio.Queue[AgentEvent | None]] = set()
         self._grace_task: asyncio.Task[None] | None = None
@@ -100,8 +102,8 @@ class RunStreamHub:
                 if event is None:
                     break
                 self._last_sequence = event.sequence
-                if self._recorder is not None:
-                    self._recorder.record(event)
+                if self._recorder is not None and not self._source_persisted:
+                    await self._recorder.arecord(event)
                 self._broadcast(event)
         except asyncio.CancelledError:
             raise
@@ -122,6 +124,12 @@ class RunStreamHub:
                     extra={"run_id": str(self._run_id)},
                 )
                 self._subscribers.discard(queue)
+                # Wake this iterator once its bounded backlog drains. Without
+                # a sentinel it would wait forever after being removed from
+                # the broadcast set, even after the run has finished.
+                with suppress(asyncio.QueueEmpty):
+                    queue.get_nowait()
+                queue.put_nowait(None)
 
     async def _finish(self) -> None:
         self._closed = True
@@ -136,9 +144,7 @@ class RunStreamHub:
     async def subscribe(self) -> AsyncIterator[AgentEvent]:
         """Watch the live run. Leaving does not end it; being last to leave might."""
 
-        queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue(
-            maxsize=_SUBSCRIBER_QUEUE_MAXSIZE
-        )
+        queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue(maxsize=_SUBSCRIBER_QUEUE_MAXSIZE)
         if self._closed:
             return
         self._subscribers.add(queue)

@@ -4,14 +4,21 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Mapping
-from dataclasses import dataclass
+from collections.abc import Awaitable, Callable, Mapping
+from dataclasses import asdict, dataclass
 from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from packages.agent_runtime.context_budget import (
+    ApproxTokenEstimator,
+    ContextBudgetConfig,
+    ContextBudgetPolicy,
+    ContextCategory,
+    ContextMessage,
+)
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.composition import RetrievalComponents
@@ -28,9 +35,13 @@ from packages.model_gateway.contracts import (
     ModelGateway,
     ModelMessage,
     ModelRequest,
+    ResolvedModelExecutionPlan,
+    ResolvedModelExecutionProfile,
     StructuredOutputSchema,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
+from packages.model_gateway.profile_resolution import ModelProfileResolver
+from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
 from packages.observability.contracts import TraceSink
 
 _INSUFFICIENT_EVIDENCE = "Insufficient evidence to answer from the selected knowledge snapshot."
@@ -190,6 +201,119 @@ def _evidence_prompt(query: str, evidence: tuple[_NumberedEvidence, ...]) -> str
     return "\n".join(sections)
 
 
+async def _resolve_model_plan(
+    session: AsyncSession,
+    context: WorkspaceExecutionContext,
+    model_profile_id: UUID,
+) -> ResolvedModelExecutionPlan:
+    repository = SqlAlchemyModelGatewayRepository(session)
+    try:
+        chain = await ModelProfileResolver(repository).resolve_chain(
+            context,
+            model_profile_id,
+            required_capabilities=CapabilityRequirements(required=frozenset({"structured_output"})),
+        )
+    except ModelGatewayError as exc:
+        raise _model_gateway_error(exc) from None
+
+    profiles: list[ResolvedModelExecutionProfile] = []
+    for profile in chain:
+        credential = await repository.get_provider_credential(
+            context,
+            profile.provider_credential_id,
+        )
+        if credential is None or not credential.enabled:
+            raise AgentHubError(
+                "MODEL_PROFILE_DISABLED",
+                "The selected model profile cannot serve this request.",
+                422,
+            )
+        profiles.append(
+            ResolvedModelExecutionProfile(
+                **{
+                    key: value
+                    for key, value in asdict(profile).items()
+                    if key not in {"fallback_profile_id", "capabilities"}
+                },
+                provider=credential.provider,
+                capabilities=profile.capabilities,
+            )
+        )
+    return ResolvedModelExecutionPlan(
+        primary=profiles[0],
+        fallbacks=tuple(profiles[1:]),
+    )
+
+
+def _deny_oversized(
+    plan: ResolvedModelExecutionPlan,
+    messages: tuple[ModelMessage, ...],
+    categories: tuple[ContextCategory, ...],
+    *,
+    response_schema: StructuredOutputSchema | None,
+) -> None:
+    estimator = ApproxTokenEstimator()
+    policy = ContextBudgetPolicy(plan, estimator=estimator)
+    context_limit = policy.context_limit
+    output_reserve = max(profile.max_tokens for profile in plan.chain)
+    try:
+        admission = ContextBudgetPolicy(
+            plan,
+            ContextBudgetConfig(
+                reserved_output_tokens=output_reserve,
+                max_retrieval_tokens=max(context_limit - output_reserve, 0),
+            ),
+            estimator=estimator,
+        ).admit(
+            tuple(
+                ContextMessage(message, category)
+                for message, category in zip(messages, categories, strict=True)
+            )
+        )
+    except AgentHubError as exc:
+        if exc.code == "AGENT_CONTEXT_BUDGET_EXCEEDED":
+            raise AgentHubError(
+                "CITATION_QA_CONTEXT_BUDGET_EXCEEDED",
+                "The complete question and evidence exceed the frozen model input budget.",
+                422,
+            ) from None
+        raise
+    schema_cost = 0
+    if response_schema is not None:
+        schema_cost = estimator.estimate(
+            json.dumps(
+                {
+                    "name": response_schema.name,
+                    "strict": response_schema.strict,
+                    "json_schema": response_schema.json_schema,
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+        )
+    if (
+        admission.usage.truncated
+        or len(admission.messages) != len(messages)
+        or admission.usage.estimated_input_after + schema_cost > admission.usage.available_input
+    ):
+        raise AgentHubError(
+            "CITATION_QA_CONTEXT_BUDGET_EXCEEDED",
+            "The complete question and evidence exceed the frozen model input budget.",
+            422,
+        )
+
+
+def _request(
+    messages: tuple[ModelMessage, ...],
+) -> ModelRequest:
+    return ModelRequest(
+        messages=messages,
+        response_schema=_OUTPUT_SCHEMA,
+        required_capabilities=CapabilityRequirements(required=frozenset({"structured_output"})),
+    )
+
+
 def _invalid_model_output() -> AgentHubError:
     return AgentHubError(
         "CITATION_QA_INVALID_MODEL_OUTPUT",
@@ -246,6 +370,11 @@ class CitationQaService:
         superseded_rank_penalty: float = 0.0,
         evidence_projection: str | None = None,
         retrieval_profile: Mapping[str, int] | None = None,
+        model_plan_resolver: Callable[
+            [AsyncSession, WorkspaceExecutionContext, UUID],
+            Awaitable[ResolvedModelExecutionPlan],
+        ]
+        | None = None,
     ) -> None:
         if evidence_projection not in (None, "compact_v1"):
             raise ValueError("invalid evidence projection")
@@ -265,6 +394,7 @@ class CitationQaService:
         self.min_rerank_score = min_rerank_score
         self.superseded_rank_penalty = superseded_rank_penalty
         self.evidence_projection = evidence_projection
+        self.model_plan_resolver = model_plan_resolver or _resolve_model_plan
 
     async def answer(
         self,
@@ -279,6 +409,11 @@ class CitationQaService:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
         if not query.strip():
             raise AgentHubError("INVALID_CITATION_QUERY", "The query must not be blank.", 400)
+        plan = await self.model_plan_resolver(
+            self.session,
+            context,
+            model_profile_id,
+        )
         retrieval = await HybridKnowledgeRetriever(
             session=self.session,
             dense_embedder=self.retrieval_components.dense,
@@ -334,20 +469,23 @@ class CitationQaService:
                     allow_nan=False,
                 ).encode("utf-8")
             )
-            plan = assemble_evidence_plan(
+            evidence_plan = assemble_evidence_plan(
                 records,
                 references,
                 budget=source_bytes + 1_024,
                 estimator=lambda text: len(text.encode("utf-8")),
                 citation_prefix="",
             )
-            if plan is None:
+            if evidence_plan is None:
                 selected = ()
             else:
-                visible = {int(item["id"]) for item in plan.payload["results"]}
+                visible = {int(item["id"]) for item in evidence_plan.payload["results"]}
                 selected = tuple(item for item in selected if item.id in visible)
                 evidence_prompt = f"Question:\n{query}\n\nUntrusted reference data:\n" + json.dumps(
-                    plan.payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+                    evidence_plan.payload,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
                 )
         if not selected:
             return CitationQaResult(
@@ -358,19 +496,23 @@ class CitationQaService:
 
         request_messages = (
             ModelMessage(role="system", content=_SYSTEM_PROMPT),
-            ModelMessage(
-                role="user", content=evidence_prompt or _evidence_prompt(query, selected)
-            ),
+            ModelMessage(role="user", content=evidence_prompt or _evidence_prompt(query, selected)),
+        )
+        request_categories = (
+            ContextCategory.SYSTEM_PROMPT,
+            ContextCategory.RAG_EVIDENCE,
+        )
+        _deny_oversized(
+            plan,
+            request_messages,
+            request_categories,
+            response_schema=_OUTPUT_SCHEMA,
         )
         try:
-            response = await self.model_gateway.generate(
-                context, model_profile_id, ModelRequest(
-                    messages=request_messages,
-                    response_schema=_OUTPUT_SCHEMA,
-                    required_capabilities=CapabilityRequirements(
-                        required=frozenset({"structured_output"})
-                    ),
-                )
+            response = await self.model_gateway.generate_resolved(
+                context,
+                plan,
+                _request(request_messages),
             )
         except ModelGatewayError as exc:
             raise _model_gateway_error(exc) from None
@@ -404,20 +546,40 @@ class CitationQaService:
                     # validation still fails closed afterwards, but a single
                     # invented [n] should not discard a grounded answer.
                     try:
-                        response = await self.model_gateway.generate(
+                        correction_messages = (
+                            ModelMessage(
+                                role="user",
+                                content=evidence_prompt or _evidence_prompt(query, selected),
+                            ),
+                            ModelMessage(role="assistant", content=response.content),
+                            ModelMessage(role="user", content=_CITATION_CORRECTION),
+                        )
+                        _deny_oversized(
+                            plan,
+                            (
+                                request_messages[0],
+                                *correction_messages,
+                            ),
+                            (
+                                ContextCategory.SYSTEM_PROMPT,
+                                ContextCategory.RAG_EVIDENCE,
+                                ContextCategory.CONVERSATION,
+                                ContextCategory.CURRENT_USER_TASK,
+                            ),
+                            response_schema=_OUTPUT_SCHEMA,
+                        )
+                        response = await self.model_gateway.generate_resolved(
                             context,
-                            model_profile_id,
-                            ModelRequest(
-                                messages=(
-                                    *request_messages,
-                                    ModelMessage(role="user", content=_CITATION_CORRECTION),
-                                ),
-                                response_schema=_OUTPUT_SCHEMA,
-                                required_capabilities=CapabilityRequirements(
-                                    required=frozenset({"structured_output"})
-                                ),
+                            plan,
+                            _request(
+                                (
+                                    request_messages[0],
+                                    *correction_messages,
+                                )
                             ),
                         )
+                    except AgentHubError:
+                        raise
                     except ModelGatewayError as exc:
                         raise _model_gateway_error(exc) from None
                     except Exception:

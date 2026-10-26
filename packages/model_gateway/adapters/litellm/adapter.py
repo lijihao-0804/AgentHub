@@ -247,7 +247,7 @@ def _normalize_response(
         _normalize_tool_call(tool_call) for tool_call in (_value(message, "tool_calls", []) or [])
     )
     return ModelResponse(
-        content=_value(message, "content", "") or "",
+        content=_value(message, "content", "") or _value(message, "refusal", "") or "",
         provider=provider,
         model=model,
         tool_calls=tool_calls,
@@ -374,7 +374,7 @@ def _stream_events(
     choices = _value(chunk, "choices", []) or []
     for choice in choices:
         delta = _value(choice, "delta", {})
-        content = _value(delta, "content")
+        content = _value(delta, "content") or _value(delta, "refusal")
         if content:
             content_parts.append(content)
             events.append(

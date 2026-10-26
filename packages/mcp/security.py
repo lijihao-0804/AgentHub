@@ -231,10 +231,13 @@ def authorize_peer_address(value: str | None, *, allow_private_targets: bool) ->
 
     The pre-flight check inspects DNS answers; this one inspects the socket.
     Between the two there is a window in which a name can start resolving
-    somewhere else, so the second look is what closes it.
+    somewhere else. A missing peer cannot be verified and is therefore always
+    refused, including when private targets were explicitly allowed.
     """
 
-    if allow_private_targets or value is None:
+    if value is None:
+        raise McpTargetError(TARGET_FORBIDDEN)
+    if allow_private_targets:
         return
     if is_forbidden_address(value):
         raise McpTargetError(TARGET_FORBIDDEN)

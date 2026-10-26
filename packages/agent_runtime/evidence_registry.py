@@ -26,6 +26,7 @@ _READING_FIELDS = (
     "effective_date",
     "superseded",
     "locator",
+    "conflict",
     "origin",
     "wiki_page_id",
 )

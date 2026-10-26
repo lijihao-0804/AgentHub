@@ -48,6 +48,7 @@ class AgentRunResponse(BaseModel):
     created_at: datetime
     started_at: datetime
     completed_at: datetime | None
+    event_log_complete: bool = False
 
 
 class RunStepResponse(BaseModel):

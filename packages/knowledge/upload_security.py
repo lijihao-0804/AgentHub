@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import codecs
 from dataclasses import dataclass
 from pathlib import PurePath, PureWindowsPath
 
@@ -64,7 +65,11 @@ def validate_content_signature(filename: str, prefix: bytes) -> None:
         valid = b"\x00" not in prefix
         if valid:
             try:
-                prefix.decode("utf-8")
+                # The route validates only a bounded prefix. A complete file may
+                # end in the middle of a multi-byte code point at that boundary,
+                # so leave a trailing partial sequence buffered rather than
+                # treating it as malformed UTF-8.
+                codecs.getincrementaldecoder("utf-8")().decode(prefix, final=False)
             except UnicodeDecodeError:
                 valid = False
     if not valid:

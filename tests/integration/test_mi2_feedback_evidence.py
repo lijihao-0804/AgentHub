@@ -226,7 +226,12 @@ async def test_feedback_scope_turn_relation_permissions_and_holdout(db_factory):
         session.add(thread)
         await session.flush()
         turn = ThreadTurn(
-            workspace_id=run.workspace_id, thread_id=thread.id, sequence=1, user_input="q"
+            workspace_id=run.workspace_id,
+            thread_id=thread.id,
+            sequence=1,
+            user_input="q",
+            client_token=uuid4().hex,
+            input_hash="0" * 64,
         )
         session.add(turn)
         await session.commit()

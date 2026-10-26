@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -16,7 +17,8 @@ from packages.core.execution_context.models import (
     PrincipalContext,
     WorkspaceExecutionContext,
 )
-from packages.knowledge.models import KnowledgeBase
+from packages.knowledge.models import Document, DocumentRevision, IngestionJob, KnowledgeBase
+from packages.knowledge.upload_security import validate_content_signature
 
 
 class _UploadSession:
@@ -29,15 +31,40 @@ class _UploadSession:
         self.added: list[object] = []
 
     async def scalar(self, _statement):
-        return self.knowledge_base
+        if not self.added:
+            return self.knowledge_base
+        if len(self.added) == 1:
+            return None
+        return None
 
     def add(self, value) -> None:
+        if getattr(value, "id", None) is None:
+            value.id = uuid4()
+        now = datetime.now(UTC)
+        for name, fallback in (
+            ("created_at", now),
+            ("updated_at", now),
+            ("lifecycle_status", "ACTIVE"),
+            ("ingestion_status", "PENDING"),
+            ("status", "PENDING"),
+            ("stage", "PARSING"),
+            ("attempt_count", 0),
+            ("last_error_code", None),
+            ("safe_error_message", None),
+        ):
+            if getattr(value, name, None) is None:
+                setattr(value, name, fallback)
         self.added.append(value)
 
     async def flush(self) -> None:
-        return None
+        for value in self.added:
+            if getattr(value, "id", None) is None:
+                value.id = uuid4()
 
     async def commit(self) -> None:
+        return None
+
+    async def rollback(self) -> None:
         return None
 
 
@@ -150,3 +177,46 @@ async def test_oversized_upload_fails_before_revision_and_enqueue() -> None:
         assert not any(blob_root.rglob("*"))
     finally:
         shutil.rmtree(blob_root, ignore_errors=True)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("character", ["é", "中", "🙂"])
+async def test_complete_utf8_upload_allows_a_multibyte_character_across_prefix_boundary(
+    character: str,
+) -> None:
+    response, session, queue, blob_root = await _post_upload(
+        filename="boundary.txt",
+        content=b"a" * 65_535 + character.encode("utf-8"),
+        media_type="text/plain",
+    )
+    try:
+        assert response.status_code == 202, response.text
+        assert queue.calls == 1
+        assert sum(isinstance(item, Document) for item in session.added) == 1
+        assert sum(isinstance(item, DocumentRevision) for item in session.added) == 1
+        assert sum(isinstance(item, IngestionJob) for item in session.added) == 1
+    finally:
+        shutil.rmtree(blob_root, ignore_errors=True)
+
+
+@pytest.mark.asyncio
+async def test_truly_invalid_utf8_upload_is_still_rejected() -> None:
+    response, session, queue, blob_root = await _post_upload(
+        filename="broken.txt",
+        content=b"valid-prefix-\xff-invalid",
+        media_type="text/plain",
+    )
+    try:
+        assert response.status_code == 422
+        assert response.json()["error"]["code"] == "INVALID_FILE"
+        assert session.added == []
+        assert queue.calls == 0
+        assert not any(blob_root.rglob("*"))
+    finally:
+        shutil.rmtree(blob_root, ignore_errors=True)
+
+
+def test_text_prefix_accepts_an_incomplete_trailing_utf8_sequence() -> None:
+    content = b"a" * 65_535 + "🙂".encode()
+
+    validate_content_signature("boundary.txt", content[:65_536])

@@ -18,9 +18,8 @@ from apps.api.schemas.threads import (
 )
 from packages.agent_runtime.events import AgentEvent
 from packages.agent_runtime.sse import sse_frames
-from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
-from packages.threads.service import ThreadService
+from packages.threads.service import PreparedTurnRun, ThreadService
 
 PREFIX = "/api/v1/workspaces/{workspace_id}"
 
@@ -35,14 +34,18 @@ offset_query = Query(default=0, ge=0)
 
 
 def _sse_frames(stream: AsyncIterator[AgentEvent], request: Request) -> AsyncIterator[str]:
-    return sse_frames(
-        stream, heartbeat_seconds=request.app.state.settings.sse_heartbeat_seconds
-    )
+    return sse_frames(stream, heartbeat_seconds=request.app.state.settings.sse_heartbeat_seconds)
 
 
 def _service(request: Request) -> ThreadService:
     run_service = get_production_agent_run_service(request)
     return ThreadService(run_service.session_factory, run_service=run_service)
+
+
+def _stream_mode(prepared_run: PreparedTurnRun) -> str:
+    """Choose replay or execution from the Turn service's dispatch decision."""
+
+    return "execute" if prepared_run.run is not None else "attach"
 
 
 @router.post(
@@ -198,50 +201,25 @@ async def stream_turn(
         user_input=payload.input_text,
         client_token=payload.client_token,
     )
-    if turn is None:
-        # A repeated client_token. The turn was recorded the first time and the
-        # run is already going or already done, so the retry must arrive at
-        # that run rather than at an empty stream: the caller cannot otherwise
-        # learn which run to follow. The durable event log makes this exact --
-        # the reply is a replay from sequence 0, which is the same stream the
-        # first attempt would have received had it not dropped.
-        existing = await service.token_turn(context, thread_id, payload.client_token)
-        if existing.agent_run_id is None:
-            # The turn exists but its run has not been attached yet: two
-            # requests raced, and the answer is "ask again", not a stream that
-            # will never carry anything.
-            raise AgentHubError(
-                "THREAD_TURN_IN_PROGRESS",
-                "The turn is still being started; retry with the same client token.",
-                409,
-            )
-        replay = run_service.attach_stream(context, run_id=existing.agent_run_id)
-        return StreamingResponse(
-            _sse_frames(replay, request),
-            media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "X-Accel-Buffering": "no",
-                "X-AgentHub-Run-Id": str(existing.agent_run_id),
-                "X-AgentHub-Turn-Id": str(existing.id),
-            },
+    prepared_run = await service.ensure_stream_run(
+        context,
+        thread_id=thread_id,
+        agent_version_id=agent_version_id,
+        turn=turn,
+    )
+    # The service returns a Run only when it is a newly prepared Run or a
+    # RUNNING Run with no owner, the two safe states for dispatch. Every other
+    # existing Run is followed so an owner is never bypassed.
+    if _stream_mode(prepared_run) == "attach":
+        stream = run_service.attach_stream(context, run_id=prepared_run.run_id)
+    else:
+        stream = run_service.stream(
+            context,
+            agent_version_id=agent_version_id,
+            input_text=turn.user_input,
+            prepared_run=prepared_run.run,
+            graceful_disconnect=True,
         )
-
-    prepared_run = await run_service.prepare_stream(
-        context,
-        agent_version_id=agent_version_id,
-        input_text=turn.user_input,
-        thread_id=thread.id,
-    )
-    await service.attach_run(context, turn_id=turn.id, run_id=prepared_run.id)
-
-    stream = run_service.stream(
-        context,
-        agent_version_id=agent_version_id,
-        input_text=turn.user_input,
-        prepared_run=prepared_run,
-        graceful_disconnect=True,
-    )
 
     return StreamingResponse(
         _sse_frames(stream, request),
@@ -251,7 +229,7 @@ async def stream_turn(
             "X-Accel-Buffering": "no",
             # The run id before the first frame, so the UI can offer
             # `View Run` while the answer is still streaming.
-            "X-AgentHub-Run-Id": str(prepared_run.id),
+            "X-AgentHub-Run-Id": str(prepared_run.run_id),
             "X-AgentHub-Turn-Id": str(turn.id),
         },
     )

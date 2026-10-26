@@ -17,10 +17,8 @@ Two deliberate limits:
   back only the typing animation. Replay therefore reconstructs the run's
   structure and its final output, not its keystrokes, and sequence gaps are
   normal.
-* Writes never block the run. The recorder hands events to a background writer
-  through a bounded queue; if that queue is ever full the event is dropped with
-  a warning rather than stalling execution. Losing a frame of the *replay* is
-  strictly better than stalling a run that is calling real systems.
+* Structural events persist before broadcast. The legacy nonblocking recorder
+  exposes incompleteness on queue/write failure; it never claims a full log.
 """
 
 from __future__ import annotations
@@ -33,11 +31,13 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import insert, select
+from sqlalchemy import and_, func, or_, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.events import AgentEvent, AgentEventType
 from packages.agent_runtime.models import AgentRun, AgentRunEvent
+from packages.core.errors.exceptions import AgentHubError
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,10 @@ SessionFactory = Callable[[], AsyncSession] | async_sessionmaker[AsyncSession]
 NON_PERSISTED_EVENT_TYPES: frozenset[AgentEventType] = frozenset({AgentEventType.MESSAGE_DELTA})
 
 _QUEUE_MAXSIZE = 2048
+
+
+class EventSequenceConflict(ValueError):
+    """A replay identity disagrees with the already persisted frame."""
 
 
 def should_persist(event: AgentEvent) -> bool:
@@ -71,7 +75,7 @@ def _row_values(event: AgentEvent, *, workspace_id: UUID, run_id: UUID) -> dict[
 
 
 class RunEventRecorder:
-    """Writes a run's events to ``agent_run_events`` off the execution path."""
+    """Persists structural events before publication; supports legacy queues."""
 
     def __init__(
         self,
@@ -85,6 +89,17 @@ class RunEventRecorder:
         self._run_id = run_id
         self._queue: asyncio.Queue[AgentEvent | None] = asyncio.Queue(maxsize=_QUEUE_MAXSIZE)
         self._writer: asyncio.Task[None] | None = None
+        self._failed = False
+
+    async def arecord(self, event: AgentEvent) -> None:
+        """Persist structural events before they become visible to followers."""
+        if not should_persist(event):
+            return
+        try:
+            await self._flush([event], strict=True)
+        except Exception:
+            self._failed = True
+            raise
 
     def start(self) -> None:
         if self._writer is None:
@@ -98,6 +113,7 @@ class RunEventRecorder:
         try:
             self._queue.put_nowait(event)
         except asyncio.QueueFull:
+            self._failed = True
             # Dropping a replay frame is recoverable; stalling a run that is
             # calling real systems is not.
             logger.warning(
@@ -110,6 +126,7 @@ class RunEventRecorder:
 
         writer = self._writer
         if writer is None:
+            await self._mark_completeness()
             return
         self._writer = None
         with suppress(asyncio.QueueFull):
@@ -118,8 +135,57 @@ class RunEventRecorder:
         # hold the response open.
         done, _ = await asyncio.wait({writer}, timeout=10)
         if not done:
+            self._failed = True
             writer.cancel()
             await asyncio.gather(writer, return_exceptions=True)
+        await self._mark_completeness()
+
+    async def _mark_completeness(self):
+        try:
+            async with self._session_factory() as session:
+                latest_type = (
+                    select(AgentRunEvent.event_type)
+                    .where(
+                        AgentRunEvent.workspace_id == self._workspace_id,
+                        AgentRunEvent.agent_run_id == self._run_id,
+                    )
+                    .order_by(AgentRunEvent.sequence.desc())
+                    .limit(1)
+                    .scalar_subquery()
+                )
+                completed_segment = or_(
+                    and_(AgentRun.status == "WAITING_APPROVAL", latest_type == "approval.required"),
+                    and_(AgentRun.status == "SUCCEEDED", latest_type == "run.completed"),
+                    and_(AgentRun.status == "CANCELLED", latest_type == "run.cancelled"),
+                    and_(
+                        AgentRun.status.in_({"FAILED", "NEEDS_ATTENTION"}),
+                        latest_type == "run.failed",
+                    ),
+                )
+                await session.execute(
+                    update(AgentRun)
+                    .where(
+                        AgentRun.workspace_id == self._workspace_id,
+                        AgentRun.id == self._run_id,
+                        *([] if self._failed else [AgentRun.event_log_failed.is_(False)]),
+                        # An older stream's close must not mark a resumed,
+                        # still-running execution as fully recorded.
+                        *([] if self._failed else [completed_segment]),
+                    )
+                    .values(
+                        **(
+                            {"event_log_complete": False, "event_log_failed": True}
+                            if self._failed
+                            else {"event_log_complete": True}
+                        )
+                    )
+                )
+                await session.commit()
+        except Exception:
+            self._failed = True
+            logger.warning(
+                "agent_run_event_completeness_unknown", extra={"run_id": str(self._run_id)}
+            )
 
     async def _drain(self) -> None:
         while True:
@@ -136,7 +202,7 @@ class RunEventRecorder:
                 batch.append(nxt)
             await self._flush(batch)
 
-    async def _flush(self, batch: Sequence[AgentEvent]) -> None:
+    async def _flush(self, batch: Sequence[AgentEvent], *, strict=False) -> None:
         if not batch:
             return
         rows = [
@@ -145,16 +211,49 @@ class RunEventRecorder:
         ]
         try:
             async with self._session_factory() as session:
-                await session.execute(insert(AgentRunEvent), rows)
+                inserted = await session.execute(
+                    insert(AgentRunEvent)
+                    .on_conflict_do_nothing()
+                    .returning(AgentRunEvent.sequence, AgentRunEvent.event_id),
+                    rows,
+                )
+                if len(inserted.all()) != len(rows):
+                    existing = dict(
+                        (
+                            await session.execute(
+                                select(AgentRunEvent.sequence, AgentRunEvent.event_id).where(
+                                    AgentRunEvent.workspace_id == self._workspace_id,
+                                    AgentRunEvent.agent_run_id == self._run_id,
+                                    AgentRunEvent.sequence.in_([event.sequence for event in batch]),
+                                )
+                            )
+                        ).all()
+                    )
+                    if any(existing.get(event.sequence) != event.event_id for event in batch):
+                        raise EventSequenceConflict("Conflicting durable run event sequence")
                 await session.commit()
-        except Exception:
+        except Exception as error:
+            self._failed = True
             # Persisting the stream is a durability feature, not a correctness
             # one: the run's own outcome is written by _complete_run.
             logger.warning(
                 "agent_run_event_persist_failed",
-                exc_info=True,
-                extra={"run_id": str(self._run_id), "count": len(rows)},
+                # SQLAlchemy exceptions may include the event's raw output in
+                # bound parameters. Keep diagnostics strictly metadata-only.
+                extra={
+                    "run_id": str(self._run_id),
+                    "count": len(rows),
+                    "error_type": type(error).__name__,
+                },
             )
+            if strict:
+                if isinstance(error, EventSequenceConflict):
+                    raise
+                raise AgentHubError(
+                    "AGENT_EVENT_LOG_UNAVAILABLE",
+                    "The run event could not be durably recorded.",
+                    503,
+                ) from None
 
 
 class RunEventReader:
@@ -162,6 +261,18 @@ class RunEventReader:
 
     def __init__(self, session_factory: SessionFactory) -> None:
         self._session_factory = session_factory
+
+    async def latest_sequence(self, *, workspace_id, run_id):
+        async with self._session_factory() as session:
+            return int(
+                await session.scalar(
+                    select(func.max(AgentRunEvent.sequence)).where(
+                        AgentRunEvent.workspace_id == workspace_id,
+                        AgentRunEvent.agent_run_id == run_id,
+                    )
+                )
+                or 0
+            )
 
     async def agent_version_id(self, *, workspace_id: UUID, run_id: UUID) -> UUID | None:
         """The run's agent version, needed to rebuild event envelopes.
@@ -200,10 +311,7 @@ class RunEventReader:
                     .limit(limit)
                 )
             ).all()
-        return [
-            _event_from_row(row, agent_version_id=agent_version_id)
-            for row in rows
-        ]
+        return [_event_from_row(row, agent_version_id=agent_version_id) for row in rows]
 
 
 def _event_from_row(row: AgentRunEvent, *, agent_version_id: UUID) -> AgentEvent:

@@ -13,6 +13,8 @@ from alembic.config import Config
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from packages.agent_runtime.runtime import AgentRunService
+from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.core.errors.exceptions import AgentHubError
@@ -29,10 +31,12 @@ from packages.evaluation.models import (
     EvaluationMetricSnapshot,
 )
 from packages.evaluation.runner import (
+    AgentRuntimeEvaluationDriver,
     CaseExecutionObservation,
     ExperimentRunner,
 )
-from tests.integration.test_m4c_agent_runtime import _seed
+from packages.model_gateway.contracts import ModelResponse, ModelUsage
+from tests.integration.test_m4c_agent_runtime import ScriptedGateway, _seed
 from tests.integration.test_m7b_experiments import (
     _item,
     _manager_context,
@@ -110,6 +114,43 @@ class _CountingDriver:
         )
 
 
+class _RetryReceiptDriver:
+    async def execute(self, session, *, run, variant, item) -> CaseExecutionObservation:
+        del session
+        return CaseExecutionObservation(
+            observation={
+                "category": item.category,
+                "variant_hash": variant.variant_hash,
+                "candidate_chunk_ids": list(item.expected.get("relevant_chunk_ids", [])),
+                "final_chunk_ids": list(item.expected.get("relevant_chunk_ids", [])),
+                "candidate_top_k": 20,
+                "final_top_k": 5,
+                "citation_ids": list(item.expected.get("relevant_chunk_ids", [])),
+                "driver_kind": "controlled",
+                "observation_schema_version": 2,
+            },
+            input_tokens=100,
+            output_tokens=50,
+            total_tokens=150,
+            cached_tokens=0,
+            model_attempts=(
+                {
+                    "source": "generation",
+                    "provider": "fake",
+                    "model": "frozen-model-a",
+                    "input_tokens": 100,
+                    "output_tokens": 50,
+                    "total_tokens": 150,
+                    "cached_tokens": 0,
+                    "attempt_status": "SUCCEEDED",
+                    "cost_status": "KNOWN",
+                },
+            ),
+            model_attempts_complete=True,
+            aggregate_billing_complete=True,
+        )
+
+
 class _ObservedFailureDriver:
     async def execute(self, session, *, run, variant, item) -> CaseExecutionObservation:
         del session, run, variant, item
@@ -129,13 +170,31 @@ async def _ready_run(
     *,
     case_count: int = 2,
     repetitions: int = 1,
+    max_attempts: int = 1,
+    category: str = "RETRIEVAL",
 ):
+    version = base["version"]
+    resolved_spec = {
+        **version.resolved_spec,
+        "model": {
+            **version.resolved_spec["model"],
+            "retry_policy": {"max_attempts": max_attempts},
+        },
+    }
+    version.resolved_spec = resolved_spec
+    version.resolved_spec_hash = canonical_json_hash(resolved_spec)
+    await session.commit()
     context = _manager_context(base)
     _, dataset_version = await _published_version(
         session,
         base,
         items=[
-            _item(f"case-{ordinal}", split="DEV", ordinal=ordinal)
+            _item(
+                f"case-{ordinal}",
+                split="DEV",
+                ordinal=ordinal,
+                category=category,
+            )
             for ordinal in range(case_count)
         ],
     )
@@ -195,10 +254,126 @@ async def test_m7c_deterministic_plan_execution_and_cost_freeze(db_factory) -> N
         assert all(row.status == EvaluationCaseResultStatus.SUCCEEDED for row in results)
         assert all(row.total_tokens == 150 for row in results)
         assert all(row.cost_amount == Decimal("0.00002000") for row in results)
+        assert all(row.cost_currency == "USD" for row in results)
+        assert all(row.observation["cost_status"] == "KNOWN" for row in results)
         assert stored_run is not None
         assert stored_run.status == EvaluationExperimentRunStatus.SUCCEEDED
         assert len(driver.calls) == 4
         assert all("raw" not in str(row.observation).lower() for row in results)
+
+
+@pytest.mark.asyncio
+async def test_m7c_retry_aggregate_without_attempt_receipt_is_not_priced(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7c-retry-{uuid4().hex}")
+        run = await _ready_run(session, base, max_attempts=2)
+    await ExperimentRunner(db_factory, driver=_CountingDriver()).execute(
+        run_id=run.id,
+        owner="m7c-retry-worker",
+        settings=Settings(testing=True),
+    )
+
+    async with db_factory() as session:
+        results = list(
+            await session.scalars(
+                select(EvaluationExperimentCaseResult).where(
+                    EvaluationExperimentCaseResult.experiment_run_id == run.id
+                )
+            )
+        )
+
+    assert results
+    assert all(row.total_tokens == 150 for row in results)
+    assert all(row.cost_amount is None for row in results)
+    assert all(row.cost_currency is None for row in results)
+    assert all(row.observation["model_attempt_collection_complete"] is False for row in results)
+    assert all(row.observation["cost_status"] != "KNOWN" for row in results)
+
+
+@pytest.mark.asyncio
+async def test_m7c_complete_attempt_flag_cannot_hide_billed_retries(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7c-retry-complete-{uuid4().hex}")
+        run = await _ready_run(session, base, max_attempts=2)
+    await ExperimentRunner(db_factory, driver=_RetryReceiptDriver()).execute(
+        run_id=run.id,
+        owner="m7c-retry-complete-worker",
+        settings=Settings(testing=True),
+    )
+
+    async with db_factory() as session:
+        results = list(
+            await session.scalars(
+                select(EvaluationExperimentCaseResult).where(
+                    EvaluationExperimentCaseResult.experiment_run_id == run.id
+                )
+            )
+        )
+
+    assert results
+    assert all(row.cost_amount is None for row in results)
+    assert all(row.cost_currency is None for row in results)
+    assert all(row.observation["cost_status"] != "KNOWN" for row in results)
+
+
+@pytest.mark.asyncio
+async def test_m7c_runtime_primary_retry_uses_frozen_limit_for_receipt_completeness(
+    db_factory,
+) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7c-runtime-retry-{uuid4().hex}")
+        run = await _ready_run(
+            session,
+            base,
+            case_count=1,
+            max_attempts=2,
+            category="KNOWLEDGE_QA",
+        )
+
+        async def context_factory(_run):
+            return _manager_context(base)
+
+        driver = AgentRuntimeEvaluationDriver(
+            agent_run_service=AgentRunService(
+                db_factory,
+                model_gateway_factory=lambda _session: ScriptedGateway(
+                    [
+                        ModelResponse(
+                            content="fixture final",
+                            provider="fake",
+                            model="frozen-model-a",
+                            usage=ModelUsage(
+                                input_tokens=100,
+                                output_tokens=50,
+                                total_tokens=150,
+                                cached_tokens=0,
+                            ),
+                        )
+                    ]
+                ),
+            ),
+            context_factory=context_factory,
+        )
+        await ExperimentRunner(db_factory, driver=driver).execute(
+            run_id=run.id,
+            owner="m7c-runtime-retry-worker",
+            settings=Settings(testing=True),
+        )
+
+    async with db_factory() as session:
+        results = list(
+            await session.scalars(
+                select(EvaluationExperimentCaseResult).where(
+                    EvaluationExperimentCaseResult.experiment_run_id == run.id
+                )
+            )
+        )
+
+    assert len(results) == 2
+    assert all(row.status == EvaluationCaseResultStatus.SUCCEEDED for row in results)
+    assert all(row.cost_amount is None for row in results)
+    assert all(row.cost_currency is None for row in results)
+    assert all(row.observation["cost_status"] != "KNOWN" for row in results)
 
 
 @pytest.mark.asyncio
@@ -266,9 +441,7 @@ async def test_m7c_cancelled_queued_run_does_not_materialize_cases(db_factory) -
         run = await _ready_run(session, base)
         runner = ExperimentRunner(db_factory)
         assert await runner.cancel(session, run_id=run.id)
-    await runner.execute(
-        run_id=run.id, owner="m7c-cancel-worker", settings=Settings(testing=True)
-    )
+    await runner.execute(run_id=run.id, owner="m7c-cancel-worker", settings=Settings(testing=True))
 
     async with db_factory() as session:
         stored_run = await session.get(type(run), run.id)
@@ -325,9 +498,7 @@ async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) ->
                 EvaluationMetricResult.experiment_run_id == run.id
             )
         )
-        viewer_metrics = await service.get_persisted_metrics(
-            session, context=viewer, run_id=run.id
-        )
+        viewer_metrics = await service.get_persisted_metrics(session, context=viewer, run_id=run.id)
         with pytest.raises(AgentHubError) as viewer_materialize:
             await service.materialize_metrics(session, context=viewer, run_id=run.id)
         assert viewer_materialize.value.status_code == 403
@@ -362,9 +533,7 @@ async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) ->
             baseline_variant_id=variants[0].id,
             candidate_variant_id=variants[1].id,
         )
-        viewer_comparisons = await service.get_comparisons(
-            session, context=viewer, run_id=run.id
-        )
+        viewer_comparisons = await service.get_comparisons(session, context=viewer, run_id=run.id)
         with pytest.raises(AgentHubError) as viewer_comparison:
             await service.create_comparison(
                 session,
@@ -384,19 +553,13 @@ async def test_m7d_metrics_and_comparison_use_persisted_m7c_cases(db_factory) ->
         for variant in variants
     )
     assert all(
-        metrics["variants"][str(variant.id)]["cost_per_successful_dataset_item"][
-            "sample_count"
-        ]
+        metrics["variants"][str(variant.id)]["cost_per_successful_dataset_item"]["sample_count"]
         == 10
         for variant in variants
     )
     assert all(
         Decimal(
-            str(
-                metrics["variants"][str(variant.id)]["cost_per_successful_dataset_item"][
-                    "value"
-                ]
-            )
+            str(metrics["variants"][str(variant.id)]["cost_per_successful_dataset_item"]["value"])
         )
         == Decimal("0.00002")
         for variant in variants
@@ -460,9 +623,9 @@ async def test_m7d_comparison_creation_is_concurrently_idempotent(db_factory) ->
     async with db_factory() as session:
         assert (
             await session.scalar(
-                select(func.count()).select_from(EvaluationExperimentComparison).where(
-                    EvaluationExperimentComparison.experiment_run_id == run.id
-                )
+                select(func.count())
+                .select_from(EvaluationExperimentComparison)
+                .where(EvaluationExperimentComparison.experiment_run_id == run.id)
             )
             == 1
         )

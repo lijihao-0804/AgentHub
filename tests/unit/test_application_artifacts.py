@@ -402,3 +402,61 @@ def test_a_result_that_is_not_structured_is_ignored() -> None:
         data={"content": ["nothing structured here"]},
     )
     assert project_incident_timeline(plain, RUN_ID) is None
+
+
+def test_artifact_logical_identity_prefers_checkpoint_call_id() -> None:
+    first = call("ops.get_deployments", DEPLOYMENTS)
+    first = RecordedToolCall(
+        tool_identity=first.tool_identity,
+        tool_call_id="provider-a",
+        step_sequence=4,
+        arguments={"service": "api"},
+        data=first.data,
+        logical_call_id="round-2-call-1",
+    )
+    replay = RecordedToolCall(
+        tool_identity=first.tool_identity,
+        tool_call_id="provider-b",
+        step_sequence=99,
+        arguments={"service": "api"},
+        data=first.data,
+        logical_call_id="round-2-call-1",
+    )
+
+    assert ToolResultArtifactRecorder.logical_call_id(
+        first, schemas.INCIDENT_TIMELINE
+    ) == ToolResultArtifactRecorder.logical_call_id(replay, schemas.INCIDENT_TIMELINE)
+
+
+def test_two_same_tool_calls_with_distinct_checkpoint_ids_do_not_merge() -> None:
+    base = call("ops.get_deployments", DEPLOYMENTS)
+    first = RecordedToolCall(
+        tool_identity=base.tool_identity,
+        tool_call_id="provider-a",
+        step_sequence=4,
+        arguments={"service": "api"},
+        data=base.data,
+        logical_call_id="round-2-call-1",
+    )
+    second = RecordedToolCall(
+        tool_identity=base.tool_identity,
+        tool_call_id="provider-b",
+        step_sequence=4,
+        arguments={"service": "web"},
+        data=base.data,
+        logical_call_id="round-2-call-2",
+    )
+
+    assert ToolResultArtifactRecorder.logical_call_id(
+        first, schemas.INCIDENT_TIMELINE
+    ) != ToolResultArtifactRecorder.logical_call_id(second, schemas.INCIDENT_TIMELINE)
+
+
+def test_artifact_fallback_identity_includes_arguments_and_type() -> None:
+    first = call("ops.get_deployments", DEPLOYMENTS, {"service": "api"})
+    second = call("ops.get_deployments", DEPLOYMENTS, {"service": "web"})
+
+    assert ToolResultArtifactRecorder.logical_call_id(
+        first, schemas.INCIDENT_TIMELINE
+    ) != ToolResultArtifactRecorder.logical_call_id(second, schemas.INCIDENT_TIMELINE)
+    assert ToolResultArtifactRecorder.logical_call_id(first, schemas.INCIDENT_TIMELINE) != "unused"

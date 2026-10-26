@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import math
+from types import SimpleNamespace
 
 import pytest
 from qdrant_client import QdrantClient
 
+import packages.knowledge.adapters.qdrant as qdrant_module
 from apps.worker.tasks.knowledge import _indexing_components
 from packages.core.config.settings import Settings
 from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
@@ -52,6 +54,32 @@ def test_testing_setting_does_not_select_fake_production_components() -> None:
     assert components.dense._model is None
 
 
+def test_qdrant_constructor_preserves_subsecond_timeout_from_settings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured = {}
+
+    def fake_client(*, url, timeout):
+        captured.update(url=url, timeout=timeout)
+        return SimpleNamespace()
+
+    monkeypatch.setattr(qdrant_module, "QdrantClient", fake_client)
+    settings = Settings(
+        testing=True,
+        qdrant_url="http://qdrant.invalid",
+        knowledge_qdrant_timeout_seconds=0.5,
+    )
+
+    qdrant_module.QdrantVectorIndex(
+        url=settings.qdrant_url,
+        collection_name="knowledge",
+        dense_vector_size=8,
+        timeout_seconds=settings.knowledge_qdrant_timeout_seconds,
+    )
+
+    assert captured == {"url": "http://qdrant.invalid", "timeout": 0.5}
+
+
 def test_provider_error_retry_classification_is_explicit() -> None:
     assert provider_error_is_retryable("QDRANT_UNAVAILABLE")
     assert provider_error_is_retryable("EMBEDDER_LOAD_FAILED")
@@ -97,16 +125,22 @@ def test_qdrant_collection_is_idempotent_and_duplicate_upsert_is_safe() -> None:
         limit=30,
     )
     assert [hit.payload["chunk_id"] for hit in hits] == ["chunk-1"]
-    assert index.dense_search(
-        dense,
-        scope=VectorScope("workspace-b", "kb-a", ("revision-a",)),
-        limit=30,
-    ) == ()
-    assert index.dense_search(
-        dense,
-        scope=VectorScope("workspace-a", "kb-other", ("revision-a",)),
-        limit=30,
-    ) == ()
+    assert (
+        index.dense_search(
+            dense,
+            scope=VectorScope("workspace-b", "kb-a", ("revision-a",)),
+            limit=30,
+        )
+        == ()
+    )
+    assert (
+        index.dense_search(
+            dense,
+            scope=VectorScope("workspace-a", "kb-other", ("revision-a",)),
+            limit=30,
+        )
+        == ()
+    )
 
 
 def test_qdrant_schema_mismatch_does_not_recreate_collection() -> None:

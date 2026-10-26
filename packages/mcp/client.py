@@ -17,6 +17,7 @@ Three properties are enforced here rather than left to callers:
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import logging
 from collections.abc import AsyncIterator, Callable, Iterator, Mapping
@@ -28,6 +29,7 @@ from typing import Any, Literal
 from uuid import UUID
 
 import anyio
+import httpcore2
 import httpx2
 from jsonschema import Draft202012Validator, SchemaError
 from jsonschema import ValidationError as JsonSchemaValidationError
@@ -40,6 +42,7 @@ from packages.core.config.settings import Settings
 from packages.mcp.models import McpAuthType
 from packages.mcp.security import (
     McpTargetError,
+    Resolver,
     authorize_endpoint,
     authorize_peer_address,
     parse_endpoint_url,
@@ -247,18 +250,33 @@ class GuardedAsyncTransport(httpx2.AsyncBaseTransport):
         self._observation = observation
 
     async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+        peer_authorizer = getattr(self._inner, "authorize_request_peer", None)
         try:
             parse_endpoint_url(str(request.url))
         except McpTargetError:
             self._observation.blocked_code = MCP_TARGET_FORBIDDEN
             raise McpRemoteError(MCP_TARGET_FORBIDDEN) from None
+        if not callable(peer_authorizer):
+            # A response is too late: the inner transport has already written
+            # the request and its credential. Only a transport that pins an
+            # authorized address before returning its socket may sit behind
+            # this guard.
+            self._observation.blocked_code = MCP_TARGET_FORBIDDEN
+            raise McpRemoteError(MCP_TARGET_FORBIDDEN)
         # Past this line nothing can be assumed not to have happened.
         self._observation.mark_dispatched()
-        response = await self._inner.handle_async_request(request)
+        try:
+            response = await self._inner.handle_async_request(request)
+        except Exception:
+            if self._observation.blocked_code == MCP_TARGET_FORBIDDEN:
+                # The pinned transport refused during connection setup before
+                # handing any request bytes to the socket.
+                self._observation.call_dispatched = False
+            raise
         self._observation.last_http_status = response.status_code
         try:
             authorize_peer_address(
-                _peer_address(response), allow_private_targets=self._allow_private_targets
+                peer_authorizer(), allow_private_targets=self._allow_private_targets
             )
         except McpTargetError as exc:
             self._observation.blocked_code = exc.failure_code
@@ -270,19 +288,196 @@ class GuardedAsyncTransport(httpx2.AsyncBaseTransport):
         await self._inner.aclose()
 
 
-def _peer_address(response: httpx2.Response) -> str | None:
-    stream = response.extensions.get("network_stream")
-    if stream is None:
-        return None
+class _PinnedNetworkBackend(httpcore2.AsyncNetworkBackend):
+    """Resolve, authorize and pin the socket address for every connection.
+
+    ``httpcore2`` keeps the origin hostname as the TLS server name while this
+    backend chooses the TCP peer. That separation is what lets AgentHub pin a
+    numeric address without weakening hostname verification or SNI.
+    """
+
+    def __init__(
+        self,
+        endpoint: Any,
+        *,
+        observation: _Observation,
+        allow_private_targets: bool,
+        resolver: Resolver | None = None,
+        delegate: httpcore2.AsyncNetworkBackend | None = None,
+    ) -> None:
+        self._endpoint = endpoint
+        self._allow_private_targets = allow_private_targets
+        self._resolver = resolver
+        self._delegate = delegate or httpcore2.AnyIOBackend()
+        self._observation = observation
+        self.last_peer: str | None = None
+
+    async def connect_tcp(
+        self,
+        host: str,
+        port: int,
+        timeout: float | None = None,
+        local_address: str | None = None,
+        socket_options: Any = None,
+    ) -> httpcore2.AsyncNetworkStream:
+        self.last_peer = None
+        try:
+            if host != self._endpoint.host or port != self._endpoint.port:
+                raise McpTargetError(MCP_TARGET_FORBIDDEN)
+            addresses = await authorize_endpoint(
+                self._endpoint,
+                allow_private_targets=self._allow_private_targets,
+                resolver=self._resolver,
+            )
+            # The authorized DNS answer is frozen for this connection. No
+            # second name lookup occurs between this decision and connect_tcp.
+            pinned_address = addresses[0]
+            stream = await self._delegate.connect_tcp(
+                pinned_address,
+                port,
+                timeout=timeout,
+                local_address=local_address,
+                socket_options=socket_options,
+            )
+            peer_address = _stream_peer_address(stream)
+            authorize_peer_address(
+                peer_address,
+                allow_private_targets=self._allow_private_targets,
+            )
+            if not _same_address(peer_address, pinned_address):
+                raise McpRemoteError(MCP_TARGET_FORBIDDEN)
+        except (McpTargetError, McpRemoteError) as exc:
+            self._observation.blocked_code = (
+                exc.failure_code if isinstance(exc, McpRemoteError) else MCP_TARGET_FORBIDDEN
+            )
+            if "stream" in locals():
+                await stream.aclose()
+            if isinstance(exc, McpTargetError):
+                raise McpRemoteError(MCP_TARGET_FORBIDDEN) from None
+            raise
+        self.last_peer = pinned_address
+        return stream
+
+    async def connect_unix_socket(
+        self,
+        path: str,
+        timeout: float | None = None,
+        socket_options: Any = None,
+    ) -> httpcore2.AsyncNetworkStream:
+        del path, timeout, socket_options
+        self._observation.blocked_code = MCP_TARGET_FORBIDDEN
+        raise McpRemoteError(MCP_TARGET_FORBIDDEN)
+
+    async def sleep(self, seconds: float) -> None:
+        await self._delegate.sleep(seconds)
+
+
+def _stream_peer_address(stream: Any) -> str | None:
     try:
         info = stream.get_extra_info("server_addr")
-    except Exception:  # pragma: no cover - transport-specific, never fatal
+    except Exception:  # pragma: no cover - backend-specific failure is untrusted
         return None
     if isinstance(info, tuple | list) and info:
         return str(info[0])
     if isinstance(info, str):
         return info
     return None
+
+
+def _same_address(left: str | None, right: str | None) -> bool:
+    if left is None or right is None:
+        return False
+    try:
+        return ipaddress.ip_address(left.split("%", 1)[0]) == ipaddress.ip_address(
+            right.split("%", 1)[0]
+        )
+    except ValueError:
+        return False
+
+
+class _PinnedAsyncHTTPTransport(httpx2.AsyncBaseTransport):
+    """httpx transport whose TCP peer is authorized before any bytes are sent."""
+
+    def __init__(
+        self,
+        endpoint: Any,
+        *,
+        observation: _Observation,
+        allow_private_targets: bool,
+        resolver: Resolver | None = None,
+        network_backend: httpcore2.AsyncNetworkBackend | None = None,
+    ) -> None:
+        ssl_context = httpx2.create_ssl_context(verify=True, trust_env=False)
+        self._network_backend = _PinnedNetworkBackend(
+            endpoint,
+            allow_private_targets=allow_private_targets,
+            resolver=resolver,
+            delegate=network_backend,
+            observation=observation,
+        )
+        self._pool = httpcore2.AsyncConnectionPool(
+            ssl_context=ssl_context,
+            max_connections=1,
+            max_keepalive_connections=1,
+            keepalive_expiry=0,
+            network_backend=self._network_backend,
+        )
+        self._last_peer: str | None = None
+
+    def authorize_request_peer(self) -> str | None:
+        """Expose the peer selected before this transport sent the last request."""
+
+        return self._last_peer
+
+    async def handle_async_request(self, request: httpx2.Request) -> httpx2.Response:
+        assert isinstance(request.stream, httpx2.AsyncByteStream)
+        core_request = httpcore2.Request(
+            method=request.method,
+            url=httpcore2.URL(
+                scheme=request.url.raw_scheme,
+                host=request.url.raw_host,
+                port=request.url.port,
+                target=request.url.raw_path,
+            ),
+            headers=request.headers.raw,
+            content=request.stream,
+            extensions=request.extensions,
+        )
+        self._last_peer = None
+        try:
+            response = await self._pool.handle_async_request(core_request)
+        except Exception:
+            raise
+        self._last_peer = self._network_backend.last_peer
+        response_stream = response.stream
+        return httpx2.Response(
+            status_code=response.status,
+            headers=response.headers,
+            stream=_HTTPXAsyncResponseStream(response_stream),
+            extensions=response.extensions,
+        )
+
+    async def aclose(self) -> None:
+        await self._pool.aclose()
+
+
+class _HTTPXAsyncResponseStream(httpx2.AsyncByteStream):
+    def __init__(self, stream: httpcore2.AsyncNetworkStream | Any) -> None:
+        self._stream = stream
+
+    async def __aiter__(self) -> AsyncIterator[bytes]:
+        async for chunk in self._stream:
+            yield chunk
+
+    async def aclose(self) -> None:
+        await self._stream.aclose()
+
+
+def _peer_address(response: httpx2.Response) -> str | None:
+    stream = response.extensions.get("network_stream")
+    if stream is None:
+        return None
+    return _stream_peer_address(stream)
 
 
 @dataclass(frozen=True)
@@ -415,9 +610,7 @@ class McpClientAdapter:
                 dispatch.value,
             )
             if dispatch is DispatchState.MAYBE_DISPATCHED:
-                return McpCallOutcome(
-                    McpCallStatus.INDETERMINATE, dispatch, failure_code=failure
-                )
+                return McpCallOutcome(McpCallStatus.INDETERMINATE, dispatch, failure_code=failure)
             return McpCallOutcome(McpCallStatus.FAILED, dispatch, failure_code=failure)
         except BaseException as exc:
             # Reaching here means the failure was not an Exception at all, so
@@ -546,8 +739,13 @@ class McpClientAdapter:
             write=self.settings.mcp_request_timeout_seconds,
             pool=self.settings.mcp_connect_timeout_seconds,
         )
+        safe_transport = _PinnedAsyncHTTPTransport(
+            endpoint,
+            observation=observation,
+            allow_private_targets=allow_private,
+        )
         transport = GuardedAsyncTransport(
-            httpx2.AsyncHTTPTransport(),
+            safe_transport,
             allow_private_targets=allow_private,
             observation=observation,
         )
@@ -677,9 +875,7 @@ def _remote_annotations(tool: Tool) -> dict[str, bool] | None:
 
 def _json_size(value: Any) -> int:
     try:
-        serialized = json.dumps(
-            value, separators=(",", ":"), ensure_ascii=False, sort_keys=True
-        )
+        serialized = json.dumps(value, separators=(",", ":"), ensure_ascii=False, sort_keys=True)
     except (TypeError, ValueError):
         raise McpRemoteError(MCP_DISCOVERY_INVALID) from None
     return len(serialized.encode("utf-8"))

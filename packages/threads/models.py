@@ -12,6 +12,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    Boolean,
     DateTime,
     ForeignKeyConstraint,
     Index,
@@ -102,7 +103,17 @@ class ThreadTurn(Base):
     sequence: Mapped[int] = mapped_column(Integer, nullable=False)
     user_input: Mapped[str] = mapped_column(Text, nullable=False)
     agent_run_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
-    client_token: Mapped[str | None] = mapped_column(String(64))
+    # Client-minted request identity. It survives an unknown response; a
+    # changed body under one token is a conflict, while a deliberate new
+    # question with a new token is a new turn even when the text repeats.
+    client_token: Mapped[str] = mapped_column(String(64), nullable=False)
+    input_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    # True only for pre-0036 turns whose run binding could not be proven
+    # uniquely from the old reverse pointer. Such a turn must never be guessed
+    # from time, sequence, or an ambiguous legacy link.
+    legacy_recovery_required: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false"), default=False
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

@@ -13,6 +13,8 @@ from packages.agent_runtime.runtime import (
     FrozenAgentSpec,
 )
 from packages.core.errors.exceptions import AgentHubError
+from packages.evaluation import experiments as experiments_module
+from packages.evaluation import reproducibility as reproducibility_module
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.reproducibility import normalize_wiki_publications, variant_hash
 from packages.model_gateway.contracts import (
@@ -87,6 +89,8 @@ def _publication(status="PUBLISHED", content_hash=_HASH):
         knowledge_base_id=_KB,
         status=status,
         content_hash=content_hash,
+        source_snapshot_id=uuid4(),
+        source_snapshot_hash="d" * 64,
     )
 
 
@@ -94,6 +98,7 @@ def _publication(status="PUBLISHED", content_hash=_HASH):
 def stub_wiki(monkeypatch):
     stub = _StubWikiService()
     monkeypatch.setattr(runtime_module, "WikiService", lambda: stub)
+    monkeypatch.setattr(experiments_module, "WikiService", lambda: stub)
     return stub
 
 
@@ -252,13 +257,14 @@ async def test_replay_integrity_check_detects_lost_publication():
     assert await service._frozen_wiki_publications_intact(run) is False
 
 
-async def test_experiment_freeze_wiki_publications():
+async def test_experiment_freeze_wiki_publications(stub_wiki):
     service = ExperimentService()
     session = _FakeSession(
         scalar_results=[_publication()],
     )
     frozen = await service._freeze_wiki_publications(
         session,
+        _context(),
         _WS,
         {
             "wiki_binding": {
@@ -280,12 +286,13 @@ async def test_experiment_freeze_wiki_publications():
     ]
 
 
-async def test_experiment_freeze_wiki_rejects_drifted_publication():
+async def test_experiment_freeze_wiki_rejects_drifted_publication(stub_wiki):
     service = ExperimentService()
     session = _FakeSession(scalar_results=[_publication(content_hash="d" * 64)])
     with pytest.raises(AgentHubError) as error:
         await service._freeze_wiki_publications(
             session,
+            _context(),
             _WS,
             {
                 "wiki_binding": {
@@ -300,9 +307,175 @@ async def test_experiment_freeze_wiki_rejects_drifted_publication():
     assert error.value.code == "EVALUATION_WIKI_PUBLICATION_INVALID"
 
 
+async def test_experiment_freeze_wiki_rejects_revoked_source(
+    stub_wiki,
+) -> None:
+    stub_wiki.revoked = True
+    service = ExperimentService()
+    with pytest.raises(AgentHubError) as error:
+        await service._freeze_wiki_publications(
+            _FakeSession(scalar_results=[_publication()]),
+            _context(),
+            _WS,
+            {
+                "wiki_binding": {
+                    "schema_version": 1,
+                    "binding_mode": "LATEST",
+                    "knowledge_base_id": str(_KB),
+                    "wiki_publication_id": str(_PUB),
+                    "publication_hash": _HASH,
+                }
+            },
+        )
+    assert error.value.code == "EVALUATION_WIKI_PUBLICATION_INVALID"
+    assert stub_wiki.calls[-1][1] is False
+
+
+async def test_stored_latest_variant_is_not_resolved_again_and_revocation_fails_finalize(
+    stub_wiki,
+    monkeypatch,
+) -> None:
+    service = ExperimentService()
+    agent_version = SimpleNamespace(
+        id=uuid4(),
+        workspace_id=_WS,
+        resolved_spec_hash="a" * 64,
+        resolved_spec={
+            "spec_schema_version": 2,
+            "model": {
+                "profile_id": str(uuid4()),
+                "credential_ref": str(uuid4()),
+                "provider": "fake",
+                "model": "frozen-model",
+                "temperature": 0.0,
+                "max_tokens": 100,
+                "timeout_seconds": 30,
+                "capabilities": {"max_context_tokens": 8_000},
+                "retry_policy": {"max_attempts": 1},
+                "fallback_chain": [],
+                "fallback_profiles": [],
+            },
+            "prompt": {"system_prompt": "answer", "prompt_version": 1},
+            "retrieval": {
+                "knowledge_binding_mode": "LATEST",
+                "knowledge_bindings": [],
+                "embedding_model": "BAAI/bge-m3",
+                "reranker_model": "BAAI/bge-reranker-v2-m3",
+                "retrieval_strategy": "HYBRID_RERANK",
+                "dense_top_k": 30,
+                "sparse_top_k": 30,
+                "candidate_top_k": 20,
+                "final_top_k": 6,
+            },
+            "tools": [],
+            "runtime": {},
+            "wiki_binding": {
+                "schema_version": 1,
+                "binding_mode": "LATEST",
+                "knowledge_base_id": str(_KB),
+                "wiki_publication_id": str(_PUB),
+                "publication_hash": _HASH,
+            },
+        },
+    )
+    priced = SimpleNamespace(
+        id=uuid4(),
+        provider="fake",
+        model="frozen-model",
+        currency="USD",
+        input_price_per_1m=0,
+        output_price_per_1m=0,
+        cached_input_price_per_1m=None,
+        effective_at="2026-10-26",
+        source="fixture",
+        content_hash="b" * 64,
+        created_at="2026-10-26",
+        name="fixture",
+        workspace_id=_WS,
+        source_note="fixture",
+    )
+    monkeypatch.setattr(
+        service,
+        "_load_agent_version",
+        lambda session, workspace_id, agent_version_id: _as_awaitable(agent_version),
+    )
+    monkeypatch.setattr(
+        reproducibility_module,
+        "pricing_snapshot_content_hash",
+        lambda value: value.content_hash,
+    )
+    monkeypatch.setattr(
+        experiments_module,
+        "load_pricing_snapshots",
+        lambda session, *, workspace_id, snapshot_ids: _as_awaitable((priced,)),
+    )
+    monkeypatch.setattr(
+        experiments_module,
+        "validate_frozen_pricing_chain",
+        lambda *args, **kwargs: None,
+    )
+    service._validate_pricing_model = lambda resolved_spec, pricing: None
+    monkeypatch.setattr(
+        service,
+        "_freeze_knowledge",
+        lambda session, context, workspace_id, resolved_spec: _as_awaitable([]),
+    )
+    wiki_publication = {
+        "knowledge_base_id": str(_KB),
+        "binding_mode": "LATEST",
+        "wiki_publication_id": str(_PUB),
+        "publication_hash": _HASH,
+    }
+    variant = SimpleNamespace(
+        agent_version_id=agent_version.id,
+        resolved_spec_hash=agent_version.resolved_spec_hash,
+        pricing_snapshot_id=priced.id,
+        pricing_snapshot_hash=priced.content_hash,
+        effective_knowledge_snapshots=[],
+        effective_wiki_publications=[wiki_publication],
+        variant_metadata={},
+    )
+    variant.variant_hash = variant_hash(
+        agent_version_id=str(variant.agent_version_id),
+        resolved_spec_hash=variant.resolved_spec_hash,
+        effective_knowledge_snapshots=[],
+        pricing_snapshot_id=str(variant.pricing_snapshot_id),
+        pricing_snapshot_hash=variant.pricing_snapshot_hash,
+        variant_metadata={},
+        effective_wiki_publications=[wiki_publication],
+    )
+    session = _FakeSession(scalar_results=[priced, _publication()])
+    stub_wiki.revoked = True
+
+    with pytest.raises(AgentHubError) as error:
+        await service._validate_stored_variant(
+            session,
+            _context(),
+            variant,
+            _WS,
+        )
+
+    assert error.value.code == "EVALUATION_WIKI_PUBLICATION_INVALID"
+    assert error.value.status_code == 409
+    assert len(stub_wiki.calls) == 1
+    assert stub_wiki.calls[0][0].id == _PUB
+
+
+async def _as_awaitable(value):
+    return value
+
+
 async def test_experiment_freeze_wiki_empty_without_binding():
     service = ExperimentService()
-    assert await service._freeze_wiki_publications(_FakeSession(), _WS, {}) == []
+    assert (
+        await service._freeze_wiki_publications(
+            _FakeSession(),
+            _context(),
+            _WS,
+            {},
+        )
+        == []
+    )
 
 
 def test_variant_hash_wiki_conditional_and_stable():

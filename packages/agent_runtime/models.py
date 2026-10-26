@@ -334,6 +334,16 @@ class AgentRun(Base):
             name="ck_agent_runs_status",
         ),
         UniqueConstraint("workspace_id", "id", name="uq_agent_runs_workspace_id"),
+        UniqueConstraint("workspace_id", "thread_turn_id", name="uq_agent_runs_thread_turn"),
+        ForeignKeyConstraint(
+            ["workspace_id", "thread_turn_id"],
+            ["thread_turns.workspace_id", "thread_turns.id"],
+            name="fk_agent_runs_thread_turn_workspace",
+            ondelete="SET NULL (thread_turn_id)",
+            deferrable=True,
+            initially="DEFERRED",
+            use_alter=True,
+        ),
         Index("ix_agent_runs_workspace_status", "workspace_id", "status"),
         Index("ix_agent_runs_workspace_created_at", "workspace_id", "created_at"),
         Index("ix_agent_runs_workspace_started_at", "workspace_id", "started_at", "id"),
@@ -361,6 +371,16 @@ class AgentRun(Base):
     # history and gate thread-only integrations; it does not change the frozen
     # AgentVersion contract or approval policy.
     thread_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    thread_turn_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    execution_owner: Mapped[str | None] = mapped_column(String(64))
+    execution_lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    waiting_approval_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    resume_pending: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    reconciled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    event_log_complete: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
+    event_log_failed: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="RUNNING")
     input_text: Mapped[str] = mapped_column(Text, nullable=False)
     final_output: Mapped[str | None] = mapped_column(Text)

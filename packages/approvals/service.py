@@ -158,9 +158,7 @@ class ApprovalService:
                 )
             )
         async with self.session_factory() as session:
-            total = await session.scalar(
-                select(func.count()).select_from(Approval).where(*filters)
-            )
+            total = await session.scalar(select(func.count()).select_from(Approval).where(*filters))
             result = await session.scalars(
                 select(Approval)
                 .where(*filters)
@@ -212,6 +210,21 @@ class ApprovalService:
         workspace_id = _workspace_uuid(context)
         user_id = _user_uuid(context)
         async with self.session_factory() as session:
+            # Match reconciliation/cancellation lock order: Run, then Approval.
+            await session.scalar(
+                select(AgentRun)
+                .where(
+                    AgentRun.workspace_id == workspace_id,
+                    AgentRun.id
+                    == select(Approval.run_id)
+                    .where(
+                        Approval.workspace_id == workspace_id,
+                        Approval.id == approval_id,
+                    )
+                    .scalar_subquery(),
+                )
+                .with_for_update()
+            )
             approval = await session.scalar(
                 select(Approval)
                 .where(Approval.workspace_id == workspace_id, Approval.id == approval_id)
@@ -225,6 +238,14 @@ class ApprovalService:
             if approval.expires_at is not None and approval.expires_at <= now:
                 approval.decision_status = ApprovalDecisionStatus.EXPIRED.value
                 approval.decided_at = now
+                await session.execute(
+                    update(AgentRun)
+                    .where(
+                        AgentRun.workspace_id == workspace_id,
+                        AgentRun.id == approval.run_id,
+                    )
+                    .values(resume_pending=True)
+                )
                 await session.commit()
                 await session.refresh(approval)
                 return approval
@@ -239,6 +260,16 @@ class ApprovalService:
             approval.decision_status = decision.value
             approval.decided_by = user_id
             approval.decided_at = now
+            # This is the durable resume outbox. Delivery may be repeated;
+            # run ownership and approval claims make resume idempotent.
+            await session.execute(
+                update(AgentRun)
+                .where(
+                    AgentRun.workspace_id == workspace_id,
+                    AgentRun.id == approval.run_id,
+                )
+                .values(resume_pending=True)
+            )
             decision_metadata: dict[str, Any] = {
                 "approval_id": str(approval.id),
                 "logical_action_id": approval.logical_action_id,
@@ -333,9 +364,7 @@ class ApprovalService:
             await session.refresh(approval)
             return approval
 
-    async def cancel_pending_for_run(
-        self, context: WorkspaceExecutionContext, run_id: UUID
-    ) -> int:
+    async def cancel_pending_for_run(self, context: WorkspaceExecutionContext, run_id: UUID) -> int:
         """Cancel pending approvals without touching an already-approved execution."""
 
         user_id = _user_uuid(context)

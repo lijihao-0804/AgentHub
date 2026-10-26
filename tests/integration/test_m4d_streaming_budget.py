@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import AgentRun
 from packages.agent_runtime.runtime import AgentRunService
+from packages.approvals.models import Approval
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import get_settings
@@ -271,9 +272,9 @@ def _message_script(content: str) -> list[object]:
 async def test_sync_model_admission_is_mandatory_and_records_no_text(db_factory) -> None:
     base = await _seed(db_factory)
     gateway = ScriptedStreamGateway([])
-    result = await AgentRunService(
-        db_factory, model_gateway_factory=lambda session: gateway
-    ).run(base["context"], agent_version_id=base["version"].id, input_text="sync")
+    result = await AgentRunService(db_factory, model_gateway_factory=lambda session: gateway).run(
+        base["context"], agent_version_id=base["version"].id, input_text="sync"
+    )
     assert result.status == "SUCCEEDED"
     assert len(gateway.requests) == 1
     assert gateway.requests[0].messages[-1].content == "sync"
@@ -297,9 +298,9 @@ async def test_mandatory_context_overflow_fails_before_model_call(db_factory) ->
         version.resolved_spec_hash = canonical_json_hash(spec)
         await session.commit()
     gateway = ScriptedStreamGateway([])
-    result = await AgentRunService(
-        db_factory, model_gateway_factory=lambda session: gateway
-    ).run(base["context"], agent_version_id=base["version"].id, input_text="overflow")
+    result = await AgentRunService(db_factory, model_gateway_factory=lambda session: gateway).run(
+        base["context"], agent_version_id=base["version"].id, input_text="overflow"
+    )
     assert result.status == "FAILED"
     assert result.failure_code == "AGENT_CONTEXT_BUDGET_EXCEEDED"
     assert gateway.requests == []
@@ -421,8 +422,10 @@ async def test_post_visible_provider_failure_is_terminal_and_never_falls_back(db
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("action_state", [None, "CLAIMED", "UNKNOWN_OUTCOME"])
 async def test_stream_cancellation_closes_provider_and_persists_terminal_failure(
     db_factory,
+    action_state,
 ) -> None:
     base = await _seed(db_factory)
     entered = asyncio.Event()
@@ -451,15 +454,34 @@ async def test_stream_cancellation_closes_provider_and_persists_terminal_failure
     assert first.type.value == "run.started"
     await anext(stream)
     await entered.wait()
+    if action_state is not None:
+        async with db_factory() as session:
+            run = await session.get(AgentRun, first.run_id)
+            session.add(
+                Approval(
+                    workspace_id=run.workspace_id,
+                    run_id=run.id,
+                    agent_version_id=run.agent_version_id,
+                    logical_action_id=uuid4().hex,
+                    tool_identity="create_ticket",
+                    canonical_arguments={},
+                    canonical_args_hash=canonical_json_hash({}),
+                    decision_status="APPROVED",
+                    execution_status=action_state,
+                    requested_by=run.created_by,
+                    idempotency_key=uuid4().hex,
+                )
+            )
+            await session.commit()
     await stream.aclose()
     assert closed.is_set()
     async with db_factory() as session:
-        run = await session.scalar(
-            select(AgentRun).where(AgentRun.id == first.run_id)
-        )
+        run = await session.scalar(select(AgentRun).where(AgentRun.id == first.run_id))
         assert run is not None
-        assert run.status == "FAILED"
+        assert run.status == ("NEEDS_ATTENTION" if action_state else "FAILED")
         assert run.failure_code == "AGENT_STREAM_CANCELLED"
+        assert run.execution_owner is None
+        assert not run.event_log_complete
 
 
 @pytest.mark.asyncio

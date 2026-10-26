@@ -127,3 +127,11 @@ async def get_model_gateway(
         credential_cipher=ProviderCredentialCipher.from_settings(request.app.state.settings),
         trace_sink=ProductionTraceSink(),
     )
+
+
+async def get_citation_qa_model_plan_resolver():
+    """Return the production resolver behind the testable Citation QA seam."""
+
+    from packages.knowledge.citation_qa import _resolve_model_plan
+
+    return _resolve_model_plan

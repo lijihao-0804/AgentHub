@@ -29,7 +29,7 @@ class QdrantVectorIndex:
     ) -> None:
         self.collection_name = collection_name
         self.dense_vector_size = dense_vector_size
-        self._client = client or QdrantClient(url=url, timeout=int(timeout_seconds))
+        self._client = client or QdrantClient(url=url, timeout=float(timeout_seconds))
 
     def close(self) -> None:
         """Release the process-owned SDK client."""

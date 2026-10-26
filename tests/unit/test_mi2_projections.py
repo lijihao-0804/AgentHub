@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from apps.api.schemas.feedback import FeedbackCreate, FeedbackImport
 from packages.agent_runtime.events import AgentEvent
 from packages.knowledge.contracts import RetrievalQuery, RetrievalResult, RetrievedEvidence
+from packages.tools.contracts import ToolApprovalPolicy, ToolDefinition, ToolEffect, ToolRisk
 from packages.tools.projections import (
     argument_summary,
     evidence_refs,
@@ -50,8 +51,19 @@ async def test_fixed_refs_stay_with_ranked_hit_when_chunk_ids_repeat(monkeypatch
 
     monkeypatch.setattr(module, "_snapshot_queries", snapshot_queries)
     monkeypatch.setattr(module, "_retrieval_context", lambda context: None)
+    definition = ToolDefinition(
+        identity="search_knowledge",
+        revision_id=uuid4(),
+        spec_hash="fixture",
+        description="Search fixture",
+        input_schema={"type": "object"},
+        effect=ToolEffect.READ,
+        risk_level=ToolRisk.LOW,
+        approval_policy=ToolApprovalPolicy.NEVER,
+        timeout_seconds=10,
+    )
     result = await module.search_knowledge(
-        None, None, {"query": "q", "limit": 1}, factory, retriever=Retriever()
+        None, definition, {"query": "q", "limit": 1}, factory, retriever=Retriever()
     )
     assert result["evidence_refs"][0]["snapshot_id"] == queries[0].knowledge_snapshot_id
     assert (

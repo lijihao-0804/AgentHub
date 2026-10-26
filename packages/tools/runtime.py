@@ -18,6 +18,7 @@ from packages.agent_runtime.models import AgentVersion, ToolRevision
 from packages.control_plane.audit import assert_safe_metadata
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
+from packages.core.execution_context.call_scope import execution_deadline, remaining_call_seconds
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.observability import NoopTraceSink
 from packages.observability.contracts import TraceSink, TraceSpan
@@ -300,9 +301,7 @@ class PublishedToolResolver:
                 timeout_seconds=spec["timeout_seconds"],
                 snapshot_refs=snapshot_refs,
                 retrieval_config=retrieval_config,
-                wiki_binding=self._wiki_binding(
-                    version.resolved_spec, effective_wiki_publications
-                ),
+                wiki_binding=self._wiki_binding(version.resolved_spec, effective_wiki_publications),
                 **_source_projection(spec),
             )
         raise AgentHubError("UNKNOWN_TOOL", "The published tool was not found.", 404)
@@ -477,13 +476,14 @@ class ToolRuntime:
                                 tool_call_id=tool_call_id,
                             )
                             try:
-                                async with asyncio.timeout(definition.timeout_seconds):
-                                    data = await handler(
-                                        execution_context,
-                                        definition,
-                                        arguments,
-                                        self.session_factory,
-                                    )
+                                with execution_deadline(definition.timeout_seconds):
+                                    async with asyncio.timeout(remaining_call_seconds()):
+                                        data = await handler(
+                                            execution_context,
+                                            definition,
+                                            arguments,
+                                            self.session_factory,
+                                        )
                                 result = ToolResult.success(data)
                             except TimeoutError:
                                 result = ToolResult.failure(

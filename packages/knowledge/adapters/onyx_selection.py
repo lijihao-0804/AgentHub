@@ -16,6 +16,7 @@ from typing import Any
 
 import httpx
 
+from packages.core.execution_context.call_scope import report_auxiliary_model_usage
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievedEvidence
 
@@ -392,10 +393,17 @@ class OpenAICompatibleSectionSelector:
                     )
         except httpx.HTTPError as exc:
             raise SectionSelectorError(f"selection request failed: {type(exc).__name__}") from exc
+        try:
+            body = response.json()
+        except ValueError:
+            body = None
+        report_auxiliary_model_usage(
+            model=body.get("model", self.model) if isinstance(body, Mapping) else None,
+            usage=_reported_usage(body.get("usage")) if isinstance(body, Mapping) else None,
+        )
         if response.status_code != 200:
             raise SectionSelectorError(f"selection http status {response.status_code}")
         try:
-            body = response.json()
             response_model = body.get("model")
             if response_model is not None and response_model != self.model:
                 raise SectionSelectorError("selection response model mismatch")
@@ -407,6 +415,32 @@ class OpenAICompatibleSectionSelector:
             if isinstance(exc, ValueError) and "section" in str(exc):
                 raise SectionSelectorError(f"invalid selection output: {exc}") from exc
             raise SectionSelectorError("invalid selection response") from exc
+
+
+def _reported_usage(value: Any) -> dict[str, int | None] | None:
+    if not isinstance(value, Mapping):
+        return None
+    prompt, completion = value.get("prompt_tokens"), value.get("completion_tokens")
+    if any(
+        type(number) is not int or not 0 <= number <= 2_147_483_647
+        for number in (prompt, completion)
+    ):
+        return None
+    total = value.get("total_tokens", prompt + completion)
+    if type(total) is not int or total != prompt + completion:
+        return None
+    details = value.get("prompt_tokens_details")
+    cached = details.get("cached_tokens") if isinstance(details, Mapping) else None
+    if cached is None:
+        cached = value.get("prompt_cache_hit_tokens")
+    if cached is not None and (type(cached) is not int or not 0 <= cached <= prompt):
+        return None
+    return {
+        "input_tokens": prompt,
+        "output_tokens": completion,
+        "total_tokens": total,
+        "cached_tokens": cached,
+    }
 
 
 __all__ = [

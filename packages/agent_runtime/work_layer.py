@@ -79,6 +79,9 @@ class RecordedToolCall:
     step_sequence: int
     arguments: dict[str, Any] = field(default_factory=dict)
     data: dict[str, Any] = field(default_factory=dict)
+    # Checkpoint coordinates supplied by the runtime, independent of audit
+    # sequence increments and provider-generated tool call identifiers.
+    logical_call_id: str | None = None
 
 
 class RunArtifactRecorder(Protocol):

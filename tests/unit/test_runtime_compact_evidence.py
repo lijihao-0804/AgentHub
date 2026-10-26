@@ -1,13 +1,26 @@
 import json
 from dataclasses import replace
+from uuid import uuid4
 
 import pytest
 
+from packages.agent_runtime.context_budget import (
+    ContextBudgetConfig,
+    ContextBudgetPolicy,
+    ContextCategory,
+    ContextMessage,
+)
 from packages.agent_runtime.evidence_registry import visible_evidence_registry
 from packages.agent_runtime.publish import _validate_retrieval_config
 from packages.core.errors.exceptions import AgentHubError
 from packages.knowledge.evidence_plan import assemble_evidence_plan, reproject_evidence_view
-from packages.model_gateway.contracts import ModelMessage
+from packages.model_gateway.contracts import (
+    ModelCapabilities,
+    ModelMessage,
+    ModelToolCall,
+    ResolvedModelExecutionPlan,
+    ResolvedModelExecutionProfile,
+)
 from tests.unit.test_runtime_rag_evidence_projection import (
     _definition,
     _frozen_spec,
@@ -191,3 +204,140 @@ def test_invalid_checkpoint_locator_is_a_safe_mapping_error():
             [ModelMessage("tool", json.dumps(plan.payload), "search_knowledge", "c")],
             plan.registry,
         )
+
+
+def _origin_record(ordinal: int, origin: str, *, text: str = "evidence"):
+    record = _record(ordinal, text)
+    record["origin"] = origin
+    if origin == "WIKI_DERIVED":
+        record["wiki_page_id"] = f"page-{ordinal}"
+    return record
+
+
+def test_server_owned_evidence_state_survives_selection_and_context_reprojection():
+    wiki = _origin_record(1, "WIKI_DERIVED")
+    raw = _origin_record(2, "RAW")
+    plan = assemble_evidence_plan(
+        [wiki, raw],
+        [_identifiers(1), _identifiers(2)],
+        budget=8_000,
+        estimator=len,
+        server_state={
+            "route": "HYBRID",
+            "insufficient_evidence": True,
+            "supplemental_required": True,
+            "conflict_count": 1,
+            "degraded": False,
+            "degraded_reason": None,
+        },
+    )
+    assert plan is not None
+    state_fields = {
+        "route",
+        "insufficient_evidence",
+        "supplemental_required",
+        "conflict_count",
+        "degraded",
+        "degraded_reason",
+        "delivered_origins",
+    }
+    assert plan.payload["status"] == "CONFLICT"
+    assert {key: plan.payload[key] for key in state_fields} == {
+        "route": "HYBRID",
+        "insufficient_evidence": True,
+        "supplemental_required": True,
+        "conflict_count": 1,
+        "degraded": False,
+        "degraded_reason": None,
+        "delivered_origins": ["RAW", "WIKI_DERIVED"],
+    }
+
+    class _CharEstimator:
+        @staticmethod
+        def estimate(text: str) -> int:
+            return len(text)
+
+    profile = ResolvedModelExecutionProfile(
+        id=uuid4(),
+        workspace_id=uuid4(),
+        provider_credential_id=uuid4(),
+        provider="fake",
+        model="fake",
+        temperature=0,
+        max_tokens=16,
+        timeout_seconds=30,
+        capabilities=ModelCapabilities(max_context_tokens=20_000),
+    )
+    admitted = ContextBudgetPolicy(
+        ResolvedModelExecutionPlan(primary=profile),
+        ContextBudgetConfig(
+            reserved_output_tokens=16,
+            max_retrieval_tokens=8_000,
+            max_tool_result_tokens=8_000,
+        ),
+        estimator=_CharEstimator(),
+    ).admit(
+        (
+            ContextMessage(
+                ModelMessage(
+                    "assistant",
+                    None,
+                    tool_calls=(ModelToolCall(name="query_wiki", arguments={}),),
+                ),
+                ContextCategory.CONVERSATION,
+                "turn-1",
+            ),
+            ContextMessage(
+                ModelMessage("tool", json.dumps(plan.payload), "query_wiki", "call-1"),
+                ContextCategory.RAG_EVIDENCE,
+                "turn-1",
+            ),
+        )
+    )
+    projected = json.loads(admitted.messages[-1].content)
+    assert {key: projected[key] for key in state_fields} == {
+        key: plan.payload[key] for key in state_fields
+    }
+    assert projected["status"] == "CONFLICT"
+
+
+def test_hybrid_keeps_both_origins_and_degrades_if_projection_leaves_one_side():
+    wiki_records = [_origin_record(index, "WIKI_DERIVED") for index in range(1, 11)]
+    raw_record = _origin_record(11, "RAW", text="r" * 400)
+    records = [*wiki_records, raw_record]
+    references = [_identifiers(index) for index in range(1, 12)]
+    server_state = {
+        "route": "HYBRID",
+        "insufficient_evidence": False,
+        "supplemental_required": False,
+        "conflict_count": 0,
+        "degraded": False,
+        "degraded_reason": None,
+    }
+
+    plan = assemble_evidence_plan(
+        records,
+        references,
+        budget=4_000,
+        estimator=len,
+        server_state=server_state,
+    )
+    assert plan is not None
+    assert {item["origin"] for item in plan.payload["results"]} == {
+        "RAW",
+        "WIKI_DERIVED",
+    }
+    assert plan.payload["delivered_origins"] == ["RAW", "WIKI_DERIVED"]
+
+    raw_only = assemble_evidence_plan(
+        [raw_record],
+        [references[-1]],
+        budget=4_000,
+        estimator=len,
+        server_state=server_state,
+    )
+    assert raw_only is not None
+    assert raw_only.payload["delivered_origins"] == ["RAW"]
+    assert raw_only.payload["degraded"] is True
+    assert raw_only.payload["degraded_reason"] == "HYBRID_PARTIAL_DELIVERY"
+    assert raw_only.payload["status"] == "DEGRADED"

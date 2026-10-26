@@ -9,6 +9,7 @@ asked for something invalid.
 
 from __future__ import annotations
 
+import asyncio
 import os
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
@@ -103,9 +104,7 @@ async def _seed(factory: async_sessionmaker[AsyncSession]) -> _Bundle:
         session.add(organization)
         await session.flush()
         session.add(
-            OrganizationMembership(
-                organization_id=organization.id, user_id=user.id, role="OWNER"
-            )
+            OrganizationMembership(organization_id=organization.id, user_id=user.id, role="OWNER")
         )
         workspace = Workspace(organization_id=organization.id, name=f"workspace-{uuid4()}")
         session.add(workspace)
@@ -236,11 +235,47 @@ async def test_clearing_is_distinguishable_from_leaving_alone(db_factory) -> Non
 async def test_a_document_cannot_supersede_itself(db_factory) -> None:
     bundle = await _seed(db_factory)
     with pytest.raises(AgentHubError) as excinfo:
-        await _update(
-            db_factory, bundle, superseded_by_document_id=bundle.v1_document_id
-        )
+        await _update(db_factory, bundle, superseded_by_document_id=bundle.v1_document_id)
     assert excinfo.value.status_code == 422
     assert excinfo.value.code == "INVALID_DOCUMENT_SUPERSESSION"
+
+
+@pytest.mark.asyncio
+async def test_concurrent_opposite_replacements_commit_only_one_edge(db_factory) -> None:
+    bundle = await _seed(db_factory)
+
+    outcomes = await asyncio.gather(
+        _update(
+            db_factory,
+            bundle,
+            document_id=bundle.v1_document_id,
+            superseded_by_document_id=bundle.v2_document_id,
+        ),
+        _update(
+            db_factory,
+            bundle,
+            document_id=bundle.v2_document_id,
+            superseded_by_document_id=bundle.v1_document_id,
+        ),
+        return_exceptions=True,
+    )
+
+    successes = [value for value in outcomes if isinstance(value, Document)]
+    failures = [value for value in outcomes if isinstance(value, AgentHubError)]
+    assert len(successes) == 1
+    assert len(failures) == 1
+    assert failures[0].status_code == 422
+    assert failures[0].code == "INVALID_DOCUMENT_SUPERSESSION"
+
+    async with db_factory() as session:
+        first = await session.get(Document, bundle.v1_document_id)
+        second = await session.get(Document, bundle.v2_document_id)
+    assert first is not None
+    assert second is not None
+    assert (first.superseded_by_document_id, second.superseded_by_document_id) in {
+        (bundle.v2_document_id, None),
+        (None, bundle.v1_document_id),
+    }
 
 
 @pytest.mark.asyncio
@@ -249,9 +284,7 @@ async def test_a_successor_in_another_knowledge_base_is_not_found(db_factory) ->
     # would be invisible at the only moment the field is read.
     bundle = await _seed(db_factory)
     with pytest.raises(AgentHubError) as excinfo:
-        await _update(
-            db_factory, bundle, superseded_by_document_id=bundle.other_base_document_id
-        )
+        await _update(db_factory, bundle, superseded_by_document_id=bundle.other_base_document_id)
     assert excinfo.value.status_code == 404
     assert excinfo.value.code == "RESOURCE_NOT_FOUND"
 

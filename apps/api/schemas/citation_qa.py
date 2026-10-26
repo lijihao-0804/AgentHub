@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from apps.api.schemas.knowledge import RetrievalPlaygroundStages
+from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 
 
 class CitationQaRequest(BaseModel):
@@ -26,7 +27,7 @@ class CitationQaCitationResponse(BaseModel):
     chunk_id: str = Field(min_length=1)
     source: str = Field(min_length=1)
     locator: dict[str, object]
-    excerpt: str = Field(max_length=1_000)
+    excerpt: str = Field(max_length=MAX_EVIDENCE_EXCERPT_CHARS)
     retrieval_score: float
     rerank_score: float | None
 

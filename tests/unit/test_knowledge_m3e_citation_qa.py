@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import json
+import re
+from decimal import Decimal
 from uuid import UUID, uuid4
 
 import pytest
 
+from packages.agent_runtime.context_budget import ApproxTokenEstimator
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import (
     OrganizationContext,
@@ -15,17 +19,31 @@ from packages.knowledge.adapters.fakes import (
     DeterministicFakeReranker,
     DeterministicFakeSparseEncoder,
 )
-from packages.knowledge.citation_qa import CitationQaService
+from packages.knowledge.citation_qa import (
+    _CITATION_CORRECTION,
+    _SYSTEM_PROMPT,
+    CitationQaService,
+    _evidence_prompt,
+    _NumberedEvidence,
+)
 from packages.knowledge.composition import RetrievalComponents
 from packages.knowledge.contracts import (
     KnowledgeProviderError,
+    RetrievedEvidence,
     SparseEncoding,
     VectorRecord,
     VectorScope,
     VectorSearchHit,
 )
 from packages.knowledge.models import Document, DocumentChunk, DocumentRevision
-from packages.model_gateway.contracts import ModelRequest, ModelResponse
+from packages.model_gateway.contracts import (
+    ModelCapabilities,
+    ModelRequest,
+    ModelResponse,
+    ResolvedModelExecutionPlan,
+    ResolvedModelExecutionProfile,
+    RetryPolicy,
+)
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 
 
@@ -138,21 +156,74 @@ class _FakeModelGateway:
     def __init__(
         self,
         content: str | None = (
-            '{"answer":"Supported [1]","citation_ids":[1],'
-            '"insufficient_evidence":false}'
+            '{"answer":"Supported [1]","citation_ids":[1],"insufficient_evidence":false}'
         ),
         error: Exception | None = None,
     ) -> None:
         self.content = content
         self.error = error
         self.requests: list[ModelRequest] = []
+        self.plans: list[ResolvedModelExecutionPlan] = []
 
-    async def generate(self, _context, _profile_id: UUID, request: ModelRequest) -> ModelResponse:
+    async def generate_resolved(
+        self,
+        _context,
+        plan: ResolvedModelExecutionPlan,
+        request: ModelRequest,
+    ) -> ModelResponse:
         self.requests.append(request)
+        self.plans.append(plan)
         if self.error is not None:
             raise self.error
         assert self.content is not None
         return ModelResponse(content=self.content, provider="fake", model="fake-model")
+
+
+def _profile(
+    *,
+    context_tokens: int,
+    max_tokens: int,
+    workspace_id: UUID | None = None,
+) -> ResolvedModelExecutionProfile:
+    return ResolvedModelExecutionProfile(
+        id=uuid4(),
+        workspace_id=workspace_id or uuid4(),
+        provider_credential_id=uuid4(),
+        provider="fake",
+        model="fake-model",
+        temperature=Decimal("0"),
+        max_tokens=max_tokens,
+        timeout_seconds=Decimal("30"),
+        capabilities=ModelCapabilities(
+            structured_output=True,
+            max_context_tokens=context_tokens,
+        ),
+    )
+
+
+def _plan(*, context_tokens: int = 16_000, max_tokens: int = 1_000):
+    primary = _profile(context_tokens=context_tokens, max_tokens=512)
+    fallback = _profile(
+        context_tokens=context_tokens,
+        max_tokens=max_tokens,
+        workspace_id=primary.workspace_id,
+    )
+    return ResolvedModelExecutionPlan(
+        primary=primary,
+        fallbacks=(fallback,),
+        retry_policy=RetryPolicy(),
+    )
+
+
+async def _resolve_plan(_session, _context, _model_profile_id):
+    return _plan()
+
+
+def _resolver_for(plan: ResolvedModelExecutionPlan):
+    async def resolve(_session, _context, _model_profile_id):
+        return plan
+
+    return resolve
 
 
 def _context(session: _FakeSession, permissions: frozenset[str] = frozenset({"knowledge_run"})):
@@ -188,6 +259,7 @@ def _service(
         ),
         model_gateway=gateway,
         max_evidence_chars=max_evidence_chars,
+        model_plan_resolver=_resolve_plan,
     )
 
 
@@ -211,10 +283,24 @@ async def _answer(
 async def test_no_evidence_is_deterministic_and_does_not_call_gateway() -> None:
     session = _FakeSession(chunks=0)
     gateway = _FakeModelGateway()
-    result = await _answer(_service(session, gateway), session, gateway)
+    resolutions = []
+
+    async def resolve(session_value, context_value, profile_id):
+        resolutions.append((session_value, context_value, profile_id))
+        return _plan()
+
+    service = CitationQaService(
+        session=session,
+        retrieval_components=_service(session, gateway).retrieval_components,
+        model_gateway=gateway,
+        max_evidence_chars=16_000,
+        model_plan_resolver=resolve,
+    )
+    result = await _answer(service, session, gateway)
 
     assert result.answer == "Insufficient evidence to answer from the selected knowledge snapshot."
     assert result.citations == ()
+    assert len(resolutions) == 1
     assert gateway.requests == []
 
 
@@ -301,23 +387,24 @@ async def test_out_of_range_citation_gets_one_corrective_retry() -> None:
             self.responses = list(responses)
             self.requests: list[ModelRequest] = []
 
-        async def generate(self, _context, _profile_id, request: ModelRequest) -> ModelResponse:
+        async def generate_resolved(
+            self, _context, _plan_value, request: ModelRequest
+        ) -> ModelResponse:
             self.requests.append(request)
             return ModelResponse(self.responses.pop(0), provider="fake", model="fake-model")
 
     session = _FakeSession(chunks=1, evidence_text="handbook evidence")
     gateway = _SequenceGateway(
         (
-            '{"answer":"Supported [3]","citation_ids":[3],'
-            '"insufficient_evidence":false}',
-            '{"answer":"Supported [1]","citation_ids":[1],'
-            '"insufficient_evidence":false}',
+            '{"answer":"Supported [3]","citation_ids":[3],"insufficient_evidence":false}',
+            '{"answer":"Supported [1]","citation_ids":[1],"insufficient_evidence":false}',
         )
     )
     result = await _answer(_service(session, gateway), session, gateway)
 
     assert result.citations[0].id == 1
     assert len(gateway.requests) == 2
+    assert gateway.requests[0].response_schema is gateway.requests[1].response_schema
     retry_messages = gateway.requests[1].messages
     assert any(
         message.role == "user" and "not in the supplied evidence list" in (message.content or "")
@@ -328,7 +415,9 @@ async def test_out_of_range_citation_gets_one_corrective_retry() -> None:
 @pytest.mark.asyncio
 async def test_schema_invalid_output_does_not_retry() -> None:
     class _SingleGateway(_FakeModelGateway):
-        async def generate(self, _context, _profile_id, request: ModelRequest) -> ModelResponse:
+        async def generate_resolved(
+            self, _context, _plan_value, request: ModelRequest
+        ) -> ModelResponse:
             self.requests.append(request)
             return ModelResponse('{"answer":"ok"}', provider="fake", model="fake-model")
 
@@ -418,6 +507,169 @@ async def test_model_gateway_errors_are_safely_mapped(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("context_tokens", "evidence_chars", "query_chars", "error_code"),
+    [
+        (1_000, 2_000, 200, "CITATION_QA_CONTEXT_BUDGET_EXCEEDED"),
+        (1_200, 2_000, 200, "CITATION_QA_CONTEXT_BUDGET_EXCEEDED"),
+        (16_000, 100, 200, None),
+    ],
+)
+async def test_complete_request_uses_minimum_window_and_fixed_schema_cost(
+    context_tokens: int,
+    evidence_chars: int,
+    query_chars: int,
+    error_code: str | None,
+) -> None:
+    session = _FakeSession(evidence_text="e" * evidence_chars)
+    gateway = _FakeModelGateway()
+    service = CitationQaService(
+        session=session,
+        retrieval_components=_service(session, gateway).retrieval_components,
+        model_gateway=gateway,
+        max_evidence_chars=16_000,
+        model_plan_resolver=_resolver_for(_plan(context_tokens=context_tokens, max_tokens=200)),
+    )
+    if error_code is None:
+        await _answer(service, session, gateway, query="q" * query_chars)
+    else:
+        with pytest.raises(AgentHubError) as rejected:
+            await _answer(service, session, gateway, query="q" * query_chars)
+        assert rejected.value.code == error_code
+        assert gateway.requests == []
+
+
+@pytest.mark.asyncio
+async def test_corrective_retry_is_re_admitted_against_the_same_frozen_chain() -> None:
+    class _SequenceGateway:
+        def __init__(self) -> None:
+            self.requests: list[ModelRequest] = []
+
+        async def generate_resolved(self, _context, _plan_value, request: ModelRequest):
+            self.requests.append(request)
+            assert len(self.requests) <= 2
+            selected = self.requests[0]
+            prompt = selected.messages[1].content or ""
+            match = re.search(r"\[(\d+)\]\nsource: ([^\n]+)", prompt)
+            assert match is not None
+            visible_id = int(match.group(1))
+            return ModelResponse(
+                json.dumps(
+                    {
+                        "answer": f"Unsupported [{visible_id + 1}]",
+                        "citation_ids": [visible_id + 1],
+                        "insufficient_evidence": False,
+                    }
+                ),
+                provider="fake",
+                model="fake-model",
+            )
+
+    session = _FakeSession(evidence_text="evidence")
+    gateway = _SequenceGateway()
+    primary = _profile(context_tokens=10_000, max_tokens=200)
+    fallback = _profile(context_tokens=1_000, max_tokens=200)
+    plan = ResolvedModelExecutionPlan(primary=primary, fallbacks=(fallback,))
+    original_request_tokens = ApproxTokenEstimator().estimate(
+        _SYSTEM_PROMPT
+    ) + ApproxTokenEstimator().estimate(
+        _evidence_prompt(
+            "What does the handbook say?",
+            (
+                _NumberedEvidence(
+                    1,
+                    RetrievedEvidence(
+                        chunk_id=session.chunks[0].chunk_id,
+                        document_id=str(session.chunks[0].document_id),
+                        document_revision_id=str(session.chunks[0].document_revision_id),
+                        source="handbook.md",
+                        locator=dict(session.chunks[0].locator),
+                        text="evidence",
+                        metadata={},
+                        retrieval_score=1.0,
+                        rerank_score=1.0,
+                    ),
+                    "evidence",
+                ),
+            ),
+        )
+    )
+    correction_message_tokens = (
+        ApproxTokenEstimator().estimate(_SYSTEM_PROMPT)
+        + original_request_tokens
+        + ApproxTokenEstimator().estimate(_CITATION_CORRECTION)
+        + ApproxTokenEstimator().estimate(
+            json.dumps(
+                {
+                    "answer": "Unsupported [3]",
+                    "citation_ids": [3],
+                    "insufficient_evidence": False,
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+        )
+    )
+    # Fallback admits the first complete request, but not the appended
+    # assistant correction exchange. Account for the fixed output-schema cost
+    # in addition to the message text.
+    fallback = _profile(context_tokens=550, max_tokens=200)
+    assert original_request_tokens < fallback.capabilities.max_context_tokens - 200
+    assert correction_message_tokens > fallback.capabilities.max_context_tokens - 200
+    plan = ResolvedModelExecutionPlan(primary=primary, fallbacks=(fallback,))
+    service = CitationQaService(
+        session=session,
+        retrieval_components=_service(
+            session,
+            _FakeModelGateway(),
+        ).retrieval_components,
+        model_gateway=gateway,
+        max_evidence_chars=16_000,
+        model_plan_resolver=_resolver_for(plan),
+    )
+
+    with pytest.raises(AgentHubError) as rejected:
+        await _answer(service, session, gateway)
+
+    assert rejected.value.code == "CITATION_QA_CONTEXT_BUDGET_EXCEEDED"
+    assert len(gateway.requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_plan_is_resolved_before_retrieval_and_minimum_window_is_enforced() -> None:
+    events: list[str] = []
+    session = _FakeSession(evidence_text="e" * 2_000)
+    gateway = _FakeModelGateway()
+    components = _service(session, gateway).retrieval_components
+    original_dense_search = components.index.dense_search
+
+    def observed_dense_search(*args, **kwargs):
+        events.append("retrieval")
+        return original_dense_search(*args, **kwargs)
+
+    components.index.dense_search = observed_dense_search
+
+    async def resolve(*_args):
+        events.append("resolve")
+        return _plan(context_tokens=1_000, max_tokens=200)
+
+    service = CitationQaService(
+        session=session,
+        retrieval_components=components,
+        model_gateway=gateway,
+        max_evidence_chars=16_000,
+        model_plan_resolver=resolve,
+    )
+    with pytest.raises(AgentHubError) as rejected:
+        await _answer(service, session, gateway)
+
+    assert rejected.value.code == "CITATION_QA_CONTEXT_BUDGET_EXCEEDED"
+    assert events[:2] == ["resolve", "retrieval"]
+    assert gateway.plans == []
+
+
+@pytest.mark.asyncio
 async def test_retrieval_provider_failure_does_not_escape_raw_error() -> None:
     session = _FakeSession()
     gateway = _FakeModelGateway()
@@ -432,6 +684,7 @@ async def test_retrieval_provider_failure_does_not_escape_raw_error() -> None:
         retrieval_components=components,
         model_gateway=gateway,
         max_evidence_chars=16_000,
+        model_plan_resolver=_resolve_plan,
     )
 
     with pytest.raises(AgentHubError) as raised:

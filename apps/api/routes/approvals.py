@@ -82,6 +82,7 @@ async def approve_approval(
     result = await _agent_run_service(request).resume(
         context, run_id=approval.run_id, approval_id=approval.id
     )
+    approval = await approvals.get(context, approval.id)
     return ApprovalDecisionResponse(
         approval=ApprovalResponse.model_validate(approval),
         run_id=result.run_id,
@@ -112,6 +113,7 @@ async def deny_approval(
     result = await _agent_run_service(request).resume(
         context, run_id=approval.run_id, approval_id=approval.id
     )
+    approval = await approvals.get(context, approval.id)
     return ApprovalDecisionResponse(
         approval=ApprovalResponse.model_validate(approval),
         run_id=result.run_id,

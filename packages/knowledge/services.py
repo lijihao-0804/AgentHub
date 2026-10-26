@@ -150,6 +150,10 @@ class KnowledgeService:
                 document_revision_id=revision.id,
             )
             session.add(job)
+            # The durable-identity confirmation below must name this exact row.
+            # A mapped UUID default is otherwise not materialized until COMMIT,
+            # which is too late if the acknowledgement is lost.
+            await session.flush()
             append_audit(
                 session,
                 action="document_revision_upload",
@@ -166,7 +170,6 @@ class KnowledgeService:
                     "file_size": stored_blob.size_bytes,
                 },
             )
-            await session.commit()
         except IntegrityError as exc:
             await session.rollback()
             await blob_store.delete(stored_blob.blob_key)
@@ -174,13 +177,55 @@ class KnowledgeService:
                 "DOCUMENT_UPLOAD_FAILED", "The document could not be recorded.", 409
             ) from exc
         except Exception:
-            # Every other failure (connection drop, serialization error, ...)
-            # leaves the same orphaned blob behind: the bytes are on disk but
-            # no revision row references them. Roll back and delete before the
-            # error propagates, whatever the failure was.
+            # No COMMIT was attempted yet, so there is no durable row that can
+            # refer to these bytes.
             await session.rollback()
             await blob_store.delete(stored_blob.blob_key)
             raise
+
+        document_id = document.id
+        revision_id = revision.id
+        job_id = job.id
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            durable = await self._confirm_durable_upload(
+                session,
+                workspace_id=workspace_id,
+                knowledge_base_id=knowledge_base_id,
+                document_id=document_id,
+                revision_id=revision_id,
+                job_id=job_id,
+            )
+            if durable is None:
+                # IntegrityError is raised by the server while applying the
+                # transaction, so this transaction definitely did not commit.
+                await blob_store.delete(stored_blob.blob_key)
+                raise AgentHubError(
+                    "DOCUMENT_UPLOAD_FAILED", "The document could not be recorded.", 409
+                ) from exc
+            document, revision, job = durable
+        except Exception:
+            # A commit acknowledgement can be lost after the server committed.
+            # Rollback only describes the client session; it cannot prove the
+            # revision is absent. Confirm by the UUID established before COMMIT
+            # and otherwise preserve the only copy of the source bytes.
+            try:
+                await session.rollback()
+            except Exception:
+                pass
+            durable = await self._confirm_durable_upload(
+                session,
+                workspace_id=workspace_id,
+                knowledge_base_id=knowledge_base_id,
+                document_id=document_id,
+                revision_id=revision_id,
+                job_id=job_id,
+            )
+            if durable is None:
+                raise
+            document, revision, job = durable
         try:
             await queue.enqueue(job.id)
         except Exception:
@@ -188,6 +233,54 @@ class KnowledgeService:
                 "knowledge_ingestion_enqueue_failed",
                 extra={"job_id": str(job.id), "adapter": type(queue).__name__},
             )
+        return document, revision, job
+
+    @staticmethod
+    async def _confirm_durable_upload(
+        session: AsyncSession,
+        *,
+        workspace_id: UUID,
+        knowledge_base_id: UUID,
+        document_id: UUID,
+        revision_id: UUID,
+        job_id: UUID,
+    ) -> tuple[Document, DocumentRevision, IngestionJob] | None:
+        """Look up the exact rows established before COMMIT.
+
+        The UUIDs are assigned before the commit attempt and therefore survive a
+        lost acknowledgement. Any incomplete or failed lookup leaves the blob
+        retained; absence of a confirmed row is not evidence that deleting the
+        only durable source copy is safe.
+        """
+
+        try:
+            document = await session.scalar(
+                select(Document).where(
+                    Document.id == document_id,
+                    Document.workspace_id == workspace_id,
+                    Document.knowledge_base_id == knowledge_base_id,
+                )
+            )
+            revision = await session.scalar(
+                select(DocumentRevision).where(
+                    DocumentRevision.id == revision_id,
+                    DocumentRevision.document_id == document_id,
+                    DocumentRevision.workspace_id == workspace_id,
+                    DocumentRevision.knowledge_base_id == knowledge_base_id,
+                )
+            )
+            job = await session.scalar(
+                select(IngestionJob).where(
+                    IngestionJob.id == job_id,
+                    IngestionJob.document_revision_id == revision_id,
+                    IngestionJob.workspace_id == workspace_id,
+                    IngestionJob.knowledge_base_id == knowledge_base_id,
+                )
+            )
+        except Exception:
+            return None
+        if document is None or revision is None or job is None:
+            return None
         return document, revision, job
 
     async def retry_document_ingestion(
@@ -287,12 +380,28 @@ class KnowledgeService:
 
         self._require_permission(context, "knowledge_edit")
         workspace_id = self._workspace_id(context)
+        # Every lifecycle update in this knowledge base takes this same row
+        # lock before reading the replacement graph. Concurrent opposite edges
+        # therefore observe one serial order instead of each checking a stale
+        # view and both committing.
+        locked_knowledge_base = await session.scalar(
+            select(KnowledgeBase.id)
+            .where(
+                KnowledgeBase.id == knowledge_base_id,
+                KnowledgeBase.workspace_id == workspace_id,
+            )
+            .with_for_update()
+        )
+        if locked_knowledge_base is None:
+            self._not_found()
         document = await session.scalar(
-            select(Document).where(
+            select(Document)
+            .where(
                 Document.id == document_id,
                 Document.workspace_id == workspace_id,
                 Document.knowledge_base_id == knowledge_base_id,
             )
+            .with_for_update()
         )
         if document is None:
             self._not_found()
@@ -303,19 +412,36 @@ class KnowledgeService:
                     "A document cannot supersede itself.",
                     422,
                 )
-            # Same workspace *and* same knowledge base: a snapshot is built from
-            # one knowledge base, so a cross-base successor would be invisible
-            # at the only moment this field is read. Missing and out-of-scope
-            # both answer 404, so the check leaks nothing either way.
-            successor = await session.scalar(
-                select(Document.id).where(
-                    Document.id == superseded_by_document_id,
+            graph = await session.execute(
+                select(Document.id, Document.superseded_by_document_id)
+                .where(
                     Document.workspace_id == workspace_id,
                     Document.knowledge_base_id == knowledge_base_id,
                 )
+                .with_for_update()
             )
-            if successor is None:
+            replacements = {row.id: row.superseded_by_document_id for row in graph}
+            if superseded_by_document_id not in replacements:
                 self._not_found()
+            current = superseded_by_document_id
+            visited: set[UUID] = set()
+            while current is not None:
+                if current == document_id or current in visited:
+                    raise AgentHubError(
+                        "INVALID_DOCUMENT_SUPERSESSION",
+                        "The document replacement chain contains a cycle.",
+                        422,
+                    )
+                visited.add(current)
+                if current not in replacements:
+                    # A direct database write could have produced a cross-scope
+                    # edge; it cannot be reasoned about safely.
+                    raise AgentHubError(
+                        "INVALID_DOCUMENT_SUPERSESSION",
+                        "The document replacement chain is invalid.",
+                        422,
+                    )
+                current = replacements[current]
         if set_effective_date:
             document.effective_date = effective_date
         if set_superseded_by:

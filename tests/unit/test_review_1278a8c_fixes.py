@@ -48,6 +48,7 @@ def make_run() -> AgentRun:
         total_cost_amount=None,
         cost_currency=None,
         cost_is_estimate=None,
+        event_log_complete=False,
         created_by=uuid4(),
         created_at=datetime.now(UTC),
         started_at=datetime.now(UTC),

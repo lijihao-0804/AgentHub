@@ -17,7 +17,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import func, or_, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -32,7 +32,7 @@ from packages.memory.contracts import (
     SelectedMemory,
     memory_content_hash,
 )
-from packages.memory.models import MEMORY_KINDS, WorkspaceMemory
+from packages.memory.models import MEMORY_KINDS, MemoryContribution, WorkspaceMemory
 
 ACTIVE = "ACTIVE"
 SUPERSEDED = "SUPERSEDED"
@@ -195,9 +195,13 @@ class SqlAlchemyMemoryStore:
             WorkspaceMemory.workspace_id == workspace_id,
             WorkspaceMemory.agent_id == agent_id,
         )
-        counter = select(func.count()).select_from(WorkspaceMemory).where(
-            WorkspaceMemory.workspace_id == workspace_id,
-            WorkspaceMemory.agent_id == agent_id,
+        counter = (
+            select(func.count())
+            .select_from(WorkspaceMemory)
+            .where(
+                WorkspaceMemory.workspace_id == workspace_id,
+                WorkspaceMemory.agent_id == agent_id,
+            )
         )
         if status is not None:
             statement = statement.where(WorkspaceMemory.status == status)
@@ -265,9 +269,9 @@ class SqlAlchemyMemoryStore:
     ) -> tuple[UUID, ...]:
         """Write the surviving candidates and return what was created.
 
-        Reinforcement, not duplication: a candidate whose hash already exists
-        and is ACTIVE bumps that row's salience instead of inserting a second
-        copy, so repeating yourself makes the agent surer rather than noisier.
+        Each source run may contribute a statement at most once. Reinforcement,
+        not duplication: a distinct run can bump salience, while a redelivery
+        of the same run cannot.
         """
 
         accepted: list[MemoryCandidate] = []
@@ -288,6 +292,37 @@ class SqlAlchemyMemoryStore:
 
         created: list[UUID] = []
         async with self.session_factory() as session:
+            if source_run_id is not None:
+                # Serialize redeliveries of this run before reading existing
+                # memories. The contribution key is still the database
+                # arbiter; this lock prevents both racers taking the
+                # "existing row" fast path and each incrementing salience.
+                # PostgreSQL cannot lock rows that do not exist yet, and an
+                # advisory transaction lock covers both the insert and the
+                # existing-row reinforcement paths without serializing
+                # unrelated agents.
+                await session.execute(
+                    text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+                    {"key": f"memory:{workspace_id}:{source_run_id}"},
+                )
+            contributed: set[str] = set()
+            if source_run_id is not None:
+                contributed = set(
+                    (
+                        await session.scalars(
+                            select(MemoryContribution.content_hash).where(
+                                MemoryContribution.workspace_id == workspace_id,
+                                MemoryContribution.agent_run_id == source_run_id,
+                                MemoryContribution.content_hash.in_(seen),
+                            )
+                        )
+                    ).all()
+                )
+                accepted = [
+                    candidate
+                    for candidate in accepted
+                    if content_hash(candidate.content) not in contributed
+                ]
             existing = {
                 row.content_hash: row
                 for row in (
@@ -307,7 +342,17 @@ class SqlAlchemyMemoryStore:
                 digest = content_hash(candidate.content)
                 previous = existing.get(digest)
                 if previous is not None:
-                    previous.salience += 1
+                    if source_run_id is not None:
+                        await self._claim_contribution(
+                            session,
+                            workspace_id=workspace_id,
+                            source_run_id=source_run_id,
+                            memory_id=previous.id,
+                            digest=digest,
+                            increment_salience=True,
+                        )
+                    else:
+                        previous.salience += 1
                     continue
                 row = WorkspaceMemory(
                     # Assigned here rather than left to the column default,
@@ -353,12 +398,75 @@ class SqlAlchemyMemoryStore:
                         )
                     )
                     if previous is not None:
-                        previous.salience += 1
+                        if source_run_id is not None:
+                            await self._claim_contribution(
+                                session,
+                                workspace_id=workspace_id,
+                                source_run_id=source_run_id,
+                                memory_id=previous.id,
+                                digest=digest,
+                                increment_salience=True,
+                            )
+                        else:
+                            previous.salience += 1
                         continue
                     raise
+                if source_run_id is not None:
+                    await self._claim_contribution(
+                        session,
+                        workspace_id=workspace_id,
+                        source_run_id=source_run_id,
+                        memory_id=row.id,
+                        digest=digest,
+                        increment_salience=False,
+                    )
                 created.append(row.id)
             await session.commit()
         return tuple(created)
+
+    async def _claim_contribution(
+        self,
+        session: AsyncSession,
+        *,
+        workspace_id: UUID,
+        source_run_id: UUID,
+        memory_id: UUID,
+        digest: str,
+        increment_salience: bool,
+    ) -> None:
+        """Atomically count one run's contribution and reinforce once.
+
+        The savepoint is nested so a duplicate source contribution rolls back
+        only itself. A PostgreSQL unique primary key serializes simultaneous
+        redeliveries; the winner optionally increments salience and every
+        loser observes the existing claim and performs no second increment. A
+        brand-new row starts at salience 1, so recording its first
+        contribution must not count that same run twice.
+        """
+
+        try:
+            async with session.begin_nested():
+                session.add(
+                    MemoryContribution(
+                        workspace_id=workspace_id,
+                        agent_run_id=source_run_id,
+                        content_hash=digest,
+                        memory_id=memory_id,
+                    )
+                )
+                await session.flush()
+                if increment_salience:
+                    await session.execute(
+                        update(WorkspaceMemory)
+                        .where(
+                            WorkspaceMemory.workspace_id == workspace_id,
+                            WorkspaceMemory.id == memory_id,
+                        )
+                        .values(salience=WorkspaceMemory.salience + 1)
+                    )
+        except IntegrityError:
+            # This run already contributed this statement. Do not increment.
+            return
 
     async def supersede(
         self, *, workspace_id: UUID, memory_id: UUID, superseded_by_id: UUID

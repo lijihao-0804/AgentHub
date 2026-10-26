@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import (
+    get_citation_qa_model_plan_resolver,
     get_model_gateway,
     get_query_workspace_context,
     get_retrieval_components,
@@ -27,6 +28,7 @@ db_session_dependency = Depends(get_db_session)
 context_dependency = Depends(get_query_workspace_context)
 retrieval_components_dependency = Depends(get_retrieval_components)
 model_gateway_dependency = Depends(get_model_gateway)
+model_plan_resolver_dependency = Depends(get_citation_qa_model_plan_resolver)
 
 
 @router.post("/api/v1/knowledge/query", response_model=CitationQaResponse)
@@ -37,6 +39,7 @@ async def citation_qa(
     session: AsyncSession = db_session_dependency,
     components: RetrievalComponents = retrieval_components_dependency,
     model_gateway: ModelGateway = model_gateway_dependency,
+    model_plan_resolver=model_plan_resolver_dependency,
 ) -> CitationQaResponse:
     result = await CitationQaService(
         session=session,
@@ -46,6 +49,7 @@ async def citation_qa(
         min_rerank_score=request.app.state.settings.knowledge_min_rerank_score,
         superseded_rank_penalty=request.app.state.settings.knowledge_superseded_rank_penalty,
         trace_sink=ProductionTraceSink(),
+        model_plan_resolver=model_plan_resolver,
     ).answer(
         context=context,
         knowledge_base_id=payload.knowledge_base_id,

@@ -64,8 +64,71 @@ class SqlAlchemyThreadContextProvider:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
         self.session_factory = session_factory
 
+    async def current_turn_sequence(
+        self, *, workspace_id: UUID, thread_id: UUID, before_run_id: UUID
+    ) -> int | None:
+        """Public seam used by runtime tests and workers to prove the bound."""
+
+        return await self.sequence_for_run(
+            workspace_id=workspace_id, thread_id=thread_id, run_id=before_run_id
+        )
+
+    async def conversation_before_sequence(
+        self,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        sequence: int,
+        max_turns: int,
+    ) -> ThreadConversation:
+        """Pure sequence-bounded history, shared by the provider and tests."""
+
+        return await self._conversation(
+            workspace_id=workspace_id, thread_id=thread_id, sequence=sequence, max_turns=max_turns
+        )
+
+    async def search_before_sequence(
+        self,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        sequence: int,
+        query: str,
+        limit: int,
+    ) -> tuple[ThreadHistoryHit, ...]:
+        return await self._search(
+            workspace_id=workspace_id,
+            thread_id=thread_id,
+            sequence=sequence,
+            query=query,
+            limit=limit,
+        )
+
     async def conversation(
         self, *, workspace_id: UUID, thread_id: UUID, before_run_id: UUID, max_turns: int
+    ) -> ThreadConversation:
+        if max_turns <= 0:
+            return ThreadConversation()
+        async with self.session_factory() as session:
+            current_sequence = await self._current_sequence(
+                session, workspace_id=workspace_id, thread_id=thread_id, run_id=before_run_id
+            )
+            if current_sequence is None:
+                return ThreadConversation()
+            return await self._conversation(
+                workspace_id=workspace_id,
+                thread_id=thread_id,
+                sequence=current_sequence,
+                max_turns=max_turns,
+            )
+
+    async def _conversation(
+        self,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        sequence: int,
+        max_turns: int,
     ) -> ThreadConversation:
         if max_turns <= 0:
             return ThreadConversation()
@@ -76,13 +139,12 @@ class SqlAlchemyThreadContextProvider:
                     .join(
                         AgentRun,
                         (AgentRun.workspace_id == ThreadTurn.workspace_id)
-                        & (AgentRun.id == ThreadTurn.agent_run_id),
+                        & (AgentRun.thread_turn_id == ThreadTurn.id),
                     )
                     .where(
                         ThreadTurn.workspace_id == workspace_id,
                         ThreadTurn.thread_id == thread_id,
-                        ThreadTurn.agent_run_id.is_not(None),
-                        ThreadTurn.agent_run_id != before_run_id,
+                        ThreadTurn.sequence < sequence,
                         AgentRun.status == _SUCCEEDED,
                         AgentRun.final_output.is_not(None),
                     )
@@ -136,6 +198,32 @@ class SqlAlchemyThreadContextProvider:
         terms = _terms(query)
         if not terms or limit <= 0:
             return ()
+        async with self.session_factory() as session:
+            current_sequence = await self._current_sequence(
+                session, workspace_id=workspace_id, thread_id=thread_id, run_id=before_run_id
+            )
+            if current_sequence is None:
+                return ()
+        return await self._search(
+            workspace_id=workspace_id,
+            thread_id=thread_id,
+            sequence=current_sequence,
+            query=query,
+            limit=limit,
+        )
+
+    async def _search(
+        self,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        sequence: int,
+        query: str,
+        limit: int,
+    ) -> tuple[ThreadHistoryHit, ...]:
+        terms = _terms(query)
+        if not terms or limit <= 0:
+            return ()
         conditions = [
             or_(
                 ThreadTurn.user_input.ilike(f"%{term}%"),
@@ -150,13 +238,12 @@ class SqlAlchemyThreadContextProvider:
                     .join(
                         AgentRun,
                         (AgentRun.workspace_id == ThreadTurn.workspace_id)
-                        & (AgentRun.id == ThreadTurn.agent_run_id),
+                        & (AgentRun.thread_turn_id == ThreadTurn.id),
                     )
                     .where(
                         ThreadTurn.workspace_id == workspace_id,
                         ThreadTurn.thread_id == thread_id,
-                        ThreadTurn.agent_run_id.is_not(None),
-                        ThreadTurn.agent_run_id != before_run_id,
+                        ThreadTurn.sequence < sequence,
                         AgentRun.status == _SUCCEEDED,
                         AgentRun.final_output.is_not(None),
                         or_(*conditions),
@@ -186,6 +273,45 @@ class SqlAlchemyThreadContextProvider:
         # conversation the later statement is the one that survived revision.
         scored.sort(key=lambda item: (-item[0], -item[1]))
         return tuple(hit for _, _, hit in scored[:limit])
+
+    async def sequence_for_run(
+        self, *, workspace_id: UUID, thread_id: UUID, run_id: UUID
+    ) -> int | None:
+        """Return the linked Turn sequence, or ``None`` when no proof exists."""
+
+        async with self.session_factory() as session:
+            return await self._current_sequence(
+                session, workspace_id=workspace_id, thread_id=thread_id, run_id=run_id
+            )
+
+    async def _current_sequence(
+        self,
+        session: AsyncSession,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        run_id: UUID,
+    ) -> int | None:
+        """Resolve the immutable Turn sequence for the asking Run.
+
+        The Run-to-Turn link is the authority. If an older Run has no such
+        link, returns ``None``; history must fail closed rather than fall back
+        to an unbounded time/order guess.
+        """
+
+        return await session.scalar(
+            select(ThreadTurn.sequence)
+            .join(
+                AgentRun,
+                (AgentRun.workspace_id == ThreadTurn.workspace_id)
+                & (AgentRun.thread_turn_id == ThreadTurn.id),
+            )
+            .where(
+                AgentRun.workspace_id == workspace_id,
+                AgentRun.thread_id == thread_id,
+                AgentRun.id == run_id,
+            )
+        )
 
 
 __all__ = ["SqlAlchemyThreadContextProvider"]

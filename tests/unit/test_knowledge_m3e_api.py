@@ -9,6 +9,7 @@ import pytest
 from apps.api.app import create_app
 from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import (
+    get_citation_qa_model_plan_resolver,
     get_model_gateway,
     get_query_workspace_context,
     get_retrieval_components,
@@ -21,6 +22,7 @@ from tests.unit.test_knowledge_m3e_citation_qa import (
     _context,
     _FakeModelGateway,
     _FakeSession,
+    _resolve_plan,
     _service,
 )
 
@@ -58,13 +60,14 @@ def _app(
     async def override_components():
         return service.retrieval_components
 
-    async def override_gateway():
-        return gateway
+    async def override_plan_resolver():
+        return _resolve_plan
 
     app.dependency_overrides[get_db_session] = override_db
     app.dependency_overrides[get_query_workspace_context] = override_context
     app.dependency_overrides[get_retrieval_components] = override_components
-    app.dependency_overrides[get_model_gateway] = override_gateway
+    app.dependency_overrides[get_model_gateway] = lambda: gateway
+    app.dependency_overrides[get_citation_qa_model_plan_resolver] = override_plan_resolver
     return app
 
 
@@ -167,3 +170,17 @@ def test_api_test_fixture_uses_explicit_fake_gateway_not_testing_switch() -> Non
 
     assert isinstance(service, CitationQaService)
     assert service.model_gateway is gateway
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("excerpt_chars", [1_000, 1_001, 1_200, 2_000])
+async def test_query_accepts_every_supported_excerpt_boundary(
+    excerpt_chars: int,
+) -> None:
+    session = _FakeSession(evidence_text="e" * excerpt_chars)
+    gateway = _FakeModelGateway()
+
+    response = await _post(_app(session, gateway), _payload(session))
+
+    assert response.status_code == 200
+    assert response.json()["citations"][0]["excerpt"] == "e" * excerpt_chars

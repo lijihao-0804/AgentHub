@@ -173,6 +173,7 @@ class ScenarioEvaluationDriver:
                 else None,
                 cost_amount=sum((Decimal(a) for a in amounts), Decimal(0)) if known_cost else None,
                 cost_currency=next(iter(currencies)) if known_cost else None,
+                aggregate_billing_complete=False,
             )
 
         return PreparedCaseExecution(

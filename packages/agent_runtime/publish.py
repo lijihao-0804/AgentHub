@@ -34,6 +34,7 @@ from packages.agent_runtime.runtime_config import (
 )
 from packages.agent_runtime.tool_revisions import validate_tool_spec
 from packages.core.canonical.json_hash import canonical_json_hash
+from packages.core.config.settings import Settings, get_settings
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievalStrategy
@@ -51,7 +52,7 @@ from packages.wiki.models import WikiCompilation
 from packages.wiki.service import WikiService
 
 SPEC_SCHEMA_VERSION = 2
-_WIKI_LATEST_SCAN_LIMIT = 10
+_WIKI_LATEST_SCAN_BATCH = 10
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
     "reranker_model": "BAAI/bge-reranker-v2-m3",
@@ -95,6 +96,9 @@ class PublishedAgentVersion:
 
 
 class AgentPublishService:
+    def __init__(self, *, settings: Settings | None = None) -> None:
+        self.settings = settings or get_settings()
+
     async def create_draft(
         self,
         session: AsyncSession,
@@ -130,7 +134,10 @@ class AgentPublishService:
             model_profile_id=model_profile_id,
             knowledge_binding_mode=knowledge_binding_mode,
             model_retry_policy=_validate_retry_policy(model_retry_policy or {"max_attempts": 1}),
-            retrieval_config=_validate_retrieval_config(retrieval_config or {}),
+            retrieval_config=_validate_retrieval_config(
+                retrieval_config or {},
+                settings=self.settings,
+            ),
             runtime_config=_validate_runtime_config(runtime_config or {}),
         )
         session.add(agent)
@@ -199,7 +206,10 @@ class AgentPublishService:
             if await repository.get_model_profile(context, values["model_profile_id"]) is None:
                 raise _model_profile_unavailable()
         proposed["model_retry_policy"] = _validate_retry_policy(proposed["model_retry_policy"])
-        proposed["retrieval_config"] = _validate_retrieval_config(proposed["retrieval_config"])
+        proposed["retrieval_config"] = _validate_retrieval_config(
+            proposed["retrieval_config"],
+            settings=self.settings,
+        )
         proposed["runtime_config"] = _validate_runtime_config(proposed["runtime_config"])
         for key, value in values.items():
             setattr(agent, key, value)
@@ -346,8 +356,13 @@ class AgentPublishService:
             _resolved_runtime_config(agent.runtime_config, resolved_model), resolved_model
         )
         bindings = await self._resolve_knowledge(session, context, agent)
-        tools = await self._resolve_tools(session, context, agent)
         wiki_binding = await self._resolve_wiki_binding(session, context, agent)
+        tools = await self._resolve_tools(
+            session,
+            context,
+            agent,
+            wiki_bound=wiki_binding is not None,
+        )
         resolved_spec = _resolved_spec(
             agent=agent,
             model=resolved_model,
@@ -559,25 +574,48 @@ class AgentPublishService:
         names "the current Wiki", and a tombstoned one is no longer it.
         """
 
-        candidates = await session.scalars(
-            select(WikiCompilation)
-            .where(
+        service = WikiService()
+        cursor: tuple[Any, UUID] | None = None
+        while True:
+            statement = select(WikiCompilation).where(
                 WikiCompilation.workspace_id == workspace_id,
                 WikiCompilation.knowledge_base_id == knowledge_base_id,
                 WikiCompilation.status == "PUBLISHED",
             )
-            .order_by(WikiCompilation.published_at.desc(), WikiCompilation.id)
-            .limit(_WIKI_LATEST_SCAN_LIMIT)
-        )
-        service = WikiService()
-        for compilation in candidates:
-            try:
-                await service.sources(session, context, compilation, require_current=False)
-            except AgentHubError as error:
-                if error.code == "WIKI_SOURCE_REVOKED":
-                    continue
-                raise
-            return compilation
+            if cursor is not None:
+                published_at, publication_id = cursor
+                statement = statement.where(
+                    (WikiCompilation.published_at < published_at)
+                    | (
+                        (WikiCompilation.published_at == published_at)
+                        & (WikiCompilation.id > publication_id)
+                    )
+                )
+            candidates = list(
+                await session.scalars(
+                    statement.order_by(
+                        WikiCompilation.published_at.desc(),
+                        WikiCompilation.id,
+                    ).limit(_WIKI_LATEST_SCAN_BATCH)
+                )
+            )
+            if not candidates:
+                break
+            for compilation in candidates:
+                try:
+                    await service.sources(
+                        session,
+                        context,
+                        compilation,
+                        require_current=False,
+                    )
+                except AgentHubError as error:
+                    if error.code == "WIKI_SOURCE_REVOKED":
+                        continue
+                    raise
+                return compilation
+            last = candidates[-1]
+            cursor = (last.published_at, last.id)
         return None
 
     async def _resolve_tools(
@@ -585,6 +623,8 @@ class AgentPublishService:
         session: AsyncSession,
         context: WorkspaceExecutionContext,
         agent: Agent,
+        *,
+        wiki_bound: bool,
     ) -> tuple[dict[str, Any], ...]:
         bindings = await session.scalars(
             select(AgentTool)
@@ -620,6 +660,12 @@ class AgentPublishService:
                 raise AgentHubError("TOOL_REVISION_INVALID", "The tool revision is invalid.", 422)
             executable_spec = validate_executable_tool_spec(safe_spec)
             identity = executable_spec["identity"]
+            if identity == "query_wiki" and not wiki_bound:
+                raise AgentHubError(
+                    "WIKI_BINDING_REQUIRED",
+                    "The query_wiki tool requires a published Wiki binding.",
+                    422,
+                )
             if identity in seen_identities:
                 # The model proposes a call by identity and the runtime
                 # dispatches by identity, so two bound tools answering to the
@@ -826,11 +872,28 @@ def _validate_retry_policy(value: Mapping[str, Any]) -> dict[str, Any]:
     return {"max_attempts": attempts}
 
 
-def _validate_retrieval_config(value: Mapping[str, Any]) -> dict[str, Any]:
+def _validate_retrieval_config(
+    value: Mapping[str, Any],
+    *,
+    settings: Settings | None = None,
+) -> dict[str, Any]:
     if not isinstance(value, Mapping) or not set(value).issubset(_RETRIEVAL_KEYS):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     explicitly_none = {key for key, item in value.items() if item is None}
     result = {**DEFAULT_RETRIEVAL_CONFIG, **dict(value)}
+    active_settings = settings or get_settings()
+    for key, configured in (
+        ("embedding_model", active_settings.knowledge_embedding_model),
+        ("reranker_model", active_settings.knowledge_reranker_model),
+    ):
+        requested = value.get(key)
+        if requested is not None and requested != configured:
+            raise AgentHubError(
+                "INVALID_AGENT_CONFIG",
+                f"{key} is not supported by the deployed retrieval components.",
+                422,
+            )
+        result[key] = configured
     if result["retrieval_strategy"] not in {item.value for item in RetrievalStrategy}:
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     for key in ("dense_top_k", "sparse_top_k", "candidate_top_k", "final_top_k"):

@@ -10,10 +10,11 @@ extraction where configured.
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import NoReturn
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -37,11 +38,6 @@ MAX_INPUT_LENGTH = 32_000
 MAX_CLIENT_TOKEN_LENGTH = 64
 DEFAULT_PAGE_SIZE = 50
 MAX_PAGE_SIZE = 200
-# A turn without a run is only rebuildable once it is clearly past the window
-# between committing the turn and ``prepare_run`` creating its run row. That
-# window is normally milliseconds; a full grace minute keeps a slow but alive
-# first request from being mistaken for a dead one.
-TURN_START_GRACE = timedelta(seconds=60)
 
 
 def _workspace_id(context: WorkspaceExecutionContext) -> UUID:
@@ -86,6 +82,16 @@ def _validated_input(value: str) -> str:
     return text
 
 
+def _input_hash(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _request_token(client_token: str | None) -> str:
+    """Return the caller's request id, minting one only when it is absent."""
+
+    return (client_token or "").strip() or uuid4().hex
+
+
 @dataclass(frozen=True, slots=True)
 class SubmittedTurn:
     """A turn that has been recorded and the run that is answering it."""
@@ -93,6 +99,16 @@ class SubmittedTurn:
     turn: ThreadTurn
     run_id: UUID
     agent_version_id: UUID
+    reused: bool
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedTurnRun:
+    """A Turn paired with the Run a retry may dispatch, when one exists."""
+
+    turn: ThreadTurn
+    run_id: UUID
+    run: AgentRun | None
     reused: bool
 
 
@@ -274,25 +290,45 @@ class ThreadService:
         *,
         user_input: str,
         client_token: str | None = None,
-    ) -> ThreadTurn | None:
+    ) -> ThreadTurn:
         """Record the question before anything is executed.
 
-        Returns ``None`` when ``client_token`` has already been used in this
-        thread: a retried submission must find the turn it already created
-        rather than turn one follow-up question into two runs.
+        A token identifies one logical request. Reusing it with the same
+        normalized body returns the original turn; reusing it for different
+        content is a conflict. A new token always creates a new turn, even
+        when it deliberately asks the same question again.
         """
 
         workspace_id = _require(context, AGENT_RUN)
         text = _validated_input(user_input)
-        token = client_token.strip() if client_token else None
-        if token is not None and (not token or len(token) > MAX_CLIENT_TOKEN_LENGTH):
+        requested_token = client_token.strip() if client_token else None
+        if requested_token is not None and (
+            not requested_token or len(requested_token) > MAX_CLIENT_TOKEN_LENGTH
+        ):
             raise AgentHubError("THREAD_TURN_INVALID", "The client token is invalid.", 422)
+        token = _request_token(requested_token)
+        digest = _input_hash(text)
         async with self.session_factory() as session:
+            # One writer per thread owns "max(sequence) + 1". Without this
+            # lock two new tokens can read the same next number; retrying that
+            # collision as though it were an idempotency replay would silently
+            # discard one request.
+            await session.scalar(
+                select(AgentThread)
+                .where(
+                    AgentThread.workspace_id == workspace_id,
+                    AgentThread.id == thread_id,
+                )
+                .with_for_update()
+            )
             await self._load(session, workspace_id, thread_id)
-            if token is not None:
-                existing = await self._by_token(session, workspace_id, thread_id, token)
-                if existing is not None:
-                    return None
+            existing = self._require_matching_turn(
+                await self._by_token(session, workspace_id, thread_id, token),
+                digest=digest,
+            )
+            if existing is not None:
+                session.expunge(existing)
+                return existing
             next_sequence = await session.scalar(
                 select(func.coalesce(func.max(ThreadTurn.sequence), 0) + 1).where(
                     ThreadTurn.workspace_id == workspace_id,
@@ -305,15 +341,46 @@ class ThreadService:
                 sequence=int(next_sequence or 1),
                 user_input=text,
                 client_token=token,
+                input_hash=digest,
             )
             session.add(turn)
             try:
                 await session.commit()
             except IntegrityError:
-                # Either two retries raced on the token, or two tabs raced on
-                # the sequence. Both are the caller asking again, not an error.
                 await session.rollback()
-                return None
+                existing = self._require_matching_turn(
+                    await self._by_token(session, workspace_id, thread_id, token),
+                    digest=digest,
+                )
+                if existing is not None:
+                    session.expunge(existing)
+                    return existing
+                # A different request raced this one for the same sequence.
+                # Retry once now that the winning row is committed.
+                next_sequence = await session.scalar(
+                    select(func.coalesce(func.max(ThreadTurn.sequence), 0) + 1).where(
+                        ThreadTurn.workspace_id == workspace_id,
+                        ThreadTurn.thread_id == thread_id,
+                    )
+                )
+                turn.sequence = int(next_sequence or 1)
+                session.add(turn)
+                try:
+                    await session.commit()
+                except IntegrityError:
+                    await session.rollback()
+                    existing = self._require_matching_turn(
+                        await self._by_token(session, workspace_id, thread_id, token),
+                        digest=digest,
+                    )
+                    if existing is None:
+                        raise AgentHubError(
+                            "THREAD_TURN_IDEMPOTENCY_CONFLICT",
+                            "The turn could not be recorded safely.",
+                            409,
+                        ) from None
+                    session.expunge(existing)
+                    return existing
             await session.refresh(turn)
             session.expunge(turn)
             return turn
@@ -357,72 +424,72 @@ class ThreadService:
         turn = await self.open_turn(
             context, thread_id, user_input=user_input, client_token=client_token
         )
-        if turn is None:
-            reused = await self._require_token_turn(context, thread_id, client_token)
-            if reused.agent_run_id is None:
-                # The first request committed its turn but has not yet attached
-                # a run. Inside the start grace window that is normal -- the
-                # run is attached only once it completes -- so the retry waits.
-                if not self._orphan_turn_expired(reused):
-                    raise AgentHubError(
-                        "THREAD_TURN_IN_PROGRESS",
-                        "The turn is still being started; retry with the same client token.",
-                        409,
-                    )
-                # Past the grace window, look for the run the first request
-                # created: ``prepare_run`` persists it (with this thread's id)
-                # before any external work, so its state tells a live run from
-                # a dead one.
-                turn_run = await self._turn_run(context, thread_id, reused)
-                if turn_run is not None:
-                    if turn_run.status in {"RUNNING", "CANCEL_REQUESTED"}:
-                        raise AgentHubError(
-                            "THREAD_TURN_IN_PROGRESS",
-                            "The turn is still being started; retry with the same client token.",
-                            409,
-                        )
-                    # The run settled (or is waiting for an approval) but the
-                    # first request died before attaching it: finish the
-                    # attach instead of 409ing forever.
-                    await self.attach_run(context, turn_id=reused.id, run_id=turn_run.id)
-                    reused.agent_run_id = turn_run.id
-                    return SubmittedTurn(
-                        turn=reused,
-                        run_id=turn_run.id,
-                        agent_version_id=turn_run.agent_version_id,
-                        reused=True,
-                    )
-                # No run was ever created: the first request died between
-                # recording the turn and starting it. Re-run the recorded
-                # question and attach the fresh run to the same turn.
-                result = await self.run_service.run(
+        return await self._submit_prepared_turn(
+            context,
+            thread_id=thread_id,
+            agent_version_id=agent_version_id,
+            turn=turn,
+        )
+
+    async def _submit_prepared_turn(
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        thread_id: UUID,
+        agent_version_id: UUID,
+        turn: ThreadTurn,
+    ) -> SubmittedTurn:
+        """Recover or create the one Run bound to a persisted Turn."""
+
+        if self.run_service is None:
+            raise AgentHubError("DATABASE_NOT_CONFIGURED", "Runs are not configured.", 503)
+        existing_run = await self._turn_run(context, thread_id, turn)
+        if existing_run is not None:
+            if turn.agent_run_id is None:
+                await self.attach_run(context, turn_id=turn.id, run_id=existing_run.id)
+                turn.agent_run_id = existing_run.id
+            if self._is_unstarted_run(existing_run):
+                await self.run_service.execute_prepared_run(
                     context,
-                    agent_version_id=agent_version_id,
-                    input_text=reused.user_input,
-                    thread_id=thread.id,
+                    run_id=existing_run.id,
                 )
-                await self.attach_run(context, turn_id=reused.id, run_id=result.run_id)
-                return SubmittedTurn(
-                    turn=reused,
-                    run_id=result.run_id,
-                    agent_version_id=agent_version_id,
-                    reused=True,
-                )
-            existing_run = await self.run_service.get_run(context, reused.agent_run_id)
             return SubmittedTurn(
-                turn=reused,
-                run_id=reused.agent_run_id,
+                turn=turn,
+                run_id=existing_run.id,
                 agent_version_id=existing_run.agent_version_id,
                 reused=True,
             )
-        result = await self.run_service.run(
-            context,
-            agent_version_id=agent_version_id,
-            input_text=turn.user_input,
-            thread_id=thread.id,
-        )
-        await self.attach_run(context, turn_id=turn.id, run_id=result.run_id)
-        turn.agent_run_id = result.run_id
+        try:
+            prepared_run = await self.run_service.prepare_run(
+                context,
+                agent_version_id=agent_version_id,
+                input_text=turn.user_input,
+                thread_id=thread_id,
+                thread_turn_id=turn.id,
+            )
+        except IntegrityError as error:
+            winner = await self._winner_after_run_conflict(
+                context,
+                thread_id=thread_id,
+                turn=turn,
+                error=error,
+            )
+            await self.attach_run(context, turn_id=turn.id, run_id=winner.id)
+            turn.agent_run_id = winner.id
+            # The uniqueness race guarantees one Run, not that its owner has
+            # started it. Run lease acquisition makes this safe for every
+            # contender; a loser immediately observes the winner's result.
+            if self._is_unstarted_run(winner):
+                await self.run_service.execute_prepared_run(context, run_id=winner.id)
+            return SubmittedTurn(
+                turn=turn,
+                run_id=winner.id,
+                agent_version_id=winner.agent_version_id,
+                reused=True,
+            )
+        await self.attach_run(context, turn_id=turn.id, run_id=prepared_run.id)
+        turn.agent_run_id = prepared_run.id
+        result = await self.run_service.execute_prepared_run(context, run_id=prepared_run.id)
         return SubmittedTurn(
             turn=turn,
             run_id=result.run_id,
@@ -430,19 +497,79 @@ class ThreadService:
             reused=False,
         )
 
-    async def token_turn(
-        self, context: WorkspaceExecutionContext, thread_id: UUID, client_token: str | None
-    ) -> ThreadTurn:
-        """Find the turn a ``client_token`` already created.
+    async def ensure_stream_run(
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        thread_id: UUID,
+        agent_version_id: UUID,
+        turn: ThreadTurn,
+    ) -> PreparedTurnRun:
+        """Claim and prepare the one streaming Run for a persisted Turn.
 
-        ``open_turn`` answers ``None`` for a repeated token because it refuses
-        to create a second turn; this is how a caller then reaches the first
-        one. The streaming path needs it for the same reason the synchronous
-        path does: a retry must arrive at the run it already started, not at
-        an empty response.
+        The database Turn row is the claim. Every contender looks up the Run by
+        ``thread_turn_id``; only the winner that created it streams, and every
+        retry replays that Run. There is no grace window or time comparison.
         """
 
-        return await self._require_token_turn(context, thread_id, client_token)
+        if self.run_service is None:
+            raise AgentHubError("DATABASE_NOT_CONFIGURED", "Runs are not configured.", 503)
+        existing = await self._turn_run(context, thread_id, turn)
+        if existing is not None:
+            if turn.agent_run_id is None:
+                await self.attach_run(context, turn_id=turn.id, run_id=existing.id)
+                turn.agent_run_id = existing.id
+            return PreparedTurnRun(
+                turn=turn,
+                run_id=existing.id,
+                run=existing if self._is_unstarted_run(existing) else None,
+                reused=True,
+            )
+        try:
+            prepared = await self.run_service.prepare_stream(
+                context,
+                agent_version_id=agent_version_id,
+                input_text=turn.user_input,
+                thread_id=thread_id,
+                thread_turn_id=turn.id,
+            )
+        except IntegrityError as error:
+            winner = await self._winner_after_run_conflict(
+                context,
+                thread_id=thread_id,
+                turn=turn,
+                error=error,
+            )
+            await self.attach_run(context, turn_id=turn.id, run_id=winner.id)
+            turn.agent_run_id = winner.id
+            return PreparedTurnRun(
+                turn=turn,
+                run_id=winner.id,
+                run=winner if self._is_unstarted_run(winner) else None,
+                reused=True,
+            )
+        await self.attach_run(context, turn_id=turn.id, run_id=prepared.id)
+        turn.agent_run_id = prepared.id
+        return PreparedTurnRun(
+            turn=turn,
+            run_id=prepared.id,
+            run=prepared,
+            reused=False,
+        )
+
+    async def token_turn(
+        self,
+        context: WorkspaceExecutionContext,
+        thread_id: UUID,
+        client_token: str | None,
+        *,
+        user_input: str,
+    ) -> ThreadTurn:
+        """Find the turn recorded for a request id, rejecting body changes."""
+
+        return await self._require_token_turn(
+            context, thread_id, client_token, user_input=user_input
+        )
 
     # -- internals -------------------------------------------------------
 
@@ -452,55 +579,159 @@ class ThreadService:
         thread_id: UUID,
         turn: ThreadTurn,
     ) -> AgentRun | None:
-        """The run the turn's first request created, if one exists.
+        """Return only a Run that is provably bound to this exact Turn.
 
-        ``prepare_run`` persists the AgentRun -- with this thread's id -- before
-        any external work starts, so the earliest run created at or after the
-        turn is the one that first request launched. ``None`` means the first
-        request died before it ever created its run.
+        New turns use ``agent_runs.thread_turn_id``. Historical reverse
+        pointers are accepted only when 0036 proved them unique and when every
+        identity field still agrees. Ambiguous or null historical bindings
+        produce an explicit recovery error; this lookup never infers ownership
+        from creation time or sequence.
         """
 
         workspace_id = _workspace_id(context)
         async with self.session_factory() as session:
-            return await session.scalar(
-                select(AgentRun)
-                .where(
+            stable = await session.scalar(
+                select(AgentRun).where(
                     AgentRun.workspace_id == workspace_id,
                     AgentRun.thread_id == thread_id,
-                    AgentRun.created_at >= turn.created_at,
+                    AgentRun.thread_turn_id == turn.id,
                 )
-                .order_by(AgentRun.created_at, AgentRun.id)
-                .limit(1)
             )
+            if stable is not None:
+                if stable.input_text != turn.user_input or (
+                    turn.agent_run_id is not None and turn.agent_run_id != stable.id
+                ):
+                    raise AgentHubError(
+                        "THREAD_TURN_RECOVERY_REQUIRED",
+                        "The turn's stable and legacy Run bindings disagree.",
+                        409,
+                    )
+                return stable
+
+            if turn.legacy_recovery_required:
+                raise AgentHubError(
+                    "THREAD_TURN_RECOVERY_REQUIRED",
+                    "The historical turn cannot be recovered without operator review.",
+                    409,
+                )
+            if turn.agent_run_id is None:
+                return None
+
+            legacy = await session.scalar(
+                select(AgentRun).where(
+                    AgentRun.workspace_id == workspace_id,
+                    AgentRun.id == turn.agent_run_id,
+                )
+            )
+            if legacy is None:
+                raise AgentHubError(
+                    "THREAD_TURN_RECOVERY_REQUIRED",
+                    "The historical turn references a missing Run.",
+                    409,
+                )
+            if (
+                legacy.thread_id != thread_id
+                or legacy.input_text != turn.user_input
+                or (legacy.thread_turn_id is not None and legacy.thread_turn_id != turn.id)
+            ):
+                raise AgentHubError(
+                    "THREAD_TURN_RECOVERY_REQUIRED",
+                    "The historical turn has an inconsistent Run binding.",
+                    409,
+                )
+            owners = await session.scalar(
+                select(func.count())
+                .select_from(ThreadTurn)
+                .where(
+                    ThreadTurn.workspace_id == workspace_id,
+                    ThreadTurn.id != turn.id,
+                    ThreadTurn.agent_run_id == legacy.id,
+                )
+            )
+            if int(owners or 0):
+                raise AgentHubError(
+                    "THREAD_TURN_RECOVERY_REQUIRED",
+                    "The historical Run is shared by more than one Turn.",
+                    409,
+                )
+            return legacy
+
+    async def _winner_after_run_conflict(
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        thread_id: UUID,
+        turn: ThreadTurn,
+        error: IntegrityError,
+    ) -> AgentRun:
+        """Resolve only the Run-to-Turn uniqueness race; re-raise anything else."""
+
+        if not self._is_run_turn_conflict(error):
+            raise error
+        winner = await self._turn_run(context, thread_id, turn)
+        if winner is None:
+            raise error
+        return winner
 
     @staticmethod
-    def _orphan_turn_expired(turn: ThreadTurn) -> bool:
-        """True once a turn without any run is safely past the start window."""
+    def _is_run_turn_conflict(error: IntegrityError) -> bool:
+        detail = str(getattr(error.orig, "diag", None) or error)
+        return "uq_agent_runs_thread_turn" in detail
 
-        created_at = getattr(turn, "created_at", None)
-        if created_at is None:
-            return False
-        if created_at.tzinfo is None:
-            created_at = created_at.replace(tzinfo=UTC)
-        return datetime.now(UTC) - created_at >= TURN_START_GRACE
+    @staticmethod
+    def _is_unstarted_run(run: AgentRun) -> bool:
+        """Only an unclaimed RUNNING row can safely be dispatched again."""
+
+        return (
+            getattr(run, "status", None) == "RUNNING"
+            and getattr(run, "execution_owner", None) is None
+        )
 
     async def _require_token_turn(
-        self, context: WorkspaceExecutionContext, thread_id: UUID, client_token: str | None
+        self,
+        context: WorkspaceExecutionContext,
+        thread_id: UUID,
+        client_token: str | None,
+        *,
+        user_input: str,
     ) -> ThreadTurn:
         workspace_id = _workspace_id(context)
+        text = _validated_input(user_input)
+        digest = _input_hash(text)
         token = (client_token or "").strip()
+        if not token:
+            raise AgentHubError(
+                "THREAD_TURN_NOT_FOUND",
+                "No submission token was supplied.",
+                404,
+            )
         async with self.session_factory() as session:
-            existing = (
-                await self._by_token(session, workspace_id, thread_id, token) if token else None
+            existing = self._require_matching_turn(
+                await self._by_token(session, workspace_id, thread_id, token),
+                digest=digest,
             )
             if existing is None:
                 raise AgentHubError(
-                    "THREAD_TURN_CONFLICT",
-                    "The turn could not be recorded; retry the submission.",
-                    409,
+                    "THREAD_TURN_NOT_FOUND",
+                    "The matching turn was not found.",
+                    404,
                 )
             session.expunge(existing)
             return existing
+
+    @staticmethod
+    def _require_matching_turn(
+        existing: ThreadTurn | None,
+        *,
+        digest: str,
+    ) -> ThreadTurn | None:
+        if existing is not None and existing.input_hash != digest:
+            raise AgentHubError(
+                "THREAD_TURN_IDEMPOTENCY_CONFLICT",
+                "The submission token is already bound to different input.",
+                409,
+            )
+        return existing
 
     async def _by_token(
         self, session: AsyncSession, workspace_id: UUID, thread_id: UUID, token: str
@@ -538,7 +769,7 @@ class ThreadService:
                 .outerjoin(
                     AgentRun,
                     (AgentRun.workspace_id == ThreadTurn.workspace_id)
-                    & (AgentRun.id == ThreadTurn.agent_run_id),
+                    & (AgentRun.thread_turn_id == ThreadTurn.id),
                 )
                 .where(
                     ThreadTurn.workspace_id == workspace_id,
@@ -549,4 +780,4 @@ class ThreadService:
             return [(turn, run) for turn, run in rows.all()]
 
 
-__all__ = ["NOT_FOUND", "SubmittedTurn", "ThreadService"]
+__all__ = ["NOT_FOUND", "PreparedTurnRun", "SubmittedTurn", "ThreadService"]

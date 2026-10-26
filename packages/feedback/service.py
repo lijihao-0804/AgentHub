@@ -87,10 +87,16 @@ class FeedbackService:
             )
         if turn_id is not None:
             turn = await session.scalar(
-                select(ThreadTurn).where(
-                    ThreadTurn.workspace_id == run.workspace_id,
+                select(AgentRun)
+                .join(
+                    ThreadTurn,
+                    (ThreadTurn.workspace_id == AgentRun.workspace_id)
+                    & (ThreadTurn.id == AgentRun.thread_turn_id),
+                )
+                .where(
+                    AgentRun.workspace_id == run.workspace_id,
+                    AgentRun.id == run.id,
                     ThreadTurn.id == turn_id,
-                    ThreadTurn.agent_run_id == run.id,
                     ThreadTurn.thread_id == run.thread_id,
                 )
             )

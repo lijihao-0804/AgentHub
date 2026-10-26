@@ -547,6 +547,11 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "cost_amount",
         "cost_currency",
         "cost_is_estimate",
+        "provider",
+        "model",
+        "usage_source",
+        "attempt_status",
+        "cost_status",
     }
     result: dict[str, Any] = {}
     for key, value in metadata.items():

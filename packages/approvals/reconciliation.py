@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -23,6 +24,7 @@ from packages.core.execution_context.models import WorkspaceExecutionContext
 # checkpoint within seconds of starting, so only a genuinely dead run is
 # caught, never a slow model call.
 RUN_CHECKPOINT_MISSING_AFTER_SECONDS = 900
+logger = logging.getLogger(__name__)
 
 
 class ApprovalReconciliationService:
@@ -31,9 +33,11 @@ class ApprovalReconciliationService:
         session_factory: async_sessionmaker[AsyncSession],
         *,
         checkpoint_probe: CheckpointProbe | None = None,
+        resume_dispatch=None,
     ) -> None:
         self.session_factory = session_factory
         self.checkpoint_probe = checkpoint_probe
+        self.resume_dispatch = resume_dispatch
 
     async def reconcile_run(
         self,
@@ -139,11 +143,18 @@ class ApprovalReconciliationService:
                         ),
                         AgentRun.started_at <= cutoff,
                     )
-                    .order_by(AgentRun.started_at, AgentRun.id)
+                    .order_by(
+                        AgentRun.reconciled_at.asc().nullsfirst(), AgentRun.started_at, AgentRun.id
+                    )
                     .limit(batch_size)
                     .with_for_update(skip_locked=True)
                 )
             )
+            # Advance the cursor even when the checkpoint probe itself fails;
+            # a permanently broken first page must not starve later runs.
+            for candidate in candidates:
+                candidate.reconciled_at = datetime.now(UTC)
+            await session.commit()
         result = {"scanned": len(candidates), "changed": 0, "errors": 0}
         for candidate in candidates:
             try:
@@ -178,6 +189,7 @@ class ApprovalReconciliationService:
                     before_status = run.status
                     before_completed_at = run.completed_at
                     now = datetime.now(UTC)
+                    run.reconciled_at = now
                     expired_count = 0
                     for approval in pending:
                         if approval.expires_at is not None and approval.expires_at <= now:
@@ -212,8 +224,27 @@ class ApprovalReconciliationService:
                         )
                         result["changed"] += 1
                     await session.commit()
+                if (
+                    self.resume_dispatch is not None
+                    and run.status == "WAITING_APPROVAL"
+                    and getattr(run, "resume_pending", False)
+                ):
+                    active = getattr(run, "waiting_approval_id", None)
+                    decided = next(
+                        (
+                            a
+                            for a in approvals
+                            if a.decision_status != "PENDING" and (active is None or a.id == active)
+                        ),
+                        None,
+                    )
+                    if decided is not None:
+                        await self.resume_dispatch(run, decided)
             except Exception:
                 result["errors"] += 1
+                logger.exception(
+                    "approval_reconciliation_failed", extra={"run_id": str(candidate.id)}
+                )
         return result
 
 
@@ -225,6 +256,34 @@ def _apply_reconciliation_transition(
     approvals: list[Approval] | None = None,
     stale: bool = False,
 ) -> None:
+    all_approvals = approvals or pending
+    before_status = run.status
+    now = datetime.now(UTC)
+    expiry = getattr(run, "execution_lease_expires_at", None)
+    live_owner = bool(
+        getattr(run, "execution_owner", None)
+        and expiry
+        and (expiry if expiry.tzinfo else expiry.replace(tzinfo=UTC)) > now
+    )
+    if live_owner:
+        return
+    expired_owner = bool(getattr(run, "execution_owner", None) and not live_owner)
+    if expired_owner:
+        run.status = "NEEDS_ATTENTION"
+        run.event_log_complete = False
+        run.failure_code = "RUN_EXECUTION_LEASE_EXPIRED"
+        run.execution_owner = None
+        run.execution_lease_expires_at = None
+    if (stale or expired_owner) and any(a.execution_status == "CLAIMED" for a in all_approvals):
+        for approval in all_approvals:
+            if approval.execution_status == "CLAIMED":
+                approval.execution_status = "UNKNOWN_OUTCOME"
+                approval.failure_code = "ACTION_OUTCOME_UNKNOWN"
+        run.status = "NEEDS_ATTENTION"
+        run.failure_code = "ACTION_RECONCILIATION_REQUIRED"
+        run.resume_pending = False
+        run.event_log_complete = False
+        return
     if run.status == "RUNNING" and pending:
         if not checkpoint_exists:
             run.status = "NEEDS_ATTENTION"
@@ -240,12 +299,23 @@ def _apply_reconciliation_transition(
     if run.status == "WAITING_APPROVAL" and not checkpoint_exists:
         run.status = "NEEDS_ATTENTION"
         run.failure_code = "APPROVAL_CHECKPOINT_MISSING"
-    all_approvals = approvals or pending
     if run.status == "CANCEL_REQUESTED" and any(
-        approval.execution_status == "CLAIMED" for approval in all_approvals
+        approval.execution_status in {"CLAIMED", "UNKNOWN_OUTCOME"} for approval in all_approvals
     ):
         run.status = "NEEDS_ATTENTION"
         run.failure_code = "ACTION_RECONCILIATION_REQUIRED"
+    elif run.status == "CANCEL_REQUESTED":
+        run.status = "CANCELLED"
+        run.failure_code = None
+    if run.status == "WAITING_APPROVAL" and checkpoint_exists and not pending:
+        active = getattr(run, "waiting_approval_id", None)
+        if any(
+            a.decision_status != "PENDING" and (active is None or a.id == active)
+            for a in all_approvals
+        ):
+            run.resume_pending = True
+    if run.status != before_status:
+        run.event_log_complete = False
 
 
 def _run_is_stale(run: AgentRun, now: datetime) -> bool:

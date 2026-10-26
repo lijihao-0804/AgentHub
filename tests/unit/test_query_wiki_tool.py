@@ -281,6 +281,9 @@ async def test_handler_projects_envelope_output(monkeypatch):
     assert captured["permissions"] <= {"tool_run", "agent_run", "knowledge_run"}
 
     assert result["route"] == "HYBRID"
+    assert result["degraded"] is False
+    assert result["degraded_reason"] is None
+    assert result["delivered_origins"] == ["RAW", "WIKI_DERIVED"]
     assert result["binding"] == {
         "knowledge_base_id": _KB,
         "wiki_publication_id": _PUB,
@@ -305,6 +308,82 @@ async def test_handler_projects_envelope_output(monkeypatch):
             "chunk_id",
         }
         assert reference["snapshot_id"] == _SNAP
+
+
+async def test_handler_reserves_both_origins_when_ten_wiki_claims_precede_raw(
+    monkeypatch,
+):
+    claims = [
+        _wiki_claim(
+            quote=f"Wiki claim {index}.",
+            chunk_id=f"chunk-{index}",
+            document_revision_id=f"rev-{index}",
+        )
+        for index in range(1, 11)
+    ]
+    raw = _raw_evidence(
+        quote="Raw passage that fills the other half of HYBRID.",
+        chunk_id="chunk-raw",
+        document_revision_id="rev-raw",
+    )
+
+    async def fake_query_wiki(*_args, **_kwargs):
+        return {
+            "route": "HYBRID",
+            "insufficient_evidence": False,
+            "supplemental_required": False,
+            "conflicts": [],
+            "evidence": [*claims, raw],
+        }
+
+    monkeypatch.setattr(_query_wiki_module(), "_query_wiki", fake_query_wiki)
+    from packages.tools.builtins.query_wiki import query_wiki
+
+    result = await query_wiki(
+        _context(),
+        _definition(),
+        {"query": "retention", "mode": "HYBRID"},
+        _session_factory([_compilation()]),
+    )
+
+    assert len(result["results"]) == 10
+    assert result["results"][0]["origin"] == "WIKI_DERIVED"
+    assert result["results"][1]["origin"] == "RAW"
+    assert result["delivered_origins"] == ["RAW", "WIKI_DERIVED"]
+    assert result["degraded"] is True
+    assert result["degraded_reason"] == "EVIDENCE_COUNT_LIMIT"
+
+
+@pytest.mark.parametrize("origin", ["WIKI_DERIVED", "RAW"])
+async def test_handler_marks_hybrid_degraded_when_one_origin_is_missing(
+    monkeypatch,
+    origin,
+):
+    evidence = [_wiki_claim()] if origin == "WIKI_DERIVED" else [_raw_evidence()]
+
+    async def fake_query_wiki(*_args, **_kwargs):
+        return {
+            "route": "HYBRID",
+            "insufficient_evidence": False,
+            "supplemental_required": False,
+            "conflicts": [],
+            "evidence": evidence,
+        }
+
+    monkeypatch.setattr(_query_wiki_module(), "_query_wiki", fake_query_wiki)
+    from packages.tools.builtins.query_wiki import query_wiki
+
+    result = await query_wiki(
+        _context(),
+        _definition(),
+        {"query": "retention", "mode": "HYBRID"},
+        _session_factory([_compilation()]),
+    )
+
+    assert result["route"] == "HYBRID"
+    assert result["delivered_origins"] == [origin]
+    assert result["degraded"] is True
+    assert result["degraded_reason"] == "HYBRID_PARTIAL_DELIVERY"
 
 
 async def test_handler_rejects_incomplete_wiki_envelope(monkeypatch):

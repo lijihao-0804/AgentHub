@@ -215,9 +215,10 @@ async def test_m1_migration_creates_postgres_schema(
             ).all()
         }
         assert audit_columns["safe_metadata"] == "jsonb"
-        assert all(audit_columns[column] == "uuid" for column in (
-            "actor_user_id", "organization_id", "workspace_id"
-        ))
+        assert all(
+            audit_columns[column] == "uuid"
+            for column in ("actor_user_id", "organization_id", "workspace_id")
+        )
         foreign_keys = await connection.scalars(
             text(
                 """
@@ -272,11 +273,7 @@ async def test_auth_rotation_reuse_and_logout_are_postgres_backed(
 
     async with factory() as session:
         sessions = list(
-            (
-                await session.scalars(
-                    select(AuthSession).where(AuthSession.user_id == user_id)
-                )
-            ).all()
+            (await session.scalars(select(AuthSession).where(AuthSession.user_id == user_id))).all()
         )
     assert len(sessions) == 2
     assert all(session.token_hash not in {old_refresh, new_refresh} for session in sessions)
@@ -286,9 +283,7 @@ async def test_auth_rotation_reuse_and_logout_are_postgres_backed(
     _, _, logout_refresh, _ = await register(client)
     logged_out = await client.post("/api/v1/auth/logout")
     assert logged_out.status_code == 200
-    after_logout = await client.post(
-        "/api/v1/auth/refresh", cookies={COOKIE_NAME: logout_refresh}
-    )
+    after_logout = await client.post("/api/v1/auth/refresh", cookies={COOKIE_NAME: logout_refresh})
     assert after_logout.status_code == 401
     assert error_code(after_logout) == "REFRESH_TOKEN_REVOKED"
 
@@ -315,6 +310,18 @@ async def test_concurrent_refresh_only_one_request_succeeds(
     assert sorted(response.status_code for response in responses) == [200, 401]
     failed = next(response for response in responses if response.status_code == 401)
     assert error_code(failed) == "REFRESH_TOKEN_REUSE"
+    # Reuse revokes the whole family, including the concurrent winner's
+    # replacement. Preserve that security contract rather than adding a grace
+    # window that would hide token theft.
+    winner = next(response for response in responses if response.status_code == 200)
+    replacement = winner.cookies.get(COOKIE_NAME)
+    assert replacement
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as fresh:
+        followup = await fresh.post("/api/v1/auth/refresh", cookies={COOKIE_NAME: replacement})
+    assert followup.status_code == 401
+    assert error_code(followup) == "REFRESH_TOKEN_REVOKED"
 
 
 @pytest.mark.asyncio
@@ -345,9 +352,7 @@ async def test_auth_failures_are_uniform_and_expired_credentials_rejected(
     assert wrong_password.json()["error"]["message"] == unknown_email.json()["error"]["message"]
 
     settings = Settings(testing=True)
-    expired_access = issue_access_token(
-        user_id, settings, datetime.now(UTC) - timedelta(hours=2)
-    )
+    expired_access = issue_access_token(user_id, settings, datetime.now(UTC) - timedelta(hours=2))
     expired_access_response = await client.get(
         "/api/v1/organizations", headers=bearer(expired_access)
     )
@@ -523,9 +528,7 @@ async def test_tenant_rbac_and_owner_protection_use_database_state(
     )
     assert cross_tenant.status_code == 404
 
-    principal = PrincipalContext(
-        request_id="m1-owner", trace_id="m1-owner", user_id=str(owner_id)
-    )
+    principal = PrincipalContext(request_id="m1-owner", trace_id="m1-owner", user_id=str(owner_id))
     async with factory() as session:
         with pytest.raises(AgentHubError, match="last organization owner") as remove_error:
             await TenantService().remove_organization_member(
@@ -760,9 +763,7 @@ async def test_last_owner_protection_serializes_independent_postgres_transaction
     )
     assert added.status_code == 201
 
-    async def remove_owner(
-        actor_user_id: UUID, target_user_id: UUID, request_id: str
-    ) -> str:
+    async def remove_owner(actor_user_id: UUID, target_user_id: UUID, request_id: str) -> str:
         async with factory() as session:
             try:
                 await TenantService().remove_organization_member(

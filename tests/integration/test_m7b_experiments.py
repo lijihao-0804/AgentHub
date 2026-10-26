@@ -100,13 +100,34 @@ def _manager_context(base: dict[str, object], *, viewer: bool = False):
     )
 
 
-def _item(case_key: str, *, split: str, ordinal: int) -> dict[str, object]:
+def _item(
+    case_key: str,
+    *,
+    split: str,
+    ordinal: int,
+    category: str = "RETRIEVAL",
+) -> dict[str, object]:
+    category_shapes = {
+        "RETRIEVAL": (
+            {"query": f"query-{case_key}"},
+            {"relevant_chunk_ids": [f"chunk-{case_key}"]},
+        ),
+        "KNOWLEDGE_QA": (
+            {"question": f"query-{case_key}"},
+            {"answer": f"answer-{case_key}", "citations": [f"chunk-{case_key}"]},
+        ),
+        "FAILURE": (
+            {"scenario": f"scenario-{case_key}"},
+            {"status": "FAILED", "failure_code": "MODEL_PROVIDER_UNAVAILABLE"},
+        ),
+    }
+    input_value, expected = category_shapes[category]
     return {
         "case_key": case_key,
         "split": split,
-        "category": "RETRIEVAL",
-        "input": {"query": f"query-{case_key}"},
-        "expected": {"relevant_chunk_ids": [f"chunk-{case_key}"]},
+        "category": category,
+        "input": input_value,
+        "expected": expected,
         "tags": ["synthetic"],
         "source_provenance": {"source_kind": "fixture", "source_id": case_key},
         "ordinal": ordinal,
@@ -121,9 +142,7 @@ async def _published_version(
 ):
     context = _manager_context(base)
     service = EvaluationDatasetService()
-    dataset = await service.create_dataset(
-        session, context=context, name=f"dataset-{uuid4().hex}"
-    )
+    dataset = await service.create_dataset(session, context=context, name=f"dataset-{uuid4().hex}")
     version = await service.create_version(
         session,
         context=context,
@@ -358,6 +377,56 @@ async def test_m7b_agent_and_pricing_integrity_are_scoped_and_frozen(db_factory)
 
 
 @pytest.mark.asyncio
+async def test_m7b_fallback_pricing_chain_requires_every_model(db_factory) -> None:
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7b-chain-{uuid4().hex}")
+        _, version = await _published_version(session, base)
+        pricing = await _pricing(session, base)
+        stored_version = await session.get(AgentVersion, base["version"].id)
+        assert stored_version is not None
+        fallback_profile = {
+            **stored_version.resolved_spec["model"],
+            "profile_id": str(uuid4()),
+            "credential_ref": str(uuid4()),
+            "model": "fallback-model",
+        }
+        stored_version.resolved_spec = {
+            **stored_version.resolved_spec,
+            "model": {
+                **stored_version.resolved_spec["model"],
+                "fallback_chain": [str(fallback_profile["profile_id"])],
+                "fallback_profiles": [fallback_profile],
+            },
+        }
+        stored_version.resolved_spec_hash = canonical_json_hash(stored_version.resolved_spec)
+        await session.commit()
+        service = ExperimentService(StaticBuildIdentityProvider("e" * 40))
+        context = _manager_context(base)
+        experiment = await service.create_experiment(
+            session,
+            context=context,
+            name="fallback chain",
+            description=None,
+            dataset_version_id=version.id,
+            split="DEV",
+            purpose="DEVELOPMENT",
+        )
+
+        with pytest.raises(AgentHubError) as invalid_chain:
+            await service.add_variant(
+                session,
+                context=context,
+                experiment_id=experiment.id,
+                label="missing-fallback-price",
+                agent_version_id=base["version"].id,
+                pricing_snapshot_id=pricing.id,
+                ordinal=0,
+            )
+
+    assert invalid_chain.value.code == "EVALUATION_PRICING_CHAIN_INVALID"
+
+
+@pytest.mark.asyncio
 async def test_m7b_latest_knowledge_is_frozen_at_variant_creation(db_factory) -> None:
     async with db_factory() as session:
         base = await _seed(session, label=f"m7b-latest-{uuid4().hex}")
@@ -479,9 +548,12 @@ async def test_m7b_holdout_exposures_are_monotonic_and_auditable(db_factory) -> 
         )
         assert first.status == second.status == EvaluationExperimentRunStatus.QUEUED
         assert (first_exposure, second_exposure) == (1, 2)
-        assert await service.holdout_exposure_count(
-            session, context=context, experiment_id=experiment.id
-        ) == 2
+        assert (
+            await service.holdout_exposure_count(
+                session, context=context, experiment_id=experiment.id
+            )
+            == 2
+        )
 
 
 @pytest.mark.asyncio
@@ -503,9 +575,7 @@ async def test_m7b_workspace_scoping_and_viewer_read(db_factory) -> None:
             purpose="DEVELOPMENT",
         )
         viewer = _manager_context(owner, viewer=True)
-        assert await service.get_experiment(
-            session, context=viewer, experiment_id=experiment.id
-        )
+        assert await service.get_experiment(session, context=viewer, experiment_id=experiment.id)
         with pytest.raises(AgentHubError) as forbidden:
             await service.create_experiment(
                 session,

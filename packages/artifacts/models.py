@@ -51,6 +51,9 @@ class Artifact(Base):
             ["created_by"], ["users.id"], name="fk_artifacts_created_by", ondelete="RESTRICT"
         ),
         UniqueConstraint("workspace_id", "id", name="uq_artifacts_workspace_id"),
+        UniqueConstraint(
+            "workspace_id", "run_id", "logical_call_id", name="uq_artifacts_run_logical_call"
+        ),
         Index("ix_artifacts_thread_created_at", "workspace_id", "thread_id", "created_at", "id"),
         Index("ix_artifacts_thread_type", "workspace_id", "thread_id", "type"),
     )
@@ -59,6 +62,10 @@ class Artifact(Base):
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     thread_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     run_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    # A deterministic projection key derived from the run-local call and the
+    # output type. It survives replay without trusting a provider-generated
+    # call id.
+    logical_call_id: Mapped[str | None] = mapped_column(String(64))
     type: Mapped[str] = mapped_column(String(64), nullable=False)
     title: Mapped[str] = mapped_column(Text, nullable=False)
     content: Mapped[dict[str, Any]] = mapped_column(

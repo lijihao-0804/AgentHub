@@ -9,9 +9,16 @@ successful selection.
 
 from __future__ import annotations
 
+import asyncio
+import math
 import time
 from dataclasses import asdict, replace
 
+from packages.core.execution_context.call_scope import (
+    auxiliary_model_attempt,
+    remaining_call_seconds,
+    unpriced_auxiliary_calls_allowed,
+)
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.adapters.onyx_selection import (
     SectionSelectorError,
@@ -66,18 +73,50 @@ class OnyxSelectionKnowledgeRetriever:
         started = time.perf_counter()
         selected: tuple[int, ...] | None = None
         fallback_reason: str | None = None
+        attempt = None
         if self.selector is None:
             fallback_reason = "unconfigured"
+        elif not unpriced_auxiliary_calls_allowed():
+            # The selector has no frozen price contract. A capped Run must not
+            # dispatch an extra unpriced model call behind its cost guard.
+            fallback_reason = "cost_budget_unpriced_selector"
         else:
             try:
                 sections = sections_from_evidence(pool.evidence)
-                selected = await self.selector.select_sections(
-                    context, query.text, sections
-                )
+                remaining = remaining_call_seconds()
+                # The candidate pool already exists: reserve time to deliver
+                # that fallback instead of letting the outer tool cancel it.
+                budget = float(getattr(self.selector, "timeout_seconds", 30.0))
+                if not math.isfinite(budget) or budget <= 0:
+                    raise ValueError("invalid selector timeout")
+                if remaining is not None:
+                    budget = min(budget, max(0.0, remaining - 0.1))
+                if budget <= 0:
+                    raise TimeoutError
+                with auxiliary_model_attempt(
+                    source="onyx_selector",
+                    provider="openai-compatible",
+                    model=getattr(self.selector, "model", None),
+                ) as attempt:
+                    try:
+                        async with asyncio.timeout(budget):
+                            selected = await self.selector.select_sections(
+                                context, query.text, sections
+                            )
+                        attempt["attempt_status"] = "SUCCEEDED"
+                    except TimeoutError:
+                        attempt["attempt_status"] = "UNKNOWN_TIMEOUT"
+                        raise
                 ranked = promote_evidence(pool.evidence, sections, selected)
+            except TimeoutError:
+                selected, fallback_reason = None, "selector_deadline"
             except SectionSelectorError as exc:
+                if attempt is not None:
+                    attempt["attempt_status"] = "FAILED"
                 selected, fallback_reason = None, f"selector_failed:{type(exc).__name__}"
             except ValueError as exc:
+                if attempt is not None:
+                    attempt["attempt_status"] = "FAILED"
                 # A malformed selection output surfaces as ValueError from
                 # strict parsing; a malformed pool must not leak either.
                 selected, fallback_reason = None, f"invalid_selection:{exc.__class__.__name__}"
@@ -113,13 +152,10 @@ class OnyxSelectionKnowledgeRetriever:
                         "status": "selected" if selected is not None else "fallback",
                         **({"reason": fallback_reason} if fallback_reason else {}),
                         "candidate_count": len(pool.evidence),
-                        **(
-                            {"selected_sections": len(selected)}
-                            if selected is not None
-                            else {}
-                        ),
+                        **({"selected_sections": len(selected)} if selected is not None else {}),
                         "admitted_count": len(evidence),
                         "order": "original_relevance",
+                        **({"model_usage": attempt} if attempt is not None else {}),
                     },
                 ),
             ),

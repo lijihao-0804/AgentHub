@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from threading import Lock
+from typing import Any
 
 from packages.core.config.settings import Settings
 from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
@@ -29,6 +30,58 @@ logger = logging.getLogger(__name__)
 
 _components_lock = Lock()
 _components_cache: dict[tuple[object, ...], RetrievalComponents] = {}
+
+
+def _model_name(component: object) -> str | None:
+    value = getattr(component, "model_name", None)
+    return value if isinstance(value, str) and value else None
+
+
+def _retrieval_components(retriever: object) -> tuple[object, ...]:
+    components = getattr(retriever, "components", None)
+    if components is not None:
+        return (
+            getattr(components, "dense", None),
+            getattr(components, "sparse", None),
+            getattr(components, "reranker", None),
+        )
+    return (
+        getattr(retriever, "dense_embedder", None),
+        getattr(retriever, "sparse_encoder", None),
+        getattr(retriever, "reranker", None),
+    )
+
+
+def retrieval_model_identity_mismatches(
+    retrieval_config: Mapping[str, Any] | None,
+    retriever: object,
+) -> tuple[tuple[str, str, str], ...]:
+    """Return frozen/current model identity drift that must fail closed.
+
+    Legacy versions published before model names became part of retrieval
+    configuration remain executable. Test doubles and custom adapters that do
+    not expose an identity also remain compatible. Production BGE adapters do
+    expose it, so a deployment changed after publication cannot silently run
+    a historical version against another model.
+    """
+
+    if not isinstance(retrieval_config, Mapping):
+        return ()
+    dense, sparse, reranker = _retrieval_components(retriever)
+    checks = (
+        ("embedding_model", dense),
+        ("embedding_model", sparse),
+        ("reranker_model", reranker),
+    )
+    mismatches: list[tuple[str, str, str]] = []
+    for field, component in checks:
+        frozen = retrieval_config.get(field)
+        actual = _model_name(component)
+        if isinstance(frozen, str) and frozen and actual is not None and frozen != actual:
+            mismatch = (field, frozen, actual)
+            if mismatch not in mismatches:
+                mismatches.append(mismatch)
+    return tuple(mismatches)
 
 
 def production_retrieval_components(settings: Settings) -> RetrievalComponents:
@@ -152,6 +205,7 @@ __all__ = [
     "RetrievalComponentsFactory",
     "onyx_section_selector_from_settings",
     "production_retrieval_components",
+    "retrieval_model_identity_mismatches",
     "warm_retrieval_components",
     "close_production_retrieval_components",
 ]

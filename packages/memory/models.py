@@ -37,6 +37,70 @@ from packages.core.database import Base
 
 MEMORY_KINDS = ("FACT", "PREFERENCE", "DECISION", "CONSTRAINT")
 MEMORY_STATUSES = ("ACTIVE", "SUPERSEDED", "INVALIDATED")
+MEMORY_EXTRACTION_STATUSES = ("PENDING", "RUNNING", "COMPLETED", "SKIPPED", "FAILED")
+
+
+class MemoryExtractionJob(Base):
+    """One durable extraction attempt for one source run."""
+
+    __tablename__ = "memory_extraction_jobs"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_run_id"],
+            ["agent_runs.workspace_id", "agent_runs.id"],
+            name="fk_memory_extraction_jobs_run_workspace",
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "status IN ('PENDING', 'RUNNING', 'COMPLETED', 'SKIPPED', 'FAILED')",
+            name="ck_memory_extraction_jobs_status",
+        ),
+    )
+
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    agent_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, server_default="PENDING", default="PENDING"
+    )
+    claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    failure_code: Mapped[str | None] = mapped_column(String(64))
+    # Parsed candidates are persisted before recording. A lost worker after
+    # the model response therefore retries the deterministic write, not the
+    # model and not a different set of candidates.
+    candidate_payload: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+
+class MemoryContribution(Base):
+    """Which distinct source run contributed a statement to a memory row."""
+
+    __tablename__ = "memory_contributions"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_run_id"],
+            ["agent_runs.workspace_id", "agent_runs.id"],
+            name="fk_memory_contributions_run_workspace",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "memory_id"],
+            ["workspace_memories.workspace_id", "workspace_memories.id"],
+            name="fk_memory_contributions_memory_workspace",
+            ondelete="CASCADE",
+        ),
+        Index("ix_memory_contributions_memory", "workspace_id", "memory_id"),
+    )
+
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    agent_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    content_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    memory_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
 
 class WorkspaceMemory(Base):
@@ -127,4 +191,11 @@ class WorkspaceMemory(Base):
     )
 
 
-__all__ = ["MEMORY_KINDS", "MEMORY_STATUSES", "WorkspaceMemory"]
+__all__ = [
+    "MEMORY_EXTRACTION_STATUSES",
+    "MEMORY_KINDS",
+    "MEMORY_STATUSES",
+    "MemoryContribution",
+    "MemoryExtractionJob",
+    "WorkspaceMemory",
+]
