@@ -67,7 +67,6 @@ export default function KnowledgeBasesPage() {
 
       <Panel
         ariaLabel={t("knowledge.bases")}
-        title={t("knowledge.bases")}
         actions={
           <button
             type="button"

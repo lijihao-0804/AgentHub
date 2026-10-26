@@ -142,17 +142,21 @@ export function Panel({
   title?: string;
   eyebrow?: string;
   actions?: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
   ariaLabel?: string;
 }) {
+  const hasHeading = Boolean(title || eyebrow);
+  const label = ariaLabel ?? title;
   return (
-    <section className="panel" aria-label={ariaLabel} aria-labelledby={title ? undefined : ariaLabel}>
-      {(title || actions) && (
+    <section className="panel" aria-label={label} aria-labelledby={title ? undefined : label}>
+      {(hasHeading || actions) && (
         <div className="panel-heading">
-          <div>
-            {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-            {title && <h2>{title}</h2>}
-          </div>
+          {hasHeading && (
+            <div>
+              {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+              {title && <h2>{title}</h2>}
+            </div>
+          )}
           {actions && <div className="panel-actions">{actions}</div>}
         </div>
       )}

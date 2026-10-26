@@ -108,7 +108,6 @@ export default function AgentsPage() {
 
       <Panel
         ariaLabel={t("agents.title")}
-        title={t("agents.agents")}
         actions={
           <button
             type="button"

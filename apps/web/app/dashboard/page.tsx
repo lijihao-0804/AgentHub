@@ -223,11 +223,7 @@ export default function DashboardPage() {
             ))}
           </select>
         </label>
-        <div className="runs-toolbar-actions">
-          <button type="button" className="button button-primary" onClick={() => void load()} disabled={loading}>
-            {loading ? t("common.loading") : t("common.refresh")}
-          </button>
-        </div>
+        {/* No refresh button: this view polls every few seconds on its own. */}
       </section>
 
       {error && (

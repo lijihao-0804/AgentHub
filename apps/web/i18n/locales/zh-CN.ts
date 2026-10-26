@@ -609,7 +609,7 @@ export const zhCN: MessageSchema = {
     },
   },
   runs: {
-    eyebrow: "运行",
+    eyebrow: "可观测性",
     title: "运行",
     lede: "工作区范围内的运行历史，展示脱敏后的状态、用量、成本与审批信息。",
     filters: {
@@ -620,7 +620,6 @@ export const zhCN: MessageSchema = {
       version: "版本",
       allVersions: "全部版本",
       linkedVersion: "链接指定的版本（ID 已保留）",
-      apply: "应用",
       clear: "清空",
     },
     columns: {
@@ -995,7 +994,7 @@ export const zhCN: MessageSchema = {
     },
     datasets: {
       loadMore: "加载更多",
-      eyebrow: "数据集",
+      eyebrow: "评估",
       title: "数据集",
       lede: "带版本的评估用例集合。已发布版本不可变，可被实验绑定。",
       columns: {
@@ -1068,7 +1067,7 @@ export const zhCN: MessageSchema = {
       },
     },
     pricing: {
-      eyebrow: "定价",
+      eyebrow: "评估",
       title: "定价快照",
       lede: "绑定到实验变体的不可变模型价格记录。金额保留记录时的币种，不进行换算。",
       columns: {
@@ -1111,7 +1110,7 @@ export const zhCN: MessageSchema = {
     },
     experiments: {
       loadMore: "加载更多",
-      eyebrow: "实验",
+      eyebrow: "评估",
       title: "实验",
       lede: "冻结在某个已发布数据集版本上的评估规格，包含一个或多个智能体变体。",
       columns: {
@@ -1386,7 +1385,7 @@ export const zhCN: MessageSchema = {
       empty: "该对比还没有门禁决定。",
     },
     gates: {
-      eyebrow: "发布门禁",
+      eyebrow: "评估",
       title: "发布门禁策略",
       lede: "不可变的规则集合，把对比证据转换为 PASS、FAIL 或 INCONCLUSIVE 的门禁决定。",
       columns: { name: "名称", description: "描述", rules: "规则", hash: "策略哈希", created: "创建时间" },
@@ -1495,7 +1494,6 @@ export const zhCN: MessageSchema = {
       description: "供应商凭据与模型配置",
       lede: "配置供应商凭据以及智能体解析所用的模型配置。",
       providers: "供应商凭据",
-      providersEyebrow: "供应商",
       addProvider: "添加供应商凭据",
       editProvider: "编辑供应商凭据",
       provider: "供应商",
@@ -1511,8 +1509,6 @@ export const zhCN: MessageSchema = {
       apiKey: "API Key",
       newApiKey: "新的 API Key",
       rotate: "轮换密钥",
-      secretState: "密钥",
-      secretConfigured: "凭据已配置",
       secretNote: "密钥只写不读，已保存的密钥不会返回浏览器。",
       secretRotated: "API Key 已轮换。",
       credentialCreated: "供应商凭据已创建。",
@@ -1520,10 +1516,8 @@ export const zhCN: MessageSchema = {
       noProviders: "暂无供应商凭据",
       noProvidersHint: "请先添加供应商凭据，再创建模型配置。",
       status: "状态",
-      created: "创建时间",
       actions: "操作",
       profiles: "模型配置",
-      profilesEyebrow: "模型配置",
       addProfile: "添加模型配置",
       editProfile: "编辑模型配置",
       profileCreated: "模型配置已创建。",
@@ -1983,7 +1977,7 @@ export const zhCN: MessageSchema = {
     create: "创建会话",
     cancel: "取消",
     needsAgent: "研究会话需要一个已发布的智能体，请先创建：",
-    recent: "最近的研究",
+    recent: "研究会话",
     noThreads: "还没有研究会话",
     noThreadsHint: "新建一个会话，提问并保留它产生的每一次运行与每一篇论文。",
     summary: "{papers} 篇论文 · {turns} 轮对话",
@@ -2133,7 +2127,7 @@ export const zhCN: MessageSchema = {
     newThread: "新建故障",
     createTitle: "开一个排查会话",
     threadTitlePlaceholder: "例如 INC-2026-091 checkout-api 5xx",
-    recent: "进行中的故障",
+    recent: "排查会话",
     noThreads: "还没有排查会话",
     noThreadsHint: "新建一个排查会话；智能体读取的每条指标、日志和发布记录都会被留存。",
     summary: "{events} 个事件 · {turns} 轮对话",
@@ -2202,7 +2196,7 @@ export const zhCN: MessageSchema = {
     newThread: "新建分析",
     createTitle: "开一个分析会话",
     threadTitlePlaceholder: "例如 注册转化率为什么下降了？",
-    recent: "最近的分析",
+    recent: "分析会话",
     noThreads: "还没有分析会话",
     noThreadsHint: "开一个，它跑过的每条查询都会连同结果一起留存。",
     summary: "{queries} 条查询 · {turns} 轮对话",
@@ -2245,7 +2239,7 @@ export const zhCN: MessageSchema = {
     newThread: "新建工单",
     createTitle: "开一个客服工单",
     threadTitlePlaceholder: "例如 CS-10291 退款没有到账",
-    recent: "进行中的工单",
+    recent: "支持工单",
     noThreads: "还没有工单",
     noThreadsHint: "新建工单后，智能体执行的每次查询都会留在这张工单上。",
     summary: "{turns} 轮对话",

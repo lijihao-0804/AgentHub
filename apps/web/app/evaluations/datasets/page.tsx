@@ -146,8 +146,6 @@ export default function EvaluationDatasetsPage() {
 
       <Panel
         ariaLabel={t("evaluation.datasets.title")}
-        title={t("evaluation.datasets.title")}
-        eyebrow={t("evaluation.datasets.eyebrow")}
         actions={
           <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
             {t("evaluation.datasets.create")}

@@ -191,8 +191,7 @@ export default function EvaluationPricingPage() {
       </header>
 
       <Panel
-        title={t("evaluation.pricing.title")}
-        eyebrow={t("evaluation.pricing.eyebrow")}
+        ariaLabel={t("evaluation.pricing.title")}
         actions={
           <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
             {t("evaluation.pricing.create")}

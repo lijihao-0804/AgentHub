@@ -617,7 +617,7 @@ export const enUS = {
     },
   },
   runs: {
-    eyebrow: "Runs",
+    eyebrow: "Observability",
     title: "Runs",
     lede: "Workspace-scoped runtime history with safe status, usage, cost and approval projections.",
     filters: {
@@ -628,7 +628,6 @@ export const enUS = {
       version: "Version",
       allVersions: "All versions",
       linkedVersion: "Version from the link (ID kept)",
-      apply: "Apply",
       clear: "Clear",
     },
     columns: {
@@ -1006,7 +1005,7 @@ export const enUS = {
     },
     datasets: {
       loadMore: "Load more",
-      eyebrow: "Datasets",
+      eyebrow: "Evaluation",
       title: "Datasets",
       lede: "Versioned evaluation case collections. Published versions are immutable and can be bound by experiments.",
       columns: {
@@ -1079,7 +1078,7 @@ export const enUS = {
       },
     },
     pricing: {
-      eyebrow: "Pricing",
+      eyebrow: "Evaluation",
       title: "Pricing snapshots",
       lede: "Immutable model price records bound into experiment variants. Amounts stay in their recorded currency and are never converted.",
       columns: {
@@ -1122,7 +1121,7 @@ export const enUS = {
     },
     experiments: {
       loadMore: "Load more",
-      eyebrow: "Experiments",
+      eyebrow: "Evaluation",
       title: "Experiments",
       lede: "Frozen evaluation specifications over a published dataset version, one or more agent variants.",
       columns: {
@@ -1399,7 +1398,7 @@ export const enUS = {
       empty: "No gate decisions for this comparison yet.",
     },
     gates: {
-      eyebrow: "Release gates",
+      eyebrow: "Evaluation",
       title: "Release gate policies",
       lede: "Immutable rule sets that turn comparison evidence into a PASS, FAIL or INCONCLUSIVE gate decision.",
       columns: { name: "Name", description: "Description", rules: "Rules", hash: "Policy hash", created: "Created" },
@@ -1508,7 +1507,6 @@ export const enUS = {
       description: "Provider credentials and model profiles",
       lede: "Configure provider credentials and the model profiles your agents resolve against.",
       providers: "Provider credentials",
-      providersEyebrow: "Providers",
       addProvider: "Add provider credential",
       editProvider: "Edit provider credential",
       provider: "Provider",
@@ -1524,8 +1522,6 @@ export const enUS = {
       apiKey: "API key",
       newApiKey: "New API key",
       rotate: "Rotate key",
-      secretState: "Secret",
-      secretConfigured: "Credential configured",
       secretNote: "Secrets are write-only. Existing keys are never returned to the browser.",
       secretRotated: "API key rotated.",
       credentialCreated: "Provider credential created.",
@@ -1533,10 +1529,8 @@ export const enUS = {
       noProviders: "No provider credentials",
       noProvidersHint: "Add a provider credential before creating model profiles.",
       status: "Status",
-      created: "Created",
       actions: "Actions",
       profiles: "Model profiles",
-      profilesEyebrow: "Profiles",
       addProfile: "Add model profile",
       editProfile: "Edit model profile",
       profileCreated: "Model profile created.",
@@ -2000,7 +1994,7 @@ export const enUS = {
     create: "Create thread",
     cancel: "Cancel",
     needsAgent: "A research thread runs on a published agent. Create one first:",
-    recent: "Recent Research",
+    recent: "Research sessions",
     noThreads: "No research threads yet",
     noThreadsHint: "Start one to ask a question and keep every run and paper it produces.",
     summary: "{papers} papers · {turns} turns",
@@ -2152,7 +2146,7 @@ export const enUS = {
     newThread: "New incident",
     createTitle: "Open an incident thread",
     threadTitlePlaceholder: "e.g. INC-2026-091 checkout-api 5xx",
-    recent: "Open incidents",
+    recent: "Incident sessions",
     noThreads: "No incidents yet",
     noThreadsHint: "Open one to investigate, and every metric, log and deploy it reads is recorded.",
     summary: "{events} events · {turns} turns",
@@ -2224,7 +2218,7 @@ export const enUS = {
     newThread: "New analysis",
     createTitle: "Start an analysis thread",
     threadTitlePlaceholder: "e.g. why did registration conversion drop?",
-    recent: "Recent analyses",
+    recent: "Analysis sessions",
     noThreads: "No analyses yet",
     noThreadsHint: "Start one and every query it runs is kept with its result.",
     summary: "{queries} queries · {turns} turns",
@@ -2268,7 +2262,7 @@ export const enUS = {
     newThread: "New case",
     createTitle: "Open a support case",
     threadTitlePlaceholder: "e.g. CS-10291 refund not received",
-    recent: "Open cases",
+    recent: "Support tickets",
     noThreads: "No cases yet",
     noThreadsHint: "Open one and every lookup the agent makes stays on the case.",
     summary: "{turns} turns",

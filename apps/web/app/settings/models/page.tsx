@@ -188,12 +188,6 @@ export default function ModelSettingsPage() {
     return credential ? `${credential.name} (${credential.provider})` : t("common.unknown");
   }
 
-  function profileName(profileId: string | null): string {
-    if (!profileId) return t("common.none");
-    const profile = profileList.find((item) => item.id === profileId);
-    return profile ? profile.model : t("common.unknown");
-  }
-
   /** Drops one profile's result — it predates the change being saved. */
   function forgetProfileTest(profileId: string) {
     setTestResults((current) => {
@@ -406,7 +400,6 @@ export default function ModelSettingsPage() {
       <Panel
         ariaLabel={t("settings.models.providers")}
         title={t("settings.models.providers")}
-        eyebrow={t("settings.models.providersEyebrow")}
         actions={
           <button
             type="button"
@@ -531,9 +524,7 @@ export default function ModelSettingsPage() {
                   <th scope="col">{t("settings.models.name")}</th>
                   <th scope="col">{t("settings.models.provider")}</th>
                   <th scope="col">{t("settings.models.baseUrl")}</th>
-                  <th scope="col">{t("settings.models.secretState")}</th>
                   <th scope="col">{t("settings.models.status")}</th>
-                  <th scope="col">{t("settings.models.created")}</th>
                   <th scope="col">{t("settings.models.actions")}</th>
                 </tr>
               </thead>
@@ -547,18 +538,12 @@ export default function ModelSettingsPage() {
                     <td data-label={t("settings.models.baseUrl")}>
                       {credential.base_url ? <code>{credential.base_url}</code> : t("common.none")}
                     </td>
-                    <td data-label={t("settings.models.secretState")}>
-                      {t("settings.models.secretConfigured")}
-                    </td>
                     <td data-label={t("settings.models.status")}>
                       <StatusBadge
                         status={credential.enabled ? "ENABLED" : "DISABLED"}
                         tone={credential.enabled ? "success" : "neutral"}
                         label={credential.enabled ? t("common.enabled") : t("common.disabled")}
                       />
-                    </td>
-                    <td data-label={t("settings.models.created")}>
-                      {credential.created_at ? formatDateTime(credential.created_at) : t("common.none")}
                     </td>
                     <td data-label={t("settings.models.actions")}>
                       <div className="approval-actions">
@@ -684,7 +669,6 @@ export default function ModelSettingsPage() {
       <Panel
         ariaLabel={t("settings.models.profiles")}
         title={t("settings.models.profiles")}
-        eyebrow={t("settings.models.profilesEyebrow")}
         actions={
           <button
             type="button"
@@ -879,10 +863,6 @@ export default function ModelSettingsPage() {
                 <tr>
                   <th scope="col">{t("settings.models.model")}</th>
                   <th scope="col">{t("settings.models.providerCredential")}</th>
-                  <th scope="col">{t("settings.models.temperature")}</th>
-                  <th scope="col">{t("settings.models.maxTokens")}</th>
-                  <th scope="col">{t("settings.models.timeout")}</th>
-                  <th scope="col">{t("settings.models.fallback")}</th>
                   <th scope="col">{t("settings.models.capabilities")}</th>
                   <th scope="col">{t("settings.models.status")}</th>
                   <th scope="col">{t("settings.models.testResult")}</th>
@@ -897,14 +877,6 @@ export default function ModelSettingsPage() {
                     </td>
                     <td data-label={t("settings.models.providerCredential")}>
                       {credentialName(profile.provider_credential_id)}
-                    </td>
-                    <td data-label={t("settings.models.temperature")}>{numberValue(profile.temperature)}</td>
-                    <td data-label={t("settings.models.maxTokens")}>{profile.max_tokens}</td>
-                    <td data-label={t("settings.models.timeout")}>
-                      {numberValue(profile.timeout_seconds)} s
-                    </td>
-                    <td data-label={t("settings.models.fallback")}>
-                      {profileName(profile.fallback_profile_id)}
                     </td>
                     <td data-label={t("settings.models.capabilities")}>
                       <CapabilityList capabilities={profile.capabilities} />

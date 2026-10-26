@@ -248,8 +248,7 @@ export default function EvaluationExperimentsPage() {
       </header>
 
       <Panel
-        title={t("evaluation.experiments.title")}
-        eyebrow={t("evaluation.experiments.eyebrow")}
+        ariaLabel={t("evaluation.experiments.title")}
         actions={
           <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
             {t("evaluation.experiments.create")}

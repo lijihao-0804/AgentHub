@@ -45,6 +45,8 @@
 }
 .panel-heading h2 { margin-top: 0.2rem; }
 .panel-actions { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-3); }
+/* Headings that carry only actions (title removed as redundant) keep them right-aligned. */
+.panel-heading > .panel-actions:first-child:last-child { margin-left: auto; }
 
 .state-block {
   border: 1px solid var(--border);

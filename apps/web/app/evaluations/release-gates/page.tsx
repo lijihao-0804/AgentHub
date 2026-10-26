@@ -215,8 +215,7 @@ export default function ReleaseGatePoliciesPage() {
       </header>
 
       <Panel
-        title={t("evaluation.gates.title")}
-        eyebrow={t("evaluation.gates.eyebrow")}
+        ariaLabel={t("evaluation.gates.title")}
         actions={
           <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
             {t("evaluation.gates.create")}

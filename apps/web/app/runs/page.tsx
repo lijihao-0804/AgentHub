@@ -166,16 +166,23 @@ export default function RunsPage() {
     return () => window.clearInterval(interval);
   }, [connected, hasActiveRows, nextCursor, loading, refresh]);
 
-  function applyFilters() {
-    const appliedVersion = selectedVersionId.trim();
+  /**
+   * Filters apply the moment a select changes — an extra Apply step reads as
+   * broken to anyone used to modern list views. Overrides carry the fresh
+   * value because state updates have not landed in this closure yet.
+   */
+  function applyFilters(overrides?: { status?: string; version?: string }) {
+    const nextStatus = overrides?.status ?? status;
+    const appliedVersion = (overrides?.version ?? selectedVersionId).trim();
     const params = new URLSearchParams();
-    if (status.trim()) params.set("status", status.trim());
+    if (nextStatus.trim()) params.set("status", nextStatus.trim());
     if (appliedVersion) params.set("agent_version_id", appliedVersion);
     const query = params.toString();
     window.history.replaceState(null, "", query ? `/runs?${query}` : "/runs");
+    setStatus(nextStatus);
     setAgentVersionId(appliedVersion);
     setInitialLoaded(true);
-    void refresh(null, { status, agentVersionId: appliedVersion });
+    void refresh(null, { status: nextStatus, agentVersionId: appliedVersion });
   }
 
   function clearFilters() {
@@ -216,7 +223,13 @@ export default function RunsPage() {
         <div className="runs-toolbar">
           <label>
             {t("runs.filters.status")}
-            <select value={status} onChange={(event) => setStatus(event.target.value)}>
+            <select
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value);
+                applyFilters({ status: event.target.value });
+              }}
+            >
               <option value="">{t("runs.filters.allStatuses")}</option>
               {RUN_STATUS_OPTIONS.map((option) => (
                 <option value={option} key={option}>
@@ -232,6 +245,9 @@ export default function RunsPage() {
               onChange={(event) => {
                 setSelectedAgentId(event.target.value);
                 setSelectedVersionId("");
+                // Switching agents invalidates a version filter picked under
+                // the previous one; without a filter there is nothing to re-run.
+                if (agentVersionId) applyFilters({ version: "" });
               }}
             >
               <option value="">{t("runs.filters.allAgents")}</option>
@@ -246,7 +262,10 @@ export default function RunsPage() {
             {t("runs.filters.version")}
             <select
               value={selectedVersionId}
-              onChange={(event) => setSelectedVersionId(event.target.value)}
+              onChange={(event) => {
+                setSelectedVersionId(event.target.value);
+                applyFilters({ version: event.target.value });
+              }}
               disabled={!selectedAgentId && agentVersions.length === 0 && !selectedVersionId}
             >
               <option value="">{t("runs.filters.allVersions")}</option>
@@ -261,15 +280,14 @@ export default function RunsPage() {
             </select>
           </label>
           <div className="runs-toolbar-actions">
-            <button type="button" className="button button-primary" onClick={applyFilters} disabled={loading}>
-              {t("runs.filters.apply")}
-            </button>
             <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>
               {t("common.refresh")}
             </button>
-            <button type="button" className="button button-ghost" onClick={clearFilters} disabled={loading}>
-              {t("runs.filters.clear")}
-            </button>
+            {hasFilters && (
+              <button type="button" className="button button-ghost" onClick={clearFilters} disabled={loading}>
+                {t("runs.filters.clear")}
+              </button>
+            )}
           </div>
         </div>
       </section>
