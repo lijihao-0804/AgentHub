@@ -133,7 +133,9 @@ export default function AgentsPage() {
         )}
         {profiles.loaded && profileList.length === 0 && (
           <p className="state-hint">
-            {t("agents.needsProfile")} <Link href="/settings/models">{t("settings.models.title")}</Link>
+            {t("agents.needsProfilePrefix")}{" "}
+            <Link href="/settings/models">{t("agents.needsProfileLink")}</Link>
+            {t("agents.needsProfileSuffix")}
           </p>
         )}
 

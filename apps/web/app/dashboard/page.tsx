@@ -493,7 +493,21 @@ export default function DashboardPage() {
           <Panel
             title={t("dashboard.trend.title")}
             eyebrow={t("dashboard.trend.eyebrow")}
-            actions={<span className="state-hint">{t("common.utcBucket", { bucket: timeseries?.bucket ?? "day" })}</span>}
+            actions={
+              <span className="state-hint">
+                {t(
+                  "common.utcBucket",
+                  {
+                    bucket:
+                      timeseries?.bucket === "hour"
+                        ? t("common.bucketHour")
+                        : timeseries?.bucket === "day"
+                          ? t("common.bucketDay")
+                          : (timeseries?.bucket ?? t("common.bucketDay")),
+                  },
+                )}
+              </span>
+            }
           >
             {!timeseries || timeseries.items.length === 0 ? (
               <EmptyState title={t("dashboard.trend.empty")} />

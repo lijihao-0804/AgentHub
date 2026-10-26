@@ -112,8 +112,14 @@ function validMaxContextTokens(value: string): boolean {
 }
 
 export default function ModelSettingsPage() {
-  const { t, formatDateTime } = useI18n();
+  const { t, formatDateTime, locale } = useI18n();
   const { connected, sessionId, workspaceId } = useFrontendSession();
+
+  const listFormat = new Intl.ListFormat(locale, { style: "long", type: "conjunction" });
+  function missingFieldsHint(fields: string[]): string | null {
+    if (fields.length === 0) return null;
+    return t("settings.models.missingFields", { fields: listFormat.format(fields) });
+  }
 
   const loadCredentials = useCallback((auth: AuthInput) => listProviderCredentials(auth), []);
   const loadProfiles = useCallback((auth: AuthInput) => listModelProfiles(auth), []);
@@ -371,6 +377,21 @@ export default function ModelSettingsPage() {
     });
   }
 
+  const credentialMissingHint = missingFieldsHint(
+    [
+      !credentialForm.provider.trim() && t("settings.models.provider"),
+      !credentialForm.name.trim() && t("settings.models.name"),
+      !credentialForm.secret && t("settings.models.apiKey"),
+    ].filter((field): field is string => Boolean(field)),
+  );
+  const profileMissingHint = missingFieldsHint(
+    [
+      !profileForm.provider_credential_id && t("settings.models.providerCredential"),
+      !profileForm.model.trim() && t("settings.models.model"),
+      !profileForm.max_tokens && t("settings.models.maxTokens"),
+    ].filter((field): field is string => Boolean(field)),
+  );
+
   return (
     <div className="page">
       <header className="page-header">
@@ -460,6 +481,11 @@ export default function ModelSettingsPage() {
               </label>
             </div>
             <InlineError error={credentialMutation.error} fallback={t("errors.requestFailed")} />
+            {!credentialMutation.pending && credentialMissingHint && (
+              <p className="state-hint" role="status">
+                {credentialMissingHint}
+              </p>
+            )}
             <div className="form-actions">
               <button
                 type="submit"
@@ -795,6 +821,11 @@ export default function ModelSettingsPage() {
               <p className="state-hint">{t("settings.models.maxContextTokensInvalid")}</p>
             )}
             <InlineError error={profileMutation.error} fallback={t("errors.requestFailed")} />
+            {!profileMutation.pending && profileMissingHint && (
+              <p className="state-hint" role="status">
+                {profileMissingHint}
+              </p>
+            )}
             <div className="form-actions">
               <button
                 type="submit"
@@ -952,18 +983,42 @@ function TestResultCell({ result }: { result: ModelProfileTestResult | undefined
   );
 }
 
-/** Read-only projection of the server-owned capability map. */
+/**
+ * Read-only projection of the server-owned capability map. Boolean
+ * capabilities render as reader-facing chips instead of the raw `key=value`
+ * pairs the map itself is made of; unknown future keys keep their raw form
+ * rather than being silently dropped.
+ */
 function CapabilityList({ capabilities }: { capabilities: Record<string, unknown> | null | undefined }) {
-  const { t } = useI18n();
+  const { t, formatCount } = useI18n();
   const entries = Object.entries(capabilities ?? {});
   if (entries.length === 0) return <span className="muted">{t("common.none")}</span>;
   return (
     <span className="approval-chips">
-      {entries.map(([key, value]) => (
-        <code key={key}>
-          {key}={String(value)}
-        </code>
-      ))}
+      {entries.map(([key, value]) => {
+        const labelKey = CAPABILITY_LABEL[key as BooleanCapability];
+        if (labelKey) {
+          const supported = value === true;
+          return (
+            <span key={key} className={supported ? "capability-chip" : "capability-chip capability-chip-off"}>
+              {t(labelKey)}
+              {supported ? "" : ` · ${t("settings.models.capabilityUnsupported")}`}
+            </span>
+          );
+        }
+        if (key === "max_context_tokens" && typeof value === "number" && Number.isFinite(value)) {
+          return (
+            <span key={key} className="capability-chip">
+              {t("settings.models.contextTokensLabel", { count: formatCount(value) })}
+            </span>
+          );
+        }
+        return (
+          <code key={key}>
+            {key}={String(value)}
+          </code>
+        );
+      })}
     </span>
   );
 }

@@ -460,6 +460,15 @@ export default function AppConversationPane({
                 setRecoverySubmission(recoverOriginal(submissionRef.current));
               }
             }}
+            onKeyDown={(event) => {
+              // Enter sends, Shift+Enter breaks the line, and a composition
+              // Enter (IME candidate confirmation) never submits.
+              if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+              event.preventDefault();
+              if (!mutation.pending && !cannotRun && draft.trim()) {
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
             placeholder={t("appThread.conversation.composerPlaceholder")}
             maxLength={32000}
             disabled={mutation.pending || cannotRun}

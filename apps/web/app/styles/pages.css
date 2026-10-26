@@ -273,6 +273,18 @@ a.stat-row:hover { border-color: var(--accent); }
 
 .approval-chips { border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-4); }
 
+/* Model capability chips: reader-facing badges for the server-owned capability map. */
+.capability-chip {
+  background: var(--row-subtle);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 0.1rem 0.6rem;
+  white-space: nowrap;
+}
+.capability-chip-off { color: var(--text-muted); }
+
 .timeline { display: grid; margin-top: var(--space-2); }
 .timeline-entry {
   display: grid;

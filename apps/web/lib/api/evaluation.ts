@@ -84,11 +84,26 @@ export type EvaluationDatasetVersionFromRunInput = {
 
 export type EvaluationDatasetList = { items: EvaluationDataset[]; total: number };
 
+/**
+ * Older deployments answered dataset/experiment listings with a bare array.
+ * Normalize both shapes so a contract drift degrades into a short page, not
+ * a render crash on `items.length`.
+ */
+function normalizeList<T>(payload: unknown): { items: T[]; total: number } {
+  if (Array.isArray(payload)) return { items: payload as T[], total: payload.length };
+  if (payload && typeof payload === "object") {
+    const record = payload as { items?: unknown; total?: unknown };
+    const items = Array.isArray(record.items) ? (record.items as T[]) : [];
+    return { items, total: typeof record.total === "number" ? record.total : items.length };
+  }
+  return { items: [], total: 0 };
+}
+
 export async function getDataset(input: AuthInput, datasetId: string): Promise<EvaluationDataset> {
   return get(input, `/datasets/${encodeURIComponent(datasetId)}`);
 }
 
-export function listDatasets(
+export async function listDatasets(
   input: AuthInput,
   query: { limit?: number; offset?: number } = {},
 ): Promise<EvaluationDatasetList> {
@@ -96,7 +111,7 @@ export function listDatasets(
   if (query.limit !== undefined) params.set("limit", String(query.limit));
   if (query.offset !== undefined) params.set("offset", String(query.offset));
   const suffix = params.toString() ? `?${params.toString()}` : "";
-  return get(input, `/datasets${suffix}`);
+  return normalizeList<EvaluationDataset>(await get<unknown>(input, `/datasets${suffix}`));
 }
 
 export function createDataset(
@@ -232,7 +247,7 @@ export type EvaluationExperimentDetail = EvaluationExperiment & {
 
 export type EvaluationExperimentList = { items: EvaluationExperiment[]; total: number };
 
-export function listExperiments(
+export async function listExperiments(
   input: AuthInput,
   query: { limit?: number; offset?: number } = {},
 ): Promise<EvaluationExperimentList> {
@@ -240,7 +255,7 @@ export function listExperiments(
   if (query.limit !== undefined) params.set("limit", String(query.limit));
   if (query.offset !== undefined) params.set("offset", String(query.offset));
   const suffix = params.toString() ? `?${params.toString()}` : "";
-  return get(input, `/experiments${suffix}`);
+  return normalizeList<EvaluationExperiment>(await get<unknown>(input, `/experiments${suffix}`));
 }
 
 export function getExperiment(input: AuthInput, experimentId: string): Promise<EvaluationExperimentDetail> {

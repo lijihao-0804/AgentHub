@@ -17,10 +17,50 @@ import {
   type ToolCatalogItem,
 } from "@/lib/api/tools";
 import { useI18n } from "@/i18n/provider";
+import type { MessageKey } from "@/i18n/messages";
+
+/**
+ * Catalog descriptions arrive as server-authored English text. The closed
+ * builtin catalog has reader-facing translations; anything else (future
+ * identities, MCP imports) keeps the server's own description.
+ */
+const CATALOG_DESCRIPTION_KEYS: Record<string, MessageKey> = {
+  calculator: "tools.catalogDescriptions.calculator",
+  query_customer: "tools.catalogDescriptions.query_customer",
+  search_knowledge: "tools.catalogDescriptions.search_knowledge",
+  query_wiki: "tools.catalogDescriptions.query_wiki",
+  create_ticket: "tools.catalogDescriptions.create_ticket",
+};
+
+const EXECUTION_KIND_KEYS: Record<string, MessageKey> = {
+  builtin: "tools.executionKind.builtin",
+  action: "tools.executionKind.action",
+  mcp: "tools.executionKind.mcp",
+};
+
+const APPROVAL_POLICY_KEYS: Record<string, MessageKey> = {
+  NEVER: "tools.approvalPolicy.NEVER",
+  ALWAYS: "tools.approvalPolicy.ALWAYS",
+};
 
 export default function ToolsPage() {
   const { t } = useI18n();
   const { connected, sessionId, workspaceId } = useFrontendSession();
+
+  function catalogDescription(identity: string, fallback: string | null): string {
+    const key = CATALOG_DESCRIPTION_KEYS[identity];
+    return key ? t(key) : fallback ?? "";
+  }
+  function executionKindLabel(kind: string | null | undefined): string {
+    if (!kind) return "—";
+    const key = EXECUTION_KIND_KEYS[kind.toLowerCase()];
+    return key ? t(key) : kind;
+  }
+  function approvalPolicyLabel(policy: string | null | undefined): string {
+    if (!policy) return "—";
+    const key = APPROVAL_POLICY_KEYS[policy];
+    return key ? t(key) : policy;
+  }
 
   const loadTools = useCallback((auth: AuthInput) => listTools(auth), []);
   const loadCatalog = useCallback((auth: AuthInput) => listToolCatalog(auth), []);
@@ -141,7 +181,7 @@ export default function ToolsPage() {
                       )}
                     </td>
                     <td data-label={t("tools.approval")}>
-                      <code>{tool.approval_policy ?? "—"}</code>
+                      {tool.approval_policy ? approvalPolicyLabel(tool.approval_policy) : "—"}
                     </td>
                     <td data-label={t("tools.revision")}>
                       {tool.current_revision_number != null ? `#${tool.current_revision_number}` : "—"}
@@ -199,10 +239,10 @@ export default function ToolsPage() {
                   <tr key={item.identity}>
                     <td data-label={t("tools.identity")}>
                       <code>{item.identity}</code>
-                      {item.description && <span className="state-hint">{item.description}</span>}
+                      <span className="state-hint">{catalogDescription(item.identity, item.description ?? null)}</span>
                     </td>
                     <td data-label={t("tools.kind")}>
-                      <code>{item.execution_kind}</code>
+                      {executionKindLabel(item.execution_kind)}
                     </td>
                     <td data-label={t("tools.effect")}>
                       <StatusBadge status={item.effect} />
@@ -211,7 +251,7 @@ export default function ToolsPage() {
                       <StatusBadge status={item.risk_level} tone={riskTone(item.risk_level)} />
                     </td>
                     <td data-label={t("tools.approval")}>
-                      <code>{item.approval_policy}</code>
+                      {approvalPolicyLabel(item.approval_policy)}
                     </td>
                     <td data-label={t("settings.models.actions")}>
                       <button
@@ -220,7 +260,7 @@ export default function ToolsPage() {
                         onClick={() => {
                           setSelectedIdentity(item.identity);
                           setName(item.identity);
-                          setDescription(item.description ?? "");
+                          setDescription(catalogDescription(item.identity, item.description ?? null));
                         }}
                       >
                         {t("tools.addToWorkspace")}
