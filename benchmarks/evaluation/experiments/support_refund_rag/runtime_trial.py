@@ -13,7 +13,8 @@ import os
 import re
 import subprocess
 import time
-from dataclasses import asdict, replace
+from collections.abc import Mapping
+from dataclasses import fields, is_dataclass, replace
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
@@ -93,12 +94,23 @@ def read(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def wire(value):
+    """Serialize frozen contracts without deepcopying MappingProxyType."""
+    if is_dataclass(value):
+        return {field.name: wire(getattr(value, field.name)) for field in fields(value)}
+    if isinstance(value, Mapping):
+        return {str(key): wire(item) for key, item in value.items()}
+    if isinstance(value, (tuple, list)):
+        return [wire(item) for item in value]
+    return value
+
+
 def save(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     with temporary.open("w", encoding="utf-8") as out:
-        json.dump(value, out, ensure_ascii=False, indent=2, default=str)
+        json.dump(wire(value), out, ensure_ascii=False, indent=2, default=str)
         out.write("\n")
         out.flush()
         os.fsync(out.fileno())
@@ -503,7 +515,7 @@ async def admission():
                         raise ValueError(
                             "GOVERNED_READ_FAILED:" + identity + ":" + str(result.error_code)
                         )
-                    raw[identity] = asdict(result)
+                    raw[identity] = wire(result)
                     if identity == "search_knowledge":
                         payload = project_rag_evidence_payload(
                             {"status": "SUCCESS", "trust": "UNTRUSTED", "data": result.data},
@@ -541,7 +553,7 @@ async def admission():
                 "gold_complete": coverage(q, rows),
                 "raw_tools": raw,
                 "observations": observations,
-                "model_view": asdict(admitted),
+                "model_view": wire(admitted),
                 "citation_identity_valid": True,
             }
             save(PRIVATE / "admission" / (q["case_id"] + ".json"), record)
@@ -856,8 +868,8 @@ async def execute(phase):
                         PRIVATE / "requests" / (q["case_id"] + "-A.json"),
                         [
                             {
-                                "request": asdict(c["request"]),
-                                "response": asdict(c["response"]) if c["response"] else None,
+                                "request": wire(c["request"]),
+                                "response": wire(c["response"]) if c["response"] else None,
                             }
                             for c in calls
                         ],
@@ -879,7 +891,7 @@ async def execute(phase):
                         view = visible(final["request"].messages, chunks)
                         rec["A_gold_complete"] = coverage(q, view)
                         cited = re.findall(r"\b[0-9a-f]{64}\b", a.final_output or "")
-                        if not cited:
+                        if not cited and q["answerability"] != "insufficient_evidence":
                             raise ValueError("A_POLICY_CITATIONS_MISSING")
                         if any(cid not in {r["chunk_id"] for r in view} for cid in cited):
                             raise ValueError("A_CITATION_ID_NOT_VISIBLE")
@@ -889,7 +901,7 @@ async def execute(phase):
                         if not rec["B_gold_complete"]:
                             raise ValueError("B_SUFFICIENT_SOURCE_NOT_ADMITTED")
                         meter.arm = "B"
-                        save(PRIVATE / "requests" / (q["case_id"] + "-B.json"), asdict(b_req))
+                        save(PRIVATE / "requests" / (q["case_id"] + "-B.json"), wire(b_req))
                         async with factory() as db:
                             b = await SqlAlchemyModelGateway(
                                 db,
@@ -921,7 +933,6 @@ async def execute(phase):
                             **observation_identity("runtime", {"status": "agent_run"}),
                             "status": a.status,
                             "observed_agent_status": a.status,
-                            "output_hash": canonical_json_hash(a.final_output or ""),
                             "diagnostic_B_status": rec["B_status"],
                         },
                         agent_run_id=a.run_id,
