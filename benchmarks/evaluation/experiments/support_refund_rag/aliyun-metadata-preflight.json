@@ -1,0 +1,9 @@
+{
+  "operation": "GET /models metadata only; no generation dispatch",
+  "host": "ws-actclc2u6282ierx.cn-beijing.maas.aliyuncs.com",
+  "model": "deepseek-v4.1-flash-1017",
+  "prior_sandbox_attempt": "ConnectError; no generation dispatch",
+  "http_status": 200,
+  "requested_model_listed": true,
+  "catalog_count": 180
+}

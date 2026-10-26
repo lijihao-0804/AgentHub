@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "scope": "offline material integrity only",
+  "semantic_accuracy": "not established by this script; see source-review.md",
+  "sources": 16,
+  "orders": 50,
+  "cases": 50,
+  "buckets": {
+    "single_policy": 10,
+    "cross_condition": 10,
+    "order_status": 10,
+    "temporal_version": 8,
+    "missing_conflict": 8,
+    "injection": 4
+  },
+  "smoke_ids": [
+    "S0-003",
+    "S0-005",
+    "S0-006",
+    "S0-007",
+    "S0-011",
+    "S0-022",
+    "S0-033",
+    "S0-035",
+    "S0-039",
+    "S0-047"
+  ],
+  "verified_quote_occurrences": 109,
+  "source_char_lengths": {
+    "POL-CHANNEL-MARKETPLACE-SIMPLE-NEW": 857,
+    "POL-MATERIALS-01": 1000,
+    "POL-REFUND-STATUS-01": 885,
+    "POL-REFUND-TIMING-01": 1070,
+    "POL-CHANNEL-MARKETPLACE-LONG-01": 4134,
+    "POL-CHANNEL-MARKETPLACE-SIMPLE-OLD": 828,
+    "POL-REFUND-WINDOW-OLD": 698,
+    "POL-REFUND-WINDOW-01": 758,
+    "POL-CONTRACT-PHONE-RETURN-OLD": 782,
+    "POL-CONTRACT-PHONE-RETURN-NEW": 4224,
+    "POL-ESCALATION-01": 1064,
+    "POL-CHANNELS-SIMPLE-01": 948,
+    "POL-RETURN-CONDITIONS-01": 4312,
+    "POL-UNSPECIFIED-FEES-01": 792,
+    "POL-CONFLICT-FEES-01": 817,
+    "POL-POLICY-LIFECYCLE-01": 4707
+  },
+  "errors": [],
+  "model_dispatches": 0,
+  "retrieval_executions": 0,
+  "hashes_added": 0
+}

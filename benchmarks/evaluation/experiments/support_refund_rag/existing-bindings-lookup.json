@@ -1,0 +1,6 @@
+{
+  "lookup": "default configured database; read-only, no model calls",
+  "matching_price_snapshots": [],
+  "published_config_candidates": [],
+  "published_config_lookup": "Same default database read-only exact model filter returned zero matching AgentVersions earlier in this task"
+}

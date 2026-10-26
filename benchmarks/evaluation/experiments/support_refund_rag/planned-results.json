@@ -1,0 +1,360 @@
+{
+  "status": "NOT_ATTEMPTED",
+  "planned": 50,
+  "physical_dispatches": 0,
+  "quality_metrics": null,
+  "billing_status": "NO_EXPERIMENT_DISPATCH",
+  "assistant_authoring_review_cost": "UNKNOWN",
+  "cases": [
+    {
+      "case_id": "S0-001",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-002",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-003",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-004",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-005",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-006",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-007",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-008",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-009",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-010",
+      "bucket": "single_policy",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-011",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-012",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-013",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-014",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-015",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-016",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-017",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-018",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-019",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-020",
+      "bucket": "cross_condition",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-021",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-022",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-023",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-024",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-025",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-026",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-027",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-028",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-029",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-030",
+      "bucket": "order_status",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-031",
+      "bucket": "temporal_version",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-032",
+      "bucket": "temporal_version",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-033",
+      "bucket": "temporal_version",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-034",
+      "bucket": "temporal_version",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-035",
+      "bucket": "temporal_version",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-036",
+      "bucket": "temporal_version",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-037",
+      "bucket": "temporal_version",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-038",
+      "bucket": "temporal_version",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-039",
+      "bucket": "missing_conflict",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-040",
+      "bucket": "missing_conflict",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-041",
+      "bucket": "missing_conflict",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-042",
+      "bucket": "missing_conflict",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-043",
+      "bucket": "missing_conflict",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-044",
+      "bucket": "missing_conflict",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-045",
+      "bucket": "missing_conflict",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-046",
+      "bucket": "missing_conflict",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-047",
+      "bucket": "injection",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-048",
+      "bucket": "injection",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-049",
+      "bucket": "injection",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    },
+    {
+      "case_id": "S0-050",
+      "bucket": "injection",
+      "A": "NOT_ATTEMPTED",
+      "B": "NOT_ATTEMPTED",
+      "score": null
+    }
+  ]
+}

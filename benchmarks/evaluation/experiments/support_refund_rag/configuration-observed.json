@@ -1,0 +1,59 @@
+{
+  "status": "OBSERVED_LOCAL_CONFIGURATION_NOT_PUBLISHED_RUNTIME",
+  "model_source": "benchmarks/public_rag/model-route.json primary",
+  "primary": {
+    "provider": "openai-compatible",
+    "model": "auto/deepseek-v4.1-flash",
+    "temperature": "0",
+    "max_tokens": 2048,
+    "timeout_seconds": "20",
+    "capabilities": {
+      "tool_calling": true,
+      "streaming": true,
+      "structured_output": false,
+      "vision": false,
+      "max_context_tokens": 32768
+    }
+  },
+  "configured_fallback_count": 1,
+  "experiment_required_fallbacks": [],
+  "runtime_source": "packages.agent_runtime.runtime_config server-owned defaults",
+  "runtime_defaults": {
+    "max_steps": 8,
+    "max_tool_calls": 12,
+    "max_identical_calls": 2,
+    "max_parallel_reads": 3
+  },
+  "derived_context_budget": {
+    "reserved_output_tokens": 2000,
+    "max_retrieval_tokens": 8192,
+    "max_tool_result_tokens": 4915
+  },
+  "retrieval_defaults_source": "packages.knowledge.contracts.RetrievalQuery",
+  "retrieval_defaults": {
+    "strategy": "HYBRID_RERANK",
+    "dense_top_k": 30,
+    "sparse_top_k": 30,
+    "candidate_top_k": 20,
+    "final_top_k": 6,
+    "min_rerank_score": null,
+    "rerank_top_k": null,
+    "max_chunks_per_document": null,
+    "context_budget_bytes": null,
+    "evidence_projection": null
+  },
+  "settings_allowlist": {
+    "knowledge_embedding_model": "BAAI/bge-m3",
+    "knowledge_embedding_device": "auto",
+    "knowledge_reranker_model": "BAAI/bge-reranker-v2-m3",
+    "knowledge_reranker_device": "auto",
+    "knowledge_dense_vector_size": 1024,
+    "knowledge_rrf_k": 60,
+    "knowledge_min_rerank_score": null,
+    "knowledge_superseded_rank_penalty": 0.0,
+    "knowledge_chunk_size_chars": 1200,
+    "knowledge_chunk_overlap_chars": 200
+  },
+  "pricing": "UNKNOWN; route config contains no verified billing tariff",
+  "publication_gate": "Before S1 acceptance, select a specific valid published config and compare its actual frozen output/temperature/runtime/retrieval values. Observed defaults are not evidence of a published version. Freeze all differences before dispatch."
+}

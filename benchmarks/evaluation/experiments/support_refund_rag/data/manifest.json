@@ -1,0 +1,402 @@
+{
+  "schema_version": "support_refund_rag.manifest.v1",
+  "fictional": true,
+  "business_clock": {
+    "timezone": "Asia/Shanghai",
+    "business_time_anchor": "2026-10-19T10:00:00+08:00",
+    "working_weekdays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "extra_holidays": [],
+    "currency": "CNY",
+    "rule_note": "虚构商家测试规则：工作日为周一至周五，无额外假日；日期含首尾日时明确写明。"
+  },
+  "source_count": 16,
+  "document_mix": {
+    "short": 4,
+    "medium": 8,
+    "long": 4
+  },
+  "documents": [
+    {
+      "fictional": true,
+      "source_id": "POL-CHANNEL-MARKETPLACE-SIMPLE-NEW",
+      "source_group": "refund_eligibility",
+      "path": "docs/01_marketplace_simple_refund_active.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "short",
+      "effective_from": "2026-06-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "marketplace"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-MATERIALS-01",
+      "source_group": "refund_materials",
+      "path": "docs/02_refund_materials_active_2025.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "medium",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general",
+          "contract_phone"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-REFUND-STATUS-01",
+      "source_group": "refund_status",
+      "path": "docs/03_refund_status_active_2025.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "short",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-REFUND-TIMING-01",
+      "source_group": "refund_timing",
+      "path": "docs/04_refund_timing_active_2025.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "medium",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general",
+          "contract_phone",
+          "large_appliance",
+          "furniture",
+          "enterprise_contract_device"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-CHANNEL-MARKETPLACE-LONG-01",
+      "source_group": "refund_eligibility",
+      "path": "docs/05_marketplace_long_refund_active.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "long",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "marketplace"
+        ],
+        "products": [
+          "large_appliance",
+          "furniture"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-CHANNEL-MARKETPLACE-SIMPLE-OLD",
+      "source_group": "refund_eligibility",
+      "path": "docs/06_marketplace_simple_refund_superseded.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "short",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2026-05-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "superseded",
+        "superseded_by": "POL-CHANNEL-MARKETPLACE-SIMPLE-NEW"
+      },
+      "scope": {
+        "channels": [
+          "marketplace"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-REFUND-WINDOW-OLD",
+      "source_group": "refund_eligibility",
+      "path": "docs/07_general_refund_window_superseded.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "short",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2025-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "superseded",
+        "superseded_by": "POL-REFUND-WINDOW-01"
+      },
+      "scope": {
+        "channels": [
+          "official"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-REFUND-WINDOW-01",
+      "source_group": "refund_eligibility",
+      "path": "docs/08_general_refund_window_active_2026.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "medium",
+      "effective_from": "2026-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-CONTRACT-PHONE-RETURN-OLD",
+      "source_group": "contract_device",
+      "path": "docs/09_contract_phone_return_superseded.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "medium",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2026-05-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "superseded",
+        "superseded_by": "POL-CONTRACT-PHONE-RETURN-NEW"
+      },
+      "scope": {
+        "channels": [
+          "official"
+        ],
+        "products": [
+          "contract_phone"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-CONTRACT-PHONE-RETURN-NEW",
+      "source_group": "contract_device",
+      "path": "docs/10_contract_phone_return_active.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "long",
+      "effective_from": "2026-06-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official"
+        ],
+        "products": [
+          "contract_phone"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-ESCALATION-01",
+      "source_group": "human_escalation",
+      "path": "docs/11_human_escalation_active_2025.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "medium",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-CHANNELS-SIMPLE-01",
+      "source_group": "channel_scope",
+      "path": "docs/12_channel_rules_active_2025.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "medium",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-RETURN-CONDITIONS-01",
+      "source_group": "return_conditions",
+      "path": "docs/13_return_conditions_active_2025.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "long",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general",
+          "large_appliance",
+          "furniture"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-UNSPECIFIED-FEES-01",
+      "source_group": "unspecified_fees",
+      "path": "docs/14_unspecified_fees_boundary_active_2025.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "medium",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-CONFLICT-FEES-01",
+      "source_group": "policy_conflicts",
+      "path": "docs/15_conflicting_cost_policies_active.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "medium",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general"
+        ]
+      }
+    },
+    {
+      "fictional": true,
+      "source_id": "POL-POLICY-LIFECYCLE-01",
+      "source_group": "policy_lifecycle",
+      "path": "docs/16_policy_lifecycle_examples_active.md",
+      "document_kind": "synthetic_policy",
+      "length_class": "long",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2027-12-31T23:59:59+08:00",
+      "lifecycle": {
+        "status": "active",
+        "superseded_by": null
+      },
+      "scope": {
+        "channels": [
+          "official",
+          "marketplace"
+        ],
+        "products": [
+          "general",
+          "contract_phone",
+          "large_appliance"
+        ]
+      }
+    }
+  ],
+  "isolation": {
+    "model_request_policy": "仅允许题目 input、指定 order_id 的 READ 查询结果和经治理的知识检索内容进入模型；cases.json 为私有金标。",
+    "order_table_policy": "orders.json 不整体进入 system prompt 或题目 input；业务事实只经订单 READ 工具按当前题目的 order_id 查询。",
+    "gold_visibility": "private_eval_only"
+  }
+}

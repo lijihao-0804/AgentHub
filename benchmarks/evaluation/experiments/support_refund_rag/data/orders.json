@@ -1,0 +1,1148 @@
+{
+  "schema_version": "support_refund_rag.orders.v1",
+  "fictional": true,
+  "business_clock": {
+    "timezone": "Asia/Shanghai",
+    "business_time_anchor": "2026-10-19T10:00:00+08:00",
+    "working_weekdays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "extra_holidays": [],
+    "currency": "CNY",
+    "rule_note": "虚构商家测试规则：工作日为周一至周五，无额外假日；日期含首尾日时明确写明。"
+  },
+  "lookup_contract": "仅按题目指定的 order_id 查询单笔订单；不将本表整体注入模型上下文。",
+  "state_contract_note": "以下 status、decision_status、execution_status 与 payment_status 是 S0 fixture 的字段映射示例，不是平台枚举或正式领域契约。接入时必须由适配器显式映射真实平台字段；status 仅作为业务展示状态，权威判断分别读取 decision、execution 与 payment 字段。",
+  "state_contract_fields": {
+    "status": [
+      "APPROVED",
+      "ISSUED",
+      "SETTLED"
+    ],
+    "decision_status": [
+      "APPROVED"
+    ],
+    "execution_status": [
+      "NOT_STARTED",
+      "SUCCEEDED",
+      "UNKNOWN_OUTCOME",
+      null
+    ],
+    "payment_status": [
+      "NOT_CREATED",
+      "PENDING",
+      "SETTLED",
+      "CHANNEL_ERROR",
+      "UNKNOWN",
+      null
+    ]
+  },
+  "orders": [
+    {
+      "order_id": "ORD-S0-001",
+      "customer_id": "CUST-S0-001",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构保温杯",
+      "signed_at": "2026-10-16T15:20:00+08:00",
+      "amounts": {
+        "order_total": "129.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "membership_tier": "ordinary",
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-001",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-002",
+      "customer_id": "CUST-S0-002",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构蓝牙耳机",
+      "signed_at": "2026-10-16T09:00:00+08:00",
+      "amounts": {
+        "order_total": "399.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "issue": "functional_failure",
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-002",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-003",
+      "customer_id": "CUST-S0-003",
+      "channel": "marketplace",
+      "product_type": "large_appliance",
+      "product_name": "虚构冰箱",
+      "amounts": {
+        "order_total": "268.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "outer_packaging": "opened",
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-003",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "installed_accepted_at": "2026-10-12T16:00:00+08:00",
+      "platform_self_operated_large_item": true
+    },
+    {
+      "order_id": "ORD-S0-004",
+      "customer_id": "CUST-S0-004",
+      "channel": "marketplace",
+      "product_type": "general",
+      "product_name": "虚构商城收纳包",
+      "signed_at": "2026-10-18T12:00:00+08:00",
+      "amounts": {
+        "order_total": "3299.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-004",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-005",
+      "customer_id": "CUST-S0-005",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构水杯",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "499.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-005",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "outer_packaging": "opened"
+    },
+    {
+      "order_id": "ORD-S0-006",
+      "customer_id": "CUST-S0-006",
+      "channel": "official",
+      "product_type": "contract_phone",
+      "product_name": "虚构合约手机",
+      "signed_at": "2026-10-16T13:00:00+08:00",
+      "amounts": {
+        "order_total": "219.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-006",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "contract_signed_at": "2026-06-10T10:00:00+08:00"
+    },
+    {
+      "order_id": "ORD-S0-007",
+      "customer_id": "CUST-S0-007",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网普通商品",
+      "amounts": {
+        "order_total": "4899.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-007",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "issue": "quality_defect"
+    },
+    {
+      "order_id": "ORD-S0-008",
+      "customer_id": "CUST-S0-008",
+      "channel": "marketplace",
+      "product_type": "general",
+      "product_name": "虚构商城普通商品",
+      "amounts": {
+        "order_total": "3599.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-008",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "payment_channel": "wallet"
+    },
+    {
+      "order_id": "ORD-S0-009",
+      "customer_id": "CUST-S0-009",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "188.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-009",
+        "status": "APPROVED",
+        "decision_status": "APPROVED",
+        "execution_status": "NOT_STARTED",
+        "payment_status": "NOT_CREATED",
+        "issued_at": null,
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-009",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-010",
+      "customer_id": "CUST-S0-010",
+      "channel": "marketplace",
+      "product_type": "general",
+      "product_name": "虚构商城小件",
+      "signed_at": "2026-10-16T13:00:00+08:00",
+      "amounts": {
+        "order_total": "299.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-010",
+        "status": "ISSUED",
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "payment_status": "PENDING",
+        "issued_at": "2026-10-16T10:00:00+08:00",
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-010",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-011",
+      "customer_id": "CUST-S0-011",
+      "channel": "marketplace",
+      "product_type": "large_appliance",
+      "product_name": "虚构洗衣机",
+      "amounts": {
+        "order_total": "129.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-001",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "installed_accepted_at": "2026-10-15T14:00:00+08:00",
+      "post_acceptance_actions": [
+        "drilled_installed"
+      ],
+      "condition": [
+        "product_intact",
+        "accessories_complete"
+      ],
+      "platform_self_operated_large_item": true
+    },
+    {
+      "order_id": "ORD-S0-012",
+      "customer_id": "CUST-S0-012",
+      "channel": "marketplace",
+      "product_type": "large_appliance",
+      "product_name": "虚构冰箱",
+      "amounts": {
+        "order_total": "399.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-002",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "installed_accepted_at": "2026-10-13T10:00:00+08:00",
+      "damage_materials_present": [
+        "outer_packaging_photo",
+        "damaged_part_photo",
+        "logistics_label_photo"
+      ],
+      "issue": "transport_damage",
+      "platform_self_operated_large_item": true
+    },
+    {
+      "order_id": "ORD-S0-013",
+      "customer_id": "CUST-S0-013",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网普通小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "268.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "outer_packaging": "opened",
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-003",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-014",
+      "customer_id": "CUST-S0-014",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构蓝牙耳机",
+      "signed_at": "2026-10-16T09:00:00+08:00",
+      "amounts": {
+        "order_total": "3299.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-004",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "issue": "functional_failure"
+    },
+    {
+      "order_id": "ORD-S0-015",
+      "customer_id": "CUST-S0-015",
+      "channel": "official",
+      "product_type": "contract_phone",
+      "product_name": "虚构合约手机",
+      "signed_at": "2026-10-17T11:00:00+08:00",
+      "amounts": {
+        "order_total": "499.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-005",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "contract_signed_at": "2026-06-10T10:00:00+08:00",
+      "issue": "functional_failure"
+    },
+    {
+      "order_id": "ORD-S0-016",
+      "customer_id": "CUST-S0-016",
+      "channel": "official",
+      "product_type": "contract_phone",
+      "product_name": "虚构合约手机",
+      "signed_at": "2026-10-16T13:00:00+08:00",
+      "amounts": {
+        "order_total": "219.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-006",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "contract_signed_at": "2026-06-10T10:00:00+08:00",
+      "missing_accessories": [
+        "packaging_sleeve"
+      ],
+      "accessories": [
+        "battery",
+        "charger"
+      ],
+      "condition": [
+        "no_human_damage"
+      ]
+    },
+    {
+      "order_id": "ORD-S0-017",
+      "customer_id": "CUST-S0-017",
+      "channel": "marketplace",
+      "product_type": "furniture",
+      "product_name": "虚构书桌",
+      "installed_accepted_at": "2026-10-13T13:00:00+08:00",
+      "amounts": {
+        "order_total": "4899.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-007",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "condition": [
+        "assembled",
+        "wear_visible"
+      ],
+      "platform_self_operated_large_item": true
+    },
+    {
+      "order_id": "ORD-S0-018",
+      "customer_id": "CUST-S0-018",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构礼品套装",
+      "amounts": {
+        "order_total": "3599.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-008",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "signed_at": "2026-10-16T08:30:00+08:00",
+      "gift_order": true,
+      "requester_is_buyer": false
+    },
+    {
+      "order_id": "ORD-S0-019",
+      "customer_id": "CUST-S0-019",
+      "channel": "marketplace",
+      "product_type": "general",
+      "product_name": "虚构商城保温杯",
+      "signed_at": "2026-10-16T09:10:00+08:00",
+      "amounts": {
+        "order_total": "188.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-009",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "return_insurance": true
+    },
+    {
+      "order_id": "ORD-S0-020",
+      "customer_id": "CUST-S0-020",
+      "channel": "marketplace",
+      "product_type": "general",
+      "product_name": "虚构商城背包",
+      "signed_at": "2026-10-18T14:10:00+08:00",
+      "amounts": {
+        "order_total": "299.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-010",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "outer_packaging": "opened"
+    },
+    {
+      "order_id": "ORD-S0-021",
+      "customer_id": "CUST-S0-021",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构保温杯",
+      "signed_at": "2026-10-16T15:20:00+08:00",
+      "amounts": {
+        "order_total": "129.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-021",
+        "status": "APPROVED",
+        "decision_status": "APPROVED",
+        "execution_status": "NOT_STARTED",
+        "payment_status": "NOT_CREATED",
+        "issued_at": null,
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-001",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-022",
+      "customer_id": "CUST-S0-022",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构蓝牙耳机",
+      "signed_at": "2026-10-16T09:00:00+08:00",
+      "amounts": {
+        "order_total": "399.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-022",
+        "status": "ISSUED",
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "payment_status": "PENDING",
+        "issued_at": "2026-10-12T09:30:00+08:00",
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-002",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-023",
+      "customer_id": "CUST-S0-023",
+      "channel": "marketplace",
+      "product_type": "general",
+      "product_name": "虚构背包",
+      "signed_at": "2026-10-18T14:10:00+08:00",
+      "amounts": {
+        "order_total": "268.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-023",
+        "status": "SETTLED",
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "payment_status": "SETTLED",
+        "issued_at": "2026-10-12T09:30:00+08:00",
+        "settled_at": "2026-10-14T11:00:00+08:00",
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": "100.00",
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "outer_packaging": "opened",
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-003",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-024",
+      "customer_id": "CUST-S0-024",
+      "channel": "official",
+      "product_type": "contract_phone",
+      "product_name": "虚构合约手机",
+      "signed_at": "2026-10-17T11:00:00+08:00",
+      "amounts": {
+        "order_total": "3299.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-024",
+        "status": "ISSUED",
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "payment_status": "PENDING",
+        "issued_at": "2026-10-16T09:00:00+08:00",
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-004",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-025",
+      "customer_id": "CUST-S0-025",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构机械键盘",
+      "signed_at": null,
+      "amounts": {
+        "order_total": "499.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-025",
+        "status": "APPROVED",
+        "decision_status": "APPROVED",
+        "execution_status": "UNKNOWN_OUTCOME",
+        "payment_status": "UNKNOWN",
+        "issued_at": null,
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00",
+        "channel_result": "UNKNOWN_TRANSPORT"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-005",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-026",
+      "customer_id": "CUST-S0-026",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构护眼台灯",
+      "signed_at": "2026-10-16T08:30:00+08:00",
+      "amounts": {
+        "order_total": "219.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-026",
+        "status": "ISSUED",
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "payment_status": "CHANNEL_ERROR",
+        "issued_at": "2026-10-15T09:00:00+08:00",
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00",
+        "channel_result": "BANK_CARD_CLOSED"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-006",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-027",
+      "customer_id": "CUST-S0-027",
+      "channel": "marketplace",
+      "product_type": "large_appliance",
+      "product_name": "虚构冰箱",
+      "amounts": {
+        "order_total": "4899.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-027",
+        "status": "ISSUED",
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "payment_status": "PENDING",
+        "issued_at": "2026-10-16T09:00:00+08:00",
+        "settled_at": null,
+        "requested_amount": "29.90",
+        "approved_amount": "29.90",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00",
+        "channel_result": "PENDING_CHANNEL"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-007",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "platform_self_operated_large_item": true
+    },
+    {
+      "order_id": "ORD-S0-028",
+      "customer_id": "CUST-S0-028",
+      "channel": "marketplace",
+      "product_type": "large_appliance",
+      "product_name": "虚构商城洗衣机",
+      "amounts": {
+        "order_total": "3599.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-028",
+        "status": "APPROVED",
+        "decision_status": "APPROVED",
+        "execution_status": "NOT_STARTED",
+        "payment_status": "NOT_CREATED",
+        "issued_at": null,
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-008",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "platform_self_operated_large_item": true
+    },
+    {
+      "order_id": "ORD-S0-029",
+      "customer_id": "CUST-S0-029",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "188.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-029",
+        "status": "SETTLED",
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "payment_status": "SETTLED",
+        "issued_at": "2026-10-13T09:30:00+08:00",
+        "settled_at": "2026-10-14T11:00:00+08:00",
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": "100.00",
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-009",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-030",
+      "customer_id": "CUST-S0-030",
+      "channel": "marketplace",
+      "product_type": "general",
+      "product_name": "虚构商城小件",
+      "signed_at": "2026-10-16T13:00:00+08:00",
+      "amounts": {
+        "order_total": "299.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-030",
+        "status": "APPROVED",
+        "decision_status": "APPROVED",
+        "execution_status": "NOT_STARTED",
+        "payment_status": "NOT_CREATED",
+        "issued_at": null,
+        "settled_at": null,
+        "requested_amount": null,
+        "approved_amount": null,
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-010",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-031",
+      "customer_id": "CUST-S0-031",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网保温杯",
+      "signed_at": "2026-10-16T15:20:00+08:00",
+      "amounts": {
+        "order_total": "129.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-001",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-032",
+      "customer_id": "CUST-S0-032",
+      "channel": "official",
+      "product_type": "contract_phone",
+      "product_name": "虚构合约手机",
+      "signed_at": "2026-10-17T11:00:00+08:00",
+      "amounts": {
+        "order_total": "399.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-002",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "contract_signed_at": "2026-05-20T10:00:00+08:00"
+    },
+    {
+      "order_id": "ORD-S0-033",
+      "customer_id": "CUST-S0-033",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网水杯",
+      "signed_at": "2026-10-17T12:00:00+08:00",
+      "amounts": {
+        "order_total": "268.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "outer_packaging": "opened",
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-003",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-034",
+      "customer_id": "CUST-S0-034",
+      "channel": "marketplace",
+      "product_type": "general",
+      "product_name": "虚构商城收纳盒",
+      "signed_at": "2026-10-18T12:00:00+08:00",
+      "amounts": {
+        "order_total": "3299.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-004",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-035",
+      "customer_id": "CUST-S0-035",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "499.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-005",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-036",
+      "customer_id": "CUST-S0-036",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2025-12-20T16:00:00+08:00",
+      "amounts": {
+        "order_total": "219.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-006",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "refund_requested_at": "2025-12-28T10:00:00+08:00"
+    },
+    {
+      "order_id": "ORD-S0-037",
+      "customer_id": "CUST-S0-037",
+      "channel": "official",
+      "product_type": "enterprise_contract_device",
+      "product_name": "虚构企业合同设备",
+      "amounts": {
+        "order_total": "4899.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-007",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "signed_at": "2026-10-17T11:00:00+08:00",
+      "payment_channel": "bank_card"
+    },
+    {
+      "order_id": "ORD-S0-038",
+      "customer_id": "CUST-S0-038",
+      "channel": "marketplace",
+      "product_type": "furniture",
+      "product_name": "虚构商城大件家具",
+      "amounts": {
+        "order_total": "3599.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-008",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "payment_channel": "wallet",
+      "platform_self_operated_large_item": true
+    },
+    {
+      "order_id": "ORD-S0-039",
+      "customer_id": "CUST-S0-039",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": null,
+      "amounts": {
+        "order_total": "188.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-009",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "ordered_at": "2026-10-10T09:00:00+08:00",
+      "estimated_delivery_at": "2026-10-15T18:00:00+08:00"
+    },
+    {
+      "order_id": "ORD-S0-040",
+      "customer_id": "CUST-S0-040",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "299.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-010",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "fee_fields": null
+    },
+    {
+      "order_id": "ORD-S0-041",
+      "customer_id": "CUST-S0-041",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "129.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-001",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "deposit": {
+        "status": "recorded",
+        "amount": null
+      }
+    },
+    {
+      "order_id": "ORD-S0-042",
+      "customer_id": "CUST-S0-042",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构礼品订单",
+      "signed_at": "2026-10-16T08:30:00+08:00",
+      "amounts": {
+        "order_total": "399.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-002",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "gift_order": true,
+      "gift_card": "GIFT-S0-042",
+      "requester_is_buyer": false
+    },
+    {
+      "order_id": "ORD-S0-043",
+      "customer_id": "CUST-S0-043",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "268.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "outer_packaging": "opened",
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-003",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-044",
+      "customer_id": "CUST-S0-044",
+      "channel": "official",
+      "product_type": "contract_phone",
+      "product_name": "虚构合约手机",
+      "signed_at": "2026-10-17T11:00:00+08:00",
+      "amounts": {
+        "order_total": "3299.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-044",
+        "status": "APPROVED",
+        "decision_status": "APPROVED",
+        "execution_status": null,
+        "payment_status": "UNKNOWN",
+        "issued_at": null,
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": null
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-004",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-045",
+      "customer_id": "CUST-S0-045",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "499.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-005",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-046",
+      "customer_id": "CUST-S0-046",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "219.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-006",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-047",
+      "customer_id": "CUST-S0-047",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "amounts": {
+        "order_total": "4899.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-007",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "rejected_application_count": 2,
+      "handoff_status": "NOT_CREATED"
+    },
+    {
+      "order_id": "ORD-S0-048",
+      "customer_id": "CUST-S0-048",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "amounts": {
+        "order_total": "3599.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-008",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      },
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "compensation_requested": "500.00"
+    },
+    {
+      "order_id": "ORD-S0-049",
+      "customer_id": "CUST-S0-049",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "188.00",
+        "currency": "CNY"
+      },
+      "refund": {
+        "refund_id": "RFD-S0-049",
+        "status": "ISSUED",
+        "decision_status": "APPROVED",
+        "execution_status": "SUCCEEDED",
+        "payment_status": "PENDING",
+        "issued_at": "2026-10-16T10:00:00+08:00",
+        "settled_at": null,
+        "requested_amount": "100.00",
+        "approved_amount": "100.00",
+        "settled_amount": null,
+        "currency": "CNY",
+        "updated_at": "2026-10-19T09:30:00+08:00"
+      },
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-009",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    },
+    {
+      "order_id": "ORD-S0-050",
+      "customer_id": "CUST-S0-050",
+      "channel": "official",
+      "product_type": "general",
+      "product_name": "虚构官网小件",
+      "signed_at": "2026-10-16T12:00:00+08:00",
+      "amounts": {
+        "order_total": "299.00",
+        "currency": "CNY"
+      },
+      "refund": null,
+      "fixture_trace": {
+        "source_order_id": "ORD-S0-010",
+        "rule": "初始模板仅用于生成；下方逐订单覆盖所有题面事实。"
+      }
+    }
+  ]
+}
