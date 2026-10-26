@@ -431,6 +431,10 @@ export async function streamThreadTurn(
   let runId: string | null = null;
   let turnId: string | null = null;
   await measureStream(performance.now(), options.onTiming, options.onEvent, async (emit) => {
+    const requestBody = {
+      input_text: options.inputText,
+      ...(options.clientToken ? { client_token: options.clientToken } : {}),
+    };
     const response = await fetch(`${apiBaseUrl}${path}`, {
       method: "POST",
       headers: {
@@ -439,16 +443,16 @@ export async function streamThreadTurn(
         Accept: "text/event-stream",
       },
       credentials: "include",
-      body: JSON.stringify({
-        input_text: options.inputText,
-        ...(options.clientToken ? { client_token: options.clientToken } : {}),
-      }),
+      body: JSON.stringify(requestBody),
       signal: options.signal,
     });
 
     runId = response.headers.get("X-AgentHub-Run-Id");
     turnId = response.headers.get("X-AgentHub-Turn-Id");
-    options.onStarted?.(runId, turnId);
+    // Report a run only after the response is known to be successful. A 409
+    // or 5xx has no reliable Run identity, and surfacing one early would make
+    // an uncertain write look confirmed.
+    if (response.ok) options.onStarted?.(runId, turnId);
     await consumeEventStream(response, emit);
   });
   return { runId, turnId };

@@ -18,6 +18,16 @@ import { useI18n } from "@/i18n/provider";
 import { Markdown } from "@/components/ui/markdown";
 import FeedbackPanel from "@/components/feedback/feedback-panel";
 import { useAutoScroll } from "@/components/ui/use-auto-scroll";
+import {
+  createSubmissionState,
+  draftForInput,
+  markSubmissionFailed,
+  markSubmissionRecovered,
+  recoverOriginal,
+  submissionForInput,
+  type TurnSubmissionState,
+  type TurnSubmission,
+} from "@/components/apps/turn-submission";
 
 const PENDING_STATUSES = new Set(["RUNNING", "WAITING_APPROVAL", "CANCEL_REQUESTED"]);
 const TURN_POLL_MS = 2500;
@@ -26,13 +36,6 @@ function shortId(id: string): string {
   return id.slice(0, 8);
 }
 
-/**
- * One submission identity, reused by every retry of the same message.
- *
- * The backend treats a repeated `client_token` as the same turn, so a retry
- * after a timeout returns the run that already exists instead of starting a
- * second one for the same question.
- */
 function newSubmissionToken(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -63,7 +66,8 @@ export default function AppConversationPane({
   const { workspaceId, accessToken, permissions } = useFrontendSession();
   const cannotRun = permissions !== null && !permissions.includes("agent_run");
   const mutation = useWorkspaceMutation(`app-turns:${threadId}`);
-  const tokenRef = useRef<string | null>(null);
+  const submissionRef = useRef<TurnSubmissionState>(createSubmissionState());
+  const [recoverySubmission, setRecoverySubmission] = useState<TurnSubmission | null>(null);
   const [draft, setDraft] = useState("");
   const [pendingInput, setPendingInput] = useState<string | null>(null);
   /** Live answer text from message.delta events, shown inside the pending bubble. */
@@ -80,7 +84,8 @@ export default function AppConversationPane({
 
   // Another thread is another conversation: nothing in flight carries over.
   useEffect(() => {
-    tokenRef.current = null;
+    submissionRef.current = createSubmissionState();
+    setRecoverySubmission(null);
     setDraft("");
     setPendingInput(null);
     setStreamText(null);
@@ -129,7 +134,12 @@ export default function AppConversationPane({
     const text = draft.trim();
     if (!text || mutation.pending || cannotRun) return;
     setCancelFeedback(null);
-    if (!tokenRef.current) tokenRef.current = newSubmissionToken();
+    const submission = submissionForInput(
+      submissionRef.current.draft,
+      text,
+      newSubmissionToken,
+    );
+    submissionRef.current = { ...submissionRef.current, draft: submission };
     setPendingInput(text);
     setStreamText("");
     setStreamRunId(null);
@@ -141,7 +151,7 @@ export default function AppConversationPane({
         {
           threadId,
           inputText: text,
-          clientToken: tokenRef.current ?? undefined,
+          clientToken: submission.token,
           signal: controller.signal,
           onStarted: (runId) => {
             if (streamAbortRef.current === controller) setStreamRunId(runId);
@@ -162,22 +172,86 @@ export default function AppConversationPane({
     streamAbortRef.current = null;
     if (result) {
       // The stream closed (completed, paused for approval or cancelled): the
-      // reloaded turn list now carries the authoritative answer.
-      tokenRef.current = null;
-      setDraft("");
+      // reloaded turn list now carries the authoritative answer. If this was
+      // recovery of an uncertain request, clear only that recovery entry while
+      // preserving an edited draft and its distinct request identity.
+      submissionRef.current = markSubmissionRecovered(
+        submissionRef.current,
+        submission,
+      );
+      setRecoverySubmission(null);
+      if (draft.trim() === submission.input) setDraft("");
       setStreamRunId(null);
       turns.reload();
       onTurnCompleted();
     } else if (controller.signal.aborted) {
       // A deliberate stop is not an error to report.
       mutation.clearError();
-      tokenRef.current = null;
+      submissionRef.current = createSubmissionState();
+      setRecoverySubmission(null);
       setStreamText(null);
       setStreamRunId(null);
       turns.reload();
     }
-    // A failed submission keeps the pending bubble (and its token) up so the
-    // same message can be retried.
+    if (!result && !controller.signal.aborted) {
+      // A failed submission may have reached the backend. Keep A addressable
+      // while allowing the user to submit a different B with a new identity.
+      submissionRef.current = markSubmissionFailed(submissionRef.current, submission);
+      setRecoverySubmission(recoverOriginal(submissionRef.current));
+    }
+  }
+
+  async function recoverUncertainSubmission() {
+    const recovery = recoverySubmission;
+    if (!recovery || mutation.pending || cannotRun) return;
+    submissionRef.current = { ...submissionRef.current, draft: recovery };
+    setDraft(recovery.input);
+    setPendingInput(recovery.input);
+    setStreamText("");
+    setStreamRunId(null);
+    const controller = new AbortController();
+    streamAbortRef.current = controller;
+    const result = await mutation.run((auth) =>
+      streamThreadTurn(
+        { workspaceId: auth.workspaceId, accessToken: auth.accessToken },
+        {
+          threadId,
+          inputText: recovery.input,
+          clientToken: recovery.token,
+          signal: controller.signal,
+          onStarted: (runId) => {
+            if (streamAbortRef.current === controller) setStreamRunId(runId);
+          },
+          onEvent: (event) => {
+            if (streamAbortRef.current !== controller) return;
+            if (event.type === "message.delta") {
+              const delta = payloadString(event.payload, "delta");
+              if (delta !== null) setStreamText((current) => (current ?? "") + delta);
+            } else if (event.type === "run.started") {
+              setStreamRunId(event.run_id);
+            }
+          },
+        },
+      ),
+    );
+    if (streamAbortRef.current !== controller) return;
+    streamAbortRef.current = null;
+    if (result) {
+      const stillEditing =
+        submissionRef.current.draft?.token !== recovery.token &&
+        draft.trim() !== recovery.input;
+      submissionRef.current = stillEditing
+        ? {
+            ...submissionRef.current,
+            recovery: null,
+          }
+        : markSubmissionRecovered(submissionRef.current, recovery);
+      setRecoverySubmission(null);
+      if (draft.trim() === recovery.input) setDraft("");
+      setStreamRunId(null);
+      turns.reload();
+      onTurnCompleted();
+    }
   }
 
   async function stopGeneration(runId: string) {
@@ -375,7 +449,17 @@ export default function AppConversationPane({
           <textarea
             rows={3}
             value={draft}
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              if (!mutation.pending) {
+                submissionRef.current = draftForInput(
+                  submissionRef.current,
+                  event.target.value,
+                  newSubmissionToken,
+                );
+                setRecoverySubmission(recoverOriginal(submissionRef.current));
+              }
+            }}
             placeholder={t("appThread.conversation.composerPlaceholder")}
             maxLength={32000}
             disabled={mutation.pending || cannotRun}
@@ -390,11 +474,28 @@ export default function AppConversationPane({
           </p>
         )}
         {mutation.error && <p className="state-hint">{t("appThread.conversation.retryHint")}</p>}
+        {recoverySubmission && (
+          <div className="inline-notice" role="status">
+            <p>{t("appThread.conversation.uncertainOutcomeHint")}</p>
+            <button
+              type="button"
+              className="button button-ghost"
+              onClick={() => void recoverUncertainSubmission()}
+              disabled={mutation.pending || cannotRun}
+            >
+              {t("appThread.conversation.recoverUncertain")}
+            </button>
+          </div>
+        )}
         <div className="form-actions">
           <button
             type="submit"
             className="button button-primary"
-            disabled={mutation.pending || cannotRun || !draft.trim()}
+            disabled={
+              mutation.pending ||
+              cannotRun ||
+              !draft.trim()
+            }
           >
             {mutation.pending
               ? t("appThread.conversation.sending")

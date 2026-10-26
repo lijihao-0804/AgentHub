@@ -2092,7 +2092,9 @@ export const enUS = {
       composerPlaceholder: "Ask a follow-up question…",
       send: "Send",
       sending: "Sending…",
-      retryHint: "A retry reuses the same submission token, so it cannot create a second run.",
+      retryHint: "Retrying the same message reuses its submission identity. Editing the question starts a new request.",
+      uncertainOutcomeHint: "The earlier request may already have reached the server. Recover that exact submission before starting a different one.",
+      recoverUncertain: "Recover previous submission",
       waitingApproval: "Waiting approval",
       waitingApprovalHint:
         "The agent proposed a write and stopped at the policy gate. Approve it in the inbox and the same run resumes where it paused.",
