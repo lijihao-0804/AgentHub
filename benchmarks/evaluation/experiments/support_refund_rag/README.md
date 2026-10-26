@@ -4,6 +4,10 @@
 S0–S3 是同一首轮里程碑的四个阶段。当前阶段与未完成项以执行报告为准；
 零调用的资料核对不能替代真实上传、GPU 检索或模型评测。
 
+本次状态：S0/S1已执行，S2首题A的3次阿里云派发后停止，B/S3未派发，未通过验收。
+见 `execution-results.json` 和 `docs/reviews/AgentHub-客服退款政策RAG执行报告-20261026.md`。
+原始引用解析误报、后续语义遗漏和金标等价组问题分别报告；不把修正后的离线审阅冒充原始运行通过。
+
 - `data/docs/`：唯一允许上传到 KnowledgeService 的政策正文。
 - `data/manifest.json`：来源与生命周期清单；S1 必须通过真实服务设置 lifecycle，不能只靠文件名。
 - `data/orders.json`：受治理 READ fixture 服务的数据，不放入 system prompt。
@@ -14,6 +18,10 @@ S0–S3 是同一首轮里程碑的四个阶段。当前阶段与未完成项以
 - `material-audit.json`：实际检查结果；原文存在性检查不等于语义金标正确性。
 - `source-review.md`：助手语义审阅记录，不能称人工审核。
 - `materialize.py`：S1 真实隔离库、上传、入库和快照的零生成调用入口；运行证据保存在 `private/`。
+- `runtime_trial.py`：真实发布、受治理工具/准入重放和预算守卫下的Thread/Run/Experiment执行。
+- `citation_contract.py`：同时核对可见chunk_id与source_id；身份合法性不代替事实支持性。
+- `planned-results.json`：初始未派发计划；实际全50题状态见 `execution-results.json`。
+- `posthoc-equivalence-review.json`：冻结评分的等价证据缺口复核，不替换原始分数。
 
 在仓库根目录执行资料核对：
 
@@ -27,6 +35,7 @@ S0–S3 是同一首轮里程碑的四个阶段。当前阶段与未完成项以
 不把这一投影称作真实模型准入视图；真实视图及其引用映射在 S1/S2 产生。
 
 后续真实请求与 attempts 只能显式 opt-in 写入 `private/`，不进入默认日志或公开汇总。
-无真实账单时费用为 UNKNOWN；用户给出 20 元不等于价格已核对或模型免费。
-S1 前必须选择具体有效已发布配置并绑定不可变 spec、真实隔离资源；S2 前必须有可核对价格及逐次派发金额预留守卫。
+无真实账单时实际费用为 UNKNOWN；冻结官方价格估算与账户账单分开。
+已发布配置、不可变spec、真实隔离资源及PricingSnapshot在首次派发前记录于 `private/prepared.json` 与正常Experiment记录。
+本次已停止，CLI拒绝覆盖阶段记录或隐式重试；离线修正后的代码没有再次付费执行。
 不原样执行引用旧库的 `formal_support.py` 或 `rag_support.py`。

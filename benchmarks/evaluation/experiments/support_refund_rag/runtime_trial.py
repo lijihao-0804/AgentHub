@@ -10,7 +10,6 @@ import argparse
 import asyncio
 import json
 import os
-import re
 import subprocess
 import time
 from collections.abc import Mapping
@@ -22,6 +21,9 @@ from uuid import UUID, uuid4
 
 from dotenv import dotenv_values
 
+from benchmarks.evaluation.experiments.support_refund_rag.citation_contract import (
+    citation_identity_audit,
+)
 from benchmarks.evaluation.experiments.support_refund_rag.fixture_tools import (
     FixtureCaseScope,
     FixtureToolRegistry,
@@ -588,6 +590,22 @@ async def admission():
         await engine.dispose()
 
 
+class RecordingRetriever:
+    """Keep actual A candidate/final traces separate from zero-call replays."""
+
+    def __init__(self, inner):
+        self.inner = inner
+        self.records = []
+
+    async def retrieve_with_trace(self, context, query):
+        result = await self.inner.retrieve_with_trace(context, query)
+        self.records.append({"query": wire(query), "result": wire(result)})
+        return result
+
+    async def retrieve(self, context, query):
+        return list((await self.retrieve_with_trace(context, query)).evidence)
+
+
 class Meter:
     """Physical dispatch reservation, persisted before the network call."""
 
@@ -814,6 +832,7 @@ async def execute(phase):
             session_factory=factory, components=components, rrf_k=settings.knowledge_rrf_k
         )
         adapter = LiteLLMProviderAdapter(client=meter)
+        retriever = RecordingRetriever(retriever)
         calls = []
 
         def gateway(db):
@@ -889,6 +908,7 @@ async def execute(phase):
 
                 async def perform():
                     calls.clear()
+                    retriever.records.clear()
                     meter.case_id, meter.arm = q["case_id"], "A"
                     meter.scope = scope
                     start = len(meter.data["attempts"])
@@ -915,6 +935,10 @@ async def execute(phase):
                             for c in calls
                         ],
                     )
+                    save(
+                        PRIVATE / "requests" / (q["case_id"] + "-A-retrieval.json"),
+                        retriever.records,
+                    )
                     try:
                         final = calls[-1] if calls else None
                         if (
@@ -931,10 +955,13 @@ async def execute(phase):
                             raise ValueError("A_REFUND_LOOKUP_MISSING")
                         view = visible(final["request"].messages, chunks)
                         rec["A_gold_complete"] = coverage(q, view)
-                        cited = re.findall(r"\b[0-9a-f]{64}\b", a.final_output or "")
-                        if not cited and q["answerability"] != "insufficient_evidence":
+                        citation_check = citation_identity_audit(a.final_output, view)
+                        if (
+                            citation_check["status"] == "MISSING"
+                            and q["answerability"] != "insufficient_evidence"
+                        ):
                             raise ValueError("A_POLICY_CITATIONS_MISSING")
-                        if any(cid not in {r["chunk_id"] for r in view} for cid in cited):
+                        if citation_check["status"] == "INVALID":
                             raise ValueError("A_CITATION_ID_NOT_VISIBLE")
                         b_req = replay_request(final["request"], q, chunks, budget)
                         b_view = visible(b_req.messages, chunks)
@@ -951,8 +978,7 @@ async def execute(phase):
                             ).generate_resolved(ctx, frozen.model_plan, b_req)
                         if b.tool_calls:
                             raise ValueError("B_DID_NOT_RETURN_FINAL_ANSWER")
-                        b_citations = re.findall(r"\b[0-9a-f]{64}\b", b.content or "")
-                        if any(cid not in {r["chunk_id"] for r in b_view} for cid in b_citations):
+                        if citation_identity_audit(b.content, b_view)["status"] == "INVALID":
                             raise ValueError("B_CITATION_ID_NOT_VISIBLE")
                         rec.update(B_status="RECEIVED", B_answer=b.content)
                     except Exception as error:

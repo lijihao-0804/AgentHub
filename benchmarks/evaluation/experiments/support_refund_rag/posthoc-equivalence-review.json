@@ -1,0 +1,86 @@
+{
+  "status": "POSTHOC_ASSISTANT_REVIEW_NOT_A_REPLACEMENT_SCORE",
+  "scope": "Seven answerable S1 admission cases marked incomplete by the frozen exact source/quote rubric. Not actual A model-selected queries.",
+  "new_model_dispatches": 0,
+  "frozen_gold_and_scores_unchanged": true,
+  "no_claim_of_preregistered_threshold_pass": true,
+  "cases": [
+    {
+      "case_id": "S0-005",
+      "adjudication": "EQUIVALENT_OR_REDUNDANT_GOLD",
+      "note": "独立政策源已给出相同条件；精确指定第三段原句造成假缺失。",
+      "visible_proofs": [
+        {
+          "chunk_id": "17e5da446c0a42a93cd36cd0b3084a9c3c2ef07f65c7cc6b5ec62b0b2b2ab9ed",
+          "source": "POL-RETURN-CONDITIONS-01",
+          "actual_visible_quote": "官网普通小件的拆除外包装不当然导致资格消灭，关键仍是本体、随机安全配件和防拆标识完整"
+        }
+      ]
+    },
+    {
+      "case_id": "S0-013",
+      "adjudication": "EQUIVALENT_GOLD_OMITTED",
+      "note": "普通材料三项已在退货条件长文可见；不应只认材料文件。",
+      "visible_proofs": [
+        {
+          "chunk_id": "353159ebb4b8f679d73b6e1cc23c962737b169d75d5e0dfeae5db4972b9715d0",
+          "source": "POL-RETURN-CONDITIONS-01",
+          "actual_visible_quote": "基础申请先核对订单号、申请原因和可接收通知的手机号"
+        }
+      ]
+    },
+    {
+      "case_id": "S0-032",
+      "adjudication": "EQUIVALENT_GOLD_OMITTED",
+      "note": "新版文档明确解释旧合约沿用及新合约分界，无须强制命中旧文件才能理解。",
+      "visible_proofs": [
+        {
+          "chunk_id": "6c83140adc38196862a5d660a6fe77aa118f7690fb22c2ce2bb3245c0c99f38e",
+          "source": "POL-CONTRACT-PHONE-RETURN-NEW",
+          "actual_visible_quote": "合约签订日在 2026-05-31 23:59:59 之前时，签订时有效的旧版 30 日窗口继续适用于该合约"
+        }
+      ]
+    },
+    {
+      "case_id": "S0-036",
+      "adjudication": "REDUNDANT_CONTEXT_REQUIREMENT",
+      "note": "旧文件本身的生效区间、15日规则和起算已可见，泛化历史回溯提示不应额外强制。",
+      "visible_proofs": [
+        {
+          "chunk_id": "2f83c683b984166c045da8cefdbd6617ff27788375ab352c1fa2650098268582",
+          "source": "POL-REFUND-WINDOW-OLD",
+          "actual_visible_quote": "官网渠道消费者自签收日次日起 15 个自然日内可以申请普通退款"
+        }
+      ]
+    },
+    {
+      "case_id": "S0-037",
+      "adjudication": "CORE_DISPOSITION_SUPPORTED_EXTRA_FACT_PENDING",
+      "note": "核心不适用结论有据；金标额外要求的企业合同正向规则未完整核定，不提升为全部关键事实通过。",
+      "visible_proofs": [
+        {
+          "chunk_id": "16e91c36ad6c4a2cbb71bb1c81df33d010a3cd46a536c3c421af0676b98ef07c",
+          "source": "POL-CHANNEL-MARKETPLACE-LONG-01",
+          "actual_visible_quote": "普通商城订单和其他渠道商品不适用"
+        }
+      ]
+    },
+    {
+      "case_id": "S0-038",
+      "adjudication": "EQUIVALENT_GOLD_OMITTED",
+      "note": "同一适用的大件来源正文已解释渠道优先；无需机械指定渠道文件原句。",
+      "visible_proofs": [
+        {
+          "chunk_id": "d5f6b6f3aeb7404f8b03b819fbfff45abc4e4c4feec86b24c29ec90a210c5f93",
+          "source": "POL-CHANNEL-MARKETPLACE-LONG-01",
+          "actual_visible_quote": "支付工具只说明款项如何退回，不会把官网订单变成商城订单，也不会让普通小件自动套用大件窗口"
+        }
+      ]
+    },
+    {
+      "case_id": "S0-031",
+      "adjudication": "CURRENT_7_DAY_RULE_MISSING_FROM_VIEW",
+      "note": "当前7日规则确实未见；可见历史15日页及现行版本提示不能替代具体7日数字。"
+    }
+  ]
+}

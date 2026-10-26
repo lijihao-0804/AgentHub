@@ -8,7 +8,8 @@
 
 当前 50 题各自只有一个完整证据方案，因此外层没有可替代组；同一题里同时需要的事实全部合并在该组的 `all_of` 中，避免只命中一个分支就被判为全部满足。
 
-本目录的 `docs/`、`manifest.json`、`orders.json` 与 `cases.json` 是 S0 静态交付资料；`build_s0_data.py` 仅用于最后一次本地再生成与一致性核对，交付时移除。文件只使用本地工具制作，没有访问网络、调用模型或读取已有评测题。
+本目录的 `docs/`、`manifest.json`、`orders.json` 与 `cases.json` 是 S0 静态交付资料；临时生成脚本交付时已移除。
+资料由助手与子代理起草、复核；S0没有派发待评测的A/B业务模型，也未读取旧HOLDOUT。助手编写消耗不属于A/B供应商用量台账。
 
 `orders.json` 中的 `status`、`decision_status`、`execution_status` 和 `payment_status` 是 fixture 字段映射示例，不是平台枚举或正式领域契约；接入真实系统时必须由适配器显式映射。固定业务时钟为 `2026-10-19T10:00:00+08:00`，合约版本按 `contract_signed_at` 选择，历史合约不因当前查询时间而切换到新版。
 

@@ -2,7 +2,7 @@
   "protocol_version": 1,
   "name": "fictional-support-refund-rag-dev-20261026",
   "milestone": "FIRST_REFUND_RAG_DIAGNOSTIC_S0_TO_S3",
-  "status": "S0_MATERIALS_AND_TARGET_CONFIG_FROZEN_S1_RUNNING",
+  "status": "NOT_ACCEPTED_S2_EARLY_STOP_NO_FURTHER_DISPATCH",
   "code_baseline": "a2d47e409569565d22cffd34703d7615f4a1882c",
   "dataset": {
     "split": "DEV",
@@ -28,13 +28,14 @@
     "max_attempts": 1,
     "fallbacks": [],
     "identity_drift_action": "STOP_NEW_DISPATCHES",
-    "published_version_id": null,
+    "published_version_id": "a10572b1-82a8-406a-9c4c-ac4a131d98d3",
     "resolved_spec": null,
-    "binding_status": "PENDING_REAL_PUBLISHED_CONFIG",
+    "binding_status": "FROZEN_BEFORE_FIRST_DISPATCH_IN_PRIVATE_PREPARED_AND_FORMAL_EXPERIMENT",
     "route_config": "model-route-frozen.json",
     "max_tokens": 2048,
     "temperature": "0",
-    "timeout_seconds": "60"
+    "timeout_seconds": "60",
+    "resolved_spec_record": "private/prepared.json; authoritative immutable AgentVersion row"
   },
   "isolation": {
     "database_name": "agenthub_support_refund_rag_20261026",
@@ -42,7 +43,7 @@
     "qdrant_collection": "agenthub_support_refund_rag_20261026",
     "blob_root": "benchmarks/evaluation/experiments/support_refund_rag/private/s1/blobs",
     "output_root": "benchmarks/evaluation/experiments/support_refund_rag/private",
-    "provisioned": false,
+    "provisioned": true,
     "migration": "explicit upgrade to actual head; never in API startup",
     "checkpoint": "explicit bootstrap before API/worker start",
     "memory_enabled": false,
@@ -118,13 +119,13 @@
     ],
     "metric_status_before_execution": "NOT_MEASURED",
     "trace_content_opt_in": false,
-    "raw_capture_default": false
+    "raw_capture_default": false,
+    "private_content_capture_executed": {
+      "opt_in_flag": "--capture-private-content",
+      "storage": "private/",
+      "default_business_trace_capture": false
+    }
   },
-  "launch_blockers": [
-    "specific valid published runtime/output/temperature/retrieval configuration not yet bound",
-    "real isolated resources, lifecycle metadata, snapshot, dataset publication and checkpoint not yet materialized",
-    "conservative durable pre-dispatch reservation ledger not yet verified"
-  ],
   "configuration_observation": {
     "path": "configuration-observed.json",
     "primary_output_limit": 2048,
@@ -173,5 +174,27 @@
     "evidence_projection": null,
     "superseded_rank_penalty": 0.0
   },
-  "target_freeze_note": "Targets fixed before first generation dispatch, derived from existing configuration; real publication binding and comparison remain mandatory. Policy effective output reservation uses max(profile.max_tokens, reserved_output_tokens)=2048."
+  "target_freeze_note": "Targets fixed before first generation dispatch, derived from existing configuration; real publication binding and comparison remain mandatory. Policy effective output reservation uses max(profile.max_tokens, reserved_output_tokens)=2048.",
+  "launch_blockers_at_S0": [
+    "specific valid published runtime/output/temperature/retrieval configuration not yet bound",
+    "real isolated resources, lifecycle metadata, snapshot, dataset publication and checkpoint not yet materialized",
+    "conservative durable pre-dispatch reservation ledger not yet verified"
+  ],
+  "next_execution_blockers": [
+    "original S2 stop retained; no automatic re-run",
+    "equivalent evidence schemes need re-review and a new freeze",
+    "citation parser fixed offline after generation, not live-validated by another paid run",
+    "actual A retrieval trace recorder added after original attempt; do not fabricate original candidate trace"
+  ],
+  "result_projection_after_execution": {
+    "actual_generation_build_sha": "7d5483aed75c08520255f1bf8ccbe4714c25e934",
+    "physical_dispatches": 3,
+    "original_stop_reason": "A_POLICY_CITATIONS_MISSING",
+    "adjudication": "source_id citation valid; separately confirmed visible policy alternative omitted",
+    "result": "execution-results.json",
+    "raw_records_unchanged": true,
+    "B_offline_constructable": true,
+    "B_dispatched": false,
+    "S3_started": false
+  }
 }
