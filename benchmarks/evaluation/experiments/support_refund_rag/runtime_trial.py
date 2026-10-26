@@ -19,6 +19,8 @@ from decimal import Decimal
 from pathlib import Path
 from uuid import UUID, uuid4
 
+from dotenv import dotenv_values
+
 from benchmarks.evaluation.experiments.support_refund_rag.fixture_tools import (
     FixtureCaseScope,
     FixtureToolRegistry,
@@ -65,7 +67,7 @@ from packages.evaluation.service import EvaluationDatasetService
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
-from packages.model_gateway.configured_route import load_route
+from packages.model_gateway.configured_route import _load_endpoint
 from packages.model_gateway.contracts import (
     ModelMessage,
     ModelToolCall,
@@ -198,8 +200,16 @@ async def prepare():
     if read(ROOT / "material-audit.json")["status"] != "PASS":
         raise ValueError("MATERIAL_AUDIT_REQUIRED")
     state, settings, (engine, factory) = environment()
-    route = load_route(ROOT / "model-route-frozen.json")
-    if route.primary.model != MODEL or route.fallbacks:
+    route = read(ROOT / "model-route-frozen.json")
+    if route["fallbacks"] or route["retry_policy"] != {"max_attempts": 1}:
+        raise ValueError("SINGLE_ALIYUN_MODEL_REQUIRED")
+    # The general local-route loader requires a fallback. This experiment
+    # deliberately publishes a primary-only profile, while reusing the same
+    # strict endpoint/credential validation and leaving that loader unchanged.
+    endpoint = _load_endpoint(
+        route["primary"], {**dotenv_values(".env"), **os.environ}, kind="primary"
+    )
+    if endpoint.model != MODEL:
         raise ValueError("SINGLE_ALIYUN_MODEL_REQUIRED")
     questions = read(ROOT / "data/cases.json")["questions"]
     protocol, prices, chunks = (
@@ -210,7 +220,6 @@ async def prepare():
     try:
         ctx = await context_for(factory, state)
         ws, actor = UUID(ctx.workspace_id), UUID(ctx.user_id)
-        endpoint = route.primary
         async with factory() as db:
             credential = ProviderCredential(
                 workspace_id=ws,
