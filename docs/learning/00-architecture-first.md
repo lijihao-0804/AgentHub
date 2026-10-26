@@ -2,7 +2,9 @@
 
 **学习位置：00，完整课程的架构起点。**
 
-[学习首页](README.md) · [下一课：01 HTTP 与执行入口](01-codebase-navigation.md) 日期：2026-10-09；源码基线：`823ac05`。
+[学习首页](README.md) · [下一课：01 HTTP 与执行入口](01-codebase-navigation.md)
+
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 本课整合现有架构、数据流、一次 Run 和面试资料，按理解顺序重新讲。首次学习只顺着这一个文件读，无须先打开其他报告。链接是核查入口，读到“打开代码”时再点。
 
@@ -20,7 +22,7 @@
 
 ### 开篇三问的答案与解读
 
-1. **第二句话通常创建新 Turn 和新 Run；审批批准继续原 Run。** Thread 聚合对话，每轮提交分别解析已发布版本并建立执行；重复相同 client_token 是重发已有提交，不是新问题。审批恢复使用原 run_id/checkpoint，不能清零原预算。依据：[ThreadService.resolve_agent_version / submit_turn](../../packages/threads/service.py) 与 [AgentRunService.resume](../../packages/agent_runtime/runtime.py)。
+1. **第二句话通常创建新 Turn 和新 Run；审批批准继续原 Run。** Thread 聚合对话，每轮提交分别解析已发布版本并建立执行；重复相同 client_token 是重发已有提交，不是新问题。审批恢复使用原 run_id/checkpoint，不能清零原预算。依据：[ThreadService.resolve_agent_version / submit_turn](../../packages/threads/service.py) 与 [AgentRunService.resume](../../packages/agent_runtime/runtime_service.py)。
 2. **两种故障影响不同。** Redis 故障主要影响依赖它的派发/消费/调度，已有 PostgreSQL 记录不会因此消失；PostgreSQL 故障会影响成员权限、版本、Run/审批和恢复状态的读写。两者都可能阻断任务，只是故障点不同。不能简化成“Redis 停了整个系统仍可用”。依据：[worker 配置](../../apps/worker/celery_app.py) 与 [审批服务](../../packages/approvals/service.py)。
 3. **模型只提议，服务根据冻结工具策略、权限和审批决定执行资格，executor 才真正派发。** 用户文字或模型 call 不是外部副作用证据；批准后仍需 claim，无法确认远端结果要保持未知。依据：[ToolPolicy.decide](../../packages/tools/policy.py)、[ApprovalService.claim_execution](../../packages/approvals/service.py) 和 [MCP execute_write](../../packages/mcp/runtime.py)。
 
@@ -36,7 +38,7 @@
 | [create_app](../../apps/api/app.py)：把 API 应用、依赖和路由接起来；不是模型推理函数。 | 应用 settings/配置→FastAPI app。 | 先看 lifespan/状态依赖与 router 注册，再追 threads 路由；确认 API 暴露了什么入口。 |
 | [get_production_agent_run_service](../../apps/api/agent_runtime_dependencies.py)：生产运行时的装配点，将接口背后的具体实现交给同一个 service。 | Request/app.state 中的配置与 session factory→AgentRunService。 | 看缓存/工厂来源，再看 Gateway、ToolRuntime、Approval/Action、checkpoint、Memory/Artifact 的注入；读完能说出每个对象负责哪一步。 |
 | [AgentPublishService.publish](../../packages/agent_runtime/publish.py)：把可编辑草稿解析为不可变执行版本，供之后 Run 绑定。 | session、workspace context、agent_id→保存 AgentVersion 行，返回 PublishedAgentVersion 摘要（版本 ID、版本号、规格 hash 等）。 | 权限/草稿→解析模型、工具、知识→resolved_spec/hash→保存版本；不要把版本当草稿指针。 |
-| [_AgentRunGraph.invoke](../../packages/agent_runtime/runtime.py)：注册图节点和条件路由，再执行图；字典只是注册表。 | 初始状态或 resume 指令，加 checkpoint/config→图的最终/中断状态。 | 看 nodes、after_* 与编译调用；先看连接关系，再读单节点实现。 |
+| [_AgentRunGraph.invoke](../../packages/agent_runtime/runtime_graph.py)：注册图节点和条件路由，再执行图；字典只是注册表。 | 初始状态或 resume 指令，加 checkpoint/config→图的最终/中断状态。 | 看 nodes、after_* 与编译调用；先看连接关系，再读单节点实现。 |
 
 ## 1. 从一个具体问题理解项目
 
@@ -137,10 +139,10 @@ flowchart TB
 | `apps/web` | 用户操作如何变成 HTTP，流式结果怎样展示 | 所有 CSS、组件细节 |
 | `apps/api/routes` | 路由参数、权限上下文、调用哪个服务 | 每个接口响应字段 |
 | `apps/api/agent_runtime_dependencies.py` | 如何装配真正的 Runtime 依赖 | 所有 adapter 内部实现 |
-| `packages/agent_runtime` | 发布、Run 服务、执行图、上下文预算 | 三千多行文件逐行背诵 |
+| `packages/agent_runtime` | publish 控制发布；runtime_service 管执行；runtime_graph 管节点；runtime_projection 管状态/纯辅助 | runtime.py 已是兼容门面，不再从大文件逐行找实现 |
 | `packages/tools` / `packages/approvals` | 提议→治理→审批→执行的边界 | 各工具完整业务逻辑 |
 | `packages/model_gateway` | 供应商无关输入/输出、能力/重试/fallback | 每种供应商 SDK 参数 |
-| `packages/knowledge` / `packages/memory` | 为 Run 提供可追溯输入 | 第一遍学习嵌入/排序算法全部细节 |
+| `packages/knowledge` / `packages/wiki` / `packages/memory` | 原始证据、编译 Wiki 与长期记忆接入同一 Run | 第一遍学习全部嵌入/编译/排序细节 |
 | `packages/evaluation` | 如何冻结实验身份、衡量结果 | 所有 judge/指标实现 |
 | `apps/worker` | 任务入口复用哪些服务，定时对账有哪些 | 每条 task 的所有异常分支 |
 
@@ -166,7 +168,7 @@ Run 的有效知识/Memory 快照、步骤、审批和结果
 
 发布把运行规格解析成可核查身份，避免今天读旧 Run 时误用今天的工具或 prompt。`resolved_spec_hash` 是对版本化规范 JSON 的 SHA-256，不是对任意 JSON 文本排序碰巧算出的字符串。
 
-但要补一个边界：知识绑定可能是 `LATEST` 策略。版本冻结这条策略，Run/实验在相应解析时冻结实际知识身份；不能声称发布一个版本就永远锁死所有未来 Run 的知识内容。Memory 的有效 ID/hash 也单独记录。
+但要分清两种 LATEST：原始知识绑定可以在 Run/实验变体解析时冻结实际 snapshot；WikiBinding 的 LATEST 则在 **AgentVersion 发布时**解析为具体 publication ID/hash。后者要换 Wiki 必须重新发布版本。Memory 的有效 ID/hash 另行记录，不能用一个 spec hash 代替全部有效输入身份。
 
 **打开代码 ①：** [AgentPublishService.publish](../../packages/agent_runtime/publish.py)。只找这几个词：`resolved_spec`、`canonical_json_hash`、`AgentVersion`。暂时不展开每项配置校验。
 
@@ -190,7 +192,7 @@ Thread
 
 新问题通常是新 Turn、新 Run；审批恢复当前 Run，预算不会因为批准而重置。重复提交相同 client_token 是提交幂等问题；它既不同于审批恢复，也不同于外部工具的逻辑动作身份。
 
-ThreadTurn 和 Run 的写入不是一个跨所有过程的长事务。中间可能出现 Turn 已保存、Run 尚未关联的窗口，所以重复请求可能收到 `THREAD_TURN_IN_PROGRESS`（409），不能承诺任何时刻重试都立即拿到完整结果。
+ThreadTurn 和 Run 的写入不是一个跨全过程的长事务。当前先把 `thread_turn_id` 写入 Run，再补 Turn 的反向关联；重发按这个稳定身份恢复，不再按创建时间猜 Run。相同 token 的规范化正文变化会返回 409；遗留关联不能证明一对一时要求人工恢复。数据库唯一约束与 Run lease 分别防重复准备、重复执行，见第 01、05 课。
 
 **暂停自测：** 为什么要同时有 client_token、run_id、logical_action_id？它们分别标识提交、一次执行和受控动作，不能互相替代。
 
@@ -202,7 +204,7 @@ ThreadTurn 和 Run 的写入不是一个跨所有过程的长事务。中间可�
 | --- | --- | --- |
 | 1 | Web 发 `POST /api/v1/workspaces/{workspace_id}/threads/{thread_id}/turns/stream` | [routes/threads.py 的 stream_turn](../../apps/api/routes/threads.py) |
 | 2 | 解析所用版本，记录 Turn，重复 token 时检查原 Run | [ThreadService.resolve_agent_version / open_turn](../../packages/threads/service.py) |
-| 3 | 先准备 Run，再关联 Turn，构造流 | [AgentRunService.prepare_stream / stream](../../packages/agent_runtime/runtime.py) |
+| 3 | ensure_stream_run 按 Turn 身份恢复或准备 Run，关联后构造流 | [AgentRunService.prepare_stream / stream](../../packages/agent_runtime/runtime_service.py) |
 | 4 | 运行图准备上下文、调用模型、处理工具与审批 | `_AgentRunGraph` 的 8 个节点（下一节） |
 | 5 | 把事件作为 SSE 给 UI，记录 Run 步骤/结果与选定持久事件 | [events](../../packages/agent_runtime/events.py)、[event_store](../../packages/agent_runtime/event_store.py) |
 | 6 | 所需审批决定后，恢复原 Run | [approvals route](../../apps/api/routes/approvals.py)→`AgentRunService.resume` |
@@ -219,7 +221,7 @@ worker 还处理知识入库、评测、Memory 抽取及对账。任务队列传
 
 ## 7. Runtime 的循环：模型提议，运行时治理
 
-实际图构造位于 `packages/agent_runtime/runtime.py` 的 `_AgentRunGraph.invoke`。下面是**源码节选**（只增加学习注释），省略了 `compile_agent_graph` 调用的其他参数：
+实际图构造位于 `packages/agent_runtime/runtime_graph.py` 的 `_AgentRunGraph.invoke`。下面是**节点注册表节选**（只增加学习注释），省略了 `compile_agent_graph` 调用的其他参数：
 
 > **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
@@ -283,7 +285,7 @@ nodes={
 
 读法：自动放行要同时满足 READ 与 NEVER。其余进入审批。risk 和 effect 是独立维度，但这个函数没有直接用 risk 做第三个放行条件；不能凭注释或字段名讲成 LOW 就自动执行。
 
-再看 [_AgentRunGraph.after_policy](../../packages/agent_runtime/runtime.py)的真实分支：
+再看 [_AgentRunGraph.after_policy](../../packages/agent_runtime/runtime_graph.py)的真实分支：
 
 > **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
@@ -334,11 +336,11 @@ def resume_command(payload: Mapping[str, Any]) -> Any:
 | checkpoint | 挂起时的图状态与后续恢复位置 | 不代表外部副作用绝对只发生一次 |
 | durable events / trace | UI 重连与观测，解释过程和耗时 | 不等于 checkpoint，也不保证完全无损业务日志 |
 
-批准时，审批 route 先保存决定，再调用同一个 `AgentRunService.resume`。执行前还要争抢执行权。恢复是在数据库与 checkpoint 约束下继续原 Run，不是重新问一遍模型并清空预算。
+批准时，审批决定与 `resume_pending` 在同一事务保存；API 可以立即恢复，后台也可据持久标记补派发。恢复游标绑定当前中断，Run lease 与动作 claim 分别控制执行权；恢复还要重验原 actor 当前权限。恢复继续原 Run 和原预算，详见第 04、05 课及 [修复验收](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
 外部写入发送后超时，可能已经完成操作但响应丢失。系统不能伪称“确定没发生”，因此记录 UNKNOWN_OUTCOME，让 Run 进入 NEEDS_ATTENTION。即使本地可以防止某个逻辑动作重复执行，也不能宣称所有外部写入 exactly-once。
 
-事件方面，`message.delta` 不持久化；异步 recorder 的有界队列满时会丢帧并告警。重连可重放已持久化的过程/最终输出，不保证每个打字动画都重新出现。trace 默认脱敏，不能把数据库可查误讲成业务正文全部已记录。
+事件方面，`message.delta` 仍不持久化。当前结构事件在发布和释放执行权前落库；实时序号有缺口时先补读，慢订阅者队列满转持久补播。日志完整性失败不能被后续成功覆盖，历史不完整记录也不会因新段恢复自动变完整；逐 token 动画仍不保证重放。trace 默认脱敏，与持久业务事件是两种契约。
 
 ## 9. 知识、记忆、评测怎样接到这条主线
 
@@ -347,6 +349,7 @@ def resume_command(payload: Mapping[str, Any]) -> Any:
 | 模块 | 接入 Run 的位置 | 第一遍必须理解的点 |
 | --- | --- | --- |
 | Knowledge / RAG | 固定知识身份，`search_knowledge` 检索后进入工具结果/上下文 | 检索命中、进入预算、回答正确是三件事；历史引用需要修订和快照身份 |
+| Wiki | 发布绑定具体 publication；query_wiki 经原生工具治理送达 | RAW/WIKI_DERIVED 共享来源与预算；撤销后拒绝消费，不自动换最新版本 |
 | Memory | prepare 装载有效记忆，model 前最终预算准入；结束后可异步抽取 | 共享 workspace+agent、默认关闭、UNTRUSTED；选中不等于准入，精确引文不等于该共享 |
 | Evaluation | 数据发布、变体/实验冻结，通过生产执行链生成结果并计算指标 | 正式实验冻结数据/schema、版本、知识、pricing、build 和 evaluator；不能用调过的 HOLDOUT 自证 |
 
@@ -354,7 +357,7 @@ Memory 已有冻结/停用/回放机制，但质量探针发现无关和矛盾�
 
 已有模型实验使用合成任务，不能当成企业线上收益。11 场景 Memory 探针的 task correctness 是脚本消费者结果，不能说真实 LLM 成功率 100%。学架构时也要学会区分机制、验证范围和未证明结论。
 
-## 10. 现在亲自打开六个文件（不启动服务）
+## 10. 现在亲自打开六个入口（不启动服务）
 
 按下面顺序各看一个位置，做完一行再进入下一行：
 
@@ -363,7 +366,7 @@ Memory 已有冻结/停用/回放机制，但质量探针发现无关和矛盾�
 | 1 | [apps/api/app.py：create_app](../../apps/api/app.py) | HTTP router 如何注册，为什么它不是 Agent Loop |
 | 2 | [routes/threads.py：stream_turn](../../apps/api/routes/threads.py) | 如何从一轮提交得到具体版本、Turn 和 Run |
 | 3 | [agent_runtime_dependencies.py：get_production_agent_run_service](../../apps/api/agent_runtime_dependencies.py) | 哪些真实依赖被组装进 Runtime |
-| 4 | [runtime.py：_AgentRunGraph.invoke / after_policy](../../packages/agent_runtime/runtime.py) | 8 个节点怎样连，条件分支由谁决定 |
+| 4 | [runtime_graph.py：_AgentRunGraph.invoke / after_policy](../../packages/agent_runtime/runtime_graph.py) | 8 个节点怎样连，条件分支由谁决定 |
 | 5 | [tools/policy.py：ToolPolicy.decide](../../packages/tools/policy.py) | 为什么 READ 本身不够自动执行 |
 | 6 | [apps/worker/celery_app.py：create_celery_app](../../apps/worker/celery_app.py) | include 与 beat_schedule 对应哪些异步/定时工作 |
 
@@ -442,7 +445,7 @@ Memory 已有冻结/停用/回放机制，但质量探针发现无关和矛盾�
 1. 打开 [API 主入口](../../apps/api/main.py)，确认应用如何产生。
 2. 打开 [应用装配](../../apps/api/app.py)，找 router 注册，了解哪些能力进入 HTTP。
 3. 打开 [运行时依赖装配](../../apps/api/agent_runtime_dependencies.py)，找 `get_production_agent_run_service`。把每个注入对象写成“接口职责→当前实现”，不用先读 SDK。
-4. 打开 [Runtime](../../packages/agent_runtime/runtime.py)，看 service 的入口与 graph 的节点，找业务状态写入点。
+4. 打开 [Runtime service](../../packages/agent_runtime/runtime_service.py) 与 [graph](../../packages/agent_runtime/runtime_graph.py)，分别看服务入口与图节点，找业务状态写入点。
 5. 回到调用的具体 adapter，核对网络/数据库行为。到这里才读 LangGraph、模型供应商、MCP 的适配细节。
 
 这个顺序让你先知道“函数在整条链的哪一段”，再理解局部语法，避免把 adapter 的实现误当成系统全部。
@@ -475,7 +478,7 @@ Memory 已有冻结/停用/回放机制，但质量探针发现无关和矛盾�
 
 **解读：** 替换框架只改变图执行/checkpoint 实现，不会消除业务的并发、权限和外部网络不确定性。需要另一个实现保存相同恢复身份，并确保中断前可重入；供应商工具 ID 仍不能充当平台逻辑动作 ID。
 
-**核查依据：** [对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `resume / _AgentRunGraph.invoke`。
+**核查依据：** [服务 resume](../../packages/agent_runtime/runtime_service.py) 与 [图 invoke](../../packages/agent_runtime/runtime_graph.py)，分别检查执行身份和框架调用。
 
 **常见误解：** 把框架提供的持久状态等同业务正确性。
 

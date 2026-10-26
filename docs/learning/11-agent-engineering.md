@@ -4,19 +4,21 @@
 
 > **学习目标：** 能用真实调用链解释 Agent 如何选择动作、如何接收反馈、如何结束，以及平台如何限制错误动作。面向 Agent 岗位，重点展示对执行语义、失败和评测的理解。
 >
-> **源码基线：** `c30befe`，2026-10-10 核对。本课为既有实现的教学整理，没有新增 Agent 功能。符号 R1/T1 等均为教学身份，流程示例不是新实验结果。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
+
+符号 R1/T1 等均为教学身份，流程示例不是新实验结果。
 
 ## 源码导读：先知道每段代码负责什么
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
 | [ModelMessage / ModelToolCall / ModelToolDefinition](../../packages/model_gateway/contracts.py)：定义模型消息与工具协议 | 消息、工具描述与参数 → 与 provider 无关的结构 | 描述工具、提议调用、反馈结果是不同对象；tool 消息需要调用 ID |
-| [model / after_model](../../packages/agent_runtime/runtime.py)：组织一次模型回合并选择下一节点 | 图状态、准入上下文 → 模型响应、轮次、下一节点 | 调用前检查步数、费用、取消；有工具调用时不能直接当最终回答 |
-| [tool_proposal](../../packages/agent_runtime/runtime.py)：规范化模型提议并检查循环上限 | ModelResponse → 待治理工具集合 | 重复计数、总调用计数、消息配对 ID；这里尚未执行工具 |
-| [read_execute / observation / after_observation](../../packages/agent_runtime/runtime.py)：受限并发读、回写结果、决定再推理或结束 | 已获准调用及其结果 → tool 消息与下一轮状态 | 并发有上限；反馈按 ID 对齐；既有失败不能被清空 |
+| [model / after_model](../../packages/agent_runtime/runtime_graph.py)：组织一次模型回合并选择下一节点 | 图状态、准入上下文 → 模型响应、轮次、下一节点 | 调用前检查步数、费用、取消；有工具调用时不能直接当最终回答 |
+| [tool_proposal](../../packages/agent_runtime/runtime_graph.py)：规范化模型提议并检查循环上限 | ModelResponse → 待治理工具集合 | 重复计数、总调用计数、消息配对 ID；这里尚未执行工具 |
+| [read_execute / observation / after_observation](../../packages/agent_runtime/runtime_graph.py)：受限并发读、回写结果、决定再推理或结束 | 已获准调用及其结果 → tool 消息与下一轮状态 | 并发有上限；反馈按 ID 对齐；既有失败不能被清空 |
 | [compute_logical_action_id](../../packages/approvals/contracts.py)：为治理动作建立稳定身份 | workspace/run/revision/参数/序号 → 动作 ID | 区别于 provider ID，供审批与执行身份使用 |
 
-建议先读 02 的图，再读本课两段源码；涉及审批和恢复时回 04/05。不要一开始把 Runtime 文件从头背到尾。
+建议先读 02 的图，再读本课 tool_proposal 源码与 observation 教学流程；涉及审批和恢复时回 04/05。不要一开始把 Runtime 文件从头背到尾。
 
 ## 1. 本项目的 Agent 究竟是什么
 
@@ -109,6 +111,8 @@ async def tool_proposal(self, state: AgentRunState) -> dict[str, Any]:
             "arguments": normalized_arguments,
             "tool_call_id": stable_id,
             "invalid_code": None if valid else "TOOL_ARGUMENT_INVALID",
+            # 学习：稳定提议位置参与调用坐标；不使用 provider ID 作为产物幂等身份。
+            "proposal_ordinal": index,
         }
         calls.append(item)
         # 学习：TOOL_REQUESTED 表示提议产生，不代表外部动作已经成功。
@@ -164,80 +168,28 @@ async def tool_proposal(self, state: AgentRunState) -> dict[str, Any]:
 
 代价是合理重复也会消耗限额，例如查同一个服务等待状态变化。因此限额是产品执行策略，要按工具用途设计，不能无限放宽来掩盖模型循环问题。
 
-## 5. 逐行读 observation：把事实还给模型
+## 5. 读 observation：把事实与来源还给模型
 
-有反馈的 Agent 不能只保留模型自己的叙述。这里从前置观察和真实执行观察取结果，补齐 tool 消息，清空本轮集合，然后决定继续还是结束。
+旧版十月初代码只展示通用 `_bounded_tool_result`，已经遗漏当前 RAG/Wiki 的关键路径。完整实现读 [runtime_graph.observation](../../packages/agent_runtime/runtime_graph.py)，证据投影接线读 [work_layer](../../packages/agent_runtime/work_layer.py)，普通结果裁剪读 [runtime_projection](../../packages/agent_runtime/runtime_projection.py)。下面是**教学流程，非逐字源码**：
 
-**源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；类、导入和调用上下文省略。
-
-**带注释源码：observation**
-
-```python
-async def observation(self, state: AgentRunState) -> dict[str, Any]:
-    # 学习：收集策略阶段已经产生的观察，例如拒绝执行的结果。
-    pre = state.get("pre_observations", {})
-    # 学习：另一路是执行器实际返回的观察。
-    executed = state.get("executed_observations", {})
-    # 学习：保留历史消息，继续维护模型协议里的消息账本。
-    messages = list(state["messages"])
-    observations: list[dict[str, Any]] = []
-    terminal_code: str | None = None
-    for call in state.get("proposed_tool_calls", []):
-        # 学习：按 tool_call_id 对齐；有前置观察时优先使用它。
-        result = pre.get(call["tool_call_id"], executed.get(call["tool_call_id"]))
-        # 学习：缺结果不能假装成功，补上明确的失败反馈。
-        if result is None:
-            result = ToolResult.failure("TOOL_EXECUTION_FAILED", "The tool execution failed.")
-        # 学习：指定的完整性/审批设施错误终止循环；普通工具错误不都终止。
-        if result.error_code in _TERMINAL_TOOL_ERRORS:
-            terminal_code = result.error_code
-        budget = ContextBudgetConfig(**state["runtime"]["context_budget"])
-        # 学习：工具结果先受单条预算限制，之后整份上下文还要重新准入。
-        payload = _bounded_tool_result(
-            result, max_tool_result_tokens=budget.max_tool_result_tokens
-        )
-        observations.append(
-            {"tool_call_id": call["tool_call_id"], "status": result.status.value}
-        )
-        messages.append(
-            # 学习：为每个提议补 tool 消息，让模型知道动作的实际结果。
-            ModelMessage(
-                role="tool",
-                name=call["name"],
-                # 学习：必须与前面 assistant 的工具调用 ID 配对。
-                tool_call_id=call["tool_call_id"],
-                content=json.dumps(payload, sort_keys=True, separators=(",", ":")),
-            )
-        )
-    await self.step(
-        "OBSERVATION",
-        "FAILED" if terminal_code else "SUCCEEDED",
-        {
-            "tool_count": len(observations),
-            "observations": observations,
-            "error_code": terminal_code,
-        },
-    )
-    return {
-        "messages": messages,
-        "tool_observations": observations,
-        # 学习：清空本轮待执行集合，防止旧提议再次进入执行器。
-        "pending_tool_calls": [],
-        "proposed_tool_calls": [],
-        "pre_observations": {},
-        "executed_observations": {},
-        # A code the execution node already set outranks this one. Reaching
-        # here with one set means the run is already over — an unconfirmed
-        # action, a lost claim — and blanking it would turn a run that needs
-        # a human into a run that quietly looks fine.
-        # 学习：保留已有失败，不能把未知写入等终止原因覆盖成空。
-        "failure_code": terminal_code or state.get("failure_code"),
-    }
+```text
+按 tool_call_id 合并策略观察和实际执行观察，缺结果补明确失败
+  ├─ 成功的 search_knowledge / query_wiki 内建工具
+  │    → 分配 RAG 证据池，预留消息开销
+  │    → 记录/引用成对投影；compact/Wiki 路径建立短引用注册
+  │    → Wiki 校验完整 envelope，保留不足/冲突/降级状态
+  │    → publication_hash 等完整来源身份留私有注册表
+  └─ 普通结果 → _bounded_tool_result，保留状态并控制单条预算
+生成与原调用 ID 配对的 tool 消息，记录 observation
+清空本轮待执行集合，保留已有 failure_code 与来源注册状态
+after_observation 决定结束或回到 model，下一轮再做全局准入
 ```
 
-`after_observation` 在有 `failure_code` 时走 finish，否则回 model。普通工具失败可以作为反馈让模型换方案；`TOOL_APPROVAL_NOT_AVAILABLE`、工具/AgentVersion 完整性错误、模型绑定无效等指定终止错误会结束循环。已有的未知结果等失败也必须保留，不能用一次观察清空。
+消息配对 ID 解决 provider 协议对齐，`proposal_ordinal` 与冻结模型轮次形成稳定调用坐标，解决 Artifact 重放幂等；logical_action_id 解决审批动作身份。三个身份都不能仅靠 provider ID 代替。
 
-`_bounded_tool_result` 限制单条工具结果；下一轮 `_admit_context` 再限制整体消息、工具定义等。前者避免一个超大结果占满上下文，后者确保所有输入合起来仍符合预算。两层控制解决不同问题。
+`after_observation` 遇到失败走 finish，普通工具错误可以作为下一轮反馈；既有 UNKNOWN_OUTCOME 等失败不能被清空。query_wiki 请求 HYBRID 时还要检查实际送达是否含 RAW 与 WIKI_DERIVED，不能以服务原始返回双层代替模型真正看到双层。
+
+单条结果与整体上下文是两层限制。当前还修复了先扣消息信封、多轮类别漂移、Citation QA 全模型链/重试准入；检索 bytes 与 Runtime 近似 token 的数值仍不能直接互换。相关默认值与公式见 [02](02-one-run-end-to-end.md)、[06](06-knowledge-rag.md)。
 
 ## 6. 用三轮教学案例串起 Agent 与治理
 
@@ -258,9 +210,11 @@ async def observation(self, state: AgentRunState) -> dict[str, Any]:
 
 **并发：** `read_execute` 用 semaphore 限制 `max_parallel_reads`，通过 gather 收集结果，再按调用 ID 组织观察。并发提高独立读取效率，不能自然推导出 WRITE 可并发、所有任务都独立或多个 Agent 已经协作。
 
-**取消：** 节点检查停止请求，执行侧还有具体取消/超时机制。停止生成首先表达用户意图；已经发出的外部请求是否取消成功，要由实际确认决定，不能把前端气泡停止等同于外部动作回滚。
+并发收尾也是执行权合同：当前退出 READ 批次时取消尚未完成的子任务，并等待全部子任务结束，再离开这一执行范围。只取消外层协程就释放 Run lease，可能让旧 selector 继续发模型请求；并发上限本身不能防止这种泄漏。[read_execute](../../packages/agent_runtime/runtime_graph.py)、[修复验收](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
-**预算：** 模型调用前检查累计轮次与已知费用记录，恢复时先取回记录。费用上限的检查不是预知下一次模型调用的精确账单；账单和估算、已知费用和最终结算需要区分。工具数、重复数、单条结果与整体上下文预算共同限制资源消耗。
+**取消：** 当前未启动取消可无 provider 收敛；UNKNOWN_OUTCOME/未确认 CLAIMED 保持 NEEDS_ATTENTION，不能被普通 CANCELLED 覆盖。节点检查停止请求，执行侧还有具体取消/超时机制。停止生成首先表达用户意图；已经发出的外部请求是否取消成功，要由实际确认决定，不能把前端气泡停止等同于外部动作回滚。
+
+**预算：** 选择器是独立 AUXILIARY_MODEL 用量，不冒充普通生成轮次；有限价但选择器无冻结单价时派发前跳过。模型调用前检查累计轮次与已知费用记录，恢复时先取回记录。费用上限的检查不是预知下一次模型调用的精确账单；账单和估算、已知费用和最终结算需要区分。工具数、重复数、单条结果与整体上下文预算共同限制资源消耗。
 
 **模型降级：** Gateway 把 provider 差异放在适配层。fallback 只有首个可见 token 前才透明；已经输出后换模型会把两段不一致的答案混在一起。Runtime 使用稳定契约，不直接耦合某个 SDK 的响应形状。
 
@@ -270,6 +224,7 @@ async def observation(self, state: AgentRunState) -> dict[str, Any]:
 | --- | --- | --- |
 | Thread history | 当前会话之前说了什么 | 不是完整无限历史；仍受准入预算 |
 | Knowledge/RAG | 有出处的外部知识与证据 | 检索命中不保证回答正确；快照与引用必须可追溯 |
+| Wiki | 复用已编译、可追溯的组织结果 | 原生绑定在版本发布时固定；撤销、冲突与预算降级仍须消费层处理 |
 | Memory | 跨会话保留适当的偏好/事实 | 保存、召回、准入、真正使用分开；语义质量尚有失败 |
 | Tool observation | 当前动作实际返回什么 | 不可信业务文本不能自动升级成 system 指令 |
 

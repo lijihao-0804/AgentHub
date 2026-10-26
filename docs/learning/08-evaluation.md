@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：07 Memory](07-memory.md) · [下一课：09 应用、反馈与接管](09-applications-feedback.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -51,7 +51,7 @@ expected 不能直接拼成模型答案上下文。HOLDOUT 的 expected 默认�
 
 打开 [ExperimentService.finalize_experiment](../../packages/evaluation/experiments.py)，先看发布数据/schema 完整性，再看 `_validate_stored_variant`，最后找到 `spec`、`spec_hash` 与 status。
 
-冻结内容包括 dataset 内容/schema、split/purpose/repetitions、变体 spec、知识 snapshot/hash、pricing、build SHA 和 evaluator manifest。正式读取历史实验不能再解析今日 LATEST 或换价格后重算成“原实验结果”。
+冻结内容包括 dataset 内容/schema、split/purpose/repetitions、变体 spec、知识 snapshot/hash、Wiki publication/hash、pricing、build SHA 和 evaluator manifest。正式读取历史实验不能再解析今日 LATEST 或换价格后重算成“原实验结果”。
 
 可复现意味着身份可核查，不承诺非确定性供应商输出逐字相同。模型/外部目标环境变化也需要保留限制。
 
@@ -67,6 +67,20 @@ expected 不能直接拼成模型答案上下文。HOLDOUT 的 expected 默认�
 | 为什么保留失败/取消？ | fail_case / complete_case | 成功率分母与费用不能只取成功样本 |
 
 源码查看不等于这轮跑过整批实验。
+
+### Wiki 与费用的最新冻结约束
+
+Wiki publication 身份在 AgentVersion 已解析，variant 保存并传入 Runtime 的 `effective_wiki_publications`；正式实验还核验可用性、工具绑定及已冻结的检索模型身份。生产 BGE 适配器有 `model_name`，可以检查漂移；旧版本未冻结模型名、无身份的自定义适配器仍兼容，不能宣称任意第三方模型都已防漂移。
+
+新 fallback 实验通过 variant metadata 的 `fallback_pricing_snapshot_ids` 按链顺序提供价格。服务端核对 workspace/provider/model/币种/hash，并冻结全链价格；历史实验不按今日 primary 单价重算。费用已知还要求实际收费身份与用量完整：目前 **max_attempts > 1 不标 KNOWN**，因为现有步骤不能证明成功前所有收费失败；fallback、辅助选择器或多 Run 也缺任一凭据即保留 None/NOT_AVAILABLE。不能因“价格链已冻结”推导“逐 attempt 账单已完整”。
+
+未知费用也不等于所有成本指标都不可用：单主模型、单次调用且用量/价格完整的路径仍准确计费。已有真库验收保留 `USD 0.00002000` 和每成功数据项成本的正向断言；这是指定夹具的结果，不是统一调用单价。[最终验收 L-13](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
+选择器实际 token 用量进入 checkpoint、Run 汇总和 AUXILIARY_MODEL step，解析失败/超时也保留 attempt。选择器尚无版本冻结单价契约，因此有限价 `max_cost_micro_usd` 的 Run **派发前跳过选择器**，trace 写 `cost_budget_unpriced_selector`；不限价时可运行，未知费用不能记零。证据：[修复验收 H-15/L-13/C-08](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
+可选指标 `required=False` 的缺证据仍为 INCONCLUSIVE；整体 PASS 不等于每个可选 safety 指标已被测到。正式实验、离线 benchmark、脚本消费者和真实模型结果需要分别报告。
+
+已发布 DatasetVersion 的不可变性仍按公开 API 合同解释；本轮未因此新增数据库管理员写入防护。维护数据应创建新版本，不能直接改旧 items 后继续沿用原 content hash。新增故障修复没有扩大这一保证边界。[最终验收 LR-02](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
 ## 5. 衡量什么，各自不能替代什么
 
@@ -87,7 +101,7 @@ expected 不能直接拼成模型答案上下文。HOLDOUT 的 expected 默认�
 - [Memory 11 场景](../../benchmarks/evaluation/memory_quality)：单独的确定性探针。
 - [benchmarks 入口](../benchmark/README.md)：原始数据、runner、历史实验的解释与复现。
 
-这些在 Git 中；本机数据库/密钥/模型缓存不等于已上传的数据备份。
+上述入口与正式证据在 Git 中；较新的公开 RAG 逐题结果部分仅存本机 results 目录，必须逐报告核对实际工件是否在库。数据库、密钥、缓存和忽略目录不会因 runner 入库自动成为可恢复备份。
 
 ## 7. 读一轮真实结果
 

@@ -1,10 +1,23 @@
 # AgentHub RAG + Wiki 并轨架构：当前结构、设计理由与取舍
 
-整理日期：2026-10-25（Asia/Shanghai）。本文用于理解这次 RAG 与 Wiki 并轨的结构，建议先读本篇，再按需阅读 [RAG 开发复盘](12-rag-development-retrospective.md)。
+首次整理：2026-10-25；更新日期：2026-10-26（Asia/Shanghai）。本文用于理解 RAG 与 Wiki 当前的架构与设计理由，建议先读本篇，再按需阅读 [RAG + Wiki 开发复盘与心得](12-rag-development-retrospective.md)；后者按开发过程解释试验、踩坑、未采用方案与共同经验。
 
-源码基线：并轨提交 `11b74f8`，第一父提交为最新 RAG `fb62b57`，第二父提交为 Wiki 独立验收版 `51cb17d`。该提交已经进入当前 `E:/JAVA/AI+agent/AgentHub` 目录所在的 RAG 分支；`main` 保持原状。本文以合并后的实际代码为依据，不把“代码合到一起”写成“所有 Agent、正式实验和生产部署都完成了 Wiki 接入”。
+已提交源码基线：`a2d47e4`（包含后端 `9ad8b9d`、前端 `1673515` 与最终验收归档）；结构分层基线为 `4d07c87`。`11b74f8` 是初次并轨，之后 `0523d06`～`318f604` 已完成原生证据 envelope、AgentVersion 绑定、Run/Experiment 冻结与 `query_wiki` 工具；`3cbc34e` 记录真实原生调用验收，`923fe16` 完成 Runtime 分层。旧版“原生绑定尚未实现”的结论已不再适用。
 
-外部资料于本日在线核查，优先采用作者原提案、项目官方文档与固定版本架构材料。下文分别标明本项目事实、设计收益的推论和已经实测的结果。
+以 `4d07c87` 为基线的隐藏缺陷修复现已提交，验收状态为“29 项主要问题修复及集成验收完成，尚未部署业务环境”。本文按该状态同步消费合同与验证范围；代码迁移 head 为 `0037_run_resume_cursor`，不代表业务数据库、容器或所有部署已升级。
+
+外部资料沿用 2026-10-25 在线核查的一手来源；本次更新主要核对本地提交、源码及实验记录，没有重新运行外部项目或付费评测。
+
+### 本次更新先看什么
+
+| 相比初次并轨 | 已有变化 | 阅读位置 |
+| --- | --- | --- |
+| Wiki 原先只能独立 API 使用 | 已增加受工具治理的原生 `query_wiki`，未绑定版本保持 opt-in | 第 6.4、8.3 节 |
+| WikiBinding 原先是后续工作 | 发布时解析一次，进入 resolved spec；Run、Checkpoint 和 Experiment 固定消费 | 第 5.1、8.3 节 |
+| 原始与派生证据仅概念分层 | 已有 RAW/WIKI_DERIVED envelope、短引用及私有来源注册 | 第 4.1、6.4 节 |
+| 只有独立 Wiki 的 6 题对照 | 新增 50 题原生工程验收；同时暴露调用上限与双层交付分母问题 | 第 9.4 节 |
+| Runtime 集中在一个大模块 | 拆为兼容门面、服务、状态图和投影辅助层 | 第 3.2 节 |
+| 只讨论预期收益 | 增补生成侧、中文送达、表格试点收口及已验收、尚未部署的修复 | 第 8.4、9.5 节 |
 
 ## 1. 先把这次设计讲清楚
 
@@ -14,7 +27,7 @@ RAG 负责围绕当前问题从原始资料中找到相关片段；Wiki 负责�
 
 这项设计试图同时保留两种能力：高频主题可以复用已经完成的知识组织，精确事实、出处和更新后的内容仍然能够回查原文。Wiki 页是派生阅读层，页面标题、关联和归组仍可能有误；原始证据也只是来源所声称的内容，系统不会因为一段文字存在，就保证它在现实世界中为真。
 
-当前并轨最重要的成果是把这种职责分离接入同一工程底座。并轨验收记录为 288 项定向检查通过，覆盖两条路径的兼容性；没有重跑付费质量对照。**Hybrid 更准确、更便宜、更快，是要继续用数据验证的假设，而不是由架构图直接推出的结论。**[并轨验收](../wiki/integration-acceptance.md)。
+当前架构已经越过“同库并轨”的阶段：**Wiki 可以作为 AgentVersion 的显式能力发布，由原生 Agent 工具调用，并沿同一证据注册和预算链交付。**初次并轨的 288 项兼容检查仍是历史证据；后续原生验收与研究结论单列，不能混为同一组分数。**Hybrid 更准确、更便宜、更快，仍需独立比较验证，原生接入完成不自动证明质量优于 RAG。**[并轨验收](../wiki/integration-acceptance.md)、[原生绑定实施](../reviews/AgentHub-Wiki原生绑定实施报告-318f604.md)。
 
 ### 1.1 “混合”在这里有两种含义
 
@@ -77,8 +90,10 @@ flowchart TB
         ROUTE["mode + intent / 校验来源与 Wiki 绑定"]
         WIKI["Wiki 页面匹配 / 有界冲突关联"]
         RAG["原始 RAG 检索 / 融合 / 重排"]
-        EVIDENCE["来源核验后的引文 / 路由・不足・冲突状态"]
-        ANSWER["可选模型回答 / 上下文准入 / 引用检查"]
+        EVIDENCE["来源核验后的 RAW / WIKI_DERIVED"]
+        ANSWER["独立 API 可选回答 / 预算与引用检查"]
+        REGISTRY["原生工具：短引用视图 / 私有证据注册表"]
+        LOOP["Agent 模型节点 / 统一上下文准入 / Checkpoint"]
         ROUTE --> WIKI
         ROUTE --> RAG
         PUB --> WIKI
@@ -86,7 +101,13 @@ flowchart TB
         WIKI --> EVIDENCE
         RAG --> EVIDENCE
         EVIDENCE --> ANSWER
+        EVIDENCE --> REGISTRY --> LOOP
     end
+
+    VERSION["AgentVersion：发布时冻结 WikiBinding"]
+    RUN["Run / Experiment：effective_wiki_publications"]
+    TOOL["原生 query_wiki / ToolPolicy・权限・审计"]
+    VERSION --> RUN --> TOOL --> ROUTE
 
     GOV["横向约束：Workspace / RBAC / ModelGateway / 预算 / 审计 / 撤销"]
     GOV -.-> COMP
@@ -94,7 +115,7 @@ flowchart TB
     GOV -.-> ANSWER
 ```
 
-图中是职责层次，不代表每次查询必须遍历所有节点。显式 WIKI 不调用原始检索，RAG 模式跳过 Wiki 页面匹配；模型回答也是可选步骤。
+图中是职责层次，不代表每次查询必须遍历所有节点。独立 API 可以只返回摘录，也可以请求独立回答器；原生工具则将证据交回 Agent 模型节点，通常不再在工具内调用一遍独立回答器。显式 WIKI 不调用原始检索，RAG 模式跳过 Wiki 页面匹配。
 
 ### 3.1 五个层次分别负责什么
 
@@ -103,8 +124,8 @@ flowchart TB
 | 原始来源层 | `packages/knowledge` 的 Document、Revision、Chunk | 管理原始内容、修订和定位范围 | 来源内容必然正确 |
 | 来源快照层 | KnowledgeSnapshot / SnapshotItem | 明确这次允许使用哪些原始修订 | 同一来源快照只会产生一种 Wiki |
 | Wiki 编译层 | `compiler.py`、`service.py`、提取缓存 | 从固定来源生成并校验候选摘编、组织页面 | 模型归组与关系必然正确 |
-| 发布和查询层 | WikiCompilation / WikiPage / `query.py` | 固定 Wiki 版本，路由、读取和验证证据 | 已实现任意图推理或语义充分性判定 |
-| 回答交付层 | `answer.py`、ContextBudgetPolicy、ModelGateway | 基于已验证来源生成带引用的回答，拒绝结构不合法输出 | 每句有编号就等于每句有语义支持 |
+| 发布和查询层 | WikiCompilation / WikiPage / AgentWikiBinding / `query.py` | 固定 Wiki 与 Agent 版本，路由、读取和验证证据 | 已实现任意图推理或语义充分性判定 |
+| 回答交付层 | 独立 `answer.py` 或原生 Agent 模型节点、证据注册表、ContextBudgetPolicy | 将原始/派生证据明确交付，执行各入口相应的预算与引用约束 | 两种入口的输出结构、句级校验及评测分数完全相同 |
 
 ### 3.2 实际模块边界
 
@@ -121,6 +142,16 @@ packages/wiki/service.py           幂等、来源、组织、lint、发布、�
 packages/wiki/query.py             Wiki / RAG / Hybrid / AUTO 的确定性组合
 packages/wiki/answer.py            可选的带引用回答
 packages/wiki/conflict_review.py   默认关闭的模型冲突复核实验
+
+packages/wiki/evidence_envelope.py RAW / WIKI_DERIVED 身份与来源合同
+packages/tools/builtins/query_wiki.py 原生工具绑定检查、查询与投影
+packages/agent_runtime/publish.py  AgentVersion 发布时解析 WikiBinding
+packages/agent_runtime/frozen.py   已发布 WikiBinding 的冻结解析
+packages/agent_runtime/work_layer.py 工具观察与证据注册投影
+packages/agent_runtime/runtime.py  兼容既有导入的门面
+packages/agent_runtime/runtime_service.py Run 编排、持久化、流式与解析
+packages/agent_runtime/runtime_graph.py 状态图节点与执行推进
+packages/agent_runtime/runtime_projection.py 状态类型、投影/记账与绑定辅助
 ```
 
 关键拼接点是 `query_wiki(..., raw_retriever=...)`。Wiki 按 `KnowledgeRetriever` / `RetrievalQuery` 稳定协议请求原始证据，不复制 Dense/Sparse/RRF/BGE 算法，也不把研究线所有选择参数存进 Wiki 数据模型。
@@ -128,6 +159,10 @@ packages/wiki/conflict_review.py   默认关闭的模型冲突复核实验
 **好处是研发可以分轨，能力可以并轨。**RAG 可以继续改召回和证据交付；Wiki 可以继续改缓存、组织和维护；只要证据身份、权限、来源与查询合同保持一致，就不必为每个策略重构另一侧。
 
 但这只是接口解耦，并不保证所有策略自动生效。当前 Wiki API 的 raw 适配器创建 `HybridKnowledgeRetriever`，读取相关部署设置，使用普通 `RetrievalQuery`。AgentVersion 中特定的 Onyx、EvidenceSet、compact 等显式配置，并没有因两个模块出现在一个分支就自动传进这个查询入口。
+
+原生接入还增加了另一条边：AgentVersion → PublishedToolResolver → `query_wiki` → Wiki 查询应用服务；Run/Experiment 传入冻结的 `effective_wiki_publications`。这与独立 API 并存，而非替换 API。
+
+`923fe16` 对 Runtime 的拆分保持旧 `runtime.py` 导入门面，主体按 `runtime_service → runtime_graph → runtime_projection` 分层。收益是发布/解析、状态推进和证据投影更容易分别审阅，仍共享一套状态合同。结构报告记录四臂冻结消息重放 200/200 一致；这是当次纯搬迁的兼容证据，之后行为修复需读自己的回归验收，不能由搬迁重放代证。[结构实施记录](../reviews/AgentHub-结构优化深度解析与实施方案-7422b93.md)。
 
 ## 4. 为什么 Wiki 选择“结构化存储＋证据摘编”
 
@@ -138,6 +173,10 @@ Wiki claim 保存原始 document/revision/chunk、locator 和精确 quote；查�
 这样做的直接收益是：Wiki 与 RAG 对“哪一版原文”说同一种语言。来源更新、历史查询、撤销与答案引用可以围绕同一身份核查，避免 Wiki 有一个文件路径、向量库有一个 UUID、回答又有一个无法对应的编号。
 
 代价是多一次校验与来源关联读取。但在本项目里，检索命中不是权限证明；这笔成本是在守住可信交付边界。
+
+原生版本把这一边界落实为证据 envelope：RAW 保留原始形状并标记 origin；WIKI_DERIVED 还必须具有 `publication_id`、`publication_hash`、`wiki_page_id`、`source_revisions` 和原始 `quote`。缺失派生身份在注册边界失败关闭，不能把 Wiki 内容改个名字就当 raw Chunk。
+
+完整 envelope 与模型阅读视图并不相同。模型可见短引用、正文、origin 和页面标识；publication hash 等完整身份保存在私有注册表/检查点中，供引用与恢复核验。这样既能追溯派生产物，又避免把重复长身份塞满上下文。`source_revisions` 是该页面受理 claims 的来源修订集合，不应解释为每条引句都由集合内全部文档联合支持。[envelope 契约](../../packages/wiki/evidence_envelope.py)。
 
 ### 4.2 第一版发布内容以精确引文为主
 
@@ -197,7 +236,7 @@ Microsoft 的 [固定版本 LLM Wiki 架构](https://github.com/microsoft/llmwik
 
 编译规格固定提示/schema、模型主备链、输出模式与参数、路由身份、冲突复核策略、撤销排除集和编辑者声明等。同来源同规格的重复请求返回同一个任务身份，而不是再次花钱生成一版“看起来一样”的内容。
 
-面向消费者的 `WikiBinding` 核心字段为：
+独立 Wiki 查询使用的 `WikiBinding` 核心字段为：
 
 ```text
 schema_version
@@ -206,6 +245,16 @@ source_snapshot_id + source_snapshot_hash
 ```
 
 这不是为增加几个 hash 而增加复杂度，而是解决具体歧义：同一个原始快照，可能对应不同模型、不同组织和不同冲突维护结果。**原文版本冻结和派生版本冻结必须同时成立。**
+
+原生 Agent 又增加一层发布绑定，不能与上面的查询 binding 混成一种 JSON：
+
+| 所在位置 | 绑定含义 | 关键字段/行为 |
+| --- | --- | --- |
+| Agent 草稿 `agent_wiki_bindings` | 编辑者选择如何绑定 | PINNED 指定 publication 与所见 hash；LATEST 留到发布时解析 |
+| AgentVersion `resolved_spec.wiki_binding` | 这版 Agent 实际绑定哪一版 Wiki | schema_version、binding_mode、knowledge_base_id、wiki_publication_id、publication_hash；LATEST 也必须已经带具体 ID/hash |
+| Run / Experiment variant | 本次执行使用哪组固定 publication | `effective_wiki_publications`；关联 publication 后核验其原始来源快照，不在历史读取时再次找最新 |
+
+`a3c9aa6` 通过迁移 `0034_wiki_native_binding` 增加草稿绑定表，以及 Run/variant 的有效 publication 列。绑定进入既有 canonical resolved-spec hash；未绑定版本省略可选段，避免无故改变旧 spec。LATEST 表示**发布时取最新**，不是每次工具调用取最新。以后要用新知识，应重新编译/发布 Wiki，再重新发布 AgentVersion。
 
 ### 5.2 READY 不等于 PUBLISHED
 
@@ -254,7 +303,7 @@ stateDiagram-v2
 
 同一 Wiki 查询 API 即使选择 RAG 模式，仍先验证 compilation 与来源快照绑定，再跳过 Wiki 页面读取；它是在同一绑定范围内比较原始路径，不是取消版本检查后搜索任意知识。
 
-这里的“补充检索”目前是这次查询里受规则约束的一次 raw 调用。没有自动生成缺口查询、持续规划和多轮补检索，不应把这条 API 说成已经完成 Agentic RAG。
+单次 `query_wiki` 内的“补充检索”仍是受规则约束的一次 raw 调用。原生 Agent 现在可以在既有运行循环中再次调用该工具，W5 也实际观察到不同参数重试；但这不等于已经验收“识别语义缺口→生成补检索计划→判断完成”的专用策略。重试次数和有依据的缺口补检要分开评价。
 
 ### 6.2 为什么精确事实必须保留原文路径
 
@@ -272,7 +321,26 @@ stateDiagram-v2
 
 **这样拆的收益：**阅读、调试、检索评测不必每次付回答费用；模型回答器可替换；检索不足和生成失败不会被混在一个文本框里。若 evidence 已标记冲突、不足或仍需补充，回答组件直接给出不足状态，避免再让模型把它润色成确定结论。
 
-当前这个独立回答入口不是原生 AgentRun 的完整工具循环。复用 ContextBudgetPolicy 和 ModelGateway，并不等于已经完成 Checkpoint、ToolPolicy 与正式 Experiment 的 Wiki 绑定。
+独立 API 的 `answer.py` 仍是独立回答器。与此同时，`318f604` 已接入原生 Agent 工具循环：`query_wiki` 返回证据，让 Agent 模型节点作答，绑定和证据注册随 Run/Checkpoint 传递。独立回答器的逐句引用守卫，不能无条件移植为“所有自由生成的 Agent 答案都经过同样逐句验证”的保证。
+
+### 6.4 原生 query_wiki 怎样穿过完整消费链
+
+```text
+草稿选择 Wiki → 发布解析具体 publication → resolved spec / canonical hash
+    → Run 创建或 Experiment override 固定 effective_wiki_publications
+    → PublishedToolResolver 核对 spec 与本次绑定
+    → ToolRuntime 执行 query_wiki（权限、策略、截止时间、审计）
+    → 从冻结 publication 派生来源快照，调用 query_wiki 应用服务
+    → RAW / WIKI_DERIVED envelope
+    → observation 注册投影 → ContextBudgetPolicy → Agent 模型节点
+    → 短引用与私有来源映射进入运行状态 / Checkpoint
+```
+
+工具参数只表达问题、mode 和 intent，模型不能通过参数另选一个 publication 或工作区。绑定由已发布版本和 Run 状态提供；无绑定、漂移或撤销都会失败关闭。原生工具使用 `require_current=False`，使新入库资料不会静默进入冻结 Run，但仍执行来源撤销检查。
+
+该工具是 READ builtin，沿现有 ToolRuntime 接受治理，并写 `wiki_query` 审计；READ 不意味着可以绕过权限。SUPPORT 模板可提供工具提示，未绑定 Wiki 的版本不因此自动开放该工具。`search_knowledge` 与 `query_wiki` 共用 RAG_EVIDENCE 类别，而不是各造一套互相不知道的模型窗口预算。
+
+同一 Chunk 可能提供多条 Wiki claim，所以 Wiki 注册可以显式接受共享原始引用；普通 `search_knowledge` 不因这一需求放松原有一对一来源配对。身份更完整不等于所有语义风险都已交付：10 月 26 日修复与验收专门补充不足/冲突状态和双层来源裁剪，见第 8.4 节。
 
 ## 7. 更新、撤销和冲突为什么要做得保守
 
@@ -281,6 +349,8 @@ stateDiagram-v2
 默认 `require_current=true` 会核对当前有效来源集合；原文新增、更新、退役或跨文档替代后，旧 Wiki 可能被判 `WIKI_STALE`，不能继续以当前知识名义返回。
 
 有意读历史时可设置 `require_current=false`，但它只是允许部分历史生命周期状态，不允许绕过撤销。历史内容版本可保留，当前是否还能交付这些内容是另一项检查。
+
+原生工具采用冻结历史语义；独立 API 默认 current 语义仍保留。因此同一个旧 publication 在新来源入库后，独立 current 查询可能提示过期，而旧 AgentVersion 仍读原冻结集合；这不是解析分歧，而是两个入口明确选择了不同的新鲜度合同。来源撤销则对两者仍有效。
 
 第一版更新由编译 API 显式触发，没有长期自动订阅所有变更，也不会因为一次上传悄悄发起大量模型维护任务。这样让成本与发布动作可控，代价是需要维护者主动刷新。
 
@@ -332,13 +402,38 @@ ContextBudgetPolicy 负责模型调用前的上下文准入。编译或回答若
 
 复用现有 `knowledge_edit` 维护权限和 `knowledge_run` 查询权限，保留 workspace 隔离与审计。维护接口没有被注册为可让模型自行执行的后台写工具，READ 也不会自动获得“安全无需权限”的含义。
 
-### 8.3 版本绑定为何暂不偷偷塞进原生 Agent
+### 8.3 原生版本绑定已经接入，为什么仍不能运行时找最新
 
 如果某 AgentVersion 只冻结 raw snapshot，却在运行时默认加载“最新 Wiki”，同一个版本在不同日期可能读到不同知识。恢复 Run 或回看实验时也会变化，破坏本项目最重视的可复现性。
 
-因此原生接入必须把 WikiBinding 进入发布规格、Run/恢复和 Experiment 的校验，并让工具经过既有授权、风险、审计和预算。当前独立 API 显式接收 compilation 与 source snapshot，是先把这条边界做清楚，而不是通过任意工具参数绕开它。
+这项约束现已由 W2–W4 实施：发布阶段固定 WikiBinding；Run 初始化把 publication 写入有效绑定及图状态；Experiment variant 固定相同 publication，runner/scenario driver 传递冻结 override；工具执行重新核对 spec、Run 列表和活体 publication，而非读取草稿配置。
 
-这是分阶段并轨：**已经组合模块与独立查询，原生版本级消费需要另做完整合同。**不能把 Git 合并当成全部产品路径都切到新知识体系。
+恢复/重放也不自动换版本。已冻结 publication 丢失或内容身份漂移时，执行转入 `NEEDS_ATTENTION / WIKI_PUBLICATION_UNAVAILABLE`；版本完整性本身不合法则显式拒绝。这里要区分“历史执行继续推进”和“撤销资料仍可读取”：撤销后旧 Run 可以继续到工具节点，但该工具拒绝交付被撤来源；新 Run 绑定该 publication 则在创建时以 `WIKI_PUBLICATION_REVOKED` 拒绝。
+
+LATEST 只在发布时选可用版本；旧 AgentVersion 不会在新 Run 创建时偷偷升级 Wiki。正式 Experiment 的 variant hash 在有绑定时覆盖有效 publication，旧无绑定 variant 不无故加新字段。当前工作区还在加强 Experiment 活体可用性与检索模型身份校验，尚未作为已提交验收结论，见下节。
+
+这轮实现的是**显式绑定版本的原生消费**。旧 Agent、未绑定版本、维护 UI、全量部署和所有模型 provider 都不会因这项接入自动完成迁移。[原生实施报告](../reviews/AgentHub-Wiki原生绑定实施报告-318f604.md)。
+
+### 8.4 10 月 26 日修复与验收：结构接通以后，还要保证真实送达
+
+以下修复已随 `9ad8b9d` 提交并完成隔离验收，前端恢复身份另随 `1673515` 提交；`c8bdeea`、`a2d47e4` 归档验收与构建/迁移补验。本节按当前实现解释，**业务环境仍未部署**。[修复验收记录](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
+| 问题 | 已提交的修复行为 | 为什么影响本架构 |
+| --- | --- | --- |
+| 工具顶层说不足/冲突，模型只收到正常引文 | 将 insufficient、supplemental、conflict、degraded 等服务端状态带过证据再投影 | 原始接口保守拒答，不应在短视图里变成“证据正常可答” |
+| 先排 Wiki 后截前 10 条，RAW 被挤掉 | HYBRID 工具投影为两种 origin 预留名额，预算投影继续检查实际送达来源并标注降级 | 请求模式 HYBRID 不等于最终模型真正收到双层材料 |
+| LATEST 只扫描固定前 10 个 publication | 分页找可用版本直到命中或耗尽 | 前十个撤销不代表第十一个合法版本不存在 |
+| 绑定了知识版本却仍可能使用变化后的检索模型 | 发布/工具/正式实验加强冻结配置与部署身份核对 | 固定原文不足以固定完整检索行为 |
+| 选择器附加调用费用不在 Run 总账 | attempt 进入状态和汇总；缺价格保留 UNKNOWN，限价 Run 派发前跳过无冻结单价的 selector | 不能只计回答器费用就宣称整次执行受费用上限保护 |
+| selector 耗尽工具预算，已有基础结果也没返回 | 在整体截止时间内分配剩余选择时间、保留基础结果退路 | 可选增强失败不应悄悄取消已经可用的检索结果 |
+| Qdrant 小数秒超时被整型截断 | 适配器保留 float，0.5 秒配置完整传到 SDK | 超时配置失真不能被解释成检索无结果或算法质量下降 |
+| 恢复、取消、事件与并发执行有窗口 | 数据库执行 lease、持久恢复游标、原 Run actor 当前权限复验、事件补播 | 防止旧执行者或重复恢复再次调用工具；未知结果仍需人工关注 |
+
+新增迁移为 `0035`～`0037`，分别涉及 Run 执行权、Turn/Memory/Artifact 身份和恢复游标；已提交 Wiki 原生绑定迁移是 `0034`。代码中出现新 migration 不代表业务库已执行它。旧 worker 排空、显式 checkpoint bootstrap、统一 API/worker 版本等部署步骤也不能由文档更新代替。
+
+上述合同也有兼容边界：检索模型漂移检查依赖适配器暴露 model_name，不能覆盖无身份的自定义适配器；正式实验即使冻结全模型链价格，缺少实际收费尝试凭据仍保留未知，max_attempts>1 当前不标 KNOWN。选择器超时可返回已经取得的基础池，不能承诺基础检索未完成时凭空有结果。[评测课](08-evaluation.md)补充了计费口径。
+
+这些修复针对的是**同一身份、同一状态和同一预算能否穿过所有边界**。它们不新增一种 RAG 质量算法，也不能换算成答案 F1 或冲突召回率提升。
 
 ## 9. 这种结构的好处，哪些已经验证
 
@@ -370,7 +465,7 @@ ContextBudgetPolicy 负责模型调用前的上下文准入。编译或回答若
 
 ### 9.2 已验证的工程价值
 
-本次 `11b74f8` 并轨验收记录为 **288 passed、0 failed、0 skipped**：Wiki 单元 83 项，最新 RAG 预算/证据/发布/复现合同 143 项，Wiki 生命周期与 worker/API 组合 26 项，旧快照、Run 与正式实验数据库回归 36 项。新隔离 PostgreSQL 数据库部署到迁移 `0033`，没有迁移业务数据库。[并轨验收记录](../wiki/integration-acceptance.md)。
+初次 `11b74f8` 并轨验收记录为 **288 passed、0 failed、0 skipped**：Wiki 单元 83 项，RAG 预算/证据/发布/复现合同 143 项，Wiki 生命周期与 worker/API 组合 26 项，旧快照、Run 与正式实验数据库回归 36 项。当次新隔离 PostgreSQL 数据库部署到迁移 `0033`，没有迁移业务数据库；后续原生绑定另增 `0034`。[并轨验收记录](../wiki/integration-acceptance.md)。
 
 新增组合用例走实际 API → HybridKnowledgeRetriever → 来源核验，Qdrant 使用 SDK 内存实现，embedding、reranker、compiler 使用确定性 fake，覆盖同源组合、外租户隔离、旧绑定排除新增资料、冲突和撤销。它证明组合及合同兼容，不能替代真实 provider、远程 Qdrant、Celery 部署重启或语义质量对照。本次写作仅核对记录与测试代码，没有自行重跑这 288 项。
 
@@ -381,6 +476,8 @@ Wiki 独立验收报告记录了 144 个不同定向单元/集成用例，包括
 真实初始编译 5 请求，产生 23 页、31 条来源 claim、126 条导航边；新增一份资料后仅新增 1 次模型请求、复用 5 份 revision 提取。这直接验证了当前 revision 级增量复用路径。
 
 126 条边多为同来源共现或导航提示，不能改称 126 条经过语义验证的知识关系。编译成本也已经付出：初始 12,565 tokens、增量 1,036 tokens，不能因为查询短了就忽略它们。
+
+最新隐藏缺陷修复另有隔离验收：单测首跑 2077 通过、1 夹具失败，修正夹具后定向 39 项通过，按身份覆盖全部 2078 项；数据库回归去重 144 项，旧数据迁移轮转 1 项，前端 Node 5 项、TypeScript、Next.js 生产构建和隔离库 alembic check 通过。首跑失败与重叠计数保留，0 付费模型调用，业务环境未部署。这些验证故障处理与合同，不增加 Wiki 语义正确率样本。[最终验收](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
 ### 9.3 尚未证明的质量与总体成本收益
 
@@ -400,7 +497,38 @@ Wiki 独立验收报告记录了 144 个不同定向单元/集成用例，包括
 
 累计 25 次真实模型请求、59,222 tokens；货币价格 UNKNOWN。不能写成“自动冲突识别已解决”或“Wiki 已比 RAG 省多少钱”。上述数据均来自独立 Wiki 原记录，没有在本次写作中追加模型调用。
 
-### 9.4 什么情况下才可能摊薄编译成本
+### 9.4 新增的 50 题原生验收：证明接入，也保留失败分母
+
+W5 使用预登记 50 题：A 组 Wiki 型 20 题、B 组需双层证据 20 题、C 组撤销 10 题；真实 DeepSeek、本地 MiniLM 与内存 Qdrant，累计 111/200 次预算内网关调用。B 组 HYBRID 调用由预登记的系统提示要求，不能当作模型自主学会了任务路由。编译前发生语料拆分和输出上限修订，失败调用和修订记录均保留。[协议](../../benchmarks/wiki/results/wiki-native-e2e-20261025/protocol.json)、[分析](../../benchmarks/wiki/results/wiki-native-e2e-20261025/analysis.json)。
+
+| 检查 | 实际分母与结果 | 可以说明什么 |
+| --- | --- | --- |
+| 引用标记 | A/B 成功交付答案中的引用 ID 均位于投递视图内 | 结构合法，不是全部答案的语义支持率 |
+| 证据 origin | 已投递 320/320 条逐项核对正确 | 原始/派生来源合同已穿过原生链路 |
+| A 组运行 | 18/20 成功，2 次调用上限失败 | 不能写成 20/20 完整回答 |
+| B 组运行 | 11/20 成功，9 次调用上限失败 | 还存在真实运行可用性损失 |
+| B 组双层交付 | 成功 Run 为 11/11；包含后来失败的 Run，总体为 12/20 | 总体仅 60%，未达到预登记 ≥80% 期望，不能用成功子集覆盖 |
+| C 组撤销 | 9/9 新 Run 创建被拒；1 个预先冻结 Run 继续到工具后被阻断，最终拒答 | 没有因历史冻结绕过撤销；不是 10/10 都在创建阶段拒绝 |
+
+分析文件将引用、origin、撤销三项硬门记 PASS；双层交付的总体期望没有达到，需要与硬门结果同时陈述。A/B 共 11 次 `AGENT_MAX_TOOL_CALLS_EXCEEDED`，模型以不同参数再次调用工具消耗了上限。提高上限可能改善完成率，也会增加时间和费用，不能未经新比较就认定这是唯一所需修复。
+
+A 组描述性 token F1 约 0.0877，是多句 Agent 答案对短金标的词面分；报告另有金标包含观察，但都不是专家语义判卷，不能用任一列声称系统回答准确率 100%。这轮也不是同问题、同配置的 Wiki-vs-RAG 质量 A/B，不能推翻独立 6 题对照的“未证明 Hybrid 优势”。
+
+### 9.5 同期 RAG 收口：哪些新结果不会改变默认架构
+
+| 方向 | 新结果 | 对本文设计的含义 |
+| --- | --- | --- |
+| gold 条件拒答校准 | 48 题对照，充分材料拒答 25%→40%，F1 0.543→0.4733；删证据两臂均 28/28 拒答 | 提示前置充分性判断未带来可靠收益，未接入生产；不证明所有缺据识别已解决 |
+| F 桶首次压词 | 100 题 F1 +2.78pp，区间跨零、拒答多 2 题 | 词面格式可改善，整体质量门仍失败 |
+| F 桶合并版 | 100 题 F1 0.6374→0.6801，区间下界约 −1.65pp；拒答 20→21；护栏 0/100 激活 | 方向关闭，护栏假设未真正受试；没有新增全局短答规则 |
+| 中文送达 | 自拟 8 份中文 Wiki 风格正文，38 个机械构造问答，37/38 命中 gold 句所在块 | 是原始 BGE 混合检索的送达检查，不是已发布中文 Wiki、天然用户问题或生成质量确认 |
+| 表格解析 | TAT-DQA 30 文档/61 题，pypdf 68.9%→pdfplumber 77.0%，+8.1pp 未达 +15pp 门 | 仅在该表格试点未过门，pdfplumber 留 bench 依赖，生产 parser 未因此替换 |
+
+来源：[生成侧结果](../reviews/AgentHub-生成侧优化结果报告-72a34a8.md)、[RAG 收尾](../reviews/AgentHub-RAG收尾工作单实施报告-11b74f8.md)、[自闭环终报](../reviews/AgentHub-自闭环收尾执行报告-a88bf74.md)。GEN-1 原记录还披露约 290 次调用、含实现废跑并超原路径预算；它是执行偏差，不应因为最终负结果而从成本账本消失。后两轮 F 桶各记约 100 次调用，不能混成一次无失败成功执行。
+
+桶分类、跳数分布和答案包含规则都是诊断代理，不能直接推出“损失与证据组织无关”或“剩余全部是模型能力”的全局因果结论。当前较稳妥的决策是：这些固定干预没有通过各自门槛，保留负结果，默认编译/检索/回答架构不据此改写。
+
+### 9.6 什么情况下才可能摊薄编译成本
 
 下面是设计推论，不是已测性能模型。设编译与维护成本为 `Ccompile`，纯 RAG 每次查询成本为 `Crag`，使用 Wiki 后每次总查询成本为 `Cwiki_query`：
 
@@ -422,7 +550,7 @@ Wiki 独立验收报告记录了 144 个不同定向单元/集成用例，包括
 | 编译与查询分离 | 复用跨问题的组织工作 | 有机会减少重复整理 | 前期编译和刷新要花钱 |
 | revision 提取缓存与页面组织分离 | 全局维护不应重提取未变资料 | 增量模型调用可复用 | 不是完整最小图差分 |
 | 显式发布、不可变历史 | 模型生成不等于正式知识 | 防止半成品和旧版被覆盖 | 更新流程更严格 |
-| 双重来源/Wiki 绑定 | 同一快照可有多版派生知识 | 能解释当时读取哪版 | 原生 Run/Experiment 接入需补合同 |
+| 来源/Wiki/Agent 多层绑定 | 同一快照可有多版派生知识，同一 Wiki 可被不同 Agent 使用 | 原生 Run/Experiment 已固定实际 publication，不重解析 LATEST | 重新用新知识需重新发布；活体可用性仍需入口校验 |
 | AUTO fact/synthesis 必须 raw | 精确事实与综合不能仅信摘编 | 原文核验路径保留 | 额外检索，未保证质量提升 |
 | WIKI 模式不暗中 fallback | 单独阅读和消融要透明 | 方法对照有意义 | Wiki 不足时会直接不足/失败 |
 | 冲突保留双方并阻止自动裁决 | 相关性不是权威，模型也可能误判 | 不把争议抹成确定答案 | 自动召回和人工裁决仍有限 |
@@ -436,22 +564,29 @@ Wiki 独立验收报告记录了 144 个不同定向单元/集成用例，包括
 
 | 层次 | 截至本次核查的事实 |
 | --- | --- |
-| 模块与独立 API | 已通过 `11b74f8` 合入当前 RAG 分支，包含 Wiki 生命周期、发布、撤销、查询及可选回答，复用现有 API/worker 底座 |
+| 模块与独立 API | `11b74f8` 已合入，独立查询与可选回答继续保留；后续原生接入是叠加 |
 | RAG 算法 | 保留最新原始检索实现，通过适配器调用；未为合并重写 Dense/Sparse/Rerank |
 | Wiki 组织 | 精确引文摘编、概念/实体/主题、导航关系和有界冲突扩展 |
 | 自动维护 | 显式增量编译；没有上传后自动持续订阅和自动发布 |
 | 冲突维护 | 确定性规则＋编辑者声明可用；MODEL 跨来源复核真实失败、默认关闭 |
 | UI | 通过现有认证 API 阅读与维护，没有新增专用 Wiki Web 页面 |
-| 原生 Agent / Run / 正式 Experiment | 独立分支未实现 WikiBinding 全链冻结，代码合并本身不补齐该能力 |
-| 效果结论 | 已有增量复用与工程边界证据；尚未证明最终并轨 BGE 配置下 Hybrid 优于 RAG |
+| 原生 Agent / Run / 正式 Experiment | W2–W4 已提交：WikiBinding 入发布 hash，Run/variant 固定 publication，原生 query_wiki 受治理；不是所有旧版本自动开启 |
+| 原生真实验收 | W5 三项结构/撤销硬门 PASS；A/B 有 11 次调用上限失败，B 组总体双层送达 12/20，保留不足 |
+| Runtime 组织 | 已有 service / graph / projection 分层与兼容门面；本次不引入新微服务 |
+| 隐藏缺陷修复 | 后端 9ad8b9d、前端 1673515 已提交，隔离验收完成；业务库/运行容器未升级，未合并主分支 |
+| 效果结论 | 新增的是绑定、治理及原生交付证据；尚无同配置实验确认 Wiki/Hybrid 优于最终 BGE RAG |
 
 ### 11.2 源码按什么顺序看
 
-下列入口指向本目录已合并的实际源码与文档，核查基线为 `11b74f8`。独立 Wiki 阶段的数据与当时行为仍按原验收报告的提交和模型解释。
+下列入口指向当前工作树实际文件；架构分层基线为 `4d07c87`，行为修复与验收已提交至 `a2d47e4`。复现某轮实验需读取那一轮的代码与数据身份，不能用今日源码回填原历史结果。
 
 | 阅读问题 | 入口 |
 | --- | --- |
 | 刚刚合并的是哪两条线，验证了什么？ | [并轨验收](../wiki/integration-acceptance.md)、[真实组合测试](../../tests/integration/test_wiki_rag_integration.py) |
+| 并轨后怎样接入原生 Agent？ | [原生绑定实施](../reviews/AgentHub-Wiki原生绑定实施报告-318f604.md)、[原生工具](../../packages/tools/builtins/query_wiki.py) |
+| 发布和恢复怎样固定 Wiki？ | [publish.py](../../packages/agent_runtime/publish.py)、[frozen.py](../../packages/agent_runtime/frozen.py)、[Run service](../../packages/agent_runtime/runtime_service.py)、[Experiment](../../packages/evaluation/experiments.py) |
+| 原始/派生如何统一交付？ | [envelope](../../packages/wiki/evidence_envelope.py)、[work_layer](../../packages/agent_runtime/work_layer.py)、[evidence registry](../../packages/agent_runtime/evidence_registry.py) |
+| 原生 50 题实际通过和失败是多少？ | [W5 协议](../../benchmarks/wiki/results/wiki-native-e2e-20261025/protocol.json)、[W5 分析](../../benchmarks/wiki/results/wiki-native-e2e-20261025/analysis.json) |
 | 为什么选这种存储和版本设计？ | [ADR-012](../adr/ADR-012-versioned-derived-wiki.md) |
 | 实际数据对象、缓存与发布身份是什么？ | [models.py](../../packages/wiki/models.py)、[contracts.py](../../packages/wiki/contracts.py) |
 | 模型能提出什么、怎样验证引文？ | [compiler.py](../../packages/wiki/compiler.py) |
@@ -462,7 +597,8 @@ Wiki 独立验收报告记录了 144 个不同定向单元/集成用例，包括
 | worker 怎样重查权限与恢复？ | [wiki task](../../apps/worker/tasks/wiki.py) |
 | 如何从 API 编译、发布和查询？ | [Wiki 使用说明](../wiki/README.md) |
 | 数据究竟证明了什么？ | [验收及负结果](../wiki/acceptance.md)、[三模式原汇总](../wiki/live-summary-20261025.json) |
-| 原生 Agent 的后续绑定还有哪些事？ | [集成合同清单](../wiki/integration-plan.md) |
+| 旧集成计划哪些已经完成？ | [初始合同清单](../wiki/integration-plan.md)第 2–5 项已由原生绑定里程碑实现；状态按[实施报告](../reviews/AgentHub-Wiki原生绑定实施报告-318f604.md)更新，不从旧计划推断仍未开工 |
+| 最新修复验证了什么，尚未部署什么？ | [修复报告](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)与 [机器汇总](../reviews/evidence/hidden-defects-fix-20261026/validation-summary.json)；区分隔离验收、本地构建、远端 CI 与业务部署 |
 
 ### 11.3 如何概括“为什么这么设计”
 
@@ -477,4 +613,6 @@ Wiki 独立验收报告记录了 144 个不同定向单元/集成用例，包括
 
 ### 11.4 本文核查方式
 
-本次阅读了 RAG/Wiki 分支、最终并轨提交的源码、ADR、使用说明、研究选型、组合测试和验收记录，并在线查阅上文链接的一手设计资料。没有启动服务、修改业务逻辑或追加模型请求。现有测试和实验数据保留其原样本、模型与日期，不改称本次写作产生的新实验成绩。
+本次更新核对了 `11b74f8` 后至 `4d07c87` 的相关提交、原生绑定/Runtime 分层源码、W5 协议与机器分析、RAG 后续收口记录，并复核 `9ad8b9d`、`1673515`、`c8bdeea` 修复提交、最终验收报告与机器汇总。外部设计资料保留 2026-10-25 的核查日期，没有把旧资料说成今日重新在线复核。
+
+本次全目录维护只修改 `docs/learning` 教程及学习索引；未改业务实现、原报告、协议或实验数据，未运行服务、单元/集成套件或付费模型。文中的 144、288、111 次请求、320 条证据等均保留原记录的范围，不叠加测试通过数，也不把结构门通过换算为语义正确率。

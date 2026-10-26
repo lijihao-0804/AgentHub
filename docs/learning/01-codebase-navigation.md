@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：00 架构](00-architecture-first.md) · [下一课：02 Runtime 与模型上下文](02-one-run-end-to-end.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -16,9 +16,9 @@
 | --- | --- | --- |
 | [get_current_principal](../../apps/api/auth_dependencies.py)：把请求认证结果变为可信主体，回答是谁。 | HTTP Request/认证材料→PrincipalContext；不合法时错误。 | 找认证来源和校验，再确认 user_id/request 身份从哪里来；不要从 body 或模型读取 actor。 |
 | [get_workspace_context](../../apps/api/knowledge_dependencies.py) / [get_agent_run_workspace_context](../../apps/api/knowledge_dependencies.py)：检查工作区访问权；后者是本课 Thread 路由实际注入的版本。 | 普通依赖取 principal/session；运行依赖从 Request 装配短 session→WorkspaceExecutionContext。 | 两者都调用 TenantService；运行依赖在 SSE 前关闭权限查询的 session，不让长流一直占用连接。 |
-| [stream_turn](../../apps/api/routes/threads.py)：协调版本、Turn、Run 和 StreamingResponse；把 HTTP 与业务执行连接起来。 | 路由 UUID、文本/client_token、可信 context 与服务→SSE response，或明确错误。 | 新 token 看准备/关联；重复 token 看旧 Run 附着和未关联 409；此函数不实现 Agent Loop。 |
-| [resolve_agent_version](../../packages/threads/service.py) / [open_turn](../../packages/threads/service.py) / [attach_run](../../packages/threads/service.py) / [submit_turn](../../packages/threads/service.py)：前三者选版本、记录提交、保存关联；submit_turn 是同步执行编排。 | workspace context + thread/input/token→版本/Turn，关联写入或 SubmittedTurn。 | 分清每次 commit；同步重点看宽限窗口与 _turn_run，流式路径没有同样的 orphan 修复。 |
-| [prepare_stream](../../packages/agent_runtime/runtime.py) / [stream](../../packages/agent_runtime/runtime.py)：准备阶段先创建 Run，stream 才推进执行并产生事件。 | context、发布 version、input/thread 或 prepared_run→Run / 异步事件流。 | Run 已存在≠模型已执行；辨认图启动、事件发布与取消/断线守卫。 |
+| [stream_turn](../../apps/api/routes/threads.py)：协调版本、Turn、Run 和 StreamingResponse；把 HTTP 与业务执行连接起来。 | 路由 UUID、文本/client_token、可信 context 与服务→SSE response，或明确错误。 | 看 open_turn→ensure_stream_run；同 token 同正文复用，未启动 Run 可按原身份启动；此函数不实现 Agent Loop。 |
+| [resolve_agent_version](../../packages/threads/service.py) / [open_turn](../../packages/threads/service.py) / [attach_run](../../packages/threads/service.py) / [submit_turn](../../packages/threads/service.py)：前三者选版本、记录提交、保存关联；submit_turn 是同步执行编排。 | workspace context + thread/input/token→版本/Turn，关联写入或 SubmittedTurn。 | 分清每次 commit；同步与流式均按 thread_turn_id 查 Run；歧义遗留记录要求人工恢复。 |
+| [prepare_stream](../../packages/agent_runtime/runtime_service.py) / [stream](../../packages/agent_runtime/runtime_service.py)：准备阶段先创建 Run，stream 才推进执行并产生事件。 | context、发布 version、input/thread 或 prepared_run→Run / 异步事件流。 | Run 已存在≠模型已执行；辨认图启动、事件发布与取消/断线守卫。 |
 
 ## 1. 输入先落在哪一层
 
@@ -36,7 +36,7 @@ flowchart TB
     Auth --> Scope["WorkspaceExecutionContext / 权限"]
     Scope --> Route["stream_turn / 路由编排"]
     Route --> Turn["解析版本 / 保存 Turn"]
-    Turn --> Run["prepare_stream / 创建 Run"]
+    Turn --> Run["ensure_stream_run / 按 Turn 恢复或创建 Run"]
     Run --> Link["attach_run / 关联 Turn"]
     Link --> Stream["stream / SSE 执行与返回"]
 ```
@@ -83,7 +83,7 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 | [apps/api/routes/threads.py](../../apps/api/routes/threads.py) `stream_turn` | 请求如何调用服务、构造 StreamingResponse | HTTP 解析/响应不用进入 Runtime |
 | [packages/threads/service.py](../../packages/threads/service.py) `resolve_agent_version` / `open_turn` / `attach_run` | 工作区归属、版本解析、Turn 的提交身份 | 会话业务可以被不同 transport 复用 |
 | [apps/api/agent_runtime_dependencies.py](../../apps/api/agent_runtime_dependencies.py) `get_production_agent_run_service` | Runtime 依赖怎样组装 | 测试或生产可以注入不同适配器，核心链不绑死 SDK |
-| [packages/agent_runtime/runtime.py](../../packages/agent_runtime/runtime.py) `prepare_stream` / `stream` | 实际 Run 怎样创建、执行 | HTTP route 不自己实现模型循环 |
+| [packages/agent_runtime/runtime_service.py](../../packages/agent_runtime/runtime_service.py) `prepare_stream` / `stream` | 实际 Run 怎样创建、执行 | HTTP route 不自己实现模型循环 |
 
 **Composition 是装配点。** 在 `get_production_agent_run_service` 找到 `ToolRuntime`、`ApprovalService`、`ActionRuntime`、`LangGraphCheckpointAdapter`、`memory_selector` 和 `artifact_recorder`。这些构造器解释了系统如何连起来，不要求本课读完每个实现。
 
@@ -91,15 +91,17 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 
 文本相同不代表同一业务提交。用户可以合法重复问同一句话；网络超时也可能导致同一次提交被发送两遍。`client_token` 区分这两件事。
 
-| 情况 | 预期处理 | 原因 |
+| 情况 | 当前处理 | 原因 |
 | --- | --- | --- |
-| 新 token | 新 Turn，再准备/关联 Run | 新业务提交 |
-| 同 token，已有关联 Run | 复用/附着已有 Run | 避免一次提交创建重复执行 |
-| 同 token，Turn 已存但 Run 未关联 | 流式 route 返回 409 in-progress，让客户端按同 token 重试 | 不能附着一个尚不存在的 Run |
+| 新 token，即使正文相同 | 创建新 Turn，再按其身份准备 Run | 用户可以合法重复提问 |
+| 同 token、相同规范化正文 | 返回原 Turn，复用/附着原 Run；未启动时可继续启动 | 一次业务提交的网络重发 |
+| 同 token、正文变化 | 409 `THREAD_TURN_IDEMPOTENCY_CONFLICT` | 不能用旧身份发送编辑后的新问题 |
+| Turn 已保存、反向 run_id 尚未写入 | 按 Run.thread_turn_id 查找并补关联；确无 Run 才准备 | 不再按时间窗口猜执行归属 |
+| 旧记录缺少可证明的稳定身份 | 409 `THREAD_TURN_RECOVERY_REQUIRED` | 不能用重跑猜测旧副作用是否发生 |
 
-同步 `ThreadService.submit_turn` 还包含孤儿 Turn 过期后的查找/修复路径，不能把同步和流式实现混成完全相同。详细比较时打开这个函数，先看 `_orphan_turn_expired` 和 `_turn_run`。
+同步 `submit_turn → _submit_prepared_turn` 与流式 `ensure_stream_run` 共享稳定 Turn 身份和检查规则。同步现在也是**先准备并关联、再执行**，不再执行结束才 attach。`_turn_run` 校验 workspace/thread/正文与双向关联；只有可证明一对一的遗留绑定才自动兼容。
 
-**数据库角度：** Turn 和 Run 先后保存/关联，不是持有事务跨过完整模型请求。长事务会占用连接和锁，也不能把网络调用变成数据库原子操作。项目用显式中间状态和重试语义处理窗口，而非宣称不存在窗口。
+**数据库角度：** Turn 的 token/正文 hash、Run 的唯一 Turn 关联、执行 lease 解决不同问题。短事务保存身份，模型在事务之外调用；并发准备冲突只处理预期的唯一约束，不能吞掉任意 IntegrityError。已执行的 Run 不因一次 HTTP 重发被当成可重启草稿。
 
 ## 5. API 路径与 worker 路径如何复用
 
@@ -109,26 +111,25 @@ Runtime 的执行入口还检查 `agent_run` 等权限。内容可读和身份/�
 
 ## 6. 只读练习：画一个提交窗口
 
-不启动服务。顺序打开上述三个核心文件，画出 `open_turn → prepare_stream → attach_run → stream`，在每条箭头旁写：若进程在此退出，哪些记录已经存在？每个窗口的参考答案如下；这是源码推演，不是新故障实测。
+不启动服务。顺序打开 ThreadService、threads route 和 runtime_service，画出 `open_turn → ensure_stream_run → prepare_stream → attach_run → stream`，标出稳定 Turn ID 何时进入 Run。
 
-再比较同步 `submit_turn`。记录两条路径各在哪里附着 Run、怎样处理重试。学习产物是你的调用链笔记，不是修改 Runtime。
+**提交窗口参考答案（当前实现的源码推演，不是本轮实测）：**
 
-**提交窗口参考答案：**
-
-| 退出位置（该步已成功提交） | 已存在的记录 | 同 token 流式重发的行为 |
+| 退出位置（该步已成功提交） | 已有事实 | 同 token、同正文重发 |
 | --- | --- | --- |
-| open_turn 后、prepare_stream 前 | Turn；还没有本次新 Run | 旧 Turn 无关联，返回 THREAD_TURN_IN_PROGRESS（409） |
-| prepare_stream 后、attach_run 前 | Turn 和 Run；尚未建立 Turn 的 run 关联 | 仍因旧 Turn 未关联而返回 409；该入口没有同步路径的 orphan 修复分支 |
-| attach_run 后、开始消费 stream 前 | Turn→Run 已关联 | 附着已有 Run；关联不证明执行已推进或事件已产生 |
-| stream 正在推进或结束后 | 关联、已写步骤/持久事件，完成时有终态 | 附着原 Run 跟读/重放结构事件，不能保证完整 delta 重放 |
+| open_turn 后、Run 创建前 | 原 Turn 与 input_hash | 复用 Turn，确无 Run 时准备新 Run |
+| Run 创建后、attach_run 前 | Run.thread_turn_id 已保存 | 读出原 Run，补反向关联；不新建第二个 Run |
+| attach_run 后、执行开始前 | Turn↔Run 已关联，尚无执行 owner | 可按原身份启动；数据库 lease 控制实际执行者 |
+| 执行中或已结束 | 原 Run、lease/步骤/持久事件/终态 | 跟读或返回原结果；不重新执行未知副作用 |
+| 遗留关系缺失、共享或正文冲突 | 无法证明唯一归属 | 要求人工恢复，不能依靠“时间接近”选 Run |
 
-**同步路径对照：** `submit_turn` 调用 run_service.run 后才 attach_run，所以未关联不必然代表没执行。重发在启动宽限内返回 409；超过宽限后 `_turn_run` 在同 Thread 内按创建时间寻找候选 Run。仍 RUNNING/CANCEL_REQUESTED 则继续 409；已等待/终结则补关联并复用；没找到 Run 才重新执行记录的问题。这个恢复查询基于范围与时间，不是直接持久的 Turn→Run 外键证明，不能泛化为所有并发情形都完全确定。依据：[submit_turn / _turn_run](../../packages/threads/service.py)、[stream_turn](../../apps/api/routes/threads.py)。
+**同步路径对照：** `submit_turn` 同样先 `prepare_run(thread_turn_id=...)`、再 attach、再 `execute_prepared_run`。`_is_unstarted_run` 只判断是否有资格尝试启动，最终互斥由数据库 Run lease 完成。旧版“同步按时间修复孤儿、流式一律未关联 409”的答案已经过时。依据：[ThreadService](../../packages/threads/service.py)、[流式 route](../../apps/api/routes/threads.py)。
 
 ## 7. 自测与面试追问
 
 1. **为什么前端判断权限后 API 还要鉴权？** 客户端可被绕过且状态可能过期；后端认证主体、解析当前 workspace 权限并在 service 限定范围。否则一个伪造请求就能避开 UI。核查 get_workspace_context 和具体 service 的 `_require`。
 2. **三种 ID 有何不同？** client_token 关联一次提交重发；run_id 标识整个执行，等待恢复不换 ID；logical_action_id 标识执行中的特定受控动作，用于审批/执行关联。一个 Run 可包含多个动作，所以不能用 run_id 替代全部动作 ID；provider call ID 也不能替代平台动作身份。
-3. **为什么 Turn 存在却没关联 Run？** open_turn、准备/运行、attach_run 不是同一事务，进程可能在中间退出；同步路径甚至在执行返回后才关联。上面的窗口表给出各步已保存什么，不能只看一个空字段就重跑。
+3. **为什么 Turn 存在却没关联 Run？** open_turn、准备、attach_run 是多个短事务，进程可能在中间退出；当前依靠 Run.thread_turn_id 补关联。上表说明何时可继续启动，何时必须附着或人工恢复，不能只看空字段就重跑。
 4. **Celery 意味着全部 Run 在 worker 吗？** 不意味。`stream_turn` 直接调用准备/流式 Runtime；入库、评测及部分恢复/异步入口使用 worker。执行位置由具体 route/queue 调用决定，框架存在不等于全链路自动派队列。
 
 **通过标准：** 从 `stream_turn` 定位真实业务调用；解释工作区权限；画出 Turn/Run 的提交窗口。不能只背“FastAPI + Celery”。
@@ -164,14 +165,13 @@ FastAPI 的 dependency 用来解析调用者和装配服务。读函数参数时
 
 真实函数在 [ThreadService.open_turn](../../packages/threads/service.py)。按以下顺序逐项核对，而不是只背“有幂等键”：
 
-1. 要求 AGENT_RUN 权限，取得当前工作区身份。权限不够时不会因 token 相同而绕过检查。
-2. 校验输入文本，规范化 token 并限制长度。格式合法和业务允许是两类检查。
-3. 按工作区加载 Thread，避免拿别的租户的 thread_id 直接写入。
-4. 如果 token 已存在，返回既有提交需要复用的信号，路由再找 Turn/Run。
-5. 查询当前 Thread 的最大序号，计算下一序号，构造 ThreadTurn 并提交。
-6. 捕获 `IntegrityError`、rollback 并返回空结果。数据库约束会拦截前置检查之后发生的竞争；调用方仍需区分已存在与尚未完成。
+1. 要求 AGENT_RUN 权限，校验正文和 token，计算规范化正文 hash。
+2. 按 workspace/thread 锁定 Thread 行，再加载归属；串行分配 `max(sequence)+1`。
+3. token 已存在时，`_require_matching_turn` 比较正文 hash；一致返回原 ThreadTurn，不一致报 409。
+4. 新提交保存 ThreadTurn、sequence、client_token、input_hash，再提交。
+5. 唯一冲突回滚后重新核对已有同 token；若是另一请求竞争序号则有限重算，不能把任意冲突当成功重放。
 
-这里有重要的并发细节：两个请求都可能在第 4 步看不到旧 Turn。前置查询只能减少常见重复，不能代替唯一约束。不同 token 也可能竞争同一个下一序号，因此不能把所有 IntegrityError 都解释成“同 token 已完美去重”。定位竞态要同时查看 route 如何处理返回值和 models 的约束。
+`open_turn` 当前返回 ThreadTurn，不再用 None 表示“旧 token”。随后服务按稳定 Turn ID 查 Run；两类唯一约束与执行 lease 共同覆盖各自窗口。隔离真库已验证相关竞争和恢复，证据范围见 [修复验收](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)，不能据此承诺任意外部动作 exactly-once。
 
 ### D. 一个重发请求的时间线
 
@@ -185,7 +185,7 @@ FastAPI 的 dependency 用来解析调用者和装配服务。读函数参数时
 | t3 | 用同 token 重发 | 查询已有提交，避免把网络重发当新问题 |
 | t4 | 已有关联 Run | stream 分支可附着旧 R1 |
 
-再把断线点提前到 T1 保存但 Run 尚未关联：stream 分支发现旧 Turn 没有 agent_run_id，会给出 `THREAD_TURN_IN_PROGRESS`，而不是立即承诺新开一个 Run。同步提交和流式提交的恢复逻辑要分别读，不把某入口的处理扩展到所有入口。
+再把断线点提前到 T1 保存但 Run 尚未反向关联：`ensure_stream_run` 按 `thread_turn_id=T1` 查 Run，存在则补关联；确无 Run 才准备。旧绑定有歧义则明确要求人工恢复。这个查找不再以创建时间接近为证据。
 
 因此 token 的前端生命周期也属于正确性：对同一次网络重试保留 token；开始新的语义提交应产生新的 token；取消分支不能让下一次问题误附着旧执行。
 
@@ -219,7 +219,7 @@ FastAPI 的 dependency 用来解析调用者和装配服务。读函数参数时
 
 **答案：** 找前置查询、唯一约束、IntegrityError 分支和后续关联/附着处理，列出崩溃点；不能只指出一行 token 查询就宣称所有竞争都已覆盖。
 
-**解读：** 相同 token 的前置查询减少重复，唯一约束处理查询后竞争，IntegrityError 分支回滚后由路由寻找已有 Turn。若 Run 尚未关联，流式入口返回 409；若已关联则附着已有 Run。这证明各层处理意图，全部崩溃/竞争覆盖还必须查相应测试。
+**解读：** Thread 行锁控制序号分配，token 唯一约束控制重复提交，正文 hash 防止编辑后误重放；Run.thread_turn_id 唯一关联控制并发准备，Run lease 控制实际执行。缺少反向关联可以补回，歧义遗留记录要求人工恢复。应结合真库并发和崩溃窗口断言，不只检查一次 SELECT。
 
 **核查依据：** [对应源码/证据](../../packages/threads/service.py)，重点看 `open_turn / token_turn；配合 threads route`。
 

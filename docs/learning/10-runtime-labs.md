@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：09 应用、反馈与接管](09-applications-feedback.md) · [下一课：11 Agent 工程强化](11-agent-engineering.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -44,9 +44,13 @@ $env:AGENTHUB_TEST_DATABASE_URL = $env:AGENTHUB_DATABASE_URL
 $env:AGENTHUB_REDIS_URL = 'redis://localhost:6379/14'
 $env:AGENTHUB_BLOB_ROOT = '.scratch/learning/blobs'
 # API/worker 使用同一组有效 JWT/凭据主密钥；不打印，不提交
-uv run --locked alembic upgrade head
-uv run --locked python -m scripts.bootstrap_langgraph_checkpoint
+.\.venv\Scripts\python.exe -m alembic heads
+# 核对所选代码版本与 lab 库后，再进行仅针对 lab 的迁移
+.\.venv\Scripts\python.exe -m alembic upgrade head
+.\.venv\Scripts\python.exe -m scripts.bootstrap_langgraph_checkpoint
 ```
+
+当前代码 head 为 `0037_run_resume_cursor`，原生 Wiki 绑定在 0034；0035–0037 涉及执行权、历史 Turn/Memory/Artifact 和恢复游标。业务环境没有随本次验收升级。对已有 lab 同样先排空旧 worker，迁移与显式 checkpoint bootstrap 完成后启动一致版本；不要把新 SQL 列直接用于未迁移的旧库。
 
 Redis 14 是示例 namespace，不自动证明空闲。Qdrant 实验需独立实例/集合隔离与唯一 lab 工作区，不删除共享 collection。学习代码若引用旧固定 UUID，替换为本次真实 lab 身份。
 
@@ -65,6 +69,8 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 ## 3. 逐个实验：每次只改变一个因素
 
 ### L0 · 不启动服务也能做的源码核查
+
+新增只读核查：按 runtime.py 门面→runtime_service→runtime_graph→runtime_projection 找实现，再对照第 13 篇的 WikiBinding/query_wiki。区分 0037 代码 head、隔离数据库验收与业务部署版本。新实验脚本放 `scripts/<project>/`；既有 90 个历史脚本未因目录政策被重排，引用时先检查原路径。
 
 - 输入：第 01 课提交路径、第 02 课循环、第 04 课 policy、第 05 课 execute_write。
 - 动作：手画正常调查、需要审批、已派发但未知三条路径，各写出负责函数。
@@ -149,6 +155,7 @@ uv run --locked python -c "import asyncio, uvicorn; config = uvicorn.Config('app
 1. 新 lab Run 记录响应中的真实 Run ID 和事件游标。
 2. 断开自己的客户端，按实际接口附着原 Run，观察已持久化事件/最终输出；记录入口和宽限配置。
 3. 不把 message.delta 缺失当成全部执行丢失，也不保证所有断线都 detached 继续。
+4. 用可控事件源制造 durable 10/11、live 12 的缺口，确认先补播再推进游标；慢消费者转补播，不能静默跨过结构事件。连续 delta 无需逐帧查库。
 
 恢复：关闭自己的客户端/流；需要取消时使用产品既有取消接口。核查 [durable stream 测试](../../tests/unit/test_durable_run_stream.py)，不手工填充事件表。
 
@@ -187,6 +194,8 @@ uv run --locked python -m benchmarks.evaluation.memory_quality.runner --database
 只用上面已创建/迁移的独立 lab 测试库，先看 runner 的 seed/run_scenario 创建了哪些记录及 run_quality 怎样释放连接，再核对实际目标 URL。当前 finally 只 dispose engine，不自动删除场景数据；重复运行会留下新的实验记录。runner 要求提供数据库地址，但不会自动证明该库确实隔离，不能指向真实工作区库。比较写入/选择/准入/脚本 USE，保留自己的结果，不替换正式证据。
 
 需要真实模型对话时另外启用 lab 记忆新版本，跨 Thread 查询，停用后对照新 Run 和旧冻结输入。抽取异步需等待/检查 job，不能看到回答就假设记忆已写。真实费用和 unknown USE 分开记录。
+
+新增恢复核查可用确定性网关完成：同一 source_run_id 重投抽取，MemoryContribution 与 salience 不重复结算；换一个 Run 才允许强化。旧 Turn 晚恢复时，history/search 不含更大的 Turn.sequence；排队期间撤销原 actor 的 agent_run 权限，抽取应在调用模型前停止。分别记录任务资格、贡献去重和历史范围，不把它们当语义质量提升。
 
 恢复：lab 新版关闭 Memory；reactivate 仅用于对应已停用条目；不删除历史来源。自动 TTL/衰减/容量运营不在此实验范围。
 
@@ -228,6 +237,16 @@ uv run --locked python -m benchmarks.evaluation.memory_quality.runner --database
 **如何确认：** 核对导入新版本与原证据保留，记录案件每次 version，查 close 的幂等条件。
 
 **解读边界：** CLOSED 不批准动作、不确认未知写入；不能将相同 close 的复用误判为版本守卫失效。
+
+### L10 · Wiki 原生绑定、双层送达与撤销
+
+**条件：** 只用本次 lab 的知识库、来源修订和 READY/PUBLISHED Wiki；具备发布 AgentVersion、agent_run 与知识读取权限。可先用确定性 gateway 验合同，再选择真实模型，分别记账。
+
+**步骤：** 给 Agent 草稿设置 WikiBinding，发布 V1，记录 resolved spec 中 publication ID/hash；创建 Run 并核对 `effective_wiki_publications`。通过原生 query_wiki 发送 HYBRID 查询，检查模型实际接收的 origin、短引用和不足/冲突/降级标记，而不只查看服务原始结果。发布新 Wiki 后仍用 V1，确认不自动换新；再撤销旧来源，分别检查新 Run 创建与已冻结 Run 的查询拒绝。
+
+**参考答案与确认方法：** Wiki LATEST 发布时已解析；新 Wiki 不改 V1。HYBRID 请求不保证小预算下双层送达，丢一侧必须显示降级；publication_hash 留在私有来源注册，不塞入模型正文。撤销后新建拒绝；原冻结 Run 可沿历史语义推进到工具，但消费层拒绝，不能换最新绕过。publication 丢失/漂移按完整性错误处理并可进入 NEEDS_ATTENTION。用数据库身份、实际模型消息与工具审计共同确认，不只看最终引用括号。
+
+**已有证据 / 本次状态：** [原生实施报告](../reviews/AgentHub-Wiki原生绑定实施报告-318f604.md)与 [50 题分母解读](13-rag-wiki-architecture-and-rationale.md#94-新增的-50-题原生验收证明接入也保留失败分母)是历史结果，本次 L10 尚未执行。不要把已归档 111 次调用复制为自己的新实验；清理仅处理本次 lab 自建对象，保留历史引用所需身份与来源。
 
 ## 4. 每个实验只用一份记录模板
 
@@ -370,9 +389,9 @@ ORDER BY sequence;
 
 | 改变的条件 | 正确推理 | 核查位置 |
 | --- | --- | --- |
-| 原 actor 被撤权 | resume 重解析原创建者的当前成员/权限，不能借审批者身份升权；是否在访问解析或后续权限守卫拒绝，要看撤销的是哪项权限 | Runtime._authoritative_run_context / resume |
+| 原 actor 被撤权 | resume 重验原创建者的当前 agent_run；失权时 NEEDS_ATTENTION / RUN_ACTOR_ACCESS_REVOKED，清除待恢复标记，不借审批者身份继续动作 | Runtime._authoritative_run_context / resume |
 | checkpoint 不存在 | 不能继续原图，NEEDS_ATTENTION / APPROVAL_CHECKPOINT_MISSING；不新建图假装成功恢复 | Runtime.resume |
-| token 指向旧 Turn | 同 token 被视为重发，会复用旧提交/Run或在未关联时返回 409；真正新问题需新 token | ThreadService.open_turn；threads.stream_turn |
+| token 指向旧 Turn | 同 token 同规范化正文复用原 Turn/Run，缺反向关联按稳定 ID 补回；同 token 改正文返回幂等冲突，真正新问题需新 token | ThreadService.open_turn / ensure_stream_run；threads.stream_turn |
 | 远端明确 TOOL_ERROR | 确定返回失败，ActionExecutionResult.failed，不归未知；整 Run 的后续状态按 Runtime 路由处理 | McpToolExecutor.execute_write |
 | sequence 有缺口 | delta 不持久化可造成正常缺口，按实际序号重连；需另查是否慢消费者丢帧，不能凭缺口认定结构事件丢失 | event_store.should_persist / attach_stream |
 

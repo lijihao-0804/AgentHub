@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：03 对象与版本身份](03-domain-model-lifecycle.md) · [下一课：05 持久恢复与事件](05-durability-events.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -17,7 +17,7 @@
 | [ToolPolicy.decide](../../packages/tools/policy.py)：只决定自动放行还是要求审批；不会调用工具网络。 | 冻结 ToolDefinition→ALLOW_AUTO / REQUIRE_APPROVAL。 | 看 READ 与 NEVER 的 conjunction；risk 没有作为第三个自动放行条件。 |
 | [compute_logical_action_id](../../packages/approvals/contracts.py)：为本次受控提议建立不依赖 provider tool-call ID 的身份。 | workspace/Run/tool revision/参数 hash/ordinal→确定性 UUID 字符串。 | 先解释每个身份字段，再看固定 namespace；去重范围不能只按参数。 |
 | [create_or_get](../../packages/approvals/service.py) / [decide](../../packages/approvals/service.py) / [claim_execution](../../packages/approvals/service.py) / [complete_execution](../../packages/approvals/service.py)：分别保存/复用提议、记录人决定、抢占执行权、保存确定/未知结果。 | context 与动作/审批身份→Approval；claim 可能 None。 | 先把 decision/execution 两个状态画开，再看锁与条件 UPDATE；网络写入不在 decide 内。 |
-| [policy](../../packages/agent_runtime/runtime.py) / [action_execute](../../packages/agent_runtime/runtime.py)：policy 将提议与审批连接；action_execute 对许可动作 claim 后调用执行器并投影结果。 | 图状态中的调用及批准信息→审批等待/工具结果/Run 状态更新。 | 找到 interrupt 和 claim；确认 UNKNOWN_OUTCOME 怎样进入 NEEDS_ATTENTION。 |
+| [policy](../../packages/agent_runtime/runtime_graph.py) / [action_execute](../../packages/agent_runtime/runtime_graph.py)：policy 将提议与审批连接；action_execute 对许可动作 claim 后调用执行器并投影结果。 | 图状态中的调用及批准信息→审批等待/工具结果/Run 状态更新。 | 找到 interrupt 和 claim；确认 UNKNOWN_OUTCOME 怎样进入 NEEDS_ATTENTION。 |
 
 ## 1. MCP 不是治理的替代品
 
@@ -114,11 +114,17 @@ def compute_logical_action_id(
 
 ## 5. 等待、批准、拒绝怎么接回图
 
+当前 `ApprovalService.decide` 在锁定 Run/Approval 后，将决定与 `resume_pending` 同事务提交；即使 HTTP 请求在决定后中断，后台仍能发现待恢复项。`resume_cursor` 绑定当前中断，避免一次旧后台投递去恢复第二次审批。审批恢复重验原 Run actor 的当前权限，审批者不替原 actor 执行。`CLAIMED` 陈旧也不意味着可以再发一次外部动作。[修复验收 H-05、C-01/C-07](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
+Run lease 管“哪个进程可推进图”，下文的 action claim 管“哪个执行者可派发这个逻辑动作”，两者不能互相替代。审批接口在恢复后重新读取动作执行状态，避免返回恢复前的旧对象。
+
 `_AgentRunGraph.policy` 创建/装载审批，发 approval.required，再调用 `approval_interrupt`。Run 服务识别挂起并记录 WAITING_APPROVAL。批准/拒绝 route 保存决定，然后调用 `AgentRunService.resume`，使用原 Run 的 actor 和冻结版本/快照。
 
 拒绝结果会回到 observation，让模型基于“不能执行”继续解释；并不保证整 Run 失败。批准后先 claim，再执行；不直接在按钮 handler 里完成真正的回滚。
 
 ## 6. MCP / REST 的网络安全也属于执行治理
+
+本轮修复还把 MCP 的已授权 DNS 结果固定为数值 TCP 对端，并在写入请求字节和 bearer 之前验证 peer，同时保留 SNI 与证书校验。只校验 URL 后重新解析域名，仍可能遭遇 DNS rebinding。受控网络测试验证了拒绝私网/未知 peer 和校验顺序；没有执行真实攻击网络或完整容器故障演练，不能扩大保证范围。[修复验收 L-09](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
 [packages/mcp/security.py](../../packages/mcp/security.py) 检查协议、DNS/地址与私网；重定向/实际 peer 的验证不能只检查最初 URL。REST 适配器同样需要 SSRF 边界。连接凭据在后端加密，展示不应打印密钥。
 
@@ -134,7 +140,7 @@ def compute_logical_action_id(
 
 **逐问答案与解读：**
 
-- **锁谁？** decide/complete_execution 按 workspace+approval_id 查询 Approval 并行锁；claim_execution 则直接条件 UPDATE，不依赖“先读再改”。锁解决本地状态竞争，不能长时间锁住远端副作用。依据：[ApprovalService](../../packages/approvals/service.py)。
+- **锁谁？** 当前 decide 先锁 Run、再按 workspace+approval_id 锁 Approval，使决定与 resume_pending 一起提交；complete_execution 锁动作审批记录；claim_execution 则直接条件 UPDATE，不依赖“先读再改”。锁解决本地状态竞争，不能长时间锁住远端副作用。依据：[ApprovalService](../../packages/approvals/service.py)。
 - **为什么分开两种 call ID？** provider ID 服务于模型消息配对，可在重试中变化；logical_action_id 由稳定的平台身份与提议位置生成，服务审批去重/恢复。依据：[compute_logical_action_id](../../packages/approvals/contracts.py)。
 - **READ 为什么不等于 safe？** READ 仍可能访问敏感数据、危险目标或昂贵资源；risk、权限、SSRF 等独立于 effect。自动路径实际只检查 READ+NEVER，不能从“没有写”推出没有风险。依据：[ToolPolicy.decide](../../packages/tools/policy.py)。
 - **APPROVED 为什么不等于 SUCCEEDED？** 人作了许可后可能尚未 claim，也可能失败或未知；执行结果来自实际 adapter 和 complete_execution。依据：[claim_execution / complete_execution](../../packages/approvals/service.py)、[execute_write](../../packages/mcp/runtime.py)。

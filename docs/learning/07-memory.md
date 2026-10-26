@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：06 知识与 RAG](06-knowledge-rag.md) · [下一课：08 数据集与评测](08-evaluation.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -17,7 +17,7 @@
 | [_extract_run_memories](../../apps/worker/tasks/memories.py)：异步重读成功 Thread Run/规格/权限，调用抽取，再保存候选。 | workspace/run/request 身份与依赖→记忆写入副作用或跳过/错误处理。 | 先看是否有资格写，再看模型请求和 record；队列里有 ID 不等于被授权。 |
 | [extraction_request](../../packages/memory/extraction.py) / [parse_candidates](../../packages/memory/extraction.py)：前者构造抽取模型请求，后者把模型文本解析为合法结构/引文候选。 | TurnForExtraction→ModelRequest；模型输出+user_input→候选集合。 | 看 user_input 与 evidence 校验；硬结构检查不等同共享/持久语义拒写。 |
 | [normalize_candidate](../../packages/memory/store.py) / [record](../../packages/memory/store.py) / [select](../../packages/memory/store.py) / [load](../../packages/memory/store.py)：规范候选、去重保存、为新问题挑当前有效项、按冻结身份回读。 | 内容/范围/来源→新 IDs；query→候选；冻结 IDs/hash→原内容或错误。 | record 看 ACTIVE hash/savepoint；select 看过滤与排序；load 看严格 hash 与旧 ID-only 兼容。 |
-| [_touch_admitted_memories](../../packages/agent_runtime/runtime.py)：从最终请求消息识别 admitted Memory IDs，更新使用时间观测。 | 最终 state.messages 与允许的 memory_ids→touch 副作用。 | 先看是否在最终 payload，再看允许范围和去重；它不是答案 USE 评估器。 |
+| [_touch_admitted_memories](../../packages/agent_runtime/runtime_graph.py)：从最终请求消息识别 admitted Memory IDs，更新使用时间观测。 | 最终 state.messages 与允许的 memory_ids→touch 副作用。 | 先看是否在最终 payload，再看允许范围和去重；它不是答案 USE 评估器。 |
 
 ## 1. Memory 在哪里，范围是什么
 
@@ -40,7 +40,7 @@ flowchart TB
     Freeze --> Replay["恢复时 load / 校验原身份"]
 ```
 
-图不表示提取在当前回答返回前完成；Memory writer 是异步 best effort，失败不应该伪称该任务已经学会。
+图不表示提取在当前回答返回前完成；Memory writer 仍不保证任何失败最终必定学会；当前抽取任务增加持久 claim/lease，并在模型调用前重验原 actor 的 agent_run 权限。队列重投与任务成功必须分开解释。[修复验收 L-04/L-05](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
 ## 3. WRITE：硬闸门与提示词要求的区别
 
@@ -139,6 +139,8 @@ if (
 
 ### A. 先分清 Thread history 和长期 Memory
 
+当前历史读取与 history search 都以 `Turn.sequence < 当前 Turn.sequence` 为上界；旧 Run 晚恢复，也不能看到后来提交的未来轮次。历史隔离修复不等于增加长期 Memory 的语义拒写能力，下面的质量失败仍保留。
+
 Thread history 是本段对话的过去消息；WorkspaceMemory 作用域是 workspace+agent，来源 Thread/Run 用于溯源，跨 Thread 存活才是其用途。它不是把所有聊天记录复制进向量库，也不是用户级无限全局记忆。
 
 教学输入：“以后事故报告先列证据再列建议”。抽取器可能把它作为 PREFERENCE 候选，随后经过结构/证据与内容闸门。这里“可能”很重要：异步抽取有失败、未抽到和语义误判，不应在回答后立即假设已入库。
@@ -147,11 +149,11 @@ Thread history 是本段对话的过去消息；WorkspaceMemory 作用域是 wor
 
 ### B. `record` 逐步读：去重为何使用 savepoint
 
-打开 [SqlAlchemyMemoryStore.record](../../packages/memory/store.py)：先规范化候选并算 content_hash；查询相同 workspace/agent/hash 的 ACTIVE 行；如果存在则增加 salience；否则构造新行，保存内容、种类和来源身份。
+打开 [SqlAlchemyMemoryStore.record](../../packages/memory/store.py)：规范化候选并计算 content_hash，查同 workspace/agent/hash 的 ACTIVE 行；新内容插入，既有内容可强化，但先核对 [MemoryContribution](../../packages/memory/models.py)。
 
-数据库还用 ACTIVE 条件的部分唯一索引处理并发。两个 worker 可能都查不到旧记录，然后同时插入。源码把插入放在 `session.begin_nested()` 内：这是 savepoint，局部唯一冲突不会直接废掉整个外层事务；捕获 IntegrityError 后再找胜出的 ACTIVE 行，按重复候选逻辑增强 salience。没有找到预期胜者则不能吞掉任意错误。
+当前 `_claim_contribution` 保证同一 Run 对同一记忆只结算一次：worker 重投、保存后确认丢失或重放不能再次增加 salience；来自不同 Run 的同一事实仍可以强化。不要把“重复候选可增强”教成“每次队列投递都增强”。
 
-这种去重依据是规范内容 hash，不是语义同义/冲突检测。“先列证据再列建议”和“建议前先给证据”可能是不同内容；重复强化也只说明被重复提取，不证明陈述更真实。自动 extraction 不负责完整语义 supersede 流程。
+ACTIVE 条件唯一索引与 `session.begin_nested()` 处理同时插入同一内容的竞争；贡献记录的唯一身份另行防重复结算。局部唯一冲突后只读取预期胜者，不吞掉任意 IntegrityError。持久任务 lease、内容去重、Run 贡献去重是三层约束，不能只靠一个 hash 概括。
 
 ### C. 给同一条记忆画四格账本
 

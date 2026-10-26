@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：08 数据集与评测](08-evaluation.md) · [下一课：10 实践与面试验收](10-runtime-labs.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -57,6 +57,8 @@ def _build(self, call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
     return None
 ```
 
+当前 Artifact 幂等身份还包含检查点中的稳定调用坐标，独立于 provider tool-call ID 和审计尾号：同调用重放只有一份，同轮同名多调用仍分别保存。只按 run_id+工具名去重会误删合法兄弟调用；只按 provider ID 又会在重放时重复。[修复验收 L-07](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
 出处中 PROJECTIONS 的顺序与工具匹配是契约的一部分。Artifact 类型还有不同生命周期和用户操作规则，不能笼统声称全部“模型绝不产生”或全部不可变。
 
 ## 3. 从实际错误形成回归数据
@@ -88,9 +90,9 @@ expected_version 防止拿陈旧卡片覆盖当前处理，数据库锁与权限
 
 ## 5. 前端显示状态也需要语义准确
 
-Run timeline、approval card、MCP wizard、T12 分片预览与 T28 代码复制已有实现。成员邀请 UI、逐轮参数、真正新派生关系和完整 Dashboard 设计仍延期，不能从页面/菜单存在推断这些已完成。
+Run timeline、approval card、MCP wizard、T12 分片预览与 T28 代码复制有既有实现；功能是否完成仍要看具体状态与验收，不能从页面/菜单存在推断完整能力。当前新增前端提交恢复身份规则见下，旧前端截图不代表这轮交互已覆盖。
 
-SSE 客户端处理 run.started、message.delta、停止与错误；流式文本不是已落库最终输出。用户取消与网络失败要区分，提交 token 的复用/清空也决定下一次是否误重放旧 Turn。
+SSE 客户端处理 run.started、message.delta、停止与错误；流式文本不是已落库最终输出。`1673515` 把 token 绑定正文：同正文网络重试保留身份，编辑后的正文生成新 token；多个不确定请求的恢复身份各自保存，取消/错误不能覆盖另一请求。后端同时核验正文 hash，前端不是唯一防线。已归档 5 项原生 Node 回归、TypeScript 和 Next.js 生产构建通过，本次只更新教程，没有重跑；生产构建成功不等于已部署或远端 CI 全绿。[修复验收](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
 [前端客户端](../../apps/web/lib/api/agent-runtime.ts)、[Incident panes](../../apps/web/components/incidents/incident-panes.tsx)以及 [前端修正报告](../reviews/AgentHub-前端文字排版修正报告-20261003.md)用于核查。脚本存在和专项截图不等于所有交互持续 E2E。
 
@@ -104,6 +106,10 @@ SSE 客户端处理 run.started、message.delta、停止与错误；流式文本
 4. trace 默认脱敏/内容 opt-in，凭据加密，不把 debug 文本都写日志。
 
 这不是独立于 Runtime 的四句口号：分别回到第 1、4、5、7 课的真实守卫。
+
+登录恢复也不能以“减少失败”为由放宽凭据策略：[认证服务](../../packages/core/auth/service.py) 继续在 refresh token 重用时撤销整个 family。此次仅补充真实 PostgreSQL 并发测试，使用并发胜者 cookie 核对结果，未删除重用检测；它与 Thread 的 client_token 提交重试是两套不同身份。[最终验收 LR-03](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
+反馈与接管现已有 `91c452f` 新增的 11 项纯权限/幂等/hash 守卫单测，并保留既有集成覆盖；不能再讲成这两个模块“没有测试”。纯守卫单测不能替代数据库并发、接口和业务闭环验收。[结构审计与实施](../reviews/AgentHub-结构优化深度解析与实施方案-7422b93.md)。
 
 ## 7. 从系统链路提炼面试故事
 

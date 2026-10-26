@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：05 持久恢复与事件](05-durability-events.md) · [下一课：07 Memory](07-memory.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -18,6 +18,7 @@
 | [claim_ingestion_job](../../packages/knowledge/ingestion.py) / [persist_chunks_and_advance](../../packages/knowledge/ingestion.py) / [finalize_ingestion_ready](../../packages/knowledge/ingestion.py) / [reconcile_ingestion_jobs](../../packages/knowledge/ingestion.py)：依次抢占任务、保存分片/阶段、确认就绪、对账异常中间态。 | job/lease 身份、chunks/阶段信息→持久状态更新与结果。 | 这是状态协作函数，不是一个 embedding SDK；看 lease_token、阶段、attempt 和提交条件。 |
 | [retrieve_with_trace](../../packages/knowledge/retrieval.py) / [_snapshot_scope](../../packages/knowledge/retrieval.py) / [_load_chunks](../../packages/knowledge/retrieval.py)：限定范围，召回/融合/重排，再装载真实分片构造证据。 | 检索请求与 snapshot→结果/evidence/trace；范围或内容不合法时拒绝。 | 先 scope，再 Dense/Sparse/RRF，最后数据库 chunk 与 evidence；不要只看 Qdrant 返回。 |
 | [fuse_reciprocal_rank](../../packages/knowledge/retrieval.py)：纯排名融合，不写库也不调用模型。 | 两路 ranked hits、rrf_k、candidate_top_k→排序后的候选 tuple。 | 看 1/(k+rank) 累加和 tie-break，再用正文例子手算。 |
+| [query_wiki 原生入口](../../packages/tools/builtins/query_wiki.py) / [统一证据 envelope](../../packages/wiki/evidence_envelope.py)：读取版本冻结的 Wiki publication，校验 RAW/WIKI_DERIVED 来源并进入共同预算。 | 受控 query/mode/intent + effective_wiki_publications→带来源的证据结果。 | 模型不能指定 publication；私有注册保存完整身份，模型只见必要页/短引用与状态。 |
 | [search_knowledge 内建工具入口](../../packages/tools/builtins/search_knowledge.py)：把 Runtime 的知识查询接到 retriever，返回可进入 observation 的证据。 | 受控工具参数与当前知识绑定/上下文→结构化检索结果。 | 确认绑定身份从执行上下文来，而非模型任意指定另一租户。 |
 
 ## 1. 写入链与读取链分开
@@ -33,6 +34,10 @@ flowchart TB
     Search --> Hits["检索 / 融合 / 可选重排"]
     Hits --> Evidence["范围校验 / Evidence / 引用"]
     Evidence --> Budget["ContextBudgetPolicy / model"]
+    Snapshot --> Compile["Wiki 编译 / 校验 / 发布"]
+    Compile --> Bind["AgentVersion 绑定 publication ID/hash"]
+    Bind --> Wiki["query_wiki / WIKI_DERIVED + RAW"]
+    Wiki --> Budget
 ```
 
 这是理解阶段图，实际 job 的阶段状态/事务以 worker 与 ingestion 实现为准；创建快照不等于复制所有原始文件进一个大文本。
@@ -46,6 +51,8 @@ flowchart TB
 beat 的入库对账能发现中间状态，重新推进到可确认的 READY。历史索引后进程退出实验是特定窗口证据，不证明所有网络分区自动修复。
 
 首次加载 BGE/重排模型会影响时延，Compose 配了预热与缓存；“工具没及时返回”不能一律解释为无知识结果。
+
+当前 [Qdrant 适配器](../../packages/knowledge/adapters/qdrant.py) 保留浮点秒超时，`0.5` 秒不会再被整型截为 `0`；验收覆盖 Settings→装配→SDK 参数传递。这验证配置语义，不保证远端请求必在精确 500 ms 内结束，也不代表检索质量提升。[修复验收 H-14](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
 ## 3. KnowledgeSnapshot 到底冻结什么
 
@@ -79,11 +86,29 @@ beat 的入库对账能发现中间状态，重新推进到可确认的 READY。
 
 引用 ID 存在，只能先证明它来自某证据身份，不能自动证明回答中全部话都被支持。答案额外引入相邻政策也可能“有真实引用但负担/语义不佳”。
 
+### 当前交付规则：不能再把检索成功等同于 JSON preview 成功
+
+`search_knowledge` 默认 limit **10**、最大 10，是上限而非保证送达数；固定窗口默认 1200/200，证据摘录上限已提高到 **2000 字符**，配置不能大于交付摘录能力。当前服务/API 长度契约已对齐。候选 limit、正文 excerpt、检索 bytes 池、Runtime 近似 token 池和总窗口会先后约束交付。
+
+证据记录与引用成对投影，放不下的项跳过后继续尝试较小项；同修订中**完全包含**才去重，部分重叠仍可能承载独有内容。`compact_v1`、Onyx 来源选择和 EvidenceSet 组合均需显式启用，历史正结果没有把它们变成全部 Agent 的默认配置。对应证据、成本和负结果见 [开发复盘](12-rag-development-retrospective.md)。
+
+### Wiki 已经接入原生执行
+
+Wiki 是同一来源集合的编译阅读层，原文 RAG 保留细节与回溯路径；不是已经引入图数据库或通用 GraphRAG。WikiBinding 的 LATEST 在发布时固定，Run/Experiment 再保存 `effective_wiki_publications`；原生 `query_wiki` 为受治理 READ，采用冻结语义，独立 Wiki API 的默认“要求当前版本”语义不能直接照搬。
+
+RAW 与 WIKI_DERIVED 共同进入 RAG_EVIDENCE。当前 HYBRID 投影为两种 origin 保留名额，消息预算继续检查实际送达；不足、冲突与降级状态送给模型。极小预算下仍可能只剩单层，必须标记降级，不能因请求写了 HYBRID 就声称双层成功。来源撤销在消费层阻断；缺失/漂移不悄悄换 publication。详见 [架构与设计理由](13-rag-wiki-architecture-and-rationale.md)。
+
+### 入库新增的故障边界
+
+上传的 COMMIT 确认丢失时按预分配 UUID 查证；仍无法确认就保留源 blob，不能误删可能已被数据库引用的文件。UTF-8 前缀改用增量解码处理 64 KiB 跨字符边界；KB 生命周期替代图按 KB 串行校验，拒绝 A→B→A 与并发反向边。它们修复一致性和可用性，不是答案准确率实验。[修复验收 L-10/L-11/L-12](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
 ## 6. 用真实实验学习，不拿小样本夸结论
 
 [正式 RAG 对照](../reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md)：8 个短政策、24 DEV 问题、两策略各三次，共 144 次真实检索生成。最终目标召回两组均 72/72；Dense MRR 0.9722、Hybrid 0.9931，Hybrid 时延更高。
 
 这说明所测小语料上排序略有变化、最终目标召回未提高；不能宣称 Hybrid 在所有业务更好。抽检只覆盖一部分回答，引用存在不等于全批次零幻觉。
+
+这组是 10 月初短政策基线；后续公开语料、真实消费者、多跳、生成侧与表格试点分别见 [第 12 篇](12-rag-development-retrospective.md)，不能将各轮提升相加。原生 Wiki 50 题工程验收为 111 次模型请求、320 条证据 origin 核对；A 组完成 18/20，B 组完成 11/20，B 组全题双层交付 12/20，不能仅用成功项的 11/11 宣称总体达到 80%。[第 13 篇数据口径](13-rag-wiki-architecture-and-rationale.md#94-新增的-50-题原生验收证明接入也保留失败分母)。
 
 数据源和 runner 在 [benchmarks/evaluation](../../benchmarks/evaluation)，原始结果在 [evidence](../reviews/evidence/mi3-mi4-20261002)。复现前核对数据/schema/code/model/pricing 身份，不先换默认策略。
 

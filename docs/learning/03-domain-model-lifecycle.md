@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：02 Runtime 与模型上下文](02-one-run-end-to-end.md) · [下一课：04 工具治理与审批](04-tools-approval.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -18,7 +18,7 @@
 | [canonical_json](../../packages/core/canonical/json_hash.py) / [canonical_json_hash](../../packages/core/canonical/json_hash.py)：把结构稳定编码，再计算摘要，用于内容身份比较。 | JSON-compatible value→规范 str→64 个十六进制字符的 SHA-256 摘要（256 bit）。 | 逐个看 dumps 选项、UTF-8 编码与 hash；别把规范化当业务语义校验。 |
 | [AgentVersion](../../packages/agent_runtime/models.py) / [AgentRun](../../packages/agent_runtime/models.py)：前者描述冻结规格，后者描述一次执行的身份与变化状态。 | 这是 ORM 映射定义，没有发起一次运行的函数输出。 | 先找 resolved_spec/hash 与 Run 的 version/status/usage；看约束及关联，再看服务如何更新。 |
 | [create_current_snapshot](../../packages/knowledge/snapshots.py) / [resolve_snapshot](../../packages/knowledge/snapshots.py)：创建当前合格修订集合的身份，或装载/解析指定 snapshot。 | 工作区/知识库、明确 ID 或 LATEST→snapshot 身份及成员依据。 | 看 _canonical_membership，再看固定 ID/LATEST 的分支；不要把 snapshot 当原文件 hash。 |
-| [_validate_frozen_execution_snapshots](../../packages/agent_runtime/runtime.py)：在正式冻结覆盖进入执行前检查数量、绑定、范围和内容摘要。 | context、FrozenAgentSpec、knowledge overrides→通过校验或完整性错误。 | 看每个比较在防哪种错配；失败不自动替换成最新快照。 |
+| [_validate_frozen_execution_snapshots](../../packages/agent_runtime/runtime_service.py)：在正式冻结覆盖进入执行前检查数量、绑定、范围和内容摘要。 | context、FrozenAgentSpec、knowledge overrides→通过校验或完整性错误。 | 看每个比较在防哪种错配；失败不自动替换成最新快照。 |
 
 ## 1. 先画关系，再看表
 
@@ -32,7 +32,9 @@ flowchart LR
     Revision --> Version
     Run --> Approval["Approval / 决策和执行"]
     Run --> Artifact["Artifact / 可查产物"]
-    Run --> Snapshot["有效知识与 Memory 身份"]
+    Run --> Snapshot["有效知识 / Wiki publication / Memory 身份"]
+    Wiki["Wiki 编译与发布"] --> WikiBinding["AgentWikiBinding / 发布时解析"]
+    WikiBinding --> Version
 ```
 
 箭头是业务关联，不是生命周期全由父对象级联删除。历史记录需保留，不能“删旧数据减轻负担”破坏运行/实验可解释性。
@@ -41,11 +43,13 @@ flowchart LR
 
 | 对象 | 主要变化 | 必须保护的东西 |
 | --- | --- | --- |
-| Agent 草稿 | prompt、模型、工具/知识绑定、预算 | 发布前可编辑，发布后不能回写旧版本 |
+| Agent 草稿 | prompt、模型、工具/知识/Wiki 绑定、预算 | 发布前可编辑，发布后不能回写旧版本 |
 | AgentVersion | 发布后规格不变 | resolved_spec / schema / hash / 工具修订身份 |
 | Tool 与 ToolRevision | Tool 有逻辑身份；修订承载执行契约 | Agent 使用的修订不能被今天的新配置偷换 |
 | DocumentRevision | 入库状态与生命周期有管理过程 | 被历史版本/实验引用的修订留存 |
 | KnowledgeSnapshot | 物化成员身份 | 固定 document/revision 成员，不能改成今天所有文档 |
+| WikiCompilation / WikiPublication | 编译任务可推进；发布内容身份固定，撤销状态单独管理 | source snapshot、编译规格与 publication hash 分开；派生证据回指原修订 |
+| AgentWikiBinding | 草稿可选 PINNED/LATEST；发布后解析值固定 | wiki_binding 可选段进入 canonical resolved spec，旧未绑定版本不凭空改 hash |
 | AgentRun | 状态、计数、输出会变化 | 所用版本、实际快照身份及原始执行归属 |
 | Approval | PENDING 到决定，执行状态另变化 | 冻结参数、逻辑动作 ID、决定者、执行结果 |
 | Thread/Turn | 会话元信息、多轮关联 | 提交 token 和 Run 的关系 |
@@ -101,11 +105,11 @@ def canonical_json_hash(value: Any) -> str:
 
 | 层 | 冻结什么 | 示例 |
 | --- | --- | --- |
-| 发布版本 | 执行规格和知识绑定策略 | 工具修订、模型档案、预算、LATEST 策略 |
+| 发布版本 | 执行规格、原始知识绑定策略及已解析 Wiki publication | 工具修订、模型档案、预算；raw LATEST 策略与 Wiki LATEST 解析结果不同 |
 | 单次 Run | 当时实际使用的有效输入身份 | 解析出的知识快照、Memory ID/hash |
 | 正式 Experiment | 实验和变体全部可比较身份 | 已发布数据/schema、spec、知识、pricing、build SHA、evaluator |
 
-因此同一个版本采用 LATEST 时，不同 Run 的知识输入可能不同；实验要求一次冻结并保留。今天读取历史实验不应再次解析 LATEST。
+因此同一个版本采用 **raw 知识 LATEST** 时，不同 Run 的 snapshot 可能不同；实验变体一次解析并保留。**Wiki LATEST 在发布 AgentVersion 时已经解析**，同版本不会逐 Run 换 Wiki；Run/variant 的 `effective_wiki_publications` 再记录并校验这份身份。今天读取历史实验都不能重新找最新内容。
 
 Memory 停用也不意味着旧 Run 的记忆快照消失。回放回答“当时看到什么”，新选择回答“现在可以看到什么”。历史回放完整性仍需范围/hash 验证。
 
@@ -119,7 +123,7 @@ Run 的 WAITING_APPROVAL 是执行等待，人决定后恢复；Approval 的 APP
 
 **练习：** 给 Incident 写一条纸上记录：AgentVersion V1、Run R1、Approval A1；编辑草稿发布 V2 后，审批 R1 应执行哪一版？答题要包含冻结 ToolRevision 和参数，不能只说“还是旧 prompt”。
 
-**参考答案：** 继续 V1。R1 绑定 V1 的 resolved_spec/hash，A1 绑定该执行里的工具修订、规范参数与 logical_action_id；resume 校验这些归属并继续原 checkpoint。V2 对之后的新执行生效，不改 R1；原 effective knowledge/Memory 输入与预算也不能因批准换成今日值。若原 actor 当前权限不足、身份或 checkpoint 校验失败，应拒绝/按对应失败分支处理，而不是切 V2“帮它成功”。核查 [resume](../../packages/agent_runtime/runtime.py) 和 [Approval 模型](../../packages/approvals/models.py)。
+**参考答案：** 继续 V1。R1 绑定 V1 的 resolved_spec/hash，A1 绑定该执行里的工具修订、规范参数与 logical_action_id；resume 校验这些归属并继续原 checkpoint。V2 对之后的新执行生效，不改 R1；原 effective knowledge/Memory 输入与预算也不能因批准换成今日值。若原 actor 当前权限不足、身份或 checkpoint 校验失败，应拒绝/按对应失败分支处理，而不是切 V2“帮它成功”。核查 [resume](../../packages/agent_runtime/runtime_service.py) 和 [Approval 模型](../../packages/approvals/models.py)。
 
 ## 7. 按顺序打开代码
 
@@ -174,6 +178,7 @@ Agent A 是持续编辑的产品对象；AgentVersion V1 是发布时的完整 r
 | AgentVersion V1 + spec hash | 发布后，被 Run/variant 绑定 | 确定模型计划、prompt 和工具配置 |
 | 工具 revision | 版本解析 | 同名工具的参数/治理可能升级 |
 | K1 + content hash | LATEST 解析或 PINNED 绑定 | 新文档不能悄悄进入历史实验 |
+| Wiki publication ID + hash | AgentVersion 发布解析；Run/variant 复制并校验 | 原生 query_wiki 不能让模型临时指定另一 publication |
 | Memory IDs + 内容身份 | 有效输入冻结 | 记忆停用或内容变化需要被识别 |
 | DatasetVersion + schema/content hash | 数据集发布与实验冻结 | 输入/答案/分组不应被静默修改 |
 | pricing/evaluator versions | 正式实验冻结 | 费用和评分算法有自己的版本 |
@@ -184,7 +189,9 @@ Agent A 是持续编辑的产品对象；AgentVersion V1 是发布时的完整 r
 
 假设冻结时知识库的有效快照为 K1，实验变体记录 K1。之后新增修订生成 K2。读取历史实验时仍应加载 K1，不能再次把 LATEST 解析为 K2，否则“同一个实验”的输入已经改变。
 
-打开 [运行时快照校验](../../packages/agent_runtime/runtime.py) 的 `_validate_frozen_execution_snapshots`：它比较覆盖项数量与绑定数量，解析知识库/快照/hash，检查 workspace、binding mode、数据库 snapshot 和 content hash；PINNED 还与原规格固定身份比较。错配会失败，不是悄悄修正为当前最新。
+打开 [运行时快照校验](../../packages/agent_runtime/runtime_service.py) 的 `_validate_frozen_execution_snapshots`：它比较覆盖项数量与绑定数量，解析知识库/快照/hash，检查 workspace、binding mode、数据库 snapshot 和 content hash；PINNED 还与原规格固定身份比较。错配会失败，不是悄悄修正为当前最新。
+
+Wiki publication 丢失/内容漂移时不静默换新，恢复可收口为 NEEDS_ATTENTION / WIKI_PUBLICATION_UNAVAILABLE；来源撤销仍在消费层阻断。不可变发布身份不等于永远有权读取，见 [第 13 篇](13-rag-wiki-architecture-and-rationale.md)。
 
 这也解释了为什么历史文档修订要保留：只留 K1 的 hash 却删掉其成员内容，无法再次装载证据。hash 能发现变化，不能从摘要反推出原文。
 
@@ -202,7 +209,7 @@ Agent A 是持续编辑的产品对象；AgentVersion V1 是发布时的完整 r
 
 **解读：** R1 已绑定 V1，审批对象冻结工具修订与参数；恢复必须检查原版本/动作归属并沿原 checkpoint 继续。V2 是新发布规格，不能替换原执行中途的治理与 prompt。
 
-**核查依据：** [对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `resume / _AgentRunGraph.prepare`。
+**核查依据：** [服务 resume](../../packages/agent_runtime/runtime_service.py) 与 [图 prepare](../../packages/agent_runtime/runtime_graph.py)，分别检查原执行恢复和版本准备。
 
 **常见误解：** 只保留旧 prompt，却换成今天的工具或知识输入。
 

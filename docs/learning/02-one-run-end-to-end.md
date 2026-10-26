@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：01 HTTP 与执行入口](01-codebase-navigation.md) · [下一课：03 对象与版本身份](03-domain-model-lifecycle.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -14,16 +14,16 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [AgentRunService.run](../../packages/agent_runtime/runtime.py) / [prepare_run](../../packages/agent_runtime/runtime.py) / [execute_prepared_run](../../packages/agent_runtime/runtime.py)：run 是组合入口，prepare_run 保存执行身份，execute_prepared_run 实际执行并汇总结果。 | 执行 context、version、input 与可选覆盖→AgentRun，再到 AgentRunResult。 | 按创建→图调用→结果保存读；找同一 run_id 在各步怎样传递。 |
-| [_AgentRunGraph.prepare](../../packages/agent_runtime/runtime.py) / [model](../../packages/agent_runtime/runtime.py)：prepare 建消息/规格/工具状态；model 准入后调用供应商，返回下一步状态更新。 | AgentRunState 与原 Run→准备状态，随后模型输出/提议/usage 或失败。 | prepare 看 workspace/spec hash/schema；model 看 admission→最终 ModelRequest→Gateway→状态计数。 |
+| [AgentRunService.run](../../packages/agent_runtime/runtime_service.py) / [prepare_run](../../packages/agent_runtime/runtime_service.py) / [execute_prepared_run](../../packages/agent_runtime/runtime_service.py)：run 是组合入口，prepare_run 保存执行身份，execute_prepared_run 实际执行并汇总结果。 | 执行 context、version、input 与可选覆盖→AgentRun，再到 AgentRunResult。 | 按创建→图调用→结果保存读；找同一 run_id 在各步怎样传递。 |
+| [_AgentRunGraph.prepare](../../packages/agent_runtime/runtime_graph.py) / [model](../../packages/agent_runtime/runtime_graph.py)：prepare 建消息/规格/工具状态；model 准入后调用供应商，返回下一步状态更新。 | AgentRunState 与原 Run→准备状态，随后模型输出/提议/usage 或失败。 | prepare 看 workspace/spec hash/schema；model 看 admission→最终 ModelRequest→Gateway→状态计数。 |
 | [admit_context](../../packages/agent_runtime/context_budget.py) / [ContextBudgetPolicy.admit](../../packages/agent_runtime/context_budget.py)：前者是函数式入口，后者执行预算分类、投影/驱逐并给出准入结果。 | 候选 messages、categories、exchange_groups、tools 与预算/estimator→ContextAdmissionResult。 | 长参数表是输入契约；实际算法在 admit。分清估算、保留类别和 exchange 配对。 |
 | [模型计划准备与生成/流式路径](../../packages/model_gateway/gateway.py)：解析能力/凭据并经 adapter 调供应商，承担重试/fallback 和观测边界。 | ModelRequest、执行计划→统一响应或 stream events。 | 先看 public 方法的计划与 adapter 调用，再看可见 token 标记；不一开始钻进 SDK。 |
 
 ## 1. Run 的开始不是一次裸模型调用
 
-先读 `AgentRunService.run → prepare_run → execute_prepared_run`。`prepare_run` 先持久化身份；执行阶段装配 `_AgentRunGraph`。历史版本规格要校验，知识/Memory 的有效输入要装载或冻结。
+先读 `AgentRunService.run → prepare_run → execute_prepared_run`。`prepare_run` 先持久化身份；执行阶段装配 `_AgentRunGraph`。历史版本规格要校验，知识/Wiki/Memory 的有效输入要装载或冻结。`runtime.py` 保留导入兼容；实现分别在 [runtime_service](../../packages/agent_runtime/runtime_service.py)、[runtime_graph](../../packages/agent_runtime/runtime_graph.py)、[runtime_projection](../../packages/agent_runtime/runtime_projection.py)，依赖由服务到图再到投影。
 
-[真实入口](../../packages/agent_runtime/runtime.py)：`_create_run`、`_validate_frozen_execution_snapshots`、`_resolve_effective_snapshots`、`_AgentRunGraph.prepare`。第一遍只找这些函数互相交付什么数据，不逐行通读。
+[服务入口](../../packages/agent_runtime/runtime_service.py)：`_create_run`、`_validate_frozen_execution_snapshots`、`_resolve_effective_snapshots`；[图入口](../../packages/agent_runtime/runtime_graph.py)：`_AgentRunGraph.prepare`。第一遍只找这些函数互相交付什么数据，不逐行通读。
 
 ## 2. 八个节点，按数据变化理解
 
@@ -54,7 +54,7 @@ flowchart TB
 
 以下是源码中的结束/下一步判断：
 
-出处：[packages/agent_runtime/runtime.py](../../packages/agent_runtime/runtime.py)，`after_model`；源码函数（省略装饰器，学习注释见下）。
+出处：[packages/agent_runtime/runtime_graph.py](../../packages/agent_runtime/runtime_graph.py)，`after_model`；源码函数（省略装饰器，学习注释见下）。
 
 > **源码注释版：** `# 学习：` 是教材新增解释，原执行语句保留；导入、类或调用上下文可能省略。
 
@@ -126,6 +126,12 @@ def admit_context(
     ).admit(messages, categories, exchange_groups, tool_definitions)
 ```
 
+当前还有三条必须读懂的预算规则：
+
+- 新发布默认池按模型链的最小上下文窗口派生：RAG 25%、工具结果 15%、Memory 8%，每个派生池最低 500；非默认配置保留，不回写旧版本中的数字。源码按池是否仍等于默认值判断派生，未另存“显式填写过默认值”的标记；Memory 池只在开启长期记忆时配置。具体余量还受输出预留和必留项约束。[派生函数](../../packages/agent_runtime/runtime_config.py)、[发布判定](../../packages/agent_runtime/publish.py)。
+- Runtime 使用近似 token；检索层 `context_budget_bytes` 的若干选择/渲染仍按真实 UTF-8 bytes。字段数值相同不代表可互换，canonical hash 的 UTF-8 编码更是另一回事。
+- `9ad8b9d` 修复了多轮裁剪后消息类别漂移、工具 JSON 未先扣信封开销、Citation QA 小窗口 fallback/结构修复重试未逐轮准入。必须保留当前任务与真实类别，不能用旧消息个数重新猜类别。[修复验收 H-01/H-03/H-04](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
 读 `_AgentRunGraph.model` 时按这个顺序圈词：`budget_policy`、`admission`、`_touch_admitted_memories`、`ModelRequest`、`prepare_resolved`、模型生成/流式。
 
 **先选择、后准入：** 检索/记忆选择得到候选；预算可能驱逐其中部分；只有真正进入 ModelRequest 的才是模型实际看见的。ContextAdmissionResult 记录准入后的数据与用量，不能用 selected 数量冒充模型使用量。
@@ -140,11 +146,11 @@ def admit_context(
 
 [ModelGatewayService](../../packages/model_gateway/gateway.py) 处理能力校验、模型执行计划、凭据解析、重试/fallback 与观测。检查声明支持的工具/上下文能力，不能假设所有模型行为等价。
 
-fallback 的关键是**首个可见 token 之前**：用户已看到一段输出后不能透明切换到另一个模型并续写，造成来源/语义拼接。读取 gateway 的流式分支与关闭路径，区分“连接失败可重试”与“已输出不能透明重来”。
+当前空普通/流式响应按可见内容前失败处理，允许按计划 fallback；拒答与 content_filter 保留其语义，不能为绕过拒答强行切换。fallback 的关键仍是**首个可见 token 之前**：用户已看到一段输出后不能透明切换到另一个模型并续写，造成来源/语义拼接。读取 gateway 的流式分支与关闭路径，区分“连接失败可重试”与“已输出不能透明重来”。
 
 ## 6. 工具结果怎样推进模型
 
-`observation` 把结构化工具结果关联回 tool call，再让 model 继续。工具参数异常或未知工具可能成为反馈让模型纠正，不保证每种工具错误都立即终止整个 Run。具体 failure_code/分支要看节点实际代码。
+`observation` 把结构化工具结果关联回 tool call，再让 model 继续。`search_knowledge` 与 `query_wiki` 走 RAG_EVIDENCE 投影，完整记录/引用成对保留；Wiki 还校验 envelope、注册私有 publication 身份并保留冲突/不足/降级状态。普通工具才用 `_bounded_tool_result` 的单条结果预算，不能把所有结果都讲成通用 JSON preview。工具参数异常或未知工具可能成为反馈让模型纠正，不保证每种工具错误都立即终止整个 Run。具体 failure_code/分支要看节点实际代码。
 
 READ 结果和 Memory 都属于不可信输入证据；它们不能覆盖 actor、权限、发布规格和 ToolPolicy。安全不是单纯一句 prompt，也包括契约、来源/范围验证和独立执行守卫。
 
@@ -158,9 +164,9 @@ READ 结果和 Memory 都属于不可信输入证据；它们不能覆盖 actor�
 
 **三张纸的参考答案：**
 
-1. 主线为 prepare→model→tool_proposal→policy→read_execute/action_execute→observation→model。两个明确失败出口可画“prepare 规格完整性失败→finish”和“model 设置 failure_code→after_model→finish”；policy 产生 failure_code/run_status 也会结束。审批等待画 interrupt，不伪装成 final_output；未知 action 画 NEEDS_ATTENTION。核查 [_AgentRunGraph 的节点与 after_*](../../packages/agent_runtime/runtime.py)。
+1. 主线为 prepare→model→tool_proposal→policy→read_execute/action_execute→observation→model。两个明确失败出口可画“prepare 规格完整性失败→finish”和“model 设置 failure_code→after_model→finish”；policy 产生 failure_code/run_status 也会结束。审批等待画 interrupt，不伪装成 final_output；未知 action 画 NEEDS_ATTENTION。核查 [_AgentRunGraph 的节点与 after_*](../../packages/agent_runtime/runtime_graph.py)。
 2. 分类为 RUNTIME_POLICY（策略）、SYSTEM_PROMPT（冻结 prompt）、CURRENT_USER_TASK（当前任务）、CONVERSATION（历史）、TOOL_RESULT（工具结果）、MEMORY（长期记忆）；知识证据与工具定义另有 RAG_EVIDENCE/TOOL_DEFINITIONS。角色回答协议身份，类别回答预算优先级；system role 的 Memory 仍可被驱逐并按不可信证据处理。核查 [ContextCategory / mandatory/untrusted 集合](../../packages/agent_runtime/context_budget.py)。
-3. estimator 在请求前为准入提供可预测单位，当前默认是保守的 UTF-8-byte 单位，不是供应商精确 tokenizer。真实 usage 在调用后由供应商响应产生，再与 pricing snapshot 得出估计费用；缺失 usage、缓存与最终账单仍需单独说明。预留输出不是实际已生成输出，不能拿预算直接报实际扣款。
+3. estimator 在请求前为准入提供可预测单位，当前默认 `ApproxTokenEstimator` 按 `ceil(CJK字符数/1.6 + 其他字符数/4)` 估算，不是供应商精确 tokenizer；旧 `Utf8ByteTokenEstimator` 名称只是兼容别名。真实 usage 在调用后由供应商响应产生，再与 pricing snapshot 得出估计费用；缺失 usage、缓存与最终账单仍需单独说明。预留输出不是实际已生成输出，不能拿预算直接报实际扣款。
 
 **自测：** 为什么 observation 后还要调用模型？因为模型需根据实际结果修正推理。为什么不能无限重试工具？预算/重复守卫与副作用边界共同限制。
 
@@ -173,7 +179,7 @@ READ 结果和 Memory 都属于不可信输入证据；它们不能覆盖 actor�
 
 ### A. `prepare` 为什么有三次规格检查
 
-打开 [_AgentRunGraph.prepare](../../packages/agent_runtime/runtime.py)，从查询 AgentVersion 开始读。查询同时带 workspace 和 version ID，先确保拿到当前租户的版本。随后分别检查：
+打开 [_AgentRunGraph.prepare](../../packages/agent_runtime/runtime_graph.py)，从查询 AgentVersion 开始读。查询同时带 workspace 和 version ID，先确保拿到当前租户的版本。随后分别检查：
 
 1. **内容自洽：** 对 `version.resolved_spec` 重新计算规范 hash，与 `resolved_spec_hash` 比较。hash 字段存在不等于内容没有变化。
 2. **Run 绑定一致：** 如果 Run 已有规格 hash，它必须等于该版本的 hash，避免原执行身份与被装载内容错配。
@@ -229,7 +235,7 @@ READ 结果和 Memory 都属于不可信输入证据；它们不能覆盖 actor�
 
 **解读：** 合法 call 仅表示协议与参数可解析。实际工具还必须存在于已发布目录，满足策略和权限，通过执行守卫后才派发；observation 将真实返回值交给下一轮模型。业务成功须看结果而非提议。
 
-**核查依据：** [对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `tool_proposal / policy / action_execute / observation`。
+**核查依据：** [对应源码/证据](../../packages/agent_runtime/runtime_graph.py)，重点看 `tool_proposal / policy / action_execute / observation`。
 
 **常见误解：** 模型说“我将回滚”就当作回滚已经完成。
 
@@ -239,7 +245,7 @@ READ 结果和 Memory 都属于不可信输入证据；它们不能覆盖 actor�
 
 **解读：** selector 产出的是候选，预算会改变最终 messages；touch 从最终 memory payload 提取 admitted ID。即使 touch 成功，它记录可见输入而非答案对该记忆的依赖，真正 USE 需要单独对照与语义判据。
 
-**核查依据：** [对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `_touch_admitted_memories / model`。
+**核查依据：** [对应源码/证据](../../packages/agent_runtime/runtime_graph.py)，重点看 `_touch_admitted_memories / model`。
 
 **常见误解：** 把 selected、admitted、used 三个数字互换。
 

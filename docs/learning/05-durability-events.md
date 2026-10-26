@@ -2,7 +2,7 @@
 
 [学习首页](README.md) · [上一课：04 工具治理与审批](04-tools-approval.md) · [下一课：06 知识与 RAG](06-knowledge-rag.md)
 
-源码核查基线：`823ac05`，2026-10-09；答案核查补充：2026-10-10。本课中的源码/流程为静态核查；个人练习尚未代你执行，历史证据保留其日期/SHA。
+源码与答案核查：2026-10-26；已提交基线 `a2d47e4`（含 `9ad8b9d` 后端修复、`1673515` 前端修复及构建/迁移补验归档）。本文按当前源码解释；修复已完成隔离验收，尚未部署业务环境。个人练习本轮未执行，历史实验保留原日期、SHA、分母和结论。全目录状态与证据口径见 [学习首页](README.md#本轮同步与核查边界)。
 
 ## 这课要解决什么
 
@@ -14,7 +14,7 @@
 
 | 入口与职责 | 输入 → 产出 | 阅读重点 |
 | --- | --- | --- |
-| [AgentRunService.resume](../../packages/agent_runtime/runtime.py)：以原 Run 继续图执行，不重新开始一次问题。 | request context、run_id、approval_id→AgentRunResult 或明确恢复错误。 | 原 Run 状态→原 actor 当前权限→审批归属→checkpoint→Command resume→结果。 |
+| [AgentRunService.resume](../../packages/agent_runtime/runtime_service.py)：以原 Run 继续图执行，不重新开始一次问题。 | request context、run_id、approval_id→AgentRunResult 或明确恢复错误。 | 原 Run 状态→原 actor 当前权限→审批归属→checkpoint→Command resume→结果。 |
 | [checkpoint_thread_id](../../packages/agent_runtime/adapters/langgraph/checkpoint.py) / [config_for_run](../../packages/agent_runtime/adapters/langgraph/checkpoint.py) / [has_checkpoint](../../packages/agent_runtime/adapters/langgraph/checkpoint.py)：生成同 Run 图身份、交给框架配置，并探测恢复状态是否存在。 | workspace+Run→标识/config；探测→bool。 | 业务 Thread 与 checkpoint thread_id 不同；配置存在也不证明远端写入结果。 |
 | [McpToolExecutor.execute_write](../../packages/mcp/runtime.py)：派发一次批准的 WRITE，将远端/派发证据转换成三类动作结果。 | context、ToolDefinition、arguments→ActionExecutionResult。 | 依次看 OK、TOOL_ERROR、NOT_DISPATCHED、未知兜底；不要先统一加 retry。 |
 | [should_persist](../../packages/agent_runtime/event_store.py)：判断事件是否进入持久重放记录，本身不执行 INSERT。 | AgentEvent→bool。 | 读 NON_PERSISTED_EVENT_TYPES，再读实际写入与队列边界；序号是游标不是行数。 |
@@ -49,30 +49,38 @@ sequenceDiagram
     participant Runtime as AgentRunService
     participant Graph as LangGraph checkpoint
     Human->>API: approve / deny
-    API->>PG: 保存审批决定
+    API->>PG: 同事务保存决定与 resume_pending
     API->>Runtime: resume 原 Run
-    Runtime->>PG: 校验状态 / 原 actor / 版本 / approval
+    Runtime->>PG: Run lease / 当前中断游标 / 原 actor 权限
     Runtime->>Graph: 查 checkpoint / Command resume
     Graph->>Runtime: 继续原图状态与预算
     Runtime->>PG: 执行抢占 / 结果或待关注
 ```
 
-图是成功恢复的步骤；checkpoint 缺失、身份不匹配、权限撤销或执行不确定会走其他分支，不保证批准一定恢复成功。
+图是 API 即时恢复的主线；后台也可从 resume_pending 补派发，不能只依靠 HTTP 回调。checkpoint 缺失、身份不匹配、权限撤销或执行不确定会走其他分支，不保证批准一定恢复成功。
 
-按顺序读 [AgentRunService.resume](../../packages/agent_runtime/runtime.py)：Run 是否存在/等待 → 原运行上下文 → approval 归属版本 → checkpoint 是否存在 → graph resume。原 actor 决定执行权限，不是审批者获得权限后替原 actor 改写执行身份。
+按顺序读 [AgentRunService.resume](../../packages/agent_runtime/runtime_service.py)：Run 是否存在/等待 → 原运行上下文 → approval 归属版本 → checkpoint 是否存在 → graph resume。原 actor 决定执行权限，不是审批者获得权限后替原 actor 改写执行身份。
 
 预算和 usage 也随原执行历史保留；不因人工批准清零。缺 checkpoint 时会记录 NEEDS_ATTENTION，并给出 `APPROVAL_CHECKPOINT_MISSING` 对应分支。
+
+### 当前增加的执行权与恢复约束
+
+`9ad8b9d` 引入数据库 Run lease：同一 Run 仅一个 owner 可推进，过期执行权进入 NEEDS_ATTENTION，不能盲目夺取并重放图。准备但未启动的 Run 可以按同一身份启动；退出执行权时图若仍未收口，先置待关注再清 owner，不能变回可重启草稿。未启动取消无需调用 provider；UNKNOWN_OUTCOME 或未确认 CLAIMED 动作优先于普通取消完成。
+
+代码迁移 head 是 `0037_run_resume_cursor`：0035 执行权、0036 Turn/Memory/Artifact 身份、0037 恢复游标。隔离旧数据已验证 0034→0037→0034→0037；**业务环境尚未升级**，部署需先排空旧 worker、迁移并显式 bootstrap checkpoint，再启动一致版本。详情与限制见 [修复验收](../reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+
+后台对账还需要公平扫描。[reconcile_candidates](../../packages/approvals/reconciliation.py) 按 `reconciled_at`、开始时间与 ID 取有限批次，并在探测前提交本批访问时间；即使某条 checkpoint 探测持续失败，也会记录错误并让后面的 Run 获得扫描机会。它修复的是首批坏记录长期占满批次的问题，不保证每条 Run 最终都能自动恢复。
 
 ## 3. 哪些窗口能重入，哪些不能盲试
 
 | 窗口 | 需要问的问题 | 项目边界 |
 | --- | --- | --- |
 | 创建审批/interrupt 前后 | 重入是否生成同一 logical_action_id？ | 纯/idempotent/re-entrant 操作，create_or_get 复用 |
-| 保存决定后，resume 前 | 决定是否已落库？图是否还等待？ | 对账/恢复依赖持久状态，不只靠 API 内存 |
+| 保存决定后，resume 前 | 决定与待恢复标记是否同事务？是否仍为当前中断？ | resume_pending + resume_cursor 可补派发；原 actor 失权则停止，不能重用审批者权限 |
 | claim 后，发出写入前 | 是否能确认远端没接收？ | 未必能仅凭本地 CLAIMED 区分，不能随意重试 |
 | 发出写入后，结果保存前 | 远端可能成功了吗？ | 无法确认则 UNKNOWN_OUTCOME / NEEDS_ATTENTION |
 
-本地动作可在特定事务/幂等身份中确认结果；远端动作另受协议和服务约束，不能用本地工单去重测试推出所有 MCP 写入 exactly-once。
+本地动作可在特定事务/幂等身份中确认结果。当前 [ActionRuntime](../../packages/tools/actions.py) 对本地执行超时或非业务异常尝试只读对账：例如工单已提交、后续 refresh 抛错，可按原幂等键确认已有工单并返回成功；仍不能查证就保留 UNKNOWN_OUTCOME，不重新创建。远端动作另受协议和服务约束，不能用本地工单去重测试推出所有 MCP 写入 exactly-once。
 
 ## 4. 从代码学三类结果
 
@@ -126,7 +134,7 @@ async def execute_write(
 
 读法：OK 是确认成功；TOOL_ERROR 是远端明确返回失败；NOT_DISPATCHED 是未发请求；其他无法确认的已派发情况归未知。不要把所有超时都写成“失败，可重试”。
 
-[_AgentRunGraph.action_execute](../../packages/agent_runtime/runtime.py) 将未知动作投影为 Run NEEDS_ATTENTION。人工接管关闭只是运营处理，不是自动副作用对账。
+[_AgentRunGraph.action_execute](../../packages/agent_runtime/runtime_graph.py) 将未知动作投影为 Run NEEDS_ATTENTION。人工接管关闭只是运营处理，不是自动副作用对账。
 
 ## 5. SSE 与持久化：四份记录不能混用
 
@@ -134,7 +142,7 @@ async def execute_write(
 | --- | --- | --- |
 | Run / RunStep | 状态、步骤、预算、结果查询 | 不是全部 graph payload |
 | checkpoint | 图中断与恢复 | 不证明远端结果 |
-| AgentRunEvent / SSE | 事件序号、重连/跟读、UI 展示 | message.delta 不持久化；队列满可丢帧 |
+| AgentRunEvent / SSE | 持久结构事件与最终结果、实时跟读 | message.delta 不持久化；live 队列满转持久补播，逐 token 动画不保证重放 |
 | trace sink | 脱敏的时延/阶段观测 | 失败不阻断业务，不默认记录正文，不等于外部 Langfuse 已接通 |
 
 [真实事件筛选](../../packages/agent_runtime/event_store.py)：
@@ -149,7 +157,7 @@ def should_persist(event: AgentEvent) -> bool:
     return event.type not in NON_PERSISTED_EVENT_TYPES
 ```
 
-这里的 NON_PERSISTED_EVENT_TYPES 包含 message.delta。读本文件开头与有界队列写入分支，理解为什么不能承诺全部帧不丢失。
+这里的 NON_PERSISTED_EVENT_TYPES 包含 message.delta。当前结构事件先持久化，再发布和释放 Run 执行权；序号冲突不能忽略，持久化失败留下完整性标记。历史不完整日志不会被新段成功抹平。不能把 trace 的 fail-open 语义套到业务结构事件上。
 
 `AgentRunService.attach_stream` 根据原 Run 与游标跟读。API 内直接流式还受订阅者/宽限/取消守卫；worker detached 路径又不同。断线不等于必然取消，也不等于永远后台继续，必须说清入口和配置。
 
@@ -159,7 +167,7 @@ def should_persist(event: AgentEvent) -> bool:
 
 **面试追问：** 为什么队列重投不能让已经 CLAIMED 的未知动作自动再发？为什么审批恢复不能新建 Run？为什么 SSE 重放不一定包含完整打字动画？
 
-**逐问答案：** CLAIMED 只证明本地抢占，远端可能已经完成；队列重复投递不提供远端结果证据，因此不能自动重新派发未知 WRITE。审批恢复必须延续原动作/checkpoint/actor/预算，新建 Run 会改变执行与去重身份，属于重跑。SSE 的 message.delta 不落库，重放结构事件和最终输出而非完整 token 动画，sequence 也可以有缺口。分别核查 [claim_execution](../../packages/approvals/service.py)、[resume](../../packages/agent_runtime/runtime.py)、[should_persist](../../packages/agent_runtime/event_store.py)。
+**逐问答案：** CLAIMED 只证明本地抢占，远端可能已经完成；队列重复投递不提供远端结果证据，因此不能自动重新派发未知 WRITE。审批恢复必须延续原动作/checkpoint/actor/预算，新建 Run 会改变执行与去重身份，属于重跑。SSE 的 message.delta 不落库，重放结构事件和最终输出而非完整 token 动画，sequence 也可以有缺口。分别核查 [claim_execution](../../packages/approvals/service.py)、[resume](../../packages/agent_runtime/runtime_service.py)、[should_persist](../../packages/agent_runtime/event_store.py)。
 
 **两个预测题的答案：** WAITING 重启后，若原数据、checkpoint、当前原 actor 权限和配置有效，应恢复同一 Run；缺 checkpoint 则 NEEDS_ATTENTION / APPROVAL_CHECKPOINT_MISSING，不伪造继续成功。远端接受写入但不回答时，若无法确认结果，执行 UNKNOWN_OUTCOME、Run NEEDS_ATTENTION；需保留远端调查线索，不能靠再次调用“试出”结果。这是条件性预期，实际实验还需记录观察。
 
@@ -190,7 +198,7 @@ def should_persist(event: AgentEvent) -> bool:
 
 ### C. same-run resume 具体保留什么
 
-读 [AgentRunService.resume](../../packages/agent_runtime/runtime.py)，按原 Run 状态、原 actor、AgentVersion/审批归属、checkpoint、恢复调用逐段记录。再核对恢复后的 counters、usage 和剩余预算，避免把一次批准当成新的无限预算。
+读 [AgentRunService.resume](../../packages/agent_runtime/runtime_service.py)，按原 Run 状态、原 actor、AgentVersion/审批归属、checkpoint、恢复调用逐段记录。再核对恢复后的 counters、usage 和剩余预算，避免把一次批准当成新的无限预算。
 
 这里有两个 Thread：业务 Thread 组织多轮对话，checkpoint_thread_id 用 workspace+Run 派生。若把业务 Thread ID 当 checkpoint ID，同一对话多次 Run 会互相覆盖恢复身份。源码的小函数虽短，但承载的是租户隔离与原执行识别。
 
@@ -200,7 +208,7 @@ def should_persist(event: AgentEvent) -> bool:
 
 教学事件序列：1 run.started、2 context.budget、3/4/5 message.delta、6 run.completed。由于 delta 不持久化，重连可能查询到 1、2、6。这里没有三条业务结构事件丢失；序号存在缺口是预期设计，游标表示位置而不是“已经存了多少行”。
 
-接收端应按真实事件 sequence 跟读，不能用 `已有行数 + 1` 推算下一位置。持久结构事件和最终输出用于重建结果，delta 用于打字动画。实时队列有容量限制，慢消费者可能丢帧；最终查询与持久事件承担不同补偿职责。
+接收端应按真实事件 sequence 跟读，不能用 `已有行数 + 1` 推算下一位置。持久结构事件和最终输出用于重建结果，delta 用于打字动画。实时队列有容量限制；当前慢消费者会退出 live 队列转持久补播。live 序号有缺口时先读 durable 事件，再推进游标；连续 token 不逐帧查库。最终查询与持久事件补偿结构和结果，不能补出从未落库的 delta。
 
 同时区分客户端断线、主动取消与 worker detached：其订阅者/宽限逻辑不同。不要在所有入口承诺“断线必取消”或者“永远继续”，先定位具体启动路径和配置。
 
@@ -230,7 +238,7 @@ def should_persist(event: AgentEvent) -> bool:
 
 **解读：** trace 是观测的辅助路径，项目采取失败不阻断业务；Run/Approval/checkpoint 是正确性和恢复依赖，丢失它们的结果不能用相同策略忽略。区分信息用途后再决定失败处理。
 
-**核查依据：** [对应源码/证据](../../packages/agent_runtime/runtime.py)，重点看 `trace 与 Run/恢复持久化调用`。
+**核查依据：** [trace 安全辅助](../../packages/agent_runtime/runtime_projection.py)与 [Run/恢复持久化](../../packages/agent_runtime/runtime_service.py)；区分观测 fail-open 和业务结构事件持久化。
 
 **常见误解：** 把“观测 fail-open”推广成“所有数据库错误都可继续”。
 
