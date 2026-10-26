@@ -1,0 +1,10 @@
+python -m ruff check --no-cache .
+All checks passed!
+Exit code: 0
+
+python -m ruff format --no-cache --check <7 changed product/test files plus archived probe>
+8 files already formatted
+Exit code: 0
+
+git diff --check
+Exit code: 0
