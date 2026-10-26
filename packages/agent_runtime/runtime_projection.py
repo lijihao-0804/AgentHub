@@ -89,6 +89,9 @@ class AgentRunState(TypedDict, total=False):
     # long-term memory. Zero for every agent that has not turned it on.
     memory_message_count: int
     memory_ids: tuple[UUID, ...]
+    # Admission attribution only: frozen selection identities stay unchanged.
+    # This private sidecar contains stable reasons, never memory bodies.
+    memory_drop_reasons: dict[str, str]
     # How many of ``messages``, right after the system prefix and the memory
     # block, are replayed thread history rather than the question asked now.
     history_message_count: int
@@ -552,6 +555,13 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "usage_source",
         "attempt_status",
         "cost_status",
+        "memory_projection_version",
+        "memory_selected_count",
+        "memory_admitted_count",
+        "memory_dropped_count",
+        "memory_dropped_pool_budget_count",
+        "memory_dropped_context_window_count",
+        "memory_dropped_unavailable_count",
     }
     result: dict[str, Any] = {}
     for key, value in metadata.items():

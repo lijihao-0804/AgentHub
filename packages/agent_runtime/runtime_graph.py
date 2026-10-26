@@ -20,7 +20,9 @@ from packages.agent_runtime.adapters.langgraph import (
     compile_agent_graph,
 )
 from packages.agent_runtime.context_budget import (
+    MEMORY_PROJECTION_VERSION,
     ApproxTokenEstimator,
+    ContextAdmissionResult,
     ContextBudgetConfig,
     ContextBudgetPolicy,
     ContextCategory,
@@ -115,6 +117,51 @@ def _retain_admission(state, admission):
             history_count += 1
         state["memory_message_count"] = memory_count
         state["history_message_count"] = history_count
+
+
+def _memory_delivery_metadata(
+    state: AgentRunState, admission: ContextAdmissionResult
+) -> dict[str, Any]:
+    """Attribute final admission against the Run's unchanged frozen selection.
+
+    Later rounds start from an already admitted message list. Preserve earlier
+    drop reasons in the checkpoint so losing the whole memory message does not
+    turn the next round into an apparent empty selection. No memory content or
+    source IDs enter the public step/trace projection.
+    """
+    report = admission.memory_admission
+    frozen_ids = tuple(str(value) for value in state.get("memory_ids", ()))
+    if report is None and not frozen_ids:
+        return {}
+    admitted_ids = {str(UUID(value)) for value in report.admitted_ids} if report else set()
+    previous = state.get("memory_drop_reasons", {})
+    current = (
+        {str(UUID(key)): reason for key, reason in report.dropped_reasons.items()}
+        if report is not None
+        else {}
+    )
+    dropped = {
+        memory_id: current.get(memory_id) or previous.get(memory_id) or "NOT_IN_ADMITTED_CONTEXT"
+        for memory_id in frozen_ids
+        if memory_id not in admitted_ids
+    }
+    state["memory_drop_reasons"] = dropped
+    return {
+        "memory_projection_version": MEMORY_PROJECTION_VERSION,
+        "memory_selected_count": len(frozen_ids),
+        "memory_admitted_count": sum(value in admitted_ids for value in frozen_ids),
+        "memory_dropped_count": len(dropped),
+        "memory_dropped_pool_budget_count": sum(
+            reason == "MEMORY_POOL_BUDGET" for reason in dropped.values()
+        ),
+        "memory_dropped_context_window_count": sum(
+            reason == "CONTEXT_WINDOW_BUDGET" for reason in dropped.values()
+        ),
+        "memory_dropped_unavailable_count": sum(
+            reason not in {"MEMORY_POOL_BUDGET", "CONTEXT_WINDOW_BUDGET"}
+            for reason in dropped.values()
+        ),
+    }
 
 
 class _AgentRunGraph:
@@ -580,10 +627,13 @@ class _AgentRunGraph:
             return {"model_round_count": next_round, "failure_code": error.code}
 
         _retain_admission(state, admission)
+        memory_delivery = _memory_delivery_metadata(state, admission)
         evidence_update = {
             "memory_message_count": int(state.get("memory_message_count", 0)),
             "history_message_count": int(state.get("history_message_count", 0)),
         }
+        if memory_delivery:
+            evidence_update["memory_drop_reasons"] = dict(state.get("memory_drop_reasons", {}))
         if "rag_evidence_registry" in state:
             state["rag_evidence_registry"] = visible_evidence_registry(
                 admission.messages, state["rag_evidence_registry"]
@@ -592,7 +642,7 @@ class _AgentRunGraph:
         state["tool_definitions"] = {
             definition.identity: definition for definition in state["tool_definitions"].values()
         }
-        await self._touch_admitted_memories(state, admission.messages)
+        await self._touch_admitted_memories(state, admission)
         usage = admission.usage
         budget_data = {
             "model_round": next_round,
@@ -615,6 +665,7 @@ class _AgentRunGraph:
             "estimated_after": usage.estimated_input_after,
             "truncated": usage.truncated,
             "dropped_exchange_count": usage.dropped_exchange_count,
+            **memory_delivery,
         }
         budget_span = await _safe_start_span(
             self.service.trace_sink, "agent.context_budget", trace_data
@@ -650,7 +701,9 @@ class _AgentRunGraph:
                 )
         except ModelGatewayError as error:
             await self.step(
-                "MODEL", "FAILED", {"model_round": next_round, "error_code": error.code.value}
+                "MODEL",
+                "FAILED",
+                {"model_round": next_round, "error_code": error.code.value, **memory_delivery},
             )
             return {
                 **evidence_update,
@@ -659,12 +712,16 @@ class _AgentRunGraph:
             }
         except AgentHubError as error:
             await self.step(
-                "MODEL", "FAILED", {"model_round": next_round, "error_code": error.code}
+                "MODEL",
+                "FAILED",
+                {"model_round": next_round, "error_code": error.code, **memory_delivery},
             )
             return {**evidence_update, "model_round_count": next_round, "failure_code": error.code}
         except Exception:
             await self.step(
-                "MODEL", "FAILED", {"model_round": next_round, "error_code": "MODEL_BAD_RESPONSE"}
+                "MODEL",
+                "FAILED",
+                {"model_round": next_round, "error_code": "MODEL_BAD_RESPONSE", **memory_delivery},
             )
             return {
                 **evidence_update,
@@ -697,7 +754,7 @@ class _AgentRunGraph:
             await self.step(
                 "MODEL",
                 "FAILED",
-                {"model_round": next_round, "error_code": empty_code},
+                {"model_round": next_round, "error_code": empty_code, **memory_delivery},
             )
             return {
                 "messages": messages,
@@ -725,6 +782,7 @@ class _AgentRunGraph:
                 "provider": response.provider,
                 "model": response.model,
                 "usage_source": "generation",
+                **memory_delivery,
             },
         )
         return {
@@ -784,9 +842,13 @@ class _AgentRunGraph:
         return admission
 
     async def _touch_admitted_memories(
-        self, state: AgentRunState, messages: tuple[ModelMessage, ...]
+        self, state: AgentRunState, admission: ContextAdmissionResult
     ) -> None:
-        """Touch only IDs still present in the authoritative admitted message."""
+        """Touch complete entries in the final explicitly categorized input.
+
+        A system message with a similarly named JSON key is not a memory, and
+        an ID left behind by legacy partial projection is not a delivered fact.
+        """
 
         touch = getattr(self.service.memory_selector, "touch", None)
         if touch is None:
@@ -794,24 +856,38 @@ class _AgentRunGraph:
         allowed = set(state.get("memory_ids", ()))
         if not allowed:
             return
+        report = admission.memory_admission
+        if report is None:
+            return
+        reported = {UUID(value) for value in report.admitted_ids}
         admitted: list[UUID] = []
-        for message in messages:
-            if message.role != "system" or not isinstance(message.content, str):
+        for message, category in zip(admission.messages, admission.message_categories, strict=True):
+            if category is not ContextCategory.MEMORY or not isinstance(message.content, str):
                 continue
             try:
                 payload = json.loads(message.content)
             except (TypeError, ValueError):
                 continue
-            if not isinstance(payload, Mapping) or not isinstance(payload.get("memories"), list):
+            if (
+                not isinstance(payload, Mapping)
+                or payload.get("trust") != "UNTRUSTED"
+                or not isinstance(payload.get("memories"), list)
+            ):
                 continue
             for item in payload["memories"]:
                 if not isinstance(item, Mapping):
                     continue
                 value = item.get("id")
-                if not _is_uuid(value):
+                if (
+                    not _is_uuid(value)
+                    or not isinstance(item.get("kind"), str)
+                    or item.get("kind") not in {"FACT", "PREFERENCE", "DECISION", "CONSTRAINT"}
+                    or not isinstance(item.get("content"), str)
+                    or not item["content"].strip()
+                ):
                     continue
                 memory_id = UUID(value)
-                if memory_id in allowed and memory_id not in admitted:
+                if memory_id in allowed and memory_id in reported and memory_id not in admitted:
                     admitted.append(memory_id)
         if not admitted:
             return
