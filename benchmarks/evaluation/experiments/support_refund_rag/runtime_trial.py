@@ -595,6 +595,7 @@ class Meter:
         self.path = PRIVATE / "attempt-ledger.json"
         self.data = read(self.path) if self.path.exists() else {"attempts": [], "stopped": False}
         self.case_id, self.arm = None, None
+        self.scope = None
 
     def flush(self):
         save(self.path, self.data)
@@ -642,6 +643,26 @@ class Meter:
             attempt.update(status="RECEIVED", usage=usage)
             if response.model != MODEL:
                 raise ValueError("ACTUAL_MODEL_IDENTITY_DRIFT")
+            for call in response.choices[0].message.tool_calls or []:
+                name = call.function.name
+                if name not in {
+                    "get_order",
+                    "get_refund_status",
+                    "query_customer",
+                    "search_knowledge",
+                }:
+                    raise ValueError("UNAUTHORIZED_TOOL_PROPOSAL")
+                arguments = json.loads(call.function.arguments)
+                if (
+                    name in {"get_order", "get_refund_status"}
+                    and arguments.get("order_id") != self.scope.order_id
+                ):
+                    raise ValueError("CROSS_CASE_ORDER_PROPOSAL")
+                if (
+                    name == "query_customer"
+                    and arguments.get("customer_ref") != self.scope.customer_id
+                ):
+                    raise ValueError("CROSS_CASE_CUSTOMER_PROPOSAL")
             if (
                 not usage
                 or usage.get("prompt_tokens") is None
@@ -658,13 +679,18 @@ class Meter:
         except BaseException as error:
             attempt.update(
                 status="ERROR_KNOWN_RESPONSE"
-                if getattr(error, "status_code", None)
+                if attempt.get("actual_model") is not None or getattr(error, "status_code", None)
                 else "UNKNOWN_OUTCOME",
                 error_type=type(error).__name__,
                 http_status=getattr(error, "status_code", None),
             )
+            if isinstance(error, ValueError):
+                attempt["guard_failure"] = str(error)
             self.data.update(
-                stopped=True, stop_reason=attempt["status"] + ":" + type(error).__name__
+                stopped=True,
+                stop_reason=attempt["status"]
+                + ":"
+                + (str(error) if isinstance(error, ValueError) else type(error).__name__),
             )
             raise
         finally:
@@ -811,7 +837,21 @@ async def execute(phase):
         )
         threads = ThreadService(factory, run_service=runtime)
 
+        def stop_on_prepare_error(method):
+            async def guarded(*args, **kwargs):
+                try:
+                    return await method(*args, **kwargs)
+                except Exception as error:
+                    meter.data.update(
+                        stopped=True, stop_reason="CASE_PREPARATION:" + type(error).__name__
+                    )
+                    meter.flush()
+                    raise
+
+            return guarded
+
         class Driver:
+            @stop_on_prepare_error
             async def prepare(self, *, run, variant, item):
                 if meter.data["stopped"]:
 
@@ -850,6 +890,7 @@ async def execute(phase):
                 async def perform():
                     calls.clear()
                     meter.case_id, meter.arm = q["case_id"], "A"
+                    meter.scope = scope
                     start = len(meter.data["attempts"])
                     with case_scope(scope):
                         a = await runtime.execute_prepared_run(ctx, run_id=agent_run.id)
@@ -910,9 +951,13 @@ async def execute(phase):
                             ).generate_resolved(ctx, frozen.model_plan, b_req)
                         if b.tool_calls:
                             raise ValueError("B_DID_NOT_RETURN_FINAL_ANSWER")
+                        b_citations = re.findall(r"\b[0-9a-f]{64}\b", b.content or "")
+                        if any(cid not in {r["chunk_id"] for r in b_view} for cid in b_citations):
+                            raise ValueError("B_CITATION_ID_NOT_VISIBLE")
                         rec.update(B_status="RECEIVED", B_answer=b.content)
                     except Exception as error:
-                        meter.data.update(stopped=True, stop_reason=str(error))
+                        meter.data["stopped"] = True
+                        meter.data.setdefault("stop_reason", str(error))
                         meter.flush()
                         rec["stop_reason"] = str(error)
                         if rec["B_status"] == "NOT_ATTEMPTED":
