@@ -449,14 +449,36 @@ export default function RunDetailClient({ runId }: { runId: string }) {
               <span>{t("run.facts.toolCalls")}<strong>{run.tool_call_count}</strong></span>
               <span>{t("run.facts.failure")}<strong>{run.failure_code ?? "—"}</strong></span>
             </div>
-            <div className="approval-chips">
-              <span className="state-hint">{t("run.approvalsLabel")}</span>
-              <StatusBadge status="PENDING" label={t("run.chips.pending", { count: run.approval_summary.pending })} />
-              <StatusBadge status="APPROVED" label={t("run.chips.approved", { count: run.approval_summary.approved })} />
-              <StatusBadge status="DENIED" label={t("run.chips.denied", { count: run.approval_summary.denied })} />
-              <StatusBadge status="FAILED" label={t("run.chips.executionFailed", { count: run.approval_summary.failed })} />
-              <StatusBadge status="UNKNOWN_OUTCOME" label={t("run.chips.unknownOutcome", { count: run.approval_summary.unknown_outcome })} />
-            </div>
+            {/* Zero counts carry no information: only approval states that
+                actually happened get a chip, and an untouched run shows none. */}
+            {run.approval_summary.pending +
+              run.approval_summary.approved +
+              run.approval_summary.denied +
+              run.approval_summary.failed +
+              run.approval_summary.unknown_outcome >
+              0 && (
+              <div className="approval-chips">
+                <span className="state-hint">{t("run.approvalsLabel")}</span>
+                {run.approval_summary.pending > 0 && (
+                  <StatusBadge status="PENDING" label={t("run.chips.pending", { count: run.approval_summary.pending })} />
+                )}
+                {run.approval_summary.approved > 0 && (
+                  <StatusBadge status="APPROVED" label={t("run.chips.approved", { count: run.approval_summary.approved })} />
+                )}
+                {run.approval_summary.denied > 0 && (
+                  <StatusBadge status="DENIED" label={t("run.chips.denied", { count: run.approval_summary.denied })} />
+                )}
+                {run.approval_summary.failed > 0 && (
+                  <StatusBadge status="FAILED" label={t("run.chips.executionFailed", { count: run.approval_summary.failed })} />
+                )}
+                {run.approval_summary.unknown_outcome > 0 && (
+                  <StatusBadge
+                    status="UNKNOWN_OUTCOME"
+                    label={t("run.chips.unknownOutcome", { count: run.approval_summary.unknown_outcome })}
+                  />
+                )}
+              </div>
+            )}
           </Panel>
 
           <AddRunToDatasetPanel

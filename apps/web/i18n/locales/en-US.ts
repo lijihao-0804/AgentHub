@@ -650,7 +650,7 @@ export const enUS = {
     openApprovals: "Open approvals",
     eyebrow: "Run detail",
     title: "Run",
-    agentVersionEyebrow: "AgentVersion v{version}",
+    agentVersionEyebrow: "Agent version v{version}",
     waitingCallout: "Waiting for an approval decision before action execution.",
     attentionCallout:
       "Needs attention: the run requires operator follow-up (for example an unconfirmed action outcome).",

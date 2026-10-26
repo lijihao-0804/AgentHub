@@ -642,7 +642,7 @@ export const zhCN: MessageSchema = {
     openApprovals: "打开审批",
     eyebrow: "运行详情",
     title: "运行",
-    agentVersionEyebrow: "AgentVersion v{version}",
+    agentVersionEyebrow: "智能体版本 v{version}",
     waitingCallout: "等待审批决定后才会执行操作。",
     attentionCallout:
       "需要处理：该运行需要人工跟进（例如未确认的操作结果）。",
