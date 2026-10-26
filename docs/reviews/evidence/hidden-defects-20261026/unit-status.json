@@ -1,0 +1,15 @@
+{
+  "state": "completed",
+  "started_at": "2026-10-26T02:22:18.142636+00:00",
+  "cwd": "E:\\JAVA\\AI+agent\\AgentHub",
+  "executable": "E:\\JAVA\\AI+agent\\AgentHub\\.venv\\Scripts\\python.exe",
+  "argument_count": 9,
+  "supervisor_pid": 25452,
+  "pid": 24788,
+  "exit_code": 0,
+  "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.audit\\review-20261026\\unit-unsandboxed-job\\stdout.log",
+  "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.audit\\review-20261026\\unit-unsandboxed-job\\stderr.log",
+  "progress_query_interval_seconds": 600,
+  "finished_at": "2026-10-26T02:23:15.964957+00:00",
+  "elapsed_seconds": 57.828
+}

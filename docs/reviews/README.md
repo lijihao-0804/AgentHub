@@ -1,5 +1,9 @@
 # 审查与验收记录索引
 
+2026-10-26 隐藏缺陷修复：[修复验收报告](AgentHub-隐藏缺陷修复验收-20261026.md)。29 项主要问题已逐项修复；三名 DeepSeek 子智能体协作。2078 项单测全部覆盖通过，144 项不同 PostgreSQL 回归与 1 项旧数据迁移轮转通过，前端 5 项及 TypeScript/Ruff 通过。保留首跑失败和修正后复跑证据；未知收费尝试不伪记已知低成本。业务库未迁移，无新增付费模型调用。
+
+2026-10-26 隐藏缺陷审查：[审查报告](AgentHub-隐藏缺陷审查报告-20261026.md)。两轮共 29 项主要发现：近期预算/运行时/Wiki 16 项，旧认证、入库、Thread/Memory/Artifact、正式评测及前端 13 项；另列待验证风险与设计复核项。附可运行离线探针、覆盖矩阵和单测日志；此为审查时状态，后续修复与验收见修复报告。
+
 2026-10-26 实施报告：[Wiki原生绑定实施报告](AgentHub-Wiki原生绑定实施报告-318f604.md)——工作单 W0–W5 全部完成（提交 0523d06/a3c9aa6/068979f/318f604 + 本报告）：统一证据 envelope（RAW/WIKI_DERIVED，publication_hash 只进私有注册表）、发布时冻结 WikiBinding（migration 0034、规则 8 哈希覆盖、未绑定 spec 字节不变）、Run/Experiment 固定解析与撤销联动（新 Run 被撤拒绝 WIKI_PUBLICATION_REVOKED、重放漂移收口 NEEDS_ATTENTION、存量 variant hash 逐字节稳定）、原生 query_wiki 工具全套治理（fail-closed 绑定校验/wiki_query 审计/统一预算）。E2E（预注册协议，111/200 调用）：引用合法性 100%、origin 标注 100%（320/320 条对库裁决）、撤销拒答 100%（9/9 创建拒绝 + 冻结 Run fail-closed 拒答）；B 组成功 run 双层送达 11/11；产品建议与偏差见报告。推送待批准。
 
 2026-10-26 施工工作单：[Wiki原生绑定施工工作单](AgentHub-Wiki原生绑定施工工作单-269d9b9.md)落实 integration-plan 第 2-5 项，让 Wiki 成为 Agent 版本一等能力：W0 统一证据 envelope（RAW/WIKI_DERIVED+publication_hash 入私有注册表）；W2 WikiBinding 冻结进 AgentVersion（migration 0034、规则 8 canonical 哈希、LATEST 发布时一次解析）；W3 Run/Experiment 固定解析与撤销联动（沿 effective_knowledge_snapshots 管道先例）；W4 原生 query_wiki 工具（照 search_knowledge 全套治理：fail-closed 绑定校验/权限桥/审计/统一预算）；W5 E2E 抽样验收 ≤100 调用（三组判据：纯 wiki/HYBRID 双层 origin 标注/撤销组拒答 100%）。五天排期、每 W 独立提交、fail-closed 冲突即停不绕行；明确不做复杂图检索与自动冲突复核。自包含，供执行会话使用。

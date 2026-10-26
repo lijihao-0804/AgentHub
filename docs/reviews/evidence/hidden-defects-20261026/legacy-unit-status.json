@@ -1,0 +1,15 @@
+{
+  "state": "completed",
+  "started_at": "2026-10-26T03:12:23.416489+00:00",
+  "cwd": "E:\\JAVA\\AI+agent\\AgentHub",
+  "executable": "E:\\JAVA\\AI+agent\\AgentHub\\.venv\\Scripts\\python.exe",
+  "argument_count": 16,
+  "supervisor_pid": 20220,
+  "pid": 28492,
+  "exit_code": 0,
+  "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\legacy-review-20261026\\main-tests\\stdout.log",
+  "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\legacy-review-20261026\\main-tests\\stderr.log",
+  "progress_query_interval_seconds": 600,
+  "finished_at": "2026-10-26T03:12:47.426144+00:00",
+  "elapsed_seconds": 24.0
+}

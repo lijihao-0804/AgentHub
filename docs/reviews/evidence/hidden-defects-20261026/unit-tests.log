@@ -1,0 +1,55 @@
+........................................................................ [  3%]
+........................................................................ [  7%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 18%]
+........................................................................ [ 22%]
+........................................................................ [ 25%]
+........................................................................ [ 29%]
+........................................................................ [ 33%]
+........................................................................ [ 36%]
+........................................................................ [ 40%]
+........................................................................ [ 44%]
+........................................................................ [ 47%]
+........................................................................ [ 51%]
+........................................................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 62%]
+........................................................................ [ 66%]
+........................................................................ [ 69%]
+........................................................................ [ 73%]
+........................................................................ [ 77%]
+........................................................................ [ 80%]
+........................................................................ [ 84%]
+........................................................................ [ 88%]
+........................................................................ [ 92%]
+........................................................................ [ 95%]
+........................................................................ [ 99%]
+............                                                             [100%]
+============================== warnings summary ===============================
+tests/unit/test_query_wiki_tool.py::test_resolver_wiki_binding_from_spec
+  tests\unit\test_query_wiki_tool.py:367: PytestWarning: The test <Function test_resolver_wiki_binding_from_spec> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_resolver_wiki_binding_from_spec():
+
+tests/unit/test_query_wiki_tool.py::test_resolver_wiki_binding_detects_run_drift
+  tests\unit\test_query_wiki_tool.py:388: PytestWarning: The test <Function test_resolver_wiki_binding_detects_run_drift> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_resolver_wiki_binding_detects_run_drift():
+
+tests/unit/test_query_wiki_tool.py::test_resolver_wiki_binding_absent
+  tests\unit\test_query_wiki_tool.py:412: PytestWarning: The test <Function test_resolver_wiki_binding_absent> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_resolver_wiki_binding_absent():
+
+tests/unit/test_query_wiki_tool.py::test_query_wiki_messages_categorize_as_rag_evidence
+  tests\unit\test_query_wiki_tool.py:418: PytestWarning: The test <Function test_query_wiki_messages_categorize_as_rag_evidence> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_query_wiki_messages_categorize_as_rag_evidence():
+
+tests/unit/test_wiki_run_resolution.py::test_variant_hash_wiki_conditional_and_stable
+  tests\unit\test_wiki_run_resolution.py:308: PytestWarning: The test <Function test_variant_hash_wiki_conditional_and_stable> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_variant_hash_wiki_conditional_and_stable():
+
+tests/unit/test_wiki_run_resolution.py::test_normalize_wiki_publications_is_strict
+  tests\unit\test_wiki_run_resolution.py:334: PytestWarning: The test <Function test_normalize_wiki_publications_is_strict> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_normalize_wiki_publications_is_strict():
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1956 passed, 6 warnings in 49.43s

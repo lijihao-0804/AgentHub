@@ -1,0 +1,58 @@
+{
+  "unit_full": {
+    "tests": 2078,
+    "passed": 2077,
+    "failed": 1,
+    "exit_code": 1
+  },
+  "unit_after_valid_tool_fixture": {
+    "retry_tests": 39,
+    "retry_exit_code": 0,
+    "unique_tests_covered": 2078,
+    "remaining_failures": []
+  },
+  "postgres_combined": {
+    "passed": 81,
+    "exit_code": 0
+  },
+  "populated_migration": {
+    "passed": 1,
+    "exit_code": 0
+  },
+  "frontend": {
+    "node_tests_passed": 5,
+    "node_exit_code": 0,
+    "typescript_exit_code": 0
+  },
+  "alembic_head": "0037_run_resume_cursor",
+  "paid_model_calls": 0,
+  "production_database_migrated": false,
+  "postgres_compatibility_initial": {
+    "passed": 60,
+    "failed": 1,
+    "exit_code": 1
+  },
+  "cancellation_fix_regression": {
+    "passed": 28,
+    "exit_code": 0,
+    "includes_cancellation_states": [
+      "no action",
+      "CLAIMED",
+      "UNKNOWN_OUTCOME"
+    ]
+  },
+  "runtime_final_unit": {
+    "passed": 36,
+    "exit_code": 0
+  },
+  "unique_postgres_regressions_after_fix": 144,
+  "unique_postgres_migration_tests": 1,
+  "legacy_unparameterized_cancellation_test_replaced_by_three_states": true,
+  "ruff_check_exit_code": 0,
+  "ruff_format_check_exit_code": 0,
+  "formatted_python_files": 91,
+  "code_commits": [
+    "9ad8b9d",
+    "1673515"
+  ]
+}

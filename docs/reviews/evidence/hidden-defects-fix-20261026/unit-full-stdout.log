@@ -1,0 +1,67 @@
+........................................................................ [  3%]
+........................................................................ [  6%]
+........................................................................ [ 10%]
+........................................................................ [ 13%]
+........................................................................ [ 17%]
+........................................................................ [ 20%]
+........................................................................ [ 24%]
+........................................................................ [ 27%]
+........................................................................ [ 31%]
+........................................................................ [ 34%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+........................................................................ [ 45%]
+........................................................................ [ 48%]
+........................................................................ [ 51%]
+...............................F........................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 62%]
+........................................................................ [ 65%]
+........................................................................ [ 69%]
+........................................................................ [ 72%]
+........................................................................ [ 76%]
+........................................................................ [ 79%]
+........................................................................ [ 83%]
+........................................................................ [ 86%]
+........................................................................ [ 90%]
+........................................................................ [ 93%]
+........................................................................ [ 97%]
+..............................................................           [100%]
+================================== FAILURES ===================================
+_________ test_fixed_refs_stay_with_ranked_hit_when_chunk_ids_repeat __________
+tests\unit\test_mi2_projections.py:53: in test_fixed_refs_stay_with_ranked_hit_when_chunk_ids_repeat
+    result = await module.search_knowledge(
+packages\tools\builtins\search_knowledge.py:140: in search_knowledge
+    mismatches = retrieval_model_identity_mismatches(definition.retrieval_config, retriever)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'NoneType' object has no attribute 'retrieval_config'
+============================== warnings summary ===============================
+tests/unit/test_query_wiki_tool.py::test_resolver_wiki_binding_from_spec
+  tests\unit\test_query_wiki_tool.py:446: PytestWarning: The test <Function test_resolver_wiki_binding_from_spec> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_resolver_wiki_binding_from_spec():
+
+tests/unit/test_query_wiki_tool.py::test_resolver_wiki_binding_detects_run_drift
+  tests\unit\test_query_wiki_tool.py:467: PytestWarning: The test <Function test_resolver_wiki_binding_detects_run_drift> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_resolver_wiki_binding_detects_run_drift():
+
+tests/unit/test_query_wiki_tool.py::test_resolver_wiki_binding_absent
+  tests\unit\test_query_wiki_tool.py:491: PytestWarning: The test <Function test_resolver_wiki_binding_absent> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_resolver_wiki_binding_absent():
+
+tests/unit/test_query_wiki_tool.py::test_query_wiki_messages_categorize_as_rag_evidence
+  tests\unit\test_query_wiki_tool.py:497: PytestWarning: The test <Function test_query_wiki_messages_categorize_as_rag_evidence> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_query_wiki_messages_categorize_as_rag_evidence():
+
+tests/unit/test_wiki_run_resolution.py::test_variant_hash_wiki_conditional_and_stable
+  tests\unit\test_wiki_run_resolution.py:481: PytestWarning: The test <Function test_variant_hash_wiki_conditional_and_stable> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_variant_hash_wiki_conditional_and_stable():
+
+tests/unit/test_wiki_run_resolution.py::test_normalize_wiki_publications_is_strict
+  tests\unit\test_wiki_run_resolution.py:507: PytestWarning: The test <Function test_normalize_wiki_publications_is_strict> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_normalize_wiki_publications_is_strict():
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: E:\JAVA\AI+agent\AgentHub\.scratch\hidden-unit-acceptance.xml -
+=========================== short test summary info ===========================
+FAILED tests/unit/test_mi2_projections.py::test_fixed_refs_stay_with_ranked_hit_when_chunk_ids_repeat
+1 failed, 2077 passed, 6 warnings in 79.61s (0:01:19)

@@ -1,0 +1,25 @@
+........................................................................ [ 88%]
+.........                                                                [100%]
+============================== warnings summary ===============================
+tests/integration/test_hidden_runtime_recovery.py: 1 warning
+tests/integration/test_hidden_turn_identity.py: 1 warning
+tests/integration/test_hidden_memory_worker.py: 1 warning
+tests/integration/test_hidden_artifact_identity.py: 1 warning
+tests/integration/test_m5a_approval_runtime.py: 1 warning
+tests/integration/test_document_lifecycle.py: 1 warning
+tests/integration/test_handoff_lifecycle.py: 1 warning
+tests/integration/test_m7b_experiments.py: 1 warning
+tests/integration/test_m7c_experiment_runner.py: 1 warning
+tests/integration/test_m1_postgres.py: 1 warning
+  E:\JAVA\AI+agent\AgentHub\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+tests/integration/test_m1_postgres.py::test_concurrent_refresh_only_one_request_succeeds
+tests/integration/test_m1_postgres.py::test_concurrent_refresh_only_one_request_succeeds
+tests/integration/test_m1_postgres.py::test_concurrent_refresh_only_one_request_succeeds
+  E:\JAVA\AI+agent\AgentHub\.venv\Lib\site-packages\httpx\_client.py:1859: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
+    return await self.request(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: E:\JAVA\AI+agent\AgentHub\.scratch\hidden-integration-acceptance.xml -
+81 passed, 13 warnings in 55.85s

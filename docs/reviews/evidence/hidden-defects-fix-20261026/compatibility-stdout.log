@@ -1,0 +1,28 @@
+...............................F.............................            [100%]
+================================== FAILURES ===================================
+___ test_stream_cancellation_closes_provider_and_persists_terminal_failure ____
+tests\integration\test_m4d_streaming_budget.py:461: in test_stream_cancellation_closes_provider_and_persists_terminal_failure
+    assert run.status == "FAILED"
+E   AssertionError: assert 'NEEDS_ATTENTION' == 'FAILED'
+E     
+E     - FAILED
+E     + NEEDS_ATTENTION
+============================== warnings summary ===============================
+tests/integration/test_m4b_tool_runtime.py: 1 warning
+tests/integration/test_m4c_agent_runtime.py: 1 warning
+tests/integration/test_m4d_streaming_budget.py: 1 warning
+tests/integration/test_approval_usage_resume.py: 1 warning
+tests/integration/test_m6a_run_observability.py: 1 warning
+tests/integration/test_mi2_feedback_evidence.py: 1 warning
+tests/integration/test_long_term_memory_hardening.py: 1 warning
+tests/integration/test_memory_quality.py: 1 warning
+tests/integration/test_m7h_unified_evaluation.py: 1 warning
+tests/integration/test_scripted_scenario_driver.py: 1 warning
+  E:\JAVA\AI+agent\AgentHub\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: E:\JAVA\AI+agent\AgentHub\.scratch\hidden-compatibility.xml -
+=========================== short test summary info ===========================
+FAILED tests/integration/test_m4d_streaming_budget.py::test_stream_cancellation_closes_provider_and_persists_terminal_failure
+1 failed, 60 passed, 10 warnings in 56.78s

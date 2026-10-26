@@ -1,0 +1,1 @@
+{"timeout_seconds": 900, "argv": ["E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe", "-m", "pytest", "tests/unit", "-o", "addopts=", "-q", "-p", "no:cacheprovider", "--basetemp=.scratch/pytest-hidden-unit-acceptance", "--tb=short", "--junitxml=.scratch/hidden-unit-acceptance.xml"], "cwd": "E:/JAVA/AI+agent/AgentHub"}

@@ -85,7 +85,10 @@
 
 T12/T28：**CLOSED**。MCP 管理 UI、Auth UI、工具参数摘要、handoff 生命周期、前端专项脚本均已存在。
 M7-G UI 实现存在；不因后续功能落地补造旧里程碑的独立验收记录。
-当前迁移 head 为 `0031_handoff_cases`（`0030_run_feedback`、`0031` 是早期 0029 基线之后的变化）。
+当前代码迁移 head 为 `0037_run_resume_cursor`：`0032`～`0034` 为既有 Wiki / 原生绑定迁移，
+`0035`～`0037` 为 Run 执行权、Turn/Memory/Artifact 幂等身份、审批恢复游标及事件完整性。
+代码 head 不代表业务库已升级。本轮只在隔离 PostgreSQL 验证新迁移及历史 Turn 数据的升级、降级、再次升级；
+显式 checkpoint bootstrap 仍由部署步骤负责。修复验收进展见[隐藏缺陷修复验收](reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
 
 ## 2. ALREADY VERIFIED
 
