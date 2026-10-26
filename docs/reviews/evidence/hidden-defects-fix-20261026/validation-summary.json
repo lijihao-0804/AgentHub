@@ -54,5 +54,8 @@
   "code_commits": [
     "9ad8b9d",
     "1673515"
-  ]
+  ],
+  "repository_ruff_exit_code": 0,
+  "alembic_model_consistency_exit_code": 0,
+  "next_production_build_exit_code": 0
 }

@@ -15,3 +15,5 @@
 - `runtime-final-unit-junit.xml`：取消收尾修正后相关 36 项单测通过，退出码 0。
 - 合并 81 项和既有兼容补验、用三状态取消测试替换原单状态用例后，144 个不同 PostgreSQL 回归用例通过；另有 1 个独立迁移轮转用例。不是把重叠的 28 项全数相加。
 - 最终 Ruff check/format 检查退出码均 0，共 91 个本轮 Python 文件。
+
+- CI 同等补验：仓库级 `ruff check .` 与隔离库 `alembic check` 退出码均 0；`web-build-*` 保留 Next.js 生产构建的命令、日志及真实退出码 0。此为本地等价检查，不声明 GitHub Actions 已全部完成。

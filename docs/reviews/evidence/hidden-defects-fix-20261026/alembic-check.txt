@@ -1,0 +1,4 @@
+Dedicated test database: agenthub_hidden_defects_20261026_final
+Command: python -m alembic check
+Result: No new upgrade operations detected.
+Exit code: 0

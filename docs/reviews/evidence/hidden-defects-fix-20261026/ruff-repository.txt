@@ -1,0 +1,3 @@
+Command: python -m ruff check . --output-format concise
+All checks passed!
+Exit code: 0

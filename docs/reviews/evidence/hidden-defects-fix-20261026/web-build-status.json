@@ -1,0 +1,15 @@
+{
+  "state": "completed",
+  "started_at": "2026-10-26T06:00:01.855707+00:00",
+  "cwd": "E:\\JAVA\\AI+agent\\AgentHub\\apps\\web",
+  "executable": "C:/Program Files/nodejs/node.exe",
+  "argument_count": 3,
+  "supervisor_pid": 34400,
+  "pid": 22808,
+  "exit_code": 0,
+  "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\jobs\\hidden-web-build\\stdout.log",
+  "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\jobs\\hidden-web-build\\stderr.log",
+  "progress_query_interval_seconds": 600,
+  "finished_at": "2026-10-26T06:00:44.491733+00:00",
+  "elapsed_seconds": 42.625
+}
