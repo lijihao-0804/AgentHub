@@ -1225,6 +1225,30 @@ async def test_dispatch_intent_budget_ledger_and_pointer_commit_together_once(
 
 
 @pytest.mark.asyncio
+async def test_response_cannot_bypass_verified_dispatch_boundary(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service, key, lease_token = await _create_claimed(factory, tenant)
+    await service.commit_dispatch_intent(
+        key,
+        lease_token=lease_token,
+        pricing_snapshot_id=tenant.pricing_id,
+        reserved_input_tokens=700,
+        reserved_output_tokens=300,
+    )
+    with pytest.raises(SummaryServiceError) as blocked:
+        await _store_response(service, key, lease_token, tenant)
+    assert blocked.value.code == "SUMMARY_DISPATCH_NOT_STARTED"
+    job, dispatch, responses = await _job_row(factory, key)
+    assert job.status == "DISPATCH_INTENT" and job.response_id is None
+    assert dispatch.outcome == "INTENT_RECORDED" and not responses
+    await service.mark_dispatched(key, lease_token=lease_token)
+    await _store_response(service, key, lease_token, tenant)
+    assert (await _job_row(factory, key))[0].status == "RESPONSE_STORED"
+
+
+@pytest.mark.asyncio
 async def test_dispatch_boundary_cannot_be_crossed_twice_even_with_same_live_lease(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
@@ -1538,6 +1562,38 @@ async def test_response_outside_reservation_is_stored_but_cannot_publish(
     assert responses[0].output_tokens == output_tokens
     assert responses[0].cost_amount == cost
     assert responses[0].cost_currency == currency
+
+
+@pytest.mark.asyncio
+async def test_truncated_response_and_usage_overrun_are_both_reported(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service, key, lease_token = await _create_claimed(factory, tenant)
+    await _commit_intent(service, key, lease_token, tenant=tenant)
+    await service.store_provider_response(
+        key,
+        lease_token=lease_token,
+        response=SummaryResponseData(
+            provider="offline",
+            model="offline-summary-service",
+            raw_response="",
+            usage_metadata={"source": "offline"},
+            input_tokens=701,
+            output_tokens=300,
+            total_tokens=1001,
+            finish_reason="length",
+        ),
+    )
+    recovery = await service.claim_recovery(key)
+    assert recovery is not None
+    result = await service.validate_stored_response(key, lease_token=recovery.lease_token)
+    assert result.status == "FAILED" and result.artifact_id is None
+    assert {item["code"] for item in result.validation_result["issues"]} == {
+        "INCOMPLETE_PROVIDER_RESPONSE",
+        "SUMMARY_PROVIDER_USAGE_EXCEEDS_RESERVATION",
+    }
+    assert len((await _job_row(factory, key))[2]) == 1
 
 
 @pytest.mark.asyncio

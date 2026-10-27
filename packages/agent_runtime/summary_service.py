@@ -1274,22 +1274,10 @@ class SummaryJobService:
                             "SUMMARY_DISPATCH_INVARIANT",
                             "The dispatch intent pointer is missing.",
                         )
-                    if dispatch.outcome == ThreadSummaryDispatchOutcome.INTENT_RECORDED.value:
-                        await session.execute(
-                            update(ThreadSummaryDispatch)
-                            .where(
-                                ThreadSummaryDispatch.workspace_id == key.workspace_id,
-                                ThreadSummaryDispatch.thread_id == key.thread_id,
-                                ThreadSummaryDispatch.job_id == key.job_id,
-                                ThreadSummaryDispatch.id == dispatch.id,
-                                ThreadSummaryDispatch.outcome
-                                == ThreadSummaryDispatchOutcome.INTENT_RECORDED.value,
-                            )
-                            .values(
-                                outcome=ThreadSummaryDispatchOutcome.DISPATCHED.value,
-                                dispatched_at=current,
-                                updated_at=current,
-                            )
+                    if dispatch.outcome != ThreadSummaryDispatchOutcome.DISPATCHED.value:
+                        raise SummaryServiceError(
+                            "SUMMARY_DISPATCH_NOT_STARTED",
+                            "A response requires the verified dispatch boundary to be crossed.",
                         )
                     response_id = uuid4()
                     session.add(
@@ -1476,30 +1464,25 @@ class SummaryJobService:
                             job.lease_expires_at = None
                             job.completed_at = current
                             settlement = _settlement(job)
-                        elif response.finish_reason != "stop":
+                        elif response.finish_reason != "stop" or bound_failure is not None:
                             state = validate_response(
                                 _state(job), lease_token=lease_token, valid=False
                             )
                             _apply_state(job, state)
+                            issues = []
+                            if response.finish_reason != "stop":
+                                issues.append({"code": "INCOMPLETE_PROVIDER_RESPONSE"})
+                            if bound_failure is not None:
+                                issues.append({"code": bound_failure})
                             job.validation_result = {
                                 "valid": False,
-                                "issues": [{"code": "INCOMPLETE_PROVIDER_RESPONSE"}],
+                                "issues": issues,
                             }
-                            job.failure_code = "SUMMARY_PROVIDER_INCOMPLETE"
-                            job.lease_token = None
-                            job.lease_expires_at = None
-                            job.completed_at = current
-                            settlement = _settlement(job)
-                        elif bound_failure is not None:
-                            state = validate_response(
-                                _state(job), lease_token=lease_token, valid=False
+                            job.failure_code = (
+                                "SUMMARY_PROVIDER_INCOMPLETE"
+                                if response.finish_reason != "stop"
+                                else bound_failure
                             )
-                            _apply_state(job, state)
-                            job.validation_result = {
-                                "valid": False,
-                                "issues": [{"code": bound_failure}],
-                            }
-                            job.failure_code = bound_failure
                             job.lease_token = None
                             job.lease_expires_at = None
                             job.completed_at = current
