@@ -28,6 +28,7 @@ from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_sp
 from packages.agent_runtime.history_checkpoint import verify_history_checkpoint_binding
 from packages.agent_runtime.history_transcript import MAX_ENCODED_BYTES, build_turn_transcript
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
+from packages.agent_runtime.run_budget_ledger import RunBudgetAttempt
 from packages.agent_runtime.runtime_graph import _AgentRunGraph
 from packages.agent_runtime.runtime_projection import (
     DEFAULT_STREAM_GRACE_SECONDS,
@@ -2047,10 +2048,29 @@ class AgentRunService:
                 or _is_uncertain_action_failure(failure_code)
                 or isinstance(claim, UUID)
             )
+            budget_unknown = False
+            if self.model_attempt_budget_factory is not None:
+                budget_unknown = (
+                    await session.scalar(
+                        select(RunBudgetAttempt.id)
+                        .where(
+                            RunBudgetAttempt.workspace_id == run.workspace_id,
+                            RunBudgetAttempt.run_id == run.id,
+                            RunBudgetAttempt.attempt_kind.in_(("MAIN_MODEL", "RETRY", "FALLBACK")),
+                            RunBudgetAttempt.status == "UNKNOWN_OUTCOME",
+                        )
+                        .limit(1)
+                    )
+                ) is not None
             if uncertain:
                 effective_status = "NEEDS_ATTENTION"
                 effective_output = None
                 effective_failure = failure_code or "ACTION_RECONCILIATION_REQUIRED"
+            elif budget_unknown:
+                # Financial uncertainty does not invalidate a returned answer,
+                # but the Run remains visible for reconciliation.
+                effective_status = "NEEDS_ATTENTION"
+                effective_failure = "RUN_BUDGET_RECONCILIATION_REQUIRED"
             elif run.status in {"CANCELLED", "NEEDS_ATTENTION"}:
                 effective_status = run.status
                 effective_output = run.final_output

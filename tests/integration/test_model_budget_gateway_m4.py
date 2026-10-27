@@ -11,6 +11,7 @@ from packages.agent_runtime.frozen import FrozenAgentSpec
 from packages.agent_runtime.model_budget_adapter import RunBudgetAttemptAdapter
 from packages.agent_runtime.models import AgentRun
 from packages.agent_runtime.run_budget_ledger import RunBudgetAttempt, RunBudgetLedger
+from packages.agent_runtime.runtime_service import AgentRunService
 from packages.model_gateway.contracts import ModelMessage
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.gateway import ModelGatewayService
@@ -95,6 +96,22 @@ async def test_real_ledger_reserves_fallback_attempts_and_fences_replay(db_resou
         await gateway.generate(context, profiles[0].id, request())
     assert repeated.value.code == "RUN_BUDGET_ATTEMPT_REPLAYED"
     assert events == before
+    service = AgentRunService(
+        factory, model_attempt_budget_factory=lambda run, round_number: budget
+    )
+    completed = await service._complete_run(
+        context,
+        tenant.run_id,
+        status="SUCCEEDED",
+        final_output="fallback",
+        failure_code=None,
+        model_step_count=1,
+        tool_call_count=0,
+        usage_records=[],
+    )
+    assert completed.status == "NEEDS_ATTENTION"
+    assert completed.failure_code == "RUN_BUDGET_RECONCILIATION_REQUIRED"
+    assert completed.final_output == "fallback"
 
 
 @pytest.mark.asyncio
