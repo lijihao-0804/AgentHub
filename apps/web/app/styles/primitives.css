@@ -17,14 +17,14 @@
   transition: opacity 120ms ease;
 }
 .button:disabled { cursor: wait; opacity: 0.55; }
-.button-primary { background: var(--accent); color: var(--accent-ink); }
-.button-primary:hover:not(:disabled) { filter: brightness(1.06); }
+.button-primary { background: var(--btn-primary-bg); color: var(--btn-primary-ink); border-color: transparent; }
+.button-primary:hover:not(:disabled) { background: var(--btn-primary-hover); }
 .button-ghost {
   background: transparent;
   border-color: var(--border-strong);
   color: var(--text);
 }
-.button-ghost:hover:not(:disabled) { background: var(--accent-soft); }
+.button-ghost:hover:not(:disabled) { background: var(--row-hover); }
 .button-danger { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
 .button-danger:hover:not(:disabled) { background: var(--danger); color: var(--accent-ink); }
 

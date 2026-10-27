@@ -70,12 +70,11 @@
   margin-top: var(--space-3);
   min-height: 0;
 }
-.thread-frame[data-side="closed"] { grid-template-columns: 15rem minmax(0, 1fr); }
-.thread-frame[data-side="closed"] .thread-side { display: none; }
-/* The conversation rail collapses too — a two-column reading mode. */
+.thread-frame[data-rail="closed"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
 .thread-frame[data-rail="closed"] .thread-rail { display: none; }
-.thread-frame[data-rail="closed"][data-side="open"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
+.thread-frame[data-side="closed"] { grid-template-columns: 15rem minmax(0, 1fr); }
 .thread-frame[data-rail="closed"][data-side="closed"] { grid-template-columns: minmax(0, 1fr); }
+.thread-frame[data-side="closed"] .thread-side { display: none; }
 
 /* Welcome / create screen shown in the center when no thread is selected. */
 .thread-welcome { margin: auto; max-width: 30rem; width: 100%; }
@@ -130,12 +129,13 @@
   padding: var(--space-1) var(--space-3) var(--space-3);
   scrollbar-gutter: stable;
 }
+:root { --chat-content-width: 44rem; }
 .conversation-list {
   display: grid;
   gap: var(--space-4);
   list-style: none;
   margin: 0 auto;
-  max-width: 46rem;
+  max-width: var(--chat-content-width);
   padding: 0;
 }
 .conversation-turn { display: grid; gap: 0.4rem; }
@@ -167,13 +167,13 @@
 /* The composer floats like an input bar, always on screen. */
 .conversation-composer {
   background: var(--surface-raised);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   border-radius: 14px;
   box-shadow: var(--shadow);
   display: grid;
   gap: var(--space-1);
   margin: 0 auto var(--space-1);
-  max-width: calc(46rem + 2 * var(--space-3));
+  max-width: calc(var(--chat-content-width) + 2rem);
   padding: var(--space-2) var(--space-3) var(--space-3);
   width: calc(100% - var(--space-6));
 }
@@ -187,21 +187,24 @@
 .conversation-composer .form-actions { justify-content: flex-end; margin: 0; }
 .conversation-composer .form-actions:only-child { grid-column: auto; }
 
-/* Right rail: the application's own panes, scrolling as one column. */
+/* Right rail: the application's own panes, scrolling as one column,
+   floating over the conversation with its own ground and hairline. */
 .thread-side {
+  background: var(--background);
+  border-left: 0.5px solid var(--border-strong);
   display: grid;
   align-content: start;
   gap: var(--space-3);
   min-height: 0;
   min-width: 0;
   overflow-y: auto;
-  padding-right: var(--space-1);
+  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-3);
   scrollbar-gutter: stable;
 }
 .thread-side > .app-pane-stack { display: grid; gap: var(--space-3); min-width: 0; }
 
 @media (max-width: 1280px) {
-  .thread-frame { grid-template-columns: 13rem minmax(0, 1fr) minmax(0, 0.9fr); }
+  .thread-frame:not([data-rail="closed"]) { grid-template-columns: 13rem minmax(0, 1fr) minmax(0, 0.9fr); }
 }
 
 @media (max-width: 1100px) {
@@ -209,7 +212,7 @@
   .thread-frame { grid-template-columns: minmax(0, 1fr); }
   .thread-rail .thread-list { border-right: 0; max-height: 40dvh; }
   .thread-turns { max-height: 60dvh; }
-  .thread-side { overflow: visible; }
+  .thread-side { border-left: 0; }
   .artifact-toolbar { grid-template-columns: minmax(0, 1fr); }
   .research-pane-body { max-height: none; }
 }
