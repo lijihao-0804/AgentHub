@@ -1,5 +1,6 @@
 """The optional summary worker never retries or bypasses the frozen request."""
 
+import asyncio
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -72,6 +73,11 @@ class FakeService:
     async def commit_dispatch_intent(self, key, **kwargs):
         self.events.append("commit")
         assert key == self.key and kwargs["request_spec"] == {"request": "verified"}
+
+    async def renew_lease(self, key, **kwargs):
+        self.events.append("renew")
+        assert key == self.key and kwargs["lease_token"] == "lease"
+        self.lease_seconds = kwargs["lease_seconds"]
 
     async def mark_dispatched(self, key, **_kwargs):
         self.events.append("mark")
@@ -147,7 +153,9 @@ async def test_worker_uses_one_admitted_frozen_model_call_and_persists_before_va
         claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
     )
     assert result.status == "VALIDATED"
-    assert events == ["prepare", "commit", "mark", "gateway", "store", "recovery", "validate"]
+    assert events == [
+        "prepare", "renew", "commit", "mark", "gateway", "store", "recovery", "validate"
+    ]
     assert len(gateway.calls) == 1
     _, plan, request = gateway.calls[0]
     assert plan.primary == spec.model_plan.primary and not plan.fallbacks
@@ -167,8 +175,94 @@ async def test_uncertain_provider_failure_marks_unknown_without_retry_or_fallbac
         claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
     )
     assert result.status == "UNKNOWN_OUTCOME"
-    assert events == ["prepare", "commit", "mark", "gateway", "unknown"]
+    assert events == ["prepare", "renew", "commit", "mark", "gateway", "unknown"]
     assert len(gateway.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_lease_covers_frozen_provider_timeout_before_dispatch(setup_worker):
+    claim, context, spec, service, gateway, _ = setup_worker
+    primary = replace(spec.model_plan.primary, timeout_seconds=Decimal("300.001"))
+    spec = replace(spec, model_plan=replace(spec.model_plan, primary=primary))
+    service.profile = primary
+    service.spec = frozen_summary_model_spec(primary)
+    await SummaryWorker(service, gateway).run_claimed(
+        claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
+    )
+    assert service.lease_seconds >= 301 + 180
+    assert len(gateway.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_failed_lease_renewal_prevents_reservation_and_dispatch(setup_worker):
+    claim, context, spec, service, gateway, events = setup_worker
+
+    async def lost_lease(*_args, **_kwargs):
+        raise SummaryServiceError("SUMMARY_LEASE_LOST", "lease lost")
+
+    service.renew_lease = lost_lease
+    with pytest.raises(SummaryServiceError, match="lease lost"):
+        await SummaryWorker(service, gateway).run_claimed(
+            claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
+        )
+    assert events == ["prepare"] and not gateway.calls
+
+
+@pytest.mark.asyncio
+async def test_provider_timeout_is_unknown_without_retry(setup_worker):
+    claim, context, spec, service, gateway, events = setup_worker
+    primary = replace(spec.model_plan.primary, timeout_seconds=Decimal("0.001"))
+    spec = replace(spec, model_plan=replace(spec.model_plan, primary=primary))
+    service.profile = primary
+    service.spec = frozen_summary_model_spec(primary)
+
+    async def wait_forever(*_args):
+        events.append("gateway")
+        await asyncio.Event().wait()
+
+    gateway.generate_resolved = wait_forever
+    result = await SummaryWorker(service, gateway).run_claimed(
+        claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
+    )
+    assert result.status == "UNKNOWN_OUTCOME"
+    assert events == ["prepare", "renew", "commit", "mark", "gateway", "unknown"]
+
+
+@pytest.mark.asyncio
+async def test_cancellation_after_dispatch_preserves_unknown_outcome(setup_worker):
+    claim, context, spec, service, gateway, events = setup_worker
+    started = asyncio.Event()
+
+    async def wait_forever(*_args):
+        events.append("gateway")
+        started.set()
+        await asyncio.Event().wait()
+
+    gateway.generate_resolved = wait_forever
+    task = asyncio.create_task(
+        SummaryWorker(service, gateway).run_claimed(
+            claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
+        )
+    )
+    await started.wait()
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert events == ["prepare", "renew", "commit", "mark", "gateway", "unknown"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("timeout", [Decimal("NaN"), Decimal("Infinity"), Decimal("100000")])
+async def test_invalid_model_timeout_stops_before_preparation(setup_worker, timeout):
+    claim, context, spec, service, gateway, events = setup_worker
+    primary = replace(spec.model_plan.primary, timeout_seconds=timeout)
+    spec = replace(spec, model_plan=replace(spec.model_plan, primary=primary))
+    with pytest.raises(SummaryServiceError) as failure:
+        await SummaryWorker(service, gateway).run_claimed(
+            claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
+        )
+    assert failure.value.code == "SUMMARY_WORKER_POLICY_INVALID"
+    assert events == [] and not gateway.calls
 
 
 @pytest.mark.asyncio

@@ -8,7 +8,7 @@ never retries or falls back after a provider boundary may have been crossed.
 from __future__ import annotations
 
 import asyncio
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_CEILING, Decimal, InvalidOperation
 from typing import Any
 from uuid import UUID
 
@@ -19,6 +19,7 @@ from packages.agent_runtime.context_budget import (
 )
 from packages.agent_runtime.frozen import FrozenAgentSpec, _parse_summary_policy
 from packages.agent_runtime.summary_service import (
+    DEFAULT_LEASE_SECONDS,
     ClaimedSummaryJob,
     SummaryJobService,
     SummaryResponseData,
@@ -107,6 +108,17 @@ class SummaryWorker:
         primary = frozen_spec.model_plan.primary
         if primary.workspace_id != claimed.key.workspace_id:
             raise SummaryServiceError("SUMMARY_WORKER_SCOPE_INVALID", "Model scope differs.")
+        timeout = primary.timeout_seconds
+        # Published profiles use NUMERIC(8, 3); reject malformed frozen values
+        # before obtaining a lease or crossing a provider boundary.
+        if (
+            not isinstance(timeout, Decimal)
+            or not timeout.is_finite()
+            or not Decimal(0) < timeout <= Decimal("99999.999")
+        ):
+            raise SummaryServiceError(
+                "SUMMARY_WORKER_POLICY_INVALID", "Model timeout is unavailable."
+            )
         input_bound = policy.context_policy["model_available_input_tokens"]
         output_bound = primary.max_tokens
         if (
@@ -165,6 +177,15 @@ class SummaryWorker:
         single_attempt = ResolvedModelExecutionPlan(
             primary=primary, fallbacks=(), retry_policy=RetryPolicy(max_attempts=1)
         )
+        # A long provider call must not outlive an ordinary claim merely
+        # because the model profile allows more than the default lease. Renew
+        # before the intent: an unsuccessful renewal cannot create a dispatch.
+        lease_seconds = int(timeout.to_integral_value(rounding=ROUND_CEILING))
+        await self.service.renew_lease(
+            claimed.key,
+            lease_token=claimed.lease_token,
+            lease_seconds=lease_seconds + DEFAULT_LEASE_SECONDS,
+        )
         await self.service.commit_dispatch_intent(
             claimed.key,
             lease_token=claimed.lease_token,
@@ -175,7 +196,8 @@ class SummaryWorker:
         )
         await self.service.mark_dispatched(claimed.key, lease_token=claimed.lease_token)
         try:
-            response = await self.gateway.generate_resolved(context, single_attempt, request)
+            async with asyncio.timeout(float(timeout)):
+                response = await self.gateway.generate_resolved(context, single_attempt, request)
             await self.service.store_provider_response(
                 claimed.key,
                 lease_token=claimed.lease_token,

@@ -1392,6 +1392,7 @@ async def test_summary_worker_and_durable_service_share_one_fake_gateway_dispatc
     profile = replace(
         _profile(total=32768, output=2048, workspace=tenant.workspace_id),
         model="offline-summary-service",
+        timeout_seconds=Decimal("300.001"),
     )
     spec = _freeze((profile,))
     spec = replace(spec, runtime={**spec.runtime, "summary_policy": _summary_policy()})
@@ -1424,6 +1425,10 @@ async def test_summary_worker_and_durable_service_share_one_fake_gateway_dispatc
             self.calls += 1
             assert current_context == context
             assert not model_plan.fallbacks and request.retry_policy.max_attempts == 1
+            async with factory() as session:
+                active_job = await session.get(ThreadSummaryJob, created.key.job_id)
+                assert active_job is not None and active_job.lease_expires_at is not None
+                assert (active_job.lease_expires_at - datetime.now(UTC)).total_seconds() > 300
             if provider_fails:
                 raise TimeoutError("provider outcome unknown")
             return ModelResponse(
