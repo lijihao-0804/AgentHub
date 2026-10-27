@@ -959,11 +959,19 @@ class _AgentRunGraph:
                     snapshot=self.run.effective_thread_history_snapshot,
                 )
                 if not plan.ready_for_dispatch:
-                    raise AgentHubError(
-                        "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
-                        "Thread history does not fit safely.",
-                        422,
+                    # Preserve the frozen identity at the blocked boundary in
+                    # the real graph checkpoint. Never provide the incomplete
+                    # view as model messages or dispatch a summary here.
+                    await self.step(
+                        "PREPARE",
+                        "FAILED",
+                        {"error_code": "AGENT_HISTORY_CONTEXT_INSUFFICIENT"},
                     )
+                    return {
+                        "failure_code": "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
+                        "runtime": spec.runtime,
+                        "history_checkpoint_binding": history_checkpoint_binding_value,
+                    }
                 history_plan_metadata = {
                     "version": plan.plan_version,
                     "pre_trim_tokens": plan.pre_trim_tokens,

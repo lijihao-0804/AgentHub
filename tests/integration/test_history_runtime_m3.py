@@ -9,6 +9,7 @@ import pytest_asyncio
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
 from packages.agent_runtime.history_checkpoint import verify_history_checkpoint_binding
 from packages.agent_runtime.models import AgentRun, AgentVersion
 from packages.agent_runtime.publish import _resolved_spec
@@ -110,6 +111,8 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
     graph.step = step
     result = await graph.prepare({})
     assert result["failure_code"] == "AGENT_HISTORY_CONTEXT_INSUFFICIENT"
+    assert "messages" not in result
+    assert result["history_checkpoint_binding"]["run_id"] == str(run_id)
     assert requests == []
     async with factory() as session:
         saved = await session.scalar(select(AgentRun).where(AgentRun.id == run_id))
@@ -122,6 +125,21 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
     with pytest.raises(AgentHubError) as invalid:
         await verify_history_checkpoint_binding(factory, run=saved, state={})
     assert invalid.value.code == "AGENT_HISTORY_SNAPSHOT_INVALID"
+
+    # The blocked identity must survive an actual graph checkpoint, not only
+    # a direct call to the prepare node.
+    adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
+    async with adapter.checkpointer() as checkpointer:
+        config = adapter.config_for_run(base["workspace_id"], run_id)
+        final = await graph.invoke({}, checkpointer=checkpointer, config=config)
+        checkpoint = await checkpointer.aget_tuple(config)
+    assert final["failure_code"] == "AGENT_HISTORY_CONTEXT_INSUFFICIENT"
+    assert checkpoint is not None
+    assert (
+        checkpoint.checkpoint["channel_values"]["history_checkpoint_binding"]
+        == result["history_checkpoint_binding"]
+    )
+    assert requests == []
 
 
 @pytest.mark.asyncio
