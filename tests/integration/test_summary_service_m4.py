@@ -59,7 +59,7 @@ TEST_DATABASE_URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "").strip()
 EXPECTED_DATABASE_URL = (
     "postgresql+psycopg://agenthub:m2_local_test@127.0.0.1:15432/agenthub_context_policy_m2"
 )
-EXPECTED_REVISION = "0044_summary_evidence_guard"
+EXPECTED_REVISION = "0045_run_budget_ledger"
 
 pytestmark = [
     pytest.mark.integration,

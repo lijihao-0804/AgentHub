@@ -559,7 +559,7 @@ def test_migration_installs_version_tables_constraints_and_triggers(
     connection: Connection,
 ) -> None:
     assert connection.scalar(text("SELECT version_num FROM alembic_version")) == (
-        "0044_summary_evidence_guard"
+        "0045_run_budget_ledger"
     )
     assert set(
         connection.execute(
