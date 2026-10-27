@@ -96,6 +96,9 @@ class AgentRunState(TypedDict, total=False):
     # block, are replayed thread history rather than the question asked now.
     history_message_count: int
     history_exchange_ids: list[str]
+    # Private, versioned binding between this checkpoint and the Run's frozen
+    # history source/plan. Never sent to the provider as conversation text.
+    history_checkpoint_binding: dict[str, Any]
     # Private checkpoint sidecar for the current opt-in turn only. It is not a
     # trace and does not contain the injected historical or memory messages.
     turn_transcript: list[ModelMessage]

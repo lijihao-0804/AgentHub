@@ -4,7 +4,7 @@ from dataclasses import replace
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
 from packages.agent_runtime.models import AgentRun
@@ -12,10 +12,11 @@ from packages.agent_runtime.publish import _resolved_spec
 from packages.agent_runtime.runtime_service import AgentRunService
 from packages.approvals import ApprovalDecisionStatus, ApprovalService
 from packages.core.canonical.json_hash import canonical_json_hash
+from packages.core.errors.exceptions import AgentHubError
 from packages.threads.context import SqlAlchemyThreadContextProvider
 from packages.threads.service import ThreadService
 from packages.tools.actions import ActionRuntime
-from packages.tools.models import Customer
+from packages.tools.models import Customer, Ticket
 from tests.integration.test_m4c_agent_runtime import _seed
 from tests.integration.test_m5a_approval_runtime import TEST_DATABASE_URL, ScriptedApprovalGateway
 from tests.integration.test_m5a_approval_runtime import db_factory as db_factory
@@ -30,7 +31,8 @@ pytestmark = [
 
 
 @pytest.mark.asyncio
-async def test_approval_resume_replays_same_source_and_complete_turn(db_factory):
+@pytest.mark.parametrize("changed_history", [False, True])
+async def test_approval_resume_replays_same_source_and_complete_turn(db_factory, changed_history):
     tool_spec = {
         "kind": "builtin",
         "identity": "create_ticket",
@@ -111,10 +113,42 @@ async def test_approval_resume_replays_same_source_and_complete_turn(db_factory)
         waiting = await session.scalar(select(AgentRun).where(AgentRun.id == submitted.run_id))
         assert waiting.status == "WAITING_APPROVAL"
         source_snapshot = waiting.effective_thread_history_snapshot
+    adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
+    async with adapter.checkpointer() as checkpointer:
+        checkpoint = await checkpointer.aget_tuple(
+            adapter.config_for_run(base["workspace_id"], submitted.run_id)
+        )
+    assert checkpoint is not None
+    binding = checkpoint.checkpoint["channel_values"]["history_checkpoint_binding"]
+    assert binding["source_manifest_sha256"] == source_snapshot["source"]["manifest_sha256"]
+    assert binding["run_id"] == str(submitted.run_id)
     approval = (await ApprovalService(db_factory).list(context))[0]
     await ApprovalService(db_factory).decide(
         context, approval.id, decision=ApprovalDecisionStatus.APPROVED
     )
+    if changed_history:
+        async with db_factory() as session:
+            run = await session.scalar(select(AgentRun).where(AgentRun.id == submitted.run_id))
+            snapshot = dict(run.effective_thread_history_snapshot)
+            plan = dict(snapshot["plan"])
+            plan["planned_tokens"] += 1
+            snapshot["plan"] = plan
+            run.effective_thread_history_snapshot = snapshot
+            await session.commit()
+        with pytest.raises(AgentHubError) as invalid:
+            await service().resume(context, run_id=submitted.run_id, approval_id=approval.id)
+        assert invalid.value.code == "AGENT_HISTORY_SNAPSHOT_INVALID"
+        async with db_factory() as session:
+            assert (
+                await session.scalar(
+                    select(func.count())
+                    .select_from(Ticket)
+                    .where(Ticket.workspace_id == base["workspace_id"])
+                )
+                == 0
+            )
+        assert gateway.calls == 1
+        return
     result = await service().resume(context, run_id=submitted.run_id, approval_id=approval.id)
     assert result.status == "SUCCEEDED"
     async with db_factory() as session:

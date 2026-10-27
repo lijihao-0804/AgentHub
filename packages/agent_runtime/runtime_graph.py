@@ -33,6 +33,10 @@ from packages.agent_runtime.evidence_registry import (
     visible_evidence_registry,
 )
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
+from packages.agent_runtime.history_checkpoint import (
+    history_checkpoint_binding,
+    verify_history_checkpoint_binding,
+)
 from packages.agent_runtime.history_evidence import validate_history_evidence
 from packages.agent_runtime.history_runtime import plan_history_view
 from packages.agent_runtime.memory_tools import (
@@ -564,6 +568,23 @@ class _AgentRunGraph:
                 await session.commit()
         self.run.effective_thread_history_snapshot = snapshot
 
+    async def _verify_history_checkpoint_binding(
+        self, state: AgentRunState, *, workspace_id: UUID
+    ) -> None:
+        """Recheck a checkpoint's frozen history against its authoritative Run.
+
+        Older M3 checkpoints predate this binding and keep their previous
+        behavior; an enabled summary policy cannot use that legacy fallback.
+        This verifies a state binding, not an exact LangGraph checkpoint ID.
+        """
+        if self.run.workspace_id != workspace_id:
+            raise AgentHubError("FORBIDDEN", "The run workspace changed.", 403)
+        snapshot = await verify_history_checkpoint_binding(
+            self.service.session_factory, run=self.run, state=state
+        )
+        if snapshot is not None:
+            self.run.effective_thread_history_snapshot = snapshot
+
     async def _history_evidence_registry(self, conversation, *, workspace_id: UUID):
         """Reauthorize compact historical evidence against the current Run binding."""
         merged: dict[str, dict[str, Any]] = {}
@@ -871,6 +892,7 @@ class _AgentRunGraph:
                     (_RUNTIME_POLICY, history_hint(turns_dropped_by_window=dropped))
                 )
             history_plan_metadata = None
+            history_checkpoint_binding_value = None
             history_exchange_ids = None
             historical_registry = None
             if history_conversation is not None:
@@ -928,6 +950,14 @@ class _AgentRunGraph:
                     ],
                 }
                 await self._install_thread_history_plan(frozen_plan, workspace_id=workspace_id)
+                history_checkpoint_binding_value = history_checkpoint_binding(
+                    workspace_id=workspace_id,
+                    thread_id=self.run.thread_id,
+                    run_id=self.run.id,
+                    agent_version_id=self.run.agent_version_id,
+                    resolved_spec_hash=version.resolved_spec_hash,
+                    snapshot=self.run.effective_thread_history_snapshot,
+                )
                 if not plan.ready_for_dispatch:
                     raise AgentHubError(
                         "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
@@ -986,6 +1016,11 @@ class _AgentRunGraph:
                 **(
                     {"history_exchange_ids": history_exchange_ids}
                     if history_exchange_ids is not None
+                    else {}
+                ),
+                **(
+                    {"history_checkpoint_binding": history_checkpoint_binding_value}
+                    if history_checkpoint_binding_value is not None
                     else {}
                 ),
                 **(
@@ -1079,6 +1114,9 @@ class _AgentRunGraph:
                         raise AgentHubError(
                             "FORBIDDEN", "The run's history permissions changed.", 403
                         )
+                await self._verify_history_checkpoint_binding(
+                    state, workspace_id=UUID(self.context.workspace_id)
+                )
                 history = await self._frozen_thread_history(UUID(self.context.workspace_id))
                 if history is None:
                     raise AgentHubError(

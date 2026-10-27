@@ -25,6 +25,7 @@ from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEv
 from packages.agent_runtime.evidence_registry import visible_evidence_registry
 from packages.agent_runtime.execution_lease import run_execution_lease
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
+from packages.agent_runtime.history_checkpoint import verify_history_checkpoint_binding
 from packages.agent_runtime.history_transcript import MAX_ENCODED_BYTES, build_turn_transcript
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.agent_runtime.runtime_graph import _AgentRunGraph
@@ -495,6 +496,7 @@ class AgentRunService:
                     "APPROVAL_CHECKPOINT_INVALID",
                     "APPROVAL_CHECKPOINT_MISSING",
                     "APPROVAL_RESUME_MISMATCH",
+                    "AGENT_HISTORY_SNAPSHOT_INVALID",
                     "WIKI_PUBLICATION_UNAVAILABLE",
                 }
                 else "RUN_EXECUTION_INTERRUPTED"
@@ -660,6 +662,21 @@ class AgentRunService:
             or (run.waiting_approval_id is not None and str(run.waiting_approval_id) != expected)
         ):
             return "APPROVAL_RESUME_MISMATCH"
+        checkpoint_data = getattr(checkpoint, "checkpoint", {})
+        channels = (
+            checkpoint_data.get("channel_values", {})
+            if isinstance(checkpoint_data, Mapping)
+            else {}
+        )
+        if not isinstance(channels, Mapping):
+            return "APPROVAL_CHECKPOINT_INVALID"
+        try:
+            await verify_history_checkpoint_binding(self.session_factory, run=run, state=channels)
+        except AgentHubError as error:
+            return error.code
+        except Exception:
+            logger.warning("approval_history_checkpoint_verification_failed", exc_info=True)
+            return "APPROVAL_CHECKPOINT_INVALID"
         return None
 
     async def _resume_required_permissions(
@@ -2013,7 +2030,11 @@ class AgentRunService:
             ):
                 try:
                     transcript = build_turn_transcript(
-                        run_id=run.id, turn_id=run.thread_turn_id, messages=turn_transcript
+                        # asyncpg may return UUID subclasses; normalize at the
+                        # persistence boundary to the transcript's exact type.
+                        run_id=UUID(str(run.id)),
+                        turn_id=UUID(str(run.thread_turn_id)),
+                        messages=turn_transcript,
                     )
                     if (
                         transcript.messages[0].content != run.input_text

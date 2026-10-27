@@ -183,6 +183,7 @@ async def test_frozen_history_is_planned_and_sent_to_fake_gateway(factory):
     graph.step = step
     state = await graph.prepare({})
     assert state["history_message_count"] == 24
+    assert state["history_checkpoint_binding"]["run_id"] == str(run_id)
     await graph.model(state)
     assert len(requests) == 1
     assert [message.content for message in requests[0].messages if message.role == "user"] == [
@@ -192,6 +193,20 @@ async def test_frozen_history_is_planned_and_sent_to_fake_gateway(factory):
     async with factory() as session:
         saved = await session.scalar(select(AgentRun).where(AgentRun.id == run_id))
         assert saved.effective_thread_history_snapshot["plan"]["pre_trim_tokens"] > 0
+        original_snapshot = saved.effective_thread_history_snapshot
+        changed_plan = dict(original_snapshot["plan"])
+        changed_plan["planned_tokens"] += 1
+        saved.effective_thread_history_snapshot = {**original_snapshot, "plan": changed_plan}
+        await session.commit()
+    blocked = await graph.model(state)
+    assert blocked["failure_code"] == "AGENT_HISTORY_SNAPSHOT_INVALID"
+    assert len(requests) == 1
+    async with factory() as session:
+        await session.execute(
+            update(AgentRun)
+            .where(AgentRun.id == run_id)
+            .values(effective_thread_history_snapshot=original_snapshot)
+        )
         await session.execute(
             update(AgentRun).where(AgentRun.id == pending_id).values(status="SUCCEEDED")
         )

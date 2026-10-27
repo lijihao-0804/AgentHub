@@ -6,12 +6,34 @@ from uuid import uuid4
 import pytest
 
 from packages.agent_runtime.context_budget import ContextBudgetPolicy
+from packages.agent_runtime.history_checkpoint import verify_history_checkpoint_binding
 from packages.agent_runtime.history_planner import PlanPressure
 from packages.agent_runtime.history_runtime import _namespace_tool_ids, plan_history_view
 from packages.agent_runtime.work_layer import ThreadConversation, ThreadTurnContext
 from packages.core.errors.exceptions import AgentHubError
 from packages.model_gateway.contracts import ModelMessage, ModelToolCall
 from tests.unit.test_context_policy_m2_runtime import Chars, _freeze, _profile
+
+
+@pytest.mark.asyncio
+async def test_old_checkpoint_remains_usable_but_summary_requires_a_binding():
+    def unexpected_database_access():
+        raise AssertionError("missing binding is decided before database access")
+
+    run = SimpleNamespace()
+    assert (
+        await verify_history_checkpoint_binding(
+            unexpected_database_access, run=run, state={"runtime": {}}
+        )
+        is None
+    )
+    with pytest.raises(AgentHubError) as error:
+        await verify_history_checkpoint_binding(
+            unexpected_database_access,
+            run=run,
+            state={"runtime": {"summary_policy": {"enabled": True}}},
+        )
+    assert error.value.code == "AGENT_HISTORY_SNAPSHOT_INVALID"
 
 
 def _conversation(count: int):
