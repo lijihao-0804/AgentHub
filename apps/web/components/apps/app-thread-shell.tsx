@@ -148,11 +148,6 @@ export default function AppThreadShell({
       />
       <header className="page-header">
         <h1>{current?.title ?? t(copy.title)}</h1>
-        {current && (
-          <p className="page-lede">
-            {t("appThread.updated", { time: formatDateTime(current.updated_at) })}
-          </p>
-        )}
       </header>
 
       {thread.error && (
