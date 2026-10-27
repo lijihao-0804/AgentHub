@@ -81,11 +81,11 @@ function prefixMatch(prefix: string, ...except: string[]): (pathname: string) =>
 }
 
 /**
- * The sidebar is the whole map of the product. Anything reachable only by
- * typing a URL or by finding one contextual button is, in practice, not
- * shipped — so the standalone tools (run comparison, the retrieval
- * playground, provider configuration) get their own entries, indented under
- * the section they belong to rather than hidden inside it.
+ * The sidebar is the whole map of the product. Sub-tools (run comparison,
+ * the retrieval playground, provider configuration) and evaluation
+ * sub-sections (datasets, experiments, gates, pricing) are reachable from
+ * their parent pages — a nav entry for each read as sixteen places to be,
+ * which helped no one.
  */
 const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
   {
@@ -93,7 +93,6 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
     items: [
       { href: "/dashboard", labelKey: "nav.dashboard", icon: "dashboard", match: prefixMatch("/dashboard") },
       { href: "/runs", labelKey: "nav.runs", icon: "runs", match: prefixMatch("/runs", "/runs/compare"), badge: "running" },
-      { href: "/runs/compare", labelKey: "nav.runCompare", icon: "compare", match: prefixMatch("/runs/compare"), nested: true },
       { href: "/approvals", labelKey: "nav.approvals", icon: "approvals", match: prefixMatch("/approvals"), badge: "approvalsPending" },
     ],
   },
@@ -110,14 +109,7 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
     headingKey: "nav.build",
     items: [
       { href: "/agents", labelKey: "nav.agents", icon: "agents", match: prefixMatch("/agents") },
-      { href: "/knowledge", labelKey: "nav.knowledge", icon: "knowledge", match: prefixMatch("/knowledge", "/knowledge/playground") },
-      {
-        href: "/knowledge/playground",
-        labelKey: "nav.retrievalPlayground",
-        icon: "search",
-        match: prefixMatch("/knowledge/playground"),
-        nested: true,
-      },
+      { href: "/knowledge", labelKey: "nav.knowledge", icon: "knowledge", match: prefixMatch("/knowledge") },
       { href: "/tools", labelKey: "nav.tools", icon: "tools", match: prefixMatch("/tools") },
     ],
   },
@@ -125,17 +117,12 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
     headingKey: "nav.evaluate",
     items: [
       { href: "/evaluations", labelKey: "nav.evaluations", icon: "evaluations", match: prefixMatch("/evaluations") },
-      { href: "/evaluations/datasets", labelKey: "nav.datasets", icon: "evaluations", nested: true, match: prefixMatch("/evaluations/datasets") },
-      { href: "/evaluations/experiments", labelKey: "nav.experiments", icon: "evaluations", nested: true, match: prefixMatch("/evaluations/experiments") },
-      { href: "/evaluations/release-gates", labelKey: "nav.releaseGates", icon: "evaluations", nested: true, match: prefixMatch("/evaluations/release-gates") },
-      { href: "/evaluations/pricing", labelKey: "nav.pricing", icon: "evaluations", nested: true, match: prefixMatch("/evaluations/pricing") },
     ],
   },
   {
     headingKey: "nav.workspace",
     items: [
-      { href: "/settings", labelKey: "nav.settings", icon: "settings", match: prefixMatch("/settings", "/settings/models") },
-      { href: "/settings/models", labelKey: "nav.models", icon: "models", match: prefixMatch("/settings/models"), nested: true },
+      { href: "/settings", labelKey: "nav.settings", icon: "settings", match: prefixMatch("/settings") },
     ],
   },
 ];

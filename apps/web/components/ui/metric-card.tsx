@@ -20,7 +20,7 @@ export function windowDelta(series: number[]): number | null {
 }
 
 /** A tiny inline bar sparkline; pure SVG, no per-point labels. */
-function Sparkline({ series }: { series: number[] }) {
+function Sparkline({ series, tone }: { series: number[]; tone: "accent" | "danger" }) {
   const width = 72;
   const height = 18;
   const max = Math.max(...series, 1);
@@ -37,6 +37,7 @@ function Sparkline({ series }: { series: number[] }) {
             width={Math.max(barWidth - 1, 1)}
             height={barHeight}
             rx="1"
+            fill={tone === "danger" ? "var(--danger)" : undefined}
           />
         );
       })}
@@ -56,6 +57,7 @@ export default function MetricCard({
   deltaLabel,
   deltaInverse,
   sparkline,
+  sparklineTone,
 }: {
   label: string;
   value: ReactNode;
@@ -76,6 +78,11 @@ export default function MetricCard({
   deltaInverse?: boolean;
   /** Recent per-bucket values, drawn as a small sparkline. */
   sparkline?: number[];
+  /**
+   * Sparkline stroke tone. Defaults to the accent; a failure metric's
+   * history drawn in the success colour reads as a lie.
+   */
+  sparklineTone?: "accent" | "danger";
 }) {
   const { formatPercent } = useI18n();
   const body = (
@@ -95,7 +102,9 @@ export default function MetricCard({
               {delta > 0 ? "▲" : delta < 0 ? "▼" : "→"} {formatPercent(Math.abs(delta))}
             </span>
           ) : null}
-          {sparkline && sparkline.length > 0 ? <Sparkline series={sparkline} /> : null}
+          {sparkline && sparkline.length > 0 ? (
+            <Sparkline series={sparkline} tone={sparklineTone ?? "accent"} />
+          ) : null}
         </span>
       ) : null}
       {hint && <small className="metric-hint">{hint}</small>}

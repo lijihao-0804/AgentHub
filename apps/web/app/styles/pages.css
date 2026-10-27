@@ -25,7 +25,7 @@
 .page-header { margin-bottom: var(--space-4); max-width: 46rem; }
 .page-lede { color: var(--text-muted); line-height: 1.6; margin-top: 0.4rem; }
 
-.overview-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--space-4); }
+.overview-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: var(--space-4); }
 .overview-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -191,8 +191,10 @@
 .quick-card:hover .quick-card-arrow { color: var(--accent); }
 
 /* Dashboard */
-.kpi-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: var(--space-4); }
-.op-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: var(--space-4); }
+/* 6 KPI cards and 5 ops cards: 3-col and 5-col fill every cell of the
+   desktop grid instead of leaving a half-empty second row. */
+.kpi-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: var(--space-4); }
+.op-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: var(--space-4); }
 .dashboard-columns { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--space-4); }
 .dashboard-columns .panel { margin-top: 0; }
 
@@ -202,7 +204,7 @@
  * panel. A fixed height plus `xMinYMax meet` keeps bars at a readable size
  * and grows the series rightwards from the axis as buckets are added.
  */
-.trend-chart { display: block; width: 100%; height: 11rem; }
+.trend-chart { display: block; width: 100%; height: 15rem; }
 .trend-note { color: var(--text-muted); font-size: 0.75rem; margin-top: var(--space-2); }
 .trend-legend { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
 .trend-legend span { align-items: center; color: var(--text-muted); display: flex; font-size: 0.75rem; gap: 0.35rem; }
@@ -450,3 +452,21 @@ a.stat-row:hover { border-color: var(--accent); }
    Without a floor it collapses to one or two words per line; without a
    ceiling it pushes the actions button off the right edge. */
 .data-table td.memory-content { line-height: 1.55; max-width: 38rem; min-width: 18rem; white-space: pre-wrap; }
+
+/* Version breakdown rows carry a proportional run-count bar behind the text. */
+.stat-row-barred { position: relative; }
+.stat-row-barred::before {
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  bottom: 0;
+  content: "";
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: var(--bar, 0%);
+}
+.stat-row-barred > * { position: relative; }
+
+/* Failure-code list: code and count sit apart instead of glued ("CODE3"). */
+.failure-code-list { display: grid; gap: var(--space-1); list-style: none; margin: var(--space-2) 0 0; padding: 0; }
+.failure-code-list li { align-items: baseline; display: flex; gap: var(--space-3); justify-content: space-between; }

@@ -277,6 +277,9 @@ export default function RunsPage() {
             />
           </label>
           <div className="runs-toolbar-actions">
+            <Link className="button button-ghost" href="/runs/compare">
+              {t("nav.runCompare")}
+            </Link>
             <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>
               {t("common.refresh")}
             </button>

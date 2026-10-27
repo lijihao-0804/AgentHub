@@ -139,6 +139,11 @@ export default function EvaluationOverviewPage() {
                   <span className="overview-card-description">{t("evaluation.gates.lede")}</span>
                   <span className="overview-card-cta" aria-hidden="true">{t("evaluation.overview.open")} →</span>
                 </Link>
+                <Link className="overview-card" href="/evaluations/pricing">
+                  <span className="overview-card-title">{t("nav.pricing")}</span>
+                  <span className="overview-card-description">{t("evaluation.pricing.lede")}</span>
+                  <span className="overview-card-cta" aria-hidden="true">{t("evaluation.overview.open")} →</span>
+                </Link>
               </div>
             )}
             {datasetTotal === 0 &&

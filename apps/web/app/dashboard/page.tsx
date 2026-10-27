@@ -296,6 +296,7 @@ export default function DashboardPage() {
               deltaLabel={t("dashboard.kpi.deltaLabel")}
               deltaInverse
               sparkline={(timeseries?.items ?? []).map((item) => item.failed)}
+              sparklineTone="danger"
             />
             <MetricCard
               label={t("dashboard.kpi.successRate")}
@@ -531,11 +532,14 @@ export default function DashboardPage() {
                 <EmptyState title={t("dashboard.versions.empty")} />
               ) : (
                 <div className="split-list">
-                  {versions.items.map((item) => (
+                  {(() => {
+                    const maxVersionRuns = Math.max(...versions.items.map((item) => item.run_count), 1);
+                    return versions.items.map((item) => (
                     <Link
-                      className="stat-row"
+                      className="stat-row stat-row-barred"
                       href={`/runs?agent_version_id=${encodeURIComponent(item.agent_version_id)}`}
                       key={item.agent_version_id}
+                      style={{ "--bar": `${Math.max((item.run_count / maxVersionRuns) * 100, 4)}%` } as React.CSSProperties}
                     >
                       <span className="stat-row-lead">v{item.version_number}</span>
                       <span className="stat-row-value">
@@ -544,18 +548,19 @@ export default function DashboardPage() {
                         })}
                       </span>
                       <span className="stat-row-meta">
-                        <StatusBadge
-                          status="SUCCEEDED"
-                          label={`${statusLabel("SUCCEEDED")} ${formatCount(item.success_count)}`}
-                        />{" "}
-                        <StatusBadge
-                          status="FAILED"
-                          label={`${statusLabel("FAILED")} ${formatCount(item.failed_count)}`}
-                        />{" "}
-                        <StatusBadge
-                          status="NEEDS_ATTENTION"
-                          label={`${statusLabel("NEEDS_ATTENTION")} ${formatCount(item.needs_attention_count)}`}
-                        />
+                        {([
+                          ["SUCCEEDED", item.success_count],
+                          ["FAILED", item.failed_count],
+                          ["NEEDS_ATTENTION", item.needs_attention_count],
+                        ] as const)
+                          .filter(([, count]) => count > 0)
+                          .map(([status, count]) => (
+                            <StatusBadge
+                              key={status}
+                              status={status}
+                              label={`${statusLabel(status)} ${formatCount(count)}`}
+                            />
+                          ))}
                       </span>
                       <span className="stat-row-meta">
                         {item.avg_tokens === null
@@ -576,7 +581,8 @@ export default function DashboardPage() {
                               .join(" · ")}
                       </span>
                     </Link>
-                  ))}
+                    ));
+                    })()}
                 </div>
               )}
             </Panel>
@@ -630,7 +636,7 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
   const { t, formatNumber, formatCount, formatUTCBucketDate, formatCurrencyAmount } = useI18n();
   const maxRuns = Math.max(...items.map((item) => item.runs), 1);
   const width = Math.max(items.length * 34, 120);
-  const chartHeight = 130;
+  const chartHeight = 190;
   const segmentColors: Array<[keyof Pick<TimeseriesResponse["items"][number], "succeeded" | "failed" | "needs_attention">, string]> = [
     ["succeeded", "var(--success)"],
     ["failed", "var(--danger)"],
@@ -686,6 +692,21 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
         role="img"
         aria-label={`${t("dashboard.trend.ariaPrefix")} ${ariaEntries}`}
       >
+        {[0.25, 0.5, 0.75].map((fraction) => (
+          <line
+            key={fraction}
+            x1="0"
+            x2={width}
+            y1={chartHeight * fraction}
+            y2={chartHeight * fraction}
+            stroke="var(--border)"
+            strokeWidth="1"
+            strokeDasharray="2 4"
+          />
+        ))}
+        <text x="2" y={chartHeight * 0.25 - 3} fontSize="8" fill="var(--text-muted)">
+          {formatCount(Math.round(maxRuns * 0.75))}
+        </text>
         {items.map((item, index) => {
           const x = index * 34 + 6;
           const barWidth = 22;
@@ -752,12 +773,7 @@ function TimeseriesChart({ items }: { items: TimeseriesResponse["items"] }) {
         <span><span className="legend-swatch" style={{ background: "var(--danger)" }} /> {t("dashboard.trend.legendFailed")}</span>
         <span><span className="legend-swatch" style={{ background: "var(--attention)" }} /> {t("dashboard.trend.legendNeedsAttention")}</span>
       </div>
-      <p className="trend-note">
-        {t("dashboard.trend.note", {
-          peak: formatNumber(maxRuns),
-          values: items.map((item) => `${formatUTCBucketDate(item.bucket)} (${formatNumber(item.runs)})`).join(", "),
-        })}
-      </p>
+
     </div>
   );
 }
