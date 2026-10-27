@@ -117,6 +117,7 @@ class RuntimeConfigRequest(BaseModel):
     ) = None
     memory: MemoryConfigRequest | None = None
     context_policy: ContextPolicyRequest | None = None
+    history_policy: Literal["deterministic_history_v1"] | None = None
 
 
 class WikiBindingRequest(BaseModel):

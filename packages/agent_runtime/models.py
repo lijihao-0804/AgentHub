@@ -408,6 +408,19 @@ class AgentRun(Base):
     effective_memory_snapshot: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
     )
+    # NULL means history has not been frozen for this run. A non-NULL,
+    # versioned manifest binds the selected source identities and plan.
+    effective_thread_history_snapshot: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True
+    )
+    # Opt-in M3 turns may retain their complete delivered tool exchange so a
+    # later run can restore it without guessing from audit events.
+    thread_history_transcript: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    # Private provenance for model-visible compact RAG records in the same
+    # transcript; never exposed as a trace or model instruction.
+    thread_history_evidence_registry: Mapped[dict[str, Any] | None] = mapped_column(
+        JSONB, nullable=True
+    )
     model_step_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     tool_call_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     total_input_tokens: Mapped[int | None] = mapped_column(Integer)

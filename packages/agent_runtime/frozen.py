@@ -27,7 +27,7 @@ from packages.model_gateway.contracts import (
 _DEFAULT_RUNTIME = DEFAULT_RUNTIME_LIMITS
 _DEFAULT_CONTEXT_BUDGET = DEFAULT_CONTEXT_BUDGET
 _DEFAULT_MEMORY = DEFAULT_MEMORY_CONFIG
-SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2, 3})
+SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2, 3, 4})
 
 
 @dataclass(frozen=True, slots=True)
@@ -152,7 +152,7 @@ def parse_frozen_agent_spec(
     if not isinstance(memory_value, Mapping):
         raise _invalid_binding()
     allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens"}
-    if schema_version == 3:
+    if schema_version in {3, 4}:
         allowed_memory_keys.add("max_memory_tokens_source")
     if not set(memory_value).issubset(allowed_memory_keys):
         raise _invalid_binding()
@@ -174,7 +174,7 @@ def parse_frozen_agent_spec(
     if max_memory_tokens is not None:
         memory["max_memory_tokens"] = max_memory_tokens
     memory_source = memory_value.get("max_memory_tokens_source")
-    if schema_version == 3 and memory["long_term_memory"]:
+    if schema_version in {3, 4} and memory["long_term_memory"]:
         if (
             not isinstance(memory_source, str)
             or memory_source not in {"UNSET", "DEFAULT", "CUSTOM"}
@@ -186,7 +186,7 @@ def parse_frozen_agent_spec(
         raise _invalid_binding()
     runtime["memory"] = memory
     policy_value = runtime_value.get("context_policy")
-    if schema_version == 3:
+    if schema_version in {3, 4}:
         sources = runtime_value.get("context_budget_sources")
         if (
             not isinstance(sources, Mapping)
@@ -207,6 +207,13 @@ def parse_frozen_agent_spec(
             raise _invalid_binding() from None
         runtime["context_budget_sources"] = dict(sources)
     elif policy_value is not None:
+        raise _invalid_binding()
+    history_policy = runtime_value.get("history_policy")
+    if schema_version == 4:
+        if history_policy != "deterministic_history_v1":
+            raise _invalid_binding()
+        runtime["history_policy"] = history_policy
+    elif history_policy is not None:
         raise _invalid_binding()
     return FrozenAgentSpec(
         model_plan=ResolvedModelExecutionPlan(

@@ -65,6 +65,7 @@ from packages.wiki.service import WikiService
 
 SPEC_SCHEMA_VERSION = 2
 ADAPTIVE_SPEC_SCHEMA_VERSION = 3
+HISTORY_SPEC_SCHEMA_VERSION = 4
 _WIKI_LATEST_SCAN_BATCH = 10
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
@@ -81,7 +82,11 @@ DEFAULT_RUNTIME_CONFIG: dict[str, Any] = {
     "context_budget": DEFAULT_CONTEXT_BUDGET.copy(),
     "memory": DEFAULT_MEMORY_CONFIG.copy(),
 }
-_RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG) | {"context_policy", "context_budget_sources"}
+_RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG) | {
+    "context_policy",
+    "context_budget_sources",
+    "history_policy",
+}
 # Validated on their own terms: neither is a step count. ``max_cost_micro_usd``
 # is the one runtime key that may be ``None``; ``memory`` is a block of booleans
 # with a ceiling that means nothing.
@@ -89,6 +94,7 @@ _RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {
     "context_budget",
     "context_budget_sources",
     "context_policy",
+    "history_policy",
     "max_cost_micro_usd",
     "memory",
 }
@@ -911,7 +917,13 @@ def _resolved_spec(
         }
     )
     spec: dict[str, Any] = {
-        "spec_schema_version": ADAPTIVE_SPEC_SCHEMA_VERSION if adaptive else SPEC_SCHEMA_VERSION,
+        "spec_schema_version": (
+            HISTORY_SPEC_SCHEMA_VERSION
+            if runtime.get("history_policy") is not None
+            else ADAPTIVE_SPEC_SCHEMA_VERSION
+            if adaptive
+            else SPEC_SCHEMA_VERSION
+        ),
         "model": primary_projection,
         "prompt": {
             "system_prompt": agent.system_prompt,
@@ -1181,6 +1193,15 @@ def _validate_runtime_config(
             raise AgentHubError(
                 "INVALID_CONTEXT_POLICY", "The context policy is invalid.", 422
             ) from None
+    history_policy = value.get("history_policy")
+    if history_policy is None:
+        result.pop("history_policy", None)
+    elif history_policy != "deterministic_history_v1" or policy_request is None:
+        raise AgentHubError(
+            "INVALID_CONTEXT_POLICY", "The history policy requires an adaptive context policy.", 422
+        )
+    else:
+        result["history_policy"] = history_policy
     return result
 
 
