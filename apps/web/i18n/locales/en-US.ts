@@ -2073,6 +2073,8 @@ export const enUS = {
   appThread: {
     summaryDegraded: "Some data failed to load; counts may be incomplete.",
     railToggle: "Details",
+    railToggleList: "Chats",
+    turnsCount: "{turns} turns",
     loadMore: "Load more",
     noPermissionHint: "Your role does not allow deleting threads",
     back: "Back",

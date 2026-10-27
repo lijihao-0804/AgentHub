@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import PaperCard from "@/app/research/[threadId]/paper-card";
+import PaperCard from "@/components/research/paper-card";
 import { InlineConfirm } from "@/components/evaluation/hash-value";
 import { EmptyState, ErrorState, InlineError, LoadingState } from "@/components/ui/states";
 import { useWorkspaceMutation, type WorkspaceQuery } from "@/hooks/use-workspace-data";

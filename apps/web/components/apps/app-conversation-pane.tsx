@@ -68,7 +68,14 @@ export default function AppConversationPane({
   const mutation = useWorkspaceMutation(`app-turns:${threadId}`);
   const submissionRef = useRef<TurnSubmissionState>(createSubmissionState());
   const [recoverySubmission, setRecoverySubmission] = useState<TurnSubmission | null>(null);
+  const composerTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [draft, setDraft] = useState("");
+  // Auto-grow the composer textarea; reset when the draft clears.
+  useEffect(() => {
+    if (draft) return;
+    const el = composerTextareaRef.current;
+    if (el) el.style.height = "";
+  }, [draft]);
   const [pendingInput, setPendingInput] = useState<string | null>(null);
   /** Live answer text from message.delta events, shown inside the pending bubble. */
   const [streamText, setStreamText] = useState<string | null>(null);
@@ -436,6 +443,9 @@ export default function AppConversationPane({
             value={draft}
             onChange={(event) => {
               setDraft(event.target.value);
+              const el = event.currentTarget;
+              el.style.height = "auto";
+              el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
               if (!mutation.pending) {
                 submissionRef.current = draftForInput(
                   submissionRef.current,
@@ -445,6 +455,7 @@ export default function AppConversationPane({
                 setRecoverySubmission(recoverOriginal(submissionRef.current));
               }
             }}
+            ref={composerTextareaRef}
             onKeyDown={(event) => {
               // Enter sends, Shift+Enter breaks the line, and a composition
               // Enter (IME candidate confirmation) never submits.

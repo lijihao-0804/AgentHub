@@ -1,21 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useParams } from "next/navigation";
 
-import AppThreadShell from "@/components/apps/app-thread-shell";
+import AppWorkbench from "@/components/apps/app-workbench";
 import type { AppThreadCopy } from "@/components/apps/app-thread-copy";
 import { Panel } from "@/components/ui/states";
 import { useI18n } from "@/i18n/provider";
+import { useMemo } from "react";
 
-export default function AgentChatThreadClient({
-  agentId,
-  threadId,
-}: {
-  agentId: string;
-  threadId: string;
-}) {
+/**
+ * Multi-turn conversation with one agent, on the same workbench the four
+ * applications use. Threads are `general` kind and always run the agent's
+ * published version; the side rail links back to the agent's own pages.
+ */
+export default function AgentChatWorkbenchPage() {
+  const params = useParams<{ agentId: string; threadId?: string[] }>();
+  const agentId = params?.agentId ?? "";
+  const threadId = params?.threadId?.[0];
   const { t } = useI18n();
+
   const copy = useMemo<AppThreadCopy>(
     () => ({
       kind: "general",
@@ -36,9 +40,9 @@ export default function AgentChatThreadClient({
   );
 
   return (
-    <AppThreadShell copy={copy} threadId={threadId}>
-      {(context) => (
-        <Panel ariaLabel={t("agents.chat.sideTitle")} title={t("agents.chat.sideTitle")} eyebrow={t("agents.chat.eyebrow")}>
+    <AppWorkbench copy={copy} threadId={threadId}>
+      {() => (
+        <Panel ariaLabel={t("agents.chat.sideTitle")} title={t("agents.chat.sideTitle")}>
           <p className="state-hint">{t("agents.chat.sideHint")}</p>
           <div className="form-actions">
             <Link className="button button-ghost" href={`/agents/${encodeURIComponent(agentId)}`}>
@@ -50,6 +54,6 @@ export default function AgentChatThreadClient({
           </div>
         </Panel>
       )}
-    </AppThreadShell>
+    </AppWorkbench>
   );
 }
