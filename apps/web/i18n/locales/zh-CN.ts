@@ -2055,6 +2055,7 @@ export const zhCN: MessageSchema = {
   },
   appThread: {
     summaryDegraded: "部分数据加载失败，计数可能不完整。",
+    railToggle: "详情",
     loadMore: "加载更多",
     noPermissionHint: "当前角色没有删除线程的权限",
     back: "返回",

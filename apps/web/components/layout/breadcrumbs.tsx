@@ -86,6 +86,15 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 export function autoBreadcrumbs(pathname: string, t: (key: MessageKey) => string): Crumb[] | null {
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length < 2) return null;
+  // The four application thread pages carry their own topbar with a back
+  // link; a generated trail above it would say the same thing twice.
+  if (
+    segments.length === 2 &&
+    ["research", "support", "incidents", "analytics"].includes(segments[0]) &&
+    UUID_PATTERN.test(segments[1])
+  ) {
+    return null;
+  }
   const items: Crumb[] = [];
   let href = "";
   for (const segment of segments) {

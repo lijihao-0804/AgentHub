@@ -271,23 +271,8 @@ export default function AppConversationPane({
   }
 
   return (
-    <section
-      className="research-pane research-pane-conversation"
-      aria-label={t("appThread.conversation.paneTitle")}
-    >
-      <div className="research-pane-head">
-        <h2>{t("appThread.conversation.paneTitle")}</h2>
-        <button
-          type="button"
-          className="button button-ghost"
-          onClick={turns.reload}
-          disabled={turns.loading}
-        >
-          {t("common.refresh")}
-        </button>
-      </div>
-
-      <div className="research-pane-body" ref={containerRef} onScroll={onScroll}>
+    <section className="thread-chat" aria-label={t("appThread.conversation.paneTitle")}>
+      <div className="thread-turns" ref={containerRef} onScroll={onScroll}>
         {turns.error && (
           <ErrorState
             code={turns.error.code}
@@ -444,7 +429,7 @@ export default function AppConversationPane({
         {(cannotRun || turnList.some((turn) => turn.user_input === null)) && (
           <p className="state-hint" role="note">{t("appThread.conversation.readOnlyHint")}</p>
         )}
-        <label>
+        <label className="visually-hidden">
           {t("appThread.conversation.composerLabel")}
           <textarea
             rows={3}

@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import type { AppThreadCopy } from "@/components/apps/app-thread-copy";
 import AppConversationPane from "@/components/apps/app-conversation-pane";
-import Breadcrumbs from "@/components/layout/breadcrumbs";
 import { InlineConfirm } from "@/components/evaluation/hash-value";
 import { ErrorState, InlineError, LoadingState, SessionRequired } from "@/components/ui/states";
 import { useFrontendSession } from "@/components/providers/session-provider";
@@ -89,6 +88,10 @@ export default function AppThreadShell({
   const [renaming, setRenaming] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // The application-specific side rail (papers, tickets, timelines) is
+  // toggleable: reading a long answer full-width beats keeping three columns
+  // on screen at all times.
+  const [sideOpen, setSideOpen] = useState(true);
 
   useEffect(() => {
     setRenaming(false);
@@ -139,15 +142,27 @@ export default function AppThreadShell({
   }
 
   return (
-    <div className="page">
-      <Breadcrumbs
-        items={[
-          { label: t(copy.title), href: copy.basePath },
-          { label: current?.title ?? t("common.loading") },
-        ]}
-      />
-      <header className="page-header">
-        <h1>{current?.title ?? t(copy.title)}</h1>
+    <div className="thread-page">
+      <header className="thread-topbar">
+        <Link className="thread-back" href={copy.basePath}>
+          <span aria-hidden="true">←</span> {t(copy.title)}
+        </Link>
+        <h1 className="thread-title">{current?.title ?? t(copy.title)}</h1>
+        <div className="thread-topbar-actions">
+          <button
+            type="button"
+            className="button button-ghost"
+            aria-pressed={sideOpen}
+            onClick={() => setSideOpen((open) => !open)}
+          >
+            {t("appThread.railToggle")}
+          </button>
+          {current && (
+            <button type="button" className="button button-ghost" onClick={turns.reload} disabled={turns.loading}>
+              {t("common.refresh")}
+            </button>
+          )}
+        </div>
       </header>
 
       {thread.error && (
@@ -159,119 +174,124 @@ export default function AppThreadShell({
         />
       )}
 
-      <div className="research-workbench">
-        <section className="research-pane research-pane-threads" aria-label={t("appThread.threads.paneTitle")}>
-          <div className="research-pane-head">
-            <h2>{t("appThread.threads.paneTitle")}</h2>
-            <Link className="button button-ghost" href={copy.basePath}>
-              {t(copy.newThread)}
-            </Link>
-          </div>
-          <div className="research-pane-body">
-            {threads.error && (
-              <ErrorState
-                code={threads.error.code}
-                message={threads.error.message || t("errors.loadThreads")}
-                hint={errorHintKey(threads.error) ? t(errorHintKey(threads.error)!) : undefined}
-                onRetry={threads.reload}
-              />
-            )}
-            {threads.loading && threadList.length === 0 && !threads.error && <LoadingState />}
+      <div className="thread-frame" data-side={current && sideOpen ? "open" : "closed"}>
+        <nav className="thread-rail" aria-label={t("appThread.threads.paneTitle")}>
+          <Link className="button button-ghost thread-new" href={copy.basePath}>
+            {t(copy.newThread)}
+          </Link>
+          {threads.error && (
+            <ErrorState
+              code={threads.error.code}
+              message={threads.error.message || t("errors.loadThreads")}
+              hint={errorHintKey(threads.error) ? t(errorHintKey(threads.error)!) : undefined}
+              onRetry={threads.reload}
+            />
+          )}
+          {threads.loading && threadList.length === 0 && !threads.error && <LoadingState />}
 
-            <ul className="thread-list">
-              {threadList.map((item) => {
-                const active = item.id === threadId;
-                return (
-                  <li key={item.id}>
-                    <Link
-                      className={`thread-list-item${active ? " thread-list-item-active" : ""}`}
-                      href={`${copy.basePath}/${encodeURIComponent(item.id)}`}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <span className="thread-list-title">{item.title}</span>
-                      <span className="thread-list-meta">{formatDateTime(item.updated_at)}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+          <ul className="thread-list">
+            {threadList.map((item) => {
+              const active = item.id === threadId;
+              return (
+                <li key={item.id}>
+                  <Link
+                    className={`thread-list-item${active ? " thread-list-item-active" : ""}`}
+                    href={`${copy.basePath}/${encodeURIComponent(item.id)}`}
+                    aria-current={active ? "page" : undefined}
+                  >
+                    <span className="thread-list-title">{item.title}</span>
+                    <span className="thread-list-meta">{formatDateTime(item.updated_at)}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
 
-            <div className="thread-admin">
-              {renaming ? (
-                <div className="thread-rename">
-                  <label>
-                    {t("appThread.threads.renameLabel")}
-                    <input
-                      value={titleDraft}
-                      onChange={(event) => setTitleDraft(event.target.value)}
-                      maxLength={200}
-                    />
-                  </label>
-                  <div className="thread-admin-actions">
-                    <button
-                      type="button"
-                      className="button button-primary"
-                      onClick={() => void rename()}
-                      disabled={threadMutation.pending || !titleDraft.trim()}
-                    >
-                      {t("appThread.threads.saveTitle")}
-                    </button>
-                    <button
-                      type="button"
-                      className="button button-ghost"
-                      onClick={() => setRenaming(false)}
-                      disabled={threadMutation.pending}
-                    >
-                      {t("appThread.cancel")}
-                    </button>
-                  </div>
-                </div>
-              ) : (
+          <div className="thread-admin">
+            {renaming ? (
+              <div className="thread-rename">
+                <label>
+                  {t("appThread.threads.renameLabel")}
+                  <input
+                    value={titleDraft}
+                    onChange={(event) => setTitleDraft(event.target.value)}
+                    maxLength={200}
+                  />
+                </label>
                 <div className="thread-admin-actions">
                   <button
                     type="button"
-                    className="button button-ghost"
-                    onClick={() => {
-                      setRenaming(true);
-                      setTitleDraft(current?.title ?? "");
-                    }}
-                    disabled={!current}
+                    className="button button-primary"
+                    onClick={() => void rename()}
+                    disabled={threadMutation.pending || !titleDraft.trim()}
                   >
-                    {t("appThread.threads.rename")}
+                    {t("appThread.threads.saveTitle")}
                   </button>
                   <button
                     type="button"
                     className="button button-ghost"
-                    onClick={() => setConfirmDelete(true)}
-                    disabled={!current || cannotDelete}
-                    title={cannotDelete ? t("appThread.noPermissionHint") : undefined}
+                    onClick={() => setRenaming(false)}
+                    disabled={threadMutation.pending}
                   >
-                    {t("appThread.threads.delete")}
+                    {t("appThread.cancel")}
                   </button>
-                  {cannotDelete && <span className="state-hint" role="note">{t("appThread.noPermissionHint")}</span>}
                 </div>
-              )}
+              </div>
+            ) : (
+              <div className="thread-admin-actions">
+                <button
+                  type="button"
+                  className="button button-ghost"
+                  onClick={() => {
+                    setRenaming(true);
+                    setTitleDraft(current?.title ?? "");
+                  }}
+                  disabled={!current}
+                >
+                  {t("appThread.threads.rename")}
+                </button>
+                <button
+                  type="button"
+                  className="button button-ghost"
+                  onClick={() => setConfirmDelete(true)}
+                  disabled={!current || cannotDelete}
+                  title={cannotDelete ? t("appThread.noPermissionHint") : undefined}
+                >
+                  {t("appThread.threads.delete")}
+                </button>
+                {cannotDelete && <span className="state-hint" role="note">{t("appThread.noPermissionHint")}</span>}
+              </div>
+            )}
 
-              {confirmDelete && (
-                <InlineConfirm
-                  title={t("appThread.threads.delete")}
-                  text={t("appThread.threads.confirmDelete")}
-                  confirmLabel={t("appThread.threads.confirm")}
-                  pendingLabel={t("common.loading")}
-                  cancelLabel={t("appThread.threads.keep")}
-                  pending={threadMutation.pending}
-                  onConfirm={() => void removeThread()}
-                  onCancel={() => setConfirmDelete(false)}
-                />
-              )}
+            {confirmDelete && (
+              <InlineConfirm
+                title={t("appThread.threads.delete")}
+                text={t("appThread.threads.confirmDelete")}
+                confirmLabel={t("appThread.threads.confirm")}
+                pendingLabel={t("common.loading")}
+                cancelLabel={t("appThread.threads.keep")}
+                pending={threadMutation.pending}
+                onConfirm={() => void removeThread()}
+                onCancel={() => setConfirmDelete(false)}
+              />
+            )}
 
-              <InlineError error={threadMutation.error} fallback={t("errors.requestFailed")} />
-            </div>
+            <InlineError error={threadMutation.error} fallback={t("errors.requestFailed")} />
           </div>
-        </section>
+        </nav>
 
-        {current && <AppConversationPane key={`${sessionId}:${threadId}`} threadId={threadId} turns={turns} onTurnCompleted={onTurnCompleted} />}
-        {current && children({ threadId, thread: current, artifacts, turns })}
+        {current ? (
+          <AppConversationPane key={`${sessionId}:${threadId}`} threadId={threadId} turns={turns} onTurnCompleted={onTurnCompleted} />
+        ) : (
+          <div className="thread-chat">
+            {!thread.error && <LoadingState />}
+          </div>
+        )}
+        {current && sideOpen && (
+          <aside className="thread-side" aria-label={t("appThread.railToggle")}>
+            {children({ threadId, thread: current, artifacts, turns })}
+          </aside>
+        )}
       </div>
     </div>
   );

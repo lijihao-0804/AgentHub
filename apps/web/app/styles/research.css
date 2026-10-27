@@ -23,85 +23,82 @@
 .research-thread-card-meta { color: var(--text-muted); font-size: 0.78rem; }
 .research-thread-card-summary { color: var(--accent); font-size: 0.82rem; font-weight: 600; }
 
-/* ---- Workbench frame ---- */
+/* ---- Chat-first thread frame ---- */
 /*
- * Chat-first frame: the workbench fills the viewport below the page chrome
- * and every column scrolls internally, so the composer is always on screen
- * no matter how long the conversation grows (Codex/DeepSeek pattern).
+ * The conversation is the page: a slim topbar (back, title, actions), a
+ * quiet conversation rail on the left, the turn stream scrolling in the
+ * middle with the composer pinned, and the application's own panes on the
+ * right. No boxed panes floating on the page.
  */
-.research-workbench {
-  display: grid;
-  gap: var(--space-3);
-  grid-template-columns: 17rem minmax(0, 1fr) minmax(0, 1.1fr);
-  /* The single row must be cappable, or tall conversation content inflates
-     the row past the frame and pushes the composer off screen. */
-  grid-template-rows: minmax(0, 1fr);
-  height: calc(100dvh - 14rem);
-  margin-top: var(--space-4);
-  min-height: 26rem;
-}
-.research-workbench > .research-pane,
-.research-workbench > .app-pane-stack { min-height: 0; }
-/* The artifact/activity stack scrolls as one column. */
-.research-workbench > .app-pane-stack { overflow-y: auto; }
-.research-pane {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+.thread-page {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  height: calc(100dvh - 8.5rem);
+  min-height: 30rem;
 }
-.research-pane-head {
+.thread-topbar {
   align-items: center;
-  border-bottom: 1px solid var(--border);
   display: flex;
-  gap: var(--space-2);
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-4);
+  gap: var(--space-3);
+  margin-top: var(--space-1);
 }
-.research-pane-head h2 { font-size: 0.95rem; margin: 0; }
-.research-pane-body {
+.thread-back {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.thread-back:hover { color: var(--accent); }
+.thread-title {
+  flex: 1 1 auto;
+  font-size: 1.02rem;
+  font-weight: 650;
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.thread-topbar-actions { display: flex; flex-shrink: 0; gap: var(--space-2); }
+
+.thread-frame {
   display: grid;
   flex: 1 1 auto;
-  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  grid-template-columns: 15rem minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-rows: minmax(0, 1fr);
+  margin-top: var(--space-3);
   min-height: 0;
-  min-width: 0;
+}
+.thread-frame[data-side="closed"] { grid-template-columns: 15rem minmax(0, 1fr); }
+.thread-frame[data-side="closed"] .thread-side { display: none; }
+
+/* Left rail: the conversation list, no box around it. */
+.thread-rail {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
+  min-height: 0;
+}
+.thread-new { flex-shrink: 0; }
+.thread-rail .thread-list {
+  border-right: 1px solid var(--border);
+  flex: 1 1 auto;
+  margin-right: calc(-1 * var(--space-2));
   overflow-y: auto;
-  padding: var(--space-3) var(--space-4);
+  padding-right: var(--space-2);
 }
-.research-pane-body > * { min-width: 0; }
-
-/* The conversation pane owns the column: turns scroll, composer stays put. */
-.research-pane-conversation { min-height: 0; }
-.research-pane-conversation .research-pane-body { display: block; }
-.conversation-list {
-  display: grid;
-  gap: var(--space-3);
-  list-style: none;
-  margin: 0 auto;
-  max-width: 46rem;
-  padding: 0;
-}
-/* The composer spans the pane; its content aligns with the turn column. */
-.conversation-composer {
-  padding-inline: max(var(--space-4), calc((100% - 46rem) / 2));
-}
-
-/* ---- Thread list ---- */
-.thread-list { display: grid; gap: 0.35rem; list-style: none; margin: 0; padding: 0; }
+.thread-list { display: grid; gap: 0.2rem; align-content: start; list-style: none; margin: 0; padding: 0; }
 .thread-list-item {
-  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   color: inherit;
   display: grid;
-  gap: 0.2rem;
+  gap: 0.15rem;
   padding: 0.5rem 0.7rem;
   text-decoration: none;
 }
-.thread-list-item:hover { border-color: var(--border-strong); }
-.thread-list-item-active { background: var(--surface-inset); border-color: var(--accent); }
+.thread-list-item:hover { background: var(--row-hover); }
+.thread-list-item-active { background: var(--accent-soft); }
 .thread-list-title { font-size: 0.88rem; font-weight: 600; overflow-wrap: anywhere; }
 .thread-list-meta { color: var(--text-muted); font-size: 0.72rem; }
 .thread-admin { border-top: 1px solid var(--border); display: grid; gap: var(--space-2); padding-top: var(--space-3); }
@@ -109,26 +106,98 @@
 .thread-rename { display: grid; gap: var(--space-2); }
 .thread-rename label { color: var(--text-muted); display: grid; font-size: 0.75rem; gap: 0.25rem; }
 
-/* ---- Conversation ---- */
-
-.conversation-turn { display: grid; gap: var(--space-2); }
+/* Center: the turn stream and the pinned composer. */
+.thread-chat { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.thread-turns {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-1) var(--space-3) var(--space-3);
+  scrollbar-gutter: stable;
+}
+.conversation-list {
+  display: grid;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0 auto;
+  max-width: 46rem;
+  padding: 0;
+}
+.conversation-turn { display: grid; gap: 0.4rem; }
 .conversation-message {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border: 0;
   display: grid;
   gap: 0.35rem;
-  padding: var(--space-3);
+  padding: 0;
 }
-.conversation-message-user { background: var(--surface-inset); }
-.conversation-role { color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.04em; margin: 0; text-transform: uppercase; }
-.conversation-role-line { align-items: center; display: flex; gap: var(--space-2); justify-content: space-between; }
-.conversation-text { line-height: 1.6; margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+/* The reader's own words sit in a quiet bubble on the right. */
+.conversation-message-user {
+  background: var(--accent-soft);
+  border-radius: 14px 14px 4px 14px;
+  justify-self: end;
+  justify-items: start;
+  margin-left: auto;
+  max-width: 82%;
+  padding: 0.55rem 0.95rem;
+}
+.conversation-message-user .conversation-text { line-height: 1.55; }
+.conversation-message-agent { padding-right: 0.2rem; }
+.conversation-role { color: var(--text-muted); font-size: 0.72rem; margin: 0; }
+.conversation-role-line { align-items: center; display: flex; gap: var(--space-2); }
+.conversation-text { line-height: 1.65; margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
 .conversation-pending { color: var(--text-muted); }
 .conversation-meta { color: var(--text-muted); font-size: 0.75rem; margin: 0; overflow-wrap: anywhere; }
 .conversation-run { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0.2rem 0 0; }
-.conversation-composer { border-top: 1px solid var(--border); display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4); }
+
+/* The composer floats like an input bar, always on screen. */
+.conversation-composer {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 auto var(--space-1);
+  max-width: calc(46rem + 2 * var(--space-3));
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  width: calc(100% - var(--space-6));
+}
 .conversation-composer label { color: var(--text-muted); display: grid; font-size: 0.78rem; gap: 0.3rem; }
-.conversation-composer .form-actions { margin-top: 0; }
+.conversation-composer textarea {
+  background: transparent;
+  border: 0;
+  resize: none;
+}
+.conversation-composer textarea:focus-visible { outline: none; }
+.conversation-composer .form-actions { justify-content: flex-end; margin: 0; }
+.conversation-composer .form-actions:only-child { grid-column: auto; }
+
+/* Right rail: the application's own panes, scrolling as one column. */
+.thread-side {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  padding-right: var(--space-1);
+  scrollbar-gutter: stable;
+}
+.thread-side > .app-pane-stack { display: grid; gap: var(--space-3); min-width: 0; }
+
+@media (max-width: 1280px) {
+  .thread-frame { grid-template-columns: 13rem minmax(0, 1fr) minmax(0, 0.9fr); }
+}
+
+@media (max-width: 1100px) {
+  .thread-page { height: auto; min-height: 0; }
+  .thread-frame { grid-template-columns: minmax(0, 1fr); }
+  .thread-rail .thread-list { border-right: 0; max-height: 40dvh; }
+  .thread-turns { max-height: 60dvh; }
+  .thread-side { overflow: visible; }
+  .artifact-toolbar { grid-template-columns: minmax(0, 1fr); }
+  .research-pane-body { max-height: none; }
+}
 
 /* ---- Artifacts ---- */
 .artifact-toolbar {
