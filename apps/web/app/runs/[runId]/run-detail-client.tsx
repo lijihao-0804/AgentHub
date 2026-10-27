@@ -141,6 +141,8 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   const [replay, setReplay] = useState<AgentRun | null>(null);
   const [addToEvaluationOpen, setAddToEvaluationOpen] = useState(false);
   const replayMutation = useWorkspaceMutation(`run-replay:${workspaceId}:${runId}`);
+  // Two-step replay: the first click states the side effect, the second runs it.
+  const [replayConfirmOpen, setReplayConfirmOpen] = useState(false);
 
   /**
    * Detail and timeline load as one resource so they always belong to the
@@ -241,7 +243,6 @@ export default function RunDetailClient({ runId }: { runId: string }) {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("run.eyebrow")}</p>
           <h1>
             {t("run.title")} <code title={runId}>{shortId(runId)}</code>
           </h1>
@@ -313,7 +314,6 @@ export default function RunDetailClient({ runId }: { runId: string }) {
     <div className="page">
       <Breadcrumbs items={[{ label: t("nav.runs"), href: "/runs" }, { label: shortId(runId) }]} />
       <header className="page-header">
-        <p className="eyebrow">{t("run.eyebrow")}</p>
         <h1>
           {t("run.title")} <code title={runId}>{shortId(runId)}</code>
         </h1>
@@ -370,20 +370,44 @@ export default function RunDetailClient({ runId }: { runId: string }) {
                 >
                   {t("run.addToEvaluation.button")}
                 </button>
-                <button
-                  className="button button-primary"
-                  type="button"
-                  disabled={replayMutation.pending}
-                  onClick={() => void handleReplay()}
-                >
-                  {replayMutation.pending ? t("run.replay.running") : t("run.replay.button")}
-                </button>
+                {replayConfirmOpen ? (
+                  <>
+                    <button
+                      className="button button-primary"
+                      type="button"
+                      disabled={replayMutation.pending}
+                      onClick={() => {
+                        setReplayConfirmOpen(false);
+                        void handleReplay();
+                      }}
+                    >
+                      {replayMutation.pending ? t("run.replay.running") : t("run.replay.confirm")}
+                    </button>
+                    <button
+                      className="button button-ghost"
+                      type="button"
+                      disabled={replayMutation.pending}
+                      onClick={() => setReplayConfirmOpen(false)}
+                    >
+                      {t("session.cancel")}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    className="button button-primary"
+                    type="button"
+                    disabled={replayMutation.pending}
+                    onClick={() => setReplayConfirmOpen(true)}
+                  >
+                    {t("run.replay.button")}
+                  </button>
+                )}
               </div>
             </div>
             {run.status === "WAITING_APPROVAL" && <p className="state-hint">{t("run.waitingCallout")}</p>}
             {run.status === "NEEDS_ATTENTION" && <p className="state-hint">{t("run.attentionCallout")}</p>}
-            {/* Stated before the click: a replay really does execute again. */}
-            <p className="state-hint">{t("run.replay.warning")}</p>
+            {/* Stated before the confirming click: a replay really does execute again. */}
+            {replayConfirmOpen && <p className="state-hint">{t("run.replay.warning")}</p>}
             <InlineError error={replayMutation.error} fallback={t("run.replay.failed")} />
             {replay && (
               <div className="inline-notice replay-notice">
@@ -489,7 +513,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
           {(TERMINAL_RUN_STATUSES.has(run.status) || run.status === "NEEDS_ATTENTION") && <FeedbackPanel runId={runId} />}
           <ToolEvidencePanel runId={runId} />
 
-          <Panel title={t("run.context.title")} eyebrow={t("run.context.eyebrow")}>
+          <Panel title={t("run.context.title")}>
             {!context.sawAdmission ? (
               <EmptyState title={t("run.context.empty")} hint={t("run.context.emptyHint")} />
             ) : (
@@ -564,7 +588,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
             )}
           </Panel>
 
-          <Panel title={t("timeline.title")} eyebrow={t("timeline.eyebrow")}>
+          <Panel title={t("timeline.title")}>
             {timeline.length === 0 ? (
               <EmptyState title={t("timeline.empty")} hint={t("timeline.emptyHint")} />
             ) : (

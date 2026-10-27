@@ -174,7 +174,6 @@ export default function EvaluationPricingPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("evaluation.pricing.eyebrow")}</p>
           <h1>{t("evaluation.pricing.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.evaluations" />
@@ -185,9 +184,7 @@ export default function EvaluationPricingPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("evaluation.pricing.eyebrow")}</p>
         <h1>{t("evaluation.pricing.title")}</h1>
-        <p className="page-lede">{t("evaluation.pricing.lede")}</p>
       </header>
 
       <Panel

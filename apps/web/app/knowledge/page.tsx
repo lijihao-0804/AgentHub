@@ -31,7 +31,6 @@ export default function KnowledgeBasesPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("knowledge.eyebrow")}</p>
           <h1>{t("knowledge.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.knowledge" />
@@ -54,9 +53,7 @@ export default function KnowledgeBasesPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("knowledge.eyebrow")}</p>
         <h1>{t("knowledge.title")}</h1>
-        <p className="page-lede">{t("knowledge.lede")}</p>
       </header>
 
       <div className="page-toolbar">

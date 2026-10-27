@@ -68,9 +68,8 @@
   border-radius: var(--radius-sm);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   padding: 0.1rem 0.45rem;
-  text-transform: uppercase;
 }
 .incident-kind-action { color: var(--warning); }
 .incident-kind-deployment, .incident-kind-commit { color: var(--accent); }

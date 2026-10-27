@@ -270,8 +270,48 @@ a.stat-row:hover { border-color: var(--accent); }
 .run-facts { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-4); }
 .run-facts span { color: var(--text-muted); font-size: 0.82rem; }
 .run-facts strong { color: var(--text); font-variant-numeric: tabular-nums; margin-left: 0.3rem; }
+/* An inline hint after a value needs its own gap: "2,457输入" read as one word. */
+.run-facts .state-hint { margin-left: 0.4rem; }
 
 .approval-chips { border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-4); }
+
+/* Compact tool-event timeline: one row per recorded event, detail on expand. */
+.tool-event-list { display: grid; margin-top: var(--space-2); }
+.tool-event-row { border-top: 1px solid var(--border); }
+.tool-event-row:first-child { border-top: 0; }
+.tool-event-row > summary {
+  align-items: baseline;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  list-style: none;
+  padding: var(--space-2) var(--space-1);
+}
+.tool-event-row > summary::-webkit-details-marker { display: none; }
+.tool-event-row > summary:hover { background: var(--row-hover); }
+.tool-event-dot { align-self: center; border-radius: 50%; flex-shrink: 0; height: 0.45rem; width: 0.45rem; }
+.tool-event-dot-requested { background: var(--text-muted); opacity: 0.6; }
+.tool-event-dot-started { background: var(--info); }
+.tool-event-dot-completed { background: var(--success); }
+.tool-event-dot-failed { background: var(--danger); }
+.tool-event-name { font-weight: 600; }
+.tool-event-kind { color: var(--text-muted); font-size: var(--text-sm); }
+.tool-event-meta { color: var(--text-muted); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.tool-event-time { margin-left: auto; }
+.tool-event-error { color: var(--danger); font-size: var(--text-sm); }
+.tool-event-row-failed > summary { background: var(--danger-soft); }
+.tool-event-detail { border-top: 1px dashed var(--border); padding: var(--space-2) var(--space-3); }
+.tool-event-detail p { color: var(--text-muted); font-size: var(--text-sm); margin: 0 0 var(--space-2); }
+.tool-evidence-row { align-items: center; display: flex; gap: var(--space-3); padding: var(--space-2) var(--space-1); }
+
+/* Single-line clamp for secondary cell text; the full value stays in title. */
+.cell-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
 
 /* Model capability chips: reader-facing badges for the server-owned capability map. */
 .capability-chip {
@@ -352,9 +392,8 @@ a.stat-row:hover { border-color: var(--accent); }
 .approval-state-label {
   color: var(--text-muted);
   font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 .approval-state-meta { color: var(--text-muted); font-size: 0.78rem; overflow-wrap: anywhere; }
 .approval-state-expiring { color: var(--warning); font-weight: 600; }

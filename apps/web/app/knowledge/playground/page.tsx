@@ -172,9 +172,7 @@ export default function RetrievalPlaygroundPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("playground.eyebrow")}</p>
           <h1>{t("playground.title")}</h1>
-          <p className="page-lede">{t("playground.lede")}</p>
         </header>
         <SessionRequired contextKey="session.context.playground" />
       </div>
@@ -184,9 +182,7 @@ export default function RetrievalPlaygroundPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("playground.eyebrow")}</p>
         <h1>{t("playground.title")}</h1>
-        <p className="page-lede">{t("playground.lede")}</p>
       </header>
 
       <form className="panel query-panel" onSubmit={handleSubmit} noValidate>

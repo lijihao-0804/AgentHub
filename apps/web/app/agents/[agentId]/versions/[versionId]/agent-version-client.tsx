@@ -96,7 +96,6 @@ export default function AgentVersionDetailClient({
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("agents.eyebrow")}</p>
           <h1>{t("agents.versionDetail")}</h1>
         </header>
         <SessionRequired contextKey="session.context.agents" />
@@ -116,11 +115,7 @@ export default function AgentVersionDetailClient({
         ]}
       />
       <header className="page-header">
-        <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{version ? `v${version.version_number}` : t("agents.versionDetail")}</h1>
-        <p className="page-lede">
-          <code>{versionId}</code>
-        </p>
       </header>
 
       <div className="page-toolbar">

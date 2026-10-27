@@ -172,7 +172,6 @@ export default function ModelSettingsPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("settings.eyebrow")}</p>
           <h1>{t("settings.models.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.models" />
@@ -389,9 +388,7 @@ export default function ModelSettingsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("settings.eyebrow")}</p>
         <h1>{t("settings.models.title")}</h1>
-        <p className="page-lede">{t("settings.models.lede")}</p>
       </header>
 
       {notice && <p className="inline-notice">{notice}</p>}

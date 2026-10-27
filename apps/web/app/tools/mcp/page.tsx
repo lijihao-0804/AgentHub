@@ -162,7 +162,6 @@ export default function McpImportPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("tools.mcp.eyebrow")}</p>
           <h1>{t("tools.mcp.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.tools" />
@@ -173,9 +172,7 @@ export default function McpImportPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("tools.mcp.eyebrow")}</p>
         <h1>{t("tools.mcp.title")}</h1>
-        <p className="page-lede">{t("tools.mcp.lede")}</p>
       </header>
 
       <Panel

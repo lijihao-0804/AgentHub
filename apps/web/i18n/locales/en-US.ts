@@ -26,7 +26,7 @@ export const enUS = {
   },
   runEvidence: {
     title: "Tool calls and fixed evidence", replayHint: "Recorded events may be incomplete. Argument summaries show field types only; sensitive values are omitted.",
-    empty: "No recorded tool events", arguments: "Argument structure", summaryUnavailable: "No summary in historical data", evidence: "Retrieved evidence",
+    empty: "No recorded tool events", arguments: "Argument structure", status: "Status", summaryUnavailable: "No summary in historical data", evidence: "Retrieved evidence",
     noEvidence: "No fixed evidence references were recorded. Historical runs are not re-resolved against LATEST.",
     permission: "Knowledge content permission is required to read excerpts.", open: "Read fixed excerpt", excerpt: "Excerpt limited to 4096 characters.",
     truncated: "Showing the first 200 recorded tool events.", events: { requested: "Requested", started: "Started", completed: "Completed", failed: "Failed" },
@@ -237,6 +237,9 @@ export const enUS = {
   },
   failureCategory: {
     MODEL: "Model",
+    RUNTIME: "Runtime",
+    "AUTH/TENANT": "Auth/Tenant",
+    UNKNOWN: "Unknown",
     ACTION: "Action",
     APPROVAL: "Approval",
     TOOL: "Tool",
@@ -517,7 +520,7 @@ export const enUS = {
       successRate: "Success rate",
       successHint: "{numerator} / {denominator} finished",
       p95Latency: "p95 latency",
-      p95Hint: "p50 {p50} · avg {avg} · {count} samples",
+      p95Hint: "p50 {p50} · {count} samples",
       tokensPerRun: "Tokens / run",
       tokensHint: "{known} known · {unknown} unknown",
       tokensBreakdown: "Avg input {input} · output {output} · cached {cached}",
@@ -702,6 +705,7 @@ export const enUS = {
     technicalMetadata: "Technical metadata",
     compareEntry: "Compare",
     replay: {
+      confirm: "确认重跑",
       button: "Run again",
       running: "Running…",
       warning:
@@ -1766,6 +1770,8 @@ export const enUS = {
     // the option does not ask the reader to already know the enum.
     bindingModeLatest: "Follow the latest snapshot",
     bindingModePinned: "Pin to one snapshot",
+    bindingModeShortLatest: "Latest snapshot",
+    bindingModeShortPinned: "Pinned snapshot",
     bindingModeHint: "LATEST: every run uses the knowledge base's newest snapshot. PINNED: runs use the snapshot bound at edit time; later updates do not change behavior.",
     promptVersion: "Prompt version",
     advanced: "Advanced",

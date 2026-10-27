@@ -102,9 +102,7 @@ export default function Home() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("home.eyebrow")}</p>
         <h1>{t("home.title")}</h1>
-        <p className="page-lede">{t("home.lede")}</p>
         {/*
          * The workspace used to own a full panel above the fold, showing a
          * truncated raw id. Connected is the normal state and needs no panel:

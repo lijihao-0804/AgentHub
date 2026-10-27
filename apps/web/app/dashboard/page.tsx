@@ -55,6 +55,23 @@ const WINDOW_OPTIONS = [
 /** Poll cadence for the live ops cards while runs are in flight. */
 const DASHBOARD_POLL_MS = 5000;
 
+/**
+ * Status chips for count distributions. A state that never happened carries
+ * no information, so zero entries are dropped and an all-zero group renders
+ * nothing at all.
+ */
+function CountChips({ entries }: { entries: readonly (readonly [string, number, string])[] }) {
+  const visible = entries.filter(([, count]) => count > 0);
+  if (visible.length === 0) return null;
+  return (
+    <div className="approval-chips">
+      {visible.map(([status, , label]) => (
+        <StatusBadge key={status} status={status} label={label} />
+      ))}
+    </div>
+  );
+}
+
 function windowFromUrl(): string {
   if (typeof window === "undefined") return "7";
   const param = new URLSearchParams(window.location.search).get("days") ?? "7";
@@ -196,7 +213,6 @@ export default function DashboardPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("dashboard.eyebrow")}</p>
           <h1>{t("dashboard.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.dashboard" />
@@ -207,9 +223,7 @@ export default function DashboardPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("dashboard.eyebrow")}</p>
         <h1>{t("dashboard.title")}</h1>
-        <p className="page-lede">{t("dashboard.lede")}</p>
       </header>
 
       <section className="runs-toolbar" aria-label={t("dashboard.window")}>
@@ -239,7 +253,7 @@ export default function DashboardPage() {
       {summary && (
         <>
           {summary.success_rate.denominator === 0 && summary.current.running_count === 0 && (
-            <Panel title={t("dashboard.onboarding.title")} eyebrow={t("dashboard.onboarding.eyebrow")}>
+            <Panel title={t("dashboard.onboarding.title")}>
               <p className="state-hint">{t("dashboard.onboarding.lede")}</p>
               <div className="split-list">
                 <Link className="stat-row" href="/settings/models">
@@ -262,10 +276,14 @@ export default function DashboardPage() {
               label={t("dashboard.kpi.finishedRuns")}
               value={formatCount(summary.finished_runs.denominator)}
               href="/runs"
-              hint={t("dashboard.kpi.finishedRunsHint", {
-                running: formatCount(summary.current.running_count),
-                waitingApproval: formatCount(summary.current.waiting_approval_count),
-              })}
+              hint={
+                summary.current.running_count + summary.current.waiting_approval_count > 0
+                  ? t("dashboard.kpi.finishedRunsHint", {
+                      running: formatCount(summary.current.running_count),
+                      waitingApproval: formatCount(summary.current.waiting_approval_count),
+                    })
+                  : undefined
+              }
               delta={windowDelta((timeseries?.items ?? []).map((item) => item.runs))}
               deltaLabel={t("dashboard.kpi.deltaLabel")}
               sparkline={(timeseries?.items ?? []).map((item) => item.runs)}
@@ -300,20 +318,11 @@ export default function DashboardPage() {
             <MetricCard
               label={t("dashboard.kpi.tokensPerRun")}
               value={summary.usage.avg_tokens_per_run === null ? "—" : formatCount(summary.usage.avg_tokens_per_run)}
-              hint={
-                <>
-                  {t("dashboard.kpi.tokensHint", {
-                    known: formatCount(summary.usage.known_usage_count),
-                    unknown: formatCount(summary.usage.unknown_usage_count),
-                  })}
-                  <br />
-                  {t("dashboard.kpi.tokensBreakdown", {
-                    input: summary.usage.avg_input_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_input_tokens),
-                    output: summary.usage.avg_output_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_output_tokens),
-                    cached: summary.usage.avg_cached_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_cached_tokens),
-                  })}
-                </>
-              }
+              hint={t("dashboard.kpi.tokensBreakdown", {
+                input: summary.usage.avg_input_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_input_tokens),
+                output: summary.usage.avg_output_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_output_tokens),
+                cached: summary.usage.avg_cached_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_cached_tokens),
+              })}
             />
             <MetricCard
               label={t("dashboard.kpi.costPerSuccess")}
@@ -372,31 +381,34 @@ export default function DashboardPage() {
             />
           </section>
 
-          <Panel title={t("dashboard.approvals.title")} eyebrow={t("dashboard.approvals.eyebrow")}>
+          <Panel title={t("dashboard.approvals.title")}>
             <div className="run-facts">
               <span>{t("dashboard.approvals.decisionTotal")}<strong>{formatCount(summary.approvals.approval_total)}</strong></span>
               <span>{t("dashboard.approvals.waitP50")}<strong>{summary.approvals.wait_latency.p50_ms === null ? "—" : formatDurationMs(summary.approvals.wait_latency.p50_ms)}</strong></span>
               <span>{t("dashboard.approvals.waitP95")}<strong>{summary.approvals.wait_latency.p95_ms === null ? "—" : formatDurationMs(summary.approvals.wait_latency.p95_ms)}</strong></span>
             </div>
-            <div className="approval-chips">
-              <StatusBadge status="PENDING" label={t("run.chips.pending", { count: formatCount(summary.approvals.pending) })} />
-              <StatusBadge status="APPROVED" label={t("run.chips.approved", { count: formatCount(summary.approvals.approved) })} />
-              <StatusBadge status="DENIED" label={t("run.chips.denied", { count: formatCount(summary.approvals.denied) })} />
-              <StatusBadge status="EXPIRED" label={t("dashboard.approvals.expired", { count: formatCount(summary.approvals.expired) })} />
-              <StatusBadge status="CANCELLED" label={t("dashboard.approvals.cancelled", { count: formatCount(summary.approvals.cancelled) })} />
-            </div>
-            <p className="state-hint">{t("dashboard.approvals.executionDistribution")}</p>
-            <div className="approval-chips">
-              <StatusBadge status="NOT_STARTED" label={t("dashboard.approvals.executionNotStarted", { count: formatCount(summary.approvals.execution_not_started) })} />
-              <StatusBadge status="CLAIMED" label={t("dashboard.approvals.executionClaimed", { count: formatCount(summary.approvals.claimed) })} />
-              <StatusBadge status="SUCCEEDED" label={t("dashboard.approvals.executionSucceeded", { count: formatCount(summary.approvals.succeeded) })} />
-              <StatusBadge status="FAILED" label={t("dashboard.approvals.executionFailed", { count: formatCount(summary.approvals.failed) })} />
-              <StatusBadge status="UNKNOWN_OUTCOME" label={t("dashboard.approvals.executionUnknown", { count: formatCount(summary.approvals.unknown_outcome) })} />
-            </div>
+            <CountChips
+              entries={[
+                ["PENDING", summary.approvals.pending, t("run.chips.pending", { count: formatCount(summary.approvals.pending) })],
+                ["APPROVED", summary.approvals.approved, t("run.chips.approved", { count: formatCount(summary.approvals.approved) })],
+                ["DENIED", summary.approvals.denied, t("run.chips.denied", { count: formatCount(summary.approvals.denied) })],
+                ["EXPIRED", summary.approvals.expired, t("dashboard.approvals.expired", { count: formatCount(summary.approvals.expired) })],
+                ["CANCELLED", summary.approvals.cancelled, t("dashboard.approvals.cancelled", { count: formatCount(summary.approvals.cancelled) })],
+              ]}
+            />
+            <CountChips
+              entries={[
+                ["NOT_STARTED", summary.approvals.execution_not_started, t("dashboard.approvals.executionNotStarted", { count: formatCount(summary.approvals.execution_not_started) })],
+                ["CLAIMED", summary.approvals.claimed, t("dashboard.approvals.executionClaimed", { count: formatCount(summary.approvals.claimed) })],
+                ["SUCCEEDED", summary.approvals.succeeded, t("dashboard.approvals.executionSucceeded", { count: formatCount(summary.approvals.succeeded) })],
+                ["FAILED", summary.approvals.failed, t("dashboard.approvals.executionFailed", { count: formatCount(summary.approvals.failed) })],
+                ["UNKNOWN_OUTCOME", summary.approvals.unknown_outcome, t("dashboard.approvals.executionUnknown", { count: formatCount(summary.approvals.unknown_outcome) })],
+              ]}
+            />
           </Panel>
 
           <div className="dashboard-columns">
-            <Panel title={t("dashboard.failures.title")} eyebrow={t("dashboard.failures.eyebrow")}>
+            <Panel title={t("dashboard.failures.title")}>
               {!failures || failures.categories.length === 0 ? (
                 <EmptyState title={t("dashboard.failures.empty")} hint={t("dashboard.failures.emptyHint")} />
               ) : (
@@ -430,7 +442,7 @@ export default function DashboardPage() {
               )}
             </Panel>
 
-            <Panel title={t("dashboard.cost.title")} eyebrow={t("dashboard.cost.eyebrow")}>
+            <Panel title={t("dashboard.cost.title")}>
               {summary.cost.mixed_currency && <p className="state-hint">{t("dashboard.cost.mixedNote")}</p>}
               {summary.cost.currencies.length === 0 ? (
                 <EmptyState title={t("dashboard.cost.empty")} hint={t("dashboard.cost.emptyHint")} />
@@ -488,7 +500,6 @@ export default function DashboardPage() {
 
           <Panel
             title={t("dashboard.trend.title")}
-            eyebrow={t("dashboard.trend.eyebrow")}
             actions={
               <span className="state-hint">
                 {t(
@@ -515,7 +526,6 @@ export default function DashboardPage() {
           <div className="dashboard-columns">
             <Panel
               title={t("dashboard.versions.title")}
-              eyebrow={t("dashboard.versions.eyebrow")}
               actions={<span className="state-hint">{t("dashboard.versions.noRanking")}</span>}
             >
               {!versions || versions.items.length === 0 ? (
@@ -574,7 +584,6 @@ export default function DashboardPage() {
 
             <Panel
               title={t("dashboard.failureRuns.title")}
-              eyebrow={t("dashboard.failureRuns.eyebrow")}
               actions={
                 <span className="state-hint">
                   {selectedCategory

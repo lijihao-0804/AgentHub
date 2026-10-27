@@ -136,7 +136,6 @@ export default function VersionCompareClient({ agentId }: { agentId: string }) {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("agents.eyebrow")}</p>
           <h1>{t("agents.versionDiff.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.agents" />
@@ -217,9 +216,7 @@ export default function VersionCompareClient({ agentId }: { agentId: string }) {
         ]}
       />
       <header className="page-header">
-        <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{t("agents.versionDiff.title")}</h1>
-        <p className="page-lede">{t("agents.versionDiff.lede")}</p>
       </header>
 
       <Panel title={t("agents.versionDiff.title")} ariaLabel={t("agents.versionDiff.title")}>

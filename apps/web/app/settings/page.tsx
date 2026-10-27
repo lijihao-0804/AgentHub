@@ -106,9 +106,7 @@ export default function SettingsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("settings.eyebrow")}</p>
         <h1>{t("settings.title")}</h1>
-        <p className="page-lede">{t("settings.lede")}</p>
       </header>
 
       <Panel ariaLabel={t("settings.context")} title={t("settings.context")}>

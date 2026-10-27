@@ -73,7 +73,6 @@ export default function EvaluationOverviewPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("evaluation.eyebrow")}</p>
           <h1>{t("evaluation.overview.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.evaluations" />
@@ -84,9 +83,7 @@ export default function EvaluationOverviewPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("evaluation.overview.eyebrow")}</p>
         <h1>{t("evaluation.overview.title")}</h1>
-        <p className="page-lede">{t("evaluation.overview.lede")}</p>
       </header>
 
       {error && (

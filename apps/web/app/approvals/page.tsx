@@ -217,9 +217,7 @@ export default function ApprovalsPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("approvals.eyebrow")}</p>
           <h1>{t("approvals.title")}</h1>
-          <p className="page-lede">{t("approvals.lede")}</p>
         </header>
         <SessionRequired contextKey="session.context.approvals" />
       </div>
@@ -232,9 +230,7 @@ export default function ApprovalsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("approvals.eyebrow")}</p>
         <h1>{t("approvals.title")}</h1>
-        <p className="page-lede">{t("approvals.lede")}</p>
       </header>
 
       <Panel

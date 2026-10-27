@@ -54,7 +54,6 @@ export default function AgentsPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("agents.eyebrow")}</p>
           <h1>{t("agents.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.agents" />
@@ -101,9 +100,7 @@ export default function AgentsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{t("agents.title")}</h1>
-        <p className="page-lede">{t("agents.lede")}</p>
       </header>
 
       <Panel
@@ -321,11 +318,17 @@ export default function AgentsPage() {
                   <tr key={agent.id}>
                     <td data-label={t("agents.name")}>
                       <Link href={`/agents/${agent.id}`}>{agent.name}</Link>
-                      {agent.description && <span className="state-hint">{agent.description}</span>}
+                      {agent.description && (
+                        <span className="state-hint cell-clamp" title={agent.description}>
+                          {agent.description}
+                        </span>
+                      )}
                     </td>
                     <td data-label={t("agents.modelProfile")}>{profileLabel(agent.model_profile_id)}</td>
                     <td data-label={t("agents.bindingMode")}>
-                      <code>{agent.knowledge_binding_mode}</code>
+                      {agent.knowledge_binding_mode === "PINNED"
+                        ? t("agents.bindingModeShortPinned")
+                        : t("agents.bindingModeShortLatest")}
                     </td>
                     <td data-label={t("agents.promptVersion")}>v{agent.prompt_version}</td>
                     <td data-label={t("common.updated")}>

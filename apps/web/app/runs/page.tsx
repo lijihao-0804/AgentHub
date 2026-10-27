@@ -199,9 +199,7 @@ export default function RunsPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("runs.eyebrow")}</p>
           <h1>{t("runs.title")}</h1>
-          <p className="page-lede">{t("runs.lede")}</p>
         </header>
         <SessionRequired contextKey="session.context.runs" />
       </div>
@@ -214,9 +212,7 @@ export default function RunsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("runs.eyebrow")}</p>
         <h1>{t("runs.title")}</h1>
-        <p className="page-lede">{t("runs.lede")}</p>
       </header>
 
       <section className="panel" aria-label={t("runs.filters.status")}>
@@ -359,8 +355,11 @@ export default function RunsPage() {
                     <td className="numeric-cell" data-label={t("runs.columns.tools")}>{run.tool_call_count}</td>
                     <td data-label={t("runs.columns.failure")}>
                       {run.failure_code ? (
-                        <span>
-                          {failureCategoryLabel(run.failure_category ?? "")}: <code>{run.failure_code}</code>
+                        <span
+                          className="failure-cell"
+                          title={`${failureCategoryLabel(run.failure_category ?? "")}: ${run.failure_code}`}
+                        >
+                          {failureCategoryLabel(run.failure_category ?? "")}
                         </span>
                       ) : (
                         "—"

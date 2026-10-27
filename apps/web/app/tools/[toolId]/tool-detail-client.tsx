@@ -41,7 +41,6 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("tools.eyebrow")}</p>
           <h1>{t("tools.detail")}</h1>
         </header>
         <SessionRequired contextKey="session.context.tools" />
@@ -85,11 +84,7 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
         ]}
       />
       <header className="page-header">
-        <p className="eyebrow">{t("tools.eyebrow")}</p>
         <h1>{current?.name ?? t("tools.detail")}</h1>
-        <p className="page-lede">
-          <code>{toolId}</code>
-        </p>
       </header>
 
       <Panel

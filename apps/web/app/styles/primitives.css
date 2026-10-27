@@ -190,10 +190,9 @@
   background: var(--surface-inset);
   color: var(--text-muted);
   font-size: var(--text-xs);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
   padding: 0.6rem 0.8rem;
   text-align: left;
-  text-transform: uppercase;
   /* Column labels are short; wrapping them ("版 / 本") only adds header height. */
   white-space: nowrap;
 }

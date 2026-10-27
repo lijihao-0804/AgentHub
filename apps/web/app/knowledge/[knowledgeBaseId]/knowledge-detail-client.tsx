@@ -147,7 +147,6 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("knowledge.eyebrow")}</p>
           <h1>{t("knowledge.baseDetail")}</h1>
         </header>
         <SessionRequired contextKey="session.context.knowledge" />
@@ -213,11 +212,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
         ]}
       />
       <header className="page-header">
-        <p className="eyebrow">{t("knowledge.eyebrow")}</p>
         <h1>{base?.name ?? t("knowledge.baseDetail")}</h1>
-        <p className="page-lede">
-          <HashValue value={knowledgeBaseId} label={t("common.id")} />
-        </p>
       </header>
 
       <div className="page-toolbar">

@@ -152,7 +152,6 @@ export default function RunDetailClient({ runId }: { runId: string }) {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("evaluation.run.eyebrow")}</p>
           <h1>
             {t("evaluation.run.title")} <code>{runId.slice(0, 8)}…</code>
           </h1>
@@ -181,7 +180,6 @@ export default function RunDetailClient({ runId }: { runId: string }) {
         ]}
       />
       <header className="page-header">
-        <p className="eyebrow">{t("evaluation.run.eyebrow")}</p>
         <h1>
           {t("evaluation.run.title")} <code title={runId}>{runId.slice(0, 8)}…</code>{" "}
           {run && <StatusBadge status={run.status} />}
@@ -243,7 +241,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
           </Panel>
 
           {progress && (
-            <Panel title={t("evaluation.run.progress.title")} eyebrow={t("evaluation.run.eyebrow")}>
+            <Panel title={t("evaluation.run.progress.title")}>
               <div
                 className="progress-track"
                 role="progressbar"

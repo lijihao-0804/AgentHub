@@ -198,7 +198,6 @@ export default function ReleaseGatePoliciesPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("evaluation.gates.eyebrow")}</p>
           <h1>{t("evaluation.gates.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.evaluations" />
@@ -209,9 +208,7 @@ export default function ReleaseGatePoliciesPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("evaluation.gates.eyebrow")}</p>
         <h1>{t("evaluation.gates.title")}</h1>
-        <p className="page-lede">{t("evaluation.gates.lede")}</p>
       </header>
 
       <Panel

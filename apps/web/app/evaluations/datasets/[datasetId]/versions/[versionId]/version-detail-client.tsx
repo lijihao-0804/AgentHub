@@ -115,7 +115,6 @@ export default function DatasetVersionDetailClient({
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("evaluation.datasets.version.eyebrow")}</p>
         <h1>
           {t("evaluation.datasets.version.title", {
             number: version?.version_number ?? "",
@@ -123,12 +122,6 @@ export default function DatasetVersionDetailClient({
           {version && <StatusBadge status={version.status} />}
           {isPublished && <span className="immutable-tag">{t("evaluation.immutable")}</span>}
         </h1>
-        <p className="page-lede">
-          <Link href={`/evaluations/datasets/${encodeURIComponent(datasetId)}`}>
-            {t("evaluation.overview.datasets")} /
-          </Link>{" "}
-          <code>{datasetId}</code>
-        </p>
       </header>
 
       {error && (

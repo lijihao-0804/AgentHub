@@ -24,7 +24,7 @@ export const zhCN: MessageSchema = {
   },
   runEvidence: {
     title: "工具调用与固定证据", replayHint: "已记录事件可能不完整。参数摘要仅展示字段类型，敏感值不进入摘要。",
-    empty: "暂无已记录工具事件", arguments: "参数结构", summaryUnavailable: "历史数据无摘要", evidence: "检索证据",
+    empty: "暂无已记录工具事件", arguments: "参数结构", status: "状态", summaryUnavailable: "历史数据无摘要", evidence: "检索证据",
     noEvidence: "没有已记录的固定证据引用，不会用最新快照替代历史证据。",
     permission: "读取证据正文需要知识内容权限。", open: "读取固定片段", excerpt: "片段最多展示 4096 字符。",
     truncated: "当前展示前 200 条已记录工具事件。", events: { requested: "请求", started: "开始", completed: "完成", failed: "失败" },
@@ -234,6 +234,9 @@ export const zhCN: MessageSchema = {
   },
   failureCategory: {
     MODEL: "模型",
+    RUNTIME: "运行时",
+    "AUTH/TENANT": "账号/租户",
+    UNKNOWN: "未知",
     ACTION: "动作",
     APPROVAL: "审批",
     TOOL: "工具",
@@ -511,7 +514,7 @@ export const zhCN: MessageSchema = {
       successRate: "成功率",
       successHint: "已完成 {numerator} / {denominator}",
       p95Latency: "p95 延迟",
-      p95Hint: "p50 {p50} · 平均 {avg} · {count} 个样本",
+      p95Hint: "p50 {p50} · {count} 样本",
       tokensPerRun: "每次运行 Token 数",
       tokensHint: "{known} 已知 · {unknown} 未知",
       tokensBreakdown: "输入均值 {input} · 输出均值 {output} · 缓存均值 {cached}",
@@ -694,6 +697,7 @@ export const zhCN: MessageSchema = {
     technicalMetadata: "技术元数据",
     compareEntry: "对比",
     replay: {
+      confirm: "确认重跑",
       button: "重跑",
       running: "运行中…",
       warning:
@@ -1751,6 +1755,8 @@ export const zhCN: MessageSchema = {
     defaultBindingMode: "默认知识绑定模式",
     bindingModeLatest: "跟随最新快照",
     bindingModePinned: "固定到指定快照",
+    bindingModeShortLatest: "最新快照",
+    bindingModeShortPinned: "固定快照",
     bindingModeHint: "LATEST：每次运行使用该知识库的最新快照；PINNED：固定使用绑定时的快照，内容更新不影响行为。",
     promptVersion: "提示词版本",
     advanced: "高级选项",

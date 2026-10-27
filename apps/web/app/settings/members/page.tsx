@@ -146,7 +146,6 @@ export default function SettingsMembersPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("settings.eyebrow")}</p>
           <h1>{t("settings.members.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.approvals" />
@@ -159,9 +158,7 @@ export default function SettingsMembersPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("settings.eyebrow")}</p>
         <h1>{t("settings.members.title")}</h1>
-        <p className="page-lede">{t("settings.members.lede")}</p>
       </header>
 
       {error && (

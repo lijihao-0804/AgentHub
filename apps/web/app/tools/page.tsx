@@ -85,7 +85,6 @@ export default function ToolsPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("tools.eyebrow")}</p>
           <h1>{t("tools.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.tools" />
@@ -120,9 +119,7 @@ export default function ToolsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("tools.eyebrow")}</p>
         <h1>{t("tools.title")}</h1>
-        <p className="page-lede">{t("tools.lede")}</p>
       </header>
 
       {notice && <p className="inline-notice">{notice}</p>}

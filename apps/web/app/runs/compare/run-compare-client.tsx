@@ -164,7 +164,6 @@ export default function RunCompareClient() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("runCompare.eyebrow")}</p>
           <h1>{t("runCompare.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.run" />
@@ -252,9 +251,7 @@ export default function RunCompareClient() {
     <div className="page">
       <Breadcrumbs items={[{ label: t("nav.runs"), href: "/runs" }, { label: t("runCompare.title") }]} />
       <header className="page-header">
-        <p className="eyebrow">{t("runCompare.eyebrow")}</p>
         <h1>{t("runCompare.title")}</h1>
-        <p className="page-lede">{t("runCompare.lede")}</p>
       </header>
 
       <Panel title={t("runCompare.title")} ariaLabel={t("runCompare.title")}>

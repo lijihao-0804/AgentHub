@@ -121,7 +121,6 @@ export default function EvaluationDatasetsPage() {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("evaluation.datasets.eyebrow")}</p>
           <h1>{t("evaluation.datasets.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.evaluations" />
@@ -139,9 +138,7 @@ export default function EvaluationDatasetsPage() {
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("evaluation.datasets.eyebrow")}</p>
         <h1>{t("evaluation.datasets.title")}</h1>
-        <p className="page-lede">{t("evaluation.datasets.lede")}</p>
       </header>
 
       <Panel

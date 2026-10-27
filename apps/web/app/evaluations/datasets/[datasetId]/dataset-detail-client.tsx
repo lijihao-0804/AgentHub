@@ -176,7 +176,6 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("evaluation.datasets.eyebrow")}</p>
           <h1>{t("evaluation.datasets.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.evaluations" />
@@ -187,15 +186,7 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("evaluation.datasets.eyebrow")}</p>
         <h1>{datasetInfo.data?.name ?? t("evaluation.datasets.title")}</h1>
-        <p className="page-lede">
-          <Link href="/evaluations/datasets">{t("evaluation.overview.datasets")} /</Link>{" "}
-          {datasetInfo.data?.description ? (
-            <span>{datasetInfo.data.description} · </span>
-          ) : null}
-          <code>{datasetId.slice(0, 8)}…</code>
-        </p>
       </header>
 
       <Panel

@@ -332,7 +332,6 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("agents.eyebrow")}</p>
           <h1>{t("agents.detail")}</h1>
         </header>
         <SessionRequired contextKey="session.context.agents" />
@@ -531,11 +530,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
         ]}
       />
       <header className="page-header">
-        <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{loadedAgent?.name ?? t("agents.detail")}</h1>
-        <p className="page-lede">
-          <code>{agentId}</code>
-        </p>
       </header>
 
       <div className="page-toolbar">

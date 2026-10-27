@@ -644,7 +644,6 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("agents.eyebrow")}</p>
           <h1>{t("agents.playground.title")}</h1>
         </header>
         <SessionRequired contextKey="session.context.agents" />
@@ -682,9 +681,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
         ]}
       />
       <header className="page-header">
-        <p className="eyebrow">{t("agents.eyebrow")}</p>
         <h1>{t("agents.playground.title")}</h1>
-        <p className="page-lede">{t("agents.playground.lede")}</p>
       </header>
 
       <div className="page-toolbar">

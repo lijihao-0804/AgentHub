@@ -287,16 +287,11 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t("evaluation.experiment.eyebrow")}</p>
         <h1>
           {experiment?.name ?? ""}{" "}
           {experiment && <StatusBadge status={experiment.status} />}
           {experiment && !isDraft && <span className="immutable-tag">{t("evaluation.immutable")}</span>}
         </h1>
-        <p className="page-lede">
-          <Link href="/evaluations/experiments">{t("evaluation.experiments.title")} /</Link>{" "}
-          <code>{experimentId}</code>
-        </p>
       </header>
 
       {error && (
