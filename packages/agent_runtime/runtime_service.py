@@ -385,12 +385,12 @@ class AgentRunService:
                     "The approval is not the active durable interrupt.",
                     409,
                 )
-            checkpoint_error = await self._validate_checkpoint_interrupt(
+            checkpoint_error, resume_config = await self._validate_checkpoint_interrupt(
                 run, approval_id=approval_id
             )
-            if checkpoint_error is not None:
+            if checkpoint_error is not None or resume_config is None:
                 raise AgentHubError(
-                    checkpoint_error,
+                    checkpoint_error or "APPROVAL_CHECKPOINT_INVALID",
                     "The durable approval checkpoint is invalid.",
                     409,
                 )
@@ -448,10 +448,30 @@ class AgentRunService:
                 event_recorder=recorder,
             )
             async with self.checkpoint_adapter.checkpointer() as checkpointer:
+                latest = await checkpointer.aget_tuple(
+                    self.checkpoint_adapter.config_for_run(run.workspace_id, run.id)
+                )
+                latest_config = getattr(latest, "config", None)
+                latest_identity = (
+                    latest_config.get("configurable")
+                    if isinstance(latest_config, Mapping)
+                    else None
+                )
+                resume_identity = resume_config["configurable"]
+                if not isinstance(latest_identity, Mapping) or any(
+                    latest_identity.get(key) != resume_identity[key]
+                    for key in ("thread_id", "checkpoint_ns", "checkpoint_id")
+                ):
+                    raise AgentHubError(
+                        "APPROVAL_CHECKPOINT_INVALID",
+                        "The durable approval checkpoint changed before recovery.",
+                        409,
+                    )
                 final_state = await graph.invoke(
                     resume_command({"approval_id": str(approval_id)}),
                     checkpointer=checkpointer,
-                    config=self.checkpoint_adapter.config_for_run(run.workspace_id, run.id),
+                    # A newer head must not replace the interrupt we validated.
+                    config=resume_config,
                 )
             approval_payload = _approval_interrupt_payload(final_state)
             if approval_payload is not None:
@@ -621,21 +641,20 @@ class AgentRunService:
 
     async def _validate_checkpoint_interrupt(
         self, run: AgentRun, *, approval_id: UUID
-    ) -> str | None:
+    ) -> tuple[str | None, dict[str, Any] | None]:
         """Require exactly the active approval identity in the pending checkpoint."""
 
         if self.checkpoint_adapter is None:
-            return "APPROVAL_CHECKPOINT_MISSING"
+            return "APPROVAL_CHECKPOINT_MISSING", None
+        latest_config = self.checkpoint_adapter.config_for_run(run.workspace_id, run.id)
         try:
             async with self.checkpoint_adapter.checkpointer() as checkpointer:
-                checkpoint = await checkpointer.aget_tuple(
-                    self.checkpoint_adapter.config_for_run(run.workspace_id, run.id)
-                )
+                checkpoint = await checkpointer.aget_tuple(latest_config)
         except Exception:
             logger.warning("approval_checkpoint_read_failed", exc_info=True)
-            return "APPROVAL_CHECKPOINT_INVALID"
+            return "APPROVAL_CHECKPOINT_INVALID", None
         if checkpoint is None:
-            return "APPROVAL_CHECKPOINT_MISSING"
+            return "APPROVAL_CHECKPOINT_MISSING", None
         pending = []
         for write in getattr(checkpoint, "pending_writes", None) or ():
             try:
@@ -645,7 +664,7 @@ class AgentRunService:
             if channel == "__interrupt__":
                 pending.extend(value if isinstance(value, (list, tuple)) else (value,))
         if not pending:
-            return "APPROVAL_CHECKPOINT_INVALID"
+            return "APPROVAL_CHECKPOINT_INVALID", None
         try:
             payloads = interrupt_payloads({"__interrupt__": pending})
             interrupt_ids = {
@@ -654,30 +673,57 @@ class AgentRunService:
                 if payload.get("approval_id") is not None
             }
         except (KeyError, TypeError, ValueError):
-            return "APPROVAL_CHECKPOINT_INVALID"
+            return "APPROVAL_CHECKPOINT_INVALID", None
         expected = str(approval_id)
         if (
             len(payloads) != 1
             or interrupt_ids != {expected}
             or (run.waiting_approval_id is not None and str(run.waiting_approval_id) != expected)
         ):
-            return "APPROVAL_RESUME_MISMATCH"
+            return "APPROVAL_RESUME_MISMATCH", None
         checkpoint_data = getattr(checkpoint, "checkpoint", {})
+        if not isinstance(checkpoint_data, Mapping):
+            return "APPROVAL_CHECKPOINT_INVALID", None
+        checkpoint_id = checkpoint_data.get("id")
+        tuple_config = getattr(checkpoint, "config", None)
+        tuple_configurable = (
+            tuple_config.get("configurable") if isinstance(tuple_config, Mapping) else None
+        )
+        expected_configurable = latest_config.get("configurable")
+        if (
+            not isinstance(checkpoint_id, str)
+            or not checkpoint_id
+            or not isinstance(tuple_configurable, Mapping)
+            or not isinstance(expected_configurable, Mapping)
+            or tuple_configurable.get("thread_id") != expected_configurable.get("thread_id")
+            or tuple_configurable.get("checkpoint_ns") != expected_configurable.get("checkpoint_ns")
+            or tuple_configurable.get("checkpoint_id") != checkpoint_id
+        ):
+            return "APPROVAL_CHECKPOINT_INVALID", None
+        checkpoint_ns = tuple_configurable["checkpoint_ns"]
+        if not isinstance(checkpoint_ns, str):
+            return "APPROVAL_CHECKPOINT_INVALID", None
         channels = (
             checkpoint_data.get("channel_values", {})
             if isinstance(checkpoint_data, Mapping)
             else {}
         )
         if not isinstance(channels, Mapping):
-            return "APPROVAL_CHECKPOINT_INVALID"
+            return "APPROVAL_CHECKPOINT_INVALID", None
         try:
             await verify_history_checkpoint_binding(self.session_factory, run=run, state=channels)
         except AgentHubError as error:
-            return error.code
+            return error.code, None
         except Exception:
             logger.warning("approval_history_checkpoint_verification_failed", exc_info=True)
-            return "APPROVAL_CHECKPOINT_INVALID"
-        return None
+            return "APPROVAL_CHECKPOINT_INVALID", None
+        resume_config = self.checkpoint_adapter.config_for_checkpoint(
+            run.workspace_id,
+            run.id,
+            checkpoint_id=checkpoint_id,
+            checkpoint_ns=checkpoint_ns,
+        )
+        return None, resume_config
 
     async def _resume_required_permissions(
         self, run: AgentRun, approval: Approval
