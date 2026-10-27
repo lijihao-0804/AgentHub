@@ -8,6 +8,7 @@ an AgentHub assistant or tool.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
@@ -469,35 +470,14 @@ def _reference_occurs(value: str, text: str, kind: SummaryRequiredReferenceKind)
     ):
         return value in text
 
-    start = 0
-    while (index := text.find(value, start)) >= 0:
-        end = index + len(value)
-        before = text[index - 1] if index else ""
-        after = text[end] if end < len(text) else ""
-        digit_before_separator = index >= 2 and text[index - 2].isdecimal()
-        digit_after_separator = end + 1 < len(text) and text[end + 1].isdecimal()
-        prefix_embedded = (
-            before.isdecimal()
-            or before in {"+", "-", "−", ".", "．"}
-            or before in {",", "，"}
-            and (index == 1 or digit_before_separator)
-        )
-        suffix_embedded = (
-            after.isdecimal()
-            or after in {".", "．", ",", "，"}
-            and digit_after_separator
-            or after in {"e", "E"}
-            and (
-                digit_after_separator
-                or end + 2 < len(text)
-                and text[end + 1] in {"+", "-"}
-                and text[end + 2].isdecimal()
-            )
-        )
-        if not prefix_embedded and not suffix_embedded:
-            return True
-        start = index + 1
-    return False
+    # An escaped literal and fixed-width lookbehinds avoid a Python-level
+    # loop for every candidate in a long run of repeated digits.
+    expression = (
+        r"(?<![\d+\-−.．])(?<!\d,)(?<!\d，)(?<!^,)(?<!^，)"
+        + re.escape(value)
+        + r"(?!\d|[.．,，]\d|[eE][+\-]?\d)"
+    )
+    return re.search(expression, text) is not None
 
 
 def _validate_context(context: SummaryInputContext) -> None:
