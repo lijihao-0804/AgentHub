@@ -21,6 +21,7 @@ from packages.agent_runtime.summary_prompt import (
     SummaryActionStatus,
     SummaryInputContext,
     SummaryInputContextError,
+    _reference_occurs,
     summary_output_schema,
     validate_summary_input_context,
 )
@@ -698,11 +699,12 @@ def _validate_required_references(
     for reference in context.required_references:
         required_source_ids = set(reference.source_ids)
         in_text = any(
-            reference.value in item.text and required_source_ids.issubset(set(item.source_ids))
+            _reference_occurs(reference.value, item.text, reference.kind)
+            and required_source_ids.issubset(set(item.source_ids))
             for item in text_items
         )
         in_action = any(
-            reference.value in action.action_ref
+            _reference_occurs(reference.value, action.action_ref, reference.kind)
             and required_source_ids.issubset(set(action.source_ids))
             for action in actions
         )

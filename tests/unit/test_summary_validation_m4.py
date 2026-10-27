@@ -154,6 +154,70 @@ def _issue_codes(result: object) -> set[SummaryValidationCode]:
     return {issue.code for issue in result.issues}
 
 
+@pytest.mark.parametrize(
+    "changed_amount",
+    ("1000", "-100", "100.5", "1,100", ".100", "100e3"),
+)
+def test_numeric_reference_does_not_match_part_of_a_different_number(changed_amount):
+    reference = SummaryRequiredReference(
+        reference_id="amount",
+        kind=SummaryRequiredReferenceKind.NUMBER,
+        value="100",
+        source_ids=("source-1",),
+    )
+    candidate = _candidate()
+    candidate["decisions"] = [
+        {"text": f"保留 {changed_amount} CNY。", "source_ids": ["source-1"]}
+    ]
+    result = validate_summary_candidate(
+        candidate, context=_context(required_references=(reference,)), counter=FixedCounter()
+    )
+    assert not result.valid
+    assert SummaryValidationCode.REFERENCE_MISSING in _issue_codes(result)
+
+
+def test_numeric_reference_accepts_exact_number_next_to_chinese_and_later_match():
+    reference = SummaryRequiredReference(
+        reference_id="amount",
+        kind=SummaryRequiredReferenceKind.NUMBER,
+        value="100",
+        source_ids=("source-1",),
+    )
+    candidate = _candidate()
+    candidate["decisions"] = [
+        {"text": "旧金额1000，当前金额100元。", "source_ids": ["source-1"]}
+    ]
+    result = validate_summary_candidate(
+        candidate,
+        context=_context(
+            sources=(
+                _source("source-1", 1, "旧金额1000，当前金额100元。"),
+                _source("source-2", 2, "核对处理状态。"),
+            ),
+            required_references=(reference,),
+        ),
+        counter=FixedCounter(),
+    )
+    assert result.valid
+
+
+def test_numeric_reference_must_exist_as_a_complete_number_in_the_source():
+    reference = SummaryRequiredReference(
+        reference_id="amount",
+        kind=SummaryRequiredReferenceKind.NUMBER,
+        value="100",
+        source_ids=("source-1",),
+    )
+    with pytest.raises(SummaryInputContextError):
+        _context(
+            sources=(
+                _source("source-1", 1, "退款金额为 1000 CNY。"),
+                _source("source-2", 2, "核对处理状态。"),
+            ),
+            required_references=(reference,),
+        )
+
+
 def test_prompt_is_frozen_verbatim_and_unknown_versions_fail_closed() -> None:
     assert frozen_summary_prompt() == SUMMARY_PROMPT_V1
     assert FROZEN_SUMMARY_PROMPTS == {SUMMARY_PROMPT_VERSION: SUMMARY_PROMPT_V1}

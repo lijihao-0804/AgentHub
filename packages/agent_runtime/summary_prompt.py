@@ -458,6 +458,48 @@ def summary_output_schema() -> dict[str, Any]:
     }
 
 
+def _reference_occurs(value: str, text: str, kind: SummaryRequiredReferenceKind) -> bool:
+    """Reject a numeric reference embedded in a different numeric literal.
+
+    This is a conservative lexical check, not proof of numerical meaning or
+    semantic faithfulness. Protected facts remain separately preserved.
+    """
+    if kind is not SummaryRequiredReferenceKind.NUMBER or not any(
+        char.isdecimal() for char in value
+    ):
+        return value in text
+
+    start = 0
+    while (index := text.find(value, start)) >= 0:
+        end = index + len(value)
+        before = text[index - 1] if index else ""
+        after = text[end] if end < len(text) else ""
+        digit_before_separator = index >= 2 and text[index - 2].isdecimal()
+        digit_after_separator = end + 1 < len(text) and text[end + 1].isdecimal()
+        prefix_embedded = (
+            before.isdecimal()
+            or before in {"+", "-", "−", ".", "．"}
+            or before in {",", "，"}
+            and (index == 1 or digit_before_separator)
+        )
+        suffix_embedded = (
+            after.isdecimal()
+            or after in {".", "．", ",", "，"}
+            and digit_after_separator
+            or after in {"e", "E"}
+            and (
+                digit_after_separator
+                or end + 2 < len(text)
+                and text[end + 1] in {"+", "-"}
+                and text[end + 2].isdecimal()
+            )
+        )
+        if not prefix_embedded and not suffix_embedded:
+            return True
+        start = index + 1
+    return False
+
+
 def _validate_context(context: SummaryInputContext) -> None:
     for name in ("workspace_id", "thread_id", "permission_snapshot", "task_goal"):
         _require_text(getattr(context, name), name)
@@ -557,7 +599,10 @@ def _validate_context(context: SummaryInputContext) -> None:
         authoritative_sources = [
             source for source in context.sources if source.source_id in reference.source_ids
         ]
-        if not any(reference.value in source.content for source in authoritative_sources):
+        if not any(
+            _reference_occurs(reference.value, source.content, reference.kind)
+            for source in authoritative_sources
+        ):
             raise SummaryInputContextError("required reference value is absent from every source")
 
 
