@@ -365,6 +365,33 @@ def test_protected_fact_and_reference_must_come_from_bound_sources() -> None:
         )
 
 
+@pytest.mark.parametrize("kind", ["protected", "reference"])
+def test_every_attributed_source_contains_the_exact_protected_value(kind):
+    sources = (
+        _source("source-1", 1, "退款金额是100元。"),
+        _source("source-2", 2, "后续仅核对处理状态。"),
+    )
+    protected = SummaryProtectedFact(
+        fact_ref="amount", text="100元", source_ids=("source-1", "source-2")
+    )
+    reference = SummaryRequiredReference(
+        reference_id="amount", kind="NUMBER", value="100", source_ids=("source-1", "source-2")
+    )
+    with pytest.raises(SummaryInputContextError, match="absent from a cited source"):
+        _context(
+            sources=sources,
+            protected_facts=(protected,) if kind == "protected" else (),
+            required_references=(reference,) if kind == "reference" else (),
+        )
+
+    both = (sources[0], _source("source-2", 2, "后来确认退款金额是100元。"))
+    _context(
+        sources=both,
+        protected_facts=(protected,) if kind == "protected" else (),
+        required_references=(reference,) if kind == "reference" else (),
+    )
+
+
 def test_valid_candidate_retains_schema_sources_and_deterministic_evidence() -> None:
     context = _context(
         sources=(

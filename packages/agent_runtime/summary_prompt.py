@@ -560,8 +560,8 @@ def _validate_context(context: SummaryInputContext) -> None:
         authoritative_sources = [
             source for source in context.sources if source.source_id in fact.source_ids
         ]
-        if not any(fact.text in source.content for source in authoritative_sources):
-            raise SummaryInputContextError("protected fact text is absent from every source")
+        if not all(fact.text in source.content for source in authoritative_sources):
+            raise SummaryInputContextError("protected fact text is absent from a cited source")
 
     action_refs: set[str] = set()
     for action in context.completed_actions:
@@ -579,11 +579,11 @@ def _validate_context(context: SummaryInputContext) -> None:
         authoritative_sources = [
             source for source in context.sources if source.source_id in reference.source_ids
         ]
-        if not any(
+        if not all(
             _reference_occurs(reference.value, source.content, reference.kind)
             for source in authoritative_sources
         ):
-            raise SummaryInputContextError("required reference value is absent from every source")
+            raise SummaryInputContextError("required reference value is absent from a cited source")
 
 
 def _require_known_source_ids(
