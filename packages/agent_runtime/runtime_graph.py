@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 import json
 import logging
 import time
@@ -97,6 +98,8 @@ from packages.model_gateway.contracts import (
     ModelToolDefinition,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
+from packages.model_gateway.gateway import ModelGatewayService
+from packages.model_gateway.run_budget_adapter import ModelAttemptBudgetError
 from packages.observability.timing import mark_visible_text
 from packages.tools.actions import ActionExecutionStatus
 from packages.tools.contracts import (
@@ -1212,6 +1215,25 @@ class _AgentRunGraph:
         try:
             async with self.service.session_factory() as session:
                 gateway = self.service.model_gateway_factory(session)
+                budget_factory = getattr(self.service, "model_attempt_budget_factory", None)
+                if budget_factory is not None:
+                    if not isinstance(gateway, ModelGatewayService):
+                        raise AgentHubError(
+                            "RUN_BUDGET_BINDING_UNAVAILABLE",
+                            "The configured gateway cannot enforce per-attempt reservations.",
+                            422,
+                        )
+                    # A factory can return a shared gateway; keep this Run's
+                    # budget binding local to this invocation.
+                    gateway = copy.copy(gateway)
+                    gateway.attempt_budget = budget_factory(self.run, next_round)
+                    if not all(
+                        callable(getattr(gateway.attempt_budget, method, None))
+                        for method in ("reserve_attempt", "mark_unknown_outcome")
+                    ):
+                        raise AgentHubError(
+                            "RUN_BUDGET_BINDING_UNAVAILABLE", "The Run budget is unavailable.", 422
+                        )
                 prepared_gateway = gateway
                 prepare_resolved = getattr(gateway, "prepare_resolved", None)
                 if prepare_resolved is not None:
@@ -1231,6 +1253,11 @@ class _AgentRunGraph:
                 response = await prepared_gateway.generate_resolved(
                     self.context, state["spec"].model_plan, request
                 )
+        except ModelAttemptBudgetError as error:
+            await self.step(
+                "MODEL", "FAILED", {"model_round": next_round, "error_code": error.code}
+            )
+            return {**evidence_update, "model_round_count": next_round, "failure_code": error.code}
         except ModelGatewayError as error:
             await self.step(
                 "MODEL",

@@ -69,6 +69,7 @@ from packages.model_gateway.contracts import (
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.model_gateway.errors import ModelGatewayError
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
+from packages.model_gateway.run_budget_adapter import ModelAttemptBudget
 from packages.observability import NoopTraceSink
 from packages.observability.contracts import TraceSink
 from packages.threads.models import AgentThread, ThreadTurn
@@ -87,6 +88,7 @@ class AgentRunService:
         session_factory: async_sessionmaker[AsyncSession],
         *,
         model_gateway_factory: Callable[[AsyncSession], ModelGateway] | None = None,
+        model_attempt_budget_factory: Callable[[AgentRun, int], ModelAttemptBudget] | None = None,
         tool_runtime: ToolRuntime | None = None,
         trace_sink: TraceSink | None = None,
         credential_cipher: ProviderCredentialCipher | None = None,
@@ -110,6 +112,8 @@ class AgentRunService:
                 trace_sink=self.trace_sink,
             )
         )
+        # Explicit composition only; existing Agents keep their current policy.
+        self.model_attempt_budget_factory = model_attempt_budget_factory
         self.tool_runtime = tool_runtime or ToolRuntime(session_factory=session_factory)
         self.approval_service = approval_service
         self.action_runtime = action_runtime

@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
+from packages.model_gateway.cache_capability import CacheSupport, PromptCacheCapability
 from packages.model_gateway.capabilities import (
     effective_capability_requirements,
     validate_capabilities,
@@ -38,6 +39,12 @@ from packages.model_gateway.profile_resolution import (
     ResolvedModelProfile,
 )
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
+from packages.model_gateway.run_budget_adapter import (
+    ModelAttemptBudget,
+    ModelAttemptBudgetError,
+    ModelAttemptBudgetReservation,
+    ModelAttemptKind,
+)
 from packages.observability.contracts import TraceSink, TraceSpan
 from packages.observability.noop import NoopTraceSink, NoopTraceSpan
 from packages.observability.timing import timed_span
@@ -126,11 +133,13 @@ class ModelGatewayService(ModelGateway):
         repository: SqlAlchemyModelGatewayRepository,
         adapter: ModelProviderAdapter,
         trace_sink: TraceSink | None = None,
+        attempt_budget: ModelAttemptBudget | None = None,
     ) -> None:
         self.repository = repository
         self.resolver = ModelProfileResolver(repository)
         self.adapter = adapter
         self.trace_sink = trace_sink or NoopTraceSink()
+        self.attempt_budget = attempt_budget
 
     async def generate(
         self,
@@ -235,6 +244,7 @@ class ModelGatewayService(ModelGateway):
         fallback_used = False
         provider: str | None = None
         model: str | None = None
+        active_budget_reservation: ModelAttemptBudgetReservation | None = None
         try:
             last_error: ModelGatewayError | None = None
             for profile_index, profile in enumerate(chain):
@@ -247,11 +257,23 @@ class ModelGatewayService(ModelGateway):
                 )
                 provider = credential.provider
                 for attempt in range(request.retry_policy.max_attempts):
+                    attempt_kind = _attempt_kind(profile_index, attempt)
+                    active_budget_reservation = await self._reserve_attempt(
+                        context,
+                        profile,
+                        request,
+                        provider=provider,
+                        operation="generate",
+                        profile_index=profile_index,
+                        attempt_index=attempt,
+                        attempt_kind=attempt_kind,
+                    )
                     attempt_count += 1
                     try:
                         async with asyncio.timeout(float(profile.timeout_seconds)):
                             response = await self.adapter.complete(profile, credential, request)
-                            _validate_usable_response(response)
+                        active_budget_reservation = None
+                        _validate_usable_response(response)
                         await _end_trace_span(
                             span,
                             attributes=_response_trace_attributes(
@@ -265,19 +287,28 @@ class ModelGatewayService(ModelGateway):
                         )
                         return response
                     except TimeoutError:
+                        await self._mark_unknown_outcome(active_budget_reservation)
+                        active_budget_reservation = None
                         last_error = ModelGatewayError(
                             ModelGatewayErrorCode.MODEL_TIMEOUT, retryable=True
                         )
                         if attempt + 1 >= request.retry_policy.max_attempts:
                             break
                     except ModelGatewayError as error:
+                        await self._mark_unknown_outcome(active_budget_reservation)
+                        active_budget_reservation = None
                         last_error = error
                         if not error.retryable or attempt + 1 >= request.retry_policy.max_attempts:
                             break
+                    except Exception:
+                        await self._mark_unknown_outcome(active_budget_reservation)
+                        active_budget_reservation = None
+                        raise
             if last_error is not None:
                 raise last_error
             raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
         except (asyncio.CancelledError, GeneratorExit):
+            await self._mark_cancelled_unknown_outcome(active_budget_reservation)
             await _end_trace_span(
                 span,
                 attributes=_failure_trace_attributes(
@@ -293,7 +324,25 @@ class ModelGatewayService(ModelGateway):
                 failure_code="CANCELLED",
             )
             raise
+        except ModelAttemptBudgetError as error:
+            await _end_trace_span(
+                span,
+                attributes=_failure_trace_attributes(
+                    context,
+                    model_profile_id,
+                    started=started,
+                    attempt_count=attempt_count,
+                    fallback_used=fallback_used,
+                    provider=provider,
+                    model=model,
+                ),
+                status="error",
+                failure_code=error.code,
+            )
+            raise
         except ModelGatewayError as error:
+            if active_budget_reservation is not None:
+                await self._mark_unknown_outcome(active_budget_reservation)
             await _end_trace_span(
                 span,
                 attributes=_failure_trace_attributes(
@@ -310,6 +359,8 @@ class ModelGatewayService(ModelGateway):
             )
             raise
         except Exception:
+            if active_budget_reservation is not None:
+                await self._mark_unknown_outcome(active_budget_reservation)
             normalized = ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
             await _end_trace_span(
                 span,
@@ -378,6 +429,7 @@ class ModelGatewayService(ModelGateway):
         fallback_used = False
         provider: str | None = None
         model: str | None = None
+        active_budget_reservation: ModelAttemptBudgetReservation | None = None
         try:
             if prepared is not None:
                 chain, credentials = prepared
@@ -403,6 +455,17 @@ class ModelGatewayService(ModelGateway):
                 )
                 provider = credential.provider
                 for attempt in range(request.retry_policy.max_attempts):
+                    attempt_kind = _attempt_kind(profile_index, attempt)
+                    active_budget_reservation = await self._reserve_attempt(
+                        context,
+                        profile,
+                        request,
+                        provider=provider,
+                        operation="stream",
+                        profile_index=profile_index,
+                        attempt_index=attempt,
+                        attempt_kind=attempt_kind,
+                    )
                     attempt_count += 1
                     buffered: list[ModelStreamEvent] = []
                     visible = False
@@ -411,6 +474,7 @@ class ModelGatewayService(ModelGateway):
                         async with asyncio.timeout(float(profile.timeout_seconds)):
                             async for event in self.adapter.stream(profile, credential, request):
                                 if event.response is not None:
+                                    active_budget_reservation = None
                                     final_response = event.response
                                     _validate_usable_response(final_response)
                                 if event.event_type in {
@@ -429,6 +493,8 @@ class ModelGatewayService(ModelGateway):
                             if final_response is None:
                                 raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
                     except TimeoutError:
+                        await self._mark_unknown_outcome(active_budget_reservation)
+                        active_budget_reservation = None
                         if visible:
                             raise ModelGatewayError(
                                 ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
@@ -441,6 +507,8 @@ class ModelGatewayService(ModelGateway):
                             break
                         continue
                     except ModelGatewayError as error:
+                        await self._mark_unknown_outcome(active_budget_reservation)
+                        active_budget_reservation = None
                         if visible:
                             raise ModelGatewayError(
                                 ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
@@ -450,6 +518,8 @@ class ModelGatewayService(ModelGateway):
                             break
                         continue
                     except Exception:
+                        await self._mark_unknown_outcome(active_budget_reservation)
+                        active_budget_reservation = None
                         if visible:
                             raise ModelGatewayError(
                                 ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
@@ -476,6 +546,7 @@ class ModelGatewayService(ModelGateway):
                 raise last_error
             raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
         except (asyncio.CancelledError, GeneratorExit):
+            await self._mark_cancelled_unknown_outcome(active_budget_reservation)
             await _end_trace_span(
                 span,
                 attributes=_failure_trace_attributes(
@@ -491,7 +562,25 @@ class ModelGatewayService(ModelGateway):
                 failure_code="CANCELLED",
             )
             raise
+        except ModelAttemptBudgetError as error:
+            await _end_trace_span(
+                span,
+                attributes=_failure_trace_attributes(
+                    context,
+                    model_profile_id,
+                    started=started,
+                    attempt_count=attempt_count,
+                    fallback_used=fallback_used,
+                    provider=provider,
+                    model=model,
+                ),
+                status="error",
+                failure_code=error.code,
+            )
+            raise
         except ModelGatewayError as error:
+            if active_budget_reservation is not None:
+                await self._mark_unknown_outcome(active_budget_reservation)
             await _end_trace_span(
                 span,
                 attributes=_failure_trace_attributes(
@@ -508,6 +597,8 @@ class ModelGatewayService(ModelGateway):
             )
             raise
         except Exception:
+            if active_budget_reservation is not None:
+                await self._mark_unknown_outcome(active_budget_reservation)
             normalized = ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
             await _end_trace_span(
                 span,
@@ -524,6 +615,74 @@ class ModelGatewayService(ModelGateway):
                 failure_code=normalized.code.value,
             )
             raise normalized from None
+
+    async def _reserve_attempt(
+        self,
+        context: WorkspaceExecutionContext,
+        profile: ResolvedModelProfile,
+        request: ModelRequest,
+        *,
+        provider: str,
+        operation: Literal["generate", "stream"],
+        profile_index: int,
+        attempt_index: int,
+        attempt_kind: ModelAttemptKind,
+    ) -> ModelAttemptBudgetReservation | None:
+        if self.attempt_budget is None:
+            return None
+        return await self.attempt_budget.reserve_attempt(
+            context,
+            profile,
+            request,
+            provider=provider,
+            operation=operation,
+            profile_index=profile_index,
+            attempt_index=attempt_index,
+            attempt_kind=attempt_kind,
+        )
+
+    async def _mark_unknown_outcome(
+        self,
+        reservation: ModelAttemptBudgetReservation | None,
+    ) -> None:
+        if reservation is None:
+            return
+        if self.attempt_budget is None:
+            raise ModelAttemptBudgetError(
+                "RUN_BUDGET_BINDING_UNAVAILABLE",
+                "The Run budget adapter disappeared after reservation.",
+            )
+        await self.attempt_budget.mark_unknown_outcome(reservation)
+
+    async def _mark_cancelled_unknown_outcome(
+        self,
+        reservation: ModelAttemptBudgetReservation | None,
+    ) -> None:
+        if reservation is None:
+            return
+        task: asyncio.Task[None] | None = None
+        try:
+            task = asyncio.create_task(self._mark_unknown_outcome(reservation))
+            await asyncio.shield(task)
+        except asyncio.CancelledError:
+            try:
+                if task is not None:
+                    await asyncio.shield(task)
+            except Exception as error:
+                logger.warning(
+                    "model_budget_unknown_outcome_persistence_failed: %s",
+                    type(error).__name__,
+                )
+            raise
+        except Exception as error:
+            # The original reservation remains committed, but changing a
+            # cancellation into a budget error would lose the caller's
+            # cancellation semantics.  Keep the safe hold and report the
+            # persistence failure without logging provider content.
+            logger.warning(
+                "model_budget_unknown_outcome_persistence_failed: %s",
+                type(error).__name__,
+            )
 
     async def health(
         self,
@@ -551,6 +710,28 @@ class ModelGatewayService(ModelGateway):
     ) -> ModelCapabilities:
         chain = await self.resolver.resolve_chain(context, model_profile_id)
         return chain[0].capabilities
+
+    async def prompt_cache_capabilities(
+        self, context: WorkspaceExecutionContext, model_profile_id: UUID
+    ) -> tuple[tuple[UUID, PromptCacheCapability], ...]:
+        """Describe the currently configured routes without claiming cache hits.
+
+        This is a read of the current profile chain, not a frozen Run decision;
+        the provider adapter must explicitly recognize a route to report support.
+        """
+        chain = await self.resolver.resolve_chain(context, model_profile_id)
+        inspect_cache = getattr(self.adapter, "prompt_cache_capability", None)
+        results = []
+        for profile in chain:
+            credential = await self._enabled_credential(context, profile.provider_credential_id)
+            try:
+                capability = inspect_cache(profile, credential) if callable(inspect_cache) else None
+            except Exception:
+                capability = None
+            if not isinstance(capability, PromptCacheCapability):
+                capability = PromptCacheCapability(CacheSupport.UNKNOWN, CacheSupport.UNKNOWN)
+            results.append((profile.id, capability))
+        return tuple(results)
 
     async def _enabled_credential(
         self,
@@ -587,12 +768,22 @@ class SqlAlchemyModelGateway(ModelGatewayService):
         adapter: ModelProviderAdapter | None = None,
         trace_sink: TraceSink | None = None,
         credential_cipher: ProviderCredentialCipher | None = None,
+        attempt_budget: ModelAttemptBudget | None = None,
     ) -> None:
         super().__init__(
             SqlAlchemyModelGatewayRepository(session, credential_cipher=credential_cipher),
             adapter or LiteLLMProviderAdapter(),
             trace_sink=trace_sink,
+            attempt_budget=attempt_budget,
         )
+
+
+def _attempt_kind(profile_index: int, attempt_index: int) -> ModelAttemptKind:
+    if profile_index > 0:
+        return ModelAttemptKind.FALLBACK
+    if attempt_index > 0:
+        return ModelAttemptKind.RETRY
+    return ModelAttemptKind.MAIN_MODEL
 
 
 def _validate_usable_response(response: ModelResponse) -> None:
