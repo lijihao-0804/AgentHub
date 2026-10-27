@@ -1615,6 +1615,48 @@ async def test_expiry_during_dispatch_review_does_not_cross_boundary(
 
 
 @pytest.mark.asyncio
+async def test_expiry_while_locking_dispatch_fences_response_as_unknown(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    clock = [datetime.now(UTC)]
+    service = SummaryJobService(
+        factory,
+        verifier=_Verifier(lambda _binding: _validation_context(tenant)),
+        budget_reserver=_TestBudgetReserver(),
+        clock=lambda: clock[0],
+        lease_seconds=60,
+    )
+    created = await service.create_job(_new_summary_job(tenant))
+    claimed = await service.claim(created.key)
+    assert claimed is not None
+    await _commit_intent(service, created.key, claimed.lease_token, tenant=tenant)
+    original_lock = service._lock_dispatch
+
+    async def lock_then_expire(session, key, dispatch_id):
+        result = await original_lock(session, key, dispatch_id)
+        clock[0] = claimed.lease_expires_at + timedelta(seconds=1)
+        return result
+
+    service._lock_dispatch = lock_then_expire
+    with pytest.raises(SummaryServiceError) as error:
+        await service.store_provider_response(
+            created.key,
+            lease_token=claimed.lease_token,
+            response=SummaryResponseData(
+                provider="offline",
+                model="offline-summary-service",
+                raw_response=_candidate(tenant),
+                usage_metadata={"source": "offline"},
+            ),
+        )
+    assert error.value.code == "SUMMARY_LEASE_EXPIRED_UNKNOWN"
+    job, dispatch, responses = await _job_row(factory, created.key)
+    assert job.status == dispatch.outcome == "UNKNOWN_OUTCOME"
+    assert job.budget_reserved and responses == []
+
+
+@pytest.mark.asyncio
 async def test_expiry_during_publication_review_does_not_publish(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:

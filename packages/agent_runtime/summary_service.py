@@ -1334,22 +1334,29 @@ class SummaryJobService:
                             "The response lease is missing, expired, or owned elsewhere.",
                         )
                     expired = True
+                dispatch = None
+                if not terminal:
+                    dispatch = await self._lock_dispatch(session, key, job.dispatch_id)
+                    if dispatch is None:
+                        raise SummaryServiceError(
+                            "SUMMARY_DISPATCH_INVARIANT",
+                            "The dispatch intent pointer is missing.",
+                        )
+                    # Acquiring the dispatch row can itself wait for another
+                    # transaction. Check the lease again after that wait.
+                    current = self._now(now)
+                    if not _owns_live_lease(job, lease_token, current):
+                        if job.lease_token is not None and _is_live(job.lease_expires_at, current):
+                            raise SummaryServiceError(
+                                "SUMMARY_LEASE_LOST", "The response lease belongs to another owner."
+                            )
+                        expired = True
                 if expired:
                     _mark_unknown(job, current)
-                    dispatch = await self._lock_dispatch(session, key, job.dispatch_id)
-                    if dispatch is None:
-                        raise SummaryServiceError(
-                            "SUMMARY_DISPATCH_INVARIANT",
-                            "The dispatch intent pointer is missing.",
-                        )
+                    assert dispatch is not None
                     await self._mark_dispatch_unknown(session, key, dispatch, current)
                 elif not terminal:
-                    dispatch = await self._lock_dispatch(session, key, job.dispatch_id)
-                    if dispatch is None:
-                        raise SummaryServiceError(
-                            "SUMMARY_DISPATCH_INVARIANT",
-                            "The dispatch intent pointer is missing.",
-                        )
+                    assert dispatch is not None
                     if dispatch.outcome != ThreadSummaryDispatchOutcome.DISPATCHED.value:
                         raise SummaryServiceError(
                             "SUMMARY_DISPATCH_NOT_STARTED",
@@ -1380,6 +1387,11 @@ class SummaryJobService:
                         )
                     )
                     await session.flush()
+                    if not _owns_live_lease(job, lease_token, self._now(now)):
+                        raise SummaryServiceError(
+                            "SUMMARY_LEASE_LOST",
+                            "The response lease expired while saving provider evidence.",
+                        )
                     state = store_response(
                         _state(job),
                         lease_token=lease_token,
