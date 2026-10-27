@@ -197,6 +197,13 @@
   white-space: nowrap;
 }
 .data-table td { border-top: 1px solid var(--border); overflow-wrap: anywhere; padding: 0.65rem 0.8rem; vertical-align: top; }
+/*
+ * Row links read as body text; green is the product's primary-action colour
+ * and a table of green links drowned every real action out. Hover still
+ * reveals the affordance.
+ */
+.data-table a { color: var(--text); text-decoration: none; }
+.data-table a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .data-table tbody tr:hover { background: var(--row-hover); }
 /*
  * A hint inside a cell is a second line, not a continuation: inline it

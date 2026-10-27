@@ -2003,7 +2003,7 @@ export const enUS = {
     recent: "Research sessions",
     noThreads: "No research threads yet",
     noThreadsHint: "Start one to ask a question and keep every run and paper it produces.",
-    summary: "{papers} papers · {turns} turns",
+    summary: "{turns} turns",
     updated: "Updated {time}",
     open: "Open",
     threads: {

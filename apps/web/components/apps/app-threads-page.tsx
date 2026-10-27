@@ -131,9 +131,7 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t(copy.eyebrow)}</p>
           <h1>{t(copy.title)}</h1>
-          <p className="page-lede">{t(copy.lede)}</p>
         </header>
         <SessionRequired contextKey={copy.sessionContext} />
       </div>
@@ -166,9 +164,7 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
   return (
     <div className="page">
       <header className="page-header">
-        <p className="eyebrow">{t(copy.eyebrow)}</p>
         <h1>{t(copy.title)}</h1>
-        <p className="page-lede">{t(copy.lede)}</p>
       </header>
 
       <Panel

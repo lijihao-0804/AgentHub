@@ -1986,7 +1986,7 @@ export const zhCN: MessageSchema = {
     recent: "研究会话",
     noThreads: "还没有研究会话",
     noThreadsHint: "新建一个会话，提问并保留它产生的每一次运行与每一篇论文。",
-    summary: "{papers} 篇论文 · {turns} 轮对话",
+    summary: "{turns} 轮对话",
     updated: "更新于 {time}",
     open: "打开",
     threads: {

@@ -324,13 +324,13 @@ export default function AgentsPage() {
                         </span>
                       )}
                     </td>
-                    <td data-label={t("agents.modelProfile")}>{profileLabel(agent.model_profile_id)}</td>
-                    <td data-label={t("agents.bindingMode")}>
+                    <td className="tight-cell" data-label={t("agents.modelProfile")}>{profileLabel(agent.model_profile_id)}</td>
+                    <td className="tight-cell" data-label={t("agents.bindingMode")}>
                       {agent.knowledge_binding_mode === "PINNED"
                         ? t("agents.bindingModeShortPinned")
                         : t("agents.bindingModeShortLatest")}
                     </td>
-                    <td data-label={t("agents.promptVersion")}>v{agent.prompt_version}</td>
+                    <td className="tight-cell" data-label={t("agents.promptVersion")}>v{agent.prompt_version}</td>
                     <td data-label={t("common.updated")}>
                       {agent.updated_at ? formatDateTime(agent.updated_at) : t("common.none")}
                     </td>

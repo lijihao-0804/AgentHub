@@ -305,12 +305,13 @@ a.stat-row:hover { border-color: var(--accent); }
 .tool-event-detail p { color: var(--text-muted); font-size: var(--text-sm); margin: 0 0 var(--space-2); }
 .tool-evidence-row { align-items: center; display: flex; gap: var(--space-3); padding: var(--space-2) var(--space-1); }
 
-/* Single-line clamp for secondary cell text; the full value stays in title. */
-.cell-clamp {
-  display: -webkit-box;
-  overflow: hidden;
+/* Single-line clamp for secondary cell text; the full value stays in title.
+   Specificity must beat `.data-table td > .state-hint`'s display:block. */
+.data-table td > .state-hint.cell-clamp {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+  display: -webkit-box;
+  overflow: hidden;
 }
 
 /* Model capability chips: reader-facing badges for the server-owned capability map. */

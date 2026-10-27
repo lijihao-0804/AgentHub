@@ -106,7 +106,6 @@ export default function AppThreadShell({
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t(copy.eyebrow)}</p>
           <h1>{t(copy.title)}</h1>
         </header>
         <SessionRequired contextKey={copy.sessionContext} />
@@ -148,7 +147,6 @@ export default function AppThreadShell({
         ]}
       />
       <header className="page-header">
-        <p className="eyebrow">{t(copy.eyebrow)}</p>
         <h1>{current?.title ?? t(copy.title)}</h1>
         {current && (
           <p className="page-lede">
