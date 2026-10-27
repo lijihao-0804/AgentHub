@@ -22,6 +22,7 @@ from benchmarks.evaluation.memory_deepseek_v41_counter import (
 )
 from benchmarks.evaluation.memory_trial_budget import MemoryTrialBudget, upper_bound_cost_cny
 from packages.agent_runtime.context_budget import ContextAdmissionResult
+from packages.core.canonical.json_hash import canonical_json_hash
 from packages.model_gateway.contracts import ModelMessage, ModelRequest
 
 MODEL = "deepseek-v4.1-flash-1017"
@@ -31,6 +32,43 @@ MAX_RESPONSE_BYTES = 1_048_576
 
 class MemoryTrialDispatchError(Exception):
     """A bounded call failed; details never include credentials or source text."""
+
+
+def _request_payload(
+    messages: tuple[ModelMessage, ...], output_limit: int, enable_thinking: bool | None
+) -> dict:
+    payload = {
+        "model": MODEL,
+        "messages": [{"role": message.role, "content": message.content} for message in messages],
+        "max_tokens": output_limit,
+        "temperature": 0,
+    }
+    if enable_thinking is not None:
+        payload["enable_thinking"] = enable_thinking
+    return payload
+
+
+def trial_request_identity(
+    *,
+    endpoint: str,
+    messages: tuple[ModelMessage, ...],
+    output_limit: int,
+    enable_thinking: bool | None = None,
+) -> str:
+    """Bind a trial attempt to its full endpoint and provider-visible request."""
+    return canonical_json_hash(
+        {
+            "version": "memory-trial-request-v1",
+            "endpoint": endpoint.rstrip("/") + "/chat/completions",
+            "price_identity": PRICE_IDENTITY,
+            "payload": _request_payload(messages, output_limit, enable_thinking),
+        }
+    )
+
+
+def trial_result_identity(result: dict) -> str:
+    """Bind a saved result to its reservation without storing content in the ledger."""
+    return canonical_json_hash({"version": "memory-trial-result-v1", "result": result})
 
 
 async def generate_once(
@@ -114,17 +152,13 @@ async def generate_once(
             "tokens": actual_estimate,
             "input_limit": provider_input_limit,
         }
-    wire_messages = [
-        {"role": message.role, "content": message.content} for message in original_messages
-    ]
-    payload = {
-        "model": MODEL,
-        "messages": wire_messages,
-        "max_tokens": output_limit,
-        "temperature": 0,
-    }
-    if enable_thinking is not None:
-        payload["enable_thinking"] = enable_thinking
+    payload = _request_payload(original_messages, output_limit, enable_thinking)
+    request_identity = trial_request_identity(
+        endpoint=endpoint,
+        messages=original_messages,
+        output_limit=output_limit,
+        enable_thinking=enable_thinking,
+    )
     output_directory.mkdir(parents=True, exist_ok=True)
     result_path = output_directory / f"{attempt_id}.json"
     if result_path.exists():
@@ -144,6 +178,7 @@ async def generate_once(
         requested_output_tokens=output_limit,
         upper_cost_cny=reserve,
         input_counter=input_counter,
+        request_identity=request_identity,
     )
     try:
         started = time.perf_counter()
@@ -208,6 +243,7 @@ async def generate_once(
             "model": model,
             "enable_thinking": enable_thinking,
             "input_counter": input_counter,
+            "request_identity": request_identity,
             "content": choices[0]["message"]["content"],
             "finish_reason": choices[0].get("finish_reason"),
             "input_tokens": prompt_tokens,
@@ -228,7 +264,11 @@ async def generate_once(
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, result_path)
-        budget.settle(attempt_id, conservative_cost_cny=observed)
+        budget.settle(
+            attempt_id,
+            conservative_cost_cny=observed,
+            result_identity=trial_result_identity(result),
+        )
         return result
     except Exception:
         # The ledger remains RESERVED_OR_UNKNOWN, even when an HTTP error

@@ -15,6 +15,7 @@ from benchmarks.evaluation.memory_trial_client import (
     PRICE_IDENTITY,
     MemoryTrialDispatchError,
     generate_once,
+    trial_result_identity,
 )
 from packages.agent_runtime.context_budget import ContextBudgetPolicy, ContextCategory
 from packages.model_gateway.contracts import ModelMessage
@@ -89,6 +90,9 @@ async def test_one_successful_call_is_reserved_and_reasoning_is_not_persisted(tr
         assert budget.state["attempts"][0]["status"] == "SETTLED"
         assert budget.state["attempts"][0]["estimated_input_tokens"] == 32768
         assert budget.state["attempts"][0]["input_counter"] == result["input_counter"]
+        assert budget.state["attempts"][0]["request_identity"] == result["request_identity"]
+        assert budget.state["attempts"][0]["result_identity"] == trial_result_identity(result)
+        assert "public calibration" not in (trial_dir / "budget.json").read_text(encoding="utf-8")
         assert result["input_counter"]["tokens"] == 20
         assert Decimal(result["conservative_cost_cny"]) == Decimal("0.00012")
         assert result["cost_identity"] == PRICE_IDENTITY

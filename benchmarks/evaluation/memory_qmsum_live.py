@@ -29,10 +29,17 @@ from benchmarks.evaluation.memory_qmsum_summary import QMSumSummaryPreparation, 
 from benchmarks.evaluation.memory_qmsum_summary_runner import (
     QMSumSummaryRun,
     SummaryNotDispatched,
+    SummaryResumeUnverified,
     run_summary_candidates,
 )
 from benchmarks.evaluation.memory_trial_budget import MemoryTrialBudget
-from benchmarks.evaluation.memory_trial_client import MODEL, PRICE_IDENTITY, generate_once
+from benchmarks.evaluation.memory_trial_client import (
+    MODEL,
+    PRICE_IDENTITY,
+    generate_once,
+    trial_request_identity,
+    trial_result_identity,
+)
 from benchmarks.evaluation.memory_trial_policy import create_trial_policy
 from packages.agent_runtime.context_budget import (
     ApproxTokenEstimator,
@@ -140,8 +147,16 @@ async def run_live_summaries(
     provider_counter: DeepseekV41TextCounter | None = None,
 ) -> QMSumSummaryRun:
     """Run or safely reconstruct confirmed calls; never retry an unknown call."""
-    freeze_summary_inputs(preparations, frozen_input_path)
     with MemoryTrialBudget(ledger_path, price_identity=PRICE_IDENTITY) as budget:
+        has_summary_attempt = any(
+            row.get("stage") == "M4"
+            and isinstance(row.get("attempt_id"), str)
+            and row["attempt_id"].startswith("m4-summary-")
+            for row in budget.state["attempts"]
+        )
+        if has_summary_attempt and not frozen_input_path.is_file():
+            raise QMSumProtocolError("frozen summary input is missing for an existing trial")
+        freeze_summary_inputs(preparations, frozen_input_path)
 
         async def dispatch(preparation: QMSumSummaryPreparation) -> Mapping[str, Any]:
             question = preparation.question_id.split("/train/", 1)[1]
@@ -153,12 +168,28 @@ async def run_live_summaries(
                 raise ValueError("DUPLICATE_MEMORY_TRIAL_ATTEMPT")
             if matching:
                 row = matching[0]
-                if row["status"] != "SETTLED" or not path.is_file():
+                if row["status"] != "SETTLED":
                     raise ValueError("UNRESOLVED_MEMORY_TRIAL_ATTEMPT")
-                result = json.loads(path.read_text(encoding="utf-8"))
-                verify_resumed_result(
-                    result, row, preparation.admitted, attempt_id, output_limit=2048
+                if not path.is_file():
+                    raise SummaryResumeUnverified
+                try:
+                    result = json.loads(path.read_text(encoding="utf-8"))
+                except (OSError, ValueError, UnicodeError) as error:
+                    raise SummaryResumeUnverified from error
+                expected_identity = trial_request_identity(
+                    endpoint=endpoint, messages=preparation.messages, output_limit=2048
                 )
+                try:
+                    verify_resumed_result(
+                        result,
+                        row,
+                        preparation.admitted,
+                        attempt_id,
+                        output_limit=2048,
+                        expected_request_identity=expected_identity,
+                    )
+                except ValueError as error:
+                    raise SummaryResumeUnverified from error
                 return result
             if path.exists():
                 raise ValueError("MEMORY_TRIAL_RESULT_WITHOUT_LEDGER")
@@ -188,6 +219,7 @@ def verify_resumed_result(
     attempt_id: str,
     *,
     output_limit: int,
+    expected_request_identity: str | None = None,
 ) -> None:
     if (
         not isinstance(admission, ContextAdmissionResult)
@@ -207,6 +239,16 @@ def verify_resumed_result(
         )
     except (KeyError, TypeError, InvalidOperation, ValueError):
         valid_cost = False
+    try:
+        valid_identity = (
+            isinstance(result, dict)
+            and isinstance(expected_request_identity, str)
+            and row.get("request_identity") == expected_request_identity
+            and result.get("request_identity") == expected_request_identity
+            and row.get("result_identity") == trial_result_identity(result)
+        )
+    except (TypeError, ValueError, UnicodeError):
+        valid_identity = False
     if (
         not isinstance(result, dict)
         or result.get("attempt_id") != attempt_id
@@ -224,6 +266,7 @@ def verify_resumed_result(
         or row.get("requested_output_tokens") != output_limit
         or row.get("input_counter") != result.get("input_counter")
         or not valid_cost
+        or not valid_identity
     ):
         raise ValueError("MEMORY_TRIAL_RESULT_MISMATCH")
 

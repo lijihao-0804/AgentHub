@@ -23,23 +23,48 @@ from benchmarks.evaluation.memory_qmsum_protocol import (
     QMSumArm,
     QMSumArmRecord,
     QMSumCallMeasurements,
+    QMSumCaseStatus,
     QMSumDispatchPlan,
     QMSumObservationStatus,
     QMSumPlannedArm,
     QMSumProtocolError,
+    QMSumSourceBundle,
     load_frozen_qmsum,
     plan_offline,
     record_observations,
+    summarize_score_records,
     validate_online_arm_sequence,
 )
-from benchmarks.evaluation.memory_qmsum_summary_runner import SummaryNotDispatched
+from benchmarks.evaluation.memory_qmsum_summary_runner import (
+    QMSumSummaryRun,
+    SummaryNotDispatched,
+    SummaryResumeUnverified,
+)
 from benchmarks.evaluation.memory_trial_budget import MemoryTrialBudget
-from benchmarks.evaluation.memory_trial_client import MODEL, PRICE_IDENTITY, generate_once
+from benchmarks.evaluation.memory_trial_client import (
+    MODEL,
+    PRICE_IDENTITY,
+    generate_once,
+    trial_request_identity,
+)
 from benchmarks.evaluation.memory_trial_policy import create_trial_policy
-from packages.agent_runtime.context_budget import ApproxTokenEstimator
+from packages.agent_runtime.context_budget import ApproxTokenEstimator, ContextBudgetPolicy
 
 AnswerDispatch = Callable[[str, QMSumPlannedArm], Awaitable[Mapping[str, Any]]]
 ANSWER_OUTPUT_LIMIT = 1024
+
+
+@dataclass(frozen=True, slots=True)
+class QMSumAnswerTerminalCase:
+    question_id: str
+    status: QMSumCaseStatus
+    reason: str
+
+    def __post_init__(self) -> None:
+        if self.status is not QMSumCaseStatus.C_SUMMARY_INVALID:
+            raise QMSumProtocolError("terminal answer case must be an invalid completed summary")
+        if not isinstance(self.reason, str) or not self.reason.strip():
+            raise QMSumProtocolError("terminal answer case requires a reason")
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,6 +73,13 @@ class QMSumAnswerRun:
     unattempted: tuple[tuple[str, QMSumArm], ...]
     stop_reason: str | None
     measurements: Mapping[tuple[str, QMSumArm], Mapping[str, Any]]
+    terminal_cases: tuple[QMSumAnswerTerminalCase, ...] = ()
+
+    def __post_init__(self) -> None:
+        terminal_cases = tuple(self.terminal_cases)
+        if any(not isinstance(item, QMSumAnswerTerminalCase) for item in terminal_cases):
+            raise QMSumProtocolError("answer run contains an invalid terminal case")
+        object.__setattr__(self, "terminal_cases", terminal_cases)
 
 
 def freeze_answer_inputs(plan: QMSumDispatchPlan, path: Path) -> None:
@@ -102,15 +134,40 @@ async def execute_answer_plan(
     validate_online_arm_sequence(plan, tuple((question_id, arm.arm) for question_id, arm in items))
     records: list[QMSumArmRecord] = []
     metadata: dict[tuple[str, QMSumArm], Mapping[str, Any]] = {}
+    terminal_cases = tuple(
+        QMSumAnswerTerminalCase(case.question_id, case.status, case.blocked_reason or "")
+        for case in plan.cases
+        if case.status is QMSumCaseStatus.C_SUMMARY_INVALID
+    )
     for index, (question_id, arm) in enumerate(items):
         try:
             result = await dispatch(question_id, arm)
+        except SummaryResumeUnverified:
+            records.append(
+                QMSumArmRecord(
+                    question_id,
+                    arm.arm,
+                    "",
+                    QMSumCallMeasurements(None, None, None, None, None),
+                    summary_candidate_id=arm.compressed_candidate_id,
+                    status=QMSumObservationStatus.UNVERIFIED_RESPONSE,
+                )
+            )
+            record_observations(plan, records)
+            return QMSumAnswerRun(
+                tuple(records),
+                tuple((qid, item.arm) for qid, item in items[index + 1 :]),
+                "RESUME_IDENTITY_UNVERIFIED",
+                metadata,
+                terminal_cases,
+            )
         except SummaryNotDispatched:
             return QMSumAnswerRun(
                 tuple(records),
                 tuple((qid, item.arm) for qid, item in items[index:]),
                 "NOT_DISPATCHED",
                 metadata,
+                terminal_cases,
             )
         except Exception:
             records.append(
@@ -129,6 +186,7 @@ async def execute_answer_plan(
                 tuple((qid, item.arm) for qid, item in items[index + 1 :]),
                 "UNKNOWN_OUTCOME",
                 metadata,
+                terminal_cases,
             )
         try:
             record = _observed_record(question_id, arm, result)
@@ -147,14 +205,16 @@ async def execute_answer_plan(
                     "",
                     QMSumCallMeasurements(None, None, None, None, None),
                     summary_candidate_id=arm.compressed_candidate_id,
-                    status=QMSumObservationStatus.UNKNOWN_OUTCOME,
+                    status=QMSumObservationStatus.UNVERIFIED_RESPONSE,
                 )
             )
+            record_observations(plan, records)
             return QMSumAnswerRun(
                 tuple(records),
                 tuple((qid, item.arm) for qid, item in items[index + 1 :]),
                 "UNVERIFIED_RESPONSE",
                 metadata,
+                terminal_cases,
             )
         records.append(record)
         metadata[(question_id, arm.arm)] = {
@@ -179,9 +239,10 @@ async def execute_answer_plan(
                 tuple((qid, item.arm) for qid, item in items[index + 1 :]),
                 "PROVIDER_COUNTER_MISMATCH",
                 metadata,
+                terminal_cases,
             )
     record_observations(plan, records)
-    return QMSumAnswerRun(tuple(records), (), None, metadata)
+    return QMSumAnswerRun(tuple(records), (), None, metadata, terminal_cases)
 
 
 def _observed_record(
@@ -238,8 +299,13 @@ async def run_live_answers(
     api_key: str,
     provider_counter: DeepseekV41TextCounter | None = None,
 ) -> QMSumAnswerRun:
-    freeze_answer_inputs(plan, frozen_input_path)
     with MemoryTrialBudget(ledger_path, price_identity=PRICE_IDENTITY) as budget:
+        if not frozen_input_path.is_file() and any(
+            row.get("stage") == "M4" and row.get("attempt_id", "").startswith("m4-answer-")
+            for row in budget.state["attempts"]
+        ):
+            raise QMSumProtocolError("frozen answer input is missing for an existing trial")
+        freeze_answer_inputs(plan, frozen_input_path)
 
         async def dispatch(question_id: str, arm: QMSumPlannedArm) -> Mapping[str, Any]:
             question = question_id.split("/train/", 1)[1]
@@ -251,12 +317,24 @@ async def run_live_answers(
                 raise ValueError("DUPLICATE_MEMORY_TRIAL_ATTEMPT")
             if matching:
                 row = matching[0]
-                if row["status"] != "SETTLED" or not path.is_file():
+                if row["status"] != "SETTLED":
                     raise ValueError("UNRESOLVED_MEMORY_TRIAL_ATTEMPT")
-                result = json.loads(path.read_text(encoding="utf-8"))
-                verify_resumed_result(
-                    result, row, arm.admitted, attempt_id, output_limit=ANSWER_OUTPUT_LIMIT
-                )
+                try:
+                    result = json.loads(path.read_text(encoding="utf-8"))
+                    verify_resumed_result(
+                        result,
+                        row,
+                        arm.admitted,
+                        attempt_id,
+                        output_limit=ANSWER_OUTPUT_LIMIT,
+                        expected_request_identity=trial_request_identity(
+                            endpoint=endpoint,
+                            messages=arm.admitted.messages,
+                            output_limit=ANSWER_OUTPUT_LIMIT,
+                        ),
+                    )
+                except (OSError, UnicodeError, ValueError, TypeError, KeyError) as error:
+                    raise SummaryResumeUnverified from error
                 return result
             if path.exists():
                 raise ValueError("MEMORY_TRIAL_RESULT_WITHOUT_LEDGER")
@@ -280,6 +358,54 @@ async def run_live_answers(
         return await execute_answer_plan(plan, dispatch=dispatch)
 
 
+def plan_answer_phase(
+    source: QMSumSourceBundle,
+    summaries: QMSumSummaryRun,
+    *,
+    policy: ContextBudgetPolicy,
+    expected_summary_ids: tuple[str, ...] | None = None,
+) -> QMSumDispatchPlan:
+    """Build the CLI answer plan from resolved summary observations."""
+    if not isinstance(source, QMSumSourceBundle):
+        raise TypeError("source must be a QMSum source bundle")
+    if not isinstance(summaries, QMSumSummaryRun):
+        raise TypeError("summaries must be a QMSum summary run")
+    if summaries.unattempted_question_ids:
+        raise QMSumProtocolError("answer planning requires every summary attempt to be resolved")
+    if expected_summary_ids is not None:
+        if (
+            not isinstance(expected_summary_ids, tuple)
+            or any(not isinstance(value, str) or not value for value in expected_summary_ids)
+            or len(set(expected_summary_ids)) != len(expected_summary_ids)
+            or set(expected_summary_ids) != {row.question_id for row in summaries.observations}
+        ):
+            raise QMSumProtocolError("summary observations do not match the frozen preparations")
+
+    candidates = {}
+    invalid_reasons = {}
+    for observation in summaries.observations:
+        if observation.status == "VALID":
+            if observation.candidate is None:
+                raise QMSumProtocolError("valid summary observation has no candidate")
+            candidates[observation.question_id] = observation.candidate
+        elif observation.status == "INVALID":
+            invalid_reasons[observation.question_id] = (
+                ",".join(observation.issues) if observation.issues else "SUMMARY_INVALID"
+            )
+        else:
+            raise QMSumProtocolError(
+                "answer planning requires VALID or INVALID summary observations"
+            )
+
+    return plan_offline(
+        source,
+        admission=policy,
+        token_counter=ApproxTokenEstimator(),
+        compressed_candidates=candidates,
+        summary_invalid_reasons=invalid_reasons,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--qmsum-root", type=Path, required=True)
@@ -296,9 +422,7 @@ def main() -> int:
     annotations = json.loads(args.annotations.read_text(encoding="utf-8"))
     preparations = prepare_reviewed_summaries(source, baseline, annotations, policy=policy)
     endpoint, api_key = _configured_credential(args.env_file)
-    provider_counter = (
-        DeepseekV41TextCounter.from_file(args.tokenizer) if args.tokenizer else None
-    )
+    provider_counter = DeepseekV41TextCounter.from_file(args.tokenizer) if args.tokenizer else None
     summaries = asyncio.run(
         run_live_summaries(
             preparations,
@@ -315,16 +439,11 @@ def main() -> int:
     ):
         print(json.dumps({"status": "SUMMARY_PHASE_UNRESOLVED"}))
         return 1
-    candidates = {
-        row.question_id: row.candidate
-        for row in summaries.observations
-        if row.candidate is not None
-    }
-    plan = plan_offline(
+    plan = plan_answer_phase(
         source,
-        admission=policy,
-        token_counter=ApproxTokenEstimator(),
-        compressed_candidates=candidates,
+        summaries,
+        policy=policy,
+        expected_summary_ids=tuple(item.question_id for item in preparations),
     )
     answer_run = asyncio.run(
         run_live_answers(
@@ -337,6 +456,7 @@ def main() -> int:
             provider_counter=provider_counter,
         )
     )
+    score = summarize_score_records(plan, answer_run.records)
     report = {
         "source_commit": source.commit,
         "frozen_question_count": len(plan.cases),
@@ -367,6 +487,18 @@ def main() -> int:
             {"question_id": qid, "arm": arm.value} for qid, arm in answer_run.unattempted
         ],
         "stop_reason": answer_run.stop_reason,
+        "pair_accounting": {
+            "invalid_summary_questions": score.invalid_summary_questions,
+            "planned_pairs": score.planned_pairs,
+            "complete_observed_pairs": score.complete_observed_pairs,
+            "partial_pairs": score.partial_pairs,
+            "not_started_pairs": score.not_started_pairs,
+            "failed_pairs": score.failed_pairs,
+            "unknown_pairs": score.unknown_pairs,
+            "unverified_pairs": score.unverified_pairs,
+            "failure_categories_may_overlap": True,
+            "semantic_accuracy": score.semantic_accuracy,
+        },
     }
     args.output_directory.mkdir(parents=True, exist_ok=True)
     destination = args.output_directory / "answer-observations.json"

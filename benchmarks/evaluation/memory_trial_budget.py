@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import time
 from collections.abc import Mapping
 from decimal import Decimal
 from pathlib import Path
@@ -89,6 +90,7 @@ class MemoryTrialBudget:
         requested_output_tokens: int,
         upper_cost_cny: Decimal,
         input_counter: Mapping[str, object] | None = None,
+        request_identity: str | None = None,
     ) -> None:
         if self._lock.closed:
             raise ValueError("MEMORY_TRIAL_NOT_OWNED")
@@ -118,6 +120,8 @@ class MemoryTrialBudget:
             )
         ):
             raise ValueError("INVALID_MEMORY_TRIAL_COUNTER")
+        if request_identity is not None and not _valid_identity(request_identity):
+            raise ValueError("INVALID_MEMORY_TRIAL_REQUEST_IDENTITY")
         attempts = self.state["attempts"]
         if any(row["status"] == "RESERVED_OR_UNKNOWN" for row in attempts):
             raise ValueError("UNRESOLVED_MEMORY_TRIAL_ATTEMPT")
@@ -150,10 +154,18 @@ class MemoryTrialBudget:
         }
         if input_counter is not None:
             row["input_counter"] = dict(input_counter)
+        if request_identity is not None:
+            row["request_identity"] = request_identity
         attempts.append(row)
         self._save_or_restore(previous)
 
-    def settle(self, attempt_id: str, *, conservative_cost_cny: Decimal) -> None:
+    def settle(
+        self,
+        attempt_id: str,
+        *,
+        conservative_cost_cny: Decimal,
+        result_identity: str | None = None,
+    ) -> None:
         if self._lock.closed:
             raise ValueError("MEMORY_TRIAL_NOT_OWNED")
         if not conservative_cost_cny.is_finite() or conservative_cost_cny < 0:
@@ -161,10 +173,16 @@ class MemoryTrialBudget:
         row = next((row for row in self.state["attempts"] if row["attempt_id"] == attempt_id), None)
         if row is None or row["status"] != "RESERVED_OR_UNKNOWN":
             raise ValueError("MEMORY_TRIAL_ATTEMPT_NOT_RESERVED")
+        if (row.get("request_identity") is not None and result_identity is None) or (
+            result_identity is not None and not _valid_identity(result_identity)
+        ):
+            raise ValueError("INVALID_MEMORY_TRIAL_RESULT_IDENTITY")
         if conservative_cost_cny > Decimal(row["upper_cost_cny"]):
             raise ValueError("MEMORY_TRIAL_COST_EXCEEDS_RESERVATION")
         previous = copy.deepcopy(self.state)
         row.update(status="SETTLED", charged_or_reserved_cny=str(conservative_cost_cny))
+        if result_identity is not None:
+            row["result_identity"] = result_identity
         self._save_or_restore(previous)
 
     def _save_or_restore(self, previous: dict) -> None:
@@ -181,7 +199,17 @@ class MemoryTrialBudget:
             handle.write("\n")
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(temporary, self.path)
+        # Windows may briefly deny an atomic rename while another local process
+        # has the file open. Retrying only the local rename is safe: no model
+        # request is sent until the reservation has been durably saved.
+        for attempt in range(5):
+            try:
+                os.replace(temporary, self.path)
+                break
+            except OSError as error:
+                if os.name != "nt" or error.winerror not in {5, 32, 33} or attempt == 4:
+                    raise
+                time.sleep(0.05)
 
     def _acquire_lock(self) -> None:
         self._lock.seek(0)
@@ -203,3 +231,11 @@ class MemoryTrialBudget:
                 fcntl.flock(self._lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except OSError:
                 raise ValueError("MEMORY_TRIAL_ALREADY_OWNED") from None
+
+
+def _valid_identity(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )

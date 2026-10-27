@@ -1,5 +1,6 @@
 """Financial and attempt limits apply before the evaluation sends a request."""
 
+import os
 import subprocess
 import sys
 from decimal import Decimal
@@ -61,6 +62,45 @@ def test_settlement_retains_attempt_identity_and_rejects_cost_over_reservation(t
             _reserve(budget)
         _reserve(budget, "attempt-2")
         assert budget.state["attempts"][0]["charged_or_reserved_cny"] == "0.30"
+
+
+def test_bound_attempt_cannot_settle_without_a_saved_result_identity(trial_dir):
+    with MemoryTrialBudget(trial_dir / "trial.json", price_identity="peak") as budget:
+        _reserve(budget, request_identity="a" * 64)
+        with pytest.raises(ValueError, match="RESULT_IDENTITY"):
+            budget.settle("attempt-1", conservative_cost_cny=Decimal("0.30"))
+        assert budget.state["attempts"][0]["status"] == "RESERVED_OR_UNKNOWN"
+        with pytest.raises(ValueError, match="UNRESOLVED"):
+            _reserve(budget, "attempt-2")
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows local sharing behavior")
+def test_transient_rename_failure_retries_but_persistent_failure_restores_reservation(
+    trial_dir, monkeypatch
+):
+    real_replace = os.replace
+    failures_remaining = 2
+
+    def transient_replace(source, destination):
+        nonlocal failures_remaining
+        if failures_remaining:
+            failures_remaining -= 1
+            raise PermissionError(13, "temporarily unavailable", str(destination), 5)
+        real_replace(source, destination)
+
+    with MemoryTrialBudget(trial_dir / "trial.json", price_identity="peak") as budget:
+        monkeypatch.setattr(os, "replace", transient_replace)
+        _reserve(budget)
+        assert failures_remaining == 0
+        assert budget.state["attempts"][0]["status"] == "RESERVED_OR_UNKNOWN"
+
+        def permanent_failure(_source, destination):
+            raise PermissionError(13, "unavailable", str(destination), 5)
+
+        monkeypatch.setattr(os, "replace", permanent_failure)
+        with pytest.raises(PermissionError):
+            budget.settle("attempt-1", conservative_cost_cny=Decimal("0.3"))
+        assert budget.state["attempts"][0]["status"] == "RESERVED_OR_UNKNOWN"
 
 
 @pytest.mark.parametrize(

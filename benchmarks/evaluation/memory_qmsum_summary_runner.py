@@ -43,6 +43,10 @@ class SummaryNotDispatched(Exception):
     """The dispatcher proved this attempt failed before the provider boundary."""
 
 
+class SummaryResumeUnverified(Exception):
+    """A prior response exists but cannot be bound to the frozen request."""
+
+
 @dataclass(frozen=True, slots=True)
 class QMSumSummaryObservation:
     question_id: str
@@ -115,6 +119,16 @@ async def run_summary_candidates(
     for position, preparation in enumerate(items):
         try:
             result = await dispatch(preparation)
+        except SummaryResumeUnverified:
+            observations.append(
+                QMSumSummaryObservation(
+                    preparation.question_id, "UNVERIFIED_RESPONSE", {},
+                    ("RESUME_IDENTITY_UNVERIFIED",),
+                )
+            )
+            return QMSumSummaryRun(
+                tuple(observations), tuple(item.question_id for item in items[position + 1 :])
+            )
         except SummaryNotDispatched:
             observations.append(
                 QMSumSummaryObservation(preparation.question_id, "NOT_DISPATCHED", {})

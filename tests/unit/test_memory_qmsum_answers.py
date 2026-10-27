@@ -18,7 +18,12 @@ from benchmarks.evaluation.memory_qmsum_answers import (
 from benchmarks.evaluation.memory_qmsum_protocol import QMSumCaseStatus, QMSumProtocolError
 from benchmarks.evaluation.memory_qmsum_summary_runner import SummaryNotDispatched
 from benchmarks.evaluation.memory_trial_budget import MemoryTrialBudget
-from benchmarks.evaluation.memory_trial_client import MODEL, PRICE_IDENTITY
+from benchmarks.evaluation.memory_trial_client import (
+    MODEL,
+    PRICE_IDENTITY,
+    trial_request_identity,
+    trial_result_identity,
+)
 from packages.model_gateway.contracts import ModelMessage
 from tests.unit.test_memory_qmsum_protocol import _plan, _source, _validated_candidate
 
@@ -134,6 +139,13 @@ def test_confirmed_answer_is_reused_without_new_dispatch():
     plan = replace(plan, cases=cases)
     attempt = "m4-answer-Bmr003-0-B"
     ledger = root / "ledger.json"
+    freeze_answer_inputs(plan, root / "frozen.json")
+    identity = trial_request_identity(
+        endpoint="invalid-if-used",
+        messages=first.arms[0].admitted.messages,
+        output_limit=ANSWER_OUTPUT_LIMIT,
+    )
+    response = {**_response(attempt), "request_identity": identity}
     with MemoryTrialBudget(ledger, price_identity=PRICE_IDENTITY) as budget:
         budget.reserve(
             attempt,
@@ -141,11 +153,16 @@ def test_confirmed_answer_is_reused_without_new_dispatch():
             estimated_input_tokens=first.arms[0].admitted.usage.estimated_input_after,
             requested_output_tokens=ANSWER_OUTPUT_LIMIT,
             upper_cost_cny=Decimal("0.1"),
+            request_identity=identity,
         )
-        budget.settle(attempt, conservative_cost_cny=Decimal("0.00028"))
+        budget.settle(
+            attempt,
+            conservative_cost_cny=Decimal("0.00028"),
+            result_identity=trial_result_identity(response),
+        )
     results = root / "results"
     results.mkdir()
-    (results / f"{attempt}.json").write_text(json.dumps(_response(attempt)), encoding="utf-8")
+    (results / f"{attempt}.json").write_text(json.dumps(response), encoding="utf-8")
     result = asyncio.run(
         run_live_answers(
             plan,
@@ -158,3 +175,78 @@ def test_confirmed_answer_is_reused_without_new_dispatch():
     )
     assert [record.status.value for record in result.records] == ["OBSERVED"]
     assert not result.unattempted and result.stop_reason is None
+
+
+@pytest.mark.parametrize("scenario", ["missing_freeze", "legacy", "changed_result"])
+def test_answer_resume_refuses_unbound_or_changed_evidence(scenario, monkeypatch):
+    root = Path(".scratch/context-policy-m4-20261027/answer-tests") / uuid4().hex
+    root.mkdir(parents=True)
+    original = _plan(_source())
+    first = original.cases[0]
+    plan = replace(
+        original,
+        cases=tuple(
+            case
+            if case == first or case.status is QMSumCaseStatus.EXCLUDED
+            else replace(case, status=QMSumCaseStatus.B_BLOCKED, arms=(), blocked_reason="test")
+            for case in original.cases
+        ),
+    )
+    if scenario != "missing_freeze":
+        freeze_answer_inputs(plan, root / "frozen.json")
+    attempt = "m4-answer-Bmr003-0-B"
+    identity = trial_request_identity(
+        endpoint="invalid-if-used",
+        messages=first.arms[0].admitted.messages,
+        output_limit=ANSWER_OUTPUT_LIMIT,
+    )
+    response = {**_response(attempt), "request_identity": identity}
+    ledger = root / "ledger.json"
+    with MemoryTrialBudget(ledger, price_identity=PRICE_IDENTITY) as budget:
+        budget.reserve(
+            attempt,
+            stage="M4",
+            estimated_input_tokens=first.arms[0].admitted.usage.estimated_input_after,
+            requested_output_tokens=ANSWER_OUTPUT_LIMIT,
+            upper_cost_cny=Decimal("0.1"),
+            request_identity=None if scenario == "legacy" else identity,
+        )
+        budget.settle(
+            attempt,
+            conservative_cost_cny=Decimal("0.00028"),
+            result_identity=None if scenario == "legacy" else trial_result_identity(response),
+        )
+    results = root / "results"
+    results.mkdir()
+    if scenario == "changed_result":
+        response["content"] = "a different answer"
+    (results / f"{attempt}.json").write_text(json.dumps(response), encoding="utf-8")
+    original_ledger = ledger.read_bytes()
+
+    async def unexpected_dispatch(**_kwargs):
+        raise AssertionError("a previous attempt must not be re-dispatched")
+
+    monkeypatch.setattr(
+        "benchmarks.evaluation.memory_qmsum_answers.generate_once", unexpected_dispatch
+    )
+
+    def resume():
+        return asyncio.run(
+            run_live_answers(
+                plan,
+                ledger_path=ledger,
+                result_directory=results,
+                frozen_input_path=root / "frozen.json",
+                endpoint="invalid-if-used",
+                api_key="unused",
+            )
+        )
+
+    if scenario == "missing_freeze":
+        with pytest.raises(QMSumProtocolError, match="frozen answer input is missing"):
+            resume()
+    else:
+        result = resume()
+        assert result.stop_reason == "RESUME_IDENTITY_UNVERIFIED"
+        assert result.records[0].status.value == "UNVERIFIED_RESPONSE"
+    assert ledger.read_bytes() == original_ledger

@@ -132,6 +132,7 @@ class QMSumCaseStatus(StrEnum):
     B_READY_C_READY = "B_READY_C_READY"
     B_BLOCKED = "B_BLOCKED"
     C_BLOCKED = "C_BLOCKED"
+    C_SUMMARY_INVALID = "C_SUMMARY_INVALID"
     EXCLUDED = "EXCLUDED"
 
 
@@ -139,6 +140,7 @@ class QMSumObservationStatus(StrEnum):
     OBSERVED = "OBSERVED"
     FAILED = "FAILED"
     UNKNOWN_OUTCOME = "UNKNOWN_OUTCOME"
+    UNVERIFIED_RESPONSE = "UNVERIFIED_RESPONSE"
 
 
 class QMSumReviewKind(StrEnum):
@@ -514,6 +516,11 @@ class QMSumPlannedCase:
                 raise QMSumProtocolError("planned status and arm set disagree")
             if self.blocked_reason is not None:
                 raise QMSumProtocolError("ready cases cannot have a blocked reason")
+        elif status is QMSumCaseStatus.C_SUMMARY_INVALID:
+            if arms or not self.blocked_reason:
+                raise QMSumProtocolError(
+                    "invalid completed summary cases require a reason and no provider arm"
+                )
         elif status is QMSumCaseStatus.EXCLUDED:
             if arms or self.blocked_reason != "COMMITTEE_EXCLUDED_FROM_ONLINE_EXPERIMENT":
                 raise QMSumProtocolError(
@@ -665,7 +672,7 @@ class QMSumArmRecord:
             status = QMSumObservationStatus(self.status)
         except (TypeError, ValueError):
             raise QMSumProtocolError(
-                "record status must be OBSERVED, FAILED, or UNKNOWN_OUTCOME"
+                "record status must be OBSERVED, FAILED, UNKNOWN_OUTCOME, or UNVERIFIED_RESPONSE"
             ) from None
         object.__setattr__(self, "status", status)
         if self.review is not None:
@@ -769,10 +776,20 @@ class QMSumScoreSummary:
     attempted_arms: int = 0
     failed_arms: int = 0
     unknown_outcome_arms: int = 0
+    unverified_response_arms: int = 0
     unattempted_planned_arms: int = 0
     missing_reviews: int = 0
     failed_pairs: int = 0
     unknown_pairs: int = 0
+    unverified_pairs: int = 0
+    invalid_summary_questions: int = 0
+    planned_pairs: int = 0
+    complete_observed_pairs: int = 0
+    partial_pairs: int = 0
+    partial_failed_pairs: int = 0
+    partial_unknown_pairs: int = 0
+    partial_unverified_pairs: int = 0
+    not_started_pairs: int = 0
     pressure_valid_pairs: int = 0
     token_reduction_under_pressure: float | None = None
     stress_proof: str = "UNVERIFIED"
@@ -798,10 +815,20 @@ class QMSumScoreSummary:
             "attempted_arms",
             "failed_arms",
             "unknown_outcome_arms",
+            "unverified_response_arms",
             "unattempted_planned_arms",
             "missing_reviews",
             "failed_pairs",
             "unknown_pairs",
+            "unverified_pairs",
+            "invalid_summary_questions",
+            "planned_pairs",
+            "complete_observed_pairs",
+            "partial_pairs",
+            "partial_failed_pairs",
+            "partial_unknown_pairs",
+            "partial_unverified_pairs",
+            "not_started_pairs",
             "pressure_valid_pairs",
         ):
             _non_negative_int(getattr(self, name), name)
@@ -816,10 +843,38 @@ class QMSumScoreSummary:
             raise QMSumProtocolError("review denominator must equal human plus agent reviews")
         if self.observed_arms != self.review_count + self.missing_reviews:
             raise QMSumProtocolError("observed arms must account for reviews and missing reviews")
-        if self.attempted_arms != self.observed_arms + self.failed_arms + self.unknown_outcome_arms:
+        if self.attempted_arms != (
+            self.observed_arms
+            + self.failed_arms
+            + self.unknown_outcome_arms
+            + self.unverified_response_arms
+        ):
             raise QMSumProtocolError("attempted arms must include successes, failures and unknowns")
         if self.answerable_pairs > self.observed_questions:
             raise QMSumProtocolError("paired denominator cannot exceed observed questions")
+        if self.planned_pairs > self.planned_c_dispatchable_questions:
+            raise QMSumProtocolError("planned pairs cannot exceed C-dispatchable questions")
+        if self.invalid_summary_questions > self.online_eligible_questions:
+            raise QMSumProtocolError("invalid summaries cannot exceed online-eligible questions")
+        if self.complete_observed_pairs > self.planned_pairs:
+            raise QMSumProtocolError("complete observed pairs cannot exceed planned pairs")
+        if self.partial_pairs > self.planned_pairs:
+            raise QMSumProtocolError("partial pairs cannot exceed planned pairs")
+        if self.not_started_pairs > self.planned_pairs:
+            raise QMSumProtocolError("not-started pairs cannot exceed planned pairs")
+        if self.partial_pairs + self.not_started_pairs > self.planned_pairs:
+            raise QMSumProtocolError("pair start accounting exceeds planned pairs")
+        if self.partial_failed_pairs > min(self.partial_pairs, self.failed_pairs):
+            raise QMSumProtocolError("partial failed pairs exceed their denominator")
+        if self.partial_unknown_pairs > min(self.partial_pairs, self.unknown_pairs):
+            raise QMSumProtocolError("partial unknown pairs exceed their denominator")
+        if self.partial_unverified_pairs > min(self.partial_pairs, self.unverified_pairs):
+            raise QMSumProtocolError("partial unverified pairs exceed their denominator")
+        if (
+            self.partial_failed_pairs + self.partial_unknown_pairs + self.partial_unverified_pairs
+            > self.partial_pairs
+        ):
+            raise QMSumProtocolError("partial pair outcomes exceed partial pairs")
         for value in self.arm_qualified_counts.values():
             _non_negative_int(value, "arm qualified count")
         for value in self.unsupported_claim_counts.values():
@@ -1142,6 +1197,7 @@ def plan_offline(
     admission: BudgetAdmitter,
     token_counter: TokenCounter,
     compressed_candidates: Mapping[str, QMSumCompressedCandidate] | None = None,
+    summary_invalid_reasons: Mapping[str, str] | None = None,
     tool_definitions: Sequence[ModelToolDefinition] = (),
     seed: int = QMSUM_BALANCE_SEED,
 ) -> QMSumDispatchPlan:
@@ -1149,7 +1205,9 @@ def plan_offline(
 
     Committee cases stay in the frozen denominator but receive no online arm.
     Every permitted Academic/Product case goes through B admission first. C is
-    considered only for a supplied, server-validated candidate.
+    considered only for a supplied, server-validated candidate. A completed
+    summary explicitly reported as invalid terminates the whole B/C pair and
+    keeps its failure reason without fabricating answer calls.
     """
 
     if not isinstance(source, QMSumSourceBundle):
@@ -1160,9 +1218,26 @@ def plan_offline(
     if not callable(getattr(token_counter, "estimate", None)):
         raise TypeError("token_counter must implement estimate(text)")
     candidates = dict(compressed_candidates or {})
+    invalid_summaries = dict(summary_invalid_reasons or {})
     unknown_candidates = set(candidates) - frozen_ids
     if unknown_candidates:
         raise QMSumProtocolError("compressed candidate refers to an unknown question")
+    unknown_invalid_summaries = set(invalid_summaries) - frozen_ids
+    if unknown_invalid_summaries:
+        raise QMSumProtocolError("invalid summary refers to an unknown question")
+    for question_id, reason in invalid_summaries.items():
+        if (
+            not isinstance(reason, str)
+            or not reason.strip()
+            or reason != reason.strip()
+            or "\x00" in reason
+        ):
+            raise QMSumProtocolError("invalid summary reason must be non-empty exact text")
+        if question_id in candidates:
+            raise QMSumProtocolError("invalid summary cannot also supply a compressed candidate")
+        question = next(item for item in source.questions if item.question_id == question_id)
+        if question.domain == "Committee":
+            raise QMSumProtocolError("Committee cases cannot enter summary execution")
     orders = balanced_arm_orders([question.question_id for question in source.questions], seed=seed)
     for candidate_question_id, candidate in candidates.items():
         if not isinstance(candidate, QMSumCompressedCandidate):
@@ -1202,6 +1277,17 @@ def plan_offline(
                     status=QMSumCaseStatus.EXCLUDED,
                     arms=(),
                     blocked_reason="COMMITTEE_EXCLUDED_FROM_ONLINE_EXPERIMENT",
+                )
+            )
+            continue
+        summary_invalid_reason = invalid_summaries.get(frozen.question_id)
+        if summary_invalid_reason is not None:
+            cases.append(
+                QMSumPlannedCase(
+                    question_id=frozen.question_id,
+                    status=QMSumCaseStatus.C_SUMMARY_INVALID,
+                    arms=(),
+                    blocked_reason=summary_invalid_reason,
                 )
             )
             continue
@@ -1404,8 +1490,14 @@ def record_observations(
             )
         if key in observed:
             raise QMSumProtocolError("duplicate arm output for a frozen question")
-        if any(row.status is QMSumObservationStatus.UNKNOWN_OUTCOME for row in observed.values()):
-            raise QMSumProtocolError("no further dispatch is permitted after an unknown outcome")
+        if any(
+            row.status in {
+                QMSumObservationStatus.UNKNOWN_OUTCOME,
+                QMSumObservationStatus.UNVERIFIED_RESPONSE,
+            }
+            for row in observed.values()
+        ):
+            raise QMSumProtocolError("no further dispatch is permitted after an unresolved outcome")
         if (
             record.arm is QMSumArm.C
             and record.summary_candidate_id != planned_arm.compressed_candidate_id
@@ -1490,6 +1582,38 @@ def summarize_score_records(
         if pair.keys() == {QMSumArm.B, QMSumArm.C}
         and all(row.status is QMSumObservationStatus.OBSERVED for row in pair.values())
     ]
+    planned_pair_ids = {
+        case.question_id
+        for case in plan.cases
+        if {arm.arm for arm in case.arms} == {QMSumArm.B, QMSumArm.C}
+    }
+    planned_pair_rows = {
+        question_id: by_pair.get(question_id, {}) for question_id in planned_pair_ids
+    }
+    failed_pair_ids = {
+        question_id
+        for question_id, pair in planned_pair_rows.items()
+        if any(row.status is QMSumObservationStatus.FAILED for row in pair.values())
+    }
+    unknown_pair_ids = {
+        question_id
+        for question_id, pair in planned_pair_rows.items()
+        if any(row.status is QMSumObservationStatus.UNKNOWN_OUTCOME for row in pair.values())
+    }
+    unverified_pair_ids = {
+        question_id
+        for question_id, pair in planned_pair_rows.items()
+        if any(row.status is QMSumObservationStatus.UNVERIFIED_RESPONSE for row in pair.values())
+    }
+    partial_pair_ids = {
+        question_id for question_id, pair in planned_pair_rows.items() if len(pair) == 1
+    }
+    partial_failed_pair_ids = partial_pair_ids & failed_pair_ids
+    partial_unknown_pair_ids = partial_pair_ids & unknown_pair_ids
+    partial_unverified_pair_ids = partial_pair_ids & unverified_pair_ids
+    not_started_pair_ids = {
+        question_id for question_id, pair in planned_pair_rows.items() if not pair
+    }
     answerable_pairs = sum(
         pair[QMSumArm.B].review is not None and pair[QMSumArm.B].review.task_qualified
         for pair in complete_pairs
@@ -1581,18 +1705,24 @@ def summarize_score_records(
         unknown_outcome_arms=sum(
             row.status is QMSumObservationStatus.UNKNOWN_OUTCOME for row in rows
         ),
+        unverified_response_arms=sum(
+            row.status is QMSumObservationStatus.UNVERIFIED_RESPONSE for row in rows
+        ),
         unattempted_planned_arms=sum(len(case.arms) for case in plan.cases) - len(rows),
         missing_reviews=sum(row.review is None for row in observed_rows),
-        failed_pairs=sum(
-            pair.keys() == {QMSumArm.B, QMSumArm.C}
-            and any(row.status is QMSumObservationStatus.FAILED for row in pair.values())
-            for pair in by_pair.values()
+        failed_pairs=len(failed_pair_ids),
+        unknown_pairs=len(unknown_pair_ids),
+        unverified_pairs=len(unverified_pair_ids),
+        invalid_summary_questions=sum(
+            case.status is QMSumCaseStatus.C_SUMMARY_INVALID for case in plan.cases
         ),
-        unknown_pairs=sum(
-            pair.keys() == {QMSumArm.B, QMSumArm.C}
-            and any(row.status is QMSumObservationStatus.UNKNOWN_OUTCOME for row in pair.values())
-            for pair in by_pair.values()
-        ),
+        planned_pairs=len(planned_pair_ids),
+        complete_observed_pairs=len(complete_pairs),
+        partial_pairs=len(partial_pair_ids),
+        partial_failed_pairs=len(partial_failed_pair_ids),
+        partial_unknown_pairs=len(partial_unknown_pair_ids),
+        partial_unverified_pairs=len(partial_unverified_pair_ids),
+        not_started_pairs=len(not_started_pair_ids),
         pressure_valid_pairs=len(pressure_reductions),
         token_reduction_under_pressure=float(median(pressure_reductions))
         if pressure_reductions
