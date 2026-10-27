@@ -11,6 +11,7 @@ import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import { createAgent, listAgents, type Agent, type KnowledgeBindingMode } from "@/lib/api/agents";
 import { listAgentTemplates, type AgentTemplate } from "@/lib/api/agent-templates";
 import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 const EMPTY_FORM = {
@@ -175,19 +176,12 @@ export default function AgentsPage() {
               </label>
               <label>
                 {t("agents.modelProfile")}
-                <select
+                <Select
                   value={form.model_profile_id}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, model_profile_id: event.target.value }))
-                  }
-                >
-                  <option value="">{t("agents.selectProfile")}</option>
-                  {profileList.map((profile) => (
-                    <option value={profile.id} key={profile.id}>
-                      {profile.model}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(next) => setForm((current) => ({ ...current, model_profile_id: next }))}
+                  placeholder={t("agents.selectProfile")}
+                  options={profileList.map((profile) => ({ value: profile.id, label: profile.model }))}
+                />
               </label>
               <label>
                 {t("agents.description")}
@@ -201,18 +195,19 @@ export default function AgentsPage() {
               </label>
               <label>
                 {t("agents.bindingMode")}
-                <select
+                <Select
                   value={form.knowledge_binding_mode}
-                  onChange={(event) =>
+                  onChange={(next) =>
                     setForm((current) => ({
                       ...current,
-                      knowledge_binding_mode: event.target.value as KnowledgeBindingMode,
+                      knowledge_binding_mode: next as KnowledgeBindingMode,
                     }))
                   }
-                >
-                  <option value="LATEST">{t("agents.bindingModeLatest")}</option>
-                  <option value="PINNED">{t("agents.bindingModePinned")}</option>
-                </select>
+                  options={[
+                    { value: "LATEST", label: t("agents.bindingModeLatest") },
+                    { value: "PINNED", label: t("agents.bindingModePinned") },
+                  ]}
+                />
                 <span className="state-hint">{t("agents.bindingModeHint")}</span>
               </label>
             </div>

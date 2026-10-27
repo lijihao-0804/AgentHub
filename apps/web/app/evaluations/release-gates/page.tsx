@@ -13,6 +13,7 @@ import {
   listReleaseGatePolicies,
 } from "@/lib/api/evaluation";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 const RULE_TYPES = [
@@ -264,16 +265,11 @@ export default function ReleaseGatePoliciesPage() {
                   </label>
                   <label>
                     {t("evaluation.gates.builder.ruleType")}
-                    <select
+                    <Select
                       value={rule.rule}
-                      onChange={(e) => updateRule(index, { rule: e.target.value as DraftRule["rule"] })}
-                    >
-                      {RULE_TYPES.map((type) => (
-                        <option value={type} key={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(next) => updateRule(index, { rule: next as DraftRule["rule"] })}
+                      options={RULE_TYPES.map((type) => ({ value: type, label: type }))}
+                    />
                     <span className="state-hint">{t(`evaluation.gates.builder.ruleDescriptions.${rule.rule}` as never)}</span>
                   </label>
                   {TOLERANCE_RULES.has(rule.rule) && (

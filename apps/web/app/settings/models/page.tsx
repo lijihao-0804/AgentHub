@@ -24,6 +24,7 @@ import {
   type ModelProfileTestResult,
   type ProviderCredential,
 } from "@/lib/api/models";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 import type { MessageKey } from "@/i18n/messages";
 
@@ -418,24 +419,18 @@ export default function ModelSettingsPage() {
             <div className="form-grid">
               <label>
                 {t("settings.models.provider")}
-                <select
+                <Select
                   value={credentialForm.provider}
-                  onChange={(event) => {
-                    const provider = event.target.value;
+                  onChange={(next) => {
                     setCredentialForm((form) => ({
                       ...form,
-                      provider,
-                      base_url: nextBaseUrl(form.base_url, provider),
+                      provider: next,
+                      base_url: nextBaseUrl(form.base_url, next),
                     }));
                   }}
-                >
-                  <option value="">{t("settings.models.providerPlaceholder")}</option>
-                  {PROVIDER_OPTIONS.map((option) => (
-                    <option value={option.value} key={option.value}>
-                      {t(option.labelKey)}
-                    </option>
-                  ))}
-                </select>
+                  placeholder={t("settings.models.providerPlaceholder")}
+                  options={PROVIDER_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
+                />
               </label>
               <label>
                 {t("settings.models.name")}
@@ -693,19 +688,15 @@ export default function ModelSettingsPage() {
             <div className="form-grid">
               <label>
                 {t("settings.models.providerCredential")}
-                <select
+                <Select
                   value={profileForm.provider_credential_id}
-                  onChange={(event) =>
-                    setProfileForm((form) => ({ ...form, provider_credential_id: event.target.value }))
-                  }
-                >
-                  <option value="">{t("settings.models.selectCredential")}</option>
-                  {credentialList.map((credential) => (
-                    <option value={credential.id} key={credential.id}>
-                      {credential.name} ({credential.provider})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(next) => setProfileForm((form) => ({ ...form, provider_credential_id: next }))}
+                  placeholder={t("settings.models.selectCredential")}
+                  options={credentialList.map((credential) => ({
+                    value: credential.id,
+                    label: `${credential.name} (${credential.provider})`,
+                  }))}
+                />
               </label>
               <label>
                 {t("settings.models.model")}
@@ -750,21 +741,14 @@ export default function ModelSettingsPage() {
               </label>
               <label>
                 {t("settings.models.fallback")}
-                <select
+                <Select
                   value={profileForm.fallback_profile_id}
-                  onChange={(event) =>
-                    setProfileForm((form) => ({ ...form, fallback_profile_id: event.target.value }))
-                  }
-                >
-                  <option value="">{t("settings.models.noFallback")}</option>
-                  {profileList
+                  onChange={(next) => setProfileForm((form) => ({ ...form, fallback_profile_id: next }))}
+                  placeholder={t("settings.models.noFallback")}
+                  options={profileList
                     .filter((profile) => profile.id !== editingProfileId)
-                    .map((profile) => (
-                      <option value={profile.id} key={profile.id}>
-                        {profile.model}
-                      </option>
-                    ))}
-                </select>
+                    .map((profile) => ({ value: profile.id, label: profile.model }))}
+                />
               </label>
               <label>
                 {t("settings.models.maxContextTokens")}

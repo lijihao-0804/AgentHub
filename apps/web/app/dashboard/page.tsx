@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import MetricCard, { windowDelta } from "@/components/ui/metric-card";
+import Select from "@/components/ui/select";
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
@@ -229,13 +230,11 @@ export default function DashboardPage() {
       <section className="runs-toolbar" aria-label={t("dashboard.window")}>
         <label>
           {t("dashboard.window")}
-          <select value={days ?? "7"} onChange={(event) => changeDays(event.target.value)}>
-            {WINDOW_OPTIONS.map((option) => (
-              <option value={option.value} key={option.value}>
-                {t(option.labelKey)}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={days ?? "7"}
+            onChange={changeDays}
+            options={WINDOW_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
+          />
         </label>
         {/* No refresh button: this view polls every few seconds on its own. */}
       </section>

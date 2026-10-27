@@ -34,6 +34,7 @@ import {
 } from "@/lib/api/evaluation";
 import Link from "next/link";
 
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 type AuthInput = { workspaceId: string; accessToken: string; sessionId: number };
@@ -432,25 +433,19 @@ export default function RunWorkflow({
                 <div className="form-grid">
                   <label>
                     {t("evaluation.comparison.baseline")}
-                    <select value={baselineId} onChange={(e) => setBaselineId(e.target.value)}>
-                      <option value="">—</option>
-                      {variants.map((variant) => (
-                        <option value={variant.id} key={variant.id}>
-                          {variant.label}
-                        </option>
-                      ))}
-                    </select>
+                    <Select
+                      value={baselineId}
+                      onChange={setBaselineId}
+                      options={[{ value: "", label: "—" }, ...variants.map((variant) => ({ value: variant.id, label: variant.label }))]}
+                    />
                   </label>
                   <label>
                     {t("evaluation.comparison.candidate")}
-                    <select value={candidateId} onChange={(e) => setCandidateId(e.target.value)}>
-                      <option value="">—</option>
-                      {variants.map((variant) => (
-                        <option value={variant.id} key={variant.id}>
-                          {variant.label}
-                        </option>
-                      ))}
-                    </select>
+                    <Select
+                      value={candidateId}
+                      onChange={setCandidateId}
+                      options={[{ value: "", label: "—" }, ...variants.map((variant) => ({ value: variant.id, label: variant.label }))]}
+                    />
                   </label>
                 </div>
                 {baselineId && candidateId && baselineId === candidateId && (
@@ -549,15 +544,17 @@ export default function RunWorkflow({
               >
                 <label>
                   {t("evaluation.gate.policySelect")}
-                  <select value={policyId} onChange={(e) => setPolicyId(e.target.value)}>
-                    <option value="">—</option>
-                    {policies.map((policy) => (
-                      <option value={policy.id} key={policy.id}>
-                        {policy.name} ·{" "}
-                        {t("evaluation.gates.ruleCount", { count: policy.policy_json.rules.length })}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    value={policyId}
+                    onChange={setPolicyId}
+                    options={[
+                      { value: "", label: "—" },
+                      ...policies.map((policy) => ({
+                        value: policy.id,
+                        label: `${policy.name} · ${t("evaluation.gates.ruleCount", { count: policy.policy_json.rules.length })}`,
+                      })),
+                    ]}
+                  />
                 </label>
                 <InlineError error={gateError} fallback={t("errors.requestFailed")} />
                 <div className="form-actions">
@@ -1059,14 +1056,14 @@ export function RunCaseResults({
           </button>
           <label className="state-hint">
             {t("evaluation.run.caseResults.filterLabel")}{" "}
-            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-              <option value="">{t("evaluation.run.caseResults.filterAll")}</option>
-              {CASE_RESULT_STATUSES.map((status) => (
-                <option value={status} key={status}>
-                  {caseStatusLabel(status)}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { value: "", label: t("evaluation.run.caseResults.filterAll") },
+                ...CASE_RESULT_STATUSES.map((status) => ({ value: status, label: caseStatusLabel(status) })),
+              ]}
+            />
           </label>
         </>
       }

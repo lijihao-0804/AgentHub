@@ -13,6 +13,7 @@ import { listAgents, type Agent } from "@/lib/api/agents";
 import { listThreadArtifacts, type Artifact } from "@/lib/api/artifacts";
 import { createThread, listThreads, listThreadTurns, type Thread } from "@/lib/api/threads";
 import type { MessageKey } from "@/i18n/messages";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 const THREAD_PAGE_SIZE = 20;
@@ -204,14 +205,13 @@ export default function AppThreadsPage({ copy, weight }: { copy: AppThreadCopy; 
             <div className="form-grid">
               <label>
                 {t("appThread.agent")}
-                <select value={copy.agentId ?? agentId} disabled={Boolean(copy.agentId)} onChange={(event) => setAgentId(event.target.value)}>
-                  <option value="">{t("appThread.selectAgent")}</option>
-                  {agentList.map((agent) => (
-                    <option value={agent.id} key={agent.id}>
-                      {agent.name}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={copy.agentId ?? agentId}
+                  disabled={Boolean(copy.agentId)}
+                  onChange={setAgentId}
+                  placeholder={t("appThread.selectAgent")}
+                  options={agentList.map((agent) => ({ value: agent.id, label: agent.name }))}
+                />
               </label>
               <label>
                 {t("appThread.threadTitle")}

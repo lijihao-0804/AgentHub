@@ -7,6 +7,7 @@ import { InlineError, Panel } from "@/components/ui/states";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { ApiError, toApiError } from "@/lib/api/client";
 import { createOrganization, createWorkspace } from "@/lib/api/tenancy";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 /**
@@ -164,17 +165,12 @@ export default function SettingsPage() {
           <p className="eval-form-title">{t("settings.createWorkspace")}</p>
           <label>
             {t("settings.organization")}
-            <select
+            <Select
               value={targetOrganizationId}
-              onChange={(event) => setTargetOrganizationId(event.target.value)}
-            >
-              <option value="">{t("settings.selectOrganization")}</option>
-              {organizations.map((organization) => (
-                <option value={organization.id} key={organization.id}>
-                  {organization.name}
-                </option>
-              ))}
-            </select>
+              onChange={setTargetOrganizationId}
+              placeholder={t("settings.selectOrganization")}
+              options={organizations.map((organization) => ({ value: organization.id, label: organization.name }))}
+            />
           </label>
           <label>
             {t("settings.workspaceName")}

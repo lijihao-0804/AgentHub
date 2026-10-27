@@ -9,6 +9,7 @@ import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
 import { Agent, AgentVersion, listAgents, listAgentVersions } from "@/lib/api/agents";
 import { listRuns, RunListItem } from "@/lib/api/runs";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import Select, { type SelectOption } from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 const RUN_STATUS_OPTIONS = [
@@ -219,61 +220,61 @@ export default function RunsPage() {
         <div className="runs-toolbar">
           <label>
             {t("runs.filters.status")}
-            <select
+            <Select
               value={status}
-              onChange={(event) => {
-                setStatus(event.target.value);
-                applyFilters({ status: event.target.value });
+              onChange={(next) => {
+                setStatus(next);
+                applyFilters({ status: next });
               }}
-            >
-              <option value="">{t("runs.filters.allStatuses")}</option>
-              {RUN_STATUS_OPTIONS.map((option) => (
-                <option value={option} key={option}>
-                  {statusLabel(option)}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "", label: t("runs.filters.allStatuses") },
+                ...RUN_STATUS_OPTIONS.map(
+                  (option): SelectOption => ({ value: option, label: statusLabel(option) }),
+                ),
+              ]}
+            />
           </label>
           <label>
             {t("runs.filters.agent")}
-            <select
+            <Select
               value={selectedAgentId}
-              onChange={(event) => {
-                setSelectedAgentId(event.target.value);
+              onChange={(next) => {
+                setSelectedAgentId(next);
                 setSelectedVersionId("");
                 // Switching agents invalidates a version filter picked under
                 // the previous one; without a filter there is nothing to re-run.
                 if (agentVersionId) applyFilters({ version: "" });
               }}
-            >
-              <option value="">{t("runs.filters.allAgents")}</option>
-              {agents.map((agent) => (
-                <option value={agent.id} key={agent.id}>
-                  {agent.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "", label: t("runs.filters.allAgents") },
+                ...agents.map(
+                  (agent): SelectOption => ({ value: agent.id, label: agent.name }),
+                ),
+              ]}
+            />
           </label>
           <label>
             {t("runs.filters.version")}
-            <select
+            <Select
               value={selectedVersionId}
-              onChange={(event) => {
-                setSelectedVersionId(event.target.value);
-                applyFilters({ version: event.target.value });
+              onChange={(next) => {
+                setSelectedVersionId(next);
+                applyFilters({ version: next });
               }}
               disabled={!selectedAgentId && agentVersions.length === 0 && !selectedVersionId}
-            >
-              <option value="">{t("runs.filters.allVersions")}</option>
-              {selectedVersionId && !agentVersions.some((v) => v.id === selectedVersionId) && (
-                <option value={selectedVersionId}>{t("runs.filters.linkedVersion")}</option>
-              )}
-              {agentVersions.map((version) => (
-                <option value={version.id} key={version.id}>
-                  {`v${version.version_number} · ${version.resolved_spec_hash.slice(0, 8)}`}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: "", label: t("runs.filters.allVersions") },
+                ...(selectedVersionId && !agentVersions.some((v) => v.id === selectedVersionId)
+                  ? [{ value: selectedVersionId, label: t("runs.filters.linkedVersion") }]
+                  : []),
+                ...agentVersions.map(
+                  (version): SelectOption => ({
+                    value: version.id,
+                    label: `v${version.version_number} · ${version.resolved_spec_hash.slice(0, 8)}`,
+                  }),
+                ),
+              ]}
+            />
           </label>
           <div className="runs-toolbar-actions">
             <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>

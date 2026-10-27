@@ -17,6 +17,7 @@ import {
   listExperiments,
 } from "@/lib/api/evaluation";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 const PURPOSES = ["DEVELOPMENT", "HOLDOUT_VALIDATION", "RELEASE_GATE"] as const;
@@ -272,14 +273,11 @@ export default function EvaluationExperimentsPage() {
               </label>
               <label>
                 {t("evaluation.experiments.labels.datasetVersion")} · {t("evaluation.experiments.datasetSelector.dataset")}
-                <select value={datasetId} onChange={(e) => setDatasetId(e.target.value)}>
-                  <option value="">—</option>
-                  {datasets.map((dataset) => (
-                    <option value={dataset.id} key={dataset.id}>
-                      {dataset.name}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={datasetId}
+                  onChange={setDatasetId}
+                  options={[{ value: "", label: "—" }, ...datasets.map((dataset) => ({ value: dataset.id, label: dataset.name }))]}
+                />
               </label>
               <label>
                 {t("evaluation.experiments.datasetSelector.version")}
@@ -292,18 +290,20 @@ export default function EvaluationExperimentsPage() {
                 ) : versionsLoading ? (
                   <span className="state-hint">{t("evaluation.experiments.datasetSelector.loadingVersions")}</span>
                 ) : (
-                  <select required value={versionId} onChange={(e) => setVersionId(e.target.value)} disabled={!datasetId}>
-                    <option value="">—</option>
-                    {versions.length === 0 && datasetId && !versionsError ? (
-                      <option value="">{t("evaluation.experiments.datasetSelector.noPublished")}</option>
-                    ) : (
-                      versions.map((version) => (
-                        <option value={version.id} key={version.id}>
-                          v{version.version_number} · {version.item_count ?? "?"} items
-                        </option>
-                      ))
-                    )}
-                  </select>
+                  <Select
+                    value={versionId}
+                    onChange={setVersionId}
+                    disabled={!datasetId}
+                    options={[
+                      { value: "", label: "—" },
+                      ...(versions.length === 0 && datasetId && !versionsError
+                        ? [{ value: "", label: t("evaluation.experiments.datasetSelector.noPublished") }]
+                        : versions.map((version) => ({
+                            value: version.id,
+                            label: `v${version.version_number} · ${version.item_count ?? "?"} items`,
+                          }))),
+                    ]}
+                  />
                 )}
                 <span className="state-hint">{t("evaluation.experiments.datasetSelector.publishedOnly")}</span>
                 {datasetId && versions.length === 0 && !versionsError && !versionsLoading && (
@@ -317,13 +317,11 @@ export default function EvaluationExperimentsPage() {
               </label>
               <label>
                 {t("evaluation.experiments.labels.purpose")}
-                <select value={purpose} onChange={(e) => setPurpose(e.target.value as (typeof PURPOSES)[number])}>
-                  {PURPOSES.map((value) => (
-                    <option value={value} key={value}>
-                      {purposeLabel(value)}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={purpose}
+                  onChange={(next) => setPurpose(next as (typeof PURPOSES)[number])}
+                  options={PURPOSES.map((value) => ({ value, label: purposeLabel(value) }))}
+                />
               </label>
               <label>
                 {t("evaluation.experiments.labels.split")}
@@ -331,13 +329,11 @@ export default function EvaluationExperimentsPage() {
               </label>
               <label>
                 {t("evaluation.experiments.labels.repetitions")}
-                <select value={repetitions} onChange={(e) => setRepetitions(e.target.value)}>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <option value={n} key={n}>
-                      {n}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={repetitions}
+                  onChange={setRepetitions}
+                  options={[1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) }))}
+                />
               </label>
               <label>
                 {t("evaluation.experiments.labels.description")}

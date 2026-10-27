@@ -22,6 +22,7 @@ import {
   type AgentRun,
 } from "@/lib/api/agent-runtime";
 import { decideApproval, listRunApprovals, type Approval } from "@/lib/api/approvals";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 /**
@@ -744,17 +745,12 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
             <div className="form-grid">
               <label>
                 {t("agents.version")}
-                <select
+                <Select
                   value={selectedVersionId}
-                  onChange={(event) => switchVersion(event.target.value)}
+                  onChange={switchVersion}
                   disabled={streaming || busy}
-                >
-                  {versionList.map((version) => (
-                    <option key={version.id} value={version.id}>
-                      v{version.version_number}
-                    </option>
-                  ))}
-                </select>
+                  options={versionList.map((version) => ({ value: version.id, label: `v${version.version_number}` }))}
+                />
               </label>
               <label className="query-field">
                 {t("agents.playground.input")}

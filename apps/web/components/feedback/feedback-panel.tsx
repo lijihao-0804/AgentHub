@@ -4,6 +4,7 @@ import { useCallback, useRef, useState, type FormEvent } from "react";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { EmptyState, ErrorState, InlineError, LoadingState } from "@/components/ui/states";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 import { FEEDBACK_CATEGORIES, importFeedback, listFeedback, reviewFeedback, submitFeedback, type Feedback, type FeedbackCategory } from "@/lib/api/feedback";
 import { listDatasets, listDatasetVersions } from "@/lib/api/evaluation";
@@ -40,8 +41,8 @@ function FeedbackBody({ runId, turnId }: { runId: string; turnId?: string }) {
     {open && <>
       <p className="state-hint">{t("feedback.hint")}</p>
       <form onSubmit={submit} className="form-stack">
-        <label>{t("feedback.rating")}<select value={rating} onChange={(e) => setRating(Number(e.target.value) as -1 | 1)}><option value={-1}>{t("feedback.negative")}</option><option value={1}>{t("feedback.positive")}</option></select></label>
-        <label>{t("feedback.category")}<select value={category} onChange={(e) => setCategory(e.target.value as FeedbackCategory)}>{FEEDBACK_CATEGORIES.map((c) => <option key={c} value={c}>{t(`feedback.categories.${c}`)}</option>)}</select></label>
+        <label>{t("feedback.rating")}<Select value={String(rating)} onChange={(next) => setRating(Number(next) as -1 | 1)} options={[{ value: "-1", label: t("feedback.negative") }, { value: "1", label: t("feedback.positive") }]} /></label>
+        <label>{t("feedback.category")}<Select value={category} onChange={(next) => setCategory(next as FeedbackCategory)} options={FEEDBACK_CATEGORIES.map((c) => ({ value: c, label: t(`feedback.categories.${c}`) }))} /></label>
         <label>{t("feedback.comment")}<textarea maxLength={4000} value={comment} onChange={(e) => setComment(e.target.value)} /></label>
         <label>{t("feedback.correction")}<textarea maxLength={16000} value={answer} onChange={(e) => setAnswer(e.target.value)} /></label>
         <InlineError error={mutation.error} />
@@ -75,7 +76,7 @@ function FeedbackReviewCard({ feedback, reload, canReview }: { feedback: Feedbac
     </div>}
     {feedback.imported_version_id ? <p>{t("feedback.imported")}</p> : canReview && feedback.status === "APPROVED" && <>
       <p className="state-hint">{t("feedback.devHint")}</p>
-      <label>{t("feedback.dataset")}<select value={datasetId} onChange={(e) => { setDatasetId(e.target.value); setBaseId(""); }}><option value="">{t("feedback.choose")}</option>{(datasets.data?.items ?? []).map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></label>
+      <label>{t("feedback.dataset")}<Select value={datasetId} onChange={(next) => { setDatasetId(next); setBaseId(""); }} placeholder={t("feedback.choose")} options={(datasets.data?.items ?? []).map((d) => ({ value: d.id, label: d.name }))} /></label>
       {datasets.data && datasets.data.total > datasets.data.items.length && <p>{t("feedback.datasetLimit")}</p>}
       {datasets.loading && <LoadingState label={t("common.loading")} />}
       <VersionSelector key={datasetId} datasetId={datasetId} baseId={baseId} setBaseId={setBaseId} />
@@ -91,7 +92,7 @@ function VersionSelector({ datasetId, baseId, setBaseId }: { datasetId: string; 
   const { t } = useI18n();
   const versions = useWorkspaceData((auth) => listDatasetVersions(auth, datasetId), `feedback-versions:${datasetId}`, { enabled: !!datasetId });
   return <>
-    <label>{t("feedback.baseVersion")}<select value={baseId} disabled={!datasetId || versions.loading} onChange={(e) => setBaseId(e.target.value)}><option value="">{t("feedback.choose")}</option>{(versions.data ?? []).map((v) => <option key={v.id} value={v.id}>{v.version_number} · {v.status}</option>)}</select></label>
+    <label>{t("feedback.baseVersion")}<Select value={baseId} disabled={!datasetId || versions.loading} onChange={setBaseId} placeholder={t("feedback.choose")} options={(versions.data ?? []).map((v) => ({ value: v.id, label: `${v.version_number} · ${v.status}` }))} /></label>
     {versions.loading && <LoadingState label={t("common.loading")} />}
     <InlineError error={versions.error} />
   </>;

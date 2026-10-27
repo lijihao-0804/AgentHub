@@ -25,6 +25,7 @@ import {
 } from "@/lib/api/evaluation";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData } from "@/hooks/use-workspace-data";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 export default function ExperimentDetailClient({ experimentId }: { experimentId: string }) {
@@ -465,14 +466,12 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                     ) : agents.length === 0 ? (
                       <span className="state-hint">{t("evaluation.experiment.variants.noAgents")}</span>
                     ) : (
-                      <select required value={agentId} onChange={(e) => setAgentId(e.target.value)}>
-                        <option value="">{t("evaluation.experiment.variants.selectAgent")}</option>
-                        {agents.map((agent) => (
-                          <option value={agent.id} key={agent.id}>
-                            {agent.name}
-                          </option>
-                        ))}
-                      </select>
+                      <Select
+                        value={agentId}
+                        onChange={setAgentId}
+                        placeholder={t("evaluation.experiment.variants.selectAgent")}
+                        options={agents.map((agent) => ({ value: agent.id, label: agent.name }))}
+                      />
                     )}
                   </label>
                   <label>
@@ -486,14 +485,16 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                     ) : versionsLoading ? (
                       <span className="state-hint">{t("evaluation.experiment.variants.versionSelectorLoading")}</span>
                     ) : (
-                      <select required value={agentVersionId} onChange={(e) => setAgentVersionId(e.target.value)} disabled={!agentId}>
-                        <option value="">{t("evaluation.experiment.variants.selectVersion")}</option>
-                        {agentVersions.map((version) => (
-                          <option value={version.id} key={version.id}>
-                            v{version.version_number} · {version.resolved_spec_hash.slice(0, 8)}…
-                          </option>
-                        ))}
-                      </select>
+                      <Select
+                        value={agentVersionId}
+                        onChange={setAgentVersionId}
+                        disabled={!agentId}
+                        placeholder={t("evaluation.experiment.variants.selectVersion")}
+                        options={agentVersions.map((version) => ({
+                          value: version.id,
+                          label: `v${version.version_number} · ${version.resolved_spec_hash.slice(0, 8)}…`,
+                        }))}
+                      />
                     )}
                   </label>
                   <label>
@@ -507,14 +508,15 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                     ) : pricingLoading ? (
                       <span className="state-hint">{t("common.loading")}</span>
                     ) : (
-                      <select required value={pricingId} onChange={(e) => setPricingId(e.target.value)}>
-                        <option value="">{t("evaluation.experiment.variants.selectPricing")}</option>
-                        {pricing.map((snapshot) => (
-                          <option value={snapshot.id} key={snapshot.id}>
-                            {snapshot.name} · {snapshot.provider}/{snapshot.model} · {snapshot.currency}
-                          </option>
-                        ))}
-                      </select>
+                      <Select
+                        value={pricingId}
+                        onChange={setPricingId}
+                        placeholder={t("evaluation.experiment.variants.selectPricing")}
+                        options={pricing.map((snapshot) => ({
+                          value: snapshot.id,
+                          label: `${snapshot.name} · ${snapshot.provider}/${snapshot.model} · ${snapshot.currency}`,
+                        }))}
+                      />
                     )}
                     {!pricingLoading && !pricingError && pricing.length === 0 && (
                       <Link className="button button-ghost" href="/evaluations/pricing">

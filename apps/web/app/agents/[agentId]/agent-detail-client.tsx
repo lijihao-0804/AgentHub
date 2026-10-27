@@ -39,6 +39,7 @@ import {
 import { listKnowledgeBases, listSnapshots, type KnowledgeBase, type KnowledgeSnapshot } from "@/lib/api/knowledge";
 import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
 import { listToolRevisions, listTools, type Tool, type ToolRevision } from "@/lib/api/tools";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 type Tab = "general" | "model" | "knowledge" | "tools" | "runtime" | "memories" | "versions";
@@ -737,19 +738,12 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
             <div className="form-grid">
               <label>
                 {t("agents.modelProfile")}
-                <select
+                <Select
                   value={model.model_profile_id}
-                  onChange={(event) =>
-                    setModel((current) => ({ ...current, model_profile_id: event.target.value }))
-                  }
-                >
-                  <option value="">{t("agents.selectProfile")}</option>
-                  {profileList.map((profile) => (
-                    <option value={profile.id} key={profile.id}>
-                      {profile.model}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(next) => setModel((current) => ({ ...current, model_profile_id: next }))}
+                  placeholder={t("agents.selectProfile")}
+                  options={profileList.map((profile) => ({ value: profile.id, label: profile.model }))}
+                />
               </label>
               <label>
                 {t("agents.maxAttempts")}
@@ -794,13 +788,14 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
           <label>
             {t("agents.defaultBindingMode")}
-            <select
+            <Select
               value={bindingMode}
-              onChange={(event) => setBindingMode(event.target.value as KnowledgeBindingMode)}
-            >
-              <option value="LATEST">{t("agents.bindingModeLatest")}</option>
-              <option value="PINNED">{t("agents.bindingModePinned")}</option>
-            </select>
+              onChange={(next) => setBindingMode(next as KnowledgeBindingMode)}
+              options={[
+                { value: "LATEST", label: t("agents.bindingModeLatest") },
+                { value: "PINNED", label: t("agents.bindingModePinned") },
+              ]}
+            />
           </label>
 
           <div className="binding-rows">
@@ -1072,34 +1067,36 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
             </label>
             <label>
               {t("agents.memory.statusFilter")}
-              <select
+              <Select
                 value={memoryStatus}
-                onChange={(event) => {
-                  setMemoryStatus(event.target.value as AgentMemoryStatus | "");
+                onChange={(next) => {
+                  setMemoryStatus(next as AgentMemoryStatus | "");
                   setMemoryOffset(0);
                 }}
-              >
-                <option value="">{t("agents.memory.statusAll")}</option>
-                <option value="ACTIVE">{t("agents.memory.status.ACTIVE")}</option>
-                <option value="SUPERSEDED">{t("agents.memory.status.SUPERSEDED")}</option>
-                <option value="INVALIDATED">{t("agents.memory.status.INVALIDATED")}</option>
-              </select>
+                placeholder={t("agents.memory.statusAll")}
+                options={[
+                  { value: "ACTIVE", label: t("agents.memory.status.ACTIVE") },
+                  { value: "SUPERSEDED", label: t("agents.memory.status.SUPERSEDED") },
+                  { value: "INVALIDATED", label: t("agents.memory.status.INVALIDATED") },
+                ]}
+              />
             </label>
             <label>
               {t("agents.memory.kindFilter")}
-              <select
+              <Select
                 value={memoryKind}
-                onChange={(event) => {
-                  setMemoryKind(event.target.value as AgentMemoryKind | "");
+                onChange={(next) => {
+                  setMemoryKind(next as AgentMemoryKind | "");
                   setMemoryOffset(0);
                 }}
-              >
-                <option value="">{t("agents.memory.kindAll")}</option>
-                <option value="FACT">{t("agents.memory.kind.FACT")}</option>
-                <option value="PREFERENCE">{t("agents.memory.kind.PREFERENCE")}</option>
-                <option value="DECISION">{t("agents.memory.kind.DECISION")}</option>
-                <option value="CONSTRAINT">{t("agents.memory.kind.CONSTRAINT")}</option>
-              </select>
+                placeholder={t("agents.memory.kindAll")}
+                options={[
+                  { value: "FACT", label: t("agents.memory.kind.FACT") },
+                  { value: "PREFERENCE", label: t("agents.memory.kind.PREFERENCE") },
+                  { value: "DECISION", label: t("agents.memory.kind.DECISION") },
+                  { value: "CONSTRAINT", label: t("agents.memory.kind.CONSTRAINT") },
+                ]}
+              />
             </label>
           </div>
           {memoryFiltered && (
@@ -1347,19 +1344,12 @@ function KnowledgeBindingRow({
     <div className="binding-row">
       <label>
         {t("agents.knowledgeBase")}
-        <select
+        <Select
           value={knowledgeBaseId}
-          onChange={(event) =>
-            onChange({ ...binding, knowledge_base_id: event.target.value, snapshot_id: null })
-          }
-        >
-          <option value="">{t("agents.selectKnowledgeBase")}</option>
-          {bases.map((base) => (
-            <option value={base.id} key={base.id}>
-              {base.name}
-            </option>
-          ))}
-        </select>
+          onChange={(next) => onChange({ ...binding, knowledge_base_id: next, snapshot_id: null })}
+          placeholder={t("agents.selectKnowledgeBase")}
+          options={bases.map((base) => ({ value: base.id, label: base.name }))}
+        />
         {knowledgeBaseId && (
           <Link
             className="button button-ghost"
@@ -1371,31 +1361,30 @@ function KnowledgeBindingRow({
       </label>
       <label>
         {t("agents.bindingMode")}
-        <select
+        <Select
           value={binding.binding_mode}
-          onChange={(event) => {
-            const mode = event.target.value as KnowledgeBindingMode;
+          onChange={(next) => {
+            const mode = next as KnowledgeBindingMode;
             onChange({ ...binding, binding_mode: mode, snapshot_id: mode === "PINNED" ? binding.snapshot_id : null });
           }}
-        >
-          <option value="LATEST">{t("agents.bindingModeLatest")}</option>
-          <option value="PINNED">{t("agents.bindingModePinned")}</option>
-        </select>
+          options={[
+            { value: "LATEST", label: t("agents.bindingModeLatest") },
+            { value: "PINNED", label: t("agents.bindingModePinned") },
+          ]}
+        />
       </label>
       {pinned ? (
         <label>
           {t("agents.snapshot")}
-          <select
+          <Select
             value={binding.snapshot_id ?? ""}
-            onChange={(event) => onChange({ ...binding, snapshot_id: event.target.value || null })}
-          >
-            <option value="">{t("agents.selectSnapshot")}</option>
-            {snapshotList.map((snapshot) => (
-              <option value={snapshot.id} key={snapshot.id}>
-                {snapshot.content_hash.slice(0, 12)} · {snapshot.item_count}
-              </option>
-            ))}
-          </select>
+            onChange={(next) => onChange({ ...binding, snapshot_id: next || null })}
+            placeholder={t("agents.selectSnapshot")}
+            options={snapshotList.map((snapshot) => ({
+              value: snapshot.id,
+              label: `${snapshot.content_hash.slice(0, 12)} · ${snapshot.item_count}`,
+            }))}
+          />
           <InlineError error={snapshots.error} fallback={t("errors.loadSnapshots")} />
         </label>
       ) : (
@@ -1435,31 +1424,24 @@ function ToolBindingRow({
     <div className="binding-row">
       <label>
         {t("agents.tool")}
-        <select
+        <Select
           value={toolId}
-          onChange={(event) => onChange({ tool_id: event.target.value, tool_revision_id: null })}
-        >
-          <option value="">{t("agents.selectTool")}</option>
-          {tools.map((tool) => (
-            <option value={tool.id} key={tool.id}>
-              {tool.name}
-            </option>
-          ))}
-        </select>
+          onChange={(next) => onChange({ tool_id: next, tool_revision_id: null })}
+          placeholder={t("agents.selectTool")}
+          options={tools.map((tool) => ({ value: tool.id, label: tool.name }))}
+        />
       </label>
       <label>
         {t("agents.revision")}
-        <select
+        <Select
           value={binding.tool_revision_id ?? ""}
-          onChange={(event) => onChange({ ...binding, tool_revision_id: event.target.value || null })}
-        >
-          <option value="">{t("agents.latestRevision")}</option>
-          {revisionList.map((revision) => (
-            <option value={revision.id} key={revision.id}>
-              #{revision.revision_number} · {revision.spec_hash.slice(0, 12)}
-            </option>
-          ))}
-        </select>
+          onChange={(next) => onChange({ ...binding, tool_revision_id: next || null })}
+          placeholder={t("agents.latestRevision")}
+          options={revisionList.map((revision) => ({
+            value: revision.id,
+            label: `#${revision.revision_number} · ${revision.spec_hash.slice(0, 12)}`,
+          }))}
+        />
       </label>
       <span className="state-hint">
         {binding.tool_revision_id ? t("agents.pinnedRevision") : t("agents.latestResolves")}

@@ -16,6 +16,7 @@ import {
   type Artifact,
   type TimelineEntry,
 } from "@/lib/api/artifacts";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 const HYPOTHESIS_STATUSES = ["INSUFFICIENT", "SUPPORTED"] as const;
@@ -318,26 +319,21 @@ export default function IncidentPanes({
                     <div className="string-list">
                       <label>
                         {t("incidents.hypotheses.evidence")}
-                        <select
+                        <Select
                           value={evidencePick[hypothesis.id] ?? ""}
-                          onChange={(event) =>
+                          onChange={(next) =>
                             setEvidencePick((current) => ({
                               ...current,
-                              [hypothesis.id]: event.target.value,
+                              [hypothesis.id]: next,
                             }))
                           }
                           disabled={timeline.length === 0}
-                        >
-                          <option value="">{t("incidents.hypotheses.evidencePlaceholder")}</option>
-                          {timeline.map((entry) => {
+                          placeholder={t("incidents.hypotheses.evidencePlaceholder")}
+                          options={timeline.map((entry) => {
                             const label = entryLabel(entry);
-                            return (
-                              <option value={label} key={label}>
-                                {label}
-                              </option>
-                            );
+                            return { value: label, label };
                           })}
-                        </select>
+                        />
                       </label>
                       <button
                         type="button"
@@ -359,17 +355,18 @@ export default function IncidentPanes({
                     <div className="hypothesis-actions">
                       <label>
                         {t("incidents.hypotheses.status")}
-                        <select
+                        <Select
                           value={hypothesis.status}
-                          onChange={(event) =>
+                          onChange={(next) =>
                             updateHypothesis(hypothesis.id, {
-                              status: event.target.value as HypothesisStatus,
+                              status: next as HypothesisStatus,
                             })
                           }
-                        >
-                          <option value="INSUFFICIENT">{t("incidents.hypotheses.insufficient")}</option>
-                          <option value="SUPPORTED">{t("incidents.hypotheses.supported")}</option>
-                        </select>
+                          options={[
+                            { value: "INSUFFICIENT", label: t("incidents.hypotheses.insufficient") },
+                            { value: "SUPPORTED", label: t("incidents.hypotheses.supported") },
+                          ]}
+                        />
                       </label>
                       <button
                         type="button"

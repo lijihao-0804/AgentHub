@@ -23,6 +23,7 @@ import {
   type EvaluationDataset,
   type EvaluationDatasetVersion,
 } from "@/lib/api/evaluation";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 const CATEGORIES = [
@@ -399,10 +400,12 @@ export default function AddRunToDatasetPanel({
               <div className="form-grid">
                 <label>
                   {t("evaluation.addToEvaluation.dataset")}
-                  <select value={datasetId} onChange={(event) => setDatasetId(event.target.value)}>
-                    <option value="">{t("evaluation.addToEvaluation.datasetPlaceholder")}</option>
-                    {datasets.map((dataset) => <option value={dataset.id} key={dataset.id}>{dataset.name}</option>)}
-                  </select>
+                  <Select
+                    value={datasetId}
+                    onChange={setDatasetId}
+                    placeholder={t("evaluation.addToEvaluation.datasetPlaceholder")}
+                    options={datasets.map((dataset) => ({ value: dataset.id, label: dataset.name }))}
+                  />
                 </label>
                 <label>
                   {t("evaluation.addToEvaluation.baseVersion")}
@@ -415,22 +418,20 @@ export default function AddRunToDatasetPanel({
                       onRetry={() => void loadVersions()}
                     />
                   ) : (
-                    <select value={baseVersionId} onChange={(event) => setBaseVersionId(event.target.value)} disabled={versions.length === 0}>
-                      <option value="">{t("evaluation.addToEvaluation.baseVersionPlaceholder")}</option>
-                      {versions.map((version) => (
-                        <option value={version.id} key={version.id}>
-                          {t("evaluation.addToEvaluation.baseVersionOption", {
-                            version: version.version_number,
-                            status: statusLabel(version.status),
-                            // Unknown stays "?" rather than a formatted 0: the
-                            // count is missing, not zero.
-                            items: version.item_count === null || version.item_count === undefined
-                              ? "?"
-                              : formatCount(version.item_count),
-                          })}
-                        </option>
-                      ))}
-                    </select>
+                    <Select
+                      value={baseVersionId}
+                      onChange={setBaseVersionId}
+                      disabled={versions.length === 0}
+                      placeholder={t("evaluation.addToEvaluation.baseVersionPlaceholder")}
+                      options={versions.map((version) => ({
+                        value: version.id,
+                        label: t("evaluation.addToEvaluation.baseVersionOption", {
+                          version: version.version_number,
+                          status: statusLabel(version.status),
+                          items: version.item_count === null || version.item_count === undefined ? "?" : formatCount(version.item_count),
+                        }),
+                      }))}
+                    />
                   )}
                   <span className="state-hint">{versions.length === 0 && !versionsLoading ? t("evaluation.addToEvaluation.baseVersionEmpty") : t("evaluation.addToEvaluation.baseVersionHint")}</span>
                 </label>
@@ -440,17 +441,23 @@ export default function AddRunToDatasetPanel({
                 </label>
                 <label>
                   {t("evaluation.addToEvaluation.split")}
-                  <select value={split} onChange={(event) => setSplit(event.target.value as "DEV" | "HOLDOUT")}>
-                    <option value="DEV">{t("evaluation.addToEvaluation.dev")}</option>
-                    <option value="HOLDOUT">{t("evaluation.addToEvaluation.holdout")}</option>
-                  </select>
+                  <Select
+                    value={split}
+                    onChange={(next) => setSplit(next as "DEV" | "HOLDOUT")}
+                    options={[
+                      { value: "DEV", label: t("evaluation.addToEvaluation.dev") },
+                      { value: "HOLDOUT", label: t("evaluation.addToEvaluation.holdout") },
+                    ]}
+                  />
                   {split === "HOLDOUT" && <span className="state-hint">{t("evaluation.addToEvaluation.holdoutWarning")}</span>}
                 </label>
                 <label>
                   {t("evaluation.addToEvaluation.category")}
-                  <select value={category} onChange={(event) => changeCategory(event.target.value as Category)}>
-                    {CATEGORIES.map((value) => <option value={value} key={value}>{categoryLabel(t, value)}</option>)}
-                  </select>
+                  <Select
+                    value={category}
+                    onChange={(next) => changeCategory(next as Category)}
+                    options={CATEGORIES.map((value) => ({ value, label: categoryLabel(t, value) }))}
+                  />
                   <span className="state-hint">{t("evaluation.addToEvaluation.categoryDescription")}: {categoryDescription(t, category)}</span>
                 </label>
                 <label>
@@ -503,11 +510,15 @@ export default function AddRunToDatasetPanel({
                 {category === "APPROVAL" && (
                   <label>
                     {t("evaluation.addToEvaluation.approvalDecision")}
-                    <select value={draft.approvalDecision} onChange={(event) => updateDraft("approvalDecision", event.target.value as ExpectedDraft["approvalDecision"])}>
-                      <option value="">—</option>
-                      <option value="APPROVED">APPROVED</option>
-                      <option value="DENIED">DENIED</option>
-                    </select>
+                    <Select
+                      value={draft.approvalDecision}
+                      onChange={(next) => updateDraft("approvalDecision", next as ExpectedDraft["approvalDecision"])}
+                      options={[
+                        { value: "", label: "—" },
+                        { value: "APPROVED", label: "APPROVED" },
+                        { value: "DENIED", label: "DENIED" },
+                      ]}
+                    />
                   </label>
                 )}
                 {category === "MULTI_STEP" && (

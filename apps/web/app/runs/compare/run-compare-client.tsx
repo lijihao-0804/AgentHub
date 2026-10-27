@@ -19,6 +19,7 @@ import {
   type RunListResponse,
   type RunTimelineEntry,
 } from "@/lib/api/runs";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 /**
@@ -258,20 +259,15 @@ export default function RunCompareClient() {
         <div className="form-grid compare-selectors">
           <label>
             {t("runCompare.left")} · {t("runCompare.runIdLabel")}
-            <select
+            <Select
               value=""
-              onChange={(event) => {
-                if (event.target.value) setLeftDraft(event.target.value);
+              onChange={(next) => {
+                if (next) setLeftDraft(next);
               }}
-              aria-label={t("runCompare.pickRecent")}
-            >
-              <option value="">{t("runCompare.pickRecent")}</option>
-              {(recent.data?.items ?? []).map((run) => (
-                <option value={run.id} key={run.id}>
-                  {recentLabel(run)}
-                </option>
-              ))}
-            </select>
+              ariaLabel={t("runCompare.pickRecent")}
+              placeholder={t("runCompare.pickRecent")}
+              options={(recent.data?.items ?? []).map((run) => ({ value: run.id, label: recentLabel(run) }))}
+            />
             <input
               value={leftDraft}
               onChange={(event) => setLeftDraft(event.target.value)}
@@ -280,20 +276,15 @@ export default function RunCompareClient() {
           </label>
           <label>
             {t("runCompare.right")} · {t("runCompare.runIdLabel")}
-            <select
+            <Select
               value=""
-              onChange={(event) => {
-                if (event.target.value) setRightDraft(event.target.value);
+              onChange={(next) => {
+                if (next) setRightDraft(next);
               }}
-              aria-label={t("runCompare.pickRecent")}
-            >
-              <option value="">{t("runCompare.pickRecent")}</option>
-              {(recent.data?.items ?? []).map((run) => (
-                <option value={run.id} key={run.id}>
-                  {recentLabel(run)}
-                </option>
-              ))}
-            </select>
+              ariaLabel={t("runCompare.pickRecent")}
+              placeholder={t("runCompare.pickRecent")}
+              options={(recent.data?.items ?? []).map((run) => ({ value: run.id, label: recentLabel(run) }))}
+            />
             <input
               value={rightDraft}
               onChange={(event) => setRightDraft(event.target.value)}

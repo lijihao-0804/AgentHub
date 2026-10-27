@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import StatusBadge from "@/components/ui/status-badge";
+import Select from "@/components/ui/select";
 import HashValue from "@/components/evaluation/hash-value";
 import { InlineError } from "@/components/ui/states";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
@@ -53,10 +54,7 @@ function HandoffControlsInner({ artifactId }: { artifactId: string }) {
       <StatusBadge status={row.status} label={labels[row.status]} />
       <p>{t("handoffLifecycle.assignee")}: {row.assignee_id ? <HashValue value={row.assignee_id} /> : t("common.none")}</p>
       {canAssign && row.status !== "CLOSED" && <div className="form-grid">
-        <label>{t("handoffLifecycle.assignee")}<select value={assignee} onChange={e => setAssignee(e.target.value)} disabled={mutation.pending || assignees.loading}>
-          <option value="">{t("handoffLifecycle.choose")}</option>
-          {(assignees.data ?? []).map(v => <option key={v.user_id} value={v.user_id}>{v.email}</option>)}
-        </select></label>
+        <label>{t("handoffLifecycle.assignee")}<Select value={assignee} onChange={setAssignee} disabled={mutation.pending || assignees.loading} placeholder={t("handoffLifecycle.choose")} options={(assignees.data ?? []).map((v) => ({ value: v.user_id, label: v.email }))} /></label>
         <InlineError error={assignees.error} fallback={t("errors.requestFailed")} />
         <button type="button" className="button button-ghost" disabled={!assignee || mutation.pending || !assignees.loaded} onClick={() => act("assign")}>{t("handoffLifecycle.assign")}</button>
       </div>}

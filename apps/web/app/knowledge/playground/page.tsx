@@ -14,6 +14,7 @@ import { listKnowledgeBases, listSnapshots, type KnowledgeBase, type KnowledgeSn
 import type { AuthInput } from "@/lib/api/client";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData } from "@/hooks/use-workspace-data";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 type PageState = "initial" | "loading" | "success" | "empty" | "error";
@@ -195,52 +196,45 @@ export default function RetrievalPlaygroundPage() {
         <div className="form-grid">
           <label>
             {t("playground.knowledgeBaseId")}
-            <select
-              required
+            <Select
               value={knowledgeBaseId}
-              onChange={(event) => {
-                setKnowledgeBaseId(event.target.value);
+              onChange={(next) => {
+                setKnowledgeBaseId(next);
                 setSnapshotId("");
                 setResult(null);
                 setError(null);
                 setPageState("initial");
               }}
               disabled={knowledgeBases.loading || Boolean(knowledgeBases.error)}
-            >
-              <option value="">
-                {knowledgeBases.loaded && (knowledgeBases.data ?? []).length === 0
+              placeholder={
+                knowledgeBases.loaded && (knowledgeBases.data ?? []).length === 0
                   ? t("playground.noKnowledgeBases")
-                  : t("playground.selectKnowledgeBase")}
-              </option>
-              {(knowledgeBases.data ?? []).map((base) => (
-                <option key={base.id} value={base.id}>{base.name}</option>
-              ))}
-            </select>
+                  : t("playground.selectKnowledgeBase")
+              }
+              options={(knowledgeBases.data ?? []).map((base) => ({ value: base.id, label: base.name }))}
+            />
           </label>
           <label>
             {t("playground.snapshotId")}
-            <select
-              required
+            <Select
               value={snapshotId}
-              onChange={(event) => {
-                setSnapshotId(event.target.value);
+              onChange={(next) => {
+                setSnapshotId(next);
                 setResult(null);
                 setError(null);
                 setPageState("initial");
               }}
               disabled={!knowledgeBaseId || snapshots.loading || Boolean(snapshots.error)}
-            >
-              <option value="">
-                {snapshots.loaded && (snapshots.data ?? []).length === 0
+              placeholder={
+                snapshots.loaded && (snapshots.data ?? []).length === 0
                   ? t("playground.noSnapshots")
-                  : t("playground.selectSnapshot")}
-              </option>
-              {(snapshots.data ?? []).map((snapshot) => (
-                <option key={snapshot.id} value={snapshot.id}>
-                  {`${formatNumber(snapshot.item_count)} · ${snapshot.content_hash.slice(0, 8)} · ${formatDateTime(snapshot.created_at)}`}
-                </option>
-              ))}
-            </select>
+                  : t("playground.selectSnapshot")
+              }
+              options={(snapshots.data ?? []).map((snapshot) => ({
+                value: snapshot.id,
+                label: `${formatNumber(snapshot.item_count)} · ${snapshot.content_hash.slice(0, 8)} · ${formatDateTime(snapshot.created_at)}`,
+              }))}
+            />
           </label>
           <label className="query-field">
             {t("playground.query")}

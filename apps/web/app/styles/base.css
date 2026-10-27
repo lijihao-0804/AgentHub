@@ -70,6 +70,21 @@ select {
   padding-right: 1.8rem;
 }
 
+/*
+ * The popup panel itself is OS-drawn and cannot follow the theme; these
+ * rules theme the option rows where the engine allows it (Chromium and
+ * Firefox both honour option backgrounds). The custom Select component is
+ * the real answer; this keeps any remaining native select from flashing a
+ * white panel with a blue system highlight.
+ */
+select option {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+select option:checked, select option:hover {
+  background: var(--surface-inset);
+}
+
 /* Checkboxes and radios keep their intrinsic box. */
 input[type="checkbox"], input[type="radio"] {
   accent-color: var(--accent);

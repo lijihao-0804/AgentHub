@@ -19,6 +19,7 @@ import {
   type McpConnectionTest,
   type McpDiscovery,
 } from "@/lib/api/mcp";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 type ImportDraft = {
@@ -261,10 +262,14 @@ export default function McpImportPage() {
               </label>
               <label>
                 {t("tools.mcp.connections.auth")}
-                <select value={authType} onChange={(e) => setAuthType(e.target.value as "NONE" | "BEARER")}>
-                  <option value="NONE">NONE</option>
-                  <option value="BEARER">BEARER</option>
-                </select>
+                <Select
+                  value={authType}
+                  onChange={(next) => setAuthType(next as "NONE" | "BEARER")}
+                  options={[
+                    { value: "NONE", label: "NONE" },
+                    { value: "BEARER", label: "BEARER" },
+                  ]}
+                />
               </label>
               {authType === "BEARER" && (
                 <label>
@@ -395,49 +400,52 @@ export default function McpImportPage() {
                                 </label>
                                 <label>
                                   {t("tools.mcp.import.effect")}
-                                  <select
+                                  <Select
                                     value={draft.effect}
-                                    onChange={(e) =>
+                                    onChange={(next) =>
                                       setImportDrafts((current) => ({
                                         ...current,
-                                        [tool.name]: { ...draft, effect: e.target.value as "READ" | "WRITE" },
+                                        [tool.name]: { ...draft, effect: next as "READ" | "WRITE" },
                                       }))
                                     }
-                                  >
-                                    <option value="READ">{statusLabel("READ")}</option>
-                                    <option value="WRITE">{statusLabel("WRITE")}</option>
-                                  </select>
+                                    options={[
+                                      { value: "READ", label: statusLabel("READ") },
+                                      { value: "WRITE", label: statusLabel("WRITE") },
+                                    ]}
+                                  />
                                 </label>
                                 <label>
                                   {t("tools.mcp.import.risk")}
-                                  <select
+                                  <Select
                                     value={draft.risk_level}
-                                    onChange={(e) =>
+                                    onChange={(next) =>
                                       setImportDrafts((current) => ({
                                         ...current,
-                                        [tool.name]: { ...draft, risk_level: e.target.value as ImportDraft["risk_level"] },
+                                        [tool.name]: { ...draft, risk_level: next as ImportDraft["risk_level"] },
                                       }))
                                     }
-                                  >
-                                    <option value="LOW">{statusLabel("LOW")}</option>
-                                    <option value="MEDIUM">{statusLabel("MEDIUM")}</option>
-                                    <option value="HIGH">{statusLabel("HIGH")}</option>
-                                  </select>
+                                    options={[
+                                      { value: "LOW", label: statusLabel("LOW") },
+                                      { value: "MEDIUM", label: statusLabel("MEDIUM") },
+                                      { value: "HIGH", label: statusLabel("HIGH") },
+                                    ]}
+                                  />
                                 </label>
                                 <label>
                                   {t("tools.mcp.import.approval")}
-                                  <select
+                                  <Select
                                     value={draft.approval_policy}
-                                    onChange={(e) =>
+                                    onChange={(next) =>
                                       setImportDrafts((current) => ({
                                         ...current,
-                                        [tool.name]: { ...draft, approval_policy: e.target.value as "NEVER" | "ALWAYS" },
+                                        [tool.name]: { ...draft, approval_policy: next as "NEVER" | "ALWAYS" },
                                       }))
                                     }
-                                  >
-                                    <option value="NEVER">{t("tools.mcp.import.approvalNever")}</option>
-                                    <option value="ALWAYS">{t("tools.mcp.import.approvalAlways")}</option>
-                                  </select>
+                                    options={[
+                                      { value: "NEVER", label: t("tools.mcp.import.approvalNever") },
+                                      { value: "ALWAYS", label: t("tools.mcp.import.approvalAlways") },
+                                    ]}
+                                  />
                                 </label>
                                 <label>
                                   {t("tools.mcp.import.timeout")}

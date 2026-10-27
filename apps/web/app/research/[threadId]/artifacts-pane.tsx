@@ -21,6 +21,7 @@ import {
   type Artifact,
   type PaperRecord,
 } from "@/lib/api/artifacts";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 import type { MessageKey } from "@/i18n/messages";
 
@@ -185,14 +186,12 @@ export default function ArtifactsPane({
           </label>
           <label>
             {t("research.artifacts.saveTo")}
-            <select value={targetShortlistId} onChange={(event) => setTargetShortlistId(event.target.value)}>
-              <option value="">{t("research.artifacts.newShortlist")}</option>
-              {shortlists.map((shortlist) => (
-                <option value={shortlist.id} key={shortlist.id}>
-                  {shortlist.title}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={targetShortlistId}
+              onChange={setTargetShortlistId}
+              placeholder={t("research.artifacts.newShortlist")}
+              options={shortlists.map((shortlist) => ({ value: shortlist.id, label: shortlist.title }))}
+            />
           </label>
           <button type="button" className="button button-ghost" onClick={() => setFilters(EMPTY_FILTERS)}>
             {t("research.artifacts.clearFilters")}

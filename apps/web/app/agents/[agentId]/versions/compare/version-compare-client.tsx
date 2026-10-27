@@ -18,6 +18,7 @@ import {
   type DiffEntry,
   type DiffGroupKey,
 } from "@/lib/version-diff";
+import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 import type { MessageKey } from "@/i18n/messages";
 
@@ -231,25 +232,27 @@ export default function VersionCompareClient({ agentId }: { agentId: string }) {
             <div className="form-grid compare-selectors">
               <label>
                 {t("agents.versionDiff.left")}
-                <select value={leftId} onChange={(event) => setLeftId(event.target.value)}>
-                  <option value="">{t("agents.versionDiff.selectPlaceholder")}</option>
-                  {versionList.map((version) => (
-                    <option key={version.id} value={version.id}>
-                      {`v${version.version_number} · ${formatDateTime(version.created_at)} · ${version.resolved_spec_hash.slice(0, 8)}`}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={leftId}
+                  onChange={setLeftId}
+                  placeholder={t("agents.versionDiff.selectPlaceholder")}
+                  options={versionList.map((version) => ({
+                    value: version.id,
+                    label: `v${version.version_number} · ${formatDateTime(version.created_at)} · ${version.resolved_spec_hash.slice(0, 8)}`,
+                  }))}
+                />
               </label>
               <label>
                 {t("agents.versionDiff.right")}
-                <select value={rightId} onChange={(event) => setRightId(event.target.value)}>
-                  <option value="">{t("agents.versionDiff.selectPlaceholder")}</option>
-                  {versionList.map((version) => (
-                    <option key={version.id} value={version.id}>
-                      {`v${version.version_number} · ${formatDateTime(version.created_at)} · ${version.resolved_spec_hash.slice(0, 8)}`}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={rightId}
+                  onChange={setRightId}
+                  placeholder={t("agents.versionDiff.selectPlaceholder")}
+                  options={versionList.map((version) => ({
+                    value: version.id,
+                    label: `v${version.version_number} · ${formatDateTime(version.created_at)} · ${version.resolved_spec_hash.slice(0, 8)}`,
+                  }))}
+                />
               </label>
             </div>
             {leftId !== "" && leftId === rightId && (
