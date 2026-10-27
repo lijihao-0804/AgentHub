@@ -896,6 +896,7 @@ class _AgentRunGraph:
                     memory_messages=memory_messages,
                     tools=self._model_tool_definitions(tool_definitions),
                     permission_snapshot=permission_snapshot,
+                    return_blocked_plan=bool(spec.runtime.get("summary_policy", {}).get("enabled")),
                 )
                 history = list(planned.messages)
                 history_exchange_ids = list(planned.exchange_ids)
@@ -927,6 +928,12 @@ class _AgentRunGraph:
                     ],
                 }
                 await self._install_thread_history_plan(frozen_plan, workspace_id=workspace_id)
+                if not plan.ready_for_dispatch:
+                    raise AgentHubError(
+                        "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
+                        "Thread history does not fit safely.",
+                        422,
+                    )
                 history_plan_metadata = {
                     "version": plan.plan_version,
                     "pre_trim_tokens": plan.pre_trim_tokens,

@@ -6,10 +6,11 @@ provider tokenizes text, how tools are implemented, or how conversation
 messages were produced.  Callers therefore have to provide the category and
 exchange-group metadata explicitly.
 
-The default estimator is intentionally conservative and offline.  It counts
-each UTF-8 byte as one token unit; the policy accepts an injected estimator so
-tests and future adapters can use a provider-specific estimate without
-changing admission semantics.
+The default estimator is an offline, language-aware approximation. It is not
+a provider tokenizer or a proven upper bound: an admitted request can exceed
+its declared window when the provider counts more tokens. The policy accepts
+an injected estimator so tests and future adapters can use a verified
+provider-specific counter without changing admission semantics.
 """
 
 from __future__ import annotations
@@ -142,13 +143,9 @@ class TokenEstimator(Protocol):
 class ApproxTokenEstimator:
     """Deterministic offline language-aware approx-token estimator.
 
-    tokens ~= ceil(CJK_chars / 1.6 + other_chars / 4): a CJK character
-    carries roughly 1.6 token units under common BPE tokenizers and an
-    ASCII-ish character roughly 4 (about 4 characters per token for
-    English prose). The same content therefore costs the same order of
-    units in any language. The previous byte-per-unit accounting charged
-    Chinese roughly 5x English for equivalent content, which is the root
-    cause of "one Chinese record versus five English records" delivery.
+    tokens ~= ceil(wide_chars / 1.6 + other_chars / 4): this charges
+    approximately 0.625 units per wide/full-width character and 0.25 per
+    other character. It is a heuristic, not a bound on any particular model.
 
     Still intentionally not an exact provider tokenizer count: no network,
     no tokenizer dependency, byte-for-byte reproducible. Inject a provider
@@ -226,7 +223,7 @@ class ContextBudgetUsage:
     estimated_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
     retained_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
     truncated_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
-    # Share of the model window the admitted context actually uses
+    # Estimated share of the model window used by the admitted context
     # (0.0-1.0). With byte-per-unit accounting this collapsed to a few
     # percent on real Chinese traffic while the window looked "full";
     # keeping it in the trace makes that failure mode visible forever.

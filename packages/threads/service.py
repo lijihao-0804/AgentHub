@@ -202,7 +202,9 @@ class ThreadService:
     async def delete_thread(self, context: WorkspaceExecutionContext, thread_id: UUID) -> None:
         workspace_id = _require(context, AGENT_RUN)
         async with self.session_factory() as session:
+            from packages.agent_runtime.summary_models import ThreadSummaryJob
             from packages.handoffs.models import HandoffCase
+            from packages.threads.summary_eligibility import ThreadSummaryEligibilityRecord
 
             thread = await session.scalar(
                 select(AgentThread)
@@ -220,6 +222,26 @@ class ThreadService:
                 raise AgentHubError(
                     "HANDOFF_EVIDENCE_RETAINED",
                     "The thread contains retained human handoff evidence.",
+                    409,
+                )
+            # Summary review and dispatch records are immutable evidence.  The
+            # thread lock also serializes this check with new scoped records.
+            summary_job = await session.scalar(
+                select(ThreadSummaryJob.id).where(
+                    ThreadSummaryJob.workspace_id == workspace_id,
+                    ThreadSummaryJob.thread_id == thread_id,
+                ).limit(1)
+            )
+            summary_review = await session.scalar(
+                select(ThreadSummaryEligibilityRecord.id).where(
+                    ThreadSummaryEligibilityRecord.workspace_id == workspace_id,
+                    ThreadSummaryEligibilityRecord.thread_id == thread_id,
+                ).limit(1)
+            )
+            if summary_job is not None or summary_review is not None:
+                raise AgentHubError(
+                    "SUMMARY_EVIDENCE_RETAINED",
+                    "The thread contains retained summary evidence.",
                     409,
                 )
             await session.delete(thread)

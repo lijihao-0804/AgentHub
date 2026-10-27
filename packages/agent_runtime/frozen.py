@@ -27,7 +27,34 @@ from packages.model_gateway.contracts import (
 _DEFAULT_RUNTIME = DEFAULT_RUNTIME_LIMITS
 _DEFAULT_CONTEXT_BUDGET = DEFAULT_CONTEXT_BUDGET
 _DEFAULT_MEMORY = DEFAULT_MEMORY_CONFIG
-SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2, 3, 4})
+SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2, 3, 4, 5})
+_SUMMARY_POLICY_VERSION = "thread_summary_policy_v1"
+_SUMMARY_PROMPT_VERSION = "summary_candidate_zh_v1"
+_SUMMARY_VALIDATOR_VERSION = "summary_mechanical_v1"
+_SUMMARY_POLICY_KEYS = frozenset(
+    {
+        "enabled",
+        "policy_version",
+        "prompt_version",
+        "validator_version",
+        "tokenizer_id",
+        "tokenizer_version",
+        "soft_trigger_percent",
+        "hard_trigger_percent",
+        "target_percent",
+    }
+)
+_SUMMARY_FIXED_VALUES = {
+    "enabled": True,
+    "policy_version": _SUMMARY_POLICY_VERSION,
+    "prompt_version": _SUMMARY_PROMPT_VERSION,
+    "validator_version": _SUMMARY_VALIDATOR_VERSION,
+    "tokenizer_id": "approx_language_v1",
+    "tokenizer_version": 1,
+    "soft_trigger_percent": 70,
+    "hard_trigger_percent": 85,
+    "target_percent": 55,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -152,7 +179,7 @@ def parse_frozen_agent_spec(
     if not isinstance(memory_value, Mapping):
         raise _invalid_binding()
     allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens"}
-    if schema_version in {3, 4}:
+    if schema_version in {3, 4, 5}:
         allowed_memory_keys.add("max_memory_tokens_source")
     if not set(memory_value).issubset(allowed_memory_keys):
         raise _invalid_binding()
@@ -174,7 +201,7 @@ def parse_frozen_agent_spec(
     if max_memory_tokens is not None:
         memory["max_memory_tokens"] = max_memory_tokens
     memory_source = memory_value.get("max_memory_tokens_source")
-    if schema_version in {3, 4} and memory["long_term_memory"]:
+    if schema_version in {3, 4, 5} and memory["long_term_memory"]:
         if (
             not isinstance(memory_source, str)
             or memory_source not in {"UNSET", "DEFAULT", "CUSTOM"}
@@ -186,7 +213,7 @@ def parse_frozen_agent_spec(
         raise _invalid_binding()
     runtime["memory"] = memory
     policy_value = runtime_value.get("context_policy")
-    if schema_version in {3, 4}:
+    if schema_version in {3, 4, 5}:
         sources = runtime_value.get("context_budget_sources")
         if (
             not isinstance(sources, Mapping)
@@ -209,11 +236,16 @@ def parse_frozen_agent_spec(
     elif policy_value is not None:
         raise _invalid_binding()
     history_policy = runtime_value.get("history_policy")
-    if schema_version == 4:
+    if schema_version in {4, 5}:
         if history_policy != "deterministic_history_v1":
             raise _invalid_binding()
         runtime["history_policy"] = history_policy
     elif history_policy is not None:
+        raise _invalid_binding()
+    summary_policy = runtime_value.get("summary_policy")
+    if schema_version == 5:
+        runtime["summary_policy"] = _parse_summary_policy(summary_policy)
+    elif summary_policy is not None:
         raise _invalid_binding()
     return FrozenAgentSpec(
         model_plan=ResolvedModelExecutionPlan(
@@ -290,6 +322,21 @@ def _parse_knowledge_bindings(
             )
         )
     return tuple(bindings)
+
+
+def _parse_summary_policy(value: Any) -> dict[str, Any]:
+    if not isinstance(value, Mapping) or set(value) != _SUMMARY_POLICY_KEYS:
+        raise _invalid_binding()
+    for key, expected in _SUMMARY_FIXED_VALUES.items():
+        actual = value[key]
+        if (
+            isinstance(actual, bool)
+            and not isinstance(expected, bool)
+            or type(actual) is not type(expected)
+            or actual != expected
+        ):
+            raise _invalid_binding()
+    return dict(_SUMMARY_FIXED_VALUES)
 
 
 def _parse_wiki_binding(resolved_spec: Mapping[str, Any]) -> FrozenWikiBinding | None:

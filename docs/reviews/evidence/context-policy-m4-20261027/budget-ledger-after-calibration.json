@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "price_identity": "aliyun-beijing-deepseek-v4.1-flash-1017-peak-2-8-cny-v1",
+  "limit_cny": "30",
+  "attempts": [
+    {
+      "attempt_id": "aliyun-calibration-001",
+      "stage": "CALIBRATION",
+      "status": "SETTLED",
+      "estimated_input_tokens": 64,
+      "requested_output_tokens": 64,
+      "upper_cost_cny": "0.066048",
+      "charged_or_reserved_cny": "0.000196"
+    }
+  ]
+}

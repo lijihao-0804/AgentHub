@@ -46,8 +46,15 @@ def plan_history_view(
     memory_messages: Sequence[ModelMessage],
     tools: Sequence[ModelToolDefinition],
     permission_snapshot: str,
+    return_blocked_plan: bool = False,
 ) -> PlannedHistory:
-    """Measure the complete bounded source view and retain complete exchanges."""
+    """Measure all sources; optionally return a blocked plan for job scheduling.
+
+    A blocked plan carries no sendable messages. The default retains the M3
+    fail-closed behavior for all existing callers.
+    """
+    if not isinstance(return_blocked_plan, bool):
+        raise TypeError("return_blocked_plan must be a bool")
     manifest = conversation.source_manifest
     if manifest is None or manifest.status != "COMPLETE":
         raise AgentHubError(
@@ -158,6 +165,8 @@ def plan_history_view(
         expected_counter_version=policy.context_policy["counter"]["version"],
     )
     if not plan.ready_for_dispatch:
+        if return_blocked_plan:
+            return PlannedHistory(plan=plan, messages=(), memory_messages=(), exchange_ids=())
         raise AgentHubError(
             "AGENT_HISTORY_CONTEXT_INSUFFICIENT", "Thread history does not fit safely.", 422
         )

@@ -76,6 +76,25 @@ def test_runtime_refuses_a_partially_measured_history():
     assert error.value.code == "AGENT_HISTORY_CONTEXT_INSUFFICIENT"
 
 
+def test_blocked_plan_can_be_examined_without_creating_a_sendable_view():
+    policy = ContextBudgetPolicy(_freeze((_profile(total=32768),)), estimator=Chars())
+    arguments = dict(
+        policy=policy,
+        conversation=_conversation(18),
+        mandatory_messages=(ModelMessage("user", "question"),),
+        memory_messages=(),
+        tools=(),
+        permission_snapshot="user-with-run-permission",
+    )
+    with pytest.raises(AgentHubError) as error:
+        plan_history_view(**arguments)
+    assert error.value.code == "AGENT_HISTORY_CONTEXT_INSUFFICIENT"
+    blocked = plan_history_view(**arguments, return_blocked_plan=True)
+    assert not blocked.plan.ready_for_dispatch
+    assert blocked.plan.pre_trim_pressure is PlanPressure.HARD
+    assert blocked.messages == blocked.memory_messages == blocked.exchange_ids == ()
+
+
 def test_protocol_ids_are_isolated_between_different_historical_turns():
     messages = (
         ModelMessage("user", "question"),

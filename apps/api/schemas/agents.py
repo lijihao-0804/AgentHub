@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 from packages.agent_runtime.context_policy import normalize_context_policy_request
 from packages.agent_runtime.runtime_config import (
@@ -92,6 +92,28 @@ class ContextPolicyRequest(BaseModel):
         return self
 
 
+class SummaryPolicyRequest(BaseModel):
+    """Explicit opt-in for deterministic, source-grounded thread summaries."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: StrictBool
+    policy_version: Literal["thread_summary_policy_v1"] = "thread_summary_policy_v1"
+    prompt_version: Literal["summary_candidate_zh_v1"] = "summary_candidate_zh_v1"
+    validator_version: Literal["summary_mechanical_v1"] = "summary_mechanical_v1"
+    tokenizer_id: Literal["approx_language_v1"] = "approx_language_v1"
+    tokenizer_version: int = Field(default=1, ge=1, le=1, strict=True)
+    soft_trigger_percent: int = Field(default=70, ge=70, le=70, strict=True)
+    hard_trigger_percent: int = Field(default=85, ge=85, le=85, strict=True)
+    target_percent: int = Field(default=55, ge=55, le=55, strict=True)
+
+    @model_validator(mode="after")
+    def validate_explicit_opt_in(self) -> SummaryPolicyRequest:
+        if self.enabled is not True:
+            raise ValueError("summary_policy must be explicitly enabled")
+        return self
+
+
 class RuntimeConfigRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -118,6 +140,15 @@ class RuntimeConfigRequest(BaseModel):
     memory: MemoryConfigRequest | None = None
     context_policy: ContextPolicyRequest | None = None
     history_policy: Literal["deterministic_history_v1"] | None = None
+    summary_policy: SummaryPolicyRequest | None = None
+
+    @model_validator(mode="after")
+    def validate_summary_prerequisites(self) -> RuntimeConfigRequest:
+        if self.summary_policy is not None and (
+            self.context_policy is None or self.history_policy != "deterministic_history_v1"
+        ):
+            raise ValueError("summary_policy requires context_policy and deterministic_history_v1")
+        return self
 
 
 class WikiBindingRequest(BaseModel):

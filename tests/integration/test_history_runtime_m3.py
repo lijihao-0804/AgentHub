@@ -45,6 +45,79 @@ async def factory():
 
 
 @pytest.mark.asyncio
+async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(factory):
+    base = await _seed_workspace(factory)
+    thread_id = await _create_thread(factory, base)
+    for sequence in range(1, 10):
+        await _add_exchange(
+            factory,
+            base,
+            thread_id=thread_id,
+            sequence=sequence,
+            user_input="q" * 8000,
+            final_output="a" * 8000,
+        )
+    _, run_id = await _add_exchange(
+        factory, base, thread_id=thread_id, sequence=10, status="RUNNING"
+    )
+    async with factory() as session:
+        version = await session.scalar(
+            select(AgentVersion).where(AgentVersion.id == base["version_id"])
+        )
+        raw_model = version.resolved_spec["model"]
+        profile = replace(
+            _profile(total=32768, workspace=base["workspace_id"]),
+            id=UUID(raw_model["profile_id"]),
+            provider_credential_id=UUID(raw_model["credential_ref"]),
+        )
+        agent = _agent(
+            workspace_id=base["workspace_id"],
+            model_profile_id=profile.id,
+            runtime_config={
+                "context_policy": {"policy_version": "adaptive_context_v1"},
+                "history_policy": "deterministic_history_v1",
+                "summary_policy": {"enabled": True},
+            },
+        )
+        spec = _resolved_spec(
+            agent=agent, model=((profile,), {profile.id: "fake"}), bindings=(), tools=()
+        )
+        version.spec_schema_version = 5
+        version.resolved_spec = spec
+        version.resolved_spec_hash = canonical_json_hash(spec)
+        await session.commit()
+        run = await session.scalar(select(AgentRun).where(AgentRun.id == run_id))
+
+    requests = []
+    graph = _model_graph(request_sink=requests)
+    graph.run = run
+    graph.context = SimpleNamespace(
+        workspace_id=str(base["workspace_id"]),
+        user_id=str(base["user_id"]),
+        permissions=frozenset({"agent_run", "tool_run", "workspace_read"}),
+    )
+    graph.service.session_factory = factory
+    graph.service.thread_context_provider = SqlAlchemyThreadContextProvider(factory)
+    graph.service.thread_context_max_turns = 10
+    graph.service.memory_selector = None
+    graph.sequence = 0
+
+    async def step(*args, **kwargs):
+        return None
+
+    graph.step = step
+    result = await graph.prepare({})
+    assert result["failure_code"] == "AGENT_HISTORY_CONTEXT_INSUFFICIENT"
+    assert requests == []
+    async with factory() as session:
+        saved = await session.scalar(select(AgentRun).where(AgentRun.id == run_id))
+        assert (
+            "NO_ELIGIBLE_SOURCE"
+            in saved.effective_thread_history_snapshot["plan"]["insufficiencies"]
+        )
+
+
+@pytest.mark.asyncio
 async def test_frozen_history_is_planned_and_sent_to_fake_gateway(factory):
     base = await _seed_workspace(factory)
     thread_id = await _create_thread(factory, base)

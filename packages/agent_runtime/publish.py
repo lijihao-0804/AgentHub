@@ -66,6 +66,16 @@ from packages.wiki.service import WikiService
 SPEC_SCHEMA_VERSION = 2
 ADAPTIVE_SPEC_SCHEMA_VERSION = 3
 HISTORY_SPEC_SCHEMA_VERSION = 4
+SUMMARY_SPEC_SCHEMA_VERSION = 5
+SUMMARY_POLICY_VERSION = "thread_summary_policy_v1"
+SUMMARY_PROMPT_VERSION = "summary_candidate_zh_v1"
+SUMMARY_VALIDATOR_VERSION = "summary_mechanical_v1"
+SUMMARY_TOKENIZER_VERSION = 1
+SUMMARY_THRESHOLD_PERCENTS: dict[str, int] = {
+    "soft_trigger_percent": 70,
+    "hard_trigger_percent": 85,
+    "target_percent": 55,
+}
 _WIKI_LATEST_SCAN_BATCH = 10
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
@@ -86,6 +96,7 @@ _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG) | {
     "context_policy",
     "context_budget_sources",
     "history_policy",
+    "summary_policy",
 }
 # Validated on their own terms: neither is a step count. ``max_cost_micro_usd``
 # is the one runtime key that may be ``None``; ``memory`` is a block of booleans
@@ -97,10 +108,24 @@ _RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {
     "history_policy",
     "max_cost_micro_usd",
     "memory",
+    "summary_policy",
 }
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
 _MEMORY_KEYS = frozenset((*DEFAULT_MEMORY_CONFIG, "max_memory_tokens", "max_memory_tokens_source"))
 _CONFIGURATION_SOURCES = frozenset({"UNSET", "DEFAULT", "CUSTOM"})
+_SUMMARY_POLICY_KEYS = frozenset(
+    {
+        "enabled",
+        "policy_version",
+        "prompt_version",
+        "validator_version",
+        "tokenizer_id",
+        "tokenizer_version",
+        "soft_trigger_percent",
+        "hard_trigger_percent",
+        "target_percent",
+    }
+)
 _RETRIEVAL_OPTIONAL_KEYS = frozenset(
     {"rerank_top_k", "max_chunks_per_document", "context_budget_bytes"}
 )
@@ -381,6 +406,15 @@ class AgentPublishService:
         )
         resolved_model = await self._resolve_model(session, context, agent)
         resolved_runtime = _resolved_runtime_config(agent.runtime_config, resolved_model)
+        if resolved_runtime.get("summary_policy") is not None:
+            # The only evaluated candidate did not produce a usable summary.
+            # Preserve the versioned contract for research and historical reads,
+            # but do not publish a configuration that cannot meet its promise.
+            raise AgentHubError(
+                "SUMMARY_QUALITY_GATE_NOT_MET",
+                "Automatic thread summaries are not available for publication.",
+                422,
+            )
         _validate_published_context_budget(resolved_runtime, resolved_model)
         bindings = await self._resolve_knowledge(session, context, agent)
         wiki_binding = await self._resolve_wiki_binding(session, context, agent)
@@ -867,6 +901,7 @@ def _resolved_spec(
         else dict(resolved_runtime)
     )
     adaptive = "context_policy" in runtime
+    summary = runtime.get("summary_policy")
     retry_policy = _validate_retry_policy(agent.model_retry_policy)
     primary_projection = _profile_projection(
         primary, providers[primary.id], include_context_metadata=adaptive
@@ -918,7 +953,9 @@ def _resolved_spec(
     )
     spec: dict[str, Any] = {
         "spec_schema_version": (
-            HISTORY_SPEC_SCHEMA_VERSION
+            SUMMARY_SPEC_SCHEMA_VERSION
+            if summary is not None
+            else HISTORY_SPEC_SCHEMA_VERSION
             if runtime.get("history_policy") is not None
             else ADAPTIVE_SPEC_SCHEMA_VERSION
             if adaptive
@@ -1072,7 +1109,51 @@ def _draft_runtime_from_version(value: Mapping[str, Any]) -> dict[str, Any]:
         result["memory"] = dict(memory)
         if memory.get("max_memory_tokens_source") in {"UNSET", "DEFAULT"}:
             result["memory"].pop("max_memory_tokens", None)
+    summary_policy = value.get("summary_policy")
+    if isinstance(summary_policy, Mapping):
+        result["summary_policy"] = dict(summary_policy)
     return result
+
+
+def _normalize_summary_policy_request(value: Any) -> dict[str, Any]:
+    """Validate the strict M4 opt-in contract without resolving model data."""
+
+    if not isinstance(value, Mapping) or not set(value).issubset(_SUMMARY_POLICY_KEYS):
+        raise AgentHubError("INVALID_SUMMARY_POLICY", "The summary policy is invalid.", 422)
+    if value.get("enabled") is not True:
+        raise AgentHubError(
+            "INVALID_SUMMARY_POLICY", "The summary policy must be explicitly enabled.", 422
+        )
+    fixed_values = {
+        "policy_version": SUMMARY_POLICY_VERSION,
+        "prompt_version": SUMMARY_PROMPT_VERSION,
+        "validator_version": SUMMARY_VALIDATOR_VERSION,
+        "tokenizer_id": "approx_language_v1",
+        "tokenizer_version": SUMMARY_TOKENIZER_VERSION,
+        **SUMMARY_THRESHOLD_PERCENTS,
+    }
+    for key, expected in fixed_values.items():
+        actual = value.get(key, expected)
+        if (
+            isinstance(actual, bool)
+            and not isinstance(expected, bool)
+            or type(actual) is not type(expected)
+            or actual != expected
+        ):
+            raise AgentHubError(
+                "INVALID_SUMMARY_POLICY",
+                f"The summary policy field {key} is unsupported or invalid.",
+                422,
+            )
+    return {
+        "enabled": True,
+        "policy_version": SUMMARY_POLICY_VERSION,
+        "prompt_version": SUMMARY_PROMPT_VERSION,
+        "validator_version": SUMMARY_VALIDATOR_VERSION,
+        "tokenizer_id": "approx_language_v1",
+        "tokenizer_version": SUMMARY_TOKENIZER_VERSION,
+        **SUMMARY_THRESHOLD_PERCENTS,
+    }
 
 
 def _validate_runtime_config(
@@ -1196,12 +1277,33 @@ def _validate_runtime_config(
     history_policy = value.get("history_policy")
     if history_policy is None:
         result.pop("history_policy", None)
-    elif history_policy != "deterministic_history_v1" or policy_request is None:
+    elif history_policy != "deterministic_history_v1":
+        raise AgentHubError(
+            "INVALID_CONTEXT_POLICY", "The history policy requires an adaptive context policy.", 422
+        )
+    elif policy_request is None:
+        if value.get("summary_policy") is not None:
+            raise AgentHubError(
+                "INVALID_SUMMARY_POLICY",
+                "The summary policy requires adaptive context and deterministic history policies.",
+                422,
+            )
         raise AgentHubError(
             "INVALID_CONTEXT_POLICY", "The history policy requires an adaptive context policy.", 422
         )
     else:
         result["history_policy"] = history_policy
+    summary_policy = value.get("summary_policy")
+    if summary_policy is None:
+        result.pop("summary_policy", None)
+    elif policy_request is None or history_policy != "deterministic_history_v1":
+        raise AgentHubError(
+            "INVALID_SUMMARY_POLICY",
+            "The summary policy requires adaptive context and deterministic history policies.",
+            422,
+        )
+    else:
+        result["summary_policy"] = _normalize_summary_policy_request(summary_policy)
     return result
 
 
@@ -1217,6 +1319,9 @@ def _resolved_runtime_config(
     validated = _validate_runtime_config(runtime_config, legacy_stored=True)
     sources = validated["context_budget_sources"]
     policy_request = validated.get("context_policy")
+    summary_policy = validated.get("summary_policy")
+    if summary_policy is not None:
+        validated["summary_policy"] = _normalize_summary_policy_request(summary_policy)
     if policy_request is not None:
         model_inputs = [
             {

@@ -1,0 +1,199 @@
+{
+  "format": "qmsum_m4_observations_v1",
+  "source_commit": "83d7768c1f2b4dfeb091385d3dc7e239b8e5bb7e",
+  "model": "deepseek-v4.1-flash-1017",
+  "price_identity": "aliyun-beijing-deepseek-v4.1-flash-1017-peak-2-8-cny-v1",
+  "frozen_question_count": 12,
+  "valid_pressure_pairs": 0,
+  "quality_conclusion": "UNVERIFIED",
+  "summary_candidate_usable": false,
+  "pricing_basis": "peak-price conservative estimate; not actual provider invoice",
+  "total_calls_including_calibration": 7,
+  "total_estimated_cny": "0.306040",
+  "cases": [
+    {
+      "question_id": "QMSum@83d7768:ALL/train/Bmr003.json#specific_query_list[0]",
+      "preflight_status": "B_BLOCKED",
+      "preflight_reason": "B_BUDGET_REJECTED:AGENT_CONTEXT_BUDGET_EXCEEDED",
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "NOT_DISPATCHED"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/Bmr003.json#specific_query_list[1]",
+      "preflight_status": "B_BLOCKED",
+      "preflight_reason": "B_BUDGET_REJECTED:AGENT_CONTEXT_BUDGET_EXCEEDED",
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "NOT_DISPATCHED"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/Buw001.json#specific_query_list[0]",
+      "preflight_status": "B_BLOCKED",
+      "preflight_reason": "B_BUDGET_REJECTED:AGENT_CONTEXT_BUDGET_EXCEEDED",
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "NOT_DISPATCHED"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/Buw001.json#specific_query_list[1]",
+      "preflight_status": "B_BLOCKED",
+      "preflight_reason": "B_BUDGET_REJECTED:AGENT_CONTEXT_BUDGET_EXCEEDED",
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "NOT_DISPATCHED"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3005d.json#specific_query_list[0]",
+      "preflight_status": "B_READY_C_NOT_APPLICABLE",
+      "preflight_reason": null,
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "INVALID",
+      "summary_issues": [
+        "PROVIDER_RESPONSE_INCOMPLETE"
+      ],
+      "summary_measurements": {
+        "attempt_id": "m4-summary-TS3005d-0",
+        "input_tokens": 30952,
+        "output_tokens": 2048,
+        "cached_tokens": 0,
+        "cache_write_tokens": null,
+        "elapsed_ms": 14221.84,
+        "conservative_cost_cny": "0.078288",
+        "cost_identity": "aliyun-beijing-deepseek-v4.1-flash-1017-peak-2-8-cny-v1",
+        "finish_reason": "length"
+      },
+      "summary_estimated_input": 25842,
+      "offline_content_token_counts": {
+        "summary": 30922,
+        "baseline": 23790
+      }
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3005d.json#specific_query_list[1]",
+      "preflight_status": "B_READY_C_NOT_APPLICABLE",
+      "preflight_reason": null,
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "INVALID",
+      "summary_issues": [
+        "PROVIDER_RESPONSE_INCOMPLETE"
+      ],
+      "summary_measurements": {
+        "attempt_id": "m4-summary-TS3005d-1",
+        "input_tokens": 31203,
+        "output_tokens": 2048,
+        "cached_tokens": 0,
+        "cache_write_tokens": null,
+        "elapsed_ms": 13172.53,
+        "conservative_cost_cny": "0.07879",
+        "cost_identity": "aliyun-beijing-deepseek-v4.1-flash-1017-peak-2-8-cny-v1",
+        "finish_reason": "length"
+      },
+      "summary_estimated_input": 26028,
+      "offline_content_token_counts": {
+        "summary": 31173,
+        "baseline": 23790
+      }
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3006d.json#specific_query_list[0]",
+      "preflight_status": "B_READY_C_NOT_APPLICABLE",
+      "preflight_reason": null,
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "INVALID",
+      "summary_issues": [
+        "PROVIDER_RESPONSE_INCOMPLETE"
+      ],
+      "summary_measurements": {
+        "attempt_id": "m4-summary-TS3006d-0",
+        "input_tokens": 28927,
+        "output_tokens": 2048,
+        "cached_tokens": 0,
+        "cache_write_tokens": null,
+        "elapsed_ms": 46628.65,
+        "conservative_cost_cny": "0.074238",
+        "cost_identity": "aliyun-beijing-deepseek-v4.1-flash-1017-peak-2-8-cny-v1",
+        "finish_reason": "length"
+      },
+      "summary_estimated_input": 24188,
+      "offline_content_token_counts": {
+        "summary": 28897,
+        "baseline": 22047
+      }
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3006d.json#specific_query_list[1]",
+      "preflight_status": "B_READY_C_NOT_APPLICABLE",
+      "preflight_reason": null,
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "INVALID",
+      "summary_issues": [
+        "PROVIDER_RESPONSE_INCOMPLETE"
+      ],
+      "summary_measurements": {
+        "attempt_id": "m4-summary-TS3006d-1",
+        "input_tokens": 28720,
+        "output_tokens": 2048,
+        "cached_tokens": 0,
+        "cache_write_tokens": null,
+        "elapsed_ms": 14494.06,
+        "conservative_cost_cny": "0.073824",
+        "cost_identity": "aliyun-beijing-deepseek-v4.1-flash-1017-peak-2-8-cny-v1",
+        "finish_reason": "length"
+      },
+      "summary_estimated_input": 23992,
+      "offline_content_token_counts": {
+        "summary": 28690,
+        "baseline": 22055
+      }
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/covid_1.json#specific_query_list[0]",
+      "preflight_status": "EXCLUDED",
+      "preflight_reason": "COMMITTEE_EXCLUDED_FROM_ONLINE_EXPERIMENT",
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "NOT_DISPATCHED"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/covid_1.json#specific_query_list[1]",
+      "preflight_status": "EXCLUDED",
+      "preflight_reason": "COMMITTEE_EXCLUDED_FROM_ONLINE_EXPERIMENT",
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "NOT_DISPATCHED"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/covid_3.json#specific_query_list[0]",
+      "preflight_status": "EXCLUDED",
+      "preflight_reason": "COMMITTEE_EXCLUDED_FROM_ONLINE_EXPERIMENT",
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "NOT_DISPATCHED"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/covid_3.json#specific_query_list[1]",
+      "preflight_status": "EXCLUDED",
+      "preflight_reason": "COMMITTEE_EXCLUDED_FROM_ONLINE_EXPERIMENT",
+      "baseline_answer_status": "NOT_DISPATCHED",
+      "candidate_answer_status": "NOT_DISPATCHED",
+      "task_quality": "UNVERIFIED",
+      "summary_status": "NOT_DISPATCHED"
+    }
+  ]
+}

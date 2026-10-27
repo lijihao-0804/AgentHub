@@ -6,6 +6,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from packages.agent_runtime import models as _agent_runtime_models  # noqa: F401
+from packages.agent_runtime import summary_models as _summary_models  # noqa: F401
 from packages.approvals import models as _approval_models  # noqa: F401
 from packages.artifacts import models as _artifact_models  # noqa: F401
 from packages.control_plane import models as _control_plane_models  # noqa: F401
@@ -19,6 +20,7 @@ from packages.mcp import models as _mcp_models  # noqa: F401
 from packages.memory import models as _memory_models  # noqa: F401
 from packages.model_gateway import models as _model_gateway_models  # noqa: F401
 from packages.threads import models as _thread_models  # noqa: F401
+from packages.threads import summary_eligibility as _summary_eligibility  # noqa: F401
 from packages.tools import models as _tool_models  # noqa: F401
 from packages.wiki import models as _wiki_models  # noqa: F401
 
