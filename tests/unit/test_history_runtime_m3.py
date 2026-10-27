@@ -20,7 +20,7 @@ async def test_old_checkpoint_remains_usable_but_summary_requires_a_binding():
     def unexpected_database_access():
         raise AssertionError("missing binding is decided before database access")
 
-    run = SimpleNamespace()
+    run = SimpleNamespace(thread_id=None)
     assert (
         await verify_history_checkpoint_binding(
             unexpected_database_access, run=run, state={"runtime": {}}

@@ -9,11 +9,13 @@ import pytest_asyncio
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from packages.agent_runtime.history_checkpoint import verify_history_checkpoint_binding
 from packages.agent_runtime.models import AgentRun, AgentVersion
 from packages.agent_runtime.publish import _resolved_spec
 from packages.agent_runtime.runtime_service import AgentRunService
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.database import create_database
+from packages.core.errors.exceptions import AgentHubError
 from packages.model_gateway.contracts import ModelMessage, ModelResponse, ModelToolCall
 from packages.threads.context import SqlAlchemyThreadContextProvider
 from packages.threads.models import ThreadTurn
@@ -115,6 +117,11 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
             "NO_ELIGIBLE_SOURCE"
             in saved.effective_thread_history_snapshot["plan"]["insufficiencies"]
         )
+    # A missing checkpoint runtime field cannot disguise a summary-enabled
+    # version as an older, unbound M3 checkpoint.
+    with pytest.raises(AgentHubError) as invalid:
+        await verify_history_checkpoint_binding(factory, run=saved, state={})
+    assert invalid.value.code == "AGENT_HISTORY_SNAPSHOT_INVALID"
 
 
 @pytest.mark.asyncio
@@ -184,6 +191,8 @@ async def test_frozen_history_is_planned_and_sent_to_fake_gateway(factory):
     state = await graph.prepare({})
     assert state["history_message_count"] == 24
     assert state["history_checkpoint_binding"]["run_id"] == str(run_id)
+    # A genuinely old checkpoint without the new binding remains recoverable.
+    assert await verify_history_checkpoint_binding(factory, run=run, state={}) is None
     await graph.model(state)
     assert len(requests) == 1
     assert [message.content for message in requests[0].messages if message.role == "user"] == [

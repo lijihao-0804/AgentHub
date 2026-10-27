@@ -63,9 +63,10 @@ async def verify_history_checkpoint_binding(
 ) -> dict[str, Any] | None:
     """Recheck checkpoint history before another model or a resumed action.
 
-    Old M3 checkpoints without this field keep their prior behavior. A
-    summary-enabled checkpoint has no such fallback. This validates the
-    checkpoint state binding, not an exact LangGraph checkpoint ID.
+    Old M3 checkpoints without this field keep their prior behavior after
+    checking the authoritative version. A summary-enabled version has no
+    such fallback, even if its checkpoint's runtime field is absent. This
+    validates the state binding, not an exact LangGraph checkpoint ID.
     """
     binding = state.get("history_checkpoint_binding")
     if binding is None:
@@ -73,7 +74,8 @@ async def verify_history_checkpoint_binding(
         policy = runtime.get("summary_policy") if isinstance(runtime, Mapping) else None
         if isinstance(policy, Mapping) and policy.get("enabled") is True:
             raise _invalid_history_binding()
-        return None
+        if run.thread_id is None:
+            return None
     async with session_factory() as session:
         row = (
             await session.execute(
@@ -100,6 +102,12 @@ async def verify_history_checkpoint_binding(
             )
         ):
             raise ValueError("Run identity or version changed")
+        if binding is None:
+            spec = version.resolved_spec
+            runtime = spec.get("runtime") if isinstance(spec, Mapping) else None
+            if not isinstance(runtime, Mapping) or runtime.get("summary_policy") is not None:
+                raise ValueError("summary-enabled version has no checkpoint binding")
+            return None
         expected = history_checkpoint_binding(
             workspace_id=persisted.workspace_id,
             thread_id=persisted.thread_id,
