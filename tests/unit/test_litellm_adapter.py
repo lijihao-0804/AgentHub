@@ -310,6 +310,34 @@ async def test_tool_result_message_preserves_provider_tool_call_id() -> None:
 
 
 @pytest.mark.asyncio
+async def test_replayed_tool_arguments_are_stable_without_reordering_arrays() -> None:
+    client = FakeCompletionClient(
+        response={"choices": [{"message": {"content": "done"}, "finish_reason": "stop"}]}
+    )
+    model_profile, credential = profile()
+    arguments = (
+        {"z": [2, 1], "a": {"y": 2, "x": 1}},
+        {"a": {"x": 1, "y": 2}, "z": [2, 1]},
+    )
+    for value in arguments:
+        await LiteLLMProviderAdapter(client).complete(
+            model_profile,
+            credential,
+            ModelRequest(
+                messages=(
+                    ModelMessage(
+                        role="assistant",
+                        tool_calls=(ModelToolCall("lookup", value, "call-1"),),
+                    ),
+                )
+            ),
+        )
+    first, second = (call["messages"][0]["tool_calls"][0] for call in client.calls)
+    assert first == second
+    assert first["function"]["arguments"] == '{"a":{"x":1,"y":2},"z":[2,1]}'
+
+
+@pytest.mark.asyncio
 async def test_openai_compatible_stream_is_typed_and_single_attempt() -> None:
     client = FakeStreamClient(
         [

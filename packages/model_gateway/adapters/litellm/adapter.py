@@ -9,6 +9,7 @@ from collections.abc import AsyncIterator, Mapping
 from decimal import Decimal
 from typing import Any, Protocol
 
+from packages.model_gateway.cache_capability import PromptCacheCapability, prompt_cache_capability
 from packages.model_gateway.contracts import (
     CostEstimate,
     ModelMessage,
@@ -53,6 +54,15 @@ def _provider_model(credential: ProviderCredential, model: str) -> str:
     raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
 
 
+def _tool_arguments_payload(arguments: Mapping[str, Any]) -> str:
+    try:
+        return json.dumps(arguments, separators=(",", ":"), sort_keys=True)
+    except TypeError:
+        # Preserve the existing serializer for unusual mappings with mixed
+        # non-string keys; the provider may still reject such arguments.
+        return json.dumps(arguments, separators=(",", ":"))
+
+
 def _message_payload(message: ModelMessage) -> dict[str, Any]:
     payload: dict[str, Any] = {"role": message.role, "content": message.content}
     if message.name is not None:
@@ -70,7 +80,9 @@ def _message_payload(message: ModelMessage) -> dict[str, Any]:
                 "type": "function",
                 "function": {
                     "name": call.name,
-                    "arguments": json.dumps(call.arguments, separators=(",", ":")),
+                    # JSON object key order is not meaningful to the tool, but
+                    # must be stable when a past call is replayed in a prefix.
+                    "arguments": _tool_arguments_payload(call.arguments),
                 },
             }
             for call in message.tool_calls
@@ -278,6 +290,13 @@ class LiteLLMProviderAdapter:
 
     def __init__(self, client: LiteLLMClient | None = None) -> None:
         self.client = client or _default_client()
+
+    @staticmethod
+    def prompt_cache_capability(
+        profile: ModelProfile, credential: ProviderCredential
+    ) -> PromptCacheCapability:
+        """Describe documented support without enabling or assuming a cache hit."""
+        return prompt_cache_capability(base_url=credential.base_url, model=profile.model)
 
     async def complete(
         self,
