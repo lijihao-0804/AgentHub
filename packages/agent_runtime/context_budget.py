@@ -24,12 +24,14 @@ from types import MappingProxyType
 from typing import Any, Protocol, cast
 from uuid import UUID
 
+from packages.agent_runtime.context_policy import validate_frozen_context_policy
 from packages.agent_runtime.frozen import FrozenAgentSpec
 from packages.agent_runtime.rag_evidence import (
     reproject_rag_evidence_payload,
 )
 from packages.core.errors.exceptions import AgentHubError
 from packages.knowledge.evidence_plan import EVIDENCE_VIEW_FORMAT, reproject_evidence_view
+from packages.model_gateway.context_metadata import context_metadata_to_mapping
 from packages.model_gateway.contracts import (
     ModelMessage,
     ModelToolDefinition,
@@ -214,7 +216,7 @@ type ContextItem = ContextMessage
 class ContextBudgetUsage:
     """Numeric admission telemetry; message text is intentionally absent."""
 
-    context_limit: int
+    context_limit: int | None
     reserved_output: int
     available_input: int
     estimated_input_before: int
@@ -229,10 +231,11 @@ class ContextBudgetUsage:
     # percent on real Chinese traffic while the window looked "full";
     # keeping it in the trace makes that failure mode visible forever.
     window_utilization: float = 0.0
+    context_policy_version: str | None = None
+    model_available_input: int | None = None
 
     def __post_init__(self) -> None:
         numeric = (
-            self.context_limit,
             self.reserved_output,
             self.available_input,
             self.estimated_input_before,
@@ -243,10 +246,24 @@ class ContextBudgetUsage:
             isinstance(value, bool) or not isinstance(value, int) or value < 0 for value in numeric
         ):
             raise ValueError("context usage counts must be non-negative integers")
-        if self.reserved_output > self.context_limit:
-            raise ValueError("reserved output cannot exceed context limit")
-        if self.available_input != self.context_limit - self.reserved_output:
-            raise ValueError("available input must equal context limit minus reserved output")
+        if self.context_limit is not None and (
+            isinstance(self.context_limit, bool)
+            or not isinstance(self.context_limit, int)
+            or self.context_limit < 0
+        ):
+            raise ValueError("context limit must be a non-negative integer or unknown")
+        if self.context_policy_version is None:
+            if self.context_limit is None or self.reserved_output > self.context_limit:
+                raise ValueError("reserved output cannot exceed context limit")
+            if self.available_input != self.context_limit - self.reserved_output:
+                raise ValueError("available input must equal context limit minus reserved output")
+        elif (
+            self.context_policy_version != "adaptive_context_v1"
+            or isinstance(self.model_available_input, bool)
+            or not isinstance(self.model_available_input, int)
+            or not 0 < self.available_input <= self.model_available_input
+        ):
+            raise ValueError("adaptive input must fit its frozen model intersection")
         if self.estimated_input_after > self.available_input:
             raise ValueError("admitted input cannot exceed available input")
         for name in (
@@ -441,10 +458,54 @@ class ContextBudgetPolicy:
         if len(supplied) != 1:
             raise TypeError("provide exactly one of frozen_spec, model_plan, or profiles")
         self._profile_source = supplied[0]
+        runtime = getattr(self._profile_source, "runtime", {})
+        policy = runtime.get("context_policy") if isinstance(runtime, Mapping) else None
+        if config is None and policy is not None:
+            config = ContextBudgetConfig(
+                **runtime.get("context_budget", {}),
+                max_memory_tokens=runtime.get("memory", {}).get("max_memory_tokens"),
+            )
         self.config = config or ContextBudgetConfig()
         self.estimator: TokenEstimator = estimator or Utf8ByteTokenEstimator()
         if not hasattr(self.estimator, "estimate"):
             raise TypeError("estimator must implement estimate(text)")
+        self.context_policy = None
+        if policy is not None:
+            try:
+                self.context_policy = validate_frozen_context_policy(
+                    policy,
+                    [
+                        {
+                            "profile_id": str(profile.id),
+                            "credential_ref": str(profile.provider_credential_id),
+                            "provider": profile.provider,
+                            "model": profile.model,
+                            "max_tokens": profile.max_tokens,
+                            "capabilities": {
+                                "tool_calling": profile.capabilities.tool_calling,
+                                "streaming": profile.capabilities.streaming,
+                                "structured_output": profile.capabilities.structured_output,
+                                "vision": profile.capabilities.vision,
+                                "max_context_tokens": profile.capabilities.max_context_tokens,
+                                **(
+                                    {
+                                        "context_metadata": context_metadata_to_mapping(
+                                            profile.capabilities.context_metadata
+                                        )
+                                    }
+                                    if profile.capabilities.context_metadata is not None
+                                    else {}
+                                ),
+                            },
+                        }
+                        for profile in self._profiles()
+                    ],
+                    reserved_output_tokens=self.config.reserved_output_tokens,
+                )
+            except (TypeError, ValueError, AttributeError):
+                raise AgentHubError(
+                    "AGENT_CONTEXT_POLICY_INVALID", "The frozen context policy is invalid.", 422
+                ) from None
 
     @classmethod
     def from_frozen_spec(
@@ -457,11 +518,11 @@ class ContextBudgetPolicy:
         return cls(frozen_spec, config, estimator=estimator)
 
     @property
-    def context_limit(self) -> int:
+    def context_limit(self) -> int | None:
         return self._effective_context_limit()
 
     @property
-    def effective_context_limit(self) -> int:
+    def effective_context_limit(self) -> int | None:
         return self.context_limit
 
     @property
@@ -577,11 +638,15 @@ class ContextBudgetPolicy:
     ) -> ContextAdmissionResult:
         context_limit = self._effective_context_limit()
         reserved_output = self._effective_reserved_output()
-        if reserved_output >= context_limit:
+        if self.context_policy is not None:
+            available_input = self.context_policy["input_limit_tokens"]
+        elif context_limit is not None and reserved_output < context_limit:
+            available_input = context_limit - reserved_output
+        else:
             raise _budget_exceeded(
                 "Reserved output tokens must be smaller than the effective context limit."
             )
-        available_input = context_limit - reserved_output
+        request_overhead = self._protocol_overhead("request_overhead_tokens")
 
         tool_estimates = tuple(self._estimate_tool(tool) for tool in tools)
         raw_items = tuple(
@@ -599,6 +664,7 @@ class ContextBudgetPolicy:
         estimated_by_category[ContextCategory.TOOL_DEFINITIONS] += sum(
             estimate.total for estimate in tool_estimates
         )
+        estimated_by_category[ContextCategory.RUNTIME_POLICY] += request_overhead
         estimated_input_before = sum(estimated_by_category.values())
 
         mandatory_items = tuple(
@@ -606,7 +672,7 @@ class ContextBudgetPolicy:
         )
         mandatory_message_tokens = sum(item.raw_tokens for item in mandatory_items)
         mandatory_tool_tokens = sum(estimate.total for estimate in tool_estimates)
-        mandatory_total = mandatory_message_tokens + mandatory_tool_tokens
+        mandatory_total = mandatory_message_tokens + mandatory_tool_tokens + request_overhead
         if mandatory_total > available_input:
             raise _mandatory_overflow(
                 mandatory_total=mandatory_total,
@@ -640,6 +706,7 @@ class ContextBudgetPolicy:
             if item.category is ContextCategory.TOOL_DEFINITIONS
         )
         truncated_by_category[ContextCategory.TOOL_DEFINITIONS] = 0
+        retained_by_category[ContextCategory.RUNTIME_POLICY] += request_overhead
 
         admitted = tuple(
             item
@@ -648,8 +715,10 @@ class ContextBudgetPolicy:
         )
         admitted_messages = tuple(item.admitted_message for item in admitted)
         message_categories = tuple(item.category for item in admitted)
-        estimated_input_after = mandatory_tool_tokens + sum(
-            item.admitted_tokens for item in selected
+        estimated_input_after = (
+            mandatory_tool_tokens
+            + request_overhead
+            + sum(item.admitted_tokens for item in selected)
         )
         if estimated_input_after > available_input:
             raise _budget_exceeded(
@@ -669,7 +738,19 @@ class ContextBudgetPolicy:
             retained_by_category=retained_by_category,
             truncated_by_category=truncated_by_category,
             window_utilization=(
-                estimated_input_after / context_limit if context_limit > 0 else 0.0
+                estimated_input_after / available_input
+                if self.context_policy is not None
+                else estimated_input_after / context_limit
+                if context_limit
+                else 0.0
+            ),
+            context_policy_version=(
+                self.context_policy["policy_version"] if self.context_policy is not None else None
+            ),
+            model_available_input=(
+                self.context_policy["model_available_input_tokens"]
+                if self.context_policy is not None
+                else None
             ),
         )
         return ContextAdmissionResult(
@@ -1044,7 +1125,9 @@ class ContextBudgetPolicy:
         return message, estimated
 
     def _estimate_message(self, message: ModelMessage) -> int:
-        total = self._estimate_text(message.content or "")
+        total = self._estimate_text(message.content or "") + self._protocol_overhead(
+            "message_overhead_tokens"
+        )
         if message.name:
             total += self._estimate_text(message.name)
         if message.tool_call_id:
@@ -1062,7 +1145,7 @@ class ContextBudgetPolicy:
         schema = self._estimate_text(_json_dumps(dict(tool.parameters)))
         return _ToolEstimate(
             tool_name=tool.name,
-            total=name + description + schema,
+            total=name + description + schema + self._protocol_overhead("tool_overhead_tokens"),
             name=name,
             description=description,
             schema=schema,
@@ -1072,7 +1155,17 @@ class ContextBudgetPolicy:
         value = self.estimator.estimate(text)
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             raise ValueError("TokenEstimator.estimate must return a non-negative integer")
+        if self.context_policy is not None and text and value == 0:
+            raise ValueError("TokenEstimator.estimate must count non-empty text")
         return value
+
+    def _protocol_overhead(self, key: str) -> int:
+        if (
+            self.context_policy is None
+            or self.context_policy["counter"]["includes_protocol_overhead"]
+        ):
+            return 0
+        return self.context_policy["counter"][key]
 
     def _profiles(self) -> tuple[Any, ...]:
         source = self._profile_source
@@ -1093,7 +1186,11 @@ class ContextBudgetPolicy:
         except TypeError:
             return (source,)
 
-    def _effective_context_limit(self) -> int:
+    def _effective_context_limit(self) -> int | None:
+        if self.context_policy is not None:
+            # Independent input/output contracts can prove a safe input limit
+            # without a declared total window. Do not invent a provider T.
+            return self.context_policy["min_total_context_tokens"]
         profiles = self._profiles()
         if not profiles:
             raise _context_limit_unavailable("No frozen model profiles were provided.")
@@ -1113,6 +1210,8 @@ class ContextBudgetPolicy:
         return min(limits)
 
     def _effective_reserved_output(self) -> int:
+        if self.context_policy is not None:
+            return self.context_policy["reserved_output_tokens"]
         maximum = self.config.reserved_output_tokens
         for profile in self._profiles():
             value = getattr(profile, "max_tokens", None)

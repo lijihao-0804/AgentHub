@@ -163,7 +163,7 @@ def test_publish_config_validation_rejects_invalid_budget_and_retrieval_limits()
         _validate_runtime_config({"context_budget": {"max_tool_result_tokens": 128_001}})
 
 
-def test_memory_budget_is_server_owned_only_for_new_memory_enabled_versions() -> None:
+def test_memory_budget_keeps_unset_and_explicit_intent_separate() -> None:
     memory_off = _validate_runtime_config({})
     assert "memory" not in memory_off
 
@@ -171,14 +171,16 @@ def test_memory_budget_is_server_owned_only_for_new_memory_enabled_versions() ->
     assert memory_on["memory"] == {
         "thread_history_search": False,
         "long_term_memory": True,
-        "max_memory_tokens": 1_500,
+        "max_memory_tokens_source": "UNSET",
     }
 
-    # A caller cannot silently choose a different frozen memory budget.
+    # The M2 request contract now exposes this setting. An explicit choice
+    # must survive instead of being silently replaced by the old default.
     overridden = _validate_runtime_config(
         {"memory": {"long_term_memory": True, "max_memory_tokens": 1}}
     )
-    assert overridden["memory"]["max_memory_tokens"] == 1_500
+    assert overridden["memory"]["max_memory_tokens"] == 1
+    assert overridden["memory"]["max_memory_tokens_source"] == "CUSTOM"
 
 
 def test_retrieval_config_defaults_to_hybrid_rerank_and_rejects_unknown_strategy() -> None:

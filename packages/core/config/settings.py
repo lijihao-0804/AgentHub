@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub"
     redis_url: str = "redis://localhost:6379/0"
     qdrant_url: str = "http://localhost:6333"
+    # Optional administrator-owned local artifact. Never a user-supplied URL,
+    # and only new publications with context_policy read it.
+    model_context_catalog_path: str | None = None
     knowledge_qdrant_collection: str = "agenthub_knowledge"
     knowledge_dense_vector_size: int = Field(default=1024, ge=1, le=4096)
     knowledge_embedding_model: str = "BAAI/bge-m3"

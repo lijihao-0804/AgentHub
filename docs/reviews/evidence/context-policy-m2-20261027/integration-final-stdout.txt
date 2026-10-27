@@ -1,0 +1,9 @@
+....................................................                     [100%]
+============================== warnings summary ===============================
+tests/integration/test_m4d_streaming_budget.py::test_sync_model_admission_is_mandatory_and_records_no_text
+  E:\JAVA\AI+agent\AgentHub\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\20303\.codex\worktrees\context-memory-atomic-m1\AgentHub\.scratch\context-policy-m2\integration-final-junit.xml -
+52 passed, 1 warning in 5.82s

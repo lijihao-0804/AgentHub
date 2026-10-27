@@ -8,6 +8,10 @@ from typing import Any, Literal, Protocol
 from uuid import UUID
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.model_gateway.context_metadata import (
+    ContextMetadata,
+    validate_context_metadata,
+)
 
 MessageRole = Literal["system", "user", "assistant", "tool"]
 
@@ -213,10 +217,26 @@ class ModelCapabilities:
     structured_output: bool = False
     vision: bool = False
     max_context_tokens: int | None = None
+    context_metadata: ContextMetadata | Mapping[str, Any] | None = field(
+        default=None,
+        metadata={"serialization_type": ContextMetadata},
+    )
 
     def __post_init__(self) -> None:
-        if self.max_context_tokens is not None and self.max_context_tokens <= 0:
+        if self.max_context_tokens is not None and (
+            isinstance(self.max_context_tokens, bool)
+            or not isinstance(self.max_context_tokens, int)
+            or self.max_context_tokens <= 0
+        ):
             raise ValueError("max_context_tokens must be positive")
+        try:
+            metadata = validate_context_metadata(
+                self.context_metadata,
+                max_context_tokens=self.max_context_tokens,
+            )
+        except ValueError as error:
+            raise ValueError(f"invalid context_metadata: {error}") from None
+        object.__setattr__(self, "context_metadata", metadata)
 
 
 @dataclass(frozen=True, slots=True)
@@ -303,6 +323,7 @@ class ModelGateway(Protocol):
 
 __all__ = [
     "CapabilityRequirements",
+    "ContextMetadata",
     "CostEstimate",
     "MessageRole",
     "ModelCapabilities",

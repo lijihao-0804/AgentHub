@@ -8,6 +8,7 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
+from packages.agent_runtime.context_policy import validate_frozen_context_policy
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
     DEFAULT_MEMORY_CONFIG,
@@ -26,7 +27,7 @@ from packages.model_gateway.contracts import (
 _DEFAULT_RUNTIME = DEFAULT_RUNTIME_LIMITS
 _DEFAULT_CONTEXT_BUDGET = DEFAULT_CONTEXT_BUDGET
 _DEFAULT_MEMORY = DEFAULT_MEMORY_CONFIG
-SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2})
+SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2, 3})
 
 
 @dataclass(frozen=True, slots=True)
@@ -151,6 +152,8 @@ def parse_frozen_agent_spec(
     if not isinstance(memory_value, Mapping):
         raise _invalid_binding()
     allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens"}
+    if schema_version == 3:
+        allowed_memory_keys.add("max_memory_tokens_source")
     if not set(memory_value).issubset(allowed_memory_keys):
         raise _invalid_binding()
     memory: dict[str, bool] = {}
@@ -170,7 +173,41 @@ def parse_frozen_agent_spec(
         raise _invalid_binding()
     if max_memory_tokens is not None:
         memory["max_memory_tokens"] = max_memory_tokens
+    memory_source = memory_value.get("max_memory_tokens_source")
+    if schema_version == 3 and memory["long_term_memory"]:
+        if (
+            not isinstance(memory_source, str)
+            or memory_source not in {"UNSET", "DEFAULT", "CUSTOM"}
+            or max_memory_tokens is None
+        ):
+            raise _invalid_binding()
+        memory["max_memory_tokens_source"] = memory_source
+    elif memory_source is not None:
+        raise _invalid_binding()
     runtime["memory"] = memory
+    policy_value = runtime_value.get("context_policy")
+    if schema_version == 3:
+        sources = runtime_value.get("context_budget_sources")
+        if (
+            not isinstance(sources, Mapping)
+            or set(sources) != set(_DEFAULT_CONTEXT_BUDGET)
+            or any(
+                not isinstance(source, str) or source not in {"UNSET", "DEFAULT", "CUSTOM"}
+                for source in sources.values()
+            )
+        ):
+            raise _invalid_binding()
+        try:
+            runtime["context_policy"] = validate_frozen_context_policy(
+                policy_value,
+                [model, *fallback_values],
+                reserved_output_tokens=context_budget["reserved_output_tokens"],
+            )
+        except (TypeError, ValueError):
+            raise _invalid_binding() from None
+        runtime["context_budget_sources"] = dict(sources)
+    elif policy_value is not None:
+        raise _invalid_binding()
     return FrozenAgentSpec(
         model_plan=ResolvedModelExecutionPlan(
             primary=primary,

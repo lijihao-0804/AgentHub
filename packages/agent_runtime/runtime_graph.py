@@ -164,6 +164,27 @@ def _memory_delivery_metadata(
     }
 
 
+def _context_policy_metadata(
+    state: AgentRunState, admission: ContextAdmissionResult
+) -> dict[str, Any]:
+    policy = state.get("runtime", {}).get("context_policy")
+    if not isinstance(policy, Mapping):
+        return {}
+    thresholds = policy["thresholds"]
+    return {
+        "context_policy_version": policy["policy_version"],
+        "available_input": admission.usage.available_input,
+        "model_available_input": policy["model_available_input_tokens"],
+        "workspace_input_limit": policy["workspace_input_limit"],
+        "context_limit_status": "KNOWN" if admission.usage.context_limit is not None else "UNKNOWN",
+        "counter_precision": policy["counter"]["precision"],
+        "window_utilization_basis": "WORKING_INPUT_LIMIT",
+        "soft_trigger_tokens": thresholds["soft"],
+        "hard_trigger_tokens": thresholds["hard"],
+        "target_tokens": thresholds["target"],
+    }
+
+
 class _AgentRunGraph:
     def __init__(
         self,
@@ -628,6 +649,7 @@ class _AgentRunGraph:
 
         _retain_admission(state, admission)
         memory_delivery = _memory_delivery_metadata(state, admission)
+        context_policy_metadata = _context_policy_metadata(state, admission)
         evidence_update = {
             "memory_message_count": int(state.get("memory_message_count", 0)),
             "history_message_count": int(state.get("history_message_count", 0)),
@@ -653,7 +675,10 @@ class _AgentRunGraph:
             "truncated": usage.truncated,
             "dropped_exchange_count": usage.dropped_exchange_count,
             "window_utilization": usage.window_utilization,
+            **context_policy_metadata,
         }
+        if usage.context_limit is None:
+            budget_data.pop("context_limit")
         await self._emit(AgentEventType.CONTEXT_BUDGET, budget_data)
         trace_data = {
             "run_id": str(self.run.id),
@@ -666,6 +691,7 @@ class _AgentRunGraph:
             "truncated": usage.truncated,
             "dropped_exchange_count": usage.dropped_exchange_count,
             **memory_delivery,
+            **context_policy_metadata,
         }
         budget_span = await _safe_start_span(
             self.service.trace_sink, "agent.context_budget", trace_data
@@ -783,6 +809,7 @@ class _AgentRunGraph:
                 "model": response.model,
                 "usage_source": "generation",
                 **memory_delivery,
+                **context_policy_metadata,
             },
         )
         return {

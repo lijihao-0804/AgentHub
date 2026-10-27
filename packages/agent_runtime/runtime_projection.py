@@ -562,6 +562,16 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "memory_dropped_pool_budget_count",
         "memory_dropped_context_window_count",
         "memory_dropped_unavailable_count",
+        "context_policy_version",
+        "available_input",
+        "model_available_input",
+        "workspace_input_limit",
+        "context_limit_status",
+        "counter_precision",
+        "window_utilization_basis",
+        "soft_trigger_tokens",
+        "hard_trigger_tokens",
+        "target_tokens",
     }
     result: dict[str, Any] = {}
     for key, value in metadata.items():

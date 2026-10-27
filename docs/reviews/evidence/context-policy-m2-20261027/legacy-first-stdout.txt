@@ -1,0 +1,20 @@
+........................................................................ [ 25%]
+........................................................................ [ 50%]
+........................................................................ [ 75%]
+.................F...................................................    [100%]
+================================== FAILURES ===================================
+___ test_memory_budget_is_server_owned_only_for_new_memory_enabled_versions ___
+tests\unit\test_agent_publish.py:171: in test_memory_budget_is_server_owned_only_for_new_memory_enabled_versions
+    assert memory_on["memory"] == {
+E   AssertionError: assert {'long_term_m...earch': False} == {'long_term_m...earch': False}
+E
+E     Omitting 2 identical items, use -vv to show
+E     Left contains 1 more item:
+E     {'max_memory_tokens_source': 'UNSET'}
+E     Right contains 1 more item:
+E     {'max_memory_tokens': 1500}
+E     Use -v to get more diff
+- generated xml file: C:\Users\20303\.codex\worktrees\context-memory-atomic-m1\AgentHub\.scratch\context-policy-m2\legacy-first-junit.xml -
+=========================== short test summary info ===========================
+FAILED tests/unit/test_agent_publish.py::test_memory_budget_is_server_owned_only_for_new_memory_enabled_versions
+1 failed, 284 passed in 11.17s

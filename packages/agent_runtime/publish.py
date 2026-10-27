@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 from uuid import UUID
 
@@ -11,6 +11,10 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from packages.agent_runtime.context_policy import (
+    normalize_context_policy_request,
+    resolve_context_policy,
+)
 from packages.agent_runtime.models import (
     Agent,
     AgentKnowledgeBinding,
@@ -40,7 +44,15 @@ from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievalStrategy
 from packages.knowledge.snapshots import KnowledgeSnapshotService, ResolvedKnowledgeSnapshot
 from packages.mcp.models import McpConnection
+from packages.model_gateway.adapters.local_context_catalog import (
+    apply_local_context_catalog,
+    load_local_context_catalog,
+)
 from packages.model_gateway.capabilities import CapabilityRequirements
+from packages.model_gateway.context_metadata import (
+    InputOutputSemantics,
+    context_metadata_to_mapping,
+)
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.profile_resolution import (
     ModelProfileResolver,
@@ -52,6 +64,7 @@ from packages.wiki.models import WikiCompilation
 from packages.wiki.service import WikiService
 
 SPEC_SCHEMA_VERSION = 2
+ADAPTIVE_SPEC_SCHEMA_VERSION = 3
 _WIKI_LATEST_SCAN_BATCH = 10
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
@@ -68,13 +81,20 @@ DEFAULT_RUNTIME_CONFIG: dict[str, Any] = {
     "context_budget": DEFAULT_CONTEXT_BUDGET.copy(),
     "memory": DEFAULT_MEMORY_CONFIG.copy(),
 }
-_RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG)
+_RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG) | {"context_policy", "context_budget_sources"}
 # Validated on their own terms: neither is a step count. ``max_cost_micro_usd``
 # is the one runtime key that may be ``None``; ``memory`` is a block of booleans
 # with a ceiling that means nothing.
-_RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {"context_budget", "max_cost_micro_usd", "memory"}
+_RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {
+    "context_budget",
+    "context_budget_sources",
+    "context_policy",
+    "max_cost_micro_usd",
+    "memory",
+}
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
-_MEMORY_KEYS = frozenset((*DEFAULT_MEMORY_CONFIG, "max_memory_tokens"))
+_MEMORY_KEYS = frozenset((*DEFAULT_MEMORY_CONFIG, "max_memory_tokens", "max_memory_tokens_source"))
+_CONFIGURATION_SOURCES = frozenset({"UNSET", "DEFAULT", "CUSTOM"})
 _RETRIEVAL_OPTIONAL_KEYS = frozenset(
     {"rerank_top_k", "max_chunks_per_document", "context_budget_bytes"}
 )
@@ -210,7 +230,9 @@ class AgentPublishService:
             proposed["retrieval_config"],
             settings=self.settings,
         )
-        proposed["runtime_config"] = _validate_runtime_config(proposed["runtime_config"])
+        proposed["runtime_config"] = _validate_runtime_config(
+            proposed["runtime_config"], legacy_stored="runtime_config" not in values
+        )
         for key, value in values.items():
             setattr(agent, key, value)
         agent.model_retry_policy = proposed["model_retry_policy"]
@@ -249,7 +271,7 @@ class AgentPublishService:
             workspace_id=workspace_id,
             agent_id=agent.id,
             version_number=version_number,
-            spec_schema_version=SPEC_SCHEMA_VERSION,
+            spec_schema_version=resolved_spec["spec_schema_version"],
             resolved_spec=resolved_spec,
             resolved_spec_hash=resolved_spec_hash,
             created_by=_principal_id(context),
@@ -287,7 +309,7 @@ class AgentPublishService:
             "agent_id": agent.id,
             "workspace_id": agent.workspace_id,
             "draft_updated_at": agent.updated_at,
-            "spec_schema_version": SPEC_SCHEMA_VERSION,
+            "spec_schema_version": resolved_spec["spec_schema_version"],
             "resolved_spec_hash": resolved_spec_hash,
             "resolved_spec": resolved_spec,
         }
@@ -335,7 +357,7 @@ class AgentPublishService:
                 "knowledge_binding_mode": retrieval_source.get("knowledge_binding_mode"),
                 "model_retry_policy": model.get("retry_policy"),
                 "retrieval_config": retrieval,
-                "runtime_config": spec.get("runtime") or {},
+                "runtime_config": _draft_runtime_from_version(spec.get("runtime") or {}),
             },
         }
 
@@ -352,9 +374,8 @@ class AgentPublishService:
             knowledge_binding_mode=agent.knowledge_binding_mode,
         )
         resolved_model = await self._resolve_model(session, context, agent)
-        _validate_published_context_budget(
-            _resolved_runtime_config(agent.runtime_config, resolved_model), resolved_model
-        )
+        resolved_runtime = _resolved_runtime_config(agent.runtime_config, resolved_model)
+        _validate_published_context_budget(resolved_runtime, resolved_model)
         bindings = await self._resolve_knowledge(session, context, agent)
         wiki_binding = await self._resolve_wiki_binding(session, context, agent)
         tools = await self._resolve_tools(
@@ -369,6 +390,7 @@ class AgentPublishService:
             bindings=bindings,
             tools=tools,
             wiki_binding=wiki_binding,
+            resolved_runtime=resolved_runtime,
         )
         return resolved_spec, canonical_json_hash(resolved_spec)
 
@@ -443,6 +465,63 @@ class AgentPublishService:
             if credential is None or not credential.enabled:
                 raise _model_profile_unavailable()
             providers[profile.id] = credential.provider
+        if agent.runtime_config.get("context_policy") is not None:
+            try:
+                catalog = (
+                    load_local_context_catalog(self.settings.model_context_catalog_path)
+                    if self.settings.model_context_catalog_path is not None
+                    else None
+                )
+                constrained = []
+                for profile in chain:
+                    metadata = profile.capabilities.context_metadata
+                    if metadata is None:
+                        constrained.append(profile)
+                        continue
+                    # Source records and catalog references are generated by the
+                    # server, not evidence supplied by an editable profile.
+                    metadata = replace(metadata, catalog_ref=None, source_records=None)
+                    entry = (
+                        catalog.resolve(
+                            provider=providers[profile.id],
+                            model=profile.model,
+                            deployment_id=metadata.deployment_id,
+                        )
+                        if catalog is not None
+                        else None
+                    )
+                    metadata, total_context, _source = apply_local_context_catalog(
+                        provider=providers[profile.id],
+                        model=profile.model,
+                        deployment_id=metadata.deployment_id,
+                        catalog=catalog,
+                        declared_metadata=metadata,
+                        declared_max_context_tokens=profile.capabilities.max_context_tokens,
+                    )
+                    if total_context is None and (
+                        entry is None
+                        or entry.metadata.input_output_semantics
+                        is not InputOutputSemantics.INDEPENDENT_INPUT_OUTPUT
+                        or entry.metadata.max_input_tokens is None
+                    ):
+                        raise ValueError("input-only capacity needs an exact trusted catalog entry")
+                    constrained.append(
+                        replace(
+                            profile,
+                            capabilities=replace(
+                                profile.capabilities,
+                                context_metadata=metadata,
+                                max_context_tokens=total_context,
+                            ),
+                        )
+                    )
+                chain = tuple(constrained)
+            except (TypeError, ValueError):
+                raise AgentHubError(
+                    "INVALID_CONTEXT_POLICY",
+                    "Model capability sources are invalid or insufficient for this policy.",
+                    422,
+                ) from None
         return chain, providers
 
     async def _resolve_knowledge(
@@ -772,11 +851,20 @@ def _resolved_spec(
     snapshots: tuple[ResolvedKnowledgeSnapshot, ...] | None = None,
     tools: tuple[dict[str, Any], ...],
     wiki_binding: dict[str, Any] | None = None,
+    resolved_runtime: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     chain, providers = model
     primary = chain[0]
+    runtime = (
+        _resolved_runtime_config(agent.runtime_config, model)
+        if resolved_runtime is None
+        else dict(resolved_runtime)
+    )
+    adaptive = "context_policy" in runtime
     retry_policy = _validate_retry_policy(agent.model_retry_policy)
-    primary_projection = _profile_projection(primary, providers[primary.id])
+    primary_projection = _profile_projection(
+        primary, providers[primary.id], include_context_metadata=adaptive
+    )
     primary_projection.update(
         {
             "profile_id": str(primary.id),
@@ -785,7 +873,9 @@ def _resolved_spec(
             "fallback_chain": [str(profile.id) for profile in chain[1:]],
             "fallback_profiles": [
                 {
-                    **_profile_projection(profile, providers[profile.id]),
+                    **_profile_projection(
+                        profile, providers[profile.id], include_context_metadata=adaptive
+                    ),
                     "profile_id": str(profile.id),
                     "credential_ref": str(profile.provider_credential_id),
                 }
@@ -821,7 +911,7 @@ def _resolved_spec(
         }
     )
     spec: dict[str, Any] = {
-        "spec_schema_version": SPEC_SCHEMA_VERSION,
+        "spec_schema_version": ADAPTIVE_SPEC_SCHEMA_VERSION if adaptive else SPEC_SCHEMA_VERSION,
         "model": primary_projection,
         "prompt": {
             "system_prompt": agent.system_prompt,
@@ -829,7 +919,7 @@ def _resolved_spec(
         },
         "retrieval": retrieval,
         "tools": list(tools),
-        "runtime": _resolved_runtime_config(agent.runtime_config, model),
+        "runtime": runtime,
     }
     # Absent means "never bound": every version published before Wiki binding
     # existed, and every agent without one, keeps its exact previous bytes.
@@ -838,8 +928,10 @@ def _resolved_spec(
     return spec
 
 
-def _profile_projection(profile: ResolvedModelProfile, provider: str) -> dict[str, Any]:
-    return {
+def _profile_projection(
+    profile: ResolvedModelProfile, provider: str, *, include_context_metadata: bool = False
+) -> dict[str, Any]:
+    result = {
         "provider": provider,
         "model": profile.model,
         "temperature": _canonical_float(profile.temperature),
@@ -853,6 +945,10 @@ def _profile_projection(profile: ResolvedModelProfile, provider: str) -> dict[st
             "max_context_tokens": profile.capabilities.max_context_tokens,
         },
     }
+    context_metadata = getattr(profile.capabilities, "context_metadata", None)
+    if include_context_metadata and context_metadata is not None:
+        result["capabilities"]["context_metadata"] = context_metadata_to_mapping(context_metadata)
+    return result
 
 
 def _canonical_float(value: Any) -> float:
@@ -937,7 +1033,39 @@ def _validate_retrieval_config(
     return result
 
 
-def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
+def _draft_runtime_from_version(value: Mapping[str, Any]) -> dict[str, Any]:
+    """Derive editable intent, not client-supplied frozen budget evidence."""
+    result = dict(value)
+    policy = value.get("context_policy")
+    if isinstance(policy, Mapping):
+        editable = {
+            key: policy[key]
+            for key in (
+                "policy_version",
+                "preset",
+                "workspace_input_limit",
+                "workspace_input_limit_source",
+                "soft_trigger_percent",
+                "hard_trigger_percent",
+                "target_percent",
+                "counter_id",
+            )
+            if key in policy
+        }
+        if editable.get("workspace_input_limit_source") in {"UNSET", "DEFAULT"}:
+            editable.pop("workspace_input_limit", None)
+        result["context_policy"] = editable
+    memory = value.get("memory")
+    if isinstance(memory, Mapping):
+        result["memory"] = dict(memory)
+        if memory.get("max_memory_tokens_source") in {"UNSET", "DEFAULT"}:
+            result["memory"].pop("max_memory_tokens", None)
+    return result
+
+
+def _validate_runtime_config(
+    value: Mapping[str, Any], *, legacy_stored: bool = False
+) -> dict[str, Any]:
     if not isinstance(value, Mapping) or not set(value).issubset(_RUNTIME_KEYS):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
     result = {**DEFAULT_RUNTIME_CONFIG, **dict(value)}
@@ -950,6 +1078,34 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
         **DEFAULT_RUNTIME_CONFIG["context_budget"],
         **dict(context_budget),
     }
+    raw_sources = value.get("context_budget_sources")
+    if raw_sources is None:
+        raw_sources = {}
+    if (
+        not isinstance(raw_sources, Mapping)
+        or not set(raw_sources).issubset(_CONTEXT_BUDGET_KEYS)
+        or any(
+            not isinstance(source, str) or source not in _CONFIGURATION_SOURCES
+            for source in raw_sources.values()
+        )
+    ):
+        raise AgentHubError(
+            "INVALID_AGENT_CONFIG", "The budget configuration sources are invalid.", 422
+        )
+    supplied_budget = value.get("context_budget", {})
+    legacy_default_budget = (
+        legacy_stored
+        and value.get("context_budget_sources") is None
+        and result["context_budget"] == DEFAULT_CONTEXT_BUDGET
+    )
+    sources = {}
+    for key in _CONTEXT_BUDGET_KEYS:
+        source = raw_sources.get(
+            key, "CUSTOM" if key in supplied_budget and not legacy_default_budget else "UNSET"
+        )
+        if source == "CUSTOM" and key not in supplied_budget:
+            raise AgentHubError("INVALID_AGENT_CONFIG", "A custom budget needs a value.", 422)
+        sources[key] = source
     for key in _RUNTIME_SCALAR_KEYS:
         item = result[key]
         if (
@@ -971,6 +1127,10 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
     for key, maximum in MAX_CONTEXT_BUDGET.items():
         if result["context_budget"][key] > maximum:
             raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    for key, source in sources.items():
+        if source != "CUSTOM":
+            result["context_budget"][key] = DEFAULT_CONTEXT_BUDGET[key]
+    result["context_budget_sources"] = sources
     memory = result.get("memory")
     if not isinstance(memory, Mapping) or not set(memory).issubset(_MEMORY_KEYS):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
@@ -979,16 +1139,30 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
         not isinstance(item, bool) for key, item in memory.items() if key in DEFAULT_MEMORY_CONFIG
     ):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
-    if "max_memory_tokens" in memory and (
-        isinstance(memory["max_memory_tokens"], bool)
-        or not isinstance(memory["max_memory_tokens"], int)
-        or memory["max_memory_tokens"] < 1
+    memory_tokens = memory.get("max_memory_tokens")
+    if memory_tokens is not None and (
+        isinstance(memory_tokens, bool) or not isinstance(memory_tokens, int) or memory_tokens < 1
     ):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    memory_source = memory.get("max_memory_tokens_source")
+    if memory_source is None:
+        memory_source = "CUSTOM" if memory_tokens is not None else "UNSET"
+    if not isinstance(memory_source, str) or memory_source not in _CONFIGURATION_SOURCES:
+        raise AgentHubError(
+            "INVALID_AGENT_CONFIG", "The memory configuration source is invalid.", 422
+        )
+    if (memory_source == "CUSTOM") != (memory_tokens is not None):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The memory source and value conflict.", 422)
+    if not memory["long_term_memory"] and memory_tokens is not None:
+        raise AgentHubError(
+            "INVALID_AGENT_CONFIG", "A memory budget requires long-term memory.", 422
+        )
+    memory.pop("max_memory_tokens", None)
+    memory.pop("max_memory_tokens_source", None)
     if memory["long_term_memory"]:
-        memory["max_memory_tokens"] = DEFAULT_MEMORY_TOKENS
-    else:
-        memory.pop("max_memory_tokens", None)
+        memory["max_memory_tokens_source"] = memory_source
+        if memory_tokens is not None:
+            memory["max_memory_tokens"] = memory_tokens
     # All-false is the same decision as never having had the key, so it is
     # written the same way: absent. Projecting a block of falses would change
     # the canonical JSON of every republished draft and therefore its hash,
@@ -997,6 +1171,16 @@ def _validate_runtime_config(value: Mapping[str, Any]) -> dict[str, Any]:
         result["memory"] = memory
     else:
         result.pop("memory", None)
+    policy_request = value.get("context_policy")
+    if policy_request is None:
+        result.pop("context_policy", None)
+    else:
+        try:
+            result["context_policy"] = normalize_context_policy_request(policy_request)
+        except (TypeError, ValueError):
+            raise AgentHubError(
+                "INVALID_CONTEXT_POLICY", "The context policy is invalid.", 422
+            ) from None
     return result
 
 
@@ -1004,45 +1188,61 @@ def _resolved_runtime_config(
     runtime_config: Mapping[str, Any],
     resolved_model: tuple[tuple[ResolvedModelProfile, ...], dict[UUID, str]],
 ) -> dict[str, Any]:
-    """Validate then window-derive pool defaults for a NEW publication.
+    """Resolve one new publication without reinterpreting numeric defaults.
 
-    A version that never customized its pools gets pools derived from the
-    smallest model window in the resolved chain instead of the legacy fixed
-    byte-sized numbers. Explicitly configured values win untouched (their
-    numbers merely read as approx-token units now); values below the
-    derived share are surfaced as INFO, never blocked. Already-published
-    specs are frozen rows and never pass through here.
+    Sources are kept in the draft, so an explicit value equal to a historical
+    default is still custom. Existing published specs never pass through here.
     """
-    import logging
-
-    logger = logging.getLogger(__name__)
-    validated = _validate_runtime_config(runtime_config)
+    validated = _validate_runtime_config(runtime_config, legacy_stored=True)
+    sources = validated["context_budget_sources"]
+    policy_request = validated.get("context_policy")
+    if policy_request is not None:
+        model_inputs = [
+            {
+                **_profile_projection(
+                    profile, resolved_model[1][profile.id], include_context_metadata=True
+                ),
+                "profile_id": str(profile.id),
+                "credential_ref": str(profile.provider_credential_id),
+            }
+            for profile in resolved_model[0]
+        ]
+        try:
+            policy = resolve_context_policy(
+                policy_request,
+                model_inputs,
+                reserved_output_tokens=validated["context_budget"]["reserved_output_tokens"],
+            )
+        except (TypeError, ValueError):
+            raise AgentHubError(
+                "INVALID_CONTEXT_POLICY", "The context policy cannot be resolved safely.", 422
+            ) from None
+        validated["context_policy"] = policy
+        derived = derive_context_budget(policy["input_limit_tokens"])
+        for key, value in derived.items():
+            if sources[key] != "CUSTOM":
+                validated["context_budget"][key] = value
+        memory = validated.get("memory")
+        if isinstance(memory, dict) and memory.get("long_term_memory"):
+            if memory["max_memory_tokens_source"] != "CUSTOM":
+                memory["max_memory_tokens"] = min(4096, policy["input_limit_tokens"])
+        return validated
     windows = [
         profile.capabilities.max_context_tokens
         for profile in resolved_model[0]
         if isinstance(profile.capabilities.max_context_tokens, int)
+        and not isinstance(profile.capabilities.max_context_tokens, bool)
     ]
-    if not windows:
-        return validated
-    window = min(windows)
-    derived = derive_context_budget(window)
-    budget = validated.get("context_budget", {})
-    if budget == DEFAULT_RUNTIME_CONFIG["context_budget"]:
-        validated["context_budget"] = derived
-    else:
-        for key, derived_value in derived.items():
-            if budget.get(key, 0) < derived_value:
-                logger.info(
-                    "context_pool_below_derived_share",
-                    extra={"key": key, "configured": budget.get(key), "derived": derived_value},
-                )
+    if windows and not any(source == "CUSTOM" for source in sources.values()):
+        validated["context_budget"] = derive_context_budget(min(windows))
     memory = validated.get("memory")
-    if (
-        isinstance(memory, dict)
-        and memory.get("long_term_memory")
-        and memory.get("max_memory_tokens") == DEFAULT_MEMORY_TOKENS
-    ):
-        memory["max_memory_tokens"] = derive_memory_tokens(window)
+    if isinstance(memory, dict) and memory.get("long_term_memory"):
+        if memory.pop("max_memory_tokens_source") != "CUSTOM":
+            memory["max_memory_tokens"] = (
+                derive_memory_tokens(min(windows)) if windows else DEFAULT_MEMORY_TOKENS
+            )
+    # Schema 1/2 consumers keep their original runtime shape and default hash.
+    validated.pop("context_budget_sources", None)
     return validated
 
 
