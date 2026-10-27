@@ -576,11 +576,11 @@ class SummaryJobService:
     ) -> ClaimedSummaryJob | None:
         """Claim one queued job under its row lock."""
 
-        current = self._now(now)
         duration = self._lease_duration(lease_seconds)
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None or job.status != SummaryJobStatus.QUEUED.value:
                     return None
                 token = secrets.token_hex(32)
@@ -603,7 +603,6 @@ class SummaryJobService:
     ) -> ClaimedSummaryJob | None:
         """Claim at most one queued job in an explicit tenant/thread scope."""
 
-        current = self._now(now)
         duration = self._lease_duration(lease_seconds)
         async with self._session_factory() as session:
             async with session.begin():
@@ -619,6 +618,7 @@ class SummaryJobService:
                     .limit(1)
                     .with_for_update(skip_locked=True)
                 )
+                current = self._now(now)
                 if job is None:
                     return None
                 token = secrets.token_hex(32)
@@ -644,11 +644,11 @@ class SummaryJobService:
     ) -> datetime:
         """Extend only a live owner of a pre-response state."""
 
-        current = self._now(now)
         duration = self._lease_duration(lease_seconds)
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
@@ -681,10 +681,10 @@ class SummaryJobService:
     ) -> None:
         """Return a claimed job to the queue only before dispatch intent exists."""
 
-        current = self._now(now)
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
@@ -716,12 +716,12 @@ class SummaryJobService:
     ) -> SummarySettlement:
         """Record a proven local failure before any dispatch intent exists."""
 
-        current = self._now(now)
         if not isinstance(failure_code, str) or not failure_code.strip():
             raise ValueError("failure_code must be a non-empty string")
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
@@ -843,11 +843,11 @@ class SummaryJobService:
     ) -> ClaimedSummaryJob | None:
         """Acquire a fresh local-only lease after a response is durable."""
 
-        current = self._now(now)
         duration = self._lease_duration(lease_seconds)
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     return None
                 if job.status not in {
@@ -879,10 +879,10 @@ class SummaryJobService:
         """Reconstruct a trusted prompt without a provider call or reservation."""
         if not _positive_int(reserved_input_tokens) or not _positive_int(reserved_output_tokens):
             raise ValueError("summary reservation token bounds must be positive integers")
-        current = self._now(now)
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND", "The summary job was not found."
@@ -897,6 +897,10 @@ class SummaryJobService:
                         "SUMMARY_LEASE_LOST", "The execution lease is unavailable."
                     )
                 context = await self._trusted_dispatch_context(session, key, job)
+                if not _owns_live_lease(job, lease_token, self._now(now)):
+                    raise SummaryServiceError(
+                        "SUMMARY_LEASE_LOST", "The execution lease expired during preparation."
+                    )
                 prompt = build_summary_prompt(context, prompt_version=job.prompt_version)
                 request_spec = _verified_request_spec(
                     job,
@@ -929,7 +933,6 @@ class SummaryJobService:
     ) -> SummaryDispatchIntent:
         """Atomically create the one dispatch ledger row, reservation and pointer."""
 
-        current = self._now(now)
         if not _positive_int(reserved_input_tokens):
             raise ValueError("reserved_input_tokens must be a positive integer")
         if not _positive_int(reserved_output_tokens):
@@ -940,6 +943,7 @@ class SummaryJobService:
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
@@ -1084,6 +1088,15 @@ class SummaryJobService:
                         "SUMMARY_SHARED_BUDGET_UNAVAILABLE",
                         "A shared budget reservation is unavailable.",
                     )
+                # Source verification and the shared-account lock can wait. A
+                # lease that expires during either wait must roll back the
+                # reservation rather than commit a stale dispatch intent.
+                current = self._now(now)
+                if not _owns_live_lease(job, lease_token, current):
+                    raise SummaryServiceError(
+                        "SUMMARY_LEASE_LOST",
+                        "The execution lease expired while reserving dispatch.",
+                    )
 
                 dispatch = ThreadSummaryDispatch(
                     id=dispatch_id,
@@ -1112,6 +1125,11 @@ class SummaryJobService:
                 job.dispatch_id = dispatch.id
                 job.dispatch_intent_at = current
                 await session.flush()
+                if not _owns_live_lease(job, lease_token, self._now(now)):
+                    raise SummaryServiceError(
+                        "SUMMARY_LEASE_LOST",
+                        "The execution lease expired before the dispatch intent committed.",
+                    )
                 return SummaryDispatchIntent(
                     key=key,
                     dispatch_id=dispatch.id,
@@ -1134,10 +1152,10 @@ class SummaryJobService:
     ) -> None:
         """Fence the provider boundary immediately before the adapter call."""
 
-        current = self._now(now)
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
@@ -1185,6 +1203,12 @@ class SummaryJobService:
                         "SUMMARY_DISPATCH_PAYLOAD_MISMATCH",
                         "The verified request changed after the dispatch intent was committed.",
                     )
+                current = self._now(now)
+                if not _owns_live_lease(job, lease_token, current):
+                    raise SummaryServiceError(
+                        "SUMMARY_LEASE_LOST",
+                        "The execution lease expired while validating dispatch.",
+                    )
                 result = await session.execute(
                     update(ThreadSummaryDispatch)
                     .where(
@@ -1206,15 +1230,20 @@ class SummaryJobService:
                         "SUMMARY_DISPATCH_STATE_INVALID",
                         "The dispatch ledger changed concurrently.",
                     )
+                if not _owns_live_lease(job, lease_token, self._now(now)):
+                    raise SummaryServiceError(
+                        "SUMMARY_LEASE_LOST",
+                        "The execution lease expired before the dispatch fence committed.",
+                    )
 
     async def mark_dispatch_unknown(
         self, key: SummaryJobKey, *, lease_token: str, now: datetime | None = None
     ) -> SummarySettlement:
         """Fence an unconfirmed provider outcome without waiting for lease expiry."""
-        current = self._now(now)
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND", "The summary job was not found."
@@ -1258,7 +1287,6 @@ class SummaryJobService:
     ) -> StoredSummaryResponse:
         """Persist provider evidence before parsing or validating its content."""
 
-        current = self._now(now)
         _validate_response_data(response)
         try:
             raw_response, response_hash = _encode_raw_response(response.raw_response)
@@ -1286,6 +1314,7 @@ class SummaryJobService:
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
@@ -1411,12 +1440,12 @@ class SummaryJobService:
     ) -> SummarySettlement:
         """Validate a stored response and persist one immutable pending artifact."""
 
-        current = self._now(now)
         trusted_error: SummaryServiceError | None = None
         settlement: SummarySettlement | None = None
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
@@ -1477,6 +1506,11 @@ class SummaryJobService:
                         )
                     binding = _binding(job, SummaryVerifierPhase.RESPONSE_VALIDATION)
                     decision = await self._verify(session, binding)
+                    current = self._now(now)
+                    if not _owns_live_lease(job, lease_token, current):
+                        raise SummaryServiceError(
+                            "SUMMARY_LEASE_LOST", "The validation lease expired during review."
+                        )
                     if decision.status is SummaryTrustStatus.UNAVAILABLE:
                         trusted_error = SummaryServiceError(
                             "SUMMARY_TRUST_UNAVAILABLE",
@@ -1570,6 +1604,7 @@ class SummaryJobService:
                                     validation,
                                     lease_token=lease_token,
                                     now=current,
+                                    clock_override=now,
                                 )
                                 if artifact_error is None:
                                     settlement = _settlement(job, validation=validation)
@@ -1595,7 +1630,6 @@ class SummaryJobService:
     ) -> SummarySettlement:
         """Revalidate trusted bindings and CAS-publish a pending artifact."""
 
-        current = self._now(now)
         if not isinstance(published_by, str) or not published_by.strip():
             raise ValueError("published_by must be a non-empty string")
         unavailable_code: str | None = None
@@ -1603,6 +1637,7 @@ class SummaryJobService:
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
+                current = self._now(now)
                 if job is None:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
@@ -1646,6 +1681,11 @@ class SummaryJobService:
                     parent_valid, parent_code = await self._parent_is_current(session, job)
                     binding = _binding(job, SummaryVerifierPhase.PUBLICATION)
                     decision = await self._verify(session, binding)
+                    current = self._now(now)
+                    if not _owns_live_lease(job, lease_token, current):
+                        raise SummaryServiceError(
+                            "SUMMARY_LEASE_LOST", "The publication lease expired during review."
+                        )
                     if not parent_valid:
                         _mark_stale(job, current, parent_code)
                         await self._mark_artifact_stale(session, artifact)
@@ -1662,6 +1702,7 @@ class SummaryJobService:
                         )
                         unavailable_code = job.failure_code
                     else:
+                        lease_expires_at = job.lease_expires_at
                         artifact_result = await session.execute(
                             update(ThreadSummaryArtifact)
                             .where(
@@ -1712,6 +1753,11 @@ class SummaryJobService:
                             raise SummaryServiceError(
                                 "SUMMARY_JOB_CAS_FAILED",
                                 "The job publication compare-and-set failed.",
+                            )
+                        if not _is_live(lease_expires_at, self._now(now)):
+                            raise SummaryServiceError(
+                                "SUMMARY_LEASE_LOST",
+                                "The publication lease expired before the update completed.",
                             )
                         job.status = SummaryJobStatus.PUBLISHED.value
                         job.lease_token = None
@@ -1807,8 +1853,13 @@ class SummaryJobService:
         *,
         lease_token: str,
         now: datetime,
+        clock_override: datetime | None,
     ) -> SummaryServiceError | None:
         await self._lock_summary_thread(session, key)
+        if not _owns_live_lease(job, lease_token, self._now(clock_override)):
+            raise SummaryServiceError(
+                "SUMMARY_LEASE_LOST", "The validation lease expired while allocating a revision."
+            )
         parent = await self._validate_parent(
             session,
             workspace_id=key.workspace_id,
@@ -1933,6 +1984,10 @@ class SummaryJobService:
         job.validated_at = now
         job.failure_code = None
         await session.flush()
+        if not _owns_live_lease(job, lease_token, self._now(clock_override)):
+            raise SummaryServiceError(
+                "SUMMARY_LEASE_LOST", "The validation lease expired before the revision committed."
+            )
         return None
 
     async def _parent_is_current(

@@ -1458,6 +1458,191 @@ async def test_summary_worker_and_durable_service_share_one_fake_gateway_dispatc
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("operation", ["reserve", "dispatch"])
+async def test_waiting_for_job_lock_cannot_use_an_expired_lease(
+    factory: async_sessionmaker[AsyncSession], operation: str
+) -> None:
+    tenant = await _seed_tenant(factory)
+    clock = [datetime.now(UTC)]
+    service = SummaryJobService(
+        factory,
+        verifier=_Verifier(lambda _binding: _validation_context(tenant)),
+        budget_reserver=_TestBudgetReserver(),
+        clock=lambda: clock[0],
+        lease_seconds=60,
+    )
+    created = await service.create_job(_new_summary_job(tenant))
+    claimed = await service.claim(created.key)
+    assert claimed is not None
+    if operation == "dispatch":
+        await service.commit_dispatch_intent(
+            created.key,
+            lease_token=claimed.lease_token,
+            pricing_snapshot_id=tenant.pricing_id,
+            reserved_input_tokens=700,
+            reserved_output_tokens=300,
+        )
+
+    started = asyncio.Event()
+    original_lock = service._lock_job
+
+    async def lock_with_notification(session, key):
+        started.set()
+        return await original_lock(session, key)
+
+    service._lock_job = lock_with_notification
+
+    async def perform_operation():
+        if operation == "reserve":
+            return await service.commit_dispatch_intent(
+                created.key,
+                lease_token=claimed.lease_token,
+                pricing_snapshot_id=tenant.pricing_id,
+                reserved_input_tokens=700,
+                reserved_output_tokens=300,
+            )
+        return await service.mark_dispatched(created.key, lease_token=claimed.lease_token)
+
+    async with factory() as blocking_session:
+        async with blocking_session.begin():
+            locked = await blocking_session.get(
+                ThreadSummaryJob, created.key.job_id, with_for_update=True
+            )
+            assert locked is not None
+            pending = asyncio.create_task(perform_operation())
+            await asyncio.wait_for(started.wait(), timeout=5)
+            clock[0] = claimed.lease_expires_at + timedelta(seconds=1)
+    with pytest.raises(SummaryServiceError) as error:
+        await pending
+    assert error.value.code == "SUMMARY_LEASE_LOST"
+    async with factory() as session:
+        job = await session.get(ThreadSummaryJob, created.key.job_id)
+        dispatch = await session.scalar(
+            select(ThreadSummaryDispatch).where(ThreadSummaryDispatch.job_id == created.key.job_id)
+        )
+        assert job is not None
+        if operation == "reserve":
+            assert job.status == "CLAIMED" and dispatch is None
+        else:
+            assert job.status == "DISPATCH_INTENT"
+            assert dispatch is not None and dispatch.outcome == "INTENT_RECORDED"
+
+
+@pytest.mark.asyncio
+async def test_expiry_while_reserving_rolls_back_same_transaction(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    clock = [datetime.now(UTC)]
+
+    class AdvancingReserver:
+        async def reserve(self, session, **_kwargs):
+            await session.execute(
+                update(Workspace).where(Workspace.id == tenant.workspace_id).values(name="changed")
+            )
+            clock[0] += timedelta(seconds=61)
+            return True
+
+    service = SummaryJobService(
+        factory,
+        verifier=_Verifier(lambda _binding: _validation_context(tenant)),
+        budget_reserver=AdvancingReserver(),
+        clock=lambda: clock[0],
+        lease_seconds=60,
+    )
+    created = await service.create_job(_new_summary_job(tenant))
+    claimed = await service.claim(created.key)
+    assert claimed is not None
+    async with factory() as session:
+        original_name = (await session.get(Workspace, tenant.workspace_id)).name
+    with pytest.raises(SummaryServiceError) as error:
+        await service.commit_dispatch_intent(
+            created.key,
+            lease_token=claimed.lease_token,
+            pricing_snapshot_id=tenant.pricing_id,
+            reserved_input_tokens=700,
+            reserved_output_tokens=300,
+        )
+    assert error.value.code == "SUMMARY_LEASE_LOST"
+    async with factory() as session:
+        workspace = await session.get(Workspace, tenant.workspace_id)
+        job = await session.get(ThreadSummaryJob, created.key.job_id)
+        dispatch = await session.scalar(
+            select(ThreadSummaryDispatch).where(ThreadSummaryDispatch.job_id == created.key.job_id)
+        )
+        assert workspace.name == original_name
+        assert job.status == "CLAIMED" and not job.budget_reserved and dispatch is None
+
+
+@pytest.mark.asyncio
+async def test_expiry_during_dispatch_review_does_not_cross_boundary(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    clock = [datetime.now(UTC)]
+    review_calls = 0
+
+    def review(_binding):
+        nonlocal review_calls
+        review_calls += 1
+        if review_calls == 2:
+            clock[0] += timedelta(seconds=61)
+        return _validation_context(tenant)
+
+    service = SummaryJobService(
+        factory,
+        verifier=_Verifier(review),
+        budget_reserver=_TestBudgetReserver(),
+        clock=lambda: clock[0],
+        lease_seconds=60,
+    )
+    created = await service.create_job(_new_summary_job(tenant))
+    claimed = await service.claim(created.key)
+    assert claimed is not None
+    await service.commit_dispatch_intent(
+        created.key,
+        lease_token=claimed.lease_token,
+        pricing_snapshot_id=tenant.pricing_id,
+        reserved_input_tokens=700,
+        reserved_output_tokens=300,
+    )
+    with pytest.raises(SummaryServiceError) as error:
+        await service.mark_dispatched(created.key, lease_token=claimed.lease_token)
+    assert error.value.code == "SUMMARY_LEASE_LOST"
+    job, dispatch, responses = await _job_row(factory, created.key)
+    assert job.status == "DISPATCH_INTENT" and dispatch.outcome == "INTENT_RECORDED"
+    assert responses == []
+
+
+@pytest.mark.asyncio
+async def test_expiry_during_publication_review_does_not_publish(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service, key, lease_token, _ = await _validated_with_pending_artifact(factory, tenant)
+    async with factory() as session:
+        job = await session.get(ThreadSummaryJob, key.job_id)
+        assert job is not None and job.lease_expires_at is not None
+        expiry = job.lease_expires_at
+    clock = [expiry - timedelta(seconds=1)]
+    service._clock = lambda: clock[0]
+
+    class AdvancingVerifier:
+        async def verify(self, _session, _binding):
+            clock[0] = expiry + timedelta(seconds=1)
+            return SummaryTrustDecision.verified()
+
+    service._verifier = AdvancingVerifier()
+    with pytest.raises(SummaryServiceError) as error:
+        await service.publish(key, lease_token=lease_token, published_by="test")
+    assert error.value.code == "SUMMARY_LEASE_LOST"
+    async with factory() as session:
+        job = await session.get(ThreadSummaryJob, key.job_id)
+        assert job.status == "VALIDATED"
+    assert (await _artifact_rows(factory, key))[0].publication_status == "PENDING"
+
+
+@pytest.mark.asyncio
 async def test_dispatch_rejects_request_spec_not_built_from_verified_context(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
