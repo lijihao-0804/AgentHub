@@ -139,6 +139,43 @@ def test_contracts_bound_invalid_limits_and_normalize_error_safely() -> None:
     assert "raw" not in str(error).lower()
 
 
+@pytest.mark.parametrize(
+    "usage",
+    [
+        {
+            "input_tokens": True,
+            "output_tokens": 2,
+            "total_tokens": 3,
+        },
+        {
+            "input_tokens": "1",
+            "output_tokens": 2,
+            "total_tokens": 3,
+        },
+        {
+            "input_tokens": -1,
+            "output_tokens": 2,
+            "total_tokens": 1,
+        },
+        {
+            "input_tokens": 1,
+            "output_tokens": 2,
+            "total_tokens": 3,
+            "cached_tokens": False,
+        },
+        {
+            "input_tokens": 1,
+            "output_tokens": 2,
+            "total_tokens": 3,
+            "cached_tokens": 2,
+        },
+    ],
+)
+def test_model_usage_rejects_untrusted_counts(usage) -> None:
+    with pytest.raises(ValueError):
+        ModelUsage(**usage)
+
+
 def test_capability_and_health_contracts_are_provider_neutral() -> None:
     capabilities = ModelCapabilities(streaming=True, max_context_tokens=8192)
 

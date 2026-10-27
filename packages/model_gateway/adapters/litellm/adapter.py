@@ -25,6 +25,8 @@ from packages.model_gateway.models import ModelProfile, ProviderCredential
 
 logger = logging.getLogger(__name__)
 
+_MISSING = object()
+
 
 class LiteLLMClient(Protocol):
     def acompletion(self, **kwargs: Any) -> Any: ...
@@ -153,24 +155,32 @@ def _normalize_error(error: Exception) -> ModelGatewayError:
     return ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
 
 
+def _token_count(value: Any) -> int | None:
+    if type(value) is not int or value < 0:
+        return None
+    return value
+
+
 def _normalize_usage(value: Any) -> ModelUsage | None:
     if value is None:
         return None
-    input_tokens = _value(value, "prompt_tokens")
-    output_tokens = _value(value, "completion_tokens")
-    total_tokens = _value(value, "total_tokens")
+    input_tokens = _token_count(_value(value, "prompt_tokens"))
+    output_tokens = _token_count(_value(value, "completion_tokens"))
     if input_tokens is None or output_tokens is None:
         return None
-    input_tokens = int(input_tokens)
-    output_tokens = int(output_tokens)
-    total_tokens = int(total_tokens or input_tokens + output_tokens)
+    reported_total = _value(value, "total_tokens")
+    if reported_total is not None and _token_count(reported_total) != input_tokens + output_tokens:
+        # Contradictory provider usage is not evidence of a complete bill.
+        return None
     details = _value(value, "prompt_tokens_details")
-    cached_tokens = _value(details, "cached_tokens") if details is not None else None
+    cached_tokens = _token_count(_value(details, "cached_tokens"))
+    if cached_tokens is not None and cached_tokens > input_tokens:
+        cached_tokens = None
     return ModelUsage(
         input_tokens=input_tokens,
         output_tokens=output_tokens,
-        total_tokens=total_tokens,
-        cached_tokens=int(cached_tokens) if cached_tokens is not None else None,
+        total_tokens=input_tokens + output_tokens,
+        cached_tokens=cached_tokens,
     )
 
 
@@ -246,14 +256,16 @@ def _normalize_response(
     tool_calls = tuple(
         _normalize_tool_call(tool_call) for tool_call in (_value(message, "tool_calls", []) or [])
     )
+    raw_usage = _value(response, "usage")
+    usage = _normalize_usage(raw_usage)
     return ModelResponse(
         content=_value(message, "content", "") or _value(message, "refusal", "") or "",
         provider=provider,
         model=model,
         tool_calls=tool_calls,
         finish_reason=_value(choice, "finish_reason"),
-        usage=_normalize_usage(_value(response, "usage")),
-        cost_estimate=_normalize_cost(response),
+        usage=usage,
+        cost_estimate=_normalize_cost(response) if raw_usage is None or usage is not None else None,
     )
 
 
@@ -297,6 +309,7 @@ class LiteLLMProviderAdapter:
         tool_parts: dict[int, dict[str, Any]] = {}
         finish_reason: str | None = None
         usage: ModelUsage | None = None
+        usage_invalidated = False
         cost_estimate: CostEstimate | None = None
         raw_stream = None
         try:
@@ -307,8 +320,14 @@ class LiteLLMProviderAdapter:
                         chunk, content_parts=content_parts, tool_parts=tool_parts
                     ):
                         yield event
-                    usage = _normalize_usage(_value(chunk, "usage")) or usage
-                    cost_estimate = _normalize_cost(chunk) or cost_estimate
+                    chunk_usage = _value(chunk, "usage", _MISSING)
+                    if chunk_usage is not _MISSING and chunk_usage is not None:
+                        usage = _normalize_usage(chunk_usage)
+                        usage_invalidated = usage is None
+                        if usage_invalidated:
+                            cost_estimate = None
+                    if not usage_invalidated:
+                        cost_estimate = _normalize_cost(chunk) or cost_estimate
                     finish_reason = _stream_finish_reason(chunk) or finish_reason
             else:
                 for chunk in raw_stream:
@@ -316,8 +335,14 @@ class LiteLLMProviderAdapter:
                         chunk, content_parts=content_parts, tool_parts=tool_parts
                     ):
                         yield event
-                    usage = _normalize_usage(_value(chunk, "usage")) or usage
-                    cost_estimate = _normalize_cost(chunk) or cost_estimate
+                    chunk_usage = _value(chunk, "usage", _MISSING)
+                    if chunk_usage is not _MISSING and chunk_usage is not None:
+                        usage = _normalize_usage(chunk_usage)
+                        usage_invalidated = usage is None
+                        if usage_invalidated:
+                            cost_estimate = None
+                    if not usage_invalidated:
+                        cost_estimate = _normalize_cost(chunk) or cost_estimate
                     finish_reason = _stream_finish_reason(chunk) or finish_reason
         except ModelGatewayError:
             raise

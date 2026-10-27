@@ -125,10 +125,17 @@ class ModelUsage:
 
     def __post_init__(self) -> None:
         values = (self.input_tokens, self.output_tokens, self.total_tokens)
+        if any(type(value) is not int for value in values):
+            raise ValueError("token counts must be integers")
         if any(value < 0 for value in values):
             raise ValueError("token counts must be non-negative")
-        if self.cached_tokens is not None and self.cached_tokens < 0:
-            raise ValueError("cached_tokens must be non-negative")
+        if self.cached_tokens is not None:
+            if type(self.cached_tokens) is not int:
+                raise ValueError("cached_tokens must be an integer")
+            if self.cached_tokens < 0:
+                raise ValueError("cached_tokens must be non-negative")
+            if self.cached_tokens > self.input_tokens:
+                raise ValueError("cached_tokens cannot exceed input_tokens")
 
 
 @dataclass(frozen=True, slots=True)

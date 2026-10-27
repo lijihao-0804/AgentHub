@@ -2,6 +2,7 @@ import asyncio
 import traceback
 from collections.abc import AsyncIterator
 from decimal import Decimal
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
@@ -13,6 +14,7 @@ from packages.model_gateway.contracts import (
     ModelStreamEventType,
     ModelToolCall,
     ModelToolDefinition,
+    ModelUsage,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.models import ModelProfile, ProviderCredential
@@ -127,6 +129,152 @@ async def test_deepseek_request_is_mapped_and_response_is_normalized() -> None:
 
 
 @pytest.mark.asyncio
+async def test_litellm_response_objects_preserve_known_usage_and_zero_cache() -> None:
+    client = FakeCompletionClient(
+        response=SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(content="hello", tool_calls=[]),
+                    finish_reason="stop",
+                )
+            ],
+            usage=SimpleNamespace(
+                prompt_tokens=10,
+                completion_tokens=4,
+                total_tokens=14,
+                prompt_tokens_details=SimpleNamespace(cached_tokens=0),
+            ),
+        )
+    )
+    model_profile, credential = profile("openai-compatible")
+
+    response = await LiteLLMProviderAdapter(client).complete(
+        model_profile,
+        credential,
+        ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+    )
+
+    assert response.usage == ModelUsage(
+        input_tokens=10,
+        output_tokens=4,
+        total_tokens=14,
+        cached_tokens=0,
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "usage",
+    [
+        None,
+        "malformed",
+        {},
+        {"prompt_tokens": 2},
+        {"prompt_tokens": True, "completion_tokens": 2, "total_tokens": 3},
+        {"prompt_tokens": 2, "completion_tokens": False, "total_tokens": 2},
+        {"prompt_tokens": "2", "completion_tokens": 2, "total_tokens": 4},
+        {"prompt_tokens": 2.0, "completion_tokens": 2, "total_tokens": 4},
+        {"prompt_tokens": -1, "completion_tokens": 2, "total_tokens": 1},
+    ],
+)
+async def test_untrusted_core_usage_fails_closed(usage) -> None:
+    client = FakeCompletionClient(
+        response={
+            "choices": [{"message": {"content": "hello"}, "finish_reason": "stop"}],
+            "usage": usage,
+            "response_cost": "0.0001",
+        }
+    )
+    model_profile, credential = profile()
+
+    response = await LiteLLMProviderAdapter(client).complete(
+        model_profile,
+        credential,
+        ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+    )
+
+    assert response.usage is None
+    if usage is not None:
+        assert response.cost_estimate is None
+
+
+@pytest.mark.asyncio
+async def test_missing_total_can_be_calculated_from_input_and_output() -> None:
+    client = FakeCompletionClient(
+        response={
+            "choices": [{"message": {"content": "hello"}, "finish_reason": "stop"}],
+            "usage": {
+                "prompt_tokens": 10,
+                "completion_tokens": 4,
+                "total_tokens": None,
+            },
+        }
+    )
+    model_profile, credential = profile()
+
+    response = await LiteLLMProviderAdapter(client).complete(
+        model_profile,
+        credential,
+        ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+    )
+
+    assert response.usage == ModelUsage(
+        input_tokens=10,
+        output_tokens=4,
+        total_tokens=14,
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("total_tokens", [True, "14", -1, 99])
+async def test_contradictory_total_cannot_be_used_for_accounting(total_tokens) -> None:
+    client = FakeCompletionClient(
+        response={
+            "choices": [{"message": {"content": "hello"}, "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 10, "completion_tokens": 4, "total_tokens": total_tokens},
+        }
+    )
+    model_profile, credential = profile()
+    response = await LiteLLMProviderAdapter(client).complete(
+        model_profile,
+        credential,
+        ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+    )
+    assert response.usage is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("cached_tokens", [False, "4", -1, 11])
+async def test_untrusted_cache_usage_is_unknown_without_dropping_core_usage(
+    cached_tokens,
+) -> None:
+    client = FakeCompletionClient(
+        response={
+            "choices": [{"message": {"content": "hello"}, "finish_reason": "stop"}],
+            "usage": {
+                "prompt_tokens": 10,
+                "completion_tokens": 4,
+                "total_tokens": 14,
+                "prompt_tokens_details": {"cached_tokens": cached_tokens},
+            },
+        }
+    )
+    model_profile, credential = profile()
+
+    response = await LiteLLMProviderAdapter(client).complete(
+        model_profile,
+        credential,
+        ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+    )
+
+    assert response.usage == ModelUsage(
+        input_tokens=10,
+        output_tokens=4,
+        total_tokens=14,
+    )
+
+
+@pytest.mark.asyncio
 async def test_tool_result_message_preserves_provider_tool_call_id() -> None:
     client = FakeCompletionClient(
         response={
@@ -198,6 +346,134 @@ async def test_openai_compatible_stream_is_typed_and_single_attempt() -> None:
     assert client.calls[0]["model"] == "openai/compatible-model"
     assert client.calls[0]["api_base"] == "https://provider.invalid/v1"
     assert len(client.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_litellm_stream_objects_preserve_reported_usage() -> None:
+    client = FakeStreamClient(
+        [
+            SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="hel"))],
+            ),
+            SimpleNamespace(
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="lo"))],
+            ),
+            SimpleNamespace(
+                choices=[],
+                usage=SimpleNamespace(
+                    prompt_tokens=10,
+                    completion_tokens=4,
+                    total_tokens=14,
+                    prompt_tokens_details=SimpleNamespace(cached_tokens=0),
+                ),
+            ),
+        ]
+    )
+    model_profile, credential = profile("openai-compatible")
+
+    events = [
+        event
+        async for event in LiteLLMProviderAdapter(client).stream(
+            model_profile,
+            credential,
+            ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+        )
+    ]
+
+    assert events[-1].response is not None
+    assert events[-1].response.usage == ModelUsage(
+        input_tokens=10,
+        output_tokens=4,
+        total_tokens=14,
+        cached_tokens=0,
+    )
+
+
+@pytest.mark.asyncio
+async def test_missing_stream_usage_keeps_last_reported_usage() -> None:
+    client = FakeStreamClient(
+        [
+            {"choices": [{"delta": {"content": "done"}}]},
+            {
+                "choices": [],
+                "usage": {
+                    "prompt_tokens": 10,
+                    "completion_tokens": 4,
+                    "total_tokens": 14,
+                },
+            },
+            {"choices": []},
+        ]
+    )
+    model_profile, credential = profile()
+
+    events = [
+        event
+        async for event in LiteLLMProviderAdapter(client).stream(
+            model_profile,
+            credential,
+            ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+        )
+    ]
+
+    assert [event.event_type for event in events] == [
+        ModelStreamEventType.MESSAGE_DELTA,
+        ModelStreamEventType.USAGE,
+        ModelStreamEventType.COMPLETED,
+    ]
+    assert events[-1].response is not None
+    assert events[-1].response.usage == ModelUsage(
+        input_tokens=10,
+        output_tokens=4,
+        total_tokens=14,
+    )
+
+
+@pytest.mark.asyncio
+async def test_final_malformed_stream_usage_clears_stale_usage() -> None:
+    client = FakeStreamClient(
+        [
+            {"choices": [{"delta": {"content": "done"}}]},
+            {
+                "choices": [],
+                "usage": {
+                    "prompt_tokens": 10,
+                    "completion_tokens": 4,
+                    "total_tokens": 14,
+                },
+                "response_cost": "0.0042",
+            },
+            {
+                "choices": [{"delta": {}, "finish_reason": "stop"}],
+                "usage": {
+                    "prompt_tokens": True,
+                    "completion_tokens": 4,
+                    "total_tokens": 5,
+                },
+                "response_cost": "0.0001",
+            },
+            {"choices": [], "response_cost": "0.0001"},
+        ]
+    )
+    model_profile, credential = profile()
+
+    events = [
+        event
+        async for event in LiteLLMProviderAdapter(client).stream(
+            model_profile,
+            credential,
+            ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+        )
+    ]
+
+    assert [event.event_type for event in events] == [
+        ModelStreamEventType.MESSAGE_DELTA,
+        ModelStreamEventType.COMPLETED,
+    ]
+    assert events[-1].response is not None
+    assert events[-1].response.usage is None
+    assert events[-1].response.cost_estimate is None
+    assert events[-1].response.finish_reason == "stop"
 
 
 @pytest.mark.asyncio
