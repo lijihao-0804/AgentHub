@@ -11,14 +11,16 @@ from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from types import SimpleNamespace
 from uuid import UUID, uuid4
 
 import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, text, update
 from sqlalchemy.engine import URL, make_url
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.summary_models import (
@@ -33,6 +35,7 @@ from packages.agent_runtime.summary_prompt import (
     SummaryPromptSource,
 )
 from packages.agent_runtime.summary_service import (
+    MAX_SUMMARY_MODEL_ROUND,
     NewSummaryJob,
     NewSummarySource,
     SummaryBindingVerifier,
@@ -43,6 +46,7 @@ from packages.agent_runtime.summary_service import (
     SummaryServiceError,
     SummaryTrustDecision,
     SummaryVerifierPhase,
+    _reservation_cost,
 )
 from packages.agent_runtime.summary_state import SummaryJobStatus
 from packages.control_plane.models import Workspace, WorkspaceMembership
@@ -55,7 +59,7 @@ TEST_DATABASE_URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "").strip()
 EXPECTED_DATABASE_URL = (
     "postgresql+psycopg://agenthub:m2_local_test@127.0.0.1:15432/agenthub_context_policy_m2"
 )
-EXPECTED_REVISION = "0042_summary_eligibility"
+EXPECTED_REVISION = "0044_summary_evidence_guard"
 
 pytestmark = [
     pytest.mark.integration,
@@ -343,6 +347,7 @@ def _new_summary_job(tenant: _Tenant) -> NewSummaryJob:
         permission_snapshot_hash=_hash(tenant.permission_snapshot),
         created_by=tenant.user_id,
         sources=(tenant.source,),
+        model_round=1,
     )
 
 
@@ -710,6 +715,7 @@ async def _validated_two_source_with_pending_artifact(
             permission_snapshot_hash=_hash(tenant.permission_snapshot),
             created_by=tenant.user_id,
             sources=(tenant.source, second_source),
+            model_round=2,
         )
     )
     claimed = await service.claim(created.key)
@@ -830,6 +836,376 @@ async def test_concurrent_create_deduplicates_one_immutable_job_and_source_manif
         )
     assert len(jobs) == 1
     assert source_count == 1
+
+
+@pytest.mark.asyncio
+async def test_dispatch_boundary_schema_is_applied_by_migration(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    async with factory() as session:
+        revision = await session.scalar(text("SELECT version_num FROM alembic_version"))
+        nullable = await session.scalar(
+            text(
+                """
+                SELECT is_nullable
+                FROM information_schema.columns
+                WHERE table_name = 'thread_summary_jobs'
+                  AND column_name = 'model_round'
+                """
+            )
+        )
+        unique_definition = await session.scalar(
+            text(
+                """
+                SELECT pg_get_constraintdef(oid)
+                FROM pg_constraint
+                WHERE conname = 'uq_thread_summary_jobs_dispatch_boundary'
+                """
+            )
+        )
+        check_definition = await session.scalar(
+            text(
+                """
+                SELECT pg_get_constraintdef(oid)
+                FROM pg_constraint
+                WHERE conname = 'ck_thread_summary_jobs_model_round_bounds'
+                """
+            )
+        )
+    assert revision == EXPECTED_REVISION
+    assert nullable == "YES"
+    assert unique_definition is not None
+    assert all(
+        column in unique_definition
+        for column in ("workspace_id", "trigger_run_id", "model_round")
+    )
+    assert check_definition is not None
+    assert "model_round" in check_definition
+    assert "2147483647" in check_definition
+
+
+@pytest.mark.asyncio
+async def test_same_boundary_distinct_identities_conflict_even_concurrently(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service = SummaryJobService(factory)
+    first_command = _new_summary_job(tenant)
+    second_command = replace(
+        first_command,
+        policy_spec={"schema_version": 1, "mode": "single_dispatch", "variant": "other"},
+    )
+
+    results = await asyncio.gather(
+        service.create_job(first_command),
+        service.create_job(second_command),
+        return_exceptions=True,
+    )
+    created = [result for result in results if not isinstance(result, BaseException)]
+    conflicts = [
+        result
+        for result in results
+        if isinstance(result, SummaryServiceError)
+        and result.code == "SUMMARY_DISPATCH_BOUNDARY_CONFLICT"
+    ]
+    assert len(created) == 1
+    assert created[0].created is True
+    assert len(conflicts) == 1
+    assert f"{tenant.run_id}" in conflicts[0].message
+    assert "model round 1" in conflicts[0].message
+    async with factory() as session:
+        jobs = list(
+            await session.scalars(
+                select(ThreadSummaryJob).where(
+                    ThreadSummaryJob.workspace_id == tenant.workspace_id,
+                    ThreadSummaryJob.trigger_run_id == tenant.run_id,
+                )
+            )
+        )
+    assert len(jobs) == 1
+    assert jobs[0].model_round == 1
+
+
+@pytest.mark.asyncio
+async def test_same_frozen_command_is_idempotent_not_a_boundary_conflict(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service = SummaryJobService(factory)
+    command = _new_summary_job(tenant)
+
+    first = await service.create_job(command)
+    second = await service.create_job(command)
+
+    assert first.created is True
+    assert second.created is False
+    assert second.key == first.key
+    assert second.identity_hash == first.identity_hash
+
+
+@pytest.mark.asyncio
+async def test_different_model_rounds_on_the_same_run_are_distinct_boundaries(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service = SummaryJobService(factory)
+    first_command = _new_summary_job(tenant)
+    second_command = replace(first_command, model_round=2)
+
+    first = await service.create_job(first_command)
+    second = await service.create_job(second_command)
+
+    assert first.created is True
+    assert second.created is True
+    assert first.key != second.key
+    assert first.identity_hash != second.identity_hash
+    async with factory() as session:
+        rounds = list(
+            await session.scalars(
+                select(ThreadSummaryJob.model_round)
+                .where(
+                    ThreadSummaryJob.workspace_id == tenant.workspace_id,
+                    ThreadSummaryJob.trigger_run_id == tenant.run_id,
+                )
+                .order_by(ThreadSummaryJob.model_round)
+            )
+        )
+    assert rounds == [1, 2]
+
+
+@pytest.mark.asyncio
+async def test_boundary_is_scoped_by_workspace_and_trigger_run(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    other = await _seed_tenant(factory)
+    service = SummaryJobService(factory)
+
+    first = await service.create_job(_new_summary_job(tenant))
+    other_workspace = await service.create_job(_new_summary_job(other))
+    second_source = await _seed_additional_exchange(factory, tenant)
+    same_workspace_other_run = await service.create_job(
+        replace(
+            _new_summary_job(tenant),
+            trigger_run_id=second_source.run_id,
+            source_watermark=3,
+            source_scope={
+                "kind": "COMPLETED_PREFIX",
+                "through_sequence": 2,
+                "before_run_id": str(second_source.run_id),
+            },
+            sources=(tenant.source, second_source),
+        )
+    )
+
+    assert first.created is True
+    assert other_workspace.created is True
+    assert same_workspace_other_run.created is True
+    assert first.key.workspace_id != other_workspace.key.workspace_id
+    assert first.key.workspace_id == same_workspace_other_run.key.workspace_id
+    assert first.key.job_id != same_workspace_other_run.key.job_id
+
+
+@pytest.mark.asyncio
+async def test_model_round_validation_rejects_booleans_non_integers_and_out_of_bounds(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service = SummaryJobService(factory)
+    command = _new_summary_job(tenant)
+    invalid_rounds = (
+        None,
+        False,
+        True,
+        0,
+        -1,
+        MAX_SUMMARY_MODEL_ROUND + 1,
+        1.0,
+        "1",
+    )
+    for invalid_round in invalid_rounds:
+        with pytest.raises(ValueError, match="model_round"):
+            await service.create_job(replace(command, model_round=invalid_round))
+
+    maximum = await service.create_job(
+        replace(command, model_round=MAX_SUMMARY_MODEL_ROUND)
+    )
+    assert maximum.created is True
+
+
+@pytest.mark.asyncio
+async def test_legacy_null_model_round_cannot_cross_a_dispatch_boundary(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    legacy_id = uuid4()
+    legacy_identity = _hash(f"legacy-summary-{legacy_id}")
+    model_spec = {"provider": "offline", "model": "offline-summary-service"}
+    async with factory() as session:
+        async with session.begin():
+            session.add(
+                ThreadSummaryJob(
+                    id=legacy_id,
+                    workspace_id=tenant.workspace_id,
+                    thread_id=tenant.thread_id,
+                    trigger_run_id=tenant.run_id,
+                    model_round=None,
+                    identity_hash=legacy_identity,
+                    source_watermark=2,
+                    source_scope={
+                        "kind": "COMPLETED_PREFIX",
+                        "through_sequence": 1,
+                        "before_run_id": str(tenant.run_id),
+                    },
+                    source_scope_hash=_hash(f"legacy-scope-{legacy_id}"),
+                    source_content_hash=_hash(f"legacy-content-{legacy_id}"),
+                    policy_spec={"schema_version": 1, "mode": "legacy"},
+                    policy_version="summary-policy-v1",
+                    prompt_version="summary_candidate_zh_v1",
+                    budget_version="summary-budget-v1",
+                    model_spec=model_spec,
+                    model_spec_hash=_hash(json.dumps(model_spec, sort_keys=True)),
+                    tokenizer_id="approx_language_v1",
+                    tokenizer_version="1",
+                    target_budget_tokens=1500,
+                    permission_snapshot_hash=_hash(tenant.permission_snapshot),
+                    status=SummaryJobStatus.QUEUED.value,
+                    created_by=tenant.user_id,
+                )
+            )
+            await session.flush()
+            session.add(
+                ThreadSummaryJobSource(
+                    id=uuid4(),
+                    workspace_id=tenant.workspace_id,
+                    thread_id=tenant.thread_id,
+                    job_id=legacy_id,
+                    ordinal=1,
+                    source_id=tenant.source.source_id,
+                    turn_id=tenant.source.turn_id,
+                    run_id=tenant.source.run_id,
+                    sequence=tenant.source.sequence,
+                    original_ref=tenant.source.original_ref,
+                    source_identity_hash=tenant.source.source_identity_hash,
+                    revision_sha256=tenant.source.revision_sha256,
+                    user_input_sha256=tenant.source.user_input_sha256,
+                    final_output_sha256=tenant.source.final_output_sha256,
+                    artifact_identities=[],
+                    summary_eligibility=tenant.source.summary_eligibility,
+                    eligibility_reason=tenant.source.eligibility_reason,
+                )
+            )
+
+    service = SummaryJobService(factory)
+    key = SummaryJobKey(tenant.workspace_id, tenant.thread_id, legacy_id)
+    with pytest.raises(SummaryServiceError) as legacy_blocked:
+        await service.create_job(_new_summary_job(tenant))
+    assert legacy_blocked.value.code == "SUMMARY_LEGACY_BOUNDARY_UNVERIFIED"
+    claimed = await service.claim(key)
+    assert claimed is not None
+    with pytest.raises(SummaryServiceError) as blocked:
+        await service.commit_dispatch_intent(
+            key,
+            lease_token=claimed.lease_token,
+            pricing_snapshot_id=tenant.pricing_id,
+            reserved_input_tokens=700,
+            reserved_output_tokens=300,
+        )
+    assert blocked.value.code == "SUMMARY_DISPATCH_BOUNDARY_REQUIRED"
+    async with factory() as session:
+        job = await session.get(ThreadSummaryJob, legacy_id)
+        dispatches = await session.scalar(
+            select(func.count())
+            .select_from(ThreadSummaryDispatch)
+            .where(ThreadSummaryDispatch.job_id == legacy_id)
+        )
+    assert job is not None
+    assert job.status == SummaryJobStatus.CLAIMED.value
+    assert job.model_round is None
+    assert job.budget_reserved is False
+    assert dispatches == 0
+
+    with pytest.raises(DBAPIError):
+        async with factory() as session:
+            async with session.begin():
+                await session.execute(
+                    update(ThreadSummaryJob)
+                    .where(ThreadSummaryJob.id == legacy_id)
+                    .values(model_round=1)
+                )
+    async with factory() as session:
+        unchanged = await session.get(ThreadSummaryJob, legacy_id)
+    assert unchanged is not None
+    assert unchanged.model_round is None
+
+
+def test_reservation_cost_uses_the_higher_cached_input_rate_when_configured() -> None:
+    higher_cached = SimpleNamespace(
+        input_price_per_1m=Decimal("1.00000000"),
+        output_price_per_1m=Decimal("0"),
+        cached_input_price_per_1m=Decimal("5.00000000"),
+        currency="CNY",
+    )
+    lower_cached = SimpleNamespace(
+        input_price_per_1m=Decimal("1.00000000"),
+        output_price_per_1m=Decimal("0"),
+        cached_input_price_per_1m=Decimal("0.50000000"),
+        currency="CNY",
+    )
+    assert _reservation_cost(
+        higher_cached,
+        input_tokens=1_000_000,
+        output_tokens=0,
+    ) == Decimal("5.00000000")
+    assert _reservation_cost(
+        lower_cached,
+        input_tokens=1_000_000,
+        output_tokens=0,
+    ) == Decimal("1.00000000")
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("input_price_per_1m", Decimal("NaN")),
+        ("output_price_per_1m", Decimal("-0.00000001")),
+        ("cached_input_price_per_1m", Decimal("Infinity")),
+    ],
+)
+def test_reservation_cost_rejects_invalid_component_prices(
+    field: str,
+    value: Decimal,
+) -> None:
+    pricing = SimpleNamespace(
+        input_price_per_1m=Decimal("1.00000000"),
+        output_price_per_1m=Decimal("2.00000000"),
+        cached_input_price_per_1m=None,
+        currency="CNY",
+    )
+    setattr(pricing, field, value)
+    with pytest.raises(ValueError):
+        _reservation_cost(pricing, input_tokens=700, output_tokens=300)
+
+
+def test_reservation_cost_requires_ascii_uppercase_currency_and_allows_zero_rates() -> None:
+    zero = SimpleNamespace(
+        input_price_per_1m=Decimal("0"),
+        output_price_per_1m=Decimal("0"),
+        cached_input_price_per_1m=None,
+        currency="CNY",
+    )
+    assert _reservation_cost(zero, input_tokens=700, output_tokens=300) == Decimal(
+        "0.00000000"
+    )
+    for currency in ("cny", "ＣＮＹ", "C1Y"):
+        invalid = SimpleNamespace(
+            input_price_per_1m=Decimal("1"),
+            output_price_per_1m=Decimal("1"),
+            cached_input_price_per_1m=None,
+            currency=currency,
+        )
+        with pytest.raises(ValueError):
+            _reservation_cost(invalid, input_tokens=700, output_tokens=300)
 
 
 @pytest.mark.asyncio
@@ -1565,6 +1941,82 @@ async def test_response_outside_reservation_is_stored_but_cannot_publish(
 
 
 @pytest.mark.asyncio
+async def test_invalid_reported_cost_status_is_retained_but_cannot_publish(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service, key, lease_token = await _create_claimed(factory, tenant)
+    await _commit_intent(service, key, lease_token, tenant=tenant)
+    stored = await service.store_provider_response(
+        key,
+        lease_token=lease_token,
+        response=SummaryResponseData(
+            provider="offline",
+            model="offline-summary-service",
+            raw_response=_candidate(tenant),
+            usage_metadata={"cost_status": "INVALID_REPORTED"},
+            input_tokens=700,
+            output_tokens=300,
+            total_tokens=1000,
+            finish_reason="stop",
+        ),
+    )
+    recovery = await service.claim_recovery(key)
+    assert recovery is not None
+    result = await service.validate_stored_response(
+        key,
+        lease_token=recovery.lease_token,
+    )
+
+    assert result.status == SummaryJobStatus.FAILED.value
+    assert result.artifact_id is None
+    assert result.validation_result["issues"][0]["code"] == (
+        "SUMMARY_PROVIDER_COST_UNVERIFIED"
+    )
+    job, dispatch, responses = await _job_row(factory, key)
+    assert job.response_id == stored.response_id
+    assert job.failure_code == "SUMMARY_PROVIDER_COST_UNVERIFIED"
+    assert dispatch.outcome == "RESPONSE_RECEIVED"
+    assert dispatch.reserved_cost_amount > 0
+    assert len(responses) == 1
+    assert responses[0].raw_response["format"] == "summary_raw_base64_v1"
+    assert responses[0].cost_amount is None
+    assert responses[0].usage_metadata == {"cost_status": "INVALID_REPORTED"}
+
+
+@pytest.mark.asyncio
+async def test_absent_cost_with_unknown_status_remains_validatable(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    tenant = await _seed_tenant(factory)
+    service, key, lease_token = await _create_claimed(factory, tenant)
+    await _commit_intent(service, key, lease_token, tenant=tenant)
+    await service.store_provider_response(
+        key,
+        lease_token=lease_token,
+        response=SummaryResponseData(
+            provider="offline",
+            model="offline-summary-service",
+            raw_response=_candidate(tenant),
+            usage_metadata={"cost_status": "UNKNOWN"},
+            input_tokens=700,
+            output_tokens=300,
+            total_tokens=1000,
+            finish_reason="stop",
+        ),
+    )
+    recovery = await service.claim_recovery(key)
+    assert recovery is not None
+    result = await service.validate_stored_response(
+        key,
+        lease_token=recovery.lease_token,
+    )
+
+    assert result.status == SummaryJobStatus.VALIDATED.value
+    assert result.artifact_id is not None
+
+
+@pytest.mark.asyncio
 async def test_truncated_response_and_usage_overrun_are_both_reported(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
@@ -1759,6 +2211,7 @@ async def test_published_newer_parent_revision_supersedes_pending_child(
         permission_snapshot_hash=_hash(tenant.permission_snapshot),
         created_by=tenant.user_id,
         sources=(tenant.source, second_source),
+        model_round=3,
     )
     child_verifier = _Verifier(lambda binding: _two_source_context(tenant, second_source))
     child_service = SummaryJobService(
@@ -1822,6 +2275,7 @@ async def test_published_newer_parent_revision_supersedes_pending_child(
             permission_snapshot_hash=_hash(tenant.permission_snapshot),
             created_by=tenant.user_id,
             sources=(tenant.source, second_source),
+            model_round=4,
         )
     )
     newer_claim = await newer_service.claim(newer.key)
@@ -1999,33 +2453,38 @@ async def test_permission_revocation_retains_response_and_cost(
 
 
 @pytest.mark.asyncio
-async def test_parent_revision_no_longer_current_cas_fails_closed_and_retains_evidence(
+async def test_job_parent_and_evidence_pointers_cannot_be_rewritten(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
     tenant = await _seed_tenant(factory)
-    service, key, lease_token, response_id = await _validated_with_pending_artifact(factory, tenant)
+    _, key, _, _ = await _validated_with_pending_artifact(factory, tenant)
     artifact = (await _artifact_rows(factory, key))[0]
     async with factory() as session:
-        async with session.begin():
-            job = await session.get(ThreadSummaryJob, key.job_id, with_for_update=True)
-            assert job is not None
-            job.parent_artifact_id = artifact.id
-            job.parent_revision_hash = artifact.revision_hash
-
-    outcome = await service.publish(
-        key,
-        lease_token=lease_token,
-        published_by="summary-publisher-v1",
-    )
-    assert outcome.status == "STALE"
+        with pytest.raises(DBAPIError, match="evidence identity is immutable"):
+            async with session.begin():
+                job = await session.get(ThreadSummaryJob, key.job_id, with_for_update=True)
+                assert job is not None
+                job.parent_artifact_id = artifact.id
+                job.parent_revision_hash = artifact.revision_hash
+                await session.flush()
+    for column in ("dispatch_id", "response_id", "artifact_id"):
+        async with factory() as session:
+            with pytest.raises(DBAPIError, match="pointer cannot be cleared or replaced"):
+                async with session.begin():
+                    await session.execute(
+                        update(ThreadSummaryJob)
+                        .where(ThreadSummaryJob.id == key.job_id)
+                        .values({column: None})
+                    )
     job, dispatch, responses = await _job_row(factory, key)
-    assert job.failure_code == "SUMMARY_PARENT_REVISION_INVALID"
+    assert job.status == "VALIDATED" and job.parent_artifact_id is None
+    assert job.dispatch_id and job.response_id and job.artifact_id
     assert dispatch.outcome == "RESPONSE_RECEIVED"
     assert len(responses) == 1
     async with factory() as session:
         artifact_after = await session.get(ThreadSummaryArtifact, artifact.id)
     assert artifact_after is not None
-    assert artifact_after.publication_status == "STALE"
+    assert artifact_after.publication_status == "PENDING"
 
 
 @pytest.mark.asyncio

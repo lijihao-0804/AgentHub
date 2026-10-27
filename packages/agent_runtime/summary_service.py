@@ -73,6 +73,7 @@ DEFAULT_LEASE_SECONDS = 180
 DEFAULT_MAX_RECOVERY_BATCH = 100
 MAX_SOURCES_PER_JOB = 500
 MAX_RESPONSE_BYTES = 1_048_576
+MAX_SUMMARY_MODEL_ROUND = 2_147_483_647
 
 
 class _SummaryCounter:
@@ -157,6 +158,7 @@ class NewSummaryJob:
     sources: tuple[NewSummarySource, ...]
     parent_artifact_id: UUID | None = None
     parent_revision_hash: str | None = None
+    model_round: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -268,6 +270,7 @@ class SummaryJobBinding:
     response_id: UUID | None
     artifact_id: UUID | None
     phase: SummaryVerifierPhase
+    model_round: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -411,6 +414,21 @@ class SummaryJobService:
                         "The trigger Run does not belong to the requested Thread.",
                     )
 
+                legacy_job = await session.scalar(
+                    select(ThreadSummaryJob.id)
+                    .where(
+                        ThreadSummaryJob.workspace_id == command.workspace_id,
+                        ThreadSummaryJob.trigger_run_id == command.trigger_run_id,
+                        ThreadSummaryJob.model_round.is_(None),
+                    )
+                    .limit(1)
+                )
+                if legacy_job is not None:
+                    raise SummaryServiceError(
+                        "SUMMARY_LEGACY_BOUNDARY_UNVERIFIED",
+                        "A legacy summary for this Run has no verifiable dispatch boundary.",
+                    )
+
                 existing = await session.scalar(
                     select(ThreadSummaryJob).where(
                         ThreadSummaryJob.workspace_id == command.workspace_id,
@@ -430,6 +448,16 @@ class SummaryJobService:
                         created=False,
                     )
 
+                boundary_owner = await session.scalar(
+                    select(ThreadSummaryJob).where(
+                        ThreadSummaryJob.workspace_id == command.workspace_id,
+                        ThreadSummaryJob.trigger_run_id == command.trigger_run_id,
+                        ThreadSummaryJob.model_round == command.model_round,
+                    )
+                )
+                if boundary_owner is not None:
+                    raise _boundary_conflict(boundary_owner)
+
                 parent = await self._validate_parent(
                     session,
                     workspace_id=command.workspace_id,
@@ -443,6 +471,7 @@ class SummaryJobService:
                     workspace_id=command.workspace_id,
                     thread_id=command.thread_id,
                     trigger_run_id=command.trigger_run_id,
+                    model_round=command.model_round,
                     identity_hash=identity_hash,
                     source_watermark=command.source_watermark,
                     source_scope=dict(command.source_scope),
@@ -492,24 +521,39 @@ class SummaryJobService:
                             )
                         await session.flush()
                 except DBAPIError as error:
-                    existing = await session.scalar(
-                        select(ThreadSummaryJob).where(
-                            ThreadSummaryJob.workspace_id == command.workspace_id,
-                            ThreadSummaryJob.thread_id == command.thread_id,
-                            ThreadSummaryJob.identity_hash == identity_hash,
+                    constraint_name = _constraint_name(error)
+                    if constraint_name in (None, "uq_thread_summary_jobs_identity"):
+                        existing = await session.scalar(
+                            select(ThreadSummaryJob).where(
+                                ThreadSummaryJob.workspace_id == command.workspace_id,
+                                ThreadSummaryJob.thread_id == command.thread_id,
+                                ThreadSummaryJob.identity_hash == identity_hash,
+                            )
                         )
-                    )
-                    if existing is not None:
-                        return CreatedSummaryJob(
-                            key=SummaryJobKey(
-                                existing.workspace_id,
-                                existing.thread_id,
-                                existing.id,
-                            ),
-                            identity_hash=existing.identity_hash,
-                            status=existing.status,
-                            created=False,
+                        if existing is not None:
+                            return CreatedSummaryJob(
+                                key=SummaryJobKey(
+                                    existing.workspace_id,
+                                    existing.thread_id,
+                                    existing.id,
+                                ),
+                                identity_hash=existing.identity_hash,
+                                status=existing.status,
+                                created=False,
+                            )
+                    if constraint_name in (
+                        None,
+                        "uq_thread_summary_jobs_dispatch_boundary",
+                    ):
+                        boundary_owner = await session.scalar(
+                            select(ThreadSummaryJob).where(
+                                ThreadSummaryJob.workspace_id == command.workspace_id,
+                                ThreadSummaryJob.trigger_run_id == command.trigger_run_id,
+                                ThreadSummaryJob.model_round == command.model_round,
+                            )
                         )
+                        if boundary_owner is not None:
+                            raise _boundary_conflict(boundary_owner) from error
                     raise SummaryServiceError(
                         "SUMMARY_JOB_CREATE_REJECTED",
                         "The summary job or source manifest is invalid.",
@@ -843,6 +887,7 @@ class SummaryJobService:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND", "The summary job was not found."
                     )
+                _require_model_round_boundary(job)
                 if job.status != SummaryJobStatus.CLAIMED.value:
                     raise SummaryServiceError(
                         "SUMMARY_DISPATCH_STATE_INVALID", "Only a claimed job may be prepared."
@@ -900,6 +945,7 @@ class SummaryJobService:
                         "SUMMARY_JOB_NOT_FOUND",
                         "The summary job was not found.",
                     )
+                _require_model_round_boundary(job)
                 if job.status != SummaryJobStatus.CLAIMED.value:
                     raise SummaryServiceError(
                         "SUMMARY_DISPATCH_STATE_INVALID",
@@ -1097,6 +1143,7 @@ class SummaryJobService:
                         "SUMMARY_JOB_NOT_FOUND",
                         "The summary job was not found.",
                     )
+                _require_model_round_boundary(job)
                 if job.status != SummaryJobStatus.DISPATCH_INTENT.value:
                     raise SummaryServiceError(
                         "SUMMARY_DISPATCH_STATE_INVALID",
@@ -2185,12 +2232,32 @@ def _settlement(
     )
 
 
+def _boundary_conflict(existing: ThreadSummaryJob) -> SummaryServiceError:
+    return SummaryServiceError(
+        "SUMMARY_DISPATCH_BOUNDARY_CONFLICT",
+        (
+            f"Summary job {existing.id} already owns trigger Run "
+            f"{existing.trigger_run_id} model round {existing.model_round} "
+            f"with identity {existing.identity_hash}."
+        ),
+    )
+
+
+def _require_model_round_boundary(job: ThreadSummaryJob) -> None:
+    if job.model_round is None:
+        raise SummaryServiceError(
+            "SUMMARY_DISPATCH_BOUNDARY_REQUIRED",
+            "A legacy summary job without a model-round boundary cannot dispatch.",
+        )
+
+
 def _binding(job: ThreadSummaryJob, phase: SummaryVerifierPhase) -> SummaryJobBinding:
     return SummaryJobBinding(
         workspace_id=job.workspace_id,
         thread_id=job.thread_id,
         job_id=job.id,
         trigger_run_id=job.trigger_run_id,
+        model_round=job.model_round,
         created_by=job.created_by,
         identity_hash=job.identity_hash,
         source_watermark=job.source_watermark,
@@ -2217,6 +2284,7 @@ def _summary_identity_hash(command: NewSummaryJob) -> str:
             "workspace_id": str(command.workspace_id),
             "thread_id": str(command.thread_id),
             "trigger_run_id": str(command.trigger_run_id),
+            "model_round": command.model_round,
             "source_watermark": command.source_watermark,
             "source_scope": dict(command.source_scope),
             "source_content_hash": _source_content_hash(command),
@@ -2345,12 +2413,22 @@ def _validate_new_job(command: NewSummaryJob) -> None:
             "SUMMARY_JOB_JSON_INVALID",
             "Job metadata must be canonical JSON.",
         ) from error
+    if (
+        not _positive_int(command.model_round)
+        or command.model_round > MAX_SUMMARY_MODEL_ROUND
+    ):
+        raise ValueError(
+            f"model_round must be a positive integer no greater than "
+            f"{MAX_SUMMARY_MODEL_ROUND}"
+        )
 
 
 def _response_bound_failure(
     response: ThreadSummaryResponse, dispatch: ThreadSummaryDispatch
 ) -> str | None:
     """Keep observed cost, but never promote usage outside the reservation."""
+    if response.usage_metadata.get("cost_status") == "INVALID_REPORTED":
+        return "SUMMARY_PROVIDER_COST_UNVERIFIED"
     if response.input_tokens is None or response.output_tokens is None:
         return "SUMMARY_PROVIDER_USAGE_UNVERIFIED"
     if (
@@ -2587,6 +2665,7 @@ def _verified_request_spec(
         "event": "SUMMARY_DISPATCH",
         "job_id": str(job.id),
         "identity_hash": job.identity_hash,
+        "model_round": job.model_round,
         "source_watermark": job.source_watermark,
         "source_scope_hash": job.source_scope_hash,
         "source_content_hash": job.source_content_hash,
@@ -2605,13 +2684,40 @@ def _reservation_cost(
     input_tokens: int,
     output_tokens: int,
 ) -> Decimal:
+    input_price = _price_component(pricing.input_price_per_1m, "input_price_per_1m")
+    output_price = _price_component(pricing.output_price_per_1m, "output_price_per_1m")
+    cached_value = getattr(pricing, "cached_input_price_per_1m", None)
+    cached_input_price = (
+        _price_component(cached_value, "cached_input_price_per_1m")
+        if cached_value is not None
+        else None
+    )
+    effective_input_price = (
+        input_price
+        if cached_input_price is None
+        else max(input_price, cached_input_price)
+    )
+    if not _currency(pricing.currency):
+        raise ValueError("invalid reservation currency")
     amount = (
-        Decimal(input_tokens) / Decimal(1_000_000) * Decimal(pricing.input_price_per_1m)
-        + Decimal(output_tokens) / Decimal(1_000_000) * Decimal(pricing.output_price_per_1m)
+        Decimal(input_tokens) / Decimal(1_000_000) * effective_input_price
+        + Decimal(output_tokens) / Decimal(1_000_000) * output_price
     ).quantize(Decimal("0.00000001"), rounding=ROUND_CEILING)
-    if amount < 0 or not _currency(pricing.currency):
+    if not amount.is_finite() or amount < 0:
         raise ValueError("invalid reservation cost")
     return amount
+
+
+def _price_component(value: Any, field: str) -> Decimal:
+    if isinstance(value, bool) or value is None:
+        raise ValueError(f"{field} must be a non-negative finite decimal")
+    try:
+        component = value if isinstance(value, Decimal) else Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError) as error:
+        raise ValueError(f"{field} must be a non-negative finite decimal") from error
+    if not component.is_finite() or component < 0:
+        raise ValueError(f"{field} must be a non-negative finite decimal")
+    return component
 
 
 def _pricing_snapshot_content_hash(snapshot: PricingSnapshot) -> str:
@@ -2686,6 +2792,12 @@ def _failure_code(decision: SummaryTrustDecision, fallback: str) -> str:
     return value[:96]
 
 
+def _constraint_name(error: DBAPIError) -> str | None:
+    diag = getattr(error.orig, "diag", None)
+    name = getattr(diag, "constraint_name", None)
+    return name if isinstance(name, str) else None
+
+
 def _positive_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value > 0
 
@@ -2703,7 +2815,11 @@ def _sha256(value: str) -> bool:
 
 
 def _currency(value: str) -> bool:
-    return isinstance(value, str) and len(value) == 3 and value.isalpha() and value.isupper()
+    return (
+        isinstance(value, str)
+        and len(value) == 3
+        and all("A" <= character <= "Z" for character in value)
+    )
 
 
 __all__ = [
@@ -2714,6 +2830,7 @@ __all__ = [
     "DEFAULT_LEASE_SECONDS",
     "DEFAULT_MAX_RECOVERY_BATCH",
     "MAX_SOURCES_PER_JOB",
+    "MAX_SUMMARY_MODEL_ROUND",
     "NewSummaryJob",
     "NewSummarySource",
     "PreparedSummaryDispatch",

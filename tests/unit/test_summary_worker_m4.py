@@ -2,6 +2,7 @@
 
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 from uuid import uuid4
 
 import pytest
@@ -24,7 +25,7 @@ from packages.core.execution_context.models import (
     PrincipalContext,
     WorkspaceExecutionContext,
 )
-from packages.model_gateway.contracts import ModelResponse, ModelToolCall, ModelUsage
+from packages.model_gateway.contracts import CostEstimate, ModelResponse, ModelToolCall, ModelUsage
 from tests.unit.test_context_policy_m2_runtime import _freeze, _profile
 
 
@@ -207,3 +208,53 @@ def test_unexpected_tool_calls_are_preserved_as_nonpublishable_response():
     assert stored.raw_response == "{}"
     assert stored.finish_reason == "unexpected_tool_calls"
     assert stored.usage_metadata["unexpected_tool_call_count"] == 1
+
+
+@pytest.mark.parametrize(
+    "cost",
+    [
+        CostEstimate(Decimal("0.01"), "ééé"),
+        CostEstimate(Decimal("1000000000000"), "USD"),
+        CostEstimate(Decimal("0.000000001"), "USD"),
+    ],
+)
+def test_unpersistable_provider_cost_retains_response_and_marks_cost_invalid(cost):
+    response = ModelResponse(
+        content='{"status":"OK"}',
+        provider="offline",
+        model="m",
+        finish_reason="stop",
+        usage=ModelUsage(input_tokens=12, output_tokens=3, total_tokens=15),
+        cost_estimate=cost,
+    )
+    stored = _response_data(response)
+    assert stored.raw_response == response.content
+    assert stored.input_tokens == 12 and stored.output_tokens == 3
+    assert stored.cost_amount is None and stored.cost_currency is None
+    assert stored.usage_metadata["cost_status"] == "INVALID_REPORTED"
+
+
+def test_unpersistable_usage_retains_response_and_marks_usage_unknown():
+    response = ModelResponse(
+        content='{"status":"OK"}',
+        provider="offline",
+        model="m",
+        usage=ModelUsage(input_tokens=2_147_483_648, output_tokens=1, total_tokens=2_147_483_649),
+    )
+    stored = _response_data(response)
+    assert stored.raw_response == response.content
+    assert stored.input_tokens is None and stored.output_tokens is None
+    assert stored.usage_metadata["usage_status"] == "UNKNOWN"
+
+
+def test_persistable_cost_remains_available_for_accounting():
+    response = ModelResponse(
+        content="{}",
+        provider="offline",
+        model="m",
+        cost_estimate=CostEstimate(Decimal("0.00000001"), "USD"),
+    )
+    stored = _response_data(response)
+    assert stored.cost_amount == Decimal("0.00000001")
+    assert stored.cost_currency == "USD"
+    assert stored.usage_metadata["cost_status"] == "ESTIMATED"

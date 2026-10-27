@@ -153,7 +153,18 @@ class ThreadSummaryJob(Base):
             "identity_hash",
             name="uq_thread_summary_jobs_identity",
         ),
+        UniqueConstraint(
+            "workspace_id",
+            "trigger_run_id",
+            "model_round",
+            name="uq_thread_summary_jobs_dispatch_boundary",
+        ),
         CheckConstraint(_JOB_STATUS_SQL, name="ck_thread_summary_jobs_status"),
+        CheckConstraint(
+            "model_round IS NULL OR "
+            "(model_round > 0 AND model_round <= 2147483647)",
+            name="ck_thread_summary_jobs_model_round_bounds",
+        ),
         CheckConstraint(
             "source_watermark > 0",
             name="ck_thread_summary_jobs_watermark_positive",
@@ -248,6 +259,7 @@ class ThreadSummaryJob(Base):
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     thread_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     trigger_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    model_round: Mapped[int | None] = mapped_column(Integer)
     identity_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     source_watermark: Mapped[int] = mapped_column(Integer, nullable=False)
     source_scope: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)

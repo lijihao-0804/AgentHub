@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import os
 from collections.abc import Iterator
 from datetime import UTC, datetime
@@ -12,6 +13,8 @@ from uuid import UUID, uuid4
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import DBAPIError, IntegrityError
@@ -439,13 +442,15 @@ def _insert_job(
     tenant: dict[str, UUID | str],
     *,
     identity_hash: str | None = None,
+    model_round: int | None = None,
 ) -> UUID:
     parameters = _job_parameters(tenant, identity_hash=identity_hash)
+    parameters["model_round"] = model_round
     connection.execute(
         text(
             """
             INSERT INTO thread_summary_jobs (
-              id, workspace_id, thread_id, trigger_run_id, identity_hash,
+              id, workspace_id, thread_id, trigger_run_id, model_round, identity_hash,
               source_watermark, source_scope, source_scope_hash,
               source_content_hash, policy_spec, policy_version, prompt_version,
               budget_version, model_spec, model_spec_hash, tokenizer_id,
@@ -453,7 +458,7 @@ def _insert_job(
               created_by
             )
             VALUES (
-              :id, :workspace_id, :thread_id, :trigger_run_id, :identity_hash,
+              :id, :workspace_id, :thread_id, :trigger_run_id, :model_round, :identity_hash,
               :source_watermark, CAST(:source_scope AS jsonb), :source_scope_hash,
               :source_content_hash, CAST(:policy_spec AS jsonb), :policy_version,
               :prompt_version, :budget_version, CAST(:model_spec AS jsonb),
@@ -554,7 +559,7 @@ def test_migration_installs_version_tables_constraints_and_triggers(
     connection: Connection,
 ) -> None:
     assert connection.scalar(text("SELECT version_num FROM alembic_version")) == (
-        "0042_summary_eligibility"
+        "0044_summary_evidence_guard"
     )
     assert set(
         connection.execute(
@@ -578,6 +583,7 @@ def test_migration_installs_version_tables_constraints_and_triggers(
     )
     assert {
         "uq_thread_summary_jobs_identity",
+        "uq_thread_summary_jobs_dispatch_boundary",
         "fk_thread_summary_jobs_thread_workspace",
         "fk_thread_summary_jobs_run_workspace",
         "fk_thread_summary_jobs_dispatch_scope",
@@ -597,12 +603,35 @@ def test_migration_installs_version_tables_constraints_and_triggers(
     )
     assert {
         "thread_summary_job_scope_guard",
+        "thread_summary_evidence_identity_guard",
         "thread_summary_source_guard",
         "thread_summary_dispatch_guard",
         "thread_summary_dispatch_commit_guard",
         "thread_summary_response_guard",
         "thread_summary_artifact_guard",
     } <= triggers
+
+
+@pytest.mark.parametrize(
+    ("module_name", "message"),
+    [
+        ("0043_summary_dispatch_boundary", "Cannot drop persisted summary dispatch boundaries"),
+        ("0044_summary_evidence_guard", "Cannot remove retained summary evidence protection"),
+    ],
+)
+def test_downgrade_cannot_erase_retained_summary_guarantees(
+    connection: Connection, monkeypatch: pytest.MonkeyPatch, module_name: str, message: str
+) -> None:
+    tenant = _seed_tenant(connection)
+    job_id = _insert_job(connection, tenant, model_round=1)
+    migration = importlib.import_module(f"migrations.versions.{module_name}")
+    monkeypatch.setattr(migration, "op", Operations(MigrationContext.configure(connection)))
+    with pytest.raises(DBAPIError, match=message):
+        with connection.begin_nested():
+            migration.downgrade()
+    assert connection.scalar(
+        text("SELECT model_round FROM thread_summary_jobs WHERE id = :id"), {"id": job_id}
+    ) == 1
 
 
 def test_identity_deduplication_and_dispatch_pricing_composite_fk(

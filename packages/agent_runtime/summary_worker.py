@@ -8,7 +8,7 @@ never retries or falls back after a provider boundary may have been crossed.
 from __future__ import annotations
 
 import asyncio
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 from uuid import UUID
 
@@ -30,10 +30,12 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.context_metadata import context_metadata_to_mapping
 from packages.model_gateway.contracts import (
+    CostEstimate,
     ModelGateway,
     ModelMessage,
     ModelRequest,
     ModelResponse,
+    ModelUsage,
     ResolvedModelExecutionPlan,
     ResolvedModelExecutionProfile,
     RetryPolicy,
@@ -206,9 +208,9 @@ def _response_data(response: ModelResponse) -> SummaryResponseData:
         raise TypeError("gateway returned an invalid response")
     usage = response.usage
     usage_valid = (
-        usage is not None
+        isinstance(usage, ModelUsage)
         and all(
-            type(value) is int and value >= 0
+            type(value) is int and 0 <= value <= 2_147_483_647
             for value in (usage.input_tokens, usage.output_tokens, usage.total_tokens)
         )
         and usage.total_tokens == usage.input_tokens + usage.output_tokens
@@ -219,13 +221,7 @@ def _response_data(response: ModelResponse) -> SummaryResponseData:
         )
     )
     cost = response.cost_estimate
-    cost_valid = (
-        cost is not None
-        and isinstance(cost.amount, Decimal)
-        and cost.amount.is_finite()
-        and cost.amount >= 0
-        and type(cost.is_estimate) is bool
-    )
+    cost_valid = isinstance(cost, CostEstimate) and _persistable_cost(cost)
     metadata = {
         "usage_status": "VERIFIED" if usage_valid else "UNKNOWN",
         "cost_status": (
@@ -233,6 +229,8 @@ def _response_data(response: ModelResponse) -> SummaryResponseData:
             if cost_valid and cost is not None and cost.is_estimate
             else "PROVIDER_REPORTED"
             if cost_valid
+            else "INVALID_REPORTED"
+            if cost is not None
             else "UNKNOWN"
         ),
         "unexpected_tool_call_count": len(response.tool_calls),
@@ -252,3 +250,31 @@ def _response_data(response: ModelResponse) -> SummaryResponseData:
         cost_is_estimate=cost.is_estimate if cost_valid and cost is not None else None,
         finish_reason="unexpected_tool_calls" if response.tool_calls else response.finish_reason,
     )
+
+
+def _persistable_cost(cost: CostEstimate) -> bool:
+    """Reject invalid metadata without discarding an already received response.
+
+    ThreadSummaryResponse uses NUMERIC(20, 8) and an ASCII currency code. Do
+    not silently round a reported amount or let a database conversion failure
+    erase the response and make a known provider result appear unknown.
+    """
+    amount = cost.amount
+    currency = cost.currency
+    if (
+        not isinstance(amount, Decimal)
+        or not amount.is_finite()
+        or amount < 0
+        or amount >= Decimal("1000000000000")
+        or not isinstance(currency, str)
+        or len(currency) != 3
+        or not currency.isascii()
+        or not currency.isalpha()
+        or not currency.isupper()
+        or type(cost.is_estimate) is not bool
+    ):
+        return False
+    try:
+        return amount == amount.quantize(Decimal("0.00000001"))
+    except InvalidOperation:
+        return False
