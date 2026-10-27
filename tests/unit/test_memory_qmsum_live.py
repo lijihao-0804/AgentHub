@@ -149,6 +149,44 @@ def test_unknown_previous_attempt_stays_unknown_without_retry(trial):
     assert [item.status for item in result.observations] == ["UNKNOWN_OUTCOME"]
 
 
+def test_counter_evidence_mismatch_on_restart_never_dispatches(trial):
+    root, _, _, _, _, _, preparations = trial
+    attempt = "m4-summary-Bmr003-0"
+    ledger = root / "ledger.json"
+    with MemoryTrialBudget(ledger, price_identity=PRICE_IDENTITY) as budget:
+        budget.reserve(
+            attempt,
+            stage="M4",
+            estimated_input_tokens=32768,
+            requested_output_tokens=2048,
+            upper_cost_cny=Decimal("0.1"),
+            input_counter={
+                "counter_id": "deepseek_v41_text_v1",
+                "tokenizer_revision": "9f9818127fdfbb60feba204799d617a874b32a86",
+                "thinking_mode": "PROVIDER_DEFAULT_THINKING",
+                "tokens": 100,
+                "input_limit": preparations[0].admitted.usage.available_input,
+            },
+        )
+        budget.settle(attempt, conservative_cost_cny=Decimal("0.046"))
+    results = root / "results"
+    results.mkdir()
+    (results / f"{attempt}.json").write_text(
+        json.dumps(_response(preparations[0], attempt)), encoding="utf-8"
+    )
+    result = asyncio.run(
+        run_live_summaries(
+            preparations,
+            ledger_path=ledger,
+            result_directory=results,
+            frozen_input_path=root / "frozen.json",
+            endpoint="invalid-if-used",
+            api_key="unused",
+        )
+    )
+    assert [item.status for item in result.observations] == ["UNKNOWN_OUTCOME"]
+
+
 def test_invalid_endpoint_is_known_not_dispatched(trial):
     root, _, _, _, _, _, preparations = trial
     result = asyncio.run(

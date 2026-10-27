@@ -102,6 +102,20 @@ def test_other_process_cannot_open_an_owned_ledger(trial_dir):
     assert "MEMORY_TRIAL_ALREADY_OWNED" in result.stderr
 
 
+def test_legacy_undercounts_cannot_bypass_shared_input_cap(trial_dir):
+    with MemoryTrialBudget(trial_dir / "trial.json", price_identity="peak") as budget:
+        for index in range(45):
+            attempt = f"legacy-{index}"
+            _reserve(
+                budget, attempt, stage="CALIBRATION", estimated_input_tokens=1,
+                upper_cost_cny=Decimal("0.01"),
+            )
+            budget.settle(attempt, conservative_cost_cny=Decimal("0.01"))
+        with pytest.raises(ValueError, match="BUDGET_EXHAUSTED"):
+            _reserve(budget, "one-too-many", stage="CALIBRATION", upper_cost_cny=Decimal("0.01"))
+        assert len(budget.state["attempts"]) == 45
+
+
 @pytest.mark.parametrize("stage,limit", [("M4", 40), ("M5", 16)])
 def test_stage_call_limit_includes_confirmed_attempts(trial_dir, stage, limit):
     with MemoryTrialBudget(trial_dir / "trial.json", price_identity="peak") as budget:

@@ -30,6 +30,7 @@ class DeepseekV41TextCounter:
         if not callable(getattr(tokenizer, "encode", None)):
             raise TypeError("tokenizer must implement encode")
         self._tokenizer = tokenizer
+        self._verified_source = False
 
     @classmethod
     def from_file(cls, path: Path) -> DeepseekV41TextCounter:
@@ -40,7 +41,14 @@ class DeepseekV41TextCounter:
             data = source.read(MAX_TOKENIZER_BYTES + 1)
         if len(data) > MAX_TOKENIZER_BYTES or hashlib.sha256(data).hexdigest() != TOKENIZER_SHA256:
             raise ValueError("DEEPSEEK_TOKENIZER_IDENTITY_MISMATCH")
-        return cls(Tokenizer.from_str(data.decode("utf-8")))
+        counter = cls(Tokenizer.from_str(data.decode("utf-8")))
+        counter._verified_source = True
+        return counter
+
+    @property
+    def verified_source(self) -> bool:
+        """Whether this instance loaded the pinned local tokenizer file."""
+        return self._verified_source
 
     def count(
         self,

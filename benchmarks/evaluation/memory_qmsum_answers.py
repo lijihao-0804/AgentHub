@@ -12,6 +12,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
+from benchmarks.evaluation.memory_deepseek_v41_counter import DeepseekV41TextCounter
 from benchmarks.evaluation.memory_qmsum_live import (
     _configured_credential,
     prepare_reviewed_summaries,
@@ -170,6 +171,15 @@ async def execute_answer_plan(
                 "cost_identity",
             )
         }
+        counter = result.get("input_counter")
+        if isinstance(counter, Mapping) and counter.get("tokens") != result.get("input_tokens"):
+            record_observations(plan, records)
+            return QMSumAnswerRun(
+                tuple(records),
+                tuple((qid, item.arm) for qid, item in items[index + 1 :]),
+                "PROVIDER_COUNTER_MISMATCH",
+                metadata,
+            )
     record_observations(plan, records)
     return QMSumAnswerRun(tuple(records), (), None, metadata)
 
@@ -196,10 +206,16 @@ def _observed_record(
     expected = (Decimal(input_tokens) * 2 + Decimal(output_tokens) * 8) / Decimal(1_000_000)
     if not amount.is_finite() or amount != expected:
         raise ValueError("answer conservative price is unverified")
+    counter = result.get("input_counter")
+    if counter is not None and (
+        not isinstance(counter, Mapping) or type(counter.get("tokens")) is not int
+    ):
+        raise ValueError("answer counter is unverified")
+    counter_matches = counter is None or counter["tokens"] == input_tokens
     output = result["content"]
     status = (
         QMSumObservationStatus.OBSERVED
-        if result.get("finish_reason") == "stop" and output.strip()
+        if result.get("finish_reason") == "stop" and output.strip() and counter_matches
         else QMSumObservationStatus.FAILED
     )
     return QMSumArmRecord(
@@ -220,6 +236,7 @@ async def run_live_answers(
     frozen_input_path: Path,
     endpoint: str,
     api_key: str,
+    provider_counter: DeepseekV41TextCounter | None = None,
 ) -> QMSumAnswerRun:
     freeze_answer_inputs(plan, frozen_input_path)
     with MemoryTrialBudget(ledger_path, price_identity=PRICE_IDENTITY) as budget:
@@ -254,6 +271,8 @@ async def run_live_answers(
                     api_key=api_key,
                     output_limit=ANSWER_OUTPUT_LIMIT,
                     output_directory=result_directory,
+                    provider_counter=provider_counter,
+                    provider_input_limit=(85 * arm.admitted.usage.available_input - 1) // 100,
                 )
             except ValueError as error:
                 raise SummaryNotDispatched from error
@@ -269,6 +288,7 @@ def main() -> int:
     parser.add_argument("--summary-directory", type=Path, required=True)
     parser.add_argument("--output-directory", type=Path, required=True)
     parser.add_argument("--env-file", type=Path)
+    parser.add_argument("--tokenizer", type=Path)
     args = parser.parse_args()
     source = load_frozen_qmsum(args.qmsum_root)
     policy = create_trial_policy()
@@ -276,6 +296,9 @@ def main() -> int:
     annotations = json.loads(args.annotations.read_text(encoding="utf-8"))
     preparations = prepare_reviewed_summaries(source, baseline, annotations, policy=policy)
     endpoint, api_key = _configured_credential(args.env_file)
+    provider_counter = (
+        DeepseekV41TextCounter.from_file(args.tokenizer) if args.tokenizer else None
+    )
     summaries = asyncio.run(
         run_live_summaries(
             preparations,
@@ -284,6 +307,7 @@ def main() -> int:
             frozen_input_path=args.summary_directory / "frozen-summary-inputs.json",
             endpoint=endpoint,
             api_key=api_key,
+            provider_counter=provider_counter,
         )
     )
     if summaries.unattempted_question_ids or any(
@@ -310,6 +334,7 @@ def main() -> int:
             frozen_input_path=args.output_directory / "frozen-answer-inputs.json",
             endpoint=endpoint,
             api_key=api_key,
+            provider_counter=provider_counter,
         )
     )
     report = {

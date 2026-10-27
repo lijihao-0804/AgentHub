@@ -15,15 +15,9 @@ def runner_prepared_case():
     return _prepared_case()
 
 
-@pytest.mark.asyncio
-async def test_summary_attempts_stop_on_uncertain_outcome_and_preserve_unattempted(prepared_case):
-    source, plan, question, policy = prepared_case
-    first = _prepare(source, plan, question, policy)
-    requests = tuple(
-        replace(first, question_id=item.question_id) for item in source.questions[:4]
-    )
-    source_id = first.context.sources[0].source_id
-    candidate = json.dumps(
+def _candidate(preparation):
+    source_id = preparation.context.sources[0].source_id
+    return json.dumps(
         {
             "status": "OK",
             "goal": {"text": "continue", "source_ids": [source_id]},
@@ -36,6 +30,16 @@ async def test_summary_attempts_stop_on_uncertain_outcome_and_preserve_unattempt
             "omitted_source_ids": [],
         }
     )
+
+
+@pytest.mark.asyncio
+async def test_summary_attempts_stop_on_uncertain_outcome_and_preserve_unattempted(prepared_case):
+    source, plan, question, policy = prepared_case
+    first = _prepare(source, plan, question, policy)
+    requests = tuple(
+        replace(first, question_id=item.question_id) for item in source.questions[:4]
+    )
+    candidate = _candidate(first)
     calls = []
 
     async def dispatch(preparation):
@@ -46,6 +50,7 @@ async def test_summary_attempts_stop_on_uncertain_outcome_and_preserve_unattempt
             "attempt_id": f"attempt-{len(calls)}",
             "content": candidate,
             "finish_reason": "stop" if len(calls) == 1 else "length",
+            "input_tokens": preparation.admitted.usage.available_input // 2,
         }
 
     result = await run_summary_candidates(requests, dispatch=dispatch)
@@ -58,6 +63,45 @@ async def test_summary_attempts_stop_on_uncertain_outcome_and_preserve_unattempt
     assert result.observations[1].issues == ("PROVIDER_RESPONSE_INCOMPLETE",)
     assert result.unattempted_question_ids == (requests[3].question_id,)
     assert all("content" not in row.measurements for row in result.observations)
+
+
+@pytest.mark.asyncio
+async def test_actual_input_over_budget_invalidates_even_a_well_formed_response(prepared_case):
+    source, plan, question, policy = prepared_case
+    preparation = _prepare(source, plan, question, policy)
+    candidate = _candidate(preparation)
+
+    async def dispatch(item):
+        return {
+            "attempt_id": "over-budget",
+            "content": candidate,
+            "finish_reason": "stop",
+            "input_tokens": item.admitted.usage.available_input + 1,
+        }
+
+    result = await run_summary_candidates((preparation,), dispatch=dispatch)
+    assert result.observations[0].status == "INVALID"
+    assert result.observations[0].issues == ("PROVIDER_INPUT_EXCEEDED_BUDGET",)
+    assert result.observations[0].candidate is None
+
+
+@pytest.mark.asyncio
+async def test_changed_provider_count_invalidates_candidate_even_below_budget(prepared_case):
+    source, plan, question, policy = prepared_case
+    preparation = _prepare(source, plan, question, policy)
+
+    async def dispatch(item):
+        return {
+            "attempt_id": "counter-mismatch",
+            "content": _candidate(item),
+            "finish_reason": "stop",
+            "input_tokens": item.admitted.usage.available_input // 2,
+            "input_counter": {"tokens": item.admitted.usage.available_input // 2 - 1},
+        }
+
+    result = await run_summary_candidates((preparation,), dispatch=dispatch)
+    assert result.observations[0].status == "INVALID"
+    assert result.observations[0].issues == ("PROVIDER_COUNTER_MISMATCH",)
 
 
 @pytest.mark.asyncio

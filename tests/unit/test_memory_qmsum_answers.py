@@ -81,6 +81,25 @@ async def test_known_predispatch_rejection_does_not_fabricate_an_attempt():
     )
 
 
+@pytest.mark.asyncio
+async def test_answer_with_changed_provider_token_count_is_not_scored_as_observed():
+    source = _source()
+    first_id = source.questions[0].question_id
+    plan = _plan(source, compressed_candidates={first_id: _validated_candidate(first_id)})
+    calls = []
+
+    async def dispatch(question_id, arm):
+        calls.append((question_id, arm.arm))
+        if len(calls) > 1:
+            raise SummaryNotDispatched
+        return {**_response(), "input_counter": {"tokens": 99}}
+
+    result = await execute_answer_plan(plan, dispatch=dispatch)
+    assert result.records[0].status.value == "FAILED"
+    assert result.stop_reason == "PROVIDER_COUNTER_MISMATCH"
+    assert len(calls) == 1
+
+
 def test_answer_freeze_rejects_any_later_message_change():
     root = Path(".scratch/context-policy-m4-20261027/answer-tests") / uuid4().hex
     root.mkdir(parents=True)

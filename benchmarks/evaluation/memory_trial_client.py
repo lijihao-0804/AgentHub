@@ -16,9 +16,13 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from benchmarks.evaluation.memory_deepseek_v41_counter import (
+    TOKENIZER_REVISION,
+    DeepseekV41TextCounter,
+)
 from benchmarks.evaluation.memory_trial_budget import MemoryTrialBudget, upper_bound_cost_cny
 from packages.agent_runtime.context_budget import ContextAdmissionResult
-from packages.model_gateway.contracts import ModelMessage
+from packages.model_gateway.contracts import ModelMessage, ModelRequest
 
 MODEL = "deepseek-v4.1-flash-1017"
 PRICE_IDENTITY = "aliyun-beijing-deepseek-v4.1-flash-1017-peak-2-8-cny-v1"
@@ -42,6 +46,8 @@ async def generate_once(
     output_directory: Path,
     transport: httpx.AsyncBaseTransport | None = None,
     enable_thinking: bool | None = None,
+    provider_counter: DeepseekV41TextCounter | None = None,
+    provider_input_limit: int | None = None,
 ) -> dict:
     """Send one exactly admitted request after a durable cost reservation."""
     parsed = urlsplit(endpoint)
@@ -84,6 +90,30 @@ async def generate_once(
         )
     ):
         raise ValueError("MEMORY_TRIAL_REQUEST_NOT_FULLY_ADMITTED")
+    input_counter = None
+    if stage == "M4":
+        if (
+            not isinstance(provider_counter, DeepseekV41TextCounter)
+            or not provider_counter.verified_source
+        ):
+            raise ValueError("MEMORY_TRIAL_PROVIDER_COUNTER_REQUIRED")
+        if provider_input_limit is None:
+            provider_input_limit = admission.usage.available_input
+        if (
+            type(provider_input_limit) is not int
+            or not 0 < provider_input_limit <= admission.usage.available_input
+        ):
+            raise ValueError("MEMORY_TRIAL_PROVIDER_INPUT_LIMIT_INVALID")
+        actual_estimate = provider_counter.count(ModelRequest(original_messages), thinking=True)
+        if actual_estimate > provider_input_limit:
+            raise ValueError("MEMORY_TRIAL_PROVIDER_WINDOW_EXCEEDED")
+        input_counter = {
+            "counter_id": "deepseek_v41_text_v1",
+            "tokenizer_revision": TOKENIZER_REVISION,
+            "thinking_mode": "PROVIDER_DEFAULT_THINKING",
+            "tokens": actual_estimate,
+            "input_limit": provider_input_limit,
+        }
     wire_messages = [
         {"role": message.role, "content": message.content} for message in original_messages
     ]
@@ -108,9 +138,12 @@ async def generate_once(
     budget.reserve(
         attempt_id,
         stage=stage,
-        estimated_input_tokens=admission.usage.estimated_input_after,
+        # The shared attempt cap must not inherit a known undercount from the
+        # approximate policy. Charge the declared full window to the cap.
+        estimated_input_tokens=32768,
         requested_output_tokens=output_limit,
         upper_cost_cny=reserve,
+        input_counter=input_counter,
     )
     try:
         started = time.perf_counter()
@@ -174,6 +207,7 @@ async def generate_once(
             "stage": stage,
             "model": model,
             "enable_thinking": enable_thinking,
+            "input_counter": input_counter,
             "content": choices[0]["message"]["content"],
             "finish_reason": choices[0].get("finish_reason"),
             "input_tokens": prompt_tokens,

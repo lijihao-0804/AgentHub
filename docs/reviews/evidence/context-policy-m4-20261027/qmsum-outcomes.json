@@ -58,6 +58,7 @@
       "summary_issues": [
         "PROVIDER_RESPONSE_INCOMPLETE"
       ],
+      "posthoc_input_budget_check": "EXCEEDED",
       "summary_measurements": {
         "attempt_id": "m4-summary-TS3005d-0",
         "input_tokens": 30952,
@@ -86,6 +87,7 @@
       "summary_issues": [
         "PROVIDER_RESPONSE_INCOMPLETE"
       ],
+      "posthoc_input_budget_check": "EXCEEDED",
       "summary_measurements": {
         "attempt_id": "m4-summary-TS3005d-1",
         "input_tokens": 31203,
@@ -114,6 +116,7 @@
       "summary_issues": [
         "PROVIDER_RESPONSE_INCOMPLETE"
       ],
+      "posthoc_input_budget_check": "WITHIN_DECLARED_WORKING_INPUT",
       "summary_measurements": {
         "attempt_id": "m4-summary-TS3006d-0",
         "input_tokens": 28927,
@@ -142,6 +145,7 @@
       "summary_issues": [
         "PROVIDER_RESPONSE_INCOMPLETE"
       ],
+      "posthoc_input_budget_check": "WITHIN_DECLARED_WORKING_INPUT",
       "summary_measurements": {
         "attempt_id": "m4-summary-TS3006d-1",
         "input_tokens": 28720,

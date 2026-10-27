@@ -3,11 +3,13 @@
 import json
 from decimal import Decimal
 from pathlib import Path
+from types import SimpleNamespace
 from uuid import uuid4
 
 import httpx
 import pytest
 
+from benchmarks.evaluation.memory_deepseek_v41_counter import DeepseekV41TextCounter
 from benchmarks.evaluation.memory_trial_budget import MemoryTrialBudget
 from benchmarks.evaluation.memory_trial_client import (
     PRICE_IDENTITY,
@@ -31,6 +33,17 @@ def _admitted():
     policy = ContextBudgetPolicy(_freeze((_profile(total=32768),)))
     result = policy.admit(messages, categories=(ContextCategory.CURRENT_USER_TASK,))
     return messages, result
+
+
+def _counter(tokens: int, *, verified: bool = True) -> DeepseekV41TextCounter:
+    class FakeTokenizer:
+        def encode(self, _text, *, add_special_tokens):
+            assert add_special_tokens is False
+            return SimpleNamespace(ids=range(tokens))
+
+    counter = DeepseekV41TextCounter(FakeTokenizer())
+    counter._verified_source = verified
+    return counter
 
 
 @pytest.mark.asyncio
@@ -70,9 +83,13 @@ async def test_one_successful_call_is_reserved_and_reasoning_is_not_persisted(tr
             output_limit=64,
             output_directory=trial_dir / "results",
             transport=httpx.MockTransport(handler),
+            provider_counter=_counter(20),
         )
         assert len(calls) == 1
         assert budget.state["attempts"][0]["status"] == "SETTLED"
+        assert budget.state["attempts"][0]["estimated_input_tokens"] == 32768
+        assert budget.state["attempts"][0]["input_counter"] == result["input_counter"]
+        assert result["input_counter"]["tokens"] == 20
         assert Decimal(result["conservative_cost_cny"]) == Decimal("0.00012")
         assert result["cost_identity"] == PRICE_IDENTITY
         assert result["reasoning_tokens"] == 7
@@ -170,6 +187,7 @@ async def test_unconfirmed_dispatch_keeps_reservation_and_blocks_next_call(trial
             output_limit=64,
             output_directory=trial_dir / "results",
             transport=httpx.MockTransport(handler),
+            provider_counter=_counter(20),
         )
         with pytest.raises(MemoryTrialDispatchError):
             await generate_once(attempt_id="first", **args)
@@ -177,6 +195,59 @@ async def test_unconfirmed_dispatch_keeps_reservation_and_blocks_next_call(trial
             await generate_once(attempt_id="second", **args)
         assert len(calls) == 1
         assert budget.state["attempts"][0]["status"] == "RESERVED_OR_UNKNOWN"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("counter", [None, _counter(20, verified=False), _counter(32768)])
+async def test_m4_never_dispatches_without_verified_counter_or_when_it_exceeds_window(
+    trial_dir, counter
+):
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(500)
+
+    messages, admission = _admitted()
+    with MemoryTrialBudget(trial_dir / "budget.json", price_identity=PRICE_IDENTITY) as budget:
+        with pytest.raises(ValueError, match="COUNTER_REQUIRED|WINDOW_EXCEEDED"):
+            await generate_once(
+                budget=budget,
+                admission=admission,
+                original_messages=messages,
+                attempt_id="blocked",
+                stage="M4",
+                endpoint="https://demo.cn-beijing.maas.aliyuncs.com/v1",
+                api_key="test-only",
+                output_limit=64,
+                output_directory=trial_dir / "results",
+                provider_counter=counter,
+                transport=httpx.MockTransport(handler),
+            )
+        assert budget.state["attempts"] == []
+    assert calls == []
+
+
+@pytest.mark.asyncio
+async def test_m4_does_not_dispatch_at_the_real_hard_pressure_boundary(trial_dir):
+    messages, admission = _admitted()
+    limit = (85 * admission.usage.available_input - 1) // 100
+    with MemoryTrialBudget(trial_dir / "budget.json", price_identity=PRICE_IDENTITY) as budget:
+        with pytest.raises(ValueError, match="WINDOW_EXCEEDED"):
+            await generate_once(
+                budget=budget,
+                admission=admission,
+                original_messages=messages,
+                attempt_id="hard-boundary",
+                stage="M4",
+                endpoint="https://demo.cn-beijing.maas.aliyuncs.com/v1",
+                api_key="test-only",
+                output_limit=64,
+                output_directory=trial_dir / "results",
+                provider_counter=_counter(limit + 1),
+                provider_input_limit=limit,
+            )
+        assert budget.state["attempts"] == []
 
 
 @pytest.mark.asyncio

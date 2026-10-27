@@ -16,6 +16,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
+from benchmarks.evaluation.memory_deepseek_v41_counter import DeepseekV41TextCounter
 from benchmarks.evaluation.memory_qmsum_protocol import (
     QMSumCaseStatus,
     QMSumDispatchPlan,
@@ -136,6 +137,7 @@ async def run_live_summaries(
     frozen_input_path: Path,
     endpoint: str,
     api_key: str,
+    provider_counter: DeepseekV41TextCounter | None = None,
 ) -> QMSumSummaryRun:
     """Run or safely reconstruct confirmed calls; never retry an unknown call."""
     freeze_summary_inputs(preparations, frozen_input_path)
@@ -171,6 +173,7 @@ async def run_live_summaries(
                     api_key=api_key,
                     output_limit=2048,
                     output_directory=result_directory,
+                    provider_counter=provider_counter,
                 )
             except ValueError as error:
                 raise SummaryNotDispatched from error
@@ -216,8 +219,10 @@ def verify_resumed_result(
         or type(result.get("output_tokens")) is not int
         or not 0 <= result["output_tokens"] <= output_limit
         or row.get("stage") != "M4"
-        or row.get("estimated_input_tokens") != admission.usage.estimated_input_after
+        or row.get("estimated_input_tokens")
+        not in {admission.usage.estimated_input_after, 32768}
         or row.get("requested_output_tokens") != output_limit
+        or row.get("input_counter") != result.get("input_counter")
         or not valid_cost
     ):
         raise ValueError("MEMORY_TRIAL_RESULT_MISMATCH")
@@ -246,6 +251,7 @@ def main() -> int:
     parser.add_argument("--ledger", type=Path, required=True)
     parser.add_argument("--output-directory", type=Path, required=True)
     parser.add_argument("--env-file", type=Path)
+    parser.add_argument("--tokenizer", type=Path)
     args = parser.parse_args()
     source = load_frozen_qmsum(args.qmsum_root)
     policy = create_trial_policy()
@@ -261,6 +267,9 @@ def main() -> int:
             frozen_input_path=args.output_directory / "frozen-summary-inputs.json",
             endpoint=endpoint,
             api_key=api_key,
+            provider_counter=(
+                DeepseekV41TextCounter.from_file(args.tokenizer) if args.tokenizer else None
+            ),
         )
     )
     report = {

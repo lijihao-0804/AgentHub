@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+from collections.abc import Mapping
 from decimal import Decimal
 from pathlib import Path
 
@@ -87,6 +88,7 @@ class MemoryTrialBudget:
         estimated_input_tokens: int,
         requested_output_tokens: int,
         upper_cost_cny: Decimal,
+        input_counter: Mapping[str, object] | None = None,
     ) -> None:
         if self._lock.closed:
             raise ValueError("MEMORY_TRIAL_NOT_OWNED")
@@ -101,6 +103,21 @@ class MemoryTrialBudget:
             or upper_cost_cny <= 0
         ):
             raise ValueError("INVALID_MEMORY_TRIAL_RESERVATION")
+        if input_counter is not None and (
+            not isinstance(input_counter, Mapping)
+            or set(input_counter)
+            != {"counter_id", "tokenizer_revision", "thinking_mode", "tokens", "input_limit"}
+            or input_counter["counter_id"] != "deepseek_v41_text_v1"
+            or input_counter["tokenizer_revision"] != "9f9818127fdfbb60feba204799d617a874b32a86"
+            or input_counter["thinking_mode"] != "PROVIDER_DEFAULT_THINKING"
+            or type(input_counter["tokens"]) is not int
+            or type(input_counter["input_limit"]) is not int
+            or not 0 < input_counter["input_limit"] <= 32768
+            or not 0 < input_counter["tokens"] <= min(
+                input_counter["input_limit"], estimated_input_tokens
+            )
+        ):
+            raise ValueError("INVALID_MEMORY_TRIAL_COUNTER")
         attempts = self.state["attempts"]
         if any(row["status"] == "RESERVED_OR_UNKNOWN" for row in attempts):
             raise ValueError("UNRESOLVED_MEMORY_TRIAL_ATTEMPT")
@@ -110,7 +127,10 @@ class MemoryTrialBudget:
             len(attempts) >= 80
             or (stage == "M4" and sum(row["stage"] == "M4" for row in attempts) >= 40)
             or (stage == "M5" and sum(row["stage"] == "M5" for row in attempts) >= 16)
-            or sum(row["estimated_input_tokens"] for row in attempts) + estimated_input_tokens
+            # Previous attempts may have used the undercounting legacy
+            # estimator. Count every historical request at its full window.
+            or sum(max(row["estimated_input_tokens"], 32768) for row in attempts)
+            + max(estimated_input_tokens, 32768)
             > 1_500_000
             or sum(row["requested_output_tokens"] for row in attempts) + requested_output_tokens
             > 60_000
@@ -119,17 +139,18 @@ class MemoryTrialBudget:
         ):
             raise ValueError("MEMORY_TRIAL_BUDGET_EXHAUSTED")
         previous = copy.deepcopy(self.state)
-        attempts.append(
-            {
-                "attempt_id": attempt_id,
-                "stage": stage,
-                "status": "RESERVED_OR_UNKNOWN",
-                "estimated_input_tokens": estimated_input_tokens,
-                "requested_output_tokens": requested_output_tokens,
-                "upper_cost_cny": str(upper_cost_cny),
-                "charged_or_reserved_cny": str(upper_cost_cny),
-            }
-        )
+        row = {
+            "attempt_id": attempt_id,
+            "stage": stage,
+            "status": "RESERVED_OR_UNKNOWN",
+            "estimated_input_tokens": estimated_input_tokens,
+            "requested_output_tokens": requested_output_tokens,
+            "upper_cost_cny": str(upper_cost_cny),
+            "charged_or_reserved_cny": str(upper_cost_cny),
+        }
+        if input_counter is not None:
+            row["input_counter"] = dict(input_counter)
+        attempts.append(row)
         self._save_or_restore(previous)
 
     def settle(self, attempt_id: str, *, conservative_cost_cny: Decimal) -> None:

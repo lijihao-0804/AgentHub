@@ -154,6 +154,46 @@ async def run_summary_candidates(
                 "finish_reason",
             )
         }
+        input_tokens = measurements["input_tokens"]
+        if type(input_tokens) is not int or input_tokens < 0:
+            observations.append(
+                QMSumSummaryObservation(
+                    preparation.question_id, "UNVERIFIED_RESPONSE", measurements,
+                    ("PROVIDER_INPUT_USAGE_UNAVAILABLE",),
+                )
+            )
+            return QMSumSummaryRun(
+                tuple(observations), tuple(item.question_id for item in items[position + 1 :])
+            )
+        counter = result.get("input_counter")
+        if counter is not None and (
+            not isinstance(counter, Mapping) or type(counter.get("tokens")) is not int
+        ):
+            observations.append(
+                QMSumSummaryObservation(
+                    preparation.question_id, "UNVERIFIED_RESPONSE", measurements,
+                    ("PROVIDER_COUNTER_UNVERIFIED",),
+                )
+            )
+            return QMSumSummaryRun(
+                tuple(observations), tuple(item.question_id for item in items[position + 1 :])
+            )
+        issues = ()
+        if input_tokens > preparation.admitted.usage.available_input:
+            issues += ("PROVIDER_INPUT_EXCEEDED_BUDGET",)
+        if counter is not None and counter["tokens"] != input_tokens:
+            issues += ("PROVIDER_COUNTER_MISMATCH",)
+        if issues:
+            if measurements["finish_reason"] != "stop":
+                issues += ("PROVIDER_RESPONSE_INCOMPLETE",)
+            observations.append(
+                QMSumSummaryObservation(preparation.question_id, "INVALID", measurements, issues)
+            )
+            if "PROVIDER_COUNTER_MISMATCH" in issues:
+                return QMSumSummaryRun(
+                    tuple(observations), tuple(item.question_id for item in items[position + 1 :])
+                )
+            continue
         try:
             validation, candidate = validate_research_summary(
                 preparation,
