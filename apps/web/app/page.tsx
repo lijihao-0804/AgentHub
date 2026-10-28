@@ -189,10 +189,25 @@ export default function Home() {
         </section>
       )}
 
-      <section className="panel home-hero" aria-labelledby="applications-title">
+      {connected && (
+        <nav className="home-apps" aria-label={t("home.applications.title")}>
+          {APPLICATIONS.map((item) => (
+            <Link className="home-app-chip" href={item.href} key={item.href}>
+              <span className="home-app-chip-icon" aria-hidden="true">
+                <Icon name={item.icon} size={16} />
+              </span>
+              <span>{t(item.titleKey)}</span>
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      <details className="panel home-hero home-collapsible">
+        <summary className="home-collapsible-summary">
+          <span className="eyebrow">{t("home.applications.eyebrow")}</span>
+          <span className="home-collapsible-title">{t("home.applications.title")}</span>
+        </summary>
         <div className="home-hero-intro">
-          <p className="eyebrow">{t("home.applications.eyebrow")}</p>
-          <h2 id="applications-title">{t("home.applications.title")}</h2>
           <p className="home-hero-lede">{t("home.applications.lede")}</p>
         </div>
         <ol className="stage-rail" aria-label={t("home.applications.stages")}>
@@ -218,12 +233,12 @@ export default function Home() {
             </Link>
           ))}
         </div>
-      </section>
+      </details>
 
-      <section className="quick-links" aria-labelledby="quick-links-title">
-        <p className="eyebrow" id="quick-links-title">
-          {t("home.quickLinks")}
-        </p>
+      <details className="home-collapsible home-quick">
+        <summary className="home-collapsible-summary">
+          <span className="home-collapsible-title">{t("home.quickLinks")}</span>
+        </summary>
         <div className="quick-grid">
           {QUICK_LINKS.map((item) => (
             <Link className="quick-card" href={item.href} key={item.href}>
@@ -236,7 +251,7 @@ export default function Home() {
             </Link>
           ))}
         </div>
-      </section>
+      </details>
     </div>
   );
 }

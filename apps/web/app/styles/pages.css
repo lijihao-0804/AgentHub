@@ -118,6 +118,35 @@
   .home-composer-form { grid-template-columns: 1fr; }
 }
 
+/* Compact, always-visible application shortcuts under the composer. */
+.home-apps { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+.home-app-chip {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: inherit;
+  display: inline-flex;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  text-decoration: none;
+  transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+}
+.home-app-chip:hover { background: var(--surface-raised); border-color: var(--accent); transform: translateY(-1px); }
+.home-app-chip-icon { color: var(--accent); display: inline-flex; }
+
+/* Collapsible secondary sections keep the home page about the conversation. */
+.home-collapsible { padding: var(--space-4) var(--space-5); }
+.home-collapsible > summary { align-items: baseline; cursor: pointer; display: flex; gap: var(--space-2); list-style: none; }
+.home-collapsible > summary::-webkit-details-marker { display: none; }
+.home-collapsible > summary::after { color: var(--text-muted); content: "▸"; font-size: 0.9rem; margin-left: auto; }
+.home-collapsible[open] > summary::after { content: "▾"; }
+.home-collapsible-title { font-size: var(--text-xl); font-weight: 680; letter-spacing: -0.012em; }
+.home-quick { margin-top: var(--space-4); }
+.home-quick .quick-grid { margin-top: var(--space-3); }
+
 /* The five actions every application performs, as a rail rather than a
    sentence: it is a sequence, and a sequence should look like one. */
 .stage-rail {
