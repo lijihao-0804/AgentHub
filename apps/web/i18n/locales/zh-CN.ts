@@ -1651,6 +1651,8 @@ export const zhCN: MessageSchema = {
         name: "名称",
         endpoint: "端点地址",
         auth: "认证",
+        authNone: "无",
+        authBearer: "Bearer 令牌",
         secret: "Bearer 令牌",
         enabled: "启用",
       },

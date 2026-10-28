@@ -1664,6 +1664,8 @@ export const enUS = {
         name: "Name",
         endpoint: "Endpoint URL",
         auth: "Auth",
+        authNone: "None",
+        authBearer: "Bearer token",
         secret: "Bearer token",
         enabled: "Enabled",
       },
