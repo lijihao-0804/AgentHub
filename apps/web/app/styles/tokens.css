@@ -4,60 +4,63 @@
  * light theme a token override rather than a second stylesheet. The theme
  * is applied as `data-theme` on <html> by ThemeProvider.
  *
- * Visual direction: "Instrument Console". A cool graphite base with layered
- * surfaces (bg -> surface -> raised -> inset), hairline separators, and one
- * confident signal-cyan accent reserved for interactive state — active nav,
- * links, focus and primary actions. Status colours stay warm and separate so
- * a running agent (cyan) never reads like a warning (amber).
+ * Visual direction: a lively agent console. Deep ink surfaces, and a vivid
+ * blue → violet → cyan brand gradient (the same family DeepSeek Harness uses
+ * for its onboarding) reserved for interactive state and the agent identity.
+ * Status colours stay warm and separate so a running agent never reads like
+ * a warning.
  */
 :root {
   --z-topbar: 30;
   --z-floating: 60;
   --z-skip-link: 100;
 
-  --background: #0e1116;
-  --surface: #141a21;
-  --surface-raised: #1a222b;
-  --surface-inset: rgba(255, 255, 255, 0.045);
-  --surface-nav: #11161d;
-  --surface-topbar: rgba(14, 17, 22, 0.82);
-  --row-hover: rgba(255, 255, 255, 0.05);
-  --row-subtle: rgba(255, 255, 255, 0.025);
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.15);
+  --background: #0b0e14;
+  --surface: #121722;
+  --surface-raised: #171d2a;
+  --surface-inset: rgba(255, 255, 255, 0.05);
+  --surface-nav: #0f141e;
+  --surface-topbar: rgba(11, 14, 20, 0.8);
+  --row-hover: rgba(255, 255, 255, 0.055);
+  --row-subtle: rgba(255, 255, 255, 0.028);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
   --border-focus: var(--accent);
   --focus-ring: var(--accent);
 
-  --text: #e6eaf0;
-  --text-muted: #98a2b0;
-  --text-placeholder: rgba(230, 234, 240, 0.34);
+  --text: #eef1f7;
+  --text-muted: #9aa6bd;
+  --text-placeholder: rgba(238, 241, 247, 0.36);
 
-  /* Primary actions carry the signal accent; it is the one bold surface. */
-  --btn-primary-bg: var(--accent);
-  --btn-primary-ink: var(--accent-ink);
-  --btn-primary-hover: #6fe0d2;
+  /* Vivid brand: blue → violet → cyan. */
+  --accent: #5b8cff;
+  --accent-ink: #08122b;
+  --accent-soft: rgba(91, 140, 255, 0.16);
+  --accent-2: #a78bfa;
+  --accent-3: #22d3ee;
+  --gradient-brand: linear-gradient(135deg, #5b8cff 0%, #8b76f6 55%, #22d3ee 100%);
 
-  --accent: #56d4c6;
-  --accent-ink: #06201d;
-  --accent-soft: rgba(86, 212, 198, 0.13);
+  --btn-primary-bg: linear-gradient(135deg, #5b8cff 0%, #7c6cf6 100%);
+  --btn-primary-ink: #ffffff;
+  --btn-primary-hover: linear-gradient(135deg, #6f9bff 0%, #8b7bff 100%);
 
-  --success: #63d68f;
-  --success-soft: rgba(99, 214, 143, 0.14);
-  --warning: #e7bb53;
-  --warning-soft: rgba(231, 187, 83, 0.15);
-  --danger: #ff8175;
-  --danger-soft: rgba(255, 129, 117, 0.14);
-  --danger-border: rgba(255, 129, 117, 0.42);
-  --attention: #f2a24e;
-  --attention-soft: rgba(242, 162, 78, 0.16);
-  --info: #82b4f2;
-  --info-soft: rgba(130, 180, 242, 0.14);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.15);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.15);
+  --danger: #fb7185;
+  --danger-soft: rgba(251, 113, 133, 0.15);
+  --danger-border: rgba(251, 113, 133, 0.45);
+  --attention: #f59e0b;
+  --attention-soft: rgba(245, 158, 11, 0.16);
+  --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.15);
 
-  --radius-sm: 6px;
-  --radius: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
   --radius-pill: 999px;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 16px 40px rgba(0, 0, 0, 0.36);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 44px rgba(0, 0, 0, 0.42);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
     "Microsoft YaHei", Helvetica, Arial, sans-serif;
@@ -73,46 +76,48 @@
 
 /*
  * Light theme. Only colour tokens are overridden: spacing, radii and type
- * are shared, so both themes stay structurally identical. The signal accent
- * deepens to teal here so it keeps AA contrast on white.
+ * are shared, so both themes stay structurally identical.
  */
 :root[data-theme="light"] {
-  --background: #f5f7f9;
+  --background: #f5f7fc;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-inset: rgba(16, 24, 32, 0.04);
-  --surface-nav: #eef2f5;
-  --surface-topbar: rgba(245, 247, 249, 0.85);
-  --row-hover: rgba(16, 24, 32, 0.045);
-  --row-subtle: rgba(16, 24, 32, 0.02);
-  --border: rgba(16, 24, 32, 0.08);
-  --border-strong: rgba(16, 24, 32, 0.16);
+  --surface-inset: rgba(16, 24, 40, 0.045);
+  --surface-nav: #eef2f9;
+  --surface-topbar: rgba(245, 247, 252, 0.85);
+  --row-hover: rgba(16, 24, 40, 0.05);
+  --row-subtle: rgba(16, 24, 40, 0.022);
+  --border: rgba(16, 24, 40, 0.09);
+  --border-strong: rgba(16, 24, 40, 0.17);
 
-  --text: #111820;
-  --text-muted: #5b6673;
-  --text-placeholder: rgba(17, 24, 32, 0.4);
+  --text: #0f172a;
+  --text-muted: #5b6b85;
+  --text-placeholder: rgba(15, 23, 42, 0.4);
 
-  --btn-primary-bg: #0f766e;
-  --btn-primary-ink: #ffffff;
-  --btn-primary-hover: #0b5e58;
-
-  --accent: #0f766e;
+  --accent: #2563eb;
   --accent-ink: #ffffff;
-  --accent-soft: rgba(15, 118, 110, 0.12);
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --accent-2: #7c3aed;
+  --accent-3: #0891b2;
+  --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #7c3aed 55%, #06b6d4 100%);
 
-  --success: #1f7a45;
-  --success-soft: rgba(31, 122, 69, 0.12);
-  --warning: #8a5a00;
-  --warning-soft: rgba(138, 90, 0, 0.13);
-  --danger: #b23a30;
-  --danger-soft: rgba(178, 58, 48, 0.11);
-  --danger-border: rgba(178, 58, 48, 0.35);
-  --attention: #9a4a12;
-  --attention-soft: rgba(154, 74, 18, 0.13);
-  --info: #1e5f9e;
-  --info-soft: rgba(30, 95, 158, 0.12);
+  --btn-primary-bg: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  --btn-primary-ink: #ffffff;
+  --btn-primary-hover: linear-gradient(135deg, #2f74ef 0%, #5758e6 100%);
 
-  --shadow: 0 1px 2px rgba(16, 24, 32, 0.08), 0 16px 40px rgba(16, 24, 32, 0.1);
+  --success: #15803d;
+  --success-soft: rgba(21, 128, 61, 0.12);
+  --warning: #a16207;
+  --warning-soft: rgba(161, 98, 7, 0.13);
+  --danger: #be123c;
+  --danger-soft: rgba(190, 18, 60, 0.1);
+  --danger-border: rgba(190, 18, 60, 0.35);
+  --attention: #b45309;
+  --attention-soft: rgba(180, 83, 9, 0.13);
+  --info: #1d4ed8;
+  --info-soft: rgba(29, 78, 216, 0.12);
+
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 18px 44px rgba(16, 24, 40, 0.12);
 
   color-scheme: light;
 }

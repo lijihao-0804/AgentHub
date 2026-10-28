@@ -72,7 +72,7 @@
 }
 .thread-frame[data-rail="closed"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
 .thread-frame[data-rail="closed"] .thread-rail { display: none; }
-.thread-frame[data-side="closed"] { grid-template-columns: 15rem minmax(0, 1fr); }
+.thread-frame[data-side="closed"] { grid-template-columns: 13rem minmax(0, 1fr); }
 .thread-frame[data-rail="closed"][data-side="closed"] { grid-template-columns: minmax(0, 1fr); }
 .thread-frame[data-side="closed"] .thread-side { display: none; }
 
@@ -175,7 +175,13 @@
   margin: 0 auto var(--space-1);
   max-width: calc(var(--chat-content-width) + 2rem);
   padding: var(--space-2) var(--space-3) var(--space-3);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
   width: calc(100% - var(--space-6));
+}
+/* The composer is the one place a live glow belongs: it answers focus. */
+.conversation-composer:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow);
 }
 .conversation-composer label { color: var(--text-muted); display: grid; font-size: 0.78rem; gap: 0.3rem; }
 .conversation-composer textarea {

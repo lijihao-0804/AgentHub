@@ -87,17 +87,9 @@ function prefixMatch(prefix: string, ...except: string[]): (pathname: string) =>
  * their parent pages — a nav entry for each read as sixteen places to be,
  * which helped no one.
  */
-const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
+const PRIMARY_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
   {
-    headingKey: "nav.overview",
-    items: [
-      { href: "/dashboard", labelKey: "nav.dashboard", icon: "dashboard", match: prefixMatch("/dashboard") },
-      { href: "/runs", labelKey: "nav.runs", icon: "runs", match: prefixMatch("/runs", "/runs/compare"), badge: "running" },
-      { href: "/approvals", labelKey: "nav.approvals", icon: "approvals", match: prefixMatch("/approvals"), badge: "approvalsPending" },
-    ],
-  },
-  {
-    headingKey: "nav.applications",
+    headingKey: "nav.conversations",
     items: [
       { href: "/research", labelKey: "nav.research", icon: "research", match: prefixMatch("/research") },
       { href: "/incidents", labelKey: "nav.incidents", icon: "incidents", match: prefixMatch("/incidents") },
@@ -106,25 +98,26 @@ const NAV_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
     ],
   },
   {
-    headingKey: "nav.build",
+    headingKey: "nav.overview",
     items: [
-      { href: "/agents", labelKey: "nav.agents", icon: "agents", match: prefixMatch("/agents") },
-      { href: "/knowledge", labelKey: "nav.knowledge", icon: "knowledge", match: prefixMatch("/knowledge") },
-      { href: "/tools", labelKey: "nav.tools", icon: "tools", match: prefixMatch("/tools") },
+      { href: "/dashboard", labelKey: "nav.dashboard", icon: "dashboard", match: prefixMatch("/dashboard") },
+      { href: "/runs", labelKey: "nav.runs", icon: "runs", match: prefixMatch("/runs", "/runs/compare"), badge: "running" },
+      { href: "/approvals", labelKey: "nav.approvals", icon: "approvals", match: prefixMatch("/approvals"), badge: "approvalsPending" },
     ],
   },
-  {
-    headingKey: "nav.evaluate",
-    items: [
-      { href: "/evaluations", labelKey: "nav.evaluations", icon: "evaluations", match: prefixMatch("/evaluations") },
-    ],
-  },
-  {
-    headingKey: "nav.workspace",
-    items: [
-      { href: "/settings", labelKey: "nav.settings", icon: "settings", match: prefixMatch("/settings") },
-    ],
-  },
+];
+
+/*
+ * Less-used surfaces stay reachable but folded away. The sidebar is a map of
+ * what you do daily, not a dump of every route: build, evaluate and settings
+ * live behind one "More" disclosure instead of padding the primary list.
+ */
+const MORE_ITEMS: NavItem[] = [
+  { href: "/agents", labelKey: "nav.agents", icon: "agents", match: prefixMatch("/agents") },
+  { href: "/knowledge", labelKey: "nav.knowledge", icon: "knowledge", match: prefixMatch("/knowledge") },
+  { href: "/tools", labelKey: "nav.tools", icon: "tools", match: prefixMatch("/tools") },
+  { href: "/evaluations", labelKey: "nav.evaluations", icon: "evaluations", match: prefixMatch("/evaluations") },
+  { href: "/settings", labelKey: "nav.settings", icon: "settings", match: prefixMatch("/settings") },
 ];
 
 /** Routes rendered without the control-plane chrome. */
@@ -180,16 +173,17 @@ function NavLink({
 function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
   const { t, formatNumber } = useI18n();
   const counts = useNavCounts();
+  const [moreOpen, setMoreOpen] = useState(false);
   return (
     <>
       <div className="sidebar-brand">
-        <Link href="/dashboard" className="brand-link" onClick={onNavigate}>
+        <Link href="/" className="brand-link" onClick={onNavigate}>
           <span className="brand-name">AgentHub</span>
           <span className="brand-subtitle">{t("brand.subtitle")}</span>
         </Link>
       </div>
       <nav className="sidebar-nav" aria-label={t("shell.primaryNav")}>
-        {NAV_GROUPS.map((group) => (
+        {PRIMARY_GROUPS.map((group) => (
           <div className="nav-group" key={group.headingKey}>
             <p className="nav-group-heading">{t(group.headingKey)}</p>
             <ul>
@@ -199,6 +193,24 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
             </ul>
           </div>
         ))}
+        <div className="nav-group">
+          <button
+            type="button"
+            className="nav-more-toggle"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((open) => !open)}
+          >
+            <span>{t("nav.more")}</span>
+            <span className="nav-more-caret" aria-hidden="true">{moreOpen ? "▾" : "▸"}</span>
+          </button>
+          {moreOpen && (
+            <ul>
+              {MORE_ITEMS.map((item) => (
+                <NavLink item={item} onNavigate={onNavigate} counts={counts} key={item.href} />
+              ))}
+            </ul>
+          )}
+        </div>
       </nav>
       <p className="sidebar-footnote">{t("shell.footnote")}</p>
     </>

@@ -62,6 +62,8 @@ export const zhCN: MessageSchema = {
     badgePending: "{count} 条审批待处理",
     badgeRunning: "{count} 个运行进行中",
     overview: "总览",
+    conversations: "对话",
+    more: "更多",
     knowledge: "知识库",
     comingLater: "即将推出",
     dashboard: "仪表板",
@@ -1450,6 +1452,8 @@ export const zhCN: MessageSchema = {
     passwordHint: "至少 8 个字符。",
     noAccount: "还没有账户？",
     haveAccount: "已有账户？",
+    showPassword: "显示",
+    hidePassword: "隐藏",
   },
   workspace: {
     selectWorkspace: "选择工作区",

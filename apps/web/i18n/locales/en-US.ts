@@ -64,6 +64,8 @@ export const enUS = {
     badgePending: "{count} approvals pending",
     badgeRunning: "{count} runs in flight",
     overview: "Overview",
+    conversations: "Conversations",
+    more: "More",
     knowledge: "Knowledge",
     comingLater: "Coming soon",
     dashboard: "Dashboard",
@@ -1463,6 +1465,8 @@ export const enUS = {
     passwordHint: "At least 8 characters.",
     noAccount: "No account yet?",
     haveAccount: "Already have an account?",
+    showPassword: "Show",
+    hidePassword: "Hide",
   },
   workspace: {
     selectWorkspace: "Select workspace",

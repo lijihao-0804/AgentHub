@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const { signUp } = useFrontendSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<ApiError | null>(null);
   // Held apart from `error`: these rules are checked here, before anything is
@@ -80,18 +81,29 @@ export default function RegisterPage() {
         </label>
         <label>
           {t("auth.password")}
-          <input
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
+          <span className="password-field">
+            <input
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((value) => !value)}
+              aria-pressed={showPassword}
+              aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+            >
+              {showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+            </button>
+          </span>
           <span className="state-hint">{t("auth.passwordHint")}</span>
         </label>
         <label>
           {t("auth.confirmPassword")}
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}

@@ -29,7 +29,7 @@
 }
 /* A small signal gem stands in for a logomark without shipping an asset. */
 .brand-name::before {
-  background: radial-gradient(circle at 32% 26%, #a6f4ea, var(--accent) 58%, #159a8d);
+  background: var(--gradient-brand);
   border-radius: 7px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 2px 8px rgba(0, 0, 0, 0.35);
   content: "";
@@ -49,6 +49,24 @@
   opacity: 0.85;
   padding: 0 0.6rem;
 }
+.nav-more-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  justify-content: space-between;
+  letter-spacing: 0.01em;
+  opacity: 0.85;
+  padding: 0 0.6rem;
+  width: 100%;
+}
+.nav-more-toggle:hover { color: var(--text); opacity: 1; }
+.nav-more-caret { font-size: 0.7rem; }
 
 .nav-link {
   align-items: center;

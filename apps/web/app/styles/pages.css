@@ -94,8 +94,8 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.5;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), var(--accent-3), transparent);
+  opacity: 0.7;
 }
 .home-hero-intro { max-width: 52rem; }
 .home-hero-intro h2 { font-size: clamp(1.35rem, 2.6vw, 1.75rem); margin: 0.25rem 0 0; }

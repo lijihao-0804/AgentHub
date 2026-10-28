@@ -130,7 +130,7 @@ export default function AppWorkbench({
   const threadMutation = useWorkspaceMutation(`app-thread:${scope}`);
 
   const [railOpen, setRailOpen] = useState(true);
-  const [sideOpen, setSideOpen] = useState(true);
+  const [sideOpen, setSideOpen] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [agentId, setAgentId] = useState("");
   const [title, setTitle] = useState("");
