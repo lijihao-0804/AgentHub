@@ -1,0 +1,139 @@
+{
+  "snapshot_schema_version": 1,
+  "snapshot_type": "redacted_research_budget_ledger",
+  "exported_at_utc": "2026-10-28T09:13:42Z",
+  "source_ledger_path": ".scratch/context-policy-m4-20261027/experiment-budget.json",
+  "currency": "CNY",
+  "price_identity": "aliyun-beijing-deepseek-v4.1-flash-1017-peak-2-8-cny-v1",
+  "pricing_basis": {
+    "model": "deepseek-v4.1-flash-1017",
+    "region": "Beijing",
+    "busy_input_cny_per_million_tokens": "2",
+    "busy_output_cny_per_million_tokens": "8",
+    "source": "https://help.aliyun.com/zh/model-studio/model-pricing"
+  },
+  "authorization_counting": {
+    "authorized_limit_new_dispatches_this_round": 12,
+    "historical_dispatches_excluded_from_that_limit": 7,
+    "new_dispatches_this_round": 2,
+    "new_dispatch_position": "2/12",
+    "ledger_records_total": 9,
+    "ledger_record_composition": "7 historical + 2 current-round new",
+    "additional_reservation_writer_guard_total_ledger_rows": 12,
+    "reservation_writer_guard_includes_historical_rows": true,
+    "ledger_row_position_under_that_guard": "9/12",
+    "additional_rows_under_that_guard": 3
+  },
+  "status_counts": {
+    "SETTLED": 8,
+    "RESERVED_OR_UNKNOWN": 1
+  },
+  "accounting_basis": "sum of estimated_or_reserved_cny; settled entries are price-table estimates and UNKNOWN retains its full reservation",
+  "totals_cny": {
+    "settled_estimates": "0.306100",
+    "unknown_reservation": "0.009216",
+    "combined_estimates_and_reservation": "0.315316",
+    "budget_limit": "30.000000",
+    "remaining_budget": "29.684684"
+  },
+  "records": [
+    {
+      "record_number": 1,
+      "dispatch_class": "historical",
+      "stage": "CALIBRATION",
+      "status": "SETTLED",
+      "estimated_input_tokens": 64,
+      "requested_output_tokens": 64,
+      "upper_cost_cny": "0.066048",
+      "estimated_or_reserved_cny": "0.000196"
+    },
+    {
+      "record_number": 2,
+      "dispatch_class": "historical",
+      "stage": "M4",
+      "status": "SETTLED",
+      "estimated_input_tokens": 25842,
+      "requested_output_tokens": 2048,
+      "upper_cost_cny": "0.08192",
+      "estimated_or_reserved_cny": "0.078288"
+    },
+    {
+      "record_number": 3,
+      "dispatch_class": "historical",
+      "stage": "M4",
+      "status": "SETTLED",
+      "estimated_input_tokens": 26028,
+      "requested_output_tokens": 2048,
+      "upper_cost_cny": "0.08192",
+      "estimated_or_reserved_cny": "0.07879"
+    },
+    {
+      "record_number": 4,
+      "dispatch_class": "historical",
+      "stage": "M4",
+      "status": "SETTLED",
+      "estimated_input_tokens": 24188,
+      "requested_output_tokens": 2048,
+      "upper_cost_cny": "0.08192",
+      "estimated_or_reserved_cny": "0.074238"
+    },
+    {
+      "record_number": 5,
+      "dispatch_class": "historical",
+      "stage": "M4",
+      "status": "SETTLED",
+      "estimated_input_tokens": 23992,
+      "requested_output_tokens": 2048,
+      "upper_cost_cny": "0.08192",
+      "estimated_or_reserved_cny": "0.073824"
+    },
+    {
+      "record_number": 6,
+      "dispatch_class": "historical",
+      "stage": "CALIBRATION",
+      "status": "SETTLED",
+      "estimated_input_tokens": 29,
+      "requested_output_tokens": 64,
+      "upper_cost_cny": "0.066048",
+      "estimated_or_reserved_cny": "0.000606"
+    },
+    {
+      "record_number": 7,
+      "dispatch_class": "historical",
+      "stage": "CALIBRATION",
+      "status": "SETTLED",
+      "estimated_input_tokens": 29,
+      "requested_output_tokens": 64,
+      "upper_cost_cny": "0.066048",
+      "estimated_or_reserved_cny": "0.000098"
+    },
+    {
+      "record_number": 8,
+      "dispatch_class": "current_round_new",
+      "stage": "M4",
+      "status": "RESERVED_OR_UNKNOWN",
+      "estimated_input_tokens": 4096,
+      "requested_output_tokens": 128,
+      "upper_cost_cny": "0.009216",
+      "estimated_or_reserved_cny": "0.009216"
+    },
+    {
+      "record_number": 9,
+      "dispatch_class": "current_round_new",
+      "stage": "M4",
+      "status": "SETTLED",
+      "estimated_input_tokens": 22,
+      "requested_output_tokens": 128,
+      "upper_cost_cny": "0.001068",
+      "estimated_or_reserved_cny": "0.000060"
+    }
+  ],
+  "omitted_sensitive_fields": [
+    "attempt_id",
+    "request_identity",
+    "endpoint/base_url/hostname",
+    "credentials",
+    "prompt/message content",
+    "dataset/task identifiers"
+  ]
+}
