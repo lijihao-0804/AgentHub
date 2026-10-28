@@ -70,6 +70,7 @@
   width: 100%;
 }
 .nav-more-toggle:hover { color: var(--text); opacity: 1; }
+.nav-more-toggle-active { color: var(--accent); opacity: 1; }
 .nav-more-caret { font-size: 0.7rem; }
 
 .nav-link {

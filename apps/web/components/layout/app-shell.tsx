@@ -173,7 +173,14 @@ function NavLink({
 function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
   const { t, formatNumber } = useI18n();
   const counts = useNavCounts();
+  const pathname = usePathname() ?? "";
+  const moreActive = MORE_ITEMS.some((item) => item.match(pathname));
   const [moreOpen, setMoreOpen] = useState(false);
+  useEffect(() => {
+    // Keep the section containing the current route expanded, so the active
+    // item is never hidden behind a collapsed "More".
+    if (moreActive) setMoreOpen(true);
+  }, [moreActive]);
   return (
     <>
       <div className="sidebar-brand">
@@ -196,7 +203,7 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
         <div className="nav-group">
           <button
             type="button"
-            className="nav-more-toggle"
+            className={`nav-more-toggle${moreActive && !moreOpen ? " nav-more-toggle-active" : ""}`}
             aria-expanded={moreOpen}
             onClick={() => setMoreOpen((open) => !open)}
           >
