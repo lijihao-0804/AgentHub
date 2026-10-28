@@ -162,6 +162,12 @@ export default function AppWorkbench({
     if (first) setAgentId(first);
   }, [copy.agentId, agentId, agents.data]);
 
+  // On phones the thread list is an overlay drawer; start it closed so the
+  // conversation is visible first.
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth <= 860) setRailOpen(false);
+  }, []);
+
   // ---- Rail summaries (per-thread turn counts, cached by updated_at) ----
   const summaryCacheRef = useRef(new Map<string, ThreadSummary>());
   useEffect(() => {
@@ -340,6 +346,9 @@ export default function AppWorkbench({
                       className={`thread-list-item${active ? " thread-list-item-active" : ""}`}
                       href={`${copy.basePath}/${encodeURIComponent(item.id)}`}
                       aria-current={active ? "page" : undefined}
+                      onClick={() => {
+                        if (typeof window !== "undefined" && window.innerWidth <= 860) setRailOpen(false);
+                      }}
                     >
                       <span className="thread-list-title">{item.title}</span>
                       <span className="thread-list-meta">{formatDateTime(item.updated_at)}</span>

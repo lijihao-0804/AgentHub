@@ -227,6 +227,38 @@
   .eval-form .form-grid, .rule-builder .form-grid { grid-template-columns: 1fr; }
 }
 
+/*
+ * Workbench on phones: the three-pane grid squeezed the conversation into a
+ * sliver. Give the conversation the full width and turn the thread list into
+ * an overlay drawer (the "conversations" toggle opens it); drop the context
+ * rail entirely.
+ */
+@media (max-width: 860px) {
+  .thread-frame,
+  .thread-frame[data-rail="open"],
+  .thread-frame[data-rail="closed"],
+  .thread-frame[data-side="open"],
+  .thread-frame[data-side="closed"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .thread-frame { position: relative; }
+  .thread-rail {
+    background: var(--surface-raised);
+    border-right: 1px solid var(--border-strong);
+    bottom: 0;
+    box-shadow: var(--shadow);
+    left: 0;
+    max-height: none;
+    padding: var(--space-3);
+    position: absolute;
+    top: 0;
+    width: min(82vw, 20rem);
+    z-index: var(--z-floating);
+  }
+  .thread-rail .thread-list { max-height: none; }
+  .thread-side { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
