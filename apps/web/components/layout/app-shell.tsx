@@ -249,7 +249,8 @@ function ShellGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (status === "UNAUTHENTICATED" && !onAuthRoute) router.replace("/login");
-    if (status === "AUTHENTICATED" && onAuthRoute) router.replace("/dashboard");
+    // Signed-in users land on the conversation-first home, not the dashboard.
+    if (status === "AUTHENTICATED" && onAuthRoute) router.replace("/");
   }, [status, onAuthRoute, router]);
 
   if (status === "BOOTSTRAPPING") return <BootstrapScreen />;
