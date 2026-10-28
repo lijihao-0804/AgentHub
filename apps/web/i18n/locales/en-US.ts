@@ -95,6 +95,7 @@ export const enUS = {
   },
   shell: {
     menu: "Menu",
+    toggleSidebar: "Toggle sidebar",
     skipToContent: "Skip to content",
     footnote: "Session lives in memory only · no token storage",
     primaryNav: "Primary",

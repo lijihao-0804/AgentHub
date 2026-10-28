@@ -22,6 +22,7 @@
   }
   body.nav-open .sidebar { transform: none; }
   .topbar .nav-toggle { display: inline-flex; }
+  .sidebar-toggle { display: none; }
   .app-content { padding: var(--space-5) var(--space-4); }
   .topbar { justify-content: space-between; padding: 0 var(--space-4); }
 }

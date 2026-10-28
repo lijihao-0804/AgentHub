@@ -268,6 +268,7 @@ function BootstrapScreen() {
 function ShellChrome({ children }: { children: ReactNode }) {
   const { t } = useI18n();
   const [navOpen, setNavOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     document.body.classList.toggle("nav-open", navOpen);
@@ -284,7 +285,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
   }, [navOpen]);
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-sidebar={sidebarCollapsed ? "collapsed" : "open"}>
       <a className="skip-link" href="#app-content">
         {t("shell.skipToContent")}
       </a>
@@ -293,6 +294,16 @@ function ShellChrome({ children }: { children: ReactNode }) {
       </aside>
       <div className="app-frame">
         <header className="topbar">
+          <button
+            type="button"
+            className="button button-ghost sidebar-toggle"
+            aria-pressed={sidebarCollapsed}
+            onClick={() => setSidebarCollapsed((value) => !value)}
+            title={t("shell.toggleSidebar")}
+            aria-label={t("shell.toggleSidebar")}
+          >
+            <span aria-hidden="true">☰</span>
+          </button>
           <button
             type="button"
             className="button button-ghost nav-toggle"
