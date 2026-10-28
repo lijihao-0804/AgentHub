@@ -56,7 +56,9 @@ canonical request identity SHA-256：`150e0e031f8f72f792ee48e4cecff859a58386bb93
 
 预留后账本 SHA-256：`f6559a2978bf4942efe5c900bac883f06a8116fdc184167fe2e12f0e19924c8d`。新 attempt 已按 `RESERVED_OR_UNKNOWN` 原子追加；原旧 UNKNOWN 行逐字段保持不变。追加后共 9 条（7 条历史 `SETTLED` + 2 条本轮 `RESERVED_OR_UNKNOWN`），累计预留/估算 `0.316324 CNY`。本次实际执行的一次性原子预留器还另行实施了更紧的总账行 guard：追加后 `len(attempts) <= 12`，历史记录也计入。因此该记录是此 guard 下第 **9/12** 条账本行，距该 guard 尚余 3 行；这与授权层的本轮新增 dispatch **2/12**（尚余 10 次）是两个不同限制。追加器在同目录排他锁下校验原 SHA、状态数、旧未知行身份、唯一 attempt/request identity、费用及该总账行 guard 后，以同目录临时文件和原子替换写入；命令退出码 0。
 
-账本只有 JSON 记录，没有发现会因已有 `UNKNOWN` 而拒绝**不同 request identity** 的追加保护逻辑。本次原子预留必须保留旧未知记录原样，要求 attempt ID 与 request identity 均唯一；若这些检查或预算检查失败，则停止且不派发。
+**保留的历史判断（错误，现予更正）：**「账本只有 JSON 记录，没有发现会因已有 `UNKNOWN` 而拒绝不同 request identity 的追加保护逻辑。」这项判断错误。现行标准全局闸门在 `benchmarks/evaluation/memory_trial_budget.py:125-127`：只要任意 attempt 为 `RESERVED_OR_UNKNOWN`，`MemoryTrialBudget.reserve` 即抛出 `UNRESOLVED_MEMORY_TRIAL_ATTEMPT`，不会因 attempt ID 或 request identity 不同而放行。标准 settlement primitive 位于同文件 `settle`（约第 162-185 行），要求该 attempt 仍处于预留状态、结算额不超过上界；若 reservation 有 `request_identity`，还必须提供有效 `result_identity`。
+
+上文所记本次独立技术请求及其成功派发、账本记录和结果均保留。该次派发前实际使用的一次性原子预留器检查了账本原哈希、旧 UNKNOWN 行身份、attempt/request identity 唯一性、费用与总账行数，但没有执行 `MemoryTrialBudget.reserve` 的全局未决闸门。因此这是流程偏差，不能表述为通过了标准账本预留检查；此更正不改变旧 UNKNOWN、既往结果或账本。
 
 ## 5. 预登记验收与账本规则
 
