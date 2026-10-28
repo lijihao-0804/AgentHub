@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 
 import Icon, { type IconName } from "@/components/ui/icon";
 import type { MessageKey } from "@/i18n/messages";
@@ -82,6 +84,9 @@ const APPLICATIONS: Array<{
 export default function Home() {
   const { t } = useI18n();
   const { connected, workspaceId, workspaces, organizations, openPanel } = useFrontendSession();
+  const router = useRouter();
+  const [draft, setDraft] = useState("");
+  const [appHref, setAppHref] = useState(APPLICATIONS[0].href);
 
   const activeWorkspace = workspaces.find((workspace) => workspace.id === workspaceId) ?? null;
   const activeOrganization = activeWorkspace
@@ -98,6 +103,13 @@ export default function Home() {
     .split("→")
     .map((stage) => stage.trim())
     .filter(Boolean);
+
+  function startConversation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const target = appHref || APPLICATIONS[0].href;
+    const seed = draft.trim();
+    router.push(seed ? `${target}?draft=${encodeURIComponent(seed)}` : target);
+  }
 
   return (
     <div className="page">
@@ -140,6 +152,40 @@ export default function Home() {
               {t("workspace.selectWorkspace")}
             </button>
           </div>
+        </section>
+      )}
+
+      {connected && (
+        <section className="home-composer" aria-label={t("home.composer.title")}>
+          <form className="home-composer-form" onSubmit={startConversation}>
+            <label className="home-composer-field">
+              <span className="sr-only">{t("home.composer.placeholder")}</span>
+              <input
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                placeholder={t("home.composer.placeholder")}
+                autoComplete="off"
+              />
+            </label>
+            <label className="home-composer-agent">
+              <span className="sr-only">{t("home.composer.agent")}</span>
+              <select
+                value={appHref}
+                onChange={(event) => setAppHref(event.target.value)}
+                aria-label={t("home.composer.agent")}
+              >
+                {APPLICATIONS.map((item) => (
+                  <option value={item.href} key={item.href}>
+                    {t(item.titleKey)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" className="button button-primary">
+              {t("home.composer.start")}
+            </button>
+          </form>
+          <p className="home-composer-hint">{t("home.composer.hint")}</p>
         </section>
       )}
 

@@ -101,6 +101,23 @@
 .home-hero-intro h2 { font-size: clamp(1.35rem, 2.6vw, 1.75rem); margin: 0.25rem 0 0; }
 .home-hero-lede { color: var(--text-muted); font-size: 0.9rem; line-height: 1.65; margin-top: 0.5rem; }
 
+/* Chat-first entry: type a task, pick an application, start a conversation. */
+.home-composer {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  margin-top: var(--space-2);
+  padding: var(--space-4);
+}
+.home-composer-form { align-items: center; display: grid; gap: var(--space-2); grid-template-columns: minmax(0, 1fr) auto auto; }
+.home-composer-field input { background: var(--surface-inset); font-size: var(--text-base); padding: 0.7rem 0.9rem; }
+.home-composer-agent select { background: var(--surface-inset); font-size: var(--text-base); padding: 0.7rem 0.9rem; width: auto; }
+.home-composer-hint { color: var(--text-muted); font-size: var(--text-xs); margin-top: var(--space-2); }
+@media (max-width: 640px) {
+  .home-composer-form { grid-template-columns: 1fr; }
+}
+
 /* The five actions every application performs, as a rail rather than a
    sentence: it is a sequence, and a sequence should look like one. */
 .stage-rail {

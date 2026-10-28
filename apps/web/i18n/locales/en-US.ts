@@ -158,6 +158,13 @@ export const enUS = {
     sessionTitle: "Workspace connection",
     quickLinks: "Quick navigation",
     cardCta: "Open",
+    composer: {
+      title: "Start a conversation",
+      placeholder: "Describe what you want the agent to do…",
+      agent: "Application",
+      start: "Start",
+      hint: "Type a task, pick an application, and the conversation opens ready to send.",
+    },
     cards: {
       dashboard: {
         title: "Dashboard",

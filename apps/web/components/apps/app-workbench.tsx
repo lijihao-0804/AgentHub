@@ -147,6 +147,21 @@ export default function AppWorkbench({
     setConfirmDelete(false);
   }, [sessionId, threadId, copy.agentId]);
 
+  // The home composer can hand off a starting task through ?draft=; prefill it.
+  useEffect(() => {
+    if (typeof window === "undefined" || threadId) return;
+    const seed = new URLSearchParams(window.location.search).get("draft");
+    if (seed) setTitle(seed);
+  }, [threadId]);
+
+  // With no fixed agent, default to the first available one so the create
+  // button is enabled without an extra choice.
+  useEffect(() => {
+    if (copy.agentId || agentId) return;
+    const first = agents.data?.[0]?.id;
+    if (first) setAgentId(first);
+  }, [copy.agentId, agentId, agents.data]);
+
   // ---- Rail summaries (per-thread turn counts, cached by updated_at) ----
   const summaryCacheRef = useRef(new Map<string, ThreadSummary>());
   useEffect(() => {

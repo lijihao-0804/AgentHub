@@ -155,6 +155,13 @@ export const zhCN: MessageSchema = {
     sessionTitle: "工作区连接",
     quickLinks: "快捷导航",
     cardCta: "打开",
+    composer: {
+      title: "开始一次对话",
+      placeholder: "描述你想让智能体做的事…",
+      agent: "应用",
+      start: "开始",
+      hint: "输入任务、选择应用，即可进入一个已填好标题的对话。",
+    },
     cards: {
       dashboard: {
         title: "仪表板",
