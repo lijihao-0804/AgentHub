@@ -381,12 +381,14 @@ def _plain_text_prefix_v1_proof(
             PlainTextPrefixProofStatus.INELIGIBLE,
             "PLAIN_TEXT_PREFIX_V1_ACTION_ACTIVITY",
         )
-    if run.thread_history_evidence_registry is not None:
+    knowledge_snapshots = getattr(run, "effective_knowledge_snapshots", None)
+    wiki_publications = getattr(run, "effective_wiki_publications", None)
+    if type(knowledge_snapshots) is not list or type(wiki_publications) is not list:
         return PlainTextPrefixProof(
-            PlainTextPrefixProofStatus.INELIGIBLE,
-            "PLAIN_TEXT_PREFIX_V1_EVIDENCE_PRESENT",
+            PlainTextPrefixProofStatus.UNPROVEN,
+            "PLAIN_TEXT_PREFIX_V1_RAG_SOURCE_STATE_UNAVAILABLE",
         )
-    if run.effective_knowledge_snapshots or run.effective_wiki_publications:
+    if knowledge_snapshots or wiki_publications:
         return PlainTextPrefixProof(
             PlainTextPrefixProofStatus.INELIGIBLE,
             "PLAIN_TEXT_PREFIX_V1_SOURCE_EVIDENCE_PRESENT",
@@ -434,6 +436,28 @@ def _plain_text_prefix_v1_proof(
         return PlainTextPrefixProof(
             PlainTextPrefixProofStatus.INELIGIBLE,
             "PLAIN_TEXT_PREFIX_V1_TRANSCRIPT_NOT_SIMPLE_EXCHANGE",
+        )
+    # Successful runtime finalization persists the visible evidence registry
+    # as a mapping, including {} when no RAG evidence was visible. NULL means
+    # that proof was not persisted; it is not interchangeable with an empty
+    # registry. Other authoritative Run state above must also be empty and the
+    # exact persisted transcript must contain no tool exchange before {} is
+    # accepted as proof of a plain-text source.
+    evidence_registry = getattr(run, "thread_history_evidence_registry", None)
+    if evidence_registry is None:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.UNPROVEN,
+            "PLAIN_TEXT_PREFIX_V1_EVIDENCE_REGISTRY_UNAVAILABLE",
+        )
+    if type(evidence_registry) is not dict:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.UNPROVEN,
+            "PLAIN_TEXT_PREFIX_V1_EVIDENCE_REGISTRY_INVALID",
+        )
+    if evidence_registry:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_EVIDENCE_PRESENT",
         )
     return PlainTextPrefixProof(
         PlainTextPrefixProofStatus.ELIGIBLE,

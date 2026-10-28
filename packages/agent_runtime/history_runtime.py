@@ -332,7 +332,8 @@ def _is_plain_text_exchange(turn: ThreadTurnContext) -> bool:
     if (
         turn.artifact_ids
         or turn.artifact_refs
-        or turn.evidence_registry is not None
+        or type(turn.evidence_registry) is not dict
+        or turn.evidence_registry
         or turn.source_knowledge_snapshots
         or turn.source_wiki_publications
         or not turn.messages

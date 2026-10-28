@@ -7,10 +7,15 @@ from sqlalchemy import event, select
 
 from packages.agent_runtime.history_transcript import build_turn_transcript
 from packages.agent_runtime.models import AgentRun, RunStep
+from packages.agent_runtime.runtime_service import AgentRunService
 from packages.agent_runtime.summary_source import stable_summary_source_identity
 from packages.agent_runtime.work_layer import PLAIN_TEXT_PREFIX_V1, PlainTextPrefixProofStatus
-from packages.model_gateway.contracts import ModelMessage
+from packages.model_gateway.contracts import ModelMessage, ModelResponse
 from packages.threads.context import SqlAlchemyThreadContextProvider
+from packages.threads.service import ThreadService
+from packages.tools.registry import ToolRegistry
+from packages.tools.runtime import ToolRuntime
+from tests.integration.test_history_transcript_capture_m3 import _seed as _seed_runtime
 from tests.integration.test_thread_history_m3 import (
     TEST_DATABASE_URL,
     _add_exchange,
@@ -26,6 +31,63 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(not TEST_DATABASE_URL, reason="Requires isolated PostgreSQL"),
 ]
+
+
+@pytest.mark.asyncio
+async def test_actual_no_rag_run_persists_empty_registry_and_proves_plain_text_source(db_factory):
+    base = await _seed_runtime(db_factory)
+
+    class Gateway:
+        async def generate_resolved(self, context, plan, request):
+            return ModelResponse(
+                content="plain answer",
+                provider="fake",
+                model="offline-history-model",
+            )
+
+    async def unused_tool_handler(context, definition, arguments, session_factory):
+        raise AssertionError("the no-RAG model response must not dispatch a tool")
+
+    service = AgentRunService(
+        db_factory,
+        model_gateway_factory=lambda _session: Gateway(),
+        tool_runtime=ToolRuntime(
+            session_factory=db_factory,
+            registry=ToolRegistry(handler_overrides={"query_customer": unused_tool_handler}),
+        ),
+        thread_context_provider=SqlAlchemyThreadContextProvider(db_factory),
+    )
+    threads = ThreadService(db_factory, run_service=service)
+    thread = await threads.create_thread(
+        base["context"], agent_id=base["agent_id"], title="empty RAG registry"
+    )
+    result = await threads.submit_turn(base["context"], thread.id, user_input="question 1")
+
+    async with db_factory() as session:
+        run = await session.scalar(select(AgentRun).where(AgentRun.id == result.run_id))
+        assert run is not None
+        assert run.status == "SUCCEEDED"
+        assert run.tool_call_count == 0
+        assert run.thread_history_transcript is not None
+        assert run.thread_history_evidence_registry == {}
+
+    _, current_run_id = await _add_exchange(
+        db_factory,
+        base,
+        thread_id=thread.id,
+        sequence=2,
+        status="RUNNING",
+        final_output=None,
+    )
+    view = await SqlAlchemyThreadContextProvider(db_factory).history_sources(
+        workspace_id=base["workspace_id"],
+        thread_id=thread.id,
+        before_run_id=current_run_id,
+        max_turns=10,
+        summary_source_policy=PLAIN_TEXT_PREFIX_V1,
+    )
+    assert len(view.turns) == 1
+    assert view.turns[0].plain_text_prefix_v1_proof.status is PlainTextPrefixProofStatus.ELIGIBLE
 
 
 @pytest.mark.asyncio
@@ -91,6 +153,21 @@ async def test_opt_in_source_proof_uses_persisted_transcripts_and_policy_steps(d
                 ModelMessage("assistant", "answer 1"),
             ),
         ).to_payload()
+        clean_run.thread_history_evidence_registry = {}
+
+        evidence_turn_id, evidence_run_id = exchange_ids[1]
+        evidence_run = await session.scalar(select(AgentRun).where(AgentRun.id == evidence_run_id))
+        evidence_run.thread_history_transcript = build_turn_transcript(
+            run_id=evidence_run_id,
+            turn_id=evidence_turn_id,
+            messages=(
+                ModelMessage("user", "question 2"),
+                ModelMessage("assistant", "answer 2"),
+            ),
+        ).to_payload()
+        evidence_run.thread_history_evidence_registry = {
+            "R00001E1": {"reference": {}, "record": {}}
+        }
 
         policy_turn_id, policy_run_id = exchange_ids[2]
         policy_run = await session.scalar(select(AgentRun).where(AgentRun.id == policy_run_id))
@@ -142,6 +219,6 @@ async def test_opt_in_source_proof_uses_persisted_transcripts_and_policy_steps(d
     )
     proofs = {turn.sequence: turn.plain_text_prefix_v1_proof for turn in opt_in_view.turns}
     assert proofs[1].status is PlainTextPrefixProofStatus.ELIGIBLE
-    assert proofs[2].status is PlainTextPrefixProofStatus.UNPROVEN
+    assert proofs[2].status is PlainTextPrefixProofStatus.INELIGIBLE
     assert proofs[3].status is PlainTextPrefixProofStatus.INELIGIBLE
     assert proofs[4].status is PlainTextPrefixProofStatus.UNPROVEN

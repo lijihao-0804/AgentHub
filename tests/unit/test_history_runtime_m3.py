@@ -131,6 +131,7 @@ def _sized_conversation(sizes, *, eligible_prefix: int = 0):
                     ModelMessage("user", user_input),
                     ModelMessage("assistant", final_output),
                 ),
+                evidence_registry={} if index < eligible_prefix else None,
                 plain_text_prefix_v1_proof=(
                     PlainTextPrefixProof(
                         PlainTextPrefixProofStatus.ELIGIBLE,
@@ -338,6 +339,7 @@ def test_plain_text_prefix_is_contiguous_and_preserves_recent_turns_and_current_
         turns=tuple(
             replace(
                 turn,
+                evidence_registry={},
                 plain_text_prefix_v1_proof=PlainTextPrefixProof(
                     status,
                     (
@@ -407,6 +409,7 @@ def test_plain_text_prefix_does_not_bridge_an_unknown_sequence_gap():
         turns[index] = replace(
             turns[index],
             sequence=sequence,
+                evidence_registry={},
             plain_text_prefix_v1_proof=PlainTextPrefixProof(
                 PlainTextPrefixProofStatus.ELIGIBLE,
                 "PLAIN_TEXT_PREFIX_V1_SIMPLE_COMPLETED_EXCHANGE",
@@ -500,8 +503,8 @@ def test_empty_transcript_is_unproven_when_side_effect_queries_are_clear():
         failure_code=None,
         waiting_approval_id=None,
         thread_history_evidence_registry=None,
-        effective_knowledge_snapshots=(),
-        effective_wiki_publications=(),
+        effective_knowledge_snapshots=[],
+        effective_wiki_publications=[],
         final_output="answer",
     )
 
@@ -622,12 +625,36 @@ async def test_default_history_evidence_is_not_queried_without_opt_in():
             "PLAIN_TEXT_PREFIX_V1_ACTION_ACTIVITY",
         ),
         (
-            {"thread_history_evidence_registry": {}},
+            {"thread_history_evidence_registry": {"R00001E1": {"reference": {}, "record": {}}}},
             False,
             False,
             False,
             PlainTextPrefixProofStatus.INELIGIBLE,
             "PLAIN_TEXT_PREFIX_V1_EVIDENCE_PRESENT",
+        ),
+        (
+            {"thread_history_evidence_registry": None},
+            False,
+            False,
+            False,
+            PlainTextPrefixProofStatus.UNPROVEN,
+            "PLAIN_TEXT_PREFIX_V1_EVIDENCE_REGISTRY_UNAVAILABLE",
+        ),
+        (
+            {"thread_history_evidence_registry": []},
+            False,
+            False,
+            False,
+            PlainTextPrefixProofStatus.UNPROVEN,
+            "PLAIN_TEXT_PREFIX_V1_EVIDENCE_REGISTRY_INVALID",
+        ),
+        (
+            {"effective_knowledge_snapshots": None},
+            False,
+            False,
+            False,
+            PlainTextPrefixProofStatus.UNPROVEN,
+            "PLAIN_TEXT_PREFIX_V1_RAG_SOURCE_STATE_UNAVAILABLE",
         ),
         (
             {"effective_knowledge_snapshots": [{"knowledge_base_id": str(uuid4())}]},
@@ -680,7 +707,7 @@ def test_plain_text_prefix_proof_uses_persisted_facts_with_complete_transcript(
             "tool_call_count": 0,
             "failure_code": None,
             "waiting_approval_id": None,
-            "thread_history_evidence_registry": None,
+            "thread_history_evidence_registry": {},
             "effective_knowledge_snapshots": [],
             "effective_wiki_publications": [],
             "final_output": "answer",
