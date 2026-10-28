@@ -24,7 +24,7 @@ from packages.agent_runtime.evidence_registry import (
     visible_evidence_registry,
 )
 from packages.agent_runtime.history_transcript import transcript_from_payload
-from packages.agent_runtime.models import AgentRun
+from packages.agent_runtime.models import AgentRun, RunStep
 from packages.agent_runtime.work_layer import (
     HISTORY_SOURCE_ARTIFACT_LIMIT,
     HISTORY_SOURCE_COMPLETE,
@@ -37,6 +37,12 @@ from packages.agent_runtime.work_layer import (
     HISTORY_SOURCE_SUMMARY_REASON_NOT_CLASSIFIED,
     HISTORY_SOURCE_TURN_SCAN_LIMIT,
     HISTORY_SOURCE_TURN_SELECTION_LIMIT,
+    PLAIN_TEXT_PREFIX_V1,
+    PLAIN_TEXT_PREFIX_V1_BLOCKER_EVIDENCE_UNAVAILABLE,
+    PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON,
+    PLAIN_TEXT_PREFIX_V1_TRANSCRIPT_UNAVAILABLE,
+    PlainTextPrefixProof,
+    PlainTextPrefixProofStatus,
     ThreadConversation,
     ThreadHistoryArtifactIdentity,
     ThreadHistoryHit,
@@ -47,6 +53,7 @@ from packages.agent_runtime.work_layer import (
     ThreadHistorySourceScope,
     ThreadTurnContext,
 )
+from packages.approvals.models import Approval
 from packages.artifacts.models import Artifact
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
@@ -54,6 +61,14 @@ from packages.core.text import search_terms
 from packages.threads.models import ThreadTurn
 
 _SUCCEEDED = "SUCCEEDED"
+_PLAIN_TEXT_PREFIX_ALLOWED_STEP_KINDS = frozenset(
+    {
+        "PREPARE",
+        "MODEL",
+        "GUARD",
+        "FINISH",
+    }
+)
 MAX_REF_TITLE = 80
 SOURCE_ARTIFACT_PAGE_SIZE = 100
 MAX_LEGACY_TURNS = 200
@@ -310,6 +325,122 @@ def _visible_transcript(turn: ThreadTurn, run: AgentRun, artifacts: tuple[Artifa
     )
 
 
+def _plain_text_prefix_v1_proof(
+    turn: ThreadTurn,
+    run: AgentRun,
+    *,
+    messages: tuple,
+    artifacts: tuple[Artifact, ...],
+    approval_run_ids: frozenset[UUID] | None,
+    action_run_ids: frozenset[UUID] | None,
+) -> PlainTextPrefixProof:
+    """Classify a completed exchange from persisted server facts.
+
+    A persisted transcript is required. Missing transcript data stays
+    unproven even when the Run counters look clean; eligibility also requires
+    independent persisted evidence that no tool, approval, action, evidence,
+    or artifact participated in the exchange.
+    """
+
+    if approval_run_ids is None or action_run_ids is None:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.UNPROVEN,
+            PLAIN_TEXT_PREFIX_V1_BLOCKER_EVIDENCE_UNAVAILABLE,
+        )
+    if run.status != _SUCCEEDED:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.UNPROVEN,
+            "PLAIN_TEXT_PREFIX_V1_COMPLETION_STATUS_UNAVAILABLE",
+        )
+    if (
+        isinstance(run.tool_call_count, bool)
+        or not isinstance(run.tool_call_count, int)
+        or run.tool_call_count < 0
+    ):
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.UNPROVEN,
+            "PLAIN_TEXT_PREFIX_V1_TOOL_COUNT_UNAVAILABLE",
+        )
+    if run.failure_code is not None:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_FAILURE_OR_UNKNOWN_OUTCOME",
+        )
+    if run.tool_call_count:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_TOOL_ACTIVITY",
+        )
+    if run.waiting_approval_id is not None or run.id in approval_run_ids:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_APPROVAL_ACTIVITY",
+        )
+    if run.id in action_run_ids:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_ACTION_ACTIVITY",
+        )
+    if run.thread_history_evidence_registry is not None:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_EVIDENCE_PRESENT",
+        )
+    if run.effective_knowledge_snapshots or run.effective_wiki_publications:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_SOURCE_EVIDENCE_PRESENT",
+        )
+    if artifacts:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_ARTIFACT_PRESENT",
+        )
+    if not isinstance(messages, tuple) or not messages:
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.UNPROVEN,
+            PLAIN_TEXT_PREFIX_V1_TRANSCRIPT_UNAVAILABLE,
+        )
+    if (
+        not isinstance(turn.user_input, str)
+        or not turn.user_input.strip()
+        or not isinstance(run.final_output, str)
+        or not run.final_output.strip()
+        or "\x00" in turn.user_input
+        or "\x00" in run.final_output
+    ):
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_EXCHANGE_TEXT_INVALID",
+        )
+    if any(
+        message.role not in {"user", "assistant"}
+        or message.tool_calls
+        or message.tool_call_id is not None
+        or not isinstance(message.content, str)
+        for message in messages
+    ):
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_TRANSCRIPT_NOT_PLAIN_TEXT",
+        )
+    if (
+        len(messages) != 2
+        or messages[0].role != "user"
+        or messages[0].content != turn.user_input
+        or messages[1].role != "assistant"
+        or messages[1].content != run.final_output
+    ):
+        return PlainTextPrefixProof(
+            PlainTextPrefixProofStatus.INELIGIBLE,
+            "PLAIN_TEXT_PREFIX_V1_TRANSCRIPT_NOT_SIMPLE_EXCHANGE",
+        )
+    return PlainTextPrefixProof(
+        PlainTextPrefixProofStatus.ELIGIBLE,
+        PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON,
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class _SourceScan:
     selected_keys: tuple[tuple[int, UUID], ...]
@@ -370,6 +501,11 @@ def _manifest_for(
 
 def _turn_key(turn: ThreadTurn) -> tuple[int, UUID]:
     return turn.sequence, turn.id
+
+
+def _validate_summary_source_policy(value: str | None) -> None:
+    if value not in {None, PLAIN_TEXT_PREFIX_V1}:
+        raise ValueError(f"summary_source_policy must be {PLAIN_TEXT_PREFIX_V1} or None")
 
 
 class SqlAlchemyThreadContextProvider:
@@ -444,6 +580,7 @@ class SqlAlchemyThreadContextProvider:
         max_turns_scanned: int = HISTORY_SOURCE_MAX_TURNS_SCANNED,
         max_artifacts: int = HISTORY_SOURCE_MAX_ARTIFACTS,
         artifact_page_size: int = SOURCE_ARTIFACT_PAGE_SIZE,
+        summary_source_policy: str | None = None,
     ) -> ThreadConversation:
         """Measure a fixed W1 prefix with paged reads and return its exact sources.
 
@@ -452,6 +589,7 @@ class SqlAlchemyThreadContextProvider:
         :meth:`replay_history_sources`; this method only starts at W1.
         """
 
+        _validate_summary_source_policy(summary_source_policy)
         for value, name, maximum in (
             (max_turns, "max_turns", HISTORY_SOURCE_MAX_TURNS),
             (
@@ -512,9 +650,15 @@ class SqlAlchemyThreadContextProvider:
                 session,
                 scope=scope,
                 scan=scan,
+                summary_source_policy=summary_source_policy,
             )
 
-    async def replay_history_sources(self, *, manifest: Mapping[str, object]) -> ThreadConversation:
+    async def replay_history_sources(
+        self,
+        *,
+        manifest: Mapping[str, object],
+        summary_source_policy: str | None = None,
+    ) -> ThreadConversation:
         """Rebuild exactly one frozen source set, or fail closed.
 
         Replay reads only the source identities in the manifest. It does not
@@ -523,6 +667,7 @@ class SqlAlchemyThreadContextProvider:
         Turn/Run or Artifact must still exist and match its frozen identity.
         """
 
+        _validate_summary_source_policy(summary_source_policy)
         try:
             frozen = ThreadHistorySourceManifest.from_manifest(manifest)
         except (TypeError, ValueError) as error:
@@ -559,6 +704,7 @@ class SqlAlchemyThreadContextProvider:
                 scope=scope,
                 manifest=frozen,
                 sources=frozen.selected_sources,
+                summary_source_policy=summary_source_policy,
             )
         return baseline
 
@@ -836,12 +982,53 @@ class SqlAlchemyThreadContextProvider:
         if total is None or total > SOURCE_CONTENT_MAX_BYTES:
             raise ThreadHistorySourceIncompleteError("History artifacts exceed their work limit.")
 
+    @staticmethod
+    async def _plain_text_prefix_blockers(
+        session: AsyncSession,
+        *,
+        workspace_id: UUID,
+        run_ids: tuple[UUID, ...],
+        enabled: bool,
+    ) -> tuple[frozenset[UUID] | None, frozenset[UUID] | None]:
+        """Read the opt-in persisted facts, or return fail-closed absence."""
+
+        if not enabled:
+            return None, None
+        if not run_ids:
+            return frozenset(), frozenset()
+        try:
+            async with session.begin_nested():
+                approval_run_ids = frozenset(
+                    await session.scalars(
+                        select(Approval.run_id).where(
+                            Approval.workspace_id == workspace_id,
+                            Approval.run_id.in_(run_ids),
+                        )
+                    )
+                )
+                action_run_ids = frozenset(
+                    await session.scalars(
+                        select(RunStep.agent_run_id).where(
+                            RunStep.workspace_id == workspace_id,
+                            RunStep.agent_run_id.in_(run_ids),
+                            RunStep.kind.not_in(_PLAIN_TEXT_PREFIX_ALLOWED_STEP_KINDS),
+                        )
+                    )
+                )
+        except Exception:
+            # Historical compatibility and safety evidence are independent:
+            # if the opt-in proof tables are unavailable, the source remains
+            # exact instead of becoming silently summarizable.
+            return None, None
+        return approval_run_ids, action_run_ids
+
     async def _materialize_sources(
         self,
         session: AsyncSession,
         *,
         scope: ThreadHistorySourceScope,
         scan: _SourceScan,
+        summary_source_policy: str | None = None,
     ) -> ThreadConversation:
         if scan.count_complete and scan.observed_eligible_count > scope.max_turns:
             measured_source_count = scan.observed_eligible_count
@@ -947,6 +1134,12 @@ class SqlAlchemyThreadContextProvider:
                 )
             )
         selected_artifact_count = len(artifact_scan.artifact_ids)
+        approval_run_ids, action_run_ids = await self._plain_text_prefix_blockers(
+            session,
+            workspace_id=scope.workspace_id,
+            run_ids=run_ids,
+            enabled=summary_source_policy is not None,
+        )
         if not scan.count_complete:
             limit_reason = HISTORY_SOURCE_TURN_SCAN_LIMIT
         else:
@@ -990,6 +1183,20 @@ class SqlAlchemyThreadContextProvider:
                 evidence_registry=run.thread_history_evidence_registry,
                 source_knowledge_snapshots=tuple(run.effective_knowledge_snapshots or ()),
                 source_wiki_publications=tuple(run.effective_wiki_publications or ()),
+                plain_text_prefix_v1_proof=(
+                    _plain_text_prefix_v1_proof(
+                        turn,
+                        run,
+                        messages=_visible_transcript(
+                            turn, run, rows_artifacts.get(run.id, ())
+                        ),
+                        artifacts=rows_artifacts.get(run.id, ()),
+                        approval_run_ids=approval_run_ids,
+                        action_run_ids=action_run_ids,
+                    )
+                    if summary_source_policy is not None
+                    else None
+                ),
             )
             for turn, run in rows
         )
@@ -1007,6 +1214,7 @@ class SqlAlchemyThreadContextProvider:
         scope: ThreadHistorySourceScope,
         manifest: ThreadHistorySourceManifest,
         sources: tuple[ThreadHistorySourceIdentity, ...],
+        summary_source_policy: str | None = None,
     ) -> ThreadConversation:
         """Load only the manifest's selected IDs and verify every frozen identity."""
 
@@ -1064,6 +1272,13 @@ class SqlAlchemyThreadContextProvider:
             if set(artifacts) != set(artifact_ids):
                 raise ThreadHistorySourceIntegrityError("A frozen Artifact identity is missing.")
 
+        approval_run_ids, action_run_ids = await self._plain_text_prefix_blockers(
+            session,
+            workspace_id=scope.workspace_id,
+            run_ids=tuple(source.run_id for source in sources),
+            enabled=summary_source_policy is not None,
+        )
+
         turns: list[ThreadTurnContext] = []
         for frozen in sources:
             turn, run = rows_by_turn[frozen.turn_id]
@@ -1095,6 +1310,18 @@ class SqlAlchemyThreadContextProvider:
                     evidence_registry=run.thread_history_evidence_registry,
                     source_knowledge_snapshots=tuple(run.effective_knowledge_snapshots or ()),
                     source_wiki_publications=tuple(run.effective_wiki_publications or ()),
+                    plain_text_prefix_v1_proof=(
+                        _plain_text_prefix_v1_proof(
+                            turn,
+                            run,
+                            messages=_visible_transcript(turn, run, run_artifacts),
+                            artifacts=run_artifacts,
+                            approval_run_ids=approval_run_ids,
+                            action_run_ids=action_run_ids,
+                        )
+                        if summary_source_policy is not None
+                        else None
+                    ),
                 )
             )
 

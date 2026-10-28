@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Any, Literal, Protocol
 from uuid import UUID
 
@@ -27,6 +28,46 @@ HISTORY_SOURCE_TURN_SELECTION_LIMIT = "TURN_SELECTION_LIMIT_REACHED"
 HISTORY_SOURCE_ARTIFACT_LIMIT = "ARTIFACT_LIMIT_REACHED"
 HISTORY_SOURCE_SUMMARY_ELIGIBILITY_UNKNOWN = "UNKNOWN"
 HISTORY_SOURCE_SUMMARY_REASON_NOT_CLASSIFIED = "PLANNER_SEMANTIC_ELIGIBILITY_NOT_CLASSIFIED"
+PLAIN_TEXT_PREFIX_V1 = "plain_text_prefix_v1"
+PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON = "PLAIN_TEXT_PREFIX_V1_SIMPLE_COMPLETED_EXCHANGE"
+PLAIN_TEXT_PREFIX_V1_BLOCKER_EVIDENCE_UNAVAILABLE = (
+    "PLAIN_TEXT_PREFIX_V1_BLOCKER_EVIDENCE_UNAVAILABLE"
+)
+PLAIN_TEXT_PREFIX_V1_TRANSCRIPT_UNAVAILABLE = "PLAIN_TEXT_PREFIX_V1_TRANSCRIPT_UNAVAILABLE"
+
+
+class PlainTextPrefixProofStatus(StrEnum):
+    """A persisted source fact visible to the opt-in M4 source policy."""
+
+    ELIGIBLE = "ELIGIBLE"
+    INELIGIBLE = "INELIGIBLE"
+    UNPROVEN = "UNPROVEN"
+
+
+@dataclass(frozen=True, slots=True)
+class PlainTextPrefixProof:
+    """Server-owned proof for the bounded ``plain_text_prefix_v1`` policy.
+
+    Only the thread-context adapter populates this value after reading the
+    persisted Run and its approval/action evidence. ``UNPROVEN`` is distinct
+    from an empty transcript: an absent or empty ``messages`` tuple alone is
+    not evidence that no external action occurred.
+    """
+
+    status: PlainTextPrefixProofStatus | str
+    reason: str
+    policy: str = PLAIN_TEXT_PREFIX_V1
+
+    def __post_init__(self) -> None:
+        try:
+            status = PlainTextPrefixProofStatus(self.status)
+        except (TypeError, ValueError):
+            raise ValueError("plain-text proof status is invalid") from None
+        object.__setattr__(self, "status", status)
+        if self.policy != PLAIN_TEXT_PREFIX_V1:
+            raise ValueError(f"plain-text proof policy must be {PLAIN_TEXT_PREFIX_V1}")
+        _trimmed_text(self.reason, "plain-text proof reason")
+
 
 # These are contract ceilings, not tuning knobs. Callers may lower them for a
 # run. The extra row is a sentinel used to prove that a scan ending exactly at
@@ -97,6 +138,9 @@ class ThreadTurnContext:
     evidence_registry: dict[str, Any] | None = None
     source_knowledge_snapshots: tuple[dict[str, Any], ...] = ()
     source_wiki_publications: tuple[dict[str, Any], ...] = ()
+    # Populated only by the persisted thread-context adapter. Callers must not
+    # infer this from an empty transcript or from user-controlled input.
+    plain_text_prefix_v1_proof: PlainTextPrefixProof | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -723,10 +767,11 @@ class ThreadContextProvider(Protocol):
         max_turns_scanned: int,
         max_artifacts: int,
         artifact_page_size: int,
+        summary_source_policy: str | None = None,
     ) -> ThreadConversation: ...
 
     async def replay_history_sources(
-        self, *, manifest: Mapping[str, Any]
+        self, *, manifest: Mapping[str, Any], summary_source_policy: str | None = None
     ) -> ThreadConversation: ...
 
 
@@ -807,6 +852,12 @@ __all__ = [
     "HISTORY_SOURCE_SUMMARY_REASON_NOT_CLASSIFIED",
     "HISTORY_SOURCE_TURN_SCAN_LIMIT",
     "HISTORY_SOURCE_TURN_SELECTION_LIMIT",
+    "PLAIN_TEXT_PREFIX_V1",
+    "PLAIN_TEXT_PREFIX_V1_BLOCKER_EVIDENCE_UNAVAILABLE",
+    "PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON",
+    "PLAIN_TEXT_PREFIX_V1_TRANSCRIPT_UNAVAILABLE",
+    "PlainTextPrefixProof",
+    "PlainTextPrefixProofStatus",
     "RecordedToolCall",
     "RunArtifactRecorder",
     "ThreadContextProvider",

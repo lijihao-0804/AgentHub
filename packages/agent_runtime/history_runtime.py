@@ -4,19 +4,59 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
+from uuid import UUID
 
 from packages.agent_runtime.context_budget import ContextBudgetPolicy
 from packages.agent_runtime.history_planner import (
+    DecisionReason,
     HistoryCategory,
     HistoryPlan,
     HistoryScope,
     HistorySourceGroup,
+    Insufficiency,
+    InsufficiencyCode,
     SummaryEligibility,
     plan_history,
 )
-from packages.agent_runtime.work_layer import ThreadConversation
+from packages.agent_runtime.work_layer import (
+    PLAIN_TEXT_PREFIX_V1,
+    PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON,
+    PlainTextPrefixProofStatus,
+    ThreadConversation,
+    ThreadTurnContext,
+)
 from packages.core.errors.exceptions import AgentHubError
 from packages.model_gateway.contracts import ModelMessage, ModelToolDefinition
+
+
+@dataclass(frozen=True, slots=True)
+class PlainTextPrefixSource:
+    """One source in the exact older prefix selected by the server policy."""
+
+    source_id: str
+    turn_id: UUID
+    run_id: UUID
+    sequence: int
+    revision_sha256: str
+    estimated_tokens: int
+
+
+@dataclass(frozen=True, slots=True)
+class PlainTextPrefix:
+    """B's selector for the contiguous eligible sources in this frozen view."""
+
+    policy: str
+    sources: tuple[PlainTextPrefixSource, ...]
+    stopped_before_source_id: str | None
+    stop_reason: str | None
+
+    @property
+    def source_ids(self) -> tuple[str, ...]:
+        return tuple(source.source_id for source in self.sources)
+
+    @property
+    def estimated_tokens(self) -> int:
+        return sum(source.estimated_tokens for source in self.sources)
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,6 +65,7 @@ class PlannedHistory:
     messages: tuple[ModelMessage, ...]
     memory_messages: tuple[ModelMessage, ...]
     exchange_ids: tuple[str, ...]
+    plain_text_prefix: PlainTextPrefix | None = None
 
 
 class _Counter:
@@ -47,6 +88,7 @@ def plan_history_view(
     tools: Sequence[ModelToolDefinition],
     permission_snapshot: str,
     return_blocked_plan: bool = False,
+    summary_source_policy: str | None = None,
 ) -> PlannedHistory:
     """Measure all sources; optionally return a blocked plan for job scheduling.
 
@@ -55,6 +97,8 @@ def plan_history_view(
     """
     if not isinstance(return_blocked_plan, bool):
         raise TypeError("return_blocked_plan must be a bool")
+    if summary_source_policy not in {None, PLAIN_TEXT_PREFIX_V1}:
+        raise ValueError(f"summary_source_policy must be {PLAIN_TEXT_PREFIX_V1} or None")
     manifest = conversation.source_manifest
     if manifest is None or manifest.status != "COMPLETE":
         raise AgentHubError(
@@ -118,6 +162,12 @@ def plan_history_view(
             policy._estimate_message(message),
         )
     pairs: dict[str, tuple[ModelMessage, ...]] = {}
+    prefix_sources: list[PlainTextPrefixSource] = []
+    prefix_open = summary_source_policy is not None
+    prefix_stopped_before: str | None = None
+    prefix_stop_reason: str | None = None
+    expected_prefix_sequence = 1
+    recent_start = max(len(conversation.turns) - 2, 0)
     for index, (source, turn) in enumerate(
         zip(manifest.selected_sources, conversation.turns, strict=True)
     ):
@@ -141,19 +191,81 @@ def plan_history_view(
             )
         )
         pairs[source.source_id] = pair
-        category = (
-            HistoryCategory.RECENT
-            if index >= len(conversation.turns) - 2
-            else HistoryCategory.KEEP_EXACT
-        )
+        source_tokens = sum(policy._estimate_message(item) for item in pair)
+        category = HistoryCategory.KEEP_EXACT
+        eligibility = SummaryEligibility.UNKNOWN
+        eligibility_reason = getattr(source, "summary_eligibility_reason", "NOT_CLASSIFIED")
+        if index >= recent_start:
+            category = HistoryCategory.RECENT
+            if summary_source_policy is not None:
+                eligibility = SummaryEligibility.INELIGIBLE
+                eligibility_reason = "PLAIN_TEXT_PREFIX_V1_RECENT_EXCHANGE_RETAINED"
+        elif summary_source_policy is None:
+            category = HistoryCategory.KEEP_EXACT
+        elif not prefix_open:
+            category = HistoryCategory.KEEP_EXACT
+            eligibility = SummaryEligibility.INELIGIBLE
+            eligibility_reason = "PLAIN_TEXT_PREFIX_V1_CONTIGUITY_CLOSED"
+        else:
+            proof = turn.plain_text_prefix_v1_proof
+            if source.sequence != expected_prefix_sequence:
+                prefix_open = False
+                prefix_stopped_before = source.source_id
+                prefix_stop_reason = "PLAIN_TEXT_PREFIX_V1_SOURCE_SEQUENCE_GAP"
+            elif proof is None:
+                prefix_open = False
+                prefix_stopped_before = source.source_id
+                prefix_stop_reason = "PLAIN_TEXT_PREFIX_V1_PERSISTED_PROOF_MISSING"
+            elif proof.status is PlainTextPrefixProofStatus.UNPROVEN:
+                prefix_open = False
+                prefix_stopped_before = source.source_id
+                prefix_stop_reason = proof.reason
+            elif proof.status is PlainTextPrefixProofStatus.INELIGIBLE:
+                prefix_open = False
+                prefix_stopped_before = source.source_id
+                prefix_stop_reason = proof.reason
+            elif proof.status is not PlainTextPrefixProofStatus.ELIGIBLE:
+                prefix_open = False
+                prefix_stopped_before = source.source_id
+                prefix_stop_reason = "PLAIN_TEXT_PREFIX_V1_PROOF_STATUS_INVALID"
+            elif proof.reason != PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON:
+                prefix_open = False
+                prefix_stopped_before = source.source_id
+                prefix_stop_reason = "PLAIN_TEXT_PREFIX_V1_PROOF_POLICY_MISMATCH"
+            elif not _is_plain_text_exchange(turn):
+                prefix_open = False
+                prefix_stopped_before = source.source_id
+                prefix_stop_reason = "PLAIN_TEXT_PREFIX_V1_PROOF_CONTRADICTED_BY_TURN"
+            else:
+                category = HistoryCategory.OPTIONAL
+                eligibility = SummaryEligibility.ELIGIBLE
+                eligibility_reason = proof.reason
+                prefix_sources.append(
+                    PlainTextPrefixSource(
+                        source_id=source.source_id,
+                        turn_id=source.turn_id,
+                        run_id=source.run_id,
+                        sequence=source.sequence,
+                        revision_sha256=source.revision_sha256,
+                        estimated_tokens=source_tokens,
+                    )
+                )
+                expected_prefix_sequence += 1
+            if category is not HistoryCategory.OPTIONAL:
+                eligibility = SummaryEligibility.INELIGIBLE
+                eligibility_reason = (
+                    prefix_stop_reason
+                    if prefix_stop_reason is not None
+                    else eligibility_reason
+                )
         add(
             source.source_id,
             category,
             source.sequence,
             source.revision_sha256,
-            sum(policy._estimate_message(item) for item in pair),
-            getattr(source, "summary_eligibility_reason", "NOT_CLASSIFIED"),
-            SummaryEligibility.UNKNOWN,
+            source_tokens,
+            eligibility_reason,
+            eligibility,
         )
     plan = plan_history(
         groups,
@@ -164,9 +276,21 @@ def plan_history_view(
         expected_counter_id=policy.context_policy["counter"]["id"],
         expected_counter_version=policy.context_policy["counter"]["version"],
     )
+    plan = _block_uncovered_optional_history_drops(plan)
     if not plan.ready_for_dispatch:
         if return_blocked_plan:
-            return PlannedHistory(plan=plan, messages=(), memory_messages=(), exchange_ids=())
+            return PlannedHistory(
+                plan=plan,
+                messages=(),
+                memory_messages=(),
+                exchange_ids=(),
+                plain_text_prefix=_plain_text_prefix_result(
+                    summary_source_policy,
+                    prefix_sources,
+                    prefix_stopped_before,
+                    prefix_stop_reason,
+                ),
+            )
         raise AgentHubError(
             "AGENT_HISTORY_CONTEXT_INSUFFICIENT", "Thread history does not fit safely.", 422
         )
@@ -189,7 +313,113 @@ def plan_history_view(
         for _ in pairs[source.source_id]
     )
     return PlannedHistory(
-        plan=plan, messages=history, memory_messages=memory, exchange_ids=exchange_ids
+        plan=plan,
+        messages=history,
+        memory_messages=memory,
+        exchange_ids=exchange_ids,
+        plain_text_prefix=_plain_text_prefix_result(
+            summary_source_policy,
+            prefix_sources,
+            prefix_stopped_before,
+            prefix_stop_reason,
+        ),
+    )
+
+
+def _is_plain_text_exchange(turn: ThreadTurnContext) -> bool:
+    """Reject context evidence that contradicts a server eligibility proof."""
+
+    if (
+        turn.artifact_ids
+        or turn.artifact_refs
+        or turn.evidence_registry is not None
+        or turn.source_knowledge_snapshots
+        or turn.source_wiki_publications
+        or not turn.messages
+        or not isinstance(turn.user_input, str)
+        or not turn.user_input.strip()
+        or not isinstance(turn.final_output, str)
+        or not turn.final_output.strip()
+        or "\x00" in turn.user_input
+        or "\x00" in turn.final_output
+        or not isinstance(turn.messages, tuple)
+    ):
+        return False
+    return (
+        len(turn.messages) == 2
+        and turn.messages[0].role == "user"
+        and turn.messages[0].content == turn.user_input
+        and not turn.messages[0].tool_calls
+        and turn.messages[0].tool_call_id is None
+        and turn.messages[1].role == "assistant"
+        and turn.messages[1].content == turn.final_output
+        and not turn.messages[1].tool_calls
+        and turn.messages[1].tool_call_id is None
+    )
+
+
+def _plain_text_prefix_result(
+    policy: str | None,
+    sources: list[PlainTextPrefixSource],
+    stopped_before_source_id: str | None,
+    stop_reason: str | None,
+) -> PlainTextPrefix | None:
+    if policy is None:
+        return None
+    if not sources and stop_reason is None:
+        stop_reason = "PLAIN_TEXT_PREFIX_V1_NO_ELIGIBLE_OLD_EXCHANGE"
+    return PlainTextPrefix(
+        policy=policy,
+        sources=tuple(sources),
+        stopped_before_source_id=stopped_before_source_id,
+        stop_reason=stop_reason,
+    )
+
+
+def _block_uncovered_optional_history_drops(plan: HistoryPlan) -> HistoryPlan:
+    """Refuse to omit optional history without a retained verified summary.
+
+    ``OPTIONAL`` allows the planner to omit a group. Historical groups are
+    replaceable only when an exact verified summary covering that group is
+    retained. This also protects groups whose source eligibility is unknown
+    or ineligible if a caller categorizes them as optional.
+    """
+
+    retained_summary_ids = {
+        decision.group_id
+        for decision in plan.decisions
+        if (
+            decision.category is HistoryCategory.VERIFIED_SUMMARY
+            and decision.retained
+        )
+    }
+    uncovered = tuple(
+        decision.group_id
+        for decision in plan.decisions
+        if (
+            decision.category is HistoryCategory.OPTIONAL
+            and decision.sequence > 0
+            and not decision.retained
+            and not (
+                decision.reason is DecisionReason.DROPPED_COVERED_BY_SUMMARY
+                and decision.covered_by_summary_id in retained_summary_ids
+            )
+        )
+    )
+    if not uncovered:
+        return plan
+    blocking = Insufficiency(
+        code=InsufficiencyCode.VERIFIED_SUMMARY_NOT_RETAINED,
+        blocking=True,
+        message=(
+            "Optional historical sources would be dropped before a verified summary "
+            "replaces them."
+        ),
+    )
+    return replace(
+        plan,
+        insufficiencies=plan.insufficiencies + (blocking,),
+        ready_for_dispatch=False,
     )
 
 
