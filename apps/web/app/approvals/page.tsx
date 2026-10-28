@@ -115,7 +115,7 @@ export default function ApprovalsPage() {
       });
       if (generationRef.current !== generation || activeSessionRef.current !== requestSessionId) return;
       pagedRef.current = false;
-      setApprovals(page.items);
+      setApprovals(page.items ?? []);
       setTotal(page.total);
       setLoaded(true);
     } catch (caught) {
@@ -140,7 +140,7 @@ export default function ApprovalsPage() {
       });
       if (generationRef.current !== generation || activeSessionRef.current !== requestSessionId) return;
       pagedRef.current = true;
-      setApprovals((current) => [...current, ...page.items]);
+      setApprovals((current) => [...current, ...(page.items ?? [])]);
       setTotal(page.total);
       setLoaded(true);
     } catch (caught) {

@@ -56,9 +56,13 @@ export function listApprovals(
   if (options.limit !== undefined) params.set("limit", String(options.limit));
   if (options.offset !== undefined) params.set("offset", String(options.offset));
   const query = params.toString();
-  return apiRequest<ApprovalList>(
+  return apiRequest<ApprovalList | Approval[]>(
     `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/approvals${query ? `?${query}` : ""}`,
     accessToken,
+  ).then((response) =>
+    // Some API builds return a bare array; normalize so the page never sets
+    // its list state to `undefined` and crashes on `approvals.some(...)`.
+    Array.isArray(response) ? { items: response, total: response.length } : response,
   );
 }
 

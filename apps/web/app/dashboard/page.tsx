@@ -227,7 +227,7 @@ export default function DashboardPage() {
         <h1>{t("dashboard.title")}</h1>
       </header>
 
-      <section className="runs-toolbar" aria-label={t("dashboard.window")}>
+      <section className="dashboard-window" aria-label={t("dashboard.window")}>
         <label>
           {t("dashboard.window")}
           <Select
