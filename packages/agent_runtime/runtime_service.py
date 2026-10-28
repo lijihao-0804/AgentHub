@@ -31,6 +31,7 @@ from packages.agent_runtime.execution_lease import run_execution_lease
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
 from packages.agent_runtime.history_checkpoint import verify_history_checkpoint_binding
 from packages.agent_runtime.history_transcript import MAX_ENCODED_BYTES, build_turn_transcript
+from packages.agent_runtime.local_summary_experiment import LocalSummaryExperimentPermit
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.agent_runtime.run_budget_ledger import RunBudgetAttempt
 from packages.agent_runtime.runtime_graph import _AgentRunGraph
@@ -106,6 +107,7 @@ class AgentRunService:
         memory_writer: MemoryWriteQueue | None = None,
         artifact_recorder: RunArtifactRecorder | None = None,
         summary_request_counter: DeepseekV41TextCounter | None = None,
+        local_summary_experiment: LocalSummaryExperimentPermit | None = None,
         thread_context_max_turns: int = DEFAULT_THREAD_CONTEXT_MAX_TURNS,
         stream_grace_seconds: float = DEFAULT_STREAM_GRACE_SECONDS,
         stream_registry: RunStreamRegistry | None = None,
@@ -132,8 +134,21 @@ class AgentRunService:
         self.memory_selector = memory_selector
         self.memory_writer = memory_writer
         self.artifact_recorder = artifact_recorder
+        if local_summary_experiment is not None:
+            if not isinstance(local_summary_experiment, LocalSummaryExperimentPermit):
+                raise TypeError("local_summary_experiment must be a local permit")
+            if not local_summary_experiment.matches_session_factory(session_factory):
+                raise ValueError("local summary experiment does not match the runtime database")
+            if model_attempt_budget_factory is None:
+                raise ValueError(
+                    "local summary experiments require the shared Run and research budget adapters"
+                )
+            if summary_request_counter is not None and not summary_request_counter.verified_source:
+                raise ValueError("local summary experiment counter is not verified")
+        self.local_summary_experiment = local_summary_experiment
         self.summary_request_counter = (
-            summary_request_counter
+            (local_summary_experiment.counter if local_summary_experiment is not None else None)
+            or summary_request_counter
             or load_configured_deepseek_v41_counter(
                 get_settings().summary_deepseek_v41_tokenizer_path
             )

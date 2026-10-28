@@ -283,6 +283,16 @@ class SummaryWorker:
                     "SUMMARY_WORKER_BUDGET_REJECTED",
                     "The complete summary request exceeds the frozen input budget.",
                 )
+            if prepared.request_spec.get("exact_input_tokens") != exact_input_tokens:
+                await self.service.fail_before_dispatch(
+                    claimed.key,
+                    lease_token=claimed.lease_token,
+                    failure_code="SUMMARY_REQUEST_COUNTER_MISMATCH",
+                )
+                raise SummaryServiceError(
+                    "SUMMARY_REQUEST_COUNTER_MISMATCH",
+                    "The worker count differs from the service-rebuilt complete request.",
+                )
         # The auxiliary job has one durable price reservation and one dispatch.
         # Main-agent fallback configuration remains unchanged.
         single_attempt = ResolvedModelExecutionPlan(

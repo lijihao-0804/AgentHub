@@ -34,6 +34,7 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.context_budget import ApproxTokenEstimator
+from packages.agent_runtime.local_summary_experiment import LocalSummaryExperimentPermit
 from packages.agent_runtime.frozen import (
     SUMMARY_NON_THINKING_MODE,
     SUMMARY_NON_THINKING_MODEL,
@@ -498,6 +499,8 @@ class SummaryJobService:
         verifier: SummaryBindingVerifier | None = None,
         budget_reserver: SummaryBudgetReserver | None = None,
         clock: Callable[[], datetime] | None = None,
+        local_summary_experiment: LocalSummaryExperimentPermit | None = None,
+        current_run_id: UUID | None = None,
         lease_seconds: int = DEFAULT_LEASE_SECONDS,
         max_recovery_batch: int = DEFAULT_MAX_RECOVERY_BATCH,
     ) -> None:
@@ -514,12 +517,224 @@ class SummaryJobService:
         self._verifier = verifier or DenyAllSummaryBindingVerifier()
         self._budget_reserver = budget_reserver or DenyAllSummaryBudgetReserver()
         self._clock = clock or _utc_now
+        if local_summary_experiment is not None and not isinstance(
+            local_summary_experiment, LocalSummaryExperimentPermit
+        ):
+            raise TypeError("local_summary_experiment must be a local permit")
+        if local_summary_experiment is not None and (
+            current_run_id not in local_summary_experiment.run_ids
+            or not local_summary_experiment.matches_session_factory(session_factory)
+        ):
+            raise ValueError("local summary experiment scope does not match this service")
+        self._local_summary_experiment = local_summary_experiment
+        self._current_run_id = current_run_id
         self._lease_seconds = lease_seconds
         self._max_recovery_batch = max_recovery_batch
+
+    def _request_strategy_error(self, job: Any) -> SummaryServiceError | None:
+        mode = _summary_request_mode(job)
+        if mode == "provider_default":
+            return None
+        permit = getattr(self, "_local_summary_experiment", None)
+        if (
+            mode == SUMMARY_NON_THINKING_MODE
+            and permit is not None
+            and permit.authorizes_job(
+                session_factory=self._session_factory,
+                current_run_id=getattr(self, "_current_run_id", None),
+                job=job,
+            )
+        ):
+            return None
+        if mode == SUMMARY_NON_THINKING_MODE:
+            return SummaryServiceError(
+                "SUMMARY_REQUEST_COUNTER_UNAVAILABLE",
+                "The DeepSeek full-request counter is unavailable outside its bound local experiment.",
+            )
+        return SummaryServiceError(
+            "SUMMARY_REQUEST_STRATEGY_UNSUPPORTED",
+            "The frozen summary request strategy is not supported.",
+        )
+
+    def _request_mode_search_allowed(self, request_mode: str) -> bool:
+        if request_mode == "provider_default":
+            return True
+        permit = getattr(self, "_local_summary_experiment", None)
+        return (
+            request_mode == SUMMARY_NON_THINKING_MODE
+            and permit is not None
+            and getattr(self, "_current_run_id", None) in permit.run_ids
+            and permit.matches_session_factory(self._session_factory)
+        )
+
+    def _verified_request_payload(
+        self,
+        job: ThreadSummaryJob,
+        *,
+        context: SummaryInputContext,
+        input_tokens: int,
+        output_tokens: int,
+    ) -> dict[str, Any]:
+        payload = _verified_request_spec(
+            job,
+            context=context,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+        )
+        mode = _summary_request_mode(job)
+        if mode != SUMMARY_NON_THINKING_MODE:
+            return payload
+        strategy_error = self._request_strategy_error(job)
+        if strategy_error is not None:
+            raise strategy_error
+        if input_tokens > 32768:
+            raise SummaryServiceError(
+                "SUMMARY_REQUEST_BUDGET_EXCEEDED",
+                "The local experiment input window is limited to 32768 tokens.",
+            )
+        permit = self._local_summary_experiment
+        assert permit is not None
+        from packages.model_gateway.contracts import (
+            AliyunDeepSeekRequestMode,
+            ModelMessage,
+            ModelRequest,
+            RetryPolicy,
+        )
+
+        prompt = build_summary_prompt(context, prompt_version=job.prompt_version)
+        request = ModelRequest(
+            (
+                ModelMessage("system", prompt.system_prompt),
+                ModelMessage("user", prompt.user_prompt),
+            ),
+            retry_policy=RetryPolicy(max_attempts=1),
+            request_mode=AliyunDeepSeekRequestMode.NON_THINKING,
+        )
+        try:
+            actual_input_tokens = permit.counter.count_frozen_summary_request(
+                request,
+                request_identity=permit.request_identity,
+                provider=permit.provider,
+                model=permit.model,
+            )
+        except Exception as error:
+            raise SummaryServiceError(
+                "SUMMARY_REQUEST_COUNTER_FAILED",
+                "The frozen local experiment counter could not recount the dispatch request.",
+            ) from error
+        if type(actual_input_tokens) is not int or actual_input_tokens <= 0:
+            raise SummaryServiceError(
+                "SUMMARY_REQUEST_COUNTER_INVALID",
+                "The frozen local experiment counter returned an invalid count.",
+            )
+        if actual_input_tokens > input_tokens:
+            raise SummaryServiceError(
+                "SUMMARY_REQUEST_BUDGET_EXCEEDED",
+                "The full request exceeds the reserved model input budget.",
+            )
+        if output_tokens > permit.output_token_limit:
+            raise SummaryServiceError(
+                "SUMMARY_REQUEST_BUDGET_EXCEEDED",
+                "The requested output exceeds the local experiment output limit.",
+            )
+        payload["exact_input_tokens"] = actual_input_tokens
+        payload["local_experiment_id"] = permit.experiment_id
+        payload["experiment_request_identity"] = permit.request_hash(
+            run_id=job.trigger_run_id,
+            attempt_kind="SUMMARY",
+            provider=permit.provider,
+            model=permit.model,
+            request=request,
+            output_tokens=output_tokens,
+            temperature=job.model_spec.get("temperature"),
+        )
+        return payload
+
+    @staticmethod
+    def _local_experiment_reservation(dispatch: ThreadSummaryDispatch) -> Mapping[str, Any] | None:
+        reservation = (dispatch.budget_reservation or {}).get("local_experiment")
+        return reservation if isinstance(reservation, Mapping) else None
+
+    def _mark_local_experiment_unknown(
+        self, dispatch: ThreadSummaryDispatch, *, reason: str
+    ) -> None:
+        permit = self._local_summary_experiment
+        reservation = self._local_experiment_reservation(dispatch)
+        if permit is None or reservation is None:
+            return
+        try:
+            permit.mark_unknown(dict(reservation), reason=reason)
+        except Exception:
+            # The reserve already committed. Leaving it reserved is the safe
+            # fallback if the outer ledger cannot record the uncertainty note.
+            logger.warning("local_summary_experiment_unknown_note_failed", exc_info=True)
+
+    def _settle_local_experiment_response(
+        self,
+        dispatch: ThreadSummaryDispatch,
+        *,
+        provider: str,
+        model: str,
+        input_tokens: int | None,
+        output_tokens: int | None,
+        total_tokens: int | None,
+    ) -> None:
+        permit = self._local_summary_experiment
+        reservation = self._local_experiment_reservation(dispatch)
+        if permit is None or reservation is None:
+            return
+        from types import SimpleNamespace
+
+        usage = (
+            SimpleNamespace(
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                total_tokens=total_tokens,
+            )
+            if input_tokens is not None and output_tokens is not None and total_tokens is not None
+            else None
+        )
+        try:
+            if usage is None:
+                permit.mark_unknown(dict(reservation), reason="provider usage is unavailable")
+            else:
+                permit.settle_response(
+                    dict(reservation),
+                    usage=usage,
+                    provider=provider,
+                    model=model,
+                )
+        except Exception:
+            # Keep the research reservation at its full upper bound. The DB
+            # response remains durable and can be reconciled without redispatch.
+            logger.warning("local_summary_experiment_settlement_failed", exc_info=True)
+
+    def _local_dispatch_integrity_error(
+        self,
+        job: ThreadSummaryJob,
+        context: SummaryInputContext,
+        dispatch: ThreadSummaryDispatch,
+    ) -> str | None:
+        try:
+            payload = self._verified_request_payload(
+                job,
+                context=context,
+                input_tokens=dispatch.reserved_input_tokens,
+                output_tokens=dispatch.reserved_output_tokens,
+            )
+            digest = canonical_json_hash(
+                {"version": SUMMARY_LEDGER_VERSION, "request": payload}
+            )
+        except SummaryServiceError as error:
+            return error.code
+        return None if digest == dispatch.request_hash else "SUMMARY_DISPATCH_PAYLOAD_MISMATCH"
 
     async def create_job(self, command: NewSummaryJob) -> CreatedSummaryJob:
         """Create an immutable job and source manifest in one bounded transaction."""
 
+        strategy_error = self._request_strategy_error(command)
+        if strategy_error is not None:
+            raise strategy_error
         _validate_new_job(command)
         checkpoint = await self._verify_exact_checkpoint(command)
         model_round = _trusted_summary_model_round(command, checkpoint)
@@ -1029,6 +1244,9 @@ class SummaryJobService:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND", "The summary job was not found."
                     )
+                strategy_error = self._request_strategy_error(job)
+                if strategy_error is not None:
+                    raise strategy_error
                 _require_model_round_boundary(job)
                 if job.status != SummaryJobStatus.CLAIMED.value:
                     raise SummaryServiceError(
@@ -1044,7 +1262,7 @@ class SummaryJobService:
                         "SUMMARY_LEASE_LOST", "The execution lease expired during preparation."
                     )
                 prompt = build_summary_prompt(context, prompt_version=job.prompt_version)
-                request_spec = _verified_request_spec(
+                request_spec = self._verified_request_payload(
                     job,
                     context=context,
                     input_tokens=reserved_input_tokens,
@@ -1084,12 +1302,12 @@ class SummaryJobService:
         if (
             isinstance(request_spec, Mapping)
             and request_spec.get("request_mode") == SUMMARY_NON_THINKING_MODE
+            and getattr(self, "_local_summary_experiment", None) is None
         ):
             raise SummaryServiceError(
                 "SUMMARY_REQUEST_COUNTER_UNAVAILABLE",
                 "The DeepSeek full-request counter is not registered for production dispatch.",
             )
-
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
@@ -1099,12 +1317,9 @@ class SummaryJobService:
                         "SUMMARY_JOB_NOT_FOUND",
                         "The summary job was not found.",
                     )
-                if _summary_request_mode(job) == SUMMARY_NON_THINKING_MODE:
-                    raise SummaryServiceError(
-                        "SUMMARY_REQUEST_COUNTER_UNAVAILABLE",
-                        "The DeepSeek full-request counter is not registered for "
-                        "production dispatch.",
-                    )
+                strategy_error = self._request_strategy_error(job)
+                if strategy_error is not None:
+                    raise strategy_error
                 _require_model_round_boundary(job)
                 if job.status != SummaryJobStatus.CLAIMED.value:
                     raise SummaryServiceError(
@@ -1183,7 +1398,7 @@ class SummaryJobService:
 
                 dispatch_id = uuid4()
                 reservation_id = uuid4()
-                request_payload = _verified_request_spec(
+                request_payload = self._verified_request_payload(
                     job,
                     context=context,
                     input_tokens=reserved_input_tokens,
@@ -1262,6 +1477,78 @@ class SummaryJobService:
                     raise SummaryServiceError(
                         "SUMMARY_LEASE_LOST",
                         "The execution lease expired while rechecking the checkpoint.",
+                    )
+
+                if _summary_request_mode(job) == SUMMARY_NON_THINKING_MODE:
+                    permit = self._local_summary_experiment
+                    if permit is None:
+                        raise SummaryServiceError(
+                            "SUMMARY_REQUEST_COUNTER_UNAVAILABLE",
+                            "The v2 dispatch has no bound local experiment ledger.",
+                        )
+                    exact_tokens = request_payload.get("exact_input_tokens")
+                    request_identity = request_payload.get("experiment_request_identity")
+                    if (
+                        type(exact_tokens) is not int
+                        or exact_tokens <= 0
+                        or not isinstance(request_identity, str)
+                        or not _sha256(request_identity)
+                    ):
+                        raise SummaryServiceError(
+                            "SUMMARY_REQUEST_COUNTER_INVALID",
+                            "The exact request count or ledger identity is unavailable.",
+                        )
+                    experiment_attempt_id = f"m4s-{job.id.hex}"
+                    input_counter = {
+                        "counter_id": permit.request_identity["request_counter_id"],
+                        "tokenizer_revision": permit.request_identity[
+                            "request_counter_revision"
+                        ],
+                        "thinking_mode": "NON_THINKING",
+                        "tokens": exact_tokens,
+                        "input_limit": min(reserved_input_tokens, 32768),
+                        "request_identity": request_identity,
+                    }
+                    try:
+                        outer_reservation = permit.reserve_dispatch(
+                            attempt_id=experiment_attempt_id,
+                            run_id=job.trigger_run_id,
+                            attempt_kind="SUMMARY",
+                            provider=provider,
+                            model=model,
+                            request_identity=request_identity,
+                            estimated_input_tokens=32768,
+                            requested_output_tokens=reserved_output_tokens,
+                            maximum_cost_cny=cost,
+                            currency=pricing.currency,
+                            input_counter=input_counter,
+                        )
+                    except Exception as error:
+                        raise SummaryServiceError(
+                            "SUMMARY_EXPERIMENT_BUDGET_REJECTED",
+                            "The shared research ledger refused the summary dispatch reservation.",
+                        ) from error
+                    outer_cost = getattr(outer_reservation, "reserved_cost_cny", None)
+                    if not isinstance(outer_cost, Decimal) or not outer_cost.is_finite():
+                        raise SummaryServiceError(
+                            "SUMMARY_EXPERIMENT_BUDGET_INVALID",
+                            "The shared research ledger returned no valid reservation.",
+                        )
+                    reservation_payload["local_experiment"] = {
+                        "experiment_id": permit.experiment_id,
+                        "attempt_id": experiment_attempt_id,
+                        "request_identity": request_identity,
+                        "reserved_cost_cny": str(outer_cost),
+                    }
+                    reservation_hash = canonical_json_hash(reservation_payload)
+                    intent_hash = canonical_json_hash(
+                        {
+                            "version": SUMMARY_LEDGER_VERSION,
+                            "job_id": str(job.id),
+                            "identity_hash": job.identity_hash,
+                            "request_hash": request_hash,
+                            "reservation_hash": reservation_hash,
+                        }
                     )
 
                 dispatch = ThreadSummaryDispatch(
@@ -1355,7 +1642,7 @@ class SummaryJobService:
                         "The dispatch ledger is already terminal.",
                     )
                 context = await self._trusted_dispatch_context(session, key, job)
-                request_payload = _verified_request_spec(
+                request_payload = self._verified_request_payload(
                     job,
                     context=context,
                     input_tokens=dispatch.reserved_input_tokens,
@@ -1420,6 +1707,12 @@ class SummaryJobService:
                     SummaryJobStatus.VALIDATED.value,
                     SummaryJobStatus.PUBLISHED.value,
                 }:
+                    if job.status == SummaryJobStatus.UNKNOWN_OUTCOME.value:
+                        dispatch = await self._lock_dispatch(session, key, job.dispatch_id)
+                        if dispatch is not None:
+                            self._mark_local_experiment_unknown(
+                                dispatch, reason="dispatch outcome remains unknown"
+                            )
                     return _settlement(job)
                 if job.status != SummaryJobStatus.DISPATCH_INTENT.value:
                     raise SummaryServiceError(
@@ -1440,6 +1733,9 @@ class SummaryJobService:
                     )
                 _mark_unknown(job, current)
                 await self._mark_dispatch_unknown(session, key, dispatch, current)
+                self._mark_local_experiment_unknown(
+                    dispatch, reason="provider dispatch outcome is unknown"
+                )
                 await session.flush()
                 return _settlement(job)
 
@@ -1477,6 +1773,7 @@ class SummaryJobService:
         expired = False
         terminal = False
         stored: StoredSummaryResponse | None = None
+        experiment_dispatch: ThreadSummaryDispatch | None = None
         async with self._session_factory() as session:
             async with session.begin():
                 job = await self._lock_job(session, key)
@@ -1521,6 +1818,9 @@ class SummaryJobService:
                     _mark_unknown(job, current)
                     assert dispatch is not None
                     await self._mark_dispatch_unknown(session, key, dispatch, current)
+                    self._mark_local_experiment_unknown(
+                        dispatch, reason="response lease expired before persistence"
+                    )
                 elif not terminal:
                     assert dispatch is not None
                     if dispatch.outcome != ThreadSummaryDispatchOutcome.DISPATCHED.value:
@@ -1596,6 +1896,7 @@ class SummaryJobService:
                         response_sha256=response_hash,
                         status=SummaryJobStatus.RESPONSE_STORED.value,
                     )
+                    experiment_dispatch = dispatch
         if terminal:
             raise SummaryServiceError(
                 "SUMMARY_UNKNOWN_OUTCOME_TERMINAL",
@@ -1607,6 +1908,15 @@ class SummaryJobService:
                 "The expired dispatch intent was recorded as UNKNOWN_OUTCOME.",
             )
         assert stored is not None
+        if experiment_dispatch is not None:
+            self._settle_local_experiment_response(
+                experiment_dispatch,
+                provider=response.provider,
+                model=response.model,
+                input_tokens=response.input_tokens,
+                output_tokens=response.output_tokens,
+                total_tokens=response.total_tokens,
+            )
         return stored
 
     async def validate_stored_response(
@@ -1640,6 +1950,13 @@ class SummaryJobService:
                     SummaryJobStatus.STALE.value,
                     SummaryJobStatus.FAILED.value,
                 }:
+                    if job.status in {
+                        SummaryJobStatus.VALIDATED.value,
+                        SummaryJobStatus.PUBLISHED.value,
+                    }:
+                        strategy_error = self._request_strategy_error(job)
+                        if strategy_error is not None:
+                            raise strategy_error
                     settlement = _settlement(job)
                     trusted_error = None
                 elif job.status != SummaryJobStatus.RESPONSE_STORED.value:
@@ -1683,6 +2000,14 @@ class SummaryJobService:
                             "SUMMARY_SOURCE_INVARIANT",
                             "The immutable source manifest is empty.",
                         )
+                    self._settle_local_experiment_response(
+                        dispatch,
+                        provider=response.provider,
+                        model=response.model,
+                        input_tokens=response.input_tokens,
+                        output_tokens=response.output_tokens,
+                        total_tokens=response.total_tokens,
+                    )
                     binding = _binding(job, SummaryVerifierPhase.RESPONSE_VALIDATION)
                     decision = await self._verify(session, binding)
                     current = self._now(now)
@@ -1747,16 +2072,37 @@ class SummaryJobService:
                             job.lease_expires_at = None
                             job.completed_at = current
                             settlement = _settlement(job)
-                        elif _summary_request_mode(job) == SUMMARY_NON_THINKING_MODE:
+                        elif (strategy_error := self._request_strategy_error(job)) is not None:
                             state = validate_response(
                                 _state(job), lease_token=lease_token, valid=False
                             )
                             _apply_state(job, state)
                             job.validation_result = {
                                 "valid": False,
-                                "issues": [{"code": "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"}],
+                                "issues": [{"code": strategy_error.code}],
                             }
-                            job.failure_code = "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"
+                            job.failure_code = strategy_error.code
+                            job.lease_token = None
+                            job.lease_expires_at = None
+                            job.completed_at = current
+                            settlement = _settlement(job)
+                        elif (
+                            _summary_request_mode(job) == SUMMARY_NON_THINKING_MODE
+                            and (
+                                request_error := self._local_dispatch_integrity_error(
+                                    job, context, dispatch
+                                )
+                            ) is not None
+                        ):
+                            state = validate_response(
+                                _state(job), lease_token=lease_token, valid=False
+                            )
+                            _apply_state(job, state)
+                            job.validation_result = {
+                                "valid": False,
+                                "issues": [{"code": request_error}],
+                            }
+                            job.failure_code = request_error
                             job.lease_token = None
                             job.lease_expires_at = None
                             job.completed_at = current
@@ -1847,7 +2193,7 @@ class SummaryJobService:
                         "The summary binding is no longer valid.",
                     )
                 if job.status == SummaryJobStatus.PUBLISHED.value:
-                    strategy_error = _publish_request_strategy_error(job)
+                    strategy_error = self._request_strategy_error(job)
                     if strategy_error is not None:
                         raise strategy_error
                     settlement = _settlement(job)
@@ -1862,7 +2208,7 @@ class SummaryJobService:
                         "The publication lease is missing, expired, or owned elsewhere.",
                     )
                 else:
-                    strategy_error = _publish_request_strategy_error(job)
+                    strategy_error = self._request_strategy_error(job)
                     if strategy_error is not None:
                         raise strategy_error
                     await self._verify_fixed_job_checkpoint(job)
@@ -1998,7 +2344,7 @@ class SummaryJobService:
     ) -> PublishedSummaryRevision | None:
         """Find the longest published prefix matching freshly replayed sources."""
         candidates = tuple(sources)
-        if not candidates or request_mode != "provider_default":
+        if not candidates or not self._request_mode_search_allowed(request_mode):
             return None
         if any(
             source.summary_eligibility != "ELIGIBLE"
@@ -2057,6 +2403,7 @@ class SummaryJobService:
                 if (
                     not _source_scopes_compatible(job.source_scope, source_scope)
                     or _summary_request_mode(job) != request_mode
+                    or self._request_strategy_error(job) is not None
                 ):
                     continue
                 key = SummaryJobKey(workspace_id, thread_id, job.id)
@@ -2114,6 +2461,7 @@ class SummaryJobService:
                             job is None
                             or job.status != SummaryJobStatus.PUBLISHED.value
                             or job.artifact_id != candidate.artifact_id
+                            or self._request_strategy_error(job) is not None
                         ):
                             continue
                         artifact = await session.scalar(
@@ -2187,18 +2535,9 @@ class SummaryJobService:
             if row is None:
                 return None
             artifact, job, response = row
-            request_mode = _summary_request_mode(job)
-            if request_mode != "provider_default":
-                code = (
-                    "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"
-                    if request_mode == SUMMARY_NON_THINKING_MODE
-                    else "SUMMARY_REQUEST_STRATEGY_UNSUPPORTED"
-                )
-                raise SummaryServiceError(
-                    code,
-                    "Only revisions validated with a supported production request "
-                    "strategy may be consumed.",
-                )
+            strategy_error = self._request_strategy_error(job)
+            if strategy_error is not None:
+                raise strategy_error
             sources = await self._load_sources(session, key)
             if not _artifact_is_integrity_valid(artifact, job, response, sources):
                 raise SummaryServiceError(
@@ -2347,6 +2686,9 @@ class SummaryJobService:
     async def _trusted_dispatch_context(
         self, session: AsyncSession, key: SummaryJobKey, job: ThreadSummaryJob
     ) -> SummaryInputContext:
+        strategy_error = self._request_strategy_error(job)
+        if strategy_error is not None:
+            raise strategy_error
         await self._verify_fixed_job_checkpoint(job)
         if job.tokenizer_id != "approx_language_v1" or job.tokenizer_version != "1":
             raise SummaryServiceError(

@@ -48,6 +48,7 @@ from packages.agent_runtime.history_checkpoint import (
 from packages.agent_runtime.history_evidence import validate_history_evidence
 from packages.agent_runtime.history_planner import PlanPressure
 from packages.agent_runtime.history_runtime import _namespace_tool_ids, plan_history_view
+from packages.agent_runtime.local_summary_experiment import LocalSummaryExperimentPermit
 from packages.agent_runtime.memory_tools import (
     MAX_SEARCH_RESULTS,
     THREAD_HISTORY_SEARCH,
@@ -908,6 +909,10 @@ class _AgentRunGraph:
                         "The published agent version schema is inconsistent.",
                         422,
                     )
+                summary_policy = spec.runtime.get("summary_policy")
+                request_identity = frozen_summary_request_identity(summary_policy)
+                if request_identity["request_mode"] == "non_thinking":
+                    self._require_local_summary_experiment(spec)
                 definitions = await PublishedToolCatalog(session).list(
                     workspace_id=workspace_id, agent_version_id=version.id
                 )
@@ -1157,6 +1162,7 @@ class _AgentRunGraph:
             return {}
 
         try:
+            self._require_local_summary_experiment(state["spec"])
             await self._assert_summary_run_lease()
             await self._require_current_summary_actor()
             await self._verify_history_checkpoint_binding(
@@ -1190,7 +1196,12 @@ class _AgentRunGraph:
                 )
             permission_snapshot = _permission_snapshot(self.context)
             permission_hash = hashlib.sha256(permission_snapshot.encode("utf-8")).hexdigest()
-            source_scope = _summary_source_scope(self.run, state["spec"], manifest)
+            source_scope = _summary_source_scope(
+                self.run,
+                state["spec"],
+                manifest,
+                local_summary_experiment=self.service.local_summary_experiment,
+            )
             request_identity = frozen_summary_request_identity(summary_policy)
             model_spec = frozen_summary_model_spec(
                 state["spec"].model_plan.primary,
@@ -1410,7 +1421,29 @@ class _AgentRunGraph:
             checkpoint_adapter=self.service.checkpoint_adapter,
             verifier=FrozenHistorySummaryBindingVerifier(load_context),
             budget_reserver=budget_reserver,
+            local_summary_experiment=self.service.local_summary_experiment,
+            current_run_id=self.run.id,
         )
+
+    def _require_local_summary_experiment(self, spec: FrozenAgentSpec) -> None:
+        identity = frozen_summary_request_identity(spec.runtime.get("summary_policy"))
+        if identity["request_mode"] != "non_thinking":
+            return
+        permit = self.service.local_summary_experiment
+        if permit is None or not permit.authorizes_run(
+            session_factory=self.service.session_factory,
+            workspace_id=UUID(self.context.workspace_id),
+            thread_id=getattr(self.run, "thread_id", None),
+            run_id=self.run.id,
+            agent_version_id=self.run.agent_version_id,
+            resolved_spec_hash=getattr(self.run, "resolved_spec_hash", None),
+            spec=spec,
+        ):
+            raise AgentHubError(
+                "SUMMARY_EXPERIMENT_SCOPE_REJECTED",
+                "This frozen summary strategy is available only in its bound local experiment.",
+                403,
+            )
 
     async def _load_summary_validation_context(self, session, binding, state):
         """Rebuild job sources and current permissions for dispatch/recovery gates."""
@@ -1509,7 +1542,12 @@ class _AgentRunGraph:
         ):
             raise _SummaryBindingRejected("SUMMARY_TRIGGER_RUN_BINDING_CHANGED")
 
-        expected_scope = _summary_source_scope(persisted, frozen_spec, manifest)
+        expected_scope = _summary_source_scope(
+            persisted,
+            frozen_spec,
+            manifest,
+            local_summary_experiment=self.service.local_summary_experiment,
+        )
         if canonical_json_hash(expected_scope) != canonical_json_hash(dict(binding.source_scope)):
             raise _SummaryBindingRejected("SUMMARY_SOURCE_SCOPE_CHANGED")
 
@@ -1934,13 +1972,30 @@ class _AgentRunGraph:
                         gateway = self.service.model_gateway_factory(session)
                         prepare = getattr(gateway, "prepare_resolved", None)
                         if prepare is None:
+                            if frozen_summary_request_identity(summary_policy)[
+                                "request_mode"
+                            ] == "non_thinking":
+                                raise SummaryServiceError(
+                                    "SUMMARY_EXPERIMENT_GATEWAY_UNVERIFIABLE",
+                                    "A local v2 experiment requires detached credential-route verification.",
+                                )
                             return gateway
-                        return await prepare(
+                        prepared = await prepare(
                             context_value,
                             plan,
                             request,
                             operation="generate",
                         )
+                        if frozen_summary_request_identity(summary_policy)[
+                            "request_mode"
+                        ] == "non_thinking" and not self.service.local_summary_experiment.authorizes_prepared_gateway(
+                            prepared, profile_id=plan.primary.id
+                        ):
+                            raise SummaryServiceError(
+                                "SUMMARY_EXPERIMENT_ROUTE_MISMATCH",
+                                "The resolved credential endpoint differs from the local permit.",
+                            )
+                        return prepared
 
                 async with self.service.session_factory() as session:
                     gateway = self.service.model_gateway_factory(session)
@@ -2196,6 +2251,7 @@ class _AgentRunGraph:
 
     async def _revalidate_summary_revision(self, state: AgentRunState) -> None:
         """Reprove permissions, source prefix and exact revision before every model call."""
+        self._require_local_summary_experiment(state["spec"])
         binding = state.get("summary_revision_binding")
         if not isinstance(binding, Mapping):
             raise AgentHubError(
@@ -2220,7 +2276,12 @@ class _AgentRunGraph:
         permission_hash = hashlib.sha256(permission_snapshot.encode("utf-8")).hexdigest()
         if binding.get("permission_snapshot_hash") != permission_hash:
             raise AgentHubError("FORBIDDEN", "Summary permission binding changed.", 403)
-        source_scope = _summary_source_scope(self.run, state["spec"], history.source_manifest)
+        source_scope = _summary_source_scope(
+            self.run,
+            state["spec"],
+            history.source_manifest,
+            local_summary_experiment=self.service.local_summary_experiment,
+        )
         request_identity = frozen_summary_request_identity(state["runtime"]["summary_policy"])
         model_spec = frozen_summary_model_spec(
             state["spec"].model_plan.primary,
@@ -2508,6 +2569,18 @@ class _AgentRunGraph:
                             "The budget does not bind this Run and model round.",
                             422,
                         )
+                    local_summary_experiment = getattr(
+                        self.service, "local_summary_experiment", None
+                    )
+                    if local_summary_experiment is not None:
+                        self._require_local_summary_experiment(state["spec"])
+                        gateway.attempt_budget = (
+                            local_summary_experiment.wrap_model_attempt_budget(
+                                gateway.attempt_budget,
+                                run_id=self.run.id,
+                            )
+                        )
+                experiment_attempt_budget = getattr(gateway, "attempt_budget", None)
                 prepared_gateway = gateway
                 prepare_resolved = getattr(gateway, "prepare_resolved", None)
                 if prepare_resolved is not None:
@@ -2516,6 +2589,21 @@ class _AgentRunGraph:
                         state["spec"].model_plan,
                         request,
                         operation="stream" if self.mode == "stream" else "generate",
+                    )
+            local_summary_experiment = getattr(
+                self.service, "local_summary_experiment", None
+            )
+            if local_summary_experiment is not None and (
+                    prepare_resolved is None
+                or not local_summary_experiment.authorizes_prepared_gateway(
+                        prepared_gateway,
+                        profile_id=state["spec"].model_plan.primary.id,
+                    )
+                ):
+                    raise AgentHubError(
+                        "SUMMARY_EXPERIMENT_ROUTE_MISMATCH",
+                        "The resolved model credential is outside the local experiment route.",
+                        403,
                     )
             # Provider completion/streaming must not retain the credential-resolution
             # session.  The prepared production facade contains only frozen identities
@@ -2529,6 +2617,13 @@ class _AgentRunGraph:
                 response = await prepared_gateway.generate_resolved(
                     self.context, state["spec"].model_plan, request
                 )
+            if callable(getattr(experiment_attempt_budget, "record_response", None)):
+                try:
+                    await experiment_attempt_budget.record_response(response)
+                except Exception:
+                    # The research ledger already holds the conservative maximum.
+                    # A failed response note cannot be mistaken for a new dispatch.
+                    logger.warning("local_experiment_response_settlement_failed", exc_info=True)
         except ModelAttemptBudgetError as error:
             await self.step(
                 "MODEL", "FAILED", {"model_round": next_round, "error_code": error.code}
@@ -2614,6 +2709,25 @@ class _AgentRunGraph:
                 "model_round_count": next_round,
                 "usage_records": list(self.usage_records),
                 "failure_code": empty_code,
+                **evidence_update,
+            }
+        if response.finish_reason == "length":
+            await self.step(
+                "MODEL",
+                "FAILED",
+                {
+                    "model_round": next_round,
+                    "error_code": "MODEL_OUTPUT_TRUNCATED",
+                    "finish_reason": response.finish_reason,
+                    **_usage_step_metadata(response),
+                    **memory_delivery,
+                },
+            )
+            return {
+                "messages": messages,
+                "model_round_count": next_round,
+                "usage_records": list(self.usage_records),
+                "failure_code": "MODEL_OUTPUT_TRUNCATED",
                 **evidence_update,
             }
         await self._emit(
@@ -3792,14 +3906,20 @@ def _permission_snapshot(context: WorkspaceExecutionContext) -> str:
     return f"user:{context.user_id};permissions:" + ",".join(sorted(context.permissions))
 
 
-def _summary_source_scope(run: AgentRun, spec: FrozenAgentSpec, manifest) -> dict[str, Any]:
+def _summary_source_scope(
+    run: AgentRun,
+    spec: FrozenAgentSpec,
+    manifest,
+    *,
+    local_summary_experiment: LocalSummaryExperimentPermit | None = None,
+) -> dict[str, Any]:
     policy = spec.runtime.get("summary_policy")
     if not isinstance(policy, Mapping) or policy.get("enabled") is not True:
         raise ValueError("summary policy is not explicitly enabled")
     resolved_spec_hash = getattr(run, "resolved_spec_hash", None)
     if not isinstance(resolved_spec_hash, str) or len(resolved_spec_hash) != 64:
         raise ValueError("the Run has no frozen resolved spec hash")
-    return {
+    result = {
         "version": "thread_summary_runtime_scope_v2",
         "summary_source_policy": PLAIN_TEXT_PREFIX_V1,
         "agent_version_id": str(run.agent_version_id),
@@ -3816,6 +3936,12 @@ def _summary_source_scope(run: AgentRun, spec: FrozenAgentSpec, manifest) -> dic
         # comparator omits it when looking for a reusable cross-Run revision.
         "source_manifest": {"manifest_sha256": manifest.manifest_sha256},
     }
+    request_identity = frozen_summary_request_identity(policy)
+    if request_identity["request_mode"] == "non_thinking":
+        if local_summary_experiment is None:
+            raise ValueError("non-thinking summary requires its local experiment permit")
+        result["local_summary_experiment"] = local_summary_experiment.source_scope_payload()
+    return result
 
 
 def _summary_candidates(history: ThreadConversation, prefix) -> tuple[NewSummarySource, ...]:

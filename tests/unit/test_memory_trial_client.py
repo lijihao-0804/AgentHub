@@ -13,7 +13,9 @@ from benchmarks.evaluation.memory_deepseek_v41_counter import DeepseekV41TextCou
 from benchmarks.evaluation.memory_trial_budget import MemoryTrialBudget
 from benchmarks.evaluation.memory_trial_client import (
     PRICE_IDENTITY,
+    MemoryTrialBudgetExperimentAdapter,
     MemoryTrialDispatchError,
+    NonThinkingExperimentPolicy,
     generate_once,
     trial_result_identity,
 )
@@ -40,7 +42,7 @@ def _counter(tokens: int, *, verified: bool = True) -> DeepseekV41TextCounter:
     class FakeTokenizer:
         def encode(self, _text, *, add_special_tokens):
             assert add_special_tokens is False
-            return SimpleNamespace(ids=range(tokens))
+            return SimpleNamespace(ids=list(range(tokens)))
 
     counter = DeepseekV41TextCounter(FakeTokenizer())
     counter._verified_source = verified
@@ -94,6 +96,8 @@ async def test_one_successful_call_is_reserved_and_reasoning_is_not_persisted(tr
         assert budget.state["attempts"][0]["result_identity"] == trial_result_identity(result)
         assert "public calibration" not in (trial_dir / "budget.json").read_text(encoding="utf-8")
         assert result["input_counter"]["tokens"] == 20
+        assert result["input_counter"]["thinking_mode"] == "PROVIDER_DEFAULT_THINKING"
+        assert result["enable_thinking"] is None
         assert Decimal(result["conservative_cost_cny"]) == Decimal("0.00012")
         assert result["cost_identity"] == PRICE_IDENTITY
         assert result["reasoning_tokens"] == 7
@@ -172,6 +176,81 @@ async def test_thinking_override_is_only_allowed_in_calibration(trial_dir):
 
 
 @pytest.mark.asyncio
+async def test_explicit_non_thinking_binds_payload_counter_and_schema_v2_request_identity(
+    trial_dir,
+):
+    class RecordingCounter(DeepseekV41TextCounter):
+        def __init__(self):
+            super().__init__(_counter(20)._tokenizer)
+            self._verified_source = True
+            self.modes = []
+
+        def count(self, request, *, thinking, reasoning_effort=None):
+            self.modes.append(thinking)
+            return super().count(request, thinking=thinking, reasoning_effort=reasoning_effort)
+
+    class ScopeLedger:
+        def __init__(self):
+            self.state = {
+                "schema_version": 2,
+                "price_identity": PRICE_IDENTITY,
+                "local_experiment_policy": {
+                    "mode": "RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT",
+                    "active_scope_id": "local-memory-pilot-m4-20261028",
+                },
+            }
+            self.reservations = []
+            self.settlements = []
+
+        def reserve(self, attempt_id, **kwargs):
+            self.reservations.append({"attempt_id": attempt_id, **kwargs})
+
+        def settle(self, attempt_id, **kwargs):
+            self.settlements.append({"attempt_id": attempt_id, **kwargs})
+
+    messages, admission = _admitted()
+    ledger = ScopeLedger()
+    counter = RecordingCounter()
+    adapter = MemoryTrialBudgetExperimentAdapter(ledger, scope_id="local-memory-pilot-m4-20261028")
+    payloads = []
+
+    def handler(request):
+        payloads.append(json.loads(request.content))
+        return httpx.Response(
+            200,
+            json={
+                "model": "deepseek-v4.1-flash-1017",
+                "usage": {"prompt_tokens": 20, "completion_tokens": 10},
+                "choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}],
+            },
+        )
+
+    policy = NonThinkingExperimentPolicy(
+        policy_id="memory-bc-nonthinking-v1",
+        budget_strategy_id="RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT",
+    )
+    with pytest.raises(ValueError, match="MEMORY_TRIAL_NON_THINKING_RESERVATION_IDENTITY_INVALID"):
+        await generate_once(
+            budget=ledger,
+            admission=admission,
+            original_messages=messages,
+            attempt_id="bc-summary-nonthinking",
+            stage="M4",
+            endpoint="https://demo.cn-beijing.maas.aliyuncs.com/v1",
+            api_key="test-only",
+            output_limit=64,
+            output_directory=trial_dir / "results",
+            transport=httpx.MockTransport(handler),
+            provider_counter=counter,
+            experiment_policy=policy,
+            experiment_budget=adapter,
+            experiment_input_limit=4096,
+        )
+    assert payloads == []
+
+
+
+@pytest.mark.asyncio
 async def test_unconfirmed_dispatch_keeps_reservation_and_blocks_next_call(trial_dir):
     calls = []
 
@@ -193,8 +272,11 @@ async def test_unconfirmed_dispatch_keeps_reservation_and_blocks_next_call(trial
             transport=httpx.MockTransport(handler),
             provider_counter=_counter(20),
         )
-        with pytest.raises(MemoryTrialDispatchError):
+        with pytest.raises(MemoryTrialDispatchError) as exc_info:
             await generate_once(attempt_id="first", **args)
+        assert exc_info.value.failure_stage == "HTTP_READ_TIMEOUT"
+        assert exc_info.value.cause_type == "ReadTimeout"
+        assert "provider outcome unknown" not in str(exc_info.value)
         with pytest.raises(ValueError, match="UNRESOLVED"):
             await generate_once(attempt_id="second", **args)
         assert len(calls) == 1
