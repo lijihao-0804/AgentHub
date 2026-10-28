@@ -298,7 +298,7 @@ export default function AppWorkbench({
           {threadId && (
             <button
               type="button"
-              className="button button-ghost"
+              className="button button-ghost thread-side-toggle"
               aria-pressed={sideOpen}
               onClick={() => setSideOpen((open) => !open)}
             >
