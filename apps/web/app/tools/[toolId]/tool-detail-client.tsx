@@ -12,9 +12,30 @@ import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-da
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import { getTool, listToolRevisions, patchTool, type Tool, type ToolRevision } from "@/lib/api/tools";
 import { useI18n } from "@/i18n/provider";
+import type { MessageKey } from "@/i18n/messages";
+
+const EXECUTION_KIND_KEYS: Record<string, MessageKey> = {
+  builtin: "tools.executionKind.builtin",
+  action: "tools.executionKind.action",
+  mcp: "tools.executionKind.mcp",
+};
+const APPROVAL_POLICY_KEYS: Record<string, MessageKey> = {
+  NEVER: "tools.approvalPolicy.NEVER",
+  ALWAYS: "tools.approvalPolicy.ALWAYS",
+};
 
 export default function ToolDetailClient({ toolId }: { toolId: string }) {
   const { t, formatDateTime } = useI18n();
+  const approvalPolicyLabel = (policy: string | null | undefined) => {
+    if (!policy) return "—";
+    const key = APPROVAL_POLICY_KEYS[policy];
+    return key ? t(key) : policy;
+  };
+  const executionKindLabel = (kind: string | null | undefined) => {
+    if (!kind) return "—";
+    const key = EXECUTION_KIND_KEYS[kind.toLowerCase()];
+    return key ? t(key) : kind;
+  };
   const { connected, sessionId, workspaceId } = useFrontendSession();
 
   const scope = `${workspaceId}:${toolId}`;
@@ -156,13 +177,13 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
               <div className="key-value-row">
                 <dt>{t("tools.approval")}</dt>
                 <dd>
-                  <code>{current.approval_policy ?? "—"}</code>
+                  <code>{approvalPolicyLabel(current.approval_policy)}</code>
                 </dd>
               </div>
               <div className="key-value-row">
                 <dt>{t("tools.kind")}</dt>
                 <dd>
-                  <code>{current.execution_kind ?? "—"}</code>
+                  <code>{executionKindLabel(current.execution_kind)}</code>
                 </dd>
               </div>
               <div className="key-value-row">
