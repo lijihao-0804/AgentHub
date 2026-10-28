@@ -299,32 +299,30 @@ export default function EvaluationPricingPage() {
               <thead>
                 <tr>
                   <th scope="col">{t("evaluation.pricing.columns.name")}</th>
-                  <th scope="col">{t("evaluation.pricing.columns.provider")}</th>
-                  <th scope="col">{t("evaluation.pricing.columns.model")}</th>
-                  <th scope="col">{t("evaluation.pricing.columns.currency")}</th>
-                  <th scope="col">{t("evaluation.pricing.columns.input")}</th>
-                  <th scope="col">{t("evaluation.pricing.columns.output")}</th>
-                  <th scope="col">{t("evaluation.pricing.columns.cached")}</th>
-                  <th scope="col">{t("evaluation.pricing.columns.effectiveAt")}</th>
-                  <th scope="col">{t("evaluation.pricing.columns.sourceNote")}</th>
+                  <th scope="col" className="tight-cell">{t("evaluation.pricing.columns.provider")}</th>
+                  <th scope="col" className="tight-cell">{t("evaluation.pricing.columns.model")}</th>
+                  <th scope="col" className="tight-cell">{t("evaluation.pricing.columns.currency")}</th>
+                  <th scope="col" className="numeric-cell">{t("evaluation.pricing.columns.input")}</th>
+                  <th scope="col" className="numeric-cell">{t("evaluation.pricing.columns.output")}</th>
+                  <th scope="col" className="numeric-cell">{t("evaluation.pricing.columns.cached")}</th>
+                  <th scope="col" className="tight-cell">{t("evaluation.pricing.columns.effectiveAt")}</th>
                   <th scope="col">{t("evaluation.pricing.columns.hash")}</th>
                 </tr>
               </thead>
               <tbody>
                 {snapshots.map((snapshot) => (
                   <tr key={snapshot.id}>
-                    <td data-label={t("evaluation.pricing.columns.name")}>{snapshot.name}</td>
-                    <td data-label={t("evaluation.pricing.columns.provider")}>{snapshot.provider}</td>
-                    <td data-label={t("evaluation.pricing.columns.model")}><code>{snapshot.model}</code></td>
-                    <td data-label={t("evaluation.pricing.columns.currency")}>{snapshot.currency}</td>
-                    <td data-label={t("evaluation.pricing.columns.input")}>{snapshot.input_price_per_1m}</td>
-                    <td data-label={t("evaluation.pricing.columns.output")}>{snapshot.output_price_per_1m}</td>
-                    <td data-label={t("evaluation.pricing.columns.cached")}>
+                    <td data-label={t("evaluation.pricing.columns.name")} className="tight-cell" title={snapshot.source_note ?? undefined}>{snapshot.name}</td>
+                    <td data-label={t("evaluation.pricing.columns.provider")} className="tight-cell">{snapshot.provider}</td>
+                    <td data-label={t("evaluation.pricing.columns.model")} className="tight-cell"><code>{snapshot.model}</code></td>
+                    <td data-label={t("evaluation.pricing.columns.currency")} className="tight-cell">{snapshot.currency}</td>
+                    <td data-label={t("evaluation.pricing.columns.input")} className="numeric-cell">{snapshot.input_price_per_1m}</td>
+                    <td data-label={t("evaluation.pricing.columns.output")} className="numeric-cell">{snapshot.output_price_per_1m}</td>
+                    <td data-label={t("evaluation.pricing.columns.cached")} className="numeric-cell">
                       {snapshot.cached_input_price_per_1m ?? "—"}
                     </td>
-                    <td data-label={t("evaluation.pricing.columns.effectiveAt")}>{formatDateTime(snapshot.effective_at)}</td>
-                    <td data-label={t("evaluation.pricing.columns.sourceNote")} className="muted">{snapshot.source_note}</td>
-                    <td data-label={t("evaluation.pricing.columns.hash")}>
+                    <td data-label={t("evaluation.pricing.columns.effectiveAt")} className="tight-cell">{formatDateTime(snapshot.effective_at)}</td>
+                    <td data-label={t("evaluation.pricing.columns.hash")} className="tight-cell">
                       <HashValue value={snapshot.content_hash} label={t("evaluation.pricing.columns.hash")} />
                     </td>
                   </tr>
