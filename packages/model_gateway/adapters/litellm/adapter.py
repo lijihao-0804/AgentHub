@@ -8,9 +8,11 @@ import logging
 from collections.abc import AsyncIterator, Mapping
 from decimal import Decimal
 from typing import Any, Protocol
+from urllib.parse import urlsplit
 
 from packages.model_gateway.cache_capability import PromptCacheCapability, prompt_cache_capability
 from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
     CostEstimate,
     ModelMessage,
     ModelRequest,
@@ -27,6 +29,9 @@ from packages.model_gateway.models import ModelProfile, ProviderCredential
 logger = logging.getLogger(__name__)
 
 _MISSING = object()
+_ALIYUN_BEIJING_HOST_SUFFIX = ".cn-beijing.maas.aliyuncs.com"
+_ALIYUN_BEIJING_OPENAI_PATH = "/compatible-mode/v1"
+_ALIYUN_DEEPSEEK_NON_THINKING_MODEL = "deepseek-v4.1-flash-1017"
 
 
 class LiteLLMClient(Protocol):
@@ -52,6 +57,49 @@ def _provider_model(credential: ProviderCredential, model: str) -> str:
     if provider in {"openai-compatible", "openai"}:
         return model if model.startswith("openai/") else f"openai/{model}"
     raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+
+
+def _is_verified_aliyun_beijing_openai_endpoint(base_url: str | None) -> bool:
+    if not base_url:
+        return False
+    try:
+        parsed = urlsplit(base_url)
+        hostname = parsed.hostname
+        port = parsed.port
+    except ValueError:
+        return False
+    return (
+        parsed.scheme == "https"
+        and hostname is not None
+        and hostname.endswith(_ALIYUN_BEIJING_HOST_SUFFIX)
+        and len(hostname) > len(_ALIYUN_BEIJING_HOST_SUFFIX)
+        and port is None
+        and parsed.username is None
+        and parsed.password is None
+        and parsed.path.rstrip("/") == _ALIYUN_BEIJING_OPENAI_PATH
+        and not parsed.query
+        and not parsed.fragment
+    )
+
+
+def _aliyun_deepseek_request_options(
+    profile: ModelProfile,
+    credential: ProviderCredential,
+    mode: AliyunDeepSeekRequestMode,
+) -> dict[str, Any]:
+    if mode is AliyunDeepSeekRequestMode.PROVIDER_DEFAULT:
+        return {}
+    provider = credential.provider.strip().lower().replace("_", "-")
+    if (
+        mode is not AliyunDeepSeekRequestMode.NON_THINKING
+        or provider != "openai-compatible"
+        or profile.model != _ALIYUN_DEEPSEEK_NON_THINKING_MODEL
+        or not _is_verified_aliyun_beijing_openai_endpoint(credential.base_url)
+    ):
+        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH)
+    # Alibaba Cloud documents enable_thinking as an extension request field for
+    # its OpenAI-compatible API. LiteLLM forwards non-standard fields there.
+    return {"extra_body": {"enable_thinking": False}}
 
 
 def _tool_arguments_payload(arguments: Mapping[str, Any]) -> str:
@@ -107,6 +155,7 @@ def _request_payload(
         "api_key": credential.secret,
         "stream": stream,
     }
+    payload.update(_aliyun_deepseek_request_options(profile, credential, request.request_mode))
     if stream:
         # OpenAI-compatible providers omit usage from a stream unless it is asked
         # for, and both providers this adapter speaks to are OpenAI-compatible.
@@ -473,4 +522,4 @@ def _complete_tool_call(parts: dict[str, Any]) -> ModelToolCall:
     )
 
 
-__all__ = ["LiteLLMProviderAdapter", "LiteLLMClient"]
+__all__ = ["AliyunDeepSeekRequestMode", "LiteLLMProviderAdapter", "LiteLLMClient"]

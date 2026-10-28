@@ -1,13 +1,14 @@
 """The research counter is restricted and agrees with recorded provider usage."""
 
 import json
+import os
 from pathlib import Path
-from uuid import uuid4
 
 import pytest
 
 from benchmarks.evaluation.memory_deepseek_v41_counter import DeepseekV41TextCounter
 from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
     ModelMessage,
     ModelRequest,
     ModelToolCall,
@@ -15,11 +16,12 @@ from packages.model_gateway.contracts import (
     StructuredOutputSchema,
 )
 
-TOKENIZER = Path(".scratch/context-policy-m4-20261027/tokenizer-v41.json")
-FROZEN_INPUTS = Path(
-    ".scratch/context-policy-m4-20261027/formal-summary/frozen-summary-inputs.json"
+_STUDY_ASSET_ROOT = Path(
+    os.environ.get("AGENTHUB_DEEPSEEK_V41_ASSET_DIR", ".scratch/context-policy-m4-20261027")
 )
-OBSERVATIONS = Path(".scratch/context-policy-m4-20261027/formal-summary/summary-observations.json")
+TOKENIZER = _STUDY_ASSET_ROOT / "tokenizer-v41.json"
+FROZEN_INPUTS = _STUDY_ASSET_ROOT / "formal-summary" / "frozen-summary-inputs.json"
+OBSERVATIONS = _STUDY_ASSET_ROOT / "formal-summary" / "summary-observations.json"
 
 
 class _NeverEncode:
@@ -63,22 +65,26 @@ def test_tool_definitions_and_structured_output_are_not_miscounted(kwargs):
 
 
 def test_wrong_tokenizer_file_fails_closed():
-    directory = Path(".scratch/context-policy-m4-20261027/counter-tests") / uuid4().hex
-    directory.mkdir(parents=True)
-    path = directory / "tokenizer.json"
-    path.write_text('{}', encoding="utf-8")
     with pytest.raises(ValueError, match="IDENTITY_MISMATCH"):
-        DeepseekV41TextCounter.from_file(path)
+        DeepseekV41TextCounter.from_file(Path(__file__))
 
 
 @pytest.mark.skipif(not TOKENIZER.is_file(), reason="Public pinned tokenizer was not downloaded")
 def test_paired_calibration_matches_real_provider_input_usage():
     counter = DeepseekV41TextCounter.from_file(TOKENIZER)
     messages = (
-        ModelMessage("user", "Calculate 987654321 times 123456789. Return only the final number."),
+        ModelMessage(
+            "user",
+            "Calculate 987654321 times 123456789. Return only the final number.",
+        ),
     )
-    assert counter.count(ModelRequest(messages), thinking=True) == 47
-    assert counter.count(ModelRequest(messages), thinking=False) == 21
+    thinking_request = ModelRequest(messages)
+    non_thinking_request = ModelRequest(
+        messages,
+        request_mode=AliyunDeepSeekRequestMode.NON_THINKING,
+    )
+    assert counter.count(thinking_request, thinking=True) == 47
+    assert counter.count(non_thinking_request, thinking=False) == 21
 
 
 @pytest.mark.skipif(

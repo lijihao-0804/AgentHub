@@ -91,6 +91,13 @@ class RetryPolicy:
             raise ValueError("max_attempts must be between 1 and 5")
 
 
+class AliyunDeepSeekRequestMode(StrEnum):
+    """Per-request mode for the verified Aliyun DeepSeek route."""
+
+    PROVIDER_DEFAULT = "provider_default"
+    NON_THINKING = "non_thinking"
+
+
 @dataclass(frozen=True, slots=True)
 class ModelRequest:
     """Provider-neutral model input. Provider selection is server-side."""
@@ -100,6 +107,7 @@ class ModelRequest:
     response_schema: StructuredOutputSchema | None = None
     required_capabilities: CapabilityRequirements = field(default_factory=CapabilityRequirements)
     retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
+    request_mode: AliyunDeepSeekRequestMode = AliyunDeepSeekRequestMode.PROVIDER_DEFAULT
 
     def __post_init__(self) -> None:
         messages = tuple(self.messages)
@@ -112,6 +120,8 @@ class ModelRequest:
             raise TypeError("required_capabilities must be CapabilityRequirements")
         if not isinstance(self.retry_policy, RetryPolicy):
             raise TypeError("retry_policy must be RetryPolicy")
+        if not isinstance(self.request_mode, AliyunDeepSeekRequestMode):
+            raise TypeError("request_mode must be an AliyunDeepSeekRequestMode")
         object.__setattr__(self, "messages", messages)
         object.__setattr__(self, "tools", tools)
 
@@ -329,6 +339,7 @@ class ModelGateway(Protocol):
 
 
 __all__ = [
+    "AliyunDeepSeekRequestMode",
     "CapabilityRequirements",
     "ContextMetadata",
     "CostEstimate",
