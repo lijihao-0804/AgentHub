@@ -113,6 +113,14 @@ export default function AppConversationPane({
     (turn) => PENDING_STATUSES.has(turn.status ?? "") && turn.agent_run_id,
   );
 
+  // A brand-new conversation should be typeable immediately: focus the
+  // composer once it has loaded with no turns.
+  useEffect(() => {
+    if (turns.loaded && turnList.length === 0) {
+      composerTextareaRef.current?.focus();
+    }
+  }, [turns.loaded, turnList.length]);
+
   // A reload loses the original SSE request. Poll durable active states so a
   // waiting approval or cancellation also resolves without reopening the page.
   useEffect(() => {
