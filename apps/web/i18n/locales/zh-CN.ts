@@ -94,6 +94,7 @@ export const zhCN: MessageSchema = {
   shell: {
     menu: "菜单",
     toggleSidebar: "展开/收起侧栏",
+    closeMenu: "关闭菜单",
     skipToContent: "跳到主要内容",
     footnote: "会话仅存于内存 · 不存储任何令牌",
     primaryNav: "主导航",

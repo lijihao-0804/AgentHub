@@ -1,5 +1,6 @@
 /* Sidebar, topbar and the page frame around every route. */
 .app-shell { display: flex; min-height: 100vh; }
+.sidebar-scrim { display: none; }
 /* The sidebar can step aside so a conversation owns the whole width. */
 .app-shell[data-sidebar="collapsed"] .sidebar { display: none; }
 .sidebar-toggle { display: inline-flex; }

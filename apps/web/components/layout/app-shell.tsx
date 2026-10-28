@@ -292,6 +292,14 @@ function ShellChrome({ children }: { children: ReactNode }) {
       <aside className="sidebar" id="app-sidebar">
         <SidebarContent onNavigate={() => setNavOpen(false)} />
       </aside>
+      {navOpen && (
+        <button
+          type="button"
+          className="sidebar-scrim"
+          aria-label={t("shell.closeMenu")}
+          onClick={() => setNavOpen(false)}
+        />
+      )}
       <div className="app-frame">
         <header className="topbar">
           <button
