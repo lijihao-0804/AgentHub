@@ -15,6 +15,26 @@ export function formatDateTime(value: string | Date, locale: Locale): string {
 }
 
 /**
+ * Compact "3 days ago" rendering for dense lists. Callers keep the exact
+ * timestamp in a title so the precise value is still one hover away.
+ */
+export function formatRelativeTime(value: string | Date, locale: Locale): string {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const ms = date.getTime();
+  if (!Number.isFinite(ms)) return "—";
+  const diffSeconds = Math.round((ms - Date.now()) / 1000);
+  const abs = Math.abs(diffSeconds);
+  const rtf = new Intl.RelativeTimeFormat(LOCALE_TAGS[locale], { numeric: "auto" });
+  if (abs < 60) return rtf.format(diffSeconds, "second");
+  if (abs < 3600) return rtf.format(Math.round(diffSeconds / 60), "minute");
+  if (abs < 86400) return rtf.format(Math.round(diffSeconds / 3600), "hour");
+  // Within a week relative time aids scanning; beyond that the actual date is
+  // more useful than "last month", so fall back to a short date.
+  if (abs < 7 * 86400) return rtf.format(Math.round(diffSeconds / 86400), "day");
+  return new Intl.DateTimeFormat(LOCALE_TAGS[locale], { dateStyle: "short" }).format(date);
+}
+
+/**
  * Bucket labels for the trend chart. The product presents these buckets in
  * UTC; only the language changes, never the timezone semantics.
  */

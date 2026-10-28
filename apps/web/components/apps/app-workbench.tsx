@@ -63,7 +63,7 @@ export default function AppWorkbench({
   threadId?: string;
   children: (context: AppThreadContext) => ReactNode;
 }) {
-  const { t, formatDateTime, formatCount } = useI18n();
+  const { t, formatDateTime, formatRelativeTime, formatCount } = useI18n();
   const { connected, sessionId, workspaceId, accessToken, permissions } = useFrontendSession();
   const cannotDelete = permissions !== null && !permissions.includes("agent_run");
   const router = useRouter();
@@ -351,7 +351,7 @@ export default function AppWorkbench({
                       }}
                     >
                       <span className="thread-list-title">{item.title}</span>
-                      <span className="thread-list-meta">{formatDateTime(item.updated_at)}</span>
+                      <span className="thread-list-meta" title={formatDateTime(item.updated_at)}>{formatRelativeTime(item.updated_at)}</span>
                       {weight.summaryKey && (
                         <span className="thread-list-meta">
                           {t(weight.summaryKey, {
