@@ -1,4 +1,11 @@
-"""PostgreSQL fault-injection tests for the M4 durable summary service."""
+"""PostgreSQL fault-injection tests for the M4 durable summary service.
+
+Service instances in this module use a controlled checkpoint test stub so the
+legacy state-machine, concurrency, and budget regressions remain focused. The
+stub does not read LangGraph and is not evidence of checkpoint integration;
+real PostgreSQL plus LangGraph binding verification belongs in the dedicated
+end-to-end suite.
+"""
 
 from __future__ import annotations
 
@@ -18,11 +25,13 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import func, select, text, update
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+from packages.agent_runtime.history_checkpoint import VerifiedCheckpointBinding
 from packages.agent_runtime.summary_models import (
     ThreadSummaryArtifact,
     ThreadSummaryDispatch,
@@ -57,10 +66,8 @@ from packages.evaluation.reproducibility import pricing_snapshot_content_hash
 
 TEST_DATABASE_URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "").strip()
 EXPECTED_DATABASE_URL = (
-    "postgresql+psycopg://agenthub:m2_local_test@127.0.0.1:15432/agenthub_context_policy_m2"
+    "postgresql+psycopg://agenthub:m2_local_test@127.0.0.1:15432/agenthub_run_budget_m4_20261028_v4"
 )
-EXPECTED_REVISION = "0045_run_budget_ledger"
-
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(
@@ -129,6 +136,136 @@ class _Tenant:
     pricing_id: UUID
     source: NewSummarySource
     permission_snapshot: str
+
+
+_CONTROLLED_CHECKPOINT_NS = "tests/summary-service/controlled-not-langgraph"
+_CONTROLLED_CHECKPOINT_PREFIX = "controlled-summary-checkpoint-round-"
+
+
+def _controlled_checkpoint_id(model_round: int) -> str:
+    if (
+        isinstance(model_round, bool)
+        or not isinstance(model_round, int)
+        or not 1 <= model_round <= MAX_SUMMARY_MODEL_ROUND
+    ):
+        raise ValueError("controlled checkpoint model round is invalid")
+    return f"{_CONTROLLED_CHECKPOINT_PREFIX}{model_round}"
+
+
+def _controlled_checkpoint_fields(model_round: int) -> dict[str, str]:
+    """Return selectors for the explicit non-LangGraph checkpoint test stub."""
+
+    return {
+        "checkpoint_id": _controlled_checkpoint_id(model_round),
+        "checkpoint_ns": _CONTROLLED_CHECKPOINT_NS,
+    }
+
+
+def _controlled_checkpoint_round(checkpoint_id: str) -> int:
+    if not isinstance(checkpoint_id, str) or not checkpoint_id.startswith(
+        _CONTROLLED_CHECKPOINT_PREFIX
+    ):
+        raise ValueError("unknown controlled checkpoint selector")
+    suffix = checkpoint_id.removeprefix(_CONTROLLED_CHECKPOINT_PREFIX)
+    if not suffix.isascii() or not suffix.isdigit():
+        raise ValueError("unknown controlled checkpoint selector")
+    model_round = int(suffix)
+    if not 1 <= model_round <= MAX_SUMMARY_MODEL_ROUND:
+        raise ValueError("unknown controlled checkpoint selector")
+    return model_round
+
+
+def _controlled_verified_binding(
+    *,
+    workspace_id: UUID,
+    thread_id: UUID,
+    run_id: UUID,
+    checkpoint_id: str,
+    checkpoint_ns: str,
+) -> VerifiedCheckpointBinding:
+    if checkpoint_ns != _CONTROLLED_CHECKPOINT_NS:
+        raise ValueError("unknown controlled checkpoint namespace")
+    model_round = _controlled_checkpoint_round(checkpoint_id)
+    checkpoint_model_round_count = model_round - 1
+    identity = (
+        f"{workspace_id}:{thread_id}:{run_id}:"
+        f"{checkpoint_id}:{checkpoint_ns}:{checkpoint_model_round_count}"
+    )
+    history_binding_sha256 = _hash(f"controlled-history:{identity}")
+    checkpoint_binding_sha256 = _hash(f"controlled-checkpoint:{identity}")
+    return VerifiedCheckpointBinding(
+        workspace_id=workspace_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        agent_version_id=UUID(
+            bytes=hashlib.sha256(f"controlled-version:{identity}".encode()).digest()[:16]
+        ),
+        checkpoint_id=checkpoint_id,
+        checkpoint_ns=checkpoint_ns,
+        checkpoint_model_round_count=checkpoint_model_round_count,
+        history_binding_sha256=history_binding_sha256,
+        checkpoint_binding_sha256=checkpoint_binding_sha256,
+    )
+
+
+class _ControlledCheckpointSummaryJobService(SummaryJobService):
+    """Test-only checkpoint seam for state-machine regressions.
+
+    This deliberately bypasses the real LangGraph reader. It validates the
+    controlled selector and round relationship so the 0047 columns and
+    identity constraints are exercised, while the production trust verifier
+    and shared-budget defaults remain in place.
+    """
+
+    async def _verify_exact_checkpoint(
+        self,
+        command: NewSummaryJob,
+    ) -> VerifiedCheckpointBinding:
+        if not isinstance(command.checkpoint_id, str):
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_SELECTOR_INVALID",
+                "controlled checkpoint ID is missing",
+            )
+        try:
+            return _controlled_verified_binding(
+                workspace_id=command.workspace_id,
+                thread_id=command.thread_id,
+                run_id=command.trigger_run_id,
+                checkpoint_id=command.checkpoint_id,
+                checkpoint_ns=command.checkpoint_ns or "",
+            )
+        except ValueError:
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_BINDING_INVALID",
+                "controlled checkpoint selector is invalid",
+            ) from None
+
+    async def _verify_fixed_job_checkpoint(
+        self,
+        job: ThreadSummaryJob,
+    ) -> VerifiedCheckpointBinding:
+        try:
+            binding = _controlled_verified_binding(
+                workspace_id=job.workspace_id,
+                thread_id=job.thread_id,
+                run_id=job.trigger_run_id,
+                checkpoint_id=job.checkpoint_id or "",
+                checkpoint_ns=job.checkpoint_ns or "",
+            )
+        except ValueError:
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_BINDING_INVALID",
+                "controlled persisted checkpoint identity is invalid",
+            ) from None
+        if (
+            job.model_round != binding.checkpoint_model_round_count + 1
+            or job.checkpoint_binding_sha256 != binding.checkpoint_binding_sha256
+        ):
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_BINDING_INVALID",
+                "controlled persisted checkpoint identity changed",
+            )
+        return binding
 
 
 async def _seed_tenant(
@@ -325,7 +462,11 @@ async def _seed_tenant(
             )
 
 
-def _new_summary_job(tenant: _Tenant) -> NewSummaryJob:
+def _new_summary_job(
+    tenant: _Tenant,
+    *,
+    model_round: int = 1,
+) -> NewSummaryJob:
     return NewSummaryJob(
         workspace_id=tenant.workspace_id,
         thread_id=tenant.thread_id,
@@ -347,7 +488,8 @@ def _new_summary_job(tenant: _Tenant) -> NewSummaryJob:
         permission_snapshot_hash=_hash(tenant.permission_snapshot),
         created_by=tenant.user_id,
         sources=(tenant.source,),
-        model_round=1,
+        model_round=model_round,
+        **_controlled_checkpoint_fields(model_round),
     )
 
 
@@ -612,7 +754,9 @@ async def _create_claimed(
 ) -> tuple[SummaryJobService, SummaryJobKey, str]:
     if verifier is None:
         verifier = _Verifier(lambda binding: _validation_context(tenant))
-    service = SummaryJobService(factory, verifier=verifier, budget_reserver=_TestBudgetReserver())
+    service = _ControlledCheckpointSummaryJobService(
+        factory, verifier=verifier, budget_reserver=_TestBudgetReserver()
+    )
     created = await service.create_job(_new_summary_job(tenant))
     claimed = await service.claim(created.key)
     assert claimed is not None
@@ -674,7 +818,7 @@ async def _validated_with_pending_artifact(
     await _commit_intent(service, key, first_lease, tenant=tenant)
     response_id = await _store_response(service, key, first_lease, tenant)
 
-    restarted = SummaryJobService(factory, verifier=verifier)
+    restarted = _ControlledCheckpointSummaryJobService(factory, verifier=verifier)
     recovery = await restarted.claim_recovery(key)
     assert recovery is not None
     settled = await restarted.validate_stored_response(
@@ -692,7 +836,9 @@ async def _validated_two_source_with_pending_artifact(
 ) -> tuple[SummaryJobService, SummaryJobKey, str, NewSummarySource, UUID]:
     second_source = await _seed_additional_exchange(factory, tenant)
     verifier = _Verifier(lambda binding: _two_source_context(tenant, second_source))
-    service = SummaryJobService(factory, verifier=verifier, budget_reserver=_TestBudgetReserver())
+    service = _ControlledCheckpointSummaryJobService(
+        factory, verifier=verifier, budget_reserver=_TestBudgetReserver()
+    )
     created = await service.create_job(
         NewSummaryJob(
             workspace_id=tenant.workspace_id,
@@ -716,6 +862,7 @@ async def _validated_two_source_with_pending_artifact(
             created_by=tenant.user_id,
             sources=(tenant.source, second_source),
             model_round=2,
+            **_controlled_checkpoint_fields(2),
         )
     )
     claimed = await service.claim(created.key)
@@ -735,7 +882,7 @@ async def _validated_two_source_with_pending_artifact(
             finish_reason="stop",
         ),
     )
-    restarted = SummaryJobService(factory, verifier=verifier)
+    restarted = _ControlledCheckpointSummaryJobService(factory, verifier=verifier)
     recovery = await restarted.claim_recovery(created.key)
     assert recovery is not None
     settled = await restarted.validate_stored_response(
@@ -805,7 +952,7 @@ async def test_concurrent_create_deduplicates_one_immutable_job_and_source_manif
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
     tenant = await _seed_tenant(factory)
-    service = SummaryJobService(factory)
+    service = _ControlledCheckpointSummaryJobService(factory)
     command = _new_summary_job(tenant)
 
     results = await asyncio.gather(
@@ -872,12 +1019,11 @@ async def test_dispatch_boundary_schema_is_applied_by_migration(
                 """
             )
         )
-    assert revision == EXPECTED_REVISION
+    assert revision == ScriptDirectory.from_config(Config("alembic.ini")).get_current_head()
     assert nullable == "YES"
     assert unique_definition is not None
     assert all(
-        column in unique_definition
-        for column in ("workspace_id", "trigger_run_id", "model_round")
+        column in unique_definition for column in ("workspace_id", "trigger_run_id", "model_round")
     )
     assert check_definition is not None
     assert "model_round" in check_definition
@@ -889,7 +1035,7 @@ async def test_same_boundary_distinct_identities_conflict_even_concurrently(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
     tenant = await _seed_tenant(factory)
-    service = SummaryJobService(factory)
+    service = _ControlledCheckpointSummaryJobService(factory)
     first_command = _new_summary_job(tenant)
     second_command = replace(
         first_command,
@@ -931,7 +1077,7 @@ async def test_same_frozen_command_is_idempotent_not_a_boundary_conflict(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
     tenant = await _seed_tenant(factory)
-    service = SummaryJobService(factory)
+    service = _ControlledCheckpointSummaryJobService(factory)
     command = _new_summary_job(tenant)
 
     first = await service.create_job(command)
@@ -948,9 +1094,9 @@ async def test_different_model_rounds_on_the_same_run_are_distinct_boundaries(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
     tenant = await _seed_tenant(factory)
-    service = SummaryJobService(factory)
+    service = _ControlledCheckpointSummaryJobService(factory)
     first_command = _new_summary_job(tenant)
-    second_command = replace(first_command, model_round=2)
+    second_command = _new_summary_job(tenant, model_round=2)
 
     first = await service.create_job(first_command)
     second = await service.create_job(second_command)
@@ -979,7 +1125,7 @@ async def test_boundary_is_scoped_by_workspace_and_trigger_run(
 ) -> None:
     tenant = await _seed_tenant(factory)
     other = await _seed_tenant(factory)
-    service = SummaryJobService(factory)
+    service = _ControlledCheckpointSummaryJobService(factory)
 
     first = await service.create_job(_new_summary_job(tenant))
     other_workspace = await service.create_job(_new_summary_job(other))
@@ -1011,10 +1157,9 @@ async def test_model_round_validation_rejects_booleans_non_integers_and_out_of_b
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
     tenant = await _seed_tenant(factory)
-    service = SummaryJobService(factory)
+    service = _ControlledCheckpointSummaryJobService(factory)
     command = _new_summary_job(tenant)
     invalid_rounds = (
-        None,
         False,
         True,
         0,
@@ -1028,115 +1173,53 @@ async def test_model_round_validation_rejects_booleans_non_integers_and_out_of_b
             await service.create_job(replace(command, model_round=invalid_round))
 
     maximum = await service.create_job(
-        replace(command, model_round=MAX_SUMMARY_MODEL_ROUND)
+        _new_summary_job(tenant, model_round=MAX_SUMMARY_MODEL_ROUND)
     )
     assert maximum.created is True
 
 
 @pytest.mark.asyncio
-async def test_legacy_null_model_round_cannot_cross_a_dispatch_boundary(
+async def test_new_legacy_style_jobs_without_checkpoint_are_rejected(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
     tenant = await _seed_tenant(factory)
     legacy_id = uuid4()
     legacy_identity = _hash(f"legacy-summary-{legacy_id}")
     model_spec = {"provider": "offline", "model": "offline-summary-service"}
-    async with factory() as session:
-        async with session.begin():
-            session.add(
-                ThreadSummaryJob(
-                    id=legacy_id,
-                    workspace_id=tenant.workspace_id,
-                    thread_id=tenant.thread_id,
-                    trigger_run_id=tenant.run_id,
-                    model_round=None,
-                    identity_hash=legacy_identity,
-                    source_watermark=2,
-                    source_scope={
-                        "kind": "COMPLETED_PREFIX",
-                        "through_sequence": 1,
-                        "before_run_id": str(tenant.run_id),
-                    },
-                    source_scope_hash=_hash(f"legacy-scope-{legacy_id}"),
-                    source_content_hash=_hash(f"legacy-content-{legacy_id}"),
-                    policy_spec={"schema_version": 1, "mode": "legacy"},
-                    policy_version="summary-policy-v1",
-                    prompt_version="summary_candidate_zh_v1",
-                    budget_version="summary-budget-v1",
-                    model_spec=model_spec,
-                    model_spec_hash=_hash(json.dumps(model_spec, sort_keys=True)),
-                    tokenizer_id="approx_language_v1",
-                    tokenizer_version="1",
-                    target_budget_tokens=1500,
-                    permission_snapshot_hash=_hash(tenant.permission_snapshot),
-                    status=SummaryJobStatus.QUEUED.value,
-                    created_by=tenant.user_id,
-                )
-            )
-            await session.flush()
-            session.add(
-                ThreadSummaryJobSource(
-                    id=uuid4(),
-                    workspace_id=tenant.workspace_id,
-                    thread_id=tenant.thread_id,
-                    job_id=legacy_id,
-                    ordinal=1,
-                    source_id=tenant.source.source_id,
-                    turn_id=tenant.source.turn_id,
-                    run_id=tenant.source.run_id,
-                    sequence=tenant.source.sequence,
-                    original_ref=tenant.source.original_ref,
-                    source_identity_hash=tenant.source.source_identity_hash,
-                    revision_sha256=tenant.source.revision_sha256,
-                    user_input_sha256=tenant.source.user_input_sha256,
-                    final_output_sha256=tenant.source.final_output_sha256,
-                    artifact_identities=[],
-                    summary_eligibility=tenant.source.summary_eligibility,
-                    eligibility_reason=tenant.source.eligibility_reason,
-                )
-            )
-
-    service = SummaryJobService(factory)
-    key = SummaryJobKey(tenant.workspace_id, tenant.thread_id, legacy_id)
-    with pytest.raises(SummaryServiceError) as legacy_blocked:
-        await service.create_job(_new_summary_job(tenant))
-    assert legacy_blocked.value.code == "SUMMARY_LEGACY_BOUNDARY_UNVERIFIED"
-    claimed = await service.claim(key)
-    assert claimed is not None
-    with pytest.raises(SummaryServiceError) as blocked:
-        await service.commit_dispatch_intent(
-            key,
-            lease_token=claimed.lease_token,
-            pricing_snapshot_id=tenant.pricing_id,
-            reserved_input_tokens=700,
-            reserved_output_tokens=300,
-        )
-    assert blocked.value.code == "SUMMARY_DISPATCH_BOUNDARY_REQUIRED"
-    async with factory() as session:
-        job = await session.get(ThreadSummaryJob, legacy_id)
-        dispatches = await session.scalar(
-            select(func.count())
-            .select_from(ThreadSummaryDispatch)
-            .where(ThreadSummaryDispatch.job_id == legacy_id)
-        )
-    assert job is not None
-    assert job.status == SummaryJobStatus.CLAIMED.value
-    assert job.model_round is None
-    assert job.budget_reserved is False
-    assert dispatches == 0
-
-    with pytest.raises(DBAPIError):
+    with pytest.raises(DBAPIError, match="exact checkpoint binding"):
         async with factory() as session:
             async with session.begin():
-                await session.execute(
-                    update(ThreadSummaryJob)
-                    .where(ThreadSummaryJob.id == legacy_id)
-                    .values(model_round=1)
+                session.add(
+                    ThreadSummaryJob(
+                        id=legacy_id,
+                        workspace_id=tenant.workspace_id,
+                        thread_id=tenant.thread_id,
+                        trigger_run_id=tenant.run_id,
+                        model_round=None,
+                        identity_hash=legacy_identity,
+                        source_watermark=2,
+                        source_scope={
+                            "kind": "COMPLETED_PREFIX",
+                            "through_sequence": 1,
+                            "before_run_id": str(tenant.run_id),
+                        },
+                        source_scope_hash=_hash(f"legacy-scope-{legacy_id}"),
+                        source_content_hash=_hash(f"legacy-content-{legacy_id}"),
+                        policy_spec={"schema_version": 1, "mode": "legacy"},
+                        policy_version="summary-policy-v1",
+                        prompt_version="summary_candidate_zh_v1",
+                        budget_version="summary-budget-v1",
+                        model_spec=model_spec,
+                        model_spec_hash=_hash(json.dumps(model_spec, sort_keys=True)),
+                        tokenizer_id="approx_language_v1",
+                        tokenizer_version="1",
+                        target_budget_tokens=1500,
+                        permission_snapshot_hash=_hash(tenant.permission_snapshot),
+                        status=SummaryJobStatus.QUEUED.value,
+                        created_by=tenant.user_id,
+                    )
                 )
-    async with factory() as session:
-        unchanged = await session.get(ThreadSummaryJob, legacy_id)
-    assert unchanged is not None
-    assert unchanged.model_round is None
+                await session.flush()
 
 
 def test_reservation_cost_uses_the_higher_cached_input_rate_when_configured() -> None:
@@ -1194,9 +1277,7 @@ def test_reservation_cost_requires_ascii_uppercase_currency_and_allows_zero_rate
         cached_input_price_per_1m=None,
         currency="CNY",
     )
-    assert _reservation_cost(zero, input_tokens=700, output_tokens=300) == Decimal(
-        "0.00000000"
-    )
+    assert _reservation_cost(zero, input_tokens=700, output_tokens=300) == Decimal("0.00000000")
     for currency in ("cny", "ＣＮＹ", "C1Y"):
         invalid = SimpleNamespace(
             input_price_per_1m=Decimal("1"),
@@ -1224,7 +1305,7 @@ async def test_unavailable_shared_budget_never_dispatches_and_rolls_back(
             return False
 
     options = {"budget_reserver": RejectedBudget()} if reject_after_write else {}
-    service = SummaryJobService(
+    service = _ControlledCheckpointSummaryJobService(
         factory, verifier=_Verifier(lambda binding: _validation_context(tenant)), **options
     )
     created = await service.create_job(_new_summary_job(tenant))
@@ -1243,9 +1324,9 @@ async def test_unavailable_shared_budget_never_dispatches_and_rolls_back(
         )
         job = await session.get(ThreadSummaryJob, created.key.job_id)
         count = await session.scalar(
-            select(func.count()).select_from(ThreadSummaryDispatch).where(
-                ThreadSummaryDispatch.job_id == created.key.job_id
-            )
+            select(func.count())
+            .select_from(ThreadSummaryDispatch)
+            .where(ThreadSummaryDispatch.job_id == created.key.job_id)
         )
     assert name == original_name
     assert job.status == "CLAIMED" and job.dispatch_id is None and not job.budget_reserved
@@ -1265,7 +1346,7 @@ async def test_thread_deletion_reports_retained_summary_job(
     from packages.threads.service import ThreadService
 
     tenant = await _seed_tenant(factory)
-    await SummaryJobService(factory).create_job(_new_summary_job(tenant))
+    await _ControlledCheckpointSummaryJobService(factory).create_job(_new_summary_job(tenant))
     context = WorkspaceExecutionContext(
         organization=OrganizationContext(
             principal=PrincipalContext(
@@ -1289,7 +1370,7 @@ async def test_concurrent_claim_has_one_owner_and_thread_tenant_lookup_fences_ev
 ) -> None:
     tenant = await _seed_tenant(factory)
     other = await _seed_tenant(factory)
-    service = SummaryJobService(factory)
+    service = _ControlledCheckpointSummaryJobService(factory)
     created = await service.create_job(_new_summary_job(tenant))
 
     claims = await asyncio.gather(
@@ -1397,7 +1478,9 @@ async def test_summary_worker_and_durable_service_share_one_fake_gateway_dispatc
     spec = _freeze((profile,))
     spec = replace(spec, runtime={**spec.runtime, "summary_policy": _summary_policy()})
     verifier = _Verifier(lambda binding: _validation_context(tenant))
-    service = SummaryJobService(factory, verifier=verifier, budget_reserver=_TestBudgetReserver())
+    service = _ControlledCheckpointSummaryJobService(
+        factory, verifier=verifier, budget_reserver=_TestBudgetReserver()
+    )
     created = await service.create_job(
         replace(
             _new_summary_job(tenant),
@@ -1464,7 +1547,7 @@ async def test_waiting_for_job_lock_cannot_use_an_expired_lease(
 ) -> None:
     tenant = await _seed_tenant(factory)
     clock = [datetime.now(UTC)]
-    service = SummaryJobService(
+    service = _ControlledCheckpointSummaryJobService(
         factory,
         verifier=_Verifier(lambda _binding: _validation_context(tenant)),
         budget_reserver=_TestBudgetReserver(),
@@ -1543,7 +1626,7 @@ async def test_expiry_while_reserving_rolls_back_same_transaction(
             clock[0] += timedelta(seconds=61)
             return True
 
-    service = SummaryJobService(
+    service = _ControlledCheckpointSummaryJobService(
         factory,
         verifier=_Verifier(lambda _binding: _validation_context(tenant)),
         budget_reserver=AdvancingReserver(),
@@ -1589,7 +1672,7 @@ async def test_expiry_during_dispatch_review_does_not_cross_boundary(
             clock[0] += timedelta(seconds=61)
         return _validation_context(tenant)
 
-    service = SummaryJobService(
+    service = _ControlledCheckpointSummaryJobService(
         factory,
         verifier=_Verifier(review),
         budget_reserver=_TestBudgetReserver(),
@@ -1620,7 +1703,7 @@ async def test_expiry_while_locking_dispatch_fences_response_as_unknown(
 ) -> None:
     tenant = await _seed_tenant(factory)
     clock = [datetime.now(UTC)]
-    service = SummaryJobService(
+    service = _ControlledCheckpointSummaryJobService(
         factory,
         verifier=_Verifier(lambda _binding: _validation_context(tenant)),
         budget_reserver=_TestBudgetReserver(),
@@ -1775,7 +1858,7 @@ async def test_claim_then_worker_crash_requeues_and_expiry_never_infers_dispatch
             assert job is not None
             job.lease_expires_at = now - timedelta(seconds=1)
 
-    recovered = await SummaryJobService(factory).recover_expired_leases(
+    recovered = await _ControlledCheckpointSummaryJobService(factory).recover_expired_leases(
         workspace_id=key.workspace_id,
         thread_id=key.thread_id,
         now=now,
@@ -2008,7 +2091,7 @@ async def test_expired_post_dispatch_lease_becomes_irreversible_unknown_with_cos
             assert job is not None
             job.lease_expires_at = now - timedelta(seconds=1)
 
-    recovered = await SummaryJobService(factory).recover_expired_leases(
+    recovered = await _ControlledCheckpointSummaryJobService(factory).recover_expired_leases(
         workspace_id=key.workspace_id,
         thread_id=key.thread_id,
         now=now,
@@ -2080,7 +2163,9 @@ async def test_response_is_persisted_before_validation_and_offline_restart_recov
     assert verifier.phases == [SummaryVerifierPhase.DISPATCH, SummaryVerifierPhase.DISPATCH]
 
     with pytest.raises(SummaryServiceError) as no_lease:
-        await SummaryJobService(factory, verifier=verifier).validate_stored_response(
+        await _ControlledCheckpointSummaryJobService(
+            factory, verifier=verifier
+        ).validate_stored_response(
             key,
             lease_token=lease_token,
         )
@@ -2091,7 +2176,7 @@ async def test_response_is_persisted_before_validation_and_offline_restart_recov
     assert len(responses_after_rejection) == 1
     assert verifier.phases == [SummaryVerifierPhase.DISPATCH, SummaryVerifierPhase.DISPATCH]
 
-    restarted = SummaryJobService(factory, verifier=verifier)
+    restarted = _ControlledCheckpointSummaryJobService(factory, verifier=verifier)
     recovery = await restarted.claim_recovery(key)
     assert recovery is not None
     with pytest.raises(SummaryServiceError) as stale_lease:
@@ -2147,7 +2232,8 @@ async def test_response_outside_reservation_is_stored_but_cannot_publish(
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             total_tokens=(
-                None if input_tokens is None or output_tokens is None
+                None
+                if input_tokens is None or output_tokens is None
                 else input_tokens + output_tokens
             ),
             cost_amount=cost,
@@ -2202,9 +2288,7 @@ async def test_invalid_reported_cost_status_is_retained_but_cannot_publish(
 
     assert result.status == SummaryJobStatus.FAILED.value
     assert result.artifact_id is None
-    assert result.validation_result["issues"][0]["code"] == (
-        "SUMMARY_PROVIDER_COST_UNVERIFIED"
-    )
+    assert result.validation_result["issues"][0]["code"] == ("SUMMARY_PROVIDER_COST_UNVERIFIED")
     job, dispatch, responses = await _job_row(factory, key)
     assert job.response_id == stored.response_id
     assert job.failure_code == "SUMMARY_PROVIDER_COST_UNVERIFIED"
@@ -2371,7 +2455,7 @@ async def test_unknown_frozen_token_counter_cannot_dispatch(
 ) -> None:
     tenant = await _seed_tenant(factory)
     verifier = _Verifier(lambda binding: _validation_context(tenant))
-    service = SummaryJobService(factory, verifier=verifier)
+    service = _ControlledCheckpointSummaryJobService(factory, verifier=verifier)
     created = await service.create_job(
         replace(_new_summary_job(tenant), tokenizer_id="unknown-counter")
     )
@@ -2444,9 +2528,10 @@ async def test_published_newer_parent_revision_supersedes_pending_child(
         created_by=tenant.user_id,
         sources=(tenant.source, second_source),
         model_round=3,
+        **_controlled_checkpoint_fields(3),
     )
     child_verifier = _Verifier(lambda binding: _two_source_context(tenant, second_source))
-    child_service = SummaryJobService(
+    child_service = _ControlledCheckpointSummaryJobService(
         factory, verifier=child_verifier, budget_reserver=_TestBudgetReserver()
     )
     child = await child_service.create_job(child_command)
@@ -2476,7 +2561,7 @@ async def test_published_newer_parent_revision_supersedes_pending_child(
     assert child_settled.status == "VALIDATED", child_settled.validation_result
 
     newer_verifier = _Verifier(lambda binding: _two_source_context(tenant, second_source))
-    newer_service = SummaryJobService(
+    newer_service = _ControlledCheckpointSummaryJobService(
         factory, verifier=newer_verifier, budget_reserver=_TestBudgetReserver()
     )
     newer = await newer_service.create_job(
@@ -2508,6 +2593,7 @@ async def test_published_newer_parent_revision_supersedes_pending_child(
             created_by=tenant.user_id,
             sources=(tenant.source, second_source),
             model_round=4,
+            **_controlled_checkpoint_fields(4),
         )
     )
     newer_claim = await newer_service.claim(newer.key)
@@ -2573,8 +2659,12 @@ async def test_concurrent_root_publications_choose_one_current_thread_revision(
             await asyncio.sleep(0.1)
             return SummaryTrustDecision.verified()
 
-    first_service = SummaryJobService(factory, verifier=DelayedPublicationVerifier())
-    second_service = SummaryJobService(factory, verifier=DelayedPublicationVerifier())
+    first_service = _ControlledCheckpointSummaryJobService(
+        factory, verifier=DelayedPublicationVerifier()
+    )
+    second_service = _ControlledCheckpointSummaryJobService(
+        factory, verifier=DelayedPublicationVerifier()
+    )
     first, second = await asyncio.gather(
         first_service.publish(first_key, lease_token=first_lease, published_by="first"),
         second_service.publish(second_key, lease_token=second_lease, published_by="second"),
@@ -2728,7 +2818,7 @@ async def test_default_verifier_fails_closed_and_can_resume_after_trusted_verifi
     await _commit_intent(service, key, lease_token, tenant=tenant)
     await _store_response(service, key, lease_token, tenant)
 
-    default_service = SummaryJobService(factory)
+    default_service = _ControlledCheckpointSummaryJobService(factory)
     recovery = await default_service.claim_recovery(key)
     assert recovery is not None
     with pytest.raises(SummaryServiceError) as unavailable:
@@ -2741,7 +2831,7 @@ async def test_default_verifier_fails_closed_and_can_resume_after_trusted_verifi
     assert job.status == "RESPONSE_STORED"
     assert len(responses) == 1
 
-    trusted = SummaryJobService(
+    trusted = _ControlledCheckpointSummaryJobService(
         factory,
         verifier=_Verifier(lambda binding: _validation_context(tenant)),
         clock=lambda: datetime.now(UTC) + timedelta(hours=1),

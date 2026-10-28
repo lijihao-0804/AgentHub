@@ -72,7 +72,7 @@ from tests.integration.test_thread_history_m3 import db_factory as db_factory
 
 EXPECTED_DATABASE_URL = (
     "postgresql+psycopg://agenthub:m2_local_test@127.0.0.1:15432/"
-    "agenthub_context_policy_m2"
+    "agenthub_run_budget_m4_20261028_v4"
 )
 REQUIRED_REVISION = "head"
 CHECKPOINT_ID = "review-checkpoint"

@@ -69,6 +69,14 @@ class RunBudgetAttemptAdapter:
         self._price_source = price_source
         self._ledger = ledger or RunBudgetLedger()
 
+    def is_bound_to_run(self, workspace_id: UUID, run_id: UUID, call_identity: str) -> bool:
+        """Reject a budget adapter accidentally attached to another Run or round."""
+        return (
+            workspace_id == self._workspace_id
+            and run_id == self._run_id
+            and call_identity == self._call_identity
+        )
+
     async def reserve_attempt(
         self,
         context: WorkspaceExecutionContext,

@@ -355,6 +355,9 @@ async def test_run_budget_adapter_commits_reservation_before_returning() -> None
         price_source=source,
         ledger=ledger,
     )
+    assert adapter.is_bound_to_run(workspace_id, run_id, "run-1:round-3")
+    assert not adapter.is_bound_to_run(workspace_id, uuid4(), "run-1:round-3")
+    assert not adapter.is_bound_to_run(workspace_id, run_id, "run-1:round-4")
 
     reservation = await adapter.reserve_attempt(
         context,

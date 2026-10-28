@@ -36,6 +36,7 @@ from packages.agent_runtime.summary_service import (
 from packages.core.config.settings import get_settings
 from packages.core.database import create_database
 from tests.integration.test_summary_service_m4 import (
+    _ControlledCheckpointSummaryJobService,
     _new_summary_job,
     _seed_tenant,
     _Tenant,
@@ -121,7 +122,7 @@ def _service(
     tenant: _Tenant,
     budget_reserver,
 ) -> SummaryJobService:
-    return SummaryJobService(
+    return _ControlledCheckpointSummaryJobService(
         factory,
         verifier=_Verifier(lambda binding: _validation_context(tenant)),
         budget_reserver=budget_reserver,
@@ -407,7 +408,7 @@ async def test_unknown_summary_outcome_keeps_budget_and_blocks_redispatch(
     assert account.reserved_amount == intent.reserved_cost_amount
     assert account.settled_amount == Decimal("0.00000000")
     assert attempt is not None
-    assert attempt.status == RunBudgetAttemptStatus.RESERVED.value
+    assert attempt.status == RunBudgetAttemptStatus.UNKNOWN_OUTCOME.value
     assert dispatch_count == 1
     assert await service.claim(key) is None
     with pytest.raises(SummaryServiceError) as redispatch:

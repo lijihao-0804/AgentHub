@@ -92,6 +92,8 @@ class ModelAttemptBudgetReservation:
 class ModelAttemptBudget(Protocol):
     """Gateway-facing strict budget boundary."""
 
+    def is_bound_to_run(self, workspace_id: UUID, run_id: UUID, call_identity: str) -> bool: ...
+
     async def reserve_attempt(
         self,
         context: WorkspaceExecutionContext,
