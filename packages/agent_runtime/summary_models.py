@@ -22,6 +22,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    Text,
     UniqueConstraint,
     func,
     text,
@@ -159,11 +160,52 @@ class ThreadSummaryJob(Base):
             "model_round",
             name="uq_thread_summary_jobs_dispatch_boundary",
         ),
+        UniqueConstraint(
+            "workspace_id",
+            "trigger_run_id",
+            "checkpoint_id",
+            "checkpoint_ns",
+            name="uq_thread_summary_jobs_exact_checkpoint",
+        ),
         CheckConstraint(_JOB_STATUS_SQL, name="ck_thread_summary_jobs_status"),
         CheckConstraint(
             "model_round IS NULL OR "
             "(model_round > 0 AND model_round <= 2147483647)",
             name="ck_thread_summary_jobs_model_round_bounds",
+        ),
+        CheckConstraint(
+            "(checkpoint_id IS NULL AND checkpoint_ns IS NULL "
+            "AND checkpoint_model_round_count IS NULL "
+            "AND checkpoint_binding_sha256 IS NULL) OR "
+            "(checkpoint_id IS NOT NULL AND checkpoint_ns IS NOT NULL "
+            "AND checkpoint_model_round_count IS NOT NULL "
+            "AND checkpoint_binding_sha256 IS NOT NULL)",
+            name="ck_thread_summary_jobs_checkpoint_shape",
+        ),
+        CheckConstraint(
+            "checkpoint_id IS NULL OR length(checkpoint_id) > 0",
+            name="ck_thread_summary_jobs_checkpoint_id_nonempty",
+        ),
+        CheckConstraint(
+            "(checkpoint_id IS NULL OR octet_length(checkpoint_id) <= 1024) "
+            "AND (checkpoint_ns IS NULL OR octet_length(checkpoint_ns) <= 1024)",
+            name="ck_thread_summary_jobs_checkpoint_selector_size",
+        ),
+        CheckConstraint(
+            "checkpoint_model_round_count IS NULL OR "
+            "(checkpoint_model_round_count >= 0 "
+            "AND checkpoint_model_round_count <= 2147483647)",
+            name="ck_thread_summary_jobs_checkpoint_round_bounds",
+        ),
+        CheckConstraint(
+            "model_round IS NULL OR checkpoint_id IS NULL OR "
+            "checkpoint_model_round_count = model_round - 1",
+            name="ck_thread_summary_jobs_checkpoint_round_relation",
+        ),
+        CheckConstraint(
+            "checkpoint_binding_sha256 IS NULL OR "
+            "checkpoint_binding_sha256 ~ '^[0-9a-f]{64}$'",
+            name="ck_thread_summary_jobs_checkpoint_hash",
         ),
         CheckConstraint(
             "source_watermark > 0",
@@ -260,6 +302,10 @@ class ThreadSummaryJob(Base):
     thread_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     trigger_run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     model_round: Mapped[int | None] = mapped_column(Integer)
+    checkpoint_id: Mapped[str | None] = mapped_column(Text)
+    checkpoint_ns: Mapped[str | None] = mapped_column(Text)
+    checkpoint_model_round_count: Mapped[int | None] = mapped_column(Integer)
+    checkpoint_binding_sha256: Mapped[str | None] = mapped_column(String(64))
     identity_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     source_watermark: Mapped[int] = mapped_column(Integer, nullable=False)
     source_scope: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)

@@ -9,6 +9,9 @@ from tests.unit.test_runtime_rag_evidence_projection import _frozen_spec, _model
 
 
 class _Budget:
+    def is_bound_to_run(self, workspace_id, run_id, call_identity):
+        return call_identity == "round-1"
+
     async def reserve_attempt(self, *args, **kwargs):
         raise ModelAttemptBudgetError("RUN_BUDGET_INSUFFICIENT_FUNDS", "budget exhausted")
 
@@ -74,3 +77,28 @@ async def test_configured_budget_rejects_gateway_that_cannot_enforce_it():
     }
     result = await graph.model(state)
     assert result["failure_code"] == "RUN_BUDGET_BINDING_UNAVAILABLE"
+
+
+@pytest.mark.asyncio
+async def test_model_node_refuses_a_budget_bound_to_another_run():
+    graph = _model_graph(request_sink=[])
+    captured = []
+    gateway = _Gateway(captured)
+
+    class WrongRunBudget(_Budget):
+        def is_bound_to_run(self, workspace_id, run_id, call_identity):
+            return False
+
+    graph.service.model_gateway_factory = lambda session: gateway
+    graph.service.model_attempt_budget_factory = lambda run, round_number: WrongRunBudget()
+    state = {
+        "messages": [ModelMessage(role="user", content="question")],
+        "spec": _frozen_spec(20_000),
+        "runtime": {"max_steps": 5, "context_budget": graph._runtime_context_budget},
+        "tool_definitions": {},
+        "model_round_count": 0,
+        "usage_records": [],
+    }
+    result = await graph.model(state)
+    assert result["failure_code"] == "RUN_BUDGET_BINDING_UNAVAILABLE"
+    assert captured == []

@@ -10,7 +10,10 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
-from packages.agent_runtime.history_checkpoint import verify_history_checkpoint_binding
+from packages.agent_runtime.history_checkpoint import (
+    verify_exact_checkpoint_binding,
+    verify_history_checkpoint_binding,
+)
 from packages.agent_runtime.models import AgentRun, AgentVersion
 from packages.agent_runtime.publish import _resolved_spec
 from packages.agent_runtime.runtime_service import AgentRunService
@@ -131,7 +134,9 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
     adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
     async with adapter.checkpointer() as checkpointer:
         config = adapter.config_for_run(base["workspace_id"], run_id)
-        final = await graph.invoke({}, checkpointer=checkpointer, config=config)
+        final = await graph.invoke(
+            {"model_round_count": 0}, checkpointer=checkpointer, config=config
+        )
         checkpoint = await checkpointer.aget_tuple(config)
     assert final["failure_code"] == "AGENT_HISTORY_CONTEXT_INSUFFICIENT"
     assert checkpoint is not None
@@ -139,6 +144,20 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
         checkpoint.checkpoint["channel_values"]["history_checkpoint_binding"]
         == result["history_checkpoint_binding"]
     )
+    assert checkpoint.checkpoint["channel_values"]["summary_boundary"] == {
+        "version": "summary_dispatch_boundary_v1",
+        "model_round": 1,
+    }
+    verified = await verify_exact_checkpoint_binding(
+        factory,
+        checkpoint_adapter=adapter,
+        workspace_id=base["workspace_id"],
+        thread_id=thread_id,
+        run_id=run_id,
+        checkpoint_id=checkpoint.config["configurable"]["checkpoint_id"],
+        checkpoint_ns=checkpoint.config["configurable"]["checkpoint_ns"],
+    )
+    assert verified.checkpoint_model_round_count == 0
     assert requests == []
 
 

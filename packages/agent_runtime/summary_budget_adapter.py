@@ -78,5 +78,20 @@ class SummaryRunBudgetReserver:
             raise
         return reservation.created is True
 
+    async def mark_unknown_outcome(
+        self,
+        session: AsyncSession,
+        *,
+        binding: SummaryJobBinding,
+        reservation_id: UUID,
+    ) -> None:
+        """Keep the hold and record uncertainty in the caller's transaction."""
+        await self._ledger.mark_unknown_outcome(
+            session,
+            workspace_id=binding.workspace_id,
+            run_id=binding.trigger_run_id,
+            attempt_identity=f"summary:{reservation_id}",
+        )
+
 
 __all__ = ["SummaryRunBudgetReserver"]

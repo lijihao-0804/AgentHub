@@ -8,7 +8,10 @@ All state-changing operations use short explicit transactions.  Every exact
 job lookup includes workspace, thread and job identity; competing workers
 serialize on the job row and must present the current unexpired lease token.
 Publication rechecks trusted server-side bindings while holding the job row
-and uses compare-and-set updates for both the artifact and job.
+and uses compare-and-set updates for both the artifact and job. Job creation
+and every pre-provider transition also reload the persisted exact LangGraph
+checkpoint through the framework adapter; request-supplied selectors are not
+treated as proof.
 """
 
 from __future__ import annotations
@@ -26,11 +29,18 @@ from enum import StrEnum
 from typing import Any, Protocol
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.context_budget import ApproxTokenEstimator
+from packages.agent_runtime.history_checkpoint import (
+    ExactCheckpointAdapter,
+    PersistedCheckpointBinding,
+    VerifiedCheckpointBinding,
+    verify_exact_checkpoint_binding,
+    verify_fixed_checkpoint_binding,
+)
 from packages.agent_runtime.models import AgentRun
 from packages.agent_runtime.summary_models import (
     ThreadSummaryArtifact,
@@ -63,10 +73,12 @@ from packages.agent_runtime.summary_validation import (
     validate_summary_candidate,
 )
 from packages.core.canonical.json_hash import canonical_json, canonical_json_hash
+from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.models import PricingSnapshot
 from packages.threads.models import AgentThread
 
 SUMMARY_LEDGER_VERSION = "thread_summary_ledger_v1"
+SUMMARY_JOB_IDENTITY_VERSION = "thread_summary_job_identity_v2"
 SUMMARY_ARTIFACT_VERSION = "thread_summary_artifact_v1"
 SUMMARY_SOURCE_INDEX_VERSION = "thread_summary_source_index_v1"
 DEFAULT_LEASE_SECONDS = 180
@@ -138,7 +150,13 @@ class NewSummarySource:
 
 @dataclass(frozen=True, slots=True)
 class NewSummaryJob:
-    """Immutable source/strategy identity used to create one deduplicated job."""
+    """Summary creation command and untrusted exact-checkpoint selector.
+
+    ``checkpoint_id`` and ``checkpoint_ns`` select the tuple to read. The
+    service derives the persisted checkpoint identity and model round from the
+    real tuple. ``model_round`` is an optional compatibility assertion and is
+    never used as evidence.
+    """
 
     workspace_id: UUID
     thread_id: UUID
@@ -158,6 +176,8 @@ class NewSummaryJob:
     sources: tuple[NewSummarySource, ...]
     parent_artifact_id: UUID | None = None
     parent_revision_hash: str | None = None
+    checkpoint_id: str | None = None
+    checkpoint_ns: str | None = None
     model_round: int | None = None
 
 
@@ -271,6 +291,38 @@ class SummaryJobBinding:
     artifact_id: UUID | None
     phase: SummaryVerifierPhase
     model_round: int | None = None
+    checkpoint_id: str | None = None
+    checkpoint_ns: str | None = None
+    checkpoint_model_round_count: int | None = None
+    checkpoint_binding_sha256: str | None = None
+
+    def __post_init__(self) -> None:
+        checkpoint_fields = (
+            self.checkpoint_id,
+            self.checkpoint_ns,
+            self.checkpoint_model_round_count,
+            self.checkpoint_binding_sha256,
+        )
+        if any(value is not None for value in checkpoint_fields) and any(
+            value is None for value in checkpoint_fields
+        ):
+            raise ValueError("exact checkpoint binding fields must be all-or-none")
+        if self.checkpoint_id is None:
+            return
+        if not isinstance(self.checkpoint_id, str) or not self.checkpoint_id:
+            raise ValueError("checkpoint_id must be a non-empty string")
+        if not isinstance(self.checkpoint_ns, str):
+            raise ValueError("checkpoint_ns must be a string")
+        if (
+            isinstance(self.checkpoint_model_round_count, bool)
+            or not isinstance(self.checkpoint_model_round_count, int)
+            or not 0 <= self.checkpoint_model_round_count < MAX_SUMMARY_MODEL_ROUND
+        ):
+            raise ValueError("checkpoint_model_round_count is outside supported bounds")
+        if not _sha256(self.checkpoint_binding_sha256):
+            raise ValueError("checkpoint_binding_sha256 must be lowercase SHA-256")
+        if self.model_round != self.checkpoint_model_round_count + 1:
+            raise ValueError("model_round must follow the checkpoint round count")
 
 
 @dataclass(frozen=True, slots=True)
@@ -374,6 +426,7 @@ class SummaryJobService:
         self,
         session_factory: async_sessionmaker[AsyncSession],
         *,
+        checkpoint_adapter: ExactCheckpointAdapter | None = None,
         verifier: SummaryBindingVerifier | None = None,
         budget_reserver: SummaryBudgetReserver | None = None,
         clock: Callable[[], datetime] | None = None,
@@ -389,6 +442,7 @@ class SummaryJobService:
         if not 1 <= max_recovery_batch <= 1_000:
             raise ValueError("max_recovery_batch must be between 1 and 1000")
         self._session_factory = session_factory
+        self._checkpoint_adapter = checkpoint_adapter
         self._verifier = verifier or DenyAllSummaryBindingVerifier()
         self._budget_reserver = budget_reserver or DenyAllSummaryBudgetReserver()
         self._clock = clock or _utc_now
@@ -398,7 +452,14 @@ class SummaryJobService:
     async def create_job(self, command: NewSummaryJob) -> CreatedSummaryJob:
         """Create an immutable job and source manifest in one bounded transaction."""
 
-        identity_hash = _summary_identity_hash(command)
+        _validate_new_job(command)
+        checkpoint = await self._verify_exact_checkpoint(command)
+        model_round = _trusted_summary_model_round(command, checkpoint)
+        identity_hash = _summary_identity_hash(
+            command,
+            checkpoint=checkpoint,
+            model_round=model_round,
+        )
         key = SummaryJobKey(command.workspace_id, command.thread_id, UUID(int=0))
         async with self._session_factory() as session:
             async with session.begin():
@@ -419,7 +480,13 @@ class SummaryJobService:
                     .where(
                         ThreadSummaryJob.workspace_id == command.workspace_id,
                         ThreadSummaryJob.trigger_run_id == command.trigger_run_id,
-                        ThreadSummaryJob.model_round.is_(None),
+                        or_(
+                            ThreadSummaryJob.model_round.is_(None),
+                            ThreadSummaryJob.checkpoint_id.is_(None),
+                            ThreadSummaryJob.checkpoint_ns.is_(None),
+                            ThreadSummaryJob.checkpoint_model_round_count.is_(None),
+                            ThreadSummaryJob.checkpoint_binding_sha256.is_(None),
+                        ),
                     )
                     .limit(1)
                 )
@@ -437,6 +504,7 @@ class SummaryJobService:
                     )
                 )
                 if existing is not None:
+                    await self._verify_fixed_job_checkpoint(existing)
                     return CreatedSummaryJob(
                         key=SummaryJobKey(
                             existing.workspace_id,
@@ -452,7 +520,7 @@ class SummaryJobService:
                     select(ThreadSummaryJob).where(
                         ThreadSummaryJob.workspace_id == command.workspace_id,
                         ThreadSummaryJob.trigger_run_id == command.trigger_run_id,
-                        ThreadSummaryJob.model_round == command.model_round,
+                        ThreadSummaryJob.model_round == model_round,
                     )
                 )
                 if boundary_owner is not None:
@@ -471,7 +539,13 @@ class SummaryJobService:
                     workspace_id=command.workspace_id,
                     thread_id=command.thread_id,
                     trigger_run_id=command.trigger_run_id,
-                    model_round=command.model_round,
+                    model_round=model_round,
+                    checkpoint_id=checkpoint.checkpoint_id,
+                    checkpoint_ns=checkpoint.checkpoint_ns,
+                    checkpoint_model_round_count=(
+                        checkpoint.checkpoint_model_round_count
+                    ),
+                    checkpoint_binding_sha256=checkpoint.checkpoint_binding_sha256,
                     identity_hash=identity_hash,
                     source_watermark=command.source_watermark,
                     source_scope=dict(command.source_scope),
@@ -531,6 +605,7 @@ class SummaryJobService:
                             )
                         )
                         if existing is not None:
+                            await self._verify_fixed_job_checkpoint(existing)
                             return CreatedSummaryJob(
                                 key=SummaryJobKey(
                                     existing.workspace_id,
@@ -544,12 +619,13 @@ class SummaryJobService:
                     if constraint_name in (
                         None,
                         "uq_thread_summary_jobs_dispatch_boundary",
+                        "uq_thread_summary_jobs_exact_checkpoint",
                     ):
                         boundary_owner = await session.scalar(
                             select(ThreadSummaryJob).where(
                                 ThreadSummaryJob.workspace_id == command.workspace_id,
                                 ThreadSummaryJob.trigger_run_id == command.trigger_run_id,
-                                ThreadSummaryJob.model_round == command.model_round,
+                                ThreadSummaryJob.model_round == model_round,
                             )
                         )
                         if boundary_owner is not None:
@@ -1097,6 +1173,16 @@ class SummaryJobService:
                         "SUMMARY_LEASE_LOST",
                         "The execution lease expired while reserving dispatch.",
                     )
+                # The fixed tuple and frozen history can change while source
+                # verification and budget locking wait. Re-read the persisted
+                # identity immediately before committing the one dispatch.
+                await self._verify_fixed_job_checkpoint(job)
+                current = self._now(now)
+                if not _owns_live_lease(job, lease_token, current):
+                    raise SummaryServiceError(
+                        "SUMMARY_LEASE_LOST",
+                        "The execution lease expired while rechecking the checkpoint.",
+                    )
 
                 dispatch = ThreadSummaryDispatch(
                     id=dispatch_id,
@@ -1487,6 +1573,7 @@ class SummaryJobService:
                         "The validation lease is missing, expired, or owned elsewhere.",
                     )
                 else:
+                    await self._verify_fixed_job_checkpoint(job)
                     stored_sources = await self._load_sources(session, key)
                     _verify_job_source_scope(
                         key,
@@ -1678,6 +1765,7 @@ class SummaryJobService:
                         "The publication lease is missing, expired, or owned elsewhere.",
                     )
                 else:
+                    await self._verify_fixed_job_checkpoint(job)
                     await self._lock_summary_thread(session, key)
                     artifact = await self._lock_artifact(session, key, job.artifact_id)
                     if artifact is None:
@@ -1821,9 +1909,65 @@ class SummaryJobService:
             return SummaryTrustDecision.unavailable("TRUSTED_VERIFIER_CONTRACT_INVALID")
         return decision
 
+    async def _verify_exact_checkpoint(
+        self,
+        command: NewSummaryJob,
+    ) -> VerifiedCheckpointBinding:
+        adapter = self._checkpoint_adapter
+        if adapter is None:
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_VERIFIER_UNAVAILABLE",
+                "Exact LangGraph checkpoint verification is not configured.",
+            )
+        if not isinstance(command.checkpoint_id, str) or command.checkpoint_ns is None:
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_SELECTOR_INVALID",
+                "A checkpoint ID and namespace are required.",
+            )
+        try:
+            return await verify_exact_checkpoint_binding(
+                self._session_factory,
+                checkpoint_adapter=adapter,
+                workspace_id=command.workspace_id,
+                thread_id=command.thread_id,
+                run_id=command.trigger_run_id,
+                checkpoint_id=command.checkpoint_id,
+                checkpoint_ns=command.checkpoint_ns,
+            )
+        except AgentHubError:
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_BINDING_INVALID",
+                "The selected LangGraph checkpoint is not trustworthy for this summary.",
+            ) from None
+
+    async def _verify_fixed_job_checkpoint(
+        self,
+        job: ThreadSummaryJob,
+    ) -> VerifiedCheckpointBinding:
+        _require_model_round_boundary(job)
+        adapter = self._checkpoint_adapter
+        if adapter is None:
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_VERIFIER_UNAVAILABLE",
+                "Exact LangGraph checkpoint verification is not configured.",
+            )
+        anchor = _checkpoint_anchor(job)
+        try:
+            return await verify_fixed_checkpoint_binding(
+                self._session_factory,
+                checkpoint_adapter=adapter,
+                expected=anchor,
+            )
+        except AgentHubError:
+            raise SummaryServiceError(
+                "SUMMARY_CHECKPOINT_BINDING_INVALID",
+                "The summary job's fixed LangGraph checkpoint is no longer valid.",
+            ) from None
+
     async def _trusted_dispatch_context(
         self, session: AsyncSession, key: SummaryJobKey, job: ThreadSummaryJob
     ) -> SummaryInputContext:
+        await self._verify_fixed_job_checkpoint(job)
         if job.tokenizer_id != "approx_language_v1" or job.tokenizer_version != "1":
             raise SummaryServiceError(
                 "SUMMARY_COUNTER_UNSUPPORTED", "The frozen summary token counter is unavailable."
@@ -2220,6 +2364,24 @@ class SummaryJobService:
                 "SUMMARY_DISPATCH_INVARIANT",
                 "The dispatch ledger could not be marked unknown.",
             )
+        mark_budget_unknown = getattr(self._budget_reserver, "mark_unknown_outcome", None)
+        if callable(mark_budget_unknown):
+            job = await session.scalar(
+                select(ThreadSummaryJob).where(
+                    ThreadSummaryJob.workspace_id == key.workspace_id,
+                    ThreadSummaryJob.thread_id == key.thread_id,
+                    ThreadSummaryJob.id == key.job_id,
+                )
+            )
+            if job is None:
+                raise SummaryServiceError(
+                    "SUMMARY_DISPATCH_INVARIANT", "The budget's summary job is missing."
+                )
+            await mark_budget_unknown(
+                session,
+                binding=_binding(job, SummaryVerifierPhase.DISPATCH),
+                reservation_id=dispatch.reservation_id,
+            )
 
     async def _mark_artifact_stale(
         self,
@@ -2311,11 +2473,65 @@ def _boundary_conflict(existing: ThreadSummaryJob) -> SummaryServiceError:
 
 
 def _require_model_round_boundary(job: ThreadSummaryJob) -> None:
-    if job.model_round is None:
+    if not _positive_int(job.model_round) or job.model_round > MAX_SUMMARY_MODEL_ROUND:
         raise SummaryServiceError(
             "SUMMARY_DISPATCH_BOUNDARY_REQUIRED",
             "A legacy summary job without a model-round boundary cannot dispatch.",
         )
+    checkpoint = _checkpoint_anchor(job)
+    if job.model_round != checkpoint.checkpoint_model_round_count + 1:
+        raise SummaryServiceError(
+            "SUMMARY_DISPATCH_BOUNDARY_INVALID",
+            "The summary model round does not follow its fixed checkpoint.",
+        )
+
+
+def _checkpoint_anchor(job: ThreadSummaryJob) -> PersistedCheckpointBinding:
+    checkpoint_id = getattr(job, "checkpoint_id", None)
+    checkpoint_ns = getattr(job, "checkpoint_ns", None)
+    checkpoint_model_round_count = getattr(
+        job, "checkpoint_model_round_count", None
+    )
+    checkpoint_binding_sha256 = getattr(job, "checkpoint_binding_sha256", None)
+    if (
+        not isinstance(checkpoint_id, str)
+        or not checkpoint_id
+        or not isinstance(checkpoint_ns, str)
+        or not _non_negative_int(checkpoint_model_round_count)
+        or checkpoint_model_round_count >= MAX_SUMMARY_MODEL_ROUND
+        or not _sha256(checkpoint_binding_sha256)
+    ):
+        raise SummaryServiceError(
+            "SUMMARY_DISPATCH_BOUNDARY_REQUIRED",
+            "The summary job has no complete fixed LangGraph checkpoint identity.",
+        )
+    return PersistedCheckpointBinding(
+        workspace_id=job.workspace_id,
+        thread_id=job.thread_id,
+        run_id=job.trigger_run_id,
+        checkpoint_id=checkpoint_id,
+        checkpoint_ns=checkpoint_ns,
+        checkpoint_model_round_count=checkpoint_model_round_count,
+        checkpoint_binding_sha256=checkpoint_binding_sha256,
+    )
+
+
+def _trusted_summary_model_round(
+    command: NewSummaryJob,
+    checkpoint: VerifiedCheckpointBinding,
+) -> int:
+    model_round = checkpoint.checkpoint_model_round_count + 1
+    if model_round > MAX_SUMMARY_MODEL_ROUND:
+        raise SummaryServiceError(
+            "SUMMARY_CHECKPOINT_ROUND_INVALID",
+            "The checkpoint has no room for another model round.",
+        )
+    if command.model_round is not None and command.model_round != model_round:
+        raise SummaryServiceError(
+            "SUMMARY_CHECKPOINT_ROUND_MISMATCH",
+            "The asserted model round does not follow the exact checkpoint.",
+        )
+    return model_round
 
 
 def _binding(job: ThreadSummaryJob, phase: SummaryVerifierPhase) -> SummaryJobBinding:
@@ -2340,18 +2556,35 @@ def _binding(job: ThreadSummaryJob, phase: SummaryVerifierPhase) -> SummaryJobBi
         response_id=job.response_id,
         artifact_id=job.artifact_id,
         phase=phase,
+        checkpoint_id=getattr(job, "checkpoint_id", None),
+        checkpoint_ns=getattr(job, "checkpoint_ns", None),
+        checkpoint_model_round_count=getattr(
+            job, "checkpoint_model_round_count", None
+        ),
+        checkpoint_binding_sha256=getattr(job, "checkpoint_binding_sha256", None),
     )
 
 
-def _summary_identity_hash(command: NewSummaryJob) -> str:
+def _summary_identity_hash(
+    command: NewSummaryJob,
+    *,
+    checkpoint: VerifiedCheckpointBinding,
+    model_round: int,
+) -> str:
     _validate_new_job(command)
     return canonical_json_hash(
         {
-            "version": SUMMARY_LEDGER_VERSION,
+            "version": SUMMARY_JOB_IDENTITY_VERSION,
             "workspace_id": str(command.workspace_id),
             "thread_id": str(command.thread_id),
             "trigger_run_id": str(command.trigger_run_id),
-            "model_round": command.model_round,
+            "model_round": model_round,
+            "checkpoint_id": checkpoint.checkpoint_id,
+            "checkpoint_ns": checkpoint.checkpoint_ns,
+            "checkpoint_model_round_count": (
+                checkpoint.checkpoint_model_round_count
+            ),
+            "checkpoint_binding_sha256": checkpoint.checkpoint_binding_sha256,
             "source_watermark": command.source_watermark,
             "source_scope": dict(command.source_scope),
             "source_content_hash": _source_content_hash(command),
@@ -2480,7 +2713,18 @@ def _validate_new_job(command: NewSummaryJob) -> None:
             "SUMMARY_JOB_JSON_INVALID",
             "Job metadata must be canonical JSON.",
         ) from error
-    if (
+    if not isinstance(command.checkpoint_id, str) or not command.checkpoint_id:
+        raise ValueError("checkpoint_id must be a non-empty string")
+    if not isinstance(command.checkpoint_ns, str):
+        raise ValueError("checkpoint_ns must be a string")
+    try:
+        checkpoint_id_bytes = len(command.checkpoint_id.encode("utf-8"))
+        checkpoint_ns_bytes = len(command.checkpoint_ns.encode("utf-8"))
+    except UnicodeEncodeError:
+        raise ValueError("checkpoint selector must be valid UTF-8 text") from None
+    if checkpoint_id_bytes > 1024 or checkpoint_ns_bytes > 1024:
+        raise ValueError("checkpoint selectors must not exceed 1024 UTF-8 bytes")
+    if command.model_round is not None and (
         not _positive_int(command.model_round)
         or command.model_round > MAX_SUMMARY_MODEL_ROUND
     ):

@@ -152,56 +152,67 @@ class SummaryEligibilityService:
         actor_id: UUID,
         decision: EligibilityDecision,
     ) -> EligibilityResult:
+        async with self.session_factory() as session:
+            async with session.begin():
+                return await self.review_in_session(
+                    session, workspace_id=workspace_id, thread_id=thread_id,
+                    trigger_run_id=trigger_run_id, source_id=source_id,
+                    actor_id=actor_id, decision=decision,
+                )
+
+    async def review_in_session(
+        self, session: AsyncSession, *, workspace_id: UUID, thread_id: UUID,
+        trigger_run_id: UUID, source_id: str, actor_id: UUID,
+        decision: EligibilityDecision,
+    ) -> EligibilityResult:
         if not isinstance(decision, EligibilityDecision) or decision not in {
             EligibilityDecision.ELIGIBLE,
             EligibilityDecision.INELIGIBLE,
         }:
             raise ValueError("a review must be ELIGIBLE or INELIGIBLE")
-        async with self.session_factory() as session:
-            async with session.begin():
-                permissions = await _permissions(session, workspace_id, actor_id)
-                if WORKSPACE_ADMIN not in permissions:
-                    raise AgentHubError("FORBIDDEN", "Workspace administration is required.", 403)
-                source, turn, identity = await self._load_source(
-                    session, workspace_id, thread_id, trigger_run_id, source_id
-                )
-                if decision is EligibilityDecision.ELIGIBLE and (
-                    turn.artifact_ids
-                    or turn.evidence_registry
-                    or turn.source_knowledge_snapshots
-                    or turn.source_wiki_publications
-                    or any(
-                        message.role == "tool" or message.tool_calls for message in turn.messages
-                    )
-                ):
-                    raise AgentHubError(
-                        "SUMMARY_SOURCE_REQUIRES_EXACT", "This source must remain exact.", 422
-                    )
-                revision = await session.scalar(
-                    select(func.max(ThreadSummaryEligibilityRecord.revision)).where(
-                        ThreadSummaryEligibilityRecord.workspace_id == workspace_id,
-                        ThreadSummaryEligibilityRecord.thread_id == thread_id,
-                        ThreadSummaryEligibilityRecord.source_identity == identity,
-                    )
-                )
-                row = ThreadSummaryEligibilityRecord(
-                    id=uuid4(),
-                    workspace_id=workspace_id,
-                    thread_id=thread_id,
-                    turn_id=source.turn_id,
-                    run_id=source.run_id,
-                    reviewed_from_run_id=trigger_run_id,
-                    source_identity=identity,
-                    revision=(revision or 0) + 1,
-                    decision=decision.value,
-                    reason_code="ADMIN_REVIEWED"
-                    if decision is EligibilityDecision.ELIGIBLE
-                    else "KEEP_EXACT",
-                    reviewed_by=actor_id,
-                )
-                session.add(row)
-                await session.flush()
-                return EligibilityResult(decision, row.reason_code, identity, row.id)
+        permissions = await _permissions(session, workspace_id, actor_id)
+        if WORKSPACE_ADMIN not in permissions:
+            raise AgentHubError("FORBIDDEN", "Workspace administration is required.", 403)
+        source, turn, identity = await self._load_source(
+            session, workspace_id, thread_id, trigger_run_id, source_id
+        )
+        if decision is EligibilityDecision.ELIGIBLE and (
+            turn.artifact_ids
+            or turn.evidence_registry
+            or turn.source_knowledge_snapshots
+            or turn.source_wiki_publications
+            or any(
+                message.role == "tool" or message.tool_calls for message in turn.messages
+            )
+        ):
+            raise AgentHubError(
+                "SUMMARY_SOURCE_REQUIRES_EXACT", "This source must remain exact.", 422
+            )
+        revision = await session.scalar(
+            select(func.max(ThreadSummaryEligibilityRecord.revision)).where(
+                ThreadSummaryEligibilityRecord.workspace_id == workspace_id,
+                ThreadSummaryEligibilityRecord.thread_id == thread_id,
+                ThreadSummaryEligibilityRecord.source_identity == identity,
+            )
+        )
+        row = ThreadSummaryEligibilityRecord(
+            id=uuid4(),
+            workspace_id=workspace_id,
+            thread_id=thread_id,
+            turn_id=source.turn_id,
+            run_id=source.run_id,
+            reviewed_from_run_id=trigger_run_id,
+            source_identity=identity,
+            revision=(revision or 0) + 1,
+            decision=decision.value,
+            reason_code="ADMIN_REVIEWED"
+            if decision is EligibilityDecision.ELIGIBLE
+            else "KEEP_EXACT",
+            reviewed_by=actor_id,
+        )
+        session.add(row)
+        await session.flush()
+        return EligibilityResult(decision, row.reason_code, identity, row.id)
 
     async def check(
         self,
@@ -214,48 +225,67 @@ class SummaryEligibilityService:
     ) -> EligibilityResult:
         async with self.session_factory() as session:
             async with session.begin():
-                permissions = await _permissions(session, workspace_id, actor_id)
-                if WORKSPACE_READ not in permissions:
-                    raise AgentHubError("FORBIDDEN", "Workspace access is required.", 403)
-                try:
-                    source, turn, identity = await self._load_source(
-                        session, workspace_id, thread_id, trigger_run_id, source_id
-                    )
-                except (ThreadHistorySourceIntegrityError, TypeError, ValueError):
-                    return EligibilityResult(EligibilityDecision.UNKNOWN, "SOURCE_UNVERIFIED")
-                if (
-                    turn.artifact_ids
-                    and WORKSPACE_READ not in permissions
-                    or turn.evidence_registry
-                    and "knowledge_run" not in permissions
-                    or any(
-                        message.role == "tool" or message.tool_calls for message in turn.messages
-                    )
-                    and "tool_run" not in permissions
-                ):
-                    return EligibilityResult(EligibilityDecision.UNKNOWN, "SOURCE_UNAUTHORIZED")
-                row = await session.scalar(
-                    select(ThreadSummaryEligibilityRecord)
-                    .where(
-                        ThreadSummaryEligibilityRecord.workspace_id == workspace_id,
-                        ThreadSummaryEligibilityRecord.thread_id == thread_id,
-                        ThreadSummaryEligibilityRecord.source_identity == identity,
-                        ThreadSummaryEligibilityRecord.turn_id == source.turn_id,
-                        ThreadSummaryEligibilityRecord.run_id == source.run_id,
-                    )
-                    .order_by(ThreadSummaryEligibilityRecord.revision.desc())
-                    .limit(1)
+                return await self.check_in_session(
+                    session,
+                    workspace_id=workspace_id,
+                    thread_id=thread_id,
+                    trigger_run_id=trigger_run_id,
+                    source_id=source_id,
+                    actor_id=actor_id,
                 )
-                if row is None:
-                    return EligibilityResult(EligibilityDecision.UNKNOWN, "NOT_REVIEWED")
-                reviewer_permissions = await _permissions(
-                    session, workspace_id, row.reviewed_by, allow_missing=True
-                )
-                if WORKSPACE_ADMIN not in reviewer_permissions:
-                    return EligibilityResult(EligibilityDecision.UNKNOWN, "REVIEWER_REVOKED")
-                return EligibilityResult(
-                    EligibilityDecision(row.decision), row.reason_code, identity, row.id
-                )
+
+    async def check_in_session(
+        self,
+        session: AsyncSession,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        trigger_run_id: UUID,
+        source_id: str,
+        actor_id: UUID,
+    ) -> EligibilityResult:
+        permissions = await _permissions(session, workspace_id, actor_id)
+        if WORKSPACE_READ not in permissions:
+            raise AgentHubError("FORBIDDEN", "Workspace access is required.", 403)
+        try:
+            source, turn, identity = await self._load_source(
+                session, workspace_id, thread_id, trigger_run_id, source_id
+            )
+        except (ThreadHistorySourceIntegrityError, TypeError, ValueError):
+            return EligibilityResult(EligibilityDecision.UNKNOWN, "SOURCE_UNVERIFIED")
+        if (
+            turn.artifact_ids
+            and WORKSPACE_READ not in permissions
+            or turn.evidence_registry
+            and "knowledge_run" not in permissions
+            or any(
+                message.role == "tool" or message.tool_calls for message in turn.messages
+            )
+            and "tool_run" not in permissions
+        ):
+            return EligibilityResult(EligibilityDecision.UNKNOWN, "SOURCE_UNAUTHORIZED")
+        row = await session.scalar(
+            select(ThreadSummaryEligibilityRecord)
+            .where(
+                ThreadSummaryEligibilityRecord.workspace_id == workspace_id,
+                ThreadSummaryEligibilityRecord.thread_id == thread_id,
+                ThreadSummaryEligibilityRecord.source_identity == identity,
+                ThreadSummaryEligibilityRecord.turn_id == source.turn_id,
+                ThreadSummaryEligibilityRecord.run_id == source.run_id,
+            )
+            .order_by(ThreadSummaryEligibilityRecord.revision.desc())
+            .limit(1)
+        )
+        if row is None:
+            return EligibilityResult(EligibilityDecision.UNKNOWN, "NOT_REVIEWED")
+        reviewer_permissions = await _permissions(
+            session, workspace_id, row.reviewed_by, allow_missing=True
+        )
+        if WORKSPACE_ADMIN not in reviewer_permissions:
+            return EligibilityResult(EligibilityDecision.UNKNOWN, "REVIEWER_REVOKED")
+        return EligibilityResult(
+            EligibilityDecision(row.decision), row.reason_code, identity, row.id
+        )
 
     async def _load_source(
         self,

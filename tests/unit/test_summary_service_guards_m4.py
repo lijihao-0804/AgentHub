@@ -50,6 +50,9 @@ def _job() -> NewSummaryJob:
         permission_snapshot_hash=identity,
         created_by=uuid4(),
         sources=(source,),
+        checkpoint_id="checkpoint-1",
+        checkpoint_ns="",
+        model_round=1,
     )
 
 
@@ -71,6 +74,20 @@ def test_boolean_source_sequence_cannot_masquerade_as_a_valid_integer():
     job = _job()
     with pytest.raises(SummaryServiceError, match="before the frozen watermark"):
         _validate_new_job(replace(job, sources=(replace(job.sources[0], sequence=True),)))
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("checkpoint_id", None),
+        ("checkpoint_id", ""),
+        ("checkpoint_ns", None),
+        ("checkpoint_ns", "x" * 1025),
+    ],
+)
+def test_summary_job_requires_bounded_exact_checkpoint_selectors(field, value):
+    with pytest.raises(ValueError, match="checkpoint"):
+        _validate_new_job(replace(_job(), **{field: value}))
 
 
 def test_fractional_cost_reservation_rounds_up_to_database_precision():

@@ -36,6 +36,7 @@ from packages.agent_runtime.evidence_registry import (
 from packages.agent_runtime.frozen import FrozenAgentSpec, parse_frozen_agent_spec
 from packages.agent_runtime.history_checkpoint import (
     history_checkpoint_binding,
+    summary_boundary_marker,
     verify_history_checkpoint_binding,
 )
 from packages.agent_runtime.history_evidence import validate_history_evidence
@@ -961,6 +962,11 @@ class _AgentRunGraph:
                     resolved_spec_hash=version.resolved_spec_hash,
                     snapshot=self.run.effective_thread_history_snapshot,
                 )
+                boundary = (
+                    summary_boundary_marker(state.get("model_round_count", 0))
+                    if spec.runtime.get("summary_policy", {}).get("enabled")
+                    else None
+                )
                 if not plan.ready_for_dispatch:
                     # Preserve the frozen identity at the blocked boundary in
                     # the real graph checkpoint. Never provide the incomplete
@@ -974,6 +980,7 @@ class _AgentRunGraph:
                         "failure_code": "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
                         "runtime": spec.runtime,
                         "history_checkpoint_binding": history_checkpoint_binding_value,
+                        **({"summary_boundary": boundary} if boundary is not None else {}),
                     }
                 history_plan_metadata = {
                     "version": plan.plan_version,
@@ -1032,6 +1039,11 @@ class _AgentRunGraph:
                 **(
                     {"history_checkpoint_binding": history_checkpoint_binding_value}
                     if history_checkpoint_binding_value is not None
+                    else {}
+                ),
+                **(
+                    {"summary_boundary": boundary}
+                    if history_conversation is not None and boundary is not None
                     else {}
                 ),
                 **(
@@ -1229,10 +1241,22 @@ class _AgentRunGraph:
                     gateway.attempt_budget = budget_factory(self.run, next_round)
                     if not all(
                         callable(getattr(gateway.attempt_budget, method, None))
-                        for method in ("reserve_attempt", "mark_unknown_outcome")
+                        for method in (
+                            "reserve_attempt",
+                            "mark_unknown_outcome",
+                            "is_bound_to_run",
+                        )
                     ):
                         raise AgentHubError(
                             "RUN_BUDGET_BINDING_UNAVAILABLE", "The Run budget is unavailable.", 422
+                        )
+                    if gateway.attempt_budget.is_bound_to_run(
+                        UUID(self.context.workspace_id), self.run.id, f"round-{next_round}"
+                    ) is not True:
+                        raise AgentHubError(
+                            "RUN_BUDGET_BINDING_UNAVAILABLE",
+                            "The budget does not bind this Run and model round.",
+                            422,
                         )
                 prepared_gateway = gateway
                 prepare_resolved = getattr(gateway, "prepare_resolved", None)
@@ -2398,6 +2422,14 @@ class _AgentRunGraph:
             # action, a lost claim — and blanking it would turn a run that needs
             # a human into a run that quietly looks fine.
             "failure_code": terminal_code or state.get("failure_code"),
+            **(
+                {"summary_boundary": summary_boundary_marker(state.get("model_round_count", 0))}
+                if terminal_code is None
+                and not state.get("failure_code")
+                and state.get("history_checkpoint_binding") is not None
+                and state.get("runtime", {}).get("summary_policy", {}).get("enabled") is True
+                else {}
+            ),
             **(
                 {"rag_evidence_registry": rag_registry, "rag_evidence_sequence": rag_sequence}
                 if compact_updated

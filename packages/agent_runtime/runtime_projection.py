@@ -99,6 +99,7 @@ class AgentRunState(TypedDict, total=False):
     # Private, versioned binding between this checkpoint and the Run's frozen
     # history source/plan. Never sent to the provider as conversation text.
     history_checkpoint_binding: dict[str, Any]
+    summary_boundary: dict[str, Any]
     # Private checkpoint sidecar for the current opt-in turn only. It is not a
     # trace and does not contain the injected historical or memory messages.
     turn_transcript: list[ModelMessage]
