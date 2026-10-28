@@ -8,6 +8,7 @@ never retries or falls back after a provider boundary may have been crossed.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable, Mapping
 from decimal import ROUND_CEILING, Decimal, InvalidOperation
 from typing import Any
 from uuid import UUID
@@ -17,10 +18,18 @@ from packages.agent_runtime.context_budget import (
     ContextCategory,
     ContextMessage,
 )
-from packages.agent_runtime.frozen import FrozenAgentSpec, _parse_summary_policy
+from packages.agent_runtime.deepseek_v41_counter import DeepseekV41TextCounter
+from packages.agent_runtime.frozen import (
+    SUMMARY_NON_THINKING_COUNTER_ID,
+    SUMMARY_NON_THINKING_MODE,
+    FrozenAgentSpec,
+    _parse_summary_policy,
+    frozen_summary_request_identity,
+)
 from packages.agent_runtime.summary_service import (
     DEFAULT_LEASE_SECONDS,
     ClaimedSummaryJob,
+    SummaryJobKey,
     SummaryJobService,
     SummaryResponseData,
     SummaryServiceError,
@@ -31,6 +40,7 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.context_metadata import context_metadata_to_mapping
 from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
     CostEstimate,
     ModelGateway,
     ModelMessage,
@@ -43,10 +53,14 @@ from packages.model_gateway.contracts import (
 )
 
 
-def frozen_summary_model_spec(profile: ResolvedModelExecutionProfile) -> dict[str, Any]:
+def frozen_summary_model_spec(
+    profile: ResolvedModelExecutionProfile,
+    *,
+    request_strategy: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
     """Bind the auxiliary job to the same non-secret frozen model profile."""
     capabilities = profile.capabilities
-    return {
+    result = {
         "provider": profile.provider,
         "model": profile.model,
         "profile_id": str(profile.id),
@@ -68,14 +82,32 @@ def frozen_summary_model_spec(profile: ResolvedModelExecutionProfile) -> dict[st
             ),
         },
     }
+    if request_strategy is not None:
+        identity = frozen_summary_request_identity(request_strategy)
+        if identity["request_mode"] == SUMMARY_NON_THINKING_MODE:
+            result.update(identity)
+    return result
 
 
 class SummaryWorker:
     """Execute one claimed auxiliary call and persist before validating."""
 
-    def __init__(self, service: SummaryJobService, gateway: ModelGateway) -> None:
+    def __init__(
+        self,
+        service: SummaryJobService,
+        gateway: ModelGateway,
+        *,
+        gateway_preparer: Callable[
+            [WorkspaceExecutionContext, ResolvedModelExecutionPlan, ModelRequest],
+            Awaitable[ModelGateway],
+        ]
+        | None = None,
+        request_counter: DeepseekV41TextCounter | None = None,
+    ) -> None:
         self.service = service
         self.gateway = gateway
+        self.gateway_preparer = gateway_preparer
+        self.request_counter = request_counter
 
     async def run_claimed(
         self,
@@ -84,6 +116,8 @@ class SummaryWorker:
         context: WorkspaceExecutionContext,
         frozen_spec: FrozenAgentSpec,
         pricing_snapshot_id: UUID,
+        before_network_call: Callable[[], Awaitable[None]] | None = None,
+        on_validated: Callable[[SummaryJobKey, str], Awaitable[SummarySettlement]] | None = None,
     ) -> SummarySettlement:
         if not isinstance(claimed, ClaimedSummaryJob):
             raise TypeError("claimed must be a server-issued summary lease")
@@ -95,7 +129,10 @@ class SummaryWorker:
             raise SummaryServiceError("SUMMARY_WORKER_SCOPE_INVALID", "Workspace scope differs.")
         summary_policy = frozen_spec.runtime.get("summary_policy")
         try:
-            summary_policy = _parse_summary_policy(summary_policy)
+            summary_policy = _parse_summary_policy(
+                summary_policy, primary=frozen_spec.model_plan.primary
+            )
+            request_identity = frozen_summary_request_identity(summary_policy)
         except AgentHubError:
             raise SummaryServiceError(
                 "SUMMARY_WORKER_DISABLED", "The frozen summary policy is unavailable."
@@ -149,7 +186,9 @@ class SummaryWorker:
             raise SummaryServiceError(
                 "SUMMARY_WORKER_POLICY_MISMATCH", "Frozen summary policy differs."
             )
-        if dict(prepared.model_spec) != frozen_summary_model_spec(primary):
+        if dict(prepared.model_spec) != frozen_summary_model_spec(
+            primary, request_strategy=summary_policy
+        ):
             raise SummaryServiceError(
                 "SUMMARY_WORKER_MODEL_MISMATCH", "Frozen model identity differs."
             )
@@ -171,12 +210,104 @@ class SummaryWorker:
             raise SummaryServiceError(
                 "SUMMARY_WORKER_BUDGET_REJECTED", "Prompt was not fully admitted."
             )
-        request = ModelRequest(messages=messages, retry_policy=RetryPolicy(max_attempts=1))
+        request_mode_value = prepared.request_spec.get(
+            "request_mode", request_identity["request_mode"]
+        )
+        frozen_request_mode = request_identity["request_mode"]
+        if request_mode_value != frozen_request_mode:
+            raise SummaryServiceError(
+                "SUMMARY_WORKER_REQUEST_MODE_MISMATCH",
+                "The dispatch request mode differs from the frozen summary strategy.",
+            )
+        if frozen_request_mode == SUMMARY_NON_THINKING_MODE and any(
+            prepared.request_spec.get(key) != value for key, value in request_identity.items()
+        ):
+            raise SummaryServiceError(
+                "SUMMARY_WORKER_REQUEST_MODE_MISMATCH",
+                "The dispatch counter or route identity differs from the frozen strategy.",
+            )
+        try:
+            request_mode = AliyunDeepSeekRequestMode(request_mode_value)
+        except (TypeError, ValueError):
+            raise SummaryServiceError(
+                "SUMMARY_WORKER_REQUEST_MODE_UNSUPPORTED",
+                "The frozen summary request mode is unsupported.",
+            ) from None
+        request = ModelRequest(
+            messages=messages,
+            retry_policy=RetryPolicy(max_attempts=1),
+            request_mode=request_mode,
+        )
+        if frozen_request_mode == SUMMARY_NON_THINKING_MODE:
+            try:
+                exact_input_tokens = _count_frozen_summary_request_tokens(
+                    request,
+                    request_identity=request_identity,
+                    counter=self.request_counter,
+                    provider=primary.provider,
+                    model=primary.model,
+                )
+            except Exception:
+                exact_input_tokens = None
+                counter_failure_code = "SUMMARY_REQUEST_COUNTER_FAILED"
+            else:
+                counter_failure_code = "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"
+
+            if exact_input_tokens is None:
+                await self.service.fail_before_dispatch(
+                    claimed.key,
+                    lease_token=claimed.lease_token,
+                    failure_code=counter_failure_code,
+                )
+                raise SummaryServiceError(
+                    counter_failure_code,
+                    "The frozen full-request counter is unavailable for this summary strategy.",
+                )
+            if type(exact_input_tokens) is not int or exact_input_tokens <= 0:
+                await self.service.fail_before_dispatch(
+                    claimed.key,
+                    lease_token=claimed.lease_token,
+                    failure_code="SUMMARY_REQUEST_COUNTER_INVALID",
+                )
+                raise SummaryServiceError(
+                    "SUMMARY_REQUEST_COUNTER_INVALID",
+                    "The frozen full-request counter returned an invalid count.",
+                )
+            if exact_input_tokens > admission.usage.available_input:
+                await self.service.fail_before_dispatch(
+                    claimed.key,
+                    lease_token=claimed.lease_token,
+                    failure_code="SUMMARY_REQUEST_BUDGET_EXCEEDED",
+                )
+                raise SummaryServiceError(
+                    "SUMMARY_WORKER_BUDGET_REJECTED",
+                    "The complete summary request exceeds the frozen input budget.",
+                )
         # The auxiliary job has one durable price reservation and one dispatch.
         # Main-agent fallback configuration remains unchanged.
         single_attempt = ResolvedModelExecutionPlan(
             primary=primary, fallbacks=(), retry_policy=RetryPolicy(max_attempts=1)
         )
+        prepared_gateway = self.gateway
+        if self.gateway_preparer is not None:
+            try:
+                prepared_gateway = await self.gateway_preparer(
+                    context, single_attempt, request
+                )
+            except BaseException:
+                await asyncio.shield(
+                    self.service.fail_before_dispatch(
+                        claimed.key, lease_token=claimed.lease_token
+                    )
+                )
+                raise
+            if not callable(getattr(prepared_gateway, "generate_resolved", None)):
+                await self.service.fail_before_dispatch(
+                    claimed.key, lease_token=claimed.lease_token
+                )
+                raise SummaryServiceError(
+                    "SUMMARY_WORKER_GATEWAY_INVALID", "The prepared gateway is unavailable."
+                )
         # A long provider call must not outlive an ordinary claim merely
         # because the model profile allows more than the default lease. Renew
         # before the intent: an unsuccessful renewal cannot create a dispatch.
@@ -195,9 +326,24 @@ class SummaryWorker:
             request_spec=prepared.request_spec,
         )
         await self.service.mark_dispatched(claimed.key, lease_token=claimed.lease_token)
+        if before_network_call is not None:
+            try:
+                await before_network_call()
+            except BaseException:
+                # The durable dispatch fence has been crossed. Even when the
+                # local owner check prevents the provider call, recovery must
+                # not treat the job as safely retryable.
+                await asyncio.shield(
+                    self.service.mark_dispatch_unknown(
+                        claimed.key, lease_token=claimed.lease_token
+                    )
+                )
+                raise
         try:
             async with asyncio.timeout(float(timeout)):
-                response = await self.gateway.generate_resolved(context, single_attempt, request)
+                response = await prepared_gateway.generate_resolved(
+                    context, single_attempt, request
+                )
             await self.service.store_provider_response(
                 claimed.key,
                 lease_token=claimed.lease_token,
@@ -212,17 +358,54 @@ class SummaryWorker:
             return await self.service.mark_dispatch_unknown(
                 claimed.key, lease_token=claimed.lease_token
             )
-        return await self.validate_stored(claimed.key)
+        # Saving a provider response releases the dispatch lease. Reacquire a
+        # local recovery lease for validation, then let the caller publish
+        # under that same token when it owns the inline path.
+        return await self.validate_stored(claimed.key, on_validated=on_validated)
 
-    async def validate_stored(self, key) -> SummarySettlement:
-        """Resume a persisted response locally; publication remains a separate gate."""
+    async def validate_stored(
+        self,
+        key: SummaryJobKey,
+        *,
+        on_validated: Callable[[SummaryJobKey, str], Awaitable[SummarySettlement]] | None = None,
+    ) -> SummarySettlement:
+        """Resume a persisted response and optionally publish under the recovery lease."""
         lease = await self.service.claim_recovery(key)
         if lease is None:
             return await self.service.get_settlement(key)
         result = await self.service.validate_stored_response(key, lease_token=lease.lease_token)
         if result.status == SummaryJobStatus.PUBLISHED.value:
             raise SummaryServiceError("SUMMARY_WORKER_STATE_INVALID", "Unexpected published state.")
+        if result.status == SummaryJobStatus.VALIDATED.value and on_validated is not None:
+            return await on_validated(key, lease.lease_token)
         return result
+
+
+def _count_frozen_summary_request_tokens(
+    request: ModelRequest,
+    *,
+    request_identity: Mapping[str, Any],
+    counter: DeepseekV41TextCounter | None = None,
+    provider: str | None = None,
+    model: str | None = None,
+) -> int | None:
+    """Return an exact finite-format count only from a digest-verified asset."""
+    if counter is None or not counter.verified_source:
+        return None
+    if (
+        request_identity.get("request_counter_id") != SUMMARY_NON_THINKING_COUNTER_ID
+        or request_identity.get("request_counter_thinking") is not False
+    ):
+        return None
+    try:
+        return counter.count_frozen_summary_request(
+            request,
+            request_identity=request_identity,
+            provider=provider,
+            model=model,
+        )
+    except (TypeError, ValueError):
+        return None
 
 
 def _response_data(response: ModelResponse) -> SummaryResponseData:

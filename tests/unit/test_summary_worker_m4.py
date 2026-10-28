@@ -8,11 +8,32 @@ from uuid import uuid4
 
 import pytest
 
+from packages.agent_runtime import summary_worker as summary_worker_module
+from packages.agent_runtime.context_budget import (
+    ContextBudgetPolicy,
+    ContextCategory,
+    ContextMessage,
+)
+from packages.agent_runtime.frozen import (
+    SUMMARY_NON_THINKING_COUNTER_ID,
+    SUMMARY_NON_THINKING_COUNTER_REVISION,
+    SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION,
+    SUMMARY_NON_THINKING_MODE,
+    SUMMARY_NON_THINKING_MODEL,
+    SUMMARY_NON_THINKING_PROVIDER,
+    SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+    SUMMARY_NON_THINKING_STRATEGY_VERSION,
+    SUMMARY_NON_THINKING_TOKENIZER_SHA256,
+    _parse_summary_policy,
+    parse_frozen_agent_spec,
+)
+from packages.agent_runtime.publish import _resolved_spec
 from packages.agent_runtime.summary_prompt import SummaryPrompt
 from packages.agent_runtime.summary_service import (
     ClaimedSummaryJob,
     PreparedSummaryDispatch,
     SummaryJobKey,
+    SummaryJobService,
     SummaryServiceError,
     SummarySettlement,
 )
@@ -21,12 +42,21 @@ from packages.agent_runtime.summary_worker import (
     _response_data,
     frozen_summary_model_spec,
 )
+from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import (
     OrganizationContext,
     PrincipalContext,
     WorkspaceExecutionContext,
 )
-from packages.model_gateway.contracts import CostEstimate, ModelResponse, ModelToolCall, ModelUsage
+from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
+    CostEstimate,
+    ModelMessage,
+    ModelResponse,
+    ModelToolCall,
+    ModelUsage,
+)
+from tests.unit.test_agent_publish import _agent
 from tests.unit.test_context_policy_m2_runtime import _freeze, _profile
 
 
@@ -51,7 +81,10 @@ class FakeService:
         self.profile = profile
         self.events = events
         self.spec = frozen_summary_model_spec(profile)
+        self.request_spec = {"request": "verified"}
         self.stored = None
+        self.committed_request_spec = None
+        self.failure_code = None
 
     async def prepare_dispatch(self, key, **kwargs):
         self.events.append("prepare")
@@ -66,13 +99,20 @@ class FakeService:
             "approx_language_v1",
             "1",
             SummaryPrompt("frozen system", "frozen user", "summary_candidate_zh_v1", 1, 1),
-            {"request": "verified"},
+            self.request_spec,
             self.spec,
         )
 
     async def commit_dispatch_intent(self, key, **kwargs):
         self.events.append("commit")
-        assert key == self.key and kwargs["request_spec"] == {"request": "verified"}
+        assert key == self.key and kwargs["request_spec"] == self.request_spec
+        self.committed_request_spec = dict(kwargs["request_spec"])
+
+    async def fail_before_dispatch(self, key, *, lease_token, failure_code):
+        self.events.append("fail")
+        assert key == self.key and lease_token == "lease"
+        self.failure_code = failure_code
+        return SummarySettlement(key, "FAILED", None, None, None)
 
     async def renew_lease(self, key, **kwargs):
         self.events.append("renew")
@@ -144,6 +184,59 @@ def setup_worker():
     return claim, context, spec, service, gateway, events
 
 
+def _install_non_thinking_candidate(spec, service):
+    primary = replace(
+        spec.model_plan.primary,
+        model=SUMMARY_NON_THINKING_MODEL,
+    )
+    fallbacks = spec.model_plan.fallbacks
+    agent = _agent(
+        workspace_id=primary.workspace_id,
+        model_profile_id=primary.id,
+        runtime_config={"context_policy": {"policy_version": "adaptive_context_v1"}},
+    )
+    providers = {primary.id: SUMMARY_NON_THINKING_PROVIDER}
+    providers.update({profile.id: profile.provider for profile in fallbacks})
+    raw_spec = _resolved_spec(
+        agent=agent,
+        model=((primary, *fallbacks), providers),
+        bindings=(),
+        tools=(),
+    )
+    spec = parse_frozen_agent_spec(raw_spec, workspace_id=agent.workspace_id)
+    frozen_policy = _parse_summary_policy(
+        {
+            **_summary_policy(),
+            "request_strategy_version": SUMMARY_NON_THINKING_STRATEGY_VERSION,
+            "request_mode": SUMMARY_NON_THINKING_MODE,
+            "request_route_allowlist": SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+            "request_counter_id": SUMMARY_NON_THINKING_COUNTER_ID,
+            "request_counter_revision": SUMMARY_NON_THINKING_COUNTER_REVISION,
+            "request_counter_runtime_version": SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION,
+            "request_counter_sha256": SUMMARY_NON_THINKING_TOKENIZER_SHA256,
+            "request_counter_thinking": False,
+        },
+        primary=spec.model_plan.primary,
+    )
+    spec = replace(spec, runtime={**spec.runtime, "summary_policy": frozen_policy})
+    service.profile = spec.model_plan.primary
+    service.spec = frozen_summary_model_spec(
+        spec.model_plan.primary, request_strategy=frozen_policy
+    )
+    service.request_spec = {
+        "request": "verified",
+        "request_strategy_version": SUMMARY_NON_THINKING_STRATEGY_VERSION,
+        "request_mode": SUMMARY_NON_THINKING_MODE,
+        "request_route_allowlist": SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+        "request_counter_id": SUMMARY_NON_THINKING_COUNTER_ID,
+        "request_counter_revision": SUMMARY_NON_THINKING_COUNTER_REVISION,
+        "request_counter_runtime_version": SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION,
+        "request_counter_sha256": SUMMARY_NON_THINKING_TOKENIZER_SHA256,
+        "request_counter_thinking": False,
+    }
+    return spec, frozen_policy
+
+
 @pytest.mark.asyncio
 async def test_worker_uses_one_admitted_frozen_model_call_and_persists_before_validation(
     setup_worker,
@@ -161,10 +254,103 @@ async def test_worker_uses_one_admitted_frozen_model_call_and_persists_before_va
     assert plan.primary == spec.model_plan.primary and not plan.fallbacks
     assert len(spec.model_plan.fallbacks) == 1
     assert request.retry_policy.max_attempts == plan.retry_policy.max_attempts == 1
+    assert request.request_mode.value == "provider_default"
     assert not request.tools
     assert [message.content for message in request.messages] == ["frozen system", "frozen user"]
     assert service.stored.raw_response == '{"status":"OK"}'
     assert service.stored.finish_reason == "stop"
+
+
+@pytest.mark.asyncio
+async def test_non_thinking_candidate_fails_closed_without_runtime_counter(setup_worker):
+    claim, context, spec, service, gateway, events = setup_worker
+    spec, _ = _install_non_thinking_candidate(spec, service)
+
+    with pytest.raises(SummaryServiceError) as failure:
+        await SummaryWorker(service, gateway).run_claimed(
+            claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
+        )
+
+    assert failure.value.code == "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"
+    assert events == ["prepare", "fail"]
+    assert service.failure_code == "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"
+    assert service.committed_request_spec is None
+    assert not gateway.calls
+
+
+@pytest.mark.asyncio
+async def test_full_request_count_above_approximation_and_budget_stops_dispatch(
+    setup_worker, monkeypatch
+):
+    claim, context, spec, service, gateway, events = setup_worker
+    spec, _ = _install_non_thinking_candidate(spec, service)
+    model_messages = (
+        ModelMessage("system", "frozen system"),
+        ModelMessage("user", "frozen user"),
+    )
+    tagged = (
+        ContextMessage(model_messages[0], ContextCategory.SYSTEM_PROMPT),
+        ContextMessage(model_messages[1], ContextCategory.CURRENT_USER_TASK),
+    )
+    approximate_admission = ContextBudgetPolicy(spec).admit(tagged)
+    counted = {}
+
+    def count_full_request(request, *, request_identity, counter, provider, model):
+        counted["request"] = request
+        counted["identity"] = dict(request_identity)
+        counted["provider"] = provider
+        counted["model"] = model
+        counted["actual"] = approximate_admission.usage.available_input + 1
+        return counted["actual"]
+
+    monkeypatch.setattr(
+        summary_worker_module, "_count_frozen_summary_request_tokens", count_full_request
+    )
+    with pytest.raises(SummaryServiceError) as failure:
+        await SummaryWorker(service, gateway).run_claimed(
+            claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
+        )
+
+    assert failure.value.code == "SUMMARY_WORKER_BUDGET_REJECTED"
+    assert approximate_admission.usage.estimated_input_after < (
+        approximate_admission.usage.available_input
+    )
+    assert counted["actual"] > approximate_admission.usage.estimated_input_before
+    assert counted["actual"] > approximate_admission.usage.available_input
+    assert counted["request"].request_mode is AliyunDeepSeekRequestMode.NON_THINKING
+    assert tuple(message.content for message in counted["request"].messages) == (
+        "frozen system",
+        "frozen user",
+    )
+    assert counted["identity"] == {
+        "request_strategy_version": SUMMARY_NON_THINKING_STRATEGY_VERSION,
+        "request_mode": SUMMARY_NON_THINKING_MODE,
+        "request_route_allowlist": SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+        "request_counter_id": SUMMARY_NON_THINKING_COUNTER_ID,
+        "request_counter_revision": SUMMARY_NON_THINKING_COUNTER_REVISION,
+        "request_counter_runtime_version": SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION,
+        "request_counter_sha256": SUMMARY_NON_THINKING_TOKENIZER_SHA256,
+        "request_counter_thinking": False,
+    }
+    assert events == ["prepare", "fail"]
+    assert service.failure_code == "SUMMARY_REQUEST_BUDGET_EXCEEDED"
+    assert service.committed_request_spec is None
+    assert not gateway.calls
+
+
+@pytest.mark.asyncio
+async def test_service_dispatch_rejects_non_thinking_without_opening_database():
+    service = object.__new__(SummaryJobService)
+    with pytest.raises(SummaryServiceError) as failure:
+        await service.commit_dispatch_intent(
+            SummaryJobKey(uuid4(), uuid4(), uuid4()),
+            lease_token="lease",
+            pricing_snapshot_id=uuid4(),
+            reserved_input_tokens=100,
+            reserved_output_tokens=100,
+            request_spec={"request_mode": SUMMARY_NON_THINKING_MODE},
+        )
+    assert failure.value.code == "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"
 
 
 @pytest.mark.asyncio
@@ -288,6 +474,25 @@ async def test_unrecognized_frozen_summary_policy_stops_before_preparation(setup
         )
     assert failure.value.code == "SUMMARY_WORKER_DISABLED"
     assert events == [] and not gateway.calls
+
+
+@pytest.mark.asyncio
+async def test_worker_rejects_non_thinking_without_a_frozen_summary_candidate(setup_worker):
+    claim, context, spec, service, gateway, events = setup_worker
+    service.request_spec = {"request": "verified", "request_mode": "non_thinking"}
+
+    with pytest.raises(SummaryServiceError) as failure:
+        await SummaryWorker(service, gateway).run_claimed(
+            claimed=claim, context=context, frozen_spec=spec, pricing_snapshot_id=uuid4()
+        )
+
+    assert failure.value.code == "SUMMARY_WORKER_REQUEST_MODE_MISMATCH"
+    assert events == ["prepare"] and not gateway.calls
+
+
+def test_frozen_summary_policy_does_not_accept_request_mode_candidate():
+    with pytest.raises(AgentHubError):
+        _parse_summary_policy({**_summary_policy(), "request_mode": "non_thinking"})
 
 
 def test_unexpected_tool_calls_are_preserved_as_nonpublishable_response():

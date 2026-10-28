@@ -20,6 +20,10 @@ from packages.agent_runtime.adapters.langgraph import (
     interrupt_payloads,
     resume_command,
 )
+from packages.agent_runtime.deepseek_v41_counter import (
+    DeepseekV41TextCounter,
+    load_configured_deepseek_v41_counter,
+)
 from packages.agent_runtime.event_store import RunEventReader, RunEventRecorder
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
 from packages.agent_runtime.evidence_registry import visible_evidence_registry
@@ -56,6 +60,7 @@ from packages.approvals import ApprovalExecutionStatus, ApprovalService
 from packages.approvals.models import Approval
 from packages.control_plane.services import TenantService
 from packages.core.canonical.json_hash import canonical_json_hash
+from packages.core.config.settings import get_settings
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
 from packages.knowledge.models import KnowledgeSnapshot
@@ -100,6 +105,7 @@ class AgentRunService:
         memory_selector: MemorySelector | None = None,
         memory_writer: MemoryWriteQueue | None = None,
         artifact_recorder: RunArtifactRecorder | None = None,
+        summary_request_counter: DeepseekV41TextCounter | None = None,
         thread_context_max_turns: int = DEFAULT_THREAD_CONTEXT_MAX_TURNS,
         stream_grace_seconds: float = DEFAULT_STREAM_GRACE_SECONDS,
         stream_registry: RunStreamRegistry | None = None,
@@ -126,6 +132,12 @@ class AgentRunService:
         self.memory_selector = memory_selector
         self.memory_writer = memory_writer
         self.artifact_recorder = artifact_recorder
+        self.summary_request_counter = (
+            summary_request_counter
+            or load_configured_deepseek_v41_counter(
+                get_settings().summary_deepseek_v41_tokenizer_path
+            )
+        )
         self.thread_context_max_turns = thread_context_max_turns
         self.stream_grace_seconds = stream_grace_seconds
         # A run is owned by its hub, not by whoever is currently reading it, so
@@ -186,10 +198,16 @@ class AgentRunService:
         ) as owner:
             if owner is None:
                 return _run_result(await self.get_run(context, run_id))
-            return await self._execute_prepared_run_owned(context, run_id=run_id)
+            return await self._execute_prepared_run_owned(
+                context, run_id=run_id, execution_owner_token=owner
+            )
 
     async def _execute_prepared_run_owned(
-        self, context: WorkspaceExecutionContext, *, run_id: UUID
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        run_id: UUID,
+        execution_owner_token: str | None = None,
     ) -> AgentRunResult:
         """Execute an already persisted run; terminal runs are never duplicated."""
 
@@ -240,7 +258,12 @@ class AgentRunService:
         state = self._initial_state(run, agent_version_id)
         graph: _AgentRunGraph | None = None
         try:
-            graph = _AgentRunGraph(self, context, run)
+            graph = _AgentRunGraph(
+                self,
+                context,
+                run,
+                execution_owner_token=execution_owner_token,
+            )
             final_state = await self._invoke_graph(graph, state, run)
             state = final_state
             approval_payload = _approval_interrupt_payload(final_state)
@@ -343,10 +366,20 @@ class AgentRunService:
         ) as owner:
             if owner is None:
                 return _run_result(await self.get_run(context, run_id))
-            return await self._resume_owned(context, run_id=run_id, approval_id=approval_id)
+            return await self._resume_owned(
+                context,
+                run_id=run_id,
+                approval_id=approval_id,
+                execution_owner_token=owner,
+            )
 
     async def _resume_owned(
-        self, context: WorkspaceExecutionContext, *, run_id: UUID, approval_id: UUID
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        run_id: UUID,
+        approval_id: UUID,
+        execution_owner_token: str | None = None,
     ) -> AgentRunResult:
         """Resume the same durable Run after a decision has been persisted."""
 
@@ -449,6 +482,7 @@ class AgentRunService:
                 self,
                 runtime_context,
                 run,
+                execution_owner_token=execution_owner_token,
                 emitter=emitter,
                 event_recorder=recorder,
             )
@@ -1206,17 +1240,37 @@ class AgentRunService:
                 if owner is None:
                     return
                 await self._produce_stream_owned(
-                    context, run, agent_version_id, queue, emitter, graph_holder
+                    context,
+                    run,
+                    agent_version_id,
+                    queue,
+                    emitter,
+                    graph_holder,
+                    execution_owner_token=owner,
                 )
         finally:
             _close_event_queue(queue)
 
     async def _produce_stream_owned(
-        self, context, run, agent_version_id, queue, emitter, graph_holder
+        self,
+        context,
+        run,
+        agent_version_id,
+        queue,
+        emitter,
+        graph_holder,
+        *,
+        execution_owner_token: str,
     ) -> None:
         try:
             await self._produce_stream_body(
-                context, run, agent_version_id, queue, emitter, graph_holder
+                context,
+                run,
+                agent_version_id,
+                queue,
+                emitter,
+                graph_holder,
+                execution_owner_token=execution_owner_token,
             )
         except asyncio.CancelledError:
             # Close out cancellation while ownership is still held. The lease
@@ -1279,12 +1333,15 @@ class AgentRunService:
         queue: asyncio.Queue[AgentEvent | None],
         emitter: AgentEventEmitter,
         graph_holder: dict[str, _AgentRunGraph],
+        *,
+        execution_owner_token: str,
     ) -> None:
         graph = _AgentRunGraph(
             self,
             context,
             run,
             mode="stream",
+            execution_owner_token=execution_owner_token,
             emitter=emitter,
             event_queue=queue,
         )
@@ -2049,7 +2106,7 @@ class AgentRunService:
                 or isinstance(claim, UUID)
             )
             budget_unknown = False
-            if self.model_attempt_budget_factory is not None:
+            if getattr(self, "model_attempt_budget_factory", None) is not None:
                 budget_unknown = (
                     await session.scalar(
                         select(RunBudgetAttempt.id)

@@ -100,6 +100,8 @@ class AgentRunState(TypedDict, total=False):
     # history source/plan. Never sent to the provider as conversation text.
     history_checkpoint_binding: dict[str, Any]
     summary_boundary: dict[str, Any]
+    summary_plan_blocked: bool
+    summary_revision_binding: dict[str, Any]
     # Private checkpoint sidecar for the current opt-in turn only. It is not a
     # trace and does not contain the injected historical or memory messages.
     turn_transcript: list[ModelMessage]
@@ -587,6 +589,9 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "soft_trigger_tokens",
         "hard_trigger_tokens",
         "target_tokens",
+        "summary_revision_hash",
+        "summary_source_count",
+        "summary_context_tokens_after",
         "history_plan_version",
         "history_plan_pre_trim_tokens",
         "history_plan_planned_tokens",

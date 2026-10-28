@@ -21,7 +21,7 @@ import binascii
 import hashlib
 import json
 import secrets
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from decimal import ROUND_CEILING, Decimal, InvalidOperation
@@ -34,6 +34,12 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.context_budget import ApproxTokenEstimator
+from packages.agent_runtime.frozen import (
+    SUMMARY_NON_THINKING_MODE,
+    SUMMARY_NON_THINKING_MODEL,
+    SUMMARY_NON_THINKING_PROVIDER,
+    frozen_summary_request_identity,
+)
 from packages.agent_runtime.history_checkpoint import (
     ExactCheckpointAdapter,
     PersistedCheckpointBinding,
@@ -72,6 +78,7 @@ from packages.agent_runtime.summary_validation import (
     SummaryValidationResult,
     validate_summary_candidate,
 )
+from packages.agent_runtime.work_layer import PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON
 from packages.core.canonical.json_hash import canonical_json, canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.models import PricingSnapshot
@@ -89,7 +96,7 @@ MAX_SUMMARY_MODEL_ROUND = 2_147_483_647
 
 
 class _SummaryCounter:
-    """Server-owned implementation of the sole currently supported counter."""
+    """Approximate counter for summary artifact validation, not request admission."""
 
     def count(self, text: str) -> int:
         return ApproxTokenEstimator().estimate(text)
@@ -268,6 +275,24 @@ class SummarySettlement:
 
 
 @dataclass(frozen=True, slots=True)
+class PublishedSummaryRevision:
+    """One exact published revision whose stored integrity has been rechecked."""
+
+    key: SummaryJobKey
+    artifact_id: UUID
+    response_id: UUID
+    revision_number: int
+    revision_hash: str
+    content_hash: str
+    summary_content: Mapping[str, Any]
+    source_index: tuple[Mapping[str, Any], ...]
+    validation_result: Mapping[str, Any]
+    policy_version: str
+    prompt_version: str
+    source_scope: Mapping[str, Any]
+
+
+@dataclass(frozen=True, slots=True)
 class SummaryJobBinding:
     """Immutable identity handed to a trusted server-side binding verifier."""
 
@@ -357,6 +382,17 @@ class SummaryTrustDecision:
         return cls(SummaryTrustStatus.UNAVAILABLE, tuple(reason_codes))
 
 
+class _SummaryBindingRejected(Exception):
+    """A trusted source recheck found a durable binding mismatch."""
+
+    def __init__(self, *reason_codes: str) -> None:
+        super().__init__("The frozen summary binding was rejected.")
+        self.reason_codes = tuple(reason_codes) or ("SUMMARY_BINDING_REJECTED",)
+
+
+SummaryContextLoader = Callable[[AsyncSession, SummaryJobBinding], Awaitable[SummaryInputContext]]
+
+
 class SummaryBindingVerifier(Protocol):
     """Trusted server service that reloads the binding from authoritative data.
 
@@ -382,6 +418,38 @@ class DenyAllSummaryBindingVerifier:
     ) -> SummaryTrustDecision:
         del session, binding
         return SummaryTrustDecision.unavailable("TRUSTED_VERIFIER_NOT_CONFIGURED")
+
+
+class FrozenHistorySummaryBindingVerifier:
+    """Fail closed unless an authoritative loader rebuilds the frozen source view."""
+
+    def __init__(self, context_loader: SummaryContextLoader) -> None:
+        if not callable(context_loader):
+            raise TypeError("context_loader must be callable")
+        self._context_loader = context_loader
+
+    async def verify(
+        self,
+        session: AsyncSession,
+        binding: SummaryJobBinding,
+    ) -> SummaryTrustDecision:
+        try:
+            context = await self._context_loader(session, binding)
+        except _SummaryBindingRejected as error:
+            return SummaryTrustDecision.denied(*error.reason_codes)
+        except Exception:
+            return SummaryTrustDecision.unavailable("TRUSTED_SOURCE_RECHECK_FAILED")
+        if not isinstance(context, SummaryInputContext):
+            return SummaryTrustDecision.unavailable("TRUSTED_SOURCE_CONTEXT_INVALID")
+        if (
+            context.workspace_id != str(binding.workspace_id)
+            or context.thread_id != str(binding.thread_id)
+            or not _permission_hash_matches(
+                context.permission_snapshot, binding.permission_snapshot_hash
+            )
+        ):
+            return SummaryTrustDecision.denied("TRUSTED_SOURCE_PERMISSION_OR_SCOPE_CHANGED")
+        return SummaryTrustDecision.verified(context)
 
 
 class SummaryBudgetReserver(Protocol):
@@ -542,9 +610,7 @@ class SummaryJobService:
                     model_round=model_round,
                     checkpoint_id=checkpoint.checkpoint_id,
                     checkpoint_ns=checkpoint.checkpoint_ns,
-                    checkpoint_model_round_count=(
-                        checkpoint.checkpoint_model_round_count
-                    ),
+                    checkpoint_model_round_count=(checkpoint.checkpoint_model_round_count),
                     checkpoint_binding_sha256=checkpoint.checkpoint_binding_sha256,
                     identity_hash=identity_hash,
                     source_watermark=command.source_watermark,
@@ -1015,6 +1081,14 @@ class SummaryJobService:
             raise ValueError("reserved_output_tokens must be a positive integer")
         if not isinstance(pricing_snapshot_id, UUID):
             raise TypeError("pricing_snapshot_id must be a UUID")
+        if (
+            isinstance(request_spec, Mapping)
+            and request_spec.get("request_mode") == SUMMARY_NON_THINKING_MODE
+        ):
+            raise SummaryServiceError(
+                "SUMMARY_REQUEST_COUNTER_UNAVAILABLE",
+                "The DeepSeek full-request counter is not registered for production dispatch.",
+            )
 
         async with self._session_factory() as session:
             async with session.begin():
@@ -1024,6 +1098,12 @@ class SummaryJobService:
                     raise SummaryServiceError(
                         "SUMMARY_JOB_NOT_FOUND",
                         "The summary job was not found.",
+                    )
+                if _summary_request_mode(job) == SUMMARY_NON_THINKING_MODE:
+                    raise SummaryServiceError(
+                        "SUMMARY_REQUEST_COUNTER_UNAVAILABLE",
+                        "The DeepSeek full-request counter is not registered for "
+                        "production dispatch.",
                     )
                 _require_model_round_boundary(job)
                 if job.status != SummaryJobStatus.CLAIMED.value:
@@ -1667,6 +1747,20 @@ class SummaryJobService:
                             job.lease_expires_at = None
                             job.completed_at = current
                             settlement = _settlement(job)
+                        elif _summary_request_mode(job) == SUMMARY_NON_THINKING_MODE:
+                            state = validate_response(
+                                _state(job), lease_token=lease_token, valid=False
+                            )
+                            _apply_state(job, state)
+                            job.validation_result = {
+                                "valid": False,
+                                "issues": [{"code": "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"}],
+                            }
+                            job.failure_code = "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"
+                            job.lease_token = None
+                            job.lease_expires_at = None
+                            job.completed_at = current
+                            settlement = _settlement(job)
                         elif (
                             job.tokenizer_id != "approx_language_v1" or job.tokenizer_version != "1"
                         ):
@@ -1753,6 +1847,9 @@ class SummaryJobService:
                         "The summary binding is no longer valid.",
                     )
                 if job.status == SummaryJobStatus.PUBLISHED.value:
+                    strategy_error = _publish_request_strategy_error(job)
+                    if strategy_error is not None:
+                        raise strategy_error
                     settlement = _settlement(job)
                 elif job.status != SummaryJobStatus.VALIDATED.value:
                     raise SummaryServiceError(
@@ -1765,6 +1862,9 @@ class SummaryJobService:
                         "The publication lease is missing, expired, or owned elsewhere.",
                     )
                 else:
+                    strategy_error = _publish_request_strategy_error(job)
+                    if strategy_error is not None:
+                        raise strategy_error
                     await self._verify_fixed_job_checkpoint(job)
                     await self._lock_summary_thread(session, key)
                     artifact = await self._lock_artifact(session, key, job.artifact_id)
@@ -1880,6 +1980,286 @@ class SummaryJobService:
             )
         assert settlement is not None
         return settlement
+
+    async def find_verified_summary_prefix(
+        self,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        sources: Sequence[NewSummarySource],
+        policy_version: str,
+        prompt_version: str,
+        tokenizer_id: str,
+        tokenizer_version: str,
+        model_spec: Mapping[str, Any],
+        permission_snapshot_hash: str,
+        source_scope: Mapping[str, Any],
+        request_mode: str = "provider_default",
+    ) -> PublishedSummaryRevision | None:
+        """Find the longest published prefix matching freshly replayed sources."""
+        candidates = tuple(sources)
+        if not candidates or request_mode != "provider_default":
+            return None
+        if any(
+            source.summary_eligibility != "ELIGIBLE"
+            or source.eligibility_reason != PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON
+            for source in candidates
+        ):
+            return None
+        try:
+            model_spec_hash = canonical_json_hash(dict(model_spec))
+        except (TypeError, ValueError, RecursionError):
+            return None
+
+        matches: list[PublishedSummaryRevision] = []
+        async with self._session_factory() as session:
+            rows = (
+                await session.execute(
+                    select(
+                        ThreadSummaryArtifact,
+                        ThreadSummaryJob,
+                        ThreadSummaryResponse,
+                    )
+                    .join(
+                        ThreadSummaryJob,
+                        (ThreadSummaryJob.workspace_id == ThreadSummaryArtifact.workspace_id)
+                        & (ThreadSummaryJob.thread_id == ThreadSummaryArtifact.thread_id)
+                        & (ThreadSummaryJob.id == ThreadSummaryArtifact.job_id),
+                    )
+                    .join(
+                        ThreadSummaryResponse,
+                        (ThreadSummaryResponse.workspace_id == ThreadSummaryArtifact.workspace_id)
+                        & (ThreadSummaryResponse.thread_id == ThreadSummaryArtifact.thread_id)
+                        & (ThreadSummaryResponse.job_id == ThreadSummaryArtifact.job_id)
+                        & (ThreadSummaryResponse.id == ThreadSummaryArtifact.response_id),
+                    )
+                    .where(
+                        ThreadSummaryArtifact.workspace_id == workspace_id,
+                        ThreadSummaryArtifact.thread_id == thread_id,
+                        ThreadSummaryArtifact.publication_status
+                        == ThreadSummaryArtifactStatus.PUBLISHED.value,
+                        ThreadSummaryJob.status == SummaryJobStatus.PUBLISHED.value,
+                        ThreadSummaryJob.policy_version == policy_version,
+                        ThreadSummaryJob.prompt_version == prompt_version,
+                        ThreadSummaryJob.tokenizer_id == tokenizer_id,
+                        ThreadSummaryJob.tokenizer_version == tokenizer_version,
+                        ThreadSummaryJob.model_spec_hash == model_spec_hash,
+                        ThreadSummaryJob.permission_snapshot_hash == permission_snapshot_hash,
+                    )
+                    .order_by(
+                        ThreadSummaryArtifact.revision_number.desc(),
+                        ThreadSummaryArtifact.id.desc(),
+                    )
+                    .limit(128)
+                )
+            ).all()
+            for artifact, job, response in rows:
+                if (
+                    not _source_scopes_compatible(job.source_scope, source_scope)
+                    or _summary_request_mode(job) != request_mode
+                ):
+                    continue
+                key = SummaryJobKey(workspace_id, thread_id, job.id)
+                source_rows = await self._load_sources(session, key)
+                if not _artifact_is_integrity_valid(artifact, job, response, source_rows):
+                    continue
+                index = tuple(artifact.source_index)
+                if not _source_index_matches_prefix(index, candidates):
+                    continue
+                validation = dict(artifact.validation_result)
+                covered = validation.get("covered_source_ids")
+                expected_ids = [item["source_id"] for item in index]
+                if covered != expected_ids or artifact.summary_content.get("omitted_source_ids"):
+                    continue
+                matches.append(
+                    PublishedSummaryRevision(
+                        key=key,
+                        artifact_id=artifact.id,
+                        response_id=response.id,
+                        revision_number=artifact.revision_number,
+                        revision_hash=artifact.revision_hash,
+                        content_hash=artifact.content_hash,
+                        summary_content=dict(artifact.summary_content),
+                        source_index=tuple(dict(item) for item in index),
+                        validation_result=validation,
+                        policy_version=job.policy_version,
+                        prompt_version=job.prompt_version,
+                        source_scope=dict(job.source_scope),
+                    )
+                )
+        ordered_matches = sorted(
+            matches,
+            key=lambda item: (len(item.source_index), item.revision_number, str(item.artifact_id)),
+            reverse=True,
+        )
+        permission_or_lease_rejections = {
+            "RUN_EXECUTION_LEASE_LOST",
+            "RUN_ACTOR_ACCESS_REVOKED",
+            "SUMMARY_CURRENT_PERMISSION_CHANGED",
+            "SUMMARY_TOOL_HISTORY_PERMISSION_REVOKED",
+            "SUMMARY_ARTIFACT_PERMISSION_REVOKED",
+            "SUMMARY_EVIDENCE_PERMISSION_REVOKED",
+        }
+        for candidate in ordered_matches:
+            try:
+                async with self._session_factory() as session:
+                    async with session.begin():
+                        # Match the dispatch/recovery lock order: summary job,
+                        # then the verifier's current Run, permission and
+                        # frozen source rows. Provider replay stays read-only
+                        # in its own session and this transaction ends before
+                        # the caller can issue a model request.
+                        job = await self._lock_job(session, candidate.key)
+                        if (
+                            job is None
+                            or job.status != SummaryJobStatus.PUBLISHED.value
+                            or job.artifact_id != candidate.artifact_id
+                        ):
+                            continue
+                        artifact = await session.scalar(
+                            select(ThreadSummaryArtifact)
+                            .where(
+                                ThreadSummaryArtifact.workspace_id == workspace_id,
+                                ThreadSummaryArtifact.thread_id == thread_id,
+                                ThreadSummaryArtifact.job_id == job.id,
+                                ThreadSummaryArtifact.id == candidate.artifact_id,
+                                ThreadSummaryArtifact.publication_status
+                                == ThreadSummaryArtifactStatus.PUBLISHED.value,
+                            )
+                            .with_for_update(read=True)
+                        )
+                        response = await session.scalar(
+                            select(ThreadSummaryResponse).where(
+                                ThreadSummaryResponse.workspace_id == workspace_id,
+                                ThreadSummaryResponse.thread_id == thread_id,
+                                ThreadSummaryResponse.job_id == job.id,
+                                ThreadSummaryResponse.id == candidate.response_id,
+                            )
+                        )
+                        if artifact is None or response is None:
+                            continue
+                        source_rows = await self._load_sources(session, candidate.key)
+                        if not _artifact_is_integrity_valid(
+                            artifact, job, response, source_rows
+                        ) or not _source_index_matches_prefix(artifact.source_index, candidates):
+                            continue
+                        await self._trusted_dispatch_context(session, candidate.key, job)
+            except SummaryServiceError as error:
+                if error.code in permission_or_lease_rejections:
+                    raise
+                continue
+            return candidate
+        return None
+
+    async def get_published_revision(self, key: SummaryJobKey) -> PublishedSummaryRevision | None:
+        """Reload the exact published job revision and recheck all stored hashes."""
+        async with self._session_factory() as session:
+            row = (
+                await session.execute(
+                    select(
+                        ThreadSummaryArtifact,
+                        ThreadSummaryJob,
+                        ThreadSummaryResponse,
+                    )
+                    .join(
+                        ThreadSummaryJob,
+                        (ThreadSummaryJob.workspace_id == ThreadSummaryArtifact.workspace_id)
+                        & (ThreadSummaryJob.thread_id == ThreadSummaryArtifact.thread_id)
+                        & (ThreadSummaryJob.id == ThreadSummaryArtifact.job_id),
+                    )
+                    .join(
+                        ThreadSummaryResponse,
+                        (ThreadSummaryResponse.workspace_id == ThreadSummaryArtifact.workspace_id)
+                        & (ThreadSummaryResponse.thread_id == ThreadSummaryArtifact.thread_id)
+                        & (ThreadSummaryResponse.job_id == ThreadSummaryArtifact.job_id)
+                        & (ThreadSummaryResponse.id == ThreadSummaryArtifact.response_id),
+                    )
+                    .where(
+                        ThreadSummaryArtifact.workspace_id == key.workspace_id,
+                        ThreadSummaryArtifact.thread_id == key.thread_id,
+                        ThreadSummaryJob.id == key.job_id,
+                        ThreadSummaryArtifact.publication_status
+                        == ThreadSummaryArtifactStatus.PUBLISHED.value,
+                        ThreadSummaryJob.status == SummaryJobStatus.PUBLISHED.value,
+                    )
+                )
+            ).one_or_none()
+            if row is None:
+                return None
+            artifact, job, response = row
+            request_mode = _summary_request_mode(job)
+            if request_mode != "provider_default":
+                code = (
+                    "SUMMARY_REQUEST_COUNTER_UNAVAILABLE"
+                    if request_mode == SUMMARY_NON_THINKING_MODE
+                    else "SUMMARY_REQUEST_STRATEGY_UNSUPPORTED"
+                )
+                raise SummaryServiceError(
+                    code,
+                    "Only revisions validated with a supported production request "
+                    "strategy may be consumed.",
+                )
+            sources = await self._load_sources(session, key)
+            if not _artifact_is_integrity_valid(artifact, job, response, sources):
+                raise SummaryServiceError(
+                    "SUMMARY_ARTIFACT_INTEGRITY_INVALID",
+                    "The published summary revision no longer matches its identity.",
+                )
+            validation = dict(artifact.validation_result)
+            expected_ids = [item["source_id"] for item in artifact.source_index]
+            if validation.get("covered_source_ids") != expected_ids or artifact.summary_content.get(
+                "omitted_source_ids"
+            ):
+                raise SummaryServiceError(
+                    "SUMMARY_ARTIFACT_COVERAGE_INVALID",
+                    "The published summary does not cover its complete source prefix.",
+                )
+            return PublishedSummaryRevision(
+                key=key,
+                artifact_id=artifact.id,
+                response_id=response.id,
+                revision_number=artifact.revision_number,
+                revision_hash=artifact.revision_hash,
+                content_hash=artifact.content_hash,
+                summary_content=dict(artifact.summary_content),
+                source_index=tuple(dict(item) for item in artifact.source_index),
+                validation_result=validation,
+                policy_version=job.policy_version,
+                prompt_version=job.prompt_version,
+                source_scope=dict(job.source_scope),
+            )
+
+    async def resolve_applicable_pricing(
+        self,
+        *,
+        workspace_id: UUID,
+        provider: str,
+        model: str,
+        effective_before: datetime,
+    ) -> UUID:
+        """Resolve one reviewed immutable price or refuse the summary dispatch."""
+        async with self._session_factory() as session:
+            snapshot = await session.scalar(
+                select(PricingSnapshot)
+                .where(
+                    PricingSnapshot.workspace_id == workspace_id,
+                    PricingSnapshot.provider == provider,
+                    PricingSnapshot.model == model,
+                    PricingSnapshot.effective_at <= effective_before,
+                )
+                .order_by(
+                    PricingSnapshot.effective_at.desc(),
+                    PricingSnapshot.created_at.desc(),
+                    PricingSnapshot.id.desc(),
+                )
+                .limit(1)
+            )
+        if snapshot is None or snapshot.content_hash != _pricing_snapshot_content_hash(snapshot):
+            raise SummaryServiceError(
+                "SUMMARY_PRICING_UNAVAILABLE",
+                "No reviewed immutable price matches the frozen summary model.",
+            )
+        return snapshot.id
 
     async def get_settlement(self, key: SummaryJobKey) -> SummarySettlement:
         """Read the durable result without mutating any failure or unknown state."""
@@ -2489,9 +2869,7 @@ def _require_model_round_boundary(job: ThreadSummaryJob) -> None:
 def _checkpoint_anchor(job: ThreadSummaryJob) -> PersistedCheckpointBinding:
     checkpoint_id = getattr(job, "checkpoint_id", None)
     checkpoint_ns = getattr(job, "checkpoint_ns", None)
-    checkpoint_model_round_count = getattr(
-        job, "checkpoint_model_round_count", None
-    )
+    checkpoint_model_round_count = getattr(job, "checkpoint_model_round_count", None)
     checkpoint_binding_sha256 = getattr(job, "checkpoint_binding_sha256", None)
     if (
         not isinstance(checkpoint_id, str)
@@ -2558,9 +2936,7 @@ def _binding(job: ThreadSummaryJob, phase: SummaryVerifierPhase) -> SummaryJobBi
         phase=phase,
         checkpoint_id=getattr(job, "checkpoint_id", None),
         checkpoint_ns=getattr(job, "checkpoint_ns", None),
-        checkpoint_model_round_count=getattr(
-            job, "checkpoint_model_round_count", None
-        ),
+        checkpoint_model_round_count=getattr(job, "checkpoint_model_round_count", None),
         checkpoint_binding_sha256=getattr(job, "checkpoint_binding_sha256", None),
     )
 
@@ -2581,9 +2957,7 @@ def _summary_identity_hash(
             "model_round": model_round,
             "checkpoint_id": checkpoint.checkpoint_id,
             "checkpoint_ns": checkpoint.checkpoint_ns,
-            "checkpoint_model_round_count": (
-                checkpoint.checkpoint_model_round_count
-            ),
+            "checkpoint_model_round_count": (checkpoint.checkpoint_model_round_count),
             "checkpoint_binding_sha256": checkpoint.checkpoint_binding_sha256,
             "source_watermark": command.source_watermark,
             "source_scope": dict(command.source_scope),
@@ -2725,12 +3099,10 @@ def _validate_new_job(command: NewSummaryJob) -> None:
     if checkpoint_id_bytes > 1024 or checkpoint_ns_bytes > 1024:
         raise ValueError("checkpoint selectors must not exceed 1024 UTF-8 bytes")
     if command.model_round is not None and (
-        not _positive_int(command.model_round)
-        or command.model_round > MAX_SUMMARY_MODEL_ROUND
+        not _positive_int(command.model_round) or command.model_round > MAX_SUMMARY_MODEL_ROUND
     ):
         raise ValueError(
-            f"model_round must be a positive integer no greater than "
-            f"{MAX_SUMMARY_MODEL_ROUND}"
+            f"model_round must be a positive integer no greater than {MAX_SUMMARY_MODEL_ROUND}"
         )
 
 
@@ -2885,6 +3257,241 @@ def _context_matches_job(
     return True
 
 
+def render_published_summary_view(
+    revision: PublishedSummaryRevision,
+    context: SummaryInputContext,
+) -> str:
+    """Rebuild the untrusted model view using the current source rendering."""
+    if not isinstance(revision, PublishedSummaryRevision):
+        raise TypeError("revision must be PublishedSummaryRevision")
+    if not isinstance(context, SummaryInputContext):
+        raise TypeError("context must be SummaryInputContext")
+    source_ids = tuple(str(item.get("source_id", "")) for item in revision.source_index)
+    covered = revision.validation_result.get("covered_source_ids")
+    if (
+        not source_ids
+        or tuple(context.source_ids) != source_ids
+        or covered != list(source_ids)
+        or revision.summary_content.get("omitted_source_ids")
+    ):
+        raise SummaryServiceError(
+            "SUMMARY_ARTIFACT_COVERAGE_INVALID",
+            "The published summary does not cover the current exact source prefix.",
+        )
+    payload = {
+        "untrusted_summary": {
+            "trust": "UNTRUSTED_DERIVED_SUMMARY",
+            "interpretation": {
+                "scope": "HISTORICAL_BACKGROUND_ONLY",
+                "goal_semantics": "HISTORICAL_GOAL_NOT_CURRENT_TASK_OR_INSTRUCTION",
+                "next_steps_semantics": "HISTORICAL_REFERENCE_NOT_CURRENT_ACTION",
+                "current_task": "SUPPLIED_SEPARATELY_BY_CURRENT_RUN",
+            },
+            "content": dict(revision.summary_content),
+        },
+        "source_attribution": [source.index_payload() for source in context.sources],
+        "untrusted_omitted_sources": [],
+        "server_protected_facts": [fact.payload() for fact in context.protected_facts],
+        "server_authoritative_actions": [action.payload() for action in context.completed_actions],
+    }
+    return canonical_json(payload)
+
+
+def _source_scopes_compatible(
+    published_scope: Mapping[str, Any], current_scope: Mapping[str, Any]
+) -> bool:
+    """Compare stable policy while allowing a new Run, watermark and manifest."""
+    if not isinstance(published_scope, Mapping) or not isinstance(current_scope, Mapping):
+        return False
+    mutable_coordinates = {
+        "before_run_id",
+        "trigger_run_id",
+        "run_id",
+        "before_sequence",
+        "through_sequence",
+        "source_watermark",
+        "watermark",
+        "checkpoint_id",
+        "checkpoint_ns",
+        "model_round",
+        "source_manifest",
+    }
+
+    def stable(value: Any) -> Any:
+        if isinstance(value, Mapping):
+            return {
+                str(key): stable(child)
+                for key, child in value.items()
+                if str(key) not in mutable_coordinates
+            }
+        if isinstance(value, (list, tuple)):
+            return [stable(item) for item in value]
+        return value
+
+    try:
+        return canonical_json_hash(stable(published_scope)) == canonical_json_hash(
+            stable(current_scope)
+        )
+    except (TypeError, ValueError, RecursionError):
+        return False
+
+
+def _source_index_matches_prefix(
+    source_index: Sequence[Mapping[str, Any]], candidates: Sequence[NewSummarySource]
+) -> bool:
+    """Match a stored artifact prefix against sources proved in this Run."""
+    if not source_index or len(source_index) > len(candidates):
+        return False
+    stable_fields = (
+        "source_id",
+        "turn_id",
+        "run_id",
+        "sequence",
+        "original_ref",
+        "source_identity_hash",
+        "user_input_sha256",
+        "final_output_sha256",
+        "artifact_identities",
+        "summary_eligibility",
+        "eligibility_reason",
+    )
+    for ordinal, (stored, candidate) in enumerate(
+        zip(source_index, candidates, strict=False), start=1
+    ):
+        if (
+            not isinstance(stored, Mapping)
+            or candidate.summary_eligibility != "ELIGIBLE"
+            or candidate.eligibility_reason != PLAIN_TEXT_PREFIX_V1_ELIGIBLE_REASON
+        ):
+            return False
+        expected = {
+            "source_id": candidate.source_id,
+            "turn_id": str(candidate.turn_id),
+            "run_id": str(candidate.run_id),
+            "sequence": candidate.sequence,
+            "original_ref": candidate.original_ref,
+            "source_identity_hash": candidate.source_identity_hash,
+            "user_input_sha256": candidate.user_input_sha256,
+            "final_output_sha256": candidate.final_output_sha256,
+            "artifact_identities": [dict(item) for item in candidate.artifact_identities],
+            "summary_eligibility": candidate.summary_eligibility,
+            "eligibility_reason": candidate.eligibility_reason,
+        }
+        if stored.get("ordinal") != ordinal or any(
+            stored.get(field) != expected[field] for field in stable_fields
+        ):
+            return False
+    return True
+
+
+def _artifact_is_integrity_valid(
+    artifact: ThreadSummaryArtifact,
+    job: ThreadSummaryJob,
+    response: ThreadSummaryResponse,
+    sources: Sequence[ThreadSummaryJobSource],
+) -> bool:
+    """Recompute the published artifact's immutable source/content hash chain."""
+    try:
+        if (
+            artifact.workspace_id != job.workspace_id
+            or artifact.thread_id != job.thread_id
+            or artifact.job_id != job.id
+            or artifact.response_id != response.id
+            or job.response_id != response.id
+            or job.artifact_id != artifact.id
+            or job.dispatch_id is None
+            or response.dispatch_id != job.dispatch_id
+            or response.job_id != job.id
+            or response.provider != job.model_spec.get("provider")
+            or response.model != job.model_spec.get("model")
+            or job.status != SummaryJobStatus.PUBLISHED.value
+            or artifact.publication_status != ThreadSummaryArtifactStatus.PUBLISHED.value
+            or not isinstance(job.source_scope, Mapping)
+            or canonical_json_hash(dict(job.source_scope)) != job.source_scope_hash
+            or canonical_json_hash(dict(job.model_spec)) != job.model_spec_hash
+            or not _sha256(job.identity_hash)
+            or not _sha256(response.response_sha256)
+            or not isinstance(artifact.summary_content, Mapping)
+            or not isinstance(artifact.source_index, list)
+            or not isinstance(artifact.validation_result, Mapping)
+            or artifact.validation_result.get("valid") is not True
+            or artifact.validation_result.get("validator_version") != artifact.validator_version
+            or job.validation_result != artifact.validation_result
+        ):
+            return False
+        _decode_raw_response(response)
+        expected_index = [_source_index_entry(source) for source in sources]
+        if not sources or artifact.source_index != expected_index:
+            return False
+        source_content_hash = canonical_json_hash(
+            {
+                "version": "thread_summary_source_content_v1",
+                "sources": [
+                    {
+                        "source_id": source.source_id,
+                        "turn_id": str(source.turn_id),
+                        "run_id": str(source.run_id),
+                        "sequence": source.sequence,
+                        "original_ref": source.original_ref,
+                        "source_identity_hash": source.source_identity_hash,
+                        "revision_sha256": source.revision_sha256,
+                        "user_input_sha256": source.user_input_sha256,
+                        "final_output_sha256": source.final_output_sha256,
+                        "artifact_identities": [dict(item) for item in source.artifact_identities],
+                        "summary_eligibility": source.summary_eligibility,
+                        "eligibility_reason": source.eligibility_reason,
+                    }
+                    for source in sorted(sources, key=lambda item: item.sequence)
+                ],
+            }
+        )
+        if source_content_hash != job.source_content_hash:
+            return False
+        source_ids = [source.source_id for source in sources]
+        if (
+            artifact.validation_result.get("covered_source_ids") != source_ids
+            or artifact.summary_content.get("status") != "OK"
+            or artifact.summary_content.get("omitted_source_ids")
+        ):
+            return False
+        content_hash = canonical_json_hash(dict(artifact.summary_content))
+        source_index_hash = canonical_json_hash(
+            {"version": SUMMARY_SOURCE_INDEX_VERSION, "sources": expected_index}
+        )
+        summary_identity_hash = canonical_json_hash(
+            {
+                "version": SUMMARY_ARTIFACT_VERSION,
+                "job_identity_hash": job.identity_hash,
+                "content_hash": content_hash,
+            }
+        )
+        revision_hash = canonical_json_hash(
+            {
+                "version": SUMMARY_ARTIFACT_VERSION,
+                "workspace_id": str(job.workspace_id),
+                "thread_id": str(job.thread_id),
+                "job_identity_hash": job.identity_hash,
+                "response_sha256": response.response_sha256,
+                "parent_artifact_id": (
+                    str(job.parent_artifact_id) if job.parent_artifact_id is not None else None
+                ),
+                "parent_revision_hash": job.parent_revision_hash,
+                "revision_number": artifact.revision_number,
+                "content_hash": content_hash,
+                "source_index_hash": source_index_hash,
+                "validator_version": artifact.validator_version,
+            }
+        )
+        return (
+            artifact.content_hash == content_hash
+            and artifact.source_index_hash == source_index_hash
+            and artifact.summary_identity_hash == summary_identity_hash
+            and artifact.revision_hash == revision_hash
+        )
+    except (AttributeError, TypeError, ValueError, RecursionError, SummaryServiceError):
+        return False
+
+
 def _verify_job_source_scope(
     key: SummaryJobKey,
     job: ThreadSummaryJob,
@@ -2955,6 +3562,49 @@ def _source_index_entry(source: ThreadSummaryJobSource) -> dict[str, Any]:
     }
 
 
+def _summary_request_mode(job: ThreadSummaryJob) -> str:
+    """Recover a request mode only when policy and model identities agree."""
+    policy = getattr(job, "policy_spec", None)
+    model_spec = getattr(job, "model_spec", None)
+    if not isinstance(policy, Mapping) or not isinstance(model_spec, Mapping):
+        return ""
+    try:
+        identity = frozen_summary_request_identity(policy)
+    except (AgentHubError, TypeError, ValueError):
+        return ""
+    request_mode = identity["request_mode"]
+    if request_mode == SUMMARY_NON_THINKING_MODE:
+        if (
+            model_spec.get("provider") != SUMMARY_NON_THINKING_PROVIDER
+            or model_spec.get("model") != SUMMARY_NON_THINKING_MODEL
+            or any(model_spec.get(key) != value for key, value in identity.items())
+        ):
+            return ""
+    elif any(
+        key in model_spec
+        for key in identity
+        if key not in {"request_strategy_version", "request_mode"}
+    ):
+        return ""
+    return request_mode
+
+
+def _publish_request_strategy_error(job: ThreadSummaryJob) -> SummaryServiceError | None:
+    """Require an explicitly supported request strategy at final publication."""
+    request_mode = _summary_request_mode(job)
+    if request_mode == SUMMARY_NON_THINKING_MODE:
+        return SummaryServiceError(
+            "SUMMARY_REQUEST_COUNTER_UNAVAILABLE",
+            "A validated summary cannot be published without its frozen full-request counter.",
+        )
+    if request_mode != "provider_default":
+        return SummaryServiceError(
+            "SUMMARY_REQUEST_STRATEGY_UNSUPPORTED",
+            "The frozen summary request strategy is not supported for publication.",
+        )
+    return None
+
+
 def _verified_request_spec(
     job: ThreadSummaryJob,
     *,
@@ -2962,6 +3612,12 @@ def _verified_request_spec(
     input_tokens: int,
     output_tokens: int,
 ) -> dict[str, Any]:
+    request_mode = _summary_request_mode(job)
+    if not request_mode:
+        raise SummaryServiceError(
+            "SUMMARY_REQUEST_STRATEGY_UNSUPPORTED",
+            "The summary request mode is not bound by a supported frozen strategy.",
+        )
     prompt = build_summary_prompt(context, prompt_version=job.prompt_version)
     prompt_hash = canonical_json_hash(
         {
@@ -2972,7 +3628,7 @@ def _verified_request_spec(
             "output_schema_version": prompt.output_schema_version,
         }
     )
-    return {
+    payload = {
         "event": "SUMMARY_DISPATCH",
         "job_id": str(job.id),
         "identity_hash": job.identity_hash,
@@ -2987,6 +3643,15 @@ def _verified_request_spec(
         "reserved_input_tokens": input_tokens,
         "reserved_output_tokens": output_tokens,
     }
+    if "request_strategy_version" in job.policy_spec:
+        identity = frozen_summary_request_identity(job.policy_spec)
+        if identity["request_mode"] != request_mode:
+            raise SummaryServiceError(
+                "SUMMARY_REQUEST_STRATEGY_UNSUPPORTED",
+                "The frozen dispatch request identity is inconsistent.",
+            )
+        payload.update(identity)
+    return payload
 
 
 def _reservation_cost(
@@ -3004,9 +3669,7 @@ def _reservation_cost(
         else None
     )
     effective_input_price = (
-        input_price
-        if cached_input_price is None
-        else max(input_price, cached_input_price)
+        input_price if cached_input_price is None else max(input_price, cached_input_price)
     )
     if not _currency(pricing.currency):
         raise ValueError("invalid reservation currency")
@@ -3136,6 +3799,7 @@ def _currency(value: str) -> bool:
 __all__ = [
     "ClaimedSummaryJob",
     "DenyAllSummaryBudgetReserver",
+    "FrozenHistorySummaryBindingVerifier",
     "CreatedSummaryJob",
     "DenyAllSummaryBindingVerifier",
     "DEFAULT_LEASE_SECONDS",
@@ -3145,6 +3809,7 @@ __all__ = [
     "NewSummaryJob",
     "NewSummarySource",
     "PreparedSummaryDispatch",
+    "PublishedSummaryRevision",
     "RecoveredSummaryJob",
     "StoredSummaryResponse",
     "SummaryBindingVerifier",
@@ -3159,4 +3824,5 @@ __all__ = [
     "SummaryTrustDecision",
     "SummaryTrustStatus",
     "SummaryVerifierPhase",
+    "render_published_summary_view",
 ]

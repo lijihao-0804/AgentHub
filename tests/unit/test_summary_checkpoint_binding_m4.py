@@ -13,12 +13,24 @@ from uuid import UUID, uuid4
 import pytest
 
 from packages.agent_runtime import history_checkpoint, summary_service
+from packages.agent_runtime.frozen import (
+    SUMMARY_NON_THINKING_COUNTER_ID,
+    SUMMARY_NON_THINKING_COUNTER_REVISION,
+    SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION,
+    SUMMARY_NON_THINKING_MODE,
+    SUMMARY_NON_THINKING_MODEL,
+    SUMMARY_NON_THINKING_PROVIDER,
+    SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+    SUMMARY_NON_THINKING_STRATEGY_VERSION,
+    SUMMARY_NON_THINKING_TOKENIZER_SHA256,
+)
 from packages.agent_runtime.history_checkpoint import (
     PersistedCheckpointBinding,
     VerifiedCheckpointBinding,
     verify_exact_checkpoint_binding,
     verify_fixed_checkpoint_binding,
 )
+from packages.agent_runtime.summary_prompt import SummaryInputContext, SummaryPromptSource
 from packages.agent_runtime.summary_service import (
     MAX_SUMMARY_MODEL_ROUND,
     NewSummaryJob,
@@ -31,7 +43,9 @@ from packages.agent_runtime.summary_service import (
     _binding,
     _require_model_round_boundary,
     _summary_identity_hash,
+    _summary_request_mode,
     _trusted_summary_model_round,
+    _verified_request_spec,
 )
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
@@ -479,6 +493,160 @@ def test_summary_identity_uses_the_trusted_checkpoint_round_and_tuple() -> None:
 
     assert caller_assertion_changed == matching
     assert different_checkpoint != matching
+
+
+def test_request_mode_is_part_of_job_and_model_identity_for_the_frozen_candidate() -> None:
+    command = _new_command(model_round=1)
+    checkpoint = _verified_for_command(command, round_count=0)
+    default_policy = {
+        "request_strategy_version": "summary_request_strategy_v1",
+        "request_mode": "provider_default",
+    }
+    default_command = replace(command, policy_spec=default_policy)
+    candidate_identity = {
+        "request_strategy_version": SUMMARY_NON_THINKING_STRATEGY_VERSION,
+        "request_mode": SUMMARY_NON_THINKING_MODE,
+        "request_route_allowlist": SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+        "request_counter_id": SUMMARY_NON_THINKING_COUNTER_ID,
+        "request_counter_revision": SUMMARY_NON_THINKING_COUNTER_REVISION,
+        "request_counter_runtime_version": SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION,
+        "request_counter_sha256": SUMMARY_NON_THINKING_TOKENIZER_SHA256,
+        "request_counter_thinking": False,
+    }
+    candidate_command = replace(
+        command,
+        policy_spec=candidate_identity,
+        model_spec={
+            "provider": SUMMARY_NON_THINKING_PROVIDER,
+            "model": SUMMARY_NON_THINKING_MODEL,
+            **candidate_identity,
+        },
+    )
+
+    default_identity = _summary_identity_hash(
+        default_command, checkpoint=checkpoint, model_round=1
+    )
+    candidate_identity_hash = _summary_identity_hash(
+        candidate_command, checkpoint=checkpoint, model_round=1
+    )
+
+    assert default_identity != candidate_identity_hash
+    assert _summary_request_mode(
+        SimpleNamespace(policy_spec=default_policy, model_spec={})
+    ) == "provider_default"
+    assert _summary_request_mode(
+        SimpleNamespace(
+            policy_spec=candidate_command.policy_spec,
+            model_spec=candidate_command.model_spec,
+        )
+    ) == SUMMARY_NON_THINKING_MODE
+    assert _summary_request_mode(
+        SimpleNamespace(
+            policy_spec=candidate_command.policy_spec,
+            model_spec={**candidate_command.model_spec, "request_counter_thinking": True},
+        )
+    ) == ""
+
+
+def test_verified_dispatch_intent_binds_only_the_supported_request_mode() -> None:
+    default_policy = {
+        "request_strategy_version": "summary_request_strategy_v1",
+        "request_mode": "provider_default",
+    }
+    job = SimpleNamespace(
+        policy_spec=default_policy,
+        prompt_version="summary_candidate_zh_v1",
+        id=uuid4(),
+        identity_hash="a" * 64,
+        model_round=1,
+        source_watermark=2,
+        source_scope_hash="b" * 64,
+        source_content_hash="c" * 64,
+        permission_snapshot_hash="d" * 64,
+        model_spec_hash="e" * 64,
+        model_spec={},
+    )
+    context = SummaryInputContext(
+        workspace_id="workspace-a",
+        thread_id="thread-a",
+        permission_snapshot="permissions-1",
+        task_goal="Summarize the older assistant explanation.",
+        prefix_first_sequence=1,
+        prefix_last_sequence=1,
+        watermark=2,
+        sources=(
+            SummaryPromptSource(
+                source_id="source-1",
+                workspace_id="workspace-a",
+                thread_id="thread-a",
+                identity="identity-1",
+                revision="revision-1",
+                sequence=1,
+                watermark=2,
+                role="assistant",
+                speaker="assistant",
+                occurred_at="2026-10-28T00:00:00Z",
+                content="A prior assistant explanation.",
+                original_ref="thread:source-1",
+                summary_eligible=True,
+                exchange_complete=True,
+            ),
+        ),
+        protected_facts=(),
+        completed_actions=(),
+        required_references=(),
+        source_budget_tokens=100,
+        target_budget_tokens=50,
+        final_view_budget_tokens=200,
+        prefix_complete=True,
+        protected_manifest_complete=True,
+        action_manifest_complete=True,
+        reference_manifest_complete=True,
+    )
+
+    request = _verified_request_spec(
+        job, context=context, input_tokens=100, output_tokens=20
+    )
+    assert request["request_strategy_version"] == "summary_request_strategy_v1"
+    assert request["request_mode"] == "provider_default"
+
+    candidate_identity = {
+        "request_strategy_version": SUMMARY_NON_THINKING_STRATEGY_VERSION,
+        "request_mode": SUMMARY_NON_THINKING_MODE,
+        "request_route_allowlist": SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+        "request_counter_id": SUMMARY_NON_THINKING_COUNTER_ID,
+        "request_counter_revision": SUMMARY_NON_THINKING_COUNTER_REVISION,
+        "request_counter_runtime_version": SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION,
+        "request_counter_sha256": SUMMARY_NON_THINKING_TOKENIZER_SHA256,
+        "request_counter_thinking": False,
+    }
+    candidate_job = SimpleNamespace(
+        **{
+            **vars(job),
+            "policy_spec": candidate_identity,
+            "model_spec": {
+                "provider": SUMMARY_NON_THINKING_PROVIDER,
+                "model": SUMMARY_NON_THINKING_MODEL,
+                **candidate_identity,
+            },
+        }
+    )
+    candidate_request = _verified_request_spec(
+        candidate_job, context=context, input_tokens=100, output_tokens=20
+    )
+    assert {key: candidate_request[key] for key in candidate_identity} == candidate_identity
+
+    unsupported_job = SimpleNamespace(
+        **{
+            **vars(job),
+            "policy_spec": {**default_policy, "request_mode": "non_thinking"},
+        }
+    )
+    with pytest.raises(SummaryServiceError) as failure:
+        _verified_request_spec(
+            unsupported_job, context=context, input_tokens=100, output_tokens=20
+        )
+    assert failure.value.code == "SUMMARY_REQUEST_STRATEGY_UNSUPPORTED"
 
 
 def test_caller_round_is_only_a_matching_assertion() -> None:
