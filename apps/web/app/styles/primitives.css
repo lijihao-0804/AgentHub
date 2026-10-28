@@ -141,6 +141,9 @@
 .metric-card-link { color: inherit; text-decoration: none; }
 .metric-card-link:hover { border-color: var(--accent); box-shadow: 0 14px 34px -22px var(--accent); transform: translateY(-2px); }
 .metric-card-emphasis { border-color: var(--accent); }
+.metric-card-emphasis-danger { border-color: var(--danger); }
+.metric-card-emphasis-attention { border-color: var(--attention); }
+.metric-card-emphasis-warning { border-color: var(--warning); }
 .metric-label { color: var(--text-muted); font-size: var(--text-sm); }
 /* Scales down inside the narrow cards a four-column KPI grid produces. */
 .metric-value { font-size: clamp(1.3rem, 2.3vw, 1.7rem); font-variant-numeric: tabular-nums; line-height: 1.15; }
