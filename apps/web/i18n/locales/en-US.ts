@@ -1178,6 +1178,10 @@ export const enUS = {
         HOLDOUT_VALIDATION: "Holdout validation",
         RELEASE_GATE: "Release gate",
       },
+      splitLabels: {
+        DEV: "DEV",
+        HOLDOUT: "HOLDOUT",
+      },
       purposeHint:
         "DEVELOPMENT experiments use the DEV split; HOLDOUT_VALIDATION and RELEASE_GATE experiments use the HOLDOUT split.",
       createdNotice: "Experiment created.",

@@ -29,6 +29,12 @@ function splitForPurpose(purpose: string): string {
 
 export default function EvaluationExperimentsPage() {
   const { t, statusLabel, purposeLabel, formatDateTime } = useI18n();
+  const splitLabel = (split: string) =>
+    split === "DEV"
+      ? t("evaluation.experiments.splitLabels.DEV")
+      : split === "HOLDOUT"
+        ? t("evaluation.experiments.splitLabels.HOLDOUT")
+        : split;
   const router = useRouter();
   const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [experiments, setExperiments] = useState<EvaluationExperiment[]>([]);
@@ -325,7 +331,7 @@ export default function EvaluationExperimentsPage() {
               </label>
               <label>
                 {t("evaluation.experiments.labels.split")}
-                <input value={splitForPurpose(purpose)} readOnly />
+                <input value={splitLabel(splitForPurpose(purpose))} readOnly />
               </label>
               <label>
                 {t("evaluation.experiments.labels.repetitions")}
@@ -382,7 +388,7 @@ export default function EvaluationExperimentsPage() {
                     <td data-label={t("evaluation.experiments.columns.status")}>
                       <StatusBadge status={experiment.status} />
                     </td>
-                    <td data-label={t("evaluation.experiments.columns.split")}>{experiment.split}</td>
+                    <td data-label={t("evaluation.experiments.columns.split")}>{splitLabel(experiment.split)}</td>
                     <td data-label={t("evaluation.experiments.columns.purpose")}>
                       {purposeLabel(experiment.purpose)}
                     </td>

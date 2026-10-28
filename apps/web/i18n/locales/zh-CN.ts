@@ -1167,6 +1167,10 @@ export const zhCN: MessageSchema = {
         HOLDOUT_VALIDATION: "留出集验证",
         RELEASE_GATE: "发布门禁",
       },
+      splitLabels: {
+        DEV: "开发",
+        HOLDOUT: "留出",
+      },
       purposeHint: "开发类实验使用开发集；留出集验证类和发布门禁类实验使用留出集。",
       createdNotice: "实验已创建。",
     },
