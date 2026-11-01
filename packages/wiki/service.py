@@ -339,7 +339,8 @@ class WikiService:
                     ProviderCredential.id == profile.provider_credential_id,
                 )
             )
-            routes[str(profile.provider_credential_id)] = credential.base_url
+            base_url = credential.base_url if credential else None
+            routes[str(profile.provider_credential_id)] = base_url
         spec["provider_routes"] = routes
         excluded = await session.scalars(
             select(WikiSourceRevocation.document_revision_id)
@@ -488,7 +489,7 @@ class WikiService:
             fail("WIKI_NOT_FOUND", "The Wiki compilation was not found.", 404)
         return row
 
-    async def sources(self, session, context, row, require_current=False):
+    async def sources(self, session, context, row, require_current=False, share_lock=False):
         snapshot = await KnowledgeSnapshotService().resolve_snapshot(
             session, context, row.knowledge_base_id, row.source_snapshot_id
         )
@@ -518,17 +519,14 @@ class WikiService:
         if (revoked & all_members) - exclusions:
             fail("WIKI_SOURCE_REVOKED", "A Wiki source has been permanently revoked.")
         items = [value for value in items if value not in exclusions]
-        revisions = list(
-            await session.scalars(
-                select(DocumentRevision)
-                .where(
-                    DocumentRevision.workspace_id == row.workspace_id,
-                    DocumentRevision.knowledge_base_id == row.knowledge_base_id,
-                    DocumentRevision.id.in_(items),
-                )
-                .with_for_update(read=True)
-            )
+        rev_query = select(DocumentRevision).where(
+            DocumentRevision.workspace_id == row.workspace_id,
+            DocumentRevision.knowledge_base_id == row.knowledge_base_id,
+            DocumentRevision.id.in_(items),
         )
+        if share_lock:
+            rev_query = rev_query.with_for_update(read=True)
+        revisions = list(await session.scalars(rev_query))
         if len(items) != len(revisions) or any(
             r.lifecycle_status == "DELETED" or r.ingestion_status != "READY" for r in revisions
         ):
@@ -687,7 +685,7 @@ class WikiService:
             return row
         if row.status != "READY":
             fail("WIKI_NOT_READY", "The compilation is not ready for publication.")
-        await self.sources(session, context, row, require_current=True)
+        await self.sources(session, context, row, require_current=True, share_lock=True)
         issues = await self.lint(session, context, kb_id, compilation_id)
         if any(i["severity"] == "error" for i in issues):
             fail("WIKI_LINT_FAILED", "Resolve Wiki lint errors before publication.")

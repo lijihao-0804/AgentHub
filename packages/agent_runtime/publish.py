@@ -671,7 +671,9 @@ class AgentPublishService:
                     "The bound Wiki publication does not match its frozen hash.",
                     422,
                 )
-        await WikiService().sources(session, wiki_context, compilation, require_current=False)
+        await WikiService().sources(
+            session, wiki_context, compilation, require_current=False, share_lock=True
+        )
         return {
             "schema_version": 1,
             "binding_mode": binding.binding_mode,

@@ -91,7 +91,7 @@ async def run_wiki_job(job_id):
                         workspace_id=UUID(context.workspace_id),
                     )
                     require(current.context, "knowledge_edit")
-                    await WikiService().sources(session, current.context, claim)
+                    await WikiService().sources(session, current.context, claim, share_lock=True)
                     for profile in plan.chain:
                         credential = await session.scalar(
                             select(ProviderCredential).where(
@@ -145,6 +145,7 @@ async def run_wiki_job(job_id):
                         lease_token=None,
                         lease_expires_at=None,
                         telemetry={
+                            **(claim.telemetry if isinstance(claim.telemetry, dict) else {}),
                             "usage_status": "UNKNOWN",
                             "cost_status": "UNKNOWN",
                             "reason": "compilation_failed_before_complete_accounting",

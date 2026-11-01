@@ -129,8 +129,8 @@ def _project(result: Mapping[str, Any], compilation: WikiCompilation) -> dict[st
     payload.
     """
 
-    projected: dict[tuple[str, str, str], tuple[dict[str, Any], dict[str, str]]] = {}
-    ordered: list[tuple[str, str, str]] = []
+    projected: dict[tuple[str, ...], tuple[dict[str, Any], dict[str, str]]] = {}
+    ordered: list[tuple[str, ...]] = []
     for item in result.get("evidence") or []:
         try:
             record = _record(item)
@@ -147,6 +147,8 @@ def _project(result: Mapping[str, Any], compilation: WikiCompilation) -> dict[st
             str(record["origin"]),
             str(record["document_revision_id"]),
             str(record["chunk_id"]),
+            str(record.get("quote", "")),
+            str(record.get("wiki_page_id") or record.get("page_id") or ""),
         )
         if identity in projected:
             continue
@@ -162,7 +164,7 @@ def _project(result: Mapping[str, Any], compilation: WikiCompilation) -> dict[st
         ordered.append(identity)
 
     route = result.get("route")
-    selected: list[tuple[str, str, str]] = []
+    selected: list[tuple[str, ...]] = []
     if route == "HYBRID":
         # The extractor may return all Wiki claims before any RAW hit. Reserve
         # one count slot per origin before filling the remaining rank order;

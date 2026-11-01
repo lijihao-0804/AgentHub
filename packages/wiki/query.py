@@ -106,11 +106,19 @@ def _page_match_score(query: str, title: str) -> float:
         return 0.85
 
     overlap = query_tokens & title_tokens
-    if len(query_tokens) == 1:
-        return 0.65 if overlap else 0.0
-    if len(overlap) < 2 or len(overlap) / len(query_tokens) < 0.5:
+    if not overlap:
         return 0.0
-    return 0.55 + (0.25 * len(overlap) / len(query_tokens))
+    if len(title_tokens) == 1 or len(query_tokens) == 1:
+        return 0.65 if overlap else 0.0
+
+    title_coverage = len(overlap) / len(title_tokens)
+    query_coverage = len(overlap) / len(query_tokens)
+
+    if len(overlap) >= 2 and (title_coverage >= 0.35 or query_coverage >= 0.4):
+        return 0.55 + (0.25 * max(title_coverage, query_coverage))
+    if len(overlap) == 1 and title_coverage >= 0.5:
+        return 0.50
+    return 0.0
 
 
 def _matched_pages(query: str, pages: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:

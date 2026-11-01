@@ -108,7 +108,7 @@ class _StubWikiService:
         self.revoked = revoked
         self.calls = []
 
-    async def sources(self, session, context, row, require_current=False):
+    async def sources(self, session, context, row, require_current=False, **kwargs):
         self.calls.append((row, require_current))
         if self.revoked:
             raise AgentHubError(
@@ -259,7 +259,7 @@ async def test_resolve_wiki_binding_latest_resolves_and_skips_revoked(stub_wiki)
     live.id = uuid4()
     calls = {"count": 0}
 
-    async def sources(session, context, row, require_current=False):
+    async def sources(session, context, row, require_current=False, **kwargs):
         calls["count"] += 1
         if row is revoked:
             raise AgentHubError(
@@ -306,7 +306,7 @@ async def test_resolve_wiki_binding_latest_keyset_scans_past_revoked_first_ten(s
     revoked_ids = {publication.id for publication in revoked}
     batch_sizes = []
 
-    async def sources(_session, _context, row, require_current=False):
+    async def sources(_session, _context, row, require_current=False, **kwargs):
         assert require_current is False
         if row.id in revoked_ids:
             raise AgentHubError(

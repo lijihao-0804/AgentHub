@@ -1,6 +1,7 @@
 """Wiki maintenance and evidence query endpoints; existing workspace RBAC applies."""
 
-from typing import Literal
+import logging
+from typing import Any, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
@@ -19,6 +20,8 @@ from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.model_gateway.contracts import ModelGateway
 from packages.wiki.models import WikiCompilation
 from packages.wiki.service import WikiService, require, resolve_model_plan
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/api/v1/workspaces/{workspace_id}/knowledge-bases/{knowledge_base_id}/wiki",
@@ -61,9 +64,20 @@ async def revoke_source(
     return {"document_revision_id": revision_id, "scope": "WIKI", "status": "REVOKED"}
 
 
+def safe_compiler_spec(spec: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(spec, dict):
+        return {}
+    safe = dict(spec)
+    safe.pop("provider_routes", None)
+    safe.pop("review_provider_routes", None)
+    safe.pop("base_url", None)
+    safe.pop("credential_id", None)
+    return safe
+
+
 def compilation_response(row):
     return {
-        k: getattr(row, k)
+        k: (safe_compiler_spec(getattr(row, k)) if k == "compiler_spec" else getattr(row, k))
         for k in (
             "id",
             "source_snapshot_id",
@@ -91,7 +105,7 @@ def enqueue(request, row):
 
         compile_wiki.delay(str(row.id))
     except Exception:
-        pass
+        logger.warning("wiki_enqueue_failed", exc_info=True)
 
 
 @router.post("/compilations", status_code=202)
