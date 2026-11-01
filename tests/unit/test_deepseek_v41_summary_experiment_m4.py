@@ -5,21 +5,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4
 
+import pytest
 from sqlalchemy.engine import make_url
 
-import pytest
-
-from packages.agent_runtime.frozen import (
-    SUMMARY_NON_THINKING_MODEL,
-    SUMMARY_NON_THINKING_PROVIDER,
-    SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
-)
-from packages.model_gateway.contracts import (
-    AliyunDeepSeekRequestMode,
-    ModelMessage,
-    ModelRequest,
-    RetryPolicy,
-)
 from benchmarks.evaluation.deepseek_v41_summary_experiment import (
     DEFAULT_TOKENIZER_PATH,
     DeepseekV41SummaryExperimentGate,
@@ -31,6 +19,17 @@ from benchmarks.evaluation.memory_trial_budget import (
     upper_bound_cost_cny,
 )
 from benchmarks.evaluation.memory_trial_client import PRICE_IDENTITY
+from packages.agent_runtime.frozen import (
+    SUMMARY_NON_THINKING_MODEL,
+    SUMMARY_NON_THINKING_PROVIDER,
+    SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+)
+from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
+    ModelMessage,
+    ModelRequest,
+    RetryPolicy,
+)
 from tests.unit.test_memory_trial_budget import (
     LEGACY_PRICE_IDENTITY,
     _enable_independent_scope,
@@ -112,8 +111,14 @@ def test_missing_or_unverified_asset_fails_closed():
     ("overrides", "code"),
     [
         ({"route_allowlist": "other-route"}, "SUMMARY_EXPERIMENT_ROUTE_REJECTED"),
-        ({"base_url": "https://sample.cn-beijing.maas.aliyuncs.com/other"}, "SUMMARY_EXPERIMENT_ROUTE_REJECTED"),
-        ({"base_url": "http://sample.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"}, "SUMMARY_EXPERIMENT_ROUTE_REJECTED"),
+        (
+            {"base_url": "https://sample.cn-beijing.maas.aliyuncs.com/other"},
+            "SUMMARY_EXPERIMENT_ROUTE_REJECTED",
+        ),
+        (
+            {"base_url": "http://sample.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"},
+            "SUMMARY_EXPERIMENT_ROUTE_REJECTED",
+        ),
         ({"provider": "deepseek"}, "SUMMARY_EXPERIMENT_MODEL_REJECTED"),
         ({"model": "deepseek-v4.1-flash"}, "SUMMARY_EXPERIMENT_MODEL_REJECTED"),
         ({"input_token_limit": 21}, "SUMMARY_EXPERIMENT_INPUT_BUDGET_EXCEEDED"),

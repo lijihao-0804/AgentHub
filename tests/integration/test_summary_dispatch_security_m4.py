@@ -59,15 +59,20 @@ pytestmark = [
 ]
 
 
+def _is_isolated_database_target() -> bool:
+    url = TEST_DATABASE_URL.lower()
+    return TEST_DATABASE_URL == EXPECTED_DATABASE_URL or "test" in url or "m4" in url
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _guard_isolated_database_target():
-    if TEST_DATABASE_URL and not (TEST_DATABASE_URL == EXPECTED_DATABASE_URL or "test" in TEST_DATABASE_URL.lower() or "m4" in TEST_DATABASE_URL.lower()):
+    if TEST_DATABASE_URL and not _is_isolated_database_target():
         pytest.fail("Summary dispatch fault tests may use only the isolated M4 v4 database.")
 
 
 @pytest.fixture(scope="session")
 def _migrated_isolated_v4_database():
-    if not (TEST_DATABASE_URL == EXPECTED_DATABASE_URL or "test" in TEST_DATABASE_URL.lower() or "m4" in TEST_DATABASE_URL.lower()):
+    if not _is_isolated_database_target():
         pytest.fail("Summary dispatch fault tests may use only the isolated M4 v4 database.")
     previous = os.environ.get("AGENTHUB_DATABASE_URL")
     os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL

@@ -1,5 +1,6 @@
 """Run actual Wiki worker composition with PostgreSQL and a bounded model adapter."""
 
+import asyncio
 import json
 import os
 from datetime import UTC, datetime, timedelta
@@ -420,7 +421,6 @@ async def test_editor_cannot_declare_foreign_snapshot_evidence(setup):
         assert error.value.code == "WIKI_INVALID_DECLARED_CONFLICT"
 
 
-
 @pytest.mark.asyncio
 async def test_concurrent_revocation_during_execute_job_aborts_installation(setup):
     factory, context, kb, profile_id, job, _ = setup
@@ -448,3 +448,93 @@ async def test_concurrent_revocation_during_execute_job_aborts_installation(setu
             await session.scalars(select(WikiPage).where(WikiPage.compilation_id == claim.id))
         )
         assert pages == []
+
+
+@pytest.mark.asyncio
+async def test_install_fence_blocks_concurrent_revocation_until_commit(setup, monkeypatch):
+    """The pre-install fence must hold FOR SHARE while pages are installed.
+
+    A revocation that starts after the fence read has already happened cannot
+    commit until the compilation transaction ends, so no page set is installed
+    from a source that was revoked mid-install.
+    """
+
+    factory, context, kb, _, job, _ = setup
+    async with factory() as session:
+        claim = await claim_job(session, job.id)
+        revision_id = await session.scalar(
+            select(KnowledgeSnapshotItem.document_revision_id).where(
+                KnowledgeSnapshotItem.snapshot_id == job.source_snapshot_id
+            )
+        )
+
+    fence_open = asyncio.Event()
+    release_fence = asyncio.Event()
+    source_calls = {"count": 0}
+    original_sources = WikiService.sources
+
+    async def observed_sources(
+        self, session, ctx, row, require_current=False, share_lock=False
+    ):
+        source_calls["count"] += 1
+        call_index = source_calls["count"]
+        if call_index == 2:
+            # The first read gathers chunks; the second is the install fence.
+            assert share_lock, "The install fence must read sources under a share lock."
+        revisions = await original_sources(
+            self,
+            session,
+            ctx,
+            row,
+            require_current=require_current,
+            share_lock=share_lock,
+        )
+        if call_index == 2:
+            fence_open.set()
+            await asyncio.wait_for(release_fence.wait(), timeout=20)
+        return revisions
+
+    monkeypatch.setattr(WikiService, "sources", observed_sources)
+
+    revoke_committed = asyncio.Event()
+
+    async def revoker():
+        await fence_open.wait()
+        async with factory() as session:
+            await WikiService().revoke_source(session, context, kb, revision_id)
+        revoke_committed.set()
+
+    revoke_task = asyncio.create_task(revoker())
+    execute_task = asyncio.create_task(
+        execute_job(factory, context, claim.id, claim.lease_token, FakeCompiler())
+    )
+    fence_waiter = asyncio.create_task(fence_open.wait())
+    try:
+        await asyncio.wait(
+            {fence_waiter, execute_task},
+            timeout=20,
+            return_when=asyncio.FIRST_COMPLETED,
+        )
+        if not fence_open.is_set():
+            # Surface a failed fence assertion instead of an opaque timeout.
+            execute_task.result()
+            pytest.fail("The compilation finished before the install fence opened.")
+        # The revoker's SELECT ... FOR UPDATE must wait for the fence's share lock.
+        await asyncio.sleep(0.5)
+        assert not revoke_committed.is_set()
+        release_fence.set()
+        assert await asyncio.wait_for(execute_task, timeout=20) == "ready"
+        await asyncio.wait_for(revoke_task, timeout=20)
+    finally:
+        release_fence.set()
+        for task in (fence_waiter, execute_task, revoke_task):
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(fence_waiter, execute_task, revoke_task, return_exceptions=True)
+
+    assert revoke_committed.is_set()
+    async with factory() as session:
+        pages = list(
+            await session.scalars(select(WikiPage).where(WikiPage.compilation_id == claim.id))
+        )
+        assert pages

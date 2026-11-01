@@ -5,6 +5,7 @@ from dataclasses import replace
 from uuid import UUID, uuid4
 
 import pytest
+from pydantic import ValidationError
 
 from apps.api.schemas.agents import MemoryConfigRequest
 from packages.agent_runtime.context_policy import (
@@ -507,11 +508,16 @@ def test_custom_trigger_percents_normalization_and_budget() -> None:
 @pytest.mark.parametrize(
     "invalid_percents",
     [
-        {"soft_trigger_percent": 80, "hard_trigger_percent": 70, "target_percent": 50},  # soft >= hard
-        {"soft_trigger_percent": 70, "hard_trigger_percent": 85, "target_percent": 75},  # target >= soft
-        {"soft_trigger_percent": 70, "hard_trigger_percent": 101, "target_percent": 50}, # hard > 100
-        {"soft_trigger_percent": 0, "hard_trigger_percent": 85, "target_percent": 0},    # <= 0
-        {"soft_trigger_percent": "70", "hard_trigger_percent": 85, "target_percent": 50}, # not int
+        # soft >= hard
+        {"soft_trigger_percent": 80, "hard_trigger_percent": 70, "target_percent": 50},
+        # target >= soft
+        {"soft_trigger_percent": 70, "hard_trigger_percent": 85, "target_percent": 75},
+        # hard > 100
+        {"soft_trigger_percent": 70, "hard_trigger_percent": 101, "target_percent": 50},
+        # <= 0
+        {"soft_trigger_percent": 0, "hard_trigger_percent": 85, "target_percent": 0},
+        # not int
+        {"soft_trigger_percent": "70", "hard_trigger_percent": 85, "target_percent": 50},
     ],
 )
 def test_invalid_custom_trigger_percents_raise_value_error(invalid_percents: dict) -> None:
@@ -600,7 +606,7 @@ def test_context_policy_request_schema_with_custom_parameters() -> None:
     assert valid.soft_trigger_percent == 65
     assert valid.retained_recent_turns == 3
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         ContextPolicyRequest.model_validate(
             {
                 "policy_version": "adaptive_context_v1",

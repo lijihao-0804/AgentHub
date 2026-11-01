@@ -85,7 +85,12 @@ pytestmark = [
 @pytest.fixture(scope="session")
 def migrated_v4_database():
     """Migrate only the explicitly named disposable v4 integration database."""
-    if not (TEST_DATABASE_URL == EXPECTED_DATABASE_URL or "test" in TEST_DATABASE_URL.lower() or "budget" in TEST_DATABASE_URL.lower()):
+    normalized = TEST_DATABASE_URL.lower()
+    if not (
+        TEST_DATABASE_URL == EXPECTED_DATABASE_URL
+        or "test" in normalized
+        or "budget" in normalized
+    ):
         pytest.fail("This test may use only agenthub_run_budget_m4_20261028_v4.")
     previous = os.environ.get("AGENTHUB_DATABASE_URL")
     os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL

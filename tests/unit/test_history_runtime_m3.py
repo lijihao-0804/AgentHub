@@ -772,7 +772,6 @@ def test_runtime_respects_custom_retained_recent_turns():
         permission_snapshot="user-with-run-permission",
         summary_source_policy="plain_text_prefix_v1",
     )
-    decisions = {d.group_id: d for d in result.plan.decisions}
     # With retained_recent_turns=4 in a 6-turn conversation, turns 3, 4, 5, 6 are RECENT
     # and therefore INELIGIBLE for prefix summary
     recent_count = sum(1 for d in result.plan.decisions if d.category is HistoryCategory.RECENT)

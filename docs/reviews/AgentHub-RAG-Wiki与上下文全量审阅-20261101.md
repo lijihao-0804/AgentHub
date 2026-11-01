@@ -577,3 +577,34 @@ BadRequestError: OpenAIException - This response_format type is unavailable now
 2. 让 `execute_job` 在每个 revision 完成后增量落库 telemetry（M-4），或在异常路径把内存中的 telemetry 交给 worker 落库；
 3. 脱敏 `compiler_spec.plan` / `review_plan` 中的 `provider_credential_id`（M-3）；
 4. 处理两个残留失败（一个确认语义、一个修夹具），并把 `15432` 地址改为环境变量（M-10）。
+
+### 8.4 第二轮复核（HEAD `d9e0bf8`）
+
+`d9e0bf8` 针对 8.3 的 4 条建议做了补全，独立复核结果：
+
+| 项 | 状态 | 证据与备注 |
+|---|---|---|
+| M-2 | **已修复** | [:787](packages/wiki/service.py:787)、[:906](packages/wiki/service.py:906) 恢复 `share_lock=True`，只读路径仍无锁 |
+| M-2 新用例 | **部分有效** | `test_concurrent_revocation_during_execute_job_aborts_installation` 在 `extract` 期间撤销，安装前校验会拦下——该用例**不依赖锁**即可通过，未覆盖"校验后、插页前并发撤销提交"这一真正由 `FOR SHARE` 保护的窗口 |
+| M-4 | **已修复** | 每个 revision 后增量 UPDATE telemetry，下一次 `commit` 落库；失败路径改读 DB 最新值。残余窗口仅剩"最后一次在途调用" |
+| M-3 | **已修复** | `_redact_compiler_secrets` 递归剔除 `provider_routes`/`base_url`/`provider_credential_id`/`credential_ref`/`credential_id` |
+| M-10 | **部分修复** | `test_m3e_citation_qa` 已改为预种真实 profile，但**仍失败**：profile 缺 `max_context_tokens` 能力 → `AGENT_CONTEXT_LIMIT_UNAVAILABLE`；`ruff check tests` 因新增长行报 **12 处 E501**（`packages apps` 仍为 0） |
+
+第二轮实测：`tests/unit` 全量 **全绿**（exit 0，无 F/E）；`test_wiki_worker / lifecycle / native_tool / m4c` **全部通过**（含新增并发撤销用例）；范围内集成仍有 **2 个失败**：
+
+1. `test_m3e_citation_qa::test_citation_qa_uses_real_tenant_postgres_and_qdrant` —— 夹具只补了一半（缺 `max_context_tokens`），见上；
+2. `test_history_runtime_m3::test_summary_opt_in_preserves_blocked_plan_without_model_dispatch` —— 与 8.2 相同，**基线即失败**，仍未确认期望语义。
+
+**结论**：P0/H-1/H-2/H-3 与 M-2/M-3/M-4/M-5/M-8/M-9 均已修复；M-10 还差最后一步（夹具能力字段 + 测试文件行宽）；新增并发用例建议改成"持锁期间并发撤销必须被阻塞"的断言，才真正锁住 M-2 的保证。
+
+### 8.5 第三轮：测试侧收尾（未改业务代码）
+
+按 8.4 的遗留项补齐，全部为测试/文档改动：
+
+| 项 | 处理 | 验证 |
+|---|---|---|
+| m3e 夹具 | 补齐 `max_context_tokens`；并发现夹具的 `_FakeModelGateway` 只实现 `generate`，而 `citation_qa` 早已改走 `generate_resolved`，导致真实原因是 `AttributeError` 被吞成 503。补上 `generate_resolved` 后测试通过 | `test_m3e_citation_qa.py` 2/2 通过 |
+| E501 等 12 处 | 9 处超长行改为多行/独立注释；`pytest.raises(Exception)` 改为 `ValidationError`；删除未使用变量；导入排序 | `ruff check packages apps tests` → All checks passed |
+| 并发用例 | 新增 `test_install_fence_blocks_concurrent_revocation_until_commit`：在安装围栏持锁期间启动并发撤销，断言撤销在编译提交前**无法完成**。已做反向验证——去掉 `share_lock=True` 后该用例立即以 `The install fence must read sources under a share lock.` 失败，说明用例确实锁住了 M-2 的保证 | `test_wiki_worker.py` 14/14 通过 |
+
+第三轮实测：`tests/unit` 全量全绿；`ruff` 全绿；集成回归（wiki 四组 + m4c + m3e + m3f + history 两组 + approvals）只剩 1 个失败——`test_history_runtime_m3::test_summary_opt_in_preserves_blocked_plan_without_model_dispatch`，即 8.2 中**基线同样失败**的那一个，属测试预期与"摘要启用走 boundary 分支"的现行语义不一致，需产品确认后再改测试或改代码。

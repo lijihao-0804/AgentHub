@@ -101,6 +101,10 @@ class _FakeModelGateway:
             model="deterministic-fake",
         )
 
+    async def generate_resolved(self, _context, _plan, _request: ModelRequest) -> ModelResponse:
+        # Citation QA dispatches through the frozen resolved plan, not a profile id.
+        return await self.generate(_context, None, _request)
+
 
 class _FailIfCalledAdapter:
     def __init__(self) -> None:
@@ -220,7 +224,7 @@ async def _seed_model_profile(
             model="exact-model",
             max_tokens=256,
             timeout_seconds=5,
-            capabilities={"structured_output": True},
+            capabilities={"structured_output": True, "max_context_tokens": 8192},
         )
         session.add(profile)
         await session.commit()
@@ -253,7 +257,7 @@ async def _seed_model_profile_in_other_workspace(
             model="workspace-b-private-model",
             max_tokens=256,
             timeout_seconds=5,
-            capabilities={"structured_output": True},
+            capabilities={"structured_output": True, "max_context_tokens": 8192},
         )
         session.add(profile)
         await session.commit()
