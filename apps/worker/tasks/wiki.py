@@ -132,6 +132,14 @@ async def run_wiki_job(job_id):
             code = getattr(error, "code", "WIKI_COMPILATION_FAILED")
             code = str(getattr(code, "value", code))[:64]
             async with factory() as session:
+                latest_telemetry = await session.scalar(
+                    select(WikiCompilation.telemetry).where(WikiCompilation.id == claim.id)
+                )
+                base_telemetry = (
+                    latest_telemetry
+                    if isinstance(latest_telemetry, dict)
+                    else (claim.telemetry if isinstance(claim.telemetry, dict) else {})
+                )
                 await session.execute(
                     update(WikiCompilation)
                     .where(
@@ -145,7 +153,7 @@ async def run_wiki_job(job_id):
                         lease_token=None,
                         lease_expires_at=None,
                         telemetry={
-                            **(claim.telemetry if isinstance(claim.telemetry, dict) else {}),
+                            **base_telemetry,
                             "usage_status": "UNKNOWN",
                             "cost_status": "UNKNOWN",
                             "reason": "compilation_failed_before_complete_accounting",

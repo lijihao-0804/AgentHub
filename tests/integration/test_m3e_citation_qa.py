@@ -200,6 +200,33 @@ async def _seed(
         return user.id, workspace.id, knowledge_base.id, snapshot.id, chunk
 
 
+async def _seed_model_profile(
+    factory: async_sessionmaker[AsyncSession],
+    *,
+    workspace_id: UUID,
+) -> UUID:
+    async with factory() as session:
+        credential = ProviderCredential(
+            workspace_id=workspace_id,
+            provider="offline",
+            name="local-test-credential",
+            secret="test-secret",
+        )
+        session.add(credential)
+        await session.flush()
+        profile = ModelProfile(
+            workspace_id=workspace_id,
+            provider_credential_id=credential.id,
+            model="exact-model",
+            max_tokens=256,
+            timeout_seconds=5,
+            capabilities={"structured_output": True},
+        )
+        session.add(profile)
+        await session.commit()
+        return profile.id
+
+
 async def _seed_model_profile_in_other_workspace(
     factory: async_sessionmaker[AsyncSession],
     *,
@@ -300,11 +327,12 @@ async def test_citation_qa_uses_real_tenant_postgres_and_qdrant(
     app.dependency_overrides[get_retrieval_components] = override_components
     app.dependency_overrides[get_model_gateway] = override_gateway
     token = issue_access_token(user_id, settings)
+    model_profile_id = await _seed_model_profile(db_factory, workspace_id=workspace_id)
     payload = {
         "workspace_id": str(workspace_id),
         "knowledge_base_id": str(knowledge_base_id),
         "knowledge_snapshot_id": str(snapshot_id),
-        "model_profile_id": str(uuid4()),
+        "model_profile_id": str(model_profile_id),
         "query": "What is in the source?",
     }
 

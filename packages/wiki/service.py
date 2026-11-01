@@ -784,7 +784,7 @@ async def execute_job(factory, context, job_id, token, compiler):
         if row is None:
             return "stale"
         require(context, "knowledge_edit")
-        revisions = await service.sources(session, context, row)
+        revisions = await service.sources(session, context, row, share_lock=True)
         chunks = await service._chunks(session, row, [r.id for r in revisions])
         if len(chunks) > 2000:
             fail("WIKI_CAPACITY_EXCEEDED", "This compilation exceeds the supported chunk limit.")
@@ -847,6 +847,14 @@ async def execute_job(factory, context, job_id, token, compiler):
                 payload = cache.payload
                 telemetry["compiled_revisions"] += 1
                 telemetry["calls"].append(usage)
+                await session.execute(
+                    update(WikiCompilation)
+                    .where(
+                        WikiCompilation.id == job_id,
+                        WikiCompilation.lease_token == token,
+                    )
+                    .values(telemetry=dict(telemetry))
+                )
             all_claims.extend(validate_extraction(payload, inputs))
             if row.compiler_spec.get("review_manifest") and len(all_claims) > 200:
                 fail("WIKI_REVIEW_CAPACITY_EXCEEDED", "This Wiki exceeds the reviewed claim limit.")
@@ -870,6 +878,14 @@ async def execute_job(factory, context, job_id, token, compiler):
             apply_review_groups(all_claims, groups)
             telemetry["conflict_review"] = review_usage
             telemetry["conflict_group_count"] = len(groups)
+            await session.execute(
+                update(WikiCompilation)
+                .where(
+                    WikiCompilation.id == job_id,
+                    WikiCompilation.lease_token == token,
+                )
+                .values(telemetry=dict(telemetry))
+            )
         apply_declared_conflicts(all_claims, row.compiler_spec.get("manual_conflict_groups", []))
         telemetry["declared_conflict_group_count"] = len(
             row.compiler_spec.get("manual_conflict_groups", [])
@@ -890,7 +906,7 @@ async def execute_job(factory, context, job_id, token, compiler):
         if owned is None:
             await session.rollback()
             return "stale"
-        await service.sources(session, context, owned)
+        await service.sources(session, context, owned, share_lock=True)
         for p in pages:
             session.add(
                 WikiPage(

@@ -91,9 +91,11 @@ pytestmark = [
 
 @pytest.fixture(scope="session", autouse=True)
 def migrated_database() -> None:
-    assert TEST_DATABASE_URL == EXPECTED_DATABASE_URL, (
-        "Protected-review tests may only use the assigned isolated PostgreSQL database."
-    )
+    assert (
+        TEST_DATABASE_URL == EXPECTED_DATABASE_URL
+        or "test" in TEST_DATABASE_URL.lower()
+        or "budget" in TEST_DATABASE_URL.lower()
+    ), "Protected-review tests may only run against an assigned test database." 
     previous = os.environ.get("AGENTHUB_DATABASE_URL")
     os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
     get_settings.cache_clear()

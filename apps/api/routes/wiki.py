@@ -64,15 +64,30 @@ async def revoke_source(
     return {"document_revision_id": revision_id, "scope": "WIKI", "status": "REVOKED"}
 
 
+def _redact_compiler_secrets(data: Any) -> Any:
+    if isinstance(data, dict):
+        redacted = {}
+        for k, v in data.items():
+            if k in {
+                "provider_routes",
+                "review_provider_routes",
+                "base_url",
+                "credential_id",
+                "provider_credential_id",
+                "credential_ref",
+            }:
+                continue
+            redacted[k] = _redact_compiler_secrets(v)
+        return redacted
+    if isinstance(data, list):
+        return [_redact_compiler_secrets(item) for item in data]
+    return data
+
+
 def safe_compiler_spec(spec: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(spec, dict):
         return {}
-    safe = dict(spec)
-    safe.pop("provider_routes", None)
-    safe.pop("review_provider_routes", None)
-    safe.pop("base_url", None)
-    safe.pop("credential_id", None)
-    return safe
+    return _redact_compiler_secrets(spec)
 
 
 def compilation_response(row):

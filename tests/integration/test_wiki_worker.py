@@ -418,3 +418,33 @@ async def test_editor_cannot_declare_foreign_snapshot_evidence(setup):
                 session, context, kb, profile_id, manual_conflict_groups=refs
             )
         assert error.value.code == "WIKI_INVALID_DECLARED_CONFLICT"
+
+
+
+@pytest.mark.asyncio
+async def test_concurrent_revocation_during_execute_job_aborts_installation(setup):
+    factory, context, kb, profile_id, job, _ = setup
+    service = WikiService()
+
+    async with factory() as session:
+        claim = await claim_job(session, job.id)
+        snapshot_rev = await session.scalar(
+            select(KnowledgeSnapshotItem.document_revision_id)
+            .where(KnowledgeSnapshotItem.snapshot_id == job.source_snapshot_id)
+        )
+
+    class RevokingCompiler(FakeCompiler):
+        async def extract(self, ctx, inputs):
+            async with factory() as sess:
+                await service.revoke_source(sess, context, kb, snapshot_rev)
+            return await super().extract(ctx, inputs)
+
+    with pytest.raises(AgentHubError) as exc_info:
+        await execute_job(factory, context, claim.id, claim.lease_token, RevokingCompiler())
+
+    assert exc_info.value.code == "WIKI_SOURCE_REVOKED"
+    async with factory() as session:
+        pages = list(
+            await session.scalars(select(WikiPage).where(WikiPage.compilation_id == claim.id))
+        )
+        assert pages == []

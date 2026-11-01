@@ -532,3 +532,48 @@ BadRequestError: OpenAIException - This response_format type is unavailable now
 - 本轮**没有**执行：Celery beat 与真实 broker 投递、前端联动、`/api/v1` 端到端鉴权（dev 库版本落后）、holdout 与正式实验绑定、并发锁争用（M-2）。因此对"平台整体可用"仍不构成验收。
 - 为跑通测试，本次在仓库之外创建了临时物：测试库 `agenthub_review_20261101`（主 Postgres 容器内）、容器 `agenthub-review-pg-15432`（及库 `agenthub_run_budget_m4_20261028_v4`、`agenthub_context_policy_m2`）、以及 `C:/Users/20303/AppData/Local/Temp/agenthub_diag/` 下的探针与日志。这些都可以删除，清理前请确认它们不属于你的环境。
 - 未修改任何业务代码；唯一新增文件为本报告。
+
+---
+
+## 八、修复复核（2026-11-01 晚，HEAD `2d4aa91`）
+
+修复由另一次会话提交（`574be70`、`fca1501`、`46b65f1`、`771bfaa`、`2d4aa91`），本节为独立复核结果：**代码逐条阅读 + 单测全量 + 集成回归 + 真实阿里云复测**。
+
+### 8.1 结论
+
+| 编号 | 复核状态 | 证据 |
+|---|---|---|
+| P0-1 | **已修复** | `prepare` 增加 `isinstance(summary_policy, Mapping)` 防护；`test_m4c_agent_runtime` 由 2/10 → **10/10**；新增 schema 2 的 PREPARE 回归用例 |
+| H-1 | **已修复** | 租约/actor 校验移到实验门禁之前，且按 `error.code` 映射；新增"租约丢失优先于实验范围"用例 |
+| H-2 | **已修复** | `summary_service.py` 补 `import logging` + `logger` |
+| H-3 | **已修复（真实模型验证）** | 证据不足分支直接返回标准化答案；真实 `deepseek-v4.1-flash-1017` 复测不再 502，返回 `insufficient_evidence=true` |
+| M-1 | **已修复** | 断言改为检查 `api_key`/`secret`；`tests/unit` 全绿 |
+| M-2 | **部分修复，且引入新竞态** | 只读路径默认不再加锁（正确）；但 `execute_job` 安装前的来源校验（[service.py:893](packages/wiki/service.py:893)）与编译取块（[:787](packages/wiki/service.py:787)）**也失去了 `FOR SHARE`**，而它们属于变更流程。安装前"校验→插页"窗口重新暴露给并发撤销 |
+| M-3 | **部分修复** | 顶层 `provider_routes`/`base_url` 已脱敏；但 `compiler_spec.plan.primary.provider_credential_id` 与 `review_plan` 仍原样返回 |
+| M-4 | **未真正修复** | `execute_job` 的 telemetry 仍只在成功末尾整体写入（[:907](packages/wiki/service.py:907)）；失败路径合并的是**本次 claim 的旧快照**，本次已发生的调用依旧丢失 |
+| M-5 | **已修复** | 投影去重键加入 `quote` 与 `wiki_page_id`；同一 chunk 的不同引文不再被丢弃 |
+| M-8 | **已修复（真实 DB 验证）** | 真实查询命中页由 1 → **3**，7 年/5 年两条矛盾引文均返回；`conflicts` 仍为 `[]`（属 L-8 页内冲突检测，未修） |
+| M-9 | **已修复（真实端点验证）** | 400 `response_format` 现映射为 `MODEL_CAPABILITY_MISMATCH`（`retryable=False`），复测输出该码 |
+| M-10 | **部分修复** | `wait_for` 生效（取消用例现已通过且不挂起）；迁移断言改为 `>=`；但 8 个文件仍硬编码 `127.0.0.1:15432`，触发器夹具与 `test_m3e_citation_qa` 的随机 `model_profile_id` 未处理 |
+| L-1/L-2 | **已修复** | `ruff check packages apps` → All checks passed |
+| L-3/L-4 | **已修复** | `enqueue` 记录告警；`credential` 空值防护 |
+
+### 8.2 回归数据
+
+| 指标 | 修复前 | 修复后 |
+|---|---|---|
+| `tests/unit` | 2 failed | **全绿**（exit 0，无 F/E） |
+| `ruff check packages apps` | 13 errors | **0 errors** |
+| 范围内集成（约 168 用例） | 42 failed + 1 error | **2 failed** |
+
+两个残留失败均**在基线 `d9806ef` 上同样失败**，与本次修复无关：
+
+1. `test_history_runtime_m3.py::test_summary_opt_in_preserves_blocked_plan_without_model_dispatch` —— 已在 `d9806ef` 快照上单跑复现同一个 `KeyError: 'failure_code'`。原因是 `prepare` 在摘要启用时走 boundary 分支，不再返回 `AGENT_HISTORY_CONTEXT_INSUFFICIENT`，与测试预期不一致；属**测试与当前语义脱节**，需确认期望行为后二选一修正。
+2. `test_m3e_citation_qa.py::test_citation_qa_uses_real_tenant_postgres_and_qdrant` —— 测试用随机 `model_profile_id`（[:307](tests/integration/test_m3e_citation_qa.py:307)），必然得到 `MODEL_PROFILE_DISABLED`；属测试夹具缺陷。
+
+### 8.3 建议补做
+
+1. `execute_job` 的安装前校验与编译取块恢复 `share_lock=True`（M-2 新竞态），并补一条"撤销与安装并发"的失败注入用例；
+2. 让 `execute_job` 在每个 revision 完成后增量落库 telemetry（M-4），或在异常路径把内存中的 telemetry 交给 worker 落库；
+3. 脱敏 `compiler_spec.plan` / `review_plan` 中的 `provider_credential_id`（M-3）；
+4. 处理两个残留失败（一个确认语义、一个修夹具），并把 `15432` 地址改为环境变量（M-10）。
