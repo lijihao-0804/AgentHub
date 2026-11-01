@@ -1,6 +1,6 @@
 # AgentHub 全链条学习路线
 
-**第一次从 [00 · 架构](00-architecture-first.md)开始，按 00→11 顺着读。** 知识系统专题再读 [12 · RAG + Wiki 开发复盘与心得](12-rag-development-retrospective.md)与 [13 · RAG + Wiki 架构](13-rag-wiki-architecture-and-rationale.md)。全目录于 2026-10-26 对照已提交基线 `a2d47e4` 同步，历史实验仍使用原日期和 SHA。
+**第一次从 [00 · 架构](00-architecture-first.md)开始，按 00→11 顺着读。** 知识系统专题读 [12 · RAG + Wiki 开发复盘与心得](12-rag-development-retrospective.md)与 [13 · RAG + Wiki 架构](13-rag-wiki-architecture-and-rationale.md)；上下文与长记忆专题读 [14 · 上下文与长记忆开发复盘](14-context-memory-development-retrospective.md)与 [15 · 上下文与长记忆架构](15-context-memory-architecture-and-rationale.md)。全目录于 2026-11-01 对照已提交基线与上下文工程 M1～M5 实测同步，历史实验仍使用原日期和 SHA。
 
 贯穿案例是 Incident 的调查→工具提议→审批→恢复；RAG/Memory/Evaluation 再接回同一个 Runtime。每课先讲问题和机制，再给真实函数/代码/流程；精读增补继续拆解数据变化、并发与失败推演，并配练习和参考答案。学会之后再练面试，而不是先背简历句子。
 
@@ -64,6 +64,8 @@
 | --- | --- |
 | [RAG + Wiki 当前结构与设计理由](13-rag-wiki-architecture-and-rationale.md) | 2026-10-26 更新：原生 WikiBinding / query_wiki、统一证据注册、Runtime 分层、隐藏缺陷修复验收与部署边界；附设计理由与源码 |
 | [RAG + Wiki 开发复盘：开发线与技术心得](12-rag-development-retrospective.md) | 检索、证据交付与知识编译共同复盘；新增 Wiki 六题负结果、增量缓存、冲突自动化失败/人工维护、原生接入与五条总结心得；数据按各轮原口径解释 |
+| [上下文与长记忆当前结构与设计理由](15-context-memory-architecture-and-rationale.md) | 2026-11-01 新增：主备预算交集、双滞后回线、单条记忆整进整出、不可变摘要生命周期、LangGraph 同步节点与隐式缓存对齐；附数学公式、状态图与模块边界 |
+| [上下文与长记忆工程开发复盘：开发线与技术心得](14-context-memory-development-retrospective.md) | 2026-11-01 新增：M1～M5 实际研发过程；DeepSeek 思考耗尽输出、1024 截断改 1536 闭环、官方分词器 0 误差、QMSum 负结果与 Spark Task 2 实测、行锁等待租约超时等八大踩坑与解决办法 |
 | [架构参考](../architecture.md) | 查完整图与边界，不作为第二套主教材 |
 | [当前状态](../current-state.md) / [验收索引](../reviews/README.md) | 查已经证明什么、还有什么未知 |
 | [数据与评测索引](../benchmark/README.md) | 原始数据、结果、runner 和复现边界 |
