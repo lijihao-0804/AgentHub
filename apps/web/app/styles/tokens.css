@@ -4,59 +4,63 @@
  * light theme a token override rather than a second stylesheet. The theme
  * is applied as `data-theme` on <html> by ThemeProvider.
  *
- * The ramp follows the DeepSeek Harness design platform: a near-neutral,
- * faintly blue-tinted grey scale; surfaces step LIGHTER as they rise
- * (bg → layer-1 → layer-2 → layer-3) instead of darker; separators are
- * hairlines at 6/12/16% alpha; the brand accent appears only on links,
- * selection and state — primary actions are monochrome contrast buttons.
+ * Visual direction: a lively agent console. Deep ink surfaces, and a vivid
+ * blue → violet → cyan brand gradient (the same family DeepSeek Harness uses
+ * for its onboarding) reserved for interactive state and the agent identity.
+ * Status colours stay warm and separate so a running agent never reads like
+ * a warning.
  */
 :root {
   --z-topbar: 30;
   --z-floating: 60;
   --z-skip-link: 100;
 
-  --background: #151517;
-  --surface: #1b1b1c;
-  --surface-raised: #232324;
-  --surface-inset: rgba(255, 255, 255, 0.04);
-  --surface-nav: #1b1b1c;
-  --surface-topbar: rgba(21, 21, 23, 0.88);
-  --row-hover: rgba(255, 255, 255, 0.05);
-  --row-subtle: rgba(255, 255, 255, 0.025);
-  --border: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  --background: #0b0e14;
+  --surface: #121722;
+  --surface-raised: #171d2a;
+  --surface-inset: rgba(255, 255, 255, 0.05);
+  --surface-nav: #0f141e;
+  --surface-topbar: rgba(11, 14, 20, 0.8);
+  --row-hover: rgba(255, 255, 255, 0.055);
+  --row-subtle: rgba(255, 255, 255, 0.028);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
   --border-focus: var(--accent);
   --focus-ring: var(--accent);
 
-  --text: #ececec;
-  --text-muted: #8f9297;
-  --text-placeholder: rgba(236, 236, 236, 0.35);
+  --text: #eef1f7;
+  --text-muted: #9aa6bd;
+  --text-placeholder: rgba(238, 241, 247, 0.36);
 
-  /* Primary actions are monochrome contrast buttons in both themes. */
-  --btn-primary-bg: #f0f0f1;
-  --btn-primary-ink: #151517;
-  --btn-primary-hover: #dcdcdf;
+  /* Vivid brand: blue → violet → cyan. */
+  --accent: #5b8cff;
+  --accent-ink: #08122b;
+  --accent-soft: rgba(91, 140, 255, 0.16);
+  --accent-2: #a78bfa;
+  --accent-3: #22d3ee;
+  --gradient-brand: linear-gradient(135deg, #5b8cff 0%, #8b76f6 55%, #22d3ee 100%);
 
-  --accent: #afdc89;
-  --accent-ink: #142015;
-  --accent-soft: rgba(175, 220, 137, 0.12);
+  --btn-primary-bg: linear-gradient(135deg, #5b8cff 0%, #7c6cf6 100%);
+  --btn-primary-ink: #ffffff;
+  --btn-primary-hover: linear-gradient(135deg, #6f9bff 0%, #8b7bff 100%);
 
-  --success: #86d993;
-  --success-soft: rgba(134, 217, 147, 0.14);
-  --warning: #e9c46a;
-  --warning-soft: rgba(233, 196, 106, 0.14);
-  --danger: #ff8c84;
-  --danger-soft: rgba(255, 140, 132, 0.14);
-  --danger-border: rgba(255, 140, 132, 0.4);
-  --attention: #f4a259;
-  --attention-soft: rgba(244, 162, 89, 0.16);
-  --info: #8ecae6;
-  --info-soft: rgba(142, 202, 230, 0.14);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.15);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.15);
+  --danger: #fb7185;
+  --danger-soft: rgba(251, 113, 133, 0.15);
+  --danger-border: rgba(251, 113, 133, 0.45);
+  --attention: #f59e0b;
+  --attention-soft: rgba(245, 158, 11, 0.16);
+  --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.15);
 
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 16px;
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --radius-pill: 999px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 44px rgba(0, 0, 0, 0.42);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
     "Microsoft YaHei", Helvetica, Arial, sans-serif;
@@ -75,65 +79,57 @@
  * are shared, so both themes stay structurally identical.
  */
 :root[data-theme="light"] {
-  --background: #fbfbfc;
-  --surface: #f4f5f7;
+  --background: #f5f7fc;
+  --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-inset: rgba(16, 20, 24, 0.04);
-  --surface-nav: #f4f5f7;
-  --surface-topbar: rgba(251, 251, 252, 0.9);
-  --row-hover: rgba(16, 20, 24, 0.045);
-  --row-subtle: rgba(16, 20, 24, 0.018);
-  --border: rgba(16, 20, 24, 0.07);
-  --border-strong: rgba(16, 20, 24, 0.16);
+  --surface-inset: rgba(16, 24, 40, 0.045);
+  --surface-nav: #eef2f9;
+  --surface-topbar: rgba(245, 247, 252, 0.85);
+  --row-hover: rgba(16, 24, 40, 0.05);
+  --row-subtle: rgba(16, 24, 40, 0.022);
+  --border: rgba(16, 24, 40, 0.09);
+  --border-strong: rgba(16, 24, 40, 0.17);
 
-  --text: #1a1c1e;
-  --text-muted: #61656b;
-  --text-placeholder: rgba(26, 28, 30, 0.38);
+  --text: #0f172a;
+  --text-muted: #5b6b85;
+  --text-placeholder: rgba(15, 23, 42, 0.4);
 
-  --btn-primary-bg: #1a1c1e;
-  --btn-primary-ink: #ffffff;
-  --btn-primary-hover: #3d4045;
-
-  /*
-   * The status family is a notch darker than its dark-theme counterpart, and
-   * deliberately darker than "looks right on white". These colours are almost
-   * never shown on white: a status badge paints its own tinted background from
-   * the matching `-soft` token, and often sits on an already-tinted block, so
-   * the real contrast is measured against that stack, not the page. Measured at
-   * the worst of those backgrounds the previous values landed at 4.1-4.5 --
-   * under or on the AA line for the 11.5px text badges actually use. These
-   * clear 5.0 there, which leaves room for one more tint layer above them.
-   */
-  --accent: #3d6824;
+  --accent: #2563eb;
   --accent-ink: #ffffff;
-  --accent-soft: rgba(61, 104, 36, 0.12);
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --accent-2: #7c3aed;
+  --accent-3: #0891b2;
+  --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #7c3aed 55%, #06b6d4 100%);
 
-  --success: #256b33;
-  --success-soft: rgba(37, 107, 51, 0.12);
-  --warning: #7c5800;
-  --warning-soft: rgba(124, 88, 0, 0.13);
-  --danger: #ab2b21;
-  --danger-soft: rgba(171, 43, 33, 0.11);
-  --danger-border: rgba(171, 43, 33, 0.35);
-  --attention: #954a10;
-  --attention-soft: rgba(149, 74, 16, 0.13);
-  --info: #16607f;
-  --info-soft: rgba(22, 96, 127, 0.12);
+  --btn-primary-bg: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  --btn-primary-ink: #ffffff;
+  --btn-primary-hover: linear-gradient(135deg, #2f74ef 0%, #5758e6 100%);
 
-  --shadow: 0 8px 24px rgba(16, 20, 24, 0.1);
+  --success: #15803d;
+  --success-soft: rgba(21, 128, 61, 0.12);
+  --warning: #a16207;
+  --warning-soft: rgba(161, 98, 7, 0.13);
+  --danger: #be123c;
+  --danger-soft: rgba(190, 18, 60, 0.1);
+  --danger-border: rgba(190, 18, 60, 0.35);
+  --attention: #b45309;
+  --attention-soft: rgba(180, 83, 9, 0.13);
+  --info: #1d4ed8;
+  --info-soft: rgba(29, 78, 216, 0.12);
+
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 18px 44px rgba(16, 24, 40, 0.12);
 
   color-scheme: light;
 }
 
 :root { color-scheme: dark; }
 
-/* Type scale: the four size steps the product actually uses, derived from a
-   frequency survey of the stylesheets (0.66-1.05rem collapses into these).
-   New UI should pick from this scale; page-level migrations continue
-   incrementally. */
+/* Type scale: the steps the product uses. New UI should pick from this scale. */
 :root {
   --text-xs: 0.72rem;
   --text-sm: 0.8rem;
-  --text-base: 0.88rem;
-  --text-lg: 1.05rem;
+  --text-base: 0.875rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
 }

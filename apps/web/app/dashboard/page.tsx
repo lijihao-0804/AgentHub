@@ -227,7 +227,7 @@ export default function DashboardPage() {
         <h1>{t("dashboard.title")}</h1>
       </header>
 
-      <section className="runs-toolbar" aria-label={t("dashboard.window")}>
+      <section className="dashboard-window" aria-label={t("dashboard.window")}>
         <label>
           {t("dashboard.window")}
           <Select
@@ -292,6 +292,7 @@ export default function DashboardPage() {
               value={formatCount(summary.finished_runs.failed)}
               href="/runs?status=FAILED"
               emphasis={summary.finished_runs.failed > 0}
+              emphasisTone="danger"
               delta={windowDelta((timeseries?.items ?? []).map((item) => item.failed))}
               deltaLabel={t("dashboard.kpi.deltaLabel")}
               deltaInverse
@@ -359,18 +360,21 @@ export default function DashboardPage() {
               value={formatCount(summary.current.waiting_approval_count)}
               href="/approvals"
               emphasis={summary.current.waiting_approval_count > 0}
+              emphasisTone="attention"
             />
             <MetricCard
               label={t("dashboard.ops.cancelRequested")}
               value={formatCount(summary.current.cancel_requested_count)}
               href="/runs?status=CANCEL_REQUESTED"
               emphasis={summary.current.cancel_requested_count > 0}
+              emphasisTone="warning"
             />
             <MetricCard
               label={t("dashboard.ops.needsAttention")}
               value={formatCount(summary.current.needs_attention_count)}
               href="/runs?status=NEEDS_ATTENTION"
               emphasis={summary.current.needs_attention_count > 0}
+              emphasisTone="attention"
             />
             <MetricCard
               label={t("dashboard.ops.unknownOutcome")}
@@ -378,6 +382,7 @@ export default function DashboardPage() {
               hint={t("dashboard.ops.unknownOutcomeHint")}
               href="/runs?status=NEEDS_ATTENTION"
               emphasis={summary.current.unknown_outcome_action_count > 0}
+              emphasisTone="warning"
             />
           </section>
 

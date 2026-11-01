@@ -677,7 +677,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
       <Breadcrumbs
         items={[
           { label: t("nav.agents"), href: "/agents" },
-          { label: t("agents.detail"), href: `/agents/${agentId}` },
+          { label: t("common.detail"), href: `/agents/${agentId}` },
           { label: t("agents.playground.title") },
         ]}
       />

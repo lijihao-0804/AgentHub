@@ -31,7 +31,7 @@ function shortId(id: string): string {
 }
 
 export default function RunsPage() {
-  const { t, statusLabel, failureCategoryLabel, formatDateTime, formatCount, formatDurationMs, formatCurrencyAmount } =
+  const { t, statusLabel, failureCategoryLabel, formatDateTime, formatRelativeTime, formatCount, formatDurationMs, formatCurrencyAmount } =
     useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [status, setStatus] = useState("");
@@ -340,7 +340,7 @@ export default function RunsPage() {
                     </td>
                     <td data-label={t("runs.columns.status")}><StatusBadge status={run.status} /></td>
                     <td className="tight-cell" data-label={t("runs.columns.version")}>v{run.agent_version_number}</td>
-                    <td className="tight-cell" data-label={t("runs.columns.started")}>{formatDateTime(run.started_at)}</td>
+                    <td className="tight-cell" data-label={t("runs.columns.started")} title={formatDateTime(run.started_at)}>{formatRelativeTime(run.started_at)}</td>
                     <td className="numeric-cell" data-label={t("runs.columns.duration")} title={
                       run.duration_ms === null ? undefined : `${run.duration_ms} ms`
                     }>

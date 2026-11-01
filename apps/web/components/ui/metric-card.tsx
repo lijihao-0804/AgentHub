@@ -53,6 +53,7 @@ export default function MetricCard({
   hint,
   href,
   emphasis,
+  emphasisTone,
   delta,
   deltaLabel,
   deltaInverse,
@@ -70,6 +71,8 @@ export default function MetricCard({
   hint?: ReactNode;
   href?: string;
   emphasis?: boolean;
+  /** Border tone when emphasised: failure metrics read red, pending ones amber. */
+  emphasisTone?: "accent" | "danger" | "attention" | "warning";
   /** Half-window change as a fraction (0.12 = +12%); rendered with an arrow. */
   delta?: number | null;
   /** Accessible description of what the delta compares. */
@@ -85,6 +88,7 @@ export default function MetricCard({
   sparklineTone?: "accent" | "danger";
 }) {
   const { formatPercent } = useI18n();
+  const emphasisClass = emphasis ? ` metric-card-emphasis metric-card-emphasis-${emphasisTone ?? "accent"}` : "";
   const body = (
     <>
       <span className="metric-label">{label}</span>
@@ -112,10 +116,10 @@ export default function MetricCard({
   );
   if (href) {
     return (
-      <Link className={`metric-card metric-card-link${emphasis ? " metric-card-emphasis" : ""}`} href={href}>
+      <Link className={`metric-card metric-card-link${emphasisClass}`} href={href}>
         {body}
       </Link>
     );
   }
-  return <article className={`metric-card${emphasis ? " metric-card-emphasis" : ""}`}>{body}</article>;
+  return <article className={`metric-card${emphasisClass}`}>{body}</article>;
 }

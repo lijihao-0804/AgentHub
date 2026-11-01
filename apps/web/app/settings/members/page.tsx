@@ -6,6 +6,7 @@ import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequir
 import { InlineConfirm } from "@/components/evaluation/hash-value";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useI18n } from "@/i18n/provider";
+import type { MessageKey } from "@/i18n/messages";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
 import {
   listOrganizationMembers,
@@ -14,6 +15,14 @@ import {
   removeWorkspaceMember,
   type Member,
 } from "@/lib/api/tenancy";
+
+const ROLE_KEYS: Record<string, MessageKey> = {
+  OWNER: "settings.members.roleOwner",
+  ADMIN: "settings.members.roleAdmin",
+  MEMBER: "settings.members.roleMember",
+  DEVELOPER: "settings.members.roleDeveloper",
+  VIEWER: "settings.members.roleViewer",
+};
 
 export default function SettingsMembersPage() {
   const { t } = useI18n();
@@ -109,7 +118,9 @@ export default function SettingsMembersPage() {
           <td data-label={t("settings.members.email")}>
             <code>{member.email}</code>
           </td>
-          <td data-label={t("settings.members.role")}>{member.role}</td>
+          <td data-label={t("settings.members.role")}>
+            {ROLE_KEYS[member.role] ? t(ROLE_KEYS[member.role]) : member.role}
+          </td>
           <td data-label={t("settings.models.actions")}>
             {canManage && !isSelf ? (
               confirmingRow ? (

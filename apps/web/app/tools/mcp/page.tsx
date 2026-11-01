@@ -21,6 +21,12 @@ import {
 } from "@/lib/api/mcp";
 import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
+import type { MessageKey } from "@/i18n/messages";
+
+const AUTH_LABELS: Record<string, MessageKey> = {
+  NONE: "tools.mcp.connections.authNone",
+  BEARER: "tools.mcp.connections.authBearer",
+};
 
 type ImportDraft = {
   identity: string;
@@ -215,7 +221,7 @@ export default function McpImportPage() {
                       <code>{connection.endpoint_url}</code>
                     </td>
                     <td data-label={t("tools.mcp.connections.auth")}>
-                      {connection.auth_type}
+                      {AUTH_LABELS[connection.auth_type] ? t(AUTH_LABELS[connection.auth_type]) : connection.auth_type}
                       {connection.secret_configured ? " · ✓" : ""}
                     </td>
                     <td data-label={t("tools.mcp.connections.enabled")}>
@@ -266,8 +272,8 @@ export default function McpImportPage() {
                   value={authType}
                   onChange={(next) => setAuthType(next as "NONE" | "BEARER")}
                   options={[
-                    { value: "NONE", label: "NONE" },
-                    { value: "BEARER", label: "BEARER" },
+                    { value: "NONE", label: t("tools.mcp.connections.authNone") },
+                    { value: "BEARER", label: t("tools.mcp.connections.authBearer") },
                   ]}
                 />
               </label>

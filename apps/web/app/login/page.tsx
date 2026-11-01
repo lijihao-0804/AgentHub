@@ -13,6 +13,7 @@ export default function LoginPage() {
   const { signIn } = useFrontendSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   // Held apart from `error`: an empty field is caught here, before anything is
   // sent, so there is no error code behind it and none should be shown.
@@ -62,12 +63,23 @@ export default function LoginPage() {
         </label>
         <label>
           {t("auth.password")}
-          <input
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
+          <span className="password-field">
+            <input
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((value) => !value)}
+              aria-pressed={showPassword}
+              aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+            >
+              {showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+            </button>
+          </span>
         </label>
         {invalid && (
           <p className="inline-error" role="alert">

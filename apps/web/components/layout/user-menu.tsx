@@ -55,7 +55,6 @@ export default function UserMenu() {
         onClick={() => setOpen((value) => !value)}
       >
         {t("user.account")}
-        <span className="user-menu-id">{shortUserId(userId)}</span>
       </button>
       {open && (
         <div className="ws-menu" role="menu" aria-label={t("user.account")}>

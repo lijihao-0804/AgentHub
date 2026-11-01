@@ -73,6 +73,8 @@ const SEGMENT_LABELS: Record<string, MessageKey> = {
   pricing: "nav.pricing",
   settings: "nav.settings",
   models: "nav.models",
+  members: "settings.members.title",
+  mcp: "nav.mcp",
   versions: "nav.versions",
 };
 
@@ -104,7 +106,7 @@ export function autoBreadcrumbs(pathname: string, t: (key: MessageKey) => string
     if (labelKey) {
       items.push({ label: t(labelKey), href: isLast ? undefined : href });
     } else {
-      const label = UUID_PATTERN.test(segment) ? t("agents.detail") : decodeURIComponent(segment);
+      const label = UUID_PATTERN.test(segment) ? t("common.detail") : decodeURIComponent(segment);
       items.push({ label, href: isLast ? undefined : href });
     }
   }

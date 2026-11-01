@@ -63,7 +63,7 @@ export default function AppWorkbench({
   threadId?: string;
   children: (context: AppThreadContext) => ReactNode;
 }) {
-  const { t, formatDateTime, formatCount } = useI18n();
+  const { t, formatDateTime, formatRelativeTime, formatCount } = useI18n();
   const { connected, sessionId, workspaceId, accessToken, permissions } = useFrontendSession();
   const cannotDelete = permissions !== null && !permissions.includes("agent_run");
   const router = useRouter();
@@ -130,7 +130,7 @@ export default function AppWorkbench({
   const threadMutation = useWorkspaceMutation(`app-thread:${scope}`);
 
   const [railOpen, setRailOpen] = useState(true);
-  const [sideOpen, setSideOpen] = useState(true);
+  const [sideOpen, setSideOpen] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [agentId, setAgentId] = useState("");
   const [title, setTitle] = useState("");
@@ -146,6 +146,27 @@ export default function AppWorkbench({
     setTitleDraft("");
     setConfirmDelete(false);
   }, [sessionId, threadId, copy.agentId]);
+
+  // The home composer can hand off a starting task through ?draft=; prefill it.
+  useEffect(() => {
+    if (typeof window === "undefined" || threadId) return;
+    const seed = new URLSearchParams(window.location.search).get("draft");
+    if (seed) setTitle(seed);
+  }, [threadId]);
+
+  // With no fixed agent, default to the first available one so the create
+  // button is enabled without an extra choice.
+  useEffect(() => {
+    if (copy.agentId || agentId) return;
+    const first = agents.data?.[0]?.id;
+    if (first) setAgentId(first);
+  }, [copy.agentId, agentId, agents.data]);
+
+  // On phones the thread list is an overlay drawer; start it closed so the
+  // conversation is visible first.
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth <= 860) setRailOpen(false);
+  }, []);
 
   // ---- Rail summaries (per-thread turn counts, cached by updated_at) ----
   const summaryCacheRef = useRef(new Map<string, ThreadSummary>());
@@ -277,7 +298,7 @@ export default function AppWorkbench({
           {threadId && (
             <button
               type="button"
-              className="button button-ghost"
+              className="button button-ghost thread-side-toggle"
               aria-pressed={sideOpen}
               onClick={() => setSideOpen((open) => !open)}
             >
@@ -325,9 +346,12 @@ export default function AppWorkbench({
                       className={`thread-list-item${active ? " thread-list-item-active" : ""}`}
                       href={`${copy.basePath}/${encodeURIComponent(item.id)}`}
                       aria-current={active ? "page" : undefined}
+                      onClick={() => {
+                        if (typeof window !== "undefined" && window.innerWidth <= 860) setRailOpen(false);
+                      }}
                     >
                       <span className="thread-list-title">{item.title}</span>
-                      <span className="thread-list-meta">{formatDateTime(item.updated_at)}</span>
+                      <span className="thread-list-meta" title={formatDateTime(item.updated_at)}>{formatRelativeTime(item.updated_at)}</span>
                       {weight.summaryKey && (
                         <span className="thread-list-meta">
                           {t(weight.summaryKey, {

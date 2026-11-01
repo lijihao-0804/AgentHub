@@ -21,7 +21,19 @@
     z-index: var(--z-floating);
   }
   body.nav-open .sidebar { transform: none; }
+  body.nav-open .sidebar-scrim {
+    background: rgba(0, 0, 0, 0.5);
+    border: 0;
+    bottom: 0;
+    display: block;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: calc(var(--z-floating) - 1);
+  }
   .topbar .nav-toggle { display: inline-flex; }
+  .sidebar-toggle { display: none; }
   .app-content { padding: var(--space-5) var(--space-4); }
   .topbar { justify-content: space-between; padding: 0 var(--space-4); }
 }
@@ -224,6 +236,40 @@
 
 @media (max-width: 640px) {
   .eval-form .form-grid, .rule-builder .form-grid { grid-template-columns: 1fr; }
+}
+
+/*
+ * Workbench on phones: the three-pane grid squeezed the conversation into a
+ * sliver. Give the conversation the full width and turn the thread list into
+ * an overlay drawer (the "conversations" toggle opens it); drop the context
+ * rail entirely.
+ */
+@media (max-width: 860px) {
+  .thread-frame,
+  .thread-frame[data-rail="open"],
+  .thread-frame[data-rail="closed"],
+  .thread-frame[data-side="open"],
+  .thread-frame[data-side="closed"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .thread-frame { position: relative; }
+  .thread-rail {
+    background: var(--surface-raised);
+    border-right: 1px solid var(--border-strong);
+    bottom: 0;
+    box-shadow: var(--shadow);
+    left: 0;
+    max-height: none;
+    padding: var(--space-3);
+    position: absolute;
+    top: 0;
+    width: min(82vw, 20rem);
+    z-index: var(--z-floating);
+  }
+  .thread-rail .thread-list { max-height: none; }
+  .thread-side { display: none; }
+  /* The context rail is hidden on phones, so its toggle would be a dead control. */
+  .thread-side-toggle { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

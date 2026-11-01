@@ -17,6 +17,7 @@ import {
   formatDurationMs,
   formatNumber,
   formatPercent,
+  formatRelativeTime,
   formatUTCBucketDate,
 } from "@/i18n/format";
 import {
@@ -41,6 +42,7 @@ type I18nContextValue = {
   purposeLabel: (purpose: string) => string;
   timelineKindLabel: (kind: string) => string;
   formatDateTime: (value: string | Date) => string;
+  formatRelativeTime: (value: string | Date) => string;
   formatUTCBucketDate: (value: string | Date) => string;
   formatNumber: (value: number) => string;
   /** Rounded integer rendering for anything that counts discrete things. */
@@ -121,6 +123,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       purposeLabel: (purpose) => evaluationPurposeLabel(purpose, locale),
       timelineKindLabel: (kind) => timelineKindLabel(kind, locale),
       formatDateTime: (value) => formatDateTime(value, locale),
+      formatRelativeTime: (value) => formatRelativeTime(value, locale),
       formatUTCBucketDate: (value) => formatUTCBucketDate(value, locale),
       formatNumber: (value) => formatNumber(value, locale),
       formatCount: (value) => formatCount(value, locale),
