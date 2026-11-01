@@ -493,6 +493,8 @@ def test_sequential_run_permits_keep_stable_revision_scope_but_recheck_run_membe
         def report(self):
             return {}
 
+    if not DEFAULT_TOKENIZER_PATH.is_file():
+        pytest.skip("The local digest-pinned experiment tokenizer is unavailable")
     counter = DeepseekV41SummaryExperimentGate.from_local_asset(
         DEFAULT_TOKENIZER_PATH, output_token_limit=512
     ).counter
