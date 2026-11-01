@@ -747,3 +747,33 @@ def test_protocol_ids_are_isolated_between_different_historical_turns():
     )
     assert first_id != second_id
     assert first[2].tool_call_id == first_id and second[2].tool_call_id == second_id
+
+
+def test_runtime_respects_custom_retained_recent_turns():
+    spec = _freeze((_profile(total=32768),))
+    # Override context_policy with custom retained_recent_turns = 4
+    custom_spec = replace(
+        spec,
+        runtime={
+            **spec.runtime,
+            "context_policy": {
+                **spec.runtime["context_policy"],
+                "retained_recent_turns": 4,
+            },
+        },
+    )
+    policy = ContextBudgetPolicy(custom_spec, estimator=Chars())
+    result = plan_history_view(
+        policy=policy,
+        conversation=_conversation(6),
+        mandatory_messages=(ModelMessage("user", "question"),),
+        memory_messages=(),
+        tools=(),
+        permission_snapshot="user-with-run-permission",
+        summary_source_policy="plain_text_prefix_v1",
+    )
+    decisions = {d.group_id: d for d in result.plan.decisions}
+    # With retained_recent_turns=4 in a 6-turn conversation, turns 3, 4, 5, 6 are RECENT
+    # and therefore INELIGIBLE for prefix summary
+    recent_count = sum(1 for d in result.plan.decisions if d.category is HistoryCategory.RECENT)
+    assert recent_count == 4

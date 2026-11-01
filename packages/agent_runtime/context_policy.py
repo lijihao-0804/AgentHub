@@ -15,9 +15,11 @@ from packages.model_gateway.context_metadata import (
 
 POLICY_VERSION = "adaptive_context_v1"
 PRESET_INPUT_LIMITS: dict[str, int] = {
-    "GENERAL_64K": 65_536,
+    "MINI_16K": 16_384,
     "STANDARD_32K": 32_768,
+    "GENERAL_64K": 65_536,
     "LONG_DOCUMENT_128K": 131_072,
+    "EXTENDED_256K": 262_144,
 }
 DEFAULT_PRESET = "GENERAL_64K"
 THRESHOLD_PERCENTS: dict[str, int] = {
@@ -25,6 +27,11 @@ THRESHOLD_PERCENTS: dict[str, int] = {
     "hard_trigger_percent": 85,
     "target_percent": 55,
 }
+DEFAULT_RETAINED_RECENT_TURNS = 2
+DEFAULT_MAX_HISTORY_GROUPS = 256
+DEFAULT_SAFETY_RESERVE_PERCENT = 5
+DEFAULT_SAFETY_RESERVE_TOKENS = 1024
+
 WORKSPACE_INPUT_LIMIT_SOURCES = frozenset({"UNSET", "DEFAULT", "CUSTOM"})
 COUNTER_ID = "approx_language_v1"
 COUNTER_VERSION = 1
@@ -38,6 +45,10 @@ _POLICY_KEYS = frozenset(
         "hard_trigger_percent",
         "target_percent",
         "counter_id",
+        "retained_recent_turns",
+        "max_history_groups",
+        "safety_reserve_percent",
+        "safety_reserve_tokens",
     }
 )
 
@@ -58,6 +69,8 @@ class _ResolvedModelContext:
     applicable_input_limit: int
     safety_reserve_tokens: int
     available_input_tokens: int
+    safety_reserve_percent: int = 5
+    configured_reserve_tokens: int = 1024
 
 
 def normalize_context_policy_request(value: Mapping[str, Any]) -> dict[str, Any]:
@@ -104,10 +117,57 @@ def normalize_context_policy_request(value: Mapping[str, Any]) -> dict[str, Any]
             raise ValueError(
                 f"{workspace_input_limit_source} workspace limit must equal the resolved preset"
             )
-    for name, expected in THRESHOLD_PERCENTS.items():
-        actual = value.get(name, expected)
-        if isinstance(actual, bool) or not isinstance(actual, int) or actual != expected:
-            raise ValueError(f"{name} only accepts the fixed value {expected}")
+    soft_pct = value.get("soft_trigger_percent", THRESHOLD_PERCENTS["soft_trigger_percent"])
+    hard_pct = value.get("hard_trigger_percent", THRESHOLD_PERCENTS["hard_trigger_percent"])
+    target_pct = value.get("target_percent", THRESHOLD_PERCENTS["target_percent"])
+    for name, val in (
+        ("soft_trigger_percent", soft_pct),
+        ("hard_trigger_percent", hard_pct),
+        ("target_percent", target_pct),
+    ):
+        if isinstance(val, bool) or not isinstance(val, int):
+            raise ValueError(f"{name} must be an integer percentage")
+    if not (0 < target_pct < soft_pct < hard_pct <= 100):
+        raise ValueError(
+            f"trigger percentages must satisfy 0 < target ({target_pct}) < soft ({soft_pct}) < hard ({hard_pct}) <= 100"
+        )
+
+    retained_recent_turns = value.get("retained_recent_turns")
+    if retained_recent_turns is not None:
+        if (
+            isinstance(retained_recent_turns, bool)
+            or not isinstance(retained_recent_turns, int)
+            or not (0 <= retained_recent_turns <= 50)
+        ):
+            raise ValueError("retained_recent_turns must be an integer between 0 and 50")
+
+    max_history_groups = value.get("max_history_groups")
+    if max_history_groups is not None:
+        if (
+            isinstance(max_history_groups, bool)
+            or not isinstance(max_history_groups, int)
+            or not (16 <= max_history_groups <= 4096)
+        ):
+            raise ValueError("max_history_groups must be an integer between 16 and 4096")
+
+    safety_reserve_percent = value.get("safety_reserve_percent")
+    if safety_reserve_percent is not None:
+        if (
+            isinstance(safety_reserve_percent, bool)
+            or not isinstance(safety_reserve_percent, int)
+            or not (0 <= safety_reserve_percent <= 30)
+        ):
+            raise ValueError("safety_reserve_percent must be an integer between 0 and 30")
+
+    safety_reserve_tokens = value.get("safety_reserve_tokens")
+    if safety_reserve_tokens is not None:
+        if (
+            isinstance(safety_reserve_tokens, bool)
+            or not isinstance(safety_reserve_tokens, int)
+            or not (0 <= safety_reserve_tokens <= 65536)
+        ):
+            raise ValueError("safety_reserve_tokens must be an integer between 0 and 65536")
+
     counter_id = value.get("counter_id", COUNTER_ID)
     if counter_id != COUNTER_ID:
         raise ValueError("counter_id must be approx_language_v1")
@@ -115,15 +175,23 @@ def normalize_context_policy_request(value: Mapping[str, Any]) -> dict[str, Any]
         "policy_version": POLICY_VERSION,
         "preset": preset,
         "workspace_input_limit_source": workspace_input_limit_source,
-        "soft_trigger_percent": THRESHOLD_PERCENTS["soft_trigger_percent"],
-        "hard_trigger_percent": THRESHOLD_PERCENTS["hard_trigger_percent"],
-        "target_percent": THRESHOLD_PERCENTS["target_percent"],
+        "soft_trigger_percent": soft_pct,
+        "hard_trigger_percent": hard_pct,
+        "target_percent": target_pct,
         "counter_id": COUNTER_ID,
     }
     if workspace_input_limit_source == "CUSTOM":
         if workspace_limit is None:
             raise ValueError("CUSTOM workspace limit requires workspace_input_limit")
         result["workspace_input_limit"] = workspace_limit
+    if retained_recent_turns is not None:
+        result["retained_recent_turns"] = retained_recent_turns
+    if max_history_groups is not None:
+        result["max_history_groups"] = max_history_groups
+    if safety_reserve_percent is not None:
+        result["safety_reserve_percent"] = safety_reserve_percent
+    if safety_reserve_tokens is not None:
+        result["safety_reserve_tokens"] = safety_reserve_tokens
     return result
 
 
@@ -137,7 +205,21 @@ def resolve_context_policy(
 
     normalized_request = normalize_context_policy_request(request)
     reserved_output = _positive_int(reserved_output_tokens, "reserved_output_tokens")
-    models = tuple(_resolve_model(item, reserved_output) for item in _chain_items(model_chain))
+    safety_reserve_percent = normalized_request.get(
+        "safety_reserve_percent", DEFAULT_SAFETY_RESERVE_PERCENT
+    )
+    safety_reserve_tokens = normalized_request.get(
+        "safety_reserve_tokens", DEFAULT_SAFETY_RESERVE_TOKENS
+    )
+    models = tuple(
+        _resolve_model(
+            item,
+            reserved_output,
+            safety_reserve_percent=safety_reserve_percent,
+            safety_reserve_tokens=safety_reserve_tokens,
+        )
+        for item in _chain_items(model_chain)
+    )
     common_available_input = min(model.available_input_tokens for model in models)
     workspace_limit: int = normalized_request.get(
         "workspace_input_limit",
@@ -148,13 +230,16 @@ def resolve_context_policy(
         model.total_context_tokens for model in models if model.total_context_tokens is not None
     ]
     min_total = min(total_windows) if len(total_windows) == len(models) else None
+    soft_pct = normalized_request["soft_trigger_percent"]
+    hard_pct = normalized_request["hard_trigger_percent"]
+    target_pct = normalized_request["target_percent"]
     thresholds = {
-        "soft": _scaled_threshold(working_input_limit, THRESHOLD_PERCENTS["soft_trigger_percent"]),
-        "hard": _scaled_threshold(working_input_limit, THRESHOLD_PERCENTS["hard_trigger_percent"]),
-        "target": _scaled_threshold(working_input_limit, THRESHOLD_PERCENTS["target_percent"]),
+        "soft": _scaled_threshold(working_input_limit, soft_pct),
+        "hard": _scaled_threshold(working_input_limit, hard_pct),
+        "target": _scaled_threshold(working_input_limit, target_pct),
     }
     model_limitations = _model_limitations(models, workspace_limit)
-    return {
+    result = {
         "policy_version": POLICY_VERSION,
         "preset": normalized_request["preset"],
         "workspace_input_limit": workspace_limit,
@@ -169,6 +254,18 @@ def resolve_context_policy(
         "limitations": model_limitations,
         "unknowns": _unknowns(models, min_total),
     }
+    for key in ("soft_trigger_percent", "hard_trigger_percent", "target_percent"):
+        if normalized_request.get(key) != THRESHOLD_PERCENTS[key]:
+            result[key] = normalized_request[key]
+    for key in (
+        "retained_recent_turns",
+        "max_history_groups",
+        "safety_reserve_percent",
+        "safety_reserve_tokens",
+    ):
+        if key in normalized_request:
+            result[key] = normalized_request[key]
+    return result
 
 
 def validate_frozen_context_policy(
@@ -200,20 +297,42 @@ def validate_frozen_context_policy(
         "limitations",
         "unknowns",
     }
-    if set(value) != required:
-        raise ValueError("frozen context policy is incomplete")
-    request = normalize_context_policy_request(
-        {
-            "policy_version": value["policy_version"],
-            "preset": value["preset"],
-            "workspace_input_limit": value["workspace_input_limit"],
-            "workspace_input_limit_source": value["workspace_input_limit_source"],
-            "soft_trigger_percent": THRESHOLD_PERCENTS["soft_trigger_percent"],
-            "hard_trigger_percent": THRESHOLD_PERCENTS["hard_trigger_percent"],
-            "target_percent": THRESHOLD_PERCENTS["target_percent"],
-            "counter_id": COUNTER_ID,
-        }
-    )
+    allowed = required | {
+        "soft_trigger_percent",
+        "hard_trigger_percent",
+        "target_percent",
+        "retained_recent_turns",
+        "max_history_groups",
+        "safety_reserve_percent",
+        "safety_reserve_tokens",
+    }
+    if not required.issubset(value) or not set(value).issubset(allowed):
+        raise ValueError("frozen context policy is incomplete or contains unsupported fields")
+    request_data: dict[str, Any] = {
+        "policy_version": value["policy_version"],
+        "preset": value["preset"],
+        "workspace_input_limit": value["workspace_input_limit"],
+        "workspace_input_limit_source": value["workspace_input_limit_source"],
+        "soft_trigger_percent": value.get(
+            "soft_trigger_percent", THRESHOLD_PERCENTS["soft_trigger_percent"]
+        ),
+        "hard_trigger_percent": value.get(
+            "hard_trigger_percent", THRESHOLD_PERCENTS["hard_trigger_percent"]
+        ),
+        "target_percent": value.get(
+            "target_percent", THRESHOLD_PERCENTS["target_percent"]
+        ),
+        "counter_id": COUNTER_ID,
+    }
+    for key in (
+        "retained_recent_turns",
+        "max_history_groups",
+        "safety_reserve_percent",
+        "safety_reserve_tokens",
+    ):
+        if key in value:
+            request_data[key] = value[key]
+    request = normalize_context_policy_request(request_data)
     source = value["workspace_input_limit_source"]
     preset_limit = PRESET_INPUT_LIMITS[request["preset"]]
     if source not in WORKSPACE_INPUT_LIMIT_SOURCES:
@@ -234,6 +353,8 @@ def validate_frozen_context_policy(
 def _resolve_model(
     raw: Mapping[str, Any],
     reserved_output_tokens: int,
+    safety_reserve_percent: int = DEFAULT_SAFETY_RESERVE_PERCENT,
+    safety_reserve_tokens: int = DEFAULT_SAFETY_RESERVE_TOKENS,
 ) -> _ResolvedModelContext:
     required = {
         "profile_id",
@@ -302,7 +423,7 @@ def _resolve_model(
     applicable = min(value for _, value in constraints)
     if applicable <= 0:
         raise ValueError("model context budget is not positive")
-    safety_reserve = max(1_024, (5 * applicable + 99) // 100)
+    safety_reserve = max(safety_reserve_tokens, (safety_reserve_percent * applicable + 99) // 100)
     available = applicable - safety_reserve
     if available <= 0:
         raise ValueError("model context budget leaves no usable input after safety reserve")
@@ -321,6 +442,8 @@ def _resolve_model(
         applicable_input_limit=applicable,
         safety_reserve_tokens=safety_reserve,
         available_input_tokens=available,
+        safety_reserve_percent=safety_reserve_percent,
+        configured_reserve_tokens=safety_reserve_tokens,
     )
 
 
@@ -397,7 +520,10 @@ def _model_reasons(model: _ResolvedModelContext) -> list[str]:
         and model.applicable_input_limit == model.deployment_input_limit
     ):
         reasons.append("DEPLOYMENT_INPUT_LIMIT")
-    reasons.append("FIVE_PERCENT_SAFETY_RESERVE")
+    if model.safety_reserve_percent == 5 and model.configured_reserve_tokens == 1024:
+        reasons.append("FIVE_PERCENT_SAFETY_RESERVE")
+    else:
+        reasons.append(f"CUSTOM_SAFETY_RESERVE_{model.safety_reserve_percent}_PERCENT")
     return reasons
 
 
@@ -466,7 +592,7 @@ def _chain_items(model_chain: Sequence[Mapping[str, Any]]) -> tuple[Mapping[str,
 
 
 def _scaled_threshold(value: int, percent: int) -> int:
-    if percent == 55:
+    if percent <= 55:
         return (percent * value) // 100
     return (percent * value + 99) // 100
 
@@ -497,7 +623,11 @@ def _canonical_json(value: Any) -> str:
 
 __all__ = [
     "COUNTER_ID",
+    "DEFAULT_MAX_HISTORY_GROUPS",
     "DEFAULT_PRESET",
+    "DEFAULT_RETAINED_RECENT_TURNS",
+    "DEFAULT_SAFETY_RESERVE_PERCENT",
+    "DEFAULT_SAFETY_RESERVE_TOKENS",
     "POLICY_VERSION",
     "PRESET_INPUT_LIMITS",
     "THRESHOLD_PERCENTS",

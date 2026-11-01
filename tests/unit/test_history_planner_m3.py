@@ -568,3 +568,68 @@ def test_empty_history_is_complete_ready_and_zero_cost() -> None:
     assert plan.pre_trim_tokens == 0
     assert plan.planned_tokens == 0
     assert plan.retained_group_ids == ()
+
+
+def test_plan_history_with_custom_thresholds() -> None:
+    group = _group("turn-01", category=HistoryCategory.KEEP_EXACT, sequence=1, watermark=10)
+    counter = CountingCounter({"turn-01": 65})
+
+    # At 65 tokens out of 100:
+    # With default 70/85 thresholds: pressure is NONE
+    default_plan = plan_history(
+        (group,),
+        scope=SCOPE,
+        frozen_watermark=10,
+        counter=counter,
+        b_work_tokens=100,
+    )
+    assert default_plan.pre_trim_pressure == PlanPressure.NONE
+
+    # With custom 60/80/40 thresholds: 65 tokens triggers SOFT pressure!
+    custom_plan = plan_history(
+        (group,),
+        scope=SCOPE,
+        frozen_watermark=10,
+        counter=counter,
+        b_work_tokens=100,
+        thresholds={"soft_trigger_percent": 60, "hard_trigger_percent": 80, "target_percent": 40},
+    )
+    assert custom_plan.pre_trim_pressure == PlanPressure.SOFT
+    assert custom_plan.thresholds.soft_percent == 60
+    assert custom_plan.thresholds.hard_percent == 80
+    assert custom_plan.thresholds.target_percent == 40
+
+
+def test_plan_history_with_custom_work_limit() -> None:
+    groups = tuple(
+        _group(
+            f"turn-{i:02d}",
+            category=HistoryCategory.KEEP_EXACT,
+            sequence=i,
+            watermark=35,
+        )
+        for i in range(1, 30)
+    )
+    counter = CountingCounter({f"turn-{i:02d}": 10 for i in range(1, 30)})
+
+    # Default limit is 256, 29 groups is complete
+    full_plan = plan_history(
+        groups,
+        scope=SCOPE,
+        frozen_watermark=35,
+        counter=counter,
+        b_work_tokens=1000,
+    )
+    assert full_plan.measurement_complete
+
+    # Custom limit of 20 groups makes 29 groups incomplete
+    limited_plan = plan_history(
+        groups,
+        scope=SCOPE,
+        frozen_watermark=35,
+        counter=counter,
+        b_work_tokens=1000,
+        work_limit=HistoryWorkLimit(max_groups=20),
+    )
+    assert not limited_plan.measurement_complete
+    assert len(limited_plan.unmeasured_group_ids) == 9

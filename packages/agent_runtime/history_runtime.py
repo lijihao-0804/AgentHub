@@ -13,6 +13,7 @@ from packages.agent_runtime.history_planner import (
     HistoryPlan,
     HistoryScope,
     HistorySourceGroup,
+    HistoryWorkLimit,
     Insufficiency,
     InsufficiencyCode,
     SummaryEligibility,
@@ -167,7 +168,11 @@ def plan_history_view(
     prefix_stopped_before: str | None = None
     prefix_stop_reason: str | None = None
     expected_prefix_sequence = 1
-    recent_start = max(len(conversation.turns) - 2, 0)
+    context_policy = getattr(policy, "context_policy", None) or {}
+    retained_turns = context_policy.get("retained_recent_turns", 2)
+    if not isinstance(retained_turns, int) or retained_turns < 0:
+        retained_turns = 2
+    recent_start = max(len(conversation.turns) - retained_turns, 0)
     for index, (source, turn) in enumerate(
         zip(manifest.selected_sources, conversation.turns, strict=True)
     ):
@@ -267,12 +272,21 @@ def plan_history_view(
             eligibility_reason,
             eligibility,
         )
+    max_groups = context_policy.get("max_history_groups", 256)
+    work_limit = (
+        HistoryWorkLimit(max_groups=max_groups)
+        if isinstance(max_groups, int) and max_groups > 0
+        else None
+    )
+    thresholds_arg = context_policy.get("thresholds")
     plan = plan_history(
         groups,
         scope=scope,
         frozen_watermark=watermark,
         counter=_Counter(counts),
         b_work_tokens=policy.context_policy["input_limit_tokens"],
+        work_limit=work_limit,
+        thresholds=thresholds_arg,
         expected_counter_id=policy.context_policy["counter"]["id"],
         expected_counter_version=policy.context_policy["counter"]["version"],
     )

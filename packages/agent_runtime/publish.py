@@ -1098,6 +1098,10 @@ def _draft_runtime_from_version(value: Mapping[str, Any]) -> dict[str, Any]:
                 "hard_trigger_percent",
                 "target_percent",
                 "counter_id",
+                "retained_recent_turns",
+                "max_history_groups",
+                "safety_reserve_percent",
+                "safety_reserve_tokens",
             )
             if key in policy
         }

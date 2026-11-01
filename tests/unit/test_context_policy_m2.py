@@ -94,12 +94,15 @@ def _resolve(
     preset: str = "GENERAL_64K",
     workspace_input_limit: int | None = None,
     reserved_output_tokens: int = 4_096,
+    request: dict | None = None,
 ) -> dict:
-    request = {"policy_version": "adaptive_context_v1", "preset": preset}
+    req = {"policy_version": "adaptive_context_v1", "preset": preset}
     if workspace_input_limit is not None:
-        request["workspace_input_limit"] = workspace_input_limit
+        req["workspace_input_limit"] = workspace_input_limit
+    if request:
+        req.update(request)
     return resolve_context_policy(
-        request,
+        req,
         chain,
         reserved_output_tokens=reserved_output_tokens,
     )
@@ -469,3 +472,140 @@ def test_tool_schema_stream_and_vision_gates_survive_policy_changes() -> None:
     with pytest.raises(ModelGatewayError) as mismatch:
         validate_capabilities(without_vision, required)
     assert mismatch.value.code == ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH
+
+
+def test_custom_trigger_percents_normalization_and_budget() -> None:
+    normalized = normalize_context_policy_request(
+        {
+            "policy_version": "adaptive_context_v1",
+            "soft_trigger_percent": 60,
+            "hard_trigger_percent": 80,
+            "target_percent": 45,
+        }
+    )
+    assert normalized["soft_trigger_percent"] == 60
+    assert normalized["hard_trigger_percent"] == 80
+    assert normalized["target_percent"] == 45
+
+    resolved = _resolve(
+        [_model()],
+        request={
+            "soft_trigger_percent": 60,
+            "hard_trigger_percent": 80,
+            "target_percent": 45,
+        },
+    )
+    limit = resolved["input_limit_tokens"]
+    assert resolved["thresholds"]["soft"] == (60 * limit + 99) // 100
+    assert resolved["thresholds"]["hard"] == (80 * limit + 99) // 100
+    assert resolved["thresholds"]["target"] == (45 * limit) // 100
+    assert resolved["soft_trigger_percent"] == 60
+    assert resolved["hard_trigger_percent"] == 80
+    assert resolved["target_percent"] == 45
+
+
+@pytest.mark.parametrize(
+    "invalid_percents",
+    [
+        {"soft_trigger_percent": 80, "hard_trigger_percent": 70, "target_percent": 50},  # soft >= hard
+        {"soft_trigger_percent": 70, "hard_trigger_percent": 85, "target_percent": 75},  # target >= soft
+        {"soft_trigger_percent": 70, "hard_trigger_percent": 101, "target_percent": 50}, # hard > 100
+        {"soft_trigger_percent": 0, "hard_trigger_percent": 85, "target_percent": 0},    # <= 0
+        {"soft_trigger_percent": "70", "hard_trigger_percent": 85, "target_percent": 50}, # not int
+    ],
+)
+def test_invalid_custom_trigger_percents_raise_value_error(invalid_percents: dict) -> None:
+    with pytest.raises(ValueError):
+        normalize_context_policy_request(
+            {"policy_version": "adaptive_context_v1", **invalid_percents}
+        )
+
+
+def test_custom_runtime_controls_normalization_and_resolution() -> None:
+    normalized = normalize_context_policy_request(
+        {
+            "policy_version": "adaptive_context_v1",
+            "retained_recent_turns": 4,
+            "max_history_groups": 512,
+            "safety_reserve_percent": 10,
+            "safety_reserve_tokens": 2048,
+        }
+    )
+    assert normalized["retained_recent_turns"] == 4
+    assert normalized["max_history_groups"] == 512
+    assert normalized["safety_reserve_percent"] == 10
+    assert normalized["safety_reserve_tokens"] == 2048
+
+    chain = [_model()]
+    resolved = _resolve(
+        chain,
+        request={
+            "retained_recent_turns": 4,
+            "max_history_groups": 512,
+            "safety_reserve_percent": 10,
+            "safety_reserve_tokens": 2048,
+        },
+    )
+    assert resolved["retained_recent_turns"] == 4
+    assert resolved["max_history_groups"] == 512
+    assert resolved["safety_reserve_percent"] == 10
+    assert resolved["safety_reserve_tokens"] == 2048
+    assert "CUSTOM_SAFETY_RESERVE_10_PERCENT" in resolved["models"][0]["reasons"]
+
+    # Test freeze validation roundtrip with custom controls
+    replayed = validate_frozen_context_policy(
+        resolved, chain, reserved_output_tokens=4096
+    )
+    assert replayed["retained_recent_turns"] == 4
+    assert replayed["max_history_groups"] == 512
+
+
+def test_new_presets_mini_and_extended() -> None:
+    mini_norm = normalize_context_policy_request(
+        {"policy_version": "adaptive_context_v1", "preset": "MINI_16K"}
+    )
+    assert mini_norm["preset"] == "MINI_16K"
+
+    ext_norm = normalize_context_policy_request(
+        {"policy_version": "adaptive_context_v1", "preset": "EXTENDED_256K"}
+    )
+    assert ext_norm["preset"] == "EXTENDED_256K"
+
+    mini_resolved = _resolve([_model()], preset="MINI_16K")
+    assert mini_resolved["workspace_input_limit"] == 16_384
+    assert mini_resolved["input_limit_tokens"] == 16_384
+
+    ext_resolved = _resolve([_model()], preset="EXTENDED_256K")
+    assert ext_resolved["workspace_input_limit"] == 262_144
+    assert ext_resolved["input_limit_tokens"] == 262_144
+
+
+def test_context_policy_request_schema_with_custom_parameters() -> None:
+    from apps.api.schemas.agents import ContextPolicyRequest
+
+    valid = ContextPolicyRequest.model_validate(
+        {
+            "policy_version": "adaptive_context_v1",
+            "preset": "MINI_16K",
+            "soft_trigger_percent": 65,
+            "hard_trigger_percent": 80,
+            "target_percent": 40,
+            "retained_recent_turns": 3,
+            "max_history_groups": 128,
+            "safety_reserve_percent": 8,
+            "safety_reserve_tokens": 1500,
+        }
+    )
+    assert valid.preset == "MINI_16K"
+    assert valid.soft_trigger_percent == 65
+    assert valid.retained_recent_turns == 3
+
+    with pytest.raises(Exception):
+        ContextPolicyRequest.model_validate(
+            {
+                "policy_version": "adaptive_context_v1",
+                "soft_trigger_percent": 80,
+                "hard_trigger_percent": 75,
+                "target_percent": 50,
+            }
+        )

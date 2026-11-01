@@ -77,16 +77,30 @@ class ContextPolicyRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     policy_version: Literal["adaptive_context_v1"]
-    preset: Literal["GENERAL_64K", "STANDARD_32K", "LONG_DOCUMENT_128K"] = "GENERAL_64K"
+    preset: Literal[
+        "MINI_16K",
+        "STANDARD_32K",
+        "GENERAL_64K",
+        "LONG_DOCUMENT_128K",
+        "EXTENDED_256K",
+    ] = "GENERAL_64K"
     workspace_input_limit: int | None = Field(default=None, ge=1, strict=True)
     workspace_input_limit_source: Literal["UNSET", "DEFAULT", "CUSTOM"] | None = None
-    soft_trigger_percent: int = Field(default=70, ge=70, le=70, strict=True)
-    hard_trigger_percent: int = Field(default=85, ge=85, le=85, strict=True)
-    target_percent: int = Field(default=55, ge=55, le=55, strict=True)
+    soft_trigger_percent: int = Field(default=70, ge=10, le=95, strict=True)
+    hard_trigger_percent: int = Field(default=85, ge=15, le=100, strict=True)
+    target_percent: int = Field(default=55, ge=5, le=90, strict=True)
+    retained_recent_turns: int | None = Field(default=None, ge=0, le=50, strict=True)
+    max_history_groups: int | None = Field(default=None, ge=16, le=4096, strict=True)
+    safety_reserve_percent: int | None = Field(default=None, ge=0, le=30, strict=True)
+    safety_reserve_tokens: int | None = Field(default=None, ge=0, le=65536, strict=True)
     counter_id: Literal["approx_language_v1"] = "approx_language_v1"
 
     @model_validator(mode="after")
     def validate_policy_intent(self) -> ContextPolicyRequest:
+        if not (0 < self.target_percent < self.soft_trigger_percent < self.hard_trigger_percent <= 100):
+            raise ValueError(
+                f"trigger percentages must satisfy target ({self.target_percent}) < soft ({self.soft_trigger_percent}) < hard ({self.hard_trigger_percent})"
+            )
         normalized = normalize_context_policy_request(self.model_dump(exclude_none=True))
         self.workspace_input_limit_source = normalized["workspace_input_limit_source"]
         return self

@@ -20,7 +20,7 @@ double counting.  Actual dispatch must still pass the existing
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from types import MappingProxyType
@@ -351,6 +351,7 @@ def plan_history(
     summary_verifier: Callable[[HistorySourceGroup, HistoryScope], bool] | None = None,
     expected_counter_id: str | None = None,
     expected_counter_version: int | None = None,
+    thresholds: HistoryThresholds | Mapping[str, Any] | None = None,
 ) -> HistoryPlan:
     """Return a deterministic all-or-nothing source-group plan.
 
@@ -393,7 +394,7 @@ def plan_history(
     )
     pre_trim_tokens = sum(item.tokens for item in source_groups)
     planned_tokens = pre_trim_tokens + unaccounted_growth_tokens
-    thresholds = _thresholds(b_work_tokens)
+    thresholds = _thresholds(b_work_tokens, thresholds)
     pre_trim_pressure = _pressure(planned_tokens, thresholds)
 
     mandatory = tuple(item for item in source_groups if item.category is HistoryCategory.MANDATORY)
@@ -876,7 +877,32 @@ def _source_decision(
     )
 
 
-def _thresholds(b_work_tokens: int) -> HistoryThresholds:
+def _thresholds(
+    b_work_tokens: int,
+    custom: HistoryThresholds | Mapping[str, Any] | None = None,
+) -> HistoryThresholds:
+    if isinstance(custom, HistoryThresholds):
+        return custom
+    if isinstance(custom, Mapping):
+        soft_pct = custom.get(
+            "soft_percent", custom.get("soft_trigger_percent", SOFT_TRIGGER_PERCENT)
+        )
+        hard_pct = custom.get(
+            "hard_percent", custom.get("hard_trigger_percent", HARD_TRIGGER_PERCENT)
+        )
+        target_pct = custom.get("target_percent", TARGET_PERCENT)
+        soft_tok = custom.get("soft", (soft_pct * b_work_tokens + 99) // 100)
+        hard_tok = custom.get("hard", (hard_pct * b_work_tokens + 99) // 100)
+        target_tok = custom.get("target", (target_pct * b_work_tokens) // 100)
+        return HistoryThresholds(
+            b_work_tokens=b_work_tokens,
+            soft_percent=soft_pct,
+            hard_percent=hard_pct,
+            target_percent=target_pct,
+            soft_tokens=soft_tok,
+            hard_tokens=hard_tok,
+            target_tokens=target_tok,
+        )
     return HistoryThresholds(
         b_work_tokens=b_work_tokens,
         soft_percent=SOFT_TRIGGER_PERCENT,
