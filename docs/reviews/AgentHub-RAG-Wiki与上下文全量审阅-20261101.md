@@ -608,3 +608,15 @@ BadRequestError: OpenAIException - This response_format type is unavailable now
 | 并发用例 | 新增 `test_install_fence_blocks_concurrent_revocation_until_commit`：在安装围栏持锁期间启动并发撤销，断言撤销在编译提交前**无法完成**。已做反向验证——去掉 `share_lock=True` 后该用例立即以 `The install fence must read sources under a share lock.` 失败，说明用例确实锁住了 M-2 的保证 | `test_wiki_worker.py` 14/14 通过 |
 
 第三轮实测：`tests/unit` 全量全绿；`ruff` 全绿；集成回归（wiki 四组 + m4c + m3e + m3f + history 两组 + approvals）只剩 1 个失败——`test_history_runtime_m3::test_summary_opt_in_preserves_blocked_plan_without_model_dispatch`，即 8.2 中**基线同样失败**的那一个，属测试预期与"摘要启用走 boundary 分支"的现行语义不一致，需产品确认后再改测试或改代码。
+
+### 8.6 第四轮：按摘要语义修正历史阻塞用例
+
+8.5 遗留的唯一失败按"摘要启用即允许压缩后继续"的现行语义处理，仍只改测试：
+
+| 项 | 处理 | 验证 |
+|---|---|---|
+| 原用例语义 | `test_summary_opt_in_preserves_blocked_plan_without_model_dispatch` 改为断言 `prepare` **不失败**、`summary_plan_blocked=True`、`history_message_count=0`、只带本轮用户输入、不调模型；保留 `NO_ELIGIBLE_SOURCE` 与"摘要启用版本不得回退为无绑定 M3 检查点"两条断言 | 通过 |
+| 新增兜底用例 | `test_summary_opt_in_fails_when_no_prefix_covers_dropped_history`：摘要节点在"无可验证纯文本前缀"时仍以 `AGENT_HISTORY_CONTEXT_INSUFFICIENT` 结束，并校验该状态经真实图检查点持久化、`verify_exact_checkpoint_binding` 可复核 | 通过 |
+| 用例有效性 | 新增用例断言 `SUMMARY/FAILED` 步骤记录的错误码必须是 `AGENT_HISTORY_CONTEXT_INSUFFICIENT`。反向验证：把"无候选前缀"换成伪候选后，最终失败码仍相同，但步骤记录变为 `SUMMARY_EXECUTION_FAILED`，用例按预期失败——说明该断言确实锁住了具体分支 | 反向验证通过 |
+
+第四轮实测：`test_history_runtime_m3.py` 4/4 通过；`ruff check packages apps tests` → All checks passed。至此本报告范围内已无已知失败用例。

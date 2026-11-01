@@ -1,6 +1,7 @@
 """M3 source snapshot, planner and actual fake-gateway request together."""
 
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from uuid import UUID
 
@@ -50,8 +51,8 @@ async def factory():
         await engine.dispose()
 
 
-@pytest.mark.asyncio
-async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(factory):
+async def _seed_blocked_summary_run(factory):
+    """Seed a long thread that cannot fit, with a summary-enabled version."""
     base = await _seed_workspace(factory)
     thread_id = await _create_thread(factory, base)
     for sequence in range(1, 10):
@@ -93,8 +94,10 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
         version.resolved_spec_hash = canonical_json_hash(spec)
         await session.commit()
         run = await session.scalar(select(AgentRun).where(AgentRun.id == run_id))
+    return base, thread_id, run_id, run
 
-    requests = []
+
+def _blocked_summary_graph(factory, base, run, *, requests):
     graph = _model_graph(request_sink=requests)
     graph.run = run
     graph.context = SimpleNamespace(
@@ -112,9 +115,26 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
         return None
 
     graph.step = step
+    return graph
+
+
+@pytest.mark.asyncio
+async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(factory):
+    base, thread_id, run_id, run = await _seed_blocked_summary_run(factory)
+    requests = []
+    graph = _blocked_summary_graph(factory, base, run, requests=requests)
+
     result = await graph.prepare({})
-    assert result["failure_code"] == "AGENT_HISTORY_CONTEXT_INSUFFICIENT"
-    assert "messages" not in result
+
+    # An enabled summary policy defers the decision: prepare keeps the blocked
+    # plan, sends no history and leaves compression to the summary node, so the
+    # first model call still cannot happen against truncated history.
+    assert "failure_code" not in result
+    assert result["summary_plan_blocked"] is True
+    assert result["history_message_count"] == 0
+    assert [
+        message.content for message in result["messages"] if message.role == "user"
+    ] == ["question 10"]
     assert result["history_checkpoint_binding"]["run_id"] == str(run_id)
     assert requests == []
     async with factory() as session:
@@ -129,6 +149,50 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
         await verify_history_checkpoint_binding(factory, run=saved, state={})
     assert invalid.value.code == "AGENT_HISTORY_SNAPSHOT_INVALID"
 
+
+@pytest.mark.asyncio
+async def test_summary_opt_in_fails_when_no_prefix_covers_dropped_history(factory, monkeypatch):
+    base, thread_id, run_id, run = await _seed_blocked_summary_run(factory)
+    requests = []
+    graph = _blocked_summary_graph(factory, base, run, requests=requests)
+    state = await graph.prepare({})
+    assert state["summary_plan_blocked"] is True
+
+    async with factory() as session:
+        await session.execute(
+            update(AgentRun)
+            .where(AgentRun.id == run_id)
+            .values(
+                execution_owner="history-runtime-test-owner",
+                execution_lease_expires_at=datetime.now(UTC) + timedelta(minutes=5),
+            )
+        )
+        await session.commit()
+        graph.run = await session.scalar(select(AgentRun).where(AgentRun.id == run_id))
+    graph.execution_owner_token = "history-runtime-test-owner"
+
+    async def authoritative_run_context(_context, _run):
+        return SimpleNamespace(
+            user_id=graph.context.user_id,
+            permissions=graph.context.permissions,
+        )
+
+    graph.service._authoritative_run_context = authoritative_run_context
+
+    # Nothing in the frozen source manifest can be compressed, so the dropped
+    # history cannot be replaced and the Run must fail rather than dispatch.
+    monkeypatch.setattr(
+        "packages.agent_runtime.runtime_graph._summary_candidates",
+        lambda *_args, **_kwargs: (),
+    )
+
+    steps = []
+
+    async def record_step(kind, status, safe_metadata=None):
+        steps.append((kind, status, safe_metadata))
+
+    graph.step = record_step
+
     # The blocked identity must survive an actual graph checkpoint, not only
     # a direct call to the prepare node.
     adapter = LangGraphCheckpointAdapter(TEST_DATABASE_URL)
@@ -139,10 +203,17 @@ async def test_summary_opt_in_preserves_blocked_plan_without_model_dispatch(fact
         )
         checkpoint = await checkpointer.aget_tuple(config)
     assert final["failure_code"] == "AGENT_HISTORY_CONTEXT_INSUFFICIENT"
+    # The failure must come from the summary node's "no verified prefix"
+    # branch, not from prepare or an unrelated mapping.
+    assert (
+        "SUMMARY",
+        "FAILED",
+        {"error_code": "AGENT_HISTORY_CONTEXT_INSUFFICIENT"},
+    ) in steps
     assert checkpoint is not None
     assert (
         checkpoint.checkpoint["channel_values"]["history_checkpoint_binding"]
-        == result["history_checkpoint_binding"]
+        == state["history_checkpoint_binding"]
     )
     assert checkpoint.checkpoint["channel_values"]["summary_boundary"] == {
         "version": "summary_dispatch_boundary_v1",
