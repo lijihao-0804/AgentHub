@@ -1,0 +1,70 @@
+{
+  "notice": "OFFLINE EXAMPLE ONLY: these are synthetic operator declarations, not verified provider capabilities.",
+  "model_profile_request": {
+    "provider_credential_id": "00000000-0000-0000-0000-000000000101",
+    "model": "example-gateway-alias",
+    "temperature": 0,
+    "max_tokens": 8192,
+    "timeout_seconds": 30,
+    "capabilities": {
+      "tool_calling": true,
+      "streaming": true,
+      "structured_output": true,
+      "vision": false,
+      "max_context_tokens": 131072,
+      "context_metadata": {
+        "schema_version": 1,
+        "deployment_id": "example-deployment-a",
+        "resolved_model": "example-exact-model",
+        "source_version": "example-operator-declaration-v1",
+        "max_input_tokens": 110000,
+        "max_output_tokens": 8192,
+        "deployment_input_limit": 90000,
+        "input_output_semantics": "TOTAL_WINDOW",
+        "output_reserve_semantics": "INCLUDES_REASONING"
+      }
+    }
+  },
+  "agent_runtime_config": {
+    "context_policy": {
+      "policy_version": "adaptive_context_v1",
+      "preset": "GENERAL_64K"
+    },
+    "memory": {
+      "long_term_memory": true,
+      "max_memory_tokens": 1500
+    }
+  },
+  "memory_intent_examples": {
+    "unset": {
+      "long_term_memory": true
+    },
+    "default": {
+      "long_term_memory": true,
+      "max_memory_tokens_source": "DEFAULT"
+    },
+    "custom_equal_to_old_default": {
+      "long_term_memory": true,
+      "max_memory_tokens": 1500
+    },
+    "custom_4096": {
+      "long_term_memory": true,
+      "max_memory_tokens": 4096
+    }
+  },
+  "expected_budget_without_or_with_larger_catalog": {
+    "business_preset": 65536,
+    "total_context_tokens": 131072,
+    "output_reserve": 8192,
+    "input_ceiling": 90000,
+    "safety_reserve": 4500,
+    "model_available_input": 85500,
+    "working_input_limit": 65536,
+    "soft": 45876,
+    "hard": 55706,
+    "target": 36044,
+    "memory_budget": 1500,
+    "memory_source": "CUSTOM",
+    "counter_precision": "APPROXIMATE"
+  }
+}

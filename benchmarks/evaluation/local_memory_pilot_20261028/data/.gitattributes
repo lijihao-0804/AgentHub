@@ -1,0 +1,9 @@
+# These frozen public inputs are SHA-256-bound by the local evaluation protocol.
+# Keep their checked-out bytes unchanged when core.autocrlf is enabled.
+/source_document.md -text
+/summary_request.txt -text
+/tasks.md -text
+/gold_scoring.md -text
+/README.md -text
+/LICENSE -text
+/NOTICE -text

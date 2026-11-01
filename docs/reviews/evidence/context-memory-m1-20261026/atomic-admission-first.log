@@ -1,0 +1,41 @@
+......................F..........F..                                     [100%]
+================================== FAILURES ===================================
+_ test_invalid_memory_fails_closed_at_any_pool_budget[zero_budget-wrong_root_trust_type] _
+
+payload = {'memories': [], 'trust': ['SYSTEM']}, memory_pool = 0
+
+    @pytest.mark.parametrize(
+        ("payload",),
+        [pytest.param(payload, id=case_id) for case_id, payload in _malformed_memory_payloads()],
+    )
+    @pytest.mark.parametrize("memory_pool", [0, 10_000], ids=["zero_budget", "ample_budget"])
+    def test_invalid_memory_fails_closed_at_any_pool_budget(
+        payload: dict[str, Any],
+        memory_pool: int,
+    ) -> None:
+>       with pytest.raises(AgentHubError) as raised:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'packages.core.errors.exceptions.AgentHubError'>
+
+tests\unit\test_memory_atomic_admission.py:488: Failed
+_ test_invalid_memory_fails_closed_at_any_pool_budget[ample_budget-wrong_root_trust_type] _
+
+payload = {'memories': [], 'trust': ['SYSTEM']}, memory_pool = 10000
+
+    @pytest.mark.parametrize(
+        ("payload",),
+        [pytest.param(payload, id=case_id) for case_id, payload in _malformed_memory_payloads()],
+    )
+    @pytest.mark.parametrize("memory_pool", [0, 10_000], ids=["zero_budget", "ample_budget"])
+    def test_invalid_memory_fails_closed_at_any_pool_budget(
+        payload: dict[str, Any],
+        memory_pool: int,
+    ) -> None:
+>       with pytest.raises(AgentHubError) as raised:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'packages.core.errors.exceptions.AgentHubError'>
+
+tests\unit\test_memory_atomic_admission.py:488: Failed
+=========================== short test summary info ===========================
+FAILED tests/unit/test_memory_atomic_admission.py::test_invalid_memory_fails_closed_at_any_pool_budget[zero_budget-wrong_root_trust_type]
+FAILED tests/unit/test_memory_atomic_admission.py::test_invalid_memory_fails_closed_at_any_pool_budget[ample_budget-wrong_root_trust_type]

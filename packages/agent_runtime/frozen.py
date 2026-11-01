@@ -8,6 +8,7 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
+from packages.agent_runtime.context_policy import validate_frozen_context_policy
 from packages.agent_runtime.runtime_config import (
     DEFAULT_CONTEXT_BUDGET,
     DEFAULT_MEMORY_CONFIG,
@@ -26,7 +27,68 @@ from packages.model_gateway.contracts import (
 _DEFAULT_RUNTIME = DEFAULT_RUNTIME_LIMITS
 _DEFAULT_CONTEXT_BUDGET = DEFAULT_CONTEXT_BUDGET
 _DEFAULT_MEMORY = DEFAULT_MEMORY_CONFIG
-SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2})
+SUPPORTED_SPEC_SCHEMA_VERSIONS = frozenset({1, 2, 3, 4, 5})
+_SUMMARY_POLICY_VERSION = "thread_summary_policy_v1"
+_SUMMARY_PROMPT_VERSION = "summary_candidate_zh_v1"
+_SUMMARY_VALIDATOR_VERSION = "summary_mechanical_v1"
+SUMMARY_REQUEST_STRATEGY_VERSION = "summary_request_strategy_v1"
+SUMMARY_NON_THINKING_STRATEGY_VERSION = "summary_request_strategy_v2"
+SUMMARY_NON_THINKING_MODE = "non_thinking"
+SUMMARY_NON_THINKING_PROVIDER = "openai-compatible"
+SUMMARY_NON_THINKING_MODEL = "deepseek-v4.1-flash-1017"
+SUMMARY_NON_THINKING_ROUTE_ALLOWLIST = "aliyun_beijing_openai_compatible_v1"
+SUMMARY_NON_THINKING_COUNTER_ID = "deepseek_v41_text_v1"
+SUMMARY_NON_THINKING_COUNTER_REVISION = "9f9818127fdfbb60feba204799d617a874b32a86"
+SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION = "0.22.2"
+SUMMARY_NON_THINKING_TOKENIZER_SHA256 = (
+    "c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b"
+)
+_SUMMARY_POLICY_KEYS = frozenset(
+    {
+        "enabled",
+        "policy_version",
+        "prompt_version",
+        "validator_version",
+        "tokenizer_id",
+        "tokenizer_version",
+        "soft_trigger_percent",
+        "hard_trigger_percent",
+        "target_percent",
+    }
+)
+_SUMMARY_NON_THINKING_KEYS = frozenset(
+    {
+        "request_strategy_version",
+        "request_mode",
+        "request_route_allowlist",
+        "request_counter_id",
+        "request_counter_revision",
+        "request_counter_runtime_version",
+        "request_counter_sha256",
+        "request_counter_thinking",
+    }
+)
+_SUMMARY_FIXED_VALUES = {
+    "enabled": True,
+    "policy_version": _SUMMARY_POLICY_VERSION,
+    "prompt_version": _SUMMARY_PROMPT_VERSION,
+    "validator_version": _SUMMARY_VALIDATOR_VERSION,
+    "tokenizer_id": "approx_language_v1",
+    "tokenizer_version": 1,
+    "soft_trigger_percent": 70,
+    "hard_trigger_percent": 85,
+    "target_percent": 55,
+}
+_SUMMARY_NON_THINKING_VALUES = {
+    "request_strategy_version": SUMMARY_NON_THINKING_STRATEGY_VERSION,
+    "request_mode": SUMMARY_NON_THINKING_MODE,
+    "request_route_allowlist": SUMMARY_NON_THINKING_ROUTE_ALLOWLIST,
+    "request_counter_id": SUMMARY_NON_THINKING_COUNTER_ID,
+    "request_counter_revision": SUMMARY_NON_THINKING_COUNTER_REVISION,
+    "request_counter_runtime_version": SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION,
+    "request_counter_sha256": SUMMARY_NON_THINKING_TOKENIZER_SHA256,
+    "request_counter_thinking": False,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -151,6 +213,8 @@ def parse_frozen_agent_spec(
     if not isinstance(memory_value, Mapping):
         raise _invalid_binding()
     allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens"}
+    if schema_version in {3, 4, 5}:
+        allowed_memory_keys.add("max_memory_tokens_source")
     if not set(memory_value).issubset(allowed_memory_keys):
         raise _invalid_binding()
     memory: dict[str, bool] = {}
@@ -170,7 +234,53 @@ def parse_frozen_agent_spec(
         raise _invalid_binding()
     if max_memory_tokens is not None:
         memory["max_memory_tokens"] = max_memory_tokens
+    memory_source = memory_value.get("max_memory_tokens_source")
+    if schema_version in {3, 4, 5} and memory["long_term_memory"]:
+        if (
+            not isinstance(memory_source, str)
+            or memory_source not in {"UNSET", "DEFAULT", "CUSTOM"}
+            or max_memory_tokens is None
+        ):
+            raise _invalid_binding()
+        memory["max_memory_tokens_source"] = memory_source
+    elif memory_source is not None:
+        raise _invalid_binding()
     runtime["memory"] = memory
+    policy_value = runtime_value.get("context_policy")
+    if schema_version in {3, 4, 5}:
+        sources = runtime_value.get("context_budget_sources")
+        if (
+            not isinstance(sources, Mapping)
+            or set(sources) != set(_DEFAULT_CONTEXT_BUDGET)
+            or any(
+                not isinstance(source, str) or source not in {"UNSET", "DEFAULT", "CUSTOM"}
+                for source in sources.values()
+            )
+        ):
+            raise _invalid_binding()
+        try:
+            runtime["context_policy"] = validate_frozen_context_policy(
+                policy_value,
+                [model, *fallback_values],
+                reserved_output_tokens=context_budget["reserved_output_tokens"],
+            )
+        except (TypeError, ValueError):
+            raise _invalid_binding() from None
+        runtime["context_budget_sources"] = dict(sources)
+    elif policy_value is not None:
+        raise _invalid_binding()
+    history_policy = runtime_value.get("history_policy")
+    if schema_version in {4, 5}:
+        if history_policy != "deterministic_history_v1":
+            raise _invalid_binding()
+        runtime["history_policy"] = history_policy
+    elif history_policy is not None:
+        raise _invalid_binding()
+    summary_policy = runtime_value.get("summary_policy")
+    if schema_version == 5:
+        runtime["summary_policy"] = _parse_summary_policy(summary_policy, primary=primary)
+    elif summary_policy is not None:
+        raise _invalid_binding()
     return FrozenAgentSpec(
         model_plan=ResolvedModelExecutionPlan(
             primary=primary,
@@ -246,6 +356,72 @@ def _parse_knowledge_bindings(
             )
         )
     return tuple(bindings)
+
+
+def _parse_summary_policy(
+    value: Any,
+    *,
+    primary: ResolvedModelExecutionProfile | None = None,
+) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise _invalid_binding()
+    keys = frozenset(value)
+    if keys not in {_SUMMARY_POLICY_KEYS, _SUMMARY_POLICY_KEYS | _SUMMARY_NON_THINKING_KEYS}:
+        raise _invalid_binding()
+    for key, expected in _SUMMARY_FIXED_VALUES.items():
+        actual = value[key]
+        if (
+            isinstance(actual, bool)
+            and not isinstance(expected, bool)
+            or type(actual) is not type(expected)
+            or actual != expected
+        ):
+            raise _invalid_binding()
+    result = dict(_SUMMARY_FIXED_VALUES)
+    if keys == _SUMMARY_POLICY_KEYS:
+        return result
+    if (
+        primary is None
+        or primary.provider != SUMMARY_NON_THINKING_PROVIDER
+        or primary.model != SUMMARY_NON_THINKING_MODEL
+    ):
+        raise _invalid_binding()
+    for key, expected in _SUMMARY_NON_THINKING_VALUES.items():
+        actual = value[key]
+        if (
+            isinstance(actual, bool)
+            and not isinstance(expected, bool)
+            or type(actual) is not type(expected)
+            or actual != expected
+        ):
+            raise _invalid_binding()
+    result.update(_SUMMARY_NON_THINKING_VALUES)
+    return result
+
+
+def frozen_summary_request_identity(policy: Any) -> dict[str, Any]:
+    """Return the server-owned strategy identity for a parsed summary policy."""
+    if not isinstance(policy, Mapping):
+        raise _invalid_binding()
+    candidate_fields = frozenset(policy).intersection(_SUMMARY_NON_THINKING_KEYS)
+    default_fields = frozenset({"request_strategy_version", "request_mode"})
+    if not candidate_fields or candidate_fields == default_fields:
+        if candidate_fields and (
+            policy.get("request_strategy_version") != SUMMARY_REQUEST_STRATEGY_VERSION
+            or policy.get("request_mode") != "provider_default"
+        ):
+            raise _invalid_binding()
+        return {
+            "request_strategy_version": SUMMARY_REQUEST_STRATEGY_VERSION,
+            "request_mode": "provider_default",
+        }
+    if candidate_fields != _SUMMARY_NON_THINKING_KEYS or any(
+        policy.get(key) != value
+        or type(policy.get(key)) is not type(value)
+        for key, value in _SUMMARY_NON_THINKING_VALUES.items()
+    ):
+        raise _invalid_binding()
+    return dict(_SUMMARY_NON_THINKING_VALUES)
 
 
 def _parse_wiki_binding(resolved_spec: Mapping[str, Any]) -> FrozenWikiBinding | None:
@@ -338,6 +514,17 @@ __all__ = [
     "FrozenAgentSpec",
     "FrozenKnowledgeBinding",
     "FrozenWikiBinding",
+    "SUMMARY_NON_THINKING_COUNTER_ID",
+    "SUMMARY_NON_THINKING_COUNTER_REVISION",
+    "SUMMARY_NON_THINKING_COUNTER_RUNTIME_VERSION",
+    "SUMMARY_NON_THINKING_MODE",
+    "SUMMARY_NON_THINKING_MODEL",
+    "SUMMARY_NON_THINKING_PROVIDER",
+    "SUMMARY_NON_THINKING_ROUTE_ALLOWLIST",
+    "SUMMARY_NON_THINKING_STRATEGY_VERSION",
+    "SUMMARY_NON_THINKING_TOKENIZER_SHA256",
+    "SUMMARY_REQUEST_STRATEGY_VERSION",
     "SUPPORTED_SPEC_SCHEMA_VERSIONS",
+    "frozen_summary_request_identity",
     "parse_frozen_agent_spec",
 ]

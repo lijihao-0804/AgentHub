@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -28,6 +29,12 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub"
     redis_url: str = "redis://localhost:6379/0"
     qdrant_url: str = "http://localhost:6333"
+    # Optional administrator-owned local artifact. Never a user-supplied URL,
+    # and only new publications with context_policy read it.
+    model_context_catalog_path: str | None = None
+    # Local, digest-pinned DeepSeek V4.1 tokenizer asset. No network download is
+    # attempted; absent or invalid assets keep v2 summary dispatch disabled.
+    summary_deepseek_v41_tokenizer_path: Path | None = None
     knowledge_qdrant_collection: str = "agenthub_knowledge"
     knowledge_dense_vector_size: int = Field(default=1024, ge=1, le=4096)
     knowledge_embedding_model: str = "BAAI/bge-m3"

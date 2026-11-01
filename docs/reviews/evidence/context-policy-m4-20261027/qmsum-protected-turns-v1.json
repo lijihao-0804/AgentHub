@@ -1,0 +1,21 @@
+{
+  "format": "qmsum-reviewed-turns-v1",
+  "cases": [
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3005d.json#specific_query_list[0]",
+      "turns": [141, 144, 146, 152, 154, 283, 330, 357, 424, 668, 670, 678]
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3005d.json#specific_query_list[1]",
+      "turns": [283, 292, 300, 303, 305, 308, 330, 331, 357, 358, 371, 373, 424, 668, 670, 678]
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3006d.json#specific_query_list[0]",
+      "turns": [16, 27, 29, 33, 42, 45, 52, 60, 112, 115, 126, 132, 154, 157, 158, 162, 163, 284, 316, 405]
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3006d.json#specific_query_list[1]",
+      "turns": [112, 115, 126, 129, 132, 135, 138, 141, 144, 146, 149, 152, 154, 157, 158, 159, 161, 162, 163]
+    }
+  ]
+}

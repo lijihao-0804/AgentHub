@@ -34,15 +34,22 @@ def checkpoint_thread_id(workspace_id: UUID | str, run_id: UUID | str) -> str:
     return f"agenthub:{workspace_id}:{run_id}"
 
 
-def checkpoint_config(workspace_id: UUID | str, run_id: UUID | str) -> dict[str, Any]:
-    return {
-        "configurable": {
-            "thread_id": checkpoint_thread_id(workspace_id, run_id),
-            # LangGraph's default graph namespace is the empty namespace; the
-            # tenant/run-scoped thread_id is the durable identity we own.
-            "checkpoint_ns": "",
-        }
+def checkpoint_config(
+    workspace_id: UUID | str,
+    run_id: UUID | str,
+    *,
+    checkpoint_id: str | None = None,
+    checkpoint_ns: str = "",
+) -> dict[str, Any]:
+    configurable = {
+        "thread_id": checkpoint_thread_id(workspace_id, run_id),
+        # LangGraph's default graph namespace is the empty namespace; the
+        # tenant/run-scoped thread_id is the durable identity we own.
+        "checkpoint_ns": checkpoint_ns,
     }
+    if checkpoint_id is not None:
+        configurable["checkpoint_id"] = checkpoint_id
+    return {"configurable": configurable}
 
 
 def checkpoint_dsn(database_url: str) -> str:
@@ -71,6 +78,25 @@ class LangGraphCheckpointAdapter:
     @staticmethod
     def config_for_run(workspace_id: UUID | str, run_id: UUID | str) -> dict[str, Any]:
         return checkpoint_config(workspace_id, run_id)
+
+    @staticmethod
+    def config_for_checkpoint(
+        workspace_id: UUID | str,
+        run_id: UUID | str,
+        *,
+        checkpoint_id: str,
+        checkpoint_ns: str,
+    ) -> dict[str, Any]:
+        """Bind a graph invocation to the exact checkpoint that was validated."""
+
+        if not checkpoint_id:
+            raise ValueError("checkpoint_id must not be empty")
+        return checkpoint_config(
+            workspace_id,
+            run_id,
+            checkpoint_id=checkpoint_id,
+            checkpoint_ns=checkpoint_ns,
+        )
 
     @staticmethod
     def safe_state(state: Mapping[str, Any]) -> dict[str, Any]:

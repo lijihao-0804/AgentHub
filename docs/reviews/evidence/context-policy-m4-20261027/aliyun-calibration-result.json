@@ -1,0 +1,14 @@
+{
+  "status": "CONFIRMED",
+  "provider": "aliyun-beijing",
+  "requested_model": "deepseek-v4.1-flash-1017",
+  "returned_model": "deepseek-v4.1-flash-1017",
+  "input_tokens": 34,
+  "output_tokens": 16,
+  "price_cny_per_million": {
+    "input": 2,
+    "output": 8
+  },
+  "conservative_cost_cny": "0.000196",
+  "output_present": true
+}

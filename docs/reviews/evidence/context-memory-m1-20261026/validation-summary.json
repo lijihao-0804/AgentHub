@@ -1,0 +1,48 @@
+{
+  "baseline_commit": "3a9490343b1b5e7828316e3c1db7411cf6291451",
+  "milestone": "M1",
+  "projection_version": "memory_atomic_v1",
+  "unit_acceptance": {
+    "modules": 15,
+    "passed": 225,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0
+  },
+  "new_behavior_tests": {
+    "atomic_admission": 36,
+    "runtime_delivery": 10
+  },
+  "baseline_mechanism_probe": {
+    "frozen_candidates": 1,
+    "complete_entries": 0,
+    "partial_entries": 1,
+    "final_memory_messages": 1,
+    "estimated_input_after": 148,
+    "memory_budget": 160
+  },
+  "fixed_mechanism_probe": {
+    "frozen_candidates": 1,
+    "complete_entries": 0,
+    "partial_entries": 0,
+    "final_memory_messages": 1,
+    "estimated_input_after": 76,
+    "memory_budget": 160
+  },
+  "repository_ruff_exit_code": 0,
+  "changed_files_format_check_exit_code": 0,
+  "diff_check_exit_code": 0,
+  "business_model_calls": 0,
+  "schema_migrations": 0,
+  "business_database_access": 0,
+  "provider_discovery_requests": 0,
+  "production_deployment": false,
+  "subagent_usage_included_in_business_model_calls": false,
+  "implementation_commit": "71a0b8b",
+  "independent_read_only_review": {
+    "completed": true,
+    "material_bugs_found": 0,
+    "real_postgres_checkpoint_verified": false
+  },
+  "formatted_files": 8
+}

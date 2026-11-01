@@ -1,0 +1,15 @@
+{
+  "state": "completed",
+  "started_at": "2026-10-26T12:57:00.239848+00:00",
+  "cwd": "C:\\Users\\20303\\.codex\\worktrees\\context-memory-atomic-m1\\AgentHub",
+  "executable": "E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe",
+  "argument_count": 25,
+  "supervisor_pid": 41344,
+  "pid": 29660,
+  "exit_code": 0,
+  "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\context-memory-m1\\final-job\\stdout.log",
+  "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\context-memory-m1\\final-job\\stderr.log",
+  "progress_query_interval_seconds": 600,
+  "finished_at": "2026-10-26T12:57:13.606758+00:00",
+  "elapsed_seconds": 13.375
+}

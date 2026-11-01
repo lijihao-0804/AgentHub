@@ -6,10 +6,11 @@ provider tokenizes text, how tools are implemented, or how conversation
 messages were produced.  Callers therefore have to provide the category and
 exchange-group metadata explicitly.
 
-The default estimator is intentionally conservative and offline.  It counts
-each UTF-8 byte as one token unit; the policy accepts an injected estimator so
-tests and future adapters can use a provider-specific estimate without
-changing admission semantics.
+The default estimator is an offline, language-aware approximation. It is not
+a provider tokenizer or a proven upper bound: an admitted request can exceed
+its declared window when the provider counts more tokens. The policy accepts
+an injected estimator so tests and future adapters can use a verified
+provider-specific counter without changing admission semantics.
 """
 
 from __future__ import annotations
@@ -22,13 +23,16 @@ from dataclasses import dataclass, field, replace
 from enum import StrEnum
 from types import MappingProxyType
 from typing import Any, Protocol, cast
+from uuid import UUID
 
+from packages.agent_runtime.context_policy import validate_frozen_context_policy
 from packages.agent_runtime.frozen import FrozenAgentSpec
 from packages.agent_runtime.rag_evidence import (
     reproject_rag_evidence_payload,
 )
 from packages.core.errors.exceptions import AgentHubError
 from packages.knowledge.evidence_plan import EVIDENCE_VIEW_FORMAT, reproject_evidence_view
+from packages.model_gateway.context_metadata import context_metadata_to_mapping
 from packages.model_gateway.contracts import (
     ModelMessage,
     ModelToolDefinition,
@@ -53,6 +57,8 @@ class ContextCategory(StrEnum):
     MEMORY = "MEMORY"
 
 
+MEMORY_PROJECTION_VERSION = "memory_atomic_v1"
+
 _MANDATORY_CATEGORIES = frozenset(
     {
         ContextCategory.RUNTIME_POLICY,
@@ -71,6 +77,11 @@ _PROJECTABLE_CATEGORIES = frozenset(
 _UNTRUSTED_CATEGORIES = frozenset({ContextCategory.TOOL_RESULT, ContextCategory.MEMORY})
 _ALL_CATEGORIES = frozenset(ContextCategory)
 _PROJECTION_UNAVAILABLE = object()
+_MEMORY_KINDS = frozenset({"FACT", "PREFERENCE", "DECISION", "CONSTRAINT"})
+_MEMORY_ROOT_KEYS = frozenset({"data_trust", "memories", "note", "truncated", "trust"})
+_MEMORY_ITEM_KEYS = frozenset({"content", "id", "kind"})
+_MEMORY_POOL_BUDGET = "MEMORY_POOL_BUDGET"
+_CONTEXT_WINDOW_BUDGET = "CONTEXT_WINDOW_BUDGET"
 _PRIORITY_JSON_KEYS = frozenset(
     {
         "status",
@@ -132,13 +143,9 @@ class TokenEstimator(Protocol):
 class ApproxTokenEstimator:
     """Deterministic offline language-aware approx-token estimator.
 
-    tokens ~= ceil(CJK_chars / 1.6 + other_chars / 4): a CJK character
-    carries roughly 1.6 token units under common BPE tokenizers and an
-    ASCII-ish character roughly 4 (about 4 characters per token for
-    English prose). The same content therefore costs the same order of
-    units in any language. The previous byte-per-unit accounting charged
-    Chinese roughly 5x English for equivalent content, which is the root
-    cause of "one Chinese record versus five English records" delivery.
+    tokens ~= ceil(wide_chars / 1.6 + other_chars / 4): this charges
+    approximately 0.625 units per wide/full-width character and 0.25 per
+    other character. It is a heuristic, not a bound on any particular model.
 
     Still intentionally not an exact provider tokenizer count: no network,
     no tokenizer dependency, byte-for-byte reproducible. Inject a provider
@@ -206,7 +213,7 @@ type ContextItem = ContextMessage
 class ContextBudgetUsage:
     """Numeric admission telemetry; message text is intentionally absent."""
 
-    context_limit: int
+    context_limit: int | None
     reserved_output: int
     available_input: int
     estimated_input_before: int
@@ -216,15 +223,16 @@ class ContextBudgetUsage:
     estimated_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
     retained_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
     truncated_by_category: Mapping[ContextCategory, int] = field(default_factory=dict)
-    # Share of the model window the admitted context actually uses
+    # Estimated share of the model window used by the admitted context
     # (0.0-1.0). With byte-per-unit accounting this collapsed to a few
     # percent on real Chinese traffic while the window looked "full";
     # keeping it in the trace makes that failure mode visible forever.
     window_utilization: float = 0.0
+    context_policy_version: str | None = None
+    model_available_input: int | None = None
 
     def __post_init__(self) -> None:
         numeric = (
-            self.context_limit,
             self.reserved_output,
             self.available_input,
             self.estimated_input_before,
@@ -235,10 +243,24 @@ class ContextBudgetUsage:
             isinstance(value, bool) or not isinstance(value, int) or value < 0 for value in numeric
         ):
             raise ValueError("context usage counts must be non-negative integers")
-        if self.reserved_output > self.context_limit:
-            raise ValueError("reserved output cannot exceed context limit")
-        if self.available_input != self.context_limit - self.reserved_output:
-            raise ValueError("available input must equal context limit minus reserved output")
+        if self.context_limit is not None and (
+            isinstance(self.context_limit, bool)
+            or not isinstance(self.context_limit, int)
+            or self.context_limit < 0
+        ):
+            raise ValueError("context limit must be a non-negative integer or unknown")
+        if self.context_policy_version is None:
+            if self.context_limit is None or self.reserved_output > self.context_limit:
+                raise ValueError("reserved output cannot exceed context limit")
+            if self.available_input != self.context_limit - self.reserved_output:
+                raise ValueError("available input must equal context limit minus reserved output")
+        elif (
+            self.context_policy_version != "adaptive_context_v1"
+            or isinstance(self.model_available_input, bool)
+            or not isinstance(self.model_available_input, int)
+            or not 0 < self.available_input <= self.model_available_input
+        ):
+            raise ValueError("adaptive input must fit its frozen model intersection")
         if self.estimated_input_after > self.available_input:
             raise ValueError("admitted input cannot exceed available input")
         for name in (
@@ -281,6 +303,48 @@ class ContextBudgetUsage:
 
 
 @dataclass(frozen=True, slots=True)
+class MemoryAdmission:
+    """Text-free attribution for memory after final context admission."""
+
+    projection_version: str = MEMORY_PROJECTION_VERSION
+    selected_ids: tuple[str, ...] = ()
+    admitted_ids: tuple[str, ...] = ()
+    dropped_reasons: Mapping[str, str] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.projection_version != MEMORY_PROJECTION_VERSION:
+            raise ValueError(f"unsupported memory projection version: {self.projection_version!r}")
+
+        selected = _validate_memory_identity_tuple(self.selected_ids, "selected_ids")
+        admitted = _validate_memory_identity_tuple(self.admitted_ids, "admitted_ids")
+        selected_set = set(selected)
+        admitted_set = set(admitted)
+        if not admitted_set.issubset(selected_set):
+            raise ValueError("admitted_ids must be a subset of selected_ids")
+
+        raw_reasons = self.dropped_reasons
+        if not isinstance(raw_reasons, Mapping):
+            raise TypeError("dropped_reasons must be a mapping")
+        dropped_set = selected_set - admitted_set
+        reasons: dict[str, str] = {}
+        for memory_id, reason in raw_reasons.items():
+            if not isinstance(memory_id, str):
+                raise TypeError("dropped_reasons keys must be memory id strings")
+            if not isinstance(reason, str) or not reason:
+                raise ValueError("dropped_reasons values must be non-empty strings")
+            reasons[memory_id] = reason
+        if set(reasons) != dropped_set:
+            raise ValueError("dropped_reasons must contain exactly one reason per dropped id")
+
+        ordered_reasons = {
+            memory_id: reasons[memory_id] for memory_id in selected if memory_id in reasons
+        }
+        object.__setattr__(self, "selected_ids", selected)
+        object.__setattr__(self, "admitted_ids", admitted)
+        object.__setattr__(self, "dropped_reasons", MappingProxyType(ordered_reasons))
+
+
+@dataclass(frozen=True, slots=True)
 class ContextAdmissionResult:
     """The provider-neutral model input after budget admission."""
 
@@ -291,6 +355,7 @@ class ContextAdmissionResult:
     # telemetry after projection. An empty tuple keeps pre-existing callers
     # source-compatible.
     message_categories: tuple[ContextCategory, ...] = ()
+    memory_admission: MemoryAdmission | None = None
 
     def __post_init__(self) -> None:
         messages = tuple(self.messages)
@@ -304,6 +369,10 @@ class ContextAdmissionResult:
             raise TypeError("usage must be ContextBudgetUsage")
         if categories and len(categories) != len(messages):
             raise ValueError("message_categories must contain one category per message")
+        if self.memory_admission is not None and not isinstance(
+            self.memory_admission, MemoryAdmission
+        ):
+            raise TypeError("memory_admission must be MemoryAdmission or None")
         normalized_categories = tuple(_coerce_category(category) for category in categories)
         object.__setattr__(self, "messages", messages)
         object.__setattr__(self, "tool_definitions", tools)
@@ -326,6 +395,9 @@ class _NormalizedMessage:
     admitted_message: ModelMessage | None = None
     admitted_tokens: int = 0
     was_projected: bool = False
+    memory_admitted_ids: tuple[str, ...] = ()
+    memory_pool_dropped_ids: tuple[str, ...] = ()
+    memory_truncated: bool = False
 
     @property
     def category(self) -> ContextCategory:
@@ -349,6 +421,24 @@ class _ToolEstimate:
     schema: int
 
 
+@dataclass(frozen=True, slots=True)
+class _MemoryCandidate:
+    id: str
+    canonical_id: str
+    kind: str
+    content: str
+
+    def as_payload(self) -> dict[str, str]:
+        return {"id": self.id, "kind": self.kind, "content": self.content}
+
+
+@dataclass(frozen=True, slots=True)
+class _MemoryPayload:
+    note: str | None
+    candidates: tuple[_MemoryCandidate, ...]
+    truncated: bool
+
+
 class ContextBudgetPolicy:
     """Admit explicitly categorized context against a frozen model chain."""
 
@@ -365,10 +455,54 @@ class ContextBudgetPolicy:
         if len(supplied) != 1:
             raise TypeError("provide exactly one of frozen_spec, model_plan, or profiles")
         self._profile_source = supplied[0]
+        runtime = getattr(self._profile_source, "runtime", {})
+        policy = runtime.get("context_policy") if isinstance(runtime, Mapping) else None
+        if config is None and policy is not None:
+            config = ContextBudgetConfig(
+                **runtime.get("context_budget", {}),
+                max_memory_tokens=runtime.get("memory", {}).get("max_memory_tokens"),
+            )
         self.config = config or ContextBudgetConfig()
         self.estimator: TokenEstimator = estimator or Utf8ByteTokenEstimator()
         if not hasattr(self.estimator, "estimate"):
             raise TypeError("estimator must implement estimate(text)")
+        self.context_policy = None
+        if policy is not None:
+            try:
+                self.context_policy = validate_frozen_context_policy(
+                    policy,
+                    [
+                        {
+                            "profile_id": str(profile.id),
+                            "credential_ref": str(profile.provider_credential_id),
+                            "provider": profile.provider,
+                            "model": profile.model,
+                            "max_tokens": profile.max_tokens,
+                            "capabilities": {
+                                "tool_calling": profile.capabilities.tool_calling,
+                                "streaming": profile.capabilities.streaming,
+                                "structured_output": profile.capabilities.structured_output,
+                                "vision": profile.capabilities.vision,
+                                "max_context_tokens": profile.capabilities.max_context_tokens,
+                                **(
+                                    {
+                                        "context_metadata": context_metadata_to_mapping(
+                                            profile.capabilities.context_metadata
+                                        )
+                                    }
+                                    if profile.capabilities.context_metadata is not None
+                                    else {}
+                                ),
+                            },
+                        }
+                        for profile in self._profiles()
+                    ],
+                    reserved_output_tokens=self.config.reserved_output_tokens,
+                )
+            except (TypeError, ValueError, AttributeError):
+                raise AgentHubError(
+                    "AGENT_CONTEXT_POLICY_INVALID", "The frozen context policy is invalid.", 422
+                ) from None
 
     @classmethod
     def from_frozen_spec(
@@ -381,11 +515,11 @@ class ContextBudgetPolicy:
         return cls(frozen_spec, config, estimator=estimator)
 
     @property
-    def context_limit(self) -> int:
+    def context_limit(self) -> int | None:
         return self._effective_context_limit()
 
     @property
-    def effective_context_limit(self) -> int:
+    def effective_context_limit(self) -> int | None:
         return self.context_limit
 
     @property
@@ -413,10 +547,11 @@ class ContextBudgetPolicy:
         """
 
         normalized = self._normalize_messages(messages, categories, exchange_groups)
+        memory_payloads = self._validate_memory_payloads(normalized)
         tools = tuple(tool_definitions)
         if any(not isinstance(tool, ModelToolDefinition) for tool in tools):
             raise TypeError("tool_definitions must contain ModelToolDefinition values")
-        return self._admit_normalized(normalized, tools)
+        return self._admit_normalized(normalized, tools, memory_payloads)
 
     def admit_context(
         self,
@@ -473,18 +608,42 @@ class ContextBudgetPolicy:
         _validate_atomic_tool_groups(normalized)
         return tuple(normalized)
 
+    @staticmethod
+    def _validate_memory_payloads(
+        messages: tuple[ContextMessage, ...],
+    ) -> Mapping[int, _MemoryPayload]:
+        """Parse every explicit MEMORY payload before any budget decision."""
+
+        parsed: dict[int, _MemoryPayload] = {}
+        seen_ids: set[str] = set()
+        for index, item in enumerate(messages):
+            if item.category is not ContextCategory.MEMORY:
+                continue
+            payload = _parse_memory_payload(item.message.content)
+            for candidate in payload.candidates:
+                if candidate.canonical_id in seen_ids:
+                    raise _memory_payload_invalid()
+                seen_ids.add(candidate.canonical_id)
+            parsed[index] = payload
+        return parsed
+
     def _admit_normalized(
         self,
         messages: tuple[ContextMessage, ...],
         tools: tuple[ModelToolDefinition, ...],
+        memory_payloads: Mapping[int, _MemoryPayload],
     ) -> ContextAdmissionResult:
         context_limit = self._effective_context_limit()
         reserved_output = self._effective_reserved_output()
-        if reserved_output >= context_limit:
+        if self.context_policy is not None:
+            available_input = self.context_policy["input_limit_tokens"]
+        elif context_limit is not None and reserved_output < context_limit:
+            available_input = context_limit - reserved_output
+        else:
             raise _budget_exceeded(
                 "Reserved output tokens must be smaller than the effective context limit."
             )
-        available_input = context_limit - reserved_output
+        request_overhead = self._protocol_overhead("request_overhead_tokens")
 
         tool_estimates = tuple(self._estimate_tool(tool) for tool in tools)
         raw_items = tuple(
@@ -502,6 +661,7 @@ class ContextBudgetPolicy:
         estimated_by_category[ContextCategory.TOOL_DEFINITIONS] += sum(
             estimate.total for estimate in tool_estimates
         )
+        estimated_by_category[ContextCategory.RUNTIME_POLICY] += request_overhead
         estimated_input_before = sum(estimated_by_category.values())
 
         mandatory_items = tuple(
@@ -509,7 +669,7 @@ class ContextBudgetPolicy:
         )
         mandatory_message_tokens = sum(item.raw_tokens for item in mandatory_items)
         mandatory_tool_tokens = sum(estimate.total for estimate in tool_estimates)
-        mandatory_total = mandatory_message_tokens + mandatory_tool_tokens
+        mandatory_total = mandatory_message_tokens + mandatory_tool_tokens + request_overhead
         if mandatory_total > available_input:
             raise _mandatory_overflow(
                 mandatory_total=mandatory_total,
@@ -517,7 +677,7 @@ class ContextBudgetPolicy:
                 tool_estimates=tool_estimates,
             )
 
-        projected = self._project_optional_items(raw_items)
+        projected = self._project_optional_items(raw_items, memory_payloads)
         selected, dropped_exchange_count = self._select_items(
             projected,
             mandatory_total=mandatory_total,
@@ -527,15 +687,14 @@ class ContextBudgetPolicy:
 
         retained_by_category = {category: 0 for category in ContextCategory}
         truncated_by_category = {category: 0 for category in ContextCategory}
+        selected_by_index = {item.index: item for item in selected}
         for item in raw_items:
             if item.index in selected_indices:
-                retained = next(
-                    selected_item.admitted_tokens
-                    for selected_item in selected
-                    if selected_item.index == item.index
-                )
+                selected_item = selected_by_index[item.index]
+                retained = selected_item.admitted_tokens
                 retained_by_category[item.category] += retained
-                truncated_by_category[item.category] += max(item.raw_tokens - retained, 0)
+                if item.category is not ContextCategory.MEMORY or selected_item.memory_truncated:
+                    truncated_by_category[item.category] += max(item.raw_tokens - retained, 0)
             else:
                 truncated_by_category[item.category] += item.raw_tokens
         retained_by_category[ContextCategory.TOOL_DEFINITIONS] = mandatory_tool_tokens + sum(
@@ -544,6 +703,7 @@ class ContextBudgetPolicy:
             if item.category is ContextCategory.TOOL_DEFINITIONS
         )
         truncated_by_category[ContextCategory.TOOL_DEFINITIONS] = 0
+        retained_by_category[ContextCategory.RUNTIME_POLICY] += request_overhead
 
         admitted = tuple(
             item
@@ -552,8 +712,10 @@ class ContextBudgetPolicy:
         )
         admitted_messages = tuple(item.admitted_message for item in admitted)
         message_categories = tuple(item.category for item in admitted)
-        estimated_input_after = mandatory_tool_tokens + sum(
-            item.admitted_tokens for item in selected
+        estimated_input_after = (
+            mandatory_tool_tokens
+            + request_overhead
+            + sum(item.admitted_tokens for item in selected)
         )
         if estimated_input_after > available_input:
             raise _budget_exceeded(
@@ -573,7 +735,19 @@ class ContextBudgetPolicy:
             retained_by_category=retained_by_category,
             truncated_by_category=truncated_by_category,
             window_utilization=(
-                estimated_input_after / context_limit if context_limit > 0 else 0.0
+                estimated_input_after / available_input
+                if self.context_policy is not None
+                else estimated_input_after / context_limit
+                if context_limit
+                else 0.0
+            ),
+            context_policy_version=(
+                self.context_policy["policy_version"] if self.context_policy is not None else None
+            ),
+            model_available_input=(
+                self.context_policy["model_available_input_tokens"]
+                if self.context_policy is not None
+                else None
             ),
         )
         return ContextAdmissionResult(
@@ -581,11 +755,18 @@ class ContextBudgetPolicy:
             tool_definitions=tools,
             usage=usage,
             message_categories=message_categories,
+            memory_admission=_memory_admission(
+                raw_items,
+                projected,
+                selected,
+                memory_payloads,
+            ),
         )
 
     def _project_optional_items(
         self,
         items: tuple[_NormalizedMessage, ...],
+        memory_payloads: Mapping[int, _MemoryPayload],
     ) -> tuple[_NormalizedMessage, ...]:
         projected: list[_NormalizedMessage] = []
         # Old specs keep the shared evidence pool for hash and behaviour
@@ -612,6 +793,7 @@ class ContextBudgetPolicy:
                 (ContextCategory.RAG_EVIDENCE, "evidence"),
                 (ContextCategory.TOOL_RESULT, "tool_result"),
             )
+        memory_group_truncated = False
         for category, pool in allocations:
             remaining = pools[pool]
             category_items = [item for item in items if item.category is category]
@@ -625,10 +807,29 @@ class ContextBudgetPolicy:
                 # shared evidence pool down to a bare truncation marker.
                 category_items.reverse()
             for item in category_items:
+                if category is ContextCategory.MEMORY:
+                    (
+                        admitted_message,
+                        admitted_tokens,
+                        memory_admitted_ids,
+                        memory_pool_dropped_ids,
+                        memory_truncated,
+                    ) = self._project_memory_message(
+                        item.item,
+                        remaining,
+                        memory_payloads[item.index],
+                        group_truncated=memory_group_truncated,
+                    )
+                    if memory_truncated:
+                        memory_group_truncated = True
+                else:
+                    admitted_message, admitted_tokens = self._project_message(
+                        item.item, remaining, category
+                    )
+                    memory_admitted_ids = ()
+                    memory_pool_dropped_ids = ()
+                    memory_truncated = False
                 message = item.item.message
-                admitted_message, admitted_tokens = self._project_message(
-                    item.item, remaining, category
-                )
                 was_projected = admitted_message != message
                 if admitted_message is None or admitted_tokens > remaining:
                     admitted_message = None
@@ -642,6 +843,9 @@ class ContextBudgetPolicy:
                         admitted_message=admitted_message,
                         admitted_tokens=admitted_tokens,
                         was_projected=was_projected,
+                        memory_admitted_ids=memory_admitted_ids,
+                        memory_pool_dropped_ids=memory_pool_dropped_ids,
+                        memory_truncated=memory_truncated,
                     )
                 )
             pools[pool] = remaining
@@ -668,6 +872,109 @@ class ContextBudgetPolicy:
                     )
                 )
         return tuple(result)
+
+    def _project_memory_message(
+        self,
+        item: ContextMessage,
+        budget: int,
+        payload: _MemoryPayload,
+        *,
+        group_truncated: bool,
+    ) -> tuple[ModelMessage | None, int, tuple[str, ...], tuple[str, ...], bool]:
+        """Fit complete memory entries in frozen order under the memory pool."""
+
+        if budget <= 0:
+            return None, 0, (), tuple(candidate.id for candidate in payload.candidates), True
+
+        selected: list[_MemoryCandidate] = []
+        rejected: list[str] = []
+        for candidate in payload.candidates:
+            candidate_selected = (*selected, candidate)
+            required = self._memory_projection(
+                item.message,
+                payload,
+                candidate_selected,
+                include_note=False,
+                include_truncated=group_truncated or payload.truncated or bool(rejected),
+            )
+            if required is not None and required[1] <= budget:
+                selected.append(candidate)
+            else:
+                rejected.append(candidate.id)
+                while selected:
+                    retained = self._memory_projection(
+                        item.message,
+                        payload,
+                        tuple(selected),
+                        include_note=False,
+                        include_truncated=True,
+                    )
+                    if retained is not None and retained[1] <= budget:
+                        break
+                    rejected.append(selected.pop().id)
+
+        projected, projected_tokens = self._memory_projection(
+            item.message,
+            payload,
+            tuple(selected),
+            include_note=False,
+            include_truncated=group_truncated or bool(rejected) or payload.truncated,
+        )
+        if projected is None:
+            projected, projected_tokens = self._memory_projection(
+                item.message,
+                payload,
+                (),
+                include_note=False,
+                include_truncated=(
+                    group_truncated or bool(payload.candidates) or payload.truncated
+                ),
+            )
+        if projected is None or projected_tokens > budget:
+            return (
+                None,
+                0,
+                (),
+                (
+                    *rejected,
+                    *(candidate.id for candidate in selected),
+                ),
+                True,
+            )
+
+        with_note = self._memory_projection(
+            item.message,
+            payload,
+            tuple(selected),
+            include_note=True,
+            include_truncated=group_truncated or bool(rejected) or payload.truncated,
+        )
+        if with_note is not None and with_note[1] <= budget:
+            projected, projected_tokens = with_note
+
+        admitted_ids = tuple(candidate.id for candidate in selected)
+        was_truncated = group_truncated or bool(rejected) or payload.truncated
+        return projected, projected_tokens, admitted_ids, tuple(rejected), was_truncated
+
+    def _memory_projection(
+        self,
+        message: ModelMessage,
+        payload: _MemoryPayload,
+        selected: tuple[_MemoryCandidate, ...],
+        *,
+        include_note: bool,
+        include_truncated: bool,
+    ) -> tuple[ModelMessage, int] | None:
+        content: dict[str, Any] = {}
+        if include_note and payload.note is not None:
+            content["note"] = payload.note
+        content["memories"] = [candidate.as_payload() for candidate in selected]
+        content["trust"] = "UNTRUSTED"
+        if include_truncated:
+            content["truncated"] = True
+        projected_message = replace(message, content=_json_dumps(content))
+        estimated = self._estimate_message(projected_message)
+        return projected_message, estimated
 
     def _select_items(
         self,
@@ -815,7 +1122,9 @@ class ContextBudgetPolicy:
         return message, estimated
 
     def _estimate_message(self, message: ModelMessage) -> int:
-        total = self._estimate_text(message.content or "")
+        total = self._estimate_text(message.content or "") + self._protocol_overhead(
+            "message_overhead_tokens"
+        )
         if message.name:
             total += self._estimate_text(message.name)
         if message.tool_call_id:
@@ -833,7 +1142,7 @@ class ContextBudgetPolicy:
         schema = self._estimate_text(_json_dumps(dict(tool.parameters)))
         return _ToolEstimate(
             tool_name=tool.name,
-            total=name + description + schema,
+            total=name + description + schema + self._protocol_overhead("tool_overhead_tokens"),
             name=name,
             description=description,
             schema=schema,
@@ -843,7 +1152,17 @@ class ContextBudgetPolicy:
         value = self.estimator.estimate(text)
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             raise ValueError("TokenEstimator.estimate must return a non-negative integer")
+        if self.context_policy is not None and text and value == 0:
+            raise ValueError("TokenEstimator.estimate must count non-empty text")
         return value
+
+    def _protocol_overhead(self, key: str) -> int:
+        if (
+            self.context_policy is None
+            or self.context_policy["counter"]["includes_protocol_overhead"]
+        ):
+            return 0
+        return self.context_policy["counter"][key]
 
     def _profiles(self) -> tuple[Any, ...]:
         source = self._profile_source
@@ -864,7 +1183,11 @@ class ContextBudgetPolicy:
         except TypeError:
             return (source,)
 
-    def _effective_context_limit(self) -> int:
+    def _effective_context_limit(self) -> int | None:
+        if self.context_policy is not None:
+            # Independent input/output contracts can prove a safe input limit
+            # without a declared total window. Do not invent a provider T.
+            return self.context_policy["min_total_context_tokens"]
         profiles = self._profiles()
         if not profiles:
             raise _context_limit_unavailable("No frozen model profiles were provided.")
@@ -884,6 +1207,8 @@ class ContextBudgetPolicy:
         return min(limits)
 
     def _effective_reserved_output(self) -> int:
+        if self.context_policy is not None:
+            return self.context_policy["reserved_output_tokens"]
         maximum = self.config.reserved_output_tokens
         for profile in self._profiles():
             value = getattr(profile, "max_tokens", None)
@@ -923,6 +1248,158 @@ def _coerce_category(value: ContextCategory | str) -> ContextCategory:
         return ContextCategory(value)
     except (TypeError, ValueError):
         raise ValueError(f"unknown context category: {value!r}") from None
+
+
+def _parse_memory_payload(raw_content: str | None) -> _MemoryPayload:
+    if not isinstance(raw_content, str):
+        raise _memory_payload_invalid()
+    try:
+        value = json.loads(
+            raw_content,
+            object_pairs_hook=_json_object_without_duplicate_keys,
+            parse_constant=_reject_json_constant,
+        )
+    except (IndexError, TypeError, ValueError):
+        raise _memory_payload_invalid() from None
+    if not isinstance(value, Mapping) or not set(value).issubset(_MEMORY_ROOT_KEYS):
+        raise _memory_payload_invalid()
+
+    note = value.get("note")
+    if note is not None and not isinstance(note, str):
+        raise _memory_payload_invalid()
+    for trust_key in ("trust", "data_trust"):
+        trust_value = value.get(trust_key)
+        if trust_value is not None and type(trust_value) is not str:
+            raise _memory_payload_invalid()
+    truncated = value.get("truncated", False)
+    if not isinstance(truncated, bool):
+        raise _memory_payload_invalid()
+    raw_memories = value.get("memories")
+    if not isinstance(raw_memories, list):
+        raise _memory_payload_invalid()
+
+    candidates: list[_MemoryCandidate] = []
+    seen_ids: set[str] = set()
+    for raw_item in raw_memories:
+        if not isinstance(raw_item, Mapping) or set(raw_item) != _MEMORY_ITEM_KEYS:
+            raise _memory_payload_invalid()
+        if (
+            type(raw_item["id"]) is not str
+            or type(raw_item["kind"]) is not str
+            or type(raw_item["content"]) is not str
+        ):
+            raise _memory_payload_invalid()
+        memory_id = raw_item["id"]
+        kind = raw_item["kind"]
+        content = raw_item["content"]
+        if not content.strip():
+            raise _memory_payload_invalid()
+        if kind not in _MEMORY_KINDS:
+            raise _memory_payload_invalid()
+        canonical_id = _canonical_uuid_string(memory_id)
+        if canonical_id is None:
+            raise _memory_payload_invalid() from None
+        if canonical_id in seen_ids:
+            raise _memory_payload_invalid()
+        seen_ids.add(canonical_id)
+        candidates.append(
+            _MemoryCandidate(
+                id=memory_id,
+                canonical_id=canonical_id,
+                kind=kind,
+                content=content,
+            )
+        )
+    return _MemoryPayload(note=note, candidates=tuple(candidates), truncated=truncated)
+
+
+def _json_object_without_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON key")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value: str) -> Any:
+    raise ValueError(f"invalid JSON constant: {value}")
+
+
+def _memory_payload_invalid() -> AgentHubError:
+    return AgentHubError(
+        "AGENT_MEMORY_PAYLOAD_INVALID",
+        "The memory context payload is invalid.",
+        422,
+    )
+
+
+def _validate_memory_identity_tuple(value: Sequence[str], field_name: str) -> tuple[str, ...]:
+    if isinstance(value, (str, bytes)):
+        raise TypeError(f"{field_name} must be a sequence")
+    try:
+        identifiers = tuple(value)
+    except TypeError:
+        raise TypeError(f"{field_name} must be a sequence") from None
+    if any(type(identifier) is not str for identifier in identifiers):
+        raise TypeError(f"{field_name} must contain memory id strings")
+    if len(set(identifiers)) != len(identifiers):
+        raise ValueError(f"{field_name} must not contain duplicate ids")
+    return identifiers
+
+
+def _canonical_uuid_string(value: str) -> str | None:
+    try:
+        parsed = UUID(value)
+    except (AttributeError, TypeError, ValueError):
+        return None
+    return str(parsed) if str(parsed) == value else None
+
+
+def _memory_admission(
+    raw_items: tuple[_NormalizedMessage, ...],
+    projected: tuple[_NormalizedMessage, ...],
+    selected: tuple[_NormalizedMessage, ...],
+    memory_payloads: Mapping[int, _MemoryPayload],
+) -> MemoryAdmission | None:
+    memory_items = [item for item in raw_items if item.category is ContextCategory.MEMORY]
+    if not memory_items:
+        return None
+
+    selected_by_index = {item.index: item for item in selected}
+    projected_by_index = {item.index: item for item in projected}
+    selected_ids: list[str] = []
+    admitted_ids: list[str] = []
+    dropped_reasons: dict[str, str] = {}
+    for raw_item in memory_items:
+        payload = memory_payloads[raw_item.index]
+        selected_ids.extend(candidate.id for candidate in payload.candidates)
+        selected_item = selected_by_index.get(raw_item.index)
+        projected_item = projected_by_index[raw_item.index]
+        if selected_item is not None and selected_item.admitted_message is not None:
+            admitted_ids.extend(selected_item.memory_admitted_ids)
+            pool_drops = set(selected_item.memory_pool_dropped_ids)
+            for candidate in payload.candidates:
+                if candidate.id not in selected_item.memory_admitted_ids:
+                    dropped_reasons[candidate.id] = (
+                        _MEMORY_POOL_BUDGET
+                        if candidate.id in pool_drops
+                        else _CONTEXT_WINDOW_BUDGET
+                    )
+            continue
+        pool_drops = set(projected_item.memory_pool_dropped_ids)
+        for candidate in payload.candidates:
+            dropped_reasons[candidate.id] = (
+                _MEMORY_POOL_BUDGET
+                if projected_item.admitted_message is None or candidate.id in pool_drops
+                else _CONTEXT_WINDOW_BUDGET
+            )
+
+    return MemoryAdmission(
+        selected_ids=tuple(selected_ids),
+        admitted_ids=tuple(admitted_ids),
+        dropped_reasons=dropped_reasons,
+    )
 
 
 def _metadata_length(value: Sequence[Any] | Mapping[int, Any]) -> int:
@@ -1309,6 +1786,8 @@ __all__ = [
     "ContextCategory",
     "ContextItem",
     "ContextMessage",
+    "MEMORY_PROJECTION_VERSION",
+    "MemoryAdmission",
     "TokenEstimator",
     "ApproxTokenEstimator",
     "Utf8ByteTokenEstimator",

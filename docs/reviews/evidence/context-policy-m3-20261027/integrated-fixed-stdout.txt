@@ -1,0 +1,17 @@
+........................................................................ [ 16%]
+........................................................................ [ 33%]
+........................................................................ [ 49%]
+........................................................................ [ 66%]
+........................................................................ [ 82%]
+........................................................................ [ 99%]
+..                                                                       [100%]
+============================== warnings summary ===============================
+tests/integration/test_thread_history_snapshot_m3.py::test_competing_prepares_install_exactly_one_history_manifest
+tests/integration/test_history_approval_m3.py::test_approval_resume_replays_same_source_and_complete_turn
+tests/integration/test_approval_usage_resume.py::test_restart_resume_preserves_usage_and_waiting_cost[APPROVED]
+  E:\JAVA\AI+agent\AgentHub\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\20303\.codex\worktrees\context-memory-atomic-m1\AgentHub\.scratch\context-policy-m3\final-fixed-junit.xml -
+434 passed, 3 warnings in 25.25s

@@ -3,6 +3,7 @@
 from collections.abc import Mapping
 from typing import Any
 
+from packages.model_gateway.context_metadata import context_metadata_from_mapping
 from packages.model_gateway.contracts import (
     CapabilityRequirements,
     ModelCapabilities,
@@ -18,6 +19,10 @@ def capabilities_from_mapping(values: Mapping[str, Any]) -> ModelCapabilities:
 
     if not isinstance(values, Mapping):
         raise ValueError("capabilities must be a mapping")
+    for capability in _BOOLEAN_CAPABILITIES:
+        value = values.get(capability)
+        if value is not None and not isinstance(value, bool):
+            raise ValueError(f"{capability} must be a boolean")
     max_context_tokens = values.get("max_context_tokens")
     if max_context_tokens is not None and (
         isinstance(max_context_tokens, bool)
@@ -31,6 +36,7 @@ def capabilities_from_mapping(values: Mapping[str, Any]) -> ModelCapabilities:
         structured_output=values.get("structured_output") is True,
         vision=values.get("vision") is True,
         max_context_tokens=max_context_tokens,
+        context_metadata=context_metadata_from_mapping(values.get("context_metadata")),
     )
 
 

@@ -4,8 +4,9 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
+from packages.agent_runtime.context_policy import normalize_context_policy_request
 from packages.agent_runtime.runtime_config import (
     MAX_RUN_COST_LIMIT_MICRO_USD,
     MAX_RUNTIME_LIMITS,
@@ -37,9 +38,9 @@ class RetrievalConfigRequest(BaseModel):
 class ContextBudgetRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    reserved_output_tokens: int | None = Field(default=None, ge=1)
-    max_retrieval_tokens: int | None = Field(default=None, ge=1)
-    max_tool_result_tokens: int | None = Field(default=None, ge=1)
+    reserved_output_tokens: int | None = Field(default=None, ge=1, strict=True)
+    max_retrieval_tokens: int | None = Field(default=None, ge=1, strict=True)
+    max_tool_result_tokens: int | None = Field(default=None, ge=1, strict=True)
 
 
 class MemoryConfigRequest(BaseModel):
@@ -54,6 +55,77 @@ class MemoryConfigRequest(BaseModel):
 
     thread_history_search: bool = False
     long_term_memory: bool = False
+    max_memory_tokens: int | None = Field(default=None, ge=1, strict=True)
+    max_memory_tokens_source: Literal["UNSET", "DEFAULT", "CUSTOM"] | None = None
+
+    @model_validator(mode="after")
+    def validate_budget_intent(self) -> MemoryConfigRequest:
+        source = self.max_memory_tokens_source
+        if source is None:
+            source = "CUSTOM" if self.max_memory_tokens is not None else "UNSET"
+        if (source == "CUSTOM") != (self.max_memory_tokens is not None):
+            raise ValueError("memory source and explicit budget conflict")
+        if self.max_memory_tokens is not None and not self.long_term_memory:
+            raise ValueError("memory budget requires long_term_memory")
+        self.max_memory_tokens_source = source
+        return self
+
+
+class ContextPolicyRequest(BaseModel):
+    """An explicit request for the versioned adaptive input policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    policy_version: Literal["adaptive_context_v1"]
+    preset: Literal[
+        "MINI_16K",
+        "STANDARD_32K",
+        "GENERAL_64K",
+        "LONG_DOCUMENT_128K",
+        "EXTENDED_256K",
+    ] = "GENERAL_64K"
+    workspace_input_limit: int | None = Field(default=None, ge=1, strict=True)
+    workspace_input_limit_source: Literal["UNSET", "DEFAULT", "CUSTOM"] | None = None
+    soft_trigger_percent: int = Field(default=70, ge=10, le=95, strict=True)
+    hard_trigger_percent: int = Field(default=85, ge=15, le=100, strict=True)
+    target_percent: int = Field(default=55, ge=5, le=90, strict=True)
+    retained_recent_turns: int | None = Field(default=None, ge=0, le=50, strict=True)
+    max_history_groups: int | None = Field(default=None, ge=16, le=4096, strict=True)
+    safety_reserve_percent: int | None = Field(default=None, ge=0, le=30, strict=True)
+    safety_reserve_tokens: int | None = Field(default=None, ge=0, le=65536, strict=True)
+    counter_id: Literal["approx_language_v1"] = "approx_language_v1"
+
+    @model_validator(mode="after")
+    def validate_policy_intent(self) -> ContextPolicyRequest:
+        if not (0 < self.target_percent < self.soft_trigger_percent < self.hard_trigger_percent <= 100):
+            raise ValueError(
+                f"trigger percentages must satisfy target ({self.target_percent}) < soft ({self.soft_trigger_percent}) < hard ({self.hard_trigger_percent})"
+            )
+        normalized = normalize_context_policy_request(self.model_dump(exclude_none=True))
+        self.workspace_input_limit_source = normalized["workspace_input_limit_source"]
+        return self
+
+
+class SummaryPolicyRequest(BaseModel):
+    """Explicit opt-in for deterministic, source-grounded thread summaries."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: StrictBool
+    policy_version: Literal["thread_summary_policy_v1"] = "thread_summary_policy_v1"
+    prompt_version: Literal["summary_candidate_zh_v1"] = "summary_candidate_zh_v1"
+    validator_version: Literal["summary_mechanical_v1"] = "summary_mechanical_v1"
+    tokenizer_id: Literal["approx_language_v1"] = "approx_language_v1"
+    tokenizer_version: int = Field(default=1, ge=1, le=1, strict=True)
+    soft_trigger_percent: int = Field(default=70, ge=70, le=70, strict=True)
+    hard_trigger_percent: int = Field(default=85, ge=85, le=85, strict=True)
+    target_percent: int = Field(default=55, ge=55, le=55, strict=True)
+
+    @model_validator(mode="after")
+    def validate_explicit_opt_in(self) -> SummaryPolicyRequest:
+        if self.enabled is not True:
+            raise ValueError("summary_policy must be explicitly enabled")
+        return self
 
 
 class RuntimeConfigRequest(BaseModel):
@@ -72,7 +144,25 @@ class RuntimeConfigRequest(BaseModel):
     # field existed has.
     max_cost_micro_usd: int | None = Field(default=None, ge=1, le=MAX_RUN_COST_LIMIT_MICRO_USD)
     context_budget: ContextBudgetRequest | None = None
+    context_budget_sources: (
+        dict[
+            Literal["reserved_output_tokens", "max_retrieval_tokens", "max_tool_result_tokens"],
+            Literal["UNSET", "DEFAULT", "CUSTOM"],
+        ]
+        | None
+    ) = None
     memory: MemoryConfigRequest | None = None
+    context_policy: ContextPolicyRequest | None = None
+    history_policy: Literal["deterministic_history_v1"] | None = None
+    summary_policy: SummaryPolicyRequest | None = None
+
+    @model_validator(mode="after")
+    def validate_summary_prerequisites(self) -> RuntimeConfigRequest:
+        if self.summary_policy is not None and (
+            self.context_policy is None or self.history_policy != "deterministic_history_v1"
+        ):
+            raise ValueError("summary_policy requires context_policy and deterministic_history_v1")
+        return self
 
 
 class WikiBindingRequest(BaseModel):

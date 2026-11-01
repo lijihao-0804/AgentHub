@@ -50,7 +50,7 @@ class ModelProfileCreateRequest(BaseModel):
     provider_credential_id: UUID
     model: str = Field(min_length=1, max_length=128)
     temperature: Decimal = Field(default=Decimal("0"), ge=0)
-    max_tokens: int = Field(gt=0)
+    max_tokens: int = Field(gt=0, strict=True)
     timeout_seconds: Decimal = Field(gt=0)
     fallback_profile_id: UUID | None = None
     capabilities: dict[str, Any] = Field(default_factory=dict)
@@ -63,7 +63,7 @@ class ModelProfilePatchRequest(BaseModel):
     provider_credential_id: UUID | None = None
     model: str | None = Field(default=None, min_length=1, max_length=128)
     temperature: Decimal | None = Field(default=None, ge=0)
-    max_tokens: int | None = Field(default=None, gt=0)
+    max_tokens: int | None = Field(default=None, gt=0, strict=True)
     timeout_seconds: Decimal | None = Field(default=None, gt=0)
     fallback_profile_id: UUID | None = None
     capabilities: dict[str, Any] | None = None

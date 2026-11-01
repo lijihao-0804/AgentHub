@@ -8,8 +8,11 @@ import logging
 from collections.abc import AsyncIterator, Mapping
 from decimal import Decimal
 from typing import Any, Protocol
+from urllib.parse import urlsplit
 
+from packages.model_gateway.cache_capability import PromptCacheCapability, prompt_cache_capability
 from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
     CostEstimate,
     ModelMessage,
     ModelRequest,
@@ -24,6 +27,11 @@ from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCo
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 
 logger = logging.getLogger(__name__)
+
+_MISSING = object()
+_ALIYUN_BEIJING_HOST_SUFFIX = ".cn-beijing.maas.aliyuncs.com"
+_ALIYUN_BEIJING_OPENAI_PATH = "/compatible-mode/v1"
+_ALIYUN_DEEPSEEK_NON_THINKING_MODEL = "deepseek-v4.1-flash-1017"
 
 
 class LiteLLMClient(Protocol):
@@ -51,6 +59,58 @@ def _provider_model(credential: ProviderCredential, model: str) -> str:
     raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
 
 
+def _is_verified_aliyun_beijing_openai_endpoint(base_url: str | None) -> bool:
+    if not base_url:
+        return False
+    try:
+        parsed = urlsplit(base_url)
+        hostname = parsed.hostname
+        port = parsed.port
+    except ValueError:
+        return False
+    return (
+        parsed.scheme == "https"
+        and hostname is not None
+        and hostname.endswith(_ALIYUN_BEIJING_HOST_SUFFIX)
+        and len(hostname) > len(_ALIYUN_BEIJING_HOST_SUFFIX)
+        and port is None
+        and parsed.username is None
+        and parsed.password is None
+        and parsed.path.rstrip("/") == _ALIYUN_BEIJING_OPENAI_PATH
+        and not parsed.query
+        and not parsed.fragment
+    )
+
+
+def _aliyun_deepseek_request_options(
+    profile: ModelProfile,
+    credential: ProviderCredential,
+    mode: AliyunDeepSeekRequestMode,
+) -> dict[str, Any]:
+    if mode is AliyunDeepSeekRequestMode.PROVIDER_DEFAULT:
+        return {}
+    provider = credential.provider.strip().lower().replace("_", "-")
+    if (
+        mode is not AliyunDeepSeekRequestMode.NON_THINKING
+        or provider != "openai-compatible"
+        or profile.model != _ALIYUN_DEEPSEEK_NON_THINKING_MODEL
+        or not _is_verified_aliyun_beijing_openai_endpoint(credential.base_url)
+    ):
+        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH)
+    # Alibaba Cloud documents enable_thinking as an extension request field for
+    # its OpenAI-compatible API. LiteLLM forwards non-standard fields there.
+    return {"extra_body": {"enable_thinking": False}}
+
+
+def _tool_arguments_payload(arguments: Mapping[str, Any]) -> str:
+    try:
+        return json.dumps(arguments, separators=(",", ":"), sort_keys=True)
+    except TypeError:
+        # Preserve the existing serializer for unusual mappings with mixed
+        # non-string keys; the provider may still reject such arguments.
+        return json.dumps(arguments, separators=(",", ":"))
+
+
 def _message_payload(message: ModelMessage) -> dict[str, Any]:
     payload: dict[str, Any] = {"role": message.role, "content": message.content}
     if message.name is not None:
@@ -68,7 +128,9 @@ def _message_payload(message: ModelMessage) -> dict[str, Any]:
                 "type": "function",
                 "function": {
                     "name": call.name,
-                    "arguments": json.dumps(call.arguments, separators=(",", ":")),
+                    # JSON object key order is not meaningful to the tool, but
+                    # must be stable when a past call is replayed in a prefix.
+                    "arguments": _tool_arguments_payload(call.arguments),
                 },
             }
             for call in message.tool_calls
@@ -93,6 +155,7 @@ def _request_payload(
         "api_key": credential.secret,
         "stream": stream,
     }
+    payload.update(_aliyun_deepseek_request_options(profile, credential, request.request_mode))
     if stream:
         # OpenAI-compatible providers omit usage from a stream unless it is asked
         # for, and both providers this adapter speaks to are OpenAI-compatible.
@@ -153,24 +216,32 @@ def _normalize_error(error: Exception) -> ModelGatewayError:
     return ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
 
 
+def _token_count(value: Any) -> int | None:
+    if type(value) is not int or value < 0:
+        return None
+    return value
+
+
 def _normalize_usage(value: Any) -> ModelUsage | None:
     if value is None:
         return None
-    input_tokens = _value(value, "prompt_tokens")
-    output_tokens = _value(value, "completion_tokens")
-    total_tokens = _value(value, "total_tokens")
+    input_tokens = _token_count(_value(value, "prompt_tokens"))
+    output_tokens = _token_count(_value(value, "completion_tokens"))
     if input_tokens is None or output_tokens is None:
         return None
-    input_tokens = int(input_tokens)
-    output_tokens = int(output_tokens)
-    total_tokens = int(total_tokens or input_tokens + output_tokens)
+    reported_total = _value(value, "total_tokens")
+    if reported_total is not None and _token_count(reported_total) != input_tokens + output_tokens:
+        # Contradictory provider usage is not evidence of a complete bill.
+        return None
     details = _value(value, "prompt_tokens_details")
-    cached_tokens = _value(details, "cached_tokens") if details is not None else None
+    cached_tokens = _token_count(_value(details, "cached_tokens"))
+    if cached_tokens is not None and cached_tokens > input_tokens:
+        cached_tokens = None
     return ModelUsage(
         input_tokens=input_tokens,
         output_tokens=output_tokens,
-        total_tokens=total_tokens,
-        cached_tokens=int(cached_tokens) if cached_tokens is not None else None,
+        total_tokens=input_tokens + output_tokens,
+        cached_tokens=cached_tokens,
     )
 
 
@@ -246,14 +317,16 @@ def _normalize_response(
     tool_calls = tuple(
         _normalize_tool_call(tool_call) for tool_call in (_value(message, "tool_calls", []) or [])
     )
+    raw_usage = _value(response, "usage")
+    usage = _normalize_usage(raw_usage)
     return ModelResponse(
         content=_value(message, "content", "") or _value(message, "refusal", "") or "",
         provider=provider,
         model=model,
         tool_calls=tool_calls,
         finish_reason=_value(choice, "finish_reason"),
-        usage=_normalize_usage(_value(response, "usage")),
-        cost_estimate=_normalize_cost(response),
+        usage=usage,
+        cost_estimate=_normalize_cost(response) if raw_usage is None or usage is not None else None,
     )
 
 
@@ -266,6 +339,13 @@ class LiteLLMProviderAdapter:
 
     def __init__(self, client: LiteLLMClient | None = None) -> None:
         self.client = client or _default_client()
+
+    @staticmethod
+    def prompt_cache_capability(
+        profile: ModelProfile, credential: ProviderCredential
+    ) -> PromptCacheCapability:
+        """Describe documented support without enabling or assuming a cache hit."""
+        return prompt_cache_capability(base_url=credential.base_url, model=profile.model)
 
     async def complete(
         self,
@@ -297,6 +377,7 @@ class LiteLLMProviderAdapter:
         tool_parts: dict[int, dict[str, Any]] = {}
         finish_reason: str | None = None
         usage: ModelUsage | None = None
+        usage_invalidated = False
         cost_estimate: CostEstimate | None = None
         raw_stream = None
         try:
@@ -307,8 +388,14 @@ class LiteLLMProviderAdapter:
                         chunk, content_parts=content_parts, tool_parts=tool_parts
                     ):
                         yield event
-                    usage = _normalize_usage(_value(chunk, "usage")) or usage
-                    cost_estimate = _normalize_cost(chunk) or cost_estimate
+                    chunk_usage = _value(chunk, "usage", _MISSING)
+                    if chunk_usage is not _MISSING and chunk_usage is not None:
+                        usage = _normalize_usage(chunk_usage)
+                        usage_invalidated = usage is None
+                        if usage_invalidated:
+                            cost_estimate = None
+                    if not usage_invalidated:
+                        cost_estimate = _normalize_cost(chunk) or cost_estimate
                     finish_reason = _stream_finish_reason(chunk) or finish_reason
             else:
                 for chunk in raw_stream:
@@ -316,8 +403,14 @@ class LiteLLMProviderAdapter:
                         chunk, content_parts=content_parts, tool_parts=tool_parts
                     ):
                         yield event
-                    usage = _normalize_usage(_value(chunk, "usage")) or usage
-                    cost_estimate = _normalize_cost(chunk) or cost_estimate
+                    chunk_usage = _value(chunk, "usage", _MISSING)
+                    if chunk_usage is not _MISSING and chunk_usage is not None:
+                        usage = _normalize_usage(chunk_usage)
+                        usage_invalidated = usage is None
+                        if usage_invalidated:
+                            cost_estimate = None
+                    if not usage_invalidated:
+                        cost_estimate = _normalize_cost(chunk) or cost_estimate
                     finish_reason = _stream_finish_reason(chunk) or finish_reason
         except ModelGatewayError:
             raise
@@ -429,4 +522,4 @@ def _complete_tool_call(parts: dict[str, Any]) -> ModelToolCall:
     )
 
 
-__all__ = ["LiteLLMProviderAdapter", "LiteLLMClient"]
+__all__ = ["AliyunDeepSeekRequestMode", "LiteLLMProviderAdapter", "LiteLLMClient"]

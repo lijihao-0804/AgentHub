@@ -8,6 +8,10 @@ from typing import Any, Literal, Protocol
 from uuid import UUID
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.model_gateway.context_metadata import (
+    ContextMetadata,
+    validate_context_metadata,
+)
 
 MessageRole = Literal["system", "user", "assistant", "tool"]
 
@@ -87,6 +91,13 @@ class RetryPolicy:
             raise ValueError("max_attempts must be between 1 and 5")
 
 
+class AliyunDeepSeekRequestMode(StrEnum):
+    """Per-request mode for the verified Aliyun DeepSeek route."""
+
+    PROVIDER_DEFAULT = "provider_default"
+    NON_THINKING = "non_thinking"
+
+
 @dataclass(frozen=True, slots=True)
 class ModelRequest:
     """Provider-neutral model input. Provider selection is server-side."""
@@ -96,6 +107,7 @@ class ModelRequest:
     response_schema: StructuredOutputSchema | None = None
     required_capabilities: CapabilityRequirements = field(default_factory=CapabilityRequirements)
     retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
+    request_mode: AliyunDeepSeekRequestMode = AliyunDeepSeekRequestMode.PROVIDER_DEFAULT
 
     def __post_init__(self) -> None:
         messages = tuple(self.messages)
@@ -108,6 +120,8 @@ class ModelRequest:
             raise TypeError("required_capabilities must be CapabilityRequirements")
         if not isinstance(self.retry_policy, RetryPolicy):
             raise TypeError("retry_policy must be RetryPolicy")
+        if not isinstance(self.request_mode, AliyunDeepSeekRequestMode):
+            raise TypeError("request_mode must be an AliyunDeepSeekRequestMode")
         object.__setattr__(self, "messages", messages)
         object.__setattr__(self, "tools", tools)
 
@@ -121,10 +135,17 @@ class ModelUsage:
 
     def __post_init__(self) -> None:
         values = (self.input_tokens, self.output_tokens, self.total_tokens)
+        if any(type(value) is not int for value in values):
+            raise ValueError("token counts must be integers")
         if any(value < 0 for value in values):
             raise ValueError("token counts must be non-negative")
-        if self.cached_tokens is not None and self.cached_tokens < 0:
-            raise ValueError("cached_tokens must be non-negative")
+        if self.cached_tokens is not None:
+            if type(self.cached_tokens) is not int:
+                raise ValueError("cached_tokens must be an integer")
+            if self.cached_tokens < 0:
+                raise ValueError("cached_tokens must be non-negative")
+            if self.cached_tokens > self.input_tokens:
+                raise ValueError("cached_tokens cannot exceed input_tokens")
 
 
 @dataclass(frozen=True, slots=True)
@@ -213,10 +234,26 @@ class ModelCapabilities:
     structured_output: bool = False
     vision: bool = False
     max_context_tokens: int | None = None
+    context_metadata: ContextMetadata | Mapping[str, Any] | None = field(
+        default=None,
+        metadata={"serialization_type": ContextMetadata},
+    )
 
     def __post_init__(self) -> None:
-        if self.max_context_tokens is not None and self.max_context_tokens <= 0:
+        if self.max_context_tokens is not None and (
+            isinstance(self.max_context_tokens, bool)
+            or not isinstance(self.max_context_tokens, int)
+            or self.max_context_tokens <= 0
+        ):
             raise ValueError("max_context_tokens must be positive")
+        try:
+            metadata = validate_context_metadata(
+                self.context_metadata,
+                max_context_tokens=self.max_context_tokens,
+            )
+        except ValueError as error:
+            raise ValueError(f"invalid context_metadata: {error}") from None
+        object.__setattr__(self, "context_metadata", metadata)
 
 
 @dataclass(frozen=True, slots=True)
@@ -302,7 +339,9 @@ class ModelGateway(Protocol):
 
 
 __all__ = [
+    "AliyunDeepSeekRequestMode",
     "CapabilityRequirements",
+    "ContextMetadata",
     "CostEstimate",
     "MessageRole",
     "ModelCapabilities",

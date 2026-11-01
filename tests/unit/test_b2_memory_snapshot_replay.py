@@ -25,7 +25,11 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from packages.agent_runtime.context_budget import ContextCategory
+from packages.agent_runtime.context_budget import (
+    ContextBudgetConfig,
+    ContextCategory,
+    ContextMessage,
+)
 from packages.agent_runtime.runtime import _AgentRunGraph, _categorize_messages
 from packages.core.errors.exceptions import AgentHubError
 from packages.memory.contracts import (
@@ -34,6 +38,7 @@ from packages.memory.contracts import (
     memory_content_hash,
 )
 from packages.model_gateway.contracts import ModelMessage
+from tests.unit.test_m4d_context_budget import _policy
 
 
 class _RecordingSelector:
@@ -49,9 +54,7 @@ class _RecordingSelector:
         self.select_calls += 1
         return self._memories[:limit]
 
-    async def load(
-        self, *, workspace_id, memory_ids, memory_content_hashes=None
-    ):  # noqa: ANN001
+    async def load(self, *, workspace_id, memory_ids, memory_content_hashes=None):  # noqa: ANN001
         self.load_calls.append(tuple(memory_ids))
         self.load_hashes.append(memory_content_hashes)
         by_id = {item.id: item for item in self._memories}
@@ -288,9 +291,7 @@ async def test_hash_aware_snapshot_never_retries_as_id_only() -> None:
     calls: list[dict | None] = []
 
     class _StrictSelector(_RecordingSelector):
-        async def load(
-            self, *, workspace_id, memory_ids, memory_content_hashes=None
-        ):  # noqa: ANN001
+        async def load(self, *, workspace_id, memory_ids, memory_content_hashes=None):  # noqa: ANN001
             calls.append(memory_content_hashes)
             if memory_content_hashes is None:
                 raise AssertionError("hashed snapshots must never use the ID-only path")
@@ -334,11 +335,30 @@ async def test_only_ids_present_in_the_admitted_memory_message_are_touched() -> 
     workspace_id = uuid4()
     graph.context = SimpleNamespace(workspace_id=str(workspace_id))
     state = {"memory_ids": (memories[0].id, memories[1].id)}
-    admitted = (
-        ModelMessage(
-            role="system",
-            content=json.dumps({"memories": [{"id": str(memories[1].id)}]}),
-        ),
+    admitted = _policy(
+        context=2_000,
+        max_tokens=1,
+        config=ContextBudgetConfig(reserved_output_tokens=1, max_memory_tokens=1_000),
+    ).admit(
+        [
+            ContextMessage(
+                ModelMessage(
+                    role="system",
+                    content=json.dumps(
+                        {
+                            "memories": [
+                                {
+                                    "id": str(memories[1].id),
+                                    "kind": memories[1].kind,
+                                    "content": memories[1].content,
+                                }
+                            ]
+                        }
+                    ),
+                ),
+                ContextCategory.MEMORY,
+            )
+        ]
     )
 
     await graph._touch_admitted_memories(state, admitted)

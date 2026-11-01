@@ -89,9 +89,23 @@ class AgentRunState(TypedDict, total=False):
     # long-term memory. Zero for every agent that has not turned it on.
     memory_message_count: int
     memory_ids: tuple[UUID, ...]
+    # Admission attribution only: frozen selection identities stay unchanged.
+    # This private sidecar contains stable reasons, never memory bodies.
+    memory_drop_reasons: dict[str, str]
     # How many of ``messages``, right after the system prefix and the memory
     # block, are replayed thread history rather than the question asked now.
     history_message_count: int
+    history_exchange_ids: list[str]
+    # Private, versioned binding between this checkpoint and the Run's frozen
+    # history source/plan. Never sent to the provider as conversation text.
+    history_checkpoint_binding: dict[str, Any]
+    summary_boundary: dict[str, Any]
+    summary_plan_blocked: bool
+    summary_revision_binding: dict[str, Any]
+    # Private checkpoint sidecar for the current opt-in turn only. It is not a
+    # trace and does not contain the injected historical or memory messages.
+    turn_transcript: list[ModelMessage]
+    turn_evidence_registry: dict[str, dict[str, Any]]
     pending_tool_calls: list[dict[str, Any]]
     proposed_tool_calls: list[dict[str, Any]]
     pre_observations: dict[str, ToolResult]
@@ -330,6 +344,7 @@ def _categorize_messages(
     *,
     memory_message_count: int = 0,
     history_message_count: int = 0,
+    history_exchange_ids: list[str] | None = None,
 ) -> tuple[ContextMessage, ...]:
     """Attach explicit budget categories without inspecting business content.
 
@@ -361,11 +376,16 @@ def _categorize_messages(
     memory_end = memory_start + max(memory_message_count, 0)
     history_start = memory_end
     history_end = history_start + max(history_message_count, 0)
+    if history_exchange_ids is not None and len(history_exchange_ids) != history_message_count:
+        raise ValueError("history exchange identities do not match the frozen messages")
     for index, message in enumerate(messages):
         is_memory = memory_start <= index < memory_end
         is_history = history_start <= index < history_end
         history_turn = (index - history_start) // 2 if is_history else None
-        if index == 0 and message.role == "system":
+        if is_history and history_exchange_ids is not None:
+            category = ContextCategory.CONVERSATION
+            group = ("history", history_exchange_ids[index - history_start])
+        elif index == 0 and message.role == "system":
             category = ContextCategory.RUNTIME_POLICY
             group = None
         elif is_memory:
@@ -552,6 +572,33 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "usage_source",
         "attempt_status",
         "cost_status",
+        "memory_projection_version",
+        "memory_selected_count",
+        "memory_admitted_count",
+        "memory_dropped_count",
+        "memory_dropped_pool_budget_count",
+        "memory_dropped_context_window_count",
+        "memory_dropped_unavailable_count",
+        "context_policy_version",
+        "available_input",
+        "model_available_input",
+        "workspace_input_limit",
+        "context_limit_status",
+        "counter_precision",
+        "window_utilization_basis",
+        "soft_trigger_tokens",
+        "hard_trigger_tokens",
+        "target_tokens",
+        "summary_revision_hash",
+        "summary_source_count",
+        "summary_context_tokens_after",
+        "history_plan_version",
+        "history_plan_pre_trim_tokens",
+        "history_plan_planned_tokens",
+        "history_plan_retained_tokens",
+        "history_plan_pre_trim_pressure",
+        "history_plan_group_count",
+        "history_plan_reasons",
     }
     result: dict[str, Any] = {}
     for key, value in metadata.items():

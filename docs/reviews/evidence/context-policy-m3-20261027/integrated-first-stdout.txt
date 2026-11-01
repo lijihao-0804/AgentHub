@@ -1,0 +1,108 @@
+........................................................................ [ 16%]
+........................................................................ [ 33%]
+........................................................................ [ 49%]
+........................................................................ [ 66%]
+........................................................................ [ 82%]
+..........................................................E............. [ 99%]
+..                                                                       [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_compact_rag_evidence_is_replayed_with_current_snapshot_and_permission _
+file C:\Users\20303\.codex\worktrees\context-memory-atomic-m1\AgentHub\tests\integration\test_history_rag_pipeline_m3.py, line 30
+  @pytest.mark.asyncio
+  async def test_compact_rag_evidence_is_replayed_with_current_snapshot_and_permission(factory):
+      base = await _seed(factory)
+      context = base["context"].model_copy(
+          update={"permissions": base["context"].permissions | frozenset({"knowledge_run"})}
+      )
+      async with factory() as session:
+          knowledge = await _create_knowledge_base(
+              session, workspace_id=base["workspace_id"], label=uuid4().hex
+          )
+          kb, revision, document = (
+              knowledge["knowledge_base"],
+              knowledge["revision"],
+              knowledge["document"],
+          )
+          chunk_id = f"history-rag-{uuid4().hex}"
+          session.add(
+              DocumentChunk(
+                  chunk_id=chunk_id,
+                  workspace_id=base["workspace_id"],
+                  knowledge_base_id=kb.id,
+                  document_id=document.id,
+                  document_revision_id=revision.id,
+                  ordinal=0,
+                  normalized_content_hash="0" * 64,
+                  text="source evidence",
+                  locator={},
+              )
+          )
+          snapshot = await KnowledgeSnapshotService().create_current_snapshot(session, context, kb.id)
+          version = await session.scalar(
+              select(AgentVersion).where(AgentVersion.id == base["version_id"])
+          )
+          resolved = deepcopy(version.resolved_spec)
+          entry = resolved["tools"][0]
+          tool = await session.scalar(
+              select(ToolRevision).where(ToolRevision.id == UUID(entry["tool_revision_id"]))
+          )
+          tool_spec = deepcopy(tool.spec)
+          tool_spec["identity"] = "search_knowledge"
+          tool_spec["input_schema"] = {
+              "type": "object",
+              "properties": {"query": {"type": "string"}},
+              "required": ["query"],
+              "additionalProperties": False,
+          }
+          tool.spec = tool_spec
+          tool.spec_hash = canonical_json_hash(tool_spec)
+          entry["tool_spec_hash"] = tool.spec_hash
+          resolved["retrieval"]["evidence_projection"] = "compact_v1"
+          resolved["retrieval"]["knowledge_bindings"] = [
+              {
+                  "knowledge_base_id": str(kb.id),
+                  "binding_mode": "PINNED",
+                  "snapshot_id": str(snapshot.snapshot_id),
+                  "snapshot_hash": snapshot.content_hash,
+              }
+          ]
+          version.resolved_spec = resolved
+          version.resolved_spec_hash = canonical_json_hash(resolved)
+          await session.commit()
+
+      ref = {
+          "knowledge_base_id": str(kb.id),
+          "snapshot_id": str(snapshot.snapshot_id),
+          "document_revision_id": str(revision.id),
+          "chunk_id": chunk_id,
+      }
+      record = {
+          "chunk_id": chunk_id,
+          "snapshot_id": str(snapshot.snapshot_id),
+          "document_id": str(document.id),
+          "document_revision_id": str(revision.id),
+          "snippet": "source evidence",
+      }
+
+      async def search_handler(context, definition, arguments, session_factory):
+          return {"results": [record], "evidence_refs": [ref]}
+
+      class Gateway:
+          def __init__(self):
+E       fixture 'factory' not found
+>       available fixtures: _session_event_loop, anyio_backend, anyio_backend_name, anyio_backend_options, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, db_factory, doctest_namespace, event_loop, event_loop_policy, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, migrated_database, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, tests/integration/test_history_rag_pipeline_m3.py::<event_loop>, tests/unit::<event_loop>, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, unused_tcp_port, unused_tcp_port_factory, unused_udp_port, unused_udp_port_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\20303\.codex\worktrees\context-memory-atomic-m1\AgentHub\tests\integration\test_history_rag_pipeline_m3.py:30
+============================== warnings summary ===============================
+tests/integration/test_thread_history_snapshot_m3.py::test_competing_prepares_install_exactly_one_history_manifest
+tests/integration/test_history_approval_m3.py::test_approval_resume_replays_same_source_and_complete_turn
+tests/integration/test_approval_usage_resume.py::test_restart_resume_preserves_usage_and_waiting_cost[APPROVED]
+  E:\JAVA\AI+agent\AgentHub\.venv\Lib\site-packages\alembic\config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\20303\.codex\worktrees\context-memory-atomic-m1\AgentHub\.scratch\context-policy-m3\final-junit.xml -
+=========================== short test summary info ===========================
+ERROR tests/integration/test_history_rag_pipeline_m3.py::test_compact_rag_evidence_is_replayed_with_current_snapshot_and_permission
+433 passed, 3 warnings, 1 error in 24.64s

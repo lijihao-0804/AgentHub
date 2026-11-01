@@ -1,0 +1,32 @@
+{
+  "cwd": "C:/Users/20303/.codex/worktrees/context-memory-atomic-m1/AgentHub",
+  "timeout_seconds": 600,
+  "argv": [
+    "E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/unit/test_memory_atomic_admission.py",
+    "tests/unit/test_memory_delivery_attribution.py",
+    "tests/unit/test_b2_long_term_memory.py",
+    "tests/unit/test_b2_memory_snapshot_replay.py",
+    "tests/unit/test_b3_memory_admin_api.py",
+    "tests/unit/test_evaluation_memory_composition.py",
+    "tests/unit/test_memory_quality.py",
+    "tests/unit/test_m4d_context_budget.py",
+    "tests/unit/test_budget_unification.py",
+    "tests/unit/test_rag_context_budget_configuration.py",
+    "tests/unit/test_rag_budget_configuration.py",
+    "tests/unit/test_runtime_rag_evidence_projection.py",
+    "tests/unit/test_runtime_compact_evidence.py",
+    "tests/unit/test_hidden_runtime_recovery.py",
+    "tests/unit/test_a1_thread_context.py",
+    "-o",
+    "addopts=",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--tb=short",
+    "--basetemp=E:/JAVA/AI+agent/AgentHub/.scratch/context-memory-m1/pytest-final",
+    "--junitxml=E:/JAVA/AI+agent/AgentHub/.scratch/context-memory-m1/final-junit.xml"
+  ]
+}
