@@ -378,6 +378,10 @@ def _claimed_job(
         source_content_hash="1" * 64,
         parent_artifact_id=None,
         parent_revision_hash=None,
+        policy_spec={
+            "request_strategy_version": "summary_request_strategy_v1",
+            "request_mode": "provider_default",
+        },
         policy_version="v1",
         prompt_version="v1",
         permission_snapshot_hash="2" * 64,
