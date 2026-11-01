@@ -129,7 +129,8 @@ def normalize_context_policy_request(value: Mapping[str, Any]) -> dict[str, Any]
             raise ValueError(f"{name} must be an integer percentage")
     if not (0 < target_pct < soft_pct < hard_pct <= 100):
         raise ValueError(
-            f"trigger percentages must satisfy 0 < target ({target_pct}) < soft ({soft_pct}) < hard ({hard_pct}) <= 100"
+            f"trigger percentages must satisfy 0 < target ({target_pct}) < "
+            f"soft ({soft_pct}) < hard ({hard_pct}) <= 100"
         )
 
     retained_recent_turns = value.get("retained_recent_turns")

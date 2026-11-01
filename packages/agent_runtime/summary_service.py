@@ -20,6 +20,7 @@ import base64
 import binascii
 import hashlib
 import json
+import logging
 import secrets
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -34,7 +35,6 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.context_budget import ApproxTokenEstimator
-from packages.agent_runtime.local_summary_experiment import LocalSummaryExperimentPermit
 from packages.agent_runtime.frozen import (
     SUMMARY_NON_THINKING_MODE,
     SUMMARY_NON_THINKING_MODEL,
@@ -48,6 +48,7 @@ from packages.agent_runtime.history_checkpoint import (
     verify_exact_checkpoint_binding,
     verify_fixed_checkpoint_binding,
 )
+from packages.agent_runtime.local_summary_experiment import LocalSummaryExperimentPermit
 from packages.agent_runtime.models import AgentRun
 from packages.agent_runtime.summary_models import (
     ThreadSummaryArtifact,
@@ -84,6 +85,8 @@ from packages.core.canonical.json_hash import canonical_json, canonical_json_has
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.models import PricingSnapshot
 from packages.threads.models import AgentThread
+
+logger = logging.getLogger(__name__)
 
 SUMMARY_LEDGER_VERSION = "thread_summary_ledger_v1"
 SUMMARY_JOB_IDENTITY_VERSION = "thread_summary_job_identity_v2"
@@ -549,7 +552,8 @@ class SummaryJobService:
         if mode == SUMMARY_NON_THINKING_MODE:
             return SummaryServiceError(
                 "SUMMARY_REQUEST_COUNTER_UNAVAILABLE",
-                "The DeepSeek full-request counter is unavailable outside its bound local experiment.",
+                "The DeepSeek full-request counter is unavailable "
+                "outside its bound local experiment.",
             )
         return SummaryServiceError(
             "SUMMARY_REQUEST_STRATEGY_UNSUPPORTED",

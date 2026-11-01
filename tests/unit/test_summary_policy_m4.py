@@ -286,3 +286,22 @@ def test_old_schema_versions_still_reject_new_summary_metadata(
 
     with pytest.raises(AgentHubError):
         parse_frozen_agent_spec(invalid, workspace_id=agent.workspace_id)
+
+
+@pytest.mark.parametrize("schema_version", [1, 2, 3, 4])
+def test_schema_versions_without_summary_policy_parse_cleanly(
+    schema_version: int,
+) -> None:
+    agent, raw = _live_spec()
+    valid = deepcopy(raw)
+    valid["spec_schema_version"] = schema_version
+    valid["runtime"].pop("summary_policy", None)
+    if schema_version < 3:
+        valid["runtime"].pop("context_policy", None)
+        valid["runtime"].pop("context_budget_sources", None)
+    if schema_version < 4:
+        valid["runtime"].pop("history_policy", None)
+
+    spec = parse_frozen_agent_spec(valid, workspace_id=agent.workspace_id)
+    assert spec.runtime.get("summary_policy") is None
+

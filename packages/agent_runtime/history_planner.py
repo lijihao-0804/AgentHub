@@ -24,7 +24,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from packages.agent_runtime.context_policy import THRESHOLD_PERCENTS
 from packages.core.errors.exceptions import AgentHubError

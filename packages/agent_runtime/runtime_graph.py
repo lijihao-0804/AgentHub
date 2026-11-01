@@ -910,16 +910,18 @@ class _AgentRunGraph:
                         422,
                     )
                 summary_policy = spec.runtime.get("summary_policy")
-                request_identity = frozen_summary_request_identity(summary_policy)
-                if request_identity["request_mode"] == "non_thinking":
-                    self._require_local_summary_experiment(spec)
+                if isinstance(summary_policy, Mapping):
+                    request_identity = frozen_summary_request_identity(summary_policy)
+                    if request_identity["request_mode"] == "non_thinking":
+                        self._require_local_summary_experiment(spec)
                 definitions = await PublishedToolCatalog(session).list(
                     workspace_id=workspace_id, agent_version_id=version.id
                 )
             tool_definitions = {definition.identity: definition for definition in definitions}
             summary_source_policy = (
                 PLAIN_TEXT_PREFIX_V1
-                if spec.runtime.get("summary_policy", {}).get("enabled") is True
+                if isinstance(spec.runtime.get("summary_policy"), Mapping)
+                and spec.runtime["summary_policy"].get("enabled") is True
                 else None
             )
             memory_messages, memory_metadata = await self._memories(
@@ -1162,9 +1164,9 @@ class _AgentRunGraph:
             return {}
 
         try:
-            self._require_local_summary_experiment(state["spec"])
             await self._assert_summary_run_lease()
             await self._require_current_summary_actor()
+            self._require_local_summary_experiment(state.get("spec"))
             await self._verify_history_checkpoint_binding(
                 state, workspace_id=UUID(self.context.workspace_id)
             )
@@ -1284,9 +1286,10 @@ class _AgentRunGraph:
                 "RUN_ACTOR_ACCESS_REVOKED",
                 "SUMMARY_CURRENT_PERMISSION_CHANGED",
                 "FORBIDDEN",
+                "SUMMARY_EXPERIMENT_SCOPE_REJECTED",
             }:
                 return {
-                    "failure_code": "RUN_ACTOR_ACCESS_REVOKED",
+                    "failure_code": error.code,
                     "run_status": "NEEDS_ATTENTION",
                 }
             return {
@@ -1425,8 +1428,13 @@ class _AgentRunGraph:
             current_run_id=self.run.id,
         )
 
-    def _require_local_summary_experiment(self, spec: FrozenAgentSpec) -> None:
-        identity = frozen_summary_request_identity(spec.runtime.get("summary_policy"))
+    def _require_local_summary_experiment(self, spec: FrozenAgentSpec | None) -> None:
+        if spec is None or not isinstance(getattr(spec, "runtime", None), Mapping):
+            return
+        summary_policy = spec.runtime.get("summary_policy")
+        if not isinstance(summary_policy, Mapping):
+            return
+        identity = frozen_summary_request_identity(summary_policy)
         if identity["request_mode"] != "non_thinking":
             return
         permit = self.service.local_summary_experiment
@@ -1977,7 +1985,8 @@ class _AgentRunGraph:
                             ] == "non_thinking":
                                 raise SummaryServiceError(
                                     "SUMMARY_EXPERIMENT_GATEWAY_UNVERIFIABLE",
-                                    "A local v2 experiment requires detached credential-route verification.",
+                                    "A local v2 experiment requires detached "
+                                    "credential-route verification.",
                                 )
                             return gateway
                         prepared = await prepare(
@@ -1986,9 +1995,12 @@ class _AgentRunGraph:
                             request,
                             operation="generate",
                         )
-                        if frozen_summary_request_identity(summary_policy)[
-                            "request_mode"
-                        ] == "non_thinking" and not self.service.local_summary_experiment.authorizes_prepared_gateway(
+                        is_non_thinking = (
+                            frozen_summary_request_identity(summary_policy)["request_mode"]
+                            == "non_thinking"
+                        )
+                        experiment = self.service.local_summary_experiment
+                        if is_non_thinking and not experiment.authorizes_prepared_gateway(
                             prepared, profile_id=plan.primary.id
                         ):
                             raise SummaryServiceError(

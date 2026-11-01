@@ -97,9 +97,12 @@ class ContextPolicyRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_policy_intent(self) -> ContextPolicyRequest:
-        if not (0 < self.target_percent < self.soft_trigger_percent < self.hard_trigger_percent <= 100):
+        if not (
+            0 < self.target_percent < self.soft_trigger_percent < self.hard_trigger_percent <= 100
+        ):
             raise ValueError(
-                f"trigger percentages must satisfy target ({self.target_percent}) < soft ({self.soft_trigger_percent}) < hard ({self.hard_trigger_percent})"
+                f"trigger percentages must satisfy target ({self.target_percent}) < "
+                f"soft ({self.soft_trigger_percent}) < hard ({self.hard_trigger_percent})"
             )
         normalized = normalize_context_policy_request(self.model_dump(exclude_none=True))
         self.workspace_input_limit_source = normalized["workspace_input_limit_source"]

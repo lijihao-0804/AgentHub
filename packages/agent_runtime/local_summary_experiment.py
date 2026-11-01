@@ -8,14 +8,14 @@ Production service composition leaves the capability unset.
 
 from __future__ import annotations
 
-import hashlib
 import ipaddress
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass, field, fields, is_dataclass
 from decimal import Decimal
 from enum import Enum
 from pathlib import Path
-from typing import Any, Mapping, Protocol
+from typing import Any, Protocol
 from urllib.parse import urlsplit
 from uuid import UUID
 

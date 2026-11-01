@@ -455,7 +455,8 @@ async def test_model_request_requires_strict_structured_output_and_has_no_secret
     assert request.response_schema.json_schema["additionalProperties"] is False
     assert "structured_output" in request.required_capabilities.required
     serialized = repr(request)
-    assert "provider" not in serialized
+    assert "api_key" not in serialized
+    assert "secret" not in serialized
     assert "credential" not in serialized
 
 
