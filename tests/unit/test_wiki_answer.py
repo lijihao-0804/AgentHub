@@ -423,6 +423,37 @@ async def test_insufficient_model_answer_must_have_no_markers_or_ids() -> None:
 
 
 @pytest.mark.asyncio
+async def test_insufficient_model_answer_with_citations_and_markers_is_accepted() -> None:
+    gateway = _Gateway(
+        _response(
+            json.dumps(
+                {
+                    "answer": "The supplied evidence does not specify a retention period [1].",
+                    "citation_ids": [1],
+                    "insufficient_evidence": True,
+                }
+            )
+        )
+    )
+
+    result = await answer_from_evidence(
+        gateway,
+        _plan(),
+        _context(),
+        "How long are records retained?",
+        _retrieval(),
+    )
+
+    assert (
+        result["answer"]
+        == "Insufficient evidence to answer from the selected knowledge binding."
+    )
+    assert result["citations"] == []
+    assert result["insufficient_evidence"] is True
+    assert result["telemetry"]["request_count"] == 1
+
+
+@pytest.mark.asyncio
 async def test_each_prose_sentence_requires_its_own_valid_marker() -> None:
     gateway = _Gateway(
         _response(_payload("Retention is seven years [1]. Legal owns escalation [1].", [1]))

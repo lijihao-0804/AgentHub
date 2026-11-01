@@ -239,14 +239,12 @@ def _admit(
 
 
 def _validate_output(output: _AnswerOutput, source_count: int) -> tuple[int, ...]:
+    if output.insufficient_evidence:
+        return ()
     marker_ids = tuple(int(match.group(1)) for match in _CITATION_MARKER.finditer(output.answer))
     if any(identifier < 1 or identifier > source_count for identifier in marker_ids):
         raise _invalid_output()
     marker_set = set(marker_ids)
-    if output.insufficient_evidence:
-        if output.citation_ids or marker_set:
-            raise _invalid_output()
-        return ()
     if not marker_set or set(output.citation_ids) != marker_set:
         raise _invalid_output()
     if _has_uncited_sentence(output.answer):
