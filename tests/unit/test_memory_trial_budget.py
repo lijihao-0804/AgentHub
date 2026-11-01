@@ -14,11 +14,13 @@ import pytest
 
 from benchmarks.evaluation.memory_trial_budget import (
     BLOCK_ALL_UNRESOLVED,
+    FINAL_ROUND_ATTEMPT_LIMIT_AUTHORIZED,
+    FINAL_SCOPE_ATTEMPT_LIMIT_AUTHORIZED,
     LOCAL_ROUND_ATTEMPT_LIMIT,
     LOCAL_SCOPE_ATTEMPT_LIMIT,
+    MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED,
     MAX_SCOPE_ATTEMPT_LIMIT,
     MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED,
-    MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED,
     RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT,
     MemoryTrialBudget,
     upper_bound_cost_cny,
@@ -180,7 +182,9 @@ def test_independent_scope_allows_distinct_identity_and_never_replays_unknown(tr
 def test_scope_limit_migrates_only_from_nine_to_ten_and_preserves_attempt_rows(trial_dir):
     path = trial_dir / "trial.json"
     _seed_verified_legacy_ledger(path)
-    authorization_ref = "User authorization 2026-10-28: raise this experiment scope cap 9 to 10 only"
+    authorization_ref = (
+        "User authorization 2026-10-28: raise this experiment scope cap 9 to 10 only"
+    )
     with MemoryTrialBudget(path, price_identity=LEGACY_PRICE_IDENTITY) as budget:
         _enable_independent_scope(budget, "scope-seven")
         original_unknown = copy.deepcopy(budget.state["attempts"][-1])
@@ -242,9 +246,7 @@ def test_scope_limit_migrates_only_from_nine_to_ten_and_preserves_attempt_rows(t
     "target_scope",
     ["another-scope", ""],
 )
-def test_scope_limit_migration_rejects_wrong_scope_without_changing_ledger(
-    trial_dir, target_scope
-):
+def test_scope_limit_migration_rejects_wrong_scope_without_changing_ledger(trial_dir, target_scope):
     path = trial_dir / "trial.json"
     _seed_verified_legacy_ledger(path)
     with MemoryTrialBudget(path, price_identity=LEGACY_PRICE_IDENTITY) as budget:
@@ -267,7 +269,9 @@ def test_scope_and_round_limits_migrate_10_12_to_16_18_without_touching_costs_or
     path = trial_dir / "trial.json"
     _seed_verified_legacy_ledger(path)
     scope_id = "scope-current"
-    authorization_ref = "User instruction 2026-10-29: increase local scope/round caps 10/12 to 16/18"
+    authorization_ref = (
+        "User instruction 2026-10-29: increase local scope/round caps 10/12 to 16/18"
+    )
     with MemoryTrialBudget(path, price_identity=LEGACY_PRICE_IDENTITY) as budget:
         _enable_independent_scope(budget, scope_id)
         budget.raise_scope_attempt_limit_to_ten(
@@ -306,10 +310,13 @@ def test_scope_and_round_limits_migrate_10_12_to_16_18_without_touching_costs_or
         assert [
             row for row in budget.state["attempts"] if row["status"] == "RESERVED_OR_UNKNOWN"
         ] == before_unknowns
-        assert sum(
-            (Decimal(row["charged_or_reserved_cny"]) for row in budget.state["attempts"]),
-            Decimal(0),
-        ) == before_cost
+        assert (
+            sum(
+                (Decimal(row["charged_or_reserved_cny"]) for row in budget.state["attempts"]),
+                Decimal(0),
+            )
+            == before_cost
+        )
         assert budget.state["limit_cny"] == "30"
         assert policy["policy_history"][-1] == {
             "previous_mode": RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT,
@@ -323,7 +330,10 @@ def test_scope_and_round_limits_migrate_10_12_to_16_18_without_touching_costs_or
             "previous_round_attempt_limit": 12,
             "round_attempt_limit": 18,
         }
-        assert path.with_name(path.name + ".pre-scope-limit-16-round-18.bak").read_bytes() == before_bytes
+        assert (
+            path.with_name(path.name + ".pre-scope-limit-16-round-18.bak").read_bytes()
+            == before_bytes
+        )
 
         for index in range(8):
             _reserve(
@@ -339,6 +349,38 @@ def test_scope_and_round_limits_migrate_10_12_to_16_18_without_touching_costs_or
             budget.raise_local_attempt_limits_to_sixteen_eighteen(
                 scope_id,
                 authorization_ref=authorization_ref,
+            )
+
+        before_final_bytes = path.read_bytes()
+        final_auth = "User instruction 2026-11-01: increase local scope/round caps 16/18 to 26/28"
+        budget.raise_local_attempt_limits_to_twenty_six_twenty_eight(
+            scope_id,
+            authorization_ref=final_auth,
+            now=datetime(2026, 11, 1, 7, tzinfo=UTC),
+        )
+        assert policy["scope_attempt_limit"] == FINAL_SCOPE_ATTEMPT_LIMIT_AUTHORIZED == 26
+        assert policy["round_attempt_limit"] == FINAL_ROUND_ATTEMPT_LIMIT_AUTHORIZED == 28
+        assert policy["round_attempts_used"] == 18
+        assert policy["policy_history"][-1] == {
+            "previous_mode": RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT,
+            "mode": RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT,
+            "changed_at": "2026-11-01T07:00:00+00:00",
+            "scope_id": scope_id,
+            "authorization_ref": final_auth,
+            "change_type": "FINAL_LOCAL_ATTEMPT_LIMIT_INCREASE",
+            "previous_scope_attempt_limit": 16,
+            "scope_attempt_limit": 26,
+            "previous_round_attempt_limit": 18,
+            "round_attempt_limit": 28,
+        }
+        assert (
+            path.with_name(path.name + ".pre-scope-limit-26-round-28.bak").read_bytes()
+            == before_final_bytes
+        )
+        with pytest.raises(ValueError, match="LIMIT_CHANGE_UNSUPPORTED"):
+            budget.raise_local_attempt_limits_to_twenty_six_twenty_eight(
+                scope_id,
+                authorization_ref=final_auth,
             )
 
 

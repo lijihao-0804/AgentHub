@@ -23,6 +23,7 @@ from benchmarks.evaluation.thread_run_local_experiment import (
     FIRST_RUN_INPUT,
     LONG_FIXTURE_APPENDICES,
     NEXT_RUN_INPUT,
+    OUTPUT_TOKEN_LIMIT,
     PLANNED_PROVIDER_DISPATCHES,
     RAG_API_KEY_ENV,
     RAG_BASE_URL_ENV,
@@ -30,6 +31,7 @@ from benchmarks.evaluation.thread_run_local_experiment import (
     WORKING_INPUT_LIMIT,
     ThreadRunConfig,
     ThreadRunExperimentError,
+    _assert_expected_dispatches,
     _assert_run_checkpoint_selector,
     _assert_summary_preflight_metrics,
     _DispatchRecorder,
@@ -536,3 +538,47 @@ def test_sequential_run_permits_keep_stable_revision_scope_but_recheck_run_membe
         temperature=Decimal("0.1"),
     )
     assert len(request_identity) == 64
+
+
+def test_output_token_limit_is_1536_and_expected_dispatches_reject_truncation() -> None:
+    assert OUTPUT_TOKEN_LIMIT == 1536
+    evidence = {
+        "runs": [{"run_id": "run-1"}, {"run_id": "run-2"}],
+        "ledger": {"attempt_count": 26},
+        "provider_dispatches": [
+            {
+                "run_id": "run-1",
+                "provider": "openai-compatible",
+                "model": "deepseek-v4.1-flash-1017",
+                "request_mode": "non_thinking",
+                "response": "{}",
+                "usage": {"input_tokens": 5074, "output_tokens": 700, "total_tokens": 5774},
+                "estimated_cost_cny": "0.01574800",
+                "response_finish_reason": "stop",
+            },
+            {
+                "run_id": "run-1",
+                "provider": "openai-compatible",
+                "model": "deepseek-v4.1-flash-1017",
+                "request_mode": "provider_default",
+                "response": "F1-F4 answer",
+                "usage": {"input_tokens": 2367, "output_tokens": 1180, "total_tokens": 3547},
+                "estimated_cost_cny": "0.01417400",
+                "response_finish_reason": "stop",
+            },
+            {
+                "run_id": "run-2",
+                "provider": "openai-compatible",
+                "model": "deepseek-v4.1-flash-1017",
+                "request_mode": "provider_default",
+                "response": "N1-N5 answer",
+                "usage": {"input_tokens": 2443, "output_tokens": 604, "total_tokens": 3047},
+                "estimated_cost_cny": "0.00971800",
+                "response_finish_reason": "stop",
+            },
+        ],
+    }
+    _assert_expected_dispatches(evidence, expected_attempt_count=26)
+    evidence["provider_dispatches"][1]["response_finish_reason"] = "length"
+    with pytest.raises(ThreadRunExperimentError, match="PROVIDER_RESPONSE_TRUNCATED_OR_INCOMPLETE"):
+        _assert_expected_dispatches(evidence, expected_attempt_count=26)

@@ -1,6 +1,6 @@
-# AgentHub Memory M4：施工与验证记录（进行中）
+# AgentHub Memory M4：施工与验证记录
 
-M3 基线：`dcaffaf`，独立测试数据库已升级到 `0042_summary_eligibility`；业务数据库未迁移。M4 尚未完成，不应默认启用摘要或据此宣称质量提升。
+M3 基线：`dcaffaf`，独立测试数据库已演进并验证至 `0048_summary_run_step`；业务数据库未迁移。M4 工程闭环（含确定性前缀分类、LangGraph 同步 `summary` 节点、跨轮固定 revision 复用与隔离实测）已完成验收；由于公开多题净收益推广门槛未满足，生产发布入口继续默认阻断自动摘要（`SUMMARY_QUALITY_GATE_NOT_MET`）。
 
 已开展的工作包括冻结中文候选提示、服务端结构校验、显式摘要配置、来源的跨水位稳定身份、摘要状态机与持久模型、实验预算和数据准备。来源是否可摘要仍需可审阅的授权决定及服务器复核；不能由模型输出或调用方布尔值直接授予。
 
@@ -65,3 +65,22 @@ M3 基线：`dcaffaf`，独立测试数据库已升级到 `0042_summary_eligibil
 摘要策略下，历史规划因预算或资格不足而阻止派发时，现在也会把冻结历史绑定写入实际 LangGraph checkpoint；不向模型发送不完整历史，也不会由此自动创建摘要 job。已在隔离 PostgreSQL 读取真实 checkpoint 验证这一边界。下一步仍需为真实摘要任务关联具体 checkpoint 和其可信来源审阅，不能把保留状态等同于调度完成。
 
 模型网关的用量归一化现在拒绝将布尔值、非整数或负数当作 token 数；无效缓存数记为未知，核心用量与提供的总量矛盾时不使用该份统计。流式场景里，后续出现畸形用量会清除之前的用量及成本估算，而不是把过时值当最终统计；正常缺省总量可按输入与输出相加。适配器、网关和契约定向回归通过。该处理不证明任一供应商真实缓存命中或最终账单，也不意味着共享预算已经接入完整主备链路。
+
+## 最终工程闭环与真实阿里云实测收口（`8368888` → `bacdfd8` → `07492dc` → 本次收尾）
+
+1. **确定性纯文本前缀与 LangGraph 同步 `summary` 节点闭环（`8efdde9`、`8368888`）**：
+   - 新增迁移 `0048_summary_run_step`，将 `SUMMARY` 纳入 `run_steps.step_type` 约束。
+   - 在 `packages/agent_runtime/history.py` 与 `runtime_graph.py` 中落地 `PLAIN_TEXT_PREFIX_V1` 确定性前缀识别：仅对满足纯文本已完成交换、非近期保留轮次（保留最近 2 轮）、无未决审批/活动工具组的旧前缀开放摘要资格，同时把前缀内全部用户原话提取为服务端 `server_protected_facts` 原样保留。
+   - 在 LangGraph 主图中接入同步 `summary` 节点（位于 `prepare` 与 `model` 之间）：当历史压力达到触发条件且尚未持有覆盖当前水位的有效已发布摘要时，在同一 Run 内同步执行摘要生成、持久化原始响应、机械校验与 CAS 发布，随后主模型请求在同一轮内直接消费已发布摘要信封；下一轮 Run 若已有已发布摘要使上下文回到预算内，则直接按固定 `revision_hash` 复用该摘要，不再重复调用摘要模型。
+   - 主模型流式输出若返回 `finish_reason == "length"`，运行时现在显式记录 `MODEL_OUTPUT_TRUNCATED` 并使 Run 失败，不再把截断半句的回答标为 `SUCCEEDED`（`bacdfd8`）。
+2. **Spark 3.5.9 Task 2 独立文档 B/C 配对实测（`bacdfd8`、`07492dc`）**：
+   - 使用 Apache-2.0 许可的公开 Apache Spark 3.5.9 Structured Streaming 文档章节（`benchmarks/evaluation/local_memory_pilot_20261028/data/source_document.md`）完成 Task 2 的单题 B/C 对照：v1 B 覆盖全部 **5/5** 核心项（G03–G07，2,958 input / 896 output tokens，末尾在非必需附注处 `finish_reason=length`），v2 `NON_THINKING` 摘要（1,830 input / 784 output tokens，`finish_reason=stop`）与 v2 C（1,366 input / 584 output tokens，`finish_reason=stop`）同样覆盖 **5/5** 核心项，后续问答输入 token 从 2,958 降至 1,366（下降 **53.8%**）。详见 [Spark Task 2 B/C 独立验收](evidence/context-policy-m4-20261028/spark-task2-bc-independent-audit-20261028.md)。
+3. **隔离 PostgreSQL + 真实 LangGraph + 真实阿里云 Thread 跨轮闭环实测**：
+   - **首次跨轮闭环（`run-c343607f45be`，输出上限 `1024`，保留原证据不删）**：完成了“同步 `NON_THINKING` 摘要（5,074 / 723 tokens，`stop`）→ 首答消费摘要（2,498 / 1,024 tokens，`finish_reason=length`，在回答完 F1、F2 后被 `1024` 上限截断，得 **2/4**）→ 下一轮 Run 复用同一固定 `revision_hash` 续答（2,647 / 604 tokens，`stop`，得 **5/5**）”。详见 [Thread Run `c343607f45be` 结果复核](evidence/context-policy-m4-20261029/thread-run-c343607f45be-review.md)。
+   - **无截断跨轮闭环复测（`run-e55f809a647b`，输出上限上调至 `1536` 并强制校验三次 `finish_reason == "stop"`）**：在隔离库 `agenthub_run_budget_m4_20261028_v4` 上完整执行 3 次阿里云调用（合计忙时估算费用 **¥0.029830**）：
+     - 调用 1（同步 `NON_THINKING` 摘要）：`4,917 input / 668 output tokens`，`finish_reason=stop`，发布 `revision_hash = 3afdeb89bdd4ee44e714eda9ced799daba99a132e6be3db59acc652f0197fdd0`；
+     - 调用 2（首轮 Run `e55f809a-647b-4617-b43d-0e61bf75d3cc` 首答）：`2,504 input / 264 output tokens`，`finish_reason=stop`，完整覆盖 **F1–F4（4/4）**（60 天更正、ACTIVE 必要非充分条件、合规留置例外、晚到留置标记先暂停删除并复核来源）；
+     - 调用 3（次轮 Run `2b63a3f7-4e7c-4d04-a523-389939f7d853` 续答）：直接复用上述固定 `revision_hash`（未触发第二次摘要），`2,726 input / 260 output tokens`，`finish_reason=stop`，完整覆盖 **N1–N5（5/5）**（不立即恢复或追溯删除、检查其他有效留置、检查待处理复核与补充通知、保留 60 天期限、保留四项审计字段）。详见 [Thread Run `e55f809a647b` 无截断复核](evidence/context-policy-m4-20261029/thread-run-e55f809a647b-review.md) 与 [机器可读证据](evidence/context-policy-m4-20261029/thread-run-e55f809a647b-evidence.json)。
+4. **生产默认关闭边界**：
+   - M4 工程状态机、持久化租约围栏、Run 预算账本、同步摘要节点与跨轮固定 revision 复用均已通过隔离 PostgreSQL 与真实模型端到端验证。
+   - 由于 QMSum 12 题分母有效配对为 0，且单题 Spark 对照与单条受控 Thread 链不足以替代多题净收益推广门槛，公开 Agent 发布预检与发布接口继续对 `summary_policy.enabled=true` 返回 `SUMMARY_QUALITY_GATE_NOT_MET`（422）；仅绑定隔离实验数据库与研究账本的 `LocalSummaryExperimentPermit` 允许在受控实验中开启运行。

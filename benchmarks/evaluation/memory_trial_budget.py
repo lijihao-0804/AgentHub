@@ -24,6 +24,8 @@ MAX_SCOPE_ATTEMPT_LIMIT = 10
 LOCAL_ROUND_ATTEMPT_LIMIT = 12
 MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED = 16
 MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED = 18
+FINAL_SCOPE_ATTEMPT_LIMIT_AUTHORIZED = 26
+FINAL_ROUND_ATTEMPT_LIMIT_AUTHORIZED = 28
 _LEGACY_ROUND_ATTEMPTS_USED = 2
 _EXPECTED_LEGACY_ATTEMPTS = 9
 _EXPECTED_LEGACY_UNRESOLVED_CNY = Decimal("0.009216")
@@ -237,10 +239,7 @@ class MemoryTrialBudget:
         _validate_scope_id(scope_id)
         _validate_authorization_ref(authorization_ref)
         policy = self._local_policy()
-        if (
-            policy is None
-            or policy.get("mode") != RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT
-        ):
+        if policy is None or policy.get("mode") != RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT:
             raise ValueError("MEMORY_TRIAL_INDEPENDENT_POLICY_REQUIRED")
         if policy.get("active_scope_id") != scope_id:
             raise ValueError("MEMORY_TRIAL_ACTIVE_SCOPE_MISMATCH")
@@ -280,10 +279,7 @@ class MemoryTrialBudget:
         _validate_scope_id(scope_id)
         _validate_authorization_ref(authorization_ref)
         policy = self._local_policy()
-        if (
-            policy is None
-            or policy.get("mode") != RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT
-        ):
+        if policy is None or policy.get("mode") != RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT:
             raise ValueError("MEMORY_TRIAL_INDEPENDENT_POLICY_REQUIRED")
         if policy.get("active_scope_id") != scope_id:
             raise ValueError("MEMORY_TRIAL_ACTIVE_SCOPE_MISMATCH")
@@ -319,6 +315,58 @@ class MemoryTrialBudget:
                 "scope_attempt_limit": MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED,
                 "previous_round_attempt_limit": LOCAL_ROUND_ATTEMPT_LIMIT,
                 "round_attempt_limit": MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED,
+            }
+        )
+        self._save_or_restore(previous)
+
+    def raise_local_attempt_limits_to_twenty_six_twenty_eight(
+        self,
+        scope_id: str,
+        *,
+        authorization_ref: str,
+        now: datetime | None = None,
+    ) -> None:
+        """Apply the authorized 16/18-to-26/28 closure increase exactly once."""
+        self._require_owned()
+        _validate_scope_id(scope_id)
+        _validate_authorization_ref(authorization_ref)
+        policy = self._local_policy()
+        if policy is None or policy.get("mode") != RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT:
+            raise ValueError("MEMORY_TRIAL_INDEPENDENT_POLICY_REQUIRED")
+        if policy.get("active_scope_id") != scope_id:
+            raise ValueError("MEMORY_TRIAL_ACTIVE_SCOPE_MISMATCH")
+        if (
+            policy.get("scope_attempt_limit") != MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED
+            or policy.get("round_attempt_limit") != MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED
+        ):
+            raise ValueError("MEMORY_TRIAL_LIMIT_CHANGE_UNSUPPORTED")
+        scope_used = sum(row.get("scope_id") == scope_id for row in self.state["attempts"])
+        if (
+            scope_used > MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED
+            or policy.get("round_attempts_used", 0) > MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED
+        ):
+            raise ValueError("MEMORY_TRIAL_LIMIT_STATE_INVALID")
+
+        previous = copy.deepcopy(self.state)
+        changed_at = _timestamp(now)
+        self._backup_scope_limit_change(
+            suffix=".pre-scope-limit-26-round-28.bak",
+            conflict_code="MEMORY_TRIAL_FINAL_LIMIT_BACKUP_CONFLICT",
+        )
+        policy["scope_attempt_limit"] = FINAL_SCOPE_ATTEMPT_LIMIT_AUTHORIZED
+        policy["round_attempt_limit"] = FINAL_ROUND_ATTEMPT_LIMIT_AUTHORIZED
+        policy["policy_history"].append(
+            {
+                "previous_mode": policy["mode"],
+                "mode": policy["mode"],
+                "changed_at": changed_at,
+                "scope_id": scope_id,
+                "authorization_ref": authorization_ref,
+                "change_type": "FINAL_LOCAL_ATTEMPT_LIMIT_INCREASE",
+                "previous_scope_attempt_limit": MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED,
+                "scope_attempt_limit": FINAL_SCOPE_ATTEMPT_LIMIT_AUTHORIZED,
+                "previous_round_attempt_limit": MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED,
+                "round_attempt_limit": FINAL_ROUND_ATTEMPT_LIMIT_AUTHORIZED,
             }
         )
         self._save_or_restore(previous)
@@ -447,8 +495,7 @@ class MemoryTrialBudget:
             or row.get("status") != "RESERVED_OR_UNKNOWN"
             or reservation_receipt.scope_id is None
             or reservation_receipt.scope_id != row.get("scope_id")
-            or reservation_receipt.scope_id
-            != (self._local_policy() or {}).get("active_scope_id")
+            or reservation_receipt.scope_id != (self._local_policy() or {}).get("active_scope_id")
             or reservation_receipt.request_identity != row.get("request_identity")
             or reservation_receipt.reservation_identity != _reservation_identity(row)
         ):
@@ -492,10 +539,7 @@ class MemoryTrialBudget:
             raise ValueError("MEMORY_TRIAL_LEGACY_UNKNOWN_IMMUTABLE")
         if row.get("scope_id") is not None:
             policy = self._local_policy()
-            if (
-                policy is None
-                or policy.get("active_scope_id") != row.get("scope_id")
-            ):
+            if policy is None or policy.get("active_scope_id") != row.get("scope_id"):
                 raise ValueError("MEMORY_TRIAL_SETTLEMENT_SCOPE_MISMATCH")
             if not isinstance(reservation_receipt, MemoryTrialReservationReceipt):
                 raise ValueError("MEMORY_TRIAL_RESERVATION_RECEIPT_REQUIRED")
@@ -506,8 +550,7 @@ class MemoryTrialBudget:
                 or self._response_receipts.get(attempt_id) is not response_receipt
                 or reservation_receipt._capability is not self._receipt_capability
                 or response_receipt._capability is not self._receipt_capability
-                or
-                reservation_receipt.attempt_id != attempt_id
+                or reservation_receipt.attempt_id != attempt_id
                 or reservation_receipt.scope_id != row.get("scope_id")
                 or reservation_receipt.request_identity != row.get("request_identity")
                 or reservation_receipt.reservation_identity != _reservation_identity(row)
@@ -727,6 +770,7 @@ def _validate_local_policy_state(state: Mapping[str, object]) -> None:
             (LOCAL_SCOPE_ATTEMPT_LIMIT, LOCAL_ROUND_ATTEMPT_LIMIT),
             (MAX_SCOPE_ATTEMPT_LIMIT, LOCAL_ROUND_ATTEMPT_LIMIT),
             (MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED, MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED),
+            (FINAL_SCOPE_ATTEMPT_LIMIT_AUTHORIZED, FINAL_ROUND_ATTEMPT_LIMIT_AUTHORIZED),
         }
         or type(policy.get("round_attempts_used")) is not int
         or not _LEGACY_ROUND_ATTEMPTS_USED
@@ -800,17 +844,29 @@ def _validate_local_policy_state(state: Mapping[str, object]) -> None:
             ):
                 raise ValueError("MEMORY_TRIAL_POLICY_STATE_INVALID")
             limit_changes.append(change_type)
+        elif change_type == "FINAL_LOCAL_ATTEMPT_LIMIT_INCREASE":
+            if (
+                event.get("previous_scope_attempt_limit") != MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED
+                or event.get("scope_attempt_limit") != FINAL_SCOPE_ATTEMPT_LIMIT_AUTHORIZED
+                or event.get("previous_round_attempt_limit") != MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED
+                or event.get("round_attempt_limit") != FINAL_ROUND_ATTEMPT_LIMIT_AUTHORIZED
+            ):
+                raise ValueError("MEMORY_TRIAL_POLICY_STATE_INVALID")
+            limit_changes.append(change_type)
         else:
             raise ValueError("MEMORY_TRIAL_POLICY_STATE_INVALID")
 
     expected_changes = {
         (LOCAL_SCOPE_ATTEMPT_LIMIT, LOCAL_ROUND_ATTEMPT_LIMIT): [],
-        (MAX_SCOPE_ATTEMPT_LIMIT, LOCAL_ROUND_ATTEMPT_LIMIT): [
-            "SCOPE_ATTEMPT_LIMIT_INCREASE"
-        ],
+        (MAX_SCOPE_ATTEMPT_LIMIT, LOCAL_ROUND_ATTEMPT_LIMIT): ["SCOPE_ATTEMPT_LIMIT_INCREASE"],
         (MAX_SCOPE_ATTEMPT_LIMIT_AUTHORIZED, MAX_ROUND_ATTEMPT_LIMIT_AUTHORIZED): [
             "SCOPE_ATTEMPT_LIMIT_INCREASE",
             "LOCAL_ATTEMPT_LIMIT_INCREASE",
+        ],
+        (FINAL_SCOPE_ATTEMPT_LIMIT_AUTHORIZED, FINAL_ROUND_ATTEMPT_LIMIT_AUTHORIZED): [
+            "SCOPE_ATTEMPT_LIMIT_INCREASE",
+            "LOCAL_ATTEMPT_LIMIT_INCREASE",
+            "FINAL_LOCAL_ATTEMPT_LIMIT_INCREASE",
         ],
     }[(policy["scope_attempt_limit"], policy["round_attempt_limit"])]
     if limit_changes != expected_changes:

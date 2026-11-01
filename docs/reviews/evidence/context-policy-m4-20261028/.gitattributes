@@ -1,2 +1,2 @@
-/sources/spark-3.5.9/** -text
-/spark-rdd-guide-v3.5.9-numbered.txt -text
+/sources/spark-3.5.9/** -text -whitespace
+/spark-rdd-guide-v3.5.9-numbered.txt -text -whitespace
