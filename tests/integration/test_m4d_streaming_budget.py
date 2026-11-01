@@ -453,7 +453,7 @@ async def test_stream_cancellation_closes_provider_and_persists_terminal_failure
     first = await anext(stream)
     assert first.type.value == "run.started"
     await anext(stream)
-    await entered.wait()
+    await asyncio.wait_for(entered.wait(), timeout=10.0)
     if action_state is not None:
         async with db_factory() as session:
             run = await session.get(AgentRun, first.run_id)
