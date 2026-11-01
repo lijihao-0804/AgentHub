@@ -203,6 +203,15 @@ def _normalize_error(error: Exception) -> ModelGatewayError:
         return ModelGatewayError(ModelGatewayErrorCode.MODEL_RATE_LIMITED, retryable=True)
     if status_number in {401, 403} or "auth" in error_name:
         return ModelGatewayError(ModelGatewayErrorCode.MODEL_AUTH_FAILED)
+    error_msg = str(error).lower()
+    if status_number in {400, 422} and any(
+        marker in error_msg
+        for marker in ("response_format", "structured_output", "json_schema", "unavailable now")
+    ):
+        return ModelGatewayError(
+            ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH,
+            message="The model provider does not support the requested response_format.",
+        )
     if status_number is not None and status_number >= 500:
         return ModelGatewayError(
             ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE,

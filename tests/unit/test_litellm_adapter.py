@@ -576,3 +576,25 @@ async def test_provider_error_is_normalized_without_raw_secret() -> None:
     assert raised.value.code == ModelGatewayErrorCode.MODEL_RATE_LIMITED
     assert raised.value.retryable is True
     assert "adapter-secret" not in str(raised.value)
+
+
+
+@pytest.mark.asyncio
+async def test_response_format_unsupported_error_is_normalized_to_capability_mismatch() -> None:
+    error = RuntimeError(
+        "BadRequestError: OpenAIException - This response_format type is unavailable now"
+    )
+    error.status_code = 400
+    client = FakeCompletionClient(error=error)
+    model_profile, credential = profile()
+
+    with pytest.raises(ModelGatewayError) as raised:
+        await LiteLLMProviderAdapter(client).complete(
+            model_profile,
+            credential,
+            ModelRequest(messages=(ModelMessage(role="user", content="hi"),)),
+        )
+
+    assert raised.value.code == ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH
+    assert raised.value.retryable is False
+    assert "response_format" in raised.value.message
