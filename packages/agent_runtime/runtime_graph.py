@@ -3035,6 +3035,12 @@ class _AgentRunGraph:
                 "tool_count": len(calls),
                 "tool_identities": [item["name"] for item in calls],
                 "tool_call_ids": [item["tool_call_id"] for item in calls],
+                # Content-free argument identity: the evaluation platform can match
+                # arguments without ever reading the argument text.  The hash is
+                # canonical JSON, so key order cannot change it.
+                "arguments_hashes": [
+                    canonical_json_hash(dict(item["arguments"])) for item in calls
+                ],
             },
         )
         return {

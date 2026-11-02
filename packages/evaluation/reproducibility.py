@@ -17,6 +17,10 @@ from packages.evaluation.judge import (
 from packages.evaluation.models import PricingSnapshot
 
 EVALUATION_SCHEMA_VERSION = 1
+#: New experiments freeze the trajectory projection.  Manifests written before AE-1
+#: keep their stored ``observation_schema_version`` (2) and their evaluator set, so
+#: reading a historical experiment still produces exactly the metrics it produced.
+OBSERVATION_SCHEMA_VERSION = 3
 DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
     JUDGE_MANIFEST_KEY: JUDGE_DISABLED_VERSION,
     "approval-evaluator": "v2",
@@ -26,6 +30,7 @@ DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
     "retrieval-evaluator": "v2",
     "tool-evaluator": "v2",
     "support-postcondition-evaluator": "support-postcondition-v1",
+    "trajectory-evaluator": "trajectory-v1",
 }
 
 
@@ -43,7 +48,7 @@ def default_evaluator_manifest(
     versions[JUDGE_MANIFEST_KEY] = judge_manifest_entry(judge_profile)
     manifest: dict[str, Any] = {
         "evaluation_schema_version": EVALUATION_SCHEMA_VERSION,
-        "observation_schema_version": 2,
+        "observation_schema_version": OBSERVATION_SCHEMA_VERSION,
         "evaluator_versions": dict(sorted(versions.items())),
     }
     if judge_profile is not None:
@@ -211,6 +216,7 @@ def _decimal_text(value: Decimal) -> str:
 __all__ = [
     "DEFAULT_EVALUATOR_VERSIONS",
     "EVALUATION_SCHEMA_VERSION",
+    "OBSERVATION_SCHEMA_VERSION",
     "default_evaluator_manifest",
     "experiment_spec_hash",
     "frozen_judge_version",

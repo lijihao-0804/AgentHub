@@ -117,7 +117,9 @@ class EvaluatorRegistry:
         self._evaluators: dict[str, tuple[str, Evaluator]] = {}
         self._definitions: dict[str, MetricDefinition] = dict(METRIC_DEFINITIONS)
         self._judge_version = JUDGE_DISABLED_VERSION
+        self._trajectory_enabled = False
         self.bind_judge_version(judge_version)
+        self._register_trajectory_definitions()
         self.register("RETRIEVAL", "v1", evaluate_retrieval)
         self.register("KNOWLEDGE_QA", "v1", evaluate_knowledge_qa)
         self.register("TOOL", "v1", evaluate_tool)
@@ -125,6 +127,29 @@ class EvaluatorRegistry:
         self.register("APPROVAL", "v1", evaluate_approval)
         self.register("MULTI_STEP", "v1", evaluate_multi_step)
         self.register("FAILURE", "v1", evaluate_failure)
+
+    def _register_trajectory_definitions(self) -> None:
+        """Pin trajectory metric versions independently of category versions."""
+        for name in (
+            "tool_precision",
+            "tool_recall",
+            "tool_f1",
+            "forbidden_tool_call_rate",
+            "tool_order_violation_rate",
+            "redundant_call_rate",
+            "recovery_rate",
+            "approval_respected",
+            "tool_call_efficiency",
+            "trajectory_success",
+        ):
+            definition = METRIC_DEFINITIONS[name]
+            self.register_metric_definition(
+                name,
+                definition.direction,
+                definition.aggregation_kind,
+                task_success_relevant=definition.task_success_relevant,
+                version="trajectory-v1",
+            )
 
     def for_manifest(self, manifest: Mapping[str, Any]) -> EvaluatorRegistry:
         """Build an isolated registry; never mutate a shared service for a run."""
@@ -172,9 +197,19 @@ class EvaluatorRegistry:
             registry.register_metric_definition(
                 name, MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, version="v2"
             )
+        schema_version = manifest.get("observation_schema_version")
+        if schema_version is None:
+            # Manifests written before the observation schema was versioned stay valid;
+            # they simply never enable trajectory metrics.
+            pass
+        elif schema_version == 3:
+            if versions.get("trajectory-evaluator") != "trajectory-v1":
+                raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
+            registry._trajectory_enabled = True
+        elif schema_version != 2:
+            raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
         if category_versions == {"v2"} and (
-            manifest.get("observation_schema_version") != 2
-            or versions.get("support-postcondition-evaluator") != "support-postcondition-v1"
+            versions.get("support-postcondition-evaluator") != "support-postcondition-v1"
         ):
             raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
         registry.bind_judge_manifest(manifest)
@@ -274,6 +309,10 @@ class EvaluatorRegistry:
             name: _with_version(metric, version)
             for name, metric in evaluator(expected, observation).items()
         }
+        if self._trajectory_enabled:
+            from packages.evaluation.trajectory import evaluate_trajectory
+
+            metrics.update(evaluate_trajectory(expected, observation))
         judged = evaluate_answer_quality(observation, judge_version=self._judge_version)
         if judged is not None:
             metrics[ANSWER_QUALITY_METRIC] = judged
@@ -942,5 +981,42 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
         ("output_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
         ("total_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
         ("cached_tokens", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
+        # Trajectory-backed: only produced when the frozen manifest enables the
+        # trajectory projection, so historical experiments keep their metric set.
+        ("tool_precision", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        ("tool_recall", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        ("tool_f1", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        (
+            "forbidden_tool_call_rate",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            True,
+        ),
+        (
+            "tool_order_violation_rate",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            True,
+        ),
+        ("redundant_call_rate", MetricDirection.LOWER_IS_BETTER, MetricAggregationKind.RATE, False),
+        ("recovery_rate", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        (
+            "approval_respected",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "tool_call_efficiency",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            False,
+        ),
+        (
+            "trajectory_success",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
     ]
 }
