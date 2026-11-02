@@ -11,7 +11,9 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.judge import (
     JUDGE_DISABLED_VERSION,
     JUDGE_MANIFEST_KEY,
+    FrozenJudgeEnsemble,
     FrozenJudgeProfile,
+    judge_ensemble_manifest_entry,
     judge_manifest_entry,
 )
 from packages.evaluation.models import PricingSnapshot
@@ -36,6 +38,7 @@ DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
 
 def default_evaluator_manifest(
     judge_profile: FrozenJudgeProfile | None = None,
+    judge_ensemble: FrozenJudgeEnsemble | None = None,
 ) -> dict[str, Any]:
     """Freeze the evaluator identities for one experiment.
 
@@ -44,14 +47,22 @@ def default_evaluator_manifest(
     version, so the experiment can never be re-scored by a different judge model
     without the manifest -- and every metric row derived from it -- changing.
     """
+    if judge_profile is not None and judge_ensemble is not None:
+        raise ValueError("use either judge_profile or judge_ensemble, not both")
     versions = dict(DEFAULT_EVALUATOR_VERSIONS)
-    versions[JUDGE_MANIFEST_KEY] = judge_manifest_entry(judge_profile)
+    versions[JUDGE_MANIFEST_KEY] = (
+        judge_ensemble_manifest_entry(judge_ensemble)
+        if judge_ensemble is not None
+        else judge_manifest_entry(judge_profile)
+    )
     manifest: dict[str, Any] = {
         "evaluation_schema_version": EVALUATION_SCHEMA_VERSION,
         "observation_schema_version": OBSERVATION_SCHEMA_VERSION,
         "evaluator_versions": dict(sorted(versions.items())),
     }
-    if judge_profile is not None:
+    if judge_ensemble is not None:
+        manifest["judge_ensemble"] = judge_ensemble.projection()
+    elif judge_profile is not None:
         # The non-secret projection is kept beside the version so the worker can
         # rebuild exactly the judge the experiment was frozen with, instead of
         # re-resolving a profile that may have been edited since.  The key is

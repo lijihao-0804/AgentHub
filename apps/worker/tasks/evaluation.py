@@ -19,7 +19,9 @@ from packages.core.execution_context.models import PrincipalContext
 from packages.evaluation.approval import EvaluationApprovalActorProvider
 from packages.evaluation.judge import (
     AnswerQualityJudge,
+    JudgeEnsemble,
     ModelGatewayJudgeClient,
+    judge_ensemble_from_manifest,
     judge_profile_from_manifest,
 )
 from packages.evaluation.models import EvaluationExperiment, EvaluationExperimentRun
@@ -102,7 +104,9 @@ class _SessionScopedJudgeClient:
             return await client.complete(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
-async def _build_judge(settings, factory, run_id: UUID) -> AnswerQualityJudge | None:
+async def _build_judge(
+    settings, factory, run_id: UUID
+) -> AnswerQualityJudge | JudgeEnsemble | None:
     """Rebuild the judge this run's experiment was frozen with, if it has one.
 
     The judge identity comes from the experiment's manifest, not from re-resolving a
@@ -123,10 +127,10 @@ async def _build_judge(settings, factory, run_id: UUID) -> AnswerQualityJudge | 
                 EvaluationExperiment.id == run.experiment_id,
             )
         )
-        profile = judge_profile_from_manifest(
-            experiment.evaluator_manifest if experiment is not None else None
-        )
-        if profile is None:
+        manifest = experiment.evaluator_manifest if experiment is not None else None
+        ensemble = judge_ensemble_from_manifest(manifest)
+        profile = None if ensemble is not None else judge_profile_from_manifest(manifest)
+        if ensemble is None and profile is None:
             return None
         principal = PrincipalContext(
             request_id=f"evaluation:{run.id}",
@@ -138,11 +142,24 @@ async def _build_judge(settings, factory, run_id: UUID) -> AnswerQualityJudge | 
                 session, principal=principal, workspace_id=run.workspace_id
             )
         ).context
+    if ensemble is not None:
+        members = [
+            AnswerQualityJudge(
+                member,
+                _SessionScopedJudgeClient(
+                    factory, settings, context, UUID(member.profile_id)
+                ),
+            )
+            for member in ensemble.members
+        ]
+        return JudgeEnsemble(members, strategy=ensemble.strategy)
     client = _SessionScopedJudgeClient(factory, settings, context, UUID(profile.profile_id))
     return AnswerQualityJudge(profile, client)
 
 
-async def _build_driver(settings, factory, *, judge: AnswerQualityJudge | None = None):
+async def _build_driver(
+    settings, factory, *, judge: AnswerQualityJudge | JudgeEnsemble | None = None
+):
     trace_sink = ProductionTraceSink()
     components = production_retrieval_components(settings)
     retriever = SessionScopedKnowledgeRetriever(

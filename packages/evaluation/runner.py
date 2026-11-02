@@ -38,6 +38,7 @@ from packages.evaluation.business import inspect_support_outcome, support_condit
 from packages.evaluation.judge import (
     JUDGE_OBSERVATION_KEY,
     AnswerQualityJudge,
+    JudgeEnsemble,
     JudgeRequest,
     sequence_of_text,
 )
@@ -206,7 +207,7 @@ class AgentRuntimeEvaluationDriver:
         *,
         retriever: KnowledgeRetriever | None = None,
         approval_context_factory: Callable[[EvaluationExperimentRun], Awaitable[Any]] | None = None,
-        judge: AnswerQualityJudge | None = None,
+        judge: AnswerQualityJudge | JudgeEnsemble | None = None,
     ) -> None:
         self.agent_run_service = agent_run_service
         self.context_factory = context_factory
