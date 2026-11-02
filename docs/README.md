@@ -15,6 +15,7 @@
 | 如何面试讲解和连续追问 | [面试手册](report/interview/README.md)、[现场演示](report/07-现场演示脚本.md)、[历史截图](report/18-截图演示.md) |
 | 数据和评测如何解释 | [benchmark 索引](benchmark/README.md)、[M-I3/M-I4 正式证据](reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) |
 | 公开 RAG 数据、评测升级与复杂任务 | [2026-10-21 调研](reviews/AgentHub-RAG公开数据与复杂任务调研-20261021.md)，尚未实施 |
+| 智能体评测（agent evaluation）的行业调研与接入方案 | [2026-11 深度调研](research/agent-evaluation-2026/README.md)：调研与设计，实施中 |
 | Wiki 与最新 RAG 并轨、混合查询和部署 | [Wiki 使用](wiki/README.md)、[并轨验收](wiki/integration-acceptance.md)、[并轨制度](wiki/integration-plan.md)；独立研究和历史结果另行保留 |
 | 找验收、失败和审查记录 | [reviews 索引](reviews/README.md)、[M4](milestones/M4-E.md)、[M5-A](milestones/M5-A.md)、[M6](milestones/M6-final-acceptance.md)、[M7-H](milestones/M7-H.md) |
 | 安全与交付约束 | [安全基线](security/baseline.md)、[版本交付](versioning.md)、[凭据迁移](deployment/provider-credential-migration.md) |
