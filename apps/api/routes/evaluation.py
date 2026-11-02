@@ -44,12 +44,13 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
-from packages.evaluation.judge import FrozenJudgeProfile, freeze_judge_profile
+from packages.evaluation.judge import FrozenJudgeEnsemble, FrozenJudgeProfile, freeze_judge_profile
 from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.models import EvaluationCaseResultStatus
 from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
+from packages.evaluation.statistics_service import EvaluationStatisticsService
 from packages.model_gateway.errors import ModelGatewayError
 from packages.model_gateway.profile_resolution import ModelProfileResolver
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
@@ -380,9 +381,39 @@ async def create_experiment(
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationExperimentResponse:
     del workspace_id
-    judge_profile = await _freeze_judge_profile(
-        session, context, payload.judge_model_profile_id
-    )
+    if payload.judge_model_profile_id and payload.judge_model_profile_ids:
+        raise AgentHubError(
+            "EVALUATION_EXPERIMENT_INVALID",
+            "Choose either one judge profile or a judge ensemble, not both.",
+            422,
+        )
+    judge_profile = None
+    judge_ensemble = None
+    if payload.judge_model_profile_ids:
+        profiles = [
+            await _freeze_judge_profile(session, context, profile_id)
+            for profile_id in payload.judge_model_profile_ids
+        ]
+        if any(profile is None for profile in profiles):
+            raise AgentHubError(
+                "EVALUATION_EXPERIMENT_INVALID",
+                "Every ensemble judge profile must resolve.",
+                422,
+            )
+        try:
+            judge_ensemble = FrozenJudgeEnsemble(
+                tuple(profiles), strategy=payload.judge_strategy
+            )
+        except ValueError:
+            raise AgentHubError(
+                "EVALUATION_EXPERIMENT_INVALID",
+                "The judge ensemble definition is invalid.",
+                422,
+            ) from None
+    else:
+        judge_profile = await _freeze_judge_profile(
+            session, context, payload.judge_model_profile_id
+        )
     experiment = await ExperimentService().create_experiment(
         session,
         context=context,
@@ -392,7 +423,9 @@ async def create_experiment(
         split=payload.split,
         purpose=payload.purpose,
         repetitions=payload.repetitions,
+        evidence_level=payload.evidence_level,
         judge_profile=judge_profile,
+        judge_ensemble=judge_ensemble,
     )
     return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
 
@@ -661,6 +694,38 @@ async def get_experiment_run_metrics(
 ) -> dict[str, Any]:
     del workspace_id
     return await EvaluationMetricsService().get_persisted_metrics(
+        session, context=context, run_id=run_id
+    )
+
+
+@router.get("/experiment-runs/{run_id}/statistics", response_model=dict[str, Any])
+async def get_experiment_run_statistics(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> dict[str, Any]:
+    """Reliability and uncertainty for a run: ``pass^k``, interval, variance, consistency.
+
+    Read-only: it rebuilds trial outcomes from persisted case results, so calling it on a
+    historical run never changes that run's stored metrics.
+    """
+
+    del workspace_id
+    return await EvaluationStatisticsService().compute(
+        session, context=context, run_id=run_id
+    )
+
+
+@router.get("/experiment-runs/{run_id}/failure-taxonomy", response_model=dict[str, Any])
+async def get_experiment_run_failure_taxonomy(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> dict[str, Any]:
+    del workspace_id
+    return await EvaluationStatisticsService().failure_taxonomy(
         session, context=context, run_id=run_id
     )
 

@@ -3035,6 +3035,12 @@ class _AgentRunGraph:
                 "tool_count": len(calls),
                 "tool_identities": [item["name"] for item in calls],
                 "tool_call_ids": [item["tool_call_id"] for item in calls],
+                # Content-free argument identity: the evaluation platform can match
+                # arguments without ever reading the argument text.  The hash is
+                # canonical JSON, so key order cannot change it.
+                "arguments_hashes": [
+                    canonical_json_hash(dict(item["arguments"])) for item in calls
+                ],
             },
         )
         return {
@@ -3242,6 +3248,7 @@ class _AgentRunGraph:
             return {"failure_code": "ACTION_RUNTIME_NOT_CONFIGURED"}
         executed: dict[str, ToolResult] = {}
         logical_action_ids: list[str] = []
+        action_results: list[dict[str, Any]] = []
         for item in state.get("action_calls", []):
             stopped = await self._stop_if_requested()
             if stopped is not None:
@@ -3277,6 +3284,19 @@ class _AgentRunGraph:
                     result = _approval_tool_result(approval)
                     executed[call["tool_call_id"]] = result
                     span_execution_status = str(approval.execution_status)
+                    action_results.append(
+                        {
+                            "tool_call_id": call["tool_call_id"],
+                            "logical_action_id": approval.logical_action_id,
+                            "tool_identity": approval.tool_identity,
+                            "status": (
+                                approval.execution_status.value
+                                if hasattr(approval.execution_status, "value")
+                                else str(approval.execution_status)
+                            ),
+                            "error_code": approval.failure_code,
+                        }
+                    )
                     if approval.execution_status == ApprovalExecutionStatus.UNKNOWN_OUTCOME:
                         span_status = "error"
                         span_failure_code = approval.failure_code or "UNKNOWN_OUTCOME"
@@ -3384,6 +3404,15 @@ class _AgentRunGraph:
                     span_execution_status = ApprovalExecutionStatus.UNKNOWN_OUTCOME.value
                     span_status = "error"
                     span_failure_code = result.failure_code or "UNKNOWN_OUTCOME"
+                    action_results.append(
+                        {
+                            "tool_call_id": call["tool_call_id"],
+                            "logical_action_id": approval.logical_action_id,
+                            "tool_identity": approval.tool_identity,
+                            "status": ApprovalExecutionStatus.UNKNOWN_OUTCOME.value,
+                            "error_code": result.failure_code,
+                        }
+                    )
                     return {
                         "executed_observations": executed,
                         "run_status": "NEEDS_ATTENTION",
@@ -3403,6 +3432,15 @@ class _AgentRunGraph:
                     safe_failure_message=result.safe_message,
                 )
                 span_execution_status = execution_status.value
+                action_results.append(
+                    {
+                        "tool_call_id": call["tool_call_id"],
+                        "logical_action_id": approval.logical_action_id,
+                        "tool_identity": approval.tool_identity,
+                        "status": execution_status.value,
+                        "error_code": result.failure_code,
+                    }
+                )
                 if result.status is ActionExecutionStatus.FAILED:
                     span_status = "error"
                     span_failure_code = result.failure_code or "ACTION_FAILED"
@@ -3435,11 +3473,12 @@ class _AgentRunGraph:
                 )
         await self.step(
             "ACTION",
-            "SUCCEEDED",
+            "FAILED" if any(item["status"] == "FAILED" for item in action_results) else "SUCCEEDED",
             {
                 "tool_count": len(executed),
                 "tool_identities": [item["call"]["name"] for item in state.get("action_calls", [])],
                 "logical_action_ids": logical_action_ids,
+                "action_results": action_results,
             },
         )
         return {"executed_observations": executed, "action_calls": []}
@@ -3554,7 +3593,29 @@ class _AgentRunGraph:
         await self.step(
             "TOOL_EXECUTE",
             "SUCCEEDED",
-            {"tool_count": len(calls), "tool_identities": [call["name"] for call in calls]},
+            {
+                "tool_count": len(calls),
+                "tool_identities": [call["name"] for call in calls],
+                "tool_call_ids": [call["tool_call_id"] for call in calls],
+                # Per-call outcome: a single failing tool must not be hidden behind the
+                # batch-level SUCCEEDED status.  Only identity/status/error code is kept.
+                "tool_results": [
+                    {
+                        "tool_call_id": call_id,
+                        "tool_identity": next(
+                            (
+                                call["name"]
+                                for call in calls
+                                if call["tool_call_id"] == call_id
+                            ),
+                            None,
+                        ),
+                        "status": result.status.value,
+                        "error_code": result.error_code,
+                    }
+                    for call_id, result in pairs
+                ],
+            },
         )
         observations = dict(pairs)
         await self._record_artifacts(

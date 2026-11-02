@@ -32,10 +32,25 @@ _RULES = frozenset(
         "MIN_VALUE",
         "MAX_VALUE",
         "TRADEOFF",
+        "REQUIRED_EVIDENCE_LEVEL",
+        "MIN_PASS_HAT_K",
+        "MIN_CI_LOWER_BOUND",
+        "NON_INFERIORITY",
     }
 )
 _BASE_RULE_KEYS = frozenset({"metric", "rule", "required", "safety"})
 _TOLERANCE_RULES = frozenset({"MAX_ABSOLUTE_REGRESSION", "MAX_RELATIVE_REGRESSION", "TRADEOFF"})
+_EVIDENCE_LEVEL_RANK = {
+    "DETERMINISTIC_CONFORMANCE": 0,
+    "CONTROLLED_SIMULATION": 1,
+    "REAL_PROVIDER": 2,
+    "PRODUCTION_SAMPLE": 3,
+}
+_EVIDENCE_LEVEL_METRIC = "evidence_level"
+_PASS_HAT_K_METRIC = "pass_hat_k"
+_PAIRED_METRIC = "success_rate_delta"
+_MIN_PAIRED_CASES = 10
+_MIN_COMPLETE_CASE_RATE = 0.5
 
 
 class EvaluationReleaseGateService:
@@ -173,7 +188,38 @@ class EvaluationReleaseGateService:
             self._verify_decision(existing, comparison, policy)
             return existing
 
-        status, rule_results, reasons = self._evaluate(comparison, policy.policy_json)
+        statistics: Mapping[str, Any] | None = None
+        statistics: Mapping[str, Any] | None = None
+        rule_names = {rule["rule"] for rule in policy.policy_json["rules"]}
+        needs_statistics = bool(
+            rule_names & {"MIN_PASS_HAT_K", "MIN_CI_LOWER_BOUND", "NON_INFERIORITY"}
+        )
+        if needs_statistics:
+            try:
+                from packages.evaluation.statistics_service import (
+                    EvaluationStatisticsService,
+                )
+
+                statistics_service = EvaluationStatisticsService(self.registry)
+                statistics = await statistics_service.compute(
+                    session, context=context, run_id=run_id
+                )
+                if rule_names & {"MIN_CI_LOWER_BOUND", "NON_INFERIORITY"}:
+                    paired = await statistics_service.paired_comparison(
+                        session,
+                        context=context,
+                        run_id=run_id,
+                        baseline_variant_id=comparison.baseline_variant_id,
+                        candidate_variant_id=comparison.candidate_variant_id,
+                    )
+                    statistics = {**statistics, "paired": paired}
+            except Exception:
+                # Evidence that cannot be rebuilt must make the rule INCONCLUSIVE, not
+                # silently pass.  The rule evaluator handles a missing payload.
+                statistics = None
+        status, rule_results, reasons = self._evaluate(
+            comparison, policy.policy_json, run, statistics
+        )
         decision_hash = canonical_json_hash(
             {
                 "comparison_hash": comparison.comparison_hash,
@@ -292,12 +338,33 @@ class EvaluationReleaseGateService:
                 allowed.add("threshold")
             if rule == "TRADEOFF":
                 allowed |= {"compensation_metric", "min_compensation_gain"}
+            if rule == "REQUIRED_EVIDENCE_LEVEL":
+                allowed = _BASE_RULE_KEYS | {"level"}
+                if metric != _EVIDENCE_LEVEL_METRIC:
+                    self._invalid_policy()
+                level = raw.get("level")
+                if level not in _EVIDENCE_LEVEL_RANK:
+                    self._invalid_policy()
+            if rule == "MIN_PASS_HAT_K":
+                allowed = _BASE_RULE_KEYS | {"threshold"}
+                if metric != _PASS_HAT_K_METRIC:
+                    self._invalid_policy()
+            if rule in {"MIN_CI_LOWER_BOUND", "NON_INFERIORITY"}:
+                allowed = _BASE_RULE_KEYS | {"threshold"}
+                if metric != _PAIRED_METRIC:
+                    self._invalid_policy()
             if not set(raw).issubset(allowed):
                 self._invalid_policy()
-            try:
-                self.registry.definition_for(metric)
-            except ValueError:
-                self._invalid_policy()
+            if rule not in {
+                "REQUIRED_EVIDENCE_LEVEL",
+                "MIN_PASS_HAT_K",
+                "MIN_CI_LOWER_BOUND",
+                "NON_INFERIORITY",
+            }:
+                try:
+                    self.registry.definition_for(metric)
+                except ValueError:
+                    self._invalid_policy()
             seen.add(metric)
             item = {
                 "metric": metric,
@@ -305,6 +372,8 @@ class EvaluationReleaseGateService:
                 "required": raw.get("required", True),
                 "safety": raw.get("safety", False),
             }
+            if rule == "REQUIRED_EVIDENCE_LEVEL":
+                item["level"] = raw["level"]
             if not isinstance(item["required"], bool) or not isinstance(item["safety"], bool):
                 self._invalid_policy()
             for key in ("tolerance", "threshold", "min_compensation_gain"):
@@ -321,7 +390,13 @@ class EvaluationReleaseGateService:
                     item[key] = value
             if rule in _TOLERANCE_RULES and "tolerance" not in item:
                 self._invalid_policy()
-            if rule in {"MIN_VALUE", "MAX_VALUE"} and "threshold" not in item:
+            if rule in {"MIN_VALUE", "MAX_VALUE", "MIN_PASS_HAT_K"} and "threshold" not in item:
+                self._invalid_policy()
+            if rule in {"MIN_CI_LOWER_BOUND", "NON_INFERIORITY"} and "threshold" not in item:
+                self._invalid_policy()
+            if rule == "MIN_PASS_HAT_K" and not 0 <= float(item["threshold"]) <= 1:
+                self._invalid_policy()
+            if rule == "NON_INFERIORITY" and float(item["threshold"]) < 0:
                 self._invalid_policy()
             if rule == "TRADEOFF":
                 if item["safety"]:
@@ -349,7 +424,11 @@ class EvaluationReleaseGateService:
         return {"rules": normalized}
 
     def _evaluate(
-        self, comparison: EvaluationExperimentComparison, policy: Mapping[str, Any]
+        self,
+        comparison: EvaluationExperimentComparison,
+        policy: Mapping[str, Any],
+        run: EvaluationExperimentRun | None = None,
+        statistics: Mapping[str, Any] | None = None,
     ) -> tuple[str, list[dict[str, Any]], list[str]]:
         if comparison.status == "NOT_COMPARABLE":
             return "INCONCLUSIVE", [], ["comparison_not_comparable"]
@@ -358,6 +437,37 @@ class EvaluationReleaseGateService:
         hard_fail = False
         inconclusive = False
         for rule in policy["rules"]:
+            if rule["rule"] == "REQUIRED_EVIDENCE_LEVEL":
+                actual_level = getattr(run, "evidence_level", None) if run is not None else None
+                result = self._evaluate_evidence_level(rule, actual_level)
+                rule_results.append(result)
+                if result["status"] == "FAIL" and rule.get("required", True):
+                    hard_fail = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                elif result["status"] == "INCONCLUSIVE" and rule.get("required", True):
+                    inconclusive = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                continue
+            if rule["rule"] == "MIN_PASS_HAT_K":
+                result = self._evaluate_pass_hat_k(rule, comparison, statistics)
+                rule_results.append(result)
+                if result["status"] == "FAIL" and rule.get("required", True):
+                    hard_fail = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                elif result["status"] == "INCONCLUSIVE" and rule.get("required", True):
+                    inconclusive = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                continue
+            if rule["rule"] in {"MIN_CI_LOWER_BOUND", "NON_INFERIORITY"}:
+                result = self._evaluate_paired_interval(rule, statistics)
+                rule_results.append(result)
+                if result["status"] == "FAIL" and rule.get("required", True):
+                    hard_fail = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                elif result["status"] == "INCONCLUSIVE" and rule.get("required", True):
+                    inconclusive = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                continue
             metric = comparison.metrics.get(rule["metric"])
             if rule["rule"] == "TRADEOFF":
                 result = self._evaluate_tradeoff(
@@ -385,6 +495,143 @@ class EvaluationReleaseGateService:
             rule_results,
             reasons,
         )
+
+    def _evaluate_paired_interval(
+        self,
+        rule: Mapping[str, Any],
+        statistics: Mapping[str, Any] | None,
+    ) -> dict[str, Any]:
+        if not isinstance(statistics, Mapping):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "statistics_unavailable",
+            }
+        paired = statistics.get("paired")
+        if not isinstance(paired, Mapping) or not isinstance(paired.get("interval"), Mapping):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "paired_interval_unavailable",
+            }
+        lower = paired["interval"].get("lower")
+        upper = paired["interval"].get("upper")
+        delta = paired.get("delta")
+        pair_count = paired.get("pair_count")
+        if lower is None or upper is None or delta is None:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "paired_interval_unavailable",
+            }
+        if pair_count is None or int(pair_count) < _MIN_PAIRED_CASES:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "insufficient_pairs",
+                "pair_count": pair_count,
+                "minimum_pairs": _MIN_PAIRED_CASES,
+            }
+        if float(lower) == float(upper):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "degenerate_interval",
+                "pair_count": pair_count,
+            }
+        threshold = float(rule["threshold"])
+        if rule["rule"] == "MIN_CI_LOWER_BOUND":
+            passed = float(lower) >= threshold
+        else:  # NON_INFERIORITY: lower bound must not cross -margin
+            passed = float(lower) >= -threshold
+        return {
+            "metric": rule["metric"],
+            "rule": rule["rule"],
+            "status": "PASS" if passed else "FAIL",
+            "delta": float(delta),
+            "ci_lower": float(lower),
+            "ci_upper": float(upper),
+            "threshold": threshold,
+            "pair_count": pair_count,
+        }
+
+    def _evaluate_pass_hat_k(
+        self,
+        rule: Mapping[str, Any],
+        comparison: EvaluationExperimentComparison,
+        statistics: Mapping[str, Any] | None,
+    ) -> dict[str, Any]:
+        if not isinstance(statistics, Mapping):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "statistics_unavailable",
+            }
+        variants = statistics.get("variants")
+        if not isinstance(variants, Mapping):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "statistics_variants_missing",
+            }
+        candidate = variants.get(str(comparison.candidate_variant_id))
+        value = candidate.get("pass_hat_k") if isinstance(candidate, Mapping) else None
+        if value is None:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "pass_hat_k_unavailable",
+            }
+        threshold = float(rule["threshold"])
+        complete_case_rate = candidate.get("complete_case_rate")
+        if complete_case_rate is None or float(complete_case_rate) < _MIN_COMPLETE_CASE_RATE:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "insufficient_complete_cases",
+                "complete_case_rate": complete_case_rate,
+                "minimum_complete_case_rate": _MIN_COMPLETE_CASE_RATE,
+            }
+        passed = float(value) >= threshold
+        return {
+            "metric": rule["metric"],
+            "rule": rule["rule"],
+            "status": "PASS" if passed else "FAIL",
+            "candidate": float(value),
+            "threshold": threshold,
+            "complete_case_rate": complete_case_rate,
+        }
+
+    def _evaluate_evidence_level(
+        self, rule: Mapping[str, Any], actual: str
+    ) -> dict[str, Any]:
+        required = rule.get("level")
+        actual_rank = _EVIDENCE_LEVEL_RANK.get(str(actual))
+        required_rank = _EVIDENCE_LEVEL_RANK.get(str(required))
+        if actual_rank is None or required_rank is None:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "evidence_level_unknown",
+            }
+        passed = actual_rank >= required_rank
+        return {
+            "metric": rule["metric"],
+            "rule": rule["rule"],
+            "status": "PASS" if passed else "FAIL",
+            "required_level": required,
+            "actual_level": actual,
+        }
 
     def _evaluate_rule(self, rule: Mapping[str, Any], metric: Any) -> dict[str, Any]:
         if not isinstance(metric, Mapping):

@@ -19,8 +19,11 @@ from packages.core.execution_context.models import PrincipalContext
 from packages.evaluation.approval import EvaluationApprovalActorProvider
 from packages.evaluation.judge import (
     AnswerQualityJudge,
+    JudgeEnsemble,
     ModelGatewayJudgeClient,
+    judge_ensemble_from_manifest,
     judge_profile_from_manifest,
+    judge_profile_to_plan,
 )
 from packages.evaluation.models import EvaluationExperiment, EvaluationExperimentRun
 from packages.evaluation.queue import CeleryExperimentRunQueue
@@ -36,6 +39,7 @@ from packages.knowledge.composition import (
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.memory.store import SqlAlchemyMemoryStore
+from packages.model_gateway.contracts import ResolvedModelExecutionPlan
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.observability import ProductionTraceSink
@@ -85,11 +89,17 @@ class _SessionScopedJudgeClient:
     gateway decrypts the ``provider_credentials`` row itself.
     """
 
-    def __init__(self, factory, settings, context, model_profile_id: UUID) -> None:
+    def __init__(
+        self,
+        factory,
+        settings,
+        context,
+        plan: ResolvedModelExecutionPlan,
+    ) -> None:
         self.factory = factory
         self.settings = settings
         self.context = context
-        self.model_profile_id = model_profile_id
+        self.plan = plan
 
     async def complete(self, *, system_prompt: str, user_prompt: str) -> str:
         async with self.factory() as session:
@@ -98,11 +108,13 @@ class _SessionScopedJudgeClient:
                 credential_cipher=ProviderCredentialCipher.from_settings(self.settings),
                 trace_sink=ProductionTraceSink(),
             )
-            client = ModelGatewayJudgeClient(gateway, self.context, self.model_profile_id)
+            client = ModelGatewayJudgeClient(gateway, self.context, self.plan)
             return await client.complete(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
-async def _build_judge(settings, factory, run_id: UUID) -> AnswerQualityJudge | None:
+async def _build_judge(
+    settings, factory, run_id: UUID
+) -> AnswerQualityJudge | JudgeEnsemble | None:
     """Rebuild the judge this run's experiment was frozen with, if it has one.
 
     The judge identity comes from the experiment's manifest, not from re-resolving a
@@ -123,10 +135,10 @@ async def _build_judge(settings, factory, run_id: UUID) -> AnswerQualityJudge | 
                 EvaluationExperiment.id == run.experiment_id,
             )
         )
-        profile = judge_profile_from_manifest(
-            experiment.evaluator_manifest if experiment is not None else None
-        )
-        if profile is None:
+        manifest = experiment.evaluator_manifest if experiment is not None else None
+        ensemble = judge_ensemble_from_manifest(manifest)
+        profile = None if ensemble is not None else judge_profile_from_manifest(manifest)
+        if ensemble is None and profile is None:
             return None
         principal = PrincipalContext(
             request_id=f"evaluation:{run.id}",
@@ -138,11 +150,29 @@ async def _build_judge(settings, factory, run_id: UUID) -> AnswerQualityJudge | 
                 session, principal=principal, workspace_id=run.workspace_id
             )
         ).context
-    client = _SessionScopedJudgeClient(factory, settings, context, UUID(profile.profile_id))
+    if ensemble is not None:
+        members = [
+            AnswerQualityJudge(
+                member,
+                _SessionScopedJudgeClient(
+                    factory,
+                    settings,
+                    context,
+                    judge_profile_to_plan(member, run.workspace_id),
+                ),
+            )
+            for member in ensemble.members
+        ]
+        return JudgeEnsemble(members, strategy=ensemble.strategy)
+    client = _SessionScopedJudgeClient(
+        factory, settings, context, judge_profile_to_plan(profile, run.workspace_id)
+    )
     return AnswerQualityJudge(profile, client)
 
 
-async def _build_driver(settings, factory, *, judge: AnswerQualityJudge | None = None):
+async def _build_driver(
+    settings, factory, *, judge: AnswerQualityJudge | JudgeEnsemble | None = None
+):
     trace_sink = ProductionTraceSink()
     components = production_retrieval_components(settings)
     retriever = SessionScopedKnowledgeRetriever(

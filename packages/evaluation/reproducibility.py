@@ -11,12 +11,18 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.judge import (
     JUDGE_DISABLED_VERSION,
     JUDGE_MANIFEST_KEY,
+    FrozenJudgeEnsemble,
     FrozenJudgeProfile,
+    judge_ensemble_manifest_entry,
     judge_manifest_entry,
 )
 from packages.evaluation.models import PricingSnapshot
 
 EVALUATION_SCHEMA_VERSION = 1
+#: New experiments freeze the trajectory projection.  Manifests written before AE-1
+#: keep their stored ``observation_schema_version`` (2) and their evaluator set, so
+#: reading a historical experiment still produces exactly the metrics it produced.
+OBSERVATION_SCHEMA_VERSION = 3
 DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
     JUDGE_MANIFEST_KEY: JUDGE_DISABLED_VERSION,
     "approval-evaluator": "v2",
@@ -26,11 +32,13 @@ DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
     "retrieval-evaluator": "v2",
     "tool-evaluator": "v2",
     "support-postcondition-evaluator": "support-postcondition-v1",
+    "trajectory-evaluator": "trajectory-v1",
 }
 
 
 def default_evaluator_manifest(
     judge_profile: FrozenJudgeProfile | None = None,
+    judge_ensemble: FrozenJudgeEnsemble | None = None,
 ) -> dict[str, Any]:
     """Freeze the evaluator identities for one experiment.
 
@@ -39,14 +47,22 @@ def default_evaluator_manifest(
     version, so the experiment can never be re-scored by a different judge model
     without the manifest -- and every metric row derived from it -- changing.
     """
+    if judge_profile is not None and judge_ensemble is not None:
+        raise ValueError("use either judge_profile or judge_ensemble, not both")
     versions = dict(DEFAULT_EVALUATOR_VERSIONS)
-    versions[JUDGE_MANIFEST_KEY] = judge_manifest_entry(judge_profile)
+    versions[JUDGE_MANIFEST_KEY] = (
+        judge_ensemble_manifest_entry(judge_ensemble)
+        if judge_ensemble is not None
+        else judge_manifest_entry(judge_profile)
+    )
     manifest: dict[str, Any] = {
         "evaluation_schema_version": EVALUATION_SCHEMA_VERSION,
-        "observation_schema_version": 2,
+        "observation_schema_version": OBSERVATION_SCHEMA_VERSION,
         "evaluator_versions": dict(sorted(versions.items())),
     }
-    if judge_profile is not None:
+    if judge_ensemble is not None:
+        manifest["judge_ensemble"] = judge_ensemble.projection()
+    elif judge_profile is not None:
         # The non-secret projection is kept beside the version so the worker can
         # rebuild exactly the judge the experiment was frozen with, instead of
         # re-resolving a profile that may have been edited since.  The key is
@@ -211,6 +227,7 @@ def _decimal_text(value: Decimal) -> str:
 __all__ = [
     "DEFAULT_EVALUATOR_VERSIONS",
     "EVALUATION_SCHEMA_VERSION",
+    "OBSERVATION_SCHEMA_VERSION",
     "default_evaluator_manifest",
     "experiment_spec_hash",
     "frozen_judge_version",

@@ -1,0 +1,90 @@
+{
+  "model": "deepseek-v4.1-flash",
+  "endpoint": "https://ws-actclc2u6282ierx.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+  "case_count": 3,
+  "judge_calls": 12,
+  "prompt_tokens": 3476,
+  "completion_tokens": 4977,
+  "total_tokens": 8453,
+  "results": [
+    {
+      "case_id": "good",
+      "single": {
+        "status": "SCORED",
+        "score": 1.0,
+        "dimension_scores": {
+          "actionability": 4,
+          "clarity": 4,
+          "evidence_grounding": 4,
+          "factual_consistency": 4,
+          "instruction_coverage": 4
+        },
+        "reason": null
+      },
+      "ensemble": {
+        "status": "SCORED",
+        "score": 1.0,
+        "dimension_scores": {
+          "actionability": 4,
+          "clarity": 4,
+          "evidence_grounding": 4,
+          "factual_consistency": 4,
+          "instruction_coverage": 4
+        },
+        "agreement": 0.9,
+        "reason": null
+      }
+    },
+    {
+      "case_id": "partial",
+      "single": {
+        "status": "SCORED",
+        "score": 0.675,
+        "dimension_scores": {
+          "actionability": 2,
+          "clarity": 3,
+          "evidence_grounding": 2,
+          "factual_consistency": 4,
+          "instruction_coverage": 2
+        },
+        "reason": null
+      },
+      "ensemble": {
+        "status": "FAILED",
+        "score": null,
+        "dimension_scores": {},
+        "agreement": null,
+        "reason": "judge_ensemble_quorum_not_met"
+      }
+    },
+    {
+      "case_id": "wrong",
+      "single": {
+        "status": "SCORED",
+        "score": 0.125,
+        "dimension_scores": {
+          "actionability": 0,
+          "clarity": 3,
+          "evidence_grounding": 0,
+          "factual_consistency": 0,
+          "instruction_coverage": 1
+        },
+        "reason": null
+      },
+      "ensemble": {
+        "status": "SCORED",
+        "score": 0.15,
+        "dimension_scores": {
+          "actionability": 1,
+          "clarity": 3,
+          "evidence_grounding": 0,
+          "factual_consistency": 0,
+          "instruction_coverage": 1
+        },
+        "agreement": 0.9333333333333333,
+        "reason": null
+      }
+    }
+  ],
+  "note": "Manual probe only; not a persisted experiment and not a model-quality claim."
+}

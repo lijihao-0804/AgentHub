@@ -21,6 +21,13 @@ from sqlalchemy import func, select
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from benchmarks.evaluation.memory_trial_budget import (
+    LOCAL_ROUND_ATTEMPT_LIMIT,
+    RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT,
+    MemoryTrialBudget,
+    upper_bound_cost_cny,
+)
+from benchmarks.evaluation.memory_trial_client import PRICE_IDENTITY
 from packages.agent_runtime.deepseek_v41_counter import DeepseekV41TextCounter
 from packages.agent_runtime.frozen import (
     SUMMARY_NON_THINKING_COUNTER_ID,
@@ -41,13 +48,6 @@ from packages.agent_runtime.publish import SUMMARY_SPEC_SCHEMA_VERSION
 from packages.control_plane.models import WorkspaceMembership
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
-from benchmarks.evaluation.memory_trial_budget import (
-    LOCAL_ROUND_ATTEMPT_LIMIT,
-    RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT,
-    MemoryTrialBudget,
-    upper_bound_cost_cny,
-)
-from benchmarks.evaluation.memory_trial_client import PRICE_IDENTITY
 from packages.model_gateway.contracts import AliyunDeepSeekRequestMode, ModelRequest
 
 _BEIJING_HOST_SUFFIX = ".cn-beijing.maas.aliyuncs.com"
@@ -185,7 +185,11 @@ class MemoryTrialBudgetAccountingHook:
         del reason
         reservation = _ledger_reservation(reservation)
         row = next(
-            (item for item in self._budget.state["attempts"] if item["attempt_id"] == reservation.attempt_id),
+            (
+                item
+                for item in self._budget.state["attempts"]
+                if item["attempt_id"] == reservation.attempt_id
+            ),
             None,
         )
         if row is None or row.get("request_identity") != reservation.request_identity:

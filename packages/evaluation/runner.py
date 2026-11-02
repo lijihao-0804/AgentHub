@@ -38,6 +38,7 @@ from packages.evaluation.business import inspect_support_outcome, support_condit
 from packages.evaluation.judge import (
     JUDGE_OBSERVATION_KEY,
     AnswerQualityJudge,
+    JudgeEnsemble,
     JudgeRequest,
     sequence_of_text,
 )
@@ -67,6 +68,8 @@ from packages.evaluation.reproducibility import (
     normalize_knowledge_snapshots,
     variant_hash,
 )
+from packages.evaluation.taxonomy import classify_failure
+from packages.evaluation.trajectory import build_trajectory_observation
 from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.observability import NoopTraceSink
@@ -205,7 +208,7 @@ class AgentRuntimeEvaluationDriver:
         *,
         retriever: KnowledgeRetriever | None = None,
         approval_context_factory: Callable[[EvaluationExperimentRun], Awaitable[Any]] | None = None,
-        judge: AnswerQualityJudge | None = None,
+        judge: AnswerQualityJudge | JudgeEnsemble | None = None,
     ) -> None:
         self.agent_run_service = agent_run_service
         self.context_factory = context_factory
@@ -349,6 +352,38 @@ class AgentRuntimeEvaluationDriver:
                         .order_by(RunStep.sequence_number, RunStep.id)
                     )
                 )
+                trajectory_rows = list(
+                    await session.scalars(
+                        select(RunStep)
+                        .where(
+                            RunStep.workspace_id == run.workspace_id,
+                            RunStep.agent_run_id == result.run_id,
+                            RunStep.kind.in_(
+                                (
+                                    "TOOL_PROPOSAL",
+                                    "TOOL_EXECUTE",
+                                    "POLICY",
+                                    "APPROVAL_WAIT",
+                                    "ACTION",
+                                    "RECONCILIATION",
+                                    "GUARD",
+                                    "FINISH",
+                                )
+                            ),
+                        )
+                        .order_by(RunStep.sequence_number, RunStep.id)
+                    )
+                )
+                approval_rows = list(
+                    await session.scalars(
+                        select(Approval)
+                        .where(
+                            Approval.workspace_id == run.workspace_id,
+                            Approval.run_id == result.run_id,
+                        )
+                        .order_by(Approval.created_at, Approval.id)
+                    )
+                )
                 version = await session.scalar(
                     select(AgentVersion).where(
                         AgentVersion.workspace_id == run.workspace_id,
@@ -388,6 +423,84 @@ class AgentRuntimeEvaluationDriver:
                 "output_hash": canonical_json_hash(result.final_output or ""),
                 "variant_hash": variant.variant_hash,
             }
+            trajectory_steps = [
+                {
+                    "index": index,
+                    "sequence_number": row.sequence_number,
+                    "kind": row.kind,
+                    "status": row.status,
+                    "error_code": (row.safe_metadata or {}).get("error_code"),
+                    "tool_identities": (row.safe_metadata or {}).get("tool_identities") or [],
+                    "arguments_hashes": (row.safe_metadata or {}).get("arguments_hashes") or [],
+                    "tool_results": (row.safe_metadata or {}).get("tool_results") or [],
+                    "logical_action_ids": (row.safe_metadata or {}).get("logical_action_ids") or [],
+                    "action_results": (row.safe_metadata or {}).get("action_results") or [],
+                }
+                for index, row in enumerate(trajectory_rows)
+            ]
+            approval_facts = [
+                {
+                    "approval_id": str(row.id),
+                    "logical_action_id": row.logical_action_id,
+                    "tool_identity": row.tool_identity,
+                    "arguments_hash": row.canonical_args_hash,
+                    "decision_status": row.decision_status,
+                    "execution_status": row.execution_status,
+                    "failure_code": row.failure_code,
+                }
+                for row in approval_rows
+            ]
+            cost_amount = (
+                persisted.total_cost_amount if persisted else result.total_cost_amount
+            )
+            observation.update(
+                build_trajectory_observation(
+                    steps=trajectory_steps,
+                    approvals=approval_facts,
+                    terminal={
+                        "status": result.status,
+                        "failure_code": result.failure_code,
+                    },
+                    counters={
+                        "model_step_count": result.model_step_count,
+                        "tool_call_count": result.tool_call_count,
+                    },
+                    budget={
+                        "input_tokens": (
+                            persisted.total_input_tokens
+                            if persisted
+                            else result.total_input_tokens
+                        ),
+                        "output_tokens": (
+                            persisted.total_output_tokens
+                            if persisted
+                            else result.total_output_tokens
+                        ),
+                        "total_tokens": (
+                            persisted.total_tokens if persisted else result.total_tokens
+                        ),
+                        "cached_tokens": (
+                            persisted.total_cached_tokens
+                            if persisted
+                            else result.total_cached_tokens
+                        ),
+                        "cost_amount": str(cost_amount) if cost_amount is not None else None,
+                        "cost_currency": (
+                            persisted.cost_currency if persisted else result.cost_currency
+                        ),
+                    },
+                    output_hash=observation["output_hash"],
+                    category=item.category,
+                    expected=item.expected,
+                    field_sources={
+                        **observation.get("field_sources", {}),
+                        "trajectory": "run_steps+approvals",
+                    },
+                )
+            )
+            observation["failure_taxonomy"] = classify_failure(item.expected, observation)
+            # Execution safety booleans are derived from the unified trajectory evidence in
+            # build_trajectory_observation; do not re-derive them from approval rows alone.
             if postcondition is not None:
                 async with self.agent_run_service.session_factory() as session:
                     observation["business_outcome"] = await inspect_support_outcome(
