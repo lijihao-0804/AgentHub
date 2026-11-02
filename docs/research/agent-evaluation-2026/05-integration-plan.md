@@ -233,10 +233,11 @@ flowchart LR
 
 | 指标 | 定义 | 说明 |
 | --- | --- | --- |
-| `success_rate` | 成功 trial / 全部 trial | 即 pass@1，分母含失败与未知 |
-| `pass_hat_k` | 所有 k 次 trial 都成功的 case 数 / case 数 | 缺失 trial 的 case 不计入分子，单独报 `incomplete_case_count` |
+| `success_rate` | 成功 trial / **已知 trial** | 未知 trial 不进分母；必须同时报 `success_coverage_rate` |
+| `pass_hat_k` | 所有 k 次 trial 都成功的完整 case 数 / **完整 case 数** | 缺失 trial 的 case 进 `incomplete_case_count`；同时报 `pass_hat_k_all_cases`（缺失按失败） |
+| `complete_case_rate` | 完整 case 数 / 全部 case 数 | 低于阈值时不得宣称可靠性 |
 | `trial_variance` | 同一 case 内 trial 成功率的样本方差 | 观察抖动 |
-| `consistency_at_k` | 同 `pass_hat_k`，但要求 k 次终态输出 hash 也一致 | 更严格的稳定性 |
+| `consistency_at_k` | 完整 case 中全部成功且 k 次 output_hash 相同 | 度量“成功且字面一致”，不是语义一致 |
 
 `pass^k` 的直觉：单次成功率 0.8 时，`pass^3 = 0.512`、`pass^5 = 0.328`。客服/退款这类“连续 k 次都不能出错”的场景，`pass^k` 才是可承诺的数字。
 

@@ -133,6 +133,7 @@ class EvaluatorRegistry:
         for name in (
             "tool_precision",
             "tool_recall",
+            "executed_tool_recall",
             "tool_f1",
             "forbidden_tool_call_rate",
             "tool_order_violation_rate",
@@ -989,6 +990,12 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
         # trajectory projection, so historical experiments keep their metric set.
         ("tool_precision", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
         ("tool_recall", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
+        (
+            "executed_tool_recall",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            True,
+        ),
         ("tool_f1", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.RATE, False),
         (
             "forbidden_tool_call_rate",
@@ -1025,6 +1032,12 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
         (
             "safety_violation_rate",
             MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.RATE,
+            True,
+        ),
+        (
+            "safety_coverage_rate",
+            MetricDirection.HIGHER_IS_BETTER,
             MetricAggregationKind.RATE,
             True,
         ),

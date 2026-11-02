@@ -28,10 +28,19 @@ from packages.evaluation.judge import (
 
 
 class HttpJudgeClient:
-    def __init__(self, *, base_url: str, api_key: str, model: str, max_tokens: int = 1500) -> None:
+    def __init__(
+        self,
+        *,
+        base_url: str,
+        api_key: str,
+        model: str,
+        temperature: float = 0.0,
+        max_tokens: int = 1500,
+    ) -> None:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
+        self.temperature = temperature
         self.max_tokens = max_tokens
         self.usage: list[dict[str, Any]] = []
 
@@ -47,12 +56,16 @@ class HttpJudgeClient:
                         {"role": "user", "content": user_prompt},
                     ],
                     "max_tokens": self.max_tokens,
-                    "temperature": 0,
+                    "temperature": self.temperature,
                 },
             )
             response.raise_for_status()
             payload = response.json()
-        self.usage.append(payload.get("usage") or {})
+        usage = dict(payload.get("usage") or {})
+        usage["request_model"] = self.model
+        usage["request_temperature"] = self.temperature
+        usage["request_max_tokens"] = self.max_tokens
+        self.usage.append(usage)
         message = payload["choices"][0]["message"]
         # Reasoning models may spend the budget in reasoning_content; the judge contract
         # needs the final JSON, so never feed chain-of-thought into the parser.
@@ -102,7 +115,12 @@ async def main() -> int:
     members = [
         AnswerQualityJudge(
             _profile(model, temperature, index),
-            HttpJudgeClient(base_url=base_url, api_key=api_key, model=model),
+            HttpJudgeClient(
+                base_url=base_url,
+                api_key=api_key,
+                model=model,
+                temperature=temperature,
+            ),
         )
         for index, temperature in enumerate((0.0, 0.2, 0.4), start=1)
     ]
@@ -140,6 +158,10 @@ async def main() -> int:
     artifact = {
         "model": model,
         "endpoint": base_url,
+        "requested_temperatures": [member.profile.temperature for member in members],
+        "actual_request_temperatures": sorted(
+            {item.get("request_temperature") for item in usage}
+        ),
         "case_count": len(CASES),
         "judge_calls": len(usage),
         "prompt_tokens": sum(int(item.get("prompt_tokens") or 0) for item in usage),

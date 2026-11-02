@@ -14,6 +14,7 @@ from packages.evaluation.judge import (
     FrozenJudgeProfile,
     JudgeEnsemble,
     judge_ensemble_from_manifest,
+    judge_profile_to_plan,
 )
 from packages.evaluation.reproducibility import default_evaluator_manifest
 
@@ -134,6 +135,19 @@ def test_ensemble_requires_one_rubric() -> None:
 
     with pytest.raises(ValueError, match="share one rubric"):
         FrozenJudgeEnsemble((_profile("a"), other))
+
+
+def test_frozen_judge_profile_builds_a_matching_execution_plan() -> None:
+    profile = _profile("frozen-model")
+    workspace_id = uuid4()
+
+    plan = judge_profile_to_plan(profile, workspace_id)
+
+    assert plan.primary.model == "frozen-model"
+    assert plan.primary.provider == "fake"
+    assert float(plan.primary.temperature) == 0.0
+    assert plan.primary.max_tokens == profile.max_tokens
+    assert plan.primary.workspace_id == workspace_id
 
 
 def _request():

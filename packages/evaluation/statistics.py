@@ -97,9 +97,17 @@ def summarize_reliability(
         "unknown_trial_count": len(outcomes) - len(known_trials),
         "success_count": successes,
         "success_rate": successes / len(known_trials) if known_trials else None,
+        "success_coverage_rate": len(known_trials) / len(outcomes) if outcomes else None,
+        "complete_case_rate": len(complete) / len(grouped) if grouped else None,
+        # Complete-case reliability.  Keep the conservative variant next to it so a run
+        # with many unknown trials cannot look reliable just by dropping them.
         "pass_hat_k": pass_hat_k,
+        "pass_hat_k_all_cases": (
+            sum(complete_success) / len(grouped) if grouped else None
+        ),
         "trial_variance": variance,
         "consistency_at_k": consistency,
+        "literal_consistency_at_k": consistency,
         "case_success_rates": {
             case_key: mean(float(bool(item.success)) for item in trials if item.success is not None)
             for case_key, trials in grouped.items()
@@ -271,9 +279,18 @@ def statistical_summary(
     successes = summary["success_count"]
     interval = jeffreys_interval(successes, known)
     summary["success_rate_interval"] = (
-        {"method": "jeffreys", "lower": interval[0], "upper": interval[1]}
+        {
+            "method": "jeffreys",
+            "basis": "known_trials",
+            "lower": interval[0],
+            "upper": interval[1],
+        }
         if interval
         else None
+    )
+    summary["reliability_note"] = (
+        "pass_hat_k uses complete cases only; pass_hat_k_all_cases counts every unknown "
+        "trial as a failure.  Report complete_case_rate before claiming reliability."
     )
     summary["mde"] = (
         {

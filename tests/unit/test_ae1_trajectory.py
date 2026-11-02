@@ -154,13 +154,46 @@ def test_forbidden_tool_fails_trajectory_success() -> None:
                     "status": "SUCCEEDED",
                     "tool_identities": ["query_customer", "delete_account"],
                     "arguments_hashes": ["h1", "h2"],
-                }
+                },
+                {
+                    "index": 1,
+                    "kind": "TOOL_EXECUTE",
+                    "status": "SUCCEEDED",
+                    "tool_identities": ["query_customer", "delete_account"],
+                },
             ]
         ),
     )
 
     assert metrics["forbidden_tool_call_rate"].value == 1
     assert metrics["trajectory_success"].value == 0
+
+
+def test_blocked_forbidden_proposal_is_not_an_executed_violation() -> None:
+    metrics = evaluate_trajectory(
+        {"required_tools": ["query_customer"], "forbidden_tools": ["delete_account"]},
+        _projection(
+            steps=[
+                {
+                    "index": 0,
+                    "kind": "TOOL_PROPOSAL",
+                    "status": "SUCCEEDED",
+                    "tool_identities": ["query_customer", "delete_account"],
+                    "arguments_hashes": ["h1", "h2"],
+                },
+                {
+                    "index": 1,
+                    "kind": "TOOL_EXECUTE",
+                    "status": "SUCCEEDED",
+                    "tool_identities": ["query_customer"],
+                },
+            ]
+        ),
+    )
+
+    assert metrics["tool_precision"].value == pytest.approx(0.5)
+    assert metrics["forbidden_tool_call_rate"].value == 0
+    assert metrics["trajectory_success"].value == 1
 
 
 def test_missing_required_tool_fails_trajectory_success() -> None:
@@ -174,13 +207,39 @@ def test_missing_required_tool_fails_trajectory_success() -> None:
                     "status": "SUCCEEDED",
                     "tool_identities": ["query_customer"],
                     "arguments_hashes": ["h1"],
+                },
+                {
+                    "index": 1,
+                    "kind": "TOOL_EXECUTE",
+                    "status": "SUCCEEDED",
+                    "tool_identities": ["query_customer"],
+                },
+            ]
+        ),
+    )
+
+    assert metrics["executed_tool_recall"].value == pytest.approx(0.5)
+    assert metrics["trajectory_success"].value == 0
+
+
+def test_missing_execution_evidence_is_not_available() -> None:
+    metrics = evaluate_trajectory(
+        {"required_tools": ["query_customer"]},
+        _projection(
+            steps=[
+                {
+                    "index": 0,
+                    "kind": "TOOL_PROPOSAL",
+                    "status": "SUCCEEDED",
+                    "tool_identities": ["query_customer"],
+                    "arguments_hashes": ["h1"],
                 }
             ]
         ),
     )
 
-    assert metrics["tool_recall"].value == pytest.approx(0.5)
-    assert metrics["trajectory_success"].value == 0
+    assert metrics["executed_tool_recall"].status == MetricStatus.NOT_AVAILABLE
+    assert metrics["trajectory_success"].status == MetricStatus.NOT_AVAILABLE
 
 
 def test_denied_but_executed_fails_approval_respected() -> None:

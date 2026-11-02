@@ -62,10 +62,26 @@ def classify_failure(
         labels.append(_label("REQUIRED_TOOL_MISSING", step_index, {"missing": missing}))
     hit_forbidden = [identity for identity in identities if identity in forbidden]
     if hit_forbidden:
-        labels.append(_label("FORBIDDEN_TOOL_CALL", step_index, {"tools": hit_forbidden}))
+        forbidden_step = next(
+            (
+                call.get("step_index")
+                for call in calls
+                if call.get("identity") in forbidden
+            ),
+            step_index,
+        )
+        labels.append(
+            _label("FORBIDDEN_TOOL_CALL", forbidden_step, {"tools": hit_forbidden})
+        )
     violation = _first_order_violation(precedence, identities)
     if violation is not None:
-        labels.append(_label("TOOL_ORDER_VIOLATION", step_index, {"pair": list(violation)}))
+        labels.append(
+            _label(
+                "TOOL_ORDER_VIOLATION",
+                _order_violation_step(precedence, calls) or step_index,
+                {"pair": list(violation)},
+            )
+        )
 
     facts = observation.get("approval_facts")
     if isinstance(facts, list):
@@ -106,6 +122,28 @@ def summarize_labels(labels: Sequence[Mapping[str, Any]]) -> dict[str, int]:
         code = str(label.get("code"))
         counts[code] = counts.get(code, 0) + 1
     return dict(sorted(counts.items()))
+
+
+def _order_violation_step(
+    precedence: Any, calls: Sequence[Mapping[str, Any]]
+) -> int | None:
+    if not isinstance(precedence, Sequence) or isinstance(precedence, (str, bytes)):
+        return None
+    positions: dict[str, int] = {}
+    steps: dict[str, Any] = {}
+    for index, call in enumerate(calls):
+        identity = str(call.get("identity"))
+        positions.setdefault(identity, index)
+        steps.setdefault(identity, call.get("step_index"))
+    for pair in precedence:
+        if not isinstance(pair, Sequence) or isinstance(pair, (str, bytes)) or len(pair) != 2:
+            continue
+        before, after = str(pair[0]), str(pair[1])
+        if before not in positions or after not in positions:
+            return steps.get(after) or steps.get(before)
+        if positions[before] > positions[after]:
+            return steps.get(after)
+    return None
 
 
 def _label(

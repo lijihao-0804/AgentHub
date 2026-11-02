@@ -89,3 +89,60 @@ def test_create_experiment_accepts_known_levels() -> None:
         "PRODUCTION_SAMPLE",
     ):
         ExperimentService._validate_evidence_level(level)
+
+
+def _pass_hat_policy(threshold: float) -> dict:
+    return EvaluationReleaseGateService()._validate_policy(
+        {
+            "rules": [
+                {
+                    "metric": "pass_hat_k",
+                    "rule": "MIN_PASS_HAT_K",
+                    "threshold": threshold,
+                }
+            ]
+        }
+    )
+
+
+def _comparison() -> SimpleNamespace:
+    return SimpleNamespace(
+        status="COMPLETE", metrics={}, candidate_variant_id="candidate"
+    )
+
+
+def test_pass_hat_k_gate_passes_when_value_meets_threshold() -> None:
+    service = EvaluationReleaseGateService()
+    statistics = {
+        "variants": {"candidate": {"pass_hat_k": 0.9, "complete_case_rate": 1.0}}
+    }
+
+    status, results, _ = service._evaluate(
+        _comparison(), _pass_hat_policy(0.8), None, statistics
+    )
+
+    assert status == "PASS"
+    assert results[0]["candidate"] == 0.9
+
+
+def test_pass_hat_k_gate_fails_below_threshold() -> None:
+    service = EvaluationReleaseGateService()
+    statistics = {"variants": {"candidate": {"pass_hat_k": 0.5}}}
+
+    status, _, reasons = service._evaluate(
+        _comparison(), _pass_hat_policy(0.8), None, statistics
+    )
+
+    assert status == "FAIL"
+    assert reasons == ["pass_hat_k:FAIL"]
+
+
+def test_pass_hat_k_gate_without_statistics_is_inconclusive() -> None:
+    service = EvaluationReleaseGateService()
+
+    status, results, _ = service._evaluate(
+        _comparison(), _pass_hat_policy(0.8), None, None
+    )
+
+    assert status == "INCONCLUSIVE"
+    assert results[0]["reason"] == "statistics_unavailable"

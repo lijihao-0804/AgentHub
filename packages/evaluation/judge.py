@@ -30,9 +30,13 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.contracts import (
     CapabilityRequirements,
+    ModelCapabilities,
     ModelGateway,
     ModelMessage,
     ModelRequest,
+    ResolvedModelExecutionPlan,
+    ResolvedModelExecutionProfile,
+    RetryPolicy,
 )
 
 #: Manifest key under ``evaluator_versions`` that pins the frozen judge identity.
@@ -268,36 +272,79 @@ class JudgeClient(Protocol):
     async def complete(self, *, system_prompt: str, user_prompt: str) -> str: ...
 
 
+def judge_profile_to_plan(
+    profile: FrozenJudgeProfile,
+    workspace_id: UUID,
+) -> ResolvedModelExecutionPlan:
+    """Rebuild the frozen judge as an execution plan.
+
+    The plan carries the exact provider/model/temperature/max-tokens/timeout that were
+    frozen.  Passing it to ``gateway.generate_resolved`` means the request cannot silently
+    pick up a later edit to the stored model profile.
+    """
+
+    resolved_profile = ResolvedModelExecutionProfile(
+        id=UUID(profile.profile_id),
+        workspace_id=workspace_id,
+        provider_credential_id=UUID(profile.credential_ref),
+        provider=profile.provider,
+        model=profile.model,
+        temperature=Decimal(str(profile.temperature)),
+        max_tokens=profile.max_tokens,
+        timeout_seconds=Decimal(str(profile.timeout_seconds)),
+        capabilities=ModelCapabilities(),
+    )
+    return ResolvedModelExecutionPlan(
+        primary=resolved_profile,
+        fallbacks=(),
+        retry_policy=RetryPolicy(),
+    )
+
+
 class ModelGatewayJudgeClient:
     """Judge transport backed by the existing model gateway.
 
     Credentials are never handled here: the gateway resolves the encrypted
     ``provider_credentials`` row for ``model_profile_id`` through the existing
-    ``AGENTHUB_CREDENTIAL_MASTER_KEY`` mechanism.
+    ``AGENTHUB_CREDENTIAL_MASTER_KEY`` mechanism.  When a frozen plan is supplied the
+    call goes through ``generate_resolved`` so the frozen parameters are authoritative.
     """
 
     def __init__(
         self,
         gateway: ModelGateway,
         context: WorkspaceExecutionContext,
-        model_profile_id: UUID,
+        plan_or_profile_id: ResolvedModelExecutionPlan | UUID,
     ) -> None:
         self.gateway = gateway
         self.context = context
-        self.model_profile_id = model_profile_id
+        if isinstance(plan_or_profile_id, ResolvedModelExecutionPlan):
+            self.plan: ResolvedModelExecutionPlan | None = plan_or_profile_id
+            self.model_profile_id = plan_or_profile_id.primary.id
+        else:
+            self.plan = None
+            self.model_profile_id = plan_or_profile_id
 
     async def complete(self, *, system_prompt: str, user_prompt: str) -> str:
-        response = await self.gateway.generate(
-            self.context,
-            self.model_profile_id,
-            ModelRequest(
-                messages=(
-                    ModelMessage(role="system", content=system_prompt),
-                    ModelMessage(role="user", content=user_prompt),
-                ),
-                required_capabilities=CapabilityRequirements(),
+        request = ModelRequest(
+            messages=(
+                ModelMessage(role="system", content=system_prompt),
+                ModelMessage(role="user", content=user_prompt),
             ),
+            required_capabilities=CapabilityRequirements(),
         )
+        if self.plan is not None:
+            response = await self.gateway.generate_resolved(
+                self.context,
+                self.plan,
+                request,
+            )
+        else:
+            response = await self.gateway.generate(
+                self.context,
+                self.model_profile_id,
+                request,
+            )
         return response.content
 
 
@@ -690,6 +737,7 @@ __all__ = [
     "judge_ensemble_manifest_entry",
     "judge_manifest_entry",
     "judge_profile_from_manifest",
+    "judge_profile_to_plan",
     "judge_version_from_manifest",
     "sequence_of_text",
 ]

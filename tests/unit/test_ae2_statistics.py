@@ -43,6 +43,9 @@ def test_pass_hat_k_and_variance() -> None:
     assert summary["known_trial_count"] == 10
     assert summary["success_rate"] == pytest.approx(0.7)
     assert summary["pass_hat_k"] == pytest.approx(1 / 3)
+    assert summary["pass_hat_k_all_cases"] == pytest.approx(1 / 4)
+    assert summary["complete_case_rate"] == pytest.approx(0.75)
+    assert summary["success_coverage_rate"] == pytest.approx(10 / 11)
     assert summary["case_all_success"] == {"a": True, "b": False, "c": False}
     assert summary["trial_variance"] is not None
 

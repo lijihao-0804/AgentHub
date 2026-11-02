@@ -69,7 +69,20 @@ def build_trajectory_observation(
     """
 
     normalized_steps = [_normalize_step(index, step) for index, step in enumerate(steps)]
-    tool_calls = _tool_calls(normalized_steps)
+    proposed_calls = _calls_for_kind(normalized_steps, "TOOL_PROPOSAL")
+    executed_calls = _calls_for_kind(normalized_steps, "TOOL_EXECUTE")
+    if not proposed_calls:
+        # A historical run may have execution records but no proposal projection.
+        proposed_calls = [dict(call) for call in executed_calls]
+    # A proposal has the argument hash; execution may not repeat it.  Pair by position
+    # only when the identity matches, so we never attribute one call's arguments to
+    # another call.
+    for index, call in enumerate(executed_calls):
+        if call.get("arguments_hash") is None and index < len(proposed_calls):
+            proposal = proposed_calls[index]
+            if proposal.get("identity") == call.get("identity"):
+                call["arguments_hash"] = proposal.get("arguments_hash")
+    tool_calls = executed_calls or proposed_calls
     tool_sequence = [call["identity"] for call in tool_calls]
     signatures = [_call_signature(call) for call in tool_calls]
     approval_facts = [_normalize_approval(item) for item in approvals]
@@ -91,6 +104,10 @@ def build_trajectory_observation(
         "trajectory_version": TRAJECTORY_VERSION,
         "trajectory_step_count": len(normalized_steps),
         "trajectory_steps": normalized_steps,
+        "proposed_calls": proposed_calls,
+        "executed_calls": executed_calls,
+        "proposed_tool_sequence": [call["identity"] for call in proposed_calls],
+        "executed_tool_sequence": [call["identity"] for call in executed_calls],
         "tool_calls": tool_calls,
         "tool_sequence": tool_sequence,
         "tool_call_signatures": signatures,
@@ -145,22 +162,25 @@ def evaluate_trajectory(
     if observation.get("trajectory_version") != TRAJECTORY_VERSION:
         return {}
 
-    calls = observation.get("tool_calls")
-    calls = [call for call in calls if isinstance(call, Mapping)] if isinstance(calls, list) else []
-    identities = [
-        str(call.get("identity")) for call in calls if isinstance(call.get("identity"), str)
-    ]
+    proposed = _mapping_calls(observation.get("proposed_calls"))
+    executed = _mapping_calls(observation.get("executed_calls"))
+    if not proposed:
+        proposed = _mapping_calls(observation.get("tool_calls"))
+    proposed_identities = [str(call["identity"]) for call in proposed if call.get("identity")]
+    executed_identities = [str(call["identity"]) for call in executed if call.get("identity")]
     required = _expected_tools(expected)
     required_set = set(required)
     forbidden = set(_string_list(expected.get("forbidden_tools")))
-    signatures = [
-        str(item) for item in observation.get("tool_call_signatures") or [] if isinstance(item, str)
-    ]
+    signatures = _executed_signatures(observation)
 
     metrics: dict[str, MetricValue] = {}
 
-    metrics["tool_precision"] = _precision("tool_precision", identities, required_set)
-    metrics["tool_recall"] = _recall("tool_recall", identities, required)
+    # Tool **selection** is scored on what the model proposed.  Execution metrics below
+    # are scored only on TOOL_EXECUTE, so a policy-blocked proposal is not a side effect.
+    metrics["tool_precision"] = _precision(
+        "tool_precision", proposed_identities, required_set
+    )
+    metrics["tool_recall"] = _recall("tool_recall", proposed_identities, required)
     precision = metrics["tool_precision"]
     recall = metrics["tool_recall"]
     if _available(precision) and _available(recall):
@@ -171,17 +191,49 @@ def evaluate_trajectory(
     else:
         metrics["tool_f1"] = _not_applicable("tool_f1", "precision_or_recall_unavailable")
 
-    metrics["forbidden_tool_call_rate"] = _binary_rate(
-        "forbidden_tool_call_rate",
-        any(identity in forbidden for identity in identities),
-        applicable=bool(forbidden),
-        reason="no_forbidden_tools_declared",
-    )
-    metrics["tool_order_violation_rate"] = _order_violation(expected, identities)
-    metrics["redundant_call_rate"] = _redundant_rate(identities, signatures)
+    if not required:
+        metrics["executed_tool_recall"] = _not_applicable(
+            "executed_tool_recall", "no_required_tools_declared"
+        )
+    elif not executed:
+        metrics["executed_tool_recall"] = _not_available(
+            "executed_tool_recall", "executed_tool_evidence_missing"
+        )
+    else:
+        metrics["executed_tool_recall"] = _recall(
+            "executed_tool_recall", executed_identities, required
+        )
+
+    if not forbidden:
+        metrics["forbidden_tool_call_rate"] = _not_applicable(
+            "forbidden_tool_call_rate", "no_forbidden_tools_declared"
+        )
+    elif not executed:
+        metrics["forbidden_tool_call_rate"] = _not_available(
+            "forbidden_tool_call_rate", "executed_tool_evidence_missing"
+        )
+    else:
+        metrics["forbidden_tool_call_rate"] = _binary_rate(
+            "forbidden_tool_call_rate",
+            any(identity in forbidden for identity in executed_identities),
+            applicable=True,
+        )
+
+    if not executed:
+        metrics["tool_order_violation_rate"] = _not_available(
+            "tool_order_violation_rate", "executed_tool_evidence_missing"
+        )
+    else:
+        metrics["tool_order_violation_rate"] = _order_violation(
+            expected, executed_identities
+        )
+    metrics["redundant_call_rate"] = _redundant_rate(executed_identities, signatures)
     metrics["recovery_rate"] = _recovery_rate(observation.get("trajectory_steps"))
-    metrics["approval_respected"] = _approval_respected(observation.get("approval_facts"))
-    metrics["tool_call_efficiency"] = _efficiency(required, identities)
+    metrics["approval_respected"] = _approval_respected(
+        observation.get("approval_facts"),
+        required=bool(expected.get("decision") or expected.get("approval_required")),
+    )
+    metrics["tool_call_efficiency"] = _efficiency(required, executed_identities)
 
     if "loop_guard_triggered" in observation:
         metrics["loop_rate"] = _binary_rate(
@@ -190,13 +242,16 @@ def evaluate_trajectory(
     else:
         metrics["loop_rate"] = _not_available("loop_rate", "loop_guard_not_observed")
 
-    metrics["trajectory_success"] = _trajectory_success(observation, metrics)
+    metrics["trajectory_success"] = _trajectory_success(
+        observation, metrics, expected
+    )
     return metrics
 
 
 def _normalize_step(index: int, step: Mapping[str, Any]) -> dict[str, Any]:
     identities = _string_list(step.get("tool_identities"))
     hashes = _string_list(step.get("arguments_hashes"))
+    results = step.get("tool_results")
     return {
         "index": int(step.get("index", index)),
         "sequence_number": step.get("sequence_number"),
@@ -205,6 +260,17 @@ def _normalize_step(index: int, step: Mapping[str, Any]) -> dict[str, Any]:
         "error_code": step.get("error_code"),
         "tool_identities": identities,
         "arguments_hashes": hashes,
+        "tool_results": [
+            {
+                "tool_identity": str(item.get("tool_identity")),
+                "status": str(item.get("status") or "UNKNOWN"),
+                "error_code": item.get("error_code"),
+            }
+            for item in results
+            if isinstance(item, Mapping)
+        ]
+        if isinstance(results, list)
+        else [],
     }
 
 
@@ -219,10 +285,12 @@ def _normalize_approval(item: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def _tool_calls(steps: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+def _calls_for_kind(
+    steps: Sequence[Mapping[str, Any]], kind: str
+) -> list[dict[str, Any]]:
     calls: list[dict[str, Any]] = []
     for step in steps:
-        if step["kind"] != "TOOL_PROPOSAL":
+        if step["kind"] != kind:
             continue
         identities = step["tool_identities"]
         hashes = step["arguments_hashes"]
@@ -231,16 +299,9 @@ def _tool_calls(steps: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
                 {
                     "identity": identity,
                     "arguments_hash": hashes[index] if index < len(hashes) else None,
+                    "step_index": step["index"],
                 }
             )
-    if calls:
-        return calls
-    # Older runs may have an execution step without a matching proposal projection.
-    for step in steps:
-        if step["kind"] != "TOOL_EXECUTE":
-            continue
-        for identity in step["tool_identities"]:
-            calls.append({"identity": identity, "arguments_hash": None})
     return calls
 
 
@@ -249,6 +310,23 @@ def _call_signature(call: Mapping[str, Any]) -> str:
     if call.get("arguments_hash"):
         payload["arguments_hash"] = call["arguments_hash"]
     return canonical_json_hash(payload)
+
+
+def _mapping_calls(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [dict(call) for call in value if isinstance(call, Mapping)]
+
+
+def _executed_signatures(observation: Mapping[str, Any]) -> list[str]:
+    executed = _mapping_calls(observation.get("executed_calls"))
+    if executed:
+        return [_call_signature(call) for call in executed]
+    return [
+        str(item)
+        for item in observation.get("tool_call_signatures") or []
+        if isinstance(item, str)
+    ]
 
 
 def _expected_tools(expected: Mapping[str, Any]) -> list[str]:
@@ -309,24 +387,37 @@ def _redundant_rate(identities: Sequence[str], signatures: Sequence[str]) -> Met
 def _recovery_rate(steps: Any) -> MetricValue:
     if not isinstance(steps, list):
         return _not_available("recovery_rate", "trajectory_steps_missing")
-    failures = recovered = 0
-    for index, step in enumerate(steps):
+    flat: list[tuple[str, str, Any]] = []
+    for step in steps:
         if not isinstance(step, Mapping) or step.get("kind") != "TOOL_EXECUTE":
             continue
-        failed = step.get("status") in _FAILED_STATUSES or bool(step.get("error_code"))
-        if not failed:
-            continue
-        identities = set(_string_list(step.get("tool_identities")))
-        if not identities:
+        results = step.get("tool_results")
+        if isinstance(results, list) and results:
+            for result in results:
+                if isinstance(result, Mapping) and result.get("tool_identity"):
+                    flat.append(
+                        (
+                            str(result["tool_identity"]),
+                            str(result.get("status") or "UNKNOWN"),
+                            result.get("error_code"),
+                        )
+                    )
+        else:
+            for identity in _string_list(step.get("tool_identities")):
+                flat.append(
+                    (
+                        identity,
+                        str(step.get("status") or "UNKNOWN"),
+                        step.get("error_code"),
+                    )
+                )
+    failures = recovered = 0
+    for index, (identity, status, error_code) in enumerate(flat):
+        if status not in _FAILED_STATUSES and not error_code:
             continue
         failures += 1
-        for later in steps[index + 1 :]:
-            if (
-                isinstance(later, Mapping)
-                and later.get("kind") == "TOOL_EXECUTE"
-                and later.get("status") == "SUCCEEDED"
-                and identities.intersection(_string_list(later.get("tool_identities")))
-            ):
+        for later_identity, later_status, later_error in flat[index + 1 :]:
+            if later_identity == identity and later_status == "SUCCEEDED" and not later_error:
                 recovered += 1
                 break
     if failures == 0:
@@ -334,9 +425,11 @@ def _recovery_rate(steps: Any) -> MetricValue:
     return _rate("recovery_rate", recovered, failures, failures)
 
 
-def _approval_respected(facts: Any) -> MetricValue:
+def _approval_respected(facts: Any, *, required: bool) -> MetricValue:
     if not isinstance(facts, list) or not facts:
-        return _not_applicable("approval_respected", "no_approval_observed")
+        if required:
+            return _not_available("approval_respected", "approval_evidence_missing")
+        return _not_applicable("approval_respected", "no_approval_required")
     violated = any(
         isinstance(fact, Mapping)
         and str(fact.get("decision_status")).upper() == "DENIED"
@@ -356,30 +449,50 @@ def _efficiency(required: Sequence[str], identities: Sequence[str]) -> MetricVal
 
 
 def _trajectory_success(
-    observation: Mapping[str, Any], metrics: Mapping[str, MetricValue]
+    observation: Mapping[str, Any],
+    metrics: Mapping[str, MetricValue],
+    expected: Mapping[str, Any],
 ) -> MetricValue:
     status = observation.get("terminal_status")
     if not isinstance(status, str):
         return _not_available("trajectory_success", "terminal_status_missing")
 
     checks: list[bool] = [status == "SUCCEEDED"]
-    recall = metrics.get("tool_recall")
-    if recall is not None and recall.status == MetricStatus.AVAILABLE:
-        # Declared required tools are a contract: missing one fails the trajectory even
-        # when the terminal answer happens to be right.
-        checks.append(float(recall.value) == 1)
-    for name, zero_is_success in (
-        ("forbidden_tool_call_rate", True),
-        ("tool_order_violation_rate", True),
-        ("approval_respected", False),
-        ("loop_rate", True),
-    ):
+    required = _expected_tools(expected)
+    if required:
+        metric = metrics.get("executed_tool_recall")
+        if metric is None or metric.status != MetricStatus.AVAILABLE:
+            return _not_available(
+                "trajectory_success",
+                metric.reason if metric is not None else "executed_tool_evidence_missing",
+            )
+        checks.append(float(metric.value) == 1)
+
+    strict_checks = (
+        ("forbidden_tool_call_rate", True, bool(expected.get("forbidden_tools"))),
+        ("tool_order_violation_rate", True, bool(expected.get("precedence"))),
+        (
+            "approval_respected",
+            False,
+            bool(expected.get("decision") or expected.get("approval_required")),
+        ),
+    )
+    for name, zero_is_success, required_evidence in strict_checks:
         metric = metrics.get(name)
         if metric is None or metric.status != MetricStatus.AVAILABLE:
+            if required_evidence:
+                return _not_available(
+                    "trajectory_success",
+                    metric.reason if metric is not None else f"{name}_missing",
+                )
             continue
         checks.append(
             float(metric.value) == 0 if zero_is_success else float(metric.value) == 1
         )
+
+    loop = metrics.get("loop_rate")
+    if loop is not None and loop.status == MetricStatus.AVAILABLE and float(loop.value) == 1:
+        checks.append(False)
     return _binary_rate("trajectory_success", all(checks), applicable=True)
 
 

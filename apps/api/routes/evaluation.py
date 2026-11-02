@@ -44,7 +44,7 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
-from packages.evaluation.judge import FrozenJudgeProfile, freeze_judge_profile
+from packages.evaluation.judge import FrozenJudgeEnsemble, FrozenJudgeProfile, freeze_judge_profile
 from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.models import EvaluationCaseResultStatus
 from packages.evaluation.queue import ExperimentRunQueue
@@ -381,9 +381,39 @@ async def create_experiment(
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationExperimentResponse:
     del workspace_id
-    judge_profile = await _freeze_judge_profile(
-        session, context, payload.judge_model_profile_id
-    )
+    if payload.judge_model_profile_id and payload.judge_model_profile_ids:
+        raise AgentHubError(
+            "EVALUATION_EXPERIMENT_INVALID",
+            "Choose either one judge profile or a judge ensemble, not both.",
+            422,
+        )
+    judge_profile = None
+    judge_ensemble = None
+    if payload.judge_model_profile_ids:
+        profiles = [
+            await _freeze_judge_profile(session, context, profile_id)
+            for profile_id in payload.judge_model_profile_ids
+        ]
+        if any(profile is None for profile in profiles):
+            raise AgentHubError(
+                "EVALUATION_EXPERIMENT_INVALID",
+                "Every ensemble judge profile must resolve.",
+                422,
+            )
+        try:
+            judge_ensemble = FrozenJudgeEnsemble(
+                tuple(profiles), strategy=payload.judge_strategy
+            )
+        except ValueError:
+            raise AgentHubError(
+                "EVALUATION_EXPERIMENT_INVALID",
+                "The judge ensemble definition is invalid.",
+                422,
+            ) from None
+    else:
+        judge_profile = await _freeze_judge_profile(
+            session, context, payload.judge_model_profile_id
+        )
     experiment = await ExperimentService().create_experiment(
         session,
         context=context,
@@ -395,6 +425,7 @@ async def create_experiment(
         repetitions=payload.repetitions,
         evidence_level=payload.evidence_level,
         judge_profile=judge_profile,
+        judge_ensemble=judge_ensemble,
     )
     return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
 

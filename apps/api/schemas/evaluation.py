@@ -136,6 +136,10 @@ class EvaluationExperimentCreateRequest(BaseModel):
     # creation time into the evaluator manifest, so changing it afterwards is
     # impossible by construction -- a different judge is a different experiment.
     judge_model_profile_id: UUID | None = None
+    # A multi-judge experiment: two to four frozen profiles plus an aggregation
+    # strategy.  Mutually exclusive with the single-profile field above.
+    judge_model_profile_ids: list[UUID] | None = Field(default=None, min_length=2, max_length=4)
+    judge_strategy: str = "MAJORITY"
 
 
 class EvaluationExperimentVariantCreateRequest(BaseModel):

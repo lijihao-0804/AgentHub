@@ -3560,7 +3560,29 @@ class _AgentRunGraph:
         await self.step(
             "TOOL_EXECUTE",
             "SUCCEEDED",
-            {"tool_count": len(calls), "tool_identities": [call["name"] for call in calls]},
+            {
+                "tool_count": len(calls),
+                "tool_identities": [call["name"] for call in calls],
+                "tool_call_ids": [call["tool_call_id"] for call in calls],
+                # Per-call outcome: a single failing tool must not be hidden behind the
+                # batch-level SUCCEEDED status.  Only identity/status/error code is kept.
+                "tool_results": [
+                    {
+                        "tool_call_id": call_id,
+                        "tool_identity": next(
+                            (
+                                call["name"]
+                                for call in calls
+                                if call["tool_call_id"] == call_id
+                            ),
+                            None,
+                        ),
+                        "status": result.status.value,
+                        "error_code": result.error_code,
+                    }
+                    for call_id, result in pairs
+                ],
+            },
         )
         observations = dict(pairs)
         await self._record_artifacts(

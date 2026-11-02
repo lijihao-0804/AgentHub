@@ -432,6 +432,7 @@ class AgentRuntimeEvaluationDriver:
                     "error_code": (row.safe_metadata or {}).get("error_code"),
                     "tool_identities": (row.safe_metadata or {}).get("tool_identities") or [],
                     "arguments_hashes": (row.safe_metadata or {}).get("arguments_hashes") or [],
+                    "tool_results": (row.safe_metadata or {}).get("tool_results") or [],
                 }
                 for index, row in enumerate(trajectory_rows)
             ]

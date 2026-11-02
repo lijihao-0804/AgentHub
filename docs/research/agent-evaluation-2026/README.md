@@ -12,7 +12,7 @@
 
 ### 0.1 三条结论
 
-1. **行业已经完成从“评回答”到“评轨迹”的范式转移**。LangSmith 的 final response / single step / trajectory、Vertex 的 `predicted_trajectory` / `reference_trajectory`、OpenAI 的 trace grading，术语不同，指向同一件事：把工具调用序列与中间状态变成一等评测对象。
+1. **主流平台正在从“评终态”扩展到“评轨迹与状态”**。LangSmith 的 final response / single step / trajectory、Vertex 的 `predicted_trajectory` / `reference_trajectory`、OpenAI 的 trace grading，术语不同，指向同一件事：把工具调用序列与中间状态变成一等评测对象。
 2. **AgentHub 的评测平台“可复现”做得比多数项目好，但“可评价”基本是空白**。数据集版本、冻结实验、租约执行、成对比较、门禁、冻结 judge 都在；但真实 Runtime 不产出工具轨迹、重复运行只取均值、没有置信区间、多轮是固定脚本。
 3. **补法不是重写，而是加三层**：轨迹层（把已有 RunStep/Event 变成评分证据）、统计层（`pass^k` + 区间 + MDE）、环境层（可 reset 的任务环境 + 用户模拟器）。建议先做前两层——一周内就能让现有 100 例数据集从“点估计”升级为“区间 + 稳定性 + 轨迹”。
 

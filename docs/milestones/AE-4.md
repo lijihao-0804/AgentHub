@@ -15,7 +15,7 @@ Status: **PARTIAL PASS（聚合与 manifest 单元验证通过；未接校准队
 **做**：
 
 - `FrozenJudgeEnsemble`：多个 `FrozenJudgeProfile` + 聚合策略，整体 hash 成 evaluator version；
-- `JudgeEnsemble`：并行调用成员，按 `MAJORITY` / `MEAN` 聚合；成员失败或结果不可解析时按法定人数（quorum）判断；
+- `JudgeEnsemble`：顺序调用成员，按 `MAJORITY` / `MEAN` 聚合；成员失败或结果不可解析时按法定人数（quorum）判断；
 - 分歧时不取平均：三维及以上且维度一致率 <0.5 → `UNPARSEABLE / judge_disagreement`；
 - worker 根据 manifest 自动选择单 judge 或 ensemble；
 - verdict 记录 `judge_agreement`、`judge_strategy`、`member_verdicts`（只有 hash/score/status，无文本）；
@@ -84,9 +84,8 @@ python -m ruff check packages/evaluation/judge.py packages/evaluation/reproducib
 
 ### 3.3 未运行
 
-- 真实 judge provider 调用（无凭证/预算）；
 - 校准集与 kappa 的生产流程；
-- worker 集成（无 PostgreSQL/Celery 环境）。
+- worker 端集成（无 PostgreSQL/Celery 环境）；真实 API 探针已做，见 [AE 实机证据](AE-live-evidence-20261102.md)。
 
 ---
 

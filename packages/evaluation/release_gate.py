@@ -33,6 +33,7 @@ _RULES = frozenset(
         "MAX_VALUE",
         "TRADEOFF",
         "REQUIRED_EVIDENCE_LEVEL",
+        "MIN_PASS_HAT_K",
     }
 )
 _BASE_RULE_KEYS = frozenset({"metric", "rule", "required", "safety"})
@@ -44,6 +45,7 @@ _EVIDENCE_LEVEL_RANK = {
     "PRODUCTION_SAMPLE": 3,
 }
 _EVIDENCE_LEVEL_METRIC = "evidence_level"
+_PASS_HAT_K_METRIC = "pass_hat_k"
 
 
 class EvaluationReleaseGateService:
@@ -181,7 +183,23 @@ class EvaluationReleaseGateService:
             self._verify_decision(existing, comparison, policy)
             return existing
 
-        status, rule_results, reasons = self._evaluate(comparison, policy.policy_json, run)
+        statistics: Mapping[str, Any] | None = None
+        if any(rule["rule"] == "MIN_PASS_HAT_K" for rule in policy.policy_json["rules"]):
+            try:
+                from packages.evaluation.statistics_service import (
+                    EvaluationStatisticsService,
+                )
+
+                statistics = await EvaluationStatisticsService(self.registry).compute(
+                    session, context=context, run_id=run_id
+                )
+            except Exception:
+                # Evidence that cannot be rebuilt must make the rule INCONCLUSIVE, not
+                # silently pass.  The rule evaluator handles a missing payload.
+                statistics = None
+        status, rule_results, reasons = self._evaluate(
+            comparison, policy.policy_json, run, statistics
+        )
         decision_hash = canonical_json_hash(
             {
                 "comparison_hash": comparison.comparison_hash,
@@ -307,9 +325,13 @@ class EvaluationReleaseGateService:
                 level = raw.get("level")
                 if level not in _EVIDENCE_LEVEL_RANK:
                     self._invalid_policy()
+            if rule == "MIN_PASS_HAT_K":
+                allowed = _BASE_RULE_KEYS | {"threshold"}
+                if metric != _PASS_HAT_K_METRIC:
+                    self._invalid_policy()
             if not set(raw).issubset(allowed):
                 self._invalid_policy()
-            if rule != "REQUIRED_EVIDENCE_LEVEL":
+            if rule not in {"REQUIRED_EVIDENCE_LEVEL", "MIN_PASS_HAT_K"}:
                 try:
                     self.registry.definition_for(metric)
                 except ValueError:
@@ -339,7 +361,9 @@ class EvaluationReleaseGateService:
                     item[key] = value
             if rule in _TOLERANCE_RULES and "tolerance" not in item:
                 self._invalid_policy()
-            if rule in {"MIN_VALUE", "MAX_VALUE"} and "threshold" not in item:
+            if rule in {"MIN_VALUE", "MAX_VALUE", "MIN_PASS_HAT_K"} and "threshold" not in item:
+                self._invalid_policy()
+            if rule == "MIN_PASS_HAT_K" and not 0 <= float(item["threshold"]) <= 1:
                 self._invalid_policy()
             if rule == "TRADEOFF":
                 if item["safety"]:
@@ -371,6 +395,7 @@ class EvaluationReleaseGateService:
         comparison: EvaluationExperimentComparison,
         policy: Mapping[str, Any],
         run: EvaluationExperimentRun | None = None,
+        statistics: Mapping[str, Any] | None = None,
     ) -> tuple[str, list[dict[str, Any]], list[str]]:
         if comparison.status == "NOT_COMPARABLE":
             return "INCONCLUSIVE", [], ["comparison_not_comparable"]
@@ -382,6 +407,16 @@ class EvaluationReleaseGateService:
             if rule["rule"] == "REQUIRED_EVIDENCE_LEVEL":
                 actual_level = getattr(run, "evidence_level", None) if run is not None else None
                 result = self._evaluate_evidence_level(rule, actual_level)
+                rule_results.append(result)
+                if result["status"] == "FAIL" and rule.get("required", True):
+                    hard_fail = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                elif result["status"] == "INCONCLUSIVE" and rule.get("required", True):
+                    inconclusive = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                continue
+            if rule["rule"] == "MIN_PASS_HAT_K":
+                result = self._evaluate_pass_hat_k(rule, comparison, statistics)
                 rule_results.append(result)
                 if result["status"] == "FAIL" and rule.get("required", True):
                     hard_fail = True
@@ -417,6 +452,47 @@ class EvaluationReleaseGateService:
             rule_results,
             reasons,
         )
+
+    def _evaluate_pass_hat_k(
+        self,
+        rule: Mapping[str, Any],
+        comparison: EvaluationExperimentComparison,
+        statistics: Mapping[str, Any] | None,
+    ) -> dict[str, Any]:
+        if not isinstance(statistics, Mapping):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "statistics_unavailable",
+            }
+        variants = statistics.get("variants")
+        if not isinstance(variants, Mapping):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "statistics_variants_missing",
+            }
+        candidate = variants.get(str(comparison.candidate_variant_id))
+        value = candidate.get("pass_hat_k") if isinstance(candidate, Mapping) else None
+        if value is None:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "pass_hat_k_unavailable",
+            }
+        threshold = float(rule["threshold"])
+        passed = float(value) >= threshold
+        return {
+            "metric": rule["metric"],
+            "rule": rule["rule"],
+            "status": "PASS" if passed else "FAIL",
+            "candidate": float(value),
+            "threshold": threshold,
+            "complete_case_rate": candidate.get("complete_case_rate"),
+        }
 
     def _evaluate_evidence_level(
         self, rule: Mapping[str, Any], actual: str

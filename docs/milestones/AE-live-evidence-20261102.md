@@ -48,16 +48,23 @@ AGENTHUB_ENVIRONMENT=test
 样本：3 个短答案（good / partial / wrong）
 调用：3 个 judge（temperature 0 / 0.2 / 0.4，同一 rubric）分别单评 + ensemble 聚合
 
-### 3.1 结果（v2，最终）
+### 3.1 结果（v3，最终；实际请求温度已核对）
 
 | case | single score | ensemble score | ensemble agreement | status |
 | --- | ---: | ---: | ---: | --- |
-| good | 1.000 | 0.925 | 0.667 | SCORED |
-| partial | 0.575 | 0.750 | 0.800 | SCORED |
-| wrong | 0.150 | 0.150 | 1.000 | SCORED |
+| good | 1.000 | 1.000 | 0.933 | SCORED |
+| partial | 0.625 | 0.550 | 0.800 | SCORED |
+| wrong | 0.175 | 0.150 | 0.867 | SCORED |
 
-用量：**12 次 judge 调用，3,476 prompt tokens + 5,762 completion tokens = 9,238 tokens**。
-按本环境价格量级远低于 30 的预算；没有创建任何持久化实验或改动生产数据。
+产物字段 `requested_temperatures = [0.0, 0.2, 0.4]`、`actual_request_temperatures = [0.0, 0.2, 0.4]`，证明三个 judge 的实际请求温度与声明一致。
+
+用量：**12 次 judge 调用，8,062 tokens**。按本环境价格量级远低于 30 的预算；没有创建任何持久化实验或改动生产数据。
+
+### 3.1.1 勘误：v2 的温度参数未生效（保留原始证据）
+
+v2 的脚本虽然创建了标称 `0.0 / 0.2 / 0.4` 的 Judge Profile，但 `HttpJudgeClient.complete()` 把请求温度写死为 `0`，因此 v2 的三个 judge 实际都以温度 0 调用；v2 的分数和 token 记录仍然真实，但不能解释为“不同温度 judge 的对照”。
+
+修复：请求温度改由冻结的 Judge Profile 驱动，并把 `request_model / request_temperature / request_max_tokens` 写入每次调用的 usage 记录；v3 已核对 `actual_request_temperatures`。原始 v2 产物保留，不覆盖。
 
 ### 3.2 第一次探针发现的问题（保留）
 
@@ -89,5 +96,6 @@ v1 使用 `max_tokens=700` 且把 `reasoning_content` 当作解析输入，结�
 ## 5. 证据文件
 
 - `docs/milestones/ae-live-judge-20261102.json`（v1，保留 reasoning 截断问题）
-- `docs/milestones/ae-live-judge-20261102-v2.json`（v2，最终）
+- `docs/milestones/ae-live-judge-20261102-v2.json`（v2，保留温度参数未生效的原始记录）
+- `docs/milestones/ae-live-judge-20261102-v3.json`（v3，最终；实际温度已核对）
 - `scripts/ae_live_judge_probe.py`（可复现脚本）
