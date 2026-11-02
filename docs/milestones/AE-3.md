@@ -2,6 +2,8 @@
 
 Status: **PARTIAL PASS（单元验证通过；迁移未在真实 PostgreSQL 上执行）**
 
+> **2026-11-02 实机更新**：迁移 `0049` 已在独立 PostgreSQL 库完成 upgrade → downgrade → upgrade；见 [AE 实机证据](AE-live-evidence-20261102.md)。
+
 基线：`69ca38b`（AE-2 之后），分支 `codex/ae-1-trajectory-evidence`。
 
 ---

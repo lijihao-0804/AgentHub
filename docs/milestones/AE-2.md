@@ -2,6 +2,8 @@
 
 Status: **PARTIAL PASS（纯函数与 API 契约单元验证通过；真实 PostgreSQL 集成未运行）**
 
+> **2026-11-02 实机更新**：统一迁移链与 M7 集成测试已在真实 PostgreSQL 上通过；见 [AE 实机证据](AE-live-evidence-20261102.md)。
+
 基线：`4598c64`（AE-1 之后），分支 `codex/ae-1-trajectory-evidence`。
 
 ---

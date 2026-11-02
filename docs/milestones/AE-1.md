@@ -2,6 +2,8 @@
 
 Status: **PARTIAL PASS（单元验证通过；真实 PostgreSQL 集成与真实模型实验未运行）**
 
+> **2026-11-02 实机更新**：M7-B/M7-C 16 项集成测试已在真实 PostgreSQL 上通过；见 [AE 实机证据](AE-live-evidence-20261102.md)。
+
 基线：`fd14baf`（分支 `codex/ae-1-trajectory-evidence`）。本里程碑只做“把已有执行事实投影成可评分证据”，不改变任何既有实验的历史结果。
 
 ---

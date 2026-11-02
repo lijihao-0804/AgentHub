@@ -1,6 +1,8 @@
 # AE-4 — Judge Reliability（judge 可靠性）
 
-Status: **PARTIAL PASS（聚合与 manifest 单元验证通过；未调用真实 judge、未接校准队列）**
+Status: **PARTIAL PASS（聚合与 manifest 单元验证通过；未接校准队列）**
+
+> **2026-11-02 实机更新**：已用 Alibaba `deepseek-v4.1-flash` 做 12 次真实 judge 调用（3 case × 1 单评 + 3 ensemble），3 个 case 全部 SCORED。详见 [AE 实机证据 §3](AE-live-evidence-20261102.md)。
 
 基线：`61528c0`（AE-3 之后），分支 `codex/ae-1-trajectory-evidence`。
 
