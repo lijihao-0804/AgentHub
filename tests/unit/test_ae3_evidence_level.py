@@ -146,3 +146,73 @@ def test_pass_hat_k_gate_without_statistics_is_inconclusive() -> None:
 
     assert status == "INCONCLUSIVE"
     assert results[0]["reason"] == "statistics_unavailable"
+
+
+def _paired_policy(rule: str, threshold: float) -> dict:
+    return EvaluationReleaseGateService()._validate_policy(
+        {
+            "rules": [
+                {
+                    "metric": "success_rate_delta",
+                    "rule": rule,
+                    "threshold": threshold,
+                }
+            ]
+        }
+    )
+
+
+def _paired_statistics(lower: float) -> dict:
+    return {
+        "paired": {
+            "delta": 0.06,
+            "interval": {"lower": lower, "upper": 0.11},
+            "pair_count": 100,
+        }
+    }
+
+
+def test_min_ci_lower_bound_gate() -> None:
+    service = EvaluationReleaseGateService()
+    comparison = SimpleNamespace(
+        status="COMPLETE",
+        metrics={},
+        baseline_variant_id="baseline",
+        candidate_variant_id="candidate",
+    )
+
+    pass_status, _, _ = service._evaluate(
+        comparison, _paired_policy("MIN_CI_LOWER_BOUND", 0.02), None, _paired_statistics(0.05)
+    )
+    fail_status, _, _ = service._evaluate(
+        comparison, _paired_policy("MIN_CI_LOWER_BOUND", 0.08), None, _paired_statistics(0.05)
+    )
+
+    assert pass_status == "PASS"
+    assert fail_status == "FAIL"
+
+
+def test_non_inferiority_gate_uses_regression_margin() -> None:
+    service = EvaluationReleaseGateService()
+    comparison = SimpleNamespace(
+        status="COMPLETE",
+        metrics={},
+        baseline_variant_id="baseline",
+        candidate_variant_id="candidate",
+    )
+
+    pass_status, _, _ = service._evaluate(
+        comparison,
+        _paired_policy("NON_INFERIORITY", 0.05),
+        None,
+        _paired_statistics(-0.01),
+    )
+    fail_status, _, _ = service._evaluate(
+        comparison,
+        _paired_policy("NON_INFERIORITY", 0.05),
+        None,
+        _paired_statistics(-0.10),
+    )
+
+    assert pass_status == "PASS"
+    assert fail_status == "FAIL"

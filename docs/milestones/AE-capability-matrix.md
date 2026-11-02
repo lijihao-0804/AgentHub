@@ -14,7 +14,7 @@
 | 统计接口 | `statistics_service.py` + route | 契约 | 未跑（无 DB 集成用例） | 未跑 | 只读；按 variant 返回 |
 | 证据等级 | `models.py` / `0049` / `experiments.py` | `test_ae3_evidence_level.py`（11） | **通过 upgrade/downgrade** | 未跑 | 已实现；等级仍由创建者声明 |
 | `REQUIRED_EVIDENCE_LEVEL` 门禁 | `release_gate.py` | 同上 | 未跑 | 未跑 | 已实现 |
-| `MIN_PASS_HAT_K` 门禁 | `release_gate.py` | 同上 | 未跑 | 未跑 | 已实现；需要统计 payload，缺失即 `INCONCLUSIVE` |
+| `MIN_PASS_HAT_K` / `MIN_CI_LOWER_BOUND` / `NON_INFERIORITY` 门禁 | `release_gate.py` | 同上 | 未跑 | 未跑 | 已实现；统计 payload / 配对区间缺失即 `INCONCLUSIVE` |
 | 多 Judge ensemble / quorum | `judge.py` | `test_ae4_judge_ensemble.py`（7） | 未跑 | **12 次真实调用** | 已实现；顺序调用；校准队列未做 |
 | 冻结 Judge 执行计划 | `judge.py` / worker | `test_ae4...` | 未跑 | 探针直连，未走 gateway | 已实现 `judge_profile_to_plan`，worker 走 `generate_resolved` |
 | Ensemble 创建 API | schema / route / service | 契约 | 未跑 | 未跑 | 已实现 `judge_model_profile_ids` + `judge_strategy` |
@@ -37,4 +37,4 @@
 
 1. **真实 Runtime Experiment**：轨迹投影还没有在真实 agent run + 工具 + 审批上跑过；
 2. **Judge 校准**：没有人工标签、没有 kappa、没有位置交换；
-3. **门禁统计闭环**：`MIN_CI_LOWER_BOUND` / `NON_INFERIORITY` 仍未实现，`MIN_PASS_HAT_K` 已实现但未在真实实验上验证。
+3. **门禁统计闭环**：三条统计规则已实现（`MIN_PASS_HAT_K` / `MIN_CI_LOWER_BOUND` / `NON_INFERIORITY`），但还没有在真实实验上验证；统计接口也缺少 DB 集成用例。

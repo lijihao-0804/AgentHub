@@ -35,7 +35,7 @@
 
 ## 4. 仍未完成（不冒充已做）
 
-1. **`MIN_CI_LOWER_BOUND` / `NON_INFERIORITY`**：需要把配对 bootstrap 结果写入 comparison payload 或门禁现算；当前只实现了 `MIN_PASS_HAT_K`。
+1. **`MIN_CI_LOWER_BOUND` / `NON_INFERIORITY` / `MIN_PASS_HAT_K`**：已实现（配对 bootstrap 由 statistics service 现算，缺失即 `INCONCLUSIVE`），但尚未在真实实验上验证；仍待真实数据回归。
 2. **真实 Runtime Experiment**：轨迹投影还没有在真实 agent run + 工具 + 审批上端到端跑过。
 3. **Judge 人工校准 / 位置交换 / 成本计量**：未做。
 4. **AE-6b / AE-7b / AE-8 / AE-9 / AE-10**：未做。
@@ -45,7 +45,7 @@
 
 ## 5. 验证汇总
 
-- 单元测试：AE + 既有评测相关 106 项通过；
+- 单元测试：AE + 既有评测相关 113 项通过；
 - 真实 PostgreSQL 集成测试：31 项通过；
 - `ruff`：全部通过；
 - 真实 Alibaba judge：v3 12 次调用、8,062 tokens，三个 case 全部 SCORED，实际温度已核对。

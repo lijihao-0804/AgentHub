@@ -8,6 +8,7 @@ It writes nothing, so it can be called on a historical run without changing it.
 
 from __future__ import annotations
 
+from statistics import mean
 from typing import Any
 from uuid import UUID
 
@@ -21,6 +22,7 @@ from packages.evaluation.metrics_service import EvaluationMetricsService
 from packages.evaluation.statistics import (
     TrialOutcome,
     cluster_bootstrap_interval,
+    paired_bootstrap_interval,
     statistical_summary,
 )
 from packages.evaluation.taxonomy import TAXONOMY_VERSION, classify_failure, summarize_labels
@@ -174,6 +176,72 @@ class EvaluationStatisticsService:
                 }
                 for variant_id, bucket in per_variant.items()
             },
+        }
+
+    async def paired_comparison(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        run_id: UUID,
+        baseline_variant_id: UUID,
+        candidate_variant_id: UUID,
+    ) -> dict[str, Any]:
+        """Paired bootstrap of the candidate-minus-baseline success-rate delta."""
+
+        self._require_read(context)
+        workspace_id = self._workspace_id(context)
+        metrics_service = EvaluationMetricsService(self.registry)
+        run = await metrics_service._load_run(session, workspace_id, run_id)
+        experiment = await metrics_service._load_experiment(
+            session, workspace_id, run.experiment_id
+        )
+        registry = self.registry.for_manifest(experiment.evaluator_manifest)
+        rows = await metrics_service._load_and_validate_case_set(
+            session, workspace_id, run, experiment
+        )
+
+        per_variant: dict[UUID, dict[str, list[float]]] = {}
+        for case, item, variant in rows:
+            evaluated = registry.evaluate(item.category, item.expected, case.observation)
+            task = evaluated.get("task_success")
+            value: float | None = None
+            if (
+                task is not None
+                and task.status == MetricStatus.AVAILABLE
+                and task.value is not None
+            ):
+                value = float(task.value)
+            per_variant.setdefault(variant.id, {}).setdefault(item.case_key, []).append(
+                value  # type: ignore[arg-type]
+            )
+
+        baseline = per_variant.get(baseline_variant_id, {})
+        candidate = per_variant.get(candidate_variant_id, {})
+        pairs: list[tuple[float, float]] = []
+        for case_key in set(baseline).intersection(candidate):
+            baseline_values = [value for value in baseline[case_key] if value is not None]
+            candidate_values = [value for value in candidate[case_key] if value is not None]
+            if baseline_values and candidate_values:
+                pairs.append((mean(baseline_values), mean(candidate_values)))
+        delta = mean([after - before for before, after in pairs]) if pairs else None
+        interval = paired_bootstrap_interval(pairs)
+        return {
+            "run_id": str(run_id),
+            "baseline_variant_id": str(baseline_variant_id),
+            "candidate_variant_id": str(candidate_variant_id),
+            "pair_count": len(pairs),
+            "delta": delta,
+            "interval": (
+                {
+                    "method": "paired_bootstrap",
+                    "lower": interval[0],
+                    "upper": interval[1],
+                    "bootstrap_count": 2000,
+                }
+                if interval
+                else None
+            ),
         }
 
     def _require_read(self, context: WorkspaceExecutionContext) -> None:
