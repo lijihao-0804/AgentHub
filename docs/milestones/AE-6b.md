@@ -3,7 +3,8 @@
 > 状态：**PASS（确定性 Simulator + 真实 Agent LLM 闭环）**  
 > 日期：2026-11-02 ｜ 分支：`codex/ae-6b-interactive-environment`  
 > 基线：main `1a256cc`（PR #6 已合并）  
-> 证据：`docs/milestones/ae-6b-evidence.json`（原始证据，保留）、`docs/milestones/ae-6b-evidence-redacted.json`（收口后脱敏 smoke 证据）
+> 证据：`docs/milestones/ae-6b-evidence.json`（原始证据，保留）、`docs/milestones/ae-6b-evidence-redacted.json`（收口后脱敏 smoke 证据）  
+> 原始真实实验 Run `6577b772-b36d-4d61-a889-dbfd9347cd85` 和 `ae-6b-evidence.json` 保留不动；本报告统计使用脱敏 smoke Run `1914c232-bd3e-40fa-9a99-0bfb2d4f4ecc`。
 
 ---
 
