@@ -19,6 +19,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from benchmarks.evaluation.ae_real_1 import _tool_spec
+from benchmarks.evaluation.fault_injection import PerRunFlakyQuery
 from packages.agent_runtime.adapters.langgraph import (
     LangGraphCheckpointAdapter,
     configure_windows_asyncio_policy,
@@ -39,7 +40,6 @@ from packages.evaluation.statistics_service import EvaluationStatisticsService
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.threads.context import SqlAlchemyThreadContextProvider
 from packages.tools.actions import ActionExecutionResult, ActionRegistry, ActionRuntime
-from packages.tools.errors import ToolHandlerError
 from packages.tools.models import Customer
 from packages.tools.registry import ToolRegistry
 from packages.tools.runtime import ToolRuntime
@@ -51,27 +51,13 @@ PROVIDER = "openai-compatible"
 BASE_URL = os.environ["AE_BASE_URL"]
 API_KEY = os.environ["AE_API_KEY"]
 REPETITIONS = int(os.environ.get("AE_REPETITIONS", "1"))
+RUN_TAG = os.environ.get("AE_RUN_TAG", "")
 OUTPUT = Path(
-    "docs/milestones/ae-real-2-evidence.json"
-    if REPETITIONS == 1
-    else f"docs/milestones/ae-real-2-evidence-k{REPETITIONS}.json"
+    "docs/milestones/ae-real-2-evidence"
+    + (f"-k{REPETITIONS}" if REPETITIONS > 1 else "")
+    + (f"-{RUN_TAG}" if RUN_TAG else "")
+    + ".json"
 )
-
-
-class FlakyQuery:
-    def __init__(self) -> None:
-        self.calls = 0
-
-    async def __call__(self, context, definition, arguments, session_factory):
-        del context, definition, session_factory
-        self.calls += 1
-        if self.calls == 1:
-            raise ToolHandlerError("SIMULATED_TOOL_FAILURE", "Injected first-call failure.")
-        return {
-            "customer_ref": arguments.get("customer_ref"),
-            "name": "AE Real Fixture",
-            "email": "ae-real@example.test",
-        }
 
 
 class UnknownTicket:
@@ -303,7 +289,7 @@ async def main() -> int:
                 )
             )
 
-        flaky = FlakyQuery()
+        flaky = PerRunFlakyQuery(failures_before_success=1)
         unknown_ticket = UnknownTicket()
         runtime = AgentRunService(
             factory,
@@ -324,14 +310,27 @@ async def main() -> int:
         )
 
         async def context_factory(run) -> WorkspaceExecutionContext:
-            del run
             assert context is not None
-            return context
+            # A fresh request id per prepared case gives the shared fault-injection
+            # handler an independent state bucket for every case/repetition.
+            case_token = uuid4().hex
+            return context.model_copy(
+                update={
+                    "request_id": f"ae-real-2:{case_token}",
+                    "trace_id": f"ae-real-2:{case_token}",
+                }
+            )
+
+        async def approval_context_factory(run) -> WorkspaceExecutionContext:
+            assert context is not None
+            return context.model_copy(
+                update={"request_id": f"ae-real-2:approval:{run.id}"}
+            )
 
         driver = AgentRuntimeEvaluationDriver(
             runtime,
             context_factory=context_factory,
-            approval_context_factory=context_factory,
+            approval_context_factory=approval_context_factory,
         )
         await ExperimentRunner(factory, driver=driver).execute(
             run_id=run.id, owner=f"ae-real-2-{uuid4().hex[:8]}", settings=settings
