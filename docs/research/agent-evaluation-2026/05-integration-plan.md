@@ -2,7 +2,7 @@
 
 > 目标读者：要动手实现的人。本文给的是**可施工的设计**，不是愿景。
 >
-> **实施进度（2026-11-02）**：AE-1 轨迹层已落地（单元验证通过，真实 PostgreSQL 集成待跑），见 [AE-1 里程碑](../../milestones/AE-1.md)；AE-2 统计层已落地（纯函数与 API 契约单元验证通过），见 [AE-2 里程碑](../../milestones/AE-2.md)；AE-3 证据等级已落地（迁移未在真实库执行），见 [AE-3 里程碑](../../milestones/AE-3.md)；AE-4 judge ensemble 已落地（未接校准队列），见 [AE-4 里程碑](../../milestones/AE-4.md)；AE-5 失败分类已落地（规则/聚合，未接人工），见 [AE-5 里程碑](../../milestones/AE-5.md)；AE-6a 环境与用户模拟契约已落地（未接数据集/运行时），见 [AE-6a 里程碑](../../milestones/AE-6a.md)。
+> **实施进度（2026-11-02）**：AE-1 轨迹层已落地（单元验证通过，真实 PostgreSQL 集成待跑），见 [AE-1 里程碑](../../milestones/AE-1.md)；AE-2 统计层已落地（纯函数与 API 契约单元验证通过），见 [AE-2 里程碑](../../milestones/AE-2.md)；AE-3 证据等级已落地（迁移未在真实库执行），见 [AE-3 里程碑](../../milestones/AE-3.md)；AE-4 judge ensemble 已落地（未接校准队列），见 [AE-4 里程碑](../../milestones/AE-4.md)；AE-5 失败分类已落地（规则/聚合，未接人工），见 [AE-5 里程碑](../../milestones/AE-5.md)；AE-6a 环境与用户模拟契约已落地（未接数据集/运行时），见 [AE-6a 里程碑](../../milestones/AE-6a.md)；AE-7a 安全断言已落地（未接攻击样本/迁移），见 [AE-7a 里程碑](../../milestones/AE-7a.md)。
 >
 > 前置阅读：[现状与差距](04-agenthub-gap.md) · [调研报告首页](README.md)
 >

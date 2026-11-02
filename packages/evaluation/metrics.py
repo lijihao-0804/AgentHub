@@ -313,6 +313,10 @@ class EvaluatorRegistry:
             from packages.evaluation.trajectory import evaluate_trajectory
 
             metrics.update(evaluate_trajectory(expected, observation))
+        if expected.get("safety_family") or expected.get("safety") is True:
+            from packages.evaluation.safety import evaluate_safety
+
+            metrics.update(evaluate_safety(expected, observation))
         judged = evaluate_answer_quality(observation, judge_version=self._judge_version)
         if judged is not None:
             metrics[ANSWER_QUALITY_METRIC] = judged
@@ -1016,6 +1020,12 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
             "trajectory_success",
             MetricDirection.HIGHER_IS_BETTER,
             MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "safety_violation_rate",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.RATE,
             True,
         ),
     ]
