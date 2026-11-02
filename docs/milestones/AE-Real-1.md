@@ -162,7 +162,7 @@
 - `ruff check .`：**通过**（含修复 main 上既有的 `deepseek_v41_summary_experiment.py` I001/E501）。
 - Backend 的 M7-C deterministic / atomic claim 集成步骤：**通过**。
 - Full integration 集合：**不是本分支引入的失败**。同一份完整集合存在 2 个既有失败、22 个 setup 错误（`MissingGreenlet` / 测试数据库 fixture 顺序问题），集中在 `test_measured_reliability.py`、`test_run_budget_ledger_m4.py` 及若干直接复用共享测试库的模块；这些模块在单独运行时可复现/与本轮 AE 改动无调用关系。由于仓库 main 的 CI 本身即为 failure，本轮不扩大范围修改这些历史测试基础设施。
-- 与本轮 AE 直接相关的验证：单元测试 107 项通过；真实 PostgreSQL 定向集成（M7-A/B/C/E/F/H、interview、scripted driver）通过；AE-Real-1 真实运行通过。
+- 与本轮 AE 直接相关的验证：单元测试 114 项通过；真实 PostgreSQL 定向集成（M7-A/B/C/E/F/H、interview、scripted driver）通过；AE-Real-1 真实运行通过。
 
 ---
 
