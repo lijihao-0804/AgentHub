@@ -50,6 +50,7 @@ from packages.evaluation.models import EvaluationCaseResultStatus
 from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
+from packages.evaluation.statistics_service import EvaluationStatisticsService
 from packages.model_gateway.errors import ModelGatewayError
 from packages.model_gateway.profile_resolution import ModelProfileResolver
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
@@ -661,6 +662,25 @@ async def get_experiment_run_metrics(
 ) -> dict[str, Any]:
     del workspace_id
     return await EvaluationMetricsService().get_persisted_metrics(
+        session, context=context, run_id=run_id
+    )
+
+
+@router.get("/experiment-runs/{run_id}/statistics", response_model=dict[str, Any])
+async def get_experiment_run_statistics(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> dict[str, Any]:
+    """Reliability and uncertainty for a run: ``pass^k``, interval, variance, consistency.
+
+    Read-only: it rebuilds trial outcomes from persisted case results, so calling it on a
+    historical run never changes that run's stored metrics.
+    """
+
+    del workspace_id
+    return await EvaluationStatisticsService().compute(
         session, context=context, run_id=run_id
     )
 
