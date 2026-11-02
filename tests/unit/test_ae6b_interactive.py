@@ -4,16 +4,20 @@ from __future__ import annotations
 
 import os
 from dataclasses import replace
+from types import SimpleNamespace
 from uuid import uuid4
 
 import pytest
 import pytest_asyncio
+from sqlalchemy import select
 
 from packages.core.database import create_database
 from packages.evaluation.environment import EnvHandle, SupportFixtureEnvironment
+from packages.evaluation.interactive_driver import InteractiveScenarioDriver
 from packages.evaluation.metrics import MetricStatus, evaluate_interactive
 from packages.evaluation.user_simulator import ScriptedUserSimulator, Turn
 from packages.evaluation.validation import validate_dataset_item
+from packages.tools.models import Customer
 from tests.integration.test_m4c_agent_runtime import _seed
 
 
@@ -71,6 +75,75 @@ async def test_support_environment_teardown_failure_is_observable() -> None:
         await env.teardown(handle)
 
 
+@pytest.mark.asyncio
+async def test_teardown_failure_keeps_handle_for_retry(ae6b_db_factory) -> None:
+    class BrokenFactory:
+        def __call__(self):
+            raise RuntimeError("injected teardown failure")
+
+    async with ae6b_db_factory() as session:
+        base = await _seed(session, label=f"ae6b-env-{uuid4().hex}")
+    env = SupportFixtureEnvironment(ae6b_db_factory, workspace_id=str(base["workspace_id"]))
+    handle = await env.reset(seed=1, fixture_ref="support_customer")
+    working_factory = env.session_factory
+    env.session_factory = BrokenFactory()
+    with pytest.raises(RuntimeError):
+        await env.teardown(handle)
+    assert handle.instance_id in env._active
+    env.session_factory = working_factory
+    await env.teardown(handle)
+    assert handle.instance_id not in env._active
+    await env.teardown(handle)
+
+
+@pytest.mark.asyncio
+async def test_prepare_failure_cleans_reset_environment(ae6b_db_factory) -> None:
+    class FailingScenarios:
+        async def prepare_first(self, *args, **kwargs):
+            raise RuntimeError("injected preparation failure")
+
+    async with ae6b_db_factory() as session:
+        base = await _seed(session, label=f"ae6b-env-{uuid4().hex}")
+    context = base["context"].model_copy(
+        update={"permissions": base["context"].permissions | {"evaluation_run"}}
+    )
+    driver = InteractiveScenarioDriver(
+        FailingScenarios(),
+        context_factory=lambda run: _resolved(context),
+        environment_factory=lambda ctx, item: SupportFixtureEnvironment(
+            ae6b_db_factory, workspace_id=ctx.workspace_id
+        ),
+    )
+    item = SimpleNamespace(
+        category="INTERACTIVE",
+        input={
+            "task": "请查询客户",
+            "environment_ref": "support_customer",
+            "simulator": {
+                "private_facts": {"customer_ref": "__CUSTOMER_REF__"},
+                "triggers": {"customer_ref": ["客户编号"]},
+            },
+        },
+        expected={"assertions": {"ticket_count": 0}},
+    )
+    variant = SimpleNamespace(agent_version_id=uuid4(), effective_knowledge_snapshots=())
+    run = SimpleNamespace(workspace_id=base["workspace_id"])
+    with pytest.raises(RuntimeError):
+        await driver.prepare(run=run, variant=variant, item=item)
+    async with ae6b_db_factory() as session:
+        remaining = await session.scalar(
+            select(Customer).where(
+                Customer.workspace_id == base["workspace_id"],
+                Customer.customer_ref.like("AE6B-%"),
+            )
+        )
+    assert remaining is None
+
+
+async def _resolved(value):
+    return value
+
+
 def test_scripted_simulator_discloses_only_on_trigger() -> None:
     simulator = ScriptedUserSimulator(
         opening_text="我想退货，但不记得编号。",
@@ -105,6 +178,8 @@ def test_interactive_evaluator_scores_state_and_teardown() -> None:
         "category": "INTERACTIVE",
         "executed_turn_count": 2,
         "execution_complete": True,
+        "environment_lifecycle_status": "TEARDOWN_COMPLETE",
+        "turns": [{"status": "SUCCEEDED"}, {"status": "SUCCEEDED"}],
         "stop_reason": "goal_met",
         "disclosure_policy_respected": True,
         "environment": {"assertion": {"passed": True, "observed": {}, "reason": None}},
@@ -112,7 +187,58 @@ def test_interactive_evaluator_scores_state_and_teardown() -> None:
     metrics = evaluate_interactive({}, observation)
     assert metrics["task_success"].value == 1
     assert metrics["environment_state_success"].value == 1
+    assert metrics["agent_execution_success"].value == 1
     assert metrics["turn_count"].value == 2
+
+
+def test_interactive_agent_failure_cannot_be_success_even_if_state_passes() -> None:
+    observation = {
+        "category": "INTERACTIVE",
+        "executed_turn_count": 1,
+        "execution_complete": True,
+        "environment_lifecycle_status": "TEARDOWN_COMPLETE",
+        "turns": [{"status": "NEEDS_ATTENTION"}],
+        "stop_reason": "agent_needs_attention",
+        "disclosure_policy_respected": True,
+        "environment": {"assertion": {"passed": True, "observed": {}, "reason": None}},
+    }
+    metrics = evaluate_interactive({}, observation)
+    assert metrics["environment_state_success"].value == 1
+    assert metrics["agent_execution_success"].value == 0
+    assert metrics["task_success"].value == 0
+    assert metrics["interactive_task_success"].value == 0
+
+
+def test_interactive_budget_exhaustion_cannot_be_success() -> None:
+    observation = {
+        "category": "INTERACTIVE",
+        "executed_turn_count": 1,
+        "execution_complete": True,
+        "environment_lifecycle_status": "TEARDOWN_COMPLETE",
+        "turns": [{"status": "SUCCEEDED"}],
+        "stop_reason": "budget_exhausted",
+        "disclosure_policy_respected": True,
+        "environment": {"assertion": {"passed": True, "observed": {}, "reason": None}},
+    }
+    metrics = evaluate_interactive({}, observation)
+    assert metrics["task_success"].value == 0
+    assert metrics["budget_exhausted"].value == 1
+
+
+def test_interactive_without_turns_is_not_available_not_success() -> None:
+    observation = {
+        "category": "INTERACTIVE",
+        "executed_turn_count": 0,
+        "execution_complete": True,
+        "environment_lifecycle_status": "TEARDOWN_COMPLETE",
+        "turns": [],
+        "stop_reason": "goal_met",
+        "disclosure_policy_respected": True,
+        "environment": {"assertion": {"passed": True, "observed": {}, "reason": None}},
+    }
+    metrics = evaluate_interactive({}, observation)
+    assert metrics["task_success"].status == MetricStatus.NOT_AVAILABLE
+    assert metrics["agent_execution_success"].status == MetricStatus.NOT_AVAILABLE
 
 
 def test_interactive_canary_leak_cannot_be_success() -> None:
@@ -120,6 +246,8 @@ def test_interactive_canary_leak_cannot_be_success() -> None:
         "category": "INTERACTIVE",
         "executed_turn_count": 1,
         "execution_complete": True,
+        "environment_lifecycle_status": "TEARDOWN_COMPLETE",
+        "turns": [{"status": "SUCCEEDED"}],
         "stop_reason": "hidden_label_leak",
         "disclosure_policy_respected": False,
         "canary_leaked": True,

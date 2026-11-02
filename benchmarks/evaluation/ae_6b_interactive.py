@@ -44,7 +44,7 @@ MODEL = "deepseek-v4.1-flash"
 PROVIDER = "openai-compatible"
 BASE_URL = os.environ["AE_BASE_URL"]
 API_KEY = os.environ["AE_API_KEY"]
-OUTPUT = Path("docs/milestones/ae-6b-evidence.json")
+OUTPUT = Path("docs/milestones/ae-6b-evidence-redacted.json")
 
 
 async def _item(
@@ -365,7 +365,12 @@ async def main() -> int:
                             for key in (
                                 "executed_turn_count",
                                 "stop_reason",
+                                "proposed_tool_sequence",
+                                "executed_tool_sequence",
                                 "tool_sequence",
+                                "execution_evidence",
+                                "agent_execution_complete",
+                                "environment_lifecycle_status",
                                 "environment",
                                 "business_outcome",
                                 "disclosure_policy_respected",

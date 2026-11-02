@@ -460,12 +460,22 @@ def evaluate_interactive(
                 "disclosure_policy_respected",
                 "budget_exhausted",
                 "environment_execution_complete",
+                "agent_execution_success",
                 "turn_count",
                 "task_success",
             )
         }
     state_success = bool(assertion["passed"])
-    execution_complete = observation.get("execution_complete") is True
+    lifecycle_complete = observation.get("environment_lifecycle_status") == "TEARDOWN_COMPLETE"
+    if "environment_lifecycle_status" not in observation:
+        lifecycle_complete = observation.get("execution_complete") is True
+    turns = observation.get("turns")
+    agent_available = isinstance(turns, list) and bool(turns)
+    agent_success = (
+        all(str(turn.get("status")).upper() == "SUCCEEDED" for turn in turns)
+        if agent_available
+        else None
+    )
     stop_reason = str(observation.get("stop_reason") or "")
     disclosure_ok = observation.get("disclosure_policy_respected")
     disclosure_available = isinstance(disclosure_ok, bool)
@@ -481,25 +491,49 @@ def evaluate_interactive(
     budget = _binary_metric(
         "budget_exhausted", stop_reason == "budget_exhausted", applicable=True
     )
-    success = (
-        state_success
-        and execution_complete
-        and approval_ok
-        and stop_reason not in {"environment_teardown_failed", "approval_unavailable"}
-        and (not disclosure_available or bool(disclosure_ok))
-    )
+    if agent_success is None:
+        task = _not_available("task_success", "agent_execution_evidence_missing")
+    else:
+        success = (
+            state_success
+            and agent_success
+            and lifecycle_complete
+            and stop_reason == "goal_met"
+            and approval_ok
+            and (not disclosure_available or bool(disclosure_ok))
+        )
+        task = _binary_metric("task_success", success)
     return {
         "environment_state_success": _binary_metric(
             "environment_state_success", state_success
         ),
-        "interactive_task_success": _binary_metric(
-            "interactive_task_success", success
+        "interactive_task_success": (
+            _not_available("interactive_task_success", "agent_execution_evidence_missing")
+            if agent_success is None
+            else _binary_metric(
+                "interactive_task_success",
+                bool(
+                    state_success
+                    and agent_success
+                    and lifecycle_complete
+                    and stop_reason == "goal_met"
+                    and approval_ok
+                    and (not disclosure_available or bool(disclosure_ok))
+                ),
+            )
         ),
-        "goal_completion": _binary_metric("goal_completion", state_success),
+        "goal_completion": _binary_metric(
+            "goal_completion", state_success and stop_reason == "goal_met"
+        ),
         "disclosure_policy_respected": disclosure,
         "budget_exhausted": budget,
         "environment_execution_complete": _binary_metric(
-            "environment_execution_complete", execution_complete
+            "environment_execution_complete", lifecycle_complete
+        ),
+        "agent_execution_success": (
+            _not_available("agent_execution_success", "agent_execution_evidence_missing")
+            if agent_success is None
+            else _binary_metric("agent_execution_success", bool(agent_success))
         ),
         "turn_count": MetricValue(
             "turn_count",
@@ -508,7 +542,7 @@ def evaluate_interactive(
             1,
             evaluator_version="v1",
         ),
-        "task_success": _binary_metric("task_success", success),
+        "task_success": task,
     }
 
 
@@ -967,6 +1001,12 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
         ),
         (
             "environment_execution_complete",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "agent_execution_success",
             MetricDirection.HIGHER_IS_BETTER,
             MetricAggregationKind.BINARY,
             True,

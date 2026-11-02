@@ -255,10 +255,13 @@ class SupportFixtureEnvironment:
                     )
                 await session.commit()
         except Exception as error:
+            # Keep the handle active so a later retry can clean the same instance.
+            # Do not pop it here: a failed teardown must not lose the cleanup capability.
             self._teardown_errors[handle.instance_id] = type(error).__name__
             raise
-        finally:
+        else:
             self._active.pop(handle.instance_id, None)
+            self._teardown_errors.pop(handle.instance_id, None)
 
     def teardown_error(self, instance_id: str) -> str | None:
         return self._teardown_errors.get(instance_id)

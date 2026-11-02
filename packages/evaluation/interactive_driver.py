@@ -30,6 +30,7 @@ from packages.evaluation.environment import StateAssertion, TaskEnvironment
 from packages.evaluation.models import EvaluationDatasetItem, EvaluationExperimentRun
 from packages.evaluation.runner import CaseExecutionObservation, PreparedCaseExecution
 from packages.evaluation.scenario_driver import ScriptedScenarioDriver
+from packages.evaluation.trajectory import build_trajectory_observation
 from packages.evaluation.user_simulator import ScriptedUserSimulator, Turn
 
 
@@ -119,42 +120,56 @@ class InteractiveScenarioDriver:
             seed=int(item.input.get("seed", 0)),
             fixture_ref=str(item.input.get("environment_ref", "support_customer")),
         )
-        simulator = simulator_from_item(
-            item,
-            customer_ref=(
-                environment.customer_ref(handle)
-                if hasattr(environment, "customer_ref")
-                else None
-            ),
-        )
-        opening = await simulator.opening()
-        prepared = await self.scenarios.prepare_first(
-            context,
-            agent_version_id=variant.agent_version_id,
-            first_input=opening,
-            knowledge_snapshots=variant.effective_knowledge_snapshots,
-        )
-        max_turns = int(
-            item.input.get(
-                "max_turns", item.input.get("simulator", {}).get("max_turns", 4)
+        try:
+            simulator = simulator_from_item(
+                item,
+                customer_ref=(
+                    environment.customer_ref(handle)
+                    if hasattr(environment, "customer_ref")
+                    else None
+                ),
             )
-        )
-        max_tokens = item.input.get("max_tokens")
-        max_cost = item.input.get("max_cost_cny")
-        approval_decisions = list(item.expected.get("approval_decisions") or [])
-        approver = (
-            await self.approval_context_factory(run)
-            if approval_decisions and self.approval_context_factory is not None
-            else context
-        )
-        if approver.workspace_id != context.workspace_id:
-            raise AgentHubError("FORBIDDEN", "Approval context belongs to another workspace.", 403)
+            opening = await simulator.opening()
+            prepared = await self.scenarios.prepare_first(
+                context,
+                agent_version_id=variant.agent_version_id,
+                first_input=opening,
+                knowledge_snapshots=variant.effective_knowledge_snapshots,
+            )
+            max_turns = int(
+                item.input.get(
+                    "max_turns", item.input.get("simulator", {}).get("max_turns", 4)
+                )
+            )
+            max_tokens = item.input.get("max_tokens")
+            max_cost = item.input.get("max_cost_cny")
+            approval_decisions = list(item.expected.get("approval_decisions") or [])
+            approver = (
+                await self.approval_context_factory(run)
+                if approval_decisions and self.approval_context_factory is not None
+                else context
+            )
+            if approver.workspace_id != context.workspace_id:
+                raise AgentHubError(
+                    "FORBIDDEN", "Approval context belongs to another workspace.", 403
+                )
+        except Exception:
+            # Reset may have created the isolated customer; if preparation cannot finish,
+            # remove that instance rather than leaving an unowned fixture behind.
+            try:
+                await environment.teardown(handle)
+            except Exception:
+                pass
+            raise
 
         async def execute() -> CaseExecutionObservation:
             started = perf_counter()
             first_input = opening
             turns: list[dict] = []
             transcript: list[Turn] = []
+            proposed_tool_sequence: list[str] = []
+            executed_tool_sequence: list[str] = []
+            execution_evidence: list[dict] = []
             decision_index = 0
             stop_reason: str | None = None
             assertion = StateAssertion(False, {}, "not_asserted")
@@ -223,11 +238,99 @@ class InteractiveScenarioDriver:
                             total_cost += float(cost_amount)
                         if persisted.cost_currency:
                             currency = persisted.cost_currency
+                        step_rows = list(
+                            await session.scalars(
+                                select(RunStep)
+                                .where(
+                                    RunStep.workspace_id == UUID(context.workspace_id),
+                                    RunStep.agent_run_id == result.run_id,
+                                    RunStep.kind.in_(
+                                        (
+                                            "TOOL_PROPOSAL",
+                                            "TOOL_EXECUTE",
+                                            "POLICY",
+                                            "APPROVAL_WAIT",
+                                            "ACTION",
+                                            "GUARD",
+                                            "FINISH",
+                                        )
+                                    ),
+                                )
+                                .order_by(RunStep.sequence_number, RunStep.id)
+                            )
+                        )
+                        approval_rows = list(
+                            await session.scalars(
+                                select(Approval)
+                                .where(
+                                    Approval.workspace_id == UUID(context.workspace_id),
+                                    Approval.run_id == result.run_id,
+                                )
+                                .order_by(Approval.created_at, Approval.id)
+                            )
+                        )
+                        trajectory = build_trajectory_observation(
+                            steps=[
+                                {
+                                    "index": index,
+                                    "sequence_number": row.sequence_number,
+                                    "kind": row.kind,
+                                    "status": row.status,
+                                    "error_code": (row.safe_metadata or {}).get("error_code"),
+                                    "tool_identities": (row.safe_metadata or {}).get(
+                                        "tool_identities"
+                                    )
+                                    or [],
+                                    "arguments_hashes": (row.safe_metadata or {}).get(
+                                        "arguments_hashes"
+                                    )
+                                    or [],
+                                    "tool_results": (row.safe_metadata or {}).get("tool_results")
+                                    or [],
+                                    "logical_action_ids": (row.safe_metadata or {}).get(
+                                        "logical_action_ids"
+                                    )
+                                    or [],
+                                    "action_results": (row.safe_metadata or {}).get(
+                                        "action_results"
+                                    )
+                                    or [],
+                                }
+                                for index, row in enumerate(step_rows)
+                            ],
+                            approvals=[
+                                {
+                                    "approval_id": str(row.id),
+                                    "logical_action_id": row.logical_action_id,
+                                    "tool_identity": row.tool_identity,
+                                    "arguments_hash": row.canonical_args_hash,
+                                    "decision_status": row.decision_status,
+                                    "execution_status": row.execution_status,
+                                    "failure_code": row.failure_code,
+                                }
+                                for row in approval_rows
+                            ],
+                            terminal={
+                                "status": persisted.status,
+                                "failure_code": persisted.failure_code,
+                            },
+                            counters={"tool_call_count": persisted.tool_call_count},
+                        )
+                        turn_proposed = trajectory.get("proposed_tool_sequence") or []
+                        turn_executed = trajectory.get("executed_tool_sequence") or []
+                        proposed_tool_sequence.extend(str(item) for item in turn_proposed)
+                        executed_tool_sequence.extend(str(item) for item in turn_executed)
+                        execution_evidence.extend(
+                            item
+                            for item in (trajectory.get("execution_evidence") or [])
+                            if isinstance(item, Mapping)
+                        )
                         run_ids.append(result.run_id)
                         turns.append(
                             {
                                 "turn_index": turn_index,
-                                "user_input": user_text,
+                                "user_input_hash": canonical_json_hash(user_text),
+                                "user_input_length": len(user_text),
                                 "run_id": str(result.run_id),
                                 "status": persisted.status,
                                 "failure_code": persisted.failure_code,
@@ -237,6 +340,12 @@ class InteractiveScenarioDriver:
                                 "cost_amount": (
                                     str(cost_amount) if cost_amount is not None else None
                                 ),
+                                "proposed_tool_sequence": [
+                                    str(item) for item in turn_proposed
+                                ],
+                                "executed_tool_sequence": [
+                                    str(item) for item in turn_executed
+                                ],
                             }
                         )
                     transcript.extend(
@@ -323,24 +432,14 @@ class InteractiveScenarioDriver:
                     teardown_error = type(error).__name__
             if teardown_status != "TEARDOWN_COMPLETE":
                 stop_reason = "environment_teardown_failed"
-            tool_sequence: list[str] = []
-            if run_ids:
-                async with self.scenarios.runtime.session_factory() as session:
-                    proposal_rows = list(
-                        await session.scalars(
-                            select(RunStep)
-                            .where(
-                                RunStep.workspace_id == UUID(context.workspace_id),
-                                RunStep.agent_run_id.in_(run_ids),
-                                RunStep.kind == "TOOL_PROPOSAL",
-                            )
-                            .order_by(RunStep.sequence_number)
-                        )
-                    )
-                    for proposal in proposal_rows:
-                        tool_sequence.extend(
-                            (proposal.safe_metadata or {}).get("tool_identities") or []
-                        )
+            safe_assertion = {
+                "passed": assertion.passed,
+                "reason": assertion.reason,
+                "observed": {
+                    "ticket_count": assertion.observed.get("ticket_count"),
+                    "ticket_statuses": assertion.observed.get("ticket_statuses", []),
+                },
+            }
             observation = {
                 "category": "INTERACTIVE",
                 "interactive_driver_version": self.version,
@@ -351,14 +450,20 @@ class InteractiveScenarioDriver:
                 "planned_max_turns": max_turns,
                 "executed_turn_count": len(turns),
                 "turns": turns,
-                "tool_sequence": tool_sequence,
+                "proposed_tool_sequence": proposed_tool_sequence,
+                "executed_tool_sequence": executed_tool_sequence,
+                "tool_sequence": executed_tool_sequence,
+                "execution_evidence": execution_evidence,
                 "stop_reason": stop_reason,
                 "execution_complete": teardown_status == "TEARDOWN_COMPLETE",
+                "agent_execution_complete": bool(turns)
+                and all(str(turn["status"]).upper() == "SUCCEEDED" for turn in turns),
+                "environment_lifecycle_status": teardown_status,
                 "environment": {
                     "kind": environment.kind,
                     "version": environment.version,
                     "handle": handle.projection(),
-                    "assertion": assertion.to_dict(),
+                    "assertion": safe_assertion,
                     "teardown_status": teardown_status,
                     "teardown_error": teardown_error,
                 },
@@ -373,7 +478,7 @@ class InteractiveScenarioDriver:
                 "disclosure_policy_respected": not canary_leaked,
                 "canary_leaked": canary_leaked,
                 "approval_decision_count": decision_index,
-                "business_outcome": assertion.to_dict(),
+                "business_outcome": safe_assertion,
                 "cost_amount": total_cost if known_cost else None,
                 "cost_currency": currency if known_cost else None,
                 "total_tokens": total_input + total_output if known_tokens else None,

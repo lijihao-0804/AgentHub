@@ -3,7 +3,7 @@
 > 状态：**PASS（确定性 Simulator + 真实 Agent LLM 闭环）**  
 > 日期：2026-11-02 ｜ 分支：`codex/ae-6b-interactive-environment`  
 > 基线：main `1a256cc`（PR #6 已合并）  
-> 证据：`docs/milestones/ae-6b-evidence.json`
+> 证据：`docs/milestones/ae-6b-evidence.json`（原始证据，保留）、`docs/milestones/ae-6b-evidence-redacted.json`（收口后脱敏 smoke 证据）
 
 ---
 
@@ -59,11 +59,11 @@ DatasetVersion(INTERACTIVE)
 
 | 项 | 值 |
 | --- | --- |
-| Experiment Run ID | `6577b772-b36d-4d61-a889-dbfd9347cd85` |
-| Experiment ID | `7b76c3ff-dcbd-4e72-98e1-cb1446e08550` |
-| Dataset Version ID | `8403e646-e091-4a46-8391-1f0d79dc78b1` |
-| Agent Version ID | `76841b2a-f70a-42ba-bfa8-7105e916cf67` |
-| Workspace ID | `ad125d9e-70bb-40e7-8745-f9997f078674` |
+| Experiment Run ID | `1914c232-bd3e-40fa-9a99-0bfb2d4f4ecc` |
+| Experiment ID | `79e3d026-b4df-4e49-88b8-e96813a112c5` |
+| Dataset Version ID | `c3db704b-2d8e-4eca-9f64-4c9f0954458b` |
+| Agent Version ID | `78d6517c-d314-49c4-b9e4-e99fed98b20f` |
+| Workspace ID | `fc489066-0d07-46be-92a5-d2220ccbffed` |
 | Agent 模型 | `deepseek-v4.1-flash`（Alibaba MaaS） |
 | Simulator | `scripted-disclosure-v1`（确定性，无模型成本） |
 | Environment | `support_fixture` / `environment-v1` |
@@ -73,20 +73,20 @@ DatasetVersion(INTERACTIVE)
 
 | case | 交互轮数 | 终态 | 工具事实 | 业务断言 |
 | --- | ---: | --- | --- | --- |
-| `interactive-clarify-create` | 3 | `goal_met` | `query_customer`、`create_ticket` | 1 条 `OPEN` 工单，独立 PostgreSQL 客户 `AE6B-...` |
+| `interactive-clarify-create` | 3 | `goal_met` | proposed `query_customer`/`create_ticket`，executed `query_customer`/`create_ticket` | 1 条 `OPEN` 工单，独立 PostgreSQL 客户 |
 | `interactive-refuse-without-info` | 2 | `goal_met` | 无工具执行 | 0 条工单，未越权 |
-| `interactive-denied-write` | 2 | `goal_met` | `query_customer`、`create_ticket`（审批 DENIED） | 0 条工单，审批拒绝无副作用 |
+| `interactive-denied-write` | 2 | `goal_met` | proposed `query_customer`/`create_ticket`，executed 仅 `query_customer`；审批 `DENIED` | 0 条工单，拒绝写操作无副作用 |
 
-关键动态行为：
+关键动态行为（原始用户文本不进入证据包，仅保留安全 hash）：
 
-- `interactive-clarify-create` 第 0 轮只有“想退货，不记得编号”；第 1 轮用户输入才是 Simulator 披露的客户编号，证明不是预先固定所有用户轮次；
+- `interactive-clarify-create` 第 0 轮 user input hash 与第 1 轮不同；第 1 轮是 Simulator 按 trigger 披露的私有客户编号，证明不是预先固定所有用户轮次；
 - `interactive-refuse-without-info` 第 1 轮是 fallback，Agent 未获得信息，环境断言 0 工单；
-- `interactive-denied-write` 有 1 次真实审批，最终 0 工单。
+- `interactive-denied-write` 有 1 次真实审批，`create_ticket` 只在 proposed 证据中，executed 无写操作。
 
 ### 用量与成本
 
-- Agent tokens：`4,605 + 3,065 + 1,804 = 9,474`，逐 case 记录；
-- Agent 实际成本：**UNKNOWN**（provider 未返回可核对账单）；未记为 0；按冻结 CNY 价格计算的估算分别约 `0.015192 / 0.008650 / 0.007196`，仅作为估算字段；
+- Agent tokens：`1,641 + 5,547 + 2,971 = 10,159`，逐 case 记录；
+- Agent 实际成本：**UNKNOWN**（provider 未返回可核对账单）；未记为 0；按冻结 CNY 价格计算的估算分别约 `0.006078 / 0.018210 / 0.008066`，仅作为估算字段；
 - Simulator：确定性脚本，无模型 token、无独立成本。
 
 ### 统计
@@ -137,7 +137,7 @@ DatasetVersion(INTERACTIVE)
 - `alembic upgrade head` / `alembic check`：通过；migration `0050` upgrade → downgrade 0049 → upgrade 通过；
 - 定向 S1 单元/契约测试通过（`test_ae6b_interactive.py`）；
 - 全仓 backend integration 仍为 main 既有基线：`2 failed, 447 passed, 1 skipped, 22 errors`（`test_measured_reliability` / `test_run_budget_ledger` 及共享测试库 fixture 顺序问题）；未跳过测试、未降低阈值。
-- 真实模型验收：Alibaba `deepseek-v4.1-flash`，3 cases / 1 repetition；Agent tokens 9,474；实际 cost UNKNOWN（未记 0），按冻结价格估算约 0.031 CNY；Simulator 为确定性脚本，无模型成本。
+- 真实模型验收：Alibaba `deepseek-v4.1-flash`，3 cases / 1 repetition；Agent tokens 10,159；实际 cost UNKNOWN（未记 0），按冻结价格估算约 0.032 CNY；Simulator 为确定性脚本，无模型成本。
 
 ## 6. 已知风险
 
