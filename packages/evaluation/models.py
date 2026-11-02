@@ -46,6 +46,7 @@ class EvaluationDatasetCategory(StrEnum):
     APPROVAL = "APPROVAL"
     MULTI_STEP = "MULTI_STEP"
     FAILURE = "FAILURE"
+    INTERACTIVE = "INTERACTIVE"
 
 
 class EvaluationDataset(Base):
@@ -161,7 +162,7 @@ class EvaluationDatasetItem(Base):
         ),
         CheckConstraint(
             "category IN ('RETRIEVAL', 'KNOWLEDGE_QA', 'TOOL', 'NO_ANSWER', 'APPROVAL', "
-            "'MULTI_STEP', 'FAILURE')",
+            "'MULTI_STEP', 'FAILURE', 'INTERACTIVE')",
             name="ck_evaluation_dataset_items_category",
         ),
         CheckConstraint("ordinal >= 0", name="ck_evaluation_dataset_items_ordinal_nonnegative"),

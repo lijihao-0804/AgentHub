@@ -22,8 +22,9 @@
 | 冻结 Judge 执行计划 | `judge.py` / worker | `test_ae4...` | 未跑 | 探针直连，未走 gateway | 已实现 `judge_profile_to_plan`，worker 走 `generate_resolved` |
 | Ensemble 创建 API | schema / route / service | 契约 | 未跑 | 未跑 | 已实现 `judge_model_profile_ids` + `judge_strategy` |
 | 失败分类（12 码） | `taxonomy.py` | `test_ae5_taxonomy.py`（10） | 未跑（接口无集成用例） | 未跑 | 规则归因；非因果 |
-| 环境契约 | `environment.py` | `test_ae6_environment_simulator.py`（9） | 未跑 | 未跑 | 仅契约；未接数据集/运行时 |
-| 用户模拟器（脚本） | `user_simulator.py` | 同上 | 未跑 | 未跑 | 确定性；模型驱动未做 |
+| **真实交互环境与动态多轮（AE-6b）** | `environment.py` + `interactive_driver.py` + `scenario_driver.py` | `test_ae6b_interactive.py`（8） | **通过（真实 PostgreSQL）** | **通过（3 cases 真实 Alibaba）** | **PASS**：reset/assert/teardown、动态披露、Canary、业务终态 |
+| 环境契约 | `environment.py` | `test_ae6b_interactive.py` + `test_ae6_environment_simulator.py` | **通过（AE-6b）** | **通过（AE-6b）** | `SupportFixtureEnvironment` 已接正式 Experiment；`FixtureEnvironment` 保留轻量契约 |
+| 用户模拟器（脚本） | `user_simulator.py` | `test_ae6b_interactive.py` | **通过（AE-6b）** | **通过（AE-6b）** | `ScriptedUserSimulator` 条件披露；模型驱动未做 |
 | 安全断言（OWASP 7 族） | `safety.py` | `test_ae7_safety.py`（7） | 未跑 | 未跑 | 断言层；覆盖率已实现，攻击语料未做 |
 | 外部基准适配 | 未实现 | — | — | — | AE-8 |
 | 在线评测 | 未实现 | — | — | — | AE-9 |

@@ -29,6 +29,7 @@ DEFAULT_EVALUATOR_VERSIONS: dict[str, str] = {
     "citation-evaluator": "v2",
     "dataset-validator": "v1",
     "failure-evaluator": "v2",
+    "interactive-evaluator": "v2",
     "retrieval-evaluator": "v2",
     "tool-evaluator": "v2",
     "support-postcondition-evaluator": "support-postcondition-v1",

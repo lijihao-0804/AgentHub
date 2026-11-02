@@ -14,9 +14,13 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field
 from typing import Any, Protocol
-from uuid import uuid4
+from uuid import UUID, uuid4
+
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.canonical.json_hash import canonical_json_hash
+from packages.tools.models import Customer, Ticket
 
 ENVIRONMENT_VERSION = "environment-v1"
 
@@ -111,10 +115,160 @@ class FixtureEnvironment:
         self._active.pop(handle.instance_id, None)
 
 
+class SupportFixtureEnvironment:
+    """PostgreSQL-backed, namespace-isolated support environment.
+
+    Isolation is by a unique ``customer_ref`` per environment instance.  Every read
+    is scoped by that customer id and the workspace id; teardown deletes only that
+    customer's tickets and the customer itself.  No global cleanup statement is used.
+    """
+
+    kind = "support_fixture"
+    version = ENVIRONMENT_VERSION
+
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        *,
+        workspace_id: str,
+        prefix: str = "AE6B",
+    ) -> None:
+        self.session_factory = session_factory
+        self.workspace_id = str(workspace_id)
+        self.prefix = prefix
+        self._active: dict[str, EnvHandle] = {}
+        self._teardown_errors: dict[str, str] = {}
+
+    def _customer_ref(self, instance_id: str) -> str:
+        return f"{self.prefix}-{instance_id[:24]}"
+
+    def customer_ref(self, handle: EnvHandle) -> str:
+        self._require_handle(handle)
+        return self._customer_ref(handle.instance_id)
+
+    async def reset(self, *, seed: int, fixture_ref: str) -> EnvHandle:
+        instance_id = uuid4().hex
+        fixture = {"fixture_ref": fixture_ref, "seed": seed}
+        customer_ref = self._customer_ref(instance_id)
+        async with self.session_factory() as session:
+            session.add(
+                Customer(
+                    workspace_id=UUID(self.workspace_id),
+                    customer_ref=customer_ref,
+                    name=f"AE6B Fixture {instance_id[:8]}",
+                    email=f"{customer_ref.lower()}@example.test",
+                )
+            )
+            await session.commit()
+        handle = EnvHandle(
+            instance_id=instance_id,
+            workspace_id=self.workspace_id,
+            seed=seed,
+            fixture_hash=canonical_json_hash(fixture),
+        )
+        self._active[instance_id] = handle
+        return handle
+
+    def _require_handle(self, handle: EnvHandle) -> None:
+        if not isinstance(handle, EnvHandle):
+            raise ValueError("ENVIRONMENT_HANDLE_INVALID")
+        if handle.workspace_id != self.workspace_id:
+            raise PermissionError("ENVIRONMENT_HANDLE_CROSS_WORKSPACE")
+        if handle.instance_id not in self._active:
+            raise ValueError("ENVIRONMENT_HANDLE_NOT_ACTIVE")
+
+    async def assert_state(
+        self, handle: EnvHandle, assertions: Mapping[str, Any]
+    ) -> StateAssertion:
+        self._require_handle(handle)
+        async with self.session_factory() as session:
+            customer = await session.scalar(
+                select(Customer).where(
+                    Customer.workspace_id == UUID(self.workspace_id),
+                    Customer.customer_ref == self._customer_ref(handle.instance_id),
+                )
+            )
+            if customer is None:
+                return StateAssertion(False, {}, "customer_missing")
+            tickets = list(
+                await session.scalars(
+                    select(Ticket).where(
+                        Ticket.workspace_id == UUID(self.workspace_id),
+                        Ticket.customer_id == customer.id,
+                    )
+                )
+            )
+        observed = {
+            "customer_ref": customer.customer_ref,
+            "ticket_count": len(tickets),
+            "ticket_statuses": [ticket.status for ticket in tickets],
+            "ticket_subjects": [ticket.subject for ticket in tickets],
+        }
+        failures: list[str] = []
+        expected_count = assertions.get("ticket_count")
+        if expected_count is not None and len(tickets) != int(expected_count):
+            failures.append("ticket_count")
+        expected_status = assertions.get("ticket_status")
+        if expected_status is not None and any(
+            ticket.status != str(expected_status) for ticket in tickets
+        ):
+            failures.append("ticket_status")
+        expected_subject = assertions.get("ticket_subject")
+        if expected_subject is not None and not any(
+            expected_subject in ticket.subject for ticket in tickets
+        ):
+            failures.append("ticket_subject")
+        if assertions.get("min_turns") is not None:
+            # min_turns is evaluated by the driver, not by the database.
+            pass
+        return StateAssertion(
+            passed=not failures, observed=observed, reason=", ".join(failures) or None
+        )
+
+    async def teardown(self, handle: EnvHandle) -> None:
+        if not isinstance(handle, EnvHandle):
+            raise ValueError("ENVIRONMENT_HANDLE_INVALID")
+        if handle.workspace_id != self.workspace_id:
+            raise PermissionError("ENVIRONMENT_HANDLE_CROSS_WORKSPACE")
+        if handle.instance_id not in self._active:
+            return
+        try:
+            async with self.session_factory() as session:
+                customer = await session.scalar(
+                    select(Customer).where(
+                        Customer.workspace_id == UUID(self.workspace_id),
+                        Customer.customer_ref == self._customer_ref(handle.instance_id),
+                    )
+                )
+                if customer is not None:
+                    await session.execute(
+                        delete(Ticket).where(
+                            Ticket.workspace_id == UUID(self.workspace_id),
+                            Ticket.customer_id == customer.id,
+                        )
+                    )
+                    await session.execute(
+                        delete(Customer).where(
+                            Customer.workspace_id == UUID(self.workspace_id),
+                            Customer.id == customer.id,
+                        )
+                    )
+                await session.commit()
+        except Exception as error:
+            self._teardown_errors[handle.instance_id] = type(error).__name__
+            raise
+        finally:
+            self._active.pop(handle.instance_id, None)
+
+    def teardown_error(self, instance_id: str) -> str | None:
+        return self._teardown_errors.get(instance_id)
+
+
 __all__ = [
     "ENVIRONMENT_VERSION",
     "EnvHandle",
     "FixtureEnvironment",
     "StateAssertion",
+    "SupportFixtureEnvironment",
     "TaskEnvironment",
 ]

@@ -33,6 +33,7 @@ _RUN_INPUT_FIELDS = {
     "APPROVAL": "action",
     "MULTI_STEP": "task",
     "FAILURE": "scenario",
+    "INTERACTIVE": "task",
 }
 
 
