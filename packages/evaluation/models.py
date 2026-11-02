@@ -236,6 +236,23 @@ class EvaluationExperimentPurpose(StrEnum):
     RELEASE_GATE = "RELEASE_GATE"
 
 
+class EvaluationEvidenceLevel(StrEnum):
+    """How strong the evidence behind a score is.
+
+    The level is frozen with the experiment and copied to each run.  It exists so a
+    deterministic conformance fixture can never be reported as model accuracy, and so a
+    release gate can refuse evidence that is weaker than its policy requires.
+    """
+
+    DETERMINISTIC_CONFORMANCE = "DETERMINISTIC_CONFORMANCE"
+    CONTROLLED_SIMULATION = "CONTROLLED_SIMULATION"
+    REAL_PROVIDER = "REAL_PROVIDER"
+    PRODUCTION_SAMPLE = "PRODUCTION_SAMPLE"
+
+
+EVIDENCE_LEVELS = tuple(level.value for level in EvaluationEvidenceLevel)
+
+
 class EvaluationExperimentRunStatus(StrEnum):
     QUEUED = "QUEUED"
     RUNNING = "RUNNING"
@@ -288,6 +305,11 @@ class EvaluationExperiment(Base):
             "repetitions BETWEEN 1 AND 5", name="ck_evaluation_experiments_repetitions"
         ),
         CheckConstraint("status IN ('DRAFT', 'READY')", name="ck_evaluation_experiments_status"),
+        CheckConstraint(
+            "evidence_level IN ('DETERMINISTIC_CONFORMANCE', 'CONTROLLED_SIMULATION', "
+            "'REAL_PROVIDER', 'PRODUCTION_SAMPLE')",
+            name="ck_evaluation_experiments_evidence_level",
+        ),
         UniqueConstraint("workspace_id", "id", name="uq_evaluation_experiments_workspace_id"),
         Index("ix_evaluation_experiments_workspace_created", "workspace_id", "created_at"),
         Index(
@@ -309,6 +331,12 @@ class EvaluationExperiment(Base):
     repetitions: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
     status: Mapped[str] = mapped_column(
         String(16), nullable=False, server_default=EvaluationExperimentStatus.DRAFT
+    )
+    evidence_level: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default=EvaluationEvidenceLevel.DETERMINISTIC_CONFORMANCE,
+        server_default=EvaluationEvidenceLevel.DETERMINISTIC_CONFORMANCE,
     )
     build_sha: Mapped[str] = mapped_column(String(64), nullable=False)
     evaluator_manifest: Mapped[dict[str, Any]] = mapped_column(
@@ -431,6 +459,11 @@ class EvaluationExperimentRun(Base):
         CheckConstraint(
             "repetitions BETWEEN 1 AND 5", name="ck_evaluation_experiment_runs_repetitions"
         ),
+        CheckConstraint(
+            "evidence_level IN ('DETERMINISTIC_CONFORMANCE', 'CONTROLLED_SIMULATION', "
+            "'REAL_PROVIDER', 'PRODUCTION_SAMPLE')",
+            name="ck_evaluation_experiment_runs_evidence_level",
+        ),
         UniqueConstraint("workspace_id", "id", name="uq_evaluation_experiment_runs_workspace_id"),
         Index(
             "ix_evaluation_experiment_runs_experiment_created",
@@ -464,6 +497,12 @@ class EvaluationExperimentRun(Base):
     split: Mapped[str] = mapped_column(String(16), nullable=False)
     purpose: Mapped[str] = mapped_column(String(32), nullable=False)
     repetitions: Mapped[int] = mapped_column(Integer, nullable=False)
+    evidence_level: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default=EvaluationEvidenceLevel.DETERMINISTIC_CONFORMANCE,
+        server_default=EvaluationEvidenceLevel.DETERMINISTIC_CONFORMANCE,
+    )
     lease_owner: Mapped[str | None] = mapped_column(String(128))
     lease_generation: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

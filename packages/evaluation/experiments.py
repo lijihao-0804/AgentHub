@@ -24,9 +24,11 @@ from packages.evaluation.build_identity import (
 )
 from packages.evaluation.judge import FrozenJudgeProfile
 from packages.evaluation.models import (
+    EVIDENCE_LEVELS,
     EvaluationDatasetItem,
     EvaluationDatasetVersion,
     EvaluationDatasetVersionStatus,
+    EvaluationEvidenceLevel,
     EvaluationExperiment,
     EvaluationExperimentCaseResult,
     EvaluationExperimentHoldoutExposure,
@@ -75,11 +77,13 @@ class ExperimentService:
         split: str,
         purpose: str,
         repetitions: int = 1,
+        evidence_level: str = EvaluationEvidenceLevel.DETERMINISTIC_CONFORMANCE.value,
         judge_profile: FrozenJudgeProfile | None = None,
     ) -> EvaluationExperiment:
         self._require_permission(context, EVALUATION_MANAGE)
         normalized_name = self._required_text(name, "name", code="EVALUATION_EXPERIMENT_INVALID")
         self._validate_definition(split, purpose, repetitions)
+        self._validate_evidence_level(evidence_level)
         workspace_id = self._workspace_id(context)
         dataset_version = await session.scalar(
             select(EvaluationDatasetVersion).where(
@@ -129,6 +133,7 @@ class ExperimentService:
             split=split,
             purpose=purpose,
             repetitions=repetitions,
+            evidence_level=evidence_level,
             status=EvaluationExperimentStatus.DRAFT,
             build_sha=build_sha,
             # The judge, when one is used, is frozen here with the deterministic
@@ -423,6 +428,7 @@ class ExperimentService:
             "split": experiment.split,
             "purpose": experiment.purpose,
             "repetitions": experiment.repetitions,
+            "evidence_level": experiment.evidence_level,
             "build_sha": experiment.build_sha,
             "variants": [self._variant_spec(variant) for variant in variants],
             "evaluator_manifest": experiment.evaluator_manifest,
@@ -480,6 +486,7 @@ class ExperimentService:
             split=experiment.split,
             purpose=experiment.purpose,
             repetitions=experiment.repetitions,
+            evidence_level=experiment.evidence_level,
             created_by=self._user_id(context),
         )
         session.add(run)
@@ -1088,6 +1095,15 @@ class ExperimentService:
             raise AgentHubError(
                 "EVALUATION_EXPERIMENT_INVALID",
                 "repetitions must be between 1 and 5.",
+                422,
+            )
+
+    @staticmethod
+    def _validate_evidence_level(evidence_level: str) -> None:
+        if evidence_level not in EVIDENCE_LEVELS:
+            raise AgentHubError(
+                "EVALUATION_EXPERIMENT_INVALID",
+                "The evidence level is invalid.",
                 422,
             )
 

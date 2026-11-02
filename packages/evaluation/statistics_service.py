@@ -101,6 +101,7 @@ class EvaluationStatisticsService:
             "repetitions": run.repetitions,
             "split": run.split,
             "purpose": run.purpose,
+            "evidence_level": run.evidence_level,
             "variants": variants,
         }
 

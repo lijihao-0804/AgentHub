@@ -393,6 +393,7 @@ async def create_experiment(
         split=payload.split,
         purpose=payload.purpose,
         repetitions=payload.repetitions,
+        evidence_level=payload.evidence_level,
         judge_profile=judge_profile,
     )
     return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)

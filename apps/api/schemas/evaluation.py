@@ -128,6 +128,10 @@ class EvaluationExperimentCreateRequest(BaseModel):
     split: str
     purpose: str
     repetitions: int = Field(default=1, ge=1, le=5)
+    # The evidence this experiment is allowed to claim.  A deterministic conformance
+    # fixture must not be reported as model accuracy, so the level is frozen with the
+    # experiment and copied to every run.
+    evidence_level: str = "DETERMINISTIC_CONFORMANCE"
     # Opting an experiment into LLM-as-judge scoring.  The profile is frozen at
     # creation time into the evaluator manifest, so changing it afterwards is
     # impossible by construction -- a different judge is a different experiment.
@@ -179,6 +183,7 @@ class EvaluationExperimentResponse(BaseModel):
     split: str
     purpose: str
     repetitions: int
+    evidence_level: str
     status: str
     build_sha: str = Field(min_length=7, max_length=64)
     evaluator_manifest: dict[str, Any]
@@ -208,6 +213,7 @@ class EvaluationExperimentRunResponse(BaseModel):
     split: str
     purpose: str
     repetitions: int
+    evidence_level: str
     started_at: datetime | None
     completed_at: datetime | None
     failure_code: str | None

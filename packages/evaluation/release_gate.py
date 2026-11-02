@@ -32,10 +32,18 @@ _RULES = frozenset(
         "MIN_VALUE",
         "MAX_VALUE",
         "TRADEOFF",
+        "REQUIRED_EVIDENCE_LEVEL",
     }
 )
 _BASE_RULE_KEYS = frozenset({"metric", "rule", "required", "safety"})
 _TOLERANCE_RULES = frozenset({"MAX_ABSOLUTE_REGRESSION", "MAX_RELATIVE_REGRESSION", "TRADEOFF"})
+_EVIDENCE_LEVEL_RANK = {
+    "DETERMINISTIC_CONFORMANCE": 0,
+    "CONTROLLED_SIMULATION": 1,
+    "REAL_PROVIDER": 2,
+    "PRODUCTION_SAMPLE": 3,
+}
+_EVIDENCE_LEVEL_METRIC = "evidence_level"
 
 
 class EvaluationReleaseGateService:
@@ -173,7 +181,7 @@ class EvaluationReleaseGateService:
             self._verify_decision(existing, comparison, policy)
             return existing
 
-        status, rule_results, reasons = self._evaluate(comparison, policy.policy_json)
+        status, rule_results, reasons = self._evaluate(comparison, policy.policy_json, run)
         decision_hash = canonical_json_hash(
             {
                 "comparison_hash": comparison.comparison_hash,
@@ -292,12 +300,20 @@ class EvaluationReleaseGateService:
                 allowed.add("threshold")
             if rule == "TRADEOFF":
                 allowed |= {"compensation_metric", "min_compensation_gain"}
+            if rule == "REQUIRED_EVIDENCE_LEVEL":
+                allowed = _BASE_RULE_KEYS | {"level"}
+                if metric != _EVIDENCE_LEVEL_METRIC:
+                    self._invalid_policy()
+                level = raw.get("level")
+                if level not in _EVIDENCE_LEVEL_RANK:
+                    self._invalid_policy()
             if not set(raw).issubset(allowed):
                 self._invalid_policy()
-            try:
-                self.registry.definition_for(metric)
-            except ValueError:
-                self._invalid_policy()
+            if rule != "REQUIRED_EVIDENCE_LEVEL":
+                try:
+                    self.registry.definition_for(metric)
+                except ValueError:
+                    self._invalid_policy()
             seen.add(metric)
             item = {
                 "metric": metric,
@@ -305,6 +321,8 @@ class EvaluationReleaseGateService:
                 "required": raw.get("required", True),
                 "safety": raw.get("safety", False),
             }
+            if rule == "REQUIRED_EVIDENCE_LEVEL":
+                item["level"] = raw["level"]
             if not isinstance(item["required"], bool) or not isinstance(item["safety"], bool):
                 self._invalid_policy()
             for key in ("tolerance", "threshold", "min_compensation_gain"):
@@ -349,7 +367,10 @@ class EvaluationReleaseGateService:
         return {"rules": normalized}
 
     def _evaluate(
-        self, comparison: EvaluationExperimentComparison, policy: Mapping[str, Any]
+        self,
+        comparison: EvaluationExperimentComparison,
+        policy: Mapping[str, Any],
+        run: EvaluationExperimentRun | None = None,
     ) -> tuple[str, list[dict[str, Any]], list[str]]:
         if comparison.status == "NOT_COMPARABLE":
             return "INCONCLUSIVE", [], ["comparison_not_comparable"]
@@ -358,6 +379,17 @@ class EvaluationReleaseGateService:
         hard_fail = False
         inconclusive = False
         for rule in policy["rules"]:
+            if rule["rule"] == "REQUIRED_EVIDENCE_LEVEL":
+                actual_level = getattr(run, "evidence_level", None) if run is not None else None
+                result = self._evaluate_evidence_level(rule, actual_level)
+                rule_results.append(result)
+                if result["status"] == "FAIL" and rule.get("required", True):
+                    hard_fail = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                elif result["status"] == "INCONCLUSIVE" and rule.get("required", True):
+                    inconclusive = True
+                    reasons.append(f"{rule['metric']}:{result['status']}")
+                continue
             metric = comparison.metrics.get(rule["metric"])
             if rule["rule"] == "TRADEOFF":
                 result = self._evaluate_tradeoff(
@@ -385,6 +417,28 @@ class EvaluationReleaseGateService:
             rule_results,
             reasons,
         )
+
+    def _evaluate_evidence_level(
+        self, rule: Mapping[str, Any], actual: str
+    ) -> dict[str, Any]:
+        required = rule.get("level")
+        actual_rank = _EVIDENCE_LEVEL_RANK.get(str(actual))
+        required_rank = _EVIDENCE_LEVEL_RANK.get(str(required))
+        if actual_rank is None or required_rank is None:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "evidence_level_unknown",
+            }
+        passed = actual_rank >= required_rank
+        return {
+            "metric": rule["metric"],
+            "rule": rule["rule"],
+            "status": "PASS" if passed else "FAIL",
+            "required_level": required,
+            "actual_level": actual,
+        }
 
     def _evaluate_rule(self, rule: Mapping[str, Any], metric: Any) -> dict[str, Any]:
         if not isinstance(metric, Mapping):
