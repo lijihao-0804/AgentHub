@@ -68,6 +68,7 @@ from packages.evaluation.reproducibility import (
     normalize_knowledge_snapshots,
     variant_hash,
 )
+from packages.evaluation.taxonomy import classify_failure
 from packages.evaluation.trajectory import build_trajectory_observation
 from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery
 from packages.knowledge.models import KnowledgeSnapshot
@@ -493,6 +494,7 @@ class AgentRuntimeEvaluationDriver:
                     },
                 )
             )
+            observation["failure_taxonomy"] = classify_failure(item.expected, observation)
             if postcondition is not None:
                 async with self.agent_run_service.session_factory() as session:
                     observation["business_outcome"] = await inspect_support_outcome(

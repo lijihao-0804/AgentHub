@@ -686,6 +686,19 @@ async def get_experiment_run_statistics(
     )
 
 
+@router.get("/experiment-runs/{run_id}/failure-taxonomy", response_model=dict[str, Any])
+async def get_experiment_run_failure_taxonomy(
+    workspace_id: UUID,
+    run_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> dict[str, Any]:
+    del workspace_id
+    return await EvaluationStatisticsService().failure_taxonomy(
+        session, context=context, run_id=run_id
+    )
+
+
 @router.post(
     "/experiment-runs/{run_id}/comparisons",
     response_model=EvaluationComparisonResponse,

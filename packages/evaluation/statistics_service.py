@@ -23,6 +23,7 @@ from packages.evaluation.statistics import (
     cluster_bootstrap_interval,
     statistical_summary,
 )
+from packages.evaluation.taxonomy import TAXONOMY_VERSION, classify_failure, summarize_labels
 
 
 class EvaluationStatisticsService:
@@ -103,6 +104,76 @@ class EvaluationStatisticsService:
             "purpose": run.purpose,
             "evidence_level": run.evidence_level,
             "variants": variants,
+        }
+
+    async def failure_taxonomy(
+        self,
+        session: AsyncSession,
+        *,
+        context: WorkspaceExecutionContext,
+        run_id: UUID,
+    ) -> dict[str, Any]:
+        """Aggregate deterministic failure labels per variant.
+
+        A persisted label list is reused when present; otherwise the same rules are
+        applied on read, so a run executed before AE-5 still gets a taxonomy.
+        """
+
+        self._require_read(context)
+        workspace_id = self._workspace_id(context)
+        metrics_service = EvaluationMetricsService(self.registry)
+        run = await metrics_service._load_run(session, workspace_id, run_id)
+        experiment = await metrics_service._load_experiment(
+            session, workspace_id, run.experiment_id
+        )
+        registry = self.registry.for_manifest(experiment.evaluator_manifest)
+        rows = await metrics_service._load_and_validate_case_set(
+            session, workspace_id, run, experiment
+        )
+
+        per_variant: dict[UUID, dict[str, Any]] = {}
+        for case, item, variant in rows:
+            evaluated = registry.evaluate(item.category, item.expected, case.observation)
+            task = evaluated.get("task_success")
+            task_success: bool | None = None
+            if (
+                task is not None
+                and task.status == MetricStatus.AVAILABLE
+                and task.value is not None
+            ):
+                task_success = float(task.value) >= 1.0
+            labels = case.observation.get("failure_taxonomy")
+            if not isinstance(labels, list):
+                labels = classify_failure(
+                    item.expected, case.observation, task_success=task_success
+                )
+            bucket = per_variant.setdefault(
+                variant.id,
+                {
+                    "variant_label": variant.label,
+                    "case_count": 0,
+                    "labeled_case_count": 0,
+                    "counts": {},
+                },
+            )
+            bucket["case_count"] += 1
+            if labels:
+                bucket["labeled_case_count"] += 1
+            for code, count in summarize_labels(labels).items():
+                bucket["counts"][code] = bucket["counts"].get(code, 0) + count
+
+        return {
+            "run_id": str(run_id),
+            "experiment_id": str(run.experiment_id),
+            "evidence_level": run.evidence_level,
+            "taxonomy_version": TAXONOMY_VERSION,
+            "variants": {
+                str(variant_id): {
+                    **bucket,
+                    "counts": dict(sorted(bucket["counts"].items())),
+                }
+                for variant_id, bucket in per_variant.items()
+            },
         }
 
     def _require_read(self, context: WorkspaceExecutionContext) -> None:
