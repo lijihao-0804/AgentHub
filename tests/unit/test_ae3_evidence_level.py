@@ -127,7 +127,9 @@ def test_pass_hat_k_gate_passes_when_value_meets_threshold() -> None:
 
 def test_pass_hat_k_gate_fails_below_threshold() -> None:
     service = EvaluationReleaseGateService()
-    statistics = {"variants": {"candidate": {"pass_hat_k": 0.5}}}
+    statistics = {
+        "variants": {"candidate": {"pass_hat_k": 0.5, "complete_case_rate": 1.0}}
+    }
 
     status, _, reasons = service._evaluate(
         _comparison(), _pass_hat_policy(0.8), None, statistics
@@ -135,6 +137,20 @@ def test_pass_hat_k_gate_fails_below_threshold() -> None:
 
     assert status == "FAIL"
     assert reasons == ["pass_hat_k:FAIL"]
+
+
+def test_pass_hat_k_gate_is_inconclusive_when_many_cases_are_incomplete() -> None:
+    service = EvaluationReleaseGateService()
+    statistics = {
+        "variants": {"candidate": {"pass_hat_k": 0.9, "complete_case_rate": 0.2}}
+    }
+
+    status, results, _ = service._evaluate(
+        _comparison(), _pass_hat_policy(0.8), None, statistics
+    )
+
+    assert status == "INCONCLUSIVE"
+    assert results[0]["reason"] == "insufficient_complete_cases"
 
 
 def test_pass_hat_k_gate_without_statistics_is_inconclusive() -> None:
@@ -216,3 +232,51 @@ def test_non_inferiority_gate_uses_regression_margin() -> None:
 
     assert pass_status == "PASS"
     assert fail_status == "FAIL"
+
+
+def test_paired_gate_is_inconclusive_with_too_few_pairs() -> None:
+    service = EvaluationReleaseGateService()
+    comparison = SimpleNamespace(
+        status="COMPLETE",
+        metrics={},
+        baseline_variant_id="baseline",
+        candidate_variant_id="candidate",
+    )
+    statistics = {
+        "paired": {
+            "delta": 0.06,
+            "interval": {"lower": 0.05, "upper": 0.11},
+            "pair_count": 3,
+        }
+    }
+
+    status, results, _ = service._evaluate(
+        comparison, _paired_policy("MIN_CI_LOWER_BOUND", 0.02), None, statistics
+    )
+
+    assert status == "INCONCLUSIVE"
+    assert results[0]["reason"] == "insufficient_pairs"
+
+
+def test_paired_gate_is_inconclusive_when_interval_is_degenerate() -> None:
+    service = EvaluationReleaseGateService()
+    comparison = SimpleNamespace(
+        status="COMPLETE",
+        metrics={},
+        baseline_variant_id="baseline",
+        candidate_variant_id="candidate",
+    )
+    statistics = {
+        "paired": {
+            "delta": 0.0,
+            "interval": {"lower": 0.0, "upper": 0.0},
+            "pair_count": 100,
+        }
+    }
+
+    status, results, _ = service._evaluate(
+        comparison, _paired_policy("MIN_CI_LOWER_BOUND", 0.02), None, statistics
+    )
+
+    assert status == "INCONCLUSIVE"
+    assert results[0]["reason"] == "degenerate_interval"

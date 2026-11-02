@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Sequence
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from statistics import mean, pstdev
 from typing import Any
 from uuid import UUID
@@ -1372,7 +1372,13 @@ def _decimal_text(value: Any) -> str | None:
 
 
 def _decimal_or_none(value: Any) -> Decimal | None:
-    return Decimal(str(value)) if value is not None else None
+    if value is None:
+        return None
+    # Numeric(28, 12) rounds at persistence time.  Quantize before hashing so the
+    # pre-insert ``metrics_hash`` equals the hash of the persisted rows, otherwise a
+    # float latency with >12 fractional digits breaks every later read as an
+    # integrity error.
+    return Decimal(str(value)).quantize(Decimal("0.000000000001"), rounding=ROUND_HALF_UP)
 
 
 __all__ = ["EvaluationMetricsService"]

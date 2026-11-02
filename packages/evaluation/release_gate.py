@@ -49,6 +49,8 @@ _EVIDENCE_LEVEL_RANK = {
 _EVIDENCE_LEVEL_METRIC = "evidence_level"
 _PASS_HAT_K_METRIC = "pass_hat_k"
 _PAIRED_METRIC = "success_rate_delta"
+_MIN_PAIRED_CASES = 10
+_MIN_COMPLETE_CASE_RATE = 0.5
 
 
 class EvaluationReleaseGateService:
@@ -515,13 +517,32 @@ class EvaluationReleaseGateService:
                 "reason": "paired_interval_unavailable",
             }
         lower = paired["interval"].get("lower")
+        upper = paired["interval"].get("upper")
         delta = paired.get("delta")
-        if lower is None or delta is None:
+        pair_count = paired.get("pair_count")
+        if lower is None or upper is None or delta is None:
             return {
                 "metric": rule["metric"],
                 "rule": rule["rule"],
                 "status": "INCONCLUSIVE",
                 "reason": "paired_interval_unavailable",
+            }
+        if pair_count is None or int(pair_count) < _MIN_PAIRED_CASES:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "insufficient_pairs",
+                "pair_count": pair_count,
+                "minimum_pairs": _MIN_PAIRED_CASES,
+            }
+        if float(lower) == float(upper):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "degenerate_interval",
+                "pair_count": pair_count,
             }
         threshold = float(rule["threshold"])
         if rule["rule"] == "MIN_CI_LOWER_BOUND":
@@ -534,9 +555,9 @@ class EvaluationReleaseGateService:
             "status": "PASS" if passed else "FAIL",
             "delta": float(delta),
             "ci_lower": float(lower),
-            "ci_upper": float(paired["interval"]["upper"]),
+            "ci_upper": float(upper),
             "threshold": threshold,
-            "pair_count": paired.get("pair_count"),
+            "pair_count": pair_count,
         }
 
     def _evaluate_pass_hat_k(
@@ -570,6 +591,16 @@ class EvaluationReleaseGateService:
                 "reason": "pass_hat_k_unavailable",
             }
         threshold = float(rule["threshold"])
+        complete_case_rate = candidate.get("complete_case_rate")
+        if complete_case_rate is None or float(complete_case_rate) < _MIN_COMPLETE_CASE_RATE:
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "insufficient_complete_cases",
+                "complete_case_rate": complete_case_rate,
+                "minimum_complete_case_rate": _MIN_COMPLETE_CASE_RATE,
+            }
         passed = float(value) >= threshold
         return {
             "metric": rule["metric"],
@@ -577,7 +608,7 @@ class EvaluationReleaseGateService:
             "status": "PASS" if passed else "FAIL",
             "candidate": float(value),
             "threshold": threshold,
-            "complete_case_rate": candidate.get("complete_case_rate"),
+            "complete_case_rate": complete_case_rate,
         }
 
     def _evaluate_evidence_level(
