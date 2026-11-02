@@ -234,7 +234,8 @@ def test_missing_execution_evidence_is_not_available() -> None:
                     "tool_identities": ["query_customer"],
                     "arguments_hashes": ["h1"],
                 }
-            ]
+            ],
+            approvals=[],
         ),
     )
 

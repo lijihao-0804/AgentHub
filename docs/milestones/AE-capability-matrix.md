@@ -7,6 +7,8 @@
 | 能力 | 实现 | 单元测试 | 真实 PostgreSQL | 真实模型 | 状态 / 已知限制 |
 | --- | --- | --- | --- | --- | --- |
 | **真实 Runtime 端到端（AE-Real-1）** | `benchmarks/evaluation/ae_real_1.py` | `test_ae_real_fixes.py` + 定向测试 | **通过（隔离库 agenthub_ae_real）** | **通过（3 case 真实 Alibaba）** | **PASS**：工具/审批/轨迹/业务断言全链；1 repetition、3 case，非总体性能 |
+| **执行证据完整性（AE-Real-2）** | `trajectory.py` + `runtime_graph.py` | `test_ae_real2_execution_evidence.py`（8） | **通过（AE-Real-2）** | **通过（受控故障注入 + 真实模型）** | **PASS**：ACTION 纳入写执行、未知结果不重试、recovery=1、redundancy 不误报重试 |
+| **失败/未知恢复统计（AE-Real-2 K=2）** | `statistics_service.py` | 同上 | **通过（真实持久化 CaseResult）** | **通过（4 次真实执行）** | `success_rate=0.5`、`pass_hat_k=0.5`、`complete_case_rate=1`；小样本边界 |
 | 轨迹投影（提议/执行/审批分离） | `packages/evaluation/trajectory.py` | `test_ae1_trajectory.py`（16） | **通过（AE-Real-1）** | **通过（AE-Real-1）** | 已实现；执行证据缺失时 `trajectory_success=NOT_AVAILABLE` |
 | 轨迹指标（选择/执行/顺序/恢复/循环） | 同上 | 同上 | **通过（AE-Real-1）** | **通过（AE-Real-1）** | 已实现；`recovery_rate` 依赖 `TOOL_EXECUTE.tool_results` |
 | 参数身份 hash | `runtime_graph.py` TOOL_PROPOSAL | 同上 | **通过（AE-Real-1）** | **通过（AE-Real-1）** | 已实现并持久化；历史 Run 无该键 → `NOT_AVAILABLE` |

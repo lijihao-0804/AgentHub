@@ -557,6 +557,7 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "tool_call_ids",
         "arguments_hashes",
         "tool_results",
+        "action_results",
         "logical_action_ids",
         "policy_decision",
         "error_code",
@@ -615,6 +616,21 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
                         field: item.get(field)
                         for field in (
                             "tool_call_id",
+                            "tool_identity",
+                            "status",
+                            "error_code",
+                        )
+                    }
+                    for item in value[:32]
+                    if isinstance(item, Mapping)
+                ]
+            elif key == "action_results":
+                result[key] = [
+                    {
+                        field: item.get(field)
+                        for field in (
+                            "tool_call_id",
+                            "logical_action_id",
                             "tool_identity",
                             "status",
                             "error_code",

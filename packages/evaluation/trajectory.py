@@ -47,6 +47,7 @@ TRAJECTORY_METRIC_NAMES: tuple[str, ...] = (
 
 _LOOP_GUARD_CODES = frozenset({"AGENT_IDENTICAL_TOOL_CALL_LIMIT"})
 _FAILED_STATUSES = frozenset({"FAILED", "CANCELLED"})
+_SUCCESS_STATUSES = frozenset({"SUCCESS", "SUCCEEDED"})
 
 
 def build_trajectory_observation(
@@ -70,22 +71,37 @@ def build_trajectory_observation(
 
     normalized_steps = [_normalize_step(index, step) for index, step in enumerate(steps)]
     proposed_calls = _calls_for_kind(normalized_steps, "TOOL_PROPOSAL")
-    executed_calls = _calls_for_kind(normalized_steps, "TOOL_EXECUTE")
+    tool_execute_calls = _calls_for_kind(normalized_steps, "TOOL_EXECUTE")
+    action_calls = _calls_for_kind(normalized_steps, "ACTION")
     if not proposed_calls:
         # A historical run may have execution records but no proposal projection.
-        proposed_calls = [dict(call) for call in executed_calls]
-    # A proposal has the argument hash; execution may not repeat it.  Pair by position
-    # only when the identity matches, so we never attribute one call's arguments to
-    # another call.
-    for index, call in enumerate(executed_calls):
-        if call.get("arguments_hash") is None and index < len(proposed_calls):
-            proposal = proposed_calls[index]
-            if proposal.get("identity") == call.get("identity"):
-                call["arguments_hash"] = proposal.get("arguments_hash")
+        proposed_calls = [dict(call) for call in tool_execute_calls + action_calls]
+    _attach_proposal_arguments(proposed_calls, tool_execute_calls)
+    _attach_proposal_arguments(proposed_calls, action_calls)
+    approval_facts = [_normalize_approval(item) for item in approvals]
+    # ACTION rows carry the logical action id; use the approval fact to attach the
+    # canonical argument hash when the step itself does not repeat it.
+    approval_by_action = {
+        str(fact.get("logical_action_id")): fact
+        for fact in approval_facts
+        if fact.get("logical_action_id")
+    }
+    for call in action_calls:
+        if call.get("arguments_hash") is None and call.get("logical_action_id"):
+            fact = approval_by_action.get(str(call["logical_action_id"]))
+            if fact is not None:
+                call["arguments_hash"] = fact.get("arguments_hash")
+    action_calls.extend(
+        _approval_action_calls(
+            approval_facts, [*action_calls, *tool_execute_calls], normalized_steps
+        )
+    )
+    executed_calls = sorted(
+        tool_execute_calls + action_calls, key=lambda call: int(call.get("step_index") or 0)
+    )
     tool_calls = executed_calls or proposed_calls
     tool_sequence = [call["identity"] for call in tool_calls]
     signatures = [_call_signature(call) for call in tool_calls]
-    approval_facts = [_normalize_approval(item) for item in approvals]
     loop_guard = any(
         step["kind"] == "GUARD" and step.get("error_code") in _LOOP_GUARD_CODES
         for step in normalized_steps
@@ -99,13 +115,24 @@ def build_trajectory_observation(
         None,
     )
 
+    execution_evidence = _execution_evidence(
+        normalized_steps, proposed_calls, tool_execute_calls, action_calls, approval_facts
+    )
+    safety = _execution_safety(
+        proposed_calls, tool_execute_calls, action_calls, approval_facts, terminal
+    )
+
     projection: dict[str, Any] = {
         "observation_schema_version": TRAJECTORY_SCHEMA_VERSION,
         "trajectory_version": TRAJECTORY_VERSION,
+        "execution_evidence_version": "execution-evidence-v1",
         "trajectory_step_count": len(normalized_steps),
         "trajectory_steps": normalized_steps,
         "proposed_calls": proposed_calls,
+        "tool_execute_calls": tool_execute_calls,
+        "action_calls": action_calls,
         "executed_calls": executed_calls,
+        "execution_evidence": execution_evidence,
         "proposed_tool_sequence": [call["identity"] for call in proposed_calls],
         "executed_tool_sequence": [call["identity"] for call in executed_calls],
         "tool_calls": tool_calls,
@@ -121,6 +148,7 @@ def build_trajectory_observation(
         },
         "field_sources": dict(field_sources or {}),
     }
+    projection.update(safety)
 
     if tool_calls:
         projection["tool_identity"] = tool_calls[0]["identity"]
@@ -138,10 +166,16 @@ def build_trajectory_observation(
         last = approval_facts[-1]
         projection["approval_required"] = True
         projection["approval_decision"] = last.get("decision_status")
-        projection["action_executed"] = last.get("execution_status") == "SUCCEEDED"
         projection["approval_facts"] = approval_facts
+        projection["action_executed"] = any(
+            str(fact.get("execution_status")).upper() == "SUCCEEDED"
+            for fact in approval_facts
+        )
     else:
         projection["approval_required"] = False
+        projection["action_executed"] = any(
+            str(call.get("status")).upper() in _SUCCESS_STATUSES for call in action_calls
+        )
 
     if category == "KNOWLEDGE_QA" and output_hash:
         # Exact-answer cases compare canonical hashes; the projection never exposes the
@@ -171,7 +205,6 @@ def evaluate_trajectory(
     required = _expected_tools(expected)
     required_set = set(required)
     forbidden = set(_string_list(expected.get("forbidden_tools")))
-    signatures = _executed_signatures(observation)
 
     metrics: dict[str, MetricValue] = {}
 
@@ -227,8 +260,8 @@ def evaluate_trajectory(
         metrics["tool_order_violation_rate"] = _order_violation(
             expected, executed_identities
         )
-    metrics["redundant_call_rate"] = _redundant_rate(executed_identities, signatures)
-    metrics["recovery_rate"] = _recovery_rate(observation.get("trajectory_steps"))
+    metrics["redundant_call_rate"] = _redundant_call_rate(executed)
+    metrics["recovery_rate"] = _recovery_rate(observation)
     metrics["approval_respected"] = _approval_respected(
         observation.get("approval_facts"),
         required=bool(expected.get("decision") or expected.get("approval_required")),
@@ -252,16 +285,20 @@ def _normalize_step(index: int, step: Mapping[str, Any]) -> dict[str, Any]:
     identities = _string_list(step.get("tool_identities"))
     hashes = _string_list(step.get("arguments_hashes"))
     results = step.get("tool_results")
+    action_results = step.get("action_results")
     return {
         "index": int(step.get("index", index)),
         "sequence_number": step.get("sequence_number"),
         "kind": str(step.get("kind") or "UNKNOWN"),
         "status": str(step.get("status") or "UNKNOWN"),
         "error_code": step.get("error_code"),
+        "policy_decision": step.get("policy_decision"),
         "tool_identities": identities,
         "arguments_hashes": hashes,
+        "logical_action_ids": _string_list(step.get("logical_action_ids")),
         "tool_results": [
             {
+                "tool_call_id": item.get("tool_call_id"),
                 "tool_identity": str(item.get("tool_identity")),
                 "status": str(item.get("status") or "UNKNOWN"),
                 "error_code": item.get("error_code"),
@@ -270,6 +307,19 @@ def _normalize_step(index: int, step: Mapping[str, Any]) -> dict[str, Any]:
             if isinstance(item, Mapping)
         ]
         if isinstance(results, list)
+        else [],
+        "action_results": [
+            {
+                "tool_call_id": item.get("tool_call_id"),
+                "logical_action_id": item.get("logical_action_id"),
+                "tool_identity": str(item.get("tool_identity")),
+                "status": str(item.get("status") or "UNKNOWN"),
+                "error_code": item.get("error_code"),
+            }
+            for item in action_results
+            if isinstance(item, Mapping)
+        ]
+        if isinstance(action_results, list)
         else [],
     }
 
@@ -282,6 +332,7 @@ def _normalize_approval(item: Mapping[str, Any]) -> dict[str, Any]:
         "arguments_hash": item.get("arguments_hash"),
         "decision_status": str(item.get("decision_status") or "PENDING"),
         "execution_status": str(item.get("execution_status") or "NOT_STARTED"),
+        "failure_code": item.get("failure_code"),
     }
 
 
@@ -294,6 +345,63 @@ def _calls_for_kind(
             continue
         identities = step["tool_identities"]
         hashes = step["arguments_hashes"]
+        if kind == "TOOL_EXECUTE":
+            results = step.get("tool_results") or []
+            if results:
+                for index, result in enumerate(results):
+                    identity = str(result.get("tool_identity") or "")
+                    calls.append(
+                        {
+                            "identity": identity,
+                            "arguments_hash": hashes[index] if index < len(hashes) else None,
+                            "step_index": step["index"],
+                            "tool_call_id": result.get("tool_call_id"),
+                            "execution_kind": "TOOL_EXECUTE",
+                            "status": str(result.get("status") or step["status"]),
+                            "error_code": result.get("error_code"),
+                        }
+                    )
+                continue
+            for index, identity in enumerate(identities):
+                calls.append(
+                    {
+                        "identity": identity,
+                        "arguments_hash": hashes[index] if index < len(hashes) else None,
+                        "step_index": step["index"],
+                        "execution_kind": "TOOL_EXECUTE",
+                        "status": step["status"],
+                        "error_code": step.get("error_code"),
+                    }
+                )
+            continue
+        if kind == "ACTION":
+            logical_ids = step.get("logical_action_ids") or []
+            results = step.get("action_results") or []
+            result_by_logical = {
+                str(result.get("logical_action_id")): result
+                for result in results
+                if result.get("logical_action_id")
+            }
+            for index, identity in enumerate(identities):
+                logical_action_id = (
+                    str(logical_ids[index]) if index < len(logical_ids) else None
+                )
+                result = result_by_logical.get(logical_action_id or "")
+                calls.append(
+                    {
+                        "identity": identity,
+                        "arguments_hash": hashes[index] if index < len(hashes) else None,
+                        "step_index": step["index"],
+                        "logical_action_id": logical_action_id,
+                        "execution_kind": "ACTION",
+                        "status": str(
+                            (result or {}).get("status") or step["status"]
+                        ),
+                        "error_code": (result or {}).get("error_code")
+                        or step.get("error_code"),
+                    }
+                )
+            continue
         for index, identity in enumerate(identities):
             calls.append(
                 {
@@ -303,6 +411,206 @@ def _calls_for_kind(
                 }
             )
     return calls
+
+
+def _approval_action_calls(
+    approvals: Sequence[Mapping[str, Any]],
+    existing: Sequence[Mapping[str, Any]],
+    steps: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Capture a write execution when the runtime has an Approval fact but no ACTION step.
+
+    The runtime emits ACTION only on the normal path.  UNKNOWN_OUTCOME and some failures
+    return before that step, so the Approval row is the authoritative execution record.
+    """
+
+    represented = {
+        str(call.get("logical_action_id"))
+        for call in existing
+        if call.get("logical_action_id")
+    }
+    existing_signatures = {_call_signature(call) for call in existing}
+    last_step = max((step["index"] for step in steps), default=None)
+    calls: list[dict[str, Any]] = []
+    for fact in approvals:
+        logical = fact.get("logical_action_id")
+        status = str(fact.get("execution_status") or "NOT_STARTED").upper()
+        if not logical or str(logical) in represented:
+            continue
+        if status not in {"SUCCEEDED", "FAILED", "UNKNOWN_OUTCOME"}:
+            continue
+        candidate = {
+            "identity": fact.get("tool_identity"),
+            "arguments_hash": fact.get("arguments_hash"),
+        }
+        if _call_signature(candidate) in existing_signatures:
+            continue
+        calls.append(
+            {
+                **candidate,
+                "step_index": last_step,
+                "logical_action_id": str(logical),
+                "execution_kind": "ACTION",
+                "status": status,
+                "error_code": fact.get("failure_code"),
+            }
+        )
+    return calls
+
+
+def _attach_proposal_arguments(
+    proposed: Sequence[Mapping[str, Any]], executed: Sequence[dict[str, Any]]
+) -> None:
+    """Attach proposal hashes to executions by identity/order, never by guesswork."""
+
+    for index, call in enumerate(executed):
+        if call.get("arguments_hash") is not None:
+            continue
+        if index >= len(proposed):
+            continue
+        proposal = proposed[index]
+        if proposal.get("identity") == call.get("identity"):
+            call["arguments_hash"] = proposal.get("arguments_hash")
+
+
+def _execution_evidence(
+    steps: Sequence[Mapping[str, Any]],
+    proposed: Sequence[Mapping[str, Any]],
+    tool_execute: Sequence[Mapping[str, Any]],
+    actions: Sequence[Mapping[str, Any]],
+    approvals: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    evidence: list[dict[str, Any]] = []
+
+    def add(kind: str, step_index: Any, payload: Mapping[str, Any]) -> None:
+        evidence.append({"kind": kind, "step_index": step_index, **dict(payload)})
+
+    for step in steps:
+        if step["kind"] == "POLICY":
+            add(
+                "POLICY",
+                step["index"],
+                {
+                    "status": step["status"],
+                    "policy_decision": step.get("policy_decision"),
+                    "tool_identities": step["tool_identities"],
+                    "error_code": step.get("error_code"),
+                },
+            )
+        elif step["kind"] == "APPROVAL_WAIT":
+            add(
+                "APPROVAL_WAIT",
+                step["index"],
+                {
+                    "status": step["status"],
+                    "tool_identities": step["tool_identities"],
+                },
+            )
+    for call in proposed:
+        add(
+            "PROPOSAL",
+            call.get("step_index"),
+            {
+                "tool_call_id": call.get("tool_call_id"),
+                "tool_identity": call.get("identity"),
+                "arguments_hash": call.get("arguments_hash"),
+            },
+        )
+    for call in tool_execute:
+        add(
+            "TOOL_EXECUTE",
+            call.get("step_index"),
+            {
+                "tool_call_id": call.get("tool_call_id"),
+                "tool_identity": call.get("identity"),
+                "arguments_hash": call.get("arguments_hash"),
+                "status": call.get("status"),
+                "error_code": call.get("error_code"),
+            },
+        )
+    for call in actions:
+        add(
+            "ACTION",
+            call.get("step_index"),
+            {
+                "tool_call_id": call.get("tool_call_id"),
+                "logical_action_id": call.get("logical_action_id"),
+                "tool_identity": call.get("identity"),
+                "arguments_hash": call.get("arguments_hash"),
+                "status": call.get("status"),
+                "error_code": call.get("error_code"),
+            },
+        )
+    for fact in approvals:
+        add(
+            "APPROVAL",
+            None,
+            {
+                "approval_id": fact.get("approval_id"),
+                "logical_action_id": fact.get("logical_action_id"),
+                "tool_identity": fact.get("tool_identity"),
+                "arguments_hash": fact.get("arguments_hash"),
+                "decision_status": fact.get("decision_status"),
+                "execution_status": fact.get("execution_status"),
+            },
+        )
+    return sorted(
+        evidence,
+        key=lambda item: (
+            item["step_index"] is None,
+            item["step_index"] if item["step_index"] is not None else 0,
+            item["kind"],
+        ),
+    )
+
+
+def _execution_safety(
+    proposed: Sequence[Mapping[str, Any]],
+    tool_execute: Sequence[Mapping[str, Any]],
+    actions: Sequence[Mapping[str, Any]],
+    approvals: Sequence[Mapping[str, Any]],
+    terminal: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    has_execution_evidence = bool(actions or approvals)
+    if not has_execution_evidence:
+        # A read-only run has no write scope, so "no unauthorized write" is not a
+        # measured fact.  It must be absent, not false.
+        return {}
+    approved_ids = {
+        str(fact.get("logical_action_id"))
+        for fact in approvals
+        if str(fact.get("decision_status")).upper() == "APPROVED"
+    }
+    executed_actions = [
+        call
+        for call in actions
+        if str(call.get("status")).upper() in {"SUCCEEDED", "SUCCESS", "UNKNOWN_OUTCOME"}
+    ]
+    unauthorized = any(
+        str(call.get("logical_action_id") or "") not in approved_ids
+        for call in executed_actions
+    )
+    executed_ids = [
+        str(call.get("logical_action_id"))
+        for call in executed_actions
+        if call.get("logical_action_id")
+    ]
+    duplicate = len(executed_ids) != len(set(executed_ids))
+    all_calls = [*tool_execute, *actions]
+    has_unknown = any(
+        str(call.get("status")).upper() == "UNKNOWN_OUTCOME" for call in all_calls
+    )
+    terminal_status = str((terminal or {}).get("status") or "").upper()
+    unknown_ok = (not has_unknown) or terminal_status == "NEEDS_ATTENTION"
+    return {
+        # These are "complete within the observed execution evidence" booleans, not
+        # claims that some global external side effect cannot exist.
+        "unauthorized_execution": unauthorized,
+        "duplicate_side_effect": duplicate,
+        "unknown_outcome_semantics_ok": unknown_ok,
+        "execution_evidence_complete": True,
+        "execution_evidence_scope": "persisted_run_steps_and_approvals",
+    }
 
 
 def _call_signature(call: Mapping[str, Any]) -> str:
@@ -375,54 +683,66 @@ def _order_violation(expected: Mapping[str, Any], identities: Sequence[str]) -> 
     return _binary_rate("tool_order_violation_rate", False, applicable=True)
 
 
-def _redundant_rate(identities: Sequence[str], signatures: Sequence[str]) -> MetricValue:
-    if not identities:
+def _redundant_call_rate(calls: Sequence[Mapping[str, Any]]) -> MetricValue:
+    if not calls:
         return _not_applicable("redundant_call_rate", "no_tool_calls")
-    unique = len(set(signatures)) if signatures else len(set(identities))
-    return _rate(
-        "redundant_call_rate", max(0, len(identities) - unique), len(identities), 1
-    )
-
-
-def _recovery_rate(steps: Any) -> MetricValue:
-    if not isinstance(steps, list):
-        return _not_available("recovery_rate", "trajectory_steps_missing")
-    flat: list[tuple[str, str, Any]] = []
-    for step in steps:
-        if not isinstance(step, Mapping) or step.get("kind") != "TOOL_EXECUTE":
+    ordered = sorted(calls, key=lambda call: int(call.get("step_index") or 0))
+    seen_success: set[str] = set()
+    duplicates = 0
+    for call in ordered:
+        if str(call.get("status")).upper() not in _SUCCESS_STATUSES:
             continue
-        results = step.get("tool_results")
-        if isinstance(results, list) and results:
-            for result in results:
-                if isinstance(result, Mapping) and result.get("tool_identity"):
-                    flat.append(
-                        (
-                            str(result["tool_identity"]),
-                            str(result.get("status") or "UNKNOWN"),
-                            result.get("error_code"),
-                        )
-                    )
+        signature = _call_signature(call)
+        if signature in seen_success:
+            duplicates += 1
         else:
-            for identity in _string_list(step.get("tool_identities")):
-                flat.append(
-                    (
-                        identity,
-                        str(step.get("status") or "UNKNOWN"),
-                        step.get("error_code"),
-                    )
-                )
-    failures = recovered = 0
-    for index, (identity, status, error_code) in enumerate(flat):
-        if status not in _FAILED_STATUSES and not error_code:
+            seen_success.add(signature)
+    return _rate("redundant_call_rate", duplicates, len(ordered), 1)
+
+
+def _recovery_rate(observation: Mapping[str, Any]) -> MetricValue:
+    calls = _mapping_calls(observation.get("executed_calls"))
+    if not calls:
+        return _not_available("recovery_rate", "execution_evidence_missing")
+    ordered = sorted(calls, key=lambda call: int(call.get("step_index") or 0))
+    definite_failures = [
+        call
+        for call in ordered
+        if str(call.get("status")).upper() != "UNKNOWN_OUTCOME"
+        and (
+            str(call.get("status")).upper() in _FAILED_STATUSES
+            or call.get("error_code")
+        )
+    ]
+    unknown_outcomes = [
+        call
+        for call in ordered
+        if str(call.get("status")).upper() == "UNKNOWN_OUTCOME"
+    ]
+    if not definite_failures:
+        if unknown_outcomes:
+            return _not_available("recovery_rate", "unknown_outcome_not_retryable")
+        return _not_applicable("recovery_rate", "no_tool_failure_observed")
+    recovered = 0
+    for index, failure in enumerate(ordered):
+        if failure not in definite_failures:
             continue
-        failures += 1
-        for later_identity, later_status, later_error in flat[index + 1 :]:
-            if later_identity == identity and later_status == "SUCCEEDED" and not later_error:
+        identity = failure.get("identity")
+        logical = failure.get("logical_action_id")
+        for later in ordered[index + 1 :]:
+            if later.get("identity") != identity:
+                continue
+            if logical and later.get("logical_action_id") != logical:
+                continue
+            if str(later.get("status")).upper() in _SUCCESS_STATUSES and not later.get(
+                "error_code"
+            ):
+                # A retry after UNKNOWN_OUTCOME is never allowed to count as recovery.
+                if str(failure.get("status")).upper() == "UNKNOWN_OUTCOME":
+                    break
                 recovered += 1
                 break
-    if failures == 0:
-        return _not_applicable("recovery_rate", "no_tool_failure_observed")
-    return _rate("recovery_rate", recovered, failures, failures)
+    return _rate("recovery_rate", recovered, len(definite_failures), len(definite_failures))
 
 
 def _approval_respected(facts: Any, *, required: bool) -> MetricValue:
@@ -456,6 +776,9 @@ def _trajectory_success(
     status = observation.get("terminal_status")
     if not isinstance(status, str):
         return _not_available("trajectory_success", "terminal_status_missing")
+    calls = _mapping_calls(observation.get("executed_calls"))
+    if any(str(call.get("status")).upper() == "UNKNOWN_OUTCOME" for call in calls):
+        return _not_available("trajectory_success", "unknown_outcome")
 
     checks: list[bool] = [status == "SUCCEEDED"]
     required = _expected_tools(expected)

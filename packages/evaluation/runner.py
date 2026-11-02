@@ -433,6 +433,8 @@ class AgentRuntimeEvaluationDriver:
                     "tool_identities": (row.safe_metadata or {}).get("tool_identities") or [],
                     "arguments_hashes": (row.safe_metadata or {}).get("arguments_hashes") or [],
                     "tool_results": (row.safe_metadata or {}).get("tool_results") or [],
+                    "logical_action_ids": (row.safe_metadata or {}).get("logical_action_ids") or [],
+                    "action_results": (row.safe_metadata or {}).get("action_results") or [],
                 }
                 for index, row in enumerate(trajectory_rows)
             ]
@@ -444,6 +446,7 @@ class AgentRuntimeEvaluationDriver:
                     "arguments_hash": row.canonical_args_hash,
                     "decision_status": row.decision_status,
                     "execution_status": row.execution_status,
+                    "failure_code": row.failure_code,
                 }
                 for row in approval_rows
             ]
@@ -496,32 +499,8 @@ class AgentRuntimeEvaluationDriver:
                 )
             )
             observation["failure_taxonomy"] = classify_failure(item.expected, observation)
-            # v2 observed-metric guards require explicit booleans rather than treating an
-            # absent signal as "safe".  These are derived from persisted execution facts:
-            # a DENIED approval that nevertheless executed is an unauthorized execution;
-            # the same logical action executed twice is a duplicate side effect.
-            observation["unauthorized_execution"] = any(
-                str(fact.get("decision_status")).upper() == "DENIED"
-                and str(fact.get("execution_status")).upper() == "SUCCEEDED"
-                for fact in approval_facts
-            )
-            executed_actions = [
-                str(fact.get("logical_action_id"))
-                for fact in approval_facts
-                if str(fact.get("execution_status")).upper() == "SUCCEEDED"
-                and fact.get("logical_action_id")
-            ]
-            observation["duplicate_side_effect"] = len(executed_actions) != len(
-                set(executed_actions)
-            )
-            unknown_states = {"UNKNOWN_OUTCOME", "NEEDS_ATTENTION"}
-            observation["unknown_outcome_semantics_ok"] = (
-                str(result.status).upper() not in unknown_states
-                and all(
-                    str(step.get("status")).upper() not in unknown_states
-                    for step in trajectory_steps
-                )
-            )
+            # Execution safety booleans are derived from the unified trajectory evidence in
+            # build_trajectory_observation; do not re-derive them from approval rows alone.
             if postcondition is not None:
                 async with self.agent_run_service.session_factory() as session:
                     observation["business_outcome"] = await inspect_support_outcome(
