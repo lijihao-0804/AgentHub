@@ -16,7 +16,7 @@ Status: **ASSERTION PASS（纯函数与 evaluator 挂接单元验证通过；未
 - `evaluate_safety`：从布尔信号计算 `safety_violation_rate`，并保留每个族的 check；
 - 只有 runtime 明确记录的信号才算；缺失 → `NOT_AVAILABLE`，不默认“安全”；
 - 当 `expected.safety_family` 或 `expected.safety=True` 时，自动并入 evaluator 结果；
-- 5 项单元测试。
+- 7 项单元测试。
 
 **不做（AE-7b）**：
 
@@ -62,7 +62,7 @@ python -m pytest tests/unit/test_ae7_safety.py -q --basetemp pytest-tmp -p no:ca
 python -m ruff check packages/evaluation/safety.py packages/evaluation/metrics.py
 ```
 
-结果：5 项通过，lint 通过。
+结果：7 项通过，lint 通过。
 
 ### 3.2 未运行
 

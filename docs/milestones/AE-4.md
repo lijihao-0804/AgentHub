@@ -19,7 +19,7 @@ Status: **PARTIAL PASS（聚合与 manifest 单元验证通过；未接校准队
 - 分歧时不取平均：三维及以上且维度一致率 <0.5 → `UNPARSEABLE / judge_disagreement`；
 - worker 根据 manifest 自动选择单 judge 或 ensemble；
 - verdict 记录 `judge_agreement`、`judge_strategy`、`member_verdicts`（只有 hash/score/status，无文本）；
-- 单元测试 6 项 + 既有 judge 测试。
+- 单元测试 7 项 + 既有 judge 测试。
 
 **不做（留给 AE-4b）**：
 
@@ -71,7 +71,7 @@ python -m ruff check packages/evaluation/judge.py packages/evaluation/reproducib
   packages/evaluation/runner.py apps/worker/tasks/evaluation.py
 ```
 
-结果：23 项通过，lint 通过。
+结果：24 项通过，lint 通过。
 
 ### 3.2 已覆盖的用例
 

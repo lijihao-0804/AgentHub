@@ -59,7 +59,7 @@ python -m ruff check packages/evaluation packages/agent_runtime/runtime_graph.py
 
 结果：
 
-- AE-1 新增 15 个单元测试全部通过；
+- AE-1 新增 16 个单元测试全部通过；
 - 既有评测相关 7 个单元测试文件全部通过（70 项）；
 - `ruff check` 通过。
 
