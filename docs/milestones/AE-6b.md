@@ -131,6 +131,14 @@ DatasetVersion(INTERACTIVE)
 
 ---
 
+## 5. CI 与验证边界
+
+- `ruff check .`：通过；
+- `alembic upgrade head` / `alembic check`：通过；migration `0050` upgrade → downgrade 0049 → upgrade 通过；
+- 定向 S1 单元/契约测试通过（`test_ae6b_interactive.py`）；
+- 全仓 backend integration 仍为 main 既有基线：`2 failed, 447 passed, 1 skipped, 22 errors`（`test_measured_reliability` / `test_run_budget_ledger` 及共享测试库 fixture 顺序问题）；未跳过测试、未降低阈值。
+- 真实模型验收：Alibaba `deepseek-v4.1-flash`，3 cases / 1 repetition；Agent tokens 9,474；实际 cost UNKNOWN（未记 0），按冻结价格估算约 0.031 CNY；Simulator 为确定性脚本，无模型成本。
+
 ## 6. 已知风险
 
 1. 真实实验只有 3 个 case、1 repetition，统计仅验证链路；
