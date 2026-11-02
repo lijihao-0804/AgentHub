@@ -3289,7 +3289,11 @@ class _AgentRunGraph:
                             "tool_call_id": call["tool_call_id"],
                             "logical_action_id": approval.logical_action_id,
                             "tool_identity": approval.tool_identity,
-                            "status": approval.execution_status.value,
+                            "status": (
+                                approval.execution_status.value
+                                if hasattr(approval.execution_status, "value")
+                                else str(approval.execution_status)
+                            ),
                             "error_code": approval.failure_code,
                         }
                     )
