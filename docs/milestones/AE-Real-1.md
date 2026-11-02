@@ -30,6 +30,8 @@
 | Experiment ID | `845570a0-cd99-4d48-b120-085087586e66` |
 | Dataset Version ID | `c107f2e2-c130-45b5-8446-2f6f4a650c20` |
 | Variant ID | `c08e3fef-e68b-4734-b7a0-c2b5e3356072` |
+| Variant hash | `689b06b63e58ff2f720f81d32a979344b2d380c1061b7e73c85303a45e8223a8` |
+| Pricing Snapshot ID | `12c2e062-f0b1-4d08-ac7e-b259b82de522` |
 | Agent Version ID | `20249485-778b-4182-b0f7-3767522ae187` |
 | Model / Provider | `deepseek-v4.1-flash` / `openai-compatible` |
 | Endpoint | Alibaba MaaS compatible-mode（`*.maas.aliyuncs.com`） |

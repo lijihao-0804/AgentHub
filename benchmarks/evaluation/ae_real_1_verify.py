@@ -240,6 +240,8 @@ async def main() -> int:
             statistics = await EvaluationStatisticsService().compute(
                 session, context=context, run_id=RUN
             )
+            variant = rows[0][2]
+            variant_metadata = dict(variant.variant_metadata or {})
             metrics_service_for_run = EvaluationMetricsService()
             await metrics_service_for_run.materialize_metrics(
                 session, context=context, run_id=RUN
@@ -259,6 +261,10 @@ async def main() -> int:
                 "split": run.split,
                 "purpose": run.purpose,
                 "evidence_level": run.evidence_level,
+                "variant_id": str(variant.id),
+                "variant_hash": variant.variant_hash,
+                "pricing_snapshot_id": str(variant.pricing_snapshot_id),
+                "variant_metadata": variant_metadata,
                 "case_results": case_records,
                 "business_outcome": {
                     "approved_ticket_count": sum(
