@@ -498,7 +498,11 @@ class RouteClient:
             **self.labels,
             "model_step": len(self.calls),
             "endpoint": endpoint["name"],
-            "request": {k: v for k, v in kwargs.items() if k not in {"api_key", "api_base"}},
+            # The gateway injects a guarded SDK client. It is transport state,
+            # not request evidence, and may retain credential-bearing objects.
+            "request": {
+                k: v for k, v in kwargs.items() if k not in {"api_key", "api_base", "client"}
+            },
             "status": "DISPATCHED",
         }
         self.raw_calls.append(record)

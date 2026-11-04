@@ -54,6 +54,11 @@ from packages.model_gateway.context_metadata import (
     InputOutputSemantics,
     context_metadata_to_mapping,
 )
+from packages.model_gateway.contracts import (
+    PROVIDER_EGRESS_POLICY_VERSION,
+    ProviderEgress,
+)
+from packages.model_gateway.egress import ProviderEgressError, normalize_provider_base_url
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.profile_resolution import (
     ModelProfileResolver,
@@ -78,6 +83,12 @@ SUMMARY_THRESHOLD_PERCENTS: dict[str, int] = {
     "target_percent": 55,
 }
 _WIKI_LATEST_SCAN_BATCH = 10
+_PublicationModel = tuple[tuple[ResolvedModelProfile, ...], dict[UUID, str]]
+_PublicationModelResolution = tuple[
+    tuple[ResolvedModelProfile, ...],
+    dict[UUID, str],
+    dict[UUID, ProviderEgress],
+]
 DEFAULT_RETRIEVAL_CONFIG: dict[str, Any] = {
     "embedding_model": "BAAI/bge-m3",
     "reranker_model": "BAAI/bge-reranker-v2-m3",
@@ -479,7 +490,7 @@ class AgentPublishService:
 
     async def _resolve_model(
         self, session: AsyncSession, context: WorkspaceExecutionContext, agent: Agent
-    ) -> tuple[tuple[ResolvedModelProfile, ...], dict[UUID, str]]:
+    ) -> _PublicationModelResolution:
         repository = SqlAlchemyModelGatewayRepository(session)
         resolver = ModelProfileResolver(repository)
         bindings = await session.scalars(
@@ -506,6 +517,7 @@ class AgentPublishService:
                 ) from None
             raise _model_profile_unavailable() from None
         providers: dict[UUID, str] = {}
+        provider_egress: dict[UUID, ProviderEgress] = {}
         for profile in chain:
             credential = await repository.get_provider_credential(
                 context, profile.provider_credential_id
@@ -513,6 +525,17 @@ class AgentPublishService:
             if credential is None or not credential.enabled:
                 raise _model_profile_unavailable()
             providers[profile.id] = credential.provider
+            try:
+                normalized_base_url = normalize_provider_base_url(credential.base_url)
+            except ProviderEgressError:
+                raise _model_profile_unavailable() from None
+            # A v1 ``None`` is an explicit provider-scoped default choice.
+            # The transport resolves it from policy-owned builtins, never from
+            # SDK state or environment variables.
+            provider_egress[profile.id] = ProviderEgress(
+                policy_version=PROVIDER_EGRESS_POLICY_VERSION,
+                base_url=normalized_base_url,
+            )
         if agent.runtime_config.get("context_policy") is not None:
             try:
                 catalog = (
@@ -570,7 +593,7 @@ class AgentPublishService:
                     "Model capability sources are invalid or insufficient for this policy.",
                     422,
                 ) from None
-        return chain, providers
+        return chain, providers, provider_egress
 
     async def _resolve_knowledge(
         self,
@@ -896,14 +919,14 @@ class AgentPublishService:
 def _resolved_spec(
     *,
     agent: Agent,
-    model: tuple[tuple[ResolvedModelProfile, ...], dict[UUID, str]],
+    model: _PublicationModel | _PublicationModelResolution,
     bindings: tuple[dict[str, Any], ...] | None = None,
     snapshots: tuple[ResolvedKnowledgeSnapshot, ...] | None = None,
     tools: tuple[dict[str, Any], ...],
     wiki_binding: dict[str, Any] | None = None,
     resolved_runtime: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    chain, providers = model
+    chain, providers, provider_egress = _publication_model_parts(model)
     primary = chain[0]
     runtime = (
         _resolved_runtime_config(agent.runtime_config, model)
@@ -914,7 +937,10 @@ def _resolved_spec(
     summary = runtime.get("summary_policy")
     retry_policy = _validate_retry_policy(agent.model_retry_policy)
     primary_projection = _profile_projection(
-        primary, providers[primary.id], include_context_metadata=adaptive
+        primary,
+        providers[primary.id],
+        include_context_metadata=adaptive,
+        provider_egress=_provider_egress_for(primary.id, provider_egress),
     )
     primary_projection.update(
         {
@@ -925,7 +951,10 @@ def _resolved_spec(
             "fallback_profiles": [
                 {
                     **_profile_projection(
-                        profile, providers[profile.id], include_context_metadata=adaptive
+                        profile,
+                        providers[profile.id],
+                        include_context_metadata=adaptive,
+                        provider_egress=_provider_egress_for(profile.id, provider_egress),
                     ),
                     "profile_id": str(profile.id),
                     "credential_ref": str(profile.provider_credential_id),
@@ -988,7 +1017,11 @@ def _resolved_spec(
 
 
 def _profile_projection(
-    profile: ResolvedModelProfile, provider: str, *, include_context_metadata: bool = False
+    profile: ResolvedModelProfile,
+    provider: str,
+    *,
+    include_context_metadata: bool = False,
+    provider_egress: ProviderEgress | None = None,
 ) -> dict[str, Any]:
     result = {
         "provider": provider,
@@ -1007,7 +1040,35 @@ def _profile_projection(
     context_metadata = getattr(profile.capabilities, "context_metadata", None)
     if include_context_metadata and context_metadata is not None:
         result["capabilities"]["context_metadata"] = context_metadata_to_mapping(context_metadata)
+    if provider_egress is not None:
+        result["provider_egress"] = {
+            "policy_version": provider_egress.policy_version,
+            "base_url": provider_egress.base_url,
+        }
     return result
+
+
+def _publication_model_parts(
+    model: _PublicationModel | _PublicationModelResolution,
+) -> tuple[
+    tuple[ResolvedModelProfile, ...],
+    dict[UUID, str],
+    dict[UUID, ProviderEgress] | None,
+]:
+    provider_egress = model[2] if len(model) == 3 else None
+    return model[0], model[1], provider_egress
+
+
+def _provider_egress_for(
+    profile_id: UUID,
+    bindings: dict[UUID, ProviderEgress] | None,
+) -> ProviderEgress | None:
+    if bindings is None:
+        return None
+    try:
+        return bindings[profile_id]
+    except KeyError:
+        raise _model_profile_unavailable() from None
 
 
 def _canonical_float(value: Any) -> float:
@@ -1333,7 +1394,7 @@ def _validate_runtime_config(
 
 def _resolved_runtime_config(
     runtime_config: Mapping[str, Any],
-    resolved_model: tuple[tuple[ResolvedModelProfile, ...], dict[UUID, str]],
+    resolved_model: _PublicationModel | _PublicationModelResolution,
 ) -> dict[str, Any]:
     """Resolve one new publication without reinterpreting numeric defaults.
 

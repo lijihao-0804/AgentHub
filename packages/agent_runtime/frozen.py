@@ -20,6 +20,8 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.memory.selection_policy import SUPPORTED_MEMORY_SELECTION_POLICIES
 from packages.model_gateway.capabilities import capabilities_from_mapping
 from packages.model_gateway.contracts import (
+    PROVIDER_EGRESS_POLICY_VERSION,
+    ProviderEgress,
     ResolvedModelExecutionPlan,
     ResolvedModelExecutionProfile,
     RetryPolicy,
@@ -485,6 +487,22 @@ def _parse_profile(
         max_tokens = value["max_tokens"]
         provider = value["provider"]
         model = value["model"]
+        provider_egress = None
+        # Presence of this mapping selects a versioned egress policy even when
+        # its base_url is null. Policy v1 resolves null from fixed builtins for
+        # the frozen provider; absence remains the pre-policy legacy state.
+        if "provider_egress" in value:
+            raw_provider_egress = value["provider_egress"]
+            if (
+                not isinstance(raw_provider_egress, Mapping)
+                or set(raw_provider_egress) != {"policy_version", "base_url"}
+                or raw_provider_egress.get("policy_version") != PROVIDER_EGRESS_POLICY_VERSION
+            ):
+                raise ValueError
+            provider_egress = ProviderEgress(
+                policy_version=raw_provider_egress["policy_version"],
+                base_url=raw_provider_egress["base_url"],
+            )
         if (
             not isinstance(provider, str)
             or not provider
@@ -509,6 +527,7 @@ def _parse_profile(
         max_tokens=max_tokens,
         timeout_seconds=timeout_seconds,
         capabilities=capabilities,
+        provider_egress=provider_egress,
     )
 
 

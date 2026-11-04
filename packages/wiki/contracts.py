@@ -18,6 +18,8 @@ COMPILER_VERSION = "wiki-extractive-v1"
 def freeze_plan(plan: ResolvedModelExecutionPlan) -> dict:
     def profile(p):
         data = asdict(p)
+        if data.get("provider_egress") is None:
+            data.pop("provider_egress", None)
         for key in (
             "id",
             "workspace_id",

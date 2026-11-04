@@ -1,14 +1,16 @@
 # AgentHub 当前状态与证据口径
 
-> 更新时间：2026-11-05。当前 main 基线：`b30ee64987e9c7c1d9654a2a4ad059abc1a20851`。AE6b（PR #7）、AE10（PR #8）及文档/统一前端回归修复（PR #9）已合并；main 迁移 head 为 `0051_interactive_lifecycle`。
+> 更新时间：2026-11-05。当前 main 基线：`fcafc83e2ad68c9b1578f5117365aaac2732852c`。AE6b（PR #7）、AE10（PR #8）、统一回归/文档修复（PR #9）及上下文/Memory/Wiki（PR #11）已合并；main 迁移 head 为 `0052_memory_recovery_index`。
 
-> 最新 main `b30ee64` 的 [CI 41895415453](https://github.com/lijihao-0804/AgentHub/actions/runs/41895415453) 已通过。PR #9 最终候选的 [PR CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41863776190) 与 [push CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41863681750) 均记录 531 integration、2846 non-integration passed；35 个条件 skip 为 32 research、2 Windows、1 fallback。skip 不等于运行通过。
+> PR #11 最终候选 `9114ac2` 的 [PR CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41902103066) 与 [push CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41902093917) 均通过；合并后 main 的 [CI 41903660317](https://github.com/lijihao-0804/AgentHub/actions/runs/41903660317) 单独记录。历史 PR #9 的 531/2846 计数不是新候选计数；条件 skip 仍按各轮实际记录说明，不改写为通过。
 
-### 正在交付的后续开发
+### 已合并的上下文与 Memory 开发
 
-[上下文、Memory 与 Wiki 交付记录](reviews/context-memory-delivery-20261105.md)对应独立分支 `codex/context-memory-delivery-20261105`：实现上下文草稿编辑、Wiki 工作台/Agent 绑定、运行时故障映射、流式 worker 路由与撤权、Memory owner/reconcile/晚到结果 fencing，以及显式词面过滤候选。候选新增迁移 `0052_memory_recovery_index`，与 main 已部署状态分开记录。
+[上下文、Memory 与 Wiki 交付记录](reviews/context-memory-delivery-20261105.md)对应已合并 PR #11：上下文草稿编辑、Wiki 工作台/Agent 绑定、运行时故障映射、流式 worker 路由与撤权、Memory owner/reconcile/晚到结果 fencing，以及显式词面过滤候选。0052 只新增扫描索引；代码已合并不代表每个业务库已经迁移。
 
-前端统一八组回归与 production build（含类型检查）已通过；Memory 七个新故障用例使用真实隔离 PostgreSQL。新的词面策略不是语义相关性保证；自动摘要推广门和跨轮硬金额默认拒绝仍保留。旧 WIP 未清理。
+前端统一八组回归与 production build（含类型检查）通过；Memory 故障文件最终 14 项真库检查，加上四项新派发意图验收。真实浏览器验证 Viewer 只读、Owner 上下文保存及 Wiki 绑定/清除回读；3020/8020 为独立设置页预览，无 worker/beat 或真实 provider 调用。词面策略不是语义保证；自动摘要推广门和跨轮硬金额默认拒绝仍保留。旧 WIP 未清理。
+
+另一个独立分支正在交付 [provider 出站与冻结端点修复](reviews/provider-egress-delivery-20261105.md)：受控 SDK/HTTP 连接、严格地址谓词及新 Agent/judge 端点绑定，CI/部署状态与 PR #11 分开记录。
 
 [T04 研究 PR #10](https://github.com/lijihao-0804/AgentHub/pull/10)仍为 draft：16 任务组、两变体、K=2 的 DEV 实验未达到预登记增益门槛，未派发 HOLDOUT；助手校准不能代替双人人工金标。旧实验与费用记录保留，不因本轮修复重算为通过。
 
@@ -17,7 +19,7 @@
 | 层次 | 当前可说的话 | 不能外推的话 |
 | --- | --- | --- |
 | 代码与入口 | AE6b 已把 INTERACTIVE Experiment 接入正式 API、worker per-item router、真实 PostgreSQL/Redis/Celery、多轮恢复、fencing、清理和未知结果留存；AE10 已提供实验运行、逐题结果、筛选分页与安全证据界面。 | 有入口不等于所有历史数据、所有类别和所有故障窗口都已重新验收。 |
-| 工程验收 | 当前 main CI 通过上述 531 + 2846 项，并保留 35 个条件 skip 的具体分类；[AE6b](milestones/AE-6b-integration-closure.md) 与 [AE10](milestones/AE-10-minimal-evaluation-ui.md) 报告记录本机隔离栈、故障窗口、浏览器与构建证据。 | CI 通过不等于真实模型总体准确率，也不等于公网生产系统可用。 |
+| 工程验收 | PR #11 最终候选 PR/push CI 通过，保留初轮失败和后续修正；[AE6b](milestones/AE-6b-integration-closure.md)、[AE10](milestones/AE-10-minimal-evaluation-ui.md) 与新交付记录分别描述隔离栈、故障、浏览器和构建范围。 | CI 通过不等于真实模型总体准确率，也不等于公网生产系统可用。 |
 | 真实模型质量 | 已有 AE-Real-1/AE-Real-2 等受控小样本真实 provider 证据，以及 judge 探针；它们验证运行时、审批、轨迹、失败恢复和评分管道。 | 3-case、K=2 或单次 judge 探针不能代表总体质量、长期稳定性或人机一致性。 |
 | 生产部署 | 本机已做过受控全栈与 production build 验收；部署步骤要求显式迁移和 checkpoint bootstrap。 | 完整公网发布、真实企业负载、资源饱和容量、长期运营、账单和收益未证明。 |
 
@@ -124,13 +126,13 @@
 
 T12/T28：**CLOSED**。MCP 管理 UI、Auth UI、工具参数摘要、handoff 生命周期、前端专项脚本均已存在。
 M7-G UI 实现存在；不因后续功能落地补造旧里程碑的独立验收记录。
-当前代码迁移 head 为 `0051_interactive_lifecycle`。`0050` 引入 INTERACTIVE 数据集类别，
-`0051` 持久化交互 episode 的 case 身份、环境、轮次、观察、断言、清理与租约状态。
+当前代码迁移 head 为 `0052_memory_recovery_index`。`0050` 引入 INTERACTIVE 数据集类别，
+`0051` 持久化交互 episode 的 case 身份、环境、轮次、观察、断言、清理与租约状态；`0052` 为 Memory PENDING/RUNNING 恢复扫描增加部分索引。
 代码 head 不代表每个业务库已升级；迁移与 LangGraph checkpoint bootstrap 仍是显式部署步骤。
 
 ## 2. 当前工程验收与历史证据
 
-- **当前 CI**：[main run 41895415453](https://github.com/lijihao-0804/AgentHub/actions/runs/41895415453) passed；PR #9 最终候选的 531 integration + 2846 non-integration / 35 条件 skip 明细仍见其交付记录。这里记录的是工程回归结果，不是模型质量分数。
+- **当前工程 CI**：PR #11 的[最终 PR CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41902103066)和[最终 push CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41902093917)通过；合并后 [main run 41903660317](https://github.com/lijihao-0804/AgentHub/actions/runs/41903660317)单独跟踪。PR #9 的旧计数保留原轮次；工程回归不是模型质量分数。
 - **当前交互评测链路**：[AE6b Integration Closure](milestones/AE-6b-integration-closure.md) 使用正式 API、真实 PostgreSQL/Redis/Celery broker/worker 和确定性 provider，覆盖逐 case 路由、双 worker 竞争、租约 fencing、四处进程退出重启、清理失败及未知写入留存。它不包含付费真实模型新增样本。
 - **当前结果界面**：[AE10](milestones/AE-10-minimal-evaluation-ui.md) 覆盖实验启动、摘要、逐题结果、筛选分页、权限、错误与 390px 视口；真实本地受控 Run 为 4 cases、2 个任务成功。P1/P2 收口分别处理 observation 隐私与 token 续期后的筛选/分页竞态。
 - **真实模型证据**：AE-Real-1 的 3-case 受控运行和 AE-Real-2 的 2-case × K=2 故障注入验证了真实 provider、审批、执行证据和恢复口径；它们只证明这些受控链路，不证明总体模型准确率。
