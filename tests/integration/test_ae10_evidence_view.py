@@ -49,6 +49,28 @@ pytestmark = [
 _PRIVATE_SENTINEL = "AE10_PRIVATE_SENTINEL"
 
 
+def _assert_no_private_content(value):
+    """Inspect every object and array in the actual HTTP response body."""
+    if isinstance(value, dict):
+        assert {
+            "prompt",
+            "private_facts",
+            "private_fact",
+            "raw_arguments",
+            "private_arguments",
+            "expected",
+            "input",
+            "source_provenance",
+        }.isdisjoint(value)
+        for child in value.values():
+            _assert_no_private_content(child)
+    elif isinstance(value, list):
+        for child in value:
+            _assert_no_private_content(child)
+    elif isinstance(value, str):
+        assert _PRIVATE_SENTINEL not in value
+
+
 async def _seed_evidence_case(db_factory):
     async with db_factory() as session:
         base = await _seed(session, label=f"ae10-evidence-{uuid4().hex}")
@@ -471,6 +493,14 @@ async def test_evidence_route_returns_safe_real_pg_projection(db_factory) -> Non
         viewer_list_response = await viewer_client.get(
             prefix + f"/experiment-runs/{seeded['run_id']}/case-results"
         )
+        paged_list_responses = [
+            await client.get(
+                prefix + f"/experiment-runs/{seeded['run_id']}/case-results",
+                params={"limit": 1, "offset": offset},
+            )
+            for client in (owner_client, viewer_client)
+            for offset in (0, 1)
+        ]
         cross_tenant_response = await other_client.get(
             prefix
             + f"/experiment-runs/{seeded['run_id']}"
@@ -624,6 +654,16 @@ async def test_evidence_route_returns_safe_real_pg_projection(db_factory) -> Non
     assert viewer_response.status_code == 200, viewer_response.text
     assert viewer_list_response.status_code == 200, viewer_list_response.text
     assert viewer_list_response.json() == owner_list
+    for response in (owner_list_response, viewer_list_response, *paged_list_responses):
+        assert response.status_code == 200, response.text
+        payload = response.json()
+        _assert_no_private_content(payload)
+        assert _PRIVATE_SENTINEL not in response.text
+        assert all(item["observation"] == {} for item in payload["items"])
+    for first, second in (paged_list_responses[:2], paged_list_responses[2:]):
+        assert first.json()["total"] == second.json()["total"] == 2
+        assert len(first.json()["items"]) == len(second.json()["items"]) == 1
+        assert {first.json()["items"][0]["id"], second.json()["items"][0]["id"]} == set(cases_by_id)
     assert cross_tenant_response.status_code in {403, 404}, cross_tenant_response.text
     assert cross_tenant_list_response.status_code in {403, 404}, cross_tenant_list_response.text
 

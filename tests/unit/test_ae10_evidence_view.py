@@ -824,9 +824,18 @@ async def test_case_list_summary_batches_zero_and_unavailable_without_raw_fields
     assert "PRIVATE_FACT_SENTINEL" not in repr(summaries)
 
 
-def test_case_list_schema_defaults_new_summary_fields_to_null() -> None:
+@pytest.mark.parametrize("observation_source", ["private", "unreadable", "legacy_missing"])
+def test_case_list_schema_defaults_new_summary_fields_to_null(observation_source: str) -> None:
+    class StoredCase(SimpleNamespace):
+        @property
+        def observation(self):
+            if observation_source == "unreadable":
+                raise AssertionError("The public list schema must not read stored observation")
+            return {"nested": [{"prompt": "PRIVATE_PROMPT_SENTINEL", "private_facts": "secret"}]}
+
+    source_type = SimpleNamespace if observation_source == "legacy_missing" else StoredCase
     response = EvaluationCaseResultResponse.model_validate(
-        SimpleNamespace(
+        source_type(
             id=CASE_ID,
             workspace_id=WORKSPACE_ID,
             experiment_run_id=RUN_ID,
@@ -847,7 +856,6 @@ def test_case_list_schema_defaults_new_summary_fields_to_null() -> None:
             observed_agent_status=None,
             observed_agent_failure_code=None,
             safe_failure_message=None,
-            observation={},
             started_at=None,
             completed_at=None,
             created_at=datetime.now(UTC),
@@ -859,6 +867,8 @@ def test_case_list_schema_defaults_new_summary_fields_to_null() -> None:
     assert response.category is None
     assert response.variant_label is None
     assert response.task_success is None
+    assert response.model_dump(mode="json")["observation"] == {}
+    assert "PRIVATE_PROMPT_SENTINEL" not in response.model_dump_json()
 
 
 def test_evidence_route_is_registered() -> None:

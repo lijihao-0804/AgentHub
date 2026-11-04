@@ -25,6 +25,7 @@ from tests.support.ae6b_queue import (
     ApiEvaluation,
     QueueWorker,
     audit_records,
+    case_result_observation,
     interactive_case,
     queue_settings,
     seed_queue_agent,
@@ -131,9 +132,16 @@ async def test_cleanup_failure_retries_after_terminal_case_without_replaying_pro
             assert len(results) == 1, results
             result = results[0]
             assert result["status"] == "SUCCEEDED", result
-            assert result["observation"]["business_outcome"]["passed"] is True
-            assert result["observation"]["business_outcome"]["observed"]["ticket_count"] == 1
-            assert result["observation"]["environment_lifecycle_status"] == "TEARDOWN_FAILED"
+            assert result["observation"] == {}
+            stored_observation = await case_result_observation(
+                db_factory,
+                workspace_id=agent.workspace_id,
+                run_id=started["id"],
+                case_id=result["id"],
+            )
+            assert stored_observation["business_outcome"]["passed"] is True
+            assert stored_observation["business_outcome"]["observed"]["ticket_count"] == 1
+            assert stored_observation["environment_lifecycle_status"] == "TEARDOWN_FAILED"
             partial_metrics = await api.post(f"/experiment-runs/{started['id']}/metrics")
             partial_variant = next(iter(partial_metrics["variants"].values()))
             assert partial_variant["task_success"]["value"] == 0

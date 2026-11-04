@@ -388,7 +388,8 @@ export type EvaluationCaseResult = {
   observed_agent_status: string | null;
   observed_agent_failure_code: string | null;
   safe_failure_message: string | null;
-  observation: Record<string, unknown>;
+  /** @deprecated Always empty. Read the safe summary or evidence endpoint. */
+  observation: Record<string, never>;
   started_at: string | null;
   completed_at: string | null;
   created_at: string;

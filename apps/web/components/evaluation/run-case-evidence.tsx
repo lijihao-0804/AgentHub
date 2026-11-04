@@ -290,27 +290,34 @@ function RunCaseEvidenceSession({
   const [evidenceCache, setEvidenceCache] = useState<Record<string, ExperimentRunCaseEvidence>>({});
   const activeRef = useRef({ sessionId, workspaceId, accessToken, runId });
   activeRef.current = { sessionId, workspaceId, accessToken, runId };
+  const statusFilterRef = useRef("");
   const selectedIdRef = useRef<string | null>(null);
   const listGenerationRef = useRef(0);
   const detailGenerationRef = useRef(0);
+  const loadMoreInFlightRef = useRef(false);
 
   const isCurrent = useCallback(
     (
       snapshot: { sessionId: number; workspaceId: string; accessToken: string; runId: string },
       generation: number,
+      expectedStatus?: string,
     ) =>
       activeRef.current.sessionId === snapshot.sessionId &&
       activeRef.current.workspaceId === snapshot.workspaceId &&
       activeRef.current.accessToken === snapshot.accessToken &&
       activeRef.current.runId === snapshot.runId &&
-      listGenerationRef.current === generation,
+      listGenerationRef.current === generation &&
+      (expectedStatus === undefined || statusFilterRef.current === expectedStatus),
     [],
   );
 
   const loadFirstPage = useCallback(
-    async (status: string) => {
+    async () => {
+      const status = statusFilterRef.current;
       const generation = (listGenerationRef.current += 1);
+      detailGenerationRef.current += 1;
       const snapshot = activeRef.current;
+      loadMoreInFlightRef.current = false;
       setListState({ kind: "loading" });
       setItems([]);
       setTotal(0);
@@ -333,13 +340,13 @@ function RunCaseEvidenceSession({
             offset: 0,
           },
         );
-        if (!isCurrent(snapshot, generation)) return;
+        if (!isCurrent(snapshot, generation, status)) return;
         const result = normalizeCaseEvidenceList(payload);
         setItems(uniqueItems(result.items));
         setTotal(result.total);
         setListState({ kind: "ready" });
       } catch (caught) {
-        if (!isCurrent(snapshot, generation)) return;
+        if (!isCurrent(snapshot, generation, status)) return;
         setListState({
           kind: "error",
           error: toApiError(caught, ""),
@@ -350,16 +357,20 @@ function RunCaseEvidenceSession({
   );
 
   useEffect(() => {
-    void loadFirstPage("");
+    void loadFirstPage();
     return () => {
       listGenerationRef.current += 1;
       detailGenerationRef.current += 1;
+      loadMoreInFlightRef.current = false;
     };
   }, [accessToken, loadFirstPage, runId, sessionId, workspaceId]);
 
   const loadMore = useCallback(async () => {
-    const generation = (listGenerationRef.current += 1);
+    if (loadMoreInFlightRef.current) return;
+    const status = statusFilterRef.current;
+    const generation = listGenerationRef.current;
     const snapshot = activeRef.current;
+    loadMoreInFlightRef.current = true;
     setLoadingMore(true);
     setLoadMoreError(null);
     try {
@@ -370,26 +381,30 @@ function RunCaseEvidenceSession({
         },
         snapshot.runId,
         {
-          status: statusFilter || undefined,
+          status: status || undefined,
           limit: PAGE_SIZE,
           offset: items.length,
         },
       );
-      if (!isCurrent(snapshot, generation)) return;
+      if (!isCurrent(snapshot, generation, status)) return;
       const result = normalizeCaseEvidenceList(payload);
       setItems((current) => uniqueItems([...current, ...result.items]));
       setTotal(result.total);
     } catch (caught) {
-      if (!isCurrent(snapshot, generation)) return;
+      if (!isCurrent(snapshot, generation, status)) return;
       setLoadMoreError(toApiError(caught, ""));
     } finally {
-      if (isCurrent(snapshot, generation)) setLoadingMore(false);
+      if (isCurrent(snapshot, generation, status)) {
+        loadMoreInFlightRef.current = false;
+        setLoadingMore(false);
+      }
     }
-  }, [isCurrent, items.length, statusFilter]);
+  }, [isCurrent, items.length]);
 
   function changeStatus(status: string) {
+    statusFilterRef.current = status;
     setStatusFilter(status);
-    void loadFirstPage(status);
+    void loadFirstPage();
   }
 
   async function openCase(item: CaseEvidenceListItem) {
@@ -451,7 +466,7 @@ function RunCaseEvidenceSession({
             <button
               type="button"
               className="button button-ghost"
-              onClick={() => void loadFirstPage(statusFilter)}
+              onClick={() => void loadFirstPage()}
             >
               {text.refresh}
             </button>
@@ -482,7 +497,7 @@ function RunCaseEvidenceSession({
             onRetry={
               listState.error.status === 403 || listState.error.status === 404
                 ? undefined
-                : () => void loadFirstPage(statusFilter)
+                : () => void loadFirstPage()
             }
           />
         ) : items.length === 0 ? (

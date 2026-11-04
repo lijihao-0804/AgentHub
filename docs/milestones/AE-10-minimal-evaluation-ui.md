@@ -11,7 +11,7 @@
 | 阶段 | 本地验收结果 |
 | --- | --- |
 | B0 | 从已合并且 CI 通过的 main 创建独立 worktree；用户根目录修改完整保留 |
-| B1 | typed statistics/taxonomy/evidence client；列表批量补安全 case key/category/variant/task_success；只读详情受 evaluation_read/Workspace 约束；11 单测与 2 真库集成通过 |
+| B1 | typed statistics/taxonomy/evidence client；列表批量补安全 case key/category/variant/task_success；只读详情受 evaluation_read/Workspace 约束；13 单测与 2 真库集成通过 |
 | B2 | case 执行、AgentRun、task_success 分开；分母、覆盖、区间、K=1 和字面一致限制可见；0/null/UNKNOWN 分开 |
 | B3 | 分页/状态筛选/详情；提议、拒绝、执行分开；逐调用 FAILED/UNKNOWN 不被批次成功覆盖；action ID、参数 hash、Run 链接、规则标签可核查 |
 | B4 | 历史清理与当前 episode 分开；四个真实 worker 故障窗口、UNKNOWN 留存、TEARDOWN_FAILED、RECOVERY_REQUIRED、最终观察恢复有受控数据和组件证据 |
@@ -48,14 +48,14 @@ Next 同源代理 → FastAPI 的 TCP 检查覆盖 10 个 case 摘要/详情、�
 
 | 检查 | 结果 |
 | --- | --- |
-| AE-10 unit + PostgreSQL | 13 passed（11 unit + 2 integration），0 skipped；ae10-agent-final.xml |
+| AE-10 unit + PostgreSQL | 15 passed（13 unit + 2 integration），0 skipped；backend-checks-02.xml 同时包含相邻 21 项，共 36 passed |
 | 相邻 API/统计/taxonomy | 21 passed；后继未改变相邻实现 |
 | Node helpers | 17 passed，0 failed |
 | Run/权限/门禁 TSX | 5 项通过，含 PASS/FAIL/INCONCLUSIVE、原因、0/null 和中英文证据不足解释 |
-| Case TSX/异步 | 17 场景通过；双等待/单审批、逐调用 FAILED/UNKNOWN、过期响应 |
+| Case TSX/异步 | 18 场景通过；双等待/单审批、逐调用 FAILED/UNKNOWN、续期筛选分页及过期响应 |
 | 管理页面权限 | 6 页面矩阵及 handler 守卫通过；null/Viewer 无管理写控件 |
 | Ruff / diff whitespace | 通过 |
-| TypeScript / production build | job-web-build-03 exit 0，使用本地 API proxy target |
+| TypeScript / production build | review-web-build-02 exit 0，使用本地 API proxy target |
 | TCP | http-preview-checks.json verified，10 cases；只保留安全回执 |
 | 浏览器 | 正常入口启动、Viewer、键盘、中英文、长字段、桌面和窄屏通过 |
 
@@ -76,7 +76,15 @@ Next 同源代理 → FastAPI 的 TCP 检查覆盖 10 个 case 摘要/详情、�
 | 英文摘要 | [english-summary.jpg](ae10-ui-assets/english-summary.jpg) |
 | Viewer 无启动按钮 | [viewer-readonly.jpg](ae10-ui-assets/viewer-readonly.jpg) |
 
-## 交付
+## 审阅收口：列表隐私与续期筛选
+
+P1：列表不再读取或序列化存储的原始 observation。公开合同保留兼容空对象 `observation: {}`，安全摘要和独立 evidence 白名单继续提供必要字段；管理员与 Viewer 均不例外。真实 PostgreSQL/HTTP 回归递归检查整个列表及两页响应的私有键和 sentinel，另验证旧数据、不可读取的 observation 属性、安全评分摘要和跨租户隔离。旧 AE-6b 测试中的内部业务事实改为按 case/workspace/run 查询数据库后断言，保留原有恢复、清理和预算断言。
+
+P2：首屏、筛选变更和 token 续期使用同一筛选来源；续期保持下拉框选择，从 offset=0 重载。实际 TSX 异步回归覆盖 FAILED → token 续期 → FAILED/offset=50 分页，并确认旧 token、旧筛选、旧分页和旧详情不会覆盖新状态，分页请求有同步防重入。
+
+本次收口检查及新候选 CI 门见 `ae10-local-acceptance.json` 和 PR；前一候选 SHA 的 CI 仅保留为历史证据。六张原截图未变更。本地构建首次因沙箱 spawn EPERM 退出，已在允许子进程的环境重跑同一构建通过。
+
+## 最终回执
 
 安全本地数据见 [ae10-local-acceptance.json](ae10-local-acceptance.json)。最终候选 SHA、远端 CI 链接和结果另存 ignored `.scratch/ae10-20261104/delivery-receipt.json` 并更新 PR 正文，避免记录结果再次改变被验收提交。
 

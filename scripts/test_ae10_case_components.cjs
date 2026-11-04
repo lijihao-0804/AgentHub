@@ -1376,6 +1376,8 @@ async function testRetainedFinalObservation() {
 async function testPaginationExpiry() {
   const world = createWorld();
   const stalePage = deferred();
+  const staleFirstPage = deferred();
+  let unfilteredFirstRequests = 0;
   world.listImpl = async (_auth, _runId, options) => {
     if (options.offset === 50) return stalePage.promise;
     if (options.status === 'FAILED') {
@@ -1384,6 +1386,8 @@ async function testPaginationExpiry() {
         items: [caseItem('filtered-failed', { status: 'FAILED' })],
       };
     }
+    unfilteredFirstRequests += 1;
+    if (unfilteredFirstRequests > 1) return staleFirstPage.promise;
     return {
       total: 100,
       items: Array.from({ length: 50 }, (_, index) => caseItem(`page-${index}`)),
@@ -1403,13 +1407,32 @@ async function testPaginationExpiry() {
     offset: 50,
   });
 
+  const refreshButton = buttonByText(mounted.tree, 'Refresh');
+  assert.ok(refreshButton);
+  refreshButton.props.onClick();
+  await settle();
+  mounted.rerender();
+  assert.equal(world.listCalls.length, 3);
+  assert.deepEqual(world.listCalls[2][2], {
+    status: undefined,
+    limit: 50,
+    offset: 0,
+  });
+
   const select = roleSelect(mounted.tree);
   assert.ok(select);
+  const callsBeforeFilter = world.listCalls.length;
   select.props.onChange({ currentTarget: { value: 'FAILED' } });
   await settle();
   mounted.rerender();
+  assert.equal(
+    world.listCalls.length,
+    callsBeforeFilter + 1,
+    'changing the visible filter must issue one first-page request',
+  );
   assert.ok(html(mounted.tree).includes('filtered-failed'));
-  assert.deepEqual(world.listCalls[2][2], {
+  assert.equal(roleSelect(mounted.tree).props.value, 'FAILED');
+  assert.deepEqual(world.listCalls[3][2], {
     status: 'FAILED',
     limit: 50,
     offset: 0,
@@ -1419,13 +1442,191 @@ async function testPaginationExpiry() {
     total: 100,
     items: [caseItem('stale-page-row')],
   });
+  staleFirstPage.resolve({
+    total: 100,
+    items: [caseItem('stale-first-page-row')],
+  });
   await settle();
   mounted.rerender();
   const afterStaleHtml = html(mounted.tree);
   assert.ok(afterStaleHtml.includes('filtered-failed'));
   assert.ok(!afterStaleHtml.includes('stale-page-row'));
+  assert.ok(!afterStaleHtml.includes('stale-first-page-row'));
   mounted.runtime.cleanup();
-  console.log('PASS stale pagination response cannot overwrite a newer filtered page');
+  console.log('PASS stale first-page and pagination responses cannot overwrite a newer filter');
+}
+
+async function testTokenRenewalKeepsFilterAndExpiresStaleWork() {
+  const world = createWorld();
+  const staleFilteredFirstPage = deferred();
+  const renewedFirstPage = deferred();
+  const staleLoadMore = deferred();
+  const renewedAfterLoadMore = deferred();
+  const currentLoadMore = deferred();
+  const staleDetail = deferred();
+  let filteredFirstPageRequests = 0;
+  const failedPage = (prefix, start = 0) =>
+    Array.from({ length: 50 }, (_, index) =>
+      caseItem(`${prefix}-${start + index}`, {
+        status: 'FAILED',
+        observed_agent_status: 'FAILED',
+      }),
+    );
+
+  world.listImpl = async (auth, _runId, options) => {
+    if (auth.accessToken === 'token-a') {
+      if (options.status === 'FAILED' && options.offset === 0) {
+        filteredFirstPageRequests += 1;
+        if (filteredFirstPageRequests === 1) {
+          return { total: 100, items: failedPage('token-a-filtered') };
+        }
+        return staleFilteredFirstPage.promise;
+      }
+      return { total: 1, items: [caseItem('initial-success')] };
+    }
+    if (auth.accessToken === 'token-b') {
+      if (options.status !== 'FAILED') {
+        throw new Error('token renewal must preserve the FAILED filter');
+      }
+      if (options.offset === 0) return renewedFirstPage.promise;
+      if (options.offset === 50) return staleLoadMore.promise;
+    }
+    if (auth.accessToken === 'token-c') {
+      if (options.status !== 'FAILED') {
+        throw new Error('second token renewal must preserve the FAILED filter');
+      }
+      if (options.offset === 0) return renewedAfterLoadMore.promise;
+      if (options.offset === 50) return currentLoadMore.promise;
+    }
+    throw new Error(`unexpected list request: ${auth.accessToken} ${JSON.stringify(options)}`);
+  };
+  world.evidenceImpl = async (auth) => {
+    if (auth.accessToken === 'token-b') return staleDetail.promise;
+    throw new Error(`unexpected evidence request: ${auth.accessToken}`);
+  };
+
+  const mounted = await mountReady(world);
+  const select = roleSelect(mounted.tree);
+  assert.ok(select);
+  select.props.onChange({ currentTarget: { value: 'FAILED' } });
+  await settle();
+  mounted.rerender();
+  assert.equal(roleSelect(mounted.tree).props.value, 'FAILED');
+  assert.deepEqual(world.listCalls.at(-1)[2], {
+    status: 'FAILED',
+    limit: 50,
+    offset: 0,
+  });
+
+  const refreshButton = buttonByText(mounted.tree, 'Refresh');
+  assert.ok(refreshButton);
+  refreshButton.props.onClick();
+  await settle();
+  mounted.rerender();
+  assert.equal(world.listCalls.at(-1)[0].accessToken, 'token-a');
+  assert.equal(world.listCalls.at(-1)[2].status, 'FAILED');
+
+  mounted.rerenderWith({ accessToken: 'token-b' });
+  const tokenBRunCleanups = mounted.runtime.runEffects();
+  assert.equal(world.listCalls.at(-1)[0].accessToken, 'token-b');
+  assert.deepEqual(world.listCalls.at(-1)[2], {
+    status: 'FAILED',
+    limit: 50,
+    offset: 0,
+  });
+  renewedFirstPage.resolve({ total: 100, items: failedPage('token-b-filtered') });
+  await settle();
+  mounted.rerender();
+  assert.equal(roleSelect(mounted.tree).props.value, 'FAILED');
+
+  staleFilteredFirstPage.resolve({
+    total: 1,
+    items: [caseItem('stale-token-a-first-page')],
+  });
+  await settle();
+  mounted.rerender();
+  let currentHtml = html(mounted.tree);
+  assert.ok(currentHtml.includes('token-b-filtered-0'));
+  assert.ok(!currentHtml.includes('stale-token-a-first-page'));
+
+  const moreButton = buttonByText(mounted.tree, 'Load more');
+  assert.ok(moreButton);
+  moreButton.props.onClick();
+  await settle();
+  mounted.rerender();
+  assert.equal(world.listCalls.at(-1)[0].accessToken, 'token-b');
+  assert.deepEqual(world.listCalls.at(-1)[2], {
+    status: 'FAILED',
+    limit: 50,
+    offset: 50,
+  });
+
+  const firstRow = rowButton(mounted.tree);
+  assert.ok(firstRow);
+  firstRow.props.onClick();
+  await settle();
+
+  mounted.rerenderWith({ accessToken: 'token-c' });
+  const tokenCRunCleanups = mounted.runtime.runEffects();
+  assert.equal(world.listCalls.at(-1)[0].accessToken, 'token-c');
+  assert.deepEqual(world.listCalls.at(-1)[2], {
+    status: 'FAILED',
+    limit: 50,
+    offset: 0,
+  });
+  renewedAfterLoadMore.resolve({
+    total: 100,
+    items: failedPage('token-c-filtered'),
+  });
+  await settle();
+  mounted.rerender();
+
+  staleLoadMore.resolve({
+    total: 100,
+    items: [caseItem('stale-token-b-page')],
+  });
+  staleDetail.resolve(
+    caseEvidence('token-b-filtered-0', { case_key: 'STALE-TOKEN-B-DETAIL' }),
+  );
+  await settle();
+  mounted.rerender();
+  currentHtml = html(mounted.tree);
+  assert.ok(currentHtml.includes('token-c-filtered-0'));
+  assert.ok(!currentHtml.includes('stale-token-b-page'));
+  assert.ok(!currentHtml.includes('STALE-TOKEN-B-DETAIL'));
+
+  const currentMoreButton = buttonByText(mounted.tree, 'Load more');
+  assert.ok(currentMoreButton);
+  assert.equal(currentMoreButton.props.disabled, false);
+  currentMoreButton.props.onClick();
+  await settle();
+  mounted.rerender();
+  assert.equal(world.listCalls.at(-1)[0].accessToken, 'token-c');
+  assert.deepEqual(world.listCalls.at(-1)[2], {
+    status: 'FAILED',
+    limit: 50,
+    offset: 50,
+  });
+  currentLoadMore.resolve({
+    total: 100,
+    items: failedPage('token-c-filtered', 50),
+  });
+  await settle();
+  mounted.rerender();
+
+  const caseStatuses = elements(
+    mounted.tree,
+    (node) => node.type === world.mocks.StatusBadge,
+  ).map((node) => node.props.status);
+  assert.ok(caseStatuses.includes('FAILED'));
+  assert.ok(
+    !caseStatuses.includes('SUCCEEDED'),
+    'renewed filtered pagination must not mix in SUCCEEDED case rows',
+  );
+  tokenBRunCleanups.forEach((cleanup) => typeof cleanup === 'function' && cleanup());
+  tokenCRunCleanups.forEach((cleanup) => typeof cleanup === 'function' && cleanup());
+  mounted.runtime.cleanup();
+  console.log('PASS token renewal keeps FAILED/offset pagination and expires stale page/detail work');
 }
 
 async function testSessionIsolationAndStaleDetail() {
@@ -1514,6 +1715,7 @@ async function main() {
   await testCleanupRecoveryStates();
   await testRetainedFinalObservation();
   await testPaginationExpiry();
+  await testTokenRenewalKeepsFilterAndExpiresStaleWork();
   await testSessionIsolationAndStaleDetail();
   console.log('PASS AE-10 case component render/async contract');
 }

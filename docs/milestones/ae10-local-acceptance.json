@@ -66,7 +66,7 @@
   },
   "checks": {
     "frontend": {
-      "job": "job-web-build-03",
+      "job": "review-web-build-02",
       "state": "completed",
       "exit_code": 0,
       "helper_node_tests": {
@@ -80,7 +80,7 @@
         "static_page_generation": "passed"
       },
       "run_permission_gate_checks": 5,
-      "case_component_scenarios": 17,
+      "case_component_scenarios": 18,
       "readonly_page_matrices": 6,
       "mutation_handler_guard": true
     },
@@ -117,14 +117,15 @@
       }
     },
     "backend_final": {
-      "junit": "ae10-agent-final.xml",
-      "tests": 13,
-      "passed": 13,
+      "junit": "backend-checks-02.xml",
+      "tests": 36,
+      "passed": 36,
       "failed": 0,
       "skipped": 0,
-      "unit": 11,
+      "unit": 13,
       "integration": 2,
-      "exit_code": 0
+      "exit_code": 0,
+      "adjacent": 21
     },
     "adjacent_api_statistics_taxonomy": {
       "passed": 21,
@@ -193,5 +194,40 @@
     "step_type": "APPROVAL_EXECUTION",
     "ambiguous_step_ordinal": 0,
     "ui_invents_wait_pairing": false
+  },
+  "review_fixes": {
+    "P1": {
+      "public_observation": {},
+      "stored_observation_read_by_list_schema": false,
+      "recursive_http_privacy": [
+        "owner",
+        "viewer",
+        "pagination"
+      ],
+      "internal_observation_assertions": "retained against scoped database rows"
+    },
+    "P2": {
+      "renewal_preserves_filter": true,
+      "renewal_offset": 0,
+      "next_page_offset": 50,
+      "stale_filter_token_page_detail_discarded": true
+    },
+    "ae6b_regression": {
+      "evidence_location": "final ignored delivery receipt and exact-head CI",
+      "mandatory_integration": 57,
+      "local_junit": "review-ae6b.xml"
+    },
+    "backend": {
+      "passed": 36,
+      "ae10_unit": 13,
+      "ae10_real_pg": 2,
+      "adjacent": 21
+    },
+    "preview": {
+      "api_job": "service-api-v4",
+      "web_job": "service-web-v4"
+    },
+    "remote_gate": "exact new PR head checks and ignored receipt; old SHA checks are historical",
+    "retained_build_failure": "review-web-build-01: sandbox spawn EPERM; same build succeeded with process permission"
   }
 }

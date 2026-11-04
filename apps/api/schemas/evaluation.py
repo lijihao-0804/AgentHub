@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class EvaluationDatasetCreateRequest(BaseModel):
@@ -251,6 +251,12 @@ class EvaluationEvidenceTaskSuccessResponse(BaseModel):
     reason: str | None
 
 
+class EvaluationRedactedObservationResponse(BaseModel):
+    """Empty compatibility envelope; list clients never receive stored observations."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class EvaluationCaseResultResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 
@@ -278,10 +284,16 @@ class EvaluationCaseResultResponse(BaseModel):
     observed_agent_status: str | None
     observed_agent_failure_code: str | None
     safe_failure_message: str | None
-    observation: dict[str, Any]
     started_at: datetime | None
     completed_at: datetime | None
     created_at: datetime
+
+    @computed_field(description="Deprecated compatibility field, always empty. Use safe evidence.")
+    @property
+    def observation(self) -> EvaluationRedactedObservationResponse:
+        # Never read the ORM observation, including for managers. Safe summary
+        # and evidence fields are projected explicitly by the evidence service.
+        return EvaluationRedactedObservationResponse()
 
 
 class EvaluationCaseResultListResponse(BaseModel):
