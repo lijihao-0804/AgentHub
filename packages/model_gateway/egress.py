@@ -130,6 +130,14 @@ class ProviderEgressPolicy:
 
         addresses = _canonicalize_dns_answer(resolved)
         for address in addresses:
+            # HTTP is a loopback-only development exception. A syntactically
+            # local name must not turn into a public/plaintext destination
+            # after DNS, even when that public IP passes the global policy.
+            if (
+                canonical_endpoint.scheme == "http"
+                and not ipaddress.ip_address(address).is_loopback
+            ):
+                raise ProviderEgressError(TARGET_FORBIDDEN)
             if not _address_is_allowed(address, self._private_cidrs):
                 raise ProviderEgressError(TARGET_FORBIDDEN)
         return ProviderEgressAuthorization(

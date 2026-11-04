@@ -391,3 +391,12 @@ def test_invalid_url_errors_do_not_echo_credentials_or_internal_hosts() -> None:
         assert "internal-provider.example" not in rendered
         assert "top-secret" not in rendered
         assert "admin" not in rendered
+
+
+@pytest.mark.asyncio
+async def test_plain_http_loopback_name_cannot_resolve_to_a_public_destination() -> None:
+    endpoint = parse_provider_endpoint("http://localhost:8080/v1")
+    policy = ProviderEgressPolicy(private_cidrs=("127.0.0.1/32",), resolver=resolver_for(PUBLIC))
+    with pytest.raises(ProviderEgressError) as raised:
+        await policy.authorize(endpoint)
+    assert raised.value.failure_code == TARGET_FORBIDDEN
