@@ -41,10 +41,13 @@ def save(path, data):
 
 def environment():
     os.environ.update(read(PRIVATE / "local-env.json"))
-    from packages.core.config.settings import Settings
+    from packages.core.config.settings import get_settings
     from packages.core.database import create_database
 
-    settings = Settings()
+    # Imported service modules may have resolved defaults before this isolated
+    # environment was selected. All publication readers must use its same key.
+    get_settings.cache_clear()
+    settings = get_settings()
     assert "agenthub_t04_20261105" in settings.database_url
     return settings, create_database(settings.database_url)
 
