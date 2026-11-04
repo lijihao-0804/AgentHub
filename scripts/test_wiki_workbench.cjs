@@ -8,6 +8,7 @@ const web = path.resolve(__dirname, "..", "apps", "web");
 const requireWeb = Module.createRequire(path.join(web, "package.json"));
 const ts = requireWeb("typescript");
 const React = requireWeb("react");
+const { renderToStaticMarkup } = requireWeb("react-dom/server");
 
 const auth = { workspaceId: "workspace/a", accessToken: "token-a" };
 
@@ -37,6 +38,90 @@ function assertNoSyntacticDiagnostics(result, surface) {
       .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"))
       .join("; ")}`,
   );
+}
+
+function Panel({ title, eyebrow, actions, ariaLabel, children }) {
+  return React.createElement(
+    "section",
+    { "aria-label": ariaLabel },
+    title ? React.createElement("h2", null, title) : null,
+    eyebrow ? React.createElement("p", null, eyebrow) : null,
+    actions ?? null,
+    children,
+  );
+}
+
+function EmptyState({ title, hint, actions }) {
+  return React.createElement(
+    "section",
+    null,
+    title ? React.createElement("h2", null, title) : null,
+    hint ? React.createElement("p", null, hint) : null,
+    actions ?? null,
+  );
+}
+
+function ErrorState({ code, message, hint, onRetry }) {
+  return React.createElement(
+    "section",
+    { role: "alert" },
+    code ? React.createElement("code", null, code) : null,
+    message ? React.createElement("p", null, message) : null,
+    hint ? React.createElement("p", null, hint) : null,
+    onRetry ? React.createElement("button", { type: "button", onClick: onRetry }, "Retry") : null,
+  );
+}
+
+function InlineError({ error, fallback }) {
+  return error || fallback
+    ? React.createElement("p", { role: "alert" }, error?.message || fallback)
+    : null;
+}
+
+function LoadingState({ label }) {
+  return React.createElement("p", { role: "status" }, label ?? "Loading");
+}
+
+function SessionRequired() {
+  return React.createElement("p", null, "Session required");
+}
+
+function HashValue({ value, label }) {
+  return React.createElement("code", { "data-label": label }, value);
+}
+
+function InlineConfirm({ title, text, confirmLabel, pendingLabel, cancelLabel, onConfirm, onCancel }) {
+  return React.createElement(
+    "section",
+    null,
+    React.createElement("h3", null, title),
+    React.createElement("p", null, text),
+    React.createElement("button", { type: "button", onClick: onConfirm }, confirmLabel ?? pendingLabel),
+    React.createElement("button", { type: "button", onClick: onCancel }, cancelLabel),
+  );
+}
+
+function Markdown({ text }) {
+  return React.createElement("div", null, text);
+}
+
+function Select({ value, options = [], placeholder, ariaLabel, disabled }) {
+  return React.createElement(
+    "select",
+    { value, "aria-label": ariaLabel, disabled, onChange() {} },
+    options.map((option) =>
+      React.createElement(
+        "option",
+        { key: option.value, value: option.value, disabled: option.disabled },
+        option.label,
+      ),
+    ),
+    !value && placeholder ? React.createElement("option", { value: "" }, placeholder) : null,
+  );
+}
+
+function StatusBadge({ status }) {
+  return React.createElement("span", null, status);
 }
 
 function loadWikiApi() {
@@ -219,7 +304,10 @@ function componentHarness() {
   };
   const i18n = {
     locale: "en-US",
-    t: (key) => key,
+    t: (key) => {
+      if (key === "common.none") return i18n.locale === "zh-CN" ? "无" : "None";
+      return key;
+    },
     formatDateTime: (value) => value,
     formatNumber: (value) => String(value),
     statusLabel: (value) => value,
@@ -328,6 +416,17 @@ function componentHarness() {
     ],
   };
 
+  const copyCompiled = transpile("app/knowledge/wiki/wiki-copy.ts");
+  assertNoSyntacticDiagnostics(copyCompiled, "Wiki workbench copy");
+  const copyModule = { exports: {} };
+  new Function("require", "module", "exports", copyCompiled.outputText)(
+    () => {
+      throw new Error("The Wiki copy module must not have runtime imports");
+    },
+    copyModule,
+    copyModule.exports,
+  );
+
   const mocks = {
     react: {
       ...React,
@@ -354,10 +453,35 @@ function componentHarness() {
       useFrontendSession: () => session,
     },
     "@/i18n/provider": { useI18n: () => i18n },
+    "@/components/ui/states": {
+      EmptyState,
+      ErrorState,
+      InlineError,
+      LoadingState,
+      Panel,
+      SessionRequired,
+    },
+    "@/components/evaluation/hash-value": {
+      __esModule: true,
+      default: HashValue,
+      InlineConfirm,
+    },
+    "@/components/ui/markdown": { __esModule: true, default: Markdown },
+    "@/components/ui/select": { __esModule: true, default: Select },
+    "@/components/ui/status-badge": { __esModule: true, default: StatusBadge },
     "@/hooks/use-workspace-data": {
       useWorkspaceData(load, resourceKey, options) {
         let data = [];
         if (resourceKey.startsWith("wiki-bases:")) {
+          data = [
+            {
+              id: "kb-a",
+              workspace_id: "workspace-a",
+              name: "Knowledge A",
+              created_at: "2026-11-05T00:00:00Z",
+            },
+          ];
+        } else if (resourceKey.startsWith("knowledge-bases:")) {
           data = [
             {
               id: "kb-a",
@@ -418,31 +542,39 @@ function componentHarness() {
     "@/lib/api/models": modelApi,
     "@/lib/api/wiki": wikiApi,
     "next/link": { __esModule: true, default: "a" },
+    "./wiki-copy": copyModule.exports,
+    "./wiki/wiki-copy": copyModule.exports,
   };
 
-  const compiled = transpile("app/knowledge/wiki/page.tsx");
-  assertNoSyntacticDiagnostics(compiled, "Wiki workbench page");
-  const module = { exports: {} };
-  new Function("require", "module", "exports", compiled.outputText)(
-    (name) => {
-      if (name in mocks) return mocks[name];
-      if (name.startsWith("@/")) {
-        return new Proxy(
-          {},
-          {
-            get(_, key) {
-              if (key === "__esModule") return true;
-              if (key === "default") return key === "default" ? "component" : key;
-              return String(key);
+  function loadSurface(relativePath, surface) {
+    const compiled = transpile(relativePath);
+    assertNoSyntacticDiagnostics(compiled, surface);
+    const loaded = { exports: {} };
+    new Function("require", "module", "exports", compiled.outputText)(
+      (name) => {
+        if (name in mocks) return mocks[name];
+        if (name.startsWith("@/")) {
+          return new Proxy(
+            {},
+            {
+              get(_, key) {
+                if (key === "__esModule") return true;
+                if (key === "default") return "component";
+                return String(key);
+              },
             },
-          },
-        );
-      }
-      return requireWeb(name);
-    },
-    module,
-    module.exports,
-  );
+          );
+        }
+        return requireWeb(name);
+      },
+      loaded,
+      loaded.exports,
+    );
+    return loaded.exports;
+  }
+
+  const wikiPage = loadSurface("app/knowledge/wiki/page.tsx", "Wiki workbench page");
+  const knowledgePage = loadSurface("app/knowledge/page.tsx", "knowledge page");
 
   function render(elementType, props) {
     stateIndex = 0;
@@ -450,14 +582,26 @@ function componentHarness() {
     return elementType(props);
   }
 
+  function renderMarkup(elementType = wikiPage.default) {
+    stateIndex = 0;
+    refIndex = 0;
+    return renderToStaticMarkup(React.createElement(elementType, {}));
+  }
+
   return {
-    Page: module.exports.default,
+    Page: wikiPage.default,
+    KnowledgePage: knowledgePage.default,
     calls,
+    i18n,
     reloads,
     render,
+    renderMarkup,
     refs,
     session,
     states,
+    setLocale(locale) {
+      i18n.locale = locale;
+    },
     setCompilationStatus(status) {
       compilationStatus = status;
     },
@@ -505,12 +649,74 @@ function prepareContent(h, permissions, status, overrides = {}) {
   return { wrapper, tree: h.render(wrapper.type, {}) };
 }
 
+function assertMarkupIncludes(markup, expected, surface) {
+  for (const value of expected) {
+    assert.ok(
+      markup.includes(value),
+      `${surface} rendered markup should include ${JSON.stringify(value)}`,
+    );
+  }
+}
+
+function testLocalizedRendering() {
+  const h = componentHarness();
+  h.setLocale("en-US");
+  let view = prepareContent(h, ["knowledge_run", "knowledge_edit"], "READY", {
+    11: "permission policy",
+  });
+  const enMarkup = h.renderMarkup();
+  assertMarkupIncludes(
+    enMarkup,
+    [
+      "Wiki workbench",
+      "Knowledge base",
+      "New compilation",
+      "Compilation review",
+      "Pages and lint are ready for review.",
+    ],
+    "English Wiki workbench",
+  );
+
+  const selectedKbId = h.states[0];
+  const queryInput = h.states[11];
+  const apiCallCount = h.calls.length;
+  const reloadCount = h.reloads.length;
+  h.setLocale("zh-CN");
+  const zhMarkup = h.renderMarkup();
+  assertMarkupIncludes(
+    zhMarkup,
+    [
+      "Wiki 工作台",
+      "知识库",
+      "新建 Wiki 编译",
+      "编译审核",
+      "页面与 lint 已可供审核",
+    ],
+    "Chinese Wiki workbench",
+  );
+  assert.equal(h.states[0], selectedKbId, "locale switching keeps the selected knowledge base");
+  assert.equal(h.states[11], queryInput, "locale switching keeps the draft query");
+  assert.equal(h.calls.length, apiCallCount, "locale switching performs no model or write API call");
+  assert.equal(h.reloads.length, reloadCount, "locale switching reloads no server data");
+
+  h.states[0] = "";
+  h.states[1] = false;
+  const zhKnowledgeMarkup = h.renderMarkup(h.KnowledgePage);
+  assertMarkupIncludes(zhKnowledgeMarkup, ["Wiki 工作台"], "Chinese knowledge navigation");
+  h.setLocale("en-US");
+  const enKnowledgeMarkup = h.renderMarkup(h.KnowledgePage);
+  assertMarkupIncludes(enKnowledgeMarkup, ["Wiki workbench"], "English knowledge navigation");
+  assert.equal(h.calls.length, apiCallCount, "localized navigation performs no API mutation");
+
+  console.log("PASS Chinese and English React rendering preserve selected filters and make no writes");
+}
+
 async function testComponentContracts() {
   const h = componentHarness();
 
   let view = prepareContent(h, null, "READY");
   assert.ok(
-    elements(view.tree, (node) => node.type === "LoadingState").length > 0,
+    elements(view.tree, (node) => node.type?.name === "LoadingState").length > 0,
     "unknown permissions show a loading state",
   );
   assert.equal(
@@ -631,7 +837,7 @@ async function testComponentContracts() {
     elements(
       refreshedTree,
       (node) =>
-        node.type === "LoadingState" &&
+        node.type?.name === "LoadingState" &&
         node.props?.label === "Refreshing workspace session…",
     ).length > 0,
   );
@@ -662,6 +868,7 @@ async function testComponentContracts() {
 
 async function main() {
   await testApiContract();
+  testLocalizedRendering();
   await testComponentContracts();
 }
 

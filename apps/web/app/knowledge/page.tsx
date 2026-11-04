@@ -11,8 +11,11 @@ import { errorHintKey, type AuthInput } from "@/lib/api/client";
 import { createKnowledgeBase, listKnowledgeBases, type KnowledgeBase } from "@/lib/api/knowledge";
 import { useI18n } from "@/i18n/provider";
 
+import { wikiWorkbenchCopy } from "./wiki/wiki-copy";
+
 export default function KnowledgeBasesPage() {
-  const { t, formatDateTime } = useI18n();
+  const { locale, t, formatDateTime } = useI18n();
+  const copy = wikiWorkbenchCopy(locale);
   const { connected, sessionId, workspaceId } = useFrontendSession();
 
   const load = useCallback((auth: AuthInput) => listKnowledgeBases(auth), []);
@@ -58,7 +61,7 @@ export default function KnowledgeBasesPage() {
 
       <div className="page-toolbar">
         <Link className="button button-ghost" href="/knowledge/wiki">
-          Wiki workbench
+          {copy.knowledgeWorkbenchLink}
         </Link>
         <Link className="button button-ghost" href="/knowledge/playground">
           {t("knowledge.openPlayground")}

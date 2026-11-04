@@ -44,6 +44,8 @@ import {
   type WikiRelation,
 } from "@/lib/api/wiki";
 
+import { wikiWorkbenchCopy, type WikiWorkbenchCopy } from "./wiki-copy";
+
 type Tab = "pages" | "lint" | "query";
 type QueryMode = "AUTO" | "WIKI" | "RAG" | "HYBRID";
 type QueryIntent = "overview" | "fact" | "synthesis";
@@ -60,21 +62,8 @@ type QueryDisplay = {
 const ACTIVE_COMPILATION_STATUSES = new Set<WikiCompilationStatus>(["PENDING", "PROCESSING"]);
 const COMPILATION_POLL_MS = 5000;
 
-function statusGuidance(status: WikiCompilationStatus): string {
-  switch (status) {
-    case "PENDING":
-      return "Queued for compilation. The server owns this state.";
-    case "PROCESSING":
-      return "The compiler is extracting and checking source-backed claims.";
-    case "READY":
-      return "Pages and lint are ready for review. Publication remains an explicit editor action.";
-    case "FAILED":
-      return "Compilation failed. Review the stable error code before retrying.";
-    case "PUBLISHED":
-      return "This compilation is published and immutable.";
-    default:
-      return status;
-  }
+function statusGuidance(status: WikiCompilationStatus, copy: WikiWorkbenchCopy): string {
+  return copy.statusGuidance[status] ?? status;
 }
 
 function relationTarget(relation: WikiRelation): string {
@@ -110,7 +99,8 @@ export default function WikiWorkbenchPage() {
 }
 
 function WikiWorkbenchContent() {
-  const { t, formatDateTime, formatNumber } = useI18n();
+  const { locale, t, formatDateTime, formatNumber } = useI18n();
+  const copy = wikiWorkbenchCopy(locale);
   const { connected, workspaceId, permissions, accessToken } = useFrontendSession();
   const canRead = permissions?.includes("knowledge_run") === true;
   const canEdit = permissions?.includes("knowledge_edit") === true;
@@ -339,7 +329,7 @@ function WikiWorkbenchContent() {
     if (!result) return;
     setSelectedCompilationId(result.id);
     setShowCompileForm(false);
-    setNotice(`Compilation accepted. Server status: ${result.status}.`);
+    setNotice(copy.compilationAccepted(result.status));
     compilations.reload();
   }
 
@@ -354,7 +344,7 @@ function WikiWorkbenchContent() {
       if (confirmed.status !== "PUBLISHED") {
         throw new ApiError(
           "SERVER_STATE_NOT_CONFIRMED",
-          `Publication returned, but the server still reports ${confirmed.status}.`,
+          copy.serverStateMismatch(confirmed.status),
           409,
         );
       }
@@ -362,7 +352,7 @@ function WikiWorkbenchContent() {
     });
     if (!result) return;
     setPublishConfirm(false);
-    setNotice("Publication confirmed by the server.");
+    setNotice(copy.publicationConfirmed);
     compilations.reload();
     pages.reload();
     lint.reload();
@@ -378,7 +368,7 @@ function WikiWorkbenchContent() {
       return getCompilation(auth, knowledgeBaseId, compilationId);
     });
     if (!result) return;
-    setNotice(`Retry accepted. Server status: ${result.status}.`);
+    setNotice(copy.retryAccepted(result.status));
     compilations.reload();
   }
 
@@ -415,7 +405,7 @@ function WikiWorkbenchContent() {
     return (
       <div className="page">
         <header className="page-header">
-          <h1>Wiki workbench</h1>
+          <h1>{copy.title}</h1>
         </header>
         <SessionRequired contextKey="session.context.knowledge" />
       </div>
@@ -426,10 +416,10 @@ function WikiWorkbenchContent() {
     return (
       <div className="page">
         <header className="page-header">
-          <h1>Wiki workbench</h1>
+          <h1>{copy.title}</h1>
         </header>
         <LoadingState
-          label={tokenTransition ? "Refreshing workspace session…" : "Loading workspace permissions…"}
+          label={tokenTransition ? copy.refreshingSession : copy.loadingPermissions}
         />
       </div>
     );
@@ -439,15 +429,15 @@ function WikiWorkbenchContent() {
     return (
       <div className="page">
         <header className="page-header">
-          <h1>Wiki workbench</h1>
+          <h1>{copy.title}</h1>
           <p className="page-lead">
-            Compile source-backed pages, review lint, publish explicitly, and query a fixed Wiki binding.
+            {copy.lead}
           </p>
         </header>
-        <Panel title="Knowledge access required">
+        <Panel title={copy.accessRequired}>
           <EmptyState
-            title="knowledge_run is required"
-            hint="Ask a workspace administrator for knowledge access. The server enforces the same permission."
+            title={copy.accessTitle}
+            hint={copy.accessHint}
             actions={
               <Link className="button button-ghost" href="/knowledge">
                 {t("nav.knowledge")}
@@ -462,14 +452,14 @@ function WikiWorkbenchContent() {
   const modelList = models.data ?? [];
   const enabledModelOptions = modelList.map((profile) => ({
     value: profile.id,
-    label: `${profile.model}${profile.enabled ? "" : " (disabled)"}`,
+    label: `${profile.model}${profile.enabled ? "" : copy.modelDisabled}`,
     disabled: !profile.enabled,
   }));
   const snapshotOptions = [
-    { value: "LATEST", label: "LATEST · newest server snapshot" },
+    { value: "LATEST", label: copy.latestSnapshot },
     ...(snapshots.data ?? []).map((snapshot) => ({
       value: snapshot.id,
-      label: `${shortId(snapshot.id)} · ${formatNumber(snapshot.item_count)} items`,
+      label: `${shortId(snapshot.id)} · ${copy.snapshotItems(formatNumber(snapshot.item_count))}`,
     })),
   ];
 
@@ -477,9 +467,9 @@ function WikiWorkbenchContent() {
     <div className="page">
       <header className="page-header">
         <div>
-          <h1>Wiki workbench</h1>
+          <h1>{copy.title}</h1>
           <p className="page-lead">
-            Compile source-backed pages, review lint, publish explicitly, and query a fixed Wiki binding.
+            {copy.lead}
           </p>
         </div>
         <div className="page-actions">
@@ -491,13 +481,13 @@ function WikiWorkbenchContent() {
 
       <div className="page-toolbar">
         <label>
-          Knowledge base
+          {copy.knowledgeBase}
           <Select
             value={selectedKbId}
             onChange={setSelectedKbId}
             options={(bases.data ?? []).map((base) => ({ value: base.id, label: base.name }))}
-            placeholder="Select a knowledge base"
-            ariaLabel="Wiki knowledge base"
+            placeholder={copy.selectKnowledgeBase}
+            ariaLabel={copy.wikiKnowledgeBaseAria}
           />
         </label>
       </div>
@@ -507,7 +497,7 @@ function WikiWorkbenchContent() {
       {bases.error && (
         <ErrorState
           code={bases.error.code}
-          message={bases.error.message || "Could not load knowledge bases."}
+          message={bases.error.message || copy.loadBases}
           hint={errorHintKey(bases.error) ? t(errorHintKey(bases.error)!) : undefined}
           onRetry={bases.reload}
         />
@@ -528,8 +518,8 @@ function WikiWorkbenchContent() {
       {selectedKbId && (
         <>
           <Panel
-            title="Compilations"
-            ariaLabel="Wiki compilations"
+            title={copy.compilations}
+            ariaLabel={copy.wikiCompilationsAria}
             actions={
               canEdit ? (
                 <button
@@ -537,69 +527,69 @@ function WikiWorkbenchContent() {
                   className="button button-primary"
                   onClick={() => setShowCompileForm((current) => !current)}
                 >
-                  New compilation
+                  {copy.newCompilation}
                 </button>
               ) : undefined
             }
           >
             {canEdit && showCompileForm && (
               <form className="eval-form" onSubmit={createWikiCompilation} noValidate>
-                <p className="eval-form-title">Compile a frozen source snapshot</p>
+                <p className="eval-form-title">{copy.compileSnapshotTitle}</p>
                 <div className="form-grid">
                   <label>
-                    Model profile
+                    {copy.modelProfile}
                     <Select
                       value={compileModelId}
                       onChange={setCompileModelId}
                       options={enabledModelOptions}
                       placeholder={
-                        models.loading ? "Loading profiles…" : "Configure an enabled model profile"
+                        models.loading ? copy.loadingProfiles : copy.configureModel
                       }
                       disabled={models.loading}
-                      ariaLabel="Compilation model profile"
+                      ariaLabel={copy.compileModelProfileAria}
                     />
                   </label>
                   <label>
-                    Source snapshot
+                    {copy.sourceSnapshot}
                     <Select
                       value={sourceSnapshotId}
                       onChange={setSourceSnapshotId}
                       options={snapshotOptions}
                       disabled={snapshots.loading}
-                      ariaLabel="Wiki source snapshot"
+                      ariaLabel={copy.wikiSourceSnapshotAria}
                     />
                   </label>
                   <label>
-                    Output contract
+                    {copy.outputContract}
                     <Select
                       value={outputMode}
                       onChange={(value) =>
                         setOutputMode(value as "PROMPT_JSON" | "JSON_SCHEMA")
                       }
                       options={[
-                        { value: "PROMPT_JSON", label: "Prompt JSON" },
-                        { value: "JSON_SCHEMA", label: "Native JSON schema" },
+                        { value: "PROMPT_JSON", label: copy.promptJson },
+                        { value: "JSON_SCHEMA", label: copy.nativeJson },
                       ]}
-                      ariaLabel="Compilation output mode"
+                      ariaLabel={copy.compilationOutputModeAria}
                     />
                   </label>
                   <label>
-                    Conflict review
+                    {copy.conflictReview}
                     <Select
                       value={reviewMode}
                       onChange={(value) => setReviewMode(value as "BASIC" | "MODEL")}
                       options={[
-                        { value: "BASIC", label: "Basic deterministic review" },
-                        { value: "MODEL", label: "Model-assisted review" },
+                        { value: "BASIC", label: copy.basicReview },
+                        { value: "MODEL", label: copy.modelReview },
                       ]}
-                      ariaLabel="Conflicts review mode"
+                      ariaLabel={copy.conflictsReviewModeAria}
                     />
                   </label>
                 </div>
                 {models.error && (
                   <ErrorState
                     code={models.error.code}
-                    message={models.error.message || "Could not load model profiles."}
+                    message={models.error.message || copy.loadModels}
                     hint={errorHintKey(models.error) ? t(errorHintKey(models.error)!) : undefined}
                     onRetry={models.reload}
                   />
@@ -607,7 +597,7 @@ function WikiWorkbenchContent() {
                 {snapshots.error && (
                   <ErrorState
                     code={snapshots.error.code}
-                    message={snapshots.error.message || "Could not load source snapshots."}
+                    message={snapshots.error.message || copy.loadSnapshots}
                     hint={
                       errorHintKey(snapshots.error) ? t(errorHintKey(snapshots.error)!) : undefined
                     }
@@ -615,7 +605,7 @@ function WikiWorkbenchContent() {
                   />
                 )}
                 <p className="state-hint">
-                  Compilation never publishes automatically. The server returns the durable job state.
+                  {copy.neverPublishAutomatically}
                 </p>
                 <InlineError
                   error={createMutation.error}
@@ -632,7 +622,7 @@ function WikiWorkbenchContent() {
                       models.loading
                     }
                   >
-                    {createMutation.pending ? "Requesting…" : "Create compilation"}
+                    {createMutation.pending ? copy.requesting : copy.createCompilation}
                   </button>
                   <button
                     type="button"
@@ -649,7 +639,7 @@ function WikiWorkbenchContent() {
             {compilations.error && (
               <ErrorState
                 code={compilations.error.code}
-                message={compilations.error.message || "Could not load Wiki compilations."}
+                message={compilations.error.message || copy.loadCompilations}
                 hint={
                   errorHintKey(compilations.error)
                     ? t(errorHintKey(compilations.error)!)
@@ -663,11 +653,11 @@ function WikiWorkbenchContent() {
               !compilations.error &&
               compilationList.length === 0 && (
                 <EmptyState
-                  title="No compilations"
+                  title={copy.noCompilations}
                   hint={
                     canEdit
-                      ? "Create a compilation from a ready knowledge snapshot."
-                      : "No published or reviewable Wiki compilation is available."
+                      ? copy.createCompilationHint
+                      : copy.readOnlyCompilationHint
                   }
                 />
               )}
@@ -679,7 +669,7 @@ function WikiWorkbenchContent() {
                     <tr>
                       <th scope="col">{t("common.id")}</th>
                       <th scope="col">{t("runs.columns.status")}</th>
-                      <th scope="col">Attempts</th>
+                      <th scope="col">{copy.attempts}</th>
                       <th scope="col">{t("common.created")}</th>
                       <th scope="col">{t("common.actions")}</th>
                     </tr>
@@ -693,7 +683,7 @@ function WikiWorkbenchContent() {
                         <td data-label={t("runs.columns.status")}>
                           <StatusBadge status={compilation.status} />
                         </td>
-                        <td data-label="Attempts" className="numeric-cell">
+                        <td data-label={copy.attempts} className="numeric-cell">
                           {formatNumber(compilation.attempt_count)}
                         </td>
                         <td data-label={t("common.created")}>
@@ -705,7 +695,7 @@ function WikiWorkbenchContent() {
                             className="button button-ghost"
                             onClick={() => setSelectedCompilationId(compilation.id)}
                           >
-                            {selectedCompilationId === compilation.id ? "Selected" : "Review"}
+                            {selectedCompilationId === compilation.id ? copy.selected : copy.review}
                           </button>
                         </td>
                       </tr>
@@ -718,9 +708,9 @@ function WikiWorkbenchContent() {
 
           {selectedCompilation ? (
             <Panel
-              title="Compilation review"
+              title={copy.compilationReview}
               eyebrow={`ID ${shortId(selectedCompilation.id)}`}
-              ariaLabel="Selected Wiki compilation"
+              ariaLabel={copy.selectedCompilationAria}
               actions={
                 canEdit && selectedCompilation.status === "FAILED" ? (
                   <button
@@ -729,7 +719,7 @@ function WikiWorkbenchContent() {
                     onClick={() => void retrySelectedCompilation()}
                     disabled={compilationMutation.pending}
                   >
-                    {compilationMutation.pending ? "Retrying…" : "Retry failed compilation"}
+                    {compilationMutation.pending ? copy.retrying : copy.retryFailed}
                   </button>
                 ) : canEdit && selectedCompilation.status === "READY" ? (
                   <button
@@ -738,7 +728,7 @@ function WikiWorkbenchContent() {
                     onClick={() => setPublishConfirm(true)}
                     disabled={compilationMutation.pending || publishConfirm}
                   >
-                    Publish…
+                    {copy.publishOpening}
                   </button>
                 ) : undefined
               }
@@ -750,28 +740,28 @@ function WikiWorkbenchContent() {
                     <StatusBadge status={selectedCompilation.status} />
                   </div>
                   <div className="key-value-row">
-                    <span>Source snapshot</span>
+                    <span>{copy.sourceSnapshot}</span>
                     <HashValue
                       value={selectedCompilation.source_snapshot_id}
-                      label="Source snapshot"
+                      label={copy.sourceSnapshot}
                     />
                   </div>
                   <div className="key-value-row">
-                    <span>Source hash</span>
+                    <span>{copy.sourceHash}</span>
                     <HashValue
                       value={selectedCompilation.source_snapshot_hash}
-                      label="Source hash"
+                      label={copy.sourceHash}
                     />
                   </div>
                   <div className="key-value-row">
-                    <span>Content hash</span>
+                    <span>{copy.contentHash}</span>
                     <HashValue
                       value={selectedCompilation.content_hash}
-                      label="Content hash"
+                      label={copy.contentHash}
                     />
                   </div>
                   <div className="key-value-row">
-                    <span>Published</span>
+                    <span>{copy.published}</span>
                     <span>
                       {selectedCompilation.published_at
                         ? formatDateTime(selectedCompilation.published_at)
@@ -780,21 +770,21 @@ function WikiWorkbenchContent() {
                   </div>
                 </div>
                 <p className="approval-state-meta">
-                  {statusGuidance(selectedCompilation.status)}
+                  {statusGuidance(selectedCompilation.status, copy)}
                 </p>
                 {selectedCompilation.error_code && (
                   <p className="inline-error" role="alert">
-                    Failure code <code className="state-code">{selectedCompilation.error_code}</code>
+                    {copy.failureCode} <code className="state-code">{selectedCompilation.error_code}</code>
                   </p>
                 )}
               </div>
 
               {publishConfirm && (
                 <InlineConfirm
-                  title="Publish this Wiki compilation?"
-                  text="Publication freezes the reviewed pages and their source evidence for consumers. Lint errors still block the server-side action."
-                  confirmLabel="Publish"
-                  pendingLabel="Publishing…"
+                  title={copy.publishTitle}
+                  text={copy.publishText}
+                  confirmLabel={copy.publishConfirm}
+                  pendingLabel={copy.publishing}
                   cancelLabel={t("session.cancel")}
                   onConfirm={() => void publishSelectedCompilation()}
                   onCancel={() => setPublishConfirm(false)}
@@ -810,7 +800,7 @@ function WikiWorkbenchContent() {
                 <div
                   className="tab-strip"
                   role="tablist"
-                  aria-label="Wiki compilation review sections"
+                  aria-label={copy.tabsAria}
                 >
                   <button
                     type="button"
@@ -819,7 +809,7 @@ function WikiWorkbenchContent() {
                     className={activeTab === "pages" ? "button button-primary" : "button button-ghost"}
                     onClick={() => setActiveTab("pages")}
                   >
-                    Pages
+                    {copy.pagesTab}
                   </button>
                   <button
                     type="button"
@@ -828,7 +818,7 @@ function WikiWorkbenchContent() {
                     className={activeTab === "lint" ? "button button-primary" : "button button-ghost"}
                     onClick={() => setActiveTab("lint")}
                   >
-                    Lint
+                    {copy.lintTab}
                   </button>
                   {selectedCompilation.status === "PUBLISHED" && (
                     <button
@@ -840,18 +830,18 @@ function WikiWorkbenchContent() {
                       }
                       onClick={() => setActiveTab("query")}
                     >
-                      Query
+                      {copy.queryTab}
                     </button>
                   )}
                 </div>
               )}
 
               {activeTab === "pages" && canInspectSelected && (
-                <section aria-label="Wiki pages">
+                <section aria-label={copy.pagesAria}>
                   {pages.error && (
                     <ErrorState
                       code={pages.error.code}
-                      message={pages.error.message || "Could not load compiled Wiki pages."}
+                      message={pages.error.message || copy.loadPages}
                       hint={errorHintKey(pages.error) ? t(errorHintKey(pages.error)!) : undefined}
                       onRetry={pages.reload}
                     />
@@ -859,8 +849,8 @@ function WikiWorkbenchContent() {
                   {pages.loading && !pages.error && <LoadingState />}
                   {pages.loaded && !pages.error && pageList.length === 0 && (
                     <EmptyState
-                      title="No compiled pages"
-                      hint="The server has not produced reviewable pages for this compilation."
+                      title={copy.noPages}
+                      hint={copy.noPagesHint}
                     />
                   )}
                   {pageList.length > 0 && (
@@ -889,15 +879,15 @@ function WikiWorkbenchContent() {
                             <div>
                               <h3>{selectedPage.title}</h3>
                               <p className="state-hint">
-                                {selectedPage.kind} · {selectedPage.claims.length} source claims
+                                {selectedPage.kind} · {copy.sourceClaims(selectedPage.claims.length)}
                               </p>
                             </div>
-                            <HashValue value={selectedPage.page_key} label="Wiki page key" />
+                            <HashValue value={selectedPage.page_key} label={copy.pageKey} />
                           </div>
                           <Markdown text={selectedPage.markdown} />
                           {selectedPage.relations.length > 0 && (
                             <p className="evidence-meta">
-                              <span>Relations</span>
+                              <span>{copy.relations}</span>
                               {selectedPage.relations.map((relation, index) => (
                                 <code key={`${relationTarget(relation)}:${index}`}>
                                   {shortId(relationTarget(relation))}
@@ -906,35 +896,35 @@ function WikiWorkbenchContent() {
                             </p>
                           )}
                           <details className="advanced-options">
-                            <summary>Structured source claims</summary>
+                            <summary>{copy.structuredClaims}</summary>
                             <div className="data-table">
                               <table>
                                 <thead>
                                   <tr>
-                                    <th scope="col">Quote</th>
-                                    <th scope="col">Predicate / value</th>
-                                    <th scope="col">Source revision</th>
-                                    <th scope="col">Conflict</th>
+                                    <th scope="col">{copy.quote}</th>
+                                    <th scope="col">{copy.predicateValue}</th>
+                                    <th scope="col">{copy.sourceRevision}</th>
+                                    <th scope="col">{copy.conflict}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {selectedPage.claims.map((claim, index) => (
                                     <tr key={`${claim.chunk_id}:${index}`}>
-                                      <td data-label="Quote">{claim.quote}</td>
-                                      <td data-label="Predicate / value">
+                                      <td data-label={copy.quote}>{claim.quote}</td>
+                                      <td data-label={copy.predicateValue}>
                                         <code>{displayValue(claim.predicate)}</code>
                                         <span className="state-hint">
                                           {displayValue(claim.value)}
                                         </span>
                                       </td>
-                                      <td data-label="Source revision">
+                                      <td data-label={copy.sourceRevision}>
                                         <HashValue
                                           value={claim.document_revision_id}
-                                          label="Source revision"
+                                          label={copy.sourceRevision}
                                         />
                                       </td>
-                                      <td data-label="Conflict">
-                                        {claim.conflict ? "Needs review" : t("common.none")}
+                                      <td data-label={copy.conflict}>
+                                        {claim.conflict ? copy.needsReview : t("common.none")}
                                       </td>
                                     </tr>
                                   ))}
@@ -950,11 +940,11 @@ function WikiWorkbenchContent() {
               )}
 
               {activeTab === "lint" && canInspectSelected && (
-                <section aria-label="Wiki lint">
+                <section aria-label={copy.lintAria}>
                   {lint.error && (
                     <ErrorState
                       code={lint.error.code}
-                      message={lint.error.message || "Could not load the Wiki lint report."}
+                      message={lint.error.message || copy.loadLint}
                       hint={errorHintKey(lint.error) ? t(errorHintKey(lint.error)!) : undefined}
                       onRetry={lint.reload}
                     />
@@ -962,7 +952,7 @@ function WikiWorkbenchContent() {
                   {lint.loading && !lint.error && <LoadingState />}
                   {lint.loaded && !lint.error && lintIssues.length === 0 && (
                     <p className="inline-notice">
-                      The server reports no lint issues for this compilation.
+                      {copy.noLint}
                     </p>
                   )}
                   {lintIssues.length > 0 && (
@@ -970,23 +960,23 @@ function WikiWorkbenchContent() {
                       <table>
                         <thead>
                           <tr>
-                            <th scope="col">Severity</th>
-                            <th scope="col">Code</th>
-                            <th scope="col">Page key</th>
+                            <th scope="col">{copy.severity}</th>
+                            <th scope="col">{copy.code}</th>
+                            <th scope="col">{copy.pageKeyLabel}</th>
                           </tr>
                         </thead>
                         <tbody>
                           {lintIssues.map((issue, index) => (
                             <tr key={`${issue.code}:${issue.page_key ?? ""}:${index}`}>
-                              <td data-label="Severity">
+                              <td data-label={copy.severity}>
                                 <StatusBadge status={issue.severity.toUpperCase()} />
                               </td>
-                              <td data-label="Code">
+                              <td data-label={copy.code}>
                                 <code>{issue.code}</code>
                               </td>
-                              <td data-label="Page key">
+                              <td data-label={copy.pageKeyLabel}>
                                 {issue.page_key ? (
-                                  <HashValue value={issue.page_key} label="Lint page key" />
+                                  <HashValue value={issue.page_key} label={copy.lintPageKey} />
                                 ) : (
                                   t("common.none")
                                 )}
@@ -1001,22 +991,22 @@ function WikiWorkbenchContent() {
               )}
 
               {activeTab === "query" && selectedCompilation.status === "PUBLISHED" && (
-                <section aria-label="Query published Wiki">
+                <section aria-label={copy.queryAria}>
                   <form className="eval-form" onSubmit={submitWikiQuery} noValidate>
                     <div className="form-grid">
                       <label className="query-field">
-                        Query
+                        {copy.queryTab}
                         <textarea
                           value={queryInput}
                           onChange={(event) =>
                             invalidateQuery(() => setQueryInput(event.target.value))
                           }
                           maxLength={4000}
-                          placeholder="Ask against this fixed Wiki publication…"
+                          placeholder={copy.queryPlaceholder}
                         />
                       </label>
                       <label>
-                        Route mode
+                        {copy.routeMode}
                         <Select
                           value={queryMode}
                           onChange={(value) =>
@@ -1028,22 +1018,22 @@ function WikiWorkbenchContent() {
                             { value: "RAG", label: "RAG" },
                             { value: "HYBRID", label: "HYBRID" },
                           ]}
-                          ariaLabel="Wiki query mode"
+                          ariaLabel={copy.queryModeAria}
                         />
                       </label>
                       <label>
-                        Intent
+                        {copy.intent}
                         <Select
                           value={queryIntent}
                           onChange={(value) =>
                             invalidateQuery(() => setQueryIntent(value as QueryIntent))
                           }
                           options={[
-                            { value: "overview", label: "Overview" },
-                            { value: "fact", label: "Fact" },
-                            { value: "synthesis", label: "Synthesis" },
+                            { value: "overview", label: copy.intents.overview },
+                            { value: "fact", label: copy.intents.fact },
+                            { value: "synthesis", label: copy.intents.synthesis },
                           ]}
-                          ariaLabel="Wiki query intent"
+                          ariaLabel={copy.queryIntentAria}
                         />
                       </label>
                       <label className="rule-checkbox">
@@ -1054,7 +1044,7 @@ function WikiWorkbenchContent() {
                             invalidateQuery(() => setRequireCurrent(event.target.checked))
                           }
                         />
-                        Require current source revision
+                        {copy.requireCurrent}
                       </label>
                       <label className="rule-checkbox">
                         <input
@@ -1064,19 +1054,19 @@ function WikiWorkbenchContent() {
                             invalidateQuery(() => setGenerateAnswer(event.target.checked))
                           }
                         />
-                        Generate a cited answer
+                        {copy.generateAnswer}
                       </label>
                       {generateAnswer && (
                         <label>
-                          Answer model profile
+                          {copy.answerModel}
                           <Select
                             value={queryModelId}
                             onChange={(value) =>
                               invalidateQuery(() => setQueryModelId(value))
                             }
                             options={enabledModelOptions}
-                            placeholder="Configure a model profile"
-                            ariaLabel="Wiki answer model profile"
+                            placeholder={copy.configureAnswerModel}
+                            ariaLabel={copy.answerModelAria}
                           />
                         </label>
                       )}
@@ -1095,7 +1085,7 @@ function WikiWorkbenchContent() {
                           (generateAnswer && !queryModelId)
                         }
                       >
-                        {queryMutation.pending ? "Querying…" : "Run query"}
+                        {queryMutation.pending ? copy.querying : copy.runQuery}
                       </button>
                     </div>
                   </form>
@@ -1104,24 +1094,24 @@ function WikiWorkbenchContent() {
                     <div className="playground-stage">
                       <div className="playground-overview">
                         <div>
-                          <span>Route</span>
+                          <span>{copy.route}</span>
                           <strong>{visibleQuery.route}</strong>
                         </div>
                         <div>
-                          <span>Evidence</span>
+                          <span>{copy.evidence}</span>
                           <strong>{formatNumber(visibleQuery.evidence.length)}</strong>
                         </div>
                         <div>
-                          <span>Conflicts</span>
+                          <span>{copy.conflicts}</span>
                           <strong>{formatNumber(visibleQuery.conflicts.length)}</strong>
                         </div>
                       </div>
                       {visibleQuery.insufficient_evidence && (
                         <p className="inline-error">
-                          The server marked this answer as insufficiently evidenced.
+                          {copy.insufficientEvidence}
                         </p>
                       )}
-                      <h3>Answer</h3>
+                      <h3>{copy.answer}</h3>
                       <Markdown
                         text={
                           visibleQuery.generated_answer?.answer ??
@@ -1133,10 +1123,10 @@ function WikiWorkbenchContent() {
                           <table>
                             <thead>
                               <tr>
-                                <th scope="col">Evidence</th>
-                                <th scope="col">Origin</th>
-                                <th scope="col">Source revision</th>
-                                <th scope="col">Conflict</th>
+                                <th scope="col">{copy.evidence}</th>
+                                <th scope="col">{copy.origin}</th>
+                                <th scope="col">{copy.evidenceSourceRevision}</th>
+                                <th scope="col">{copy.conflict}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1144,6 +1134,8 @@ function WikiWorkbenchContent() {
                                 <EvidenceRow
                                   key={`${evidence.chunk_id}:${index}`}
                                   evidence={evidence}
+                                  copy={copy}
+                                  noneLabel={t("common.none")}
                                 />
                               ))}
                             </tbody>
@@ -1156,10 +1148,10 @@ function WikiWorkbenchContent() {
               )}
             </Panel>
           ) : (
-            <Panel title="Compilation review">
+            <Panel title={copy.compilationReview}>
               <EmptyState
-                title="No compilation selected"
-                hint="Select a compilation from the server-backed list to review it."
+                title={copy.noCompilationTitle}
+                hint={copy.noCompilationHint}
               />
             </Panel>
           )}
@@ -1169,18 +1161,30 @@ function WikiWorkbenchContent() {
   );
 }
 
-function EvidenceRow({ evidence }: { evidence: WikiEvidence }) {
-  const { t } = useI18n();
+function EvidenceRow({
+  evidence,
+  copy,
+  noneLabel,
+}: {
+  evidence: WikiEvidence;
+  copy: WikiWorkbenchCopy;
+  noneLabel: string;
+}) {
   return (
     <tr>
-      <td data-label="Evidence">{evidence.quote}</td>
-      <td data-label="Origin">
-        <code>{evidence.origin ?? evidence.source ?? t("common.none")}</code>
+      <td data-label={copy.evidence}>{evidence.quote}</td>
+      <td data-label={copy.origin}>
+        <code>{evidence.origin ?? evidence.source ?? noneLabel}</code>
       </td>
-      <td data-label="Source revision">
-        <HashValue value={evidence.document_revision_id} label="Evidence source revision" />
+      <td data-label={copy.evidenceSourceRevision}>
+        <HashValue
+          value={evidence.document_revision_id}
+          label={copy.evidenceSourceRevision}
+        />
       </td>
-      <td data-label="Conflict">{evidence.conflict ? "Needs review" : t("common.none")}</td>
+      <td data-label={copy.conflict}>
+        {evidence.conflict ? copy.needsReview : noneLabel}
+      </td>
     </tr>
   );
 }
