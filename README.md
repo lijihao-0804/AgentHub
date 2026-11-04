@@ -4,14 +4,15 @@
 
 AgentHub 让一次请求经历上下文准备、模型推理、工具治理、持久审批和执行观测。模型提出操作，运行时决定是否执行；审批等待与恢复共享同一 Run，历史配置、知识和记忆输入可追溯。
 
-架构是 **Modular Monolith + Worker**：Next.js、FastAPI、LangGraph 适配器、PostgreSQL、Redis 和 Qdrant。Enterprise 描述治理场景；真实企业生产规模和完整公网部署尚未证明。截至 2026-11-04，AE6b 交互评测持久化闭环（PR #7）和 AE10 最小评测结果界面（PR #8）已合并到 main。
+架构是 **Modular Monolith + Worker**：Next.js、FastAPI、LangGraph 适配器、PostgreSQL、Redis 和 Qdrant。Enterprise 描述治理场景；真实企业生产规模和完整公网部署尚未证明。截至 2026-11-05，AE6b（PR #7）、AE10（PR #8）和统一前端回归/文档修复（PR #9）已合并到 main。
 
 [当前状态](docs/current-state.md) · [AE6b 验收](docs/milestones/AE-6b-integration-closure.md) · [AE10 验收](docs/milestones/AE-10-minimal-evaluation-ui.md) · [能力证据矩阵](docs/milestones/AE-capability-matrix.md) · [未完成项盘点](docs/reviews/WIP-inventory-20261104.md)
 
 ## 当前主线
 
-- **代码与工程验收**：main 基线 `4d5de004c3ee3736360a93dd374f2069eafda0dc`；迁移 head 为 `0051_interactive_lifecycle`。AE6b 将 INTERACTIVE Experiment 接入正式 API、真实 PostgreSQL/Redis/Celery worker、逐 case 路由、租约 fencing、崩溃恢复、清理与 `UNKNOWN_OUTCOME` 留存；AE10 将实验运行、逐题结果、筛选分页和安全证据接到现有 Web 入口。
-- **当前 CI**：[main CI 41859097801](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) 通过，包括 531 个 integration、2846 个 non-integration；另有 35 个条件 skip（32 个 research 本地材料、2 个 Windows、1 个 fallback），不是把跳过改写成通过。
+- **代码与工程验收**：main 基线 `b30ee64987e9c7c1d9654a2a4ad059abc1a20851`；迁移 head 为 `0051_interactive_lifecycle`。AE6b 将 INTERACTIVE Experiment 接入正式 API、真实 PostgreSQL/Redis/Celery worker、逐 case 路由、租约 fencing、崩溃恢复、清理与 `UNKNOWN_OUTCOME` 留存；AE10 将实验运行、逐题结果、筛选分页和安全证据接到现有 Web 入口。
+- **后续开发**：[上下文、Memory 与 Wiki 候选](docs/reviews/context-memory-delivery-20261105.md)提供配置编辑器、Wiki 工作台/绑定和故障恢复修复，候选迁移为 `0052`；独立分支验证与 main/部署状态分开记录。真实质量研究 [PR #10](https://github.com/lijihao-0804/AgentHub/pull/10)保留 DEV 负结果，未进入 HOLDOUT。
+- **当前 CI**：[main CI 41895415453](https://github.com/lijihao-0804/AgentHub/actions/runs/41895415453) 已通过。PR #9 最终候选另有 531 integration、2846 non-integration passed 和 35 条件 skip 的交付记录；跳过不改写为通过。
 - **已有但需准确表述的能力**：Dashboard 已展示 p50/p95、运行趋势、失败与版本维度；worker/beat 已接内部审批、知识、Wiki、评测对账；Memory 读取会过滤 `expires_at` 已过期条目。内部对账不等于外部副作用自动确认，过期过滤也不等于完整 TTL/物理清理。
 - **证据分层**：真实模型质量仍有受控小样本证据，已有 3 case/K=1 与 2 case/K=2，不能推出总体准确率；统计门禁的具体规则、原始 JSON 与 PASS/FAIL/INCONCLUSIVE 分类以 [能力矩阵](docs/milestones/AE-capability-matrix.md) 为准，本入口不把少量真实 PASS 泛化为全面通过。
 - **生产边界**：AE6b/AE10 主要是本机隔离栈与远端 CI 的工程验收。完整公网部署、资源饱和容量、长期运营、供应商账单和真实企业收益仍未证明。

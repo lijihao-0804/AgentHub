@@ -9,6 +9,9 @@ const frontendChecks = [
   ['ae10-run-permissions-gates', 'test_ae10_ui.cjs'],
   ['ae10-case-evidence', 'test_ae10_case_components.cjs'],
   ['ae10-readonly', 'test_ae10_readonly.cjs'],
+  ['context-policy-editor', 'test_context_policy_ui.cjs'],
+  ['wiki-workbench', 'test_wiki_workbench.cjs'],
+  ['agent-wiki-binding', 'test_agent_wiki_binding.cjs'],
 ].map(([name, file]) => ({ name, command: process.execPath, args: [path.join(__dirname, file)] }));
 
 function runChecks(checks) {
@@ -35,7 +38,7 @@ function runChecks(checks) {
 function main(args) {
   if (args.length === 1 && args[0] === '--help') {
     console.log('node scripts/test_web_regressions.cjs [--with-api-evidence]');
-    console.log('Default: current web contracts plus all four AE-10 suites.');
+    console.log('Default: current web contracts, all four AE-10 suites, context policy and Wiki editors.');
     console.log('--with-api-evidence also runs the real PostgreSQL owner/Viewer/pagination privacy regression.');
     console.log('It requires AGENTHUB_TEST_DATABASE_URL and AGENTHUB_TEST_PYTHON (existing project Python).');
     console.log('CI runs the frontend entry once and covers API evidence in its existing full backend integration job.');

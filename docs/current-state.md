@@ -1,8 +1,16 @@
 # AgentHub 当前状态与证据口径
 
-> 更新时间：2026-11-04。当前 main 基线：`4d5de004c3ee3736360a93dd374f2069eafda0dc`。AE6b 交互评测持久化闭环（PR #7）与 AE10 最小评测结果界面（PR #8）已合并；迁移 head 为 `0051_interactive_lifecycle`。
+> 更新时间：2026-11-05。当前 main 基线：`b30ee64987e9c7c1d9654a2a4ad059abc1a20851`。AE6b（PR #7）、AE10（PR #8）及文档/统一前端回归修复（PR #9）已合并；main 迁移 head 为 `0051_interactive_lifecycle`。
 
-> 当前 main CI：[41859097801](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) passed，包含 531 个 integration 与 2846 个 non-integration。另保留 35 个条件 skip：32 个 research 本地材料、2 个 Windows、1 个 fallback；skip 不等于运行通过。
+> 最新 main `b30ee64` 的 [CI 41895415453](https://github.com/lijihao-0804/AgentHub/actions/runs/41895415453) 已通过。PR #9 最终候选的 [PR CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41863776190) 与 [push CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41863681750) 均记录 531 integration、2846 non-integration passed；35 个条件 skip 为 32 research、2 Windows、1 fallback。skip 不等于运行通过。
+
+### 正在交付的后续开发
+
+[上下文、Memory 与 Wiki 交付记录](reviews/context-memory-delivery-20261105.md)对应独立分支 `codex/context-memory-delivery-20261105`：实现上下文草稿编辑、Wiki 工作台/Agent 绑定、运行时故障映射、流式 worker 路由与撤权、Memory owner/reconcile/晚到结果 fencing，以及显式词面过滤候选。候选新增迁移 `0052_memory_recovery_index`，与 main 已部署状态分开记录。
+
+前端统一八组回归与 production build（含类型检查）已通过；Memory 七个新故障用例使用真实隔离 PostgreSQL。新的词面策略不是语义相关性保证；自动摘要推广门和跨轮硬金额默认拒绝仍保留。旧 WIP 未清理。
+
+[T04 研究 PR #10](https://github.com/lijihao-0804/AgentHub/pull/10)仍为 draft：16 任务组、两变体、K=2 的 DEV 实验未达到预登记增益门槛，未派发 HOLDOUT；助手校准不能代替双人人工金标。旧实验与费用记录保留，不因本轮修复重算为通过。
 
 ## 当前结论
 
@@ -122,7 +130,7 @@ M7-G UI 实现存在；不因后续功能落地补造旧里程碑的独立验收
 
 ## 2. 当前工程验收与历史证据
 
-- **当前 CI**：[main run 41859097801](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) passed，531 integration + 2846 non-integration；35 个条件 skip 为 32 research、2 Windows、1 fallback。这里记录的是 main 的工程回归结果，不是模型质量分数。
+- **当前 CI**：[main run 41895415453](https://github.com/lijihao-0804/AgentHub/actions/runs/41895415453) passed；PR #9 最终候选的 531 integration + 2846 non-integration / 35 条件 skip 明细仍见其交付记录。这里记录的是工程回归结果，不是模型质量分数。
 - **当前交互评测链路**：[AE6b Integration Closure](milestones/AE-6b-integration-closure.md) 使用正式 API、真实 PostgreSQL/Redis/Celery broker/worker 和确定性 provider，覆盖逐 case 路由、双 worker 竞争、租约 fencing、四处进程退出重启、清理失败及未知写入留存。它不包含付费真实模型新增样本。
 - **当前结果界面**：[AE10](milestones/AE-10-minimal-evaluation-ui.md) 覆盖实验启动、摘要、逐题结果、筛选分页、权限、错误与 390px 视口；真实本地受控 Run 为 4 cases、2 个任务成功。P1/P2 收口分别处理 observation 隐私与 token 续期后的筛选/分页竞态。
 - **真实模型证据**：AE-Real-1 的 3-case 受控运行和 AE-Real-2 的 2-case × K=2 故障注入验证了真实 provider、审批、执行证据和恢复口径；它们只证明这些受控链路，不证明总体模型准确率。
@@ -169,7 +177,7 @@ M7-G UI 实现存在；不因后续功能落地补造旧里程碑的独立验收
 - 统计门禁的原始 JSON 和逐项分类以 [AE 能力证据矩阵](milestones/AE-capability-matrix.md) 为准；本页不代替矩阵，也不把少量真实 PASS 泛化为全面通过。
 - 未完成项与文档待核对项见 [WIP inventory 2026-11-04](reviews/WIP-inventory-20261104.md)。
 - 说明文档中的代码行号/规模数字有基线时点；现场面试优先看函数名、当前源码和新证据。
-- 本轮只做 Markdown 口径同步，保留历史记录；不重跑模型、负载、构建或浏览器矩阵。
+- 2026-11-04 的 T02/T03 文档同步保留历史记录；2026-11-05 的实现与实际验证范围另见[开发交付](reviews/context-memory-delivery-20261105.md)。
 
 GitHub About（2026-10-09 历史展示文案，原样保留）：
 

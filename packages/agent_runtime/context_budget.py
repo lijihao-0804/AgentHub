@@ -80,6 +80,7 @@ _PROJECTION_UNAVAILABLE = object()
 _MEMORY_KINDS = frozenset({"FACT", "PREFERENCE", "DECISION", "CONSTRAINT"})
 _MEMORY_ROOT_KEYS = frozenset({"data_trust", "memories", "note", "truncated", "trust"})
 _MEMORY_ITEM_KEYS = frozenset({"content", "id", "kind"})
+_APPROVAL_FACT_KEYS = frozenset({"approval_decision", "approval_execution"})
 _MEMORY_POOL_BUDGET = "MEMORY_POOL_BUDGET"
 _CONTEXT_WINDOW_BUDGET = "CONTEXT_WINDOW_BUDGET"
 _PRIORITY_JSON_KEYS = frozenset(
@@ -1533,6 +1534,18 @@ def _project_json_value(
             return _PROJECTION_UNAVAILABLE, True
         return projected, bool(normalized.get("truncated") or projected.get("truncated"))
     trust_fields: dict[str, Any] = {}
+    approval_keys_present = False
+    approval_fields: dict[str, str] = {}
+    if _root and category is ContextCategory.TOOL_RESULT and isinstance(normalized, Mapping):
+        approval_keys_present = bool(_APPROVAL_FACT_KEYS.intersection(normalized))
+        if _APPROVAL_FACT_KEYS.issubset(normalized):
+            decision = normalized["approval_decision"]
+            execution = normalized["approval_execution"]
+            if type(decision) is str and type(execution) is str:
+                approval_fields = {
+                    "approval_decision": decision,
+                    "approval_execution": execution,
+                }
     if _root and category in _UNTRUSTED_CATEGORIES:
         # Tool output and recalled memory are untrusted boundaries regardless
         # of labels supplied by the payload itself.  Never allow a payload to
@@ -1563,15 +1576,18 @@ def _project_json_value(
             business_value = {
                 key: item
                 for key, item in normalized.items()
-                if key not in {"trust", "data_trust", "truncated"}
+                if key not in {"trust", "data_trust", "truncated", *_APPROVAL_FACT_KEYS}
             }
         else:
             business_value = normalized
 
         def project_with_root_envelope(
             reserve_truncated: bool,
+            include_approval: bool,
         ) -> tuple[dict[str, Any], bool] | None:
             envelope = dict(trust_fields)
+            if include_approval:
+                envelope.update(approval_fields)
             if reserve_truncated:
                 envelope["truncated"] = True
             inner_budget = budget - _json_estimate(envelope, estimator)
@@ -1588,15 +1604,30 @@ def _project_json_value(
                 return None
 
             if isinstance(business_value, Mapping):
-                candidate = {**projected, **trust_fields}
+                candidate = {
+                    **projected,
+                    **trust_fields,
+                    **(approval_fields if include_approval else {}),
+                }
                 was_truncated = (
-                    child_truncated or original_truncated or len(projected) < len(business_value)
+                    child_truncated
+                    or original_truncated
+                    or len(projected) < len(business_value)
+                    or (approval_keys_present and not include_approval)
                 )
             elif isinstance(business_value, list):
-                candidate = {"items": projected, **trust_fields}
+                candidate = {
+                    "items": projected,
+                    **trust_fields,
+                    **(approval_fields if include_approval else {}),
+                }
                 was_truncated = child_truncated
             else:
-                candidate = {"value": projected, **trust_fields}
+                candidate = {
+                    "value": projected,
+                    **trust_fields,
+                    **(approval_fields if include_approval else {}),
+                }
                 was_truncated = child_truncated
             if was_truncated:
                 candidate["truncated"] = True
@@ -1604,12 +1635,23 @@ def _project_json_value(
                 return candidate, was_truncated
             return None
 
-        projected = project_with_root_envelope(reserve_truncated=False)
-        if projected is not None and not projected[1]:
-            return projected
-        projected = project_with_root_envelope(reserve_truncated=True)
-        if projected is not None:
-            return projected
+        # Approval decision and execution are one model-visible fact pair.
+        # Try to carry both as root metadata; if their combined cost does not
+        # fit, remove both and leave the normal truncated marker instead.
+        include_approvals = (True, False) if approval_fields else (False,)
+        for include_approval in include_approvals:
+            projected = project_with_root_envelope(
+                reserve_truncated=False,
+                include_approval=include_approval,
+            )
+            if projected is not None and not projected[1]:
+                return projected
+            projected = project_with_root_envelope(
+                reserve_truncated=True,
+                include_approval=include_approval,
+            )
+            if projected is not None:
+                return projected
         marker: dict[str, Any] = {"truncated": True}
         marker.update(trust_fields)
         if _json_estimate(marker, estimator) <= budget:
