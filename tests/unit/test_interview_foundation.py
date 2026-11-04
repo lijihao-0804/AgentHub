@@ -23,12 +23,23 @@ from packages.knowledge.contracts import (
 from packages.observability.noop import NoopTraceSpan
 from packages.observability.timing import capture_timings, mark_visible_text, timed_span
 
+LEGACY_CATEGORY_EVALUATORS = (
+    "approval-evaluator",
+    "citation-evaluator",
+    "failure-evaluator",
+    "retrieval-evaluator",
+    "tool-evaluator",
+)
+
 
 def registry(version="v2"):
     manifest = default_evaluator_manifest()
-    for key in manifest["evaluator_versions"]:
-        if key.endswith("-evaluator") and key != "support-postcondition-evaluator":
-            manifest["evaluator_versions"][key] = version
+    for key in LEGACY_CATEGORY_EVALUATORS:
+        manifest["evaluator_versions"][key] = version
+    if version == "v1":
+        # v1 manifests predate INTERACTIVE. Omit that later category without
+        # rewriting the independent trajectory, postcondition and judge entries.
+        manifest["evaluator_versions"].pop("interactive-evaluator", None)
     return EvaluatorRegistry().for_manifest(manifest)
 
 

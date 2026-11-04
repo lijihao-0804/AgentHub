@@ -54,6 +54,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --locked
+      - name: Prepare digest-pinned public tokenizer for counter tests
+        run: uv run --locked python -m tests.support.deepseek_assets --prepare-default
       - name: Wait for Qdrant
         run: |
           uv run --locked python - <<'PY'
