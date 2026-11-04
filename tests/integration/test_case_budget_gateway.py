@@ -53,6 +53,9 @@ from tests.integration.test_case_budget_ledger import (
 from tests.integration.test_case_budget_ledger import (
     migrated_database as migrated_database,
 )
+from tests.integration.test_case_budget_ledger import (
+    pytestmark as pytestmark,
+)
 from tests.integration.test_m7b_experiments import _manager_context
 
 ROUTE_PROVIDER = "openai-compatible"
