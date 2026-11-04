@@ -62,6 +62,7 @@ from packages.agent_runtime.runtime_projection import (
     _TERMINAL_TOOL_ERRORS,
     AgentRunState,
     _append_tool_call_delta,
+    _approval_state_facts,
     _approval_tool_result,
     _bounded_tool_result,
     _categorize_messages,
@@ -121,6 +122,12 @@ from packages.memory.contracts import (
     SelectedMemory,
     memory_content_hash,
 )
+from packages.memory.selection_policy import (
+    MEMORY_SELECTION_LIMITATION_CODES,
+    SUPPORTED_MEMORY_SELECTION_POLICIES,
+    InvalidMemorySelectionPolicy,
+    apply_memory_selection_policy,
+)
 from packages.model_gateway.contracts import (
     ModelGateway,
     ModelMessage,
@@ -152,6 +159,26 @@ if TYPE_CHECKING:
     from packages.agent_runtime.runtime_service import AgentRunService
 
 logger = logging.getLogger(__name__)
+
+_NEEDS_ATTENTION_CONTEXT_FAILURES = frozenset(
+    {
+        "RUN_ACTOR_ACCESS_REVOKED",
+        "RUN_EXECUTION_LEASE_LOST",
+        "UNKNOWN_OUTCOME",
+        "ACTION_OUTCOME_UNKNOWN",
+        "ACTION_RECONCILIATION_REQUIRED",
+    }
+)
+
+
+def _context_runtime_failure_fields(error_code: str) -> dict[str, str]:
+    """Map terminal context errors without consulting summary policy."""
+    failure_code = "RUN_ACTOR_ACCESS_REVOKED" if error_code == "FORBIDDEN" else error_code
+    fields = {"failure_code": failure_code}
+    if failure_code in _NEEDS_ATTENTION_CONTEXT_FAILURES:
+        fields["run_status"] = "NEEDS_ATTENTION"
+    return fields
+
 
 SUMMARY_HISTORICAL_CONTEXT_GOAL = (
     "整理给定的已完成历史交流，作为未来未指定任务的背景。"
@@ -407,10 +434,24 @@ class _AgentRunGraph:
         """
 
         selector = self.service.memory_selector
-        if not spec.runtime.get("memory", {}).get("long_term_memory", False):
+        memory_config = spec.runtime.get("memory", {})
+        if not memory_config.get("long_term_memory", False):
             return [], None
         if selector is None:
             return [], None
+        selection_policy = memory_config.get("selection_policy")
+        if (
+            selection_policy is not None
+            and (
+                not isinstance(selection_policy, str)
+                or selection_policy not in SUPPORTED_MEMORY_SELECTION_POLICIES
+            )
+        ):
+            raise AgentHubError(
+                "INVALID_MEMORY_SELECTION_POLICY",
+                "The frozen memory selection policy is unsupported.",
+                422,
+            )
         snapshot = getattr(self.run, "effective_memory_snapshot", None) or {}
         if not isinstance(snapshot, Mapping):
             raise AgentHubError(
@@ -459,18 +500,40 @@ class _AgentRunGraph:
                     422,
                 ) from error
         else:
-            selected = await selector.select(
+            candidates = await selector.select(
                 workspace_id=workspace_id,
                 agent_id=agent_id,
                 query=self.run.input_text,
                 limit=MAX_INJECTED_MEMORIES,
             )
+            try:
+                selected = apply_memory_selection_policy(
+                    candidates,
+                    query=self.run.input_text,
+                    policy=selection_policy,
+                )
+            except InvalidMemorySelectionPolicy as error:
+                raise AgentHubError(
+                    "INVALID_MEMORY_SELECTION_POLICY",
+                    "The frozen memory selection policy is unsupported.",
+                    422,
+                ) from error
             await self._freeze_memory_snapshot(selected, workspace_id=workspace_id)
             memory_ids = tuple(item.id for item in selected)
         metadata = {
             "memory_count": len(selected),
             "replayed_from_snapshot": frozen,
         }
+        if selection_policy is not None:
+            metadata["memory_selection"] = {
+                "policy": selection_policy,
+                "source": "FROZEN_SNAPSHOT" if frozen else "LIVE_SELECTION",
+                "filter_applied": not frozen,
+                "semantic_relevance": False,
+                "limitations": list(MEMORY_SELECTION_LIMITATION_CODES),
+                **({} if frozen else {"candidate_count": len(candidates)}),
+                "selected_count": len(selected),
+            }
         if not selected:
             return [], metadata
         return [_memory_message(selected)], metadata
@@ -2473,19 +2536,7 @@ class _AgentRunGraph:
             )
             return {
                 "model_round_count": next_round,
-                "failure_code": (
-                    "RUN_ACTOR_ACCESS_REVOKED"
-                    if state["runtime"].get("summary_policy", {}).get("enabled") is True
-                    and error.code in {"FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    else error.code
-                ),
-                **(
-                    {"run_status": "NEEDS_ATTENTION"}
-                    if error.code
-                    in {"RUN_EXECUTION_LEASE_LOST", "FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    and state["runtime"].get("summary_policy", {}).get("enabled") is True
-                    else {}
-                ),
+                **_context_runtime_failure_fields(error.code),
             }
 
         _retain_admission(state, admission)
@@ -2661,19 +2712,7 @@ class _AgentRunGraph:
             return {
                 **evidence_update,
                 "model_round_count": next_round,
-                "failure_code": (
-                    "RUN_ACTOR_ACCESS_REVOKED"
-                    if state["runtime"].get("summary_policy", {}).get("enabled") is True
-                    and error.code in {"FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    else error.code
-                ),
-                **(
-                    {"run_status": "NEEDS_ATTENTION"}
-                    if error.code
-                    in {"RUN_EXECUTION_LEASE_LOST", "FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    and state["runtime"].get("summary_policy", {}).get("enabled") is True
-                    else {}
-                ),
+                **_context_runtime_failure_fields(error.code),
             }
         except Exception:
             await self.step(
@@ -3219,8 +3258,11 @@ class _AgentRunGraph:
                         }
                     }
                 if current.decision_status != ApprovalDecisionStatus.APPROVED:
+                    approval_facts = _approval_state_facts(current)
                     pre_observations[call_id] = ToolResult.failure(
-                        "TOOL_APPROVAL_DENIED", "The action was not approved."
+                        "TOOL_APPROVAL_DENIED",
+                        "The action was not approved.",
+                        **approval_facts,
                     )
                     continue
                 action_calls.append({"call": call, "approval_id": str(current.id)})
@@ -3394,13 +3436,14 @@ class _AgentRunGraph:
                     idempotency_key=claimed.idempotency_key,
                 )
                 if result.status is ActionExecutionStatus.UNKNOWN_OUTCOME:
-                    await self.service.approval_service.complete_execution(
+                    completed = await self.service.approval_service.complete_execution(
                         self.context,
                         approval_id,
                         status=ApprovalExecutionStatus.UNKNOWN_OUTCOME,
                         failure_code=result.failure_code,
                         safe_failure_message=result.safe_message,
                     )
+                    executed[call["tool_call_id"]] = _approval_tool_result(completed)
                     span_execution_status = ApprovalExecutionStatus.UNKNOWN_OUTCOME.value
                     span_status = "error"
                     span_failure_code = result.failure_code or "UNKNOWN_OUTCOME"
@@ -3423,7 +3466,7 @@ class _AgentRunGraph:
                     if result.status is ActionExecutionStatus.SUCCEEDED
                     else ApprovalExecutionStatus.FAILED
                 )
-                await self.service.approval_service.complete_execution(
+                completed = await self.service.approval_service.complete_execution(
                     self.context,
                     approval_id,
                     status=execution_status,
@@ -3444,14 +3487,7 @@ class _AgentRunGraph:
                 if result.status is ActionExecutionStatus.FAILED:
                     span_status = "error"
                     span_failure_code = result.failure_code or "ACTION_FAILED"
-                executed[call["tool_call_id"]] = (
-                    ToolResult.success(result.data)
-                    if result.status is ActionExecutionStatus.SUCCEEDED
-                    else ToolResult.failure(
-                        result.failure_code or "ACTION_FAILED",
-                        result.safe_message or "The action failed.",
-                    )
-                )
+                executed[call["tool_call_id"]] = _approval_tool_result(completed)
             finally:
                 await _safe_end_span(
                     execution_span,
@@ -3821,6 +3857,12 @@ class _AgentRunGraph:
                 payload = _bounded_tool_result(
                     result, max_tool_result_tokens=budget.max_tool_result_tokens
                 )
+            elif result.approval_decision is not None and result.approval_execution is not None:
+                payload = {
+                    **dict(payload),
+                    "approval_decision": result.approval_decision,
+                    "approval_execution": result.approval_execution,
+                }
             payload_text = (
                 json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
                 if rag_evidence_projected

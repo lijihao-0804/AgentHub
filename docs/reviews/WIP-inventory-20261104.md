@@ -1,5 +1,7 @@
 # 根目录 WIP 分类清单（2026-11-04）
 
+> 后续进展（2026-11-05）：Wiki/绑定/上下文 UI、流式 worker 路由、首次 worker 撤权、运行时错误映射、Memory owner/reconcile 已在独立分支重新实现并进行定向验收，见[新交付记录](context-memory-delivery-20261105.md)。本清单以下保留盘点当时的原始分类，根目录文件没有被搬走或清空。evidence 嵌套引用问题复核未复现：现有 AgentEvent 引用白名单只接受四个标量字段；历史 PINNED 取证保留符合产品可复现合同，因此没有按旧建议直接收紧历史读取。
+
 ## 范围与方法
 
 - 只读盘点根目录 `E:/JAVA/AI+agent/AgentHub` 的未提交改动和未跟踪文件；扫描命令以 `.worktrees` pathspec 排除，未递归进入其他 worktree。

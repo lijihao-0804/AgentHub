@@ -1,6 +1,6 @@
 # AgentHub 文档导航
 
-截至 2026-11-04，当前入口同步到 main `4d5de004c3ee3736360a93dd374f2069eafda0dc`：AE6b 交互评测持久化闭环（PR #7）和 AE10 最小评测结果界面（PR #8）均已合并，迁移 head 为 `0051_interactive_lifecycle`。main CI [41859097801](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) 通过：531 integration + 2846 non-integration；35 个条件 skip 分类保留为 32 research、2 Windows、1 fallback。
+截至 2026-11-05，当前入口同步到 main `b30ee64987e9c7c1d9654a2a4ad059abc1a20851`：AE6b（PR #7）、AE10（PR #8）及统一前端回归/文档修复（PR #9）已合并，main 迁移 head 为 `0051_interactive_lifecycle`。后续上下文/Memory/Wiki 分支、候选迁移 `0052` 与研究 draft 均在 [当前状态](current-state.md)单独记录。既有已完成 CI 为 531 integration + 2846 non-integration；35 个条件 skip 分类保留为 32 research、2 Windows、1 fallback。
 
 先看 [当前状态与证据口径](current-state.md)。它把代码与产品入口、工程验收、真实模型质量和生产部署分开说明；历史报告只代表各自日期与提交，不改写成当前总体结论。
 
@@ -12,6 +12,7 @@
 | 统计门禁的原始 JSON、逐项 PASS/FAIL/INCONCLUSIVE 与真实/契约分类 | [AE 能力证据矩阵](milestones/AE-capability-matrix.md) |
 | 本轮仍未完成或待核对的工作清单 | [WIP inventory 2026-11-04](reviews/WIP-inventory-20261104.md) |
 | 统一前端检查、API 隐私专项与旧断言迁移 | [T02/T03 交付及运行命令](reviews/post-ae10-delivery-20261104.md) |
+| 上下文配置、Wiki UI、Memory 恢复与显式候选策略 | [2026-11-05 开发交付](reviews/context-memory-delivery-20261105.md) |
 | 一次 Run 如何经过模块 | [架构](architecture.md)、[详细数据流](report/02-架构与数据流.md)、[学习路线](learning/README.md) |
 | 对外行为与数据归属 | [API contracts](api-contracts.md)、[data model](data-model.md) |
 | Dashboard、失败分析、审批与运行观测 | [M6 最终验收](milestones/M6-final-acceptance.md)、[观测指标口径](reviews/AgentHub-M-I1观测契约与指标口径-20261002.md) |

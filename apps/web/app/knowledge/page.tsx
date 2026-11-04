@@ -57,6 +57,9 @@ export default function KnowledgeBasesPage() {
       </header>
 
       <div className="page-toolbar">
+        <Link className="button button-ghost" href="/knowledge/wiki">
+          Wiki workbench
+        </Link>
         <Link className="button button-ghost" href="/knowledge/playground">
           {t("knowledge.openPlayground")}
         </Link>

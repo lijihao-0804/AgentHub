@@ -2,8 +2,8 @@
 
 > 目的：把“研究报告里写了什么”和“代码/测试/实机到底做到了什么”分开。每一行都必须能追到一个实现、一个测试和一个实机状态。
 >
-> 当前功能基线：2026-11-04，main `4d5de004c3ee3736360a93dd374f2069eafda0dc`（AE-10 [PR #8](https://github.com/lijihao-0804/AgentHub/pull/8) 已合并）；迁移 head `0051_interactive_lifecycle`。
-> 该 main 的 [完整 CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801)：531 integration passed / 0 skipped，2846 non-integration passed / 35 条件跳过。下表历史实验各自保留原分母、时点与证据等级，不相加为质量成绩。
+> 当前主线：2026-11-05，main `b30ee64987e9c7c1d9654a2a4ad059abc1a20851`（AE-10 PR #8、统一回归/文档 PR #9 已合并）；迁移 head `0051_interactive_lifecycle`，最新 [main CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41895415453) passed。
+> 后续上下文/Memory/Wiki 候选及迁移 0052 的独立状态见[开发交付](../reviews/context-memory-delivery-20261105.md)。历史 `4d5de00` 的 [CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) 为 531 integration passed / 0 skipped、2846 non-integration passed / 35 条件跳过；下表实验各自保留原分母、时点与证据等级，不相加为质量成绩。
 
 | 能力 | 实现 | 单元测试 | 真实 PostgreSQL | 真实模型 | 状态 / 已知限制 |
 | --- | --- | --- | --- | --- | --- |
