@@ -10,13 +10,16 @@ execution phases use the user-authorized Aliyun DeepSeek route and CNY 30 total 
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner prepare
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner calibration
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner preflight
-# For the explicit v2 measurement revision only, grade known retained runtime
-# trajectories once; this does not replay runtime, tools or approvals:
-python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner preflight-judge
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner dev
 # Only if dev-gate.json allows it; at most one persisted HOLDOUT exposure:
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner holdout
 ```
+
+The historical v2 measurement revision used `preflight-judge` instead of repeating
+`preflight`. This requires an explicit retained-runtime binding in the private prepared
+state and produces new grades without changing original case observations. It is not an
+additional step for a fresh study. Results and known protocol deviations are recorded in
+the report linked below; a successful process exit is not a quality-gate pass.
 
 Execution settings and raw synthetic requests/results stay in ignored
 `.scratch/quality-20261105/`. The physical HTTP client sends once, with retries and
@@ -221,5 +224,6 @@ be reported.
 8. Keep approval decisions scripted only through `expected.approval_decisions`, using an
    approver distinct from the run user.
 
-The package does not claim that T05, production deployment, or a formal result has been
-implemented.
+The executed DEV result is negative against its preregistered gain threshold. HOLDOUT
+stays sealed; no candidate is promoted. Human calibration and complete language-level
+stop coverage remain incomplete. This does not establish T05 or production reliability.
