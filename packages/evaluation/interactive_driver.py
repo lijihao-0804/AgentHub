@@ -14,7 +14,9 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from time import perf_counter
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
@@ -27,6 +29,16 @@ from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.environment import StateAssertion, TaskEnvironment
+from packages.evaluation.interactive_lifecycle import (
+    INTERACTIVE_DRIVER_VERSION,
+    CaseExecutionIdentity,
+    InteractiveLifecycle,
+)
+from packages.evaluation.interactive_observation import (
+    observation_envelope,
+    observation_from_envelope,
+    with_cleanup,
+)
 from packages.evaluation.models import EvaluationDatasetItem, EvaluationExperimentRun
 from packages.evaluation.runner import CaseExecutionObservation, PreparedCaseExecution
 from packages.evaluation.scenario_driver import ScriptedScenarioDriver
@@ -60,8 +72,7 @@ def simulator_from_item(
             opening_text=str(item.input["task"]),
             private_facts=private_facts,
             triggers={
-                str(k): [str(v) for v in values]
-                for k, values in dict(raw["triggers"]).items()
+                str(k): [str(v) for v in values] for k, values in dict(raw["triggers"]).items()
             },
             fallback=str(raw.get("fallback", "我不太明白，你能直接帮我处理吗？")),
             max_turns=int(raw.get("max_turns", 4)),
@@ -79,15 +90,13 @@ def simulator_from_item(
 
 class InteractiveScenarioDriver:
     kind = "interactive_runtime"
-    version = "interactive-driver-v1"
+    version = INTERACTIVE_DRIVER_VERSION
 
     def __init__(
         self,
         scenarios: ScriptedScenarioDriver,
         *,
-        context_factory: Callable[
-            [EvaluationExperimentRun], Awaitable[WorkspaceExecutionContext]
-        ],
+        context_factory: Callable[[EvaluationExperimentRun], Awaitable[WorkspaceExecutionContext]],
         environment_factory: Callable[
             [WorkspaceExecutionContext, EvaluationDatasetItem], TaskEnvironment
         ],
@@ -101,7 +110,9 @@ class InteractiveScenarioDriver:
         self.environment_factory = environment_factory
         self.approval_context_factory = approval_context_factory
 
-    async def prepare(self, *, run, variant, item) -> PreparedCaseExecution:
+    async def prepare(
+        self, *, run, variant, item, case_identity: CaseExecutionIdentity | None = None
+    ) -> PreparedCaseExecution:
         if item.category != "INTERACTIVE":
             raise ValueError("INTERACTIVE_CATEGORY_REQUIRED")
         context = await self.context_factory(run)
@@ -111,16 +122,37 @@ class InteractiveScenarioDriver:
             )
         if "evaluation_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "Evaluation permission is required.", 403)
+        if case_identity is None:
+            raise RuntimeError("EVALUATION_CASE_IDENTITY_REQUIRED")
+        if (
+            case_identity.workspace_id != run.workspace_id
+            or case_identity.run_id != run.id
+            or case_identity.variant_id != variant.id
+            or case_identity.item_id != item.id
+        ):
+            raise RuntimeError("EVALUATION_CASE_IDENTITY_MISMATCH")
+        max_turns, max_tokens = _execution_limits(item.input)
         assertions = item.expected.get("assertions")
         if not isinstance(assertions, Mapping):
             raise ValueError("INTERACTIVE_ASSERTIONS_REQUIRED")
         canary = str(item.expected.get("canary") or "")
         environment = self.environment_factory(context, item)
-        handle = await environment.reset(
-            seed=int(item.input.get("seed", 0)),
-            fixture_ref=str(item.input.get("environment_ref", "support_customer")),
-        )
+        if environment.kind != "support_fixture" or not hasattr(environment, "for_case"):
+            raise RuntimeError("EVALUATION_ENVIRONMENT_DURABILITY_REQUIRED")
+        environment = environment.for_case(case_identity)
+        lifecycle = InteractiveLifecycle(self.scenarios.runtime.session_factory)
         try:
+            episode = await lifecycle.reserve(
+                case_identity,
+                seed=int(item.input.get("seed", 0)),
+                fixture_ref=str(item.input.get("environment_ref", "support_customer")),
+                input_hash=canonical_json_hash(item.input),
+                policy_hash=canonical_json_hash(dict(item.input["simulator"]["triggers"])),
+            )
+            handle = await environment.reset(
+                seed=int(item.input.get("seed", 0)),
+                fixture_ref=str(item.input.get("environment_ref", "support_customer")),
+            )
             simulator = simulator_from_item(
                 item,
                 customer_ref=(
@@ -129,20 +161,23 @@ class InteractiveScenarioDriver:
                     else None
                 ),
             )
-            opening = await simulator.opening()
+            opening = (await simulator.opening()).strip()
+            await lifecycle.reserve_turn(
+                case_identity, turn_index=0, input_hash=canonical_json_hash(opening)
+            )
             prepared = await self.scenarios.prepare_first(
                 context,
                 agent_version_id=variant.agent_version_id,
                 first_input=opening,
                 knowledge_snapshots=variant.effective_knowledge_snapshots,
+                wiki_publications=variant.effective_wiki_publications,
+                instance_id=episode.instance_id.hex,
+                thread_id=episode.reserved_thread_id,
             )
-            max_turns = int(
-                item.input.get(
-                    "max_turns", item.input.get("simulator", {}).get("max_turns", 4)
-                )
+            await lifecycle.bind_thread(case_identity, thread_id=prepared.thread_id)
+            await lifecycle.bind_turn(
+                case_identity, turn_index=0, turn_id=prepared.turn_id, run_id=prepared.run_id
             )
-            max_tokens = item.input.get("max_tokens")
-            max_cost = item.input.get("max_cost_cny")
             approval_decisions = list(item.expected.get("approval_decisions") or [])
             approver = (
                 await self.approval_context_factory(run)
@@ -153,13 +188,14 @@ class InteractiveScenarioDriver:
                 raise AgentHubError(
                     "FORBIDDEN", "Approval context belongs to another workspace.", 403
                 )
-        except Exception:
-            # Reset may have created the isolated customer; if preparation cannot finish,
-            # remove that instance rather than leaving an unowned fixture behind.
+        except BaseException as error:
             try:
-                await environment.teardown(handle)
-            except Exception:
-                pass
+                await lifecycle.terminate(case_identity, reason="INTERACTIVE_PREPARATION_FAILED")
+                await lifecycle.cleanup(case_identity)
+            except BaseException as cleanup_error:
+                error.add_note(
+                    "Interactive cleanup remains pending: " + type(cleanup_error).__name__
+                )
             raise
 
         async def execute() -> CaseExecutionObservation:
@@ -178,20 +214,43 @@ class InteractiveScenarioDriver:
             total_input = 0
             total_output = 0
             total_cached = 0
-            total_cost = 0.0
+            total_cost = Decimal("0")
             currency: str | None = None
             known_cost = True
             known_tokens = True
+            known_cached = True
+            known_token_turns = 0
+            known_cost_turns = 0
             canary_leaked = False
             prepared_run = prepared
             user_text = first_input
             run_ids: list[UUID] = []
+
+            async def retain_turn(partial_assertion: StateAssertion | None = None) -> None:
+                if partial_assertion is not None:
+                    turns[-1]["business_assertion"] = {
+                        **_safe_assertion(partial_assertion),
+                        "source": "support_fixture.assert_state.partial",
+                    }
+                await lifecycle.record_turn(
+                    case_identity, turn_index=turn_index, evidence=turns[-1]
+                )
+
             try:
                 for turn_index in range(max_turns):
+                    await lifecycle.ensure_current(case_identity)
+                    context = await self.context_factory(run)
+                    if (
+                        str(context.workspace_id) != str(case_identity.workspace_id)
+                        or "evaluation_run" not in context.permissions
+                    ):
+                        raise AgentHubError("FORBIDDEN", "Evaluation access was revoked.", 403)
+                    await lifecycle.dispatch(case_identity, turn_index=turn_index)
                     result = await self.scenarios.runtime.execute_prepared_run(
                         context, run_id=prepared_run.run_id
                     )
                     while result.status == "WAITING_APPROVAL":
+                        await lifecycle.ensure_current(case_identity)
                         if decision_index >= len(approval_decisions):
                             stop_reason = "approval_script_exhausted"
                             break
@@ -208,17 +267,38 @@ class InteractiveScenarioDriver:
                         if approval is None or self.scenarios.runtime.approval_service is None:
                             stop_reason = "approval_unavailable"
                             break
+                        if self.approval_context_factory is None:
+                            raise AgentHubError(
+                                "EVALUATION_APPROVAL_ACTOR_UNAVAILABLE",
+                                "A distinct approval operator is required.",
+                                409,
+                            )
+                        approver = await self.approval_context_factory(run)
+                        if (
+                            approver.workspace_id != context.workspace_id
+                            or approver.user_id == context.user_id
+                        ):
+                            raise AgentHubError("FORBIDDEN", "Approval identity is invalid.", 403)
                         await self.scenarios.runtime.approval_service.decide(
                             approver,
                             approval.id,
                             decision=ApprovalDecisionStatus(approval_decisions[decision_index]),
                         )
                         decision_index += 1
+                        await lifecycle.ensure_current(case_identity)
                         result = await self.scenarios.runtime.resume(
                             context, run_id=result.run_id, approval_id=approval.id
                         )
+                    if result.status == "WAITING_APPROVAL":
+                        await lifecycle.ensure_current(case_identity)
+                        result = await self.scenarios.runtime.cancel(context, run_id=result.run_id)
                     async with self.scenarios.runtime.session_factory() as session:
-                        persisted = await session.get(AgentRun, result.run_id)
+                        persisted = await session.scalar(
+                            select(AgentRun).where(
+                                AgentRun.workspace_id == case_identity.workspace_id,
+                                AgentRun.id == result.run_id,
+                            )
+                        )
                         if persisted is None:
                             raise RuntimeError("INTERACTIVE_RUN_MISSING")
                         final_output = str(persisted.final_output or "")
@@ -229,14 +309,21 @@ class InteractiveScenarioDriver:
                         if input_tokens is None or output_tokens is None:
                             known_tokens = False
                         else:
+                            known_token_turns += 1
                             total_input += input_tokens
                             total_output += output_tokens
-                            total_cached += cached_tokens or 0
-                        if cost_amount is None:
+                            if cached_tokens is None:
+                                known_cached = False
+                            else:
+                                total_cached += cached_tokens
+                        if cost_amount is None or not persisted.cost_currency:
                             known_cost = False
                         else:
-                            total_cost += float(cost_amount)
+                            known_cost_turns += 1
+                            total_cost += Decimal(str(cost_amount))
                         if persisted.cost_currency:
+                            if currency is not None and currency != persisted.cost_currency:
+                                known_cost = False
                             currency = persisted.cost_currency
                         step_rows = list(
                             await session.scalars(
@@ -340,12 +427,8 @@ class InteractiveScenarioDriver:
                                 "cost_amount": (
                                     str(cost_amount) if cost_amount is not None else None
                                 ),
-                                "proposed_tool_sequence": [
-                                    str(item) for item in turn_proposed
-                                ],
-                                "executed_tool_sequence": [
-                                    str(item) for item in turn_executed
-                                ],
+                                "proposed_tool_sequence": [str(item) for item in turn_proposed],
+                                "executed_tool_sequence": [str(item) for item in turn_executed],
                             }
                         )
                     transcript.extend(
@@ -357,45 +440,59 @@ class InteractiveScenarioDriver:
                     if canary and canary in final_output:
                         canary_leaked = True
                         stop_reason = "hidden_label_leak"
+                        await retain_turn()
                         break
                     if result.status in {"FAILED", "CANCELLED", "NEEDS_ATTENTION"}:
-                        stop_reason = f"agent_{result.status.lower()}"
+                        stop_reason = stop_reason or f"agent_{result.status.lower()}"
+                        await retain_turn()
+                        if result.status == "NEEDS_ATTENTION":
+                            raise AgentHubError(
+                                "EVALUATION_INTERACTIVE_RECOVERY_REQUIRED",
+                                "The interactive outcome requires durable reconciliation.",
+                                409,
+                            )
                         break
                     if result.status != "SUCCEEDED":
                         stop_reason = "agent_not_successful"
+                        await retain_turn()
+                        break
+                    if max_tokens is not None and (
+                        not known_tokens or total_input + total_output >= max_tokens
+                    ):
+                        stop_reason = "budget_exhausted" if known_tokens else "budget_unavailable"
+                        await retain_turn()
                         break
                     # Assert the world after each turn.  This is what makes a completed
                     # answer insufficient: only the environment can stop the dialogue.
                     turn_assertions = dict(assertions)
                     turn_assertions["turn_count"] = turn_index + 1
                     assertion = await environment.assert_state(handle, turn_assertions)
+                    await retain_turn(assertion)
                     min_turns = int(assertions.get("min_turns", 1))
                     approvals_satisfied = decision_index >= len(approval_decisions)
                     if assertion.passed and turn_index + 1 >= min_turns and approvals_satisfied:
                         stop_reason = "goal_met"
                         break
-                    if max_tokens is not None and known_tokens and (
-                        total_input + total_output >= int(max_tokens)
-                    ):
-                        stop_reason = "budget_exhausted"
-                        break
-                    if max_cost is not None and known_cost and total_cost >= float(max_cost):
-                        stop_reason = "budget_exhausted"
-                        break
                     if simulator.exhausted() or turn_index + 1 >= max_turns:
                         stop_reason = "max_turns"
                         break
-                    user_text = await simulator.respond(
-                        transcript=transcript, agent_message=final_output
-                    )
+                    user_text = (
+                        await simulator.respond(transcript=transcript, agent_message=final_output)
+                    ).strip()
                     if not user_text or user_text.startswith("（对话已结束）"):
                         stop_reason = "simulator_exhausted"
                         break
+                    await lifecycle.ensure_current(case_identity)
+                    reserved_turn = await lifecycle.reserve_turn(
+                        case_identity,
+                        turn_index=turn_index + 1,
+                        input_hash=canonical_json_hash(user_text),
+                    )
                     next_turn = await self.scenarios.threads.open_turn(
                         context,
                         prepared.thread_id,
                         user_input=user_text,
-                        client_token=f"{prepared.instance_id}:{turn_index + 1}",
+                        client_token=reserved_turn.client_token,
                     )
                     next_run = await self.scenarios.runtime.prepare_run(
                         context,
@@ -404,11 +501,18 @@ class InteractiveScenarioDriver:
                         thread_id=prepared.thread_id,
                         thread_turn_id=next_turn.id,
                         execution_overrides=AgentRunExecutionOverrides.for_evaluation(
-                            list(variant.effective_knowledge_snapshots)
+                            list(variant.effective_knowledge_snapshots),
+                            wiki_publications=list(variant.effective_wiki_publications),
                         ),
                     )
                     await self.scenarios.threads.attach_run(
                         context, turn_id=next_turn.id, run_id=next_run.id
+                    )
+                    await lifecycle.bind_turn(
+                        case_identity,
+                        turn_index=turn_index + 1,
+                        turn_id=next_turn.id,
+                        run_id=next_run.id,
                     )
                     prepared_run = type(prepared)(
                         prepared.instance_id,
@@ -423,26 +527,30 @@ class InteractiveScenarioDriver:
                 final_assertions = dict(assertions)
                 final_assertions["turn_count"] = len(turns)
                 assertion = await environment.assert_state(handle, final_assertions)
-            finally:
+            except BaseException as error:
                 try:
-                    await environment.teardown(handle)
-                    teardown_status = "TEARDOWN_COMPLETE"
-                except Exception as error:  # noqa: BLE001 - surfaced as a failed trial, never swallowed
-                    teardown_status = "TEARDOWN_FAILED"
-                    teardown_error = type(error).__name__
-            if teardown_status != "TEARDOWN_COMPLETE":
-                stop_reason = "environment_teardown_failed"
-            safe_assertion = {
-                "passed": assertion.passed,
-                "reason": assertion.reason,
-                "observed": {
-                    "ticket_count": assertion.observed.get("ticket_count"),
-                    "ticket_statuses": assertion.observed.get("ticket_statuses", []),
-                },
-            }
+                    await lifecycle.terminate(
+                        case_identity, reason="INTERACTIVE_EXECUTION_INTERRUPTED"
+                    )
+                    await lifecycle.cleanup(case_identity)
+                except BaseException as cleanup_error:
+                    error.add_note(
+                        "Interactive cleanup remains pending: " + type(cleanup_error).__name__
+                    )
+                raise
+            safe_assertion = _safe_assertion(assertion)
+            await lifecycle.retain_assertion(
+                case_identity, assertion=safe_assertion, source="support_fixture.assert_state"
+            )
             observation = {
                 "category": "INTERACTIVE",
                 "interactive_driver_version": self.version,
+                "interactive_case_id": str(case_identity.case_id),
+                "repetition_index": case_identity.repetition_index,
+                "observed_agent_status": turns[0]["status"] if turns else None,
+                "observed_agent_failure_code": turns[0]["failure_code"] if turns else None,
+                "terminal_agent_run_id": turns[-1]["run_id"] if turns else None,
+                "terminal_agent_status": turns[-1]["status"] if turns else None,
                 "instance_id": prepared.instance_id,
                 "thread_id": str(prepared.thread_id),
                 "agent_version_id": str(variant.agent_version_id),
@@ -479,21 +587,41 @@ class InteractiveScenarioDriver:
                 "canary_leaked": canary_leaked,
                 "approval_decision_count": decision_index,
                 "business_outcome": safe_assertion,
-                "cost_amount": total_cost if known_cost else None,
+                "cost_amount": str(total_cost) if known_cost else None,
                 "cost_currency": currency if known_cost else None,
                 "total_tokens": total_input + total_output if known_tokens else None,
+                "usage_coverage": {
+                    "executed_turns": len(turns),
+                    "known_token_turns": known_token_turns,
+                    "known_cost_turns": known_cost_turns,
+                },
             }
-            return CaseExecutionObservation(
+            result = CaseExecutionObservation(
                 observation=observation,
                 agent_run_id=run_ids[0] if run_ids else prepared.run_id,
                 latency_ms=round((perf_counter() - started) * 1000),
                 input_tokens=total_input if known_tokens else None,
                 output_tokens=total_output if known_tokens else None,
-                cached_tokens=total_cached if known_tokens else None,
+                cached_tokens=total_cached if known_tokens and known_cached else None,
                 total_tokens=total_input + total_output if known_tokens else None,
                 cost_amount=total_cost if known_cost else None,
                 cost_currency=currency if known_cost else None,
-                aggregate_billing_complete=known_tokens and known_cost,
+                aggregate_billing_complete=known_tokens and known_cost and known_cached,
+            )
+            envelope = observation_envelope(result)
+            await lifecycle.retain_observation(case_identity, envelope=envelope)
+            try:
+                await environment.teardown(handle)
+                teardown_status = "TEARDOWN_COMPLETE"
+            except Exception as error:
+                teardown_status = (
+                    "CLEANUP_BLOCKED"
+                    if getattr(error, "code", None) == "CLEANUP_BLOCKED"
+                    else "TEARDOWN_FAILED"
+                )
+                teardown_error = getattr(error, "code", None) or type(error).__name__
+            return observation_from_envelope(
+                with_cleanup(envelope, teardown_status, teardown_error)
             )
 
         return PreparedCaseExecution(
@@ -511,7 +639,60 @@ class InteractiveScenarioDriver:
             },
         )
 
-    async def execute(self, session=None, *, run, variant, item):
+    async def execute(self, session=None, *, run, variant, item, case_identity=None):
         del session
-        prepared = await self.prepare(run=run, variant=variant, item=item)
+        prepared = await self.prepare(
+            run=run, variant=variant, item=item, case_identity=case_identity
+        )
         return await prepared.execute()
+
+
+def _execution_limits(value: Mapping[str, Any]) -> tuple[int, int | None]:
+    simulator = value.get("simulator")
+    if not isinstance(simulator, Mapping):
+        raise ValueError("INTERACTIVE_SIMULATOR_CONFIG_REQUIRED")
+    declared = [
+        value.get("max_turns", simulator.get("max_turns", 4)),
+        simulator.get("max_turns", 4),
+    ]
+    if any(
+        isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 10
+        for limit in declared
+    ):
+        raise ValueError("INTERACTIVE_TURN_LIMIT_INVALID")
+    tokens = value.get("max_tokens")
+    if tokens is not None and (
+        isinstance(tokens, bool) or not isinstance(tokens, int) or tokens <= 0
+    ):
+        raise ValueError("INTERACTIVE_TOKEN_LIMIT_INVALID")
+    if value.get("environment_ref") != "support_customer":
+        raise ValueError("INTERACTIVE_ENVIRONMENT_NOT_REGISTERED")
+    seed = value.get("seed", 0)
+    if isinstance(seed, bool) or not isinstance(seed, int) or not 0 <= seed < 2**31:
+        raise ValueError("INTERACTIVE_SEED_INVALID")
+    if "max_cost_cny" in value:
+        try:
+            cost = Decimal(str(value["max_cost_cny"]))
+        except (InvalidOperation, TypeError, ValueError):
+            raise ValueError("INTERACTIVE_COST_LIMIT_INVALID") from None
+        if not cost.is_finite() or cost < 0:
+            raise ValueError("INTERACTIVE_COST_LIMIT_INVALID")
+        # There is currently no episode-wide reservation covering auxiliary
+        # calls. Never turn a finite declared limit into an unenforced estimate.
+        raise AgentHubError(
+            "INTERACTIVE_COST_RESERVATION_UNAVAILABLE",
+            "A finite interactive cost limit requires complete dispatch reservations.",
+            409,
+        )
+    return min(declared), tokens
+
+
+def _safe_assertion(assertion: StateAssertion) -> dict[str, Any]:
+    return {
+        "passed": assertion.passed,
+        "reason": assertion.reason,
+        "observed": {
+            "ticket_count": assertion.observed.get("ticket_count"),
+            "ticket_statuses": assertion.observed.get("ticket_statuses", []),
+        },
+    }

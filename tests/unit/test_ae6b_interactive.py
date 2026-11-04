@@ -15,10 +15,12 @@ from packages.core.database import create_database
 from packages.evaluation.environment import EnvHandle, SupportFixtureEnvironment
 from packages.evaluation.interactive_driver import InteractiveScenarioDriver
 from packages.evaluation.metrics import MetricStatus, evaluate_interactive
+from packages.evaluation.models import InteractiveEpisode
 from packages.evaluation.user_simulator import ScriptedUserSimulator, Turn
 from packages.evaluation.validation import validate_dataset_item
 from packages.tools.models import Customer
 from tests.integration.test_m4c_agent_runtime import _seed
+from tests.support.ae6b_lifecycle import create_owned_lifecycle_cases
 
 
 @pytest_asyncio.fixture
@@ -40,12 +42,8 @@ async def test_support_environment_reset_assert_teardown_and_isolation(
     async with ae6b_db_factory() as session:
         first = await _seed(session, label=f"ae6b-env-{uuid4().hex}")
         second = await _seed(session, label=f"ae6b-env-{uuid4().hex}")
-    env = SupportFixtureEnvironment(
-        ae6b_db_factory, workspace_id=str(first["workspace_id"])
-    )
-    other = SupportFixtureEnvironment(
-        ae6b_db_factory, workspace_id=str(second["workspace_id"])
-    )
+    env = SupportFixtureEnvironment(ae6b_db_factory, workspace_id=str(first["workspace_id"]))
+    other = SupportFixtureEnvironment(ae6b_db_factory, workspace_id=str(second["workspace_id"]))
 
     handle = await env.reset(seed=1, fixture_ref="support_customer")
     other_handle = await other.reset(seed=1, fixture_ref="support_customer")
@@ -99,44 +97,34 @@ async def test_teardown_failure_keeps_handle_for_retry(ae6b_db_factory) -> None:
 @pytest.mark.asyncio
 async def test_prepare_failure_cleans_reset_environment(ae6b_db_factory) -> None:
     class FailingScenarios:
+        runtime = SimpleNamespace(session_factory=ae6b_db_factory)
+
         async def prepare_first(self, *args, **kwargs):
             raise RuntimeError("injected preparation failure")
 
-    async with ae6b_db_factory() as session:
-        base = await _seed(session, label=f"ae6b-env-{uuid4().hex}")
-    context = base["context"].model_copy(
-        update={"permissions": base["context"].permissions | {"evaluation_run"}}
-    )
+    owned = (await create_owned_lifecycle_cases(ae6b_db_factory, repetitions=1))[0]
     driver = InteractiveScenarioDriver(
         FailingScenarios(),
-        context_factory=lambda run: _resolved(context),
+        context_factory=lambda run: _resolved(owned.context),
         environment_factory=lambda ctx, item: SupportFixtureEnvironment(
             ae6b_db_factory, workspace_id=ctx.workspace_id
         ),
     )
-    item = SimpleNamespace(
-        category="INTERACTIVE",
-        input={
-            "task": "请查询客户",
-            "environment_ref": "support_customer",
-            "simulator": {
-                "private_facts": {"customer_ref": "__CUSTOMER_REF__"},
-                "triggers": {"customer_ref": ["客户编号"]},
-            },
-        },
-        expected={"assertions": {"ticket_count": 0}},
-    )
-    variant = SimpleNamespace(agent_version_id=uuid4(), effective_knowledge_snapshots=())
-    run = SimpleNamespace(workspace_id=base["workspace_id"])
-    with pytest.raises(RuntimeError):
-        await driver.prepare(run=run, variant=variant, item=item)
+    with pytest.raises(RuntimeError, match="injected preparation failure"):
+        await driver.prepare(
+            run=owned.run, variant=owned.variant, item=owned.item, case_identity=owned.identity
+        )
     async with ae6b_db_factory() as session:
         remaining = await session.scalar(
             select(Customer).where(
-                Customer.workspace_id == base["workspace_id"],
+                Customer.workspace_id == owned.identity.workspace_id,
                 Customer.customer_ref.like("AE6B-%"),
             )
         )
+        episode = await session.get(InteractiveEpisode, owned.identity.case_id)
+        assert episode is not None
+        assert episode.cleanup_status == "TEARDOWN_COMPLETE"
+        assert episode.termination_reason == "INTERACTIVE_PREPARATION_FAILED"
     assert remaining is None
 
 

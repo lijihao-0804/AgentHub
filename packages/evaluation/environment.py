@@ -20,6 +20,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.canonical.json_hash import canonical_json_hash
+from packages.core.errors.exceptions import AgentHubError
 from packages.tools.models import Customer, Ticket
 
 ENVIRONMENT_VERSION = "environment-v1"
@@ -132,21 +133,63 @@ class SupportFixtureEnvironment:
         *,
         workspace_id: str,
         prefix: str = "AE6B",
+        case_identity: Any = None,
     ) -> None:
         self.session_factory = session_factory
         self.workspace_id = str(workspace_id)
         self.prefix = prefix
+        self._case_identity = case_identity
+        self._bound_handle: EnvHandle | None = None
+        self._bound_customer_ref: str | None = None
+        if case_identity is not None:
+            from packages.evaluation.interactive_lifecycle import (
+                INTERACTIVE_ENVIRONMENT_VERSION,
+                InteractiveLifecycle,
+            )
+
+            if str(case_identity.workspace_id) != self.workspace_id:
+                raise PermissionError("ENVIRONMENT_HANDLE_CROSS_WORKSPACE")
+            self.version = INTERACTIVE_ENVIRONMENT_VERSION
+            self._lifecycle = InteractiveLifecycle(session_factory)
         self._active: dict[str, EnvHandle] = {}
         self._teardown_errors: dict[str, str] = {}
 
     def _customer_ref(self, instance_id: str) -> str:
         return f"{self.prefix}-{instance_id[:24]}"
 
+    def for_case(self, identity: Any) -> SupportFixtureEnvironment:
+        """Bind standard evaluation execution to its database-owned episode."""
+        return type(self)(
+            self.session_factory,
+            workspace_id=self.workspace_id,
+            prefix=self.prefix,
+            case_identity=identity,
+        )
+
     def customer_ref(self, handle: EnvHandle) -> str:
         self._require_handle(handle)
+        if self._case_identity is not None:
+            if self._bound_customer_ref is None:
+                raise ValueError("ENVIRONMENT_RESOURCE_NOT_BOUND")
+            return self._bound_customer_ref
         return self._customer_ref(handle.instance_id)
 
     async def reset(self, *, seed: int, fixture_ref: str) -> EnvHandle:
+        if self._case_identity is not None:
+            episode = await self._lifecycle.create_fixture(self._case_identity)
+            if episode.seed != seed or episode.fixture_hash != canonical_json_hash(
+                {"fixture_ref": fixture_ref, "seed": seed}
+            ):
+                raise ValueError("ENVIRONMENT_FIXTURE_IDENTITY_MISMATCH")
+            handle = EnvHandle(
+                instance_id=episode.instance_id.hex,
+                workspace_id=self.workspace_id,
+                seed=episode.seed,
+                fixture_hash=episode.fixture_hash,
+            )
+            self._bound_handle = handle
+            self._bound_customer_ref = episode.customer_ref
+            return handle
         instance_id = uuid4().hex
         fixture = {"fixture_ref": fixture_ref, "seed": seed}
         customer_ref = self._customer_ref(instance_id)
@@ -174,6 +217,10 @@ class SupportFixtureEnvironment:
             raise ValueError("ENVIRONMENT_HANDLE_INVALID")
         if handle.workspace_id != self.workspace_id:
             raise PermissionError("ENVIRONMENT_HANDLE_CROSS_WORKSPACE")
+        if self._case_identity is not None:
+            if handle != self._bound_handle:
+                raise ValueError("ENVIRONMENT_HANDLE_NOT_BOUND")
+            return
         if handle.instance_id not in self._active:
             raise ValueError("ENVIRONMENT_HANDLE_NOT_ACTIVE")
 
@@ -181,11 +228,14 @@ class SupportFixtureEnvironment:
         self, handle: EnvHandle, assertions: Mapping[str, Any]
     ) -> StateAssertion:
         self._require_handle(handle)
+        if self._case_identity is not None:
+            await self._lifecycle.ensure_current(self._case_identity)
+        customer_ref = self.customer_ref(handle)
         async with self.session_factory() as session:
             customer = await session.scalar(
                 select(Customer).where(
                     Customer.workspace_id == UUID(self.workspace_id),
-                    Customer.customer_ref == self._customer_ref(handle.instance_id),
+                    Customer.customer_ref == customer_ref,
                 )
             )
             if customer is None:
@@ -230,6 +280,12 @@ class SupportFixtureEnvironment:
             raise ValueError("ENVIRONMENT_HANDLE_INVALID")
         if handle.workspace_id != self.workspace_id:
             raise PermissionError("ENVIRONMENT_HANDLE_CROSS_WORKSPACE")
+        if self._case_identity is not None:
+            self._require_handle(handle)
+            status = await self._lifecycle.cleanup(self._case_identity)
+            if status != "TEARDOWN_COMPLETE":
+                raise AgentHubError(status, "The environment requires cleanup reconciliation.", 409)
+            return
         if handle.instance_id not in self._active:
             return
         try:

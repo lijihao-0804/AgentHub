@@ -1009,6 +1009,324 @@ class EvaluationReleaseGateDecision(Base):
     )
 
 
+_INTERACTIVE_EXECUTION_STATUS_SQL = (
+    "execution_status IN ('PREPARING', 'RUNNING', 'COMPLETED', 'RECOVERY_REQUIRED', 'TERMINATED')"
+)
+_INTERACTIVE_CLEANUP_STATUS_SQL = (
+    "cleanup_status IN ('PENDING', 'TEARDOWN_COMPLETE', 'TEARDOWN_FAILED', 'CLEANUP_BLOCKED')"
+)
+_INTERACTIVE_DISPATCH_STATUS_SQL = (
+    "dispatch_status IN ('RESERVED', 'BOUND', 'DISPATCH_INTENT', "
+    "'TERMINAL', 'UNKNOWN_OUTCOME', 'RECOVERY_REQUIRED')"
+)
+
+
+class InteractiveEpisode(Base):
+    """Durable execution and cleanup evidence for one interactive case."""
+
+    __tablename__ = "evaluation_interactive_episodes"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "case_id"],
+            [
+                "evaluation_experiment_case_results.workspace_id",
+                "evaluation_experiment_case_results.id",
+            ],
+            name="fk_interactive_episodes_case_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "thread_id"],
+            ["agent_threads.workspace_id", "agent_threads.id"],
+            name="fk_interactive_episodes_thread_workspace",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "case_id",
+            name="uq_interactive_episodes_workspace_case",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "instance_id",
+            name="uq_interactive_episodes_workspace_instance",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "reserved_thread_id",
+            name="uq_interactive_episodes_workspace_reserved_thread",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "thread_id",
+            name="uq_interactive_episodes_workspace_thread",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "customer_id",
+            name="uq_interactive_episodes_workspace_customer_id",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "customer_ref",
+            name="uq_interactive_episodes_workspace_customer_ref",
+        ),
+        CheckConstraint(
+            "fixture_ref = 'support_customer'",
+            name="ck_interactive_episodes_fixture_ref",
+        ),
+        CheckConstraint("seed >= 0", name="ck_interactive_episodes_seed"),
+        CheckConstraint(
+            "thread_id IS NULL OR thread_id = reserved_thread_id",
+            name="ck_interactive_episodes_reserved_thread",
+        ),
+        CheckConstraint(
+            "instance_id = case_id",
+            name="ck_interactive_episodes_instance_case",
+        ),
+        CheckConstraint(
+            "env_kind = 'support_fixture'",
+            name="ck_interactive_episodes_environment_kind",
+        ),
+        CheckConstraint(
+            "env_version = 'environment-v2' AND "
+            "simulator_version = 'scripted-disclosure-v1' AND "
+            "driver_version = 'interactive-driver-v2'",
+            name="ck_interactive_episodes_protocol_versions",
+        ),
+        CheckConstraint(
+            _INTERACTIVE_EXECUTION_STATUS_SQL,
+            name="ck_interactive_episodes_execution_status",
+        ),
+        CheckConstraint(
+            _INTERACTIVE_CLEANUP_STATUS_SQL,
+            name="ck_interactive_episodes_cleanup_status",
+        ),
+        CheckConstraint(
+            "cleanup_attempts >= 0",
+            name="ck_interactive_episodes_cleanup_attempts",
+        ),
+        CheckConstraint(
+            "input_hash ~ '^[0-9a-f]{64}$' AND "
+            "policy_hash ~ '^[0-9a-f]{64}$' AND "
+            "fixture_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_interactive_episodes_hash_formats",
+        ),
+        CheckConstraint(
+            "(customer_id IS NULL AND customer_ref IS NULL AND "
+            "fixture_created_at IS NULL) OR "
+            "(customer_id IS NOT NULL AND customer_ref IS NOT NULL AND "
+            "fixture_created_at IS NOT NULL)",
+            name="ck_interactive_episodes_customer_binding",
+        ),
+        CheckConstraint(
+            "(assertion IS NULL AND assertion_hash IS NULL AND "
+            "assertion_source IS NULL AND assertion_recorded_at IS NULL) OR "
+            "(assertion IS NOT NULL AND assertion_hash IS NOT NULL AND "
+            "assertion_source IS NOT NULL AND assertion_recorded_at IS NOT NULL)",
+            name="ck_interactive_episodes_assertion_binding",
+        ),
+        CheckConstraint(
+            "(observation_envelope IS NULL AND observation_hash IS NULL AND "
+            "observation_recorded_at IS NULL) OR "
+            "(observation_envelope IS NOT NULL AND observation_hash IS NOT NULL AND "
+            "observation_recorded_at IS NOT NULL)",
+            name="ck_interactive_episodes_observation_binding",
+        ),
+        CheckConstraint(
+            "assertion_hash IS NULL OR assertion_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_interactive_episodes_assertion_hash",
+        ),
+        CheckConstraint(
+            "observation_hash IS NULL OR observation_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_interactive_episodes_observation_hash",
+        ),
+        Index(
+            "ix_interactive_episodes_cleanup_retry",
+            "cleanup_status",
+            "cleanup_next_attempt_at",
+            "workspace_id",
+            "case_id",
+        ),
+        Index(
+            "ix_interactive_episodes_execution_status",
+            "workspace_id",
+            "execution_status",
+        ),
+    )
+
+    case_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    instance_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    reserved_thread_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    thread_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    seed: Mapped[int] = mapped_column(Integer, nullable=False)
+    fixture_ref: Mapped[str] = mapped_column(String(64), nullable=False)
+    fixture_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    env_kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    env_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    simulator_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    driver_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    input_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    policy_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    customer_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    customer_ref: Mapped[str | None] = mapped_column(String(128))
+    fixture_created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    prepare_stage: Mapped[str] = mapped_column(String(32), nullable=False)
+    execution_status: Mapped[str] = mapped_column(
+        String(24), nullable=False, server_default="PREPARING"
+    )
+    termination_reason: Mapped[str | None] = mapped_column(String(96))
+    assertion: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    assertion_hash: Mapped[str | None] = mapped_column(String(64))
+    assertion_source: Mapped[str | None] = mapped_column(String(128))
+    assertion_recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    observation_envelope: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    observation_hash: Mapped[str | None] = mapped_column(String(64))
+    observation_recorded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    cleanup_status: Mapped[str] = mapped_column(
+        String(32), nullable=False, server_default="PENDING"
+    )
+    cleanup_error: Mapped[str | None] = mapped_column(String(96))
+    cleanup_attempts: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    cleanup_next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    cleanup_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    cleanup_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
+class InteractiveEpisodeTurn(Base):
+    """One fenced turn and its exact ThreadTurn/AgentRun binding."""
+
+    __tablename__ = "evaluation_interactive_episode_turns"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "case_id"],
+            [
+                "evaluation_interactive_episodes.workspace_id",
+                "evaluation_interactive_episodes.case_id",
+            ],
+            name="fk_interactive_episode_turns_episode_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "thread_turn_id"],
+            ["thread_turns.workspace_id", "thread_turns.id"],
+            name="fk_interactive_episode_turns_thread_turn_workspace",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
+            ["workspace_id", "agent_run_id"],
+            ["agent_runs.workspace_id", "agent_runs.id"],
+            name="fk_interactive_episode_turns_agent_run_workspace",
+            ondelete="RESTRICT",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "case_id",
+            "turn_index",
+            name="uq_interactive_episode_turns_case_index",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "case_id",
+            "client_token",
+            name="uq_interactive_episode_turns_case_token",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "thread_turn_id",
+            name="uq_interactive_episode_turns_workspace_thread_turn",
+        ),
+        UniqueConstraint(
+            "workspace_id",
+            "agent_run_id",
+            name="uq_interactive_episode_turns_workspace_agent_run",
+        ),
+        CheckConstraint(
+            "turn_index >= 0",
+            name="ck_interactive_episode_turns_index",
+        ),
+        CheckConstraint(
+            _INTERACTIVE_DISPATCH_STATUS_SQL,
+            name="ck_interactive_episode_turns_dispatch_status",
+        ),
+        CheckConstraint(
+            "input_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_interactive_episode_turns_input_hash",
+        ),
+        CheckConstraint(
+            "evidence_hash IS NULL OR evidence_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_interactive_episode_turns_evidence_hash",
+        ),
+        CheckConstraint(
+            "(thread_turn_id IS NULL AND agent_run_id IS NULL) OR "
+            "(thread_turn_id IS NOT NULL AND agent_run_id IS NOT NULL)",
+            name="ck_interactive_episode_turns_binding_pair",
+        ),
+        CheckConstraint(
+            "(evidence IS NULL AND evidence_hash IS NULL) OR "
+            "(evidence IS NOT NULL AND evidence_hash IS NOT NULL)",
+            name="ck_interactive_episode_turns_evidence_binding",
+        ),
+        CheckConstraint(
+            "dispatch_status NOT IN "
+            "('DISPATCH_INTENT', 'TERMINAL', 'UNKNOWN_OUTCOME', "
+            "'RECOVERY_REQUIRED') OR "
+            "(thread_turn_id IS NOT NULL AND agent_run_id IS NOT NULL AND "
+            "dispatch_intent_at IS NOT NULL)",
+            name="ck_interactive_episode_turns_dispatch_binding",
+        ),
+        Index(
+            "ix_interactive_episode_turns_case_index",
+            "workspace_id",
+            "case_id",
+            "turn_index",
+        ),
+        Index(
+            "ix_interactive_episode_turns_agent_run",
+            "workspace_id",
+            "agent_run_id",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    case_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    turn_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    client_token: Mapped[str] = mapped_column(String(64), nullable=False)
+    input_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    thread_turn_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    agent_run_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    dispatch_status: Mapped[str] = mapped_column(
+        String(24), nullable=False, server_default="RESERVED"
+    )
+    dispatch_intent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    terminal_status: Mapped[str | None] = mapped_column(String(32))
+    failure_code: Mapped[str | None] = mapped_column(String(96))
+    evidence: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    evidence_hash: Mapped[str | None] = mapped_column(String(64))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
 __all__ = [
     "EvaluationDataset",
     "EvaluationDatasetCategory",
@@ -1033,5 +1351,7 @@ __all__ = [
     "EvaluationReleaseGateDecisionStatus",
     "EvaluationReleaseGatePolicy",
     "EvaluationReleaseGateDecision",
+    "InteractiveEpisode",
+    "InteractiveEpisodeTurn",
     "PricingSnapshot",
 ]
