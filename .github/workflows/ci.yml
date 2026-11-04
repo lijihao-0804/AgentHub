@@ -215,11 +215,7 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
       - run: npm ci --no-audit --no-fund
-      - name: Validate AE-10 evaluation UI semantics
+      - name: Validate web regression contracts
         working-directory: .
-        run: |
-          node scripts/test_ae10_helpers.cjs
-          node scripts/test_ae10_ui.cjs
-          node scripts/test_ae10_case_components.cjs
-          node scripts/test_ae10_readonly.cjs
+        run: node scripts/test_web_regressions.cjs
       - run: npm run build

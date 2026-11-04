@@ -1,29 +1,30 @@
 # AgentHub 文档导航
 
-学习项目请走 [00–11 完整课程](learning/README.md)，按架构→请求→运行时→版本→治理→恢复→RAG→Memory→评测→业务闭环→实验→Agent 强化顺序。
+截至 2026-11-04，当前入口同步到 main `4d5de004c3ee3736360a93dd374f2069eafda0dc`：AE6b 交互评测持久化闭环（PR #7）和 AE10 最小评测结果界面（PR #8）均已合并，迁移 head 为 `0051_interactive_lifecycle`。main CI [41859097801](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) 通过：531 integration + 2846 non-integration；35 个条件 skip 分类保留为 32 research、2 Windows、1 fallback。
 
-课程每课包含主线说明和精读增补：真实函数拆解、教学数据账本、并发与失败时间线、练习与参考答案。先从 [00 · 架构](learning/00-architecture-first.md)建立全景，再顺序学习；第 10 课提供只读观察 SQL、综合排障题和隔离实验步骤。[第 11 课](learning/11-agent-engineering.md)面向 Agent 岗位，逐行解释工具提议与观察回写，配十道有答案的追问。
+先看 [当前状态与证据口径](current-state.md)。它把代码与产品入口、工程验收、真实模型质量和生产部署分开说明；历史报告只代表各自日期与提交，不改写成当前总体结论。
 
-先看 [当前状态与证据口径](current-state.md) 和 [根 README](../README.md)。功能收口基线为 main `e7dc1f6`；功能开发已停止，旧计划未全部实现。
-
-| 想了解什么 | 入口 |
+| 想了解什么 | 当前入口 |
 | --- | --- |
-| 项目已做什么、已证明什么、还不知道什么 | [current-state](current-state.md)、[最终收口报告](reviews/AgentHub-closure-memory-quality-20261005.md) |
-| 一次 Run 如何经过模块 | [architecture](architecture.md)、[详细数据流](report/02-架构与数据流.md)、[学习路线](learning/README.md) |
-| 对外行为与数据归属 | [API contracts](api-contracts.md)、[data model](data-model.md)、[模型/API 讲解](report/09-数据模型与API.md) |
-| 为什么这样设计 | [报告目录](report/README.md)、[ADR-001 架构](adr/ADR-001-modular-monolith.md)、[ADR-007 发布](adr/ADR-007-agentversion-resolved-snapshot.md)、[ADR-011 Memory](adr/ADR-011-memory-must-be-snapshotted.md) |
-| 如何面试讲解和连续追问 | [面试手册](report/interview/README.md)、[现场演示](report/07-现场演示脚本.md)、[历史截图](report/18-截图演示.md) |
-| 数据和评测如何解释 | [benchmark 索引](benchmark/README.md)、[M-I3/M-I4 正式证据](reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) |
-| 公开 RAG 数据、评测升级与复杂任务 | [2026-10-21 调研](reviews/AgentHub-RAG公开数据与复杂任务调研-20261021.md)，尚未实施 |
-| 智能体评测（agent evaluation）的行业调研与接入方案 | [2026-11 深度调研](research/agent-evaluation-2026/README.md)：调研与设计，实施中 |
-| Wiki 与最新 RAG 并轨、混合查询和部署 | [Wiki 使用](wiki/README.md)、[并轨验收](wiki/integration-acceptance.md)、[并轨制度](wiki/integration-plan.md)；独立研究和历史结果另行保留 |
-| 找验收、失败和审查记录 | [reviews 索引](reviews/README.md)、[M4](milestones/M4-E.md)、[M5-A](milestones/M5-A.md)、[M6](milestones/M6-final-acceptance.md)、[M7-H](milestones/M7-H.md) |
-| 安全与交付约束 | [安全基线](security/baseline.md)、[版本交付](versioning.md)、[凭据迁移](deployment/provider-credential-migration.md) |
-| 原始需求及未来范围 | [产品总计划](../plan/plan.md)、[应用拓展](../plan/extend-plan.md)、[归档延期计划](reviews/AgentHub-待做事项详细推进计划-20261005.md) |
+| 最新主线、实际能力、证据与边界 | [current-state](current-state.md)、[根 README](../README.md) |
+| AE6b 交互 Experiment、worker、崩溃恢复和未知写入 | [AE6b Integration Closure](milestones/AE-6b-integration-closure.md) |
+| AE10 评测结果 UI、筛选分页和 observation 隐私收口 | [AE10 最小评测结果界面](milestones/AE-10-minimal-evaluation-ui.md) |
+| 统计门禁的原始 JSON、逐项 PASS/FAIL/INCONCLUSIVE 与真实/契约分类 | [AE 能力证据矩阵](milestones/AE-capability-matrix.md) |
+| 本轮仍未完成或待核对的工作清单 | [WIP inventory 2026-11-04](reviews/WIP-inventory-20261104.md) |
+| 统一前端检查、API 隐私专项与旧断言迁移 | [T02/T03 交付及运行命令](reviews/post-ae10-delivery-20261104.md) |
+| 一次 Run 如何经过模块 | [架构](architecture.md)、[详细数据流](report/02-架构与数据流.md)、[学习路线](learning/README.md) |
+| 对外行为与数据归属 | [API contracts](api-contracts.md)、[data model](data-model.md) |
+| Dashboard、失败分析、审批与运行观测 | [M6 最终验收](milestones/M6-final-acceptance.md)、[观测指标口径](reviews/AgentHub-M-I1观测契约与指标口径-20261002.md) |
+| 为什么这样设计 | [ADR-001 架构](adr/ADR-001-modular-monolith.md)、[ADR-007 AgentVersion](adr/ADR-007-agentversion-resolved-snapshot.md)、[ADR-011 Memory 快照](adr/ADR-011-memory-must-be-snapshotted.md)、[0051 交互生命周期](adr/0051-interactive-execution-lifecycle.md) |
+| 如何展示、面试和连续追问 | [求职材料](portfolio/README.md)、[核心 Demo](report/07-现场演示脚本.md)、[面试手册](report/interview/README.md) |
+| 历史评测与失败记录 | [reviews 索引](reviews/README.md)、[benchmark 索引](benchmark/README.md)、[M-I3/M-I4 历史证据](reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) |
+| 安全与部署约束 | [安全基线](security/baseline.md)、[版本交付](versioning.md)、[凭据迁移](deployment/provider-credential-migration.md) |
 
-求职/展示优先入口：[紧凑项目介绍、简历和 12 道追问](portfolio/README.md)、[核心 Demo](report/07-现场演示脚本.md)、[两张架构图](architecture.md)。
+项目学习从 [00–11 完整课程](learning/README.md)开始。课程按架构、请求、运行时、版本、治理、恢复、知识、Memory、评测、业务闭环和 Agent 工程展开；[第 11 课](learning/11-agent-engineering.md)适合把工具提议、执行证据、恢复与评测串起来。
 
 ## 阅读口径
 
-当前状态页是汇总，不覆盖产品不变量、源码或 OpenAPI。验收报告固定历史时点，旧的“缺 MCP UI/无前端脚本/0029 head”不能当作当前结论。
-测试、合成业务实验、脚本消费者、助手审阅与真人/生产证据分别解释。历史报告中的失败保留，不替换成后来成功值。
+- 代码存在、单元/集成测试通过、真实模型小样本运行和完整生产部署是四种不同证据。Dashboard 已有 p50/p95 与趋势，worker/beat 已有内部周期对账，Memory 读取已过滤过期条目；文档仍需保留各自的实现和验收边界。
+- 统计门禁不在这里概化。具体规则、原始 JSON、真实运行与合成契约结果以 [能力矩阵](milestones/AE-capability-matrix.md) 为准。
+- `docs/milestones`、有日期或 SHA 的 `docs/reviews`、旧截图和试跑数字是历史材料。历史失败和费用保留；旧报告不能覆盖 AE6b/AE10 当前验收，也不能覆盖当前 worker 接线结论。
+- `plan/plan.md` 是需求与语义设计，不是全部完成声明。当前未闭环事项以 [WIP inventory](reviews/WIP-inventory-20261104.md) 和当前状态页为准。
