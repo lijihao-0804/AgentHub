@@ -17,6 +17,12 @@ from packages.core.config.settings import get_settings
 from packages.core.database import create_database
 from packages.core.execution_context.models import PrincipalContext
 from packages.evaluation.approval import EvaluationApprovalActorProvider
+from packages.evaluation.driver_router import (
+    EvaluationDriverRouter,
+    require_interactive_sandbox,
+)
+from packages.evaluation.environment import SupportFixtureEnvironment
+from packages.evaluation.interactive_driver import InteractiveScenarioDriver
 from packages.evaluation.judge import (
     AnswerQualityJudge,
     JudgeEnsemble,
@@ -32,6 +38,7 @@ from packages.evaluation.runner import (
     ExperimentRunner,
     reconcile_experiment_runs,
 )
+from packages.evaluation.scenario_driver import ScriptedScenarioDriver
 from packages.knowledge.composition import (
     onyx_section_selector_from_settings,
     production_retrieval_components,
@@ -80,6 +87,16 @@ async def _execute_experiment_run(run_id: UUID) -> None:
         await engine.dispose()
 
 
+def _production_model_gateway(session, *, settings, trace_sink):
+    """Construct the production gateway at the worker's replaceable provider seam."""
+
+    return SqlAlchemyModelGateway(
+        session,
+        credential_cipher=ProviderCredentialCipher.from_settings(settings),
+        trace_sink=trace_sink,
+    )
+
+
 class _SessionScopedJudgeClient:
     """Judge transport that opens a short-lived session per call.
 
@@ -103,9 +120,9 @@ class _SessionScopedJudgeClient:
 
     async def complete(self, *, system_prompt: str, user_prompt: str) -> str:
         async with self.factory() as session:
-            gateway = SqlAlchemyModelGateway(
+            gateway = _production_model_gateway(
                 session,
-                credential_cipher=ProviderCredentialCipher.from_settings(self.settings),
+                settings=self.settings,
                 trace_sink=ProductionTraceSink(),
             )
             client = ModelGatewayJudgeClient(gateway, self.context, self.plan)
@@ -190,13 +207,17 @@ async def _build_driver(
     mcp_executor = McpToolExecutor(factory, settings=settings)
     service = AgentRunService(
         factory,
-        credential_cipher=ProviderCredentialCipher.from_settings(settings),
+        model_gateway_factory=lambda session: _production_model_gateway(
+            session,
+            settings=settings,
+            trace_sink=trace_sink,
+        ),
         tool_runtime=ToolRuntime(
             session_factory=factory,
             registry=ToolRegistry(
-                    retriever=retriever,
-                    section_selector=onyx_section_selector_from_settings(settings),
-                ),
+                retriever=retriever,
+                section_selector=onyx_section_selector_from_settings(settings),
+            ),
             audit_sink=SqlAlchemyToolAuditSink(factory),
             trace_sink=trace_sink,
             mcp_handler=mcp_executor.execute_read,
@@ -228,12 +249,32 @@ async def _build_driver(
                 )
             ).context
 
-    return AgentRuntimeEvaluationDriver(
+    def environment_factory(context, item):
+        require_interactive_sandbox(
+            workspace_id=context.workspace_id,
+            environment_ref=item.input.get("environment_ref"),
+            sandbox_workspace_ids=settings.evaluation_sandbox_workspace_ids,
+        )
+        return SupportFixtureEnvironment(factory, workspace_id=context.workspace_id)
+
+    runtime_driver = AgentRuntimeEvaluationDriver(
         service,
         context_factory,
         retriever=retriever,
         approval_context_factory=approval_actor_provider.context_for,
         judge=judge,
+    )
+    scenarios = ScriptedScenarioDriver(service, driver_kind="controlled")
+    interactive_driver = InteractiveScenarioDriver(
+        scenarios,
+        context_factory=context_factory,
+        environment_factory=environment_factory,
+        approval_context_factory=approval_actor_provider.context_for,
+    )
+    return EvaluationDriverRouter(
+        interactive_driver=interactive_driver,
+        runtime_driver=runtime_driver,
+        sandbox_workspace_ids=settings.evaluation_sandbox_workspace_ids,
     )
 
 

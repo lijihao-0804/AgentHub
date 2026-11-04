@@ -39,7 +39,12 @@ from packages.evaluation.interactive_observation import (
     observation_from_envelope,
     with_cleanup,
 )
-from packages.evaluation.models import EvaluationDatasetItem, EvaluationExperimentRun
+from packages.evaluation.interactive_protocol import require_interactive_protocol
+from packages.evaluation.models import (
+    EvaluationDatasetItem,
+    EvaluationExperiment,
+    EvaluationExperimentRun,
+)
 from packages.evaluation.runner import CaseExecutionObservation, PreparedCaseExecution
 from packages.evaluation.scenario_driver import ScriptedScenarioDriver
 from packages.evaluation.trajectory import build_trajectory_observation
@@ -132,6 +137,14 @@ class InteractiveScenarioDriver:
         ):
             raise RuntimeError("EVALUATION_CASE_IDENTITY_MISMATCH")
         max_turns, max_tokens = _execution_limits(item.input)
+        async with self.scenarios.runtime.session_factory() as session:
+            evaluator_manifest = await session.scalar(
+                select(EvaluationExperiment.evaluator_manifest).where(
+                    EvaluationExperiment.workspace_id == run.workspace_id,
+                    EvaluationExperiment.id == run.experiment_id,
+                )
+            )
+        require_interactive_protocol(evaluator_manifest)
         assertions = item.expected.get("assertions")
         if not isinstance(assertions, Mapping):
             raise ValueError("INTERACTIVE_ASSERTIONS_REQUIRED")

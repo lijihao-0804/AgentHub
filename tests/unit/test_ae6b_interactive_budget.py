@@ -16,6 +16,11 @@ from packages.evaluation.interactive_observation import (
 from packages.evaluation.runner import CaseExecutionObservation
 
 
+class _PreflightSessionFactory:
+    def __call__(self):
+        raise AssertionError("Execution limits must reject before protocol lookup")
+
+
 def _case():
     workspace_id, run_id, variant_id, item_id = (uuid4() for _ in range(4))
     identity = CaseExecutionIdentity(
@@ -30,7 +35,7 @@ def _case():
     )
     return (
         identity,
-        SimpleNamespace(id=run_id, workspace_id=workspace_id),
+        SimpleNamespace(id=run_id, workspace_id=workspace_id, experiment_id=uuid4()),
         SimpleNamespace(id=variant_id),
         SimpleNamespace(
             id=item_id,
@@ -55,7 +60,9 @@ def _driver(identity):
         raise AssertionError("Preflight rejection must not allocate an environment")
 
     return InteractiveScenarioDriver(
-        SimpleNamespace(),
+        SimpleNamespace(
+            runtime=SimpleNamespace(session_factory=_PreflightSessionFactory()),
+        ),
         context_factory=context_factory,
         environment_factory=environment_factory,
     )

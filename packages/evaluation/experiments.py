@@ -22,6 +22,10 @@ from packages.evaluation.build_identity import (
     BuildIdentityProvider,
     EnvironmentBuildIdentityProvider,
 )
+from packages.evaluation.interactive_protocol import (
+    INTERACTIVE_PROTOCOL_KEY,
+    interactive_protocol_manifest,
+)
 from packages.evaluation.judge import FrozenJudgeEnsemble, FrozenJudgeProfile
 from packages.evaluation.models import (
     EVIDENCE_LEVELS,
@@ -162,6 +166,21 @@ class ExperimentService:
                     "postcondition_version": "support-scenario-postcondition-v2",
                     "recovery_policy": "fail_closed_no_fixture_replay",
                 },
+            }
+        interactive_item = await session.scalar(
+            select(EvaluationDatasetItem.id)
+            .where(
+                EvaluationDatasetItem.workspace_id == workspace_id,
+                EvaluationDatasetItem.dataset_version_id == dataset_version.id,
+                EvaluationDatasetItem.split == split,
+                EvaluationDatasetItem.category == "INTERACTIVE",
+            )
+            .limit(1)
+        )
+        if interactive_item is not None:
+            experiment.evaluator_manifest = {
+                **experiment.evaluator_manifest,
+                INTERACTIVE_PROTOCOL_KEY: interactive_protocol_manifest(),
             }
         session.add(experiment)
         try:

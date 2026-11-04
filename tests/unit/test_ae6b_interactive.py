@@ -12,10 +12,13 @@ import pytest_asyncio
 from sqlalchemy import select
 
 from packages.core.database import create_database
+from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.environment import EnvHandle, SupportFixtureEnvironment
 from packages.evaluation.interactive_driver import InteractiveScenarioDriver
+from packages.evaluation.interactive_lifecycle import CaseExecutionIdentity
 from packages.evaluation.metrics import MetricStatus, evaluate_interactive
 from packages.evaluation.models import InteractiveEpisode
+from packages.evaluation.reproducibility import default_evaluator_manifest
 from packages.evaluation.user_simulator import ScriptedUserSimulator, Turn
 from packages.evaluation.validation import validate_dataset_item
 from packages.tools.models import Customer
@@ -130,6 +133,88 @@ async def test_prepare_failure_cleans_reset_environment(ae6b_db_factory) -> None
 
 async def _resolved(value):
     return value
+
+
+class _ManifestSession:
+    def __init__(self, manifest: object) -> None:
+        self.manifest = manifest
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *_exc_info):
+        return None
+
+    async def scalar(self, _statement):
+        return self.manifest
+
+
+class _ManifestSessionFactory:
+    def __init__(self, manifest: object) -> None:
+        self.manifest = manifest
+
+    def __call__(self) -> _ManifestSession:
+        return _ManifestSession(self.manifest)
+
+
+@pytest.mark.asyncio
+async def test_prepare_rejects_historical_manifest_before_environment_allocation() -> None:
+    workspace_id, run_id, variant_id, item_id, case_id = (uuid4() for _ in range(5))
+    identity = CaseExecutionIdentity(
+        workspace_id=workspace_id,
+        run_id=run_id,
+        case_id=case_id,
+        variant_id=variant_id,
+        item_id=item_id,
+        repetition_index=0,
+        owner="historical-protocol-test",
+        generation=1,
+    )
+    run = SimpleNamespace(
+        id=run_id,
+        workspace_id=workspace_id,
+        experiment_id=uuid4(),
+    )
+    variant = SimpleNamespace(id=variant_id)
+    item = SimpleNamespace(
+        id=item_id,
+        category="INTERACTIVE",
+        expected={"assertions": {"ticket_count": 0}},
+        input={
+            "environment_ref": "support_customer",
+            "simulator": {"max_turns": 3},
+        },
+    )
+    scenarios = SimpleNamespace(
+        runtime=SimpleNamespace(
+            session_factory=_ManifestSessionFactory(default_evaluator_manifest())
+        )
+    )
+    environment_requested = False
+
+    async def context_factory(_run):
+        return SimpleNamespace(
+            workspace_id=str(workspace_id),
+            permissions={"evaluation_run"},
+        )
+
+    def environment_factory(*_args):
+        nonlocal environment_requested
+        environment_requested = True
+        raise AssertionError("historical protocol rejection must precede environment allocation")
+
+    driver = InteractiveScenarioDriver(
+        scenarios,
+        context_factory=context_factory,
+        environment_factory=environment_factory,
+    )
+
+    with pytest.raises(AgentHubError) as raised:
+        await driver.prepare(run=run, variant=variant, item=item, case_identity=identity)
+
+    assert raised.value.code == "INTERACTIVE_PROTOCOL_NOT_FROZEN"
+    assert raised.value.status_code == 409
+    assert environment_requested is False
 
 
 def test_scripted_simulator_discloses_only_on_trigger() -> None:

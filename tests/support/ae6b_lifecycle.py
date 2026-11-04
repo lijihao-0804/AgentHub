@@ -22,6 +22,7 @@ from packages.evaluation.interactive_lifecycle import (
     CaseExecutionIdentity,
     InteractiveLifecycle,
 )
+from packages.evaluation.interactive_protocol import require_interactive_protocol
 from packages.evaluation.models import (
     EvaluationDatasetItem,
     EvaluationExperimentCaseResult,
@@ -140,6 +141,7 @@ async def create_interactive_driver_experiment(
             purpose="DEVELOPMENT",
             repetitions=1,
         )
+        require_interactive_protocol(experiment.evaluator_manifest)
         variant = await experiments.add_variant(
             session,
             context=context,
@@ -213,6 +215,7 @@ async def create_owned_lifecycle_cases(
                 purpose="DEVELOPMENT",
                 repetitions=repetitions,
             )
+            require_interactive_protocol(experiment.evaluator_manifest)
             variant = await experiments.add_variant(
                 session,
                 context=context,
