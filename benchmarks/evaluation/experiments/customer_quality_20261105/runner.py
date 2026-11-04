@@ -172,7 +172,7 @@ async def prepare():
             )
             profile.fallback_profile_id = None
             agent.model_retry_policy = {"max_attempts": 1}
-            agent.runtime_config = {"max_steps": 8, "max_tool_calls": 4, "max_output_tokens": 8192}
+            agent.runtime_config = {"max_steps": 8, "max_tool_calls": 4}
             versions = {}
             for label in ("baseline", "candidate"):
                 agent.system_prompt = protocol["variants"][label]["system_prompt"]
