@@ -94,6 +94,7 @@ from packages.agent_runtime.summary_service import (
 )
 from packages.agent_runtime.summary_state import SummaryJobStatus
 from packages.agent_runtime.summary_worker import SummaryWorker, frozen_summary_model_spec
+from packages.agent_runtime.wiki_history_evidence import validate_wiki_history_evidence
 from packages.agent_runtime.work_layer import (
     HISTORY_SOURCE_MAX_TURNS,
     PLAIN_TEXT_PREFIX_V1,
@@ -710,6 +711,10 @@ class _AgentRunGraph:
         """Reauthorize compact historical evidence against the current Run binding."""
         merged: dict[str, dict[str, Any]] = {}
         current_bindings = getattr(self.run, "effective_knowledge_snapshots", None) or []
+        current_wiki = getattr(self.run, "effective_wiki_publications", None) or []
+        # This cache lives only for this call. Permission and source ACL proof
+        # must be rebuilt whenever history validation is entered.
+        wiki_publication_cache: dict[tuple[UUID, UUID, UUID, str], Any] = {}
         validated_pairs: dict[tuple[str, str], str] = {}
         checks: list[tuple[str, str, str, str]] = []
         for turn in conversation.turns:
@@ -721,24 +726,50 @@ class _AgentRunGraph:
             }
             if rag_calls and "knowledge_run" not in self.context.permissions:
                 raise AgentHubError("FORBIDDEN", "Historical evidence is not authorized.", 403)
-            if "query_wiki" in rag_calls:
-                raise AgentHubError(
-                    "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
-                    "Historical Wiki evidence is unavailable.",
-                    422,
-                )
             registry = turn.evidence_registry or {}
+            has_wiki_evidence = isinstance(registry, Mapping) and any(
+                isinstance(entry, Mapping)
+                and isinstance(entry.get("record"), Mapping)
+                and entry["record"].get("origin") == "WIKI_DERIVED"
+                for entry in registry.values()
+            )
             if rag_calls:
                 try:
-                    registry = validate_history_evidence(
-                        turn.messages,
-                        registry,
-                        turn.source_knowledge_snapshots,
-                        current_bindings,
-                        turn.source_wiki_publications,
-                        getattr(self.run, "effective_wiki_publications", None) or [],
-                        self.context.permissions,
-                    )
+                    if "query_wiki" in rag_calls or has_wiki_evidence:
+                        try:
+                            context_workspace_id = UUID(str(self.context.workspace_id))
+                        except (AttributeError, TypeError, ValueError):
+                            context_workspace_id = None
+                        if context_workspace_id != workspace_id:
+                            raise AgentHubError(
+                                "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
+                                "Historical evidence cannot be verified for the current run.",
+                                422,
+                            )
+                        async with self.service.session_factory() as session:
+                            registry = await validate_wiki_history_evidence(
+                                session,
+                                self.context,
+                                workspace_id=workspace_id,
+                                messages=turn.messages,
+                                registry=registry,
+                                source_knowledge_snapshots=turn.source_knowledge_snapshots,
+                                current_knowledge_snapshots=current_bindings,
+                                source_wiki_publications=turn.source_wiki_publications,
+                                current_wiki_publications=current_wiki,
+                                permissions=self.context.permissions,
+                                publication_cache=wiki_publication_cache,
+                            )
+                    else:
+                        registry = validate_history_evidence(
+                            turn.messages,
+                            registry,
+                            turn.source_knowledge_snapshots,
+                            current_bindings,
+                            turn.source_wiki_publications,
+                            current_wiki,
+                            self.context.permissions,
+                        )
                 except AgentHubError as error:
                     if error.code == "FORBIDDEN":
                         raise
@@ -772,11 +803,13 @@ class _AgentRunGraph:
                         "AGENT_HISTORY_SNAPSHOT_INVALID", "Historical evidence is invalid.", 422
                     )
                 if record.get("origin") == "WIKI_DERIVED":
-                    raise AgentHubError(
-                        "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
-                        "Historical Wiki evidence is unavailable.",
-                        422,
-                    )
+                    if "query_wiki" not in rag_calls:
+                        raise AgentHubError(
+                            "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
+                            "Historical Wiki evidence has no matching tool result.",
+                            422,
+                        )
+                    continue
                 try:
                     kb, snapshot = (
                         str(UUID(str(ref["knowledge_base_id"]))),

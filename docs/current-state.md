@@ -10,6 +10,8 @@
 
 前端统一八组回归与 production build（含类型检查）通过；Memory 故障文件最终 14 项真库检查，加上四项新派发意图验收。真实浏览器验证 Viewer 只读、Owner 上下文保存及 Wiki 绑定/清除回读；3020/8020 为独立设置页预览，无 worker/beat 或真实 provider 调用。词面策略不是语义保证；自动摘要推广门和跨轮硬金额默认拒绝仍保留。旧 WIP 未清理。
 
+[固定 Wiki 出版物历史恢复](reviews/wiki-history-context-20261105.md)在独立分支通过本地验收和复核，恢复此前可见的精确引用，仍检查当前来源权限；没有重解 LATEST 或扩大 RAW 授权。此项尚待远端 CI，不代表 main 已合并或上下文质量全面解决。
+
 另一个独立分支正在交付 [provider 出站与冻结端点修复](reviews/provider-egress-delivery-20261105.md)：受控 SDK/HTTP 连接、严格地址谓词及新 Agent/judge 端点绑定，CI/部署状态与 PR #11 分开记录。
 
 [T04 研究 PR #10](https://github.com/lijihao-0804/AgentHub/pull/10)仍为 draft：16 任务组、两变体、K=2 的 DEV 实验未达到预登记增益门槛，未派发 HOLDOUT；助手校准不能代替双人人工金标。旧实验与费用记录保留，不因本轮修复重算为通过。
