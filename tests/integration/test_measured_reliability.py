@@ -28,6 +28,12 @@ pytestmark = [
 ]
 
 
+def _with_positive_action_permissions(context):
+    return context.model_copy(
+        update={"permissions": context.permissions | {"approve_action", "workspace_read"}}
+    )
+
+
 class DurableSimulatedWrite:
     def __init__(self, path, mode):
         self.path, self.mode = path, mode
@@ -73,9 +79,7 @@ async def test_persistent_side_effect_matrix(db_factory, tmp_path):
         }
         async with db_factory() as db:
             base = await _seed(db, label=f"ledger-{uuid4().hex}", tool_spec=spec)
-        context = base["context"].model_copy(
-            update={"permissions": base["context"].permissions | {"approve_action"}}
-        )
+        context = _with_positive_action_permissions(base["context"])
         gateway = ScriptedGateway(
             [
                 ModelResponse(
