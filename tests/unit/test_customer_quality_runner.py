@@ -100,7 +100,14 @@ async def test_runtime_evidence_uses_the_persisted_approval_run_foreign_key():
     values = iter(
         [
             [SimpleNamespace(agent_run_id=run_id, terminal_status="SUCCEEDED")],
-            [SimpleNamespace(id=run_id, final_output="工单未创建。", failure_code=None)],
+            [
+                SimpleNamespace(
+                    id=run_id,
+                    input_text="我的客户编号是 SYNTHETIC-1。",
+                    final_output="工单未创建。",
+                    failure_code=None,
+                )
+            ],
             [],
             [
                 SimpleNamespace(
@@ -108,6 +115,13 @@ async def test_runtime_evidence_uses_the_persisted_approval_run_foreign_key():
                     execution_status="NOT_STARTED",
                     requested_by="owner",
                     decided_by="reviewer",
+                    tool_identity="create_ticket",
+                    canonical_arguments={
+                        "customer_ref": "SYNTHETIC-1",
+                        "subject": "合成工单",
+                        "priority": "HIGH",
+                        "private_facts": "excluded",
+                    },
                 )
             ],
         ]
@@ -130,8 +144,35 @@ async def test_runtime_evidence_uses_the_persisted_approval_run_foreign_key():
             "execution": "NOT_STARTED",
             "requested_by": "owner",
             "decided_by": "reviewer",
+            "tool_identity": "create_ticket",
+            "arguments": {"subject": "合成工单", "priority": "HIGH"},
         }
     ]
+    assert evidence["dialogue"] == [
+        {"user": "我的客户编号是 SYNTHETIC-1。", "assistant": "工单未创建。"}
+    ]
+
+
+def test_judge_context_reserves_its_frozen_output_cap_without_changing_solver_policy():
+    from packages.agent_runtime.context_budget import ContextBudgetConfig, ContextBudgetPolicy
+    from packages.model_gateway.contracts import ModelCapabilities
+
+    frozen = SimpleNamespace(
+        model_plan=SimpleNamespace(
+            primary=SimpleNamespace(
+                capabilities=ModelCapabilities(max_context_tokens=32768), max_tokens=2048
+            )
+        )
+    )
+    profile = judge_profile(uuid4(), uuid4())
+    plan = research.judge_admission_plan(profile, frozen, uuid4())
+    policy = ContextBudgetPolicy(
+        plan, ContextBudgetConfig(reserved_output_tokens=profile.max_tokens)
+    )
+    assert plan.primary.max_tokens == 8192
+    assert policy.reserved_output_tokens == 8192
+    assert policy.context_limit == 32768
+    assert frozen.model_plan.primary.max_tokens == 2048
 
 
 @pytest.mark.asyncio
@@ -154,7 +195,7 @@ async def test_export_passes_boolean_business_scores_into_real_analysis(monkeypa
     )
     case = SimpleNamespace(
         id=uuid4(),
-        observation={"t04_semantic_label": "CORRECT"},
+        observation={"t04_semantic_label": "UNKNOWN"},
         repetition_index=0,
         status="SUCCEEDED",
         input_tokens=10,
@@ -184,8 +225,19 @@ async def test_export_passes_boolean_business_scores_into_real_analysis(monkeypa
     saved = {}
     monkeypatch.setattr(research, "save", lambda path, value: saved.update({path.name: value}))
     meter = SimpleNamespace(ledger=SimpleNamespace(summary=lambda: {}))
-    await research.export_results(factory, uuid4(), "preflight", {"build_sha": "build"}, meter)
+    await research.export_results(
+        factory,
+        uuid4(),
+        "preflight",
+        {"build_sha": "build"},
+        meter,
+        judge_overrides={str(case.id): {"label": "CORRECT", "judge": {"status": "SCORED"}}},
+        native_build_sha="retained-native-build",
+    )
     result = saved["preflight-results.json"]
+    assert case.observation["t04_semantic_label"] == "UNKNOWN"
+    assert result["retained_runtime_regraded"] is True
+    assert result["native_execution_build_sha"] == "retained-native-build"
     assert all(row["task_success"] is True for row in result["rows"])
     assert (
         result["combined_quality"]["variants"]["baseline"]["business_success"]["success_rate"] == 1

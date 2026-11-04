@@ -108,8 +108,8 @@ def judge_profile(profile_id, credential_id):
         provider="openai-compatible",
         model=MODEL,
         temperature=0,
-        max_tokens=2048,
-        timeout_seconds=60,
+        max_tokens=read(ROOT / "protocol.json")["judge_execution"]["max_output_tokens"],
+        timeout_seconds=read(ROOT / "protocol.json")["judge_execution"]["timeout_seconds"],
         profile_id=str(profile_id),
         credential_ref=str(credential_id),
         rubric=AnswerQualityRubric(
@@ -319,14 +319,16 @@ class AdmittedJudgeClient:
             ContextMessage,
         )
         from packages.core.config.settings import Settings
-        from packages.evaluation.judge import judge_profile_to_plan
         from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
         from packages.model_gateway.contracts import ModelMessage, ModelRequest
         from packages.model_gateway.credentials import ProviderCredentialCipher
         from packages.model_gateway.gateway import SqlAlchemyModelGateway
 
+        # Judge admission uses its own frozen output cap, while inheriting the
+        # verified model context capability. Solver policy is never mutated.
+        plan = judge_admission_plan(self.profile, self.frozen, self.context.workspace_id)
         admitted = ContextBudgetPolicy(
-            self.frozen, ContextBudgetConfig(**self.frozen.runtime["context_budget"])
+            plan, ContextBudgetConfig(reserved_output_tokens=self.profile.max_tokens)
         ).admit(
             (
                 ContextMessage(
@@ -347,11 +349,21 @@ class AdmittedJudgeClient:
             )
             response = await gateway.generate_resolved(
                 self.context,
-                judge_profile_to_plan(self.profile, UUID(self.context.workspace_id)),
+                plan,
                 ModelRequest(messages=admitted.messages),
             )
             self.last_raw_response = response.content
             return response.content
+
+
+def judge_admission_plan(profile, frozen, workspace_id):
+    from packages.evaluation.judge import judge_profile_to_plan
+
+    plan = judge_profile_to_plan(profile, UUID(str(workspace_id)))
+    return replace(
+        plan,
+        primary=replace(plan.primary, capabilities=frozen.model_plan.primary.capabilities),
+    )
 
 
 def semantic_label(verdict, raw_text=""):
@@ -414,6 +426,15 @@ async def runtime_evidence(factory, case_id):
             )
         )
         evidence = {
+            "evidence_version": "customer-quality-evidence-v2",
+            "dialogue": [
+                {
+                    "user": runs[turn.agent_run_id].input_text,
+                    "assistant": runs[turn.agent_run_id].final_output or "",
+                }
+                for turn in turns
+                if turn.agent_run_id in runs
+            ],
             "turn_statuses": [turn.terminal_status for turn in turns],
             "run_failures": [row.failure_code for row in runs.values() if row.failure_code],
             "steps": [
@@ -426,6 +447,12 @@ async def runtime_evidence(factory, case_id):
                     "execution": approval.execution_status,
                     "requested_by": str(approval.requested_by),
                     "decided_by": str(approval.decided_by) if approval.decided_by else None,
+                    "tool_identity": approval.tool_identity,
+                    "arguments": {
+                        key: approval.canonical_arguments[key]
+                        for key in ("subject", "priority")
+                        if key in approval.canonical_arguments
+                    },
                 }
                 for approval in approvals
             ],
@@ -495,6 +522,7 @@ class ScopedDriver:
                             evidence=(
                                 json.dumps(
                                     {
+                                        "category": item.source_provenance["category"],
                                         "runtime": evidence,
                                         "business": result.observation.get("business_outcome"),
                                     },
@@ -550,7 +578,10 @@ async def components(factory, settings, state, phase):
     if ledger.summary()["halted"]:
         raise RuntimeError("RESEARCH_LEDGER_HALTED_RECONCILIATION_REQUIRED")
     meter = BudgetedAliyunClient(
-        ledger=ledger, base_url=os.environ["AGENTHUB_RAG_BASE_URL"], private_dir=PRIVATE / "calls"
+        ledger=ledger,
+        base_url=os.environ["AGENTHUB_RAG_BASE_URL"],
+        private_dir=PRIVATE / "calls",
+        judge_max_tokens=read(ROOT / "protocol.json")["judge_execution"]["max_output_tokens"],
     )
     context = await access(factory, state["owner_id"], state["workspace_id"])
     approver = await access(factory, state["approver_id"], state["workspace_id"])
@@ -628,7 +659,8 @@ async def run_phase(phase):
                 if meter.ledger.summary()["halted"]:
                     break
                 with meter.scope(
-                    "calibration/" + example["id"],
+                    read(ROOT / "protocol.json")["judge_execution"]["calibration_identity_prefix"]
+                    + example["id"],
                     {
                         "phase": phase,
                         "case_id": example["id"],
@@ -681,7 +713,14 @@ async def run_phase(phase):
             calibration["weighting"] = "none"
             save(
                 PRIVATE / "calibration.json",
-                {"rows": rows, "calibration": calibration, "budget": meter.ledger.summary()},
+                {
+                    "rows": rows,
+                    "calibration": calibration,
+                    "budget": meter.ledger.summary(),
+                    "build_sha": state["build_sha"],
+                    "protocol_hash": state["protocol_hash"],
+                    "judge_evaluator_version": judge.profile.evaluator_version,
+                },
             )
         else:
             if phase == "dev" and not (PRIVATE / "preflight-results.json").exists():
@@ -765,7 +804,9 @@ async def run_phase(phase):
         await engine.dispose()
 
 
-async def export_results(factory, run_id, phase, state, meter):
+async def export_results(
+    factory, run_id, phase, state, meter, *, judge_overrides=None, native_build_sha=None
+):
     from sqlalchemy import select
 
     from packages.evaluation.metrics import EvaluatorRegistry
@@ -809,7 +850,8 @@ async def export_results(factory, run_id, phase, state, meter):
                 if score and score.status.value == "AVAILABLE" and score.value is not None
                 else None
             )
-            label = case.observation.get("t04_semantic_label", "UNKNOWN")
+            revised = (judge_overrides or {}).get(str(case.id), {})
+            label = revised.get("label", case.observation.get("t04_semantic_label", "UNKNOWN"))
             answer, evidence = await runtime_evidence(factory, case.id)
             rows.append(
                 {
@@ -841,7 +883,7 @@ async def export_results(factory, run_id, phase, state, meter):
                     "answer_text": answer,
                     "input_text": item.input["task"],
                     "failure_code": case.failure_code,
-                    "judge": case.observation.get("t04_semantic_judge"),
+                    "judge": revised.get("judge", case.observation.get("t04_semantic_judge")),
                     "business_outcome": case.observation.get("business_outcome"),
                     "stop_reason": case.observation.get("t04_stop_reason"),
                     "evidence": evidence,
@@ -886,6 +928,8 @@ async def export_results(factory, run_id, phase, state, meter):
             "phase": phase,
             "run_id": str(run_id),
             "build_sha": state["build_sha"],
+            "native_execution_build_sha": native_build_sha or state["build_sha"],
+            "retained_runtime_regraded": judge_overrides is not None,
             "rows": rows,
             "business": analysis,
             "combined_quality": quality,
@@ -903,6 +947,136 @@ async def export_results(factory, run_id, phase, state, meter):
         },
     )
     save(PRIVATE / (phase + "-blind-label-pack.json"), build_blind_annotation_pack(rows))
+
+
+async def grade_retained_preflight():
+    """One explicit v2 measurement; never replay or mutate the known native cases."""
+    from sqlalchemy import select
+
+    from packages.core.canonical.json_hash import canonical_json_hash
+    from packages.evaluation.judge import JudgeRequest
+    from packages.evaluation.models import (
+        EvaluationDatasetItem,
+        EvaluationExperimentCaseResult,
+        EvaluationExperimentVariant,
+    )
+
+    state = read(PRIVATE / "prepared.json")
+    if state["build_sha"] != build_sha() or state["protocol_hash"] != canonical_json_hash(
+        read(ROOT / "protocol.json")
+    ):
+        raise RuntimeError("FROZEN_RESEARCH_IDENTITY_DRIFT")
+    retained = state["retained_preflight"]
+    original = read(PRIVATE / retained["result_path"])
+    if len(original["rows"]) != 6 or not all(
+        row["status"] == "SUCCEEDED"
+        and row["task_success"] is not None
+        and row["input_tokens"] is not None
+        and row["output_tokens"] is not None
+        and row["evidence"]["turn_statuses"]
+        and all(s == "SUCCEEDED" for s in row["evidence"]["turn_statuses"])
+        and not row.get("stop_reason")
+        for row in original["rows"]
+    ):
+        raise RuntimeError("RETAINED_RUNTIME_NOT_KNOWN_COMPLETE")
+    marker = PRIVATE / "preflight-judge-started.json"
+    settings, (engine, factory) = environment()
+    try:
+        _, meter, judge, _ = await components(factory, settings, state, "preflight")
+        with marker.open("x", encoding="utf-8") as lock:
+            json.dump({"run_id": retained["run_id"], "new_judge_build": state["build_sha"]}, lock)
+        async with factory() as session:
+            records = (
+                await session.execute(
+                    select(
+                        EvaluationExperimentCaseResult,
+                        EvaluationDatasetItem,
+                        EvaluationExperimentVariant,
+                    )
+                    .join(
+                        EvaluationDatasetItem,
+                        EvaluationDatasetItem.id == EvaluationExperimentCaseResult.dataset_item_id,
+                    )
+                    .join(
+                        EvaluationExperimentVariant,
+                        EvaluationExperimentVariant.id
+                        == EvaluationExperimentCaseResult.experiment_variant_id,
+                    )
+                    .where(
+                        EvaluationExperimentCaseResult.experiment_run_id == UUID(retained["run_id"])
+                    )
+                )
+            ).all()
+        if len(records) != 6:
+            raise RuntimeError("RETAINED_PREFLIGHT_IDENTITY_MISMATCH")
+        overrides = {}
+        for case, item, variant in records:
+            if meter.ledger.summary()["halted"]:
+                break
+            answer, evidence = await runtime_evidence(factory, case.id)
+            with meter.scope(
+                "measurement/v2/case/" + str(case.id) + "/judge",
+                {
+                    "case_id": str(case.id),
+                    "phase": "preflight",
+                    "variant": variant.label,
+                    "model": MODEL,
+                    "provider": "aliyun-beijing",
+                },
+            ):
+                verdict = await judge.judge(
+                    JudgeRequest(
+                        question=item.input["task"],
+                        answer=answer,
+                        reference_answer=json.dumps(item.expected, ensure_ascii=False),
+                        evidence=(
+                            json.dumps(
+                                {
+                                    "category": item.source_provenance["category"],
+                                    "runtime": evidence,
+                                    "business": case.observation.get("business_outcome"),
+                                },
+                                ensure_ascii=False,
+                                default=str,
+                            ),
+                        ),
+                    )
+                )
+            overrides[str(case.id)] = {
+                "judge": verdict,
+                "label": semantic_label(verdict, getattr(judge.client, "last_raw_response", ""))
+                or "UNKNOWN",
+            }
+        # Missing new grades remain UNKNOWN, never fall back to an old positive.
+        for case, _, _ in records:
+            overrides.setdefault(
+                str(case.id),
+                {
+                    "judge": {"status": "FAILED", "reason": "not_dispatched_after_halt"},
+                    "label": "UNKNOWN",
+                },
+            )
+        await export_results(
+            factory,
+            UUID(retained["run_id"]),
+            "preflight",
+            state,
+            meter,
+            judge_overrides=overrides,
+            native_build_sha=retained["native_build_sha"],
+        )
+        print(
+            json.dumps(
+                {
+                    "phase": "preflight-judge",
+                    "runtime_replays": 0,
+                    "budget": meter.ledger.summary(),
+                },
+                default=str,
+            )
+        )
+    finally:
+        await engine.dispose()
 
 
 def conservative_primary_rows(rows, phase):
@@ -1005,12 +1179,22 @@ def dev_gate(rows, calibration):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("phase", choices=("prepare", "calibration", "preflight", "dev", "holdout"))
+    parser.add_argument(
+        "phase",
+        choices=("prepare", "calibration", "preflight", "preflight-judge", "dev", "holdout"),
+    )
     args = parser.parse_args()
     from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
 
     configure_windows_asyncio_policy()
-    asyncio.run(prepare() if args.phase == "prepare" else run_phase(args.phase))
+    action = (
+        prepare
+        if args.phase == "prepare"
+        else grade_retained_preflight
+        if args.phase == "preflight-judge"
+        else lambda: run_phase(args.phase)
+    )
+    asyncio.run(action())
 
 
 if __name__ == "__main__":

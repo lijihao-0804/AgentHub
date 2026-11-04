@@ -10,6 +10,9 @@ execution phases use the user-authorized Aliyun DeepSeek route and CNY 30 total 
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner prepare
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner calibration
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner preflight
+# For the explicit v2 measurement revision only, grade known retained runtime
+# trajectories once; this does not replay runtime, tools or approvals:
+python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner preflight-judge
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner dev
 # Only if dev-gate.json allows it; at most one persisted HOLDOUT exposure:
 python -m benchmarks.evaluation.experiments.customer_quality_20261105.runner holdout
@@ -106,8 +109,12 @@ outer research dispatch ledger.
 ## Experimental comparison
 
 The requested model is Alibaba Cloud Model Studio Beijing
-`deepseek-v4.1-flash-1017`, with temperature `0`, maximum output `2048`, no automatic retry,
-and no fallback. Baseline and candidate must share the model, tools, runtime framework,
+`deepseek-v4.1-flash-1017`, with temperature `0`, solver maximum output `2048`, no automatic retry,
+and no fallback. Protocol v2 separately freezes judge output/reserve `8192` and timeout
+`120s`, after two retained v1 judge attempts exhausted the `2048` cap. Judge evidence
+adds disclosed chronological dialogue, actual category and whitelisted approval
+subject/priority arguments; original v1 labels are never rewritten.
+Baseline and candidate must share the model, tools, runtime framework,
 dataset version, environment, pricing snapshot, and execution limits.
 
 The only allowed variation is one system-prompt paragraph. Candidate adds the following
@@ -120,8 +127,9 @@ The full prompt text is in `protocol.json`. The runner must not change prompts p
 add tools, add a framework, or rewrite the rubric after seeing results.
 
 Each source group is run two times per variant (`K=2`). The primary statistical unit is the
-source group, and `Pass^2` is 1 only when both repetitions receive `CORRECT` or
-`CORRECT_REFUSAL`. A missing or `UNKNOWN` trial is retained as `UNKNOWN` in the operational
+source group, and `Pass^2` is 1 only when both repetitions pass native business assertions
+and receive `CORRECT` or `CORRECT_REFUSAL` with native judge score 1.
+A missing or `UNKNOWN` trial is retained as `UNKNOWN` in the operational
 evidence and conservatively coded as non-pass in the fixed two-trial statistical
 denominator. It is never replaced by a rerun.
 

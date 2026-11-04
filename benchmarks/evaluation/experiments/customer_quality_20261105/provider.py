@@ -25,6 +25,8 @@ from benchmarks.evaluation.experiments.customer_quality_20261105.budget import (
 )
 
 MODEL: Final = "deepseek-v4.1-flash-1017"
+_RUNTIME_MAX_TOKENS: Final = 2_048
+_ALLOWED_JUDGE_MAX_TOKENS: Final = frozenset({2_048, 8_192})
 _ALIYUN_BEIJING_HOST_SUFFIX: Final = ".cn-beijing.maas.aliyuncs.com"
 _ALIYUN_BEIJING_OPENAI_PATH: Final = "/compatible-mode/v1"
 _MISSING = object()
@@ -129,6 +131,7 @@ class BudgetedAliyunClient:
         private_dir: str | Path,
         model: str = MODEL,
         client: Completion | None = None,
+        judge_max_tokens: int = _RUNTIME_MAX_TOKENS,
     ) -> None:
         if not _is_verified_aliyun_beijing_endpoint(base_url):
             raise ValueError(
@@ -136,9 +139,12 @@ class BudgetedAliyunClient:
             )
         if not isinstance(model, str) or not model:
             raise ValueError("model must be a non-empty string")
+        if type(judge_max_tokens) is not int or judge_max_tokens not in _ALLOWED_JUDGE_MAX_TOKENS:
+            raise ValueError("judge_max_tokens must be 2048 or 8192")
 
         self.ledger = ledger
         self.model = model
+        self._judge_max_tokens = judge_max_tokens
         self.private_dir = Path(private_dir).expanduser().resolve()
         self.private_dir.mkdir(parents=True, exist_ok=True)
         self._base_url = base_url
@@ -186,7 +192,7 @@ class BudgetedAliyunClient:
         if bool(self.ledger.summary()["halted"]):
             raise BudgetHalted("BUDGET_HALTED", "Research ledger is already halted")
 
-        self._validate_request(kwargs)
+        self._validate_request(kwargs, scope=scope)
         ordinal = scope.next_ordinal
         scope.next_ordinal += 1
         logical_call_key = f"{scope.base_key}/{ordinal}"
@@ -319,7 +325,12 @@ class BudgetedAliyunClient:
             }
         )
 
-    def _validate_request(self, kwargs: Mapping[str, Any]) -> None:
+    def _validate_request(
+        self,
+        kwargs: Mapping[str, Any],
+        *,
+        scope: _ScopeState,
+    ) -> None:
         if kwargs.get("extra_body"):
             raise BudgetedProviderError("UNFROZEN_REQUEST_EXTENSION")
         model = kwargs.get("model")
@@ -331,7 +342,11 @@ class BudgetedAliyunClient:
             raise BudgetedProviderError("INVALID_RETRY_POLICY")
         if kwargs.get("stream") is not False:
             raise BudgetedProviderError("STREAMING_NOT_ALLOWED")
-        if type(kwargs.get("max_tokens")) is not int or kwargs.get("max_tokens") != 2_048:
+        is_judge_scope = scope.base_key.startswith("calibration/") or scope.base_key.endswith(
+            "/judge"
+        )
+        max_tokens_cap = self._judge_max_tokens if is_judge_scope else _RUNTIME_MAX_TOKENS
+        if type(kwargs.get("max_tokens")) is not int or kwargs.get("max_tokens") != max_tokens_cap:
             raise BudgetedProviderError("INVALID_MAX_TOKENS")
         temperature = kwargs.get("temperature")
         if isinstance(temperature, bool) or temperature != 0:

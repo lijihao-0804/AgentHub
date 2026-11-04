@@ -1,8 +1,15 @@
 {
-  "protocol_version": 1,
+  "protocol_version": 2,
+  "technical_revision": {
+    "previous_protocol_build": "a9623128c7af50b436cedf823a84857eec225500",
+    "reason": "Two of six real preflight judge attempts exhausted 2048 output tokens with empty answers. Runtime/approval execution and usage were known; no DEV or HOLDOUT was run.",
+    "changed": "Judge output cap/context reserve 8192 and timeout 120s; grader evidence adds disclosed chronological dialogue, actual category, and whitelisted approval subject/priority arguments.",
+    "unchanged": "Solver output 2048, model, prompts, dataset, rubric, metrics, gates, split, pricing, no retries/fallback, cumulative CNY30 ledger.",
+    "retention": "All v1 calls, unknown semantic scores and expenses retained. A new frozen judge and new experiments are published; no prior provider attempt is retried or relabeled."
+  },
   "experiment_id": "customer_quality_20261105",
   "title": "客服交互澄清与审批结果措辞：baseline 对 candidate",
-  "status": "PREPARED_NOT_EXECUTED",
+  "status": "REVISION_PREPARED_NOT_EXECUTED",
   "registered_on": "2026-11-05",
   "purpose": {
     "question": "仅修改 system prompt 中的澄清与审批后结果措辞协议，能否提高客服交互任务在 DEV 上的一致成功率，并减少审批拒绝后的虚假完成声明？",
@@ -88,6 +95,7 @@
     "runner_split_strategy": "先创建 split=DEV、repetitions=2 的实验；仅当 DEV 门通过时，再创建一次 split=HOLDOUT、repetitions=2 的实验。"
   },
   "model": {
+    "scope": "solver; judge output cap is separately frozen in judge_execution",
     "provider": "Alibaba Cloud Model Studio Beijing",
     "requested_model_id": "deepseek-v4.1-flash-1017",
     "transport": "existing Alibaba Cloud DeepSeek route",
@@ -101,7 +109,7 @@
     "observed_provider_max_output_tokens": 393216,
     "output_billing_note": "Alibaba Cloud bills output tokens for both reasoning/thinking content and answer content; do not subtract one component.",
     "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
-    "pricing_source_checked_by": "user",
+    "pricing_source_checked_by": "assistant_official_documentation",
     "pricing_source_date": "2026-11-05",
     "request_mode": "provider_default",
     "physical_transport": "single HTTP POST via httpx; transport retries=0 and redirects=false"
@@ -129,6 +137,16 @@
       "template_id": "customer-quality-clarify-result-wording-v1",
       "system_prompt": "你是企业客服工单助手。只使用对话和已授权工具返回的事实，按用户要求处理请求。不得编造客户信息、工具结果、审批结果或已执行的操作；无法执行时如实说明。\n交互措辞规则：客户编号缺失或含糊时，先提出一个明确的澄清问题；收到审批结果后，按实际状态措辞，审批被拒绝时明确说明工单未创建，查询后再写入时分别说明查询事实和写入结果。"
     }
+  },
+  "judge_execution": {
+    "max_output_tokens": 8192,
+    "reserved_output_tokens": 8192,
+    "timeout_seconds": 120,
+    "request_mode": "provider_default",
+    "calibration_identity_prefix": "calibration/v2/",
+    "evidence_version": "customer-quality-evidence-v2",
+    "technical_preflight_revision": "Reuse the six retained, known-complete a962312 runtime trajectories and grade them once with the newly frozen judge. Preserve all old v1 scores/unknowns unchanged; do not repeat runtime/tool side effects. This revised preflight is excluded from primary DEV/HOLDOUT.",
+    "evidence": "Disclosed user/assistant dialogue, native runtime/tool/approval statuses, category, business assertion, whitelisted approval subject/priority; no undisclosed private facts or secret credentials."
   },
   "outcome_definition": {
     "unit": "source_group",
@@ -208,7 +226,8 @@
     "usage_unknown": "无法获得完整 usage 时保留该物理请求的 5.242880 占用，停止新派发，等待人工对账。",
     "retry_or_fallback": "关闭；失败或未知不得自动重发。",
     "platform_field": "所有交互 item 均省略 max_cost_cny；不得把外层账本伪称为平台内强制金额限制。",
-    "model_calls_performed_for_this_package": 0,
+    "model_calls_performed_before_this_revision": 38,
+    "known_peak_priced_cost_before_this_revision_cny": "0.198180",
     "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
     "token_ceiling_source": "https://help.aliyun.com/zh/model-studio/deepseek-api"
   },
@@ -248,7 +267,7 @@
   },
   "runner_mapping": {
     "formal_publication_owner": "main runner",
-    "dataset_version": "调用 build_items()，经 packages.evaluation.validation.validate_dataset_items 校验后创建并发布正式 DatasetVersion；本包不写数据库。",
+    "dataset_version": "调用 build_items()，经 packages.evaluation.validation.validate_dataset_items 校验后通过原生服务创建并发布 DatasetVersion；v2 复用已发布身份，不修改数据。",
     "agent_versions": "分别发布 baseline 与 candidate AgentVersion；除本协议中的一个 system prompt 增量外，模型、工具、运行时、输出上限和预算配置保持一致。",
     "experiment": "DEV 先建 split=DEV、repetitions=2；通过预注册门后才允许一次 split=HOLDOUT、repetitions=2。",
     "evaluator_manifest": "将 execution_contract.interactive_manifest 作为 evaluator_manifest.interactive，并绑定 rubric.json；不得省略或改写冻结版本字段。",
@@ -260,7 +279,7 @@
     "t05_implemented": false,
     "production_ready": false,
     "formal_result_available": false,
-    "reason": "本包只提供合成 fixture、预注册分析计划和助手参考 rubric；未调用模型、未发布 DatasetVersion/AgentVersion/Experiment、未运行数据库或 HOLDOUT。"
+    "reason": "v1 已发布身份并完成参考校准和技术预检，38 次调用费用全部已知；两次真实轨迹评分截断。v2 尚未执行，DEV/HOLDOUT 均未启动，尚无正式质量比较或生产推广结论。"
   },
   "preflight": {
     "source_groups": 3,

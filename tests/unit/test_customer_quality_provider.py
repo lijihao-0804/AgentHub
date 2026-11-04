@@ -136,14 +136,14 @@ def _request() -> ModelRequest:
     )
 
 
-def _payload() -> dict[str, object]:
+def _payload(max_tokens: int = 2_048) -> dict[str, object]:
     return {
         "model": f"openai/{MODEL}",
         "api_base": BASE_URL,
         "api_key": API_KEY,
         "num_retries": 0,
         "stream": False,
-        "max_tokens": 2_048,
+        "max_tokens": max_tokens,
         "temperature": 0.0,
         "timeout": 30.0,
         "messages": [{"role": "user", "content": "Synthetic customer request."}],
@@ -390,3 +390,41 @@ async def test_missing_scope_and_duplicate_key_never_dispatch(tmp_path):
     assert len(fake.calls) == 1
     assert len(meter.records) == 1
     assert ledger.summary()["dispatch_marks"] == 1
+
+
+@pytest.mark.asyncio
+async def test_role_specific_max_tokens_are_frozen_before_dispatch(tmp_path):
+    ledger = ResearchBudgetLedger(tmp_path / "role-token-caps.sqlite3")
+    fake = RecordingClient(ledger)
+    meter = BudgetedAliyunClient(
+        ledger=ledger,
+        base_url=BASE_URL,
+        private_dir=tmp_path / "private",
+        client=fake,
+        judge_max_tokens=8_192,
+    )
+    judge_key = f"case/{CASE_ID}/judge"
+    calibration_key = f"calibration/{CASE_ID}/quality"
+    solver_key = f"case/{CASE_ID}/solver"
+    runtime_key = f"case/{CASE_ID}/runtime"
+
+    for key in (judge_key, calibration_key):
+        with meter.scope(key, _metadata("judge")):
+            await meter.acompletion(**_payload(max_tokens=8_192))
+
+    with meter.scope(solver_key, _metadata("runtime")):
+        with pytest.raises(BudgetedProviderError, match="INVALID_MAX_TOKENS"):
+            await meter.acompletion(**_payload(max_tokens=8_192))
+
+    assert len(fake.calls) == 2
+    assert ledger.summary()["dispatch_marks"] == 2
+
+    with meter.scope(runtime_key, _metadata("runtime")):
+        await meter.acompletion(**_payload(max_tokens=2_048))
+
+    assert [call["max_tokens"] for call in fake.calls] == [8_192, 8_192, 2_048]
+    summary = ledger.summary()
+    assert summary["status_counts"][SETTLED] == 3
+    assert summary["dispatch_marks"] == 3
+    assert summary["actual_settled_cny"] == Decimal("0.001818")
+    assert summary["held_reserved_cny"] == 0
