@@ -66,7 +66,7 @@
   },
   "checks": {
     "frontend": {
-      "job": "job-web-build-02",
+      "job": "job-web-build-03",
       "state": "completed",
       "exit_code": 0,
       "helper_node_tests": {
@@ -79,7 +79,7 @@
         "typescript_and_lint": "passed",
         "static_page_generation": "passed"
       },
-      "run_permission_gate_checks": 4,
+      "run_permission_gate_checks": 5,
       "case_component_scenarios": 17,
       "readonly_page_matrices": 6,
       "mutation_handler_guard": true

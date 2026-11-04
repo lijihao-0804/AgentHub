@@ -860,6 +860,18 @@ function AblationView({
   );
 }
 
+function gateReasonExplanation(reason: string | null | undefined, locale: string): string | null {
+  const explanations: Record<string, [string, string]> = {
+    insufficient_pairs: ["可配对样本数不足，无法作出可靠门禁判断。", "Too few paired cases to support a reliable gate decision."],
+    insufficient_complete_cases: ["完整重复覆盖的 case 不足，缺失样本不能按失败或成功补齐。", "Too few cases have complete repetition coverage; missing trials cannot be filled as successes or failures."],
+    degenerate_interval: ["统计区间上下界重合，不能据此宣称稳定或门禁通过。", "The interval bounds coincide; this does not establish stability or a passing gate."],
+    paired_interval_unavailable: ["配对区间不可用，不能把缺失区间当作零差异。", "The paired interval is unavailable; a missing interval is not a zero difference."],
+    comparison_incomplete: ["对比覆盖不完整，缺失配对不能当作已通过。", "Comparison coverage is incomplete; missing pairs do not count as passing evidence."],
+  };
+  const explanation = reason ? explanations[reason] : undefined;
+  return explanation ? explanation[locale === "zh-CN" ? 0 : 1] : null;
+}
+
 function GateDecisionView({
   decision,
   policy,
@@ -872,7 +884,7 @@ function GateDecisionView({
   candidateVersionHref: string | null;
   candidatePlaygroundHref: string | null;
 }) {
-  const { t, statusLabel, formatDateTime } = useI18n();
+  const { t, statusLabel, formatDateTime, locale } = useI18n();
   return (
     <article className="gate-decision">
       <div className="gate-decision-header">
@@ -924,7 +936,10 @@ function GateDecisionView({
                   <StatusBadge status={result.status} />
                 </td>
                 <td data-label={t("evaluation.gate.ruleColumns.reason")} className="muted">
-                  {result.reason ?? "—"}
+                  <code>{result.reason ?? "—"}</code>
+                  {gateReasonExplanation(result.reason, locale) && (
+                    <p className="state-hint">{gateReasonExplanation(result.reason, locale)}</p>
+                  )}
                   {result.status === "PASS" && result.reason === "compensated_tradeoff" && (
                     <span className="inline-notice">{t("evaluation.gate.compensation.passedNotice")}</span>
                   )}
@@ -943,6 +958,9 @@ function GateDecisionView({
       {decision.reasons.length > 0 && (
         <p className="state-hint">
           {t("evaluation.gate.reasons")}: {decision.reasons.join(", ")}
+          {decision.reasons.map((reason) => gateReasonExplanation(reason, locale)).filter(Boolean).map((explanation, index) => (
+            <span className="state-hint" key={index}> · {explanation}</span>
+          ))}
         </p>
       )}
       <TechnicalDetails

@@ -51,11 +51,11 @@ Next 同源代理 → FastAPI 的 TCP 检查覆盖 10 个 case 摘要/详情、�
 | AE-10 unit + PostgreSQL | 13 passed（11 unit + 2 integration），0 skipped；ae10-agent-final.xml |
 | 相邻 API/统计/taxonomy | 21 passed；后继未改变相邻实现 |
 | Node helpers | 17 passed，0 failed |
-| Run/权限/门禁 TSX | 4 项通过，含 PASS/FAIL/INCONCLUSIVE、原因、0/null |
+| Run/权限/门禁 TSX | 5 项通过，含 PASS/FAIL/INCONCLUSIVE、原因、0/null 和中英文证据不足解释 |
 | Case TSX/异步 | 17 场景通过；双等待/单审批、逐调用 FAILED/UNKNOWN、过期响应 |
 | 管理页面权限 | 6 页面矩阵及 handler 守卫通过；null/Viewer 无管理写控件 |
 | Ruff / diff whitespace | 通过 |
-| TypeScript / production build | job-web-build-02 exit 0，使用本地 API proxy target |
+| TypeScript / production build | job-web-build-03 exit 0，使用本地 API proxy target |
 | TCP | http-preview-checks.json verified，10 cases；只保留安全回执 |
 | 浏览器 | 正常入口启动、Viewer、键盘、中英文、长字段、桌面和窄屏通过 |
 

@@ -12,6 +12,7 @@ function harness() {
   const states = [], refs = [], calls = [];
   let stateIndex = 0, refIndex = 0;
   const session = { connected: true, workspaceId: 'workspace-a', accessToken: 'token', sessionId: 1, permissions: [] };
+  const i18n = { locale: 'en-US', t: key => key, formatDateTime: String, formatNumber: String, statusLabel: String, purposeLabel: String };
   const api = new Proxy({}, { get: (_, key) => {
     if (key === '__esModule') return true;
     if (key === 'CANCELLABLE_RUN_STATUSES') return new Set(['QUEUED', 'RUNNING']);
@@ -25,7 +26,7 @@ function harness() {
       useEffect() {}, useCallback: fn => fn, useMemo: fn => fn(),
     },
     '@/components/providers/session-provider': { useFrontendSession: () => session },
-    '@/i18n/provider': { useI18n: () => ({ locale: 'en-US', t: key => key, formatDateTime: String, formatNumber: String, statusLabel: String, purposeLabel: String }) },
+    '@/i18n/provider': { useI18n: () => i18n },
     '@/hooks/use-workspace-data': { useWorkspaceData: () => ({ data: [], loaded: true, loading: false }) },
     '@/lib/api/evaluation': api,
     '@/lib/api/client': { ApiError: Error, toApiError: error => error },
@@ -45,7 +46,7 @@ function harness() {
     }, mod, mod.exports);
     return mod.exports;
   }
-  return { session, states, calls, load, render(component, props) { stateIndex = refIndex = 0; return component(props); } };
+  return { session, i18n, states, calls, load, render(component, props) { stateIndex = refIndex = 0; return component(props); } };
 }
 function elements(node, predicate, found = []) {
   if (Array.isArray(node)) { node.forEach(child => elements(child, predicate, found)); return found; }
@@ -107,5 +108,18 @@ async function main() {
     assert.ok(reasons.includes('minimum_paired_cases_not_met'));
   }
   console.log('PASS gate PASS/FAIL/INCONCLUSIVE, reasons, zero and missing values remain distinct');
+  for (const fixture of [
+    { reason: 'insufficient_pairs', en: 'Too few paired cases', zh: '可配对样本数不足' },
+    { reason: 'insufficient_complete_cases', en: 'complete repetition coverage', zh: '完整重复覆盖的 case 不足' },
+    { reason: 'degenerate_interval', en: 'interval bounds coincide', zh: '统计区间上下界重合' },
+  ]) {
+    for (const [locale, phrase] of [['en-US', fixture.en], ['zh-CN', fixture.zh]]) {
+      h.i18n.locale = locale;
+      const tree = h.render(gate, { decision: { status: 'INCONCLUSIVE', policy_id: 'policy-a', created_at: '2026-11-04', reasons: [], rule_results: [{ metric: 'task_success', rule: 'paired_interval', status: 'INCONCLUSIVE', reason: fixture.reason }] }, policy: null, candidateVersionHref: null, candidatePlaygroundHref: null });
+      assert.ok(elements(tree, n => n.type === 'code' && n.props.children === fixture.reason).length);
+      assert.ok(elements(tree, n => n.type === 'p' && typeof n.props.children === 'string' && n.props.children.includes(phrase)).length);
+    }
+  }
+  console.log('PASS gate evidence-shortfall reasons retain codes and explain pairs, coverage and degenerate intervals in both languages');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
