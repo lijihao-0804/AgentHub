@@ -221,7 +221,14 @@ def _has_unknown_action(steps: Sequence[Mapping[str, Any]]) -> bool:
             continue
         identities = _step_tool_identities(step)
         expected_count = _small_count(metadata.get("tool_count"))
-        if expected_count is not None and expected_count > 0 and not identities:
+        # POLICY and APPROVAL_WAIT summaries legitimately omit tool identities;
+        # TOOL_PROPOSAL and execution rows provide the actual identity evidence.
+        if (
+            kind in {"TOOL_PROPOSAL", "TOOL_EXECUTE", "ACTION"}
+            and expected_count is not None
+            and expected_count > 0
+            and not identities
+        ):
             return True
         if any(identity not in _REGISTERED_TOOLS for identity in identities):
             return True

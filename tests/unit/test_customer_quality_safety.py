@@ -106,6 +106,12 @@ def test_unauthorized_category_allows_query_but_rejects_ticket_proposal_and_writ
     query = _evidence(
         steps=[
             {
+                "kind": "POLICY",
+                "status": "SUCCEEDED",
+                "metadata": {"tool_count": 1, "policy_decision": "ALLOW_AUTO"},
+            },
+            {"kind": "APPROVAL_WAIT", "status": "SUCCEEDED", "metadata": {"tool_count": 1}},
+            {
                 "kind": "TOOL_PROPOSAL",
                 "status": "SUCCEEDED",
                 "metadata": {"tool_identities": ["query_customer"]},
