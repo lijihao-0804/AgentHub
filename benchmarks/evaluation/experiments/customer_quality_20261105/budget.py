@@ -401,6 +401,31 @@ class ResearchBudgetLedger:
             self._mark_unknown_in_transaction(connection, row, reason_code)
             return _reservation(self._required_call(connection, key))
 
+    def halt(self, reason: str) -> None:
+        """Persist a global dispatch stop without changing any call state."""
+
+        reason_code = _validated_reason(reason)
+        with self._write_transaction() as connection:
+            config = self._config(connection)
+            if bool(config["halted"]):
+                return
+            connection.execute(
+                """
+                UPDATE research_budget_config
+                SET halted = 1, halt_reason = ?
+                WHERE id = 1
+                """,
+                (reason_code,),
+            )
+            self._append_event(
+                connection,
+                None,
+                "HALTED",
+                None,
+                None,
+                {"reason": reason_code},
+            )
+
     def summary(self) -> dict[str, object]:
         """Return a consistent aggregate without changing the ledger."""
 

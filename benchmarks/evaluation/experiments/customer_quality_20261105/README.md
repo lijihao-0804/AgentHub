@@ -54,9 +54,9 @@ from packages.evaluation.validation import validate_dataset_items
 validated_items = validate_dataset_items(build_items())
 ```
 
-The runner should submit `validated_items` with `schema_version=1` through the existing
-DatasetVersion creation route and then publish that immutable version. This package never
-writes to a database and does not create a real DatasetVersion.
+The runner submits these items with `schema_version=1` through the existing
+DatasetVersion service and publishes the immutable version. `dataset.py` itself is pure;
+`runner prepare` performs the explicitly selected database publication.
 
 The current repository does not contain a `packages/evaluation/schema_dataset.py`. The
 items follow the actual `packages/evaluation/validation.py` INTERACTIVE shape and the
@@ -169,12 +169,13 @@ unconfirmed external side effect stays `UNKNOWN_OUTCOME`; its Run maps to
 `NEEDS_ATTENTION`. There is no automatic retry or model fallback. A run that cannot make
 the next reservation must not be silently dropped or replaced.
 
-No model call, network request, database creation, or private old-experiment read was part
-of producing this artifact.
+The frozen protocol describes the state before execution. Actual execution, paid attempts,
+publication identities, deviations and decisions are recorded separately in the
+[T04 report](../../../../docs/reviews/T04-customer-quality-20261105.md).
 
 ## Rubric and calibration status
 
-`rubric.json` defines seven mutually ordered labels:
+`rubric.json` defines seven nominal labels:
 
 - `CORRECT`
 - `PARTIAL`

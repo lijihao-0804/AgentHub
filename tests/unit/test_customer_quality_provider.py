@@ -322,6 +322,45 @@ async def test_provider_failure_keeps_unknown_reservation_and_halts(tmp_path, er
 
 
 @pytest.mark.asyncio
+async def test_evidence_write_failure_keeps_settled_cost_and_halts(tmp_path, monkeypatch):
+    ledger = ResearchBudgetLedger(tmp_path / "evidence-failure.sqlite3")
+    fake = RecordingClient(ledger)
+    meter = BudgetedAliyunClient(
+        ledger=ledger,
+        base_url=BASE_URL,
+        private_dir=tmp_path / "private",
+        client=fake,
+    )
+    scope_key = f"case/{CASE_ID}/judge"
+
+    def fail_evidence_write(**_kwargs):
+        raise OSError("synthetic evidence write failure")
+
+    monkeypatch.setattr(meter, "_write_evidence", fail_evidence_write)
+    with meter.scope(scope_key, _metadata("judge")):
+        with pytest.raises(
+            BudgetedProviderError,
+            match="PROVIDER_EVIDENCE_WRITE_FAILED",
+        ):
+            await meter.acompletion(**_payload())
+
+    summary = ledger.summary()
+    assert len(fake.calls) == 1
+    assert summary["status_counts"][SETTLED] == 1
+    assert summary["held_reserved_cny"] == 0
+    assert summary["actual_settled_cny"] == Decimal("0.000606")
+    assert summary["occupied_cny"] == Decimal("0.000606")
+    assert summary["halted"] is True
+    assert summary["halt_reason"] == "PROVIDER_EVIDENCE_WRITE_FAILED"
+    assert meter.records[0]["status"] == SETTLED
+
+    with meter.scope(f"{scope_key}/next", _metadata("judge")):
+        with pytest.raises(BudgetHalted, match="BUDGET_HALTED"):
+            await meter.acompletion(**_payload())
+    assert len(fake.calls) == 1
+
+
+@pytest.mark.asyncio
 async def test_missing_scope_and_duplicate_key_never_dispatch(tmp_path):
     ledger = ResearchBudgetLedger(tmp_path / "guards.sqlite3")
     fake = RecordingClient(ledger)

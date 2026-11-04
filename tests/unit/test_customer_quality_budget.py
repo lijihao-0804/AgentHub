@@ -199,6 +199,54 @@ def test_complete_usage_settles_actual_cost_and_releases_difference(tmp_path):
     assert '"released_cny":"5.239280"' in event[0]
 
 
+def test_explicit_halt_preserves_call_state_and_survives_restart(tmp_path):
+    db_path = tmp_path / "global-halt.sqlite3"
+    ledger = ResearchBudgetLedger(db_path)
+    settled_key = "customer-quality/CQ-005/settled"
+    held_key = "customer-quality/CQ-005/held"
+    ledger.reserve(settled_key, {"case_id": "CQ-005"})
+    ledger.mark_dispatched(settled_key)
+    ledger.settle(settled_key, 1_000, 200)
+    ledger.reserve(held_key, {"case_id": "CQ-005"})
+
+    ledger.halt("PROVIDER_EVIDENCE_WRITE_FAILED")
+    summary = ledger.summary()
+
+    assert summary["halted"] is True
+    assert summary["halt_reason"] == "PROVIDER_EVIDENCE_WRITE_FAILED"
+    assert summary["status_counts"][SETTLED] == 1
+    assert summary["status_counts"][RESERVED] == 1
+    assert summary["actual_settled_cny"] == Decimal("0.003600")
+    assert summary["held_reserved_cny"] == CONSERVATIVE_RESERVATION_CNY
+    assert summary["occupied_cny"] == Decimal("5.246480")
+
+    restarted = ResearchBudgetLedger(db_path)
+    assert restarted.summary()["halt_reason"] == "PROVIDER_EVIDENCE_WRITE_FAILED"
+    with pytest.raises(BudgetHalted, match="BUDGET_HALTED"):
+        restarted.reserve("customer-quality/after-halt", {"case_id": "CQ-006"})
+    with pytest.raises(BudgetHalted, match="BUDGET_HALTED"):
+        restarted.mark_dispatched(held_key)
+
+    with sqlite3.connect(db_path) as connection:
+        rows = dict(
+            connection.execute(
+                """
+                SELECT logical_call_key, status
+                FROM research_budget_calls
+                WHERE logical_call_key IN (?, ?)
+                """,
+                (settled_key, held_key),
+            ).fetchall()
+        )
+        assert rows == {settled_key: SETTLED, held_key: RESERVED}
+        assert (
+            connection.execute(
+                "SELECT COUNT(*) FROM research_budget_audit WHERE event_type = 'HALTED'"
+            ).fetchone()[0]
+            == 1
+        )
+
+
 def test_invalid_usage_fails_closed_without_releasing_reservation(tmp_path):
     invalid_pairs = (
         (None, 0),

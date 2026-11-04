@@ -407,16 +407,26 @@ async def runtime_evidence(factory, case_id):
             )
         )
         approvals = list(
-            await session.scalars(select(Approval).where(Approval.agent_run_id.in_(ids)))
+            await session.scalars(
+                select(Approval)
+                .where(Approval.run_id.in_(ids))
+                .order_by(Approval.created_at, Approval.id)
+            )
         )
         evidence = {
             "turn_statuses": [turn.terminal_status for turn in turns],
+            "run_failures": [row.failure_code for row in runs.values() if row.failure_code],
             "steps": [
                 {"kind": step.kind, "status": step.status, "metadata": step.safe_metadata}
                 for step in steps
             ],
             "approvals": [
-                {"decision": approval.decision_status, "execution": approval.execution_status}
+                {
+                    "decision": approval.decision_status,
+                    "execution": approval.execution_status,
+                    "requested_by": str(approval.requested_by),
+                    "decided_by": str(approval.decided_by) if approval.decided_by else None,
+                }
                 for approval in approvals
             ],
         }
@@ -434,12 +444,13 @@ class ScopedDriver:
         )
         self.kind, self.version = native.kind, native.version
 
-    async def prepare(self, **kwargs):
+    async def prepare(self, *, run, variant, item, case_identity):
         if self.meter.ledger.summary()["halted"]:
             raise RuntimeError("RESEARCH_BUDGET_HALTED_NO_DISPATCH")
-        prepared = await self.native.prepare(**kwargs)
-        identity, item, variant = kwargs["case_identity"], kwargs["item"], kwargs["variant"]
-        case_id = str(identity.case_id)
+        prepared = await self.native.prepare(
+            run=run, variant=variant, item=item, case_identity=case_identity
+        )
+        case_id = str(case_identity.case_id)
         metadata = {
             "case_id": case_id,
             "phase": self.phase,
@@ -452,9 +463,25 @@ class ScopedDriver:
             from time import perf_counter
 
             started = perf_counter()
-            with self.meter.scope("case/" + case_id + "/runtime", metadata):
-                result = await prepared.execute()
-            answer, evidence = await runtime_evidence(self.factory, case_id)
+            try:
+                with self.meter.scope("case/" + case_id + "/runtime", metadata):
+                    result = await prepared.execute()
+                answer, evidence = await runtime_evidence(self.factory, case_id)
+            except BaseException:
+                # A paid/runtime attempt must never be followed by more dispatches
+                # when its durable evidence cannot be inspected. Fees stay intact.
+                self.meter.ledger.halt("RUNTIME_EXECUTION_OR_EVIDENCE_UNAVAILABLE")
+                raise
+            from .safety import stop_reason
+
+            violation = stop_reason(
+                observation=result.observation,
+                evidence=evidence,
+                expected=item.expected,
+                category=item.source_provenance["category"],
+            )
+            if violation:
+                self.meter.ledger.halt(violation)
             from packages.evaluation.judge import JudgeRequest
 
             judgement = {"status": "FAILED", "reason": "research_budget_halted"}
@@ -484,6 +511,7 @@ class ScopedDriver:
                     judgement, getattr(self.judge.client, "last_raw_response", "")
                 )
                 or "UNKNOWN",
+                "t04_stop_reason": violation,
             }
             # Auxiliary judge attempts are separately priced in the research ledger.
             # Do not claim the runtime-only platform cost covers them.
@@ -584,8 +612,10 @@ async def run_phase(phase):
     try:
         context, meter, judge, driver = await components(factory, settings, state, phase)
         if phase == "dev":
+            from .safety import technical_preflight_ok
+
             preflight = read(PRIVATE / "preflight-results.json")
-            if len(preflight["rows"]) != 6 or meter.ledger.summary()["halted"]:
+            if not technical_preflight_ok(preflight["rows"]) or meter.ledger.summary()["halted"]:
                 raise RuntimeError("TECHNICAL_PREFLIGHT_INCOMPLETE")
         if phase == "holdout" and not read(PRIVATE / "dev-gate.json")["allowed"]:
             raise RuntimeError("DEV_GATE_FAILED_HOLDOUT_REMAINS_SEALED")
@@ -775,7 +805,7 @@ async def export_results(factory, run_id, phase, state, meter):
                 .get("task_success")
             )
             business = (
-                float(score.value)
+                bool(score.value == 1)
                 if score and score.status.value == "AVAILABLE" and score.value is not None
                 else None
             )
@@ -801,7 +831,7 @@ async def export_results(factory, run_id, phase, state, meter):
                     "semantic_label": label,
                     "input_tokens": case.input_tokens,
                     "output_tokens": case.output_tokens,
-                    "cost_estimate_cny": str(
+                    "cost_estimate_cny": float(
                         (Decimal(case.input_tokens) * 2 + Decimal(case.output_tokens) * 8)
                         / 1_000_000
                     )
@@ -813,6 +843,7 @@ async def export_results(factory, run_id, phase, state, meter):
                     "failure_code": case.failure_code,
                     "judge": case.observation.get("t04_semantic_judge"),
                     "business_outcome": case.observation.get("business_outcome"),
+                    "stop_reason": case.observation.get("t04_stop_reason"),
                     "evidence": evidence,
                 }
             )
@@ -829,12 +860,20 @@ async def export_results(factory, run_id, phase, state, meter):
             **row,
             "task_success": None
             if row["task_success"] is None or row["semantic_score"] is None
-            else int(row["task_success"] == 1 and row["semantic_score"] == 1),
+            else bool(row["task_success"] == 1 and row["semantic_score"] == 1),
         }
         for row in rows
     ]
     quality = analyze_trials(
         combined,
+        k=1 if phase == "preflight" else 2,
+        baseline_variant="baseline",
+        candidate_variant="candidate",
+        bootstrap_count=read(ROOT / "protocol.json")["statistics"]["bootstrap"]["resamples"],
+        seed=read(ROOT / "protocol.json")["statistics"]["bootstrap"]["seed"],
+    )
+    primary = analyze_trials(
+        conservative_primary_rows(rows, phase),
         k=1 if phase == "preflight" else 2,
         baseline_variant="baseline",
         candidate_variant="candidate",
@@ -850,6 +889,12 @@ async def export_results(factory, run_id, phase, state, meter):
             "rows": rows,
             "business": analysis,
             "combined_quality": quality,
+            "primary_conservative_bound": primary,
+            "primary_bound_note": (
+                "Statistical non-pass bound over every preregistered group and repetition. "
+                "Missing/unknown slots are non-pass only in this bound, not operational WRONG. "
+                "Original rows and complete-known analysis retain all unknowns."
+            ),
             "budget_all_physical_calls": meter.ledger.summary(),
             "trial_cost_note": (
                 "runtime estimate only; total includes judge/calibration and is in the "
@@ -858,6 +903,50 @@ async def export_results(factory, run_id, phase, state, meter):
         },
     )
     save(PRIVATE / (phase + "-blind-label-pack.json"), build_blind_annotation_pack(rows))
+
+
+def conservative_primary_rows(rows, phase):
+    from .dataset import build_items
+
+    split = "HOLDOUT" if phase == "holdout" else "DEV"
+    items = [item for item in build_items() if item["split"] == split]
+    if phase == "preflight":
+        items = [
+            next(item for item in items if item["source_provenance"]["category"] == category)
+            for category in read(ROOT / "protocol.json")["preflight"]["categories"]
+        ]
+    planned = {item["source_provenance"]["source_group"] for item in items}
+    slots = {}
+    k = 1 if phase == "preflight" else 2
+    for row in rows:
+        key = (row["source_group_id"], row["variant"], row["repetition"])
+        if (
+            key in slots
+            or key[0] not in planned
+            or key[1] not in {"baseline", "candidate"}
+            or key[2] not in range(k)
+        ):
+            raise RuntimeError("PRIMARY_BOUND_IDENTITY_MISMATCH")
+        slots[key] = row
+    bound = []
+    for group in sorted(planned):
+        for variant in ("baseline", "candidate"):
+            for repetition in range(k):
+                row = slots.get((group, variant, repetition), {})
+                bound.append(
+                    {
+                        "case_key": group,
+                        "source_group_id": group,
+                        "split": split,
+                        "variant": variant,
+                        "repetition": repetition,
+                        "status": "STATISTICAL_NON_PASS_BOUND",
+                        "task_success": bool(
+                            row.get("task_success") == 1 and row.get("semantic_score") == 1
+                        ),
+                    }
+                )
+    return bound
 
 
 def dev_gate(rows, calibration):

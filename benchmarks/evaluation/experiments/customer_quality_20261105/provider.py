@@ -294,6 +294,7 @@ class BudgetedAliyunClient:
                 latency_ms=latency_ms,
             )
         except Exception:
+            self.ledger.halt("PROVIDER_EVIDENCE_WRITE_FAILED")
             raise BudgetedProviderError("PROVIDER_EVIDENCE_WRITE_FAILED") from None
         return response
 
