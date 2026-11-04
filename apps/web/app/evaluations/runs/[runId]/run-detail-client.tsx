@@ -20,13 +20,21 @@ import {
 } from "@/lib/api/evaluation";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useI18n } from "@/i18n/provider";
-import RunWorkflow, { RunCaseResults } from "@/app/evaluations/runs/[runId]/workflow-sections";
+import RunWorkflow from "@/app/evaluations/runs/[runId]/workflow-sections";
+import RunStatistics from "@/components/evaluation/run-statistics";
+import RunCaseEvidence from "@/components/evaluation/run-case-evidence";
 
 const POLL_INTERVAL_MS = 2500;
 
 export default function RunDetailClient({ runId }: { runId: string }) {
-  const { t, statusLabel, purposeLabel, formatDateTime, formatNumber } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { sessionId } = useFrontendSession();
+  return <RunDetailSession key={`${sessionId}:${runId}`} runId={runId} />;
+}
+
+function RunDetailSession({ runId }: { runId: string }) {
+  const { t, statusLabel, purposeLabel, formatDateTime, formatNumber, locale } = useI18n();
+  const { workspaceId, accessToken, connected, sessionId, permissions } = useFrontendSession();
+  const canRun = permissions?.includes("evaluation_run") === true;
   const inputRef = useRef({ workspaceId, accessToken });
   inputRef.current = { workspaceId, accessToken };
   const activeSessionRef = useRef(sessionId);
@@ -133,6 +141,7 @@ export default function RunDetailClient({ runId }: { runId: string }) {
   }, [connected, active, runId, sessionId]);
 
   async function requestCancel() {
+    if (!canRun) return;
     setCancelError(null);
     const requestSessionId = sessionId;
     setCancelling(true);
@@ -229,7 +238,12 @@ export default function RunDetailClient({ runId }: { runId: string }) {
               </span>
             </div>
             {run.safe_failure_message && <p className="state-hint">{run.safe_failure_message}</p>}
-            {CANCELLABLE_RUN_STATUSES.has(run.status) && (
+            {run.failure_code === "INTERACTIVE_COST_RESERVATION_UNAVAILABLE" && (
+              <p className="inline-notice" role="status">
+                {locale === "zh-CN" ? "金额硬上限暂不支持，收费调用尚未派发。" : "A monetary hard cap is not yet supported; chargeable calls have not been dispatched."}
+              </p>
+            )}
+            {canRun && CANCELLABLE_RUN_STATUSES.has(run.status) && (
               <div className="form-actions">
                 <button type="button" className="button button-ghost" onClick={() => void requestCancel()} disabled={cancelling}>
                   {cancelling ? t("evaluation.run.cancelling") : t("evaluation.run.cancel")}
@@ -281,17 +295,19 @@ export default function RunDetailClient({ runId }: { runId: string }) {
               }}
             />
           )}
+          <RunStatistics runId={run.id} refreshKey={run.status} />
+          <RunCaseEvidence
+            key={`${sessionId}:${run.id}:cases`}
+            runId={run.id}
+            variants={experiment?.variants ?? []}
+            refreshKey={run.status}
+          />
           <RunWorkflow
             key={`${sessionId}:${run.id}`}
             input={{ workspaceId, accessToken, sessionId }}
             run={run}
             variants={experiment?.variants ?? []}
             terminal={terminal}
-          />
-          <RunCaseResults
-            input={{ workspaceId, accessToken, sessionId }}
-            runId={run.id}
-            variants={experiment?.variants ?? []}
           />
         </>
       )}

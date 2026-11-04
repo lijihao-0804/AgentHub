@@ -16,6 +16,7 @@ from tests.support.ae6b_queue import (
     ApiEvaluation,
     QueueWorker,
     audit_records,
+    case_result_observation,
     interactive_case,
     queue_settings,
     seed_queue_agent,
@@ -55,6 +56,13 @@ async def test_queue_refusal_denied_and_limits(
         started = await api.start(frozen["id"])
         terminal = await api.wait_run(started["id"])
         result = (await api.results(started["id"]))[0]
+        assert result["observation"] == {}
+        stored_observation = await case_result_observation(
+            db_factory,
+            workspace_id=agent.workspace_id,
+            run_id=started["id"],
+            case_id=result["id"],
+        )
         records = audit_records(audit)
         assert len(records) == calls, records
         assert all(not row["expected_label_present"] for row in records)
@@ -63,17 +71,17 @@ async def test_queue_refusal_denied_and_limits(
             assert result["failure_code"] == "INTERACTIVE_COST_RESERVATION_UNAVAILABLE"
         else:
             assert terminal["status"] == "SUCCEEDED", result
-            assert result["observation"]["stop_reason"] == stop
-            assert result["observation"]["executed_turn_count"] == turns
-            assert result["observation"]["environment_lifecycle_status"] == "TEARDOWN_COMPLETE"
+            assert stored_observation["stop_reason"] == stop
+            assert stored_observation["executed_turn_count"] == turns
+            assert stored_observation["environment_lifecycle_status"] == "TEARDOWN_COMPLETE"
         if marker == "UNKNOWN_USAGE":
             assert result["input_tokens"] is None
             assert result["output_tokens"] is None
             assert result["total_tokens"] is None
             assert result["cost_amount"] is None
         if marker == "REFUSE":
-            assert result["observation"]["proposed_tool_sequence"] == []
-            assert result["observation"]["executed_tool_sequence"] == []
+            assert stored_observation["proposed_tool_sequence"] == []
+            assert stored_observation["executed_tool_sequence"] == []
         if stop is not None:
             metrics = await api.post(f"/experiment-runs/{started['id']}/metrics")
             variant = next(iter(metrics["variants"].values()))
@@ -95,8 +103,8 @@ async def test_queue_refusal_denied_and_limits(
                 assert len(approvals) == 1
                 assert approvals[0].decision_status == "DENIED"
                 assert approvals[0].execution_status == "NOT_STARTED"
-                assert "create_ticket" in result["observation"]["proposed_tool_sequence"]
-                assert "create_ticket" not in result["observation"]["executed_tool_sequence"]
+                assert "create_ticket" in stored_observation["proposed_tool_sequence"]
+                assert "create_ticket" not in stored_observation["executed_tool_sequence"]
             else:
                 assert approvals == []
             for model in (Customer, Ticket):

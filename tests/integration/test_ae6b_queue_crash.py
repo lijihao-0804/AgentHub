@@ -17,6 +17,7 @@ from tests.support.ae6b_queue import (
     ApiEvaluation,
     QueueWorker,
     audit_records,
+    case_result_observation,
     interactive_case,
     queue_settings,
     seed_queue_agent,
@@ -79,6 +80,7 @@ async def test_worker_crash_recovery(db_factory, tmp_path, point, expected_calls
         before_results = await api.results(started["id"])
         assert len(before_results) == 1
         assert before_results[0]["status"] == "RUNNING"
+        assert before_results[0]["observation"] == {}
         case_id = UUID(before_results[0]["id"])
         assert injected["case_id"] == str(case_id)
         assert injected["workspace_id"] == str(agent.workspace_id)
@@ -132,6 +134,13 @@ async def test_worker_crash_recovery(db_factory, tmp_path, point, expected_calls
         results = await api.results(started["id"])
         result = results[0]
         assert result["status"] == expected_status, result
+        assert result["observation"] == {}
+        stored_observation = await case_result_observation(
+            db_factory,
+            workspace_id=agent.workspace_id,
+            run_id=started["id"],
+            case_id=case_id,
+        )
         assert audit_records(audit) == before, "Recovery must never replay the provider."
         async with db_factory() as session:
             episode = await session.get(InteractiveEpisode, case_id)
@@ -176,7 +185,7 @@ async def test_worker_crash_recovery(db_factory, tmp_path, point, expected_calls
                     assert episode.assertion["observed"]["ticket_count"] == 1
                 else:
                     assert result["failure_code"] == "EVALUATION_INTERACTIVE_RECOVERY_REQUIRED"
-                    assert result["observation"]["execution_complete"] is False
+                    assert stored_observation["execution_complete"] is False
             proof = {
                 "point": point,
                 "case_id": str(case_id),

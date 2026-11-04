@@ -10,6 +10,7 @@ import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 from uuid import UUID, uuid4
 
 import httpx
@@ -24,7 +25,7 @@ from packages.control_plane.rbac import ORGANIZATION_ADMIN_PERMISSIONS
 from packages.core.auth.security import issue_access_token
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings, get_settings
-from packages.evaluation.models import EvaluationExperimentRun
+from packages.evaluation.models import EvaluationExperimentCaseResult, EvaluationExperimentRun
 from packages.model_gateway.credentials import (
     ProviderCredentialCipher,
     encrypt_provider_credential_secret,
@@ -132,6 +133,29 @@ async def seed_queue_agent(factory, settings: Settings) -> QueueAgent:
         context = base["context"].model_copy(update={"permissions": ORGANIZATION_ADMIN_PERMISSIONS})
         published = await AgentPublishService().publish(session, context, base["version"].agent_id)
         return QueueAgent(base["workspace_id"], published.id, base["user"].id, approver.id)
+
+
+async def case_result_observation(
+    factory,
+    *,
+    workspace_id: UUID | str,
+    run_id: UUID | str,
+    case_id: UUID | str,
+) -> dict[str, Any]:
+    """Read one persisted observation for internal queue assertions."""
+
+    async with factory() as session:
+        case = await session.scalar(
+            select(EvaluationExperimentCaseResult).where(
+                EvaluationExperimentCaseResult.workspace_id == UUID(str(workspace_id)),
+                EvaluationExperimentCaseResult.experiment_run_id == UUID(str(run_id)),
+                EvaluationExperimentCaseResult.id == UUID(str(case_id)),
+            )
+        )
+    assert case is not None, (
+        f"Case result {case_id} was not found in workspace {workspace_id} and run {run_id}."
+    )
+    return dict(case.observation)
 
 
 def interactive_case(marker: str, *, ordinal=0, assertions=None, decisions=(), **limits):
