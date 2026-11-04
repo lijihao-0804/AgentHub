@@ -158,6 +158,7 @@ v1 的最小正确形态是：
 - response provider/model 和实际 route identity
 - input/output/total/cached token usage，允许 unknown
 - response `cost_estimate` amount/currency，明确 `is_estimate=true`
+- SDK 观察值可保留 USD 等原币种和原小数精度，不能误标 CNY、换汇、混入 case totals 或据此释放 reservation；CNY 仍只约束账户/quote/最终账单结算。
 - observed time
 
 该表是证据，不是结算：

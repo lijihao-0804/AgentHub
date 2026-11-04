@@ -18,6 +18,7 @@
 - 实际 SQL gateway + fake provider 文件 5 项真库检查通过：provider 回调使用另一连接确认两级占用已提交；成功观察不释放；旧 owner/generation、下一 Run 余额不足和 case/route/price 漂移均零派发；超时一次调用后保留 UNKNOWN。随后补充 replay 的 reconciliation/NEEDS_ATTENTION 语义，只复跑受影响的提交/重放用例，exit 0，不把它加成第六个独立场景。
 - 报价文件接入实际 PR #12 依赖后 36 项通过；初版预检 25 项通过，真实发布 shape 集成后修正为 28 项通过。旧 Run budget adapter 文件 11 项通过。没有重复本地全库。
 - runtime 节点新增 case lease/actor/reconciliation 的 NEEDS_ATTENTION 映射，相关文件及后续新增重放参数均通过；普通余额不足保留原失败语义。
+- 旧候选 `476d7d8` 的 PR/push CI 通过后，联调发现 CNY 观察约束会拒绝 SDK 常见的 USD/细精度估算并丢失 usage 旁证。已复现旧代码失败，改为观察表保留原币种及 numeric 原精度；父/子账户、报价与 provider-bill 结算继续严格 CNY，不转换、不释放 hold。新增反例与必要成功观察/gateway 回归共 3 项通过，外币账单仍拒绝结算。0053 尚未合并或部署 API，本次直接修正该新增迁移并在新专用库验证，保留旧验收库；新库 Alembic check 通过。
 - Alembic upgrade/check 在专用测试库通过。迁移与 SQL 保留历史，不执行 truncate/clean 或覆盖用户旧根目录 WIP。远端 CI 尚待记录，不能预写通过。
 
 ## 尚未完成

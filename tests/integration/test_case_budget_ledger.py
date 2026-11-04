@@ -801,3 +801,66 @@ async def test_wrong_case_and_duplicate_run_binding_are_rejected(db_resources, m
                     dispatch_generation=first.owned.identity.generation + 1,
                 )
     assert duplicate.value.code == "CASE_BUDGET_RUN_BINDING_CONFLICT"
+
+
+@pytest.mark.asyncio
+async def test_response_estimate_keeps_original_currency_and_precision_without_settlement(
+    db_resources, monkeypatch
+) -> None:
+    _, factory = db_resources
+    fixture = await _create_budget_case(factory, monkeypatch, turn_count=1)
+    await _reserve(
+        factory,
+        fixture,
+        0,
+        attempt_identity="foreign-estimate",
+        case_attempt_identity="turn-0:foreign-estimate",
+        amount=Decimal("1"),
+    )
+    estimate = Decimal("0.00000012345678")
+    ledger = CaseBudgetLedger()
+    async with factory() as session, session.begin():
+        observation, created = await ledger.record_response_observation(
+            session,
+            workspace_id=fixture.owned.identity.workspace_id,
+            run_id=fixture.turns[0].run.id,
+            attempt_identity="foreign-estimate",
+            observation_identity="response:foreign-estimate",
+            provider="fake",
+            model="frozen-model-a",
+            provider_egress_policy_version="provider_egress_test_v1",
+            provider_base_url=None,
+            input_tokens=8,
+            output_tokens=4,
+            total_tokens=12,
+            cached_tokens=None,
+            cost_amount=estimate,
+            cost_currency="USD",
+        )
+        assert created and observation.cost_amount == estimate
+        assert observation.cost_currency == "USD"
+        assert observation.total_tokens == 12
+    async with factory() as session:
+        parent = await ledger_case_account(session, fixture)
+        assert parent.currency == "CNY"
+        assert parent.reserved_amount == Decimal("1")
+        assert parent.settled_amount == Decimal("0")
+        attempt = await ledger.get_attempt(
+            session,
+            workspace_id=fixture.owned.identity.workspace_id,
+            run_id=fixture.turns[0].run.id,
+            attempt_identity="foreign-estimate",
+        )
+        assert attempt.status is RunBudgetAttemptStatus.RESERVED
+        with pytest.raises(RunBudgetLedgerError) as foreign_bill:
+            await ledger.settle(
+                session,
+                workspace_id=fixture.owned.identity.workspace_id,
+                run_id=fixture.turns[0].run.id,
+                attempt_identity="foreign-estimate",
+                amount=Decimal("0.00000012"),
+                currency="USD",
+                evidence=RunBudgetSettlementEvidence.PROVIDER_BILL,
+                evidence_identity="synthetic-foreign-bill",
+            )
+        assert foreign_bill.value.code == "RUN_BUDGET_CURRENCY_MISMATCH"

@@ -252,7 +252,7 @@ def upgrade() -> None:
         sa.Column("output_tokens", sa.Integer()),
         sa.Column("total_tokens", sa.Integer()),
         sa.Column("cached_tokens", sa.Integer()),
-        sa.Column("cost_amount", sa.Numeric(20, 8)),
+        sa.Column("cost_amount", sa.Numeric()),
         sa.Column("cost_currency", sa.String(3)),
         sa.Column("observed_at", sa.DateTime(timezone=True), nullable=False, server_default=now),
         sa.ForeignKeyConstraint(
@@ -319,7 +319,7 @@ def upgrade() -> None:
             "(cost_amount IS NULL AND cost_currency IS NULL) OR "
             "(cost_amount IS NOT NULL AND cost_amount >= 0 AND "
             "cost_amount NOT IN ('NaN'::numeric, 'Infinity'::numeric, '-Infinity'::numeric) "
-            "AND cost_currency = 'CNY')",
+            "AND cost_currency ~ '^[A-Z]{3}$')",
             name="ck_case_budget_response_observations_cost",
         ),
     )

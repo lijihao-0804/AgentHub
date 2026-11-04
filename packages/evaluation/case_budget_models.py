@@ -284,7 +284,7 @@ class CaseBudgetResponseObservation(Base):
             "(cost_amount IS NULL AND cost_currency IS NULL) OR "
             "(cost_amount IS NOT NULL AND cost_amount >= 0 AND "
             "cost_amount NOT IN ('NaN'::numeric, 'Infinity'::numeric, '-Infinity'::numeric) "
-            "AND cost_currency = 'CNY')",
+            "AND cost_currency ~ '^[A-Z]{3}$')",
             name="ck_case_budget_response_observations_cost",
         ),
         PrimaryKeyConstraint("id", name="pk_case_budget_response_observations"),
@@ -304,7 +304,9 @@ class CaseBudgetResponseObservation(Base):
     output_tokens: Mapped[int | None] = mapped_column(Integer)
     total_tokens: Mapped[int | None] = mapped_column(Integer)
     cached_tokens: Mapped[int | None] = mapped_column(Integer)
-    cost_amount: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))
+    # Response estimates are side evidence. Preserve their original precision;
+    # the CNY account and reservation amounts remain NUMERIC(20, 8).
+    cost_amount: Mapped[Decimal | None] = mapped_column(Numeric())
     cost_currency: Mapped[str | None] = mapped_column(String(3))
     observed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

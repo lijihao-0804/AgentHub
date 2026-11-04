@@ -655,14 +655,15 @@ class CaseBudgetLedger(RunBudgetLedger):
         normalized_cost_amount = None
         normalized_cost_currency = None
         if cost_amount is not None:
-            normalized_cost_amount = _validate_amount(
-                cost_amount,
-                field="cost_amount",
-                allow_zero=True,
-            )
+            if (
+                not isinstance(cost_amount, Decimal)
+                or not cost_amount.is_finite()
+                or cost_amount < 0
+                or cost_amount > MAX_AMOUNT
+            ):
+                raise ValueError("response cost must be a finite non-negative Decimal in range")
+            normalized_cost_amount = cost_amount
             _validate_currency(cost_currency)
-            if cost_currency != "CNY":
-                raise ValueError("cost_currency must be CNY")
             normalized_cost_currency = cost_currency
 
         case_account = await self._lock_case_account_for_run(
