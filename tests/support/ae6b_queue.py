@@ -9,12 +9,10 @@ import sys
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from functools import lru_cache
 from pathlib import Path
 from uuid import UUID, uuid4
 
 import httpx
-from cryptography.fernet import Fernet
 from sqlalchemy import select
 
 from apps.api.app import create_app
@@ -41,11 +39,6 @@ QUEUE_REDIS_URL_ENV = "AGENTHUB_AE6B_REDIS_URL"
 WORKER_IDENTITY_PATH_ENV = "AGENTHUB_AE6B_WORKER_IDENTITY_PATH"
 
 
-@lru_cache(maxsize=1)
-def _test_credential_master_key() -> str:
-    return Fernet.generate_key().decode("ascii")
-
-
 def queue_settings() -> Settings:
     """Copy application settings onto the explicitly isolated AE-6b broker."""
 
@@ -55,13 +48,9 @@ def queue_settings() -> Settings:
             f"{QUEUE_REDIS_URL_ENV} must name an isolated Redis database for AE-6b queue tests."
         )
     settings = get_settings()
-    credential_master_key = settings.credential_master_key
-    if not (credential_master_key or "").strip():
-        credential_master_key = _test_credential_master_key()
     return settings.model_copy(
         update={
             "redis_url": redis_url,
-            "credential_master_key": credential_master_key,
         }
     )
 
@@ -290,17 +279,16 @@ class QueueWorker:
         self.directory = directory
         self.identity_path = self.directory / "worker-identity.json"
         self.hostname = "ae6b-" + uuid4().hex + "@test"
-        if not settings.credential_master_key:
-            raise RuntimeError(
-                "AE6B queue workers require settings.credential_master_key; use queue_settings()."
-            )
+        # Keep the application's cipher policy, including its development
+        # fallback. Never invent a key for only this subprocess.
+        ProviderCredentialCipher.from_settings(settings)
         self.env = (
             os.environ
             | (extra_env or {})
             | {
                 "AGENTHUB_DATABASE_URL": settings.database_url,
                 "AGENTHUB_REDIS_URL": settings.redis_url,
-                "AGENTHUB_CREDENTIAL_MASTER_KEY": settings.credential_master_key,
+                "AGENTHUB_CREDENTIAL_MASTER_KEY": settings.credential_master_key or "",
                 "AGENTHUB_AUTH_JWT_SECRET": settings.auth_jwt_secret,
                 "AGENTHUB_PROCESS_ROLE": "worker",
                 "AGENTHUB_EVALUATION_SANDBOX_WORKSPACE_IDS": json.dumps(

@@ -39,7 +39,9 @@
 
 最终 `ruff check .`、`alembic heads/upgrade/check`、显式 checkpoint bootstrap、`dataset_builder --check`、M7 `runner --validate-only` 和 `git diff --check` 均通过。最后的共享 worker 正常退出 0。任务创建的三个容器已核实标签后停止，数据库和受控未知写入证据保留，没有删除容器或数据；原有用户容器保持原样。
 
-这些是本机 Windows 验收结果。CI 的独立测试 broker 配置已更新；本次没有触发远端 GitHub Actions，也没有把本地通过写成远端 CI 已通过。
+以上表格记录本机 Windows 验收结果。后续远端交付以 [PR #7 的检查](https://github.com/lijihao-0804/AgentHub/pull/7/checks) 为准；本地历史通过不替代远端结果。
+
+交付阶段的首轮 Linux CI 暴露了测试配置差异：队列夹具在 settings 副本里生成临时密钥，而发布服务使用全局应用设置，导致 18 条用例在真实凭据解密处失败。夹具现沿用应用的密钥配置；CI 在测试开始前生成并 mask 一个供所有进程共享的临时 key。生产加解密、发布和权限规则均未修改。专用历史迁移数据库也在 CI 显式创建，非 integration 用 `-rs` 保留条件跳过的实际原因。
 
 ## 持久合同和限制
 
@@ -85,7 +87,7 @@ T04 的真实混合队列组合为 KNOWLEDGE_QA + INTERACTIVE；其他受支持�
 
 在显式隔离的测试 PostgreSQL/Redis 上，先运行 `alembic upgrade head` 与 `python -m scripts.bootstrap_langgraph_checkpoint`。队列测试另需 `AGENTHUB_AE6B_REDIS_URL` 指向独立 Redis 逻辑库，以便与原有共享 integration worker 分开消费。CI 已配置数据库 3；测试 worker 始终使用真实 broker，退出后只关闭其唯一 hostname 对应的实例。
 
-`python -m tests.support.ae6b_upgrade_acceptance --database-url <新空测试库> --output <安全JSON路径>` 可复现 T15；既有 schema/数据或非隔离 URL 会被拒绝。`--history-only --output <路径>` 只核对版本控制中的历史工件，不连接数据库。测试凭据缺省时在测试进程生成 Fernet 密钥，不修改全局运行时或系统 PATH。
+`python -m tests.support.ae6b_upgrade_acceptance --database-url <新空测试库> --output <安全JSON路径>` 可复现 T15；既有 schema/数据或非隔离 URL 会被拒绝。`--history-only --output <路径>` 只核对版本控制中的历史工件，不连接数据库。seed、发布/API 与 worker 必须使用一致的应用密钥配置；CI 临时 key 在进程启动前显式准备，不在单个 settings 副本中另造密钥。
 
 `python -m tests.support.deepseek_assets --prepare-default` 准备公开 tokenizer；revision `9f9818127fdfbb60feba204799d617a874b32a86`、SHA-256 `c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b` 均保持原冻结值。已有有效本地缓存直接复用，缺失时仅 GET 固定公共文件。CI 在测试前显式执行该步骤，counter/金额/质量 allowlist 原样保留。
 
