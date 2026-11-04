@@ -54,6 +54,7 @@ from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
 from packages.evaluation.statistics_service import EvaluationStatisticsService
+from packages.model_gateway.contracts import PROVIDER_EGRESS_POLICY_VERSION
 from packages.model_gateway.errors import ModelGatewayError
 from packages.model_gateway.profile_resolution import ModelProfileResolver
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
@@ -394,7 +395,17 @@ async def _freeze_judge_profile(
     credential = await repository.get_provider_credential(context, profile.provider_credential_id)
     if credential is None or not credential.enabled:
         raise _judge_profile_unavailable()
-    return freeze_judge_profile(profile, provider=credential.provider)
+    try:
+        return freeze_judge_profile(
+            profile,
+            provider=credential.provider,
+            provider_egress={
+                "policy_version": PROVIDER_EGRESS_POLICY_VERSION,
+                "base_url": credential.base_url,
+            },
+        )
+    except (TypeError, ValueError):
+        raise _judge_profile_unavailable() from None
 
 
 def _judge_profile_unavailable() -> AgentHubError:

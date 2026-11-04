@@ -40,6 +40,7 @@ from packages.knowledge.models import (
 from packages.model_gateway.capabilities import capabilities_from_mapping
 from packages.model_gateway.contracts import ModelGateway
 from packages.model_gateway.credentials import CredentialEncryptionError
+from packages.model_gateway.egress import ProviderEgressError, normalize_provider_base_url
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.tools.validation import validate_executable_tool_spec
 from packages.wiki.models import WikiCompilation
@@ -206,6 +207,17 @@ def _provider_name(value: str) -> str:
     return provider
 
 
+def _validated_provider_base_url(value: str | None) -> str | None:
+    try:
+        return normalize_provider_base_url(value)
+    except ProviderEgressError as exc:
+        raise AgentHubError(
+            exc.failure_code,
+            "The provider base URL is invalid.",
+            422,
+        ) from None
+
+
 def _catalog_entry(identity: str) -> dict[str, Any]:
     entry = BUILTIN_TOOL_CATALOG.get(identity)
     if entry is None:
@@ -333,6 +345,7 @@ class ProductControlPlaneService:
     ) -> dict[str, Any]:
         workspace_id = _require(context, WORKSPACE_ADMIN)
         provider = _provider_name(provider)
+        base_url = _validated_provider_base_url(base_url)
         credential = ProviderCredential(
             workspace_id=workspace_id,
             provider=provider,
@@ -377,6 +390,11 @@ class ProductControlPlaneService:
         )
         if credential is None:
             _not_found("PROVIDER_CREDENTIAL_NOT_FOUND", "The provider credential was not found.")
+        if "base_url" in values:
+            values = {
+                **values,
+                "base_url": _validated_provider_base_url(values["base_url"]),
+            }
         for key, value in values.items():
             setattr(credential, key, value.strip() if key == "name" else value)
         try:

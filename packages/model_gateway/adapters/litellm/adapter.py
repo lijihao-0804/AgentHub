@@ -10,6 +10,11 @@ from decimal import Decimal
 from typing import Any, Protocol
 from urllib.parse import urlsplit
 
+from packages.core.config.settings import get_settings
+from packages.model_gateway.adapters.litellm.provider_http import (
+    TransportFactory,
+    guarded_sdk_client,
+)
 from packages.model_gateway.cache_capability import PromptCacheCapability, prompt_cache_capability
 from packages.model_gateway.contracts import (
     AliyunDeepSeekRequestMode,
@@ -23,6 +28,7 @@ from packages.model_gateway.contracts import (
     ModelToolCallDelta,
     ModelUsage,
 )
+from packages.model_gateway.egress import ProviderEgressError, ProviderEgressPolicy
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 
@@ -346,8 +352,39 @@ async def _await_if_needed(value: Any) -> Any:
 class LiteLLMProviderAdapter:
     """One provider attempt; retry and fallback are intentionally out of scope here."""
 
-    def __init__(self, client: LiteLLMClient | None = None) -> None:
+    def __init__(
+        self,
+        client: LiteLLMClient | None = None,
+        *,
+        egress_policy: ProviderEgressPolicy | None = None,
+        egress_transport_factory: TransportFactory | None = None,
+    ) -> None:
         self.client = client or _default_client()
+        self.egress_policy = egress_policy or ProviderEgressPolicy(
+            private_cidrs=get_settings().model_provider_private_cidrs
+        )
+        self.egress_transport_factory = egress_transport_factory
+
+    def _guarded_client(self, profile, credential):
+        return guarded_sdk_client(
+            credential.provider,
+            credential.base_url,
+            credential.secret,
+            float(profile.timeout_seconds),
+            policy=self.egress_policy,
+            transport_factory=self.egress_transport_factory,
+        )
+
+    @staticmethod
+    def _raise_provider_error(error, bound):
+        # SDKs wrap transport errors. The per-attempt transport records a
+        # refusal without retaining the URL, token or SDK exception message.
+        blocked = bound is not None and bound.transport.blocked_failure_code is not None
+        if isinstance(error, ProviderEgressError) or blocked:
+            raise ModelGatewayError(ModelGatewayErrorCode.MODEL_TARGET_FORBIDDEN) from None
+        if isinstance(error, ModelGatewayError):
+            raise error
+        raise _normalize_error(error) from None
 
     @staticmethod
     def prompt_cache_capability(
@@ -363,17 +400,18 @@ class LiteLLMProviderAdapter:
         request: ModelRequest,
     ) -> ModelResponse:
         payload = _request_payload(profile, credential, request)
+        bound = None
         try:
-            response = await _await_if_needed(self.client.acompletion(**payload))
+            async with self._guarded_client(profile, credential) as bound:
+                payload.update(client=bound.client, api_base=bound.base_url)
+                response = await _await_if_needed(self.client.acompletion(**payload))
             return _normalize_response(
                 response,
                 provider=credential.provider,
                 model=profile.model,
             )
-        except ModelGatewayError:
-            raise
         except Exception as error:
-            raise _normalize_error(error) from None
+            self._raise_provider_error(error, bound)
 
     async def stream(
         self,
@@ -382,6 +420,25 @@ class LiteLLMProviderAdapter:
         request: ModelRequest,
     ) -> AsyncIterator[ModelStreamEvent]:
         payload = _request_payload(profile, credential, request, stream=True)
+        bound = None
+        try:
+            async with self._guarded_client(profile, credential) as bound:
+                payload.update(client=bound.client, api_base=bound.base_url)
+                inner = self._stream_payload(profile, credential, payload)
+                try:
+                    async for event in inner:
+                        yield event
+                finally:
+                    await inner.aclose()
+        except Exception as error:
+            self._raise_provider_error(error, bound)
+
+    async def _stream_payload(
+        self,
+        profile: ModelProfile,
+        credential: ProviderCredential,
+        payload: dict[str, Any],
+    ) -> AsyncIterator[ModelStreamEvent]:
         content_parts: list[str] = []
         tool_parts: dict[int, dict[str, Any]] = {}
         finish_reason: str | None = None

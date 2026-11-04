@@ -29,11 +29,13 @@ from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.contracts import (
+    PROVIDER_EGRESS_POLICY_VERSION,
     CapabilityRequirements,
     ModelCapabilities,
     ModelGateway,
     ModelMessage,
     ModelRequest,
+    ProviderEgress,
     ResolvedModelExecutionPlan,
     ResolvedModelExecutionProfile,
     RetryPolicy,
@@ -160,6 +162,25 @@ class FrozenJudgeProfile:
     profile_id: str
     credential_ref: str
     rubric: AnswerQualityRubric = DEFAULT_ANSWER_QUALITY_RUBRIC
+    provider_egress: ProviderEgress | Mapping[str, Any] | None = None
+
+    def __post_init__(self) -> None:
+        if self.provider_egress is None:
+            return
+        if isinstance(self.provider_egress, ProviderEgress):
+            return
+        if not isinstance(self.provider_egress, Mapping):
+            raise ValueError("provider_egress must be a mapping or ProviderEgress")
+        if set(self.provider_egress) != {"policy_version", "base_url"}:
+            raise ValueError("provider_egress has invalid fields")
+        try:
+            provider_egress = ProviderEgress(
+                policy_version=str(self.provider_egress["policy_version"]),
+                base_url=self.provider_egress["base_url"],
+            )
+        except (KeyError, TypeError, ValueError):
+            raise ValueError("invalid provider_egress") from None
+        object.__setattr__(self, "provider_egress", provider_egress)
 
     def projection(self) -> dict[str, Any]:
         """Mirror of ``packages.agent_runtime.publish._profile_projection`` plus the rubric.
@@ -167,7 +188,7 @@ class FrozenJudgeProfile:
         The credential reference is an identifier, never a secret: the encrypted
         material stays in ``provider_credentials`` and is only read by the gateway.
         """
-        return {
+        projection = {
             "judge_algorithm_version": JUDGE_VERSION_PREFIX.rstrip("-"),
             "provider": self.provider,
             "model": self.model,
@@ -178,6 +199,12 @@ class FrozenJudgeProfile:
             "credential_ref": self.credential_ref,
             "rubric": self.rubric.projection(),
         }
+        if self.provider_egress is not None:
+            projection["provider_egress"] = {
+                "policy_version": self.provider_egress.policy_version,
+                "base_url": self.provider_egress.base_url,
+            }
+        return projection
 
     @property
     def identity_hash(self) -> str:
@@ -239,6 +266,7 @@ def freeze_judge_profile(
     *,
     provider: str,
     rubric: AnswerQualityRubric = DEFAULT_ANSWER_QUALITY_RUBRIC,
+    provider_egress: ProviderEgress | Mapping[str, Any] | None = None,
 ) -> FrozenJudgeProfile:
     """Freeze a resolved model profile into a judge identity.
 
@@ -254,6 +282,7 @@ def freeze_judge_profile(
         profile_id=str(profile.id),
         credential_ref=str(profile.provider_credential_id),
         rubric=rubric,
+        provider_egress=provider_egress,
     )
 
 
@@ -293,6 +322,7 @@ def judge_profile_to_plan(
         max_tokens=profile.max_tokens,
         timeout_seconds=Decimal(str(profile.timeout_seconds)),
         capabilities=ModelCapabilities(),
+        provider_egress=profile.provider_egress,
     )
     return ResolvedModelExecutionPlan(
         primary=resolved_profile,
@@ -685,6 +715,19 @@ def _rebuild_profile(projection: Mapping[str, Any]) -> FrozenJudgeProfile:
                 for item in dimensions
             ),
         )
+        provider_egress = None
+        if "provider_egress" in projection:
+            raw_provider_egress = projection["provider_egress"]
+            if (
+                not isinstance(raw_provider_egress, Mapping)
+                or set(raw_provider_egress) != {"policy_version", "base_url"}
+                or raw_provider_egress.get("policy_version") != PROVIDER_EGRESS_POLICY_VERSION
+            ):
+                raise ValueError
+            provider_egress = ProviderEgress(
+                policy_version=raw_provider_egress["policy_version"],
+                base_url=raw_provider_egress["base_url"],
+            )
         return FrozenJudgeProfile(
             provider=str(projection["provider"]),
             model=str(projection["model"]),
@@ -694,6 +737,7 @@ def _rebuild_profile(projection: Mapping[str, Any]) -> FrozenJudgeProfile:
             profile_id=str(projection["profile_id"]),
             credential_ref=str(projection["credential_ref"]),
             rubric=rubric,
+            provider_egress=provider_egress,
         )
     except (KeyError, TypeError, ValueError):
         raise _judge_manifest_invalid() from None
