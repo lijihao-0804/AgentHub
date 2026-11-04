@@ -4,9 +4,17 @@
 
 AgentHub 让一次请求经历上下文准备、模型推理、工具治理、持久审批和执行观测。模型提出操作，运行时决定是否执行；审批等待与恢复共享同一 Run，历史配置、知识和记忆输入可追溯。
 
-架构是 **Modular Monolith + Worker**：Next.js、FastAPI、LangGraph 适配器、PostgreSQL、Redis 和 Qdrant。Enterprise 描述治理场景；真实企业生产规模和完整公网部署尚未证明。功能开发已收口。
+架构是 **Modular Monolith + Worker**：Next.js、FastAPI、LangGraph 适配器、PostgreSQL、Redis 和 Qdrant。Enterprise 描述治理场景；真实企业生产规模和完整公网部署尚未证明。截至 2026-11-04，AE6b 交互评测持久化闭环（PR #7）和 AE10 最小评测结果界面（PR #8）已合并到 main。
 
-[核心 Demo](docs/report/07-现场演示脚本.md) · [架构与运行生命周期](docs/architecture.md) · [求职与面试](docs/portfolio/README.md) · [代码学习](docs/learning/README.md) · [证据与边界](docs/current-state.md)
+[当前状态](docs/current-state.md) · [AE6b 验收](docs/milestones/AE-6b-integration-closure.md) · [AE10 验收](docs/milestones/AE-10-minimal-evaluation-ui.md) · [能力证据矩阵](docs/milestones/AE-capability-matrix.md) · [未完成项盘点](docs/reviews/WIP-inventory-20261104.md)
+
+## 当前主线
+
+- **代码与工程验收**：main 基线 `4d5de004c3ee3736360a93dd374f2069eafda0dc`；迁移 head 为 `0051_interactive_lifecycle`。AE6b 将 INTERACTIVE Experiment 接入正式 API、真实 PostgreSQL/Redis/Celery worker、逐 case 路由、租约 fencing、崩溃恢复、清理与 `UNKNOWN_OUTCOME` 留存；AE10 将实验运行、逐题结果、筛选分页和安全证据接到现有 Web 入口。
+- **当前 CI**：[main CI 41859097801](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) 通过，包括 531 个 integration、2846 个 non-integration；另有 35 个条件 skip（32 个 research 本地材料、2 个 Windows、1 个 fallback），不是把跳过改写成通过。
+- **已有但需准确表述的能力**：Dashboard 已展示 p50/p95、运行趋势、失败与版本维度；worker/beat 已接内部审批、知识、Wiki、评测对账；Memory 读取会过滤 `expires_at` 已过期条目。内部对账不等于外部副作用自动确认，过期过滤也不等于完整 TTL/物理清理。
+- **证据分层**：真实模型质量仍有受控小样本证据，已有 3 case/K=1 与 2 case/K=2，不能推出总体准确率；统计门禁的具体规则、原始 JSON 与 PASS/FAIL/INCONCLUSIVE 分类以 [能力矩阵](docs/milestones/AE-capability-matrix.md) 为准，本入口不把少量真实 PASS 泛化为全面通过。
+- **生产边界**：AE6b/AE10 主要是本机隔离栈与远端 CI 的工程验收。完整公网部署、资源饱和容量、长期运营、供应商账单和真实企业收益仍未证明。
 
 ## Why AgentHub
 
@@ -71,26 +79,29 @@ Research（文献证据）、Incident（调查与受控回滚）、Data Analyst�
 
 [5–8 分钟演示脚本](docs/report/07-现场演示脚本.md)使用仓库 Ops MCP 固定数据与回滚模拟，不连接生产部署系统。包含隔离环境、MCP 导入/工具策略、数据库与事件检查、失败排查和代码入口。
 
-本轮状态：**DOCUMENTED_ONLY**（已核对源码与历史证据，未重新启动服务/调用模型）。模型工具顺序与次数不保证；审批与执行结果以实际 Run 为准。[既有真实截图](docs/report/18-截图演示.md)保留原时点，不当作本轮运行结果。
+演示脚本与[历史截图](docs/report/18-截图演示.md)是固定演示资料，不代表当前服务已再次启动。最新可核对的结果页链路、受控 worker 故障窗口和界面证据见 [AE10 验收](docs/milestones/AE-10-minimal-evaluation-ui.md)；审批与执行结果仍以实际 Run 为准。
 
 ## Engineering Evidence
 
 | 证据 | 已验证内容与限制 |
 | --- | --- |
-| [基线 CI](https://github.com/lijihao-0804/AgentHub/actions/runs/37327384930) | `a12e8abf7e1f55d07fe6429d5a618737f782efe0` success；不是后续文档提交的 CI 声明 |
+| [当前 main CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) | 531 integration + 2846 non-integration passed；35 个条件 skip 分类保留，不代表这些外部材料检查实际运行 |
+| [AE6b Integration Closure](docs/milestones/AE-6b-integration-closure.md) | 正式 Experiment/API、真实 PostgreSQL/Redis/Celery、逐 case worker、租约 fencing、四处进程退出重启、清理与未知写入留存；当前验收使用确定性 provider |
+| [AE10 最小评测结果界面](docs/milestones/AE-10-minimal-evaluation-ui.md) | Run/case 结果、统计与安全证据、筛选分页、权限和中英文界面；P1 不再序列化原始 observation，P2 修复 token 续期后的筛选/分页状态 |
 | [持久审批验收](docs/reviews/post-M5-independent-review-closure.md) | PostgreSQL/checkpoint、并发与 crash 窗口的历史集成证据；不能泛化为跨机 exactly-once |
 | [正式客服评测](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 60 条合成任务、两个变体各三次；HOLDOUT 业务 47/60→60/60，结合助手语义 41/60→57/60；非线上成功率/真人一致性 |
 | [RAG / 安全 / 故障 / 负载](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 24 DEV 问题、144 次检索生成；最终目标召回两策略均 72/72。含隔离/注入/worker crash/重连/1、4、8 并发受控负载，非资源饱和容量 |
 | [Memory 质量收口](docs/reviews/AgentHub-closure-memory-quality-20261005.md) | 11 确定性场景，强制候选 Write precision 6/9，禁止召回 5/8；脚本任务 10/10 不是 LLM 成功率，复杂真实 USE 未测 |
 | [前端排版](docs/reviews/AgentHub-前端文字排版修正报告-20261003.md)、[快照预览/复制](docs/reviews/AgentHub-前端补缺批次一验收报告-20261003.md) | 专项浏览器与脚本证据，非所有交互持续 E2E |
+| [历史基线 CI](https://github.com/lijihao-0804/AgentHub/actions/runs/37327384930) | `a12e8abf7e1f55d07fe6429d5a618737f782efe0` success；仅代表该历史提交 |
 
 已实现不等于本轮复测、正式里程碑验收或生产可用。历史记录固定各自 SHA，不汇总成“当前测试覆盖率”。
 
 ## Known Limits
 
-未完成项已归档延期：逐轮参数、新派生草稿/关系、完整 Dashboard、成员邀请/角色 UI、Memory TTL/衰减/容量清理、自动副作用对账、M8 公网部署。M7-G UI 存在，不补造独立验收记录。Memory 冲突事实可共存，临时/私人/恶意语义拒写仍依赖 prompt。
+延期项包括逐轮参数、新派生草稿/关系、成员邀请/角色 UI、Memory TTL/衰减/容量物理清理、外部副作用自动对账和 M8 公网部署。Dashboard 的 p95/趋势/失败与版本视图、worker/beat 内部对账、Memory 过期过滤均已存在；它们分别不等于完整生产分析平台、外部副作用自动确认和完整记忆淘汰。Memory 冲突事实仍可共存，临时/私人/恶意语义拒写仍依赖 prompt。
 
-[当前状态与证据口径](docs/current-state.md)区分已验证、未知和延期；真实企业收益、长期大规模 Memory、跨机故障与全面 E2E 未证明。**FEATURE DEVELOPMENT: STOP**。
+[当前状态与证据口径](docs/current-state.md)区分代码、工程验收、真实模型质量与生产部署；真实企业收益、长期大规模 Memory、跨机故障与全面 E2E 未证明。[WIP 盘点](docs/reviews/WIP-inventory-20261104.md)记录待开发切片及依赖；后续按用户授权推进，不把历史收口声明当作当前开发状态。
 
 ## Quick Start & Documentation
 
@@ -150,13 +161,14 @@ Web 的 `/api/...` 同源代理默认转发至 `http://127.0.0.1:8000`；其他�
 ```powershell
 uv run --locked ruff check .
 uv run --locked pytest -m "not integration"
-node scripts/test_web_review.cjs
+node scripts/test_web_regressions.cjs
 node scripts/test_stream_timing.cjs
 cd apps/web
 npm run build
 ```
 
 PostgreSQL 集成测试使用独立、已迁移的 `AGENTHUB_TEST_DATABASE_URL`；持久审批测试还需该测试库的显式 checkpoint bootstrap。
+统一前端入口包含旧 web-review 与全部 AE-10 专项；需要同时执行真实 PG 列表隐私回归时，加 `--with-api-evidence` 并指定现有 `AGENTHUB_TEST_PYTHON`。[覆盖范围与旧断言迁移](docs/reviews/post-ae10-delivery-20261104.md)。
 Memory 小探针入口为 `python -m benchmarks.evaluation.memory_quality.runner`，只用于隔离测试库，默认模型费用为零；
 证据与复现说明见 [评测索引](docs/benchmark/README.md)。仅修改文档时检查链接、路径和 diff，无须重跑模型或浏览器矩阵。
 

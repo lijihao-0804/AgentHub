@@ -1,5 +1,34 @@
 # AgentHub 当前状态与证据口径
 
+> 更新时间：2026-11-04。当前 main 基线：`4d5de004c3ee3736360a93dd374f2069eafda0dc`。AE6b 交互评测持久化闭环（PR #7）与 AE10 最小评测结果界面（PR #8）已合并；迁移 head 为 `0051_interactive_lifecycle`。
+
+> 当前 main CI：[41859097801](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) passed，包含 531 个 integration 与 2846 个 non-integration。另保留 35 个条件 skip：32 个 research 本地材料、2 个 Windows、1 个 fallback；skip 不等于运行通过。
+
+## 当前结论
+
+| 层次 | 当前可说的话 | 不能外推的话 |
+| --- | --- | --- |
+| 代码与入口 | AE6b 已把 INTERACTIVE Experiment 接入正式 API、worker per-item router、真实 PostgreSQL/Redis/Celery、多轮恢复、fencing、清理和未知结果留存；AE10 已提供实验运行、逐题结果、筛选分页与安全证据界面。 | 有入口不等于所有历史数据、所有类别和所有故障窗口都已重新验收。 |
+| 工程验收 | 当前 main CI 通过上述 531 + 2846 项，并保留 35 个条件 skip 的具体分类；[AE6b](milestones/AE-6b-integration-closure.md) 与 [AE10](milestones/AE-10-minimal-evaluation-ui.md) 报告记录本机隔离栈、故障窗口、浏览器与构建证据。 | CI 通过不等于真实模型总体准确率，也不等于公网生产系统可用。 |
+| 真实模型质量 | 已有 AE-Real-1/AE-Real-2 等受控小样本真实 provider 证据，以及 judge 探针；它们验证运行时、审批、轨迹、失败恢复和评分管道。 | 3-case、K=2 或单次 judge 探针不能代表总体质量、长期稳定性或人机一致性。 |
+| 生产部署 | 本机已做过受控全栈与 production build 验收；部署步骤要求显式迁移和 checkpoint bootstrap。 | 完整公网发布、真实企业负载、资源饱和容量、长期运营、账单和收益未证明。 |
+
+### 最新主线
+
+- **AE6b Integration Closure（PR #7）**：正式 Experiment/API 链路接入真实 PostgreSQL、Redis 和 Celery；worker 按 case 路由，支持租约 fencing、多轮恢复、清理对账及四处真实进程退出/重启。无法确认的外部写入保留 `UNKNOWN_OUTCOME`，映射 Run `NEEDS_ATTENTION`，不自动重试。当前 integration 验收使用确定性 provider，不冒充新增付费模型质量。
+- **AE10 最小评测结果界面（PR #8）**：从实验启动运行后可查看摘要、逐题结果和安全证据；筛选、分页、续期、权限、0/null/UNKNOWN 与 FAILED/UNKNOWN 分开展示。P1 收口后列表只返回兼容空对象 `observation: {}`，不再序列化原始 observation；P2 收口使首屏、筛选变更和 token 续期共享同一筛选源，旧 token/旧响应不覆盖新状态。
+- **既有能力不可漏写**：Dashboard 已提供 run p50/p95、审批等待 p95、运行趋势、失败与 AgentVersion 维度；worker/beat 已有 Wiki、知识入库、审批和评测的内部周期对账；Memory 读取已过滤 `expires_at` 过期条目。内部对账不确认任意外部副作用，过期过滤也不等于完整 TTL、衰减、容量淘汰或物理清理。
+- **统计门禁**：规则、原始 JSON、真实运行与合成契约的逐项 PASS/FAIL/INCONCLUSIVE 以 [AE 能力证据矩阵](milestones/AE-capability-matrix.md) 为准。本页不把其中少量真实 PASS 泛化成三条规则在所有模型与场景上都已通过。
+
+未完成项和待核对边界集中维护在 [WIP inventory 2026-11-04](reviews/WIP-inventory-20261104.md)。
+
+## 历史阶段快照
+
+以下日期段落原样保留，只代表各自时点；其中的“当前”“尚未完成”等词均按当时语境阅读，不能覆盖本页顶部的最新口径。
+
+<details>
+<summary>2026-10-05 至 2026-10-24 RAG 与收口阶段记录（展开查看）</summary>
+
 > **2026-10-24 最新交付修复的阿里云DeepSeek回归完成**：对照`42215c8`与产品提交`96587c3`，同一批已曝光MuSiQue200题/139来源组，直连阿里云`deepseek-v4.1-flash-1017`，400次单次派发、无备用/重试。F1 **29.75%→40.16%**，配对分组95%增益区间**[+4.99,+16.49]pp**；EM21.50%→32.50%。当前2次HTTP400保留计0，未知传输0，398个成功响应模型身份一致。通过本地回归门槛，非新独立确认/完整生产E2E或语义准确率；成功响应平均输入约+15.95%，完整金额/2次错误用量UNKNOWN。历史和当前代码分别再生成200/200精确核对；无新生产改动。[结果、退化案例与边界](reviews/AgentHub-RAG阿里云DeepSeek交付修复回归-20261024.md)。
 
 > **2026-10-24 全链路归因与有界实验收口，未推广新算法**：分支`codex/rag-root-cause-20261024`。完成原70题/140臂来源坐标重放；MAML案例区分指标漏计、最终选材和预览丢失。新51题真实GPU检索中，段落恢复+5.88pp、信息保留修正+8.82pp（后者95%区间[0,+21.44]pp），均未过+10pp且下界>0门槛，不进入答案试验。51题保留机器辅助审核但不是专家金标，28题保留未生成/评分。模式控制5次无效调用后停止；经用户确认补完模型比较42次未派发请求，总58次尝试/57已知/1UNKNOWN未重试，完整主比较仍无效。充分材料8对DeepSeek/GLM词面F1为50.91%/24.18%，两道极性题解释长度贡献该差值83%，不是语义准确率差。已知85217 tokens另加未知调用及未计子代理消耗，金额UNKNOWN。没有新质量推广或默认变化；替换模型、改写/拆解、补检索和生产E2E未完成。[协议](reviews/AgentHub-RAG全链路归因执行协议-20261024.md)、[完整决策、成本与未完成项](reviews/AgentHub-RAG全链路性能归因与决策-20261024.md)。
@@ -70,35 +99,36 @@
 > 增量API均值744ms、观测2,982,846 tokens，非整体加速/答案准确率；Onyx仍为benchmark适配器，生产接入尚未完成。
 > 下一独立里程碑是版本级opt-in与真实端到端预算/费用验证，不通过更换数据集继续选参数。
 
+</details>
+
 ## 1. 已实现能力
 
 | 领域 | 当前实现 | 入口/证据 |
 | --- | --- | --- |
 | 租户与模型 | Auth UI、组织/工作区、RBAC、凭据加密、模型档案、能力/重试/可见 token 前 fallback | `packages/control_plane`、`packages/model_gateway` |
-| 发布与执行 | 不可变解析规格与规范哈希、LangGraph Run、预算、流式/重连/停止、费用闸门 | `packages/agent_runtime`、[ADR-007](adr/ADR-007-agentversion-resolved-snapshot.md) |
-| 知识 | 修订/生命周期、异步入库、索引对账、Dense/Hybrid、快照、固定证据、T12 分片预览 | `packages/knowledge`、[T12/T28 验收](reviews/AgentHub-前端补缺批次一验收报告-20261003.md) |
+| 发布与执行 | 不可变解析规格与规范哈希、LangGraph Run、预算、流式/重连/停止、费用闸门；标准 worker 可执行 Agent Run 与评测 case | `packages/agent_runtime`、`apps/worker/tasks/agent_runs.py`、[ADR-007](adr/ADR-007-agentversion-resolved-snapshot.md) |
+| 知识 | 修订/生命周期、异步入库、索引对账、Dense/Hybrid、快照、固定证据、T12 分片预览；worker/beat 有周期内部对账 | `packages/knowledge`、`apps/worker/tasks/knowledge.py`、[T12/T28 验收](reviews/AgentHub-前端补缺批次一验收报告-20261003.md) |
 | 工具与审批 | effect/risk/approval 分离、持久审批与恢复、逻辑动作身份、不确定结果保留、MCP 管理 UI | `packages/tools`、`packages/approvals`、`/tools/mcp` |
 | 应用 | Research/Incident/Analyst/Support、Thread/Artifact、多轮会话流式、Markdown 复制 T28 | `packages/threads`、`packages/artifacts`、`apps/web` |
-| 评测/反馈 | 发布数据集、冻结实验、holdout 暴露、消融/成对比较/门禁 UI；评分/纠正/审核/DEV 草稿导入 | [M-I1](reviews/AgentHub-面试增强M-I1完成报告-20261002.md)、[M-I2](reviews/AgentHub-面试增强M-I2完成报告-20261002.md) |
-| 观测/接管 | 时延/失败/usage/cost、工具摘要、固定引用；分配/接手/关闭、权限/并发版本/审计/证据保留 | [M-I5](reviews/AgentHub-面试增强M-I5验收报告-20261003.md) |
-| Memory | 共享 workspace+agent 语义；默认关闭、异步用户输入抽取、精确引文、去重、停用/启用、ID/hash 快照、UNTRUSTED、最终准入 touch | [长期记忆报告](report/19-长期记忆与上下文管理实施报告.md)、[ADR-011](adr/ADR-011-memory-must-be-snapshotted.md) |
+| 评测/反馈 | 发布数据集、冻结实验、holdout 暴露、交互式多轮执行、统计门禁、实验运行/逐题结果 UI、安全证据、筛选分页；评分/纠正/审核/DEV 草稿导入 | [AE6b](milestones/AE-6b-integration-closure.md)、[AE10](milestones/AE-10-minimal-evaluation-ui.md)、[能力矩阵](milestones/AE-capability-matrix.md) |
+| 观测/接管 | Dashboard 展示 run p50/p95、审批等待 p95、趋势、失败和 AgentVersion 维度；时延/失败/usage/cost、工具摘要、固定引用；分配/接手/关闭与证据保留 | `apps/web/app/dashboard/page.tsx`、[M6 验收](milestones/M6-final-acceptance.md)、[M-I5](reviews/AgentHub-面试增强M-I5验收报告-20261003.md) |
+| Memory | 共享 workspace+agent 语义；默认关闭、异步抽取、精确引文、去重、停用/启用、ID/hash 快照、UNTRUSTED、最终准入 touch；读取过滤已过期条目 | `packages/memory/store.py`、[长期记忆报告](report/19-长期记忆与上下文管理实施报告.md)、[ADR-011](adr/ADR-011-memory-must-be-snapshotted.md) |
 
 T12/T28：**CLOSED**。MCP 管理 UI、Auth UI、工具参数摘要、handoff 生命周期、前端专项脚本均已存在。
 M7-G UI 实现存在；不因后续功能落地补造旧里程碑的独立验收记录。
-当前代码迁移 head 为 `0037_run_resume_cursor`：`0032`～`0034` 为既有 Wiki / 原生绑定迁移，
-`0035`～`0037` 为 Run 执行权、Turn/Memory/Artifact 幂等身份、审批恢复游标及事件完整性。
-代码 head 不代表业务库已升级。本轮只在隔离 PostgreSQL 验证新迁移及历史 Turn 数据的升级、降级、再次升级；
-显式 checkpoint bootstrap 仍由部署步骤负责。修复验收进展见[隐藏缺陷修复验收](reviews/AgentHub-隐藏缺陷修复验收-20261026.md)。
+当前代码迁移 head 为 `0051_interactive_lifecycle`。`0050` 引入 INTERACTIVE 数据集类别，
+`0051` 持久化交互 episode 的 case 身份、环境、轮次、观察、断言、清理与租约状态。
+代码 head 不代表每个业务库已升级；迁移与 LangGraph checkpoint bootstrap 仍是显式部署步骤。
 
-## 2. ALREADY VERIFIED
+## 2. 当前工程验收与历史证据
 
-- Memory API/Celery/PostgreSQL、跨 Thread ON/OFF、停用/启用、快照重放/审批恢复、hash 失败关闭、UNTRUSTED、RBAC/租户隔离、并发冲突、准入 touch 和独立预算有既有证据。
-- [M-I3/M-I4](reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md)：60 条合成客服、DEV 40/HOLDOUT 20、两个变体各三次，共 360 个 trial。HOLDOUT 业务成功 47/60→60/60；结合助手语义 41/60→57/60。
-- 同报告 RAG 对照：8 个短政策、24 DEV 问题、两策略各三次，共 144 次；最终目标召回两策略均 72/72。重排排序略改善，时延更高；不是一般规模下策略优劣结论。
-- 有安全注入、租户隔离、worker crash/beat 恢复、HTTP 重连、usage/cost、1/4/8 并发各 60 秒受控负载证据。受控吞吐不是系统饱和容量；人工接管不等于自动副作用对账。
-- [排版专项](reviews/AgentHub-前端文字排版修正报告-20261003.md)与 [T12/T28](reviews/AgentHub-前端补缺批次一验收报告-20261003.md)保留各自浏览器范围，不宣称全部交互持续 E2E。
+- **当前 CI**：[main run 41859097801](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) passed，531 integration + 2846 non-integration；35 个条件 skip 为 32 research、2 Windows、1 fallback。这里记录的是 main 的工程回归结果，不是模型质量分数。
+- **当前交互评测链路**：[AE6b Integration Closure](milestones/AE-6b-integration-closure.md) 使用正式 API、真实 PostgreSQL/Redis/Celery broker/worker 和确定性 provider，覆盖逐 case 路由、双 worker 竞争、租约 fencing、四处进程退出重启、清理失败及未知写入留存。它不包含付费真实模型新增样本。
+- **当前结果界面**：[AE10](milestones/AE-10-minimal-evaluation-ui.md) 覆盖实验启动、摘要、逐题结果、筛选分页、权限、错误与 390px 视口；真实本地受控 Run 为 4 cases、2 个任务成功。P1/P2 收口分别处理 observation 隐私与 token 续期后的筛选/分页竞态。
+- **真实模型证据**：AE-Real-1 的 3-case 受控运行和 AE-Real-2 的 2-case × K=2 故障注入验证了真实 provider、审批、执行证据和恢复口径；它们只证明这些受控链路，不证明总体模型准确率。
+- **历史证据**：Memory API/Celery/PostgreSQL、跨 Thread ON/OFF、快照与审批恢复、RBAC/租户隔离有各自报告；[M-I3/M-I4](reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) 的合成业务与 144 次 RAG 对照、受控 crash/beat 与 1/4/8 并发、排版和 T12/T28 浏览器范围均保留原时点限制。
 
-## 3. NEWLY VERIFIED：Memory 质量边界
+## 3. 历史 Memory 质量边界（2026-10-05）
 
 [收口报告](reviews/AgentHub-closure-memory-quality-20261005.md)和 [结果](../benchmarks/evaluation/memory_quality/result.json)记录 11 个确定性场景，10 类；1 个 OFF sanity control，新增付费调用 0。
 
@@ -120,27 +150,29 @@ M7-G UI 实现存在；不因后续功能落地补造旧里程碑的独立验收
 
 | 范围 | 状态 |
 | --- | --- |
-| T25 逐轮参数、T26 新派生草稿/关系、T29 完整双轴/p95 Dashboard、T30 成员添加/邀请/角色修改 UI | DEFERRED / FUTURE WORK |
-| Memory TTL、衰减、容量淘汰/清理，语义冲突替换 | DEFERRED / FUTURE WORK |
-| 外部副作用自动对账、邀请接受/撤销流程、部署加固/M8 完整公网交付 | DEFERRED / FUTURE WORK |
-| 旧 S1–S8、大型 Memory/RAG 数据与衰减消融 | DEFERRED / FUTURE WORK；本次小探针不关闭旧 S4 |
+| T25 逐轮参数、T26 新派生草稿/关系、T30 成员添加/邀请/角色修改 UI | DEFERRED / FUTURE WORK |
+| Memory 时间策略、衰减、容量淘汰和物理清理，语义冲突自动替换 | DEFERRED / FUTURE WORK；当前已有 `expires_at` 读取过滤，不宣称完整生命周期 |
+| 外部副作用自动对账、邀请接受/撤销流程、部署加固/M8 完整公网交付 | DEFERRED / FUTURE WORK；内部 worker 对账已存在，不替代外部系统确认 |
+| 历史 S1–S8、大型 Memory/RAG 数据与衰减消融 | DEFERRED / FUTURE WORK；2026-10-05 小探针不关闭旧 S4 |
 
 ## 5. STILL UNKNOWN
 
-真实企业用户与生产收益、数百条记忆和长期使用、真实模型复杂记忆误用率、真人标注一致性、
-自动 stale 生命周期、跨机故障/网络分区、完整资源饱和容量、全面持续浏览器 E2E。
-合成评测和助手审阅不消除这些未知。
+真实企业用户与生产收益、长期大规模 Memory、真实模型复杂记忆误用率、人工 judge 校准与一致性、
+外部供应商账单对账、跨机故障/网络分区、完整资源饱和容量、全部类别与数据规模的持续浏览器/服务 E2E、完整公网生产部署。
+真实模型 small-N、合成评测、CI 和助手审阅不消除这些未知。
 
 ## 6. 文档与对外介绍规则
 
-- [根 README](../README.md) 和 [文档导航](README.md)提供当前入口；本页统一“已实现/已验证/未知/延期”的口径。
+- [根 README](../README.md) 和 [文档导航](README.md)提供当前入口；本页统一“代码/工程验收/真实模型质量/生产部署”的口径。
 - `docs/milestones`、有日期/SHA 的 `docs/reviews`、旧截图/试跑数字是历史记录。旧 SHA、费用、失败和测试数量保留，不能逐份改写成最新结果。
 - `plan/plan.md` 是需求/语义设计，不是全部完成声明；旧计划的后续实施顺序不构成当前开工指令。
+- 统计门禁的原始 JSON 和逐项分类以 [AE 能力证据矩阵](milestones/AE-capability-matrix.md) 为准；本页不代替矩阵，也不把少量真实 PASS 泛化为全面通过。
+- 未完成项与文档待核对项见 [WIP inventory 2026-11-04](reviews/WIP-inventory-20261104.md)。
 - 说明文档中的代码行号/规模数字有基线时点；现场面试优先看函数名、当前源码和新证据。
-- 本轮只更新 Markdown/GitHub About，检查链接/路径与 diff，不重跑已充分验证的模型、负载、构建或浏览器矩阵。
+- 本轮只做 Markdown 口径同步，保留历史记录；不重跑模型、负载、构建或浏览器矩阵。
 
-GitHub About（2026-10-09 展示收口同步；功能/质量基线不变）：
+GitHub About（2026-10-09 历史展示文案，原样保留）：
 
 > Governed AI Agent runtime with durable execution, human approval, RAG, and reproducible evaluation.
 
-**NEXT：PROJECT LEARNING / README / ARCHITECTURE DIAGRAM / DEMO / RESUME / INTERVIEW PREPARATION。**
+**NEXT：按 [WIP inventory](reviews/WIP-inventory-20261104.md) 核对未闭环事项；本文档同步不启动新功能。**

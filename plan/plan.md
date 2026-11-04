@@ -1,6 +1,6 @@
 # AgentHub 开发总计划 v3.1
 
-> **2026-10-05 状态补充**：本文保留产品要求与历史阶段设计，不能据此认定全部条目已完成或继续开工。当前能力、证据与 DEFERRED / FUTURE WORK 见 [状态页](../docs/current-state.md)；FEATURE DEVELOPMENT: STOP。
+> **历史状态说明（2026-10-05）**：当时的功能收口与 FEATURE DEVELOPMENT: STOP 保留为历史决策；后续用户授权工作已继续交付。当前功能基线为 main `4d5de00`（AE-6b、AE-10 已合并，迁移 0051），能力与证据见 [状态页](../docs/current-state.md)。本文仍是产品语义来源，不将旧计划条目自动视为已完成或自动授权新功能。
 
 > **项目定位**：Enterprise Agent Runtime & Control Plane  
 > **核心原则**：**缩功能，不缩语义。**  

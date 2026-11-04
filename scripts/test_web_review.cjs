@@ -44,7 +44,7 @@ function harness(api = {}) {
       useEffect: (fn) => effects.push(fn),
     },
     '@/components/providers/session-provider': { useFrontendSession: () => session },
-    '@/i18n/provider': { useI18n: () => ({ t: (key) => key, formatDateTime: String, formatNumber: String, statusLabel: String, purposeLabel: String }) },
+    '@/i18n/provider': { useI18n: () => ({ t: (key) => key, formatDateTime: String, formatRelativeTime: String, formatCount: String, formatDurationMs: String, formatNumber: String, statusLabel: String, purposeLabel: String }) },
     '@/lib/api/client': { toApiError: (error) => error, errorHintKey: () => null, ApiError: class extends Error { constructor(code, message, status) { super(message); this.code = code; this.status = status; } } },
     '@/hooks/use-workspace-data': {
       useWorkspaceData: (fn, key) => { queries.push({ fn, key }); return { data: null, loaded: false }; },
@@ -218,21 +218,37 @@ async function main() {
   assert.equal(h.states[2], null);
   console.log('PASS org-only 403 during permission loading preserves workspace roster');
 
+  const copy = {
+    agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat',
+    eyebrow: 'eyebrow', title: 'title', lede: 'lede', newThread: 'newThread', createTitle: 'createTitle',
+    threadTitlePlaceholder: 'placeholder', recent: 'recent', noThreads: 'noThreads',
+    noThreadsHint: 'noThreadsHint', sessionContext: 'sessionContext',
+  };
   const threadCalls = [];
-  const threadHarness = harness({ '@/lib/api/threads': {
+  const threadApi = {
     listThreads: async (_auth, query) => { threadCalls.push(query); return []; },
-  }});
-  const List = load('components/apps/app-threads-page.tsx', threadHarness.mocks).default;
-  threadHarness.render(List, { copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' }, weight: { values: () => ({}) } });
-  await threadHarness.queries[0].fn(threadHarness.session);
-  assert.equal(threadCalls[0].agentId, 'agent-a');
-  console.log('PASS agent conversation list sends server-side agent filter');
-  threadHarness.mocks['@/lib/api/threads'].getThread = async () => ({ agent_id: 'agent-b', kind: 'general' });
-  const shellHarness = harness({ '@/lib/api/threads': threadHarness.mocks['@/lib/api/threads'] });
-  const Shell = load('components/apps/app-thread-shell.tsx', shellHarness.mocks).default;
-  shellHarness.render(Shell, { copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' }, threadId: 'thread-b', children: () => null });
-  await assert.rejects(shellHarness.queries[0].fn(shellHarness.session), /not found/);
-  console.log('PASS mismatched agent deep link cannot mount a conversation');
+    getThread: async () => ({ agent_id: 'agent-a', kind: 'general' }),
+  };
+  const workbenchHarness = harness({ '@/lib/api/threads': threadApi });
+  const Workbench = load('components/apps/app-workbench.tsx', workbenchHarness.mocks).default;
+  workbenchHarness.render(Workbench, { copy, children: () => null });
+  const listQuery = workbenchHarness.queries.find((query) => query.key.startsWith('app-threads:')
+    && !query.key.startsWith('app-threads-agents:'));
+  assert.ok(listQuery, 'workbench must expose its thread-list query');
+  await listQuery.fn(workbenchHarness.session);
+  assert.deepEqual(threadCalls[0], { kind: 'general', agentId: 'agent-a', limit: 20, offset: 0 });
+  console.log('PASS AppWorkbench sends server-side agent and kind filters');
+
+  threadApi.getThread = async () => ({ agent_id: 'agent-b', kind: 'general' });
+  const deepHarness = harness({ '@/lib/api/threads': threadApi });
+  const DeepWorkbench = load('components/apps/app-workbench.tsx', deepHarness.mocks).default;
+  deepHarness.render(DeepWorkbench, { copy, threadId: 'thread-b', children: () => null });
+  const deepThreadQuery = deepHarness.queries.find(
+    (query) => query.key === 'app-thread:/agents/agent-a/chat:workspace-a:thread-b',
+  );
+  assert.ok(deepThreadQuery, 'workbench must expose its selected-thread query');
+  await assert.rejects(deepThreadQuery.fn(deepHarness.session), /not found/);
+  console.log('PASS AppWorkbench rejects a mismatched agent deep link');
 
   for (const file of ['feedback/feedback-panel', 'runs/tool-evidence-panel']) {
     const scoped = harness();
@@ -245,24 +261,50 @@ async function main() {
     assert.notEqual(switched.key, nextRun.key, 'run switch must remount local state');
     console.log(`PASS ${file} identity boundaries remount on workspace and run switch`);
   }
+  let evidenceData = {
+    events: [{ sequence: 1, type: 'tool.requested', payload: { tool_identity: 'legacy-tool' } }],
+    evidence_refs: [{ snapshot_id: 'snapshot-a', knowledge_base_id: 'kb', document_revision_id: 'revision-a', chunk_id: 'chunk-a' }],
+    content_allowed: false,
+    truncated: false,
+  };
   const evidenceHarness = harness({ '@/hooks/use-workspace-data': {
-    useWorkspaceData: () => ({ loaded: true, data: {
-      events: [{ sequence: 1, type: 'tool.requested', payload: { tool_identity: 'legacy-tool' } }],
-      evidence_refs: [], content_allowed: false, truncated: false,
-    } }),
+    useWorkspaceData: () => ({ loaded: true, data: evidenceData }),
   } });
   const Evidence = load('components/runs/tool-evidence-panel.tsx', evidenceHarness.mocks).default;
   const body = evidenceHarness.render(Evidence, { runId: 'run-a' });
-  const tree = evidenceHarness.render(body.type, body.props);
-  assert.ok(JSON.stringify(tree).includes('runEvidence.summaryUnavailable'));
-  assert.ok(JSON.stringify(tree).includes('runEvidence.permission'));
-  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', chunk_id: 'chunk-a' };
-  const a = evidenceHarness.render(body.type, body.props);
-  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', chunk_id: 'chunk-b' };
-  const b = evidenceHarness.render(body.type, body.props);
-  const excerpt = (node) => elements(node, (el) => typeof el.type === 'function' && el.props.selected)[0];
-  assert.notEqual(excerpt(a).key, excerpt(b).key, 'evidence selection must remount fetched excerpt');
-  console.log('PASS historical summary fallback, content denial and evidence selection identity');
+  let evidenceTree = evidenceHarness.render(body.type, body.props);
+  const eventRow = elements(evidenceTree, (el) => typeof el.type === 'function' && el.type.name === 'ToolEventRow')[0];
+  assert.ok(eventRow, 'tool events must render through the compact row');
+  const eventMarkup = JSON.stringify(evidenceHarness.render(eventRow.type, eventRow.props));
+  assert.ok(eventMarkup.includes('legacy-tool'));
+  assert.ok(eventMarkup.includes('runEvidence.events.requested'));
+  assert.ok(!eventMarkup.includes('runEvidence.arguments'));
+  assert.ok(!eventMarkup.includes('runEvidence.summaryUnavailable'));
+  const deniedOpen = elements(evidenceTree, (el) => el.type === 'button' && el.props.children === 'runEvidence.open')[0];
+  assert.ok(deniedOpen);
+  assert.equal(deniedOpen.props.disabled, true);
+  assert.equal(deniedOpen.props.title, 'runEvidence.permission');
+
+  evidenceData = {
+    ...evidenceData,
+    evidence_refs: [
+      ...evidenceData.evidence_refs,
+      { snapshot_id: 'snapshot-a', knowledge_base_id: 'kb', document_revision_id: 'revision-b', chunk_id: 'chunk-b' },
+    ],
+    content_allowed: true,
+  };
+  evidenceTree = evidenceHarness.render(body.type, body.props);
+  const openButtons = elements(evidenceTree, (el) => el.type === 'button' && el.props.children === 'runEvidence.open');
+  openButtons[0].props.onClick();
+  const selectedA = evidenceHarness.render(body.type, body.props);
+  const firstExcerpt = elements(selectedA, (el) => typeof el.type === 'function' && el.type.name === 'EvidenceExcerpt')[0];
+  const switchedButtons = elements(selectedA, (el) => el.type === 'button' && el.props.children === 'runEvidence.open');
+  switchedButtons[1].props.onClick();
+  const selectedB = evidenceHarness.render(body.type, body.props);
+  const secondExcerpt = elements(selectedB, (el) => typeof el.type === 'function' && el.type.name === 'EvidenceExcerpt')[0];
+  assert.ok(firstExcerpt && secondExcerpt);
+  assert.notEqual(firstExcerpt.key, secondExcerpt.key, 'evidence selection must remount fetched excerpt');
+  console.log('PASS historical missing-summary omission, content denial and evidence selection identity');
 
   const lifecycle = { id: 'handoff-a', workspace_id: 'workspace-a', thread_id: 'thread-a', source_artifact_id: 'artifact-a', source_hash: 'abc', status: 'OPEN', version: 1,
     created_by: 'self', assignee_id: null, claimed_by: null, closed_by: null, closure_reason: null, unresolved_items: [], created_at: 'now', updated_at: 'now', claimed_at: null, closed_at: null };
