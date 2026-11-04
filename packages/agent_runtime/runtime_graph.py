@@ -348,7 +348,9 @@ class _AgentRunGraph:
         )
         # Summary admission reads the exact preceding checkpoint through a
         # separate connection. Commit each boundary before its next node runs.
-        result = await graph.ainvoke(initial, config=config, durability="sync")
+        result = await graph.ainvoke(
+            initial, config=config, durability="sync" if checkpointer is not None else None
+        )
         # A new graph instance resumes durable state. Its local counters must
         # also reflect earlier rounds, including paths that finish without
         # another model call.
