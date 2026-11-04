@@ -10,7 +10,6 @@ import argparse
 import asyncio
 import json
 import logging
-import socket
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -39,6 +38,7 @@ from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
 from packages.model_gateway.configured_route import build_gateway, load_route
 from packages.model_gateway.contracts import ModelMessage, ModelRequest, ModelToolDefinition
 from packages.model_gateway.credentials import ProviderCredentialCipher
+from packages.model_gateway.egress import normalize_provider_base_url
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 
@@ -221,8 +221,8 @@ async def install(route, args):
 
 class RecordedClient:
     def __init__(self, primary_base):
-        self.primary_base = primary_base
-        self.force_base = None
+        self.primary_base = normalize_provider_base_url(primary_base)
+        self.simulate_next_primary_failure = False
         self.calls = []
 
     async def acompletion(self, **kwargs):
@@ -230,19 +230,29 @@ class RecordedClient:
 
         if len(self.calls) >= 6:
             raise ValueError("smoke request ceiling reached")
-        original_base = kwargs.get("api_base")
-        injected = self.force_base is not None and original_base == self.primary_base
-        if injected:
-            kwargs["api_base"] = self.force_base
+        simulated = (
+            self.simulate_next_primary_failure and kwargs.get("api_base") == self.primary_base
+        )
+        if simulated:
+            self.simulate_next_primary_failure = False
         kwargs["max_tokens"] = min(kwargs["max_tokens"], 128)
         kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
         entry = {
             "endpoint": kwargs.get("api_base"),
             "requested_model": kwargs["model"],
-            "injected_connection_refusal": injected,
-            "status": "DISPATCHED",
+            "record_kind": ("SIMULATED_CONNECTION_FAILURE" if simulated else "LITELLM_DISPATCH"),
+            "litellm_invoked": not simulated,
+            "provider_network_confirmed": False,
+            "status": "SIMULATED_FAILED" if simulated else "DISPATCHED",
         }
         self.calls.append(entry)
+        if simulated:
+            requested_model = kwargs["model"]
+            raise litellm.APIConnectionError(
+                message="simulated primary connection failure",
+                llm_provider=requested_model.partition("/")[0] or "unknown",
+                model=requested_model,
+            )
         try:
             result = await litellm.acompletion(**kwargs)
             entry.update(status="RECEIVED", raw_response_model=getattr(result, "model", None))
@@ -346,42 +356,79 @@ async def smoke(route, args):
                 "selected_model": response.model,
             }
         )
-        # A bound, non-listening local socket refuses the temporary probe connection.
-        # The user's running Magpie gateway and the configured endpoint are untouched.
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as refusal:
-            refusal.bind(("127.0.0.1", 0))
-            client.force_base = f"http://127.0.0.1:{refusal.getsockname()[1]}/v1"
-            offset = len(client.calls)
-            response = await generate(simple)
-            attempts = client.calls[offset:]
-            checks.append(
-                {
-                    "check": "real_connection_refusal_to_aliyun",
-                    "passed": response.content.strip() == "OK"
-                    and len(attempts) == 2
-                    and attempts[0]["injected_connection_refusal"]
-                    and attempts[0]["status"] == "FAILED"
-                    and attempts[1]["endpoint"] == route.fallbacks[0].base_url
-                    and response.model == route.fallbacks[0].model,
-                    "selected_model": response.model,
-                }
-            )
+        client.simulate_next_primary_failure = True
+        offset = len(client.calls)
+        response = await generate(simple)
+        attempts = client.calls[offset:]
+        checks.append(
+            {
+                "check": "simulated_primary_connection_failure_failover",
+                "passed": response.content.strip() == "OK"
+                and len(attempts) == 2
+                and attempts[0]["record_kind"] == "SIMULATED_CONNECTION_FAILURE"
+                and not attempts[0]["litellm_invoked"]
+                and attempts[0]["status"] == "SIMULATED_FAILED"
+                and attempts[1]["record_kind"] == "LITELLM_DISPATCH"
+                and attempts[1]["litellm_invoked"]
+                and attempts[1]["endpoint"] == route.fallbacks[0].base_url
+                and response.model == route.fallbacks[0].model,
+                "selected_model": response.model,
+                "simulated": True,
+                "provider_network_confirmed": False,
+            }
+        )
+        response = await generate(simple)
+        checks.append(
+            {
+                "check": "primary_recovered_after_simulated_failure",
+                "passed": response.content.strip() == "OK"
+                and response.model == route.primary.model,
+                "selected_model": response.model,
+            }
+        )
+        simulated_failures = [
+            call for call in client.calls if call["record_kind"] == "SIMULATED_CONNECTION_FAILURE"
+        ]
+        litellm_dispatches = [
+            call for call in client.calls if call["record_kind"] == "LITELLM_DISPATCH"
+        ]
         return {
             "passed": all(c["passed"] for c in checks),
             "checks": checks,
-            "physical_calls": client.calls,
+            "attempts": client.calls,
+            "simulated_failures": simulated_failures,
+            "litellm_dispatches": litellm_dispatches,
+            "attempt_counts": {
+                "SIMULATED_CONNECTION_FAILURE": len(simulated_failures),
+                "LITELLM_DISPATCH": len(litellm_dispatches),
+            },
             "request_ceiling": 6,
             "per_request_output_cap": 128,
             "path": "persisted SQL gateway" if args.installed else "configuration gateway",
             "currency_cost": None,
-            "scope": "Connectivity/tools/failover, not RAG quality.",
+            "scope": (
+                "Connectivity/tools/failover, not RAG quality. Simulated failures are local "
+                "exceptions and do not prove provider network behavior."
+            ),
             "context_budget_applied": True,
         }
     except Exception as error:
+        simulated_failures = [
+            call for call in client.calls if call["record_kind"] == "SIMULATED_CONNECTION_FAILURE"
+        ]
+        litellm_dispatches = [
+            call for call in client.calls if call["record_kind"] == "LITELLM_DISPATCH"
+        ]
         return {
             "passed": False,
             "checks": checks,
-            "physical_calls": client.calls,
+            "attempts": client.calls,
+            "simulated_failures": simulated_failures,
+            "litellm_dispatches": litellm_dispatches,
+            "attempt_counts": {
+                "SIMULATED_CONNECTION_FAILURE": len(simulated_failures),
+                "LITELLM_DISPATCH": len(litellm_dispatches),
+            },
             "failure_type": type(error).__name__,
             "failure_code": str(getattr(error, "code", "SMOKE_FAILED")),
             "request_ceiling": 6,

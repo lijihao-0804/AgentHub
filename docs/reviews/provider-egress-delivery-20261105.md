@@ -26,6 +26,7 @@
 - 原有 LiteLLM adapter/阿里云请求模式两文件通过；完整 MCP security 文件通过（50 项）。这些不是新增真实 provider 兼容性实验。
 - 新 judge 端点 13 项通过；judge/ensemble/evaluation API 必要回归 37 项通过，旧 manifest/identity 不漂移。
 - 合入 PR #11 后，provider binding、Agent publish、Memory selection 和 Wiki binding 的联合回归退出 0；验证两个切片共同修改 publish/frozen 后仍可解析和发布。
+- 候选 `1b16d79` 的远端 CI 集成 549 项通过，non-integration 为 3077 通过、35 条件跳过、1 失败：旧 paragraph 记录器把注入的 SDK client 写进 JSON。修复此处及同类 paper 记录器，客户端仍原样传给 LiteLLM，证据不记录 client/key；相应两文件分别 9/5 项通过。旧 smoke 的改目标地址故障注入改为固定 origin 上的明确模拟异常，单独标记模拟与 LiteLLM 调用；gateway 仍拥有 fallback，新增无网络 sentinel 用例通过。模拟不证明公网断连恢复。
 - Ruff、diff whitespace 检查通过。远端 CI 以最终 PR checks 和 ignored delivery receipt 记录，不预写绿灯；没有重复本地全库、生成截图或文件哈希。
 
-本轮没有新增真实模型调用、账单对账或质量研究。Fake TLS stream 的 SNI/验证配置断言不是公网证书握手实测；操作系统路由、自定义 NAT64、代理/服务网格等未覆盖，应用 guard 不能替代部署网络策略。旧版本缺失的原始端点不能补造。私网 CIDR 例外影响该部署的全部租户/模型，应按已授权本地目标配置。
+本切片的项目测试和应用预览没有新增真实 provider 派发、账单对账或质量研究；用户指定的 DeepSeek 开发子代理消耗不在研究费用账本内。Fake TLS stream 的 SNI/验证配置断言不是公网证书握手实测；操作系统路由、自定义 NAT64、代理/服务网格等未覆盖，应用 guard 不能替代部署网络策略。旧版本缺失的原始端点不能补造。私网 CIDR 例外影响该部署的全部租户/模型，应按已授权本地目标配置。
