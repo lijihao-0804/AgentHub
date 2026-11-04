@@ -76,7 +76,9 @@ function validatePricingForm(form: ReturnType<typeof initialPricingForm>): Prici
 
 export default function EvaluationPricingPage() {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId, permissions } =
+    useFrontendSession();
+  const canManage = permissions?.includes("evaluation_manage") === true;
   const [snapshots, setSnapshots] = useState<PricingSnapshot[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -135,6 +137,7 @@ export default function EvaluationPricingPage() {
   /** Prices are submitted as strings so the backend Decimal parses them exactly. */
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManage) return;
     setCreateError(null);
     const validation = validatePricingForm(form);
     if (validation) {
@@ -190,14 +193,16 @@ export default function EvaluationPricingPage() {
       <Panel
         ariaLabel={t("evaluation.pricing.title")}
         actions={
-          <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
-            {t("evaluation.pricing.create")}
-          </button>
+          canManage ? (
+            <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
+              {t("evaluation.pricing.create")}
+            </button>
+          ) : undefined
         }
       >
         {createdNotice && <p className="inline-notice">{t("evaluation.pricing.createdNotice")}</p>}
 
-        {showForm && (
+        {canManage && showForm && (
           <form className="eval-form" onSubmit={submitCreate} noValidate>
             <div className="eval-form-title">{t("evaluation.pricing.formTitle")}</div>
             <div className="form-grid">

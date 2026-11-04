@@ -1,0 +1,197 @@
+{
+  "schema_version": "ae10-local-acceptance-v1",
+  "status": "LOCAL_VERIFIED_REMOTE_GATE_IN_PR",
+  "final_acceptance_claimed": false,
+  "date": "2026-11-04",
+  "baseline_commit": "bb033d6cc78a7055a57af106ed520f2b8630e872",
+  "branch": "codex/ae10-minimal-evaluation-ui",
+  "evidence_level": "DETERMINISTIC_CONFORMANCE",
+  "production_deployment": false,
+  "new_paid_provider_calls": 0,
+  "local_deployment": {
+    "web": "http://127.0.0.1:3010",
+    "api": "http://127.0.0.1:8010",
+    "dependencies": "isolated Docker services",
+    "production_services_touched": false
+  },
+  "browser_acceptance": {
+    "path": "normal login -> Evaluations -> experiment -> start run -> run detail",
+    "run_id": "a3701134-e75c-44f5-a20f-a2f3f605dc1d",
+    "run_status": "SUCCEEDED",
+    "case_count": 4,
+    "known_trial_count": 4,
+    "task_success_count": 2,
+    "task_non_success_count": 2,
+    "success_rate": 0.5,
+    "evidence_level": "DETERMINISTIC_CONFORMANCE"
+  },
+  "controlled_scenarios": [
+    {
+      "window": "T07",
+      "scenario": "fixture_committed",
+      "provider_calls": 0,
+      "provider_replay": false
+    },
+    {
+      "window": "T08",
+      "scenario": "first_run_terminal",
+      "provider_calls": 1,
+      "provider_replay": false
+    },
+    {
+      "window": "T09",
+      "scenario": "write_response_lost",
+      "provider_calls": 3,
+      "provider_replay": false,
+      "semantics": "UNKNOWN_OUTCOME / NEEDS_ATTENTION; no automatic retry"
+    },
+    {
+      "window": "T10",
+      "scenario": "observation_retained",
+      "provider_calls": 4,
+      "provider_replay": false,
+      "semantics": "retained observation rendered without refetch or rerun"
+    }
+  ],
+  "additional_scenarios": {
+    "cleanup_failed": {
+      "recorded": true,
+      "semantics": "historical cleanup failure is distinct from current cleanup and recovery-required state"
+    },
+    "cost_refusal": {
+      "recorded": true,
+      "failure_code": "INTERACTIVE_COST_RESERVATION_UNAVAILABLE",
+      "chargeable_calls_dispatched": false
+    }
+  },
+  "checks": {
+    "frontend": {
+      "job": "job-web-build-02",
+      "state": "completed",
+      "exit_code": 0,
+      "helper_node_tests": {
+        "tests": 17,
+        "passed": 17,
+        "failed": 0
+      },
+      "production_build": {
+        "passed": true,
+        "typescript_and_lint": "passed",
+        "static_page_generation": "passed"
+      },
+      "run_permission_gate_checks": 4,
+      "case_component_scenarios": 17,
+      "readonly_page_matrices": 6,
+      "mutation_handler_guard": true
+    },
+    "preserved_history": {
+      "first_backend_attempt": {
+        "job": "job-backend-checks",
+        "state": "failed",
+        "ae10_integration_failure": "ready-run fixture had zero materialized case rows where two were expected",
+        "correction_recorded": true
+      },
+      "second_backend_attempt": {
+        "job": "job-backend-checks-02",
+        "state": "failed",
+        "exit_code": 1,
+        "junit": {
+          "tests": 34,
+          "passed": 32,
+          "failed": 2,
+          "errors": 0,
+          "skipped": 0
+        },
+        "ae10_unit": {
+          "tests": 11,
+          "passed": 11,
+          "failed": 0
+        },
+        "ae10_integration": {
+          "tests": 2,
+          "passed": 0,
+          "failed": 2,
+          "final_rerun": "pending",
+          "current_failure": "fixture setup violates ck_interactive_episode_turns_dispatch_binding before the evidence assertions"
+        }
+      }
+    },
+    "backend_final": {
+      "junit": "ae10-agent-final.xml",
+      "tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "unit": 11,
+      "integration": 2,
+      "exit_code": 0
+    },
+    "adjacent_api_statistics_taxonomy": {
+      "passed": 21,
+      "implementation_unchanged_after_check": true
+    },
+    "ruff": {
+      "passed": true
+    },
+    "baseline_web_review": {
+      "status": "blocked_on_preexisting_missing_app_threads_page",
+      "first_nine_checks_passed": true,
+      "not_claimed_fully_passed": true
+    }
+  },
+  "screenshots": {
+    "status": "saved_and_visually_inspected",
+    "directory": "ae10-ui-assets",
+    "expected": [
+      "desktop-summary.jpg",
+      "unknown-write.jpg",
+      "cleanup-failed.jpg",
+      "mobile-evidence.jpg",
+      "english-summary.jpg",
+      "viewer-readonly.jpg"
+    ],
+    "viewport_matrix": [
+      {
+        "width": 1440,
+        "height": 1000
+      },
+      {
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "horizontal_document_overflow": false
+  },
+  "tcp_acceptance": {
+    "status": "verified",
+    "targets": [
+      "127.0.0.1:3010",
+      "127.0.0.1:8010"
+    ],
+    "case_count": 10,
+    "transport": "TCP via Next proxy to FastAPI",
+    "viewer_read_and_mutation_denial": true,
+    "cross_workspace_denied": true
+  },
+  "remote_ci": {
+    "evidence_location": "exact PR head checks and ignored delivery receipt",
+    "required_before_milestone_complete": true
+  },
+  "delivery_receipt": {
+    "storage": ".scratch/ae10-20261104/delivery-receipt.json",
+    "reason": "avoid changing validated candidate SHA to record its own CI result"
+  },
+  "exclusions": {
+    "credentials_included": false,
+    "raw_observation_included": false,
+    "prompt_or_result_body_included": false,
+    "private_canary_included": false,
+    "workspace_or_user_ids_included": false
+  },
+  "readonly_approval_execution": {
+    "source": "persisted Approval execution",
+    "step_type": "APPROVAL_EXECUTION",
+    "ambiguous_step_ordinal": 0,
+    "ui_invents_wait_pairing": false
+  }
+}

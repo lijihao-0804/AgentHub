@@ -31,7 +31,9 @@ import { useI18n } from "@/i18n/provider";
 export default function ExperimentDetailClient({ experimentId }: { experimentId: string }) {
   const { t, statusLabel, purposeLabel, formatDateTime, formatNumber } = useI18n();
   const router = useRouter();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId, permissions } = useFrontendSession();
+  const canManage = permissions?.includes("evaluation_manage") === true;
+  const canRun = permissions?.includes("evaluation_run") === true;
   const [experiment, setExperiment] = useState<EvaluationExperimentDetail | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -203,6 +205,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
 
   async function submitVariant(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManage) return;
     setVariantError(null);
     setVariantInvalid(null);
     if (!label.trim() || !agentVersionId || !pricingId) return;
@@ -239,6 +242,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
   }
 
   async function finalize() {
+    if (!canManage) return;
     setFinalizeError(null);
     const requestSessionId = sessionId;
     setFinalizing(true);
@@ -256,6 +260,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
   }
 
   async function startRun() {
+    if (!canRun) return;
     setStartRunError(null);
     const requestSessionId = sessionId;
     setStartingRun(true);
@@ -338,7 +343,7 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
             {experiment.description && <p className="state-hint">{experiment.description}</p>}
 
             <div className="form-actions">
-              {isDraft && !showFinalizeConfirm && (
+              {canManage && isDraft && !showFinalizeConfirm && (
                 <button
                   type="button"
                   className="button button-primary"
@@ -348,13 +353,13 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
                   {t("evaluation.experiment.finalize")}
                 </button>
               )}
-              {!isDraft && (
+              {canRun && !isDraft && (
                 <button type="button" className="button button-primary" onClick={() => void startRun()} disabled={startingRun}>
                   {startingRun ? t("evaluation.experiment.starting") : t("evaluation.experiment.startRun")}
                 </button>
               )}
             </div>
-            {showFinalizeConfirm && (
+            {canManage && showFinalizeConfirm && (
               <InlineConfirm
                 title={t("evaluation.experiment.finalizeConfirmTitle")}
                 text={t("evaluation.experiment.finalizeConfirmText")}
@@ -438,14 +443,14 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
             title={t("evaluation.experiment.variants.title")}
             eyebrow={t("evaluation.experiment.eyebrow")}
             actions={
-              isDraft && (
+              canManage && isDraft && (
                 <button type="button" className="button button-ghost" onClick={() => setShowVariantForm((v) => !v)}>
                   {t("evaluation.experiment.variants.addVariant")}
                 </button>
               )
             }
           >
-            {showVariantForm && (
+            {canManage && showVariantForm && (
               <form className="eval-form" onSubmit={submitVariant} noValidate>
                 <div className="eval-form-title">{t("evaluation.experiment.variants.formTitle")}</div>
                 <div className="form-grid">

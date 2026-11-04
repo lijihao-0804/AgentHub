@@ -102,7 +102,9 @@ function buildPolicyJson(
 
 export default function ReleaseGatePoliciesPage() {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId, permissions } =
+    useFrontendSession();
+  const canManage = permissions?.includes("evaluation_manage") === true;
   const [policies, setPolicies] = useState<ReleaseGatePolicy[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -165,6 +167,7 @@ export default function ReleaseGatePoliciesPage() {
 
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManage) return;
     setFormError(null);
     setFormInvalid(null);
     const built = buildPolicyJson(rules, (key) => t(key as never));
@@ -215,15 +218,17 @@ export default function ReleaseGatePoliciesPage() {
       <Panel
         ariaLabel={t("evaluation.gates.title")}
         actions={
-          <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
-            {t("evaluation.gates.create")}
-          </button>
+          canManage ? (
+            <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
+              {t("evaluation.gates.create")}
+            </button>
+          ) : undefined
         }
       >
         {createdNotice && <p className="inline-notice">{t("evaluation.gates.createdNotice")}</p>}
         <p className="state-hint">{t("evaluation.gates.immutableNotice")}</p>
 
-        {showForm && (
+        {canManage && showForm && (
           <form className="eval-form" onSubmit={submitCreate} noValidate>
             <div className="eval-form-title">{t("evaluation.gates.formTitle")}</div>
             <div className="form-grid">

@@ -36,7 +36,9 @@ export default function EvaluationExperimentsPage() {
         ? t("evaluation.experiments.splitLabels.HOLDOUT")
         : split;
   const router = useRouter();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId, permissions } =
+    useFrontendSession();
+  const canManage = permissions?.includes("evaluation_manage") === true;
   const [experiments, setExperiments] = useState<EvaluationExperiment[]>([]);
   const [experimentTotal, setExperimentTotal] = useState<number | null>(null);
   const [extraPages, setExtraPages] = useState<EvaluationExperiment[][]>([]);
@@ -196,6 +198,7 @@ export default function EvaluationExperimentsPage() {
 
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManage) return;
     setCreateError(null);
     if (!name.trim() || !versionId) return;
     const requestSessionId = sessionId;
@@ -254,14 +257,16 @@ export default function EvaluationExperimentsPage() {
       <Panel
         ariaLabel={t("evaluation.experiments.title")}
         actions={
-          <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
-            {t("evaluation.experiments.create")}
-          </button>
+          canManage ? (
+            <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
+              {t("evaluation.experiments.create")}
+            </button>
+          ) : undefined
         }
       >
         {createdNotice && <p className="inline-notice">{t("evaluation.experiments.createdNotice")}</p>}
 
-        {showForm && (
+        {canManage && showForm && (
           <form className="eval-form" onSubmit={submitCreate} noValidate>
             <div className="eval-form-title">{t("evaluation.experiments.formTitle")}</div>
             {datasetsError && (

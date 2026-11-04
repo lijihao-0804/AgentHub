@@ -11,6 +11,7 @@ from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_experiment_run_queue, get_workspace_context
 from apps.api.schemas.evaluation import (
     EvaluationAblationResponse,
+    EvaluationCaseEvidenceResponse,
     EvaluationCaseResultListResponse,
     EvaluationCaseResultResponse,
     EvaluationComparisonCreateRequest,
@@ -23,6 +24,7 @@ from apps.api.schemas.evaluation import (
     EvaluationDatasetVersionDetailResponse,
     EvaluationDatasetVersionFromRunRequest,
     EvaluationDatasetVersionResponse,
+    EvaluationEvidenceTaskSuccessResponse,
     EvaluationExperimentCreateRequest,
     EvaluationExperimentDetailResponse,
     EvaluationExperimentListResponse,
@@ -43,6 +45,7 @@ from packages.control_plane.rbac import EVALUATION_MANAGE
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.ablation import EvaluationAblationService
+from packages.evaluation.evidence_view import EvaluationEvidenceViewService
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.judge import FrozenJudgeEnsemble, FrozenJudgeProfile, freeze_judge_profile
 from packages.evaluation.metrics_service import EvaluationMetricsService
@@ -661,13 +664,54 @@ async def list_experiment_run_case_results(
     result = await ExperimentService().list_case_results(
         session, context=context, run_id=run_id, status=status, limit=limit, offset=offset
     )
+    summaries = await EvaluationEvidenceViewService().summarize_case_results(
+        session,
+        context=context,
+        run_id=run_id,
+        cases=result["items"],
+    )
+    items = []
+    for case in result["items"]:
+        response = EvaluationCaseResultResponse.model_validate(case, from_attributes=True)
+        summary = summaries.get(case.id)
+        if summary is not None:
+            task_success = summary.get("task_success")
+            response = response.model_copy(
+                update={
+                    **summary,
+                    "task_success": (
+                        EvaluationEvidenceTaskSuccessResponse.model_validate(task_success)
+                        if task_success is not None
+                        else None
+                    ),
+                }
+            )
+        items.append(response)
     return EvaluationCaseResultListResponse(
         total=result["total"],
-        items=[
-            EvaluationCaseResultResponse.model_validate(item, from_attributes=True)
-            for item in result["items"]
-        ],
+        items=items,
     )
+
+
+@router.get(
+    "/experiment-runs/{run_id}/case-results/{case_id}/evidence",
+    response_model=EvaluationCaseEvidenceResponse,
+)
+async def get_experiment_case_evidence(
+    workspace_id: UUID,
+    run_id: UUID,
+    case_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> EvaluationCaseEvidenceResponse:
+    del workspace_id
+    evidence = await EvaluationEvidenceViewService().get_case_evidence(
+        session,
+        context=context,
+        run_id=run_id,
+        case_id=case_id,
+    )
+    return EvaluationCaseEvidenceResponse.model_validate(evidence)
 
 
 @router.post(
