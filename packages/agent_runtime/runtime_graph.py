@@ -164,6 +164,9 @@ _NEEDS_ATTENTION_CONTEXT_FAILURES = frozenset(
     {
         "RUN_ACTOR_ACCESS_REVOKED",
         "RUN_EXECUTION_LEASE_LOST",
+        "CASE_BUDGET_EXECUTION_FENCE_INVALID",
+        "CASE_BUDGET_ACTOR_BINDING_INVALID",
+        "CASE_BUDGET_ATTEMPT_RECONCILIATION_REQUIRED",
         "UNKNOWN_OUTCOME",
         "ACTION_OUTCOME_UNKNOWN",
         "ACTION_RECONCILIATION_REQUIRED",
@@ -2691,7 +2694,11 @@ class _AgentRunGraph:
             await self.step(
                 "MODEL", "FAILED", {"model_round": next_round, "error_code": error.code}
             )
-            return {**evidence_update, "model_round_count": next_round, "failure_code": error.code}
+            return {
+                **evidence_update,
+                "model_round_count": next_round,
+                **_context_runtime_failure_fields(error.code),
+            }
         except ModelGatewayError as error:
             await self.step(
                 "MODEL",

@@ -9,11 +9,14 @@ from tests.unit.test_runtime_rag_evidence_projection import _frozen_spec, _model
 
 
 class _Budget:
+    def __init__(self, code="RUN_BUDGET_INSUFFICIENT_FUNDS"):
+        self.code = code
+
     def is_bound_to_run(self, workspace_id, run_id, call_identity):
         return call_identity == "round-1"
 
     async def reserve_attempt(self, *args, **kwargs):
-        raise ModelAttemptBudgetError("RUN_BUDGET_INSUFFICIENT_FUNDS", "budget exhausted")
+        raise ModelAttemptBudgetError(self.code, "budget admission refused")
 
     async def mark_unknown_outcome(self, *args, **kwargs):
         return None
@@ -34,12 +37,23 @@ class _Gateway(ModelGatewayService):
 
 
 @pytest.mark.asyncio
-async def test_model_node_binds_run_budget_and_reports_rejection_without_dispatch():
+@pytest.mark.parametrize(
+    "code, expected_status",
+    [
+        ("RUN_BUDGET_INSUFFICIENT_FUNDS", None),
+        ("CASE_BUDGET_EXECUTION_FENCE_INVALID", "NEEDS_ATTENTION"),
+        ("CASE_BUDGET_ACTOR_BINDING_INVALID", "NEEDS_ATTENTION"),
+        ("CASE_BUDGET_ATTEMPT_RECONCILIATION_REQUIRED", "NEEDS_ATTENTION"),
+    ],
+)
+async def test_model_node_binds_run_budget_and_reports_rejection_without_dispatch(
+    code, expected_status
+):
     graph = _model_graph(request_sink=[])
     bound = []
     calls = []
     gateway = _Gateway(bound)
-    budget = _Budget()
+    budget = _Budget(code)
     graph.service.model_gateway_factory = lambda session: gateway
     graph.service.model_attempt_budget_factory = lambda run, round_number: (
         calls.append((run.id, round_number)) or budget
@@ -57,7 +71,8 @@ async def test_model_node_binds_run_budget_and_reports_rejection_without_dispatc
         "usage_records": [],
     }
     result = await graph.model(state)
-    assert result["failure_code"] == "RUN_BUDGET_INSUFFICIENT_FUNDS"
+    assert result["failure_code"] == code
+    assert result.get("run_status") == expected_status
     assert calls == [(graph.run.id, 1)]
     assert bound == [budget]
     assert gateway.attempt_budget is None
