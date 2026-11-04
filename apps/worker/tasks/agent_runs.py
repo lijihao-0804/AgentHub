@@ -90,6 +90,33 @@ def resume_agent_run(run_id: str, approval_id: str) -> None:
     asyncio.run(_resume_agent_run(get_settings(), UUID(run_id), UUID(approval_id)))
 
 
+async def _authorized_run_context(session, *, principal, workspace_id):
+    try:
+        context = (
+            await TenantService().get_workspace_access(
+                session,
+                principal=principal,
+                workspace_id=workspace_id,
+            )
+        ).context
+    except AgentHubError as error:
+        if error.status_code not in {403, 404}:
+            raise
+        return None
+    if context is None or "agent_run" not in context.permissions:
+        return None
+    return context
+
+
+async def _mark_run_access_revoked(session, run) -> None:
+    run.status = "NEEDS_ATTENTION"
+    run.failure_code = "RUN_ACTOR_ACCESS_REVOKED"
+    run.resume_pending = False
+    run.event_log_complete = False
+    run.completed_at = datetime.now(UTC)
+    await session.commit()
+
+
 async def _resume_agent_run(settings, run_id, approval_id):
     engine, factory = create_database(settings.database_url)
     try:
@@ -104,25 +131,13 @@ async def _resume_agent_run(settings, run_id, approval_id):
                 trace_id=f"resume:{run_id}",
                 user_id=str(run.created_by),
             )
-            context = None
-            try:
-                context = (
-                    await TenantService().get_workspace_access(
-                        session,
-                        principal=principal,
-                        workspace_id=run.workspace_id,
-                    )
-                ).context
-            except AgentHubError as error:
-                if error.status_code not in {403, 404}:
-                    raise
-            if context is None or "agent_run" not in context.permissions:
-                run.status = "NEEDS_ATTENTION"
-                run.failure_code = "RUN_ACTOR_ACCESS_REVOKED"
-                run.resume_pending = False
-                run.event_log_complete = False
-                run.completed_at = datetime.now(UTC)
-                await session.commit()
+            context = await _authorized_run_context(
+                session,
+                principal=principal,
+                workspace_id=run.workspace_id,
+            )
+            if context is None:
+                await _mark_run_access_revoked(session, run)
                 return
         await _build_service(settings, factory).resume(
             context, run_id=run_id, approval_id=approval_id
@@ -178,11 +193,14 @@ async def _execute_agent_run(
                 trace_id=request_id,
                 user_id=str(run.created_by),
             )
-            context = (
-                await TenantService().get_workspace_access(
-                    session, principal=principal, workspace_id=workspace_id
-                )
-            ).context
+            context = await _authorized_run_context(
+                session,
+                principal=principal,
+                workspace_id=workspace_id,
+            )
+            if context is None:
+                await _mark_run_access_revoked(session, run)
+                return
             # Detach with its attributes already loaded: the run object outlives
             # this session, and a lazy refresh on a closed session would fail.
             session.expunge(run)

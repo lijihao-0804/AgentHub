@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 
+import ContextPolicyEditor from "@/components/agents/context-policy-editor";
+import WikiBindingEditor from "@/components/agents/wiki-binding-editor";
 import Breadcrumbs from "@/components/layout/breadcrumbs";
 import SnapshotPreview from "@/components/knowledge/snapshot-preview";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
@@ -32,10 +34,25 @@ import {
   type AgentKnowledgeBinding,
   type AgentToolBinding,
   type AgentVersion,
-  type ContextBudget,
+  type FrozenContextPolicyProjection,
   type KnowledgeBindingMode,
   type RuntimeConfig,
 } from "@/lib/api/agents";
+import {
+  contextPolicyDraftFromPolicy,
+  defaultContextPolicyDraft,
+  defaultMemoryDraft,
+  extractFrozenContextPolicy,
+  hasContextPolicyDependents,
+  invalidRuntimeLimitFields,
+  memoryDraftFromConfig,
+  mergeRuntimeConfigDraft,
+  validateContextPolicyDraft,
+  validateMemoryDraft,
+  type ContextPolicyDraft,
+  type MemoryDraft,
+  type RuntimeLimitDraft,
+} from "@/lib/agents/context-policy";
 import { listKnowledgeBases, listSnapshots, type KnowledgeBase, type KnowledgeSnapshot } from "@/lib/api/knowledge";
 import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
 import { listToolRevisions, listTools, type Tool, type ToolRevision } from "@/lib/api/tools";
@@ -87,30 +104,26 @@ const MEMORY_STATUS_LABEL: Record<
   INVALIDATED: "agents.memory.status.INVALIDATED",
 };
 
-/**
- * A blank runtime field is an absent field, never a null: the backend
- * merges the submitted map over its defaults, so an explicit null would
- * overwrite a default and then fail validation.
- *
- * Every runtime limit and every context-budget value must be a positive
- * integer — zero is rejected by the backend, so it is not sent.
- */
-function positiveIntegerOrUndefined(value: string): number | undefined {
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  const parsed = Number(trimmed);
-  return Number.isInteger(parsed) && parsed >= 1 ? parsed : undefined;
-}
-
-/** Blank is valid; anything else must parse as a positive integer. */
-function validRuntimeValue(value: string): boolean {
-  const trimmed = value.trim();
-  if (!trimmed) return true;
-  return positiveIntegerOrUndefined(trimmed) !== undefined;
-}
-
 /** Shown wherever the resolved spec does not carry a field. */
 const MISSING = "—";
+
+const MEMORY_SELECTION_COPY = {
+  "zh-CN": {
+    label: "长时记忆召回策略",
+    legacy: "默认原策略",
+    lexical: "词面过滤实验策略",
+    hint: "词面过滤只按词面重叠召回，可能漏掉同义词或跨语言表达；这只是一个实验候选，不代表语义质量已验证。",
+    requiresLongTerm: "显式选择词面过滤策略时，必须同时启用长时记忆。",
+  },
+  "en-US": {
+    label: "Long-term memory retrieval strategy",
+    legacy: "Default legacy strategy",
+    lexical: "Lexical-overlap experiment",
+    hint: "Lexical filtering uses word overlap only. It can miss synonyms and cross-language wording; this is an experiment candidate, not evidence that semantic quality has been validated.",
+    requiresLongTerm:
+      "The explicit lexical-overlap strategy requires long-term memory to be enabled.",
+  },
+} as const;
 
 /**
  * The publish preview is read out of the server's resolved spec and
@@ -133,12 +146,13 @@ function specCount(value: unknown): number | null {
 }
 
 export default function AgentDetailClient({ agentId }: { agentId: string }) {
-  const { t, formatDateTime } = useI18n();
+  const { t, formatDateTime, locale } = useI18n();
   const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
-  // null = unknown access: fail open (the backend still enforces everything).
-  const cannotPublish = permissions !== null && !permissions.includes("agent_edit");
+  // Unknown or revoked access stays read-only while membership is refreshed.
+  const cannotPublish = permissions?.includes("agent_edit") !== true;
 
   const scope = `${workspaceId}:${agentId}`;
+  const mutationScope = `${scope}:${cannotPublish ? "read-only" : "edit"}`;
   const [tab, setTab] = useState<Tab>("general");
   const [notice, setNotice] = useState<string | null>(null);
   /**
@@ -224,18 +238,18 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     { enabled: tab === "memories" },
   );
 
-  const agentMutation = useWorkspaceMutation(`agent:${scope}`);
-  const memoryMutation = useWorkspaceMutation(`agent-memories:${scope}`);
-  const knowledgeMutation = useWorkspaceMutation(`agent-knowledge-bindings:${scope}`);
-  const toolMutation = useWorkspaceMutation(`agent-tool-bindings:${scope}`);
-  const preflightMutation = useWorkspaceMutation(`agent-preflight:${scope}`);
-  const publishMutation = useWorkspaceMutation(`agent-publish:${scope}`);
+  const agentMutation = useWorkspaceMutation(`agent:${mutationScope}`);
+  const memoryMutation = useWorkspaceMutation(`agent-memories:${mutationScope}`);
+  const knowledgeMutation = useWorkspaceMutation(`agent-knowledge-bindings:${mutationScope}`);
+  const toolMutation = useWorkspaceMutation(`agent-tool-bindings:${mutationScope}`);
+  const preflightMutation = useWorkspaceMutation(`agent-preflight:${mutationScope}`);
+  const publishMutation = useWorkspaceMutation(`agent-publish:${mutationScope}`);
 
   // ---- Editable drafts, hydrated from the server projection ----
   const [general, setGeneral] = useState({ name: "", description: "", system_prompt: "" });
   const [model, setModel] = useState({ model_profile_id: "", max_attempts: "" });
   const [bindingMode, setBindingMode] = useState<KnowledgeBindingMode>("LATEST");
-  const [runtime, setRuntime] = useState({
+  const [runtime, setRuntime] = useState<RuntimeLimitDraft>({
     max_steps: "",
     max_tool_calls: "",
     max_identical_calls: "",
@@ -246,7 +260,10 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   });
   // Booleans, so they live outside `runtime`: that state is all numeric
   // strings and is validated as such.
-  const [memory, setMemory] = useState({ thread_history_search: false, long_term_memory: false });
+  const [memory, setMemory] = useState<MemoryDraft>(defaultMemoryDraft);
+  const [contextPolicy, setContextPolicy] = useState<ContextPolicyDraft>(
+    defaultContextPolicyDraft,
+  );
   const [knowledgeDraft, setKnowledgeDraft] = useState<AgentKnowledgeBinding[]>([]);
   const [toolDraft, setToolDraft] = useState<AgentToolBinding[]>([]);
 
@@ -269,7 +286,8 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       max_retrieval_tokens: "",
       max_tool_result_tokens: "",
     });
-    setMemory({ thread_history_search: false, long_term_memory: false });
+    setMemory(defaultMemoryDraft());
+    setContextPolicy(defaultContextPolicyDraft());
     setKnowledgeDraft([]);
     setToolDraft([]);
     setMemoryStatus("");
@@ -312,11 +330,8 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     });
     // Absent means off, which is what every agent published before memory
     // existed meant.
-    const storedMemory = runtimeConfig.memory ?? {};
-    setMemory({
-      thread_history_search: storedMemory.thread_history_search === true,
-      long_term_memory: storedMemory.long_term_memory === true,
-    });
+    setMemory(memoryDraftFromConfig(runtimeConfig.memory));
+    setContextPolicy(contextPolicyDraftFromPolicy(runtimeConfig.context_policy));
   }, [loadedAgent]);
 
   const loadedKnowledgeBindings = knowledgeBindings.data;
@@ -350,7 +365,33 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   // as there is something to clear, not a debounce later.
   const memoryFiltered =
     memoryStatus !== "" || memoryKind !== "" || memoryQueryInput.trim() !== "";
-  const runtimeValuesValid = Object.values(runtime).every((value) => validRuntimeValue(value));
+  const runtimeValuesValid = invalidRuntimeLimitFields(runtime).length === 0;
+  const memoryDraftValidation = validateMemoryDraft(memory);
+  const memorySelectionCopy =
+    locale === "zh-CN"
+      ? MEMORY_SELECTION_COPY["zh-CN"]
+      : MEMORY_SELECTION_COPY["en-US"];
+  const contextPolicyValidation = validateContextPolicyDraft(contextPolicy);
+  const currentRuntimeConfig = loadedAgent?.runtime_config ?? {};
+  const hasExistingContextPolicy = currentRuntimeConfig.context_policy != null;
+  const contextPolicyClearBlocked =
+    hasExistingContextPolicy &&
+    hasContextPolicyDependents(currentRuntimeConfig) &&
+    !contextPolicy.enabled;
+  const latestPublishedContext = versionList.reduce<{
+    version: AgentVersion;
+    policy: FrozenContextPolicyProjection;
+  } | null>((latest, version) => {
+    const policy = extractFrozenContextPolicy(version.resolved_spec);
+    if (!policy) return latest;
+    if (!latest || version.version_number > latest.version.version_number) {
+      return { version, policy };
+    }
+    return latest;
+  }, null);
+  const preflightContextPolicy = preflight
+    ? extractFrozenContextPolicy(preflight.resolved_spec)
+    : null;
 
   // Preview figures come from the server's resolved spec, never from the
   // drafts above; a field the spec does not carry is shown as missing.
@@ -377,6 +418,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
   async function saveGeneral(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (cannotPublish) return;
     setNotice(null);
     invalidatePreflight();
     const result = await agentMutation.run((auth) =>
@@ -394,6 +436,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
   async function saveModel(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (cannotPublish) return;
     setNotice(null);
     invalidatePreflight();
     const result = await agentMutation.run((auth) =>
@@ -410,44 +453,35 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
 
   async function saveRuntime(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (cannotPublish) return;
     setNotice(null);
-    invalidatePreflight();
-    const runtimeConfig: RuntimeConfig = {};
-    const maxSteps = positiveIntegerOrUndefined(runtime.max_steps);
-    const maxToolCalls = positiveIntegerOrUndefined(runtime.max_tool_calls);
-    const maxIdenticalCalls = positiveIntegerOrUndefined(runtime.max_identical_calls);
-    const maxParallelReads = positiveIntegerOrUndefined(runtime.max_parallel_reads);
-    if (maxSteps !== undefined) runtimeConfig.max_steps = maxSteps;
-    if (maxToolCalls !== undefined) runtimeConfig.max_tool_calls = maxToolCalls;
-    if (maxIdenticalCalls !== undefined) runtimeConfig.max_identical_calls = maxIdenticalCalls;
-    if (maxParallelReads !== undefined) runtimeConfig.max_parallel_reads = maxParallelReads;
-
-    const budget: ContextBudget = {};
-    const reservedOutput = positiveIntegerOrUndefined(runtime.reserved_output_tokens);
-    const maxRetrieval = positiveIntegerOrUndefined(runtime.max_retrieval_tokens);
-    const maxToolResult = positiveIntegerOrUndefined(runtime.max_tool_result_tokens);
-    if (reservedOutput !== undefined) budget.reserved_output_tokens = reservedOutput;
-    if (maxRetrieval !== undefined) budget.max_retrieval_tokens = maxRetrieval;
-    if (maxToolResult !== undefined) budget.max_tool_result_tokens = maxToolResult;
-    // An empty budget is not sent at all, and neither is an empty runtime.
-    if (Object.keys(budget).length > 0) runtimeConfig.context_budget = budget;
-    const memoryRequested = memory.thread_history_search || memory.long_term_memory;
-    if (Object.keys(runtimeConfig).length === 0 && !memoryRequested) {
-      setNotice(t("agents.runtimeEmpty"));
+    if (
+      !runtimeValuesValid ||
+      !memoryDraftValidation.valid ||
+      !contextPolicyValidation.valid ||
+      contextPolicyClearBlocked
+    ) {
       return;
     }
-    // Always sent, never omitted: this form replaces the runtime config
-    // wholesale, so omitting the block is how a switch gets turned off.
-    runtimeConfig.memory = { ...memory };
+    invalidatePreflight();
+    const runtimeConfig: RuntimeConfig = mergeRuntimeConfigDraft({
+      currentRuntime: currentRuntimeConfig,
+      runtimeDraft: runtime,
+      memoryDraft: memory,
+      contextDraft: contextPolicy,
+    });
 
     const result = await agentMutation.run((auth) => patchAgent(auth, agentId, { runtime_config: runtimeConfig }));
     if (result) {
+      setContextPolicy(contextPolicyDraftFromPolicy(result.runtime_config.context_policy));
+      setMemory(memoryDraftFromConfig(result.runtime_config.memory));
       setNotice(t("agents.saved"));
       agent.reload();
     }
   }
 
   async function saveKnowledgeBindings() {
+    if (cannotPublish) return;
     setNotice(null);
     invalidatePreflight();
     const draft = knowledgeDraft.filter((binding) => binding.knowledge_base_id);
@@ -466,6 +500,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   }
 
   async function saveToolBindings() {
+    if (cannotPublish) return;
     setNotice(null);
     invalidatePreflight();
     const draft = toolDraft.filter((binding) => binding.tool_id);
@@ -482,6 +517,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
    * a failed check reports the backend's error code and stops here.
    */
   async function startPreflight() {
+    if (cannotPublish) return;
     setNotice(null);
     setPublishResult(null);
     setPreflight(null);
@@ -497,6 +533,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
    * by the backend when an identical memory has since become active.
    */
   async function overrideMemory(memoryId: string, next: "INVALIDATE" | "REACTIVATE") {
+    if (cannotPublish) return;
     setNotice(null);
     const result = await memoryMutation.run((auth) =>
       next === "INVALIDATE"
@@ -507,6 +544,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   }
 
   async function runPublish() {
+    if (cannotPublish) return;
     setNotice(null);
     // Publish goes through the publish endpoint, always. The preflight
     // spec is a preview: it is never turned into a version client-side.
@@ -642,7 +680,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               type="button"
               className="button button-primary"
               onClick={() => void runPublish()}
-              disabled={publishMutation.pending}
+              disabled={publishMutation.pending || cannotPublish}
             >
               {t("agents.publishNow")}
             </button>
@@ -724,7 +762,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               </div>
             </dl>
             <div className="form-actions">
-              <button type="submit" className="button button-primary" disabled={agentMutation.pending}>
+              <button type="submit" className="button button-primary" disabled={agentMutation.pending || cannotPublish}>
                 {t("common.save")}
               </button>
             </div>
@@ -761,7 +799,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               <button
                 type="submit"
                 className="button button-primary"
-                disabled={agentMutation.pending || !model.model_profile_id}
+                disabled={agentMutation.pending || cannotPublish || !model.model_profile_id}
               >
                 {t("common.save")}
               </button>
@@ -846,11 +884,18 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               type="button"
               className="button button-primary"
               onClick={() => void saveKnowledgeBindings()}
-              disabled={knowledgeMutation.pending || agentMutation.pending}
+              disabled={knowledgeMutation.pending || agentMutation.pending || cannotPublish}
             >
               {t("agents.saveBindings")}
             </button>
           </div>
+          <WikiBindingEditor
+            agentId={agentId}
+            bases={baseList}
+            versions={versionList}
+            canEdit={!cannotPublish}
+            onChanged={invalidatePreflight}
+          />
         </Panel>
       )}
 
@@ -913,7 +958,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               type="button"
               className="button button-primary"
               onClick={() => void saveToolBindings()}
-              disabled={toolMutation.pending}
+              disabled={toolMutation.pending || cannotPublish}
             >
               {t("agents.saveBindings")}
             </button>
@@ -1032,7 +1077,46 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                 {t("agents.memoryLongTerm")}
               </label>
             </div>
+            <label>
+              {memorySelectionCopy.label}
+              <Select
+                value={memory.selection_policy}
+                onChange={(value) =>
+                  setMemory((current) => ({
+                    ...current,
+                    selection_policy:
+                      value === "lexical_overlap_v1" ? value : "",
+                  }))
+                }
+                disabled={agentMutation.pending || cannotPublish}
+                options={[
+                  { value: "", label: memorySelectionCopy.legacy },
+                  {
+                    value: "lexical_overlap_v1",
+                    label: memorySelectionCopy.lexical,
+                  },
+                ]}
+              />
+              <span className="state-hint">{memorySelectionCopy.hint}</span>
+            </label>
+            {!memoryDraftValidation.valid && (
+              <p className="inline-error" role="alert">
+                {memorySelectionCopy.requiresLongTerm}
+              </p>
+            )}
             <p className="state-hint">{t("agents.memoryThreadSearchHint")}</p>
+            <ContextPolicyEditor
+              draft={contextPolicy}
+              validation={contextPolicyValidation}
+              disabled={agentMutation.pending || cannotPublish}
+              hasExistingPolicy={hasExistingContextPolicy}
+              hasDependentPolicies={hasContextPolicyDependents(currentRuntimeConfig)}
+              runtimeHasSummaryPolicy={currentRuntimeConfig.summary_policy != null}
+              publishedPolicy={latestPublishedContext?.policy ?? null}
+              publishedVersionNumber={latestPublishedContext?.version.version_number ?? null}
+              preflightPolicy={preflightContextPolicy}
+              onChange={setContextPolicy}
+            />
             {!runtimeValuesValid && (
               <p className="state-hint">{t("agents.runtimeInvalid")}</p>
             )}
@@ -1040,7 +1124,14 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               <button
                 type="submit"
                 className="button button-primary"
-                disabled={agentMutation.pending || !runtimeValuesValid}
+                disabled={
+                  agentMutation.pending ||
+                  cannotPublish ||
+                  !runtimeValuesValid ||
+                  !memoryDraftValidation.valid ||
+                  !contextPolicyValidation.valid ||
+                  contextPolicyClearBlocked
+                }
               >
                 {t("common.save")}
               </button>
@@ -1186,7 +1277,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                             <button
                               type="button"
                               className="button button-ghost"
-                              disabled={memoryMutation.pending}
+                              disabled={memoryMutation.pending || cannotPublish}
                               onClick={() => overrideMemory(item.id, "REACTIVATE")}
                             >
                               {t("agents.memory.reactivate")}
@@ -1195,7 +1286,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                             <button
                               type="button"
                               className="button button-ghost"
-                              disabled={memoryMutation.pending || item.status === "SUPERSEDED"}
+                              disabled={memoryMutation.pending || cannotPublish || item.status === "SUPERSEDED"}
                               onClick={() => overrideMemory(item.id, "INVALIDATE")}
                             >
                               {t("agents.memory.invalidate")}

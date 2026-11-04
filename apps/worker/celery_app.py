@@ -36,6 +36,7 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
         timezone="UTC",
         beat_schedule={
             "reconcile-wiki": {"task": "agenthub.reconcile_wiki", "schedule": 60.0},
+            "reconcile-memories": {"task": "agenthub.reconcile_memories", "schedule": 60.0},
             "reconcile-knowledge-ingestion": {
                 "task": "agenthub.reconcile_knowledge_ingestion",
                 "schedule": 60.0,

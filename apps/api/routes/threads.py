@@ -7,7 +7,10 @@ from fastapi import APIRouter, Depends, Query, Request, Response, status
 from fastapi.responses import StreamingResponse
 
 from apps.api.agent_runtime_dependencies import get_production_agent_run_service
-from apps.api.knowledge_dependencies import get_agent_run_workspace_context
+from apps.api.knowledge_dependencies import (
+    get_agent_run_queue,
+    get_agent_run_workspace_context,
+)
 from apps.api.schemas.threads import (
     ThreadCreateRequest,
     ThreadPatchRequest,
@@ -17,7 +20,9 @@ from apps.api.schemas.threads import (
     ThreadTurnSubmitResponse,
 )
 from packages.agent_runtime.events import AgentEvent
+from packages.agent_runtime.queue import AgentRunQueue
 from packages.agent_runtime.sse import sse_frames
+from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.threads.service import PreparedTurnRun, ThreadService
 
@@ -25,6 +30,7 @@ PREFIX = "/api/v1/workspaces/{workspace_id}"
 
 router = APIRouter(prefix=PREFIX, tags=["threads"])
 context_dependency = Depends(get_agent_run_workspace_context)
+agent_run_queue_dependency = Depends(get_agent_run_queue)
 agent_id_query = Query(default=None)
 # How each application page finds its own threads. Omitted means every thread
 # in the workspace, which is what the plain Agents view wants.
@@ -183,6 +189,7 @@ async def stream_turn(
     payload: ThreadTurnCreateRequest,
     request: Request,
     context: WorkspaceExecutionContext = context_dependency,
+    queue: AgentRunQueue = agent_run_queue_dependency,
 ) -> StreamingResponse:
     """Submit a turn and stream the run that answers it.
 
@@ -211,6 +218,25 @@ async def stream_turn(
     # RUNNING Run with no owner, the two safe states for dispatch. Every other
     # existing Run is followed so an owner is never bypassed.
     if _stream_mode(prepared_run) == "attach":
+        stream = run_service.attach_stream(context, run_id=prepared_run.run_id)
+    elif request.app.state.settings.run_execution_in_worker:
+        try:
+            await queue.enqueue(
+                workspace_id=UUID(context.workspace_id),
+                run_id=prepared_run.run_id,
+                request_id=context.request_id,
+            )
+        except AgentHubError:
+            raise
+        except Exception as error:
+            # An enqueue acknowledgement may be lost after the broker accepted
+            # the message. Keep the unowned RUNNING row dispatchable and let the
+            # worker's lease resolve either possible delivery.
+            raise AgentHubError(
+                "RUN_DISPATCH_UNAVAILABLE",
+                "The run could not be queued.",
+                503,
+            ) from error
         stream = run_service.attach_stream(context, run_id=prepared_run.run_id)
     else:
         stream = run_service.stream(

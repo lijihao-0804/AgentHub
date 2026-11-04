@@ -10,8 +10,10 @@ from uuid import UUID, uuid4
 
 import pytest
 import pytest_asyncio
+from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
+from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -295,7 +297,12 @@ async def test_0051_guards_retained_episode_and_rejects_nested_downgrade(
     try:
         with sync_engine.connect() as connection:
             version_before = connection.scalar(text("SELECT version_num FROM alembic_version"))
-            assert version_before == "0051_interactive_lifecycle"
+            scripts = ScriptDirectory.from_config(Config("alembic.ini"))
+            assert version_before == scripts.get_current_head()
+            assert any(
+                revision.revision == "0051_interactive_lifecycle"
+                for revision in scripts.iterate_revisions(version_before, "base")
+            )
             monkeypatch.setattr(
                 migration,
                 "op",

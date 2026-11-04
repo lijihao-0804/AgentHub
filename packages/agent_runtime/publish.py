@@ -44,6 +44,7 @@ from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievalStrategy
 from packages.knowledge.snapshots import KnowledgeSnapshotService, ResolvedKnowledgeSnapshot
 from packages.mcp.models import McpConnection
+from packages.memory.selection_policy import SUPPORTED_MEMORY_SELECTION_POLICIES
 from packages.model_gateway.adapters.local_context_catalog import (
     apply_local_context_catalog,
     load_local_context_catalog,
@@ -111,7 +112,14 @@ _RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {
     "summary_policy",
 }
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
-_MEMORY_KEYS = frozenset((*DEFAULT_MEMORY_CONFIG, "max_memory_tokens", "max_memory_tokens_source"))
+_MEMORY_KEYS = frozenset(
+    (
+        *DEFAULT_MEMORY_CONFIG,
+        "max_memory_tokens",
+        "max_memory_tokens_source",
+        "selection_policy",
+    )
+)
 _CONFIGURATION_SOURCES = frozenset({"UNSET", "DEFAULT", "CUSTOM"})
 _SUMMARY_POLICY_KEYS = frozenset(
     {
@@ -1256,12 +1264,22 @@ def _validate_runtime_config(
         raise AgentHubError(
             "INVALID_AGENT_CONFIG", "A memory budget requires long-term memory.", 422
         )
+    selection_policy = memory.get("selection_policy")
+    if selection_policy is not None and (
+        not memory["long_term_memory"]
+        or not isinstance(selection_policy, str)
+        or selection_policy not in SUPPORTED_MEMORY_SELECTION_POLICIES
+    ):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The memory selection policy is invalid.", 422)
     memory.pop("max_memory_tokens", None)
     memory.pop("max_memory_tokens_source", None)
+    memory.pop("selection_policy", None)
     if memory["long_term_memory"]:
         memory["max_memory_tokens_source"] = memory_source
         if memory_tokens is not None:
             memory["max_memory_tokens"] = memory_tokens
+        if selection_policy is not None:
+            memory["selection_policy"] = selection_policy
     # All-false is the same decision as never having had the key, so it is
     # written the same way: absent. Projecting a block of falses would change
     # the canonical JSON of every republished draft and therefore its hash,
