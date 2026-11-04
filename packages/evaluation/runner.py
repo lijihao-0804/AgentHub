@@ -1033,6 +1033,7 @@ class ExperimentRunner:
                 EvaluationExperimentRun.lease_owner == owner,
                 EvaluationExperimentRun.lease_generation == generation,
                 EvaluationExperimentRun.status == EvaluationExperimentRunStatus.RUNNING,
+                EvaluationExperimentRun.lease_expires_at > _now(),
             )
             .join(
                 EvaluationExperimentRun,
@@ -1064,7 +1065,7 @@ class ExperimentRunner:
                 EvaluationExperimentVariant.ordinal,
                 EvaluationExperimentCaseResult.repetition_index,
             )
-            .with_for_update(skip_locked=True)
+            .with_for_update(of=EvaluationExperimentCaseResult, skip_locked=True)
         )
         if row is None:
             await session.rollback()
@@ -1333,6 +1334,8 @@ class ExperimentRunner:
                         }
                         or run.lease_owner != owner
                         or run.lease_generation != generation
+                        or run.lease_expires_at is None
+                        or run.lease_expires_at <= _now()
                     ):
                         span_status, span_failure = "lease_lost", "EVALUATION_LEASE_LOST"
                         return
@@ -1349,10 +1352,16 @@ class ExperimentRunner:
                         session, run_id=run_id, owner=owner, generation=generation
                     )
                     if case is None:
-                        await self._finish_run(
+                        finished = await self._finish_run(
                             session, run_id=run_id, owner=owner, generation=generation
                         )
-                        return
+                        if finished:
+                            return
+                        # A concurrent delivery may briefly hold a pending case.
+                        # Keep the current lease alive rather than interpreting
+                        # SKIP LOCKED as proof that all work has completed.
+                        await asyncio.sleep(0.05)
+                        continue
                     variant = await session.scalar(
                         select(EvaluationExperimentVariant).where(
                             EvaluationExperimentVariant.workspace_id == run.workspace_id,
@@ -1774,10 +1783,17 @@ class ExperimentRunner:
         run_id: UUID,
         owner: str,
         generation: int | None = None,
-    ) -> None:
+    ) -> bool:
         predicates = [
             EvaluationExperimentRun.id == run_id,
             EvaluationExperimentRun.lease_owner == owner,
+            EvaluationExperimentRun.lease_expires_at > _now(),
+            EvaluationExperimentRun.status.in_(
+                (
+                    EvaluationExperimentRunStatus.RUNNING,
+                    EvaluationExperimentRunStatus.CANCEL_REQUESTED,
+                )
+            ),
         ]
         if generation is not None:
             predicates.append(EvaluationExperimentRun.lease_generation == generation)
@@ -1785,11 +1801,13 @@ class ExperimentRunner:
             select(EvaluationExperimentRun).where(*predicates).with_for_update()
         )
         if run is None:
-            return
+            return False
         counts = await self.progress(session, run_id=run_id)
-        if counts.running:
+        if counts.running or (
+            counts.pending and run.status != EvaluationExperimentRunStatus.CANCEL_REQUESTED
+        ):
             await session.rollback()
-            return
+            return False
         if run.status == EvaluationExperimentRunStatus.CANCEL_REQUESTED:
             await session.execute(
                 update(EvaluationExperimentCaseResult)
@@ -1809,6 +1827,7 @@ class ExperimentRunner:
         run.lease_expires_at = None
         run.heartbeat_at = None
         await session.commit()
+        return True
 
 
 async def reconcile_experiment_runs(

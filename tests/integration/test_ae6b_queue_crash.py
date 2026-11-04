@@ -80,11 +80,44 @@ async def test_worker_crash_recovery(db_factory, tmp_path, point, expected_calls
         assert len(before_results) == 1
         assert before_results[0]["status"] == "RUNNING"
         case_id = UUID(before_results[0]["id"])
+        assert injected["case_id"] == str(case_id)
+        assert injected["workspace_id"] == str(agent.workspace_id)
+        assert injected["run_id"] == started["id"]
+        assert injected["pid"] == death["worker_pid"]
         async with db_factory() as session:
             persisted = await session.get(InteractiveEpisode, case_id)
             assert persisted is not None
             customer_id = persisted.customer_id
             assert await session.get(Customer, customer_id) is not None
+            before_turns = list(
+                await session.scalars(
+                    select(InteractiveEpisodeTurn)
+                    .where(InteractiveEpisodeTurn.case_id == case_id)
+                    .order_by(InteractiveEpisodeTurn.turn_index)
+                )
+            )
+            expected_turn_count = (
+                0 if point == "fixture_committed" else (1 if point == "first_run_terminal" else 2)
+            )
+            assert len(before_turns) == expected_turn_count
+            before_ticket_count = await session.scalar(
+                select(func.count())
+                .select_from(Ticket)
+                .where(Ticket.workspace_id == agent.workspace_id)
+            )
+            assert before_ticket_count == (
+                1 if point in {"write_response_lost", "observation_retained"} else 0
+            )
+            if point == "fixture_committed":
+                assert persisted.prepare_stage == "FIXTURE_READY"
+                assert persisted.thread_id is None
+            if point in {"first_run_terminal", "write_response_lost"}:
+                terminal_run = await session.get(AgentRun, before_turns[-1].agent_run_id)
+                assert injected["agent_run_id"] == str(terminal_run.id)
+                assert terminal_run.status == (
+                    "SUCCEEDED" if point == "first_run_terminal" else "NEEDS_ATTENTION"
+                )
+                assert before_turns[-1].dispatch_status == "DISPATCH_INTENT"
             if point == "observation_retained":
                 assert persisted.assertion["passed"] is True
                 assert persisted.assertion["observed"]["ticket_count"] == 1
@@ -113,6 +146,11 @@ async def test_worker_crash_recovery(db_factory, tmp_path, point, expected_calls
                 .select_from(Ticket)
                 .where(Ticket.workspace_id == agent.workspace_id)
             )
+            approvals = list(
+                await session.scalars(
+                    select(Approval).where(Approval.workspace_id == agent.workspace_id)
+                )
+            )
             if point == "write_response_lost":
                 assert result["failure_code"] == "EVALUATION_INTERACTIVE_RECOVERY_REQUIRED"
                 assert episode.cleanup_status == "CLEANUP_BLOCKED"
@@ -126,11 +164,6 @@ async def test_worker_crash_recovery(db_factory, tmp_path, point, expected_calls
                     )
                 )
                 assert [run for run in runs if run.status == "NEEDS_ATTENTION"]
-                approvals = list(
-                    await session.scalars(
-                        select(Approval).where(Approval.workspace_id == agent.workspace_id)
-                    )
-                )
                 assert len(approvals) == 1
                 assert approvals[0].decision_status == "APPROVED"
                 assert approvals[0].execution_status == "UNKNOWN_OUTCOME"
@@ -150,11 +183,29 @@ async def test_worker_crash_recovery(db_factory, tmp_path, point, expected_calls
                 "workspace_id": str(agent.workspace_id),
                 "run_id": started["id"],
                 "worker_exit_code": death["exit_code"],
+                "worker_pid": death["worker_pid"],
+                "worker_parent_pid": death["worker_parent_pid"],
+                "launched_process_pid": death["pid"],
                 "provider_calls_before": len(before),
                 "provider_calls_after": len(audit_records(audit)),
                 "case_status": result["status"],
+                "instance_id": str(episode.instance_id),
+                "agent_run_ids": [str(turn.agent_run_id) for turn in turns],
+                "actions": [
+                    {
+                        "approval_id": str(approval.id),
+                        "logical_action_id": approval.logical_action_id,
+                        "decision_status": approval.decision_status,
+                        "execution_status": approval.execution_status,
+                    }
+                    for approval in approvals
+                ],
+                "turn_count": len(turns),
                 "cleanup_status": episode.cleanup_status,
                 "assertion_source": episode.assertion_source,
+                "assertion_hash": episode.assertion_hash,
+                "observation_hash": episode.observation_hash,
+                "ticket_count_before": before_ticket_count,
                 "ticket_count_after": count,
                 "evidence_kind": "DETERMINISTIC_CONFORMANCE",
             }

@@ -71,6 +71,9 @@ async def test_queue_refusal_denied_and_limits(
             assert result["output_tokens"] is None
             assert result["total_tokens"] is None
             assert result["cost_amount"] is None
+        if marker == "REFUSE":
+            assert result["observation"]["proposed_tool_sequence"] == []
+            assert result["observation"]["executed_tool_sequence"] == []
         if stop is not None:
             metrics = await api.post(f"/experiment-runs/{started['id']}/metrics")
             variant = next(iter(metrics["variants"].values()))

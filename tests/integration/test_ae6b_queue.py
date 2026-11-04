@@ -1,10 +1,13 @@
 """Formal HTTP routes, Redis and owned Celery subprocess acceptance."""
 
+import json
 from uuid import UUID
 
 import pytest
 from sqlalchemy import func, select
 
+from packages.agent_runtime.models import AgentRun
+from packages.approvals.models import Approval
 from packages.evaluation.models import InteractiveEpisode, InteractiveEpisodeTurn
 from packages.tools.models import Customer, Ticket
 from tests.integration.test_m7c_experiment_runner import db_factory, migrated_database
@@ -70,6 +73,27 @@ async def test_http_queue_clarify_write_and_cleanup(db_factory, tmp_path):
             assert len(turns) == 2
             assert len({turn.input_hash for turn in turns}) == 2
             assert len({turn.agent_run_id for turn in turns}) == 2
+            agent_runs = list(
+                await session.scalars(
+                    select(AgentRun).where(AgentRun.id.in_([turn.agent_run_id for turn in turns]))
+                )
+            )
+            assert len(agent_runs) == 2
+            assert all(
+                run.agent_version_id == agent.agent_version_id and run.status == "SUCCEEDED"
+                for run in agent_runs
+            )
+            approval = (
+                await session.scalars(
+                    select(Approval).where(Approval.workspace_id == agent.workspace_id)
+                )
+            ).one()
+            assert approval.requested_by == agent.owner_id
+            assert approval.decided_by == agent.approver_id
+            assert approval.requested_by != approval.decided_by
+            assert approval.decision_status == "APPROVED"
+            assert approval.execution_status == "SUCCEEDED"
+            assert approval.execution_attempt_count == 1
             for model in (Customer, Ticket):
                 assert (
                     await session.scalar(
@@ -93,6 +117,30 @@ async def test_http_queue_clarify_write_and_cleanup(db_factory, tmp_path):
         assert records[1]["user_fixture_ref_present"]
         assert all(not row["expected_label_present"] for row in records)
         assert all(not row["fixture_ref_outside_user_before_disclosure"] for row in records)
+        (tmp_path / "acceptance.json").write_text(
+            json.dumps(
+                {
+                    "scenario": "clarify_approved_write",
+                    "case_id": result["id"],
+                    "run_id": started["id"],
+                    "workspace_id": str(agent.workspace_id),
+                    "agent_version_id": str(agent.agent_version_id),
+                    "agent_run_ids": [str(turn.agent_run_id) for turn in turns],
+                    "approval_id": str(approval.id),
+                    "logical_action_id": approval.logical_action_id,
+                    "distinct_approval_actor": True,
+                    "execution_attempt_count": 1,
+                    "provider_calls": len(records),
+                    "ticket_count_asserted": 1,
+                    "cleanup_status": episode.cleanup_status,
+                    "metrics_hash": metrics["metrics_hash"],
+                    "task_success": variant["task_success"]["value"],
+                    "evidence_kind": "DETERMINISTIC_CONFORMANCE",
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
     finally:
         await worker.stop()
         await api.close()

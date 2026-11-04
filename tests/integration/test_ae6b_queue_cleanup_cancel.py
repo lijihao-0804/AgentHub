@@ -134,6 +134,9 @@ async def test_cleanup_failure_retries_after_terminal_case_without_replaying_pro
             assert result["observation"]["business_outcome"]["passed"] is True
             assert result["observation"]["business_outcome"]["observed"]["ticket_count"] == 1
             assert result["observation"]["environment_lifecycle_status"] == "TEARDOWN_FAILED"
+            partial_metrics = await api.post(f"/experiment-runs/{started['id']}/metrics")
+            partial_variant = next(iter(partial_metrics["variants"].values()))
+            assert partial_variant["task_success"]["value"] == 0
 
             case_id = UUID(result["id"])
             async with db_factory() as session:

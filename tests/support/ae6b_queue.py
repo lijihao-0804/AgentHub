@@ -38,6 +38,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PYTHON = Path(sys.executable)
 MODEL = "deepseek-v4.1-flash"
 QUEUE_REDIS_URL_ENV = "AGENTHUB_AE6B_REDIS_URL"
+WORKER_IDENTITY_PATH_ENV = "AGENTHUB_AE6B_WORKER_IDENTITY_PATH"
 
 
 @lru_cache(maxsize=1)
@@ -242,10 +243,13 @@ class ApiEvaluation:
             expected=201,
         )
         frozen = await self.post(f"/experiments/{experiment['id']}/finalize")
+        assert frozen["evidence_level"] == "DETERMINISTIC_CONFORMANCE", frozen
         return frozen
 
     async def start(self, experiment_id):
-        return await self.post(f"/experiments/{experiment_id}/runs", expected=201)
+        run = await self.post(f"/experiments/{experiment_id}/runs", expected=201)
+        assert run["evidence_level"] == "DETERMINISTIC_CONFORMANCE", run
+        return run
 
     async def results(self, run_id):
         response = await self.client.get(self.prefix + f"/experiment-runs/{run_id}/case-results")
@@ -284,6 +288,7 @@ class QueueWorker:
         extra_env=None,
     ):
         self.directory = directory
+        self.identity_path = self.directory / "worker-identity.json"
         self.hostname = "ae6b-" + uuid4().hex + "@test"
         if not settings.credential_master_key:
             raise RuntimeError(
@@ -302,6 +307,7 @@ class QueueWorker:
                     [str(value) for value in sandbox_workspaces]
                 ),
                 "AGENTHUB_AE6B_AUDIT_PATH": str(audit_path),
+                WORKER_IDENTITY_PATH_ENV: str(self.identity_path.resolve(strict=False)),
                 "AGENTHUB_EVALUATION_RUNNER_LEASE_SECONDS": "5",
                 "AGENTHUB_EVALUATION_RUNNER_HEARTBEAT_SECONDS": "1",
             }
@@ -367,6 +373,23 @@ class QueueWorker:
         await self.supervisor.wait(timeout=timeout)
         result = self.status()
         assert result["exit_code"] == expected_code, result
+        assert self.identity_path.is_file(), result
+        identity = json.loads(self.identity_path.read_text(encoding="utf-8"))
+        assert identity["hostname"] == self.hostname, identity
+        identity_cwd = Path(identity["cwd"]).resolve(strict=False)
+        expected_cwd = ROOT.resolve(strict=False)
+        try:
+            same_cwd = identity_cwd.samefile(expected_cwd)
+        except OSError:
+            same_cwd = os.path.normcase(str(identity_cwd)) == os.path.normcase(str(expected_cwd))
+        assert same_cwd, identity
+        worker_pid = identity["pid"]
+        worker_parent_pid = identity["parent_pid"]
+        assert isinstance(worker_pid, int) and worker_pid > 0, identity
+        assert isinstance(worker_parent_pid, int) and worker_parent_pid > 0, identity
+        assert result["pid"] in {worker_pid, worker_parent_pid}, result
+        result["worker_pid"] = worker_pid
+        result["worker_parent_pid"] = worker_parent_pid
         return result
 
     async def stop(self, *, graceful=True):
