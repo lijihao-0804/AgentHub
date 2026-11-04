@@ -12,6 +12,8 @@ jobs:
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_test
       AGENTHUB_TEST_REDIS_URL: redis://localhost:6379/0
       AGENTHUB_REDIS_URL: redis://localhost:6379/0
+      # Real AE-6b workers must not compete with the shared integration worker.
+      AGENTHUB_AE6B_REDIS_URL: redis://localhost:6379/3
       AGENTHUB_TEST_QDRANT_URL: http://localhost:6333
       AGENTHUB_QDRANT_URL: http://localhost:6333
       AGENTHUB_TESTING: "true"
