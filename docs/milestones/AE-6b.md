@@ -1,8 +1,8 @@
 # AE-6b 真实交互环境与自适应用户模拟器
 
-> **2026-11-04 集成补充（IN PROGRESS）**：下文 PASS 限于历史受控 driver
-> 注入实验，不证明正常 API/Celery 入口、多轮持久恢复或进程崩溃清理已经通过。
-> Integration Closure 的执行记录见 [AE-6b-integration-execution.md](AE-6b-integration-execution.md)。
+> **2026-11-04 Integration Closure：PASS**。正常 API/Celery、持久多轮身份、
+> 进程故障恢复及完整回归见 [收口验收报告](AE-6b-integration-closure.md)。
+> 下文保留历史受控真实模型实验及其当时的 driver/迁移边界；新验收使用确定性 provider。
 > 两份历史 JSON 仍对应不同 Run，保留不改写；本轮没有新增付费模型调用。
 
 > 状态：**PASS（确定性 Simulator + 真实 Agent LLM 闭环）**  
@@ -142,7 +142,7 @@ DatasetVersion(INTERACTIVE)
 - `ruff check .`：通过；
 - `alembic upgrade head` / `alembic check`：通过；migration `0050` upgrade → downgrade 0049 → upgrade 通过；
 - 定向 S1 单元/契约测试通过（`test_ae6b_interactive.py`）；
-- 当时全仓 backend integration 为 `2 failed, 447 passed, 1 skipped, 22 errors`，该历史计数保留。2026-11-04 的执行计划根据原始 CI 日志将直接原因区分为 Linux `TEMP` 假设、开发机 URL 精确断言、同步连接使用 asyncpg、fixture 未显式注册和正向测试身份缺少 `workspace_read`；不能把全部 setup error 归因于共享库污染或顺序问题。本轮修复与复验仍在进行。
+- 当时全仓 backend integration 为 `2 failed, 447 passed, 1 skipped, 22 errors`，该历史计数保留。2026-11-04 的执行计划根据原始 CI 日志将直接原因区分为 Linux `TEMP` 假设、开发机 URL 精确断言、同步连接使用 asyncpg、fixture 未显式注册和正向测试身份缺少 `workspace_read`。这些直接原因已修复；本地最终完整 integration 为 528 passed / 0 skipped，详见新收口报告。远端 CI 未在本次触发。
 - 真实模型验收：Alibaba `deepseek-v4.1-flash`，3 cases / 1 repetition；Agent tokens 10,159；实际 cost UNKNOWN（未记 0），按冻结价格估算约 0.032 CNY；Simulator 为确定性脚本，无模型成本。
 
 ## 6. 已知风险

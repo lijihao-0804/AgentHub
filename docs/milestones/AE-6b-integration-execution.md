@@ -1,6 +1,7 @@
 # AE-6b Integration Closure execution record
 
-Date: 2026-11-04 (Asia/Shanghai). Status: IN PROGRESS; acceptance is not claimed.
+Date: 2026-11-04 (Asia/Shanghai). Status: PASS; final evidence and limits are in
+[AE-6b-integration-closure.md](AE-6b-integration-closure.md).
 
 The controlling plan is `E:/JAVA/AI+agent/AgentHub/plan/ae6b-integration-acceptance-plan-20261104.md`.
 The isolated branch `codex/ae6b-integration-closure` starts at
@@ -35,8 +36,9 @@ files remain unchanged. The earlier 2 failures / 22 setup errors are the hypothe
 to reproduce and close; this record does not classify all setup errors as pollution.
 Deterministic provider tests will be labelled controlled, never REAL_PROVIDER.
 
-T01–T15 and every S0–S5 gate are pending unless command evidence below explicitly
-marks them passed. Tests skipped for unavailable infrastructure do not pass a gate.
+T01–T15 and S0–S5 passed their required gates. The 32 remaining optional unit skips
+require local-only research protocols/inputs and are enumerated in the final report;
+the AE-6b database, queue and failure-injection gates have no skipped tests.
 
 ## Verified progress
 
@@ -67,6 +69,39 @@ marks them passed. Tests skipped for unavailable infrastructure do not pass a ga
   Cleanup was corrected by verifying the owned PID and terminating that process
   tree with normal host permissions. The final worker was stopped after tests;
   its forced termination exit 1 is recorded separately from pytest exit 0.
-- S2 IN PROGRESS: persistent lifecycle/schema, stable preparation, driver/runner
-  integration and independent PostgreSQL tests have disjoint owners. No S2 gate,
-  normal worker routing or process-crash guarantee is claimed yet.
+- S2 PASS at `2952193`: 72 targeted tests passed with real PostgreSQL, including
+  stable preparation, parent/case fencing, retained assertion and observation,
+  recovery and independent cleanup. `job-s2-05`, exit 0. This gate alone did not
+  claim process-death behavior.
+- S3 source at `9fbaaff`: per-item worker routing, explicit sandbox workspace
+  assignment, protocol freezing and fail-closed historical dispatch. Formal HTTP
+  acceptance also found and fixed missing dataset identity in experiment responses.
+- S4 tests at `793ee4e`: real Redis/Celery with deterministic provider adapters.
+  Initial matrix 67 passed; the additional mixed/sandbox/cleanup/cancel gate had
+  five passes and one fixture-input failure. The latter preserved the dataset
+  duplicate-input rejection; public task ordinals now distinguish the two cases.
+  T05 isolation plus revoke then passed in `job-queue-isolation-01`, exit 0.
+- T07–T10 each killed an actual owned worker with exit 73 and used a replacement
+  plus the real reconciliation queue task. Provider calls remained 0/1/3/4 across
+  recovery; an injected lost-write response retained NEEDS_ATTENTION, UNKNOWN_OUTCOME
+  and the controlled fixture. These are injected failures, not external incidents.
+- T15 upgrade rehearsal passed in `job-t15-01`, exit 0: ordinary controlled data
+  and persisted metrics created at 0050 retained identical hashes after 0051.
+  Original historical evidence JSON files independently match the starting hashes.
+- S5 first fresh run found a real joined-row-lock/pending-case terminality race.
+  The fix at `e11e840` restricts claim locking to cases, refuses to finish pending
+  work and validates the active parent lease. Five real row-lock tests passed.
+- S5 final integration: **528 passed, 0 skipped**, pytest exit 0 at `e11e840`.
+  The following unit phase failed on stale fixtures and missing public assets, so
+  the enclosing `job-s5-full-02` correctly retains exit 1. Its successful
+  integration component is recorded independently, not relabelled as a successful job.
+- Test-only fixes at `9adc5ff` preserved every production source file. The complete
+  non-integration retry passed **2831 tests**, with **32 optional local research
+  skips** and exit 0 (`job-unit-final-01`). Public pinned-tokenizer tests now run;
+  default-secret tests isolate process environment and evaluator fixtures retain
+  independent versions. No production validation gate was weakened.
+- Actual worker vs Windows venv launcher PIDs are independently retained and
+  checked in the final fault receipts. All four crash cases passed with exit 73.
+- Final ruff/migration/checkpoint/dataset/runner gates passed; unchanged frontend
+  tree retains its earlier successful build evidence. Owned workers exited and the
+  three task-labelled containers were stopped with database evidence retained.
