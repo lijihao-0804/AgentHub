@@ -34,11 +34,13 @@ from packages.agent_runtime.run_budget_ledger import (
 )
 from packages.core.config.settings import get_settings
 from packages.core.database import Base, create_database
+from tests.support.ae6b_database_urls import (
+    async_test_database_url,
+    require_isolated_test_database_url,
+    sync_test_database_url,
+)
 
 TEST_DATABASE_URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "").strip()
-EXPECTED_DATABASE_URL = (
-    "postgresql+psycopg://agenthub:m2_local_test@127.0.0.1:15432/agenthub_run_budget_m4_20261028_v4"
-)
 
 pytestmark = [
     pytest.mark.integration,
@@ -56,25 +58,13 @@ class Tenant:
     run_id: UUID
 
 
-def _async_database_url(database_url: str) -> str:
-    if database_url.startswith("postgresql+psycopg://"):
-        return database_url.replace("postgresql+psycopg://", "postgresql+asyncpg://", 1)
-    if database_url.startswith("postgresql://"):
-        return database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    if database_url.startswith("postgres://"):
-        return database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    return database_url
-
-
 @pytest.fixture(scope="session", autouse=True)
 def migrated_database() -> None:
-    assert (
-        TEST_DATABASE_URL == EXPECTED_DATABASE_URL
-        or "test" in TEST_DATABASE_URL.lower()
-        or "budget" in TEST_DATABASE_URL.lower()
-    ), "Run budget tests may only run against an assigned test database." 
+    require_isolated_test_database_url(TEST_DATABASE_URL)
     previous = os.environ.get("AGENTHUB_DATABASE_URL")
-    os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
+    os.environ["AGENTHUB_DATABASE_URL"] = async_test_database_url(
+        TEST_DATABASE_URL
+    ).render_as_string(hide_password=False)
     get_settings.cache_clear()
     try:
         command.upgrade(Config(str(Path("alembic.ini"))), "head")
@@ -92,7 +82,9 @@ async def db_resources(
     migrated_database: None,
 ) -> AsyncIterator[tuple[AsyncEngine, async_sessionmaker[AsyncSession]]]:
     del migrated_database
-    engine, factory = create_database(_async_database_url(TEST_DATABASE_URL))
+    engine, factory = create_database(
+        async_test_database_url(TEST_DATABASE_URL).render_as_string(hide_password=False)
+    )
     try:
         yield engine, factory
     finally:
@@ -1478,7 +1470,7 @@ async def test_retained_rows_resist_rewrite_and_destructive_migration(
                 )
 
     migration = importlib.import_module("migrations.versions.0045_run_budget_ledger")
-    sync_engine = create_engine(TEST_DATABASE_URL)
+    sync_engine = create_engine(sync_test_database_url(TEST_DATABASE_URL))
     try:
         with sync_engine.connect() as connection:
             monkeypatch.setattr(

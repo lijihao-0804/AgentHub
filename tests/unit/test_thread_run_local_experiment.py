@@ -8,7 +8,6 @@ from uuid import uuid4
 import pytest
 
 from benchmarks.evaluation.deepseek_v41_summary_experiment import (
-    DEFAULT_TOKENIZER_PATH,
     DeepseekV41SummaryExperimentGate,
 )
 from benchmarks.evaluation.memory_trial_budget import (
@@ -55,6 +54,8 @@ from packages.model_gateway.contracts import (
     ModelStreamEventType,
     ModelUsage,
 )
+
+pytest_plugins = ("tests.support.deepseek_assets",)
 
 _NO_IO_PATH = Path(".")
 
@@ -479,7 +480,9 @@ def test_cost_preflight_uses_conservative_full_window_reservation() -> None:
     assert "GLOBAL_CNY_LIMIT" not in report["missing_configuration_or_budget"]
 
 
-def test_sequential_run_permits_keep_stable_revision_scope_but_recheck_run_membership() -> None:
+def test_sequential_run_permits_keep_stable_revision_scope_but_recheck_run_membership(
+    deepseek_v41_tokenizer_path: Path,
+) -> None:
     class AccountingHook:
         def reserve_dispatch(self, **kwargs):
             pass
@@ -493,10 +496,8 @@ def test_sequential_run_permits_keep_stable_revision_scope_but_recheck_run_membe
         def report(self):
             return {}
 
-    if not DEFAULT_TOKENIZER_PATH.is_file():
-        pytest.skip("The local digest-pinned experiment tokenizer is unavailable")
     counter = DeepseekV41SummaryExperimentGate.from_local_asset(
-        DEFAULT_TOKENIZER_PATH, output_token_limit=512
+        deepseek_v41_tokenizer_path, output_token_limit=512
     ).counter
     workspace_id, thread_id, version_id = uuid4(), uuid4(), uuid4()
     first_run_id, second_run_id = uuid4(), uuid4()

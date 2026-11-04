@@ -1,17 +1,25 @@
 """Actual gateway attempt boundaries against a real isolated Run ledger."""
 
 import os
+from collections.abc import AsyncIterator, Iterator
 from decimal import Decimal
+from pathlib import Path
 from uuid import uuid4
 
 import pytest
+import pytest_asyncio
+from alembic import command
+from alembic.config import Config
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.frozen import FrozenAgentSpec
 from packages.agent_runtime.model_budget_adapter import RunBudgetAttemptAdapter
 from packages.agent_runtime.models import AgentRun
 from packages.agent_runtime.run_budget_ledger import RunBudgetAttempt, RunBudgetLedger
 from packages.agent_runtime.runtime_service import AgentRunService
+from packages.core.config.settings import get_settings
+from packages.core.database import create_database
 from packages.model_gateway.contracts import ModelMessage
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.gateway import ModelGatewayService
@@ -21,10 +29,11 @@ from tests.integration.test_summary_budget_bridge_m4 import (
     _seed_tenant,
 )
 from tests.integration.test_summary_budget_bridge_m4 import (
-    db_resources as db_resources,
-)
-from tests.integration.test_summary_budget_bridge_m4 import (
     pytestmark as pytestmark,
+)
+from tests.support.ae6b_database_urls import (
+    async_test_database_url,
+    require_isolated_test_database_url,
 )
 from tests.unit.test_model_gateway_run_budget import (
     FakePriceSource,
@@ -39,13 +48,38 @@ from tests.unit.test_runtime_rag_evidence_projection import _model_graph
 
 
 @pytest.fixture(scope="session")
-def migrated_database():
-    # This dedicated ledger database was explicitly upgraded to 0045 before
-    # the test; do not race unrelated, in-progress schema work.
-    assert os.environ.get("AGENTHUB_TEST_DATABASE_URL") == (
-        "postgresql+psycopg://agenthub:m2_local_test@127.0.0.1:15432/"
-        "agenthub_run_budget_m4_20261028_v4"
+def migrated_database() -> Iterator[None]:
+    database_url = os.environ.get("AGENTHUB_TEST_DATABASE_URL")
+    require_isolated_test_database_url(database_url)
+    previous = os.environ.get("AGENTHUB_DATABASE_URL")
+    os.environ["AGENTHUB_DATABASE_URL"] = async_test_database_url(
+        database_url
+    ).render_as_string(hide_password=False)
+    get_settings.cache_clear()
+    try:
+        command.upgrade(Config(str(Path("alembic.ini"))), "head")
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop("AGENTHUB_DATABASE_URL", None)
+        else:
+            os.environ["AGENTHUB_DATABASE_URL"] = previous
+        get_settings.cache_clear()
+
+
+@pytest_asyncio.fixture
+async def db_resources(
+    migrated_database: None,
+) -> AsyncIterator[tuple[AsyncEngine, async_sessionmaker[AsyncSession]]]:
+    del migrated_database
+    database_url = os.environ.get("AGENTHUB_TEST_DATABASE_URL")
+    engine, factory = create_database(
+        async_test_database_url(database_url).render_as_string(hide_password=False)
     )
+    try:
+        yield engine, factory
+    finally:
+        await engine.dispose()
 
 
 @pytest.mark.asyncio

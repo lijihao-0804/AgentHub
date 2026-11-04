@@ -9,7 +9,6 @@ import pytest
 from sqlalchemy.engine import make_url
 
 from benchmarks.evaluation.deepseek_v41_summary_experiment import (
-    DEFAULT_TOKENIZER_PATH,
     DeepseekV41SummaryExperimentGate,
     MemoryTrialBudgetAccountingHook,
     SummaryExperimentAdmissionError,
@@ -36,16 +35,15 @@ from tests.unit.test_memory_trial_budget import (
     _seed_verified_legacy_ledger,
 )
 
+pytest_plugins = ("tests.support.deepseek_assets",)
+
 _BASE_URL = "https://sample.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
-_ASSET = Path(DEFAULT_TOKENIZER_PATH)
 
 
 @pytest.fixture(scope="module")
-def gate() -> DeepseekV41SummaryExperimentGate:
-    if not _ASSET.is_file():
-        pytest.skip("The local digest-pinned experiment tokenizer is unavailable")
+def gate(deepseek_v41_tokenizer_path: Path) -> DeepseekV41SummaryExperimentGate:
     return DeepseekV41SummaryExperimentGate.from_local_asset(
-        _ASSET,
+        deepseek_v41_tokenizer_path,
         output_token_limit=128,
     )
 

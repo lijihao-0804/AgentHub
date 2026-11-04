@@ -1,0 +1,486 @@
+{
+  "schema_version": "ae6b-integration-closure-v1",
+  "status": "PASS",
+  "evidence_level": "DETERMINISTIC_CONFORMANCE",
+  "new_agenthub_paid_provider_calls": 0,
+  "development_baseline": "27f8442749b807eb119ea28297671260351b7569",
+  "integration_checked_sha": "e11e840ad1aa7c84d1388e659ac6164601bc9861",
+  "nonintegration_checked_sha": "9adc5ff1e6ba1f6cc0ff0c761a5749dc1b44022e",
+  "production_source_unchanged_between_checks": true,
+  "evidence_export_head": "9adc5ff1e6ba1f6cc0ff0c761a5749dc1b44022e",
+  "migration_head": "0051_interactive_lifecycle",
+  "gates": {
+    "s1_full_integration": {
+      "job": "job-s1-full-fresh-03",
+      "pytest_exit_code": 0,
+      "parent_job_exit_code": 0,
+      "junit": "s1-full-1793782664.xml",
+      "tests": 472,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "s2_targeted": {
+      "job": "job-s2-05",
+      "pytest_exit_code": 0,
+      "parent_job_exit_code": 0,
+      "junit": "s2-1793787045.xml",
+      "tests": 72,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "s3_s4_initial_matrix": {
+      "job": "job-queue-matrix-01",
+      "pytest_exit_code": 0,
+      "parent_job_exit_code": 0,
+      "junit": "queue-1793788444.xml",
+      "tests": 67,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "real_row_lock_regression": {
+      "job": "job-locks-01",
+      "pytest_exit_code": 0,
+      "parent_job_exit_code": 0,
+      "junit": "lock-gate.xml",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "final_integration": {
+      "job": "job-s5-full-02",
+      "pytest_exit_code": 0,
+      "parent_job_exit_code": 1,
+      "junit": "s5-integration-1793790574.xml",
+      "tests": 528,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "final_nonintegration": {
+      "job": "job-unit-final-01",
+      "pytest_exit_code": 0,
+      "parent_job_exit_code": 0,
+      "junit": "s5-unit-final-1793791741.xml",
+      "tests": 2863,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 32
+    }
+  },
+  "optional_local_research_skips": [
+    {
+      "module": "tests.unit.test_answer_path_data",
+      "reason": "requires the full local-only paragraph QA source and runtime artifacts",
+      "count": 5
+    },
+    {
+      "module": "tests.unit.test_attributed_reader_report",
+      "reason": "requires the local-only attributed-reader experiment protocol",
+      "count": 3
+    },
+    {
+      "module": "tests.unit.test_evidence_plan_report",
+      "reason": "requires the local-only evidence-plan experiment protocol",
+      "count": 2
+    },
+    {
+      "module": "tests.unit.test_evidence_set_experiment",
+      "reason": "requires the local-only evidence-set experiment protocol",
+      "count": 5
+    },
+    {
+      "module": "tests.unit.test_memory_deepseek_v41_counter",
+      "reason": "Frozen local study inputs are unavailable",
+      "count": 1
+    },
+    {
+      "module": "tests.unit.test_public_rag_consumer_report",
+      "reason": "requires the local-only consumer experiment protocol",
+      "count": 4
+    },
+    {
+      "module": "tests.unit.test_public_rag_fiqa_confirmation",
+      "reason": "requires the local-only FiQA method protocol",
+      "count": 4
+    },
+    {
+      "module": "tests.unit.test_public_rag_fiqa_confirmation",
+      "reason": "requires the local-only frozen FiQA development selection",
+      "count": 5
+    },
+    {
+      "module": "tests.unit.test_public_rag_learned_runner",
+      "reason": "requires the local-only learned-sparse experiment protocol",
+      "count": 3
+    }
+  ],
+  "public_tokenizer": {
+    "revision": "9f9818127fdfbb60feba204799d617a874b32a86",
+    "sha256": "c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b",
+    "bytes": 6367257,
+    "model": "deepseek-v4.1-flash-1017"
+  },
+  "frontend": {
+    "exit_code": 0,
+    "job": "job-frontend-build-02",
+    "unchanged_tree_sha": "634cc8c7d6277e467bd06e81bfe4343a41f9445d"
+  },
+  "historical_evidence": {
+    "ae-6b-evidence.json": {
+      "sha256": "3fd8d810d8301537dc3622e845887c2b9e50812613b4ecd2d7fd824091017d8e",
+      "experiment_run_id": "6577b772-b36d-4d61-a889-dbfd9347cd85"
+    },
+    "ae-6b-evidence-redacted.json": {
+      "sha256": "4428469ce5d654da4d7deac81b8d0b7a9efaa7ff129f68336f2f9fec836ccf9c",
+      "experiment_run_id": "1914c232-bd3e-40fa-9a99-0bfb2d4f4ecc"
+    }
+  },
+  "upgrade_compatibility": {
+    "checks": {
+      "controlled_driver_calls": 1,
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE",
+      "interactive_tables_created_by_0051": true,
+      "metrics_integrity_verified_after_upgrade": true,
+      "metrics_materialized_before_upgrade": true,
+      "provider_calls": 0,
+      "real_experiment_runner": true,
+      "same_safe_hashes_after_upgrade": true
+    },
+    "hashes_after_head": {
+      "case": {
+        "observation_hash": "3de95883cad39e5cefaa6b6e0e85dbef1fc25a5d9b66ea13273d243ddc385642",
+        "projection_hash": "315fb4716fedcc78376ffea66a61b2b5593bfbea6334c3aa489d778f37a5b943"
+      },
+      "dataset": {
+        "item_hash": "2498643d4ccc3770e912458d3b0d92bb490a33b7c554b2c50bd7c138b97215b6",
+        "version_hash": "80ec149e61c7c3707ab19781dfc8f83a7f538378ac72adb1f17b6601662d09e7"
+      },
+      "experiment": {
+        "projection_hash": "7d5b579a4c3adf5fd81c9b81db451819be19f966b635cc1e9a7500c4e5a077ea",
+        "spec_hash": "0ff1930f4fafa0bc15c20d3f82620b71e1fdda2f2dbe73c7020b8e9654c4533c",
+        "variant_hash": "e0d1300099ecd510a0dd509386d462565fd601d92283f24e8f016241d3c877e3",
+        "variant_projection_hash": "294ae09eb49463af7880bd71a8675d2a783007ad1d218ee325f6a11fbf562a75"
+      },
+      "metrics": {
+        "case_result_set_hash": "686151877b26995ede6a0816a84fb193712603470a50f8c3ea515fbe8e744d24",
+        "evaluator_manifest_hash": "534a274f4231237fbcc337cb3ea907408137eb39677f2d9a6dd335ca675907c8",
+        "metrics_hash": "32c2d389d7a22212a0faf5dee65c7ea18415449eaa2a84e03e99fb362e535032",
+        "payload_hash": "68602c29a7ac230026070be3bdadd8f00808f42c1716f20e6751b8b0fbb843f5"
+      }
+    },
+    "hashes_before_head": {
+      "case": {
+        "observation_hash": "3de95883cad39e5cefaa6b6e0e85dbef1fc25a5d9b66ea13273d243ddc385642",
+        "projection_hash": "315fb4716fedcc78376ffea66a61b2b5593bfbea6334c3aa489d778f37a5b943"
+      },
+      "dataset": {
+        "item_hash": "2498643d4ccc3770e912458d3b0d92bb490a33b7c554b2c50bd7c138b97215b6",
+        "version_hash": "80ec149e61c7c3707ab19781dfc8f83a7f538378ac72adb1f17b6601662d09e7"
+      },
+      "experiment": {
+        "projection_hash": "7d5b579a4c3adf5fd81c9b81db451819be19f966b635cc1e9a7500c4e5a077ea",
+        "spec_hash": "0ff1930f4fafa0bc15c20d3f82620b71e1fdda2f2dbe73c7020b8e9654c4533c",
+        "variant_hash": "e0d1300099ecd510a0dd509386d462565fd601d92283f24e8f016241d3c877e3",
+        "variant_projection_hash": "294ae09eb49463af7880bd71a8675d2a783007ad1d218ee325f6a11fbf562a75"
+      },
+      "metrics": {
+        "case_result_set_hash": "686151877b26995ede6a0816a84fb193712603470a50f8c3ea515fbe8e744d24",
+        "evaluator_manifest_hash": "534a274f4231237fbcc337cb3ea907408137eb39677f2d9a6dd335ca675907c8",
+        "metrics_hash": "32c2d389d7a22212a0faf5dee65c7ea18415449eaa2a84e03e99fb362e535032",
+        "payload_hash": "68602c29a7ac230026070be3bdadd8f00808f42c1716f20e6751b8b0fbb843f5"
+      }
+    },
+    "head": "e11e840ad1aa7c84d1388e659ac6164601bc9861",
+    "historical_evidence": {
+      "ae-6b-evidence-redacted.json": {
+        "experiment_run_id": "1914c232-bd3e-40fa-9a99-0bfb2d4f4ecc",
+        "sha256": "4428469ce5d654da4d7deac81b8d0b7a9efaa7ff129f68336f2f9fec836ccf9c"
+      },
+      "ae-6b-evidence.json": {
+        "experiment_run_id": "6577b772-b36d-4d61-a889-dbfd9347cd85",
+        "sha256": "3fd8d810d8301537dc3622e845887c2b9e50812613b4ecd2d7fd824091017d8e"
+      }
+    },
+    "identity": {
+      "case_result_id": "7ce729b7-3f3e-40fb-89ba-cf5f78dbd9b6",
+      "dataset_id": "5da1ebff-ee83-4a25-b192-c6e7966a7f87",
+      "dataset_item_id": "68f247fe-95eb-4439-9f35-188121595e1e",
+      "dataset_version_id": "a9ceedb5-d7b9-4992-8aee-f52321a1e0e4",
+      "experiment_id": "1a894c36-2633-4845-a7fa-9188556b2345",
+      "experiment_run_id": "db00500a-126d-4f79-ba60-2ebb468ed3cb",
+      "variant_id": "3cbff40d-229e-48bc-8856-6627cc177673",
+      "workspace_id": "c9b163ca-3cd4-440c-beae-6ea7949c0c7b"
+    },
+    "migration": {
+      "base_revision": "0050_interactive_category",
+      "database_scope": "fresh_isolated_no_drop",
+      "head_revision": "0051_interactive_lifecycle",
+      "legacy_data_created_before_head": true
+    },
+    "mode": "migration_compatibility",
+    "schema_version": "ae6b-t15-compatibility-v1",
+    "status": "PASS"
+  },
+  "infrastructure": {
+    "action": "stop_only_no_remove",
+    "preserved_database_evidence": true,
+    "containers": [
+      {
+        "name": "ae6b0c1e37d6-pg",
+        "id": "422160b06e8cbd6c18fece32087f0fea067f5c85e30e33fa8e6f1fd1e938aac7",
+        "running": false
+      },
+      {
+        "name": "ae6b0c1e37d6-redis",
+        "id": "d06c2a09dbb378ba2193cf504ad36adad5e2b751ab7374662839dc863e066734",
+        "running": false
+      },
+      {
+        "name": "ae6b0c1e37d6-qdrant",
+        "id": "7e4515acae381f8de3e47067456f53f74a4c885e1b3395d49317cb0d4e88bf3f",
+        "running": false
+      }
+    ]
+  },
+  "process_and_cleanup_proofs": [
+    {
+      "case_id": "9435532d-1c47-4d94-85a7-67f786eac5fa",
+      "workspace_id": "fe9d4493-e982-4b1d-90bb-92eb6d57bcb1",
+      "experiment_run_id": "f86ed976-6cbe-4142-ad90-14bda28f611d",
+      "worker_exit_code": 73,
+      "fault_pid": 39072,
+      "provider_calls": 0,
+      "case_status": "CANCELLED",
+      "cleanup_status": "TEARDOWN_COMPLETE",
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "case_id": "8754bdee-5fbc-488b-97b7-79c082b38ad5",
+      "workspace_id": "e6123e56-3bc4-412d-ae74-f97df39edc3b",
+      "provider_calls_before_retry": 4,
+      "provider_calls_after_retry": 4,
+      "initial_cleanup_status": "TEARDOWN_FAILED",
+      "final_cleanup_status": "TEARDOWN_COMPLETE",
+      "assertion_source": "support_fixture.assert_state",
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "scenario": "clarify_approved_write",
+      "case_id": "aaec0df9-1804-4977-b884-bc951fdef1d0",
+      "run_id": "e4e988af-4d0a-42bb-ad7e-6589361f19f6",
+      "workspace_id": "f7960a12-9a51-47dc-b2ad-66970d91d748",
+      "agent_version_id": "8d976c37-fe79-4929-bb07-d67f969c328c",
+      "agent_run_ids": [
+        "ab3ca882-110e-4423-aeaa-d06a9882ef4c",
+        "12a2b312-93d9-4850-867b-e1369ab04eca"
+      ],
+      "approval_id": "a0103a6e-0037-42d1-9e12-9a843ddc8ae5",
+      "logical_action_id": "f63ee643-2780-595b-98d7-d78d62d2aa46",
+      "distinct_approval_actor": true,
+      "execution_attempt_count": 1,
+      "provider_calls": 4,
+      "ticket_count_asserted": 1,
+      "cleanup_status": "TEARDOWN_COMPLETE",
+      "metrics_hash": "ed8dca6376b7bbec53523e1d1743ea098e99aeaf0c59f04e3ac8f80a2b075185",
+      "task_success": 1.0,
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "marker": "REFUSE",
+      "limits": {},
+      "provider_calls": 2,
+      "status": "SUCCEEDED",
+      "stop_reason": "goal_met",
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "marker": "DENIED",
+      "limits": {},
+      "provider_calls": 4,
+      "status": "SUCCEEDED",
+      "stop_reason": "goal_met",
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "marker": "CLARIFY",
+      "limits": {
+        "max_turns": 1
+      },
+      "provider_calls": 1,
+      "status": "SUCCEEDED",
+      "stop_reason": "max_turns",
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "marker": "CLARIFY",
+      "limits": {
+        "max_tokens": 18
+      },
+      "provider_calls": 1,
+      "status": "SUCCEEDED",
+      "stop_reason": "budget_exhausted",
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "marker": "UNKNOWN_USAGE",
+      "limits": {
+        "max_tokens": 200
+      },
+      "provider_calls": 1,
+      "status": "SUCCEEDED",
+      "stop_reason": "budget_unavailable",
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "marker": "CLARIFY",
+      "limits": {
+        "max_cost_cny": "1.00"
+      },
+      "provider_calls": 0,
+      "status": "FAILED",
+      "stop_reason": null,
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "experiment_run_id": "9d4ce605-394a-4123-acc0-2e87fdf5091b",
+      "workspace_id": "f73e2f68-49f9-4413-9caf-bd1b4f24622c",
+      "owner_id": "302f4dad-9d2b-4c66-a7f7-43c0593c6ea1",
+      "reader_id": "102cebcc-5240-4af5-a37d-aa46b563e0c5",
+      "distinct_actor": true,
+      "owner_http_status": 404,
+      "provider_calls": 0,
+      "episode_count": 0,
+      "case_status": "FAILED",
+      "run_status": "FAILED",
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "point": "first_run_terminal",
+      "case_id": "d64cd138-98ae-4d80-a553-b43ca7b5b7c6",
+      "workspace_id": "0109025a-45cf-4948-ae48-90ca5fd5e912",
+      "run_id": "a7912f9c-c7f6-4530-bd5d-d2cf17fcc8f3",
+      "worker_exit_code": 73,
+      "worker_pid": 39544,
+      "worker_parent_pid": 36672,
+      "launched_process_pid": 36672,
+      "provider_calls_before": 1,
+      "provider_calls_after": 1,
+      "case_status": "FAILED",
+      "instance_id": "d64cd138-98ae-4d80-a553-b43ca7b5b7c6",
+      "agent_run_ids": [
+        "20b841ad-4d6a-40a7-a36e-8d2b81059220"
+      ],
+      "actions": [],
+      "turn_count": 1,
+      "cleanup_status": "TEARDOWN_COMPLETE",
+      "assertion_source": "recovery_fixture_snapshot",
+      "assertion_hash": "a30a3e4ccc104ae902b04e956fd29ebc238aa147165ce9d9b97c894b78ba9fee",
+      "observation_hash": null,
+      "ticket_count_before": 0,
+      "ticket_count_after": 0,
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "point": "fixture_committed",
+      "case_id": "127d08d9-3985-4b53-b391-4612200a6f0b",
+      "workspace_id": "0fbdd80f-eb8b-4db4-beb1-6c194d067999",
+      "run_id": "a91a72ce-8eae-4219-8fd4-da1318883a70",
+      "worker_exit_code": 73,
+      "worker_pid": 42916,
+      "worker_parent_pid": 38092,
+      "launched_process_pid": 38092,
+      "provider_calls_before": 0,
+      "provider_calls_after": 0,
+      "case_status": "FAILED",
+      "instance_id": "127d08d9-3985-4b53-b391-4612200a6f0b",
+      "agent_run_ids": [],
+      "actions": [],
+      "turn_count": 0,
+      "cleanup_status": "TEARDOWN_COMPLETE",
+      "assertion_source": "recovery_fixture_snapshot",
+      "assertion_hash": "a30a3e4ccc104ae902b04e956fd29ebc238aa147165ce9d9b97c894b78ba9fee",
+      "observation_hash": null,
+      "ticket_count_before": 0,
+      "ticket_count_after": 0,
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "point": "observation_retained",
+      "case_id": "41770842-573b-4325-947a-6475ab6d008a",
+      "workspace_id": "539e2ab3-893b-4c19-8024-10a1f61c8982",
+      "run_id": "5570a1d2-15c6-48c3-b501-c607475ee4b0",
+      "worker_exit_code": 73,
+      "worker_pid": 39700,
+      "worker_parent_pid": 25420,
+      "launched_process_pid": 25420,
+      "provider_calls_before": 4,
+      "provider_calls_after": 4,
+      "case_status": "SUCCEEDED",
+      "instance_id": "41770842-573b-4325-947a-6475ab6d008a",
+      "agent_run_ids": [
+        "bcef3dc2-d074-475c-b8a3-38c47f832e48",
+        "ba76ed75-26b2-47b2-8f59-79e34b2060f9"
+      ],
+      "actions": [
+        {
+          "approval_id": "9e4bf4aa-47e3-4522-b1c3-3bb4d8f92ceb",
+          "logical_action_id": "6968f9a5-6263-5984-b757-0fd4381647c4",
+          "decision_status": "APPROVED",
+          "execution_status": "SUCCEEDED"
+        }
+      ],
+      "turn_count": 2,
+      "cleanup_status": "TEARDOWN_COMPLETE",
+      "assertion_source": "support_fixture.assert_state",
+      "assertion_hash": "741f8cbadd6c5ef6cbe60dd50d212796d4ebe893396ad4dbd85bfae45bf14e35",
+      "observation_hash": "939e05a6c182ac517471c564c6bb50d4e9f8c482856d591efc65779fd62013df",
+      "ticket_count_before": 1,
+      "ticket_count_after": 0,
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    },
+    {
+      "point": "write_response_lost",
+      "case_id": "10383704-1b23-41f1-90c6-079a9890aa20",
+      "workspace_id": "65a2efdb-a2b0-4fdc-aad8-3aaeaf0d7cd5",
+      "run_id": "19d98773-736c-417d-b67f-81fe3807ee7c",
+      "worker_exit_code": 73,
+      "worker_pid": 14688,
+      "worker_parent_pid": 35496,
+      "launched_process_pid": 35496,
+      "provider_calls_before": 3,
+      "provider_calls_after": 3,
+      "case_status": "FAILED",
+      "instance_id": "10383704-1b23-41f1-90c6-079a9890aa20",
+      "agent_run_ids": [
+        "471eea67-b9ec-463f-a42b-870a6f1787ca",
+        "5484119e-f011-4d03-9ed9-e8cbc014cb72"
+      ],
+      "actions": [
+        {
+          "approval_id": "e561b8dd-4376-46ff-891d-1464272bd60a",
+          "logical_action_id": "1939d890-d1c2-5a2e-a874-90b708649ca0",
+          "decision_status": "APPROVED",
+          "execution_status": "UNKNOWN_OUTCOME"
+        }
+      ],
+      "turn_count": 2,
+      "cleanup_status": "CLEANUP_BLOCKED",
+      "assertion_source": null,
+      "assertion_hash": null,
+      "observation_hash": null,
+      "ticket_count_before": 1,
+      "ticket_count_after": 1,
+      "evidence_kind": "DETERMINISTIC_CONFORMANCE"
+    }
+  ],
+  "limits": [
+    "finite interactive money limits reject before dispatch until complete reservations exist",
+    "unknown action outcomes retain their controlled fixtures for reconciliation",
+    "HTTP exercised through ASGITransport, TCP proxy layer outside this acceptance",
+    "new provider responses are deterministic, historical real-provider results are separate"
+  ]
+}

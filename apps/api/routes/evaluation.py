@@ -4,7 +4,7 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, status
-from sqlalchemy import select
+from sqlalchemy import select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
@@ -46,7 +46,7 @@ from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.judge import FrozenJudgeEnsemble, FrozenJudgeProfile, freeze_judge_profile
 from packages.evaluation.metrics_service import EvaluationMetricsService
-from packages.evaluation.models import EvaluationCaseResultStatus
+from packages.evaluation.models import EvaluationCaseResultStatus, EvaluationDatasetVersion
 from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
@@ -59,6 +59,41 @@ router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}/evaluation", tags=[
 context_dependency = Depends(get_workspace_context)
 db_session_dependency = Depends(get_db_session)
 run_queue_dependency = Depends(get_experiment_run_queue)
+
+
+async def _experiment_responses(session: AsyncSession, experiments: list):
+    """Project the dataset identity from the immutable, workspace-scoped version."""
+    bindings = {(row.workspace_id, row.dataset_version_id) for row in experiments}
+    datasets = {}
+    if bindings:
+        rows = await session.execute(
+            select(
+                EvaluationDatasetVersion.workspace_id,
+                EvaluationDatasetVersion.id,
+                EvaluationDatasetVersion.dataset_id,
+            ).where(
+                tuple_(EvaluationDatasetVersion.workspace_id, EvaluationDatasetVersion.id).in_(
+                    bindings
+                )
+            )
+        )
+        datasets = {(workspace, version): dataset for workspace, version, dataset in rows}
+    responses = []
+    for row in experiments:
+        dataset_id = datasets.get((row.workspace_id, row.dataset_version_id))
+        if dataset_id is None:
+            raise AgentHubError(
+                "EVALUATION_DATASET_VERSION_MISSING", "The frozen dataset version is missing.", 409
+            )
+        values = {
+            field: getattr(row, field)
+            for field in EvaluationExperimentResponse.model_fields
+            if hasattr(row, field)
+        }
+        responses.append(
+            EvaluationExperimentResponse.model_validate(values | {"dataset_id": dataset_id})
+        )
+    return responses
 
 
 async def _variant_responses(
@@ -353,9 +388,7 @@ async def _freeze_judge_profile(
     except ModelGatewayError:
         raise _judge_profile_unavailable() from None
     profile = chain[0]
-    credential = await repository.get_provider_credential(
-        context, profile.provider_credential_id
-    )
+    credential = await repository.get_provider_credential(context, profile.provider_credential_id)
     if credential is None or not credential.enabled:
         raise _judge_profile_unavailable()
     return freeze_judge_profile(profile, provider=credential.provider)
@@ -401,9 +434,7 @@ async def create_experiment(
                 422,
             )
         try:
-            judge_ensemble = FrozenJudgeEnsemble(
-                tuple(profiles), strategy=payload.judge_strategy
-            )
+            judge_ensemble = FrozenJudgeEnsemble(tuple(profiles), strategy=payload.judge_strategy)
         except ValueError:
             raise AgentHubError(
                 "EVALUATION_EXPERIMENT_INVALID",
@@ -427,7 +458,7 @@ async def create_experiment(
         judge_profile=judge_profile,
         judge_ensemble=judge_ensemble,
     )
-    return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+    return (await _experiment_responses(session, [experiment]))[0]
 
 
 @router.get("/experiments", response_model=EvaluationExperimentListResponse)
@@ -443,10 +474,7 @@ async def list_experiments(
         session, context=context, limit=limit, offset=offset
     )
     return EvaluationExperimentListResponse(
-        items=[
-            EvaluationExperimentResponse.model_validate(item, from_attributes=True)
-            for item in experiments
-        ],
+        items=await _experiment_responses(session, experiments),
         total=total,
     )
 
@@ -468,7 +496,7 @@ async def get_experiment(
     count = await service.holdout_exposure_count(
         session, context=context, experiment_id=experiment_id
     )
-    response = EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+    response = (await _experiment_responses(session, [experiment]))[0]
     return EvaluationExperimentDetailResponse(
         **response.model_dump(exclude={"holdout_exposure_count"}),
         holdout_exposure_count=count,
@@ -538,7 +566,7 @@ async def finalize_experiment(
     count = await service.holdout_exposure_count(
         session, context=context, experiment_id=experiment_id
     )
-    response = EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+    response = (await _experiment_responses(session, [experiment]))[0]
     return EvaluationExperimentDetailResponse(
         **response.model_dump(exclude={"holdout_exposure_count"}),
         holdout_exposure_count=count,
@@ -712,9 +740,7 @@ async def get_experiment_run_statistics(
     """
 
     del workspace_id
-    return await EvaluationStatisticsService().compute(
-        session, context=context, run_id=run_id
-    )
+    return await EvaluationStatisticsService().compute(session, context=context, run_id=run_id)
 
 
 @router.get("/experiment-runs/{run_id}/failure-taxonomy", response_model=dict[str, Any])

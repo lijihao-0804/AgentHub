@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import shutil
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -75,13 +74,8 @@ async def db_factory() -> async_sessionmaker[AsyncSession]:
 
 
 @pytest.fixture
-def catalog_dir() -> Path:
-    directory = Path(os.environ["TEMP"]) / f"agenthub-context-policy-m2-{uuid4().hex}"
-    directory.mkdir()
-    try:
-        yield directory
-    finally:
-        shutil.rmtree(directory, ignore_errors=True)
+def catalog_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    return tmp_path_factory.mktemp("agenthub-context-policy-m2")
 
 
 def _context(user_id: UUID, workspace_id: UUID, organization_id: UUID) -> WorkspaceExecutionContext:

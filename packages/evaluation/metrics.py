@@ -127,6 +127,7 @@ class EvaluatorRegistry:
         self.register("APPROVAL", "v1", evaluate_approval)
         self.register("MULTI_STEP", "v1", evaluate_multi_step)
         self.register("FAILURE", "v1", evaluate_failure)
+        self.register("INTERACTIVE", "v1", evaluate_interactive)
 
     def _register_trajectory_definitions(self) -> None:
         """Pin trajectory metric versions independently of category versions."""
@@ -165,6 +166,11 @@ class EvaluatorRegistry:
             raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
         for category, (registered_version, evaluator) in tuple(registry._evaluators.items()):
             version = versions.get(_manifest_key(category))
+            if category == "INTERACTIVE" and version is None:
+                # Historical manifests predate the interactive category; they contain no
+                # INTERACTIVE case, so leave that evaluator out rather than changing them.
+                registry._evaluators.pop(category, None)
+                continue
             if version not in {"v1", "v2"}:
                 raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
             if registered_version not in {"v1", version}:
@@ -282,6 +288,8 @@ class EvaluatorRegistry:
             raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
         for category, (version, _) in self._evaluators.items():
             key = _manifest_key(category)
+            if category == "INTERACTIVE" and key not in versions:
+                continue
             if versions.get(key) != version:
                 raise ValueError("EXPERIMENT_EVALUATOR_VERSION_MISMATCH")
         judge_entry = versions.get(JUDGE_MANIFEST_KEY, JUDGE_DISABLED_VERSION)
@@ -435,6 +443,107 @@ def evaluate_failure(
         "observed_agent_failure_code", observation.get("failure_code")
     )
     return {"task_success": _binary_metric("task_success", status_ok and code_ok)}
+
+
+def evaluate_interactive(
+    expected: Mapping[str, Any], observation: Mapping[str, Any]
+) -> dict[str, MetricValue]:
+    environment = observation.get("environment")
+    assertion = environment.get("assertion") if isinstance(environment, Mapping) else None
+    if not isinstance(assertion, Mapping) or not isinstance(assertion.get("passed"), bool):
+        return {
+            name: _not_available(name, "environment_assertion_missing")
+            for name in (
+                "environment_state_success",
+                "interactive_task_success",
+                "goal_completion",
+                "disclosure_policy_respected",
+                "budget_exhausted",
+                "environment_execution_complete",
+                "agent_execution_success",
+                "turn_count",
+                "task_success",
+            )
+        }
+    state_success = bool(assertion["passed"])
+    lifecycle_complete = observation.get("environment_lifecycle_status") == "TEARDOWN_COMPLETE"
+    if "environment_lifecycle_status" not in observation:
+        lifecycle_complete = observation.get("execution_complete") is True
+    turns = observation.get("turns")
+    agent_available = isinstance(turns, list) and bool(turns)
+    agent_success = (
+        all(str(turn.get("status")).upper() == "SUCCEEDED" for turn in turns)
+        if agent_available
+        else None
+    )
+    stop_reason = str(observation.get("stop_reason") or "")
+    disclosure_ok = observation.get("disclosure_policy_respected")
+    disclosure_available = isinstance(disclosure_ok, bool)
+    approval_expected = expected.get("approval_decisions") or []
+    approval_ok = int(observation.get("approval_decision_count") or 0) >= len(
+        approval_expected
+    )
+    disclosure = _binary_metric(
+        "disclosure_policy_respected",
+        bool(disclosure_ok),
+        applicable=disclosure_available,
+    )
+    budget = _binary_metric(
+        "budget_exhausted", stop_reason == "budget_exhausted", applicable=True
+    )
+    if agent_success is None:
+        task = _not_available("task_success", "agent_execution_evidence_missing")
+    else:
+        success = (
+            state_success
+            and agent_success
+            and lifecycle_complete
+            and stop_reason == "goal_met"
+            and approval_ok
+            and (not disclosure_available or bool(disclosure_ok))
+        )
+        task = _binary_metric("task_success", success)
+    return {
+        "environment_state_success": _binary_metric(
+            "environment_state_success", state_success
+        ),
+        "interactive_task_success": (
+            _not_available("interactive_task_success", "agent_execution_evidence_missing")
+            if agent_success is None
+            else _binary_metric(
+                "interactive_task_success",
+                bool(
+                    state_success
+                    and agent_success
+                    and lifecycle_complete
+                    and stop_reason == "goal_met"
+                    and approval_ok
+                    and (not disclosure_available or bool(disclosure_ok))
+                ),
+            )
+        ),
+        "goal_completion": _binary_metric(
+            "goal_completion", state_success and stop_reason == "goal_met"
+        ),
+        "disclosure_policy_respected": disclosure,
+        "budget_exhausted": budget,
+        "environment_execution_complete": _binary_metric(
+            "environment_execution_complete", lifecycle_complete
+        ),
+        "agent_execution_success": (
+            _not_available("agent_execution_success", "agent_execution_evidence_missing")
+            if agent_success is None
+            else _binary_metric("agent_execution_success", bool(agent_success))
+        ),
+        "turn_count": MetricValue(
+            "turn_count",
+            MetricStatus.AVAILABLE,
+            float(observation.get("executed_turn_count") or 0),
+            1,
+            evaluator_version="v1",
+        ),
+        "task_success": task,
+    }
 
 
 def evaluate_retrieval(
@@ -805,6 +914,7 @@ def _manifest_key(category: str) -> str:
         "APPROVAL": "approval-evaluator",
         "MULTI_STEP": "tool-evaluator",
         "FAILURE": "failure-evaluator",
+        "INTERACTIVE": "interactive-evaluator",
     }[category]
 
 
@@ -859,6 +969,49 @@ METRIC_DEFINITIONS: dict[str, MetricDefinition] = {
     name: _definition(name, direction, kind, task_success_relevant=task_success)
     for name, direction, kind, task_success in [
         ("task_success", MetricDirection.HIGHER_IS_BETTER, MetricAggregationKind.BINARY, True),
+        (
+            "environment_state_success",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "interactive_task_success",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "goal_completion",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "disclosure_policy_respected",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "budget_exhausted",
+            MetricDirection.LOWER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            False,
+        ),
+        (
+            "environment_execution_complete",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        (
+            "agent_execution_success",
+            MetricDirection.HIGHER_IS_BETTER,
+            MetricAggregationKind.BINARY,
+            True,
+        ),
+        ("turn_count", MetricDirection.UNKNOWN, MetricAggregationKind.SCALAR, False),
         (
             "tool_selection_accuracy",
             MetricDirection.HIGHER_IS_BETTER,

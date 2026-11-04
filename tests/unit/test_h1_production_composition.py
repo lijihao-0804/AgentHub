@@ -58,7 +58,8 @@ def test_production_agent_run_composition_reuses_real_component_graph(monkeypatc
     assert search_handler.keywords["retriever"].components is components
 
 
-def test_worker_and_beat_do_not_require_api_jwt_secret() -> None:
+def test_worker_and_beat_do_not_require_api_jwt_secret(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("AGENTHUB_AUTH_JWT_SECRET", raising=False)
     for role in ("worker", "beat"):
         settings = Settings(environment="docker", process_role=role, _env_file=None)
         assert settings.auth_jwt_secret

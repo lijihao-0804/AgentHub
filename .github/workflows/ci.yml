@@ -10,8 +10,11 @@ jobs:
     env:
       AGENTHUB_TEST_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_test
       AGENTHUB_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_test
+      AGENTHUB_MIGRATION_TEST_DATABASE_URL: postgresql+asyncpg://agenthub:agenthub@localhost:5432/agenthub_hidden_defects_ci_migration
       AGENTHUB_TEST_REDIS_URL: redis://localhost:6379/0
       AGENTHUB_REDIS_URL: redis://localhost:6379/0
+      # Real AE-6b workers must not compete with the shared integration worker.
+      AGENTHUB_AE6B_REDIS_URL: redis://localhost:6379/3
       AGENTHUB_TEST_QDRANT_URL: http://localhost:6333
       AGENTHUB_QDRANT_URL: http://localhost:6333
       AGENTHUB_TESTING: "true"
@@ -52,6 +55,21 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --locked
+      - name: Generate ephemeral test credential key
+        run: |
+          uv run --locked python - <<'PY'
+          import os
+          from pathlib import Path
+
+          from cryptography.fernet import Fernet
+
+          key = Fernet.generate_key().decode("ascii")
+          print(f"::add-mask::{key}")
+          with Path(os.environ["GITHUB_ENV"]).open("a", encoding="utf-8") as stream:
+              stream.write(f"AGENTHUB_CREDENTIAL_MASTER_KEY={key}\n")
+          PY
+      - name: Prepare digest-pinned public tokenizer for counter tests
+        run: uv run --locked python -m tests.support.deepseek_assets --prepare-default
       - name: Wait for Qdrant
         run: |
           uv run --locked python - <<'PY'
@@ -70,6 +88,31 @@ jobs:
                   time.sleep(1)
               else:
                   raise SystemExit("Qdrant did not become ready")
+          PY
+      - name: Create dedicated migration test database
+        run: |
+          uv run --locked python - <<'PY'
+          import os
+
+          import psycopg
+          from sqlalchemy.engine import make_url
+
+          url = make_url(os.environ["AGENTHUB_MIGRATION_TEST_DATABASE_URL"])
+          database_name = "agenthub_hidden_defects_ci_migration"
+          with psycopg.connect(
+              host=url.host,
+              port=url.port or 5432,
+              dbname="postgres",
+              user=url.username,
+              password=url.password,
+              autocommit=True,
+          ) as connection:
+              exists = connection.execute(
+                  "SELECT 1 FROM pg_database WHERE datname = %s",
+                  (database_name,),
+              ).fetchone()
+              if exists is None:
+                  connection.execute(f'CREATE DATABASE "{database_name}"')
           PY
       - run: uv run --locked alembic upgrade head
       - run: uv run --locked alembic check
@@ -145,7 +188,7 @@ jobs:
         run: |
           if [ -f celery-worker.pid ]; then kill "$(cat celery-worker.pid)" || true; fi
           if [ -f celery-worker.log ]; then cat celery-worker.log; fi
-      - run: uv run --locked pytest -m "not integration"
+      - run: uv run --locked pytest -m "not integration" -rs
       - name: Validate M7-A dataset contract
         run: uv run --locked pytest tests/unit/test_m7a_dataset_validation.py -vv
       - name: Validate M7-B reproducibility contract
