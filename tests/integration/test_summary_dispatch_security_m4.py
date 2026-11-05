@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
 from packages.agent_runtime.model_budget_adapter import RunBudgetAttemptAdapter
-from packages.agent_runtime.models import AgentRun
+from packages.agent_runtime.models import AgentRun, RunStep
 from packages.agent_runtime.run_budget_ledger import RunBudgetLedger
 from packages.agent_runtime.runtime import AgentRunService
 from packages.agent_runtime.runtime_graph import SUMMARY_HISTORICAL_CONTEXT_GOAL
@@ -181,12 +181,18 @@ async def _summary_thread(db_factory, *, label: str):
         "RECENT-TURN-03: keep this exact user utterance.",
     )
     for sequence, user_input in enumerate(history_inputs, start=1):
-        await thread_service.submit_turn(
+        submitted = await thread_service.submit_turn(
             context,
             thread.id,
             user_input=user_input,
             client_token=f"summary-fence-{label}-{sequence}-{uuid4().hex[:12]}",
         )
+        diagnostics = await _run_diagnostics(db_factory, run_id=submitted.run_id)
+        if diagnostics["run_status"] != "SUCCEEDED":
+            pytest.fail(
+                "summary fixture history turn "
+                f"{sequence} did not succeed: {json.dumps(diagnostics, sort_keys=True)}"
+            )
     assert len(provider.main_requests) == 3
     assert not provider.summary_requests
     return {
@@ -195,6 +201,60 @@ async def _summary_thread(db_factory, *, label: str):
         "thread": thread,
         "thread_service": thread_service,
         "provider": provider,
+    }
+
+
+async def _run_diagnostics(db_factory, *, run_id: UUID) -> dict[str, object]:
+    async with db_factory() as session:
+        run = await session.get(AgentRun, run_id)
+        steps = tuple(
+            await session.scalars(
+                select(RunStep)
+                .where(RunStep.agent_run_id == run_id)
+                .order_by(RunStep.sequence_number)
+            )
+        )
+        jobs = tuple(
+            await session.scalars(
+                select(ThreadSummaryJob)
+                .where(ThreadSummaryJob.trigger_run_id == run_id)
+                .order_by(ThreadSummaryJob.created_at, ThreadSummaryJob.id)
+            )
+        )
+
+    diagnostic_keys = (
+        "error_code",
+        "history_plan_pre_trim_tokens",
+        "history_plan_planned_tokens",
+        "history_plan_pre_trim_pressure",
+        "history_plan_retained_tokens",
+        "history_plan_reasons",
+    )
+    return {
+        "run_id": str(run_id),
+        "run_status": getattr(run, "status", None),
+        "run_failure_code": getattr(run, "failure_code", None),
+        "steps": [
+            {
+                "sequence": step.sequence_number,
+                "kind": step.kind,
+                "status": step.status,
+                "metadata": {
+                    key: step.safe_metadata[key]
+                    for key in diagnostic_keys
+                    if key in step.safe_metadata
+                },
+            }
+            for step in steps
+        ],
+        "summary_jobs": [
+            {
+                "job_id": str(job.id),
+                "status": job.status,
+                "failure_code": job.failure_code,
+            }
+            for job in jobs
+        ],
     }
 
 
@@ -376,6 +436,7 @@ async def test_real_run_owner_takeover_never_sends_or_retries_summary(
     injected: dict[str, object] = {}
 
     async def take_over(service, key, *, lease_token, now=None):
+        injected["hook_calls"] = int(injected.get("hook_calls", 0)) + 1
         if takeover_stage == "before_dispatch_fence":
             run_id, old_owner, new_owner = await _mutate_run_owner(db_factory, key=key)
             injected.update(run_id=run_id, old_owner=old_owner, new_owner=new_owner)
@@ -402,8 +463,23 @@ async def test_real_run_owner_takeover_never_sends_or_retries_summary(
     )
 
     provider = run_context["provider"]
+    if "run_id" not in injected:
+        diagnostics = await _run_diagnostics(db_factory, run_id=submitted.run_id)
+        diagnostics.update(
+            {
+                "takeover_stage": takeover_stage,
+                "mark_dispatched_hook_calls": int(injected.get("hook_calls", 0)),
+                "main_provider_requests": len(provider.main_requests),
+                "summary_provider_requests": len(provider.summary_requests),
+            }
+        )
+        pytest.fail(
+            "summary owner takeover hook was not reached: "
+            f"{json.dumps(diagnostics, sort_keys=True)}"
+        )
     assert injected["run_id"] == submitted.run_id
     assert injected["old_owner"] != injected["new_owner"]
+    assert injected["hook_calls"] == 1
     assert not provider.summary_requests
     assert len(provider.main_requests) == 3
     if takeover_stage == "before_dispatch_fence":
