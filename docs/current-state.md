@@ -16,6 +16,8 @@
 
 [T04 研究 PR #10](https://github.com/lijihao-0804/AgentHub/pull/10)仍为 draft：16 任务组、两变体、K=2 的 DEV 实验未达到预登记增益门槛，未派发 HOLDOUT；助手校准不能代替双人人工金标。旧实验与费用记录保留，不因本轮修复重算为通过。
 
+跨轮金额预算的[基础切片](reviews/interactive-case-budget-foundation-20261105.md)在独立分支完成父账本、报价/预检、执行检查及实际 gateway 的本地联合验收。0053 只迁移了专用测试库；worker/driver 及真实计费证明未接通，T05 和全平台硬金额保证仍未完成。该状态不改变 main 的 0052 迁移口径。
+
 ## 当前结论
 
 | 层次 | 当前可说的话 | 不能外推的话 |

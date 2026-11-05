@@ -1355,3 +1355,8 @@ __all__ = [
     "InteractiveEpisodeTurn",
     "PricingSnapshot",
 ]
+
+# Import after the evaluation tables above are declared.  The case budget
+# module references those tables by name and remains metadata-registered even
+# though its persistence contract is exposed to the Run ledger.
+from packages.evaluation import case_budget_models as _case_budget_models  # noqa: E402,F401
