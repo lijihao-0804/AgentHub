@@ -9,7 +9,7 @@
 | 冻结演示源码 C1 | `ca87af0a3ecde444a7dcf03fb93c48f1a31441d6` |
 | 交付分支 | `codex/final-closeout-20261106`；材料提交号由交付回执记录，文档不自引用提交 hash |
 | 数据库 | 新隔离 `agenthub_portfolio_test`，migration `0052_memory_recovery_index`，显式 checkpoint bootstrap |
-| 远程状态 | 此前本地版未推送；本轮获授权在 Windows ACL/就绪修复后推送及通过候选 CI 后合并；结果见交付回执 |
+| 远程状态 | [PR #17](https://github.com/lijihao-0804/AgentHub/pull/17) 已推送 Windows 修复及交付材料；最终 head、CI/合并状态见 PR 实时记录 |
 | 预算与研究 | PR #14/#10 未合入；运行服务未注入 attempt budget / summary experiment permit |
 
 实际批准 Run `78bf4e17-d343-42e2-a067-5e5cb51cf963` 在等待审批期间经历进程停止/重启，

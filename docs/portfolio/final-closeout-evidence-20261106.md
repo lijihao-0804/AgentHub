@@ -166,3 +166,13 @@ init在写密钥前保护目录；Windows优先pwsh，非Windows仍为0700/0600�
 其中最初Windows PowerShell 5因继承模块路径加载失败，改为优先pwsh后通过；
 重复加固曾触发SeSecurityPrivilege问题，改用仅持久化DACL并增加重复执行回归后通过。
 Ruff与diff检查通过。前端源码未变，本地不重复构建；候选远程CI按原仓库工作流运行。
+
+
+## 仓库交付入口
+
+[PR #17](https://github.com/lijihao-0804/AgentHub/pull/17) 已提交上述 R1、隔离演示、材料与Windows修复。
+Windows修复源码锚点 `04fe8db53468e077481256b11002ca95c738a270`，此后只更新发布链接文档。
+最终 head、PR/push CI 与合并状态以 PR Checks 和
+[该分支 Actions](https://github.com/lijihao-0804/AgentHub/actions?query=branch%3Acodex%2Ffinal-closeout-20261106)
+实时记录为准，不在材料中复制过时状态。用户已授权在最终候选 CI 通过后合并；
+主代理交付消息另报实际 merge SHA，本地 deployment 回执记录运行版本。预算/研究 Draft 继续排除。

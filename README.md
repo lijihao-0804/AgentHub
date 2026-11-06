@@ -8,8 +8,8 @@ AgentHub 围绕工具治理、人工审批、持久恢复和可追溯评测构�
 源码锚点为 main `5a37462` → R1 `27d7847` → 演示源码
 `ca87af0a3ecde444a7dcf03fb93c48f1a31441d6`，分支 `codex/final-closeout-20261106`。
 后续材料提交只含文档与安全证据；最终材料提交号见交付回执/`git log -1`。
-当前新增 Windows ACL 与有界启动就绪修复；已获授权推送并在候选 CI 通过后合并。
-实际远程状态见交付记录，历史本地回执不作为远程 CI 结果。预算 #14、研究 #10 未合入。
+Windows 交付修复源码为 `04fe8db`；仓库交付入口为 [PR #17](https://github.com/lijihao-0804/AgentHub/pull/17)。
+最终提交、CI 与合并状态以该 PR 的实时检查为准，历史本地回执不替代候选 CI。预算 #14、研究 #10 未混入。
 
 [启动与现场记录](docs/portfolio/final-closeout-evidence-20261106.md) ·
 [当前状态](docs/current-state.md) · [求职入口](docs/portfolio/README.md) ·
