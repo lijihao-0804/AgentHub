@@ -30,6 +30,7 @@ import asyncio
 import logging
 from dataclasses import asdict, replace
 from datetime import UTC, datetime, timedelta
+from enum import Enum, auto
 from uuid import UUID
 
 from sqlalchemy import select, text, update
@@ -64,6 +65,13 @@ from packages.observability import ProductionTraceSink
 logger = logging.getLogger(__name__)
 AGENT_RUN_PERMISSION = "agent_run"
 MEMORY_RECONCILE_STALE_AFTER = timedelta(minutes=5)
+
+
+class _ExtractionPhase(Enum):
+    PREPARING = auto()
+    MODEL_CALL_POSSIBLE = auto()
+    RESPONSE_RECEIVED = auto()
+    CANDIDATES_READY = auto()
 
 
 def _owner_lock_key(workspace_id: UUID, run_id: UUID) -> str:
@@ -242,6 +250,7 @@ async def _extract_owned_memories(
     run_id: UUID,
     request_id: str,
 ) -> None:
+    phase = _ExtractionPhase.PREPARING
     try:
         job = await _claim_extraction(factory, workspace_id=workspace_id, run_id=run_id)
         if job is None:
@@ -361,9 +370,15 @@ async def _extract_owned_memories(
                 prepared = await gateway.prepare_resolved(
                     current_context, model_plan, request, operation="generate"
                 )
+            # Entering the detached gateway does not prove that bytes were
+            # sent: it may still refuse locally. Without a returned response,
+            # however, a send cannot safely be ruled out (including fallback).
+            phase = _ExtractionPhase.MODEL_CALL_POSSIBLE
             response = await prepared.generate_resolved(current_context, model_plan, request)
+            phase = _ExtractionPhase.RESPONSE_RECEIVED
             candidates = parse_candidates(response, user_input=input_text)
             payload = [asdict(candidate) for candidate in candidates]
+            phase = _ExtractionPhase.CANDIDATES_READY
             async with factory() as session:
                 persisted = await session.execute(
                     update(MemoryExtractionJob)
@@ -414,16 +429,17 @@ async def _extract_owned_memories(
         )
         logger.info(
             "memory_extraction_completed",
-            extra={"proposed": len(candidates), "created": len(created)},
+            extra={"proposed": len(candidates), "memories_created": len(created)},
         )
         await _finish_extraction(
             factory, workspace_id=workspace_id, run_id=run_id, status="COMPLETED"
         )
     except Exception:
-        # A failed extraction must never look like a failed run. Candidates
-        # persisted before deterministic recording can be resumed without a
-        # second model send; before that boundary the job is terminal, because
-        # a request may already have reached the provider.
+        # Preserve the successful parent Run. Only persisted candidates may
+        # resume deterministic recording; other failures are terminal and
+        # must never be repaired by another model call. Local response stages
+        # distinguish known-response processing/storage failure from a call
+        # whose outcome is unknown. Process loss still reconciles conservatively.
         try:
             async with factory() as failure_session:
                 persisted = await failure_session.get(
@@ -435,7 +451,16 @@ async def _extract_owned_memories(
                     failure_code = "MEMORY_EXTRACTION_RECORDING_PENDING"
                 else:
                     final_status = "FAILED"
-                    failure_code = "MEMORY_EXTRACTION_FAILED"
+                    failure_code = {
+                        _ExtractionPhase.PREPARING: "MEMORY_EXTRACTION_FAILED",
+                        _ExtractionPhase.MODEL_CALL_POSSIBLE: "MEMORY_EXTRACTION_OUTCOME_UNKNOWN",
+                        _ExtractionPhase.RESPONSE_RECEIVED: (
+                            "MEMORY_EXTRACTION_RESPONSE_PROCESSING_FAILED"
+                        ),
+                        _ExtractionPhase.CANDIDATES_READY: (
+                            "MEMORY_EXTRACTION_RESPONSE_PERSISTENCE_FAILED"
+                        ),
+                    }[phase]
             await _finish_extraction(
                 factory,
                 workspace_id=workspace_id,
