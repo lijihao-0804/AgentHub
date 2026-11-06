@@ -4,11 +4,12 @@ AgentHub 围绕工具治理、人工审批、持久恢复和可追溯评测构�
 模型提出调用，发布策略决定能否执行；写入等待审批，批准后从 checkpoint 恢复原 Run。
 审批决定与执行结果分别保存，无法确认的副作用进入 `UNKNOWN_OUTCOME / NEEDS_ATTENTION`。
 
-**FINAL-CLOSE-1 本地交付版，2026-11-06。六项收口已完成，停止功能施工。**
+**FINAL-CLOSE-1 本地交付版，2026-11-06。六项核心收口完成；本轮仅补齐密钥 ACL 与启动就绪两项交付修复。**
 源码锚点为 main `5a37462` → R1 `27d7847` → 演示源码
 `ca87af0a3ecde444a7dcf03fb93c48f1a31441d6`，分支 `codex/final-closeout-20261106`。
 后续材料提交只含文档与安全证据；最终材料提交号见交付回执/`git log -1`。
-这是本地提交，尚未推送、创建新 PR 或运行候选远程 CI。预算 #14、研究 #10 未合入。
+当前新增 Windows ACL 与有界启动就绪修复；已获授权推送并在候选 CI 通过后合并。
+实际远程状态见交付记录，历史本地回执不作为远程 CI 结果。预算 #14、研究 #10 未合入。
 
 [启动与现场记录](docs/portfolio/final-closeout-evidence-20261106.md) ·
 [当前状态](docs/current-state.md) · [求职入口](docs/portfolio/README.md) ·
@@ -58,7 +59,9 @@ Incident 使用真实 API、数据库、队列、checkpoint、MCP、策略与审
 不调用模型或业务工具；3 题结果仅证明工程链路，不能写成模型准确率。
 
 本轮检查包括 Ruff、前端统一入口 8 组、生产构建/TypeScript、5 个新增定点节点，以及
-实际启动、重启恢复、拒绝和 HTTP/RBAC 验证；R1 沿用已有定点证据，不重复跑全量套件。
+实际启动、重启恢复、拒绝和 HTTP/RBAC 验证；R1 沿用已有定点证据。
+Windows 密钥与配置使用受保护 DACL；Start 默认最多等待 90 秒，检查 API、Web、Ops MCP 和专用 worker，
+失败返回非零、报告日志并清理本次启动进程。可用 `-ReadyTimeoutSeconds 120` 调整为 5–300 秒。
 完整 CI、公网部署、硬金额预算、judge 校准、Memory/RAG 新优化、容量/SLA 留待以后。
 Qdrant/RAG 未启用；依赖诊断中的未选服务不能当作已部署能力。
 

@@ -9,7 +9,7 @@
 | 冻结演示源码 C1 | `ca87af0a3ecde444a7dcf03fb93c48f1a31441d6` |
 | 交付分支 | `codex/final-closeout-20261106`；材料提交号由交付回执记录，文档不自引用提交 hash |
 | 数据库 | 新隔离 `agenthub_portfolio_test`，migration `0052_memory_recovery_index`，显式 checkpoint bootstrap |
-| 远程状态 | 本轮没有推送/PR/合并；没有当前候选远程 CI，不借用历史 main CI |
+| 远程状态 | 此前本地版未推送；本轮获授权在 Windows ACL/就绪修复后推送及通过候选 CI 后合并；结果见交付回执 |
 | 预算与研究 | PR #14/#10 未合入；运行服务未注入 attempt budget / summary experiment permit |
 
 实际批准 Run `78bf4e17-d343-42e2-a067-5e5cb51cf963` 在等待审批期间经历进程停止/重启，
@@ -32,3 +32,6 @@ R1 使用既有新增 10 个、历史 18 个独立节点的相关定点证据；
 
 历史客服/RAG/Memory 结果只按原报告日期、SHA、配置和分母引用，不改写成当前候选成绩。
 用户个人贡献由本人核对，代码和验收含 Codex/DeepSeek 协作，不能由仓库反推独立实现全部系统。
+
+Windows交付修复已完成实际受保护DACL、旧密钥保留、重复应用与有界冷启动验收；
+6个新增定点节点有正向证据，详见交付记录。预算/研究Draft仍不在候选中。

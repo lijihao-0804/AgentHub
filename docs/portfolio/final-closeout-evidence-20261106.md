@@ -8,7 +8,8 @@
 `27d78476a0d55a19ca80b2c1e71dd678845ea8ee` → 冻结演示源码 C1
 `ca87af0a3ecde444a7dcf03fb93c48f1a31441d6`。分支 `codex/final-closeout-20261106`。
 C1 后的材料提交只含 README/docs/安全工件；其 SHA 见最终交付回执及 `git log -1`，避免文档自引用 hash。
-预算 Draft #14、研究 Draft #10 未合入。本轮未推送/建 PR/合并，没有当前候选远程 CI。
+预算 Draft #14、研究 Draft #10 未合入。此前本地交付未推送/建 PR/合并；
+2026-11-06 用户新增授权两项修复后推送、候选 CI 通过后合并。远程结果见本页后续发布回执。
 
 [安全运行回执](evidence/final-close-20261106/receipt.json)保存实际 API、数据库、进程与动作记录。
 [装配审阅](final-closeout-scope-20261106.md)保留子代理审阅时点，并附实际装配补记。
@@ -67,6 +68,7 @@ Workspace `7e54888a-aa14-4a5f-8762-b9b82b91e72a`；AgentVersion
 Set-Location 'E:\JAVA\AI+agent\AgentHub\.worktrees\ae1\.agents\worktrees\codex\final-closeout'
 $taskPython = 'E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe'
 & $taskPython -m scripts.portfolio_demo init
+# Windows init 在写入密钥前收紧目录 DACL，现有状态用 secure-state 保留原密钥加固。
 docker compose -p agenthub-final-close-20261106 --env-file .scratch/portfolio-closeout/compose.env -f infra/portfolio.compose.yml up -d --wait
 & $taskPython -m scripts.portfolio_demo prepare
 & $taskPython -m scripts.portfolio_demo build-web
@@ -77,7 +79,12 @@ Invoke-RestMethod http://127.0.0.1:3040/api/v1/health
 & $taskPython -m scripts.portfolio_demo evaluation
 ```
 
-已有状态不要重复 init（会拒绝覆盖密钥）；只在自己的进程停止后 Start。
+已有状态不要重复 init（会拒绝覆盖密钥）；可运行 `python -m scripts.portfolio_demo secure-state`
+修复原目录/配置 ACL 而不重写密钥。Start 也会先自动加固，再启动并有界等待就绪。
+默认 90 秒，可用 `-ReadyTimeoutSeconds 120` 调整（5–300 秒）；提前退出/超时返回非零、
+指出角色与 readiness 日志并清理本次启动进程。Ops/API/Web 端口占用在启动前拒绝。
+worker 通过含本次实际 PID 的专用 Celery 节点名验证 pong，其他 worker 不能代替它。
+仅在自己的进程停止后 Start。
 prepare 显式执行 Alembic 与 checkpoint bootstrap，API 不自动建表。
 Next 代理在构建时固定，须使用 build-web 加载8040配置，不能只在 start 设置变量。
 Next生成的依赖拷贝目录已移入scratch，不提交依赖产物。
@@ -143,3 +150,19 @@ B02/B03/B05在选中流程未启用且未修复，不为收口接通。金额Int
 由主代理规划与验收，Codex实现，DeepSeek子代理提供装配审阅及文档/评测夹具协作。
 个人简历按本人实际负责、复核、复现范围陈述，不能由仓库反推独立完成或企业生产收益。
 达到收口标准即停止施工，开始个人简历与面试讲述，不继续清空backlog。
+
+
+## Windows 交付修复验收（2026-11-06）
+
+[本轮安全回执](evidence/final-close-20261106/windows-hardening-receipt.json)：实际演示目录及两个
+配置文件均为受保护DACL，只允许当前用户、SYSTEM、Administrators；旧密钥逐字节未变。
+重复secure-state与Start可成功，不改执行策略、不申请审计/owner权限，拒绝状态树junction。
+init在写密钥前保护目录；Windows优先pwsh，非Windows仍为0700/0600。
+
+真实冷启动已在60秒上限内通过API ready、Web页面/代理、Ops MCP握手与工具列表、
+当前PID对应的专用worker pong；成功时五个角色进程仍存活。端口冲突、worker提前退出、
+就绪超时的三个Windows故障注入均返回非零并清理本轮已启动进程，输出日志位置。
+另有外来worker pong拒绝与两项ACL测试，共6个独立新增节点取得正向证据；仅重跑受影响失败节点。
+其中最初Windows PowerShell 5因继承模块路径加载失败，改为优先pwsh后通过；
+重复加固曾触发SeSecurityPrivilege问题，改用仅持久化DACL并增加重复执行回归后通过。
+Ruff与diff检查通过。前端源码未变，本地不重复构建；候选远程CI按原仓库工作流运行。

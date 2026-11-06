@@ -202,11 +202,21 @@ def api():
 
 
 def worker():
+    import socket
+
     install_provider()
     from apps.worker.celery_app import celery_app
 
     process_record("worker")
-    celery_app.worker_main(["worker", "--pool=solo", "--concurrency=1", "--loglevel=WARNING"])
+    celery_app.worker_main(
+        [
+            "worker",
+            "--pool=solo",
+            "--concurrency=1",
+            "--loglevel=WARNING",
+            f"--hostname=portfolio-closeout-{os.getpid()}@{socket.gethostname()}",
+        ]
+    )
 
 
 def beat():
