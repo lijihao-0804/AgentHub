@@ -1,181 +1,72 @@
 # AgentHub
 
-**Enterprise Agent Runtime & Control Plane** — 一个围绕工具执行、人工审批与可复现评测构建的 Agent 工程项目。
+AgentHub 围绕工具治理、人工审批、持久恢复和可追溯评测构建 Agent Runtime。
+模型提出调用，发布策略决定能否执行；写入等待审批，批准后从 checkpoint 恢复原 Run。
+审批决定与执行结果分别保存，无法确认的副作用进入 `UNKNOWN_OUTCOME / NEEDS_ATTENTION`。
 
-AgentHub 让一次请求经历上下文准备、模型推理、工具治理、持久审批和执行观测。模型提出操作，运行时决定是否执行；审批等待与恢复共享同一 Run，历史配置、知识和记忆输入可追溯。
+**FINAL-CLOSE-1 本地交付版，2026-11-06。六项核心收口完成；本轮仅补齐密钥 ACL 与启动就绪两项交付修复。**
+源码锚点为 main `5a37462` → R1 `27d7847` → 演示源码
+`ca87af0a3ecde444a7dcf03fb93c48f1a31441d6`，分支 `codex/final-closeout-20261106`。
+后续材料提交只含文档与安全证据；最终材料提交号见交付回执/`git log -1`。
+Windows 交付修复源码为 `04fe8db`；仓库交付入口为 [PR #17](https://github.com/lijihao-0804/AgentHub/pull/17)。
+最终提交、CI 与合并状态以该 PR 的实时检查为准，历史本地回执不替代候选 CI。预算 #14、研究 #10 未混入。
 
-架构是 **Modular Monolith + Worker**：Next.js、FastAPI、LangGraph 适配器、PostgreSQL、Redis 和 Qdrant。Enterprise 描述治理场景；真实企业生产规模和完整公网部署尚未证明。截至 2026-11-05，AE6b（PR #7）、AE10（PR #8）、统一回归/文档修复（PR #9）和上下文/Memory/Wiki（PR #11）已合并到 main。
+[启动与现场记录](docs/portfolio/final-closeout-evidence-20261106.md) ·
+[当前状态](docs/current-state.md) · [求职入口](docs/portfolio/README.md) ·
+[完整架构](docs/architecture.md)
 
-[当前状态](docs/current-state.md) · [AE6b 验收](docs/milestones/AE-6b-integration-closure.md) · [AE10 验收](docs/milestones/AE-10-minimal-evaluation-ui.md) · [能力证据矩阵](docs/milestones/AE-capability-matrix.md) · [未完成项盘点](docs/reviews/WIP-inventory-20261104.md)
+## 可直接展示的结果
 
-## 当前主线
-
-- **代码与工程验收**：main 基线 `fcafc83e2ad68c9b1578f5117365aaac2732852c`；迁移 head 为 `0052_memory_recovery_index`。AE6b/AE10 已提供交互实验与安全结果界面，PR #11 新增上下文/Wiki 配置和 Memory 恢复修复。
-- **后续开发**：[上下文、Memory 与 Wiki](docs/reviews/context-memory-delivery-20261105.md)已通过最终候选两轮 CI 并合并；[provider 出站修复](docs/reviews/provider-egress-delivery-20261105.md)独立交付。真实质量研究 [PR #10](https://github.com/lijihao-0804/AgentHub/pull/10)保留 DEV 负结果，未进入 HOLDOUT。
-- **当前 CI**：PR #11 最终候选的 [PR CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41902103066) 和 [push CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41902093917) 通过；合并后 main [41903660317](https://github.com/lijihao-0804/AgentHub/actions/runs/41903660317) 单独跟踪。历史计数与 skip 保留原时点。
-- **已有但需准确表述的能力**：Dashboard 已展示 p50/p95、运行趋势、失败与版本维度；worker/beat 已接内部审批、知识、Wiki、评测对账；Memory 读取会过滤 `expires_at` 已过期条目。内部对账不等于外部副作用自动确认，过期过滤也不等于完整 TTL/物理清理。
-- **证据分层**：真实模型质量仍有受控小样本证据，已有 3 case/K=1 与 2 case/K=2，不能推出总体准确率；统计门禁的具体规则、原始 JSON 与 PASS/FAIL/INCONCLUSIVE 分类以 [能力矩阵](docs/milestones/AE-capability-matrix.md) 为准，本入口不把少量真实 PASS 泛化为全面通过。
-- **生产边界**：AE6b/AE10 主要是本机隔离栈与远端 CI 的工程验收。完整公网部署、资源饱和容量、长期运营、供应商账单和真实企业收益仍未证明。
-
-## Why AgentHub
-
-| 执行中遇到的问题 | 本项目的处理 |
+| 必须项 | 本轮结果 |
 | --- | --- |
-| 模型提出危险工具操作，谁决定能否执行？ | 发布 ToolRevision + ToolPolicy；READ/WRITE 与风险分开，READ + NEVER 才自动执行，其余进入审批 |
-| 长时间等待审批，服务重启后怎么继续？ | PostgreSQL checkpoint、独立审批决策/执行状态、same-run resume，计数预算不重置 |
-| 配置与知识变化后如何解释历史结果？ | 不可变 AgentVersion 和规范哈希；Run 保存有效知识/Memory 快照，正式实验冻结输入身份 |
-| 如何知道一次修改是否有效？ | Run steps / 生命周期事件 / 脱敏 trace；发布数据集、成对比较、消融、独立指标与失败记录 |
+| 版本冻结 | 纳入 R1；独立工作树、独立数据库与 Redis；运行源码 C1 干净，文档编辑另记 |
+| 核心阻断 | 修正 Windows Uvicorn 事件循环启动、固定指标枚举与 Next 构建时代理配置；预算/摘要研究路径保持关闭 |
+| 主演示 | 两个独立账号；等待时真实停止并重启进程，再批准同 Run 成功；拒绝后无新增模拟回滚 |
+| 评测入口 | 当前提交的 DEV 工程夹具 3 题，PASS/FAIL/UNKNOWN 各一；摘要、逐题详情、分页和 Viewer 权限实际核对 |
+| 启动复现 | 新 Compose namespace/data volume，显式迁移至 0052、checkpoint bootstrap；API health/ready 与 Web 代理均 200 |
+| 最小材料 | 当前 README、架构图、能力—证据表、5 张现场截图及安全 JSON 回执；必要检查通过 |
 
-## Architecture Overview
+本地 Web：<http://127.0.0.1:3040>；API：<http://127.0.0.1:8040/docs>。
+可复制的启动/停止命令、账号位置及演示步骤见[交付记录](docs/portfolio/final-closeout-evidence-20261106.md)。
+
+## 演示架构
 
 ```mermaid
-flowchart TB
-    Web["Next.js - Applications / Thread / Run UI"] --> API["FastAPI - /api/v1"]
-    subgraph Control["Control plane - API application services"]
-        API --> Config["AgentPublishService - immutable AgentVersion"]
-        API --> Thread["ThreadService - turns / run identity"]
-        API --> Eval["Evaluation - frozen variants / datasets / metrics"]
-    end
-    Config --> Runtime["AgentRunService - LangGraph adapter"]
-    Thread --> Runtime
-    Eval --> Runtime
-    Runtime --> Context["ContextBudgetPolicy - frozen knowledge / memory"]
-    Context --> Model["Model Gateway - provider adapters"]
-    Runtime --> Tool["ToolRuntime / ToolPolicy / ActionRuntime"]
-    Tool --> Approval["ApprovalService - decision / execution"]
-    Tool --> MCP["Builtin / REST / MCP adapters"]
-    Runtime --> PG[("PostgreSQL - runs / events / snapshots / checkpoints")]
+flowchart LR
+    Web[Next.js Web] --> API[FastAPI /api/v1]
+    API --> Redis[(Redis)]
+    Redis --> Worker[Celery worker]
+    Worker --> Runtime[AgentRunService]
+    API --> Runtime
+    Runtime --> Context[ContextBudgetPolicy]
+    Context --> Model[确定性演示模型适配器]
+    Runtime --> Policy[ToolRuntime + ToolPolicy]
+    Policy --> Approval[独立账号审批]
+    Approval --> Resume[原 Run 恢复与动作执行]
+    Policy --> Ops[Ops MCP 模拟工具]
+    Resume --> Ops
+    Runtime --> PG[(PostgreSQL + checkpoint)]
     Approval --> PG
-    Eval --> PG
-    API --> Redis[("Redis - Celery broker")]
-    Redis --> Worker["Celery worker - ingestion / evaluation / extraction"]
-    Beat["Celery beat - ingestion reconciliation"] --> Redis
-    Worker --> PG
-    Worker --> Qdrant[("Qdrant - retrieval index")]
-    Context --> Qdrant
+    Eval[受控评测 driver] --> Evidence[冻结实验 + 指标 + 安全投影]
+    Evidence --> PG
+    API --> Evidence
 ```
 
-模块箭头是职责/数据流，不表示独立微服务。Knowledge 经适配器检索 Qdrant 并校验 PostgreSQL 快照；Memory 从 PostgreSQL 加载。Redis 不承载审批权威状态。[第二张图：治理执行与恢复](docs/architecture.md#governed-agent-run-lifecycle)。
+## 证据和限制
 
-## Key Engineering Decisions
+Incident 使用真实 API、数据库、队列、checkpoint、MCP、策略与审批；模型适配器为显式
+确定性脚本，Ops 回滚为仓库模拟工具，不连接生产。评测 driver 直接提供受控 observation，
+不调用模型或业务工具；3 题结果仅证明工程链路，不能写成模型准确率。
 
-| 设计 | 为什么这样做 | 代码入口 |
-| --- | --- | --- |
-| Immutable AgentVersion | 发布后规格不可变；LATEST 是绑定策略，有效知识另冻结到 Run/实验 | [publish](packages/agent_runtime/publish.py) |
-| Governed Tool Runtime | 模型只能提议工具；发布修订、参数校验和策略决定执行 | [policy](packages/tools/policy.py)、[runtime](packages/tools/runtime.py) |
-| Durable Approval & Resume | 决策与动作执行分开持久化；批准不等于动作成功 | [approvals](packages/approvals/service.py)、[resume](packages/agent_runtime/runtime.py) |
-| Side-effect Safety | 逻辑身份约束重复执行；已派发但无法确认的写入标记 UNKNOWN_OUTCOME → NEEDS_ATTENTION | [actions](packages/tools/actions.py)、[MCP](packages/mcp/runtime.py) |
-| Context Budget & Snapshot | 所有模型上下文经预算准入，历史知识/记忆校验冻结身份 | [context_budget](packages/agent_runtime/context_budget.py) |
-| Knowledge / RAG | 修订与快照保留、异步入库恢复、Dense/Hybrid、固定引用与有界分片预览 | [knowledge](packages/knowledge) |
-| Run Observability | Run 详情/步骤、持久生命周期事件与脱敏 trace，各自职责分开 | [event_store](packages/agent_runtime/event_store.py) |
-| Evaluation & Evidence | 发布数据集/holdout 暴露、实验冻结、成对/消融与门禁，保留失败而非只展示成功 | [evaluation](packages/evaluation) |
+本轮检查包括 Ruff、前端统一入口 8 组、生产构建/TypeScript、5 个新增定点节点，以及
+实际启动、重启恢复、拒绝和 HTTP/RBAC 验证；R1 沿用已有定点证据。
+Windows 密钥与配置使用受保护 DACL；Start 默认最多等待 90 秒，检查 API、Web、Ops MCP 和专用 worker，
+失败返回非零、报告日志并清理本次启动进程。可用 `-ReadyTimeoutSeconds 120` 调整为 5–300 秒。
+完整 CI、公网部署、硬金额预算、judge 校准、Memory/RAG 新优化、容量/SLA 留待以后。
+Qdrant/RAG 未启用；依赖诊断中的未选服务不能当作已部署能力。
 
-共享 Memory 默认关闭，提供异步抽取、去重、停用/启用、快照与 UNTRUSTED 准入。精确引文不能证明应写入共享记忆；相关性与冲突质量仍有不足，见下方证据。
+Org OWNER/ADMIN 存在自审批豁免；本次实际使用不同账号，未宣称强制四眼审批。
+上下文准入和版本快照有既有合同；自动摘要发布门仍拒绝，未宣称新语义收益。
 
-## Applications
-
-Research（文献证据）、Incident（调查与受控回滚）、Data Analyst（只读分析）、Customer Support（政策与受控工单）共用 Thread / Turn / Artifact / Runtime。每个应用提供 prompt、工具与产物投影；审批与运行预算由共同运行时处理。
-
-## Hero Demo：调查 → 提议回滚 → 审批 → 同一 Run 恢复
-
-[5–8 分钟演示脚本](docs/report/07-现场演示脚本.md)使用仓库 Ops MCP 固定数据与回滚模拟，不连接生产部署系统。包含隔离环境、MCP 导入/工具策略、数据库与事件检查、失败排查和代码入口。
-
-演示脚本与[历史截图](docs/report/18-截图演示.md)是固定演示资料，不代表当前服务已再次启动。最新可核对的结果页链路、受控 worker 故障窗口和界面证据见 [AE10 验收](docs/milestones/AE-10-minimal-evaluation-ui.md)；审批与执行结果仍以实际 Run 为准。
-
-## Engineering Evidence
-
-| 证据 | 已验证内容与限制 |
-| --- | --- |
-| [当前 main CI](https://github.com/lijihao-0804/AgentHub/actions/runs/41859097801) | 531 integration + 2846 non-integration passed；35 个条件 skip 分类保留，不代表这些外部材料检查实际运行 |
-| [AE6b Integration Closure](docs/milestones/AE-6b-integration-closure.md) | 正式 Experiment/API、真实 PostgreSQL/Redis/Celery、逐 case worker、租约 fencing、四处进程退出重启、清理与未知写入留存；当前验收使用确定性 provider |
-| [AE10 最小评测结果界面](docs/milestones/AE-10-minimal-evaluation-ui.md) | Run/case 结果、统计与安全证据、筛选分页、权限和中英文界面；P1 不再序列化原始 observation，P2 修复 token 续期后的筛选/分页状态 |
-| [持久审批验收](docs/reviews/post-M5-independent-review-closure.md) | PostgreSQL/checkpoint、并发与 crash 窗口的历史集成证据；不能泛化为跨机 exactly-once |
-| [正式客服评测](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 60 条合成任务、两个变体各三次；HOLDOUT 业务 47/60→60/60，结合助手语义 41/60→57/60；非线上成功率/真人一致性 |
-| [RAG / 安全 / 故障 / 负载](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 24 DEV 问题、144 次检索生成；最终目标召回两策略均 72/72。含隔离/注入/worker crash/重连/1、4、8 并发受控负载，非资源饱和容量 |
-| [Memory 质量收口](docs/reviews/AgentHub-closure-memory-quality-20261005.md) | 11 确定性场景，强制候选 Write precision 6/9，禁止召回 5/8；脚本任务 10/10 不是 LLM 成功率，复杂真实 USE 未测 |
-| [前端排版](docs/reviews/AgentHub-前端文字排版修正报告-20261003.md)、[快照预览/复制](docs/reviews/AgentHub-前端补缺批次一验收报告-20261003.md) | 专项浏览器与脚本证据，非所有交互持续 E2E |
-| [历史基线 CI](https://github.com/lijihao-0804/AgentHub/actions/runs/37327384930) | `a12e8abf7e1f55d07fe6429d5a618737f782efe0` success；仅代表该历史提交 |
-
-已实现不等于本轮复测、正式里程碑验收或生产可用。历史记录固定各自 SHA，不汇总成“当前测试覆盖率”。
-
-## Known Limits
-
-延期项包括逐轮参数、新派生草稿/关系、成员邀请/角色 UI、Memory TTL/衰减/容量物理清理、外部副作用自动对账和 M8 公网部署。Dashboard 的 p95/趋势/失败与版本视图、worker/beat 内部对账、Memory 过期过滤均已存在；它们分别不等于完整生产分析平台、外部副作用自动确认和完整记忆淘汰。Memory 冲突事实仍可共存，临时/私人/恶意语义拒写仍依赖 prompt。
-
-[当前状态与证据口径](docs/current-state.md)区分代码、工程验收、真实模型质量与生产部署；真实企业收益、长期大规模 Memory、跨机故障与全面 E2E 未证明。[WIP 盘点](docs/reviews/WIP-inventory-20261104.md)记录待开发切片及依赖；后续按用户授权推进，不把历史收口声明当作当前开发状态。
-
-## Quick Start & Documentation
-
-- 最小展示：阅读 [Demo](docs/report/07-现场演示脚本.md)与历史截图、运行源码走读，无需模型密钥。
-- 系统学习：从 [00 · 架构](docs/learning/00-architecture-first.md)顺读 12 课，结合源码拆解、状态推演、手算例题与参考答案；最后按隔离实验指南留下自己的观察记录。Agent 岗位重点读 [Agent 工程强化](docs/learning/11-agent-engineering.md)，串起工具协议、执行控制、恢复与评测。
-- 本机业务运行：以下完整依赖启动；模型凭据、发布 Agent、工具导入仍须配置。
-- Hero Demo：独立 lab 数据库/Redis namespace/blob、显式 checkpoint bootstrap、Ops MCP 与有效工具调用模型；不自动建立所有配置。
-- CI：工作流使用自己的集成依赖，见 [workflow](.github/workflows/ci.yml)，与付费业务实验分开。
-- 真实模型验证：已有冻结证据，复现可能产生费用，本轮不重复。
-
-[文档导航](docs/README.md) · [架构](docs/architecture.md) · [求职材料](docs/portfolio/README.md) · [学习顺序](docs/learning/README.md) · [验收索引](docs/reviews/README.md)
-
-## 本地启动
-
-需要 Python 3.12、uv、Node.js 20+、Git；以下使用 Docker 提供 PostgreSQL、Redis、Qdrant、API 和 worker，Web 在本机运行。
-
-```powershell
-Copy-Item .env.example .env
-uv sync --locked
-```
-
-编辑 `.env`：设置自己的 `AGENTHUB_AUTH_JWT_SECRET`，并添加 `AGENTHUB_CREDENTIAL_MASTER_KEY`。
-Docker 环境需要有效密钥；API 与 worker 必须使用相同凭据主密钥。可分别用以下命令生成并保存到本机 `.env`：
-
-```powershell
-uv run --locked python -c "import secrets; print(secrets.token_urlsafe(48))"
-uv run --locked python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-```
-
-```powershell
-docker compose up -d postgres redis qdrant
-uv run --locked alembic upgrade head
-uv run --locked python -m scripts.bootstrap_langgraph_checkpoint
-docker compose up -d --build api worker beat
-
-cd apps/web
-npm ci --no-audit --no-fund
-npm run dev
-```
-
-打开 `http://localhost:3000`，通过登录/注册界面进入工作区，配置供应商凭据和模型档案后发布 Agent。
-访问令牌仅存于前端内存；页面已有 Auth UI，不需要手动粘贴 Bearer token。
-API 为 `http://localhost:8000`，OpenAPI 在 `/docs`；健康入口为 `/api/v1/health`、`/api/v1/ready`、`/api/v1/dependencies`。
-
-Web 的 `/api/...` 同源代理默认转发至 `http://127.0.0.1:8000`；其他端口使用服务端变量
-`AGENTHUB_API_PROXY_TARGET`。原生 Windows API 使用持久 checkpoint 时需要兼容 psycopg 的 Selector 事件循环；
-上面的 Linux 容器 API 避开该平台差异。数据库迁移与 checkpoint bootstrap 是显式部署步骤，不由 API 自动执行。
-
-首次 RAG 会加载 BGE-M3/重排权重；Compose 已启用进程预热和持久缓存，下载/加载时间与环境有关。
-`uv sync --locked` 使用仓库的 PyTorch 平台配置（Windows CUDA / Linux CPU）；不要复用其他 Python 环境的 wheel。
-容器真机链路已有记录，完整公网部署验收仍未完成。
-
-## 开发检查
-
-按实际改动选择检查，不要求重跑历史付费实验：
-
-```powershell
-uv run --locked ruff check .
-uv run --locked pytest -m "not integration"
-node scripts/test_web_regressions.cjs
-node scripts/test_stream_timing.cjs
-cd apps/web
-npm run build
-```
-
-PostgreSQL 集成测试使用独立、已迁移的 `AGENTHUB_TEST_DATABASE_URL`；持久审批测试还需该测试库的显式 checkpoint bootstrap。
-统一前端入口包含旧 web-review 与全部 AE-10 专项；需要同时执行真实 PG 列表隐私回归时，加 `--with-api-evidence` 并指定现有 `AGENTHUB_TEST_PYTHON`。[覆盖范围与旧断言迁移](docs/reviews/post-ae10-delivery-20261104.md)。
-Memory 小探针入口为 `python -m benchmarks.evaluation.memory_quality.runner`，只用于隔离测试库，默认模型费用为零；
-证据与复现说明见 [评测索引](docs/benchmark/README.md)。仅修改文档时检查链接、路径和 diff，无须重跑模型或浏览器矩阵。
-
-## 工程约束
-
-依赖方向：`Transport/API → Application → Domain/Contracts → Adapters`。
-框架隐藏在适配器之后；版本/知识/数据的不可变身份有规范哈希；租户与内容权限分开校验；
-工具和记忆作为不可信证据；未确认的外部写入不静默重试；历史修订与运行证据保留。
-完整规则见 [AGENTS.md](AGENTS.md) 与 [产品/语义总计划](plan/plan.md)。
+代码与材料由用户组织并经 Codex/DeepSeek 协作完成。个人贡献应按本人实际设计、复核、
+复现范围填写；历史模型实验保留原日期、SHA 和分母，见[历史验收](docs/reviews/README.md)。

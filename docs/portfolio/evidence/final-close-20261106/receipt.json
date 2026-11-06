@@ -1,0 +1,564 @@
+{
+  "mode": "DETERMINISTIC_ENGINEERING_CONFORMANCE",
+  "build_sha": "ca87af0a3ecde444a7dcf03fb93c48f1a31441d6",
+  "workspace_id": "7e54888a-aa14-4a5f-8762-b9b82b91e72a",
+  "agent_version_id": "96e79b7a-73aa-4ad0-9e24-c77e9ed3ebe6",
+  "resolved_spec_hash": "ca63263fc826865b595400f5d8910b5822db781ded4cf520d75234426675bdb6",
+  "final-approval": {
+    "thread_id": "2ee51943-9352-40aa-8fb6-6a5131d994a5",
+    "run_id": "78bf4e17-d343-42e2-a067-5e5cb51cf963",
+    "approval_id": "f448023d-723b-4c3c-a55b-d40a65f66a95",
+    "before_actions": 1,
+    "waiting_at": "2026-11-06T06:52:19.109972+00:00",
+    "events": [
+      {
+        "type": "run.started",
+        "sequence": 1
+      },
+      {
+        "type": "context.budget",
+        "sequence": 2
+      },
+      {
+        "type": "message.started",
+        "sequence": 3
+      },
+      {
+        "type": "message.completed",
+        "sequence": 5
+      },
+      {
+        "type": "tool.requested",
+        "sequence": 6
+      },
+      {
+        "type": "tool.started",
+        "sequence": 7
+      },
+      {
+        "type": "tool.completed",
+        "sequence": 8
+      },
+      {
+        "type": "context.budget",
+        "sequence": 9
+      },
+      {
+        "type": "message.started",
+        "sequence": 10
+      },
+      {
+        "type": "message.completed",
+        "sequence": 12
+      },
+      {
+        "type": "tool.requested",
+        "sequence": 13
+      },
+      {
+        "type": "tool.started",
+        "sequence": 14
+      },
+      {
+        "type": "tool.completed",
+        "sequence": 15
+      },
+      {
+        "type": "context.budget",
+        "sequence": 16
+      },
+      {
+        "type": "message.started",
+        "sequence": 17
+      },
+      {
+        "type": "message.completed",
+        "sequence": 19
+      },
+      {
+        "type": "tool.requested",
+        "sequence": 20
+      },
+      {
+        "type": "approval.required",
+        "sequence": 21
+      }
+    ],
+    "decision": "approve",
+    "after_actions": 2,
+    "run_status": "SUCCEEDED",
+    "execution_status": "SUCCEEDED",
+    "requested_by": "a869a019-58d3-4719-b802-7e76a426c161",
+    "decided_by": "ffa1440e-2f2e-44d1-9298-d0e745289951",
+    "decided_at": "2026-11-06T06:53:32.698387+00:00",
+    "run_evidence": {
+      "id": "78bf4e17-d343-42e2-a067-5e5cb51cf963",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "started_at": "2026-11-06T06:52:12.714803Z",
+      "completed_at": "2026-11-06T06:53:32.584051Z",
+      "final_output": "【确定性工程演示】已收到动作观察，请以 Run 步骤中的实际状态为准。",
+      "agent_version_id": "96e79b7a-73aa-4ad0-9e24-c77e9ed3ebe6"
+    }
+  },
+  "final-denial": {
+    "thread_id": "fb7993f0-f2d3-451d-b6db-0ec32870940d",
+    "run_id": "c08223b0-9b56-4977-945b-54c10020b2d6",
+    "approval_id": "4b14b445-7e25-4906-b10c-dc2ac8fbb1ae",
+    "before_actions": 2,
+    "waiting_at": "2026-11-06T06:53:40.997088+00:00",
+    "events": [
+      {
+        "type": "run.started",
+        "sequence": 1
+      },
+      {
+        "type": "context.budget",
+        "sequence": 2
+      },
+      {
+        "type": "message.started",
+        "sequence": 3
+      },
+      {
+        "type": "message.completed",
+        "sequence": 5
+      },
+      {
+        "type": "tool.requested",
+        "sequence": 6
+      },
+      {
+        "type": "tool.started",
+        "sequence": 7
+      },
+      {
+        "type": "tool.completed",
+        "sequence": 8
+      },
+      {
+        "type": "context.budget",
+        "sequence": 9
+      },
+      {
+        "type": "message.started",
+        "sequence": 10
+      },
+      {
+        "type": "message.completed",
+        "sequence": 12
+      },
+      {
+        "type": "tool.requested",
+        "sequence": 13
+      },
+      {
+        "type": "tool.started",
+        "sequence": 14
+      },
+      {
+        "type": "tool.completed",
+        "sequence": 15
+      },
+      {
+        "type": "context.budget",
+        "sequence": 16
+      },
+      {
+        "type": "message.started",
+        "sequence": 17
+      },
+      {
+        "type": "message.completed",
+        "sequence": 19
+      },
+      {
+        "type": "tool.requested",
+        "sequence": 20
+      },
+      {
+        "type": "approval.required",
+        "sequence": 21
+      }
+    ],
+    "decision": "deny",
+    "after_actions": 2,
+    "run_status": "SUCCEEDED",
+    "execution_status": "NOT_STARTED",
+    "requested_by": "a869a019-58d3-4719-b802-7e76a426c161",
+    "decided_by": "ffa1440e-2f2e-44d1-9298-d0e745289951",
+    "decided_at": "2026-11-06T06:54:32.855585+00:00",
+    "run_evidence": {
+      "id": "c08223b0-9b56-4977-945b-54c10020b2d6",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "started_at": "2026-11-06T06:53:34.456970Z",
+      "completed_at": "2026-11-06T06:54:32.790457Z",
+      "final_output": "【确定性工程演示】审批已拒绝，未执行回滚，也不会自动重试。",
+      "agent_version_id": "96e79b7a-73aa-4ad0-9e24-c77e9ed3ebe6"
+    }
+  },
+  "evaluation": {
+    "run_id": "9f0506de-4d5a-4a46-918e-b2b7e30eaa95",
+    "case_ids": [
+      "a76a9b2c-8370-4ac5-96d2-7130eeae7907",
+      "2e891bfc-d2ff-47c3-825d-390c8e0a5f12",
+      "ff46deaf-9609-4ef6-90ba-8dbecd5653db"
+    ],
+    "dataset_version_id": "ecbdc8e3-80bc-44d4-89c3-69fd7f5c3b21",
+    "kind": "DETERMINISTIC_ENGINEERING_CONFORMANCE",
+    "deterministic": true,
+    "non_model_quality": true,
+    "provider_calls": "NOT_DISPATCHED",
+    "evidence_level": "DETERMINISTIC_CONFORMANCE",
+    "execution_version": {
+      "build_sha": "ca87af0a3ecde444a7dcf03fb93c48f1a31441d6",
+      "driver_version": "portfolio-controlled-conformance-v1",
+      "evaluation_schema_version": 1
+    },
+    "model_binding": {
+      "provider": "openai-compatible",
+      "model": "portfolio/incident-deterministic-v1"
+    },
+    "dataset": {
+      "dataset_id": "2f0cf5b8-1435-46e3-a72b-e715126e5c99",
+      "version_id": "ecbdc8e3-80bc-44d4-89c3-69fd7f5c3b21",
+      "version_number": 1,
+      "status": "PUBLISHED",
+      "schema_version": 1,
+      "content_hash": "3c770fe79a930d0bbfd7cc718ab36c09ddccac921b6d555e465319ae99625abc",
+      "case_count": 3
+    },
+    "experiment": {
+      "experiment_id": "2f3b1273-fab4-4d1d-88a1-f9878266eafe",
+      "split": "DEV",
+      "purpose": "DEVELOPMENT",
+      "variant_id": "25d97eea-281f-4bb4-8926-c0ddafb65bf1",
+      "variant_hash": "9580763d68b882e6413ed9561914f04bccc23e3cb747f3222f6e668310b35e05"
+    },
+    "pricing": {
+      "primary_snapshot_id": "28474b0c-c7e3-43d1-be1b-18d4699d3fd7",
+      "all_snapshot_ids": [
+        "28474b0c-c7e3-43d1-be1b-18d4699d3fd7"
+      ],
+      "explicit_zero_price": true
+    },
+    "run": {
+      "status": "SUCCEEDED",
+      "metrics_snapshot_id": "1f4d187a-62e7-4abc-8eb3-c86ddf8de2cd",
+      "metrics_hash": "ca748daaab6d9f8f05ba356f774251a63dca9b1c2d9fcff829dd6fd706a7f7de",
+      "outcome_counts": {
+        "PASS": 1,
+        "FAIL": 1,
+        "UNKNOWN": 1
+      }
+    },
+    "cases": [
+      {
+        "case_key": "portfolio-controlled-fixture-pass-v1",
+        "case_id": "a76a9b2c-8370-4ac5-96d2-7130eeae7907",
+        "dataset_item_id": "68e8d835-ae58-48ef-b2d7-9a45b02d1245",
+        "category": "TOOL",
+        "execution_status": "SUCCEEDED",
+        "task_success": {
+          "status": "AVAILABLE",
+          "value": 1,
+          "reason": null
+        },
+        "task_outcome": "PASS",
+        "interpretation": "controlled_fixture_conforms"
+      },
+      {
+        "case_key": "portfolio-controlled-fixture-fail-v1",
+        "case_id": "2e891bfc-d2ff-47c3-825d-390c8e0a5f12",
+        "dataset_item_id": "67fd4b4a-3f6d-47db-ade9-6f6410e18ca3",
+        "category": "TOOL",
+        "execution_status": "SUCCEEDED",
+        "task_success": {
+          "status": "AVAILABLE",
+          "value": 0,
+          "reason": null
+        },
+        "task_outcome": "FAIL",
+        "interpretation": "intentional_fixture_mismatch_not_model_output"
+      },
+      {
+        "case_key": "portfolio-controlled-fixture-unknown-v1",
+        "case_id": "ff46deaf-9609-4ef6-90ba-8dbecd5653db",
+        "dataset_item_id": "2d8908f0-6379-4549-99f0-b67d514a6319",
+        "category": "TOOL",
+        "execution_status": "SUCCEEDED",
+        "task_success": {
+          "status": "NOT_AVAILABLE",
+          "value": null,
+          "reason": "required_observation_missing"
+        },
+        "task_outcome": "UNKNOWN",
+        "interpretation": "required_observation_intentionally_withheld"
+      }
+    ]
+  },
+  "http_checks": {
+    "owner_and_viewer_summary_list_detail": 200,
+    "viewer_metrics_write": 403,
+    "viewer_approval_write": 403,
+    "viewer_run_content_redacted": true,
+    "private_observation_recursively_absent": true,
+    "filtered_pagination_distinct_cases": 3,
+    "evaluation_run_id": "9f0506de-4d5a-4a46-918e-b2b7e30eaa95"
+  },
+  "restart": {
+    "before": [
+      {
+        "role": "ops",
+        "pid": 12056,
+        "started_ticks": 639295447063220043
+      },
+      {
+        "role": "worker",
+        "pid": 25536,
+        "started_ticks": 639295447063498635
+      },
+      {
+        "role": "beat",
+        "pid": 30636,
+        "started_ticks": 639295447063619173
+      },
+      {
+        "role": "api",
+        "pid": 4720,
+        "started_ticks": 639295447063726748
+      },
+      {
+        "role": "web",
+        "pid": 16664,
+        "started_ticks": 639295447063850787
+      }
+    ],
+    "after": [
+      {
+        "role": "ops",
+        "pid": 27984,
+        "started_ticks": 639295447967653523
+      },
+      {
+        "role": "worker",
+        "pid": 30688,
+        "started_ticks": 639295447967920639
+      },
+      {
+        "role": "beat",
+        "pid": 22536,
+        "started_ticks": 639295447968050965
+      },
+      {
+        "role": "api",
+        "pid": 14484,
+        "started_ticks": 639295447968174741
+      },
+      {
+        "role": "web",
+        "pid": 29200,
+        "started_ticks": 639295447968313198
+      }
+    ]
+  },
+  "runtime_records": [
+    {
+      "role": "api",
+      "pid": 14372,
+      "started_at": "2026-11-06T06:53:22.426465+00:00",
+      "source_commit": "ca87af0a3ecde444a7dcf03fb93c48f1a31441d6",
+      "source_dirty": true,
+      "code_dirty": false,
+      "provider": "portfolio/incident-deterministic-v1",
+      "budget_factory": false,
+      "summary_permit": false
+    },
+    {
+      "role": "worker",
+      "pid": 29688,
+      "started_at": "2026-11-06T06:53:21.447954+00:00",
+      "source_commit": "ca87af0a3ecde444a7dcf03fb93c48f1a31441d6",
+      "source_dirty": true,
+      "code_dirty": false,
+      "provider": "portfolio/incident-deterministic-v1",
+      "budget_factory": false,
+      "summary_permit": false
+    },
+    {
+      "role": "beat",
+      "pid": 28644,
+      "started_at": "2026-11-06T06:53:19.820307+00:00",
+      "source_commit": "ca87af0a3ecde444a7dcf03fb93c48f1a31441d6",
+      "source_dirty": true,
+      "code_dirty": false,
+      "provider": "portfolio/incident-deterministic-v1",
+      "budget_factory": false,
+      "summary_permit": false
+    },
+    {
+      "role": "ops",
+      "pid": 28964,
+      "started_at": "2026-11-06T06:53:18.674605+00:00",
+      "source_commit": "ca87af0a3ecde444a7dcf03fb93c48f1a31441d6",
+      "source_dirty": true,
+      "code_dirty": false,
+      "provider": "portfolio/incident-deterministic-v1",
+      "budget_factory": false,
+      "summary_permit": false
+    },
+    {
+      "role": "web",
+      "pid": 17048,
+      "started_at": "2026-11-06T06:53:17.838734+00:00",
+      "source_commit": "ca87af0a3ecde444a7dcf03fb93c48f1a31441d6",
+      "source_dirty": true,
+      "code_dirty": false,
+      "provider": "portfolio/incident-deterministic-v1",
+      "budget_factory": false,
+      "summary_permit": false
+    }
+  ],
+  "runtime_scope": [
+    {
+      "budget_factory": false,
+      "summary_permit": false,
+      "gateway_attempt_budget": false,
+      "provider": "portfolio/incident-deterministic-v1"
+    },
+    {
+      "budget_factory": false,
+      "summary_permit": false,
+      "gateway_attempt_budget": false,
+      "provider": "portfolio/incident-deterministic-v1"
+    }
+  ],
+  "runtime_versions": {
+    "python": "3.12.10",
+    "fastapi": "0.141.1",
+    "uvicorn": "0.53.0",
+    "sqlalchemy": "2.0.54",
+    "psycopg": "3.3.5",
+    "langgraph": "1.2.11",
+    "langgraph-checkpoint-postgres": "3.1.2",
+    "celery": "5.6.3",
+    "redis": "5.3.1",
+    "node": "v24.15.0",
+    "next": "15.2.4"
+  },
+  "health": {
+    "http://127.0.0.1:8040/api/v1/health": 200,
+    "http://127.0.0.1:8040/api/v1/ready": 200,
+    "http://127.0.0.1:3040/api/v1/health": 200
+  },
+  "frozen_demo_spec": {
+    "agent_id": "1317508b-07cc-4be4-976f-847908e6b1f9",
+    "version_number": 1,
+    "summary_policy": null,
+    "memory": null,
+    "tools": [
+      {
+        "effect": "WRITE",
+        "risk_level": "HIGH",
+        "source_kind": "mcp",
+        "tool_spec_hash": "2cdc2ae034d2b87288979c86af68fd1488fe4d9b150448534153b9064aee603f",
+        "approval_policy": "ALWAYS",
+        "tool_revision_id": "f023d297-2986-423a-89ff-f5d742d42f04"
+      },
+      {
+        "effect": "READ",
+        "risk_level": "LOW",
+        "source_kind": "mcp",
+        "tool_spec_hash": "65cc5a010c58c3c0258d17dff14e55b6aa560ddd52303dc845b08351185f1ebf",
+        "approval_policy": "NEVER",
+        "tool_revision_id": "ba486ec0-d67f-4e4f-9a69-26110d32d4a6"
+      },
+      {
+        "effect": "READ",
+        "risk_level": "LOW",
+        "source_kind": "mcp",
+        "tool_spec_hash": "252664a4d2441c2a81c6c8886761adbae2c073c04e4e57b4c795acc38db66955",
+        "approval_policy": "NEVER",
+        "tool_revision_id": "75b8cdd9-e07d-4031-a188-292106fee7f9"
+      }
+    ],
+    "budget": null,
+    "runtime": {
+      "max_steps": 8,
+      "context_budget": {
+        "max_retrieval_tokens": 8192,
+        "max_tool_result_tokens": 4915,
+        "reserved_output_tokens": 2000
+      },
+      "max_tool_calls": 4,
+      "max_cost_micro_usd": null,
+      "max_parallel_reads": 1,
+      "max_identical_calls": 2
+    }
+  },
+  "database": {
+    "migration": "0052_memory_recovery_index",
+    "postgres_version": "16.15",
+    "checkpoint_tables": [
+      "langgraph_checkpoint.checkpoint_blobs",
+      "langgraph_checkpoint.checkpoint_migrations",
+      "langgraph_checkpoint.checkpoint_writes",
+      "langgraph_checkpoint.checkpoints"
+    ]
+  },
+  "ops_actions": [
+    {
+      "action": "simulated_rollback",
+      "service": "checkout-api",
+      "target": "5.4.1",
+      "at": "2026-11-06T06:22:15.028020+00:00"
+    },
+    {
+      "action": "simulated_rollback",
+      "service": "checkout-api",
+      "target": "5.4.1",
+      "at": "2026-11-06T06:53:32.471399+00:00"
+    }
+  ],
+  "checks": {
+    "ruff": "ruff check . --output-format concise: exit 0",
+    "new_unit_nodes": {
+      "positive_nodes": 5,
+      "batches": "2 passed; 3 tmp_path setup errors in sandbox; only affected 3 rerun outside sandbox: 3 passed",
+      "scope": "tests/unit/test_portfolio_demo.py"
+    },
+    "frontend_regression": {
+      "state": "completed",
+      "started_at": "2026-11-06T06:51:13.269076+00:00",
+      "cwd": "E:\\JAVA\\AI+agent\\AgentHub\\.worktrees\\ae1\\.agents\\worktrees\\codex\\final-closeout",
+      "executable": "C:/Program Files/nodejs/node.exe",
+      "argument_count": 1,
+      "supervisor_pid": 29224,
+      "pid": 29408,
+      "exit_code": 0,
+      "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.worktrees\\ae1\\.agents\\worktrees\\codex\\final-closeout\\.scratch\\closeout-jobs\\web-regressions-01\\stdout.log",
+      "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.worktrees\\ae1\\.agents\\worktrees\\codex\\final-closeout\\.scratch\\closeout-jobs\\web-regressions-01\\stderr.log",
+      "progress_query_interval_seconds": 600,
+      "finished_at": "2026-11-06T06:51:18.137724+00:00",
+      "elapsed_seconds": 4.875
+    },
+    "production_web_build": {
+      "state": "completed",
+      "started_at": "2026-11-06T06:23:54.752188+00:00",
+      "cwd": "E:\\JAVA\\AI+agent\\AgentHub\\.worktrees\\ae1\\.agents\\worktrees\\codex\\final-closeout",
+      "executable": "E:/JAVA/AI+agent/AgentHub/.venv/Scripts/python.exe",
+      "argument_count": 3,
+      "supervisor_pid": 31616,
+      "pid": 31280,
+      "exit_code": 0,
+      "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.worktrees\\ae1\\.agents\\worktrees\\codex\\final-closeout\\.scratch\\closeout-jobs\\web-build-03\\stdout.log",
+      "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.worktrees\\ae1\\.agents\\worktrees\\codex\\final-closeout\\.scratch\\closeout-jobs\\web-build-03\\stderr.log",
+      "progress_query_interval_seconds": 600,
+      "finished_at": "2026-11-06T06:24:14.005982+00:00",
+      "elapsed_seconds": 19.25
+    },
+    "migration_and_checkpoint_prepare": "exit 0; explicit prepare, not API auto-setup",
+    "remote_ci": "NOT_RUN_LOCAL_DELIVERY_NOT_PUSHED"
+  }
+}
