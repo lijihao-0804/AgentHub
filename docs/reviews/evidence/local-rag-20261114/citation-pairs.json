@@ -1,0 +1,339 @@
+{
+  "scope": "Exploratory bilingual DEV only. Ten synthetic questions, six for current rules, two for archived rules and two unanswerable fee questions. One completion per arm per question, using the same retrieved records and ordering for both arms. No correction turn in the paired comparison.",
+  "baseline_renderer_git": "dca82a7",
+  "candidate_change": "Include the stored document supersession status and effective date, when present, beside each numbered snippet. Both arms use the same locally validated PROMPT_JSON system prompt, same fallback-free Aliyun Beijing model and context budget.",
+  "attempts_before_final_pair": {
+    "strict_mode": "The configured DeepSeek route rejected the first native JSON_SCHEMA call. Separate synthetic probes of qwen-plus and qwen-flash at the same endpoint also failed the capability check. No change to their declared production capabilities.",
+    "prompt_mode_pilot": "An initial raw validation of one baseline response failed before a pair completed. The final protocol adds the same explicit abstention/marker instructions to both arms and counts invalid answers as failures. Pilot calls are not in the ten paired denominators."
+  },
+  "fixture": {
+    "normalized_lf_sha256": "f42ed539784ff44fef4686ca0c1527c81a4ba78658079c417660ae589b43dc8f",
+    "documents_ready": 20,
+    "snapshot_sha256": "46bad8c175ff5dac14ad569fca2f34258ade5ea9c2cbdb39127f21e8a76103dc",
+    "both_revisions_retrieved": 10,
+    "retrieval": "public upload -> Celery worker -> CPU BGE-M3 plus lexical tokenizer -> Qdrant -> BGE reranking -> six pieces of evidence per question"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "outcome": {
+    "A": {
+      "calls": 10,
+      "pass": 3,
+      "tokens": 10470,
+      "invalid_outputs": 3
+    },
+    "B": {
+      "calls": 10,
+      "pass": 9,
+      "tokens": 9953,
+      "invalid_outputs": 1
+    }
+  },
+  "manual_review": {
+    "definition": "Read the answer text. For answerable cases require an unambiguous decision for the requested version; naming both numbers while saying the version is indeterminate does not resolve the question. For unanswerable cases retain the explicit abstention and zero-citation condition.",
+    "A_pass_cases": [],
+    "B_pass_cases": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10
+    ],
+    "baseline_false_positives": [
+      4,
+      5,
+      6
+    ],
+    "remaining_B_failure": "Case 9 was invalid under local citation-output validation on the single first completion. The study does not assume what the missing unretained raw answer said.",
+    "language_observation": "Case 5 supplied the correct number and source but answered an English question partly in Chinese; language match is not in the mechanical score."
+  },
+  "cases": [
+    {
+      "case": 1,
+      "expected": "current",
+      "arms": {
+        "A": {
+          "pass": false,
+          "abstain": true,
+          "cites_current": false,
+          "cites_archived": false,
+          "answer": "The evidence is insufficient to determine the currently applicable DORU release and therefore the applicable expiry. It contains conflicting DORU account verification code expiry values of 17 hours and 43 hours, with no indication of which release is current.",
+          "tokens": 1098,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 7921
+        },
+        "B": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": false,
+          "answer": "For the currently applicable DORU release, the account verification code expires after 17 hours [1].",
+          "tokens": 1034,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1483
+        }
+      }
+    },
+    {
+      "case": 2,
+      "expected": "current",
+      "arms": {
+        "B": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": false,
+          "answer": "Under the current VEMA policy, receipts are kept for 36 days [2].",
+          "tokens": 970,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1124
+        },
+        "A": {
+          "pass": false,
+          "abstain": true,
+          "cites_current": false,
+          "cites_archived": false,
+          "answer": "The evidence does not establish a single current VEMA receipt-retention period. Two VEMA operational references give conflicting figures: one states receipt retention of 12 days, and another states receipt retention of 36 days. Because both are presented as VEMA operational references and the evidence does not indicate which one reflects the current policy (nor provide dates or version precedence), the retention period cannot be determined from the supplied evidence.",
+          "tokens": 1312,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 3721
+        }
+      }
+    },
+    {
+      "case": 3,
+      "expected": "current",
+      "arms": {
+        "A": {
+          "pass": false,
+          "abstain": true,
+          "cites_current": false,
+          "cites_archived": false,
+          "answer": "现有证据不足以确定“现行发布规则”下的有效期。证据中出现两份均标注为《诺岚服务规程》的资料，其中一份记载寄存柜提取码有效期为 72 小时，另一份记载为 24 小时；但两份证据均未标明哪一份属于现行发布规则，因此无法据此给出唯一答案。",
+          "tokens": 1112,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 2849
+        },
+        "B": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": false,
+          "answer": "根据诺岚现行有效的服务规程，寄存柜提取码的有效期为72小时。[1]",
+          "tokens": 990,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1388
+        }
+      }
+    },
+    {
+      "case": 4,
+      "expected": "current",
+      "arms": {
+        "B": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": true,
+          "answer": "根据当前有效（未被取代）的《菲榕服务规程》，资料补交窗口为 11 天。[1] 另一份标注为已被取代（superseded）的资料显示为 29 天，不应作为当前口径采用。[2]",
+          "tokens": 1042,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1497
+        },
+        "A": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": true,
+          "answer": "现有资料对“菲榕”的资料补交窗口存在冲突记载：一份资料显示为11天[1]，另一份资料显示为29天[2]。因此无法确定唯一数值。",
+          "tokens": 950,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1517
+        }
+      }
+    },
+    {
+      "case": 5,
+      "expected": "current",
+      "arms": {
+        "A": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": true,
+          "answer": "The evidence contains conflicting values for PAKO's callback interval: one reference states 83 minutes [1], while another states 31 minutes [2]. Because these sources disagree and no evidence indicates which is current, the current callback interval cannot be determined from the supplied evidence.",
+          "tokens": 936,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1589
+        },
+        "B": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": false,
+          "answer": "PAKO 当前的 callback interval 为 83 分钟。[1]",
+          "tokens": 957,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1092
+        }
+      }
+    },
+    {
+      "case": 6,
+      "expected": "current",
+      "arms": {
+        "B": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": false,
+          "answer": "按目前适用的云麓服务规程，保修登记审核时间为15个工作日[1]。",
+          "tokens": 987,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1181
+        },
+        "A": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": true,
+          "cites_archived": true,
+          "answer": "现有证据对「云麓」保修登记审核时间给出两个互相矛盾的值，无法确定哪个是「目前适用」的条款：[1] 记载为 15 个工作日，[2] 记载为 55 个工作日，两份资料均标注为《云麓服务规程》，但未提供版本生效或废止信息。因此仅凭现有证据无法给出唯一确定的答案，建议以正式发布的最新版本服务规程为准。",
+          "tokens": 1088,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 2572
+        }
+      }
+    },
+    {
+      "case": 7,
+      "expected": "archive",
+      "arms": {
+        "A": {
+          "pass": false,
+          "abstain": true,
+          "cites_current": false,
+          "cites_archived": false,
+          "answer": "The evidence contains conflicting HELI label retention values (41 days and 19 days), but nothing indicates which one applies to the specifically superseded release, so this cannot be determined from the provided evidence.",
+          "tokens": 987,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 2194
+        },
+        "B": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": false,
+          "cites_archived": true,
+          "answer": "For the superseded HELI release, label retention lasts 19 days [2].",
+          "tokens": 974,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1169
+        }
+      }
+    },
+    {
+      "case": 8,
+      "expected": "archive",
+      "arms": {
+        "B": {
+          "pass": true,
+          "abstain": false,
+          "cites_current": false,
+          "cites_archived": true,
+          "answer": "青榛已被替代的历史版本中，换货确认窗口为16小时。[2]",
+          "tokens": 1023,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1397
+        },
+        "A": {
+          "pass": false,
+          "error": "INVALID_OUTPUT",
+          "tokens": 1152,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 2290
+        }
+      }
+    },
+    {
+      "case": 9,
+      "expected": "abstain",
+      "arms": {
+        "A": {
+          "pass": false,
+          "error": "INVALID_OUTPUT",
+          "tokens": 922,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1209
+        },
+        "B": {
+          "pass": false,
+          "error": "INVALID_OUTPUT",
+          "tokens": 995,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1299
+        }
+      }
+    },
+    {
+      "case": 10,
+      "expected": "abstain",
+      "arms": {
+        "B": {
+          "pass": true,
+          "abstain": true,
+          "cites_current": false,
+          "cites_archived": false,
+          "answer": "提供的资料中，西隅服务规程只列出了复核处理时间（分别为22小时和66小时），没有提到复核收费金额，因此无法回答复核收费多少元。",
+          "tokens": 981,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1315
+        },
+        "A": {
+          "pass": false,
+          "error": "INVALID_OUTPUT",
+          "tokens": 913,
+          "model": "deepseek-v4.1-flash-1017",
+          "ms": 1377
+        }
+      }
+    }
+  ],
+  "public_spot_checks": [
+    {
+      "case": 1,
+      "insufficient_evidence": false,
+      "http": 200,
+      "passed": true,
+      "citations": 1,
+      "answer": "According to the currently applicable DORU operational reference, the account verification code expires after 17 hours [1]."
+    },
+    {
+      "case": 7,
+      "insufficient_evidence": false,
+      "http": 200,
+      "passed": true,
+      "citations": 1,
+      "answer": "For the specifically superseded HELI release, label retention lasts 19 days [2]."
+    },
+    {
+      "case": 10,
+      "insufficient_evidence": true,
+      "http": 200,
+      "passed": true,
+      "citations": 0,
+      "answer": "资料中仅列出西隅的复核处理时间，未提供复核收费金额，因此无法回答复核收费多少元。"
+    }
+  ],
+  "credential_cleanup": {
+    "disable": {
+      "confirmed": true,
+      "failures": []
+    },
+    "rotate": {
+      "confirmed": true,
+      "failures": []
+    }
+  }
+}

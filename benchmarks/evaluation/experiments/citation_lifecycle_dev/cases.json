@@ -1,0 +1,92 @@
+[
+  {
+    "case": 1,
+    "query": "DORU When does the account verification code expire? Answer for the currently applicable release.",
+    "current_body": "DORU operational reference. account verification code expiry: 17 hours.",
+    "archived_body": "DORU operational reference. account verification code expiry: 43 hours.",
+    "target": "current",
+    "current": "17",
+    "archived": "43"
+  },
+  {
+    "case": 2,
+    "query": "VEMA How long are receipts kept under the current policy?",
+    "current_body": "VEMA operational reference. receipt retention: 36 days.",
+    "archived_body": "VEMA operational reference. receipt retention: 12 days.",
+    "target": "current",
+    "current": "36",
+    "archived": "12"
+  },
+  {
+    "case": 3,
+    "query": "诺岚 按现行发布规则，寄存柜提取码的有效期是多少？",
+    "current_body": "诺岚服务规程。寄存柜提取码有效期：72小时。",
+    "archived_body": "诺岚服务规程。寄存柜提取码有效期：24小时。",
+    "target": "current",
+    "current": "72",
+    "archived": "24"
+  },
+  {
+    "case": 4,
+    "query": "菲榕 当前资料补交窗口有几天？",
+    "current_body": "菲榕服务规程。资料补交窗口：11天。",
+    "archived_body": "菲榕服务规程。资料补交窗口：29天。",
+    "target": "current",
+    "current": "11",
+    "archived": "29"
+  },
+  {
+    "case": 5,
+    "query": "PAKO What is the current callback interval?",
+    "current_body": "PAKO operational reference. callback interval: 83 minutes.",
+    "archived_body": "PAKO operational reference. callback interval: 31 minutes.",
+    "target": "current",
+    "current": "83",
+    "archived": "31"
+  },
+  {
+    "case": 6,
+    "query": "云麓 按目前适用的条款，保修登记审核要多久？",
+    "current_body": "云麓服务规程。保修登记审核时间：15个工作日。",
+    "archived_body": "云麓服务规程。保修登记审核时间：55个工作日。",
+    "target": "current",
+    "current": "15",
+    "archived": "55"
+  },
+  {
+    "case": 7,
+    "query": "HELI For the specifically superseded release, how long does label retention last?",
+    "current_body": "HELI operational reference. label retention: 41 days.",
+    "archived_body": "HELI operational reference. label retention: 19 days.",
+    "target": "archive",
+    "current": "41",
+    "archived": "19"
+  },
+  {
+    "case": 8,
+    "query": "青榛 只问已被替代的历史版本，当时换货确认窗口是多少？",
+    "current_body": "青榛服务规程。换货确认窗口：32小时。",
+    "archived_body": "青榛服务规程。换货确认窗口：16小时。",
+    "target": "archive",
+    "current": "32",
+    "archived": "16"
+  },
+  {
+    "case": 9,
+    "query": "NETA What is the current percentage fee? The texts only state the processing time.",
+    "current_body": "NETA operational reference. processing time: 5 days.",
+    "archived_body": "NETA operational reference. processing time: 13 days.",
+    "target": "abstain",
+    "current": "5",
+    "archived": "13"
+  },
+  {
+    "case": 10,
+    "query": "西隅 资料只列复核处理时间。复核收费多少元？",
+    "current_body": "西隅服务规程。复核处理时间：66小时。",
+    "archived_body": "西隅服务规程。复核处理时间：22小时。",
+    "target": "abstain",
+    "current": "66",
+    "archived": "22"
+  }
+]

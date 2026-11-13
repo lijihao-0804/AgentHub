@@ -389,6 +389,8 @@ async def test_qdrant_unavailable_keeps_indexing_retryable_then_recovers(
     assert job.last_error_code == "QDRANT_UNAVAILABLE"
 
     settings.qdrant_url = TEST_QDRANT_URL
+    # The one-second timeout above belongs to the deliberately offline endpoint.
+    settings.knowledge_qdrant_timeout_seconds = Settings().knowledge_qdrant_timeout_seconds
     queue = RecordingQueue()
     async with db_factory() as session:
         await session.execute(
