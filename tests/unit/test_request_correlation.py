@@ -8,10 +8,25 @@ from apps.api.app import create_app
 from packages.core.config.settings import Settings
 from packages.core.http.request_id import RequestIdMiddleware
 from packages.core.logging.json_logging import (
+    AccessLogPathFilter,
     JsonFormatter,
     request_id_var,
     trace_id_var,
 )
+
+
+def test_access_logs_preserve_path_and_status_without_customer_search_terms() -> None:
+    record = logging.LogRecord(
+        "uvicorn.access",
+        logging.INFO,
+        __file__,
+        1,
+        '%s - "%s %s HTTP/%s" %d',
+        ("127.0.0.1", "GET", "/support/customers?q=private%40example.test", "1.1", 200),
+        None,
+    )
+    assert AccessLogPathFilter().filter(record)
+    assert record.getMessage() == '127.0.0.1 - "GET /support/customers HTTP/1.1" 200'
 
 
 @pytest.mark.asyncio
@@ -52,9 +67,7 @@ async def test_request_id_header_uses_settings_and_rejects_invalid_ids() -> None
 
     configured_app = create_app(Settings(testing=True, request_id_header="X-Correlation-ID"))
     configured_transport = httpx.ASGITransport(app=configured_app)
-    async with httpx.AsyncClient(
-        transport=configured_transport, base_url="http://test"
-    ) as client:
+    async with httpx.AsyncClient(transport=configured_transport, base_url="http://test") as client:
         configured_response = await client.get(
             "/api/v1/health", headers={"X-Correlation-ID": "configured-request"}
         )

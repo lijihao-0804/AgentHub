@@ -27,6 +27,7 @@ from apps.api.routes.mcp_connections import router as mcp_connections_router
 from apps.api.routes.observability import router as observability_router
 from apps.api.routes.product_control_plane import router as product_control_plane_router
 from apps.api.routes.runs import router as runs_router
+from apps.api.routes.support import router as support_router
 from apps.api.routes.tenancy import router as tenancy_router
 from apps.api.routes.threads import router as threads_router
 from apps.api.routes.wiki import router as wiki_router
@@ -111,6 +112,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(observability_router)
     app.include_router(product_control_plane_router)
     app.include_router(runs_router)
+    app.include_router(support_router)
     app.include_router(tenancy_router)
     app.include_router(threads_router)
     app.include_router(wiki_router)

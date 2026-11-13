@@ -8,6 +8,8 @@ from packages.control_plane.rbac import (
     ORGANIZATION_ADMIN_PERMISSIONS,
     ORGANIZATION_MANAGE,
     RUN_ACTION,
+    SUPPORT_RECORDS_MANAGE,
+    SUPPORT_RECORDS_READ,
     VIEWER_PERMISSIONS,
     WORKSPACE_ADMIN,
     WORKSPACE_READ,
@@ -32,6 +34,8 @@ def test_organization_admin_permissions_are_workspace_scoped_without_member_role
         WORKSPACE_READ,
         APPROVE_ACTION,
         RUN_ACTION,
+        SUPPORT_RECORDS_READ,
+        SUPPORT_RECORDS_MANAGE,
         "agent_create",
         "agent_edit",
         "agent_run",
@@ -50,12 +54,14 @@ def test_developer_can_run_but_cannot_approve() -> None:
     assert permissions == DEVELOPER_PERMISSIONS
     assert {WORKSPACE_READ, RUN_ACTION, "agent_create", "tool_run"} <= permissions
     assert WORKSPACE_ADMIN not in permissions
+    assert {SUPPORT_RECORDS_MANAGE, SUPPORT_RECORDS_READ} <= permissions
     assert APPROVE_ACTION not in permissions
 
 
 def test_viewer_is_read_only_and_member_without_workspace_access_has_no_permissions() -> None:
     assert resolve_permissions(OrganizationRole.MEMBER, WorkspaceRole.VIEWER) == VIEWER_PERMISSIONS
     assert resolve_permissions(OrganizationRole.MEMBER, None) == frozenset()
+    assert {SUPPORT_RECORDS_MANAGE, SUPPORT_RECORDS_READ}.isdisjoint(VIEWER_PERMISSIONS)
 
 
 def test_last_owner_cannot_be_removed_or_downgraded() -> None:

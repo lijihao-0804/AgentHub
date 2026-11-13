@@ -16,18 +16,20 @@ from datetime import UTC, datetime
 from typing import NoReturn
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, select
+from sqlalchemy import String, cast, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.orm import with_expression
 
 from packages.agent_runtime.models import Agent, AgentRun, AgentVersion
 from packages.agent_runtime.runtime import AgentRunService
 from packages.approvals.models import Approval
-from packages.control_plane.rbac import WORKSPACE_READ
+from packages.control_plane.rbac import SUPPORT_RECORDS_READ, WORKSPACE_READ
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.threads import kinds
 from packages.threads.models import AgentThread, ThreadTurn
+from packages.tools.models import Customer, Ticket
 
 AGENT_RUN = "agent_run"
 
@@ -206,6 +208,7 @@ class ThreadService:
         *,
         agent_id: UUID | None = None,
         kind: str | None = None,
+        include_turn_count: bool = False,
         limit: int = DEFAULT_PAGE_SIZE,
         offset: int = 0,
     ) -> list[AgentThread]:
@@ -213,6 +216,18 @@ class ThreadService:
         bounded = max(1, min(limit, MAX_PAGE_SIZE))
         async with self.session_factory() as session:
             query = select(AgentThread).where(AgentThread.workspace_id == workspace_id)
+            if include_turn_count:
+                turn_count = (
+                    select(func.count())
+                    .select_from(ThreadTurn)
+                    .where(
+                        ThreadTurn.workspace_id == workspace_id,
+                        ThreadTurn.thread_id == AgentThread.id,
+                    )
+                    .correlate(AgentThread)
+                    .scalar_subquery()
+                )
+                query = query.options(with_expression(AgentThread.turn_count, turn_count))
             if agent_id is not None:
                 query = query.where(AgentThread.agent_id == agent_id)
             if kind is not None:
@@ -930,10 +945,10 @@ class ThreadService:
 
             # Show only the persisted decision/execution pair. An assistant message cannot
             # create a receipt. Scope the query by thread rather than a growing list of UUIDs.
-            receipts = await session.execute(
+            query = (
                 select(
                     Approval.run_id,
-                    Approval.id,
+                    Approval.id.label("approval_id"),
                     Approval.decision_status,
                     Approval.execution_status,
                 )
@@ -949,18 +964,44 @@ class ThreadService:
                 )
                 .order_by(Approval.created_at, Approval.id)
             )
-            by_run: dict[UUID, list[dict[str, str]]] = {}
-            for run_id, approval_id, decision, execution in receipts:
-                by_run.setdefault(run_id, []).append(
-                    {
-                        "approval_id": str(approval_id),
-                        "decision_status": decision,
-                        "execution_status": execution,
-                    }
+            if SUPPORT_RECORDS_READ in context.permissions:
+                # The action's stored key and confirmed result must identify the
+                # same local record. A remote result or assistant text is insufficient.
+                local = (
+                    select(
+                        Ticket.workspace_id, Ticket.idempotency_key, Ticket.id, Ticket.ticket_ref
+                    )
+                    .join(
+                        Customer,
+                        (Customer.workspace_id == Ticket.workspace_id)
+                        & (Customer.id == Ticket.customer_id),
+                    )
+                    .where(Customer.is_evaluation_fixture.is_(False))
+                    .subquery()
                 )
+                query = query.outerjoin(
+                    local,
+                    (Approval.workspace_id == local.c.workspace_id)
+                    & (Approval.idempotency_key == local.c.idempotency_key)
+                    & (Approval.safe_result["ticket_id"].astext == cast(local.c.id, String))
+                    & (Approval.decision_status == "APPROVED")
+                    & (Approval.execution_status == "SUCCEEDED"),
+                ).add_columns(local.c.id.label("ticket_id"), local.c.ticket_ref)
+            receipts = (await session.execute(query)).mappings()
+            by_run: dict[UUID, list[dict[str, str]]] = {}
+            for row in receipts:
+                receipt = {
+                    "approval_id": str(row["approval_id"]),
+                    "decision_status": row["decision_status"],
+                    "execution_status": row["execution_status"],
+                }
+                if row.get("ticket_id") is not None:
+                    receipt.update(ticket_id=str(row["ticket_id"]), ticket_ref=row["ticket_ref"])
+                by_run.setdefault(row["run_id"], []).append(receipt)
             return [
                 (turn, run, by_run.get(run.id, []) if run is not None else None)
                 for turn, run in rows
             ]
+
 
 __all__ = ["NOT_FOUND", "PreparedTurnRun", "SubmittedTurn", "ThreadService"]

@@ -199,6 +199,7 @@ class SupportFixtureEnvironment:
                     workspace_id=UUID(self.workspace_id),
                     customer_ref=customer_ref,
                     name=f"AE6B Fixture {instance_id[:8]}",
+                    is_evaluation_fixture=True,
                     email=f"{customer_ref.lower()}@example.test",
                 )
             )

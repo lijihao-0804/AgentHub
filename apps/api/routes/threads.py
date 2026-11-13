@@ -13,6 +13,7 @@ from apps.api.knowledge_dependencies import (
 )
 from apps.api.schemas.threads import (
     ThreadCreateRequest,
+    ThreadListItem,
     ThreadPatchRequest,
     ThreadResponse,
     ThreadTurnCreateRequest,
@@ -73,7 +74,7 @@ async def create_thread(
     return ThreadResponse.model_validate(thread)
 
 
-@router.get("/threads", response_model=list[ThreadResponse])
+@router.get("/threads", response_model=list[ThreadListItem], response_model_exclude_none=True)
 async def list_threads(
     workspace_id: UUID,
     request: Request,
@@ -81,13 +82,19 @@ async def list_threads(
     kind: str | None = kind_query,
     limit: int = limit_query,
     offset: int = offset_query,
+    include_turn_count: bool = False,
     context: WorkspaceExecutionContext = context_dependency,
-) -> list[ThreadResponse]:
+) -> list[ThreadListItem]:
     del workspace_id
     threads = await _service(request).list_threads(
-        context, agent_id=agent_id, kind=kind, limit=limit, offset=offset
+        context,
+        agent_id=agent_id,
+        kind=kind,
+        limit=limit,
+        offset=offset,
+        include_turn_count=include_turn_count,
     )
-    return [ThreadResponse.model_validate(thread) for thread in threads]
+    return [ThreadListItem.model_validate(thread) for thread in threads]
 
 
 @router.get("/threads/{thread_id}", response_model=ThreadResponse)
@@ -126,7 +133,11 @@ async def delete_thread(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/threads/{thread_id}/turns", response_model=list[ThreadTurnDetailResponse])
+@router.get(
+    "/threads/{thread_id}/turns",
+    response_model=list[ThreadTurnDetailResponse],
+    response_model_exclude_unset=True,
+)
 async def list_turns(
     workspace_id: UUID,
     thread_id: UUID,

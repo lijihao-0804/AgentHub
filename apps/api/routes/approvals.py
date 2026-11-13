@@ -46,7 +46,7 @@ async def list_approvals(
     del workspace_id
     items, total = await _approval_service(request).list_page(context, decision, limit, offset)
     return ApprovalListResponse(
-        items=[ApprovalResponse.model_validate(approval) for approval in items],
+        items=[ApprovalResponse.for_reader(approval, context) for approval in items],
         total=total,
     )
 
@@ -60,7 +60,7 @@ async def get_approval(
 ) -> ApprovalResponse:
     del workspace_id
     approval = await _approval_service(request).get(context, approval_id)
-    return ApprovalResponse.model_validate(approval)
+    return ApprovalResponse.for_reader(approval, context)
 
 
 @router.post(
@@ -84,7 +84,7 @@ async def approve_approval(
     )
     approval = await approvals.get(context, approval.id)
     return ApprovalDecisionResponse(
-        approval=ApprovalResponse.model_validate(approval),
+        approval=ApprovalResponse.for_reader(approval, context),
         run_id=result.run_id,
         run_status=result.status,
     )
@@ -115,7 +115,7 @@ async def deny_approval(
     )
     approval = await approvals.get(context, approval.id)
     return ApprovalDecisionResponse(
-        approval=ApprovalResponse.model_validate(approval),
+        approval=ApprovalResponse.for_reader(approval, context),
         run_id=result.run_id,
         run_status=result.status,
     )

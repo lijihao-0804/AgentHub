@@ -24,7 +24,7 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy import Uuid as SQLUuid
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, query_expression
 
 from packages.core.database import Base
 
@@ -40,6 +40,7 @@ class AgentThread(Base):
     """
 
     __tablename__ = "agent_threads"
+    turn_count: Mapped[int | None] = query_expression()
     __table_args__ = (
         ForeignKeyConstraint(
             ["workspace_id", "agent_id"],

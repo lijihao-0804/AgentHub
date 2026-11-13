@@ -221,14 +221,21 @@ class AgentPublishService:
         return agent
 
     async def list_drafts(
-        self, session: AsyncSession, context: WorkspaceExecutionContext
+        self,
+        session: AsyncSession,
+        context: WorkspaceExecutionContext,
+        *,
+        published_only: bool = False,
     ) -> list[Agent]:
         workspace_id = _workspace_id(context)
-        result = await session.scalars(
-            select(Agent)
-            .where(Agent.workspace_id == workspace_id)
-            .order_by(Agent.created_at, Agent.id)
-        )
+        query = select(Agent).where(Agent.workspace_id == workspace_id)
+        if published_only:
+            query = query.where(
+                select(AgentVersion.id)
+                .where(AgentVersion.workspace_id == workspace_id, AgentVersion.agent_id == Agent.id)
+                .exists()
+            )
+        result = await session.scalars(query.order_by(Agent.created_at, Agent.id))
         return list(result)
 
     async def get_draft(

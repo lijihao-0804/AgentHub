@@ -50,6 +50,10 @@ class ThreadResponse(BaseModel):
     updated_at: datetime
 
 
+class ThreadListItem(ThreadResponse):
+    turn_count: int | None = None
+
+
 class ThreadTurnCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -78,6 +82,8 @@ class TicketRequestReceipt(BaseModel):
     approval_id: UUID
     decision_status: ApprovalDecisionStatus
     execution_status: ApprovalExecutionStatus
+    ticket_id: UUID | None = None
+    ticket_ref: str | None = None
 
 
 class ThreadTurnDetailResponse(ThreadTurnResponse):
@@ -105,6 +111,7 @@ class ThreadTurnSubmitResponse(BaseModel):
 
 __all__ = [
     "ThreadCreateRequest",
+    "ThreadListItem",
     "ThreadPatchRequest",
     "ThreadResponse",
     "ThreadTurnCreateRequest",

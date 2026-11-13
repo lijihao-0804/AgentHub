@@ -187,7 +187,7 @@ def _require_read(context: WorkspaceExecutionContext) -> UUID:
     return _workspace_uuid(context)
 
 
-def _safe_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
+def safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
     result: dict[str, Any] = {}
     for key, value in metadata.items():
         inner_keys = _SAFE_NESTED_METADATA_KEYS.get(key)
@@ -625,7 +625,7 @@ class RunQueryService:
                 "kind": source.kind,
                 "status": source.status,
                 "duration_ms": source.duration_ms,
-                "metadata": _safe_metadata(source.metadata),
+                "metadata": safe_step_metadata(source.metadata),
                 "failure_code": source.failure_code,
                 "failure_category": classify_failure(source.failure_code),
             }
@@ -634,7 +634,7 @@ class RunQueryService:
 
 
 def _map_step(step: RunStep) -> TimelineSource | None:
-    metadata = _safe_metadata(step.safe_metadata)
+    metadata = safe_step_metadata(step.safe_metadata)
     failure_code = metadata.get("error_code") or metadata.get("failure_code")
     tool_identities = metadata.get("tool_identities")
     is_retrieval = (

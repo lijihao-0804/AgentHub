@@ -74,11 +74,14 @@ async def create_agent(
 @router.get("", response_model=list[AgentResponse])
 async def list_agents(
     workspace_id: UUID,
+    published_only: bool = False,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
 ) -> list[AgentResponse]:
     del workspace_id
-    agents = await AgentPublishService().list_drafts(session, context)
+    agents = await AgentPublishService().list_drafts(
+        session, context, published_only=published_only
+    )
     return [_agent_response(agent) for agent in agents]
 
 
@@ -149,8 +152,7 @@ async def list_agent_versions(
     del workspace_id
     versions = await AgentPublishService().list_versions(session, context, agent_id)
     return [
-        AgentVersionResponse.model_validate(version, from_attributes=True)
-        for version in versions
+        AgentVersionResponse.model_validate(version, from_attributes=True) for version in versions
     ]
 
 

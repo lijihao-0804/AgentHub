@@ -407,6 +407,7 @@ class InteractiveLifecycle:
                     workspace_id=identity.workspace_id,
                     customer_ref=customer_ref,
                     name=f"AE6B Fixture {episode.instance_id.hex[:8]}",
+                    is_evaluation_fixture=True,
                     email=f"{customer_ref.lower()}@example.test",
                 )
             )

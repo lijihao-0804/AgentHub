@@ -10,10 +10,9 @@ from sqlalchemy import select
 
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
 from packages.tools.errors import ToolHandlerError
-from packages.tools.models import Customer, Ticket
+from packages.tools.models import OPEN_TICKET_STATUSES, Customer, Ticket
 
 _OPEN_TICKET_LIMIT = 20
-_OPEN_TICKET_STATUSES = ("OPEN", "PENDING", "IN_PROGRESS")
 
 
 async def query_customer(
@@ -54,7 +53,7 @@ async def query_customer(
             query = select(Ticket).where(
                 Ticket.workspace_id == workspace_id,
                 Ticket.customer_id == customer.id,
-                Ticket.status.in_(_OPEN_TICKET_STATUSES),
+                Ticket.status.in_(OPEN_TICKET_STATUSES),
             )
             if subject is not None:
                 query = query.where(Ticket.subject == subject)
@@ -63,7 +62,7 @@ async def query_customer(
             output["open_ticket_scope"] = {
                 "subject_filter": "EXACT" if subject is not None else "ALL",
                 "subject": subject,
-                "statuses": list(_OPEN_TICKET_STATUSES),
+                "statuses": list(OPEN_TICKET_STATUSES),
                 "includes_history": False,
             }
             output["open_tickets_complete"] = len(tickets) <= _OPEN_TICKET_LIMIT

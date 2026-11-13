@@ -489,6 +489,26 @@ async def test_evidence_route_returns_safe_real_pg_projection(db_factory) -> Non
             }
         ]
         assert _PRIVATE_SENTINEL not in support_turns.text
+        # A viewer can follow decision and execution states across views. Raw
+        # tool arguments, results and historical free-form step metadata stay private.
+        scope = f"/api/v1/workspaces/{base['workspace_id']}"
+        counted = await viewer_client.get(
+            scope + "/threads", params={"kind": "support", "include_turn_count": True}
+        )
+        counts = {t["id"]: t["turn_count"] for t in counted.json()}
+        assert counts[str(seeded["thread_id"])] == 1
+        regular = await viewer_client.get(scope + "/threads", params={"kind": "support"})
+        assert all("turn_count" not in thread for thread in regular.json())
+        for path in (
+            f"{scope}/approvals",
+            f"{scope}/approvals/{seeded['ticket_approval_id']}",
+            f"{scope}/agent-runs/{support_turn['agent_run_id']}/approvals",
+            f"{scope}/agent-runs/{support_turn['agent_run_id']}/steps",
+        ):
+            safe = await viewer_client.get(path)
+            assert safe.status_code == 200 and _PRIVATE_SENTINEL not in safe.text
+            full = await owner_client.get(path)
+            assert full.status_code == 200 and _PRIVATE_SENTINEL in full.text
         assert (await other_client.get(turns_path)).status_code in {403, 404}
         rich_response = await owner_client.get(
             prefix

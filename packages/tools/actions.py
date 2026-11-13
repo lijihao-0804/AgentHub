@@ -89,7 +89,17 @@ class CreateTicketActionExecutor:
         customer_ref = arguments.get("customer_ref")
         subject = arguments.get("subject")
         priority = arguments.get("priority", "MEDIUM")
-        if not isinstance(customer_ref, str) or not isinstance(subject, str):
+        # Older published revisions allow arbitrary strings. Reject content the
+        # local store cannot accept before a database write can become uncertain.
+        if not (
+            isinstance(customer_ref, str)
+            and 0 < len(customer_ref) <= 128
+            and isinstance(subject, str)
+            and 0 < len(subject) <= 500
+            and subject.strip()
+            and "\x00" not in customer_ref
+            and "\x00" not in subject
+        ):
             return ActionExecutionResult.failed(
                 "TOOL_ARGUMENT_INVALID", "The create_ticket arguments are invalid."
             )
@@ -261,7 +271,9 @@ def _ticket_result(ticket: Ticket) -> ActionExecutionResult:
         {
             "ticket_id": str(ticket.id),
             "ticket_ref": ticket.ticket_ref,
-            "status": ticket.status,
+            # This receipt describes the creation. Operators can change the
+            # current status before a lost acknowledgement is reconciled.
+            "status": "OPEN",
         }
     )
 

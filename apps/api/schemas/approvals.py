@@ -6,6 +6,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from packages.control_plane.rbac import APPROVE_ACTION
+from packages.core.execution_context.models import WorkspaceExecutionContext
+
 
 class ApprovalResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
@@ -33,6 +36,15 @@ class ApprovalResponse(BaseModel):
     execution_attempt_count: int
     created_at: datetime
     updated_at: datetime
+
+    @classmethod
+    def for_reader(cls, approval, context: WorkspaceExecutionContext) -> ApprovalResponse:
+        response = cls.model_validate(approval)
+        if "agent_run" in context.permissions or APPROVE_ACTION in context.permissions:
+            return response
+        return response.model_copy(
+            update={"canonical_arguments": {}, "safe_result": None, "safe_failure_message": None}
+        )
 
 
 class ApprovalDecisionResponse(BaseModel):

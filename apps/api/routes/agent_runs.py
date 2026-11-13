@@ -23,6 +23,7 @@ from packages.agent_runtime.runtime import AgentRunService
 from packages.agent_runtime.sse import sse_frames
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.observability.runs import safe_step_metadata
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}", tags=["agent-runs"])
 context_dependency = Depends(get_agent_run_workspace_context)
@@ -180,7 +181,13 @@ async def list_agent_run_steps(
 ) -> list[RunStepResponse]:
     del workspace_id
     steps = await _service(request).list_steps(context, run_id)
-    return [RunStepResponse.model_validate(step) for step in steps]
+    responses = [RunStepResponse.model_validate(step) for step in steps]
+    if "agent_run" in context.permissions:
+        return responses
+    return [
+        step.model_copy(update={"safe_metadata": safe_step_metadata(step.safe_metadata)})
+        for step in responses
+    ]
 
 
 @router.get("/agent-runs/{run_id}/approvals", response_model=list[ApprovalResponse])
@@ -192,7 +199,7 @@ async def list_agent_run_approvals(
 ) -> list[ApprovalResponse]:
     del workspace_id
     approvals = await _approval_service(request).list_for_run(context, run_id)
-    return [ApprovalResponse.model_validate(approval) for approval in approvals]
+    return [ApprovalResponse.for_reader(approval, context) for approval in approvals]
 
 
 @router.post("/agent-runs/{run_id}/cancel", response_model=AgentRunResponse)

@@ -64,7 +64,22 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(payload, ensure_ascii=False, default=str)
 
 
+class AccessLogPathFilter(logging.Filter):
+    """Uvicorn includes raw search terms in the request target by default."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args
+        if isinstance(args, tuple) and len(args) == 5 and isinstance(args[2], str):
+            client, method, target, protocol, status = args
+            record.args = (client, method, target.partition("?")[0], protocol, status)
+        return True
+
+
+_access_path_filter = AccessLogPathFilter()
+
+
 def configure_logging(level: str = "INFO") -> None:
+    logging.getLogger("uvicorn.access").addFilter(_access_path_filter)
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(JsonFormatter())
     root = logging.getLogger()

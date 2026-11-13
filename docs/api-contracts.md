@@ -243,7 +243,25 @@ Detailed contracts: [feedback](reviews/AgentHub-面试增强M-I2契约与设计-
 
 ## Support ticket requests in conversation history
 
-`GET /api/v1/workspaces/{workspace_id}/threads/{thread_id}/turns` includes `ticket_requests` on turns in support conversations. Each receipt exposes only the approval ID, decision status and execution status of a recorded `create_ticket` request for that Run. An empty array means no such request was recorded. `null` means the projection does not apply. Workspace viewers can inspect those states while prompt and answer content remains redacted. The UI obtains the receipt from the existing turn-history response.
+`GET /api/v1/workspaces/{workspace_id}/threads/{thread_id}/turns` includes `ticket_requests` on support turns. Each receipt includes the approval ID, decision status and execution status of a recorded `create_ticket` request for that Run. An empty array means no such request was recorded. `null` means the projection does not apply. A reader with `support_records_read` also receives `ticket_id` and `ticket_ref` when the approved, successful action's stored result and idempotency key identify a local business ticket. Viewer responses omit these fields. The approval detail, workspace approval list and run approval list redact arguments and results for Viewers.
+
+## Customer and ticket records
+
+All paths in the table start at `/api/v1/workspaces/{workspace_id}/support`. Organization owners and admins with workspace access, and workspace developers, can operate the records. Viewers retain read access to the approval states. Controlled evaluation fixtures are excluded from the operator API.
+
+| Method and path | Behavior |
+| --- | --- |
+| GET `/customers` | Search by reference, name or email using literal case-insensitive substring `q`. Returns `{items, total}`. |
+| POST `/customers` | Supply `customer_ref`, `name` and optional `email`. The first matching reference creates a record (201). A retry with the same normalized details returns the same ID (200). Conflicting details return 409. |
+| GET `/customers/{id}/tickets` | Lists all statuses for that customer, including closed tickets. Returns `{items, total}`. |
+| GET `/tickets/{id}` | Reads the ticket, its current version and the customer's reference and name. |
+| PATCH `/tickets/{id}` | Supply `expected_version` and `status`. An active ticket can move to `PENDING`, `IN_PROGRESS` or `CLOSED`. A status change increments the version. A conflicting stale write returns 409. Repeating an immediately confirmed update returns the current record without a second audit event. Closure is terminal. |
+
+Both lists accept `limit` (1–200, default 50) and `offset` (default 0). Tickets start at version 1 and are created by the governed action. A successful approval response records the historical action outcome. Read the ticket detail for its current status. The model's open-ticket lookup excludes closed tickets.
+
+Application workbenches can request `GET /api/v1/workspaces/{workspace_id}/agents?published_only=true` to select agents that have at least one published version. The default list includes drafts.
+
+`GET /api/v1/workspaces/{workspace_id}/threads?include_turn_count=true` includes the number of persisted turns in each thread on the requested page. This lets the support and research conversation lists display counts in the same request without fetching prompts, answers or artifacts for every conversation.
 
 ## Interactive evaluation budgets
 
