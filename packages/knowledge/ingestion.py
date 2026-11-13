@@ -6,6 +6,7 @@ import logging
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from itertools import batched
 from uuid import UUID, uuid4
 
 from sqlalchemy import and_, or_, select, update
@@ -26,6 +27,9 @@ from packages.knowledge.models import (
 from packages.knowledge.queue import IngestionQueue
 
 logger = logging.getLogger(__name__)
+
+# Keep the write buffers bounded even when a revision has thousands of chunks.
+_CHUNK_WRITE_BATCH_SIZE = 1_000
 
 
 @dataclass(frozen=True)
@@ -198,37 +202,41 @@ async def persist_chunks_and_advance(
             return False
 
         document_id = await _document_id_for_revision(session, claim.document_revision_id)
-        rows = [
-            {
-                "id": uuid4(),
-                "chunk_id": chunk.chunk_id,
-                "workspace_id": claim.workspace_id,
-                "knowledge_base_id": claim.knowledge_base_id,
-                "document_id": document_id,
-                "document_revision_id": claim.document_revision_id,
-                "ordinal": chunk.ordinal,
-                "normalized_content_hash": chunk.normalized_content_hash,
-                "text": chunk.text,
-                "locator": chunk.locator,
-            }
-            for chunk in chunks
-        ]
-        if rows:
-            chunk_insert = insert(DocumentChunk).values(rows)
+        chunk_insert = insert(DocumentChunk.__table__)
+        upsert = chunk_insert.on_conflict_do_update(
+            index_elements=[DocumentChunk.chunk_id],
+            set_={
+                "workspace_id": chunk_insert.excluded.workspace_id,
+                "knowledge_base_id": chunk_insert.excluded.knowledge_base_id,
+                "document_id": chunk_insert.excluded.document_id,
+                "document_revision_id": chunk_insert.excluded.document_revision_id,
+                "ordinal": chunk_insert.excluded.ordinal,
+                "normalized_content_hash": chunk_insert.excluded.normalized_content_hash,
+                "text": chunk_insert.excluded.text,
+                "locator": chunk_insert.excluded.locator,
+            },
+        )
+        # Bind rows separately: a single multi-VALUES statement exceeds
+        # asyncpg's 32,767-argument limit at 3,277 chunks. All batches and
+        # the stage transition still commit together under the job lock.
+        for batch in batched(chunks, _CHUNK_WRITE_BATCH_SIZE):
             await session.execute(
-                chunk_insert.on_conflict_do_update(
-                    index_elements=[DocumentChunk.chunk_id],
-                    set_={
-                        "workspace_id": chunk_insert.excluded.workspace_id,
-                        "knowledge_base_id": chunk_insert.excluded.knowledge_base_id,
-                        "document_id": chunk_insert.excluded.document_id,
-                        "document_revision_id": chunk_insert.excluded.document_revision_id,
-                        "ordinal": chunk_insert.excluded.ordinal,
-                        "normalized_content_hash": chunk_insert.excluded.normalized_content_hash,
-                        "text": chunk_insert.excluded.text,
-                        "locator": chunk_insert.excluded.locator,
-                    },
-                )
+                upsert,
+                [
+                    {
+                        "id": uuid4(),
+                        "chunk_id": chunk.chunk_id,
+                        "workspace_id": claim.workspace_id,
+                        "knowledge_base_id": claim.knowledge_base_id,
+                        "document_id": document_id,
+                        "document_revision_id": claim.document_revision_id,
+                        "ordinal": chunk.ordinal,
+                        "normalized_content_hash": chunk.normalized_content_hash,
+                        "text": chunk.text,
+                        "locator": chunk.locator,
+                    }
+                    for chunk in batch
+                ],
             )
         job.stage = IngestionStage.EMBEDDING
         job.updated_at = now

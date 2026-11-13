@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from unittest.mock import patch
 from uuid import UUID, uuid4
 
 import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import update
+from qdrant_client import QdrantClient
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from apps.worker.tasks.knowledge import _process_knowledge_ingestion
@@ -22,7 +25,7 @@ from packages.knowledge.adapters.fakes import (
 )
 from packages.knowledge.adapters.qdrant import QdrantVectorIndex
 from packages.knowledge.blob_store import LocalBlobStore
-from packages.knowledge.contracts import VectorRecord, VectorScope
+from packages.knowledge.contracts import KnowledgeProviderError, VectorRecord, VectorScope
 from packages.knowledge.ingestion import (
     claim_ingestion_job,
     finalize_ingestion_ready,
@@ -138,6 +141,7 @@ async def _seed_revision(
     stage: IngestionStage = IngestionStage.PARSING,
     status: IngestionJobStatus = IngestionJobStatus.PENDING,
     with_chunk: bool = False,
+    content: str = "中文 knowledge and English retrieval",
 ) -> tuple[UUID, UUID, UUID]:
     async with factory() as session:
         user = User(
@@ -172,7 +176,7 @@ async def _seed_revision(
             original_filename="m3c.txt",
             blob_key=blob_key,
             media_type="text/plain",
-            file_size=32,
+            file_size=len(content.encode()),
             ingestion_status=(
                 RevisionIngestionStatus.PROCESSING
                 if stage == IngestionStage.INDEXING
@@ -207,7 +211,7 @@ async def _seed_revision(
     if stage == IngestionStage.PARSING:
         await LocalBlobStore(blob_root).put(
             blob_key,
-            _bytes("中文 knowledge and English retrieval".encode()),
+            _bytes(content.encode()),
         )
     return job.id, revision.id, document.id
 
@@ -226,6 +230,79 @@ def _settings(collection: str, blob_root: Path) -> Settings:
         blob_root=str(blob_root),
         knowledge_ingestion_enqueue_grace_seconds=0,
     )
+
+
+@pytest.mark.asyncio
+async def test_large_revision_replays_partial_index_writes_before_ready(
+    db_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    # Ten bound columns per chunk put this input just over asyncpg's
+    # 32,767-argument limit when written as a single multi-VALUES statement.
+    count = 3_277
+    content = "".join(f"{index:015d}\n" for index in range(count))
+    collection = f"agenthub_m3c_large_{uuid4().hex}"
+    blob_root = Path("data/blobs/m3c-integration") / uuid4().hex
+    settings = _settings(collection, blob_root)
+    settings.knowledge_chunk_overlap_chars = 0
+    settings.knowledge_chunk_size_chars = 16
+    job_id, revision_id, _ = await _seed_revision(db_factory, blob_root=blob_root, content=content)
+    components = fake_indexing_components(settings)
+    index = components.index
+    first_batch: list[VectorRecord] = []
+    upsert = index.upsert
+    trace = RecordingTraceSink()
+
+    def interrupt_second_write(records: Sequence[VectorRecord]) -> None:
+        if first_batch:
+            raise KnowledgeProviderError("QDRANT_UNAVAILABLE", "Interrupted test write.")
+        upsert(records)
+        first_batch.extend(records)
+
+    client = QdrantClient(url=TEST_QDRANT_URL)
+    try:
+        with patch.object(index, "upsert", side_effect=interrupt_second_write):
+            await _process_knowledge_ingestion(
+                job_id, settings, indexing_factory=lambda _: components, trace_sink=trace
+            )
+        async with db_factory() as session:
+            job = await session.get(IngestionJob, job_id)
+            revision = await session.get(DocumentRevision, revision_id)
+            chunk_count = await session.scalar(
+                select(func.count())
+                .select_from(DocumentChunk)
+                .where(DocumentChunk.document_revision_id == revision_id)
+            )
+            assert chunk_count == count
+            assert revision.ingestion_status == RevisionIngestionStatus.PROCESSING
+            assert job.status == IngestionJobStatus.PENDING
+            assert job.stage == IngestionStage.INDEXING
+            assert job.last_error_code == "QDRANT_UNAVAILABLE"
+            job.next_attempt_at = datetime.now(UTC) - timedelta(seconds=1)
+            await session.commit()
+        assert 0 < len(first_batch) < count
+        assert client.count(collection, exact=True).count == len(first_batch)
+        assert trace.ended[0][1]["point_count"] == len(first_batch)
+
+        await _process_knowledge_ingestion(job_id, settings, indexing_factory=lambda _: components)
+        async with db_factory() as session:
+            job = await session.get(IngestionJob, job_id)
+            revision = await session.get(DocumentRevision, revision_id)
+            assert job.status == IngestionJobStatus.SUCCEEDED
+            assert job.attempt_count == 2
+            assert revision.ingestion_status == RevisionIngestionStatus.READY
+        assert client.count(collection, exact=True).count == count
+        last = f"{count - 1:015d}"
+        scope = VectorScope(
+            str(revision.workspace_id), str(revision.knowledge_base_id), (str(revision_id),)
+        )
+        hits = index.sparse_search(components.sparse.encode_query(last), scope=scope, limit=1)
+        assert len(hits) == 1
+        assert hits[0].payload["locator"]["char_start"] == (count - 1) * 16
+    finally:
+        index.close()
+        if client.collection_exists(collection):
+            client.delete_collection(collection)
+        client.close()
 
 
 @pytest.mark.asyncio

@@ -3,8 +3,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
+from itertools import batched
 from uuid import UUID
 
 from sqlalchemy import select
@@ -47,6 +48,9 @@ from packages.observability import NoopTraceSink, ProductionTraceSink
 from packages.observability.contracts import TraceSink, TraceSpan
 
 logger = logging.getLogger(__name__)
+
+# Keep 1024-dimensional vectors and their serialized HTTP request bounded per write.
+_INDEX_BATCH_SIZE = 64
 
 
 IndexingComponents = RetrievalComponents
@@ -181,7 +185,7 @@ async def _load_chunks(factory, revision_id: UUID) -> list[DocumentChunk]:
 
 def _vector_records(
     claim: ClaimedIngestionJob,
-    chunks: list[DocumentChunk],
+    chunks: Sequence[DocumentChunk],
     dense: DenseEmbedder,
     sparse: SparseEncoder,
 ) -> tuple[VectorRecord, ...]:
@@ -233,28 +237,38 @@ async def _index_claim(
     # Embeddings are intentionally recomputed for both EMBEDDING and INDEXING.
     # PostgreSQL remains the durable textual source; deterministic Qdrant upsert
     # makes a retry after a worker crash safe and idempotent.
-    records = await asyncio.to_thread(_vector_records, claim, chunks, dense, sparse)
-    if claim.stage == IngestionStage.EMBEDDING:
-        async with factory() as session:
-            transitioned = await advance_ingestion_stage(
-                session,
-                job_id=claim.id,
-                lease_token=claim.lease_token,
-                expected_stage=IngestionStage.EMBEDDING,
-                next_stage=IngestionStage.INDEXING,
-            )
-        if not transitioned:
-            return _IndexingOutcome(None, None, True, len(chunks), len(records))
+    point_count = 0
+    try:
+        for batch in batched(chunks, _INDEX_BATCH_SIZE):
+            records = await asyncio.to_thread(_vector_records, claim, batch, dense, sparse)
+            if point_count == 0:
+                if claim.stage == IngestionStage.EMBEDDING:
+                    async with factory() as session:
+                        transitioned = await advance_ingestion_stage(
+                            session,
+                            job_id=claim.id,
+                            lease_token=claim.lease_token,
+                            expected_stage=IngestionStage.EMBEDDING,
+                            next_stage=IngestionStage.INDEXING,
+                        )
+                    if not transitioned:
+                        return _IndexingOutcome(None, None, True, len(chunks), 0)
+                await asyncio.to_thread(index.ensure_collection)
+            await asyncio.to_thread(index.upsert, records)
+            point_count += len(records)
+    except KnowledgeProviderError as exc:
+        error = (exc.code, exc.message)
+        if provider_error_is_retryable(exc.code):
+            return _IndexingOutcome(None, error, False, len(chunks), point_count)
+        return _IndexingOutcome(error, None, False, len(chunks), point_count)
 
-    await asyncio.to_thread(index.ensure_collection)
-    await asyncio.to_thread(index.upsert, records)
     async with factory() as session:
         finalized = await finalize_ingestion_ready(
             session,
             job_id=claim.id,
             lease_token=claim.lease_token,
         )
-    return _IndexingOutcome(None, None, not finalized, len(chunks), len(records))
+    return _IndexingOutcome(None, None, not finalized, len(chunks), point_count)
 
 
 async def _process_knowledge_ingestion(
@@ -351,24 +365,18 @@ async def _process_knowledge_ingestion(
 
                 if not stale and terminal_error is None:
                     components = _indexing_components(settings, factory=indexing_factory)
-                    try:
-                        outcome = await _index_claim(
-                            factory,
-                            claim,
-                            dense=components.dense,
-                            sparse=components.sparse,
-                            index=components.index,
-                        )
-                        terminal_error = outcome.terminal_error
-                        retryable_error = outcome.retryable_error
-                        stale = outcome.stale
-                        chunk_count = max(chunk_count, outcome.chunk_count)
-                        point_count = outcome.point_count
-                    except KnowledgeProviderError as exc:
-                        if provider_error_is_retryable(exc.code):
-                            retryable_error = (exc.code, exc.message)
-                        else:
-                            terminal_error = (exc.code, exc.message)
+                    outcome = await _index_claim(
+                        factory,
+                        claim,
+                        dense=components.dense,
+                        sparse=components.sparse,
+                        index=components.index,
+                    )
+                    terminal_error = outcome.terminal_error
+                    retryable_error = outcome.retryable_error
+                    stale = outcome.stale
+                    chunk_count = max(chunk_count, outcome.chunk_count)
+                    point_count = outcome.point_count
             except BlobStoreError:
                 retryable_error = (
                     "BLOB_TEMPORARY_FAILURE",

@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-14",
+  "scope": {
+    "path": "KnowledgeService.upload_document → recorded job ID → ingestion worker → PostgreSQL chunks and Qdrant points → current snapshot and revision-scoped search",
+    "dispatch": "The probe recorded enqueued job IDs and invoked the worker directly.",
+    "timing": "One worker attempt per measured condition. The timer starts after upload and stops when the worker returns. Snapshot and search checks follow.",
+    "storage": {"postgresql": "16.15", "asyncpg": "0.31.0", "qdrant_server": "1.13.6", "qdrant_client": "1.13.3"},
+    "after_batch_limits": {"postgresql_rows_per_executemany": 1000, "vectors_per_embedding_and_upsert": 64},
+    "search": {"query": "language", "limit": 3, "scope": ["workspace_id", "knowledge_base_id", "document_revision_id"]}
+  },
+  "corpus": {
+    "dataset": "QASPER v0.3",
+    "split": "train",
+    "archive_url": "https://qasper-dataset.s3.us-west-2.amazonaws.com/qasper-train-dev-v0.3.tgz",
+    "file": "qasper-train-v0.3.json",
+    "sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+    "input_recipe": "Traverse papers, full_text sections and their paragraphs in file order. Append one newline after every paragraph, take the specified number of Unicode characters from the beginning, and upload as one UTF-8 text/plain document."
+  },
+  "storage_comparison": {
+    "embedding": "DeterministicFakeDenseEmbedder and DeterministicFakeSparseEncoder. These runs measure the production parser, database, index transport, snapshots and search readback with deterministic vectors.",
+    "cases": [
+      {
+        "name": "PostgreSQL chunk write",
+        "input": {"characters": 550000, "utf8_bytes": 551518, "sha256": "cb5918126d987c675c66891fc594e2a1f521bd3e179979cc56b8fb07a962250c"},
+        "configuration": {"chunk_characters": 160, "overlap_characters": 0, "dense_dimension": 16},
+        "input_chunks": 3438,
+        "before": {
+          "worker": {"attempts": 1, "seconds": 1.424, "job": "PENDING", "stage": "CHUNKING", "revision": "PROCESSING", "error": "DATABASE_TEMPORARY_FAILURE"},
+          "postgresql_chunks": 0, "qdrant_exact_points": 0, "current_snapshot_revisions": 0,
+          "upserts": {"requests": 0}
+        },
+        "after": {
+          "worker": {"attempts": 1, "seconds": 2.863, "job": "SUCCEEDED", "stage": "INDEXING", "revision": "READY"},
+          "postgresql_chunks": 3438, "qdrant_exact_points": 3438, "current_snapshot_revisions": 1,
+          "upserts": {"requests": 54, "http_200": 54, "max_points": 64, "max_body_bytes": 84978},
+          "sparse_hits": 3, "all_sparse_hits_match_revision": true
+        }
+      },
+      {
+        "name": "Qdrant upsert at default chunk size and dimension",
+        "input": {"characters": 2000000, "utf8_bytes": 2003862, "sha256": "3e76069906fcebc9d9866e0c8a6176ff68c0a2c2e10a1e71676b853c4042e796"},
+        "configuration": {"chunk_characters": 1200, "overlap_characters": 200, "dense_dimension": 1024},
+        "input_chunks": 2000,
+        "before": {
+          "worker": {"attempts": 1, "seconds": 5.346, "job": "PENDING", "stage": "INDEXING", "revision": "PROCESSING", "error": "QDRANT_UNAVAILABLE"},
+          "postgresql_chunks": 2000, "qdrant_exact_points": 0, "current_snapshot_revisions": 0,
+          "upserts": {"requests": 1, "http_400": 1, "max_points": 2000, "max_body_bytes": 48848883}
+        },
+        "after": {
+          "worker": {"attempts": 1, "seconds": 6.025, "job": "SUCCEEDED", "stage": "INDEXING", "revision": "READY"},
+          "postgresql_chunks": 2000, "qdrant_exact_points": 2000, "current_snapshot_revisions": 1,
+          "upserts": {"requests": 32, "http_200": 32, "max_points": 64, "max_body_bytes": 1570856},
+          "sparse_hits": 3, "all_sparse_hits_match_revision": true
+        }
+      }
+    ]
+  },
+  "production_model_smoke": {
+    "model": "BAAI/bge-m3",
+    "revision": "5617a9f61b028005a4858fdac845db406aefb181",
+    "embedding": "BgeM3DenseEmbedder and BgeM3SparseEncoder with the model tokenizer",
+    "device": "cpu", "torch_threads": 2, "model_batch_size": 4,
+    "input": {"characters": 4000, "utf8_bytes": 4012, "sha256": "4425961e002f4a05df271f45ea734c3e8df7fde1d221ad47c8e83c7d455ea2ac"},
+    "configuration": {"chunk_characters": 1200, "overlap_characters": 200, "dense_dimension": 1024},
+    "input_chunks": 4,
+    "after": {
+      "worker": {"attempts": 1, "seconds": 20.323, "job": "SUCCEEDED", "stage": "INDEXING", "revision": "READY"},
+      "postgresql_chunks": 4, "qdrant_exact_points": 4, "current_snapshot_revisions": 1,
+      "upserts": {"requests": 1, "http_200": 1, "max_points": 4, "max_body_bytes": 97225},
+      "dense_hits": 3, "sparse_hits": 1, "all_sparse_hits_match_revision": true
+    }
+  },
+  "retry_regression": {
+    "test": "tests/integration/test_m3c_indexing.py::test_large_revision_replays_partial_index_writes_before_ready",
+    "input": "3277 synthetic numbered lines with 15 digits and a newline, 16-character windows, zero overlap and deterministic 16-dimensional dense vectors.",
+    "injection": "Qdrant acknowledged the first write. The test raised QDRANT_UNAVAILABLE before sending the second write.",
+    "first_attempt": {"job": "PENDING", "stage": "INDEXING", "revision": "PROCESSING", "postgresql_chunks": 3277, "qdrant_exact_points": 64, "trace_acknowledged_points": 64},
+    "retry": {"attempts": 2, "job": "SUCCEEDED", "revision": "READY", "qdrant_exact_points": 3277, "last_chunk_sparse_hits_at_1": 1, "last_chunk_char_start": 52416}
+  },
+  "verification": {
+    "exit_codes": {"before_observation": 0, "after_observation": 0, "integration_tests": 0, "unit_tests": 0},
+    "integration_tests": {"file": "tests/integration/test_m3c_indexing.py", "passed": 7, "seconds": 24.82, "warnings": 1},
+    "unit_tests": {"files": ["tests/unit/test_knowledge_m3b.py", "tests/unit/test_knowledge_m3c_indexing.py"], "passed": 16, "seconds": 8.84},
+    "replay_prerequisites": "From the repository root, set AGENTHUB_TEST_DATABASE_URL to a disposable PostgreSQL database and AGENTHUB_TEST_QDRANT_URL to a local Qdrant test service. The integration fixture applies migrations.",
+    "replay_integration_command": ".venv/Scripts/python.exe -m pytest -o addopts= -q -p no:cacheprovider tests/integration/test_m3c_indexing.py"
+  }
+}
