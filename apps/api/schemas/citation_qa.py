@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from apps.api.schemas.knowledge import RetrievalPlaygroundStages
+from packages.knowledge.contracts import CitationOutputMode
 from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 
 
@@ -16,6 +17,7 @@ class CitationQaRequest(BaseModel):
     knowledge_snapshot_id: UUID
     model_profile_id: UUID
     query: str = Field(min_length=1, max_length=4_000)
+    output_mode: CitationOutputMode = "JSON_SCHEMA"
 
 
 class CitationQaCitationResponse(BaseModel):
@@ -44,6 +46,7 @@ class CitationQaResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     answer: str
+    insufficient_evidence: bool
     citations: list[CitationQaCitationResponse]
     retrieval_trace: CitationQaRetrievalTraceResponse
 

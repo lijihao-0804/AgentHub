@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Request
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.api.dependencies import get_db_session
+from apps.api.dependencies import get_db_session_factory
 from apps.api.knowledge_dependencies import (
+    get_citation_qa_generator,
     get_citation_qa_model_plan_resolver,
-    get_model_gateway,
     get_query_workspace_context,
     get_retrieval_components,
 )
@@ -20,14 +19,13 @@ from apps.api.schemas.citation_qa import (
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.citation_qa import CitationQaResult, CitationQaService
 from packages.knowledge.composition import RetrievalComponents
-from packages.model_gateway.contracts import ModelGateway
+from packages.model_gateway.contracts import ResolvedModelGenerator
 from packages.observability import ProductionTraceSink
 
 router = APIRouter(tags=["knowledge"])
-db_session_dependency = Depends(get_db_session)
 context_dependency = Depends(get_query_workspace_context)
 retrieval_components_dependency = Depends(get_retrieval_components)
-model_gateway_dependency = Depends(get_model_gateway)
+model_gateway_dependency = Depends(get_citation_qa_generator)
 model_plan_resolver_dependency = Depends(get_citation_qa_model_plan_resolver)
 
 
@@ -36,15 +34,15 @@ async def citation_qa(
     payload: CitationQaRequest,
     request: Request,
     context: WorkspaceExecutionContext = context_dependency,
-    session: AsyncSession = db_session_dependency,
     components: RetrievalComponents = retrieval_components_dependency,
-    model_gateway: ModelGateway = model_gateway_dependency,
+    model_gateway: ResolvedModelGenerator = model_gateway_dependency,
     model_plan_resolver=model_plan_resolver_dependency,
 ) -> CitationQaResponse:
     result = await CitationQaService(
-        session=session,
+        session_factory=get_db_session_factory(request),
         retrieval_components=components,
         model_gateway=model_gateway,
+        output_mode=payload.output_mode,
         max_evidence_chars=request.app.state.settings.knowledge_qa_max_evidence_chars,
         min_rerank_score=request.app.state.settings.knowledge_min_rerank_score,
         superseded_rank_penalty=request.app.state.settings.knowledge_superseded_rank_penalty,
@@ -63,6 +61,7 @@ async def citation_qa(
 def _response(result: CitationQaResult) -> CitationQaResponse:
     return CitationQaResponse(
         answer=result.answer,
+        insufficient_evidence=result.insufficient_evidence,
         citations=[
             CitationQaCitationResponse(
                 id=item.id,

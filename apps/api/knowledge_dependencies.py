@@ -1,16 +1,16 @@
 from __future__ import annotations
 
+from functools import partial
 from uuid import UUID
 
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.auth_dependencies import get_current_principal
-from apps.api.dependencies import get_db_session
+from apps.api.dependencies import get_db_session, get_db_session_factory
 from apps.api.schemas.citation_qa import CitationQaRequest
 from packages.agent_runtime.queue import AgentRunQueue, CeleryAgentRunQueue
 from packages.control_plane.services import TenantService
-from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
 from packages.evaluation.queue import CeleryExperimentRunQueue, ExperimentRunQueue
 from packages.knowledge.adapters.celery_queue import CeleryIngestionQueue
@@ -19,9 +19,9 @@ from packages.knowledge.composition import (
     production_retrieval_components,
 )
 from packages.knowledge.queue import IngestionQueue
-from packages.model_gateway.contracts import ModelGateway
+from packages.model_gateway.contracts import ModelGateway, ResolvedModelGenerator
 from packages.model_gateway.credentials import ProviderCredentialCipher
-from packages.model_gateway.gateway import SqlAlchemyModelGateway
+from packages.model_gateway.gateway import SessionScopedModelGenerator, SqlAlchemyModelGateway
 from packages.observability import ProductionTraceSink
 
 db_session_dependency = Depends(get_db_session)
@@ -78,16 +78,9 @@ async def get_retrieval_components(request: Request) -> RetrievalComponents:
 
 async def get_query_workspace_context(
     payload: CitationQaRequest,
-    principal: PrincipalContext = principal_dependency,
-    session: AsyncSession = db_session_dependency,
+    request: Request,
 ) -> WorkspaceExecutionContext:
-    return (
-        await TenantService().get_workspace_access(
-            session,
-            principal=principal,
-            workspace_id=payload.workspace_id,
-        )
-    ).context
+    return await get_agent_run_workspace_context(payload.workspace_id, request)
 
 
 async def get_agent_run_workspace_context(
@@ -100,13 +93,7 @@ async def get_agent_run_workspace_context(
     request-scoped authorization read short-lived, including for SSE streams.
     """
 
-    factory = getattr(request.app.state, "db_session_factory", None)
-    if factory is None:
-        raise AgentHubError(
-            "DATABASE_NOT_CONFIGURED",
-            "Database access is not configured.",
-            status_code=503,
-        )
+    factory = get_db_session_factory(request)
     async with factory() as session:
         principal = await get_current_principal(request, session=session)
         return (
@@ -129,9 +116,18 @@ async def get_model_gateway(
     )
 
 
-async def get_citation_qa_model_plan_resolver():
-    """Return the production resolver behind the testable Citation QA seam."""
-
+async def get_citation_qa_model_plan_resolver(payload: CitationQaRequest):
+    """Return the production resolver for the requested output capability."""
     from packages.knowledge.citation_qa import _resolve_model_plan
 
-    return _resolve_model_plan
+    return partial(_resolve_model_plan, output_mode=payload.output_mode)
+
+
+async def get_citation_qa_generator(request: Request) -> ResolvedModelGenerator:
+    cipher = ProviderCredentialCipher.from_settings(request.app.state.settings)
+    return SessionScopedModelGenerator(
+        get_db_session_factory(request),
+        lambda session: SqlAlchemyModelGateway(
+            session, credential_cipher=cipher, trace_sink=ProductionTraceSink()
+        ),
+    )

@@ -346,18 +346,20 @@ class ModelHealthResult:
     failure_code: str | None = None
 
 
-class ModelGateway(Protocol):
-    async def generate(
-        self,
-        context: WorkspaceExecutionContext,
-        model_profile_id: UUID,
-        request: ModelRequest,
-    ) -> ModelResponse: ...
-
+class ResolvedModelGenerator(Protocol):
     async def generate_resolved(
         self,
         context: WorkspaceExecutionContext,
         plan: ResolvedModelExecutionPlan,
+        request: ModelRequest,
+    ) -> ModelResponse: ...
+
+
+class ModelGateway(ResolvedModelGenerator, Protocol):
+    async def generate(
+        self,
+        context: WorkspaceExecutionContext,
+        model_profile_id: UUID,
         request: ModelRequest,
     ) -> ModelResponse: ...
 
@@ -403,6 +405,7 @@ __all__ = [
     "ModelResponse",
     "ResolvedModelExecutionPlan",
     "ResolvedModelExecutionProfile",
+    "ResolvedModelGenerator",
     "ModelStreamEvent",
     "ModelStreamEventType",
     "ModelToolCall",

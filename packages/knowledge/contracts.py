@@ -3,9 +3,11 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
+
+CitationOutputMode = Literal["JSON_SCHEMA", "PROMPT_JSON"]
 
 
 class RetrievalStrategy(StrEnum):

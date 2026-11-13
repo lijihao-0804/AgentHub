@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from contextlib import nullcontext
 from uuid import uuid4
 
 import httpx
 import pytest
 
 from apps.api.app import create_app
-from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import (
+    get_citation_qa_generator,
     get_citation_qa_model_plan_resolver,
-    get_model_gateway,
     get_query_workspace_context,
     get_retrieval_components,
 )
@@ -51,8 +50,7 @@ def _app(
     app = create_app(Settings(testing=True, knowledge_dense_vector_size=8))
     service = _service(session, gateway)
 
-    async def override_db() -> AsyncIterator[_FakeSession]:
-        yield session
+    app.state.db_session_factory = lambda: nullcontext(session)
 
     async def override_context() -> WorkspaceExecutionContext:
         return context or _context(session)
@@ -63,10 +61,9 @@ def _app(
     async def override_plan_resolver():
         return _resolve_plan
 
-    app.dependency_overrides[get_db_session] = override_db
     app.dependency_overrides[get_query_workspace_context] = override_context
     app.dependency_overrides[get_retrieval_components] = override_components
-    app.dependency_overrides[get_model_gateway] = lambda: gateway
+    app.dependency_overrides[get_citation_qa_generator] = lambda: gateway
     app.dependency_overrides[get_citation_qa_model_plan_resolver] = override_plan_resolver
     return app
 
@@ -76,10 +73,8 @@ async def test_query_requires_bearer_authentication() -> None:
     session = _FakeSession()
     app = create_app(Settings(testing=True, knowledge_dense_vector_size=8))
 
-    async def override_db() -> AsyncIterator[_FakeSession]:
-        yield session
+    app.state.db_session_factory = lambda: nullcontext(session)
 
-    app.dependency_overrides[get_db_session] = override_db
     response = await _post(app, _payload(session))
 
     assert response.status_code == 401
@@ -95,6 +90,7 @@ async def test_query_returns_citations_and_safe_trace_projection() -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["answer"] == "Supported [1]"
+    assert body["insufficient_evidence"] is False
     assert body["citations"][0]["id"] == 1
     assert set(body["retrieval_trace"]["stages"]) == {
         "dense",
@@ -106,6 +102,29 @@ async def test_query_returns_citations_and_safe_trace_projection() -> None:
     assert "internal-point" not in response.text
     assert "credential" not in response.text.lower()
     assert "provider" not in response.text.lower()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("valid", [True, False])
+async def test_explicit_prompt_json_uses_strict_local_validation(valid: bool) -> None:
+    session = _FakeSession()
+    gateway = _FakeModelGateway(
+        '{"answer":"Source [1]","citation_ids":[1],"insufficient_evidence":false}'
+        if valid
+        else '{"answer":"not valid enough"}'
+    )
+    response = await _post(
+        _app(session, gateway), _payload(session) | {"output_mode": "PROMPT_JSON"}
+    )
+    [sent] = gateway.requests
+    assert sent.response_schema is None
+    assert "structured_output" not in sent.required_capabilities.required
+    assert '"insufficient_evidence"' in sent.messages[0].content
+    if valid:
+        assert response.status_code == 200 and response.json()["citations"][0]["id"] == 1
+    else:
+        assert response.status_code == 502
+        assert response.json()["error"]["code"] == "CITATION_QA_INVALID_MODEL_OUTPUT"
 
 
 @pytest.mark.asyncio
@@ -121,10 +140,36 @@ async def test_query_requires_concrete_snapshot_and_forbids_extra_fields() -> No
 
     latest_response = await _post(app, latest)
     extra_response = await _post(app, extra)
+    unknown_mode = await _post(app, _payload(session) | {"output_mode": "AUTO"})
 
     assert latest_response.status_code == 422
     assert extra_response.status_code == 422
+    assert unknown_mode.status_code == 422
     assert gateway.requests == []
+
+
+@pytest.mark.asyncio
+async def test_empty_snapshot_reports_insufficient_evidence_without_model_call():
+    session = _FakeSession(chunks=0)
+    gateway = _FakeModelGateway()
+    response = await _post(_app(session, gateway), _payload(session))
+    assert response.status_code == 200
+    assert response.json()["insufficient_evidence"] is True and response.json()["citations"] == []
+    assert not gateway.requests
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["JSON_SCHEMA", "PROMPT_JSON"])
+@pytest.mark.parametrize("duplicate", ['"insufficient_evidence":true,', '"answer":"unverified",'])
+async def test_repeated_json_fields_are_ambiguous(mode, duplicate):
+    session = _FakeSession()
+    gateway = _FakeModelGateway(
+        "{" + duplicate + '"answer":"Source [1]","citation_ids":[1],"insufficient_evidence":false}'
+    )
+    response = await _post(_app(session, gateway), _payload(session) | {"output_mode": mode})
+    assert response.status_code == 502
+    assert response.json()["error"]["code"] == "CITATION_QA_INVALID_MODEL_OUTPUT"
+    assert len(gateway.requests) == 1
 
 
 @pytest.mark.asyncio

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import asyncio
 import os
-from collections.abc import AsyncIterator
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -10,12 +10,11 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from apps.api.app import create_app
-from apps.api.dependencies import get_db_session
-from apps.api.knowledge_dependencies import get_model_gateway, get_retrieval_components
+from apps.api.knowledge_dependencies import get_citation_qa_generator, get_retrieval_components
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
 from packages.core.auth.security import issue_access_token
 from packages.core.config.settings import Settings
@@ -39,7 +38,11 @@ from packages.knowledge.models import (
 )
 from packages.knowledge.point_ids import deterministic_point_id
 from packages.model_gateway.contracts import ModelRequest, ModelResponse
-from packages.model_gateway.gateway import SqlAlchemyModelGateway
+from packages.model_gateway.credentials import (
+    ProviderCredentialCipher,
+    encrypt_provider_credential_secret,
+)
+from packages.model_gateway.gateway import SessionScopedModelGenerator, SqlAlchemyModelGateway
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 
 TEST_DATABASE_URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "").strip()
@@ -51,7 +54,6 @@ pytestmark = [
         reason="Set AGENTHUB_TEST_DATABASE_URL and AGENTHUB_TEST_QDRANT_URL for M3-E integration.",
     ),
 ]
-db_session_dependency = Depends(get_db_session)
 
 
 def async_database_url(database_url: str) -> str:
@@ -214,7 +216,9 @@ async def _seed_model_profile(
             workspace_id=workspace_id,
             provider="offline",
             name="local-test-credential",
-            secret="test-secret",
+        )
+        encrypt_provider_credential_secret(
+            credential, "test-secret", cipher=ProviderCredentialCipher.from_settings()
         )
         session.add(credential)
         await session.flush()
@@ -317,9 +321,7 @@ async def test_citation_qa_uses_real_tenant_postgres_and_qdrant(
     )
     app = create_app(settings)
 
-    async def override_db() -> AsyncIterator[AsyncSession]:
-        async with db_factory() as session:
-            yield session
+    app.state.db_session_factory = db_factory
 
     async def override_components() -> RetrievalComponents:
         return components
@@ -327,9 +329,8 @@ async def test_citation_qa_uses_real_tenant_postgres_and_qdrant(
     async def override_gateway() -> _FakeModelGateway:
         return gateway
 
-    app.dependency_overrides[get_db_session] = override_db
     app.dependency_overrides[get_retrieval_components] = override_components
-    app.dependency_overrides[get_model_gateway] = override_gateway
+    app.dependency_overrides[get_citation_qa_generator] = override_gateway
     token = issue_access_token(user_id, settings)
     model_profile_id = await _seed_model_profile(db_factory, workspace_id=workspace_id)
     payload = {
@@ -382,19 +383,18 @@ async def test_citation_qa_rejects_cross_workspace_model_profile_before_adapter(
     adapter = _FailIfCalledAdapter()
     app = create_app(settings)
 
-    async def override_db() -> AsyncIterator[AsyncSession]:
-        async with db_factory() as session:
-            yield session
+    app.state.db_session_factory = db_factory
 
     async def override_components() -> RetrievalComponents:
         return components
 
-    async def override_gateway(session: AsyncSession = db_session_dependency):
-        return SqlAlchemyModelGateway(session, adapter=adapter)
+    async def override_gateway():
+        return SessionScopedModelGenerator(
+            db_factory, lambda session: SqlAlchemyModelGateway(session, adapter=adapter)
+        )
 
-    app.dependency_overrides[get_db_session] = override_db
     app.dependency_overrides[get_retrieval_components] = override_components
-    app.dependency_overrides[get_model_gateway] = override_gateway
+    app.dependency_overrides[get_citation_qa_generator] = override_gateway
     token = issue_access_token(user_id, settings)
     payload = {
         "workspace_id": str(workspace_id),
@@ -417,3 +417,80 @@ async def test_citation_qa_rejects_cross_workspace_model_profile_before_adapter(
     assert adapter.calls == 0
     assert "workspace-b-private" not in response.text
     assert "workspace-b-secret" not in response.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("path", ["playground", "citation"])
+async def test_sql_connection_available_while_rag_provider_waits(db_factory, monkeypatch, path):
+    """One connection is enough for unrelated reads while an external stage is in flight."""
+    from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
+
+    user_id, workspace, kb, snapshot, chunk = await _seed(db_factory)
+    profile_id = await _seed_model_profile(db_factory, workspace_id=workspace)
+    settings = Settings(
+        testing=True,
+        qdrant_url=TEST_QDRANT_URL,
+        knowledge_dense_vector_size=16,
+        knowledge_qdrant_collection=f"rag_pool_{uuid4().hex}",
+    )
+    index = _index(settings, chunk)
+    engine = create_async_engine(
+        async_database_url(TEST_DATABASE_URL), pool_size=1, max_overflow=0, pool_timeout=1
+    )
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    app = create_app(settings)
+    app.state.db_session_factory = factory
+    entered, release = asyncio.Event(), asyncio.Event()
+    loop = asyncio.get_running_loop()
+
+    class DelayedReranker(DeterministicFakeReranker):
+        def rerank(self, query, candidates):
+            if path == "playground":
+                loop.call_soon_threadsafe(entered.set)
+                asyncio.run_coroutine_threadsafe(release.wait(), loop).result(timeout=10)
+            return super().rerank(query, candidates)
+
+    async def complete(_adapter, _profile, _credential, _request):
+        entered.set()
+        await asyncio.wait_for(release.wait(), 10)
+        return ModelResponse(
+            content='{"answer":"alpha [1]","citation_ids":[1],"insufficient_evidence":false}',
+            provider="offline",
+            model="exact-model",
+        )
+
+    monkeypatch.setattr(LiteLLMProviderAdapter, "complete", complete)
+    app.dependency_overrides[get_retrieval_components] = lambda: RetrievalComponents(
+        DeterministicFakeDenseEmbedder(dimension=16),
+        DeterministicFakeSparseEncoder(),
+        DelayedReranker(),
+        index,
+    )
+    payload = {"knowledge_snapshot_id": str(snapshot), "query": "alpha"}
+    url = f"/api/v1/workspaces/{workspace}/knowledge-bases/{kb}/retrieval/playground"
+    if path == "citation":
+        url = "/api/v1/knowledge/query"
+        payload.update(
+            workspace_id=str(workspace), knowledge_base_id=str(kb), model_profile_id=str(profile_id)
+        )
+    try:
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            task = asyncio.create_task(
+                client.post(
+                    url,
+                    json=payload,
+                    headers={"Authorization": "Bearer " + issue_access_token(user_id, settings)},
+                )
+            )
+            try:
+                await asyncio.wait_for(entered.wait(), timeout=7)
+                async with factory() as session:
+                    assert await session.scalar(text("SELECT 1")) == 1
+            finally:
+                release.set()
+                response = await task
+            assert response.status_code == 200, response.text
+    finally:
+        await engine.dispose()

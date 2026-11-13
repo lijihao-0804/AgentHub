@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from uuid import UUID
 
 from sqlalchemy import select
@@ -23,6 +24,12 @@ def _workspace_id(context: WorkspaceExecutionContext) -> UUID | None:
         return None
 
 
+@dataclass(frozen=True)
+class ProviderRoute:
+    provider: str
+    base_url: str | None
+
+
 class SqlAlchemyModelGatewayRepository:
     """Repository methods intentionally require execution context for every lookup."""
 
@@ -36,6 +43,20 @@ class SqlAlchemyModelGatewayRepository:
         self.session = session
         self.credential_cipher = credential_cipher
         self.settings = settings
+
+    async def get_enabled_route(
+        self, context: WorkspaceExecutionContext, credential_id: UUID
+    ) -> ProviderRoute | None:
+        row = (
+            await self.session.execute(
+                select(ProviderCredential.provider, ProviderCredential.base_url).where(
+                    ProviderCredential.workspace_id == _workspace_id(context),
+                    ProviderCredential.id == credential_id,
+                    ProviderCredential.enabled.is_(True),
+                )
+            )
+        ).one_or_none()
+        return ProviderRoute(*row) if row else None
 
     async def get_provider_credential(
         self,
@@ -57,9 +78,7 @@ class SqlAlchemyModelGatewayRepository:
                 cipher = self.credential_cipher or ProviderCredentialCipher.from_settings(
                     self.settings
                 )
-                secret = cipher.decrypt(
-                    credential.secret_ciphertext
-                )
+                secret = cipher.decrypt(credential.secret_ciphertext)
             except CredentialEncryptionError as exc:
                 raise ModelGatewayError(ModelGatewayErrorCode.MODEL_AUTH_FAILED) from exc
             set_committed_value(credential, "secret", secret)

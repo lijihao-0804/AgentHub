@@ -274,3 +274,9 @@ Exact evidence, bounded candidates, scope and de-duplication are code gates; dur
 The small [quality probes](reviews/AgentHub-closure-memory-quality-20261005.md) retained inappropriate grounded writes and irrelevant admissions.
 Two contradictory ACTIVE facts can coexist; SUPERSEDED is reserved, not automatically generated. No TTL/decay/capacity cleanup contract is implemented.
 New injected Memory remains UNTRUSTED and cannot rewrite published ToolPolicy or caller identity; the new probe did not exercise an actual refund.
+
+## Grounded citation QA
+
+`POST /api/v1/knowledge/query` takes a workspace, knowledge base, concrete snapshot, model profile and question. The default `output_mode` is `JSON_SCHEMA` and requires the entire resolved model chain to support native structured output. Clients can explicitly request `PROMPT_JSON` for text models. In that mode the same schema enters the budgeted system prompt and the service validates the returned JSON, citation IDs and answer markers before returning it. A provider error does not switch modes.
+
+The response contains `answer`, `citations`, `insufficient_evidence` and the retrieval trace. An empty evidence set returns `insufficient_evidence=true` without generation. An accepted insufficient answer has no citations. A supported answer must cite one or more IDs actually visible to that request. The default evidence rendering includes available document-level supersession and effective-date fields. These are the stored document lifecycle values at query time. The pinned snapshot selects document revisions. Model declarations, returned IDs and syntactic validation do not establish that every individual factual claim is correct.

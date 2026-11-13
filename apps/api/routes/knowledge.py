@@ -7,8 +7,9 @@ from fastapi import APIRouter, Depends, File, Query, Request, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.api.dependencies import get_db_session
+from apps.api.dependencies import get_db_session, get_db_session_factory
 from apps.api.knowledge_dependencies import (
+    get_agent_run_workspace_context,
     get_ingestion_queue,
     get_retrieval_components,
     get_workspace_context,
@@ -34,7 +35,7 @@ from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.blob_store import LocalBlobStore
 from packages.knowledge.composition import RetrievalComponents
 from packages.knowledge.contracts import RetrievalQuery, RetrievalResult
-from packages.knowledge.models import DocumentChunk, DocumentRevision, KnowledgeSnapshotItem
+from packages.knowledge.models import DocumentChunk, KnowledgeSnapshotItem
 from packages.knowledge.queue import IngestionQueue
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.knowledge.services import KnowledgeService
@@ -51,6 +52,7 @@ from packages.knowledge.upload_security import (
 router = APIRouter(tags=["knowledge"])
 db_session_dependency = Depends(get_db_session)
 context_dependency = Depends(get_workspace_context)
+playground_context = Depends(get_agent_run_workspace_context)
 queue_dependency = Depends(get_ingestion_queue)
 retrieval_components_dependency = Depends(get_retrieval_components)
 upload_file_dependency = File(...)
@@ -66,38 +68,27 @@ async def _load_trace_metadata(
 ) -> dict[str, RetrievalTraceMetadata]:
     if not chunk_ids:
         return {}
-    revision_ids = tuple(
-        await session.scalars(
-            select(KnowledgeSnapshotItem.document_revision_id).where(
-                KnowledgeSnapshotItem.workspace_id == workspace_id,
-                KnowledgeSnapshotItem.knowledge_base_id == knowledge_base_id,
-                KnowledgeSnapshotItem.snapshot_id == snapshot_id,
-            )
-        )
-    )
-    if not revision_ids:
-        return {}
     result = await session.execute(
-        select(DocumentChunk, DocumentRevision)
+        select(DocumentChunk.chunk_id, DocumentChunk.document_revision_id, DocumentChunk.locator)
         .join(
-            DocumentRevision,
-            (DocumentRevision.id == DocumentChunk.document_revision_id)
-            & (DocumentRevision.workspace_id == DocumentChunk.workspace_id)
-            & (DocumentRevision.knowledge_base_id == DocumentChunk.knowledge_base_id),
+            KnowledgeSnapshotItem,
+            (KnowledgeSnapshotItem.workspace_id == DocumentChunk.workspace_id)
+            & (KnowledgeSnapshotItem.knowledge_base_id == DocumentChunk.knowledge_base_id)
+            & (KnowledgeSnapshotItem.document_id == DocumentChunk.document_id)
+            & (KnowledgeSnapshotItem.document_revision_id == DocumentChunk.document_revision_id),
         )
         .where(
             DocumentChunk.workspace_id == workspace_id,
             DocumentChunk.knowledge_base_id == knowledge_base_id,
-            DocumentChunk.document_revision_id.in_(revision_ids),
+            KnowledgeSnapshotItem.snapshot_id == snapshot_id,
             DocumentChunk.chunk_id.in_(chunk_ids),
         )
     )
     return {
-        chunk.chunk_id: RetrievalTraceMetadata(
-            document_revision_id=str(revision.id),
-            locator=dict(chunk.locator),
+        chunk_id: RetrievalTraceMetadata(
+            document_revision_id=str(revision_id), locator=dict(locator)
         )
-        for chunk, revision in result
+        for chunk_id, revision_id, locator in result
     }
 
 
@@ -140,14 +131,14 @@ async def retrieval_playground(
     knowledge_base_id: UUID,
     payload: RetrievalPlaygroundRequest,
     request: Request,
-    context: WorkspaceExecutionContext = context_dependency,
-    session: AsyncSession = db_session_dependency,
+    context: WorkspaceExecutionContext = playground_context,
     components: RetrievalComponents = retrieval_components_dependency,
 ) -> RetrievalPlaygroundResponse:
     if not payload.query.strip():
         raise AgentHubError("INVALID_RETRIEVAL_QUERY", "The query must not be blank.", 400)
+    factory = get_db_session_factory(request)
     result = await HybridKnowledgeRetriever(
-        session=session,
+        session_factory=factory,
         dense_embedder=components.dense,
         sparse_encoder=components.sparse,
         reranker=components.reranker,
@@ -175,24 +166,25 @@ async def retrieval_playground(
             ),
         ),
     )
-    metadata = await _load_trace_metadata(
-        session,
-        workspace_id=workspace_id,
-        knowledge_base_id=knowledge_base_id,
-        snapshot_id=payload.knowledge_snapshot_id,
-        chunk_ids={
-            item.chunk_id
-            for stage in (
-                result.trace.dense,
-                result.trace.sparse,
-                result.trace.fusion,
-                result.trace.rerank,
-                result.trace.selection,
-            )
-            if stage is not None
-            for item in stage.results
-        },
-    )
+    async with factory() as session:
+        metadata = await _load_trace_metadata(
+            session,
+            workspace_id=workspace_id,
+            knowledge_base_id=knowledge_base_id,
+            snapshot_id=payload.knowledge_snapshot_id,
+            chunk_ids={
+                item.chunk_id
+                for stage in (
+                    result.trace.dense,
+                    result.trace.sparse,
+                    result.trace.fusion,
+                    result.trace.rerank,
+                    result.trace.selection,
+                )
+                if stage is not None
+                for item in stage.results
+            },
+        )
     return _playground_response(result, metadata=metadata)
 
 

@@ -1,0 +1,18 @@
+{
+  "scope": "Real PostgreSQL and Qdrant, production FastAPI auth, explicit pause during reranker or adapter call. Controlled single connection pool; a separate SQL SELECT 1 must complete before the stage may resume.",
+  "baseline_git": "dca82a7",
+  "pool": {
+    "size": 1,
+    "overflow": 0,
+    "pool_timeout_seconds": 1
+  },
+  "before": {
+    "playground": "pool_timeout",
+    "citation": "pool_timeout"
+  },
+  "after": {
+    "playground": "passed",
+    "citation": "passed"
+  },
+  "test": "tests/integration/test_m3e_citation_qa.py::test_sql_connection_available_while_rag_provider_waits"
+}

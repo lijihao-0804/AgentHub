@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from contextlib import nullcontext
 from datetime import date
 from uuid import UUID, uuid4
 
@@ -8,8 +8,10 @@ import httpx
 import pytest
 
 from apps.api.app import create_app
-from apps.api.dependencies import get_db_session
-from apps.api.knowledge_dependencies import get_retrieval_components, get_workspace_context
+from apps.api.knowledge_dependencies import (
+    get_agent_run_workspace_context,
+    get_retrieval_components,
+)
 from packages.core.config.settings import Settings
 from packages.core.execution_context.models import (
     OrganizationContext,
@@ -77,10 +79,9 @@ class _FakeSession:
         return [self.revision_id]
 
     async def execute(self, statement):
-        selected_count = len(statement._raw_columns)
-        if selected_count == 3:
+        if statement.column_descriptions[0]["name"] == "DocumentChunk":
             return [(self.chunk, self.document, self.revision)]
-        return [(self.chunk, self.revision)]
+        return [(self.chunk.chunk_id, self.chunk.document_revision_id, self.chunk.locator)]
 
 
 class _FakeVectorIndex:
@@ -169,8 +170,7 @@ def _app(
 ) -> object:
     app = create_app(Settings(testing=True, knowledge_dense_vector_size=8))
 
-    async def override_db() -> AsyncIterator[_FakeSession]:
-        yield session
+    app.state.db_session_factory = lambda: nullcontext(session)
 
     async def override_context() -> WorkspaceExecutionContext:
         return context
@@ -178,8 +178,7 @@ def _app(
     async def override_components() -> RetrievalComponents:
         return components
 
-    app.dependency_overrides[get_db_session] = override_db
-    app.dependency_overrides[get_workspace_context] = override_context
+    app.dependency_overrides[get_agent_run_workspace_context] = override_context
     app.dependency_overrides[get_retrieval_components] = override_components
     return app
 

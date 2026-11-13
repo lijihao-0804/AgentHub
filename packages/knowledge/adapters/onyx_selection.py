@@ -16,6 +16,7 @@ from typing import Any
 
 import httpx
 
+from packages.core.canonical.json_parse import load_unique_json
 from packages.core.execution_context.call_scope import report_auxiliary_model_usage
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievedEvidence
@@ -172,15 +173,6 @@ def sections_from_evidence(evidence: Sequence[RetrievedEvidence]) -> list[dict]:
     return sections
 
 
-def _reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
-    result: dict[str, object] = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError(f"duplicate JSON key {key!r}")
-        result[key] = value
-    return result
-
-
 def _validate_selected_ids(selected_ids: Sequence[object], count: int) -> tuple[int, ...]:
     if type(count) is not int or count < 0:
         raise ValueError("count must be a non-negative integer")
@@ -204,7 +196,7 @@ def parse_selection(text: str, *, count: int) -> tuple[int, ...]:
     if not isinstance(text, str):
         raise ValueError("selection must be JSON text")
     try:
-        payload = json.loads(text, object_pairs_hook=_reject_duplicate_json_keys)
+        payload = load_unique_json(text)
     except (json.JSONDecodeError, TypeError) as exc:
         raise ValueError("selection must be valid JSON") from exc
     if not isinstance(payload, dict) or set(payload) != {"section_ids"}:

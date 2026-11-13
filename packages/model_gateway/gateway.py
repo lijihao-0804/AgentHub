@@ -10,7 +10,7 @@ from dataclasses import replace
 from typing import Any, Literal, Protocol
 from uuid import UUID
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
@@ -779,10 +779,31 @@ class ModelGatewayService(ModelGateway):
             # selected later by provider. They never authorize SDK or
             # environment-driven routing.
             if current_base_url != profile.provider_egress.base_url:
-                raise ModelGatewayError(
-                    ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID
-                )
+                raise ModelGatewayError(ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID)
         return credential
+
+
+class SessionScopedModelGenerator:
+    """Resolve a frozen request in PostgreSQL and release the connection before generation."""
+
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        gateway_factory: Callable[[AsyncSession], ModelGatewayService],
+    ) -> None:
+        self.session_factory = session_factory
+        self.gateway_factory = gateway_factory
+
+    async def generate_resolved(
+        self,
+        context: WorkspaceExecutionContext,
+        plan: ResolvedModelExecutionPlan,
+        request: ModelRequest,
+    ) -> ModelResponse:
+        async with self.session_factory() as session:
+            gateway = self.gateway_factory(session)
+            prepared = await gateway.prepare_resolved(context, plan, request, operation="generate")
+        return await prepared.generate_resolved(context, plan, request)
 
 
 class SqlAlchemyModelGateway(ModelGatewayService):
@@ -918,4 +939,9 @@ async def _end_trace_span(
         logger.warning("trace end failed: %s", type(error).__name__)
 
 
-__all__ = ["ModelGatewayService", "ModelProviderAdapter", "SqlAlchemyModelGateway"]
+__all__ = [
+    "ModelGatewayService",
+    "ModelProviderAdapter",
+    "SessionScopedModelGenerator",
+    "SqlAlchemyModelGateway",
+]

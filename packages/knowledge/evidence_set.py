@@ -15,6 +15,7 @@ from packages.agent_runtime.context_budget import (
     ContextBudgetPolicy,
     ContextCategory,
 )
+from packages.core.canonical.json_parse import load_unique_json
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.contracts import RetrievedEvidence
 from packages.knowledge.evidence_plan import model_evidence_locator
@@ -103,18 +104,7 @@ def selection_messages(
 def parse_evidence_set(
     text: str, candidates: tuple[RetrievedEvidence, ...], *, max_items: int
 ) -> EvidenceSetPlan:
-    def unique(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError("duplicate selection key")
-            result[key] = value
-        return result
-
-    def reject(value):
-        raise ValueError("invalid selection number")
-
-    value = json.loads(text, object_pairs_hook=unique, parse_constant=reject)
+    value = load_unique_json(text)
     if type(value) is not dict or set(value) != {"selected_ids"}:
         raise ValueError("selection must contain only selected_ids")
     ids = value["selected_ids"]
