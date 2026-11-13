@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "rows": 681,
+  "arms": [
+    "baseline",
+    "lexical_refill4",
+    "bge_protected_refill4"
+  ],
+  "hit_groups": [
+    "pool_positive_sources",
+    "raw5_positive_sources",
+    "pool_rationales",
+    "raw5_rationales"
+  ],
+  "canonical_hits_sha256": "9802ed5b118b3d05a709606477ff9c6caaf579f3525fe39fbf9beccf07ac72d1",
+  "raw_source_sha256": {
+    "frozen_cohorts": "e0269ebb38328a5eaf8cdf6c5d0ac20bfd77c94e7cbca0b912af003b97b56efa",
+    "gold_train": "a53f2114831916c096b6c37d9e54da68cef4efdcdbd5ed46533601af972acf1d",
+    "official_train_rationales_archive": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+    "development_top20": "beaf0e61809b6e3e1af5efd3cf60554ad338a5df20717960b7be92dbdb3d6070",
+    "confirmation_top20": "8512995afd1bed03263deabb5c2d6ef3612020b929672584cd23036abaa7ce60",
+    "historical_baseline_logits": "cf391506ecdc72dc2d65fd0e8a943b078a1386ae2427603b61b4cd294822a4f9",
+    "historical_superset_logits": "c68ea86a0f35f9ae0eb347f9d0f43d465420d978fd652a4dc22ed14c7f4a0047",
+    "direct_bge_scores": "bf21da226ffc7ed5a00108d1c7ec2fe9d2ca41ff8cd5bc6ada88641e4770474e",
+    "derived_protected_top20": "a3f5b448b32cad535521b5a2b4fcaf5e1b993d9dda6ba835f27f17747599d379",
+    "source_windows_inventory": "cf0c3807844384745d1ad4edaf4c54ffa47fa2c64bb1b8ff4bfbff6a05914709",
+    "original_corpus": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6"
+  }
+}

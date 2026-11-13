@@ -15,6 +15,8 @@
 
 ## 哪些收益到达了用户
 
+仓库附有 681 条派生明细，每行保存公开题号、标注论文 ID，以及各方案在不同阶段可见的来源和完整证据。只需 Python 标准库即可重新计算宏召回和全部新增、丢失的题目–来源对。要重新生成向量或模型分数，需使用下方完整实验的原始输入。[无需 GPU、数据库或凭据的复核](../../benchmarks/public_rag/results/published/candidate-recall-20261114/portable/README.md)
+
 在 128 道开发题上比较原双路尾部补位、每篇先取一块、头部加权 RRF、DBSF、三路等额 RRF 和独立 BM25 补位。SciFact 确认集的 553 题与开发题不共享金标论文的连通分量。项目早先已用过这批公开 TRAIN 数据，两组不同的 NFCorpus TRAIN 查询补充检验跨语料表现。全程未打开官方 test 或平台 HOLDOUT。[分组协议](../../benchmarks/public_rag/results/published/candidate-recall-20261114/protocol.json)
 
 | 比较 | 结果 | 验收判断 |
@@ -36,4 +38,4 @@
 
 ## 实验分支与查询成本
 
-本地分支 `codex/rag-candidate-recall-lab-20261114` 的提交 `4673299` 保存了实际用于问答的 BM25 接口、快照索引、迁移和测试。全库索引有 797,447 条倒排记录。32 题 SQL 检查中，2 题成功，前 20 个块、来源和分数逐项与 Python 参考相同。两题热查询分别耗时 4.39 与 5.73 秒，后两题触及 15 秒上限，余下 28 题按约停止。第 1074 题的单次 PostgreSQL 执行计划显示，快照成员连接过滤了约 8,434 万个中间配对。索引性能也未达到适合推广的水平。[SQL 范围、逐题耗时及执行计划](../../benchmarks/public_rag/results/published/candidate-recall-20261114/lexical-index.json)
+本地分支 `codex/rag-candidate-recall-lab-20261114` 的提交 `4673299` 保存了实际用于问答的 BM25 接口、快照索引、迁移和测试。保护高分块的第二版仅在真实 BGE 分数上做检索试验。全库索引有 797,447 条倒排记录。32 题 SQL 检查中，2 题成功，前 20 个块、来源和分数逐项与 Python 参考相同。两题热查询分别耗时 4.39 与 5.73 秒，后两题触及 15 秒上限，余下 28 题按约停止。第 1074 题的单次 PostgreSQL 执行计划显示，快照成员连接过滤了约 8,434 万个中间配对。[SQL 范围、逐题耗时及执行计划](../../benchmarks/public_rag/results/published/candidate-recall-20261114/lexical-index.json)

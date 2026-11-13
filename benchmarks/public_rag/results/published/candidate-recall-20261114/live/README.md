@@ -36,6 +36,8 @@
 & .\.venv\Scripts\python.exe -m benchmarks.public_rag.candidate_recall_live_replay run --cohort product --arms both --api-url http://127.0.0.1:8000/api/v1 --output .scratch/recall-product-new.json
 ```
 
+运行双臂时，从主线工作目录执行复跑程序，在另一个工作目录启动实验 API 和 Worker。可以用 `git worktree add --detach ../AgentHub-recall-lab 4673299` 取得实测版本，实验迁移与服务共用隔离数据库。默认 A 路径可直接连接主线 API。
+
 把上例 `--cohort product` 换为 `--cohort subset` 可重放 42 篇子集。运行使用本地公开 SciFact corpus SHA-256 `dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6` 和 42 个已冻结文档 ID。每次新上传会取得新的修订 ID，相同分数的检索结果可能因此改变顺序；模型回复也可能随运行变化。全库读侧需要另行准备 9,189 个真实向量和作用域成员关系，当前一键入口仅覆盖两份从 HTTP 上传的语料。逐题原始完整内容留在本地 `.scratch/recall-live-20261114`，本目录回执保留公开答案、来源、引文定位与原文摘要指纹。
 
 另以全新合成工作区运行了此复跑程序的 `--cohort product --arms A --retrieval-only`。18 份业务材料实际上传并形成 30 块，公开试验台返回 6 个其他账户的文档，正确账号仍未送入首批证据。该独立复验没有调用外部模型。[复跑命令实测记录](replay-check.json)

@@ -87,6 +87,8 @@ BM25 使用相同快照全部 5,183 篇论文的 9,189 个块，Unicode NFKC、c
 
 ## 复现
 
+仅复核候选覆盖、BGE 前五来源和完整证据时，仓库已包含每题每臂的派生命中明细。干净克隆中可直接执行 `python -I -S benchmarks/public_rag/results/published/candidate-recall-20261114/portable/verify.py`，加 `--json` 可查看全部新增或丢失的配对。[标准库复核与原始输入指纹](portable/README.md)
+
 从仓库根目录在新的本地目录依序执行。协议列有公开语料和本地历史快照的精确输入指纹。原逐题检索和新生成的候选列表均留在本机。
 
 ```powershell
