@@ -26,7 +26,6 @@ from scripts.aliyun_api_smoke import (
     aliyun_route,
     check_url,
     create_model_profile,
-    create_provider_credential,
     identifier,
     request,
     require,
@@ -44,6 +43,70 @@ def register(client):
     account = request(client, "POST", "auth/register", credentials)
     client.headers["Authorization"] = "Bearer " + account["access_token"]
     return identifier(account["user_id"]), credentials
+
+
+def authenticate(client, credentials):
+    login = request(client, "POST", "auth/login", credentials)
+    token = login.get("access_token") if isinstance(login, dict) else None
+    require(isinstance(token, str) and bool(token), "login returned no access token")
+    client.headers["Authorization"] = "Bearer " + token
+
+
+def cleanup_request(client, owner_login, method, path, data=None):
+    """Retry only local cleanup reads and same-value writes. Return value-free diagnostics."""
+    failures = []
+    for attempt in range(3):
+        try:
+            response = client.request(method, path, json=data)
+        except httpx.RequestError as error:
+            failures.append(type(error).__name__)
+            continue
+        if response.is_success:
+            return {"confirmed": True, "failures": failures}, response
+        failures.append(f"HTTP {response.status_code}")
+        if response.status_code == 401 and attempt < 2:
+            try:
+                authenticate(client, owner_login)
+            except SmokeFailure as error:
+                failures.append(str(error))
+            except (httpx.RequestError, ValueError, TypeError) as error:
+                failures.append(type(error).__name__)
+        elif response.status_code not in {429, 500, 502, 503, 504}:
+            break
+    return {"confirmed": False, "failures": failures}, None
+
+
+def retire_credential(client, owner_login, collection, credential_id, name):
+    # A disconnected creation request may already have committed. Match only this
+    # invocation's unique credential in its newly created workspace.
+    result = {}
+    if credential_id is None:
+        result["lookup"], response = cleanup_request(client, owner_login, "GET", collection)
+        if response is None:
+            return result
+        try:
+            matches = [row for row in response.json() if row["name"] == name]
+            if not matches:
+                result["matching_credentials"] = 0
+                return result
+            (match,) = matches
+            credential_id = identifier(match["id"])
+        except (ValueError, TypeError, KeyError, AttributeError) as error:
+            result["lookup"] = {"confirmed": False, "failures": [type(error).__name__]}
+            return result
+    endpoint = collection + "/" + credential_id
+    result["credential_id"] = credential_id
+    result["disable"], _ = cleanup_request(
+        client, owner_login, "PATCH", endpoint, {"enabled": False}
+    )
+    result["rotate"], _ = cleanup_request(
+        client,
+        owner_login,
+        "POST",
+        endpoint + "/rotate-secret",
+        {"secret": secrets.token_urlsafe(32)},
+    )
+    return result
 
 
 def require_conflict(response, code):
@@ -337,7 +400,7 @@ def run(api_url, report):
         "follow_redirects": False,
     }
     with httpx.Client(**options) as owner, httpx.Client(**options) as operator:
-        owner_id, _ = register(owner)
+        owner_id, owner_login = register(owner)
         operator_id, operator_login = register(operator)
         org = request(owner, "POST", "organizations", {"name": "客服流程验收"})
         ws = request(
@@ -358,8 +421,22 @@ def run(api_url, report):
             owner, "POST", workspace + "/members", {"user_id": operator_id, "role": "DEVELOPER"}
         )
         customer = register_customer(operator, workspace)
-        credential_id = create_provider_credential(owner, workspace, route)
+        collection = workspace + "/provider-credentials"
+        credential_name = "Support acceptance " + uuid4().hex
+        credential_id = None
         try:
+            credential = request(
+                owner,
+                "POST",
+                collection,
+                {
+                    "provider": route.provider,
+                    "name": credential_name,
+                    "secret": route.api_key,
+                    "base_url": route.base_url,
+                },
+            )
+            credential_id = identifier(credential["id"])
             profile_id = create_model_profile(owner, workspace, route, credential_id)
             agent_path, version = publish(owner, workspace, profile_id)
             report.update(version_id=version["id"], spec_sha256=version["resolved_spec_hash"])
@@ -374,8 +451,7 @@ def run(api_url, report):
                 report,
             )
             with httpx.Client(**options) as reader:
-                login = request(reader, "POST", "auth/login", operator_login)
-                reader.headers["Authorization"] = "Bearer " + login["access_token"]
+                authenticate(reader, operator_login)
                 row = request(reader, "GET", detail)
                 page = request(reader, "GET", tickets)
                 require(
@@ -395,11 +471,16 @@ def run(api_url, report):
                     customer_ticket_count=page["total"],
                 )
         finally:
-            endpoint = workspace + "/provider-credentials/" + credential_id
-            request(owner, "PATCH", endpoint, {"enabled": False})
-            request(
-                owner, "POST", endpoint + "/rotate-secret", {"secret": secrets.token_urlsafe(32)}
+            cleanup = retire_credential(
+                owner, owner_login, collection, credential_id, credential_name
             )
+            report["credential_cleanup"] = cleanup
+        # When acceptance itself failed, its exception is already propagating and
+        # the caller still has both individual cleanup results in the report.
+        require(
+            all(cleanup.get(operation, {}).get("confirmed") for operation in ("disable", "rotate")),
+            "provider credential cleanup was not fully confirmed",
+        )
     report["passed"] = True
 
 

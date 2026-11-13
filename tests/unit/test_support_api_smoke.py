@@ -10,7 +10,8 @@ from packages.model_gateway.configured_route import Endpoint
 from scripts import support_api_smoke as smoke
 
 
-def test_profile_setup_failure_retires_only_the_new_provider_credential(monkeypatch):
+@pytest.mark.parametrize("disable_status", [200, 503])
+def test_profile_setup_failure_preserves_error_and_independent_cleanup(monkeypatch, disable_status):
     route = Endpoint(
         name="aliyun-rag",
         provider="openai-compatible",
@@ -52,6 +53,8 @@ def test_profile_setup_failure_retires_only_the_new_provider_credential(monkeypa
             return httpx.Response(422, json={"error": {"code": "VALIDATION_ERROR"}})
         credential = base + "/provider-credentials/" + credential_id
         assert path in {credential, credential + "/rotate-secret"}
+        if req.method == "PATCH":
+            return httpx.Response(disable_status, json={})
         return httpx.Response(200, json={"id": credential_id})
 
     client = httpx.Client
@@ -64,9 +67,82 @@ def test_profile_setup_failure_retires_only_the_new_provider_credential(monkeypa
     report = {"passed": False, "runs": []}
     with pytest.raises(smoke.SmokeFailure, match="model-profiles returned HTTP 422"):
         smoke.run("http://127.0.0.1:8080/api/v1", report)
-    assert report == {"passed": False, "runs": [], "workspace_id": workspace_id}
+    assert report == {
+        "passed": False,
+        "runs": [],
+        "workspace_id": workspace_id,
+        "credential_cleanup": {
+            "credential_id": credential_id,
+            "disable": {
+                "confirmed": disable_status == 200,
+                "failures": [] if disable_status == 200 else ["HTTP 503"] * 3,
+            },
+            "rotate": {"confirmed": True, "failures": []},
+        },
+    }
     credential = base + "/provider-credentials/" + credential_id
     assert calls[-2] == ("PATCH", credential, {"enabled": False})
     method, path, body = calls[-1]
     assert (method, path) == ("POST", credential + "/rotate-secret")
     assert body["secret"] and body["secret"] != route.api_key
+
+
+def test_cleanup_renews_owner_on_401_and_retries_rotate_with_the_same_value():
+    owner = {"email": "synthetic@example.test", "password": "private-password"}
+    writes, rotations = [], []
+    credential_id = str(uuid4())
+
+    def api(req):
+        path, data = req.url.path, json.loads(req.content)
+        if path == "/auth/login":
+            assert data == owner
+            return httpx.Response(200, json={"access_token": "refreshed-token"})
+        writes.append(req.method)
+        if req.method == "PATCH":
+            assert path == "/provider-credentials/" + credential_id and data == {"enabled": False}
+            if req.headers.get("Authorization") != "Bearer refreshed-token":
+                return httpx.Response(401, json={"error": {"message": "private-response"}})
+        else:
+            assert path == f"/provider-credentials/{credential_id}/rotate-secret"
+            rotations.append(data["secret"])
+            if len(rotations) == 1:
+                return httpx.Response(503, json={"error": {"message": "private-response"}})
+        return httpx.Response(200, json={})
+
+    with httpx.Client(base_url="http://127.0.0.1", transport=httpx.MockTransport(api)) as client:
+        result = smoke.retire_credential(
+            client, owner, "provider-credentials", credential_id, "unused"
+        )
+    assert writes == ["PATCH", "PATCH", "POST", "POST"]
+    assert len(rotations) == 2 and rotations[0] == rotations[1]
+    assert result == {
+        "credential_id": credential_id,
+        "disable": {"confirmed": True, "failures": ["HTTP 401"]},
+        "rotate": {"confirmed": True, "failures": ["HTTP 503"]},
+    }
+
+
+def test_cleanup_recovers_an_unacknowledged_create_and_rotates_despite_disabled_route_failure():
+    target, other = str(uuid4()), str(uuid4())
+    writes = []
+
+    def api(req):
+        if req.method == "GET":
+            return httpx.Response(
+                200, json=[{"id": other, "name": "other"}, {"id": target, "name": "new-job"}]
+            )
+        writes.append((req.method, req.url.path))
+        if req.method == "PATCH":
+            return httpx.Response(503, json={"error": {"message": "private-response"}})
+        return httpx.Response(200)
+
+    with httpx.Client(base_url="http://127.0.0.1", transport=httpx.MockTransport(api)) as client:
+        result = smoke.retire_credential(client, {}, "provider-credentials", None, "new-job")
+    expected_path = "/provider-credentials/" + target
+    assert writes == [("PATCH", expected_path)] * 3 + [("POST", expected_path + "/rotate-secret")]
+    assert result == {
+        "lookup": {"confirmed": True, "failures": []},
+        "credential_id": target,
+        "disable": {"confirmed": False, "failures": ["HTTP 503"] * 3},
+        "rotate": {"confirmed": True, "failures": []},
+    }
