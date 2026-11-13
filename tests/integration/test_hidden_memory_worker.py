@@ -66,6 +66,8 @@ async def _seed_run(
     agent_id: UUID,
     *,
     input_text: str = "Release day is Friday",
+    max_attempts: int = 1,
+    fallback: bool = False,
 ) -> tuple[AgentRun, UUID]:
     async with factory() as session:
         workspace = await session.get(Workspace, workspace_id)
@@ -105,7 +107,7 @@ async def _seed_run(
                     **profile.capabilities,
                     "max_context_tokens": 8192,
                 },
-                "retry_policy": {"max_attempts": 1},
+                "retry_policy": {"max_attempts": max_attempts},
                 "fallback_chain": [],
                 "fallback_profiles": [],
             },
@@ -114,6 +116,24 @@ async def _seed_run(
             "tools": [],
             "runtime": {"memory": {"long_term_memory": True}},
         }
+        if fallback:
+            alternate = ModelProfile(
+                workspace_id=workspace_id,
+                provider_credential_id=credential.id,
+                model="secondary-fake-model",
+                temperature=profile.temperature,
+                max_tokens=profile.max_tokens,
+                timeout_seconds=profile.timeout_seconds,
+                capabilities=profile.capabilities,
+            )
+            session.add(alternate)
+            await session.flush()
+            frozen_profile = dict(resolved["model"])
+            for key in ("retry_policy", "fallback_profiles", "fallback_chain"):
+                frozen_profile.pop(key)
+            frozen_profile.update(profile_id=str(alternate.id), model=alternate.model)
+            resolved["model"]["fallback_profiles"] = [frozen_profile]
+            resolved["model"]["fallback_chain"] = [str(alternate.id)]
         version = await session.scalar(
             select(AgentVersion)
             .where(

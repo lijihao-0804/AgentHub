@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import multiprocessing
 import os
 from dataclasses import asdict
 from datetime import UTC, datetime, timedelta
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
@@ -13,11 +15,13 @@ from sqlalchemy import select, text, update
 from sqlalchemy.exc import DBAPIError
 
 from apps.worker.tasks import memories as worker
+from packages.agent_runtime.models import AgentRun
 from packages.control_plane.models import OrganizationMembership, Workspace, WorkspaceMembership
 from packages.core.config.settings import Settings
 from packages.core.errors.exceptions import AgentHubError
 from packages.memory.contracts import MemoryCandidate
 from packages.memory.models import MemoryExtractionJob
+from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from tests.integration.test_hidden_memory_worker import (
     _job,
@@ -241,8 +245,13 @@ async def test_late_provider_response_cannot_revive_terminal_unknown(db_factory,
     adapter = Late(PAYLOAD)
     gateway(monkeypatch, adapter)
     await run_extraction(workspace, run)
+    claim_token = (await _job(db_factory, workspace, run.id)).claim_token
     await worker._finish_extraction(
-        db_factory, workspace_id=workspace, run_id=run.id, status="COMPLETED"
+        db_factory,
+        workspace_id=workspace,
+        run_id=run.id,
+        status="COMPLETED",
+        claim_token=claim_token,
     )
     job = await _job(db_factory, workspace, run.id)
     assert adapter.calls == 1 and job.status == "FAILED" and job.candidate_payload is None
@@ -434,3 +443,172 @@ async def test_lost_owner_connection_never_replays_or_records_a_late_response(
     job = await _job(db_factory, workspace, run.id)
     assert job.status == "FAILED" and job.candidate_payload is None
     assert not await _memory_rows(db_factory, workspace, agent)
+
+
+def _exit_at_handoff(workspace_id, run_id, after_commit):
+    """Run a separate worker against the test DB and die without any cleanup."""
+    handoff = worker._mark_provider_handoff
+
+    async def interrupted(factory, **claim):
+        if after_commit:
+            assert await handoff(factory, **claim)
+        os._exit(73)
+
+    def gateway_with_test_adapter(session, **kwargs):
+        return SqlAlchemyModelGateway(session, adapter=_RecordingAdapter(PAYLOAD), **kwargs)
+
+    with (
+        patch.object(worker, "_mark_provider_handoff", interrupted),
+        patch.object(worker, "SqlAlchemyModelGateway", gateway_with_test_adapter),
+    ):
+        asyncio.run(
+            worker._extract_run_memories(
+                settings(), workspace_id=workspace_id, run_id=run_id, request_id=str(uuid4())
+            )
+        )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("after_commit", [False, True], ids=["before-handoff", "after-handoff"])
+async def test_worker_interrupted_at_provider_handoff(db_factory, monkeypatch, after_commit):
+    workspace, agent = await _seed_workspace(db_factory)
+    run, _ = await _seed_run(db_factory, workspace, agent)
+    adapter = _RecordingAdapter(PAYLOAD)
+    gateway(monkeypatch, adapter)
+    process = multiprocessing.get_context("spawn").Process(
+        target=_exit_at_handoff, args=(workspace, run.id, after_commit)
+    )
+    process.start()
+    try:
+        await asyncio.to_thread(process.join, 30)
+        assert process.exitcode == 73
+    finally:
+        if process.is_alive():
+            process.terminate()
+            await asyncio.to_thread(process.join, 5)
+        process.close()
+    job = await _job(db_factory, workspace, run.id)
+    assert job.status == "RUNNING" and job.claim_token is not None
+    assert job.provider_call_possible is after_commit and adapter.calls == 0
+    queued = []
+
+    async def enqueue(**message):
+        queued.append(message["run_id"])
+
+    result = await worker._reconcile_memory_jobs(
+        db_factory,
+        workspace_id=workspace,
+        enqueue=enqueue,
+        now=datetime.now(UTC) + timedelta(hours=1),
+    )
+    if after_commit:
+        # Even a crash *before* the adapter received the request is ambiguous
+        # once this commit is visible to another process.
+        assert queued == [] and result["unknown"] == 1
+    else:
+        assert queued == [run.id] and result["unknown"] == 0
+        assert (await _job(db_factory, workspace, run.id)).status == "PENDING"
+    await run_extraction(workspace, run)
+    await run_extraction(workspace, run)
+    job = await _job(db_factory, workspace, run.id)
+    assert adapter.calls == (0 if after_commit else 1)
+    if after_commit:
+        assert (job.status, job.failure_code) == ("FAILED", "MEMORY_EXTRACTION_OUTCOME_UNKNOWN")
+    else:
+        assert (job.status, job.failure_code) == ("COMPLETED", None)
+    async with db_factory() as session:
+        parent = await session.get(AgentRun, run.id)
+        assert (parent.status, parent.final_output) == ("SUCCEEDED", "noted")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("max_attempts", "fallback"), [(2, False), (1, True)], ids=["retry", "fallback"]
+)
+async def test_uncertain_memory_call_fences_the_next_physical_attempt(
+    db_factory, monkeypatch, max_attempts, fallback
+):
+    workspace, agent = await _seed_workspace(db_factory)
+    run, _ = await _seed_run(
+        db_factory, workspace, agent, max_attempts=max_attempts, fallback=fallback
+    )
+    entered = []
+
+    class UncertainAdapter(_RecordingAdapter):
+        async def complete(self, profile, *_args):
+            job = await _job(db_factory, workspace, run.id)
+            entered.append((profile.model, job.provider_call_possible))
+            raise ModelGatewayError(ModelGatewayErrorCode.MODEL_TIMEOUT, retryable=True)
+
+    gateway(monkeypatch, UncertainAdapter())
+    await run_extraction(workspace, run)
+    await run_extraction(workspace, run)
+    assert entered == [("fake-model", True)]
+    job = await _job(db_factory, workspace, run.id)
+    assert (job.status, job.failure_code) == ("FAILED", "MEMORY_EXTRACTION_OUTCOME_UNKNOWN")
+
+
+@pytest.mark.asyncio
+async def test_live_process_with_lost_preparation_claim_cannot_send_or_finish(
+    db_factory, monkeypatch
+):
+    workspace, agent = await _seed_workspace(db_factory)
+    run, _ = await _seed_run(db_factory, workspace, agent)
+    adapter = _RecordingAdapter(PAYLOAD)
+    gateway(monkeypatch, adapter)
+    original_lock = worker._try_own_extraction
+    original_handoff = worker._mark_provider_handoff
+    owner_pids, tokens = [], []
+    entered = [asyncio.Event(), asyncio.Event()]
+    release = [asyncio.Event(), asyncio.Event()]
+
+    async def capture_lock(session, *keys):
+        owned = await original_lock(session, *keys)
+        if owned:
+            owner_pids.append(await session.scalar(text("SELECT pg_backend_pid()")))
+        return owned
+
+    async def pause_handoff(factory, **claim):
+        index = len(tokens)
+        tokens.append(claim["claim_token"])
+        entered[index].set()
+        await release[index].wait()
+        return await original_handoff(factory, **claim)
+
+    monkeypatch.setattr(worker, "_try_own_extraction", capture_lock)
+    monkeypatch.setattr(worker, "_mark_provider_handoff", pause_handoff)
+    original = asyncio.create_task(run_extraction(workspace, run))
+    tasks = [original]
+    try:
+        await asyncio.wait_for(entered[0].wait(), 10)
+        async with db_factory() as session:
+            assert await session.scalar(text("SELECT current_database()")) != "postgres"
+            assert await session.scalar(
+                text("SELECT pg_terminate_backend(:pid)"), {"pid": owner_pids[0]}
+            )
+        successor = asyncio.create_task(run_extraction(workspace, run))
+        tasks.append(successor)
+        await asyncio.wait_for(entered[1].wait(), 10)
+        assert tokens[0] != tokens[1]
+        release[0].set()
+        try:
+            await asyncio.wait_for(original, 10)
+        except DBAPIError:
+            pass  # Its advisory-lock transaction was terminated by this test.
+        await worker._finish_extraction(
+            db_factory,
+            workspace_id=workspace,
+            run_id=run.id,
+            claim_token=tokens[0],
+            status="FAILED",
+        )
+        live = await _job(db_factory, workspace, run.id)
+        assert live.status == "RUNNING" and live.claim_token == tokens[1]
+        assert live.provider_call_possible is False and adapter.calls == 0
+    finally:
+        for gate in release:
+            gate.set()
+        await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), 10)
+    assert adapter.calls == 1
+    assert (await _job(db_factory, workspace, run.id)).status == "COMPLETED"
+    assert len(await _memory_rows(db_factory, workspace, agent)) == 1

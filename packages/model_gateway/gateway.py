@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import AsyncIterator, Mapping
+from collections.abc import AsyncIterator, Awaitable, Callable, Mapping
 from dataclasses import replace
 from typing import Any, Literal, Protocol
 from uuid import UUID
@@ -101,6 +101,8 @@ class _PreparedModelGateway:
         context: WorkspaceExecutionContext,
         plan: ResolvedModelExecutionPlan,
         request: ModelRequest,
+        *,
+        before_provider_attempt: Callable[[], Awaitable[None]] | None = None,
     ) -> ModelResponse:
         del plan
         return await self._service._generate_chain(
@@ -109,6 +111,7 @@ class _PreparedModelGateway:
             self._chain,
             replace(request, retry_policy=self._plan.retry_policy),
             credentials=self._credentials,
+            before_provider_attempt=before_provider_attempt,
         )
 
     def stream_resolved(
@@ -234,6 +237,7 @@ class ModelGatewayService(ModelGateway):
         request: ModelRequest,
         *,
         credentials: Mapping[UUID, ProviderCredential] | None = None,
+        before_provider_attempt: Callable[[], Awaitable[None]] | None = None,
     ) -> ModelResponse:
         started = time.perf_counter()
         span = await _start_trace_span(
@@ -270,11 +274,16 @@ class ModelGatewayService(ModelGateway):
                         attempt_kind=attempt_kind,
                     )
                     attempt_count += 1
+                    # A durable caller may fence each physical send, including
+                    # a retry/fallback chosen by the gateway after a timeout.
+                    # A refused fence must exit the chain without touching an adapter.
+                    if before_provider_attempt is not None:
+                        await before_provider_attempt()
                     try:
                         async with asyncio.timeout(float(profile.timeout_seconds)):
                             response = await self.adapter.complete(profile, credential, request)
-                        active_budget_reservation = None
                         _validate_usable_response(response)
+                        active_budget_reservation = None
                         await _end_trace_span(
                             span,
                             attributes=_response_trace_attributes(

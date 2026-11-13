@@ -55,6 +55,10 @@ class MemoryExtractionJob(Base):
             "status IN ('PENDING', 'RUNNING', 'COMPLETED', 'SKIPPED', 'FAILED')",
             name="ck_memory_extraction_jobs_status",
         ),
+        CheckConstraint(
+            "provider_call_possible IS NULL OR claim_token IS NOT NULL",
+            name="ck_memory_extraction_jobs_handoff_claim",
+        ),
         Index(
             "ix_memory_extraction_jobs_recovery",
             "updated_at",
@@ -68,6 +72,10 @@ class MemoryExtractionJob(Base):
         String(16), nullable=False, server_default="PENDING", default="PENDING"
     )
     claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    claim_token: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    # NULL is a legacy claim with unknown dispatch history. Only a new,
+    # explicitly false claim proves the worker has not entered the provider adapter.
+    provider_call_possible: Mapped[bool | None] = mapped_column()
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     failure_code: Mapped[str | None] = mapped_column(String(64))
     # Parsed candidates are persisted before recording. A lost worker after

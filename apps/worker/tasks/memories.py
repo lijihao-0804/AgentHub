@@ -31,7 +31,8 @@ import logging
 from dataclasses import asdict, replace
 from datetime import UTC, datetime, timedelta
 from enum import Enum, auto
-from uuid import UUID
+from functools import partial
+from uuid import UUID, uuid4
 
 from sqlalchemy import select, text, update
 from sqlalchemy.exc import IntegrityError
@@ -108,11 +109,9 @@ async def _claim_extraction(
 ) -> MemoryExtractionJob | None:
     """Create or resume a job without ever repeating an uncertain send.
 
-    A RUNNING row means a worker may already have sent the request. Re-claiming
-    it is allowed only to finish deterministic recording from a persisted
-    candidate payload. After ownership has been acquired, a RUNNING row without
-    that payload becomes a terminal unknown extraction, without changing the
-    already-completed parent Run or risking a second provider call.
+    Each owner receives a fresh token. Only an explicitly pre-handoff claim or
+    an already persisted candidate permits recovery. A legacy RUNNING row with
+    neither piece of evidence remains uncertain.
     """
 
     async with factory() as session:
@@ -133,6 +132,8 @@ async def _claim_extraction(
                 agent_run_id=run_id,
                 status="RUNNING",
                 claimed_at=datetime.now(UTC),
+                claim_token=uuid4(),
+                provider_call_possible=False,
             )
             session.add(job)
             try:
@@ -141,31 +142,47 @@ async def _claim_extraction(
                 await session.rollback()
                 return None
             return job
-        if job.status in {"COMPLETED", "SKIPPED"}:
+        if job.status not in {"PENDING", "RUNNING"}:
             return None
-        if job.status == "RUNNING":
-            if job.candidate_payload is None:
-                job.status = "FAILED"
-                job.failure_code = "MEMORY_EXTRACTION_OUTCOME_UNKNOWN"
-                job.completed_at = datetime.now(UTC)
-                job.claimed_at = None
-                await session.commit()
-                return None
-            # Keep the original RUNNING ownership marker. The write path below
-            # re-checks the agent_run permission immediately before acting.
-            return job
-        # PENDING has never sent. FAILED is a terminal failure code and does
-        # not prove that no request reached the provider, so it is never
-        # replayed automatically. Persisting candidates precedes the
-        # deterministic memory write, so a retry after a later write failure is
-        # handled through the RUNNING branch.
-        if job.status == "FAILED":
+        if (
+            job.status == "RUNNING"
+            and job.candidate_payload is None
+            and job.provider_call_possible is not False
+        ):
+            job.status = "FAILED"
+            job.failure_code = "MEMORY_EXTRACTION_OUTCOME_UNKNOWN"
+            job.completed_at = datetime.now(UTC)
+            job.claimed_at = None
+            await session.commit()
             return None
+        if job.status == "PENDING" and job.candidate_payload is None:
+            job.provider_call_possible = False
         job.status = "RUNNING"
+        job.claim_token = uuid4()
         job.claimed_at = datetime.now(UTC)
         job.failure_code = None
         await session.commit()
         return job
+
+
+async def _mark_provider_handoff(
+    factory, *, workspace_id: UUID, run_id: UUID, claim_token: UUID
+) -> bool:
+    """Commit the current claim's single transition before a provider adapter can bill."""
+    async with factory() as session:
+        marked = await session.execute(
+            update(MemoryExtractionJob)
+            .where(
+                MemoryExtractionJob.workspace_id == workspace_id,
+                MemoryExtractionJob.agent_run_id == run_id,
+                MemoryExtractionJob.status == "RUNNING",
+                MemoryExtractionJob.claim_token == claim_token,
+                MemoryExtractionJob.provider_call_possible.is_(False),
+            )
+            .values(provider_call_possible=True)
+        )
+        await session.commit()
+        return marked.rowcount == 1
 
 
 async def _finish_extraction(
@@ -173,6 +190,7 @@ async def _finish_extraction(
     *,
     workspace_id: UUID,
     run_id: UUID,
+    claim_token: UUID,
     status: str,
     failure_code: str | None = None,
 ) -> None:
@@ -189,6 +207,7 @@ async def _finish_extraction(
                 MemoryExtractionJob.workspace_id == workspace_id,
                 MemoryExtractionJob.agent_run_id == run_id,
                 MemoryExtractionJob.status == "RUNNING",
+                MemoryExtractionJob.claim_token == claim_token,
             )
             .values(**values)
         )
@@ -251,23 +270,27 @@ async def _extract_owned_memories(
     request_id: str,
 ) -> None:
     phase = _ExtractionPhase.PREPARING
+    job = None
     try:
         job = await _claim_extraction(factory, workspace_id=workspace_id, run_id=run_id)
         if job is None:
             return
+        finish = partial(
+            _finish_extraction,
+            factory,
+            workspace_id=workspace_id,
+            run_id=run_id,
+            claim_token=job.claim_token,
+        )
         async with factory() as session:
             run = await session.scalar(
                 select(AgentRun).where(AgentRun.workspace_id == workspace_id, AgentRun.id == run_id)
             )
             if run is None or run.status != "SUCCEEDED" or run.thread_id is None:
-                await _finish_extraction(
-                    factory, workspace_id=workspace_id, run_id=run_id, status="SKIPPED"
-                )
+                await finish(status="SKIPPED")
                 return
             if not run.input_text:
-                await _finish_extraction(
-                    factory, workspace_id=workspace_id, run_id=run_id, status="SKIPPED"
-                )
+                await finish(status="SKIPPED")
                 return
             version = await session.scalar(
                 select(AgentVersion).where(
@@ -276,15 +299,11 @@ async def _extract_owned_memories(
                 )
             )
             if version is None:
-                await _finish_extraction(
-                    factory, workspace_id=workspace_id, run_id=run_id, status="SKIPPED"
-                )
+                await finish(status="SKIPPED")
                 return
             spec = parse_frozen_agent_spec(version.resolved_spec, workspace_id=workspace_id)
             if not spec.runtime.get("memory", {}).get("long_term_memory", False):
-                await _finish_extraction(
-                    factory, workspace_id=workspace_id, run_id=run_id, status="SKIPPED"
-                )
+                await finish(status="SKIPPED")
                 return
             turn = TurnForExtraction(user_input=run.input_text)
             agent_id = version.agent_id
@@ -298,13 +317,7 @@ async def _extract_owned_memories(
                 session, principal=principal, workspace_id=workspace_id
             )
             if context is None:
-                await _finish_extraction(
-                    factory,
-                    workspace_id=workspace_id,
-                    run_id=run_id,
-                    status="SKIPPED",
-                    failure_code="AGENT_RUN_FORBIDDEN",
-                )
+                await finish(status="SKIPPED", failure_code="AGENT_RUN_FORBIDDEN")
                 return
             # Re-authorize immediately before the provider call. The earlier
             # membership read closes the dispatch race; this read closes a
@@ -323,7 +336,11 @@ async def _extract_owned_memories(
                     MemoryExtractionJob.agent_run_id == run_id,
                 )
             )
-            if persisted_job is None or persisted_job.status != "RUNNING":
+            if (
+                persisted_job is None
+                or persisted_job.status != "RUNNING"
+                or persisted_job.claim_token != job.claim_token
+            ):
                 return
             stored_payload = persisted_job.candidate_payload
 
@@ -352,13 +369,7 @@ async def _extract_owned_memories(
                     authorization_session, principal=principal, workspace_id=workspace_id
                 )
             if current_context is None:
-                await _finish_extraction(
-                    factory,
-                    workspace_id=workspace_id,
-                    run_id=run_id,
-                    status="SKIPPED",
-                    failure_code="AGENT_RUN_FORBIDDEN",
-                )
+                await finish(status="SKIPPED", failure_code="AGENT_RUN_FORBIDDEN")
                 return
             trace_sink = ProductionTraceSink()
             async with factory() as session:
@@ -370,11 +381,18 @@ async def _extract_owned_memories(
                 prepared = await gateway.prepare_resolved(
                     current_context, model_plan, request, operation="generate"
                 )
-            # Entering the detached gateway does not prove that bytes were
-            # sent: it may still refuse locally. Without a returned response,
-            # however, a send cannot safely be ruled out (including fallback).
-            phase = _ExtractionPhase.MODEL_CALL_POSSIBLE
-            response = await prepared.generate_resolved(current_context, model_plan, request)
+
+            async def mark_handoff() -> None:
+                nonlocal phase
+                if not await _mark_provider_handoff(
+                    factory, workspace_id=workspace_id, run_id=run_id, claim_token=job.claim_token
+                ):
+                    raise RuntimeError("Memory extraction provider handoff is unavailable")
+                phase = _ExtractionPhase.MODEL_CALL_POSSIBLE
+
+            response = await prepared.generate_resolved(
+                current_context, model_plan, request, before_provider_attempt=mark_handoff
+            )
             phase = _ExtractionPhase.RESPONSE_RECEIVED
             candidates = parse_candidates(response, user_input=input_text)
             payload = [asdict(candidate) for candidate in candidates]
@@ -386,6 +404,7 @@ async def _extract_owned_memories(
                         MemoryExtractionJob.workspace_id == workspace_id,
                         MemoryExtractionJob.agent_run_id == run_id,
                         MemoryExtractionJob.status == "RUNNING",
+                        MemoryExtractionJob.claim_token == job.claim_token,
                         MemoryExtractionJob.candidate_payload.is_(None),
                     )
                     .values(candidate_payload=payload)
@@ -401,9 +420,7 @@ async def _extract_owned_memories(
 
             candidates = tuple(MemoryCandidate(**item) for item in stored_payload)
         if not candidates:
-            await _finish_extraction(
-                factory, workspace_id=workspace_id, run_id=run_id, status="COMPLETED"
-            )
+            await finish(status="COMPLETED")
             return
         # Persisted candidates are evidence of a response, never authorization
         # to write after the actor's membership was revoked during extraction.
@@ -412,13 +429,7 @@ async def _extract_owned_memories(
                 authorization_session, principal=principal, workspace_id=workspace_id
             )
         if write_context is None:
-            await _finish_extraction(
-                factory,
-                workspace_id=workspace_id,
-                run_id=run_id,
-                status="SKIPPED",
-                failure_code="AGENT_RUN_FORBIDDEN",
-            )
+            await finish(status="SKIPPED", failure_code="AGENT_RUN_FORBIDDEN")
             return
         created = await SqlAlchemyMemoryStore(factory).record(
             workspace_id=workspace_id,
@@ -431,9 +442,7 @@ async def _extract_owned_memories(
             "memory_extraction_completed",
             extra={"proposed": len(candidates), "memories_created": len(created)},
         )
-        await _finish_extraction(
-            factory, workspace_id=workspace_id, run_id=run_id, status="COMPLETED"
-        )
+        await finish(status="COMPLETED")
     except Exception:
         # Preserve the successful parent Run. Only persisted candidates may
         # resume deterministic recording; other failures are terminal and
@@ -441,6 +450,10 @@ async def _extract_owned_memories(
         # distinguish known-response processing/storage failure from a call
         # whose outcome is unknown. Process loss still reconciles conservatively.
         try:
+            if job is None:
+                # A claim with an uncertain commit is recovered by its current owner.
+                logger.warning("memory_extraction_claim_failed")
+                return
             async with factory() as failure_session:
                 persisted = await failure_session.get(
                     MemoryExtractionJob,
@@ -461,13 +474,7 @@ async def _extract_owned_memories(
                             "MEMORY_EXTRACTION_RESPONSE_PERSISTENCE_FAILED"
                         ),
                     }[phase]
-            await _finish_extraction(
-                factory,
-                workspace_id=workspace_id,
-                run_id=run_id,
-                status=final_status,
-                failure_code=failure_code,
-            )
+            await finish(status=final_status, failure_code=failure_code)
         except Exception:
             logger.warning("memory_extraction_failure_bookkeeping_failed")
         logger.warning("memory_extraction_failed")
@@ -501,19 +508,31 @@ async def _reconcile_memory_jobs(factory, *, enqueue, now=None, limit=50, worksp
             if not await _try_own_extraction(session, job.workspace_id, job.agent_run_id):
                 counts["active"] += 1
                 continue
-            if job.status == "RUNNING" and job.candidate_payload is None:
+            if (
+                job.status == "RUNNING"
+                and job.candidate_payload is None
+                and job.provider_call_possible is not False
+            ):
                 job.status = "FAILED"
                 job.failure_code = "MEMORY_EXTRACTION_OUTCOME_UNKNOWN"
                 job.claimed_at = None
                 job.completed_at = now
                 counts["unknown"] += 1
             else:
-                job.claimed_at = now
+                # Invalidate the former owner's token before enqueue. An old
+                # worker can survive the loss of its advisory-lock connection.
+                if job.candidate_payload is None:
+                    job.status = "PENDING"
+                    job.claim_token = None
+                    job.provider_call_possible = None
+                else:
+                    job.claim_token = uuid4()
+                job.claimed_at = None
                 job.completed_at = None
                 job.updated_at = now
                 job.failure_code = (
                     "MEMORY_EXTRACTION_DISPATCH_PENDING"
-                    if job.status == "PENDING"
+                    if job.candidate_payload is None
                     else "MEMORY_EXTRACTION_RECORDING_PENDING"
                 )
                 queued.append((job.workspace_id, job.agent_run_id))
