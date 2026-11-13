@@ -62,6 +62,7 @@ const SEGMENT_LABELS: Record<string, MessageKey> = {
   incidents: "nav.incidents",
   analytics: "nav.analytics",
   support: "nav.support",
+  records: "support.records.title",
   agents: "nav.agents",
   knowledge: "nav.knowledge",
   playground: "nav.retrievalPlayground",

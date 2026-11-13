@@ -40,7 +40,7 @@ export type AppThreadContext = {
   turns: WorkspaceQuery<ThreadTurn[]>;
 };
 
-type ThreadSummary = { thread: Thread; values: Record<string, number> };
+type ThreadSummary = { thread: Thread; values: Record<string, number> | null };
 
 const THREAD_PAGE_SIZE = 20;
 
@@ -72,6 +72,7 @@ export default function AppWorkbench({
 
   const listScope = `${copy.basePath}:${workspaceId}`;
   const scope = `${copy.basePath}:${workspaceId}:${threadId ?? "none"}`;
+  const countOnly = copy.kind === "support" || copy.kind === "research";
 
   const summarize = useCallback(
     async (auth: AuthInput, thread: Thread): Promise<ThreadSummary> => {
@@ -95,20 +96,27 @@ export default function AppWorkbench({
   );
   const loadThreadPage = useCallback(
     async (auth: AuthInput, offset = 0): Promise<ThreadSummary[]> => {
-      const page = await listThreads(auth, { kind: copy.kind, agentId: copy.agentId, limit: THREAD_PAGE_SIZE, offset });
+      const page = await listThreads(auth, {
+        kind: copy.kind, agentId: copy.agentId, limit: THREAD_PAGE_SIZE, offset,
+        ...(countOnly ? { includeTurnCount: true } : {}),
+      });
+      if (countOnly) return page.map((thread) => ({
+        thread,
+        values: typeof thread.turn_count === "number" ? weight.values([], thread.turn_count) : null,
+      }));
       return await Promise.all(page.map((thread) => summarize(auth, thread)));
     },
-    [copy.kind, copy.agentId, summarize],
+    [copy.kind, copy.agentId, countOnly, summarize, weight],
   );
-  const loadAgents = useCallback((auth: AuthInput) => listAgents(auth), []);
+  const loadAgents = useCallback((auth: AuthInput) => listAgents(auth, { publishedOnly: true }), []);
   const threads = useWorkspaceData<ThreadSummary[]>(loadThreadPage, `app-threads:${listScope}`);
-  const agents = useWorkspaceData<Agent[]>(loadAgents, `app-threads-agents:${listScope}`);
+  const agents = useWorkspaceData<Agent[]>(loadAgents, `app-threads-agents:${listScope}`, { enabled: !threadId });
   const mutation = useWorkspaceMutation(`app-threads:${listScope}`);
 
   const loadThread = useCallback(
     async (auth: AuthInput) => {
       const result = await getThread(auth, threadId!);
-      if (copy.agentId && (result.agent_id !== copy.agentId || result.kind !== copy.kind)) {
+      if (result.kind !== copy.kind || (copy.agentId && result.agent_id !== copy.agentId)) {
         throw new ApiError("THREAD_NOT_FOUND", "The thread was not found for this agent.", 404);
       }
       return result;
@@ -170,14 +178,6 @@ export default function AppWorkbench({
     if (seed) setTitle(seed);
   }, [threadId]);
 
-  // With no fixed agent, default to the first available one so the create
-  // button is enabled without an extra choice.
-  useEffect(() => {
-    if (copy.agentId || agentId) return;
-    const first = agents.data?.[0]?.id;
-    if (first) setAgentId(first);
-  }, [copy.agentId, agentId, agents.data]);
-
   // On phones the thread list is an overlay drawer; start it closed so the
   // conversation is visible first.
   useEffect(() => {
@@ -237,6 +237,9 @@ export default function AppWorkbench({
   }, [threadList, threadSearch, locale]);
 
   const current = thread.data ?? null;
+  const agentList = (agents.data ?? []).filter((agent) => !copy.agentId || agent.id === copy.agentId);
+  const selectedAgent = agentList.find((agent) => agent.id === (copy.agentId ?? agentId));
+  const templateKey = copy.kind === "analysis" ? "data_analyst" : copy.kind;
 
   useEffect(() => {
     if (threadId && thread.loaded && !current) setSideOpen(false);
@@ -244,9 +247,9 @@ export default function AppWorkbench({
 
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (cannotCreate || !title.trim() || (!copy.agentId && !agentId)) return;
+    if (cannotCreate || !title.trim() || !selectedAgent) return;
     const created = await mutation.run((auth) =>
-      createThread(auth, copy.agentId ?? agentId, { title: title.trim(), kind: copy.kind }),
+      createThread(auth, selectedAgent.id, { title: title.trim(), kind: copy.kind }),
     );
     if (created) {
       setShowCreate(false);
@@ -300,7 +303,6 @@ export default function AppWorkbench({
     );
   }
 
-  const agentList = (agents.data ?? []).filter((agent) => !copy.agentId || agent.id === copy.agentId);
   const showCreateForm = showCreate || !threadId;
 
   return (
@@ -322,6 +324,9 @@ export default function AppWorkbench({
           <h1 className="thread-title">{current?.title ?? t(copy.title)}</h1>
         </div>
         <div className="thread-topbar-actions">
+          {copy.kind === "support" && permissions?.includes("support_records_read") && (
+            <Link className="button button-ghost" href="/support/records">{t("support.records.title")}</Link>
+          )}
           {threadId && (
             <button
               type="button"
@@ -388,12 +393,9 @@ export default function AppWorkbench({
                     >
                       <span className="thread-list-title">{item.title}</span>
                       <span className="thread-list-meta" title={formatDateTime(item.updated_at)}>{formatRelativeTime(item.updated_at)}</span>
-                      {weight.summaryKey && (
+                      {values && weight.summaryKey && (
                         <span className="thread-list-meta">
-                          {t(weight.summaryKey, {
-                            turns: formatCount(values.turns ?? 0),
-                            ...(values as Record<string, number>),
-                          })}
+                          {t(weight.summaryKey, Object.fromEntries(Object.entries(values).map(([key, value]) => [key, formatCount(value)])))}
                         </span>
                       )}
                     </Link>
@@ -511,8 +513,8 @@ export default function AppWorkbench({
                   <p className="eval-form-title">{t(copy.createTitle)}</p>
                   {!copy.agentId && (
                     <label>
-                      {t("appThread.agent")}
-                      <select name="agent" value={agentId} onChange={(event) => setAgentId(event.target.value)}>
+                      {t("appThread.publishedAgent")}
+                      <select name="agent" value={agentId} disabled={!agents.loaded || !agentList.length || cannotCreate} onChange={(event) => setAgentId(event.target.value)}>
                         <option value="">{t("appThread.selectAgent")}</option>
                         {agentList.map((agent) => (
                           <option value={agent.id} key={agent.id}>
@@ -521,6 +523,14 @@ export default function AppWorkbench({
                         ))}
                       </select>
                     </label>
+                  )}
+                  {agents.error && <ErrorState code={agents.error.code} message={agents.error.message} onRetry={agents.reload} />}
+                  {agents.loading && !agents.loaded && <LoadingState />}
+                  {agents.loaded && !agentList.length && <p className="state-hint">{t("appThread.noPublishedAgent")}</p>}
+                  {permissions?.includes("agent_create") && (
+                    <Link href={copy.agentId ? `/agents/${encodeURIComponent(copy.agentId)}` : `/agents?template=${encodeURIComponent(templateKey)}`}>
+                      {t(copy.agentId ? "agents.chat.openAgent" : "appThread.configureTemplate")}
+                    </Link>
                   )}
                   <label>
                     {t("appThread.threadTitle")}
@@ -539,7 +549,7 @@ export default function AppWorkbench({
                     <button
                       type="submit"
                       className="button button-primary"
-                      disabled={cannotCreate || mutation.pending || !title.trim() || (!copy.agentId && !agentId)}
+                      disabled={cannotCreate || mutation.pending || !title.trim() || !selectedAgent}
                     >
                       {mutation.pending ? t("common.loading") : t(copy.createTitle)}
                     </button>

@@ -113,3 +113,18 @@
 /* ---- Support ---- */
 .support-activity-item { display: grid; gap: 0.3rem; justify-content: stretch; }
 .support-activity-item .conversation-text { font-size: 0.84rem; }
+.records-columns { align-items: start; display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); }
+.records-columns > * { min-width: 0; }
+.records-search, .records-pager { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.records-search { margin-bottom: var(--space-3); }
+.records-search input { flex: 1 1 12rem; min-width: 0; }
+.records-pager { color: var(--text-muted); font-size: 0.82rem; justify-content: space-between; margin-top: var(--space-3); }
+.records-customer-list { border-top: 1px solid var(--border); list-style: none; margin: 0; padding: 0; }
+.records-customer-list li { border-bottom: 1px solid var(--border); }
+.records-customer-list button { background: transparent; border: 0; border-radius: var(--radius-sm); color: var(--text); cursor: pointer; display: grid; gap: 0.25rem; padding: var(--space-3); text-align: left; width: 100%; }
+.records-customer-list button:hover, .records-customer-list button[aria-pressed="true"] { background: var(--row-hover); }
+.records-customer-list button[aria-pressed="true"] { box-shadow: inset 3px 0 var(--accent); }
+.records-customer-list button > span { align-items: baseline; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.records-customer-list code, .records-customer-list small, .records-customer code { color: var(--text-muted); }
+.records-customer-list button, .records-customer { overflow-wrap: anywhere; }
+@media (max-width: 860px) { .records-columns { grid-template-columns: minmax(0, 1fr); } }

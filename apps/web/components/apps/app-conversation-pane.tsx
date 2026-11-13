@@ -14,6 +14,7 @@ import {
   streamThreadTurn,
 } from "@/lib/api/agent-runtime";
 import type { ThreadTurn } from "@/lib/api/threads";
+import { supportTicketHref } from "@/lib/api/support-records";
 import { useI18n } from "@/i18n/provider";
 import { Markdown } from "@/components/ui/markdown";
 import FeedbackPanel from "@/components/feedback/feedback-panel";
@@ -348,6 +349,9 @@ export default function AppConversationPane({
                               <li key={receipt.approval_id}>
                                 {t("appThread.conversation.ticketDecision")} <StatusBadge status={receipt.decision_status} />
                                 {" · "}{t("appThread.conversation.ticketExecution")} <StatusBadge status={receipt.execution_status} />
+                                {permissions?.includes("support_records_read") && receipt.execution_status === "SUCCEEDED" && receipt.ticket_id && receipt.ticket_ref && (
+                                  <>{" · "}<Link href={supportTicketHref(receipt.ticket_id)}>{t("support.records.viewTicket", { ref: receipt.ticket_ref })}</Link></>
+                                )}
                               </li>
                             ))}
                           </ul>

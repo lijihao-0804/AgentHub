@@ -201,8 +201,9 @@ export type AgentPublishResult = {
   created_at: string;
 };
 
-export async function listAgents(input: AuthInput): Promise<Agent[]> {
-  const payload = await apiRequest<unknown>(agentsBase(input.workspaceId), input.accessToken);
+export async function listAgents(input: AuthInput, options?: { publishedOnly?: boolean }): Promise<Agent[]> {
+  const suffix = options?.publishedOnly ? "?published_only=true" : "";
+  const payload = await apiRequest<unknown>(agentsBase(input.workspaceId) + suffix, input.accessToken);
   return listItems<Agent>(payload);
 }
 

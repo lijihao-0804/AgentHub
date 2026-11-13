@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useDeferredValue, useEffect, useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useDeferredValue, useEffect, useRef, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import {
@@ -21,6 +21,7 @@ import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
 const EMPTY_FORM = {
+  templateKey: "",
   name: "",
   description: "",
   system_prompt: "",
@@ -31,9 +32,26 @@ const EMPTY_FORM = {
   max_tool_calls: "",
 };
 
+function withTemplate(current: typeof EMPTY_FORM, template: AgentTemplate, templates: AgentTemplate[]) {
+  const previous = templates.find((entry) => entry.key === current.templateKey);
+  return {
+    ...current,
+    templateKey: template.key,
+    name: !current.name || current.name === previous?.name ? template.name : current.name,
+    description: !current.description || current.description === previous?.description ? template.description : current.description,
+    system_prompt: template.system_prompt,
+  };
+}
+
 export default function AgentsPage() {
+  return <Suspense fallback={<LoadingState />}><AgentCatalog /></Suspense>;
+}
+
+function AgentCatalog() {
   const { t, locale, formatCount, formatDateTime } = useI18n();
   const router = useRouter();
+  const templateKey = useSearchParams().get("template");
+  const appliedLink = useRef("");
   const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
   const canCreate = permissions?.includes("agent_create") === true;
 
@@ -60,6 +78,15 @@ export default function AgentsPage() {
     setShowAdvanced(false);
     setSearch("");
   }, [sessionId]);
+
+  useEffect(() => {
+    const requested = templates.data?.find((template) => template.key === templateKey);
+    const link = `${sessionId}:${templateKey ?? ""}`;
+    if (!canCreate || !requested || appliedLink.current === link) return;
+    appliedLink.current = link;
+    setForm(withTemplate(EMPTY_FORM, requested, templates.data ?? []));
+    setShowForm(true);
+  }, [canCreate, sessionId, templateKey, templates.data]);
 
   const copy = locale === "zh-CN"
     ? {
@@ -189,6 +216,9 @@ export default function AgentsPage() {
             onRetry={profiles.reload}
           />
         )}
+        {(showForm || templateKey) && templates.error && (
+          <ErrorState code={templates.error.code} message={templates.error.message} onRetry={templates.reload} />
+        )}
         {profiles.loaded && profileList.length === 0 && (
           <p className="state-hint">
             {t("agents.needsProfilePrefix")}{" "}
@@ -205,13 +235,9 @@ export default function AgentsPage() {
                 type="button"
                 key={template.key}
                 className="overview-card"
+                aria-pressed={form.templateKey === template.key}
                 onClick={() =>
-                  setForm((current) => ({
-                    ...current,
-                    name: current.name || template.name,
-                    description: current.description || template.description,
-                    system_prompt: template.system_prompt,
-                  }))
+                  setForm((current) => withTemplate(current, template, templates.data ?? []))
                 }
               >
                 <span className="overview-card-title">{template.name}</span>

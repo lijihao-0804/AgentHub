@@ -21,6 +21,7 @@ const TITLE_RULES: Array<[string, MessageKey]> = [
   ["/research", "nav.research"],
   ["/incidents", "nav.incidents"],
   ["/analytics", "nav.analytics"],
+  ["/support/records", "support.records.title"],
   ["/support", "nav.support"],
   ["/agents", "nav.agents"],
   ["/knowledge/playground", "nav.retrievalPlayground"],

@@ -30,6 +30,8 @@ export type Thread = {
   agent_id: string;
   title: string;
   kind: string;
+  /** Supplied by the paged list when include_turn_count was requested. */
+  turn_count?: number | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -46,7 +48,13 @@ export type ThreadTurn = {
   status: string | null;
   final_output: string | null;
   failure_code: string | null;
-  ticket_requests?: { approval_id: string; decision_status: string; execution_status: string }[] | null;
+  ticket_requests?: {
+    approval_id: string;
+    decision_status: string;
+    execution_status: string;
+    ticket_id?: string | null;
+    ticket_ref?: string | null;
+  }[] | null;
 };
 
 export type ThreadTurnSubmitResult = {
@@ -71,11 +79,12 @@ export function createThread(
 
 export async function listThreads(
   input: AuthInput,
-  query?: { agentId?: string; kind?: ThreadKind; limit?: number; offset?: number },
+  query?: { agentId?: string; kind?: ThreadKind; includeTurnCount?: boolean; limit?: number; offset?: number },
 ): Promise<Thread[]> {
   const params = new URLSearchParams();
   if (query?.agentId?.trim()) params.set("agent_id", query.agentId.trim());
   if (query?.kind) params.set("kind", query.kind);
+  if (query?.includeTurnCount) params.set("include_turn_count", "true");
   if (query?.limit !== undefined) params.set("limit", String(query.limit));
   if (query?.offset !== undefined) params.set("offset", String(query.offset));
   const suffix = params.toString() ? `?${params.toString()}` : "";

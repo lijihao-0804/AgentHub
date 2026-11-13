@@ -263,6 +263,26 @@ async function main() {
   await listQuery.fn(workbenchHarness.session);
   assert.deepEqual(threadCalls[0], { kind: 'general', agentId: 'agent-a', limit: 20, offset: 0 });
   console.log('PASS AppWorkbench thread list sends the server-side app and agent filters');
+  const countedCalls = [];
+  const countsHarness = harness({
+    '@/lib/api/threads': {
+      listThreads: async (_auth, options) => {
+        countedCalls.push(options);
+        return [{ id: 'with-0', turn_count: 0 }, { id: 'with-7', turn_count: 7 }, { id: 'older-server' }];
+      },
+      listThreadTurns: () => { throw new Error('do not download conversation bodies for the rail'); },
+    },
+    '@/lib/api/artifacts': { listThreadArtifacts: () => { throw new Error('do not download artifacts for a turn count'); } },
+  });
+  const CountedWorkbench = load('components/apps/app-workbench.tsx', countsHarness.mocks).default;
+  for (const kind of ['research', 'support']) {
+    countsHarness.render(CountedWorkbench, { copy: { kind, basePath: '/' + kind }, children: () => null });
+    const query = countsHarness.queries.find((item) => item.key.startsWith('app-threads:'));
+    const result = await query.fn(countsHarness.session, 20);
+    assert.deepEqual(countedCalls.at(-1), { kind, agentId: undefined, limit: 20, offset: 20, includeTurnCount: true });
+    assert.deepEqual(result.map((item) => item.values), [{ turns: 0 }, { turns: 7 }, null]);
+  }
+  console.log('PASS support and research rails use the paged count, retain true zero, and skip missing metadata');
   const threadQuery = workbenchHarness.queries.find((query) => query.key.startsWith('app-thread:'));
   await assert.rejects(threadQuery.fn(workbenchHarness.session), (error) =>
     error.code === 'THREAD_NOT_FOUND' && error.status === 404);
