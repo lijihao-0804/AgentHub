@@ -39,3 +39,9 @@
 ## 实验分支与查询成本
 
 本地分支 `codex/rag-candidate-recall-lab-20261114` 的提交 `4673299` 保存了实际用于问答的 BM25 接口、快照索引、迁移和测试。保护高分块的第二版仅在真实 BGE 分数上做检索试验。全库索引有 797,447 条倒排记录。32 题 SQL 检查中，2 题成功，前 20 个块、来源和分数逐项与 Python 参考相同。两题热查询分别耗时 4.39 与 5.73 秒，后两题触及 15 秒上限，余下 28 题按约停止。第 1074 题的单次 PostgreSQL 执行计划显示，快照成员连接过滤了约 8,434 万个中间配对。[SQL 范围、逐题耗时及执行计划](../../benchmarks/public_rag/results/published/candidate-recall-20261114/lexical-index.json)
+
+## 回归与重放
+
+实验工作树首次运行全套 3,974 个测试节点，通过 3,951 个、失败 22 个、跳过 1 个。补齐隔离 Redis、真实 Celery Worker 和迁移专用数据库，处理临时目录权限并预热 Worker 后，定点复测通过。另在原始基线独立复现了记忆质量评测替身漏接供应商交接回调的问题，修正后 11 个有正例与反例的脚本场景通过。按原节点身份逐项核对，3,974 个均取得通过记录，各次执行的源码、分母、退出码和 JUnit 指纹分别保留。[各次回归明细](../../benchmarks/public_rag/results/published/candidate-recall-20261114/regression.json)
+
+在最终生产代码上重新跑开发与确认流程，128 和 553 题的候选排序指纹及所有方法指标与首次完整报告相同。从 Git 提交导出的纯文件目录用隔离的标准库解释器运行验证，3 项自测通过。实测凭据已停用并换钥。[逐题便携复核](../../benchmarks/public_rag/results/published/candidate-recall-20261114/portable/README.md) · [本机回收回执](../../benchmarks/public_rag/results/published/candidate-recall-20261114/live/session-cleanup.json)

@@ -4,5 +4,20 @@
   "temporary_login_file_removed": true,
   "retirement_job_exit_code": 0,
   "retrieval_only_verification_external_model_calls": 0,
-  "task_api_or_worker_processes_alive_after_retirement": 0
+  "task_api_or_worker_processes_alive_after_retirement": 0,
+  "infrastructure": {
+    "removed_containers": 3,
+    "removed_mounted_volumes": 2,
+    "removed_networks": 1,
+    "remaining_containers": 0,
+    "remaining_mounted_volumes": 0,
+    "remaining_labeled_volumes": 0,
+    "remaining_networks": 0,
+    "unchanged_nonproject_container_ids": 19,
+    "other_running_containers_before_desktop_stop": 0,
+    "private_env_file_and_ports_removed": true,
+    "initial_desktop_engine_reachable": false,
+    "desktop_stop_exit_code": 0,
+    "final_desktop_engine_reachable": false
+  }
 }
