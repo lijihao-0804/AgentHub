@@ -1,0 +1,143 @@
+{
+  "protocol": "agenthub-public-api-aliyun-synthetic-v1",
+  "source_commit": "b365fa41b6a5787c0201752d2506294e3feecff2",
+  "preflight_only": false,
+  "steps": [
+    {
+      "step": "isolated-postgres",
+      "version": "16.15",
+      "host": "127.0.0.1",
+      "auth": "scram-sha-256"
+    },
+    {
+      "step": "deployment",
+      "alembic": "head",
+      "langgraph_schema": "bootstrapped"
+    },
+    {
+      "step": "test-database-head",
+      "versions": [
+        "0053_interactive_case_budget"
+      ]
+    },
+    {
+      "step": "alembic-check",
+      "passed": true
+    },
+    {
+      "step": "case-budget-integration",
+      "exit_code": 0,
+      "tests": 20,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "failed_nodes": []
+    },
+    {
+      "step": "05-api",
+      "ready": true,
+      "postgres": "healthy"
+    },
+    {
+      "step": "public-control-plane",
+      "organization_id": "eed3c6e1-d232-42b1-807e-3f40e06957de",
+      "workspace_id": "2485001b-2555-40ff-b3ca-1741ec9d7015",
+      "agent_id": "3c42e47f-59d2-42f9-be9e-0113019b9516",
+      "version_id": "6306583d-d1a6-47fb-89e9-bd89ee591292",
+      "resolved_spec_hash": "14dcf0f36fd02a16bd50de20488b1deb51bc2cf60e7f457ced73d21439d4b332",
+      "thread_id": "e12000ff-4155-4098-9c53-c52e2cf972c7",
+      "fallback_profile": false,
+      "max_attempts": 1,
+      "max_tokens_per_request": 512
+    },
+    {
+      "step": "idempotent-turn",
+      "same_turn": true,
+      "same_run": true,
+      "reused": true
+    },
+    {
+      "step": "public-stream",
+      "events": [
+        "run.started",
+        "context.budget",
+        "message.started",
+        "message.delta",
+        "message.delta",
+        "usage",
+        "message.completed",
+        "run.completed"
+      ]
+    },
+    {
+      "step": "06-api-restarted",
+      "ready": true,
+      "postgres": "healthy"
+    },
+    {
+      "step": "cold-read",
+      "distinct_run_ids": 2,
+      "succeeded": 2,
+      "exact_answers": 2,
+      "published_hash_matches": true
+    }
+  ],
+  "runs": [
+    {
+      "mode": "synchronous",
+      "run_id": "303c22d2-b8b2-480c-9895-cb3c4f87db69",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "expected_answer": "JADE-31",
+      "answer_exact": true,
+      "input_roundtrip": true,
+      "version_matches": true,
+      "published_hash_matches": true,
+      "token_input": 151,
+      "token_output": 21,
+      "token_total": 172,
+      "model_steps": 1,
+      "model_rounds": 1,
+      "tool_calls": 0,
+      "from_generation": true,
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "estimated_cost": null,
+      "cost_currency": null
+    },
+    {
+      "mode": "sse",
+      "run_id": "8aec8c55-c49b-4602-a92f-cc090649e610",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "expected_answer": "AMBER-47",
+      "answer_exact": true,
+      "input_roundtrip": true,
+      "version_matches": true,
+      "published_hash_matches": true,
+      "token_input": 168,
+      "token_output": 206,
+      "token_total": 374,
+      "model_steps": 1,
+      "model_rounds": 1,
+      "tool_calls": 0,
+      "from_generation": true,
+      "provider": "openai-compatible",
+      "model": "deepseek-v4.1-flash-1017",
+      "estimated_cost": null,
+      "cost_currency": null
+    }
+  ],
+  "live_submissions": 2,
+  "passed": true,
+  "provider_route": "Aliyun Beijing compatible-mode/v1",
+  "model": "deepseek-v4.1-flash-1017",
+  "integration_passed": true,
+  "live_source_commit": "b365fa41b6a5787c0201752d2506294e3feecff2",
+  "live_source_dirty": true,
+  "live_source_files": {
+    "apps/api/agent_runtime_dependencies.py": "360c3f8e7e5a910ad97e2647f5286c72b79a2bf4bb105e217686cb61ca60925e",
+    "packages/agent_runtime/runtime_graph.py": "3d257310fd6cb477e95da1e4c11882f984c557a313cb3b94f39e28594f9bd343"
+  },
+  "database_stopped": true
+}

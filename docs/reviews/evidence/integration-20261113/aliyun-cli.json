@@ -1,0 +1,1 @@
+{"passed": true, "model": "deepseek-v4.1-flash-1017", "synchronous": true, "sse": true, "idempotent_replay": true, "fresh_client_readback": true, "run_ids": ["6ca46831-6a93-444d-8edc-99f05b1b20d6", "6edc099b-3878-453c-8ae5-2d2d356c2e92"], "spec_sha256": "81ce9f9a5859e227a844177f1bc80efd679654c492ffe42afabf912bf68da321", "total_tokens_by_run": [174, 336]}
