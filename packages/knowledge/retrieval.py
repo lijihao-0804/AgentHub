@@ -395,6 +395,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                 "INVALID_RETRIEVAL_QUERY", "The evidence projection is invalid.", 400
             )
 
+        started = time.perf_counter()
         async with self._db_session() as session:
             workspace_id, knowledge_base_id, revision_ids = await self._snapshot_scope(
                 session, context, query
@@ -405,6 +406,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             {"snapshot_id": query.knowledge_snapshot_id},
         )
         if not revision_ids:
+            total_latency_ms = round((time.perf_counter() - started) * 1000, 3)
             await _safe_span_end(
                 snapshot_span,
                 attributes={
@@ -415,7 +417,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     "rerank_input_count": 0,
                     "rerank_output_count": 0,
                     "selection_latency_ms": 0,
-                    "total_latency_ms": 0,
+                    "total_latency_ms": total_latency_ms,
                 },
             )
             empty_stage = RetrievalTraceStage(latency_ms=0, results=())
@@ -427,7 +429,7 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     sparse=empty_stage,
                     fusion=empty_stage,
                     rerank=empty_stage,
-                    total_latency_ms=0,
+                    total_latency_ms=total_latency_ms,
                 ),
             )
 
@@ -436,7 +438,6 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             knowledge_base_id=str(knowledge_base_id),
             document_revision_ids=revision_ids,
         )
-        started = time.perf_counter()
         rerank_span: TraceSpan | None = None
         stage = "dense"
         try:

@@ -1,0 +1,26 @@
+{
+  "type": "descriptive_rescore_of_frozen_output",
+  "source_report_sha256": "2545400527ebb8fc985f4ced59fe8f1b433ed02217fa4f001271e671e9f6cdb9",
+  "registered": 128,
+  "primary_decision_changed": false,
+  "quality": {
+    "document_recall5": {
+      "baseline": 0.818359375,
+      "candidate": 0.818359375,
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "document_mrr5": {
+      "baseline": 0.739453125,
+      "candidate": 0.739453125,
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  }
+}

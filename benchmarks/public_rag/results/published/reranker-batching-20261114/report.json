@@ -1,0 +1,133 @@
+{
+  "decision": "FAIL",
+  "checks": {
+    "complete_pairs": true,
+    "same_input_tokens": true,
+    "mean_latency": false,
+    "latency_interval": true,
+    "p95_latency": true,
+    "ndcg10": true,
+    "raw5_source_recall": true,
+    "top1": true,
+    "top5_set": true,
+    "score_drift": true
+  },
+  "queries": 128,
+  "first_in_pair_counts": {
+    "baseline": 64,
+    "candidate": 64
+  },
+  "bootstrap_groups": 120,
+  "quality": {
+    "document_ndcg10": {
+      "baseline": 0.7682712270433322,
+      "candidate": 0.7682712270433322,
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "raw5_source_recall": {
+      "baseline": 0.806640625,
+      "candidate": 0.806640625,
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "pool_source_recall": {
+      "baseline": 0.890625,
+      "candidate": 0.890625,
+      "delta": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "adapter_latency_ms": {
+    "baseline": 270.86138906292945,
+    "candidate": 249.76462343755657,
+    "delta": -21.096765625372882,
+    "ci95": [
+      -24.459155950111757,
+      -17.756974243056373
+    ],
+    "percentiles_ms": {
+      "baseline": {
+        "p50": 270.9452999988571,
+        "p95": 306.63984499951755
+      },
+      "candidate": {
+        "p50": 247.2811499974341,
+        "p95": 290.56273500391393
+      }
+    },
+    "relative_mean_reduction": 0.07788768158636095,
+    "mean_delta_ms_by_first_arm": {
+      "baseline": -26.167293750063436,
+      "candidate": -16.026237500682328
+    }
+  },
+  "chunk_rank_identity_counts": {
+    "1": {
+      "same_order": 128,
+      "same_set": 128
+    },
+    "5": {
+      "same_order": 128,
+      "same_set": 128
+    },
+    "10": {
+      "same_order": 128,
+      "same_set": 128
+    },
+    "20": {
+      "same_order": 127,
+      "same_set": 128
+    }
+  },
+  "max_abs_logit_drift": 0.015625,
+  "changed_logits": 166,
+  "tensor_counts": {
+    "baseline": {
+      "forward_batches": 384,
+      "pairs": 2560,
+      "nonpadding_tokens": 733350,
+      "padded_tokens": 919048
+    },
+    "candidate": {
+      "forward_batches": 384,
+      "pairs": 2560,
+      "nonpadding_tokens": 733350,
+      "padded_tokens": 836128
+    }
+  },
+  "pool_missing_all_judged_sources": 13,
+  "raw5_no_judged_source": {
+    "baseline": 21,
+    "candidate": 21
+  },
+  "environment": {
+    "protocol_sha256": "ebf3105ad9ace94923b190f0a5b92a9b015379a65e6f2c6d23714ef648afa9db",
+    "runner_sha256": "e1f8c28dd070c896a774731bdf3f37de806366085b201fca77d5ecfb4f4d368b",
+    "baseline_commit": "dca82a71d6c54cfe00e31073a493eb11d1ec081b",
+    "baseline_blob_sha256": "25be0de9fc75f91b9335763a2aa0e73d493ab80e0600a88be21cca686d3ce98d",
+    "candidate_blob_sha256_lf": "2a7e04fdf47855e19e8965c4f382a07750c6d409e21d93e05b1aff640c169d62",
+    "model_snapshot": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+    "evaluated_at_utc": "2026-11-13T18:11:10.250029+00:00",
+    "python": "3.12.10",
+    "torch": "2.14.0+cu130",
+    "cuda": "13.0",
+    "transformers": "4.57.6",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "model_load_ms": 8698.591899999883
+  },
+  "local_record_sha256": {
+    "cohort.json": "a36429f508d02d6f4dd78f0f3f3c0b150b4283cd64326c743c0ee90b0026476a",
+    "pairs.jsonl": "4f5c5db4e66663dd4851238c89afb5acc92c9d0beee7e9f991087399483759b1",
+    "tensor-audit.jsonl": "4e8d2d284e7cc0919e267cb130087ec5df08b61861e7be5c6a9f1e3839e74343"
+  }
+}

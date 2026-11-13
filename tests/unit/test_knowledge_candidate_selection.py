@@ -265,6 +265,33 @@ def _retriever(
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("empty_snapshot", [True, False])
+async def test_trace_includes_snapshot_lookup_even_when_there_are_no_chunks(
+    monkeypatch: pytest.MonkeyPatch, empty_snapshot: bool
+) -> None:
+    trace_sink = _RecordingTraceSink()
+    retriever, _ = _retriever(monkeypatch, trace_sink=trace_sink)
+    now = 0.0
+
+    async def snapshot_scope(_session, _context, _query):
+        nonlocal now
+        now += 0.125
+        return uuid4(), uuid4(), () if empty_snapshot else (str(uuid4()),)
+
+    monkeypatch.setattr(retriever, "_snapshot_scope", snapshot_scope)
+    monkeypatch.setattr(
+        "packages.knowledge.retrieval.time", SimpleNamespace(perf_counter=lambda: now)
+    )
+    result = await retriever.retrieve_with_trace(_context(), _query())
+
+    retrieve_end = next(
+        attrs for name, attrs, *_ in trace_sink.ended if name == "knowledge.retrieve"
+    )
+    assert retrieve_end["total_latency_ms"] == result.trace.total_latency_ms == 125
+    assert result.trace.dense.latency_ms == result.trace.rerank.latency_ms == 0
+
+
+@pytest.mark.asyncio
 async def test_hybrid_rerank_uses_separate_budget_and_traces_selection(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

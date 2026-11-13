@@ -1,0 +1,71 @@
+{
+  "protocol": "scifact-train-reranker-batching-v1",
+  "scope": "Local paired development benchmark of the warm production reranker adapter on frozen retrieval candidates. Documents are English scientific abstracts. No answer generation, database, vector search or paid provider requests.",
+  "frozen_on": "2026-11-14",
+  "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+  "snapshot_hash": "2453684867babc64462b17543f333d5847956ddb73c474bfd60c349d75c106fe",
+  "corpus_documents": 5183,
+  "corpus_chunks": 9189,
+  "split": "train",
+  "source_query_count": 809,
+  "data_directory": "data/external/rag-public-20261021/scifact/extracted/scifact",
+  "historical_directory": "benchmarks/public_rag/results/parent-context-20261022",
+  "input_sha256": {
+    "corpus.jsonl": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6",
+    "queries.jsonl": "8ff84a7c903f722981cd8d595c022660140c51867b27608a6d4910db86080313",
+    "qrels/train.tsv": "a53f2114831916c096b6c37d9e54da68cef4efdcdbd5ed46533601af972acf1d",
+    "dev-baseline.jsonl": "cf391506ecdc72dc2d65fd0e8a943b078a1386ae2427603b61b4cd294822a4f9",
+    "dev-baseline.meta.json": "89d9e8d76bb546d3a68bd85af3848c264ae47efcc72197e4556b9f35c0720d7d",
+    "pair-token-audit.jsonl": "37c66ed3f50af24f771f0b5cdb2d1f53f5a218d91b208a7d433b5991c952878f"
+  },
+  "sample": {
+    "salt": "agenthub-scifact-reranker-batching-20261114",
+    "rule": "Sort all 809 official train IDs by SHA-256 of UTF-8 salt + ':' + ID. First 128 for paired measurement; next 4 distinct queries warm both arms. Each sequence is independent of text, labels, scores and timing.",
+    "measured": 128,
+    "warmup": 4,
+    "candidates_per_query": 20,
+    "candidate_identity": "Historical development baseline selection stage in original fusion order. Recover source text from public corpus using recorded revision UUID, 1200-character windows and 200-character overlap; every candidate logical chunk ID must match exactly."
+  },
+  "baseline_commit": "dca82a71d6c54cfe00e31073a493eb11d1ec081b",
+  "adapter_path": "packages/knowledge/adapters/reranker.py",
+  "baseline_blob_sha256": "25be0de9fc75f91b9335763a2aa0e73d493ab80e0600a88be21cca686d3ce98d",
+  "arms": {
+    "baseline": "BgeReranker.rerank at the pinned commit. Tokenize and pad sequential batches in original candidate order.",
+    "candidate": "Same local BGE tokenizer and FP16 weights; tokenize each pair once, group by exact encoded length, restore logits to original candidate positions."
+  },
+  "model": {
+    "name": "BAAI/bge-reranker-v2-m3",
+    "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+    "batch_size": 8,
+    "max_length": 8192,
+    "device": "cuda",
+    "dtype": "torch.float16",
+    "file_sha256": {
+      "model.safetensors": "d9e3e081faff1eefb84019509b2f5558fd74c1a05a2c7db22f74174fcedb5286",
+      "config.json": "13dcd6c31d9fec9d1d8e158702072f62d7fa7d312a64b9fe057bec9a08cfe41a",
+      "tokenizer.json": "69564b696052886ed0ac63fa393e928384e0f8caada38c1f4864a9bfbf379c15",
+      "special_tokens_map.json": "8c785abebea9ae3257b61681b4e6fd8365ceafde980c21970d001e834cf10835",
+      "tokenizer_config.json": "7e4c1cc848840aeccdd763458c18dd525eb0f795c992e00ebe9c28554e7db2d4",
+      "sentencepiece.bpe.model": "cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865"
+    }
+  },
+  "order_seed": 20261114,
+  "timing": "In a single process, share the already loaded model and tokenizer. Shuffle an equal count of A-first/B-first pairs, concurrency one. Synchronize CUDA on both sides of each timed adapter call; include tokenization, padding, CPU-GPU transfers, forwards, restored logits. Exclude disk, warmup, sorting, annotations and bootstrap. Record p50/p95, paired mean and order strata.",
+  "quality": "Use production ordering (-logit, -fusion_score, chunk_id). nDCG@10 deduplicates documents before cutoff. Consumer recall takes the first 5 raw chunks before document deduplication. Compare top1 chunk, top5/top10 chunk sets and order, all 20 scores, and which judged sources were available in the frozen 20. Count any failed query in the registered cohort and invalidate acceptance.",
+  "token_diagnostics": "Record actual model input tensor shapes outside wall-clock measurement to count real and padded tokens. Require the same count of real tokens and scored pairs in each arm.",
+  "bootstrap": {"replicates": 10000, "seed": 20261114, "confidence": 0.95, "grouping": "Connected components of full train queries sharing at least one positive source, resampled with replacement on the selected queries. Query-weighted paired means; percentile interval."},
+  "gates": {
+    "required_complete_pairs": 128,
+    "min_mean_latency_reduction": 0.10,
+    "max_p95_latency_ratio": 1.0,
+    "require_latency_difference_ci_upper_below_zero": true,
+    "min_ndcg10_difference": -0.002,
+    "min_consumer_recall5_difference": -0.002,
+    "min_quality_difference_ci_lower": -0.005,
+    "min_top1_chunk_identity": 0.99,
+    "min_top5_chunk_set_identity": 0.98,
+    "max_absolute_logit_difference": 0.125,
+    "require_equal_nonpadding_tokens": true
+  },
+  "decision": "All gates must pass to support this adapter on this measured workload. An incomplete run or failed gate does not qualify. No tuning or sample enlargement based on results; the public test split, other held-out labels and answer generators are excluded."
+}

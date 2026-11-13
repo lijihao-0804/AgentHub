@@ -1,0 +1,129 @@
+"""Lazy BGE cross-encoder reranker adapter."""
+
+from __future__ import annotations
+
+from collections.abc import Iterator, Mapping, Sequence
+from threading import Lock
+from typing import Any
+
+from packages.knowledge.adapters.embeddings import _resolve_device
+from packages.knowledge.contracts import KnowledgeProviderError, RerankCandidate
+
+
+class BgeReranker:
+    # bge-reranker-v2-m3's supported window. An explicit value keeps the
+    # effective input length from drifting with tokenizer defaults; anything
+    # smaller would silently truncate the 1200-char chunks plus the 4000-char
+    # query cap that share this input.
+    DEFAULT_MAX_LENGTH = 8_192
+
+    def __init__(
+        self,
+        *,
+        model_name: str = "BAAI/bge-reranker-v2-m3",
+        device: str = "auto",
+        batch_size: int = 8,
+        max_length: int = 8_192,
+    ) -> None:
+        self.model_name = model_name
+        self.device_request = device
+        if isinstance(batch_size, bool) or not isinstance(batch_size, int) or batch_size < 1:
+            raise ValueError("batch_size must be a positive integer")
+        self.batch_size = batch_size
+        if isinstance(max_length, bool) or not isinstance(max_length, int) or max_length < 32:
+            raise ValueError("max_length must be an integer of at least 32")
+        self.max_length = max_length
+        self._tokenizer: Any | None = None
+        self._model: Any | None = None
+        self._torch: Any | None = None
+        self._device: str | None = None
+        self._load_lock = Lock()
+        self._tokenize_lock = Lock()
+
+    def _load(self) -> tuple[Any, Any]:
+        if self._model is not None and self._tokenizer is not None and self._torch is not None:
+            return self._tokenizer, self._model
+        with self._load_lock:
+            if self._model is not None and self._tokenizer is not None and self._torch is not None:
+                return self._tokenizer, self._model
+            try:
+                import torch
+                from transformers import AutoModelForSequenceClassification, AutoTokenizer
+            except ImportError as exc:
+                raise KnowledgeProviderError(
+                    "RERANKER_UNAVAILABLE",
+                    "The reranker runtime is not installed.",
+                ) from exc
+            self._torch = torch
+            self._device = _resolve_device(self.device_request, torch)
+            dtype = torch.float16 if self._device == "cuda" else torch.float32
+            try:
+                tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+                model = AutoModelForSequenceClassification.from_pretrained(
+                    self.model_name,
+                    torch_dtype=dtype,
+                )
+                model.to(self._device)
+                model.eval()
+            except Exception as exc:
+                raise KnowledgeProviderError(
+                    "RERANKER_LOAD_FAILED",
+                    "The reranker model could not be loaded.",
+                ) from exc
+            self._tokenizer = tokenizer
+            self._model = model
+            return tokenizer, model
+
+    def _batches(
+        self, tokenizer: Any, query: str, candidates: Sequence[RerankCandidate]
+    ) -> Iterator[tuple[Sequence[int], Mapping[str, Any]]]:
+        count = len(candidates)
+        single_batch = count <= self.batch_size
+        # Fast tokenizers change their shared backend's padding mode during encoding.
+        with self._tokenize_lock:
+            inputs = tokenizer(
+                [query] * count,
+                [candidate.text for candidate in candidates],
+                padding=single_batch,
+                truncation=True,
+                max_length=self.max_length,
+                return_tensors="pt" if single_batch else None,
+            )
+        if single_batch:
+            yield range(count), inputs
+            return
+
+        lengths = [len(ids) for ids in inputs["input_ids"]]
+        order = sorted(range(count), key=lengths.__getitem__)
+        for offset in range(0, count, self.batch_size):
+            indices = order[offset : offset + self.batch_size]
+            batch = {field: [values[i] for i in indices] for field, values in inputs.items()}
+            yield indices, tokenizer.pad(batch, padding=True, return_tensors="pt")
+
+    def rerank(self, query: str, candidates: Sequence[RerankCandidate]) -> tuple[float, ...]:
+        if not candidates:
+            return ()
+        tokenizer, model = self._load()
+        torch = self._torch
+        try:
+            scores = [0.0] * len(candidates)
+            for indices, batch in self._batches(tokenizer, query, candidates):
+                encoded = {key: value.to(self._device) for key, value in batch.items()}
+                with torch.inference_mode():
+                    logits = model(**encoded).logits.reshape(-1)
+                for index, score in zip(indices, logits.detach().cpu().tolist(), strict=True):
+                    scores[index] = float(score)
+            return tuple(scores)
+        except Exception as exc:
+            raise KnowledgeProviderError(
+                "RERANKER_INFERENCE_FAILED",
+                "The reranker provider failed.",
+            ) from exc
+
+    def warm(self) -> None:
+        """Load the cross-encoder now; it is the second model a query waits on."""
+
+        self._load()
+
+
+__all__ = ["BgeReranker"]
