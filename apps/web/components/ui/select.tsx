@@ -87,6 +87,11 @@ export default function Select({
       return;
     }
     switch (event.key) {
+      case "Escape":
+        event.preventDefault();
+        event.stopPropagation();
+        setOpen(false);
+        break;
       case "ArrowDown":
         event.preventDefault();
         setActiveIndex((index) => Math.min(index + 1, options.length - 1));

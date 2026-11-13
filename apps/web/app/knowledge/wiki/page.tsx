@@ -121,8 +121,12 @@ function WikiWorkbenchContent() {
   useEffect(() => {
     const dialog = compileDialog.current;
     if (!showCompileForm || !canEdit || !selectedKbId || !dialog) return;
+    const opener = document.activeElement;
     dialog.showModal();
-    return () => dialog.close();
+    return () => {
+      dialog.close();
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    };
   }, [showCompileForm, canEdit, selectedKbId]);
 
   const [publishConfirm, setPublishConfirm] = useState(false);
