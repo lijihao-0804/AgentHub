@@ -346,6 +346,16 @@ class EvaluationEvidenceFailureLabelResponse(BaseModel):
     step_orders: list[int]
 
 
+class EvaluationCaseBudgetResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    currency: Literal["CNY"]
+    limit_amount: Decimal
+    reserved_amount: Decimal
+    settled_amount: Decimal
+    available_amount: Decimal
+
+
 class EvaluationCaseEvidenceResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -359,6 +369,7 @@ class EvaluationCaseEvidenceResponse(BaseModel):
     execution_cleanup_status: str | None
     termination_reason: str | None
     episode: EvaluationEvidenceEpisodeResponse | None
+    budget: EvaluationCaseBudgetResponse | None = None
     steps: list[EvaluationEvidenceStepResponse]
     failure_labels: list[EvaluationEvidenceFailureLabelResponse]
 

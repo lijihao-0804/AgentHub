@@ -240,7 +240,7 @@ function RunDetailSession({ runId }: { runId: string }) {
             {run.safe_failure_message && <p className="state-hint">{run.safe_failure_message}</p>}
             {run.failure_code === "INTERACTIVE_COST_RESERVATION_UNAVAILABLE" && (
               <p className="inline-notice" role="status">
-                {locale === "zh-CN" ? "金额硬上限暂不支持，收费调用尚未派发。" : "A monetary hard cap is not yet supported; chargeable calls have not been dispatched."}
+                {locale === "zh-CN" ? "本次请求未能预留预算。请核对计费合同、模型配置和案例剩余额度。" : "This run could not reserve its budget. Check the billing contract, model configuration and available case balance."}
               </p>
             )}
             {canRun && CANCELLABLE_RUN_STATUSES.has(run.status) && (

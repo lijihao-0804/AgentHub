@@ -16,6 +16,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
 from types import MappingProxyType
@@ -225,9 +226,16 @@ class BillingAttestation:
     output_price_per_1m: Decimal
     cached_input_price_per_1m: Decimal | None
     request_evidence: RequestAdmissibilityEvidence
+    valid_until: datetime | None = None
 
     def __post_init__(self) -> None:
         identity = _required_text(self.identity, "identity", maximum=64)
+        if self.valid_until is not None and (
+            not isinstance(self.valid_until, datetime) or self.valid_until.utcoffset() is None
+        ):
+            raise CaseBudgetPricingError(
+                "CASE_BUDGET_ATTESTATION_INVALID", "The validity deadline needs a time zone."
+            )
         if not isinstance(self.workspace_id, UUID):
             raise CaseBudgetPricingError(
                 "CASE_BUDGET_ATTESTATION_INVALID",
@@ -360,7 +368,30 @@ class BillingAttestationRegistry:
 
         if not isinstance(identity, str):
             return None
-        return self._attestations.get(identity)
+        proof = self._attestations.get(identity)
+        if proof and proof.valid_until is not None and proof.valid_until <= datetime.now(UTC):
+            return None
+        return proof
+
+    def for_binding(
+        self,
+        *,
+        workspace_id: UUID,
+        route: FrozenProviderRoute,
+        pricing_snapshot_id: UUID,
+        pricing_snapshot_hash: str,
+    ) -> BillingAttestation | None:
+        matches = [
+            proof
+            for proof in self._attestations.values()
+            if proof.workspace_id == workspace_id
+            and proof.route == route
+            and proof.pricing_snapshot_id == pricing_snapshot_id
+            and proof.pricing_snapshot_hash == pricing_snapshot_hash
+            and self.get(proof.identity) is not None
+            and self.get_validator(proof) is not None
+        ]
+        return matches[0] if len(matches) == 1 else None
 
     def get_validator(
         self,

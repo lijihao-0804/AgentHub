@@ -522,6 +522,20 @@ class CaseBudgetLedger(RunBudgetLedger):
     ) -> CaseBudgetAccountSnapshot:
         """Read the parent case account without locking it."""
 
+        snapshot = await self.find_case_account(session, workspace_id=workspace_id, case_id=case_id)
+        if snapshot is None:
+            raise RunBudgetLedgerError(
+                "CASE_BUDGET_ACCOUNT_NOT_FOUND", "The case budget account was not found."
+            )
+        return snapshot
+
+    async def find_case_account(
+        self,
+        session: AsyncSession,
+        *,
+        workspace_id: UUID,
+        case_id: UUID,
+    ) -> CaseBudgetAccountSnapshot | None:
         _validate_uuid(workspace_id, "workspace_id")
         _validate_uuid(case_id, "case_id")
         account = await session.scalar(
@@ -532,12 +546,7 @@ class CaseBudgetLedger(RunBudgetLedger):
             )
             .execution_options(populate_existing=True)
         )
-        if account is None:
-            raise RunBudgetLedgerError(
-                "CASE_BUDGET_ACCOUNT_NOT_FOUND",
-                "The case budget account was not found.",
-            )
-        return _case_account_snapshot(account)
+        return _case_account_snapshot(account) if account is not None else None
 
     async def get_case_run_binding(
         self,

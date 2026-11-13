@@ -468,6 +468,13 @@ export type EvaluationCaseEvidence = {
   execution_cleanup_status: string | null;
   termination_reason: string | null;
   episode: EvaluationCaseEvidenceEpisode | null;
+  budget?: {
+    currency: "CNY";
+    limit_amount: string;
+    reserved_amount: string;
+    settled_amount: string;
+    available_amount: string;
+  } | null;
   steps: EvaluationCaseEvidenceStep[];
   failure_labels: EvaluationCaseFailureLabel[];
 };

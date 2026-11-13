@@ -16,6 +16,7 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import insert, select, text, update
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
@@ -40,6 +41,7 @@ from packages.evaluation.case_budget_models import (
     CaseBudgetAccount,
     CaseBudgetResponseObservation,
 )
+from packages.evaluation.evidence_view import EvaluationEvidenceViewService
 from packages.evaluation.interactive_lifecycle import InteractiveLifecycle
 from packages.evaluation.models import InteractiveEpisode
 from packages.evaluation.service import EvaluationDatasetService
@@ -271,7 +273,10 @@ async def test_legacy_null_and_case_binding_contract(db_resources, monkeypatch) 
     fixture = await _create_budget_case(factory, monkeypatch)
     async with factory() as session:
         account_version = await session.scalar(text("SELECT version_num FROM alembic_version"))
-        assert account_version == "0053_interactive_case_budget"
+        migrations = ScriptDirectory.from_config(Config("alembic.ini"))
+        assert "0053_interactive_case_budget" in {
+            revision.revision for revision in migrations.walk_revisions(head=account_version)
+        }
         legacy_run_id = await _create_bare_run(session, fixture.owned)
         await session.commit()
         ledger = RunBudgetLedger()
@@ -673,6 +678,19 @@ async def test_provider_bill_low_and_high_settlement(db_resources, monkeypatch) 
         assert parent.is_over_limit is True
         assert parent.reserved_amount == Decimal("0.00000000")
         assert parent.settled_amount == Decimal("3.40000000")
+        evidence = await EvaluationEvidenceViewService().get_case_evidence(
+            session,
+            context=fixture.owned.context,
+            run_id=fixture.owned.identity.run_id,
+            case_id=fixture.owned.identity.case_id,
+        )
+        assert evidence["budget"] == {
+            "currency": "CNY",
+            "limit_amount": "2.00000000",
+            "settled_amount": "3.40000000",
+            "reserved_amount": "0.00000000",
+            "available_amount": "0",
+        }
     with pytest.raises(RunBudgetLedgerError) as rejected:
         await _reserve(
             factory,

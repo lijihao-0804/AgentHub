@@ -12,10 +12,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.agent_runtime.models import AgentRun, RunStep
+from packages.agent_runtime.run_budget_ledger import CaseBudgetAccountSnapshot
 from packages.approvals.models import Approval
 from packages.control_plane.rbac import EVALUATION_READ
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.evaluation.case_budget_ledger import CaseBudgetLedger
 from packages.evaluation.metrics import EvaluatorRegistry, MetricStatus, MetricValue
 from packages.evaluation.models import (
     EvaluationDatasetItem,
@@ -251,6 +253,13 @@ class EvaluationEvidenceViewService:
                 )
             )
 
+        budget = (
+            await CaseBudgetLedger().find_case_account(
+                session, workspace_id=workspace_id, case_id=case.id
+            )
+            if episode is not None
+            else None
+        )
         return build_evidence_view(
             run=run,
             case=case,
@@ -258,6 +267,7 @@ class EvaluationEvidenceViewService:
             variant=variant,
             experiment=experiment,
             episode=episode,
+            budget=budget,
             turns=turns,
             agent_statuses=agent_statuses,
             steps=steps,
@@ -299,6 +309,7 @@ def build_evidence_view(
     variant: EvaluationExperimentVariant | None,
     experiment: EvaluationExperiment | None,
     episode: InteractiveEpisode | None,
+    budget: CaseBudgetAccountSnapshot | None = None,
     turns: Sequence[InteractiveEpisodeTurn],
     agent_statuses: Mapping[UUID, str],
     steps: Sequence[RunStep],
@@ -330,6 +341,17 @@ def build_evidence_view(
         "execution_cleanup_status": _historical_cleanup_status(observation),
         "termination_reason": _historical_termination_reason(observation),
         "episode": _project_episode(episode, turns, agent_statuses),
+        "budget": (
+            {
+                "currency": budget.currency,
+                "limit_amount": format(budget.limit_amount, "f"),
+                "reserved_amount": format(budget.reserved_amount, "f"),
+                "settled_amount": format(budget.settled_amount, "f"),
+                "available_amount": format(budget.available_amount, "f"),
+            }
+            if budget is not None
+            else None
+        ),
         "steps": projected_steps,
         "failure_labels": _project_failure_labels(
             observation=observation,

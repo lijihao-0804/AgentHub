@@ -211,6 +211,23 @@ function normalizeStep(value: unknown): ExperimentRunEvidenceStep | null {
   };
 }
 
+function normalizeBudget(value: unknown): NonNullable<EvaluationCaseEvidence["budget"]> | null {
+  const item = record(value);
+  const money = (amount: unknown): amount is string =>
+    typeof amount === "string" && /^\d{1,12}(?:\.\d{1,8})?$/.test(amount);
+  if (
+    !item || item.currency !== "CNY" || !money(item.limit_amount) ||
+    !money(item.reserved_amount) || !money(item.settled_amount) || !money(item.available_amount)
+  ) return null;
+  return {
+    currency: item.currency,
+    limit_amount: item.limit_amount,
+    reserved_amount: item.reserved_amount,
+    settled_amount: item.settled_amount,
+    available_amount: item.available_amount,
+  };
+}
+
 function normalizeFailureLabel(value: unknown): EvidenceFailureLabel | null {
   const item = record(value);
   const code = item ? stringValue(item.code) : null;
@@ -242,6 +259,7 @@ export function normalizeCaseEvidence(payload: unknown): ExperimentRunCaseEviden
     execution_cleanup_status: stringValue(item.execution_cleanup_status),
     termination_reason: stringValue(item.termination_reason),
     episode: normalizeEpisode(item.episode),
+    budget: normalizeBudget(item.budget),
     steps: Array.isArray(item.steps)
       ? item.steps.flatMap((step) => {
           const normalized = normalizeStep(step);

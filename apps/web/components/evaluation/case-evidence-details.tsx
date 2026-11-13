@@ -89,15 +89,20 @@ const DETAIL_COPY = {
     unknownBody:
       "The side effect could not be confirmed. Do not retry it automatically. Keep this case's evidence and fixture for reconciliation; raw fixture contents are not exposed here.",
     cost: "Pricing estimate",
+    budget: "Case budget (CNY)",
+    limit: "Limit",
+    reserved: "Reserved for pending bills",
+    settled: "Settled from bills",
+    available: "Available to reserve",
     costUnknown: "UNKNOWN",
     costUnknownNote: "Unknown is not zero and does not mean the call was free.",
     costRecorded: "Recorded pricing estimate (not a bill)",
     currency: "Currency",
     currencyMissing: "Not recorded",
     costSourceMissing: "Pricing source not recorded.",
-    costReservationTitle: "Amount hard limit unavailable",
+    costReservationTitle: "Budget reservation unavailable",
     costReservationBody:
-      "The amount hard limit is not supported; no billable call was dispatched.",
+      "This request could not reserve its budget. Check the billing contract, model configuration and available case balance.",
     legacyTitle: "Older or incomplete evidence protocol",
     legacyBody:
       "Missing fields are shown as not recorded. They are not interpreted as a clean outcome, zero, or absence of a violation.",
@@ -173,14 +178,19 @@ const DETAIL_COPY = {
     unknownBody:
       "外部副作用无法确认。不要自动重试；请保留该题证据与 fixture 用于对账，本页面不暴露原始 fixture 内容。",
     cost: "计价估算",
+    budget: "案例预算（元）",
+    limit: "预算上限",
+    reserved: "待对账的预留额",
+    settled: "已按账单结算",
+    available: "可用额度",
     costUnknown: "UNKNOWN",
     costUnknownNote: "未知不等于零，也不表示调用免费。",
     costRecorded: "记录的计价估算（非账单）",
     currency: "币种",
     currencyMissing: "未记录",
     costSourceMissing: "费用来源未记录。",
-    costReservationTitle: "金额硬上限暂不支持",
-    costReservationBody: "金额硬上限暂不支持，收费调用尚未派发。",
+    costReservationTitle: "本次预算预留未获准",
+    costReservationBody: "本次请求未能预留预算。请核对计费合同、模型配置和案例剩余额度。",
     legacyTitle: "旧版或不完整证据协议",
     legacyBody: "缺失字段显示为未记录，不解释为结果干净、数值为零或没有违规。",
     notRecorded: "未记录",
@@ -631,6 +641,18 @@ export function CaseEvidenceDetails({
             </ul>
           )}
         </section>
+
+        {evidence.budget && (
+          <section className="case-evidence-section" aria-label={text.budget}>
+            <h3>{text.budget}</h3>
+            <dl className="case-evidence-inline-facts">
+              <div><dt>{text.limit}</dt><dd>{evidence.budget.limit_amount}</dd></div>
+              <div><dt>{text.reserved}</dt><dd>{evidence.budget.reserved_amount}</dd></div>
+              <div><dt>{text.settled}</dt><dd>{evidence.budget.settled_amount}</dd></div>
+              <div><dt>{text.available}</dt><dd>{evidence.budget.available_amount}</dd></div>
+            </dl>
+          </section>
+        )}
 
         <section className="case-evidence-section" aria-label={text.cost}>
           <h3>{text.cost}</h3>

@@ -86,8 +86,23 @@ test("missing evidence fields become null or empty arrays", () => {
     reason: null,
   });
   assert.equal(evidence.episode, null);
+  assert.equal(evidence.budget, null);
   assert.deepEqual(evidence.steps, []);
   assert.deepEqual(evidence.failure_labels, []);
+});
+
+test("case budget retains exact ledger decimals and omits untrusted fields", () => {
+  const budget = {
+    currency: "CNY",
+    limit_amount: "999999999999.99999999",
+    reserved_amount: "0.00000001",
+    settled_amount: "0",
+    available_amount: "999999999999.99999998",
+  };
+  const valid = normalizeCaseEvidence({ budget: { ...budget, private_note: "secret" } });
+  const invalid = normalizeCaseEvidence({ budget: { ...budget, available_amount: -1 } });
+  assert.deepEqual(valid.budget, budget);
+  assert.equal(invalid.budget, null);
 });
 
 test("list normalization strips legacy raw observation data", () => {

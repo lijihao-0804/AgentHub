@@ -115,6 +115,8 @@ class Settings(BaseSettings):
     evaluation_enqueue_grace_seconds: int = Field(default=30, ge=0, le=86_400)
     evaluation_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
     evaluation_sandbox_workspace_ids: frozenset[UUID] = frozenset()
+    # Local deployment evidence. Never take a budget attestation from a dataset or tenant API.
+    evaluation_case_budget_attestations_path: Path | None = None
     # Remote MCP egress. The defaults are the safe ones: private targets are
     # refused, and every remote call is bounded in time and in size. Loosening
     # any of these is an explicit operator decision, never an inference from
