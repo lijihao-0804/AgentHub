@@ -1,6 +1,8 @@
 # AgentHub 求职与面试入口
 
-FINAL-CLOSE-1 已于 2026-11-06 完成本地收口。功能冻结，不再以 backlog 清空作为写简历前提。
+2026-11-14 新增了一条适合现场讲解的客服业务流程。专员录入客户，阿里云模型查未结工单并发起申请，另一账号审批。回执可打开真实工单，专员处理后结案，再次登录可以核对数量和状态。三次真实 Run 分别覆盖批准、查重、拒绝，合计 8 次模型步骤、16,518 个 token。这组数据描述一次流程验收，模型质量另有专项实验。[客服流程与复跑](../reviews/support-operator-closure-20261114.md) · [真实 HTTP 回执](../reviews/evidence/support-desk-20261114/public-http.json)
+
+以下是 2026-11-06 冻结的 FINAL-CLOSE-1 离线展示，可在没有供应商账号的环境中使用。
 
 先阅读[交付记录与能力—证据表](final-closeout-evidence-20261106.md)，按其中命令打开本地 Demo。
 现场先讲清楚：模型是确定性适配器，Ops 为模拟回滚，评测为受控工程 observation；
@@ -25,4 +27,4 @@ FINAL-CLOSE-1 已于 2026-11-06 完成本地收口。功能冻结，不再以 ba
 
 个人简历只填写本人真实负责、复核和复现过的部分。实现、验收与材料含 Codex/DeepSeek 协作；
 不写独立实现全部系统、企业生产落地、线上收益、完整硬金额预算或未做过的模型校准。
-仓库交付入口为 [PR #17](https://github.com/lijihao-0804/AgentHub/pull/17)，最终CI/合并状态与实际提交见PR及交付记录。到此停止功能施工。
+11 月 6 日的历史交付关联 [PR #17](https://github.com/lijihao-0804/AgentHub/pull/17)。后续本地交付与验证边界见[当前状态](../current-state.md)。

@@ -28,5 +28,37 @@
     "cmd.exe executes both batch launchers with isolated dependencies. Simulated migration failure returns nonzero before application startup.",
     "Readiness fault injection covers storage, web login, API proxy and the named worker. Windows shutdown stops the launched process tree while an unrelated test process remains alive."
   ],
-  "limits": "Docker Desktop's Linux engine was unavailable. This check did not run a complete container stack, real Web/Redis/Qdrant/worker integration or a model call."
+  "compose_smoke": {
+    "completed_at_utc": "2026-11-13T17:43:59.234548Z",
+    "docker_engine": "29.6.2",
+    "docker_compose": "5.3.1",
+    "isolation": "Fresh project, private generated .env, project-specific backend tag and volumes, random IPv4 loopback host ports.",
+    "build": "Built infra/docker/api.Dockerfile from current source and locked Linux dependencies. API, worker, beat and prepare shared the resulting image.",
+    "exit_codes": {"build": 0, "up_wait": 0, "prepare": 0, "repeat_prepare": 0, "down_volumes": 0, "remove_test_tag": 0},
+    "services": {"postgres": "healthy", "redis": "PONG", "qdrant_healthz": 200, "api": "healthy", "worker": "healthy", "beat": "running"},
+    "periodic_task": "Celery Beat dispatched approval reconciliation and the worker completed it.",
+    "http": {"ready": 200, "register": 201, "refresh": 200, "create_organization": 201, "create_workspace": 201},
+    "dependencies": {"postgres": "healthy", "redis": "healthy", "qdrant": "healthy", "langfuse": "disabled"},
+    "alembic_head": "0055_support_records",
+    "checkpoint_table_count": 4,
+    "project_resources_after_cleanup": {"containers": 0, "volumes": 0, "networks": 0}
+  },
+  "container_support_smoke": {
+    "completed_at_utc": "2026-11-13T17:48:55.067192Z",
+    "command": "python -m scripts.support_api_smoke --api-url http://127.0.0.1:<test-port>/api/v1",
+    "exit_code": 0,
+    "model": "deepseek-v4.1-flash-1017",
+    "workspace_id": "04a63a2e-15c2-425c-b888-bf89d8c1365e",
+    "resolved_spec_sha256": "a4cd59ae5a9ef87e87eb40ae405ff3dbf57a3b8a3555b65d4b1f0b8f45e86186",
+    "runs": [
+      {"case": "approved", "run_id": "9d7f24ec-a4c8-4eda-a973-97d5b19aa455", "status": "SUCCEEDED", "decision": "APPROVED", "execution": "SUCCEEDED", "model_steps": 3, "tokens": 6189},
+      {"case": "existing", "run_id": "dac489ac-962a-4953-95e2-1e578cc88e09", "status": "SUCCEEDED", "model_steps": 2, "tokens": 3991},
+      {"case": "denied", "run_id": "649e6e71-ef67-41e0-86fc-2971e0be58f4", "status": "SUCCEEDED", "decision": "DENIED", "execution": "NOT_STARTED", "model_steps": 3, "tokens": 6262}
+    ],
+    "usage": {"model_steps": 8, "input_tokens": 15055, "output_tokens": 1387, "total_tokens": 16442},
+    "ticket": {"count": 1, "final_status": "CLOSED", "version": 3, "fresh_login_readback": true},
+    "credential_cleanup": {"disable": {"confirmed": true, "failures": []}, "rotate": {"confirmed": true, "failures": []}},
+    "project_resources_after_cleanup": {"containers": 0, "volumes": 0, "networks": 0}
+  },
+  "limits": "The Compose backend was tested through public HTTP. The browser runs on the host. The model calls used synthetic support cases."
 }

@@ -23,6 +23,10 @@ AgentHub 关注这些执行环节：
 前端提供研究、故障排查、数据分析和客户支持等任务入口，复用相同的 Agent、Thread、Run
 和治理机制。不同场景由模板、模型、知识与工具绑定组合，不为每个应用另建一套运行时。
 
+可以从客服工单看完整的使用过程。专员录入客户，模型查重后发起建单申请，另一账号批准，
+专员从回执打开工单、处理并结案。验收材料保留了真实阿里云调用、拒绝分支、并发冲突和重新登录后的读回结果。
+[操作与复跑](docs/reviews/support-operator-closure-20261114.md) · [公开 HTTP 回执](docs/reviews/evidence/support-desk-20261114/public-http.json)
+
 ## 核心能力
 
 | 模块 | 主要能力 |
@@ -165,21 +169,44 @@ docker compose -p agenthub-portfolio --env-file .scratch/portfolio-closeout/comp
 
 ### 接入真实模型与知识
 
-常规开发使用 [docker-compose.yml](docker-compose.yml) 和 [.env.example](.env.example)，
-与上述隔离演示使用不同的数据库、端口和配置。典型配置顺序：
+常规开发使用独立的数据库、配置和端口。Windows PowerShell 在仓库根目录运行以下命令，
+需 Python 3.12、uv、Node.js 20+ 和已启动的 Docker Desktop。
 
-1. 配置独立的 JWT secret、Fernet credential master key，以及 PostgreSQL、Redis、Qdrant 地址。
-   API 与 Worker 使用相同的凭据主密钥。
-2. 显式执行 `alembic upgrade head` 和 `python -m scripts.bootstrap_checkpoint`，再启动 API、Worker、Beat。
-   API 进程不自动创建业务或 checkpoint schema。
-3. 启动 `apps/web`，登录并创建 Organization / Workspace。
-4. 在控制面配置 Provider Credential 与 Model Profile，按需上传知识、等待入库并注册工具。
-5. 创建 Agent Draft，选择模型、知识和工具，发布 AgentVersion 后运行；再把需要比较的场景纳入数据集与实验。
+```powershell
+.\setup-agenthub.bat
+.\start-agenthub.bat
+```
 
-开发 Web 默认连接 `http://127.0.0.1:8000`；代理地址通过 `AGENTHUB_API_PROXY_TARGET` 配置，
-生产构建需要在 build 前设置。检索模型按需加载或预热，首次使用需要模型下载与本地资源。
-模型目标授权和私网例外见 [Provider 出站合同](docs/security/provider-egress.md)，
-既有数据的凭据升级见 [凭据迁移指南](docs/deployment/provider-credential-migration.md)。
+首次安装会创建本地 `.env`，分别生成 JWT 签名密钥与 Provider 凭据加密主密钥。
+启动程序在数据库迁移、checkpoint 初始化、API 依赖检查、Web 登录页及代理、指定 Worker
+的应答通过后打开 <http://127.0.0.1:3000>。本次日志在 `.scratch/local-dev/`。
+在启动窗口按 Ctrl+C 可停止应用进程，再运行 `docker compose stop postgres redis qdrant` 可停止基础设施并保留数据。
+
+也可以使用 Compose 启动后端，另在宿主机启动 Web。在仓库根目录执行：
+
+```sh
+uv run --locked python -m scripts.local_setup init
+docker compose up --build -d --wait --wait-timeout 120
+npm --prefix apps/web ci
+npm --prefix apps/web run dev -- --hostname 127.0.0.1 --port 3000
+```
+
+Compose 的 `prepare` 服务顺序执行 Alembic 与 LangGraph checkpoint 初始化。成功退出后，
+API、Worker 和 Beat 才会启动。用 `docker compose logs prepare` 查看初始化结果，
+用 <http://127.0.0.1:8000/api/v1/dependencies> 查看 PostgreSQL、Redis、Qdrant 状态。
+退出 Web 后用 `docker compose stop` 停止此环境。
+
+已有数据库需要保留原来的加密主密钥并随数据库备份保存；初始化命令遇到已有 `.env`
+会验证配置并保留文件。若现有文件只是刚复制的空模板且确认数据库全新，可先将该模板
+重命名备份，再运行 `init`。使用原数据库时从备份或部署环境恢复主密钥；替换签名密钥
+会使已有访问令牌失效。旧明文凭据的迁移另见[凭据迁移指南](docs/deployment/provider-credential-migration.md)。
+
+在 Web 注册账户，进入「设置」创建 Organization 和 Workspace，再到「模型」创建 Provider
+Credential 和 Model Profile。在 Agent 草稿中选择模型、发布 AgentVersion，进入 Playground
+发送消息即可查看第一次真实模型调用的 Run。接入知识库时可在 `.env` 中设置
+`AGENTHUB_KNOWLEDGE_WARM_MODELS_ON_START=true` 后重启，首次预热需下载数 GB 模型。
+开发 Web 默认代理到 `http://127.0.0.1:8000`；生产构建需在 build 前配置
+`AGENTHUB_API_PROXY_TARGET`。[Provider 出站合同](docs/security/provider-egress.md)
 
 ## 仓库结构
 
