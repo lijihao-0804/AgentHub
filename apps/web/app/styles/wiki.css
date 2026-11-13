@@ -88,6 +88,36 @@ dialog.wiki-create-dialog::backdrop {
   min-width: 0;
 }
 
+.wiki-compilations {
+  container: wiki-compilations / inline-size;
+}
+
+@container wiki-compilations (max-width: 38rem) {
+  .wiki-compilations thead { display: none; }
+  .wiki-compilations table, .wiki-compilations tbody { display: block; }
+  .wiki-compilations tr {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+  .wiki-compilations tr + tr { border-top: 1px solid var(--border); }
+  .wiki-compilations td, .wiki-compilations td.numeric-cell {
+    align-items: start;
+    border: 0;
+    display: grid;
+    gap: var(--space-2);
+    grid-template-columns: minmax(4.5rem, 30%) minmax(0, 1fr);
+    padding: 0;
+    text-align: start;
+  }
+  .wiki-compilations td::before {
+    color: var(--text-muted);
+    content: attr(data-label);
+    font-size: var(--text-sm);
+  }
+  .wiki-compilations td > * { justify-self: start; }
+}
+
 @media (max-width: 1150px) {
   .wiki-workspace {
     grid-template-columns: minmax(0, 1fr);

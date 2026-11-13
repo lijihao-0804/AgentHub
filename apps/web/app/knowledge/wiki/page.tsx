@@ -682,7 +682,7 @@ function WikiWorkbenchContent() {
               )}
 
             {compilationList.length > 0 && (
-              <div className="data-table">
+              <div className="data-table wiki-compilations">
                 <table>
                   <thead>
                     <tr>
