@@ -8,7 +8,6 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-
 CELL_WIDTH = 460
 CELL_HEIGHT = 330
 COLUMNS = 4
@@ -34,14 +33,20 @@ def build_sheet(screenshots: list[Path], destination: Path, title: str) -> None:
         row = index // COLUMNS
         left = column * CELL_WIDTH
         top = row * CELL_HEIGHT
-        draw.rectangle((left + 3, top + 3, left + CELL_WIDTH - 4, top + CELL_HEIGHT - 4), fill="#ffffff", outline="#7d8796")
+        draw.rectangle(
+            (left + 3, top + 3, left + CELL_WIDTH - 4, top + CELL_HEIGHT - 4),
+            fill="#ffffff",
+            outline="#7d8796",
+        )
         draw.text((left + 12, top + 8), screenshot.stem, fill="#17202e", font=label_font)
         with Image.open(screenshot) as source:
             image = source.convert("RGB")
         max_width = CELL_WIDTH - 24
         max_height = CELL_HEIGHT - 52
         scale = min(max_width / image.width, max_height / image.height)
-        rendered = image.resize((round(image.width * scale), round(image.height * scale)), Image.Resampling.LANCZOS)
+        rendered = image.resize(
+            (round(image.width * scale), round(image.height * scale)), Image.Resampling.LANCZOS
+        )
         x = left + (CELL_WIDTH - rendered.width) // 2
         y = top + 34 + (max_height - rendered.height) // 2
         sheet.paste(rendered, (x, y))

@@ -151,8 +151,7 @@ class IncidentProvider:
 
 def install_provider():
     configure()
-    from apps.api import agent_runtime_dependencies
-    from apps.worker.tasks import agent_runs
+    from apps import agent_run_composition
     from packages.agent_runtime.runtime import AgentRunService
     from packages.core.config.settings import get_settings
     from packages.model_gateway.credentials import ProviderCredentialCipher
@@ -183,10 +182,8 @@ def install_provider():
                 encoding="utf-8",
             )
 
-    # These process-local composition replacements are never imported by the
-    # normal API/worker entry points. The dedicated DB guard runs first.
-    agent_runtime_dependencies.AgentRunService = PortfolioRunService
-    agent_runs.AgentRunService = PortfolioRunService
+    # The dedicated database guard runs before replacing the service in this process.
+    agent_run_composition.AgentRunService = PortfolioRunService
 
 
 def api():

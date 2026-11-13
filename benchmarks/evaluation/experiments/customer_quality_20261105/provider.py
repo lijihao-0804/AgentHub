@@ -79,7 +79,7 @@ class _InvalidOutcome(Exception):
 
 
 async def _single_http_completion(**kwargs: Any) -> dict[str, Any]:
-    """One physical request, with no SDK message-repair retry or redirects."""
+    """Send once through the gateway's guarded OpenAI-compatible client."""
     import httpx
 
     allowed = {
@@ -96,18 +96,11 @@ async def _single_http_completion(**kwargs: Any) -> dict[str, Any]:
     }
     payload = {key: value for key, value in kwargs.items() if key in allowed}
     payload["model"] = payload["model"].removeprefix("openai/")
-    async with httpx.AsyncClient(
-        timeout=kwargs["timeout"],
-        follow_redirects=False,
-        transport=httpx.AsyncHTTPTransport(retries=0),
-    ) as client:
-        response = await client.post(
-            kwargs["api_base"].rstrip("/") + "/chat/completions",
-            headers={"Authorization": "Bearer " + kwargs["api_key"]},
-            json=payload,
-        )
-        response.raise_for_status()
-        return response.json()
+    # Read the wire values so the SDK cannot coerce invalid usage before settlement.
+    response = await kwargs["client"].post(
+        "/chat/completions", cast_to=httpx.Response, body=payload
+    )
+    return response.json()
 
 
 class BudgetedAliyunClient:
@@ -153,10 +146,7 @@ class BudgetedAliyunClient:
             default=None,
         )
         self._records: list[dict[str, Any]] = []
-        if client is None:
-            self._completion = _single_http_completion
-        else:
-            self._completion = client
+        self._completion = client
 
     @contextmanager
     def scope(
@@ -207,7 +197,8 @@ class BudgetedAliyunClient:
         self.ledger.mark_dispatched(logical_call_key)
         started = perf_counter()
         try:
-            response = await self._completion(**kwargs)
+            complete = _single_http_completion if self._completion is None else self._completion
+            response = await complete(**kwargs)
         except asyncio.CancelledError:
             unknown = self.ledger.mark_unknown(
                 logical_call_key,
@@ -338,6 +329,14 @@ class BudgetedAliyunClient:
             raise BudgetedProviderError("INVALID_PROVIDER_MODEL")
         if kwargs.get("api_base") != self._base_url:
             raise BudgetedProviderError("INVALID_PROVIDER_ENDPOINT")
+        if self._completion is None:
+            sdk = kwargs.get("client")
+            if sdk is None:
+                raise BudgetedProviderError("GATEWAY_CLIENT_REQUIRED")
+            if str(sdk.base_url).rstrip("/") != self._base_url:
+                raise BudgetedProviderError("INVALID_PROVIDER_ENDPOINT")
+            if sdk.max_retries != 0:
+                raise BudgetedProviderError("INVALID_RETRY_POLICY")
         if type(kwargs.get("num_retries")) is not int or kwargs.get("num_retries") != 0:
             raise BudgetedProviderError("INVALID_RETRY_POLICY")
         if kwargs.get("stream") is not False:

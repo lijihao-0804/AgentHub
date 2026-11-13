@@ -5,6 +5,7 @@ import "@/app/styles/wiki.css";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
+import { CatalogPageHeader } from "@/components/catalog/catalog-layout";
 import HashValue, { InlineConfirm } from "@/components/evaluation/hash-value";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { Markdown } from "@/components/ui/markdown";
@@ -476,22 +477,18 @@ function WikiWorkbenchContent() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <div>
-          <h1>{copy.title}</h1>
-          <p className="page-lead">
-            {copy.lead}
-          </p>
-        </div>
-        <div className="page-actions">
+      <CatalogPageHeader
+        title={copy.title}
+        description={copy.lead}
+        actions={
           <Link className="button button-ghost" href="/knowledge">
             {t("nav.knowledge")}
           </Link>
-        </div>
-      </header>
+        }
+      />
 
-      <div className="page-toolbar">
-        <label>
+      <div className="wiki-context-bar">
+        <label className="wiki-context-field">
           {copy.knowledgeBase}
           <Select
             value={selectedKbId}
@@ -527,7 +524,7 @@ function WikiWorkbenchContent() {
       )}
 
       {selectedKbId && (
-        <>
+        <div className="wiki-workspace">
           <Panel
             title={copy.compilations}
             ariaLabel={copy.wikiCompilationsAria}
@@ -550,107 +547,107 @@ function WikiWorkbenchContent() {
                   if (!createMutation.pending) setShowCompileForm(false);
                 }}
               >
-              <form className="wiki-dialog-form" onSubmit={createWikiCompilation} noValidate>
-                <h2 id="wiki-compile-heading">{copy.compileSnapshotTitle}</h2>
-                <div className="form-grid">
-                  <label>
-                    {copy.modelProfile}
-                    <Select
-                      value={compileModelId}
-                      onChange={setCompileModelId}
-                      options={enabledModelOptions}
-                      placeholder={
-                        models.loading ? copy.loadingProfiles : copy.configureModel
+                <form className="wiki-dialog-form" onSubmit={createWikiCompilation} noValidate>
+                  <h2 id="wiki-compile-heading">{copy.compileSnapshotTitle}</h2>
+                  <div className="form-grid">
+                    <label>
+                      {copy.modelProfile}
+                      <Select
+                        value={compileModelId}
+                        onChange={setCompileModelId}
+                        options={enabledModelOptions}
+                        placeholder={
+                          models.loading ? copy.loadingProfiles : copy.configureModel
+                        }
+                        disabled={models.loading}
+                        ariaLabel={copy.compileModelProfileAria}
+                      />
+                    </label>
+                    <label>
+                      {copy.sourceSnapshot}
+                      <Select
+                        value={sourceSnapshotId}
+                        onChange={setSourceSnapshotId}
+                        options={snapshotOptions}
+                        disabled={snapshots.loading}
+                        ariaLabel={copy.wikiSourceSnapshotAria}
+                      />
+                    </label>
+                    <label>
+                      {copy.outputContract}
+                      <Select
+                        value={outputMode}
+                        onChange={(value) =>
+                          setOutputMode(value as "PROMPT_JSON" | "JSON_SCHEMA")
+                        }
+                        options={[
+                          { value: "PROMPT_JSON", label: copy.promptJson },
+                          { value: "JSON_SCHEMA", label: copy.nativeJson },
+                        ]}
+                        ariaLabel={copy.compilationOutputModeAria}
+                      />
+                    </label>
+                    <label>
+                      {copy.conflictReview}
+                      <Select
+                        value={reviewMode}
+                        onChange={(value) => setReviewMode(value as "BASIC" | "MODEL")}
+                        options={[
+                          { value: "BASIC", label: copy.basicReview },
+                          { value: "MODEL", label: copy.modelReview },
+                        ]}
+                        ariaLabel={copy.conflictsReviewModeAria}
+                      />
+                    </label>
+                  </div>
+                  {models.error && (
+                    <ErrorState
+                      code={models.error.code}
+                      message={models.error.message || copy.loadModels}
+                      hint={errorHintKey(models.error) ? t(errorHintKey(models.error)!) : undefined}
+                      onRetry={models.reload}
+                    />
+                  )}
+                  {snapshots.error && (
+                    <ErrorState
+                      code={snapshots.error.code}
+                      message={snapshots.error.message || copy.loadSnapshots}
+                      hint={
+                        errorHintKey(snapshots.error) ? t(errorHintKey(snapshots.error)!) : undefined
                       }
-                      disabled={models.loading}
-                      ariaLabel={copy.compileModelProfileAria}
+                      onRetry={snapshots.reload}
                     />
-                  </label>
-                  <label>
-                    {copy.sourceSnapshot}
-                    <Select
-                      value={sourceSnapshotId}
-                      onChange={setSourceSnapshotId}
-                      options={snapshotOptions}
-                      disabled={snapshots.loading}
-                      ariaLabel={copy.wikiSourceSnapshotAria}
-                    />
-                  </label>
-                  <label>
-                    {copy.outputContract}
-                    <Select
-                      value={outputMode}
-                      onChange={(value) =>
-                        setOutputMode(value as "PROMPT_JSON" | "JSON_SCHEMA")
+                  )}
+                  <p className="state-hint">
+                    {copy.neverPublishAutomatically}
+                  </p>
+                  <InlineError
+                    error={createMutation.error}
+                    fallback={t("errors.requestFailed")}
+                  />
+                  <div className="form-actions">
+                    <button
+                      type="submit"
+                      className="button button-primary"
+                      disabled={
+                        createMutation.pending ||
+                        !compileModelId ||
+                        !selectedKbId ||
+                        models.loading
                       }
-                      options={[
-                        { value: "PROMPT_JSON", label: copy.promptJson },
-                        { value: "JSON_SCHEMA", label: copy.nativeJson },
-                      ]}
-                      ariaLabel={copy.compilationOutputModeAria}
-                    />
-                  </label>
-                  <label>
-                    {copy.conflictReview}
-                    <Select
-                      value={reviewMode}
-                      onChange={(value) => setReviewMode(value as "BASIC" | "MODEL")}
-                      options={[
-                        { value: "BASIC", label: copy.basicReview },
-                        { value: "MODEL", label: copy.modelReview },
-                      ]}
-                      ariaLabel={copy.conflictsReviewModeAria}
-                    />
-                  </label>
-                </div>
-                {models.error && (
-                  <ErrorState
-                    code={models.error.code}
-                    message={models.error.message || copy.loadModels}
-                    hint={errorHintKey(models.error) ? t(errorHintKey(models.error)!) : undefined}
-                    onRetry={models.reload}
-                  />
-                )}
-                {snapshots.error && (
-                  <ErrorState
-                    code={snapshots.error.code}
-                    message={snapshots.error.message || copy.loadSnapshots}
-                    hint={
-                      errorHintKey(snapshots.error) ? t(errorHintKey(snapshots.error)!) : undefined
-                    }
-                    onRetry={snapshots.reload}
-                  />
-                )}
-                <p className="state-hint">
-                  {copy.neverPublishAutomatically}
-                </p>
-                <InlineError
-                  error={createMutation.error}
-                  fallback={t("errors.requestFailed")}
-                />
-                <div className="form-actions">
-                  <button
-                    type="submit"
-                    className="button button-primary"
-                    disabled={
-                      createMutation.pending ||
-                      !compileModelId ||
-                      !selectedKbId ||
-                      models.loading
-                    }
-                  >
-                    {createMutation.pending ? copy.requesting : copy.createCompilation}
-                  </button>
-                  <button
-                    type="button"
-                    className="button button-ghost"
-                    onClick={() => setShowCompileForm(false)}
-                    disabled={createMutation.pending}
-                  >
-                    {t("session.cancel")}
-                  </button>
-                </div>
-              </form>
+                    >
+                      {createMutation.pending ? copy.requesting : copy.createCompilation}
+                    </button>
+                    <button
+                      type="button"
+                      className="button button-ghost"
+                      onClick={() => setShowCompileForm(false)}
+                      disabled={createMutation.pending}
+                    >
+                      {t("session.cancel")}
+                    </button>
+                  </div>
+                </form>
               </dialog>
             )}
 
@@ -816,7 +813,7 @@ function WikiWorkbenchContent() {
 
               {canInspectSelected && (
                 <div
-                  className="tab-strip"
+                  className="wiki-tabs"
                   role="tablist"
                   aria-label={copy.tabsAria}
                   onKeyDown={handleTabListKeyDown}
@@ -828,7 +825,7 @@ function WikiWorkbenchContent() {
                     aria-controls="wiki-panel-pages"
                     tabIndex={activeTab === "pages" ? 0 : -1}
                     aria-selected={activeTab === "pages"}
-                    className={activeTab === "pages" ? "button button-primary" : "button button-ghost"}
+                    className={activeTab === "pages" ? "wiki-tab wiki-tab-active" : "wiki-tab"}
                     onClick={() => setActiveTab("pages")}
                   >
                     {copy.pagesTab}
@@ -840,7 +837,7 @@ function WikiWorkbenchContent() {
                     aria-controls="wiki-panel-lint"
                     tabIndex={activeTab === "lint" ? 0 : -1}
                     aria-selected={activeTab === "lint"}
-                    className={activeTab === "lint" ? "button button-primary" : "button button-ghost"}
+                    className={activeTab === "lint" ? "wiki-tab wiki-tab-active" : "wiki-tab"}
                     onClick={() => setActiveTab("lint")}
                   >
                     {copy.lintTab}
@@ -850,11 +847,11 @@ function WikiWorkbenchContent() {
                       type="button"
                       role="tab"
                       id="wiki-tab-query"
-                    aria-controls="wiki-panel-query"
-                    tabIndex={activeTab === "query" ? 0 : -1}
-                    aria-selected={activeTab === "query"}
+                      aria-controls="wiki-panel-query"
+                      tabIndex={activeTab === "query" ? 0 : -1}
+                      aria-selected={activeTab === "query"}
                       className={
-                        activeTab === "query" ? "button button-primary" : "button button-ghost"
+                        activeTab === "query" ? "wiki-tab wiki-tab-active" : "wiki-tab"
                       }
                       onClick={() => setActiveTab("query")}
                     >
@@ -865,7 +862,7 @@ function WikiWorkbenchContent() {
               )}
 
               {activeTab === "pages" && canInspectSelected && (
-                <section role="tabpanel" tabIndex={0} id="wiki-panel-pages" aria-labelledby="wiki-tab-pages">
+                <section className="wiki-tab-panel" role="tabpanel" tabIndex={0} id="wiki-panel-pages" aria-labelledby="wiki-tab-pages">
                   {pages.error && (
                     <ErrorState
                       code={pages.error.code}
@@ -968,7 +965,7 @@ function WikiWorkbenchContent() {
               )}
 
               {activeTab === "lint" && canInspectSelected && (
-                <section role="tabpanel" tabIndex={0} id="wiki-panel-lint" aria-labelledby="wiki-tab-lint">
+                <section className="wiki-tab-panel" role="tabpanel" tabIndex={0} id="wiki-panel-lint" aria-labelledby="wiki-tab-lint">
                   {lint.error && (
                     <ErrorState
                       code={lint.error.code}
@@ -1019,7 +1016,7 @@ function WikiWorkbenchContent() {
               )}
 
               {activeTab === "query" && selectedCompilation.status === "PUBLISHED" && (
-                <section role="tabpanel" tabIndex={0} id="wiki-panel-query" aria-labelledby="wiki-tab-query">
+                <section className="wiki-tab-panel" role="tabpanel" tabIndex={0} id="wiki-panel-query" aria-labelledby="wiki-tab-query">
                   <form className="eval-form" onSubmit={submitWikiQuery} noValidate>
                     <div className="form-grid">
                       <label className="query-field">
@@ -1183,7 +1180,7 @@ function WikiWorkbenchContent() {
               />
             </Panel>
           )}
-        </>
+        </div>
       )}
     </div>
   );

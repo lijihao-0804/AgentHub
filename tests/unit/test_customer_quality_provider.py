@@ -4,6 +4,7 @@ import sqlite3
 from decimal import Decimal
 from types import SimpleNamespace
 
+import httpx
 import pytest
 
 from benchmarks.evaluation.experiments.customer_quality_20261105.budget import (
@@ -21,6 +22,14 @@ from benchmarks.evaluation.experiments.customer_quality_20261105.provider import
 )
 from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
 from packages.model_gateway.contracts import ModelMessage, ModelRequest, ModelToolDefinition
+from packages.model_gateway.egress import ProviderEgressPolicy
+from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
+from tests.unit.test_provider_http_egress import (
+    _completion_body,
+    _http_response,
+    _RecordingFactory,
+    _Resolver,
+)
 
 BASE_URL = "https://synthetic-workspace.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
 API_KEY = "synthetic-test-key-must-not-be-recorded"
@@ -28,34 +37,81 @@ CASE_ID = "52f0cfa1-7794-4af4-88f1-ccad9518f0ae"
 
 
 @pytest.mark.asyncio
-async def test_real_transport_boundary_never_retries_or_follows_redirects(monkeypatch):
-    import httpx
+@pytest.mark.parametrize("status", [200, 307, 503])
+async def test_default_completion_uses_one_guarded_request_per_reservation(
+    tmp_path, monkeypatch, status
+):
+    def unexpected_transport(*args, **kwargs):
+        pytest.fail("T04 must use the adapter's guarded transport")
 
-    from benchmarks.evaluation.experiments.customer_quality_20261105.provider import (
-        _single_http_completion,
+    monkeypatch.setattr(httpx, "AsyncHTTPTransport", unexpected_transport)
+    data = _completion_body(MODEL) if status == 200 else b"{}"
+    headers = (("Location", "https://unapproved.example/model"),) if status == 307 else ()
+    factory = _RecordingFactory(_http_response(data, status=status, extra_headers=headers))
+    resolver = _Resolver(("8.8.8.8",))
+    ledger = ResearchBudgetLedger(tmp_path / "budget.sqlite3")
+    meter = BudgetedAliyunClient(ledger, BASE_URL, tmp_path / "private")
+    adapter = LiteLLMProviderAdapter(
+        client=meter,
+        egress_policy=ProviderEgressPolicy(resolver=resolver),
+        egress_transport_factory=factory,
     )
+    with meter.scope(f"case/{CASE_ID}/solver", _metadata("runtime")):
+        if status == 200:
+            response = await adapter.complete(_profile(), _credential(), _request())
+            assert response.content == "guarded"
+        else:
+            with pytest.raises(ModelGatewayError) as raised:
+                await adapter.complete(_profile(), _credential(), _request())
+            if status == 307:
+                assert raised.value.code is ModelGatewayErrorCode.MODEL_TARGET_FORBIDDEN
 
-    requests = []
+    (bound,) = factory.built
+    assert bound.endpoint.url == BASE_URL
+    assert resolver.calls == [(bound.endpoint.host, 443)]
+    assert bound.backend.connect_calls == [("8.8.8.8", 443)]
+    wire = b"".join(bound.backend.streams[0].writes)
+    request_headers, request_body = wire.split(b"\r\n\r\n", 1)
+    assert request_headers.startswith(b"POST /compatible-mode/v1/chat/completions HTTP/1.1\r\n")
+    assert json.loads(request_body)["model"] == MODEL
+    summary = ledger.summary()
+    assert summary["dispatch_marks"] == 1
+    expected = SETTLED if status == 200 else UNKNOWN_OUTCOME
+    assert [record["status"] for record in meter.records] == [expected]
+    assert summary["halted"] == (status != 200)
 
-    def respond(request):
-        requests.append(request)
-        return httpx.Response(307, headers={"Location": "https://unapproved.example/model"})
 
-    transport = httpx.MockTransport(respond)
-    monkeypatch.setattr(httpx, "AsyncHTTPTransport", lambda **kwargs: transport)
-    with pytest.raises(httpx.HTTPStatusError):
-        await _single_http_completion(
-            model="openai/" + MODEL,
-            api_base=BASE_URL,
-            api_key=API_KEY,
-            timeout=1,
-            messages=[],
-            max_tokens=2048,
-            stream=False,
-        )
-    assert len(requests) == 1
-    assert requests[0].url.host.endswith(".cn-beijing.maas.aliyuncs.com")
-    assert json.loads(requests[0].content)["model"] == MODEL
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("sdk_kwargs", "failure_code"),
+    [
+        ({}, "GATEWAY_CLIENT_REQUIRED"),
+        (
+            {"client": SimpleNamespace(base_url=BASE_URL, max_retries=1)},
+            "INVALID_RETRY_POLICY",
+        ),
+        (
+            {"client": SimpleNamespace(base_url="https://unapproved.example/v1", max_retries=0)},
+            "INVALID_PROVIDER_ENDPOINT",
+        ),
+    ],
+)
+async def test_invalid_gateway_client_refuses_before_reserving(
+    tmp_path, monkeypatch, sdk_kwargs, failure_code
+):
+    def unexpected_transport(*args, **kwargs):
+        pytest.fail("Invalid gateway client must prevent network I/O")
+
+    monkeypatch.setattr(httpx, "AsyncHTTPTransport", unexpected_transport)
+    ledger = ResearchBudgetLedger(tmp_path / "budget.sqlite3")
+    meter = BudgetedAliyunClient(ledger, BASE_URL, tmp_path / "private")
+    with meter.scope(f"case/{CASE_ID}/solver", _metadata("runtime")):
+        with pytest.raises(BudgetedProviderError, match=failure_code):
+            await meter.acompletion(**_payload(), **sdk_kwargs)
+
+    assert ledger.summary()["occupied_cny"] == 0
+    assert ledger.summary()["dispatch_marks"] == 0
+    assert meter.records == []
 
 
 class RecordingClient:

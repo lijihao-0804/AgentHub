@@ -54,4 +54,10 @@ Desktop.ini
 /pytest-cache-files-*/
 
 # Local frontend QA screenshots and reports may contain workspace content.
-/output/playwright/frontend-product-20261111/
+/output/playwright/
+/.playwright-cli/
+/.worktrees/
+
+# One-off metadata collectors retained locally from the November research survey.
+/benchmarks/_gh_meta.py
+/benchmarks/_research_meta.py

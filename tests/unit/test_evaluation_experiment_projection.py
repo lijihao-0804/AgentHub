@@ -65,6 +65,7 @@ def _experiment(*, workspace_id, version_id):
         dataset_schema_version=2,
         split="DEV",
         purpose="DEVELOPMENT",
+        evidence_level="DETERMINISTIC_CONFORMANCE",
         repetitions=1,
         status="DRAFT",
         build_sha="b" * 40,

@@ -31,33 +31,17 @@ from uuid import UUID
 
 from sqlalchemy import select
 
+from apps.agent_run_composition import build_agent_run_service
 from apps.worker.celery_app import celery_app
-from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
 from packages.agent_runtime.models import AgentRun
 from packages.agent_runtime.runtime import AgentRunService
-from packages.approvals import ApprovalService
 from packages.approvals.models import Approval
-from packages.artifacts.recorder import ToolResultArtifactRecorder
 from packages.control_plane.services import TenantService
 from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import PrincipalContext
-from packages.knowledge.composition import (
-    onyx_section_selector_from_settings,
-    production_retrieval_components,
-)
-from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
-from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.memory.queue import CeleryMemoryWriteQueue
-from packages.memory.store import SqlAlchemyMemoryStore
-from packages.model_gateway.credentials import ProviderCredentialCipher
-from packages.observability import ProductionTraceSink
-from packages.threads.context import SqlAlchemyThreadContextProvider
-from packages.tools.actions import ActionRuntime
-from packages.tools.audit import SqlAlchemyToolAuditSink
-from packages.tools.registry import ToolRegistry
-from packages.tools.runtime import ToolRuntime
 
 
 @celery_app.task(
@@ -219,45 +203,8 @@ async def _execute_agent_run(
 
 
 def _build_service(settings: Settings, factory) -> AgentRunService:
-    trace_sink = ProductionTraceSink()
-    components = production_retrieval_components(settings)
-    retriever = SessionScopedKnowledgeRetriever(
-        session_factory=factory,
-        components=components,
-        rrf_k=settings.knowledge_rrf_k,
-        min_rerank_score=settings.knowledge_min_rerank_score,
-        superseded_rank_penalty=settings.knowledge_superseded_rank_penalty,
-        trace_sink=trace_sink,
-    )
-    # The worker runs the same published agent the API would, so it must reach
-    # the same remote tools under the same governance.
-    mcp_executor = McpToolExecutor(factory, settings=settings)
-    return AgentRunService(
-        factory,
-        credential_cipher=ProviderCredentialCipher.from_settings(settings),
-        tool_runtime=ToolRuntime(
-            session_factory=factory,
-            registry=ToolRegistry(
-                retriever=retriever,
-                section_selector=onyx_section_selector_from_settings(settings),
-            ),
-            audit_sink=SqlAlchemyToolAuditSink(factory),
-            trace_sink=trace_sink,
-            mcp_handler=mcp_executor.execute_read,
-        ),
-        trace_sink=trace_sink,
-        approval_service=ApprovalService(factory, ttl_seconds=settings.approval_ttl_seconds),
-        action_runtime=ActionRuntime(
-            session_factory=factory, mcp_executor=McpActionExecutor(mcp_executor)
-        ),
-        checkpoint_adapter=LangGraphCheckpointAdapter(settings.database_url),
-        # Composed exactly as the API composes it. A run must not behave
-        # differently -- lose its thread history, stop recording artifacts --
-        # merely because of which process picked it up.
-        thread_context_provider=SqlAlchemyThreadContextProvider(factory),
-        memory_selector=SqlAlchemyMemoryStore(factory),
-        memory_writer=CeleryMemoryWriteQueue(celery_app),
-        artifact_recorder=ToolResultArtifactRecorder(factory),
+    return build_agent_run_service(
+        settings, factory, memory_writer=CeleryMemoryWriteQueue(celery_app)
     )
 
 

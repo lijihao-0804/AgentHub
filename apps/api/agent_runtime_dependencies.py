@@ -4,26 +4,10 @@ from __future__ import annotations
 
 from fastapi import FastAPI, Request
 
-from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
+from apps.agent_run_composition import build_agent_run_service
 from packages.agent_runtime.runtime import AgentRunService
-from packages.approvals import ApprovalService
-from packages.artifacts.recorder import ToolResultArtifactRecorder
 from packages.core.errors.exceptions import AgentHubError
-from packages.knowledge.composition import (
-    onyx_section_selector_from_settings,
-    production_retrieval_components,
-)
-from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
-from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.memory.queue import CeleryMemoryWriteQueue
-from packages.memory.store import SqlAlchemyMemoryStore
-from packages.model_gateway.credentials import ProviderCredentialCipher
-from packages.observability import ProductionTraceSink
-from packages.threads.context import SqlAlchemyThreadContextProvider
-from packages.tools.actions import ActionRuntime
-from packages.tools.audit import SqlAlchemyToolAuditSink
-from packages.tools.registry import ToolRegistry
-from packages.tools.runtime import ToolRuntime
 
 
 def get_production_agent_run_service(request: Request) -> AgentRunService:
@@ -36,53 +20,10 @@ def get_production_agent_run_service(request: Request) -> AgentRunService:
         from apps.worker.celery_app import create_celery_app
 
         settings = app.state.settings
-        trace_sink = ProductionTraceSink()
-        components = production_retrieval_components(settings)
-        retriever = SessionScopedKnowledgeRetriever(
-            session_factory=factory,
-            components=components,
-            rrf_k=settings.knowledge_rrf_k,
-            min_rerank_score=settings.knowledge_min_rerank_score,
-            superseded_rank_penalty=settings.knowledge_superseded_rank_penalty,
-            trace_sink=trace_sink,
-        )
-        # One executor serves both sides of the approval boundary: the same
-        # connection lookup and the same single call, read one way for a READ
-        # and another for a WRITE.
-        mcp_executor = McpToolExecutor(factory, settings=settings)
-        service = AgentRunService(
+        service = build_agent_run_service(
+            settings,
             factory,
-            credential_cipher=ProviderCredentialCipher.from_settings(settings),
-            tool_runtime=ToolRuntime(
-                session_factory=factory,
-                registry=ToolRegistry(
-                    retriever=retriever,
-                    section_selector=onyx_section_selector_from_settings(settings),
-                ),
-                audit_sink=SqlAlchemyToolAuditSink(factory),
-                trace_sink=trace_sink,
-                mcp_handler=mcp_executor.execute_read,
-            ),
-            trace_sink=trace_sink,
-            approval_service=ApprovalService(factory, ttl_seconds=settings.approval_ttl_seconds),
-            action_runtime=ActionRuntime(
-                session_factory=factory, mcp_executor=McpActionExecutor(mcp_executor)
-            ),
-            checkpoint_adapter=LangGraphCheckpointAdapter(settings.database_url),
-            # The work layer's two adapters. Without them the runtime behaves
-            # exactly as it did before threads existed, which is what keeps a
-            # Playground run unchanged.
-            thread_context_provider=SqlAlchemyThreadContextProvider(factory),
-            # Long-term memory, both halves. Selection reads the store
-            # directly; extraction is queued so that learning never runs on the
-            # path a user is waiting on. Both are no-ops for every agent whose
-            # published spec has not turned the switch on. See ADR-011.
-            memory_selector=SqlAlchemyMemoryStore(factory),
             memory_writer=CeleryMemoryWriteQueue(create_celery_app(settings)),
-            artifact_recorder=ToolResultArtifactRecorder(factory),
-            # Held on app.state, so the registry of live runs outlives the
-            # request that started any one of them -- which is the whole point.
-            stream_grace_seconds=settings.run_stream_grace_seconds,
         )
         app.state.agent_run_service = service
     return service

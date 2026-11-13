@@ -573,6 +573,10 @@ function componentHarness() {
     return loaded.exports;
   }
 
+  mocks["@/components/ui/icon"] = { __esModule: true, default: () => null };
+  mocks["@/components/catalog/catalog-layout"] = loadSurface(
+    "components/catalog/catalog-layout.tsx", "catalog layout",
+  );
   const wikiPage = loadSurface("app/knowledge/wiki/page.tsx", "Wiki workbench page");
   const knowledgePage = loadSurface("app/knowledge/page.tsx", "knowledge page");
 
