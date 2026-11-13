@@ -34,7 +34,9 @@ export default function DatasetVersionDetailClient({
   versionId: string;
 }) {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId, permissions } =
+    useFrontendSession();
+  const canManage = permissions?.includes("evaluation_manage") === true;
   const [version, setVersion] = useState<EvaluationDatasetVersionDetail | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -82,6 +84,7 @@ export default function DatasetVersionDetailClient({
   }, [connected, loaded, load]);
 
   async function publish() {
+    if (!canManage) return;
     setPublishError(null);
     const requestSessionId = sessionId;
     setPublishing(true);
@@ -149,14 +152,14 @@ export default function DatasetVersionDetailClient({
                 <strong><HashValue value={version.content_hash} label={t("evaluation.datasets.version.facts.contentHash")} /></strong>
               </span>
             </div>
-            {!isPublished && !showPublishConfirm && (
+            {canManage && !isPublished && !showPublishConfirm && (
               <div className="form-actions">
                 <button type="button" className="button button-primary" onClick={() => setShowPublishConfirm(true)}>
                   {t("evaluation.datasets.version.publish")}
                 </button>
               </div>
             )}
-            {showPublishConfirm && (
+            {canManage && showPublishConfirm && (
               <InlineConfirm
                 title={t("evaluation.datasets.version.publishConfirmTitle")}
                 text={t("evaluation.datasets.version.publishConfirmText")}

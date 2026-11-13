@@ -308,6 +308,8 @@ export type EvaluationExperimentRun = {
   split: string;
   purpose: string;
   repetitions: number;
+  /** Frozen with the experiment. Null is reserved for older projections. */
+  evidence_level: string | null;
   started_at: string | null;
   completed_at: string | null;
   failure_code: string | null;
@@ -364,6 +366,16 @@ export type EvaluationCaseResult = {
   repetition_index: number;
   case_execution_key: string;
   status: string;
+  /**
+   * Optional safe result-summary fields. Older deployments omit them; callers
+   * should coalesce an absent value to null rather than infer a result.
+   */
+  case_key?: string | null;
+  category?: string | null;
+  variant_label?: string | null;
+  task_success?: EvaluationTaskSuccessProjection | null;
+  /** A case-level projection; older backends may not have recorded it. */
+  evidence_level: string | null;
   agent_run_id: string | null;
   latency_ms: number | null;
   input_tokens: number | null;
@@ -376,7 +388,8 @@ export type EvaluationCaseResult = {
   observed_agent_status: string | null;
   observed_agent_failure_code: string | null;
   safe_failure_message: string | null;
-  observation: Record<string, unknown>;
+  /** @deprecated Always empty. Read the safe summary or evidence endpoint. */
+  observation: Record<string, never>;
   started_at: string | null;
   completed_at: string | null;
   created_at: string;
@@ -398,6 +411,156 @@ export function listExperimentRunCaseResults(
   if (options?.offset) query.set("offset", String(options.offset));
   const suffix = query.toString() ? `?${query.toString()}` : "";
   return get(input, `/experiment-runs/${encodeURIComponent(runId)}/case-results${suffix}`);
+}
+
+export type EvaluationTaskSuccessProjection = {
+  status: string;
+  value: number | null;
+  reason: string | null;
+};
+
+export type EvaluationCaseEvidenceEpisode = {
+  episode_id: string;
+  execution_status: string;
+  cleanup_status: string;
+  cleanup_error: string | null;
+  termination_reason: string | null;
+  thread_id: string | null;
+  observation_hash: string | null;
+  assertion_hash: string | null;
+  turns: Array<{
+    turn_index: number;
+    agent_run_id: string | null;
+    status: string | null;
+  }>;
+};
+
+export type EvaluationCaseEvidenceStep = {
+  step_order: number;
+  step_type: string;
+  agent_run_id: string | null;
+  logical_action_id: string | null;
+  arguments_hash: string | null;
+  status: string | null;
+  error_code: string | null;
+  tool_name: string | null;
+  policy_decision: string | null;
+};
+
+export type EvaluationCaseFailureLabel = {
+  code: string;
+  step_orders: number[];
+};
+
+/**
+ * Safe, read-only case evidence projection. This excludes raw observations,
+ * prompts, arguments, private facts, and result bodies; absent values remain
+ * null or empty arrays so the UI never infers a clean trajectory from omission.
+ */
+export type EvaluationCaseEvidence = {
+  schema_version: 1;
+  case_id: string;
+  case_key: string | null;
+  category: string | null;
+  variant_label: string | null;
+  task_success: EvaluationTaskSuccessProjection;
+  evidence_level: string | null;
+  execution_cleanup_status: string | null;
+  termination_reason: string | null;
+  episode: EvaluationCaseEvidenceEpisode | null;
+  steps: EvaluationCaseEvidenceStep[];
+  failure_labels: EvaluationCaseFailureLabel[];
+};
+
+export function getExperimentRunCaseEvidence(
+  input: AuthInput,
+  runId: string,
+  caseId: string,
+): Promise<EvaluationCaseEvidence> {
+  return get(
+    input,
+    `/experiment-runs/${encodeURIComponent(runId)}/case-results/${encodeURIComponent(caseId)}/evidence`,
+  );
+}
+
+// ---------- Reliability statistics & failure taxonomy ----------
+
+export type EvaluationStatisticsInterval = {
+  method: string;
+  lower: number;
+  upper: number;
+  bootstrap_count?: number;
+  basis?: string;
+};
+
+export type EvaluationStatisticsVariant = {
+  k: number;
+  case_count: number;
+  complete_case_count: number;
+  incomplete_case_count: number;
+  trial_count: number;
+  known_trial_count: number;
+  unknown_trial_count: number;
+  success_count: number;
+  success_rate: number | null;
+  success_coverage_rate: number | null;
+  complete_case_rate: number | null;
+  pass_hat_k: number | null;
+  pass_hat_k_all_cases: number | null;
+  trial_variance: number | null;
+  consistency_at_k: number | null;
+  literal_consistency_at_k: number | null;
+  success_rate_interval: EvaluationStatisticsInterval | null;
+  reliability_note: string;
+  mde: {
+    pairs: number;
+    assumed_discordance: number | null;
+    delta: number | null;
+  } | null;
+  variant_id: string;
+  variant_label: string;
+  /** Added only when at least one complete case or known trial exists. */
+  pass_hat_k_interval?: EvaluationStatisticsInterval | null;
+  success_rate_interval_bootstrap?: EvaluationStatisticsInterval | null;
+};
+
+export type EvaluationExperimentRunStatistics = {
+  run_id: string;
+  experiment_id: string;
+  repetitions: number;
+  split: string;
+  purpose: string;
+  evidence_level: string | null;
+  variants: Record<string, EvaluationStatisticsVariant>;
+};
+
+export type EvaluationFailureTaxonomyVariant = {
+  variant_label: string;
+  case_count: number;
+  labeled_case_count: number;
+  counts: Record<string, number>;
+};
+
+export type EvaluationFailureTaxonomy = {
+  run_id: string;
+  experiment_id: string;
+  evidence_level: string | null;
+  taxonomy_version: string;
+  variants: Record<string, EvaluationFailureTaxonomyVariant>;
+};
+
+export function getExperimentRunStatistics(
+  input: AuthInput,
+  runId: string,
+): Promise<EvaluationExperimentRunStatistics> {
+  return get(input, `/experiment-runs/${encodeURIComponent(runId)}/statistics`);
+}
+
+export function getExperimentRunFailureTaxonomy(
+  input: AuthInput,
+  runId: string,
+): Promise<EvaluationFailureTaxonomy> {
+  return get(input, `/experiment-runs/${encodeURIComponent(runId)}/failure-taxonomy`);
 }
 
 // ---------- Metric snapshots ----------

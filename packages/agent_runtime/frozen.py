@@ -17,8 +17,11 @@ from packages.agent_runtime.runtime_config import (
     MAX_RUNTIME_LIMITS,
 )
 from packages.core.errors.exceptions import AgentHubError
+from packages.memory.selection_policy import SUPPORTED_MEMORY_SELECTION_POLICIES
 from packages.model_gateway.capabilities import capabilities_from_mapping
 from packages.model_gateway.contracts import (
+    PROVIDER_EGRESS_POLICY_VERSION,
+    ProviderEgress,
     ResolvedModelExecutionPlan,
     ResolvedModelExecutionProfile,
     RetryPolicy,
@@ -212,12 +215,12 @@ def parse_frozen_agent_spec(
     memory_value = runtime_value.get("memory", _DEFAULT_MEMORY)
     if not isinstance(memory_value, Mapping):
         raise _invalid_binding()
-    allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens"}
+    allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens", "selection_policy"}
     if schema_version in {3, 4, 5}:
         allowed_memory_keys.add("max_memory_tokens_source")
     if not set(memory_value).issubset(allowed_memory_keys):
         raise _invalid_binding()
-    memory: dict[str, bool] = {}
+    memory: dict[str, Any] = {}
     for key, default in _DEFAULT_MEMORY.items():
         value = memory_value.get(key, default)
         if not isinstance(value, bool):
@@ -245,6 +248,15 @@ def parse_frozen_agent_spec(
         memory["max_memory_tokens_source"] = memory_source
     elif memory_source is not None:
         raise _invalid_binding()
+    if "selection_policy" in memory_value:
+        selection_policy = memory_value["selection_policy"]
+        if (
+            not memory["long_term_memory"]
+            or not isinstance(selection_policy, str)
+            or selection_policy not in SUPPORTED_MEMORY_SELECTION_POLICIES
+        ):
+            raise _invalid_binding()
+        memory["selection_policy"] = selection_policy
     runtime["memory"] = memory
     policy_value = runtime_value.get("context_policy")
     if schema_version in {3, 4, 5}:
@@ -475,6 +487,22 @@ def _parse_profile(
         max_tokens = value["max_tokens"]
         provider = value["provider"]
         model = value["model"]
+        provider_egress = None
+        # Presence of this mapping selects a versioned egress policy even when
+        # its base_url is null. Policy v1 resolves null from fixed builtins for
+        # the frozen provider; absence remains the pre-policy legacy state.
+        if "provider_egress" in value:
+            raw_provider_egress = value["provider_egress"]
+            if (
+                not isinstance(raw_provider_egress, Mapping)
+                or set(raw_provider_egress) != {"policy_version", "base_url"}
+                or raw_provider_egress.get("policy_version") != PROVIDER_EGRESS_POLICY_VERSION
+            ):
+                raise ValueError
+            provider_egress = ProviderEgress(
+                policy_version=raw_provider_egress["policy_version"],
+                base_url=raw_provider_egress["base_url"],
+            )
         if (
             not isinstance(provider, str)
             or not provider
@@ -499,6 +527,7 @@ def _parse_profile(
         max_tokens=max_tokens,
         timeout_seconds=timeout_seconds,
         capabilities=capabilities,
+        provider_egress=provider_egress,
     )
 
 

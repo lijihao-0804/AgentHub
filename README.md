@@ -1,168 +1,241 @@
 # AgentHub
 
-**Enterprise Agent Runtime & Control Plane** — 一个围绕工具执行、人工审批与可复现评测构建的 Agent 工程项目。
+**面向企业场景的 Agent Runtime 与控制平面。**
 
-AgentHub 让一次请求经历上下文准备、模型推理、工具治理、持久审批和执行观测。模型提出操作，运行时决定是否执行；审批等待与恢复共享同一 Run，历史配置、知识和记忆输入可追溯。
+AgentHub 将模型、知识、工具、权限与人工审批接入同一套执行流程，让 Agent 的每次运行
+都有可追溯的版本、明确的执行状态和可核查的证据。项目采用模块化单体加异步 Worker 的架构，
+覆盖从配置与发布，到执行、暂停恢复、故障定位和评测比较的完整开发流程。
 
-架构是 **Modular Monolith + Worker**：Next.js、FastAPI、LangGraph 适配器、PostgreSQL、Redis 和 Qdrant。Enterprise 描述治理场景；真实企业生产规模和完整公网部署尚未证明。功能开发已收口。
+[架构设计](docs/architecture.md) · [快速体验](#快速体验) · [文档导航](docs/README.md) ·
+[能力与验证状态](docs/current-state.md) · [CI](https://github.com/lijihao-0804/AgentHub/actions/workflows/ci.yml)
 
-[核心 Demo](docs/report/07-现场演示脚本.md) · [架构与运行生命周期](docs/architecture.md) · [求职与面试](docs/portfolio/README.md) · [代码学习](docs/learning/README.md) · [证据与边界](docs/current-state.md)
+## 项目解决什么问题
 
-## Why AgentHub
+当 Agent 开始读取内部资料、调用业务系统和修改外部状态时，仅有模型对话接口还不够。
+AgentHub 关注这些执行环节：
 
-| 执行中遇到的问题 | 本项目的处理 |
+- **调用能否执行**：模型提出工具调用，平台根据发布版本、工具策略和用户权限决定是否放行。
+- **操作是否需要人确认**：需要审批的动作先持久化并暂停，决定与执行结果分别记录。
+- **中断后如何继续**：通过 PostgreSQL checkpoint 恢复原 Run，而不是重新发起一轮业务操作。
+- **历史结果如何解释**：保留版本、知识来源、上下文快照、运行步骤与评测输入的对应关系。
+- **修改是否有效**：用版本化数据集、实验、指标和逐题证据比较配置，区分工程通过与模型质量。
+
+前端提供研究、故障排查、数据分析和客户支持等任务入口，复用相同的 Agent、Thread、Run
+和治理机制。不同场景由模板、模型、知识与工具绑定组合，不为每个应用另建一套运行时。
+
+## 核心能力
+
+| 模块 | 主要能力 |
 | --- | --- |
-| 模型提出危险工具操作，谁决定能否执行？ | 发布 ToolRevision + ToolPolicy；READ/WRITE 与风险分开，READ + NEVER 才自动执行，其余进入审批 |
-| 长时间等待审批，服务重启后怎么继续？ | PostgreSQL checkpoint、独立审批决策/执行状态、same-run resume，计数预算不重置 |
-| 配置与知识变化后如何解释历史结果？ | 不可变 AgentVersion 和规范哈希；Run 保存有效知识/Memory 快照，正式实验冻结输入身份 |
-| 如何知道一次修改是否有效？ | Run steps / 生命周期事件 / 脱敏 trace；发布数据集、成对比较、消融、独立指标与失败记录 |
+| 多租户与权限 | Organization / Workspace 分层，成员与角色权限独立管理，API、知识与运行记录按租户授权 |
+| 模型网关 | Provider Credential 与 Model Profile 管理、凭据加密、能力校验、超时/重试/回退及调用用量记录 |
+| Agent 与版本 | Draft 配置与不可变 AgentVersion；发布冻结 Prompt、模型行为、工具修订及运行策略，使用版本化规范 JSON 标识规格 |
+| 工具治理 | Built-in、REST、MCP 工具接入；区分 effect 与 risk，结合审批策略控制调用；出站目标执行 SSRF 校验 |
+| 审批与持久恢复 | 审批决定和动作执行分别保存；checkpoint 暂停/恢复；稳定逻辑动作身份；未知副作用转人工关注 |
+| Knowledge / RAG | 文档异步入库、历史修订与知识快照、稠密/稀疏混合检索、重排和引用证据 |
+| Wiki 与上下文 | 带原文来源的派生 Wiki、编译/审阅/发布与版本绑定；ContextBudgetPolicy 对进入模型的上下文做最终准入 |
+| Memory | 默认关闭的长期 Memory、来源记录、异步抽取与恢复、有效快照回放；语义质量与治理限制单独披露 |
+| 运行观测与接管 | Run 步骤、持久生命周期事件、脱敏 Trace、用量与失败分类，以及反馈和人工接管入口 |
+| Evaluation | 版本化数据集、实验变体、重复试验、配对比较、消融分析与发布门禁；Web 展示摘要、筛选分页和安全逐题证据 |
 
-## Architecture Overview
+正式实验绑定已发布 DatasetVersion、解析后的 AgentVersion、有效知识快照、定价快照、
+构建提交与评测器版本。历史结果读取不重新解析当前的 LATEST 配置。
+
+## 一次受治理的运行
+
+```mermaid
+flowchart LR
+    Task[用户任务 / Thread Turn] --> Run[创建 Run 与解析有效快照]
+    Run --> Context[上下文预算准入]
+    Context --> Model[模型生成答复或工具提议]
+    Model --> Policy{工具策略与权限}
+    Policy -->|允许自动执行| Read[执行获准的只读调用]
+    Policy -->|需要审批| Wait[持久化 checkpoint / 等待决定]
+    Wait --> Decision{人工批准或拒绝}
+    Decision -->|批准| Action[恢复原 Run / 执行动作]
+    Decision -->|拒绝| Observation[记录拒绝观察]
+    Read --> Observation
+    Action --> Outcome{结果能否确认}
+    Outcome -->|确认| Observation
+    Outcome -->|无法确认| Attention[UNKNOWN_OUTCOME / NEEDS_ATTENTION]
+    Observation --> Context
+    Model -->|最终答复| Finish[结束运行 / 保存证据]
+    Attention --> Evidence[人工核查与后续处理]
+```
+
+这里有几个关键约束：
+
+- `READ` 与风险等级是不同维度，不能把所有只读工具都视为可自动执行。
+- 审批通过不等于动作成功；拒绝被正确处理后，Run 可以成功结束，但动作没有执行。
+- 外部写入已派发、结果无法确认时保留 `UNKNOWN_OUTCOME`，不静默重试。
+- 审批恢复继续原 Run，不重置已有计数预算；模型回退只允许发生在首个可见 token 之前。
+- 运行事件回放与模型重新执行是不同操作；流式 token delta 不承诺逐条永久保存。
+
+## 系统架构
 
 ```mermaid
 flowchart TB
-    Web["Next.js - Applications / Thread / Run UI"] --> API["FastAPI - /api/v1"]
-    subgraph Control["Control plane - API application services"]
-        API --> Config["AgentPublishService - immutable AgentVersion"]
-        API --> Thread["ThreadService - turns / run identity"]
-        API --> Eval["Evaluation - frozen variants / datasets / metrics"]
-    end
-    Config --> Runtime["AgentRunService - LangGraph adapter"]
-    Thread --> Runtime
-    Eval --> Runtime
-    Runtime --> Context["ContextBudgetPolicy - frozen knowledge / memory"]
-    Context --> Model["Model Gateway - provider adapters"]
-    Runtime --> Tool["ToolRuntime / ToolPolicy / ActionRuntime"]
-    Tool --> Approval["ApprovalService - decision / execution"]
-    Tool --> MCP["Builtin / REST / MCP adapters"]
-    Runtime --> PG[("PostgreSQL - runs / events / snapshots / checkpoints")]
+    Web[Next.js / React Web] --> API[FastAPI /api/v1]
+    API --> Control[控制面：租户、模型、知识、工具、版本、实验]
+    API --> Runtime[Agent Runtime / Thread / Run]
+    Control --> Runtime
+    Runtime --> Context[ContextBudgetPolicy / 有效快照]
+    Context --> Gateway[Model Gateway / Provider Adapters]
+    Runtime --> Tool[ToolRuntime / ToolPolicy]
+    Tool --> Approval[ApprovalService / ActionRuntime]
+    Tool --> Adapters[Built-in / REST / MCP Adapters]
+    Approval --> Adapters
+    Runtime --> PG[(PostgreSQL / checkpoint / 业务状态)]
+    Control --> PG
     Approval --> PG
-    Eval --> PG
-    API --> Redis[("Redis - Celery broker")]
-    Redis --> Worker["Celery worker - ingestion / evaluation / extraction"]
-    Beat["Celery beat - ingestion reconciliation"] --> Redis
+    API --> Redis[(Redis / Celery Broker)]
+    Beat[Celery Beat / 周期对账] --> Redis
+    Redis --> Worker[Worker：入库、运行、评测、Memory、Wiki]
     Worker --> PG
-    Worker --> Qdrant[("Qdrant - retrieval index")]
-    Context --> Qdrant
+    Worker --> Qdrant[(Qdrant / 检索索引)]
+    Context --> Knowledge[Knowledge 检索与来源校验]
+    Knowledge --> Qdrant
+    Knowledge --> PG
 ```
 
-模块箭头是职责/数据流，不表示独立微服务。Knowledge 经适配器检索 Qdrant 并校验 PostgreSQL 快照；Memory 从 PostgreSQL 加载。Redis 不承载审批权威状态。[第二张图：治理执行与恢复](docs/architecture.md#governed-agent-run-lifecycle)。
+模块箭头表示应用调用或数据流，不表示独立微服务。PostgreSQL 保存业务状态、历史身份与
+checkpoint；Redis 承担队列传递；Qdrant 是检索索引，不能替代知识修订和快照的业务记录。
+Memory 从 PostgreSQL 加载。
 
-## Key Engineering Decisions
+依赖方向为 `Transport/API → Application → Domain/Contracts → Adapters`。
+LangGraph、模型 SDK 和 MCP 等框架被限制在适配器边界内，业务权限、动作身份、审批状态和
+终态语义由 AgentHub 自己定义。详细设计见 [Architecture](docs/architecture.md) 与
+[架构决策记录](docs/adr/ADR-001-modular-monolith.md)。
 
-| 设计 | 为什么这样做 | 代码入口 |
-| --- | --- | --- |
-| Immutable AgentVersion | 发布后规格不可变；LATEST 是绑定策略，有效知识另冻结到 Run/实验 | [publish](packages/agent_runtime/publish.py) |
-| Governed Tool Runtime | 模型只能提议工具；发布修订、参数校验和策略决定执行 | [policy](packages/tools/policy.py)、[runtime](packages/tools/runtime.py) |
-| Durable Approval & Resume | 决策与动作执行分开持久化；批准不等于动作成功 | [approvals](packages/approvals/service.py)、[resume](packages/agent_runtime/runtime.py) |
-| Side-effect Safety | 逻辑身份约束重复执行；已派发但无法确认的写入标记 UNKNOWN_OUTCOME → NEEDS_ATTENTION | [actions](packages/tools/actions.py)、[MCP](packages/mcp/runtime.py) |
-| Context Budget & Snapshot | 所有模型上下文经预算准入，历史知识/记忆校验冻结身份 | [context_budget](packages/agent_runtime/context_budget.py) |
-| Knowledge / RAG | 修订与快照保留、异步入库恢复、Dense/Hybrid、固定引用与有界分片预览 | [knowledge](packages/knowledge) |
-| Run Observability | Run 详情/步骤、持久生命周期事件与脱敏 trace，各自职责分开 | [event_store](packages/agent_runtime/event_store.py) |
-| Evaluation & Evidence | 发布数据集/holdout 暴露、实验冻结、成对/消融与门禁，保留失败而非只展示成功 | [evaluation](packages/evaluation) |
+### 技术栈
 
-共享 Memory 默认关闭，提供异步抽取、去重、停用/启用、快照与 UNTRUSTED 准入。精确引文不能证明应写入共享记忆；相关性与冲突质量仍有不足，见下方证据。
-
-## Applications
-
-Research（文献证据）、Incident（调查与受控回滚）、Data Analyst（只读分析）、Customer Support（政策与受控工单）共用 Thread / Turn / Artifact / Runtime。每个应用提供 prompt、工具与产物投影；审批与运行预算由共同运行时处理。
-
-## Hero Demo：调查 → 提议回滚 → 审批 → 同一 Run 恢复
-
-[5–8 分钟演示脚本](docs/report/07-现场演示脚本.md)使用仓库 Ops MCP 固定数据与回滚模拟，不连接生产部署系统。包含隔离环境、MCP 导入/工具策略、数据库与事件检查、失败排查和代码入口。
-
-本轮状态：**DOCUMENTED_ONLY**（已核对源码与历史证据，未重新启动服务/调用模型）。模型工具顺序与次数不保证；审批与执行结果以实际 Run 为准。[既有真实截图](docs/report/18-截图演示.md)保留原时点，不当作本轮运行结果。
-
-## Engineering Evidence
-
-| 证据 | 已验证内容与限制 |
+| 层次 | 技术 |
 | --- | --- |
-| [基线 CI](https://github.com/lijihao-0804/AgentHub/actions/runs/37327384930) | `a12e8abf7e1f55d07fe6429d5a618737f782efe0` success；不是后续文档提交的 CI 声明 |
-| [持久审批验收](docs/reviews/post-M5-independent-review-closure.md) | PostgreSQL/checkpoint、并发与 crash 窗口的历史集成证据；不能泛化为跨机 exactly-once |
-| [正式客服评测](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 60 条合成任务、两个变体各三次；HOLDOUT 业务 47/60→60/60，结合助手语义 41/60→57/60；非线上成功率/真人一致性 |
-| [RAG / 安全 / 故障 / 负载](docs/reviews/AgentHub-面试增强M-I3-M-I4验收报告-20261003.md) | 24 DEV 问题、144 次检索生成；最终目标召回两策略均 72/72。含隔离/注入/worker crash/重连/1、4、8 并发受控负载，非资源饱和容量 |
-| [Memory 质量收口](docs/reviews/AgentHub-closure-memory-quality-20261005.md) | 11 确定性场景，强制候选 Write precision 6/9，禁止召回 5/8；脚本任务 10/10 不是 LLM 成功率，复杂真实 USE 未测 |
-| [前端排版](docs/reviews/AgentHub-前端文字排版修正报告-20261003.md)、[快照预览/复制](docs/reviews/AgentHub-前端补缺批次一验收报告-20261003.md) | 专项浏览器与脚本证据，非所有交互持续 E2E |
+| Web | Next.js、React、TypeScript |
+| API 与应用服务 | Python 3.12、FastAPI、Pydantic、SQLAlchemy |
+| 图执行与恢复 | LangGraph、PostgreSQL checkpoint adapter |
+| 数据与迁移 | PostgreSQL、Alembic |
+| 异步执行 | Celery、Redis、周期对账任务 |
+| 检索 | Qdrant、BGE 模型适配器、混合检索与重排 |
+| 工具协议与部署 | REST、MCP、Docker Compose |
 
-已实现不等于本轮复测、正式里程碑验收或生产可用。历史记录固定各自 SHA，不汇总成“当前测试覆盖率”。
+依赖的具体版本以 [pyproject.toml](pyproject.toml)、[uv.lock](uv.lock) 和
+[前端锁文件](apps/web/package-lock.json) 为准。
 
-## Known Limits
+## 快速体验
 
-未完成项已归档延期：逐轮参数、新派生草稿/关系、完整 Dashboard、成员邀请/角色 UI、Memory TTL/衰减/容量清理、自动副作用对账、M8 公网部署。M7-G UI 存在，不补造独立验收记录。Memory 冲突事实可共存，临时/私人/恶意语义拒写仍依赖 prompt。
+### 受控本地演示
 
-[当前状态与证据口径](docs/current-state.md)区分已验证、未知和延期；真实企业收益、长期大规模 Memory、跨机故障与全面 E2E 未证明。**FEATURE DEVELOPMENT: STOP**。
+适合先体验工具提议、审批、同 Run 恢复、拒绝与评测结果界面。
+使用真实 API、PostgreSQL、Redis、Worker、checkpoint 和 MCP 通信；模型采用确定性适配器，
+回滚工具作用于模拟数据，不需要付费模型或生产系统。
 
-## Quick Start & Documentation
-
-- 最小展示：阅读 [Demo](docs/report/07-现场演示脚本.md)与历史截图、运行源码走读，无需模型密钥。
-- 系统学习：从 [00 · 架构](docs/learning/00-architecture-first.md)顺读 12 课，结合源码拆解、状态推演、手算例题与参考答案；最后按隔离实验指南留下自己的观察记录。Agent 岗位重点读 [Agent 工程强化](docs/learning/11-agent-engineering.md)，串起工具协议、执行控制、恢复与评测。
-- 本机业务运行：以下完整依赖启动；模型凭据、发布 Agent、工具导入仍须配置。
-- Hero Demo：独立 lab 数据库/Redis namespace/blob、显式 checkpoint bootstrap、Ops MCP 与有效工具调用模型；不自动建立所有配置。
-- CI：工作流使用自己的集成依赖，见 [workflow](.github/workflows/ci.yml)，与付费业务实验分开。
-- 真实模型验证：已有冻结证据，复现可能产生费用，本轮不重复。
-
-[文档导航](docs/README.md) · [架构](docs/architecture.md) · [求职材料](docs/portfolio/README.md) · [学习顺序](docs/learning/README.md) · [验收索引](docs/reviews/README.md)
-
-## 本地启动
-
-需要 Python 3.12、uv、Node.js 20+、Git；以下使用 Docker 提供 PostgreSQL、Redis、Qdrant、API 和 worker，Web 在本机运行。
+以下命令在仓库根目录的 Windows PowerShell 执行。需要 Python 3.12、uv、Node.js 20+
+和已启动的 Docker Desktop。已有 `.venv` 或依赖缓存可复用。
 
 ```powershell
-Copy-Item .env.example .env
 uv sync --locked
+npm --prefix apps/web ci
+
+uv run --locked python -m scripts.portfolio_demo init
+docker compose -p agenthub-portfolio --env-file .scratch/portfolio-closeout/compose.env -f infra/portfolio.compose.yml up -d --wait
+uv run --locked python -m scripts.portfolio_demo prepare
+uv run --locked python -m scripts.portfolio_demo build-web
+./infra/portfolio-local.ps1 Start
+
+uv run --locked python -m scripts.portfolio_demo seed
+uv run --locked python -m scripts.portfolio_demo evaluation
 ```
 
-编辑 `.env`：设置自己的 `AGENTHUB_AUTH_JWT_SECRET`，并添加 `AGENTHUB_CREDENTIAL_MASTER_KEY`。
-Docker 环境需要有效密钥；API 与 worker 必须使用相同凭据主密钥。可分别用以下命令生成并保存到本机 `.env`：
+打开 Web：<http://127.0.0.1:3040>；API 文档：<http://127.0.0.1:8040/docs>。
+演示账号与随机密码保存在本地 `.scratch/portfolio-closeout/private-config.json` 的 `accounts` 中。
+`init` 不覆盖已有状态；Windows 使用受保护 DACL，Start 有界等待服务就绪，失败返回非零并给出日志位置。
+已有演示环境应沿用原 Compose project 名称，避免与正在使用的端口和数据卷冲突。
+
+停止进程和基础设施，并保留数据：
 
 ```powershell
-uv run --locked python -c "import secrets; print(secrets.token_urlsafe(48))"
-uv run --locked python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+./infra/portfolio-local.ps1 Stop
+docker compose -p agenthub-portfolio --env-file .scratch/portfolio-closeout/compose.env -f infra/portfolio.compose.yml stop
 ```
 
-```powershell
-docker compose up -d postgres redis qdrant
-uv run --locked alembic upgrade head
-uv run --locked python -m scripts.bootstrap_langgraph_checkpoint
-docker compose up -d --build api worker beat
+审批/拒绝复演、重启验证与证据读取步骤见
+[本地演示使用与验收记录](docs/portfolio/final-closeout-evidence-20261106.md)。
+其中的逐题评测样例用于工程一致性展示，不代表真实模型准确率。
 
-cd apps/web
-npm ci --no-audit --no-fund
-npm run dev
+### 接入真实模型与知识
+
+常规开发使用 [docker-compose.yml](docker-compose.yml) 和 [.env.example](.env.example)，
+与上述隔离演示使用不同的数据库、端口和配置。典型配置顺序：
+
+1. 配置独立的 JWT secret、Fernet credential master key，以及 PostgreSQL、Redis、Qdrant 地址。
+   API 与 Worker 使用相同的凭据主密钥。
+2. 显式执行 `alembic upgrade head` 和 `python -m scripts.bootstrap_checkpoint`，再启动 API、Worker、Beat。
+   API 进程不自动创建业务或 checkpoint schema。
+3. 启动 `apps/web`，登录并创建 Organization / Workspace。
+4. 在控制面配置 Provider Credential 与 Model Profile，按需上传知识、等待入库并注册工具。
+5. 创建 Agent Draft，选择模型、知识和工具，发布 AgentVersion 后运行；再把需要比较的场景纳入数据集与实验。
+
+开发 Web 默认连接 `http://127.0.0.1:8000`；代理地址通过 `AGENTHUB_API_PROXY_TARGET` 配置，
+生产构建需要在 build 前设置。检索模型按需加载或预热，首次使用需要模型下载与本地资源。
+模型目标授权和私网例外见 [Provider 出站合同](docs/security/provider-egress.md)，
+既有数据的凭据升级见 [凭据迁移指南](docs/deployment/provider-credential-migration.md)。
+
+## 仓库结构
+
+```text
+apps/
+  api/                HTTP API 与应用装配
+  web/                Web 控制面、应用入口、运行与评测界面
+  worker/             异步任务与周期对账
+  *_mcp/              场景工具服务器与模拟业务适配器
+packages/
+  agent_runtime/      版本发布、上下文、图执行与持久恢复
+  model_gateway/      模型档案、Provider 适配与调用治理
+  tools/ approvals/   工具策略、动作身份、审批与执行状态
+  knowledge/ wiki/    知识入库、检索、快照与派生知识
+  memory/             Memory 存储、来源与读取策略
+  evaluation/         数据集、实验、评测、统计与安全证据
+  control_plane/      租户、成员与权限
+  core/               配置、数据库、错误与共享合同
+  observability/      运行观测与脱敏追踪
+  threads/ feedback/ handoffs/ artifacts/
+migrations/           AgentHub 业务表迁移
+benchmarks/           评测数据、实验与研究入口
+tests/                单元、集成与故障注入测试
+infra/ scripts/       部署、初始化与本地运行工具
+docs/ plan/           合同、架构、学习材料与产品设计
 ```
 
-打开 `http://localhost:3000`，通过登录/注册界面进入工作区，配置供应商凭据和模型档案后发布 Agent。
-访问令牌仅存于前端内存；页面已有 Auth UI，不需要手动粘贴 Bearer token。
-API 为 `http://localhost:8000`，OpenAPI 在 `/docs`；健康入口为 `/api/v1/health`、`/api/v1/ready`、`/api/v1/dependencies`。
+## 验证与能力边界
 
-Web 的 `/api/...` 同源代理默认转发至 `http://127.0.0.1:8000`；其他端口使用服务端变量
-`AGENTHUB_API_PROXY_TARGET`。原生 Windows API 使用持久 checkpoint 时需要兼容 psycopg 的 Selector 事件循环；
-上面的 Linux 容器 API 避开该平台差异。数据库迁移与 checkpoint bootstrap 是显式部署步骤，不由 API 自动执行。
-
-首次 RAG 会加载 BGE-M3/重排权重；Compose 已启用进程预热和持久缓存，下载/加载时间与环境有关。
-`uv sync --locked` 使用仓库的 PyTorch 平台配置（Windows CUDA / Linux CPU）；不要复用其他 Python 环境的 wheel。
-容器真机链路已有记录，完整公网部署验收仍未完成。
-
-## 开发检查
-
-按实际改动选择检查，不要求重跑历史付费实验：
+仓库包含单元、真实 PostgreSQL/Redis 集成、审批与 checkpoint 故障注入，以及前端权限和
+证据投影检查。CI 执行后端检查与前端生产构建；具体结果以对应提交的
+[GitHub Actions](https://github.com/lijihao-0804/AgentHub/actions) 为准。
+本地按变更选择相关检查，集成测试需要独立测试数据库及所用外部依赖：
 
 ```powershell
 uv run --locked ruff check .
-uv run --locked pytest -m "not integration"
-node scripts/test_web_review.cjs
-node scripts/test_stream_timing.cjs
-cd apps/web
-npm run build
+uv run --locked pytest tests/unit/test_agent_publish.py
+node scripts/test_web_regressions.cjs
 ```
 
-PostgreSQL 集成测试使用独立、已迁移的 `AGENTHUB_TEST_DATABASE_URL`；持久审批测试还需该测试库的显式 checkpoint bootstrap。
-Memory 小探针入口为 `python -m benchmarks.evaluation.memory_quality.runner`，只用于隔离测试库，默认模型费用为零；
-证据与复现说明见 [评测索引](docs/benchmark/README.md)。仅修改文档时检查链接、路径和 diff，无须重跑模型或浏览器矩阵。
+当前交付可以本地启动和展示，生产规模、容量、SLA 与真实企业收益尚未验证。
+任意外部系统的 exactly-once 不在承诺范围内；Org OWNER/ADMIN 仍有自审批豁免。
+完整硬金额预算尚未接通，自动摘要仍受质量门禁限制，Memory/Wiki 的语义质量与人工 judge 校准
+不能由工程测试通过率推出。工程夹具、真实模型实验和生产效果分别解释，不合并统计口径。
 
-## 工程约束
+当前能力与限制见 [状态页](docs/current-state.md)；具体运行环境、历史实验分母和失败记录见
+[验收索引](docs/reviews/README.md) 与 [评测证据矩阵](docs/milestones/AE-capability-matrix.md)。
 
-依赖方向：`Transport/API → Application → Domain/Contracts → Adapters`。
-框架隐藏在适配器之后；版本/知识/数据的不可变身份有规范哈希；租户与内容权限分开校验；
-工具和记忆作为不可信证据；未确认的外部写入不静默重试；历史修订与运行证据保留。
-完整规则见 [AGENTS.md](AGENTS.md) 与 [产品/语义总计划](plan/plan.md)。
+## 继续阅读
+
+| 目的 | 入口 |
+| --- | --- |
+| 理解产品语义与设计范围 | [产品计划](plan/plan.md)、[架构](docs/architecture.md)、[数据流](docs/report/02-架构与数据流.md) |
+| 查看接口与数据归属 | [API 合同](docs/api-contracts.md)、[数据模型](docs/data-model.md)、运行中的 `/docs` |
+| 学习实现与技术取舍 | [学习路线](docs/learning/README.md)、[架构决策](docs/adr/ADR-001-modular-monolith.md) |
+| 核查评测与交互证据 | [评测能力矩阵](docs/milestones/AE-capability-matrix.md)、[评测 UI](docs/milestones/AE-10-minimal-evaluation-ui.md) |
+| 演示与讲述项目 | [演示记录](docs/portfolio/final-closeout-evidence-20261106.md)、[项目报告](docs/report/README.md)、[求职材料](docs/portfolio/README.md) |
+
+有日期或提交号的设计、验收和研究文档保留各自的历史语义；最新实现与边界从状态页和源码核对。

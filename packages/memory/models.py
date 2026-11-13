@@ -55,6 +55,11 @@ class MemoryExtractionJob(Base):
             "status IN ('PENDING', 'RUNNING', 'COMPLETED', 'SKIPPED', 'FAILED')",
             name="ck_memory_extraction_jobs_status",
         ),
+        Index(
+            "ix_memory_extraction_jobs_recovery",
+            "updated_at",
+            postgresql_where=text("status IN ('PENDING', 'RUNNING')"),
+        ),
     )
 
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)

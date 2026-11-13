@@ -22,6 +22,7 @@ from apps.api.schemas.threads import (
 from packages.agent_runtime.events import AgentEvent
 from packages.agent_runtime.queue import AgentRunQueue
 from packages.agent_runtime.sse import sse_frames
+from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.threads.service import PreparedTurnRun, ThreadService
 
@@ -36,12 +37,6 @@ agent_id_query = Query(default=None)
 kind_query = Query(default=None, max_length=32)
 limit_query = Query(default=50, ge=1, le=200)
 offset_query = Query(default=0, ge=0)
-
-
-class ThreadTurnReadResponse(ThreadTurnDetailResponse):
-    """Turn detail with nullable raw content for workspace-only readers."""
-
-    user_input: str | None
 
 
 def _sse_frames(stream: AsyncIterator[AgentEvent], request: Request) -> AsyncIterator[str]:
@@ -131,13 +126,13 @@ async def delete_thread(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/threads/{thread_id}/turns", response_model=list[ThreadTurnReadResponse])
+@router.get("/threads/{thread_id}/turns", response_model=list[ThreadTurnDetailResponse])
 async def list_turns(
     workspace_id: UUID,
     thread_id: UUID,
     request: Request,
     context: WorkspaceExecutionContext = context_dependency,
-) -> list[ThreadTurnReadResponse]:
+) -> list[ThreadTurnDetailResponse]:
     del workspace_id
     rows = await _service(request).turn_summaries(context, thread_id)
     # Same content boundary as the runs endpoint's `_run_response`: a caller
@@ -145,7 +140,7 @@ async def list_turns(
     # counters, never the prompt that was sent or the text the model wrote.
     may_read_content = "agent_run" in context.permissions
     return [
-        ThreadTurnReadResponse(
+        ThreadTurnDetailResponse(
             id=turn.id,
             thread_id=turn.thread_id,
             sequence=turn.sequence,
@@ -225,11 +220,23 @@ async def stream_turn(
     if _stream_mode(prepared_run) == "attach":
         stream = run_service.attach_stream(context, run_id=prepared_run.run_id)
     elif request.app.state.settings.run_execution_in_worker:
-        await queue.enqueue(
-            workspace_id=UUID(context.workspace_id),
-            run_id=prepared_run.run_id,
-            request_id=context.request_id,
-        )
+        try:
+            await queue.enqueue(
+                workspace_id=UUID(context.workspace_id),
+                run_id=prepared_run.run_id,
+                request_id=context.request_id,
+            )
+        except AgentHubError:
+            raise
+        except Exception as error:
+            # An enqueue acknowledgement may be lost after the broker accepted
+            # the message. Keep the unowned RUNNING row dispatchable and let the
+            # worker's lease resolve either possible delivery.
+            raise AgentHubError(
+                "RUN_DISPATCH_UNAVAILABLE",
+                "The run could not be queued.",
+                503,
+            ) from error
         stream = run_service.attach_stream(context, run_id=prepared_run.run_id)
     else:
         stream = run_service.stream(

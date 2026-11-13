@@ -10,7 +10,7 @@ from packages.observability.evidence import RunEvidenceService
 
 
 @pytest.mark.asyncio
-async def test_run_evidence_service_tools_handles_nested_dict_references():
+async def test_run_evidence_service_deduplicates_persisted_references():
     ws_id = uuid4()
     kb_id = str(uuid4())
     rev_id = str(uuid4())
@@ -67,19 +67,6 @@ async def test_run_evidence_service_tools_handles_nested_dict_references():
     result = await service.tools(FakeSession(), context, uuid4())
 
     assert len(result["events"]) == 1
-    # Successfully deduplicated without unhashable dict crash
     assert len(result["evidence_refs"]) == 2
     assert result["evidence_refs"][0]["chunk_id"] == "c-1"
     assert result["evidence_refs"][1]["chunk_id"] == "c-2"
-
-
-def test_unique_deduplication_supports_arbitrary_nested_dicts():
-    refs = [
-        {"chunk_id": "c1", "meta": {"page": 1, "deep": {"nested": True}}},
-        {"chunk_id": "c1", "meta": {"page": 1, "deep": {"nested": True}}},
-        {"chunk_id": "c2", "meta": {"page": 2, "deep": {"nested": False}}},
-    ]
-    unique = {json.dumps(r, sort_keys=True): r for r in refs}
-    assert len(unique) == 2
-    assert list(unique.values())[0]["chunk_id"] == "c1"
-    assert list(unique.values())[1]["chunk_id"] == "c2"

@@ -21,6 +21,23 @@ M0 system endpoints:
 - `GET /api/v1/ready`: readiness depends on PostgreSQL only.
 - `GET /api/v1/dependencies`: PostgreSQL, Redis, Qdrant and Langfuse status.
 
+## Provider destinations and Wiki draft replacement
+
+Provider credential create/patch normalizes the optional `base_url`. Invalid
+or credential-bearing URLs return `PROVIDER_ENDPOINT_INVALID` (422), without
+echoing the endpoint. Omitting the patch field preserves it; explicit null
+selects the versioned default-intent state. Actual model destinations are
+authorized before each connection, independently of API validation. A refused
+destination is a non-retryable `MODEL_TARGET_FORBIDDEN` model failure. Newly
+published Agent/judge endpoint bindings reject later URL changes before model
+dispatch with `AGENT_VERSION_MODEL_BINDING_INVALID`; secret rotation remains
+supported. [Outbound contract and operator CIDRs](security/provider-egress.md).
+
+`PUT /api/v1/workspaces/{workspace_id}/agents/{agent_id}/wiki-binding` accepts a
+PINNED/LATEST object, JSON null, or an omitted body. Null/omitted body clears only
+the draft binding and returns null; published AgentVersions retain their frozen
+publication. Invalid object/list shapes still return the standard 422 envelope.
+
 ## Run streaming and reconnection
 
 A run's lifecycle is owned by the run, not by the HTTP connection that started it.

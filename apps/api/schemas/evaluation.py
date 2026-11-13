@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class EvaluationDatasetCreateRequest(BaseModel):
@@ -128,10 +128,18 @@ class EvaluationExperimentCreateRequest(BaseModel):
     split: str
     purpose: str
     repetitions: int = Field(default=1, ge=1, le=5)
+    # The evidence this experiment is allowed to claim.  A deterministic conformance
+    # fixture must not be reported as model accuracy, so the level is frozen with the
+    # experiment and copied to every run.
+    evidence_level: str = "DETERMINISTIC_CONFORMANCE"
     # Opting an experiment into LLM-as-judge scoring.  The profile is frozen at
     # creation time into the evaluator manifest, so changing it afterwards is
     # impossible by construction -- a different judge is a different experiment.
     judge_model_profile_id: UUID | None = None
+    # A multi-judge experiment: two to four frozen profiles plus an aggregation
+    # strategy.  Mutually exclusive with the single-profile field above.
+    judge_model_profile_ids: list[UUID] | None = Field(default=None, min_length=2, max_length=4)
+    judge_strategy: str = "MAJORITY"
 
 
 class EvaluationExperimentVariantCreateRequest(BaseModel):
@@ -179,6 +187,7 @@ class EvaluationExperimentResponse(BaseModel):
     split: str
     purpose: str
     repetitions: int
+    evidence_level: str
     status: str
     build_sha: str = Field(min_length=7, max_length=64)
     evaluator_manifest: dict[str, Any]
@@ -208,6 +217,7 @@ class EvaluationExperimentRunResponse(BaseModel):
     split: str
     purpose: str
     repetitions: int
+    evidence_level: str
     started_at: datetime | None
     completed_at: datetime | None
     failure_code: str | None
@@ -233,6 +243,20 @@ class EvaluationExperimentRunProgressResponse(BaseModel):
     progress: float
 
 
+class EvaluationEvidenceTaskSuccessResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: str
+    value: float | None
+    reason: str | None
+
+
+class EvaluationRedactedObservationResponse(BaseModel):
+    """Empty compatibility envelope; list clients never receive stored observations."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class EvaluationCaseResultResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 
@@ -244,6 +268,10 @@ class EvaluationCaseResultResponse(BaseModel):
     repetition_index: int
     case_execution_key: str
     status: str
+    case_key: str | None = None
+    category: str | None = None
+    variant_label: str | None = None
+    task_success: EvaluationEvidenceTaskSuccessResponse | None = None
     agent_run_id: UUID | None
     latency_ms: int | None
     input_tokens: int | None
@@ -256,10 +284,16 @@ class EvaluationCaseResultResponse(BaseModel):
     observed_agent_status: str | None
     observed_agent_failure_code: str | None
     safe_failure_message: str | None
-    observation: dict[str, Any]
     started_at: datetime | None
     completed_at: datetime | None
     created_at: datetime
+
+    @computed_field(description="Deprecated compatibility field, always empty. Use safe evidence.")
+    @property
+    def observation(self) -> EvaluationRedactedObservationResponse:
+        # Never read the ORM observation, including for managers. Safe summary
+        # and evidence fields are projected explicitly by the evidence service.
+        return EvaluationRedactedObservationResponse()
 
 
 class EvaluationCaseResultListResponse(BaseModel):
@@ -267,6 +301,66 @@ class EvaluationCaseResultListResponse(BaseModel):
 
     total: int
     items: list[EvaluationCaseResultResponse]
+
+
+class EvaluationEvidenceTurnResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    turn_index: int
+    agent_run_id: str | None
+    status: str | None
+
+
+class EvaluationEvidenceEpisodeResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    episode_id: str
+    execution_status: str
+    cleanup_status: str
+    cleanup_error: str | None
+    termination_reason: str | None
+    thread_id: str | None
+    observation_hash: str | None
+    assertion_hash: str | None
+    turns: list[EvaluationEvidenceTurnResponse]
+
+
+class EvaluationEvidenceStepResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    step_order: int
+    step_type: str
+    agent_run_id: str | None
+    logical_action_id: str | None
+    arguments_hash: str | None
+    status: str | None
+    error_code: str | None
+    tool_name: str | None
+    policy_decision: str | None
+
+
+class EvaluationEvidenceFailureLabelResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    code: str
+    step_orders: list[int]
+
+
+class EvaluationCaseEvidenceResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal[1]
+    case_id: str
+    case_key: str | None
+    category: str | None
+    variant_label: str | None
+    task_success: EvaluationEvidenceTaskSuccessResponse
+    evidence_level: str | None
+    execution_cleanup_status: str | None
+    termination_reason: str | None
+    episode: EvaluationEvidenceEpisodeResponse | None
+    steps: list[EvaluationEvidenceStepResponse]
+    failure_labels: list[EvaluationEvidenceFailureLabelResponse]
 
 
 class EvaluationComparisonCreateRequest(BaseModel):

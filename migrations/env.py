@@ -32,12 +32,19 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
+# A bulk upgrade still commits every revision before the next one starts.
+# PostgreSQL rejects ALTER TABLE when an earlier data migration left deferred
+# constraint trigger events pending on the same table. Per-revision commits
+# isolate those events while keeping each revision internally atomic.
+TRANSACTION_PER_MIGRATION = True
+
 
 def run_migrations_offline() -> None:
     context.configure(
         url=get_settings().database_sync_url,
         target_metadata=target_metadata,
         literal_binds=True,
+        transaction_per_migration=TRANSACTION_PER_MIGRATION,
         dialect_opts={"paramstyle": "named"},
     )
     with context.begin_transaction():
@@ -53,7 +60,11 @@ def run_migrations_online() -> None:
         poolclass=pool.NullPool,
     )
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            transaction_per_migration=TRANSACTION_PER_MIGRATION,
+        )
         with context.begin_transaction():
             context.run_migrations()
 

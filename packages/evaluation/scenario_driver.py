@@ -55,7 +55,18 @@ class ScriptedScenarioDriver:
         first_input: str,
         knowledge_snapshots: Sequence[dict[str, str]],
         wiki_publications: Sequence[dict[str, str]] = (),
+        instance_id: str | None = None,
+        thread_id: UUID | None = None,
     ) -> PreparedScenario:
+        if (instance_id is None) != (thread_id is None):
+            raise ValueError("SCENARIO_STABLE_IDENTITY_INCOMPLETE")
+        if instance_id is not None and (not isinstance(instance_id, str) or not instance_id):
+            raise ValueError("SCENARIO_INSTANCE_ID_INVALID")
+        if instance_id is None:
+            instance_id = uuid4().hex
+        turn_token = f"{instance_id}:0"
+        if len(turn_token) > 64 or thread_id is not None and not isinstance(thread_id, UUID):
+            raise ValueError("SCENARIO_STABLE_IDENTITY_INVALID")
         if "evaluation_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "Evaluation permission is required.", 403)
         async with self.runtime.session_factory() as session:
@@ -68,12 +79,15 @@ class ScriptedScenarioDriver:
             if version is None:
                 raise AgentHubError("AGENT_VERSION_NOT_FOUND", "Agent version was not found.", 404)
             agent_id, spec_hash = version.agent_id, version.resolved_spec_hash
-        instance_id = uuid4().hex
         thread = await self.threads.create_thread(
-            context, agent_id=agent_id, title=f"evaluation-{instance_id}", kind="support"
+            context,
+            agent_id=agent_id,
+            title=f"evaluation-{instance_id}",
+            kind="support",
+            thread_id=thread_id,
         )
         turn = await self.threads.open_turn(
-            context, thread.id, user_input=first_input, client_token=f"{instance_id}:0"
+            context, thread.id, user_input=first_input, client_token=turn_token
         )
         run = await self.runtime.prepare_run(
             context,

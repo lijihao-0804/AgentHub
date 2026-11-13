@@ -76,6 +76,8 @@ class ThreadTurnDetailResponse(ThreadTurnResponse):
 
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 
+    # Workspace viewers may read turn metadata while the prompt stays redacted.
+    user_input: str | None
     status: str | None = None
     final_output: str | None = None
     failure_code: str | None = None

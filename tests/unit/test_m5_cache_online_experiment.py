@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from benchmarks.evaluation.deepseek_v41_summary_experiment import DEFAULT_TOKENIZER_PATH
 from benchmarks.evaluation.m5_cache_online_experiment import (
     M5_MODEL,
     M5_PLANNED_DISPATCHES,
@@ -23,7 +22,11 @@ from benchmarks.evaluation.memory_trial_budget import (
     RESERVE_UNKNOWN_UPPER_BOUND_ALLOW_INDEPENDENT,
 )
 from benchmarks.evaluation.memory_trial_client import PRICE_IDENTITY
-from benchmarks.evaluation.thread_run_local_experiment import EXPERIMENT_SCOPE_ID
+from benchmarks.evaluation.thread_run_local_experiment import (
+    EXPERIMENT_SCOPE_ID,
+    RAG_API_KEY_ENV,
+    RAG_BASE_URL_ENV,
+)
 from packages.agent_runtime.deepseek_v41_counter import DeepseekV41TextCounter
 from packages.model_gateway.cache_capability import CacheSupport, PromptCacheCapability
 from packages.model_gateway.contracts import (
@@ -33,9 +36,13 @@ from packages.model_gateway.contracts import (
     ModelUsage,
 )
 
+pytest_plugins = ("tests.support.deepseek_assets",)
 
-def test_stable_prefix_a_and_control_prefix_b_satisfy_m5_token_and_byte_contracts() -> None:
-    counter = DeepseekV41TextCounter.from_file(DEFAULT_TOKENIZER_PATH)
+
+def test_stable_prefix_a_and_control_prefix_b_satisfy_m5_token_and_byte_contracts(
+    deepseek_v41_tokenizer_path: Path,
+) -> None:
+    counter = DeepseekV41TextCounter.from_file(deepseek_v41_tokenizer_path)
     source_text = SOURCE_DOCUMENT_PATH.read_text(encoding="utf-8")
     prefix_a_1 = build_stable_prefix_a(source_text)
     prefix_a_2 = build_stable_prefix_a(source_text)
@@ -72,7 +79,9 @@ def test_stable_prefix_a_and_control_prefix_b_satisfy_m5_token_and_byte_contract
 
 @pytest.mark.asyncio
 async def test_execute_m5_cache_online_experiment_reserves_and_settles_four_m5_attempts(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    deepseek_v41_tokenizer_path: Path,
 ) -> None:
     ledger_path = tmp_path / "experiment-budget.json"
     ledger_state = {
@@ -162,12 +171,12 @@ async def test_execute_m5_cache_online_experiment_reserves_and_settles_four_m5_a
     ledger_path.write_text(json.dumps(ledger_state, indent=2) + "\n", encoding="utf-8")
 
     monkeypatch.setenv(
-        "AGENTHUB_RAG_BENCHMARK_BASE_URL",
+        RAG_BASE_URL_ENV,
         "https://dashscope.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
     )
-    monkeypatch.setenv("AGENTHUB_RAG_BENCHMARK_API_KEY", "test-secret")
+    monkeypatch.setenv(RAG_API_KEY_ENV, "test-secret")
 
-    counter = DeepseekV41TextCounter.from_file(DEFAULT_TOKENIZER_PATH)
+    counter = DeepseekV41TextCounter.from_file(deepseek_v41_tokenizer_path)
 
     class FakeAdapter:
         def __init__(self) -> None:
@@ -208,7 +217,7 @@ async def test_execute_m5_cache_online_experiment_reserves_and_settles_four_m5_a
     evidence_dir = tmp_path / "evidence"
     result = await execute_m5_cache_online_experiment(
         ledger_path=ledger_path,
-        tokenizer_path=DEFAULT_TOKENIZER_PATH,
+        tokenizer_path=deepseek_v41_tokenizer_path,
         evidence_dir=evidence_dir,
         inter_request_pause_seconds=0.0,
         adapter=FakeAdapter(),

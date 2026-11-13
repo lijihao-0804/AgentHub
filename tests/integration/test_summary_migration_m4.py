@@ -19,18 +19,22 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
+from packages.agent_runtime.adapters.langgraph.checkpoint import checkpoint_thread_id
+from packages.agent_runtime.history_checkpoint import summary_boundary_marker
 from packages.agent_runtime.summary_models import (
     ThreadSummaryJobSource,
 )
 from packages.agent_runtime.summary_state import SummaryJobStatus
+from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import get_settings
 from packages.core.database import Base
+from tests.support.ae6b_database_urls import (
+    async_test_database_url,
+    require_isolated_test_database_url,
+    sync_test_database_url,
+)
 
 TEST_DATABASE_URL = os.environ.get("AGENTHUB_TEST_DATABASE_URL", "").strip()
-EXPECTED_DATABASE_URL = (
-    "postgresql+psycopg://"
-    "agenthub:m2_local_test@127.0.0.1:15432/agenthub_context_policy_m2"
-)
 SUMMARY_TABLES = {
     "thread_summary_artifacts",
     "thread_summary_dispatches",
@@ -53,15 +57,48 @@ def _hash(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def _checkpoint_binding_parameters(
+    tenant: dict[str, UUID | str],
+    model_round: int,
+) -> dict[str, object]:
+    if model_round < 1:
+        raise ValueError("checkpoint model round must be positive")
+    checkpoint_id = f"summary-migration-{tenant['run_id']}-round-{model_round}"
+    checkpoint_ns = ""
+    checkpoint_model_round_count = model_round - 1
+    history_binding_sha256 = _hash(f"summary-migration-history-{tenant['label']}-{model_round}")
+    checkpoint_identity = {
+        "contract_version": "exact_langgraph_checkpoint_v1",
+        "workspace_id": str(tenant["workspace_id"]),
+        "thread_id": str(tenant["thread_id"]),
+        "run_id": str(tenant["run_id"]),
+        "agent_version_id": str(tenant["version_id"]),
+        "checkpoint_thread_id": checkpoint_thread_id(
+            tenant["workspace_id"],
+            tenant["run_id"],
+        ),
+        "checkpoint_id": checkpoint_id,
+        "checkpoint_ns": checkpoint_ns,
+        "model_round_count": checkpoint_model_round_count,
+        "summary_boundary": summary_boundary_marker(checkpoint_model_round_count),
+        "history_binding_sha256": history_binding_sha256,
+    }
+    return {
+        "model_round": model_round,
+        "checkpoint_id": checkpoint_id,
+        "checkpoint_ns": checkpoint_ns,
+        "checkpoint_model_round_count": checkpoint_model_round_count,
+        "checkpoint_binding_sha256": canonical_json_hash(checkpoint_identity),
+    }
+
+
 @pytest.fixture(scope="session", autouse=True)
 def migrated_database() -> Iterator[None]:
-    assert (
-        TEST_DATABASE_URL == EXPECTED_DATABASE_URL
-        or "test" in TEST_DATABASE_URL.lower()
-        or "policy" in TEST_DATABASE_URL.lower()
-    ), "M4 migration tests may only run against an assigned test database." 
+    require_isolated_test_database_url(TEST_DATABASE_URL)
     previous = os.environ.get("AGENTHUB_DATABASE_URL")
-    os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
+    os.environ["AGENTHUB_DATABASE_URL"] = async_test_database_url(
+        TEST_DATABASE_URL
+    ).render_as_string(hide_password=False)
     get_settings.cache_clear()
     try:
         command.upgrade(Config(str(Path("alembic.ini"))), "head")
@@ -76,7 +113,7 @@ def migrated_database() -> Iterator[None]:
 
 @pytest.fixture(scope="session")
 def engine() -> Iterator[Engine]:
-    database_engine = create_engine(TEST_DATABASE_URL)
+    database_engine = create_engine(sync_test_database_url(TEST_DATABASE_URL))
     try:
         yield database_engine
     finally:
@@ -128,13 +165,16 @@ def test_models_cover_the_persisted_contract() -> None:
         "UNKNOWN_OUTCOME",
     }
     source_columns = set(ThreadSummaryJobSource.__table__.columns.keys())
-    assert not {
-        "user_input",
-        "input_text",
-        "final_output",
-        "raw_text",
-        "content",
-    } & source_columns
+    assert (
+        not {
+            "user_input",
+            "input_text",
+            "final_output",
+            "raw_text",
+            "content",
+        }
+        & source_columns
+    )
     assert {
         "turn_id",
         "run_id",
@@ -413,6 +453,7 @@ def _job_parameters(
     tenant: dict[str, UUID | str],
     *,
     identity_hash: str | None = None,
+    model_round: int = 1,
 ) -> dict[str, object]:
     label = str(tenant["label"])
     return {
@@ -420,6 +461,7 @@ def _job_parameters(
         "workspace_id": tenant["workspace_id"],
         "thread_id": tenant["thread_id"],
         "trigger_run_id": tenant["run_id"],
+        **_checkpoint_binding_parameters(tenant, model_round),
         "identity_hash": identity_hash or _hash(f"job-{label}"),
         "source_watermark": 1,
         "source_scope": '{"kind": "COMPLETED_PREFIX", "through_sequence": 1}',
@@ -444,15 +486,20 @@ def _insert_job(
     tenant: dict[str, UUID | str],
     *,
     identity_hash: str | None = None,
-    model_round: int | None = None,
+    model_round: int = 1,
 ) -> UUID:
-    parameters = _job_parameters(tenant, identity_hash=identity_hash)
-    parameters["model_round"] = model_round
+    parameters = _job_parameters(
+        tenant,
+        identity_hash=identity_hash,
+        model_round=model_round,
+    )
     connection.execute(
         text(
             """
             INSERT INTO thread_summary_jobs (
-              id, workspace_id, thread_id, trigger_run_id, model_round, identity_hash,
+              id, workspace_id, thread_id, trigger_run_id, model_round,
+              checkpoint_id, checkpoint_ns, checkpoint_model_round_count,
+              checkpoint_binding_sha256, identity_hash,
               source_watermark, source_scope, source_scope_hash,
               source_content_hash, policy_spec, policy_version, prompt_version,
               budget_version, model_spec, model_spec_hash, tokenizer_id,
@@ -460,7 +507,9 @@ def _insert_job(
               created_by
             )
             VALUES (
-              :id, :workspace_id, :thread_id, :trigger_run_id, :model_round, :identity_hash,
+              :id, :workspace_id, :thread_id, :trigger_run_id, :model_round,
+              :checkpoint_id, :checkpoint_ns, :checkpoint_model_round_count,
+              :checkpoint_binding_sha256, :identity_hash,
               :source_watermark, CAST(:source_scope AS jsonb), :source_scope_hash,
               :source_content_hash, CAST(:policy_spec AS jsonb), :policy_version,
               :prompt_version, :budget_version, CAST(:model_spec AS jsonb),
@@ -563,16 +612,19 @@ def test_migration_installs_version_tables_constraints_and_triggers(
     assert connection.scalar(text("SELECT version_num FROM alembic_version")) >= (
         "0045_run_budget_ledger"
     )
-    assert set(
-        connection.execute(
-            text(
-                """
+    assert (
+        set(
+            connection.execute(
+                text(
+                    """
                 SELECT tablename FROM pg_tables
                 WHERE schemaname = 'public' AND tablename LIKE 'thread_summary_%'
                 """
-            )
-        ).scalars()
-    ) == SUMMARY_TABLES
+                )
+            ).scalars()
+        )
+        == SUMMARY_TABLES
+    )
     constraints = set(
         connection.execute(
             text(
@@ -631,9 +683,12 @@ def test_downgrade_cannot_erase_retained_summary_guarantees(
     with pytest.raises(DBAPIError, match=message):
         with connection.begin_nested():
             migration.downgrade()
-    assert connection.scalar(
-        text("SELECT model_round FROM thread_summary_jobs WHERE id = :id"), {"id": job_id}
-    ) == 1
+    assert (
+        connection.scalar(
+            text("SELECT model_round FROM thread_summary_jobs WHERE id = :id"), {"id": job_id}
+        )
+        == 1
+    )
 
 
 def test_identity_deduplication_and_dispatch_pricing_composite_fk(
@@ -651,7 +706,9 @@ def test_identity_deduplication_and_dispatch_pricing_composite_fk(
             text(
                 """
                 INSERT INTO thread_summary_jobs (
-                  id, workspace_id, thread_id, trigger_run_id, identity_hash,
+                  id, workspace_id, thread_id, trigger_run_id, model_round,
+                  checkpoint_id, checkpoint_ns, checkpoint_model_round_count,
+                  checkpoint_binding_sha256, identity_hash,
                   source_watermark, source_scope, source_scope_hash,
                   source_content_hash, policy_spec, policy_version, prompt_version,
                   budget_version, model_spec, model_spec_hash, tokenizer_id,
@@ -659,7 +716,9 @@ def test_identity_deduplication_and_dispatch_pricing_composite_fk(
                   created_by
                 )
                 VALUES (
-                  :id, :workspace_id, :thread_id, :trigger_run_id, :identity_hash,
+                  :id, :workspace_id, :thread_id, :trigger_run_id, :model_round,
+                  :checkpoint_id, :checkpoint_ns, :checkpoint_model_round_count,
+                  :checkpoint_binding_sha256, :identity_hash,
                   :source_watermark, CAST(:source_scope AS jsonb), :source_scope_hash,
                   :source_content_hash, CAST(:policy_spec AS jsonb), :policy_version,
                   :prompt_version, :budget_version, CAST(:model_spec AS jsonb),
@@ -672,7 +731,7 @@ def test_identity_deduplication_and_dispatch_pricing_composite_fk(
         )
     connection.execute(text("ROLLBACK TO SAVEPOINT duplicate_job"))
 
-    job_id = _insert_job(connection, tenant)
+    job_id = _insert_job(connection, tenant, model_round=2)
     _claim_job(connection, tenant, job_id)
     cross_tenant_dispatch = {
         "id": uuid4(),
@@ -1084,7 +1143,9 @@ def test_unknown_outcome_is_persisted_and_cannot_become_retryable(
             text(
                 """
                 INSERT INTO thread_summary_jobs (
-                  id, workspace_id, thread_id, trigger_run_id, identity_hash,
+                  id, workspace_id, thread_id, trigger_run_id, model_round,
+                  checkpoint_id, checkpoint_ns, checkpoint_model_round_count,
+                  checkpoint_binding_sha256, identity_hash,
                   source_watermark, source_scope, source_scope_hash,
                   source_content_hash, policy_spec, policy_version, prompt_version,
                   budget_version, model_spec, model_spec_hash, tokenizer_id,
@@ -1092,7 +1153,9 @@ def test_unknown_outcome_is_persisted_and_cannot_become_retryable(
                   created_by
                 )
                 VALUES (
-                  :id, :workspace_id, :thread_id, :trigger_run_id, :identity_hash,
+                  :id, :workspace_id, :thread_id, :trigger_run_id, :model_round,
+                  :checkpoint_id, :checkpoint_ns, :checkpoint_model_round_count,
+                  :checkpoint_binding_sha256, :identity_hash,
                   :source_watermark, CAST(:source_scope AS jsonb), :source_scope_hash,
                   :source_content_hash, CAST(:policy_spec AS jsonb), :policy_version,
                   :prompt_version, :budget_version, CAST(:model_spec AS jsonb),

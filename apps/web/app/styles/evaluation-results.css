@@ -1,0 +1,55 @@
+/* Read-only evaluation evidence, using the existing console tokens. */
+.state-block > .progress-track { width: 100%; }
+.case-evidence { display: grid; gap: var(--space-5); min-width: 0; }
+.case-evidence > .panel { min-width: 0; max-width: 100%; }
+.case-evidence-filter { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+.case-evidence-list { overflow-x: auto; min-width: 0; max-width: 100%; }
+.case-evidence-list table { min-width: 1240px; table-layout: fixed; }
+.case-evidence-list th:nth-child(1) { width: 220px; }
+.case-evidence-list th:nth-child(2) { width: 100px; }
+.case-evidence-list th:nth-child(3) { width: 130px; }
+.case-evidence-list th:nth-child(4) { width: 100px; }
+.case-evidence-list th:nth-child(5) { width: 105px; }
+.case-evidence-list th:nth-child(6) { width: 115px; }
+.case-evidence-list th:nth-child(7) { width: 120px; }
+.case-evidence-list th:nth-child(8) { width: 160px; }
+.case-evidence-list th:nth-child(9) { width: 170px; }
+.case-evidence-list td { vertical-align: top; }
+.case-evidence-list code { overflow-wrap: anywhere; word-break: break-word; }
+.case-evidence-list .tight-cell { max-width: 250px; white-space: normal; }
+.case-evidence-row-select { display: grid; gap: var(--space-2); width: 100%; min-width: 0; max-width: 100%; padding: 0; border: 0; background: none; color: var(--accent); cursor: pointer; text-align: left; font: inherit; }
+.case-evidence-row-select > code { min-width: 0; white-space: normal; word-break: break-all; display: block; }
+.case-evidence-row-select code { color: inherit; font-size: .78rem; }
+.case-evidence-row-select span { color: var(--text-muted); font-size: .75rem; }
+.case-evidence-row-selected { background: var(--accent-soft); }
+.case-evidence-cost, .case-evidence-failures, .case-evidence-detail { display: grid; gap: var(--space-2); }
+.case-evidence-failures { max-width: 240px; font-size: .8rem; }
+.case-evidence-detail { gap: var(--space-5); min-width: 0; }
+.case-evidence-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-4); margin: 0; }
+.case-evidence-summary > div { min-width: 0; }
+.case-evidence-summary dt, .case-evidence-inline-facts dt { color: var(--text-muted); font-size: .78rem; margin-bottom: var(--space-1); }
+.case-evidence-summary dd, .case-evidence-inline-facts dd { margin: 0; overflow-wrap: anywhere; font-size: .85rem; }
+.case-evidence-detail code { overflow-wrap: anywhere; word-break: break-word; font-size: .78rem; }
+.case-evidence-section { min-width: 0; border-top: 1px solid var(--border); padding-top: var(--space-4); }
+.case-evidence-section h3 { font-size: .95rem; margin: 0 0 var(--space-2); }
+.case-evidence-lifecycle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+.case-evidence-inline-facts { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); margin: var(--space-3) 0 0; }
+.case-evidence-inline-facts > div { min-width: 0; max-width: 100%; }
+.case-evidence-task-success, .case-evidence-step-header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.case-evidence-notice { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: var(--space-4); background: var(--surface-inset); }
+.case-evidence-notice-attention { border-color: var(--accent-2); }
+.case-evidence-notice p { margin: 0 0 var(--space-2); }
+.case-evidence-empty { color: var(--text-muted); font-size: .85rem; }
+.case-evidence-steps, .case-evidence-turns, .case-evidence-label-list { display: grid; gap: var(--space-3); margin: var(--space-3) 0 0; padding-left: 1.3rem; }
+.case-evidence-steps > li, .case-evidence-turn, .case-evidence-label { min-width: 0; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); }
+.case-evidence-step-meta { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-top: var(--space-2); font-size: .8rem; }
+@media (max-width: 760px) {
+  .case-evidence-lifecycle { grid-template-columns: 1fr; }
+  .case-evidence-summary { grid-template-columns: 1fr; }
+  .case-evidence-filter { align-items: stretch; width: 100%; }
+  .case-evidence-filter select { min-width: 0; max-width: 100%; }
+  .case-evidence-list table { min-width: 0; }
+  .case-evidence-list .tight-cell { max-width: none; }
+  .case-evidence-list .numeric-cell { text-align: left; }
+  .case-evidence-row-select { max-width: 100%; }
+}

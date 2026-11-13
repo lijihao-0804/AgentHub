@@ -2,6 +2,8 @@
 
 > 目标读者：要动手实现的人。本文给的是**可施工的设计**，不是愿景。
 >
+> **实施进度（2026-11-02）**：AE-1 轨迹层、AE-2 统计层、AE-3 证据等级、AE-4 judge ensemble、AE-5 失败分类、AE-6a 环境/用户模拟契约、AE-7a 安全断言已落地。**实机证据**：迁移 `0049` upgrade/downgrade 通过、31 项真实 PostgreSQL 集成测试通过、Alibaba `deepseek-v4.1-flash` 12 次真实 judge 调用完成；见 [AE 实机证据](../../milestones/AE-live-evidence-20261102.md)。各里程碑细节：[AE-1](../../milestones/AE-1.md)、[AE-2](../../milestones/AE-2.md)、[AE-3](../../milestones/AE-3.md)、[AE-4](../../milestones/AE-4.md)、[AE-5](../../milestones/AE-5.md)、[AE-6a](../../milestones/AE-6a.md)、[AE-7a](../../milestones/AE-7a.md)。
+>
 > 前置阅读：[现状与差距](04-agenthub-gap.md) · [调研报告首页](README.md)
 >
 > 基线：迁移 head `0048_summary_run_step`（以 `migrations/versions/` 实际文件为准）；新增迁移从 `0049` 开始。本文不修改任何历史迁移、不改 M7 已发布数据集的 hash。
@@ -231,10 +233,11 @@ flowchart LR
 
 | 指标 | 定义 | 说明 |
 | --- | --- | --- |
-| `success_rate` | 成功 trial / 全部 trial | 即 pass@1，分母含失败与未知 |
-| `pass_hat_k` | 所有 k 次 trial 都成功的 case 数 / case 数 | 缺失 trial 的 case 不计入分子，单独报 `incomplete_case_count` |
+| `success_rate` | 成功 trial / **已知 trial** | 未知 trial 不进分母；必须同时报 `success_coverage_rate` |
+| `pass_hat_k` | 所有 k 次 trial 都成功的完整 case 数 / **完整 case 数** | 缺失 trial 的 case 进 `incomplete_case_count`；同时报 `pass_hat_k_all_cases`（缺失按失败） |
+| `complete_case_rate` | 完整 case 数 / 全部 case 数 | 低于阈值时不得宣称可靠性 |
 | `trial_variance` | 同一 case 内 trial 成功率的样本方差 | 观察抖动 |
-| `consistency_at_k` | 同 `pass_hat_k`，但要求 k 次终态输出 hash 也一致 | 更严格的稳定性 |
+| `consistency_at_k` | 完整 case 中全部成功且 k 次 output_hash 相同 | 度量“成功且字面一致”，不是语义一致 |
 
 `pass^k` 的直觉：单次成功率 0.8 时，`pass^3 = 0.512`、`pass^5 = 0.328`。客服/退款这类“连续 k 次都不能出错”的场景，`pass^k` 才是可承诺的数字。
 

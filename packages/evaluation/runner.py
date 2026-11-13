@@ -21,6 +21,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy import case as sql_case
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.frozen import parse_frozen_agent_spec
@@ -35,9 +36,12 @@ from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.business import inspect_support_outcome, support_condition_from_expected
+from packages.evaluation.interactive_lifecycle import CaseExecutionIdentity, InteractiveLifecycle
+from packages.evaluation.interactive_observation import observation_from_envelope, with_cleanup
 from packages.evaluation.judge import (
     JUDGE_OBSERVATION_KEY,
     AnswerQualityJudge,
+    JudgeEnsemble,
     JudgeRequest,
     sequence_of_text,
 )
@@ -67,6 +71,8 @@ from packages.evaluation.reproducibility import (
     normalize_knowledge_snapshots,
     variant_hash,
 )
+from packages.evaluation.taxonomy import classify_failure
+from packages.evaluation.trajectory import build_trajectory_observation
 from packages.knowledge.contracts import KnowledgeRetriever, RetrievalQuery
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.observability import NoopTraceSink
@@ -205,7 +211,7 @@ class AgentRuntimeEvaluationDriver:
         *,
         retriever: KnowledgeRetriever | None = None,
         approval_context_factory: Callable[[EvaluationExperimentRun], Awaitable[Any]] | None = None,
-        judge: AnswerQualityJudge | None = None,
+        judge: AnswerQualityJudge | JudgeEnsemble | None = None,
     ) -> None:
         self.agent_run_service = agent_run_service
         self.context_factory = context_factory
@@ -349,6 +355,38 @@ class AgentRuntimeEvaluationDriver:
                         .order_by(RunStep.sequence_number, RunStep.id)
                     )
                 )
+                trajectory_rows = list(
+                    await session.scalars(
+                        select(RunStep)
+                        .where(
+                            RunStep.workspace_id == run.workspace_id,
+                            RunStep.agent_run_id == result.run_id,
+                            RunStep.kind.in_(
+                                (
+                                    "TOOL_PROPOSAL",
+                                    "TOOL_EXECUTE",
+                                    "POLICY",
+                                    "APPROVAL_WAIT",
+                                    "ACTION",
+                                    "RECONCILIATION",
+                                    "GUARD",
+                                    "FINISH",
+                                )
+                            ),
+                        )
+                        .order_by(RunStep.sequence_number, RunStep.id)
+                    )
+                )
+                approval_rows = list(
+                    await session.scalars(
+                        select(Approval)
+                        .where(
+                            Approval.workspace_id == run.workspace_id,
+                            Approval.run_id == result.run_id,
+                        )
+                        .order_by(Approval.created_at, Approval.id)
+                    )
+                )
                 version = await session.scalar(
                     select(AgentVersion).where(
                         AgentVersion.workspace_id == run.workspace_id,
@@ -388,6 +426,80 @@ class AgentRuntimeEvaluationDriver:
                 "output_hash": canonical_json_hash(result.final_output or ""),
                 "variant_hash": variant.variant_hash,
             }
+            trajectory_steps = [
+                {
+                    "index": index,
+                    "sequence_number": row.sequence_number,
+                    "kind": row.kind,
+                    "status": row.status,
+                    "error_code": (row.safe_metadata or {}).get("error_code"),
+                    "tool_identities": (row.safe_metadata or {}).get("tool_identities") or [],
+                    "arguments_hashes": (row.safe_metadata or {}).get("arguments_hashes") or [],
+                    "tool_results": (row.safe_metadata or {}).get("tool_results") or [],
+                    "logical_action_ids": (row.safe_metadata or {}).get("logical_action_ids") or [],
+                    "action_results": (row.safe_metadata or {}).get("action_results") or [],
+                }
+                for index, row in enumerate(trajectory_rows)
+            ]
+            approval_facts = [
+                {
+                    "approval_id": str(row.id),
+                    "logical_action_id": row.logical_action_id,
+                    "tool_identity": row.tool_identity,
+                    "arguments_hash": row.canonical_args_hash,
+                    "decision_status": row.decision_status,
+                    "execution_status": row.execution_status,
+                    "failure_code": row.failure_code,
+                }
+                for row in approval_rows
+            ]
+            cost_amount = persisted.total_cost_amount if persisted else result.total_cost_amount
+            observation.update(
+                build_trajectory_observation(
+                    steps=trajectory_steps,
+                    approvals=approval_facts,
+                    terminal={
+                        "status": result.status,
+                        "failure_code": result.failure_code,
+                    },
+                    counters={
+                        "model_step_count": result.model_step_count,
+                        "tool_call_count": result.tool_call_count,
+                    },
+                    budget={
+                        "input_tokens": (
+                            persisted.total_input_tokens if persisted else result.total_input_tokens
+                        ),
+                        "output_tokens": (
+                            persisted.total_output_tokens
+                            if persisted
+                            else result.total_output_tokens
+                        ),
+                        "total_tokens": (
+                            persisted.total_tokens if persisted else result.total_tokens
+                        ),
+                        "cached_tokens": (
+                            persisted.total_cached_tokens
+                            if persisted
+                            else result.total_cached_tokens
+                        ),
+                        "cost_amount": str(cost_amount) if cost_amount is not None else None,
+                        "cost_currency": (
+                            persisted.cost_currency if persisted else result.cost_currency
+                        ),
+                    },
+                    output_hash=observation["output_hash"],
+                    category=item.category,
+                    expected=item.expected,
+                    field_sources={
+                        **observation.get("field_sources", {}),
+                        "trajectory": "run_steps+approvals",
+                    },
+                )
+            )
+            observation["failure_taxonomy"] = classify_failure(item.expected, observation)
+            # Execution safety booleans are derived from the unified trajectory evidence in
+            # build_trajectory_observation; do not re-derive them from approval rows alone.
             if postcondition is not None:
                 async with self.agent_run_service.session_factory() as session:
                     observation["business_outcome"] = await inspect_support_outcome(
@@ -704,7 +816,11 @@ class ExperimentRunner:
                 EvaluationExperimentCaseResult.status == EvaluationCaseResultStatus.RUNNING,
                 EvaluationExperimentCaseResult.lease_owner == owner,
                 EvaluationExperimentCaseResult.lease_generation == generation,
-                EvaluationExperimentCaseResult.agent_run_id.is_(None),
+                or_(
+                    EvaluationExperimentCaseResult.agent_run_id.is_(None),
+                    EvaluationExperimentCaseResult.agent_run_id == agent_run_id,
+                ),
+                _current_run_fence(run_id, owner, generation),
             )
             .values(**values)
         )
@@ -747,6 +863,12 @@ class ExperimentRunner:
         return result.rowcount == 1
 
     async def recover_inflight_cases(self, session: AsyncSession, *, run_id: UUID) -> None:
+        parent = await session.scalar(
+            select(EvaluationExperimentRun)
+            .where(EvaluationExperimentRun.id == run_id)
+            .with_for_update()
+        )
+        recovered_results = []
         cases = list(
             await session.scalars(
                 select(EvaluationExperimentCaseResult)
@@ -765,6 +887,37 @@ class ExperimentRunner:
                     EvaluationDatasetItem.id == case.dataset_item_id,
                 )
             )
+            if item is not None and item.category == "INTERACTIVE":
+                recovered = await InteractiveLifecycle(self.session_factory).recover_case(
+                    session, case
+                )
+                envelope = recovered.get("envelope")
+                if recovered.get("agent_run_id"):
+                    recovered_run_id = UUID(recovered["agent_run_id"])
+                    if case.agent_run_id is not None and case.agent_run_id != recovered_run_id:
+                        envelope = None
+                    else:
+                        case.agent_run_id = recovered_run_id
+                case.observed_agent_status = recovered.get("observed_agent_status")
+                case.observed_agent_failure_code = recovered.get("observed_agent_failure_code")
+                if envelope is not None and parent is not None:
+                    case.lease_owner = parent.lease_owner
+                    case.lease_generation = parent.lease_generation
+                    recovered_results.append(
+                        (
+                            case.id,
+                            parent.lease_owner,
+                            parent.lease_generation,
+                            with_cleanup(envelope, recovered["cleanup_status"]),
+                        )
+                    )
+                else:
+                    case.status = EvaluationCaseResultStatus.FAILED
+                    case.failure_code = "EVALUATION_INTERACTIVE_RECOVERY_REQUIRED"
+                    case.safe_failure_message = "The interactive episode requires reconciliation."
+                    case.observation = _interactive_recovery_projection(recovered)
+                    case.completed_at = _now()
+                continue
             if item is not None and item.category == "MULTI_STEP" and "scenario" in item.input:
                 # A linked first turn being terminal cannot prove the whole
                 # conversation finished. Never replay fixtures or mark partial
@@ -814,6 +967,16 @@ class ExperimentRunner:
             case.completed_at = _now()
         await session.commit()
 
+        for case_id, owner, generation, envelope in recovered_results:
+            await self.complete_case(
+                session,
+                case_id=case_id,
+                run_id=run_id,
+                owner=owner,
+                generation=generation,
+                observation=observation_from_envelope(envelope),
+            )
+
     async def heartbeat(
         self,
         session: AsyncSession,
@@ -830,6 +993,7 @@ class ExperimentRunner:
                 EvaluationExperimentRun.id == run_id,
                 EvaluationExperimentRun.status == EvaluationExperimentRunStatus.RUNNING,
                 EvaluationExperimentRun.lease_owner == owner,
+                EvaluationExperimentRun.lease_expires_at > now,
                 *(
                     (EvaluationExperimentRun.lease_generation == generation,)
                     if generation is not None
@@ -869,6 +1033,7 @@ class ExperimentRunner:
                 EvaluationExperimentRun.lease_owner == owner,
                 EvaluationExperimentRun.lease_generation == generation,
                 EvaluationExperimentRun.status == EvaluationExperimentRunStatus.RUNNING,
+                EvaluationExperimentRun.lease_expires_at > _now(),
             )
             .join(
                 EvaluationExperimentRun,
@@ -900,7 +1065,7 @@ class ExperimentRunner:
                 EvaluationExperimentVariant.ordinal,
                 EvaluationExperimentCaseResult.repetition_index,
             )
-            .with_for_update(skip_locked=True)
+            .with_for_update(of=EvaluationExperimentCaseResult, skip_locked=True)
         )
         if row is None:
             await session.rollback()
@@ -1002,6 +1167,7 @@ class ExperimentRunner:
                     EvaluationExperimentCaseResult.experiment_run_id == run_id,
                     EvaluationExperimentCaseResult.lease_owner == owner,
                     EvaluationExperimentCaseResult.lease_generation == generation,
+                    _current_run_fence(run_id, owner, generation),
                 ]
             )
         result = await session.execute(
@@ -1053,6 +1219,7 @@ class ExperimentRunner:
                     EvaluationExperimentCaseResult.experiment_run_id == run_id,
                     EvaluationExperimentCaseResult.lease_owner == owner,
                     EvaluationExperimentCaseResult.lease_generation == generation,
+                    _current_run_fence(run_id, owner, generation),
                 ]
             )
         result = await session.execute(
@@ -1148,8 +1315,10 @@ class ExperimentRunner:
                 owner=owner,
                 generation=generation,
                 settings=settings,
+                execution_task=asyncio.current_task(),
             )
         )
+        span_status, span_failure = "completed", None
         try:
             while True:
                 async with self.session_factory() as session:
@@ -1165,9 +1334,16 @@ class ExperimentRunner:
                         }
                         or run.lease_owner != owner
                         or run.lease_generation != generation
+                        or run.lease_expires_at is None
+                        or run.lease_expires_at <= _now()
                     ):
+                        span_status, span_failure = "lease_lost", "EVALUATION_LEASE_LOST"
                         return
                     if run.status == EvaluationExperimentRunStatus.CANCEL_REQUESTED:
+                        span_status, span_failure = (
+                            "cancel_requested",
+                            "EVALUATION_CANCEL_REQUESTED",
+                        )
                         await self._finish_run(
                             session, run_id=run_id, owner=owner, generation=generation
                         )
@@ -1176,10 +1352,16 @@ class ExperimentRunner:
                         session, run_id=run_id, owner=owner, generation=generation
                     )
                     if case is None:
-                        await self._finish_run(
+                        finished = await self._finish_run(
                             session, run_id=run_id, owner=owner, generation=generation
                         )
-                        return
+                        if finished:
+                            return
+                        # A concurrent delivery may briefly hold a pending case.
+                        # Keep the current lease alive rather than interpreting
+                        # SKIP LOCKED as proof that all work has completed.
+                        await asyncio.sleep(0.05)
+                        continue
                     variant = await session.scalar(
                         select(EvaluationExperimentVariant).where(
                             EvaluationExperimentVariant.workspace_id == run.workspace_id,
@@ -1205,7 +1387,21 @@ class ExperimentRunner:
                         )
                     continue
                 try:
-                    prepared = await self._prepare_driver(run=run, variant=variant, item=item)
+                    prepared = await self._prepare_driver(
+                        run=run,
+                        variant=variant,
+                        item=item,
+                        case_identity=CaseExecutionIdentity(
+                            workspace_id=run.workspace_id,
+                            run_id=run.id,
+                            case_id=case.id,
+                            variant_id=variant.id,
+                            item_id=item.id,
+                            repetition_index=case.repetition_index,
+                            owner=owner,
+                            generation=generation,
+                        ),
+                    )
                     if prepared.agent_run_id is not None:
                         async with self.session_factory() as session:
                             linked = await self.bind_case_agent_run(
@@ -1233,12 +1429,17 @@ class ExperimentRunner:
                     )
                     try:
                         result = await prepared.execute()
-                    except Exception:
+                    except BaseException as error:
+                        failure = (
+                            "EVALUATION_EXECUTION_INTERRUPTED"
+                            if isinstance(error, asyncio.CancelledError)
+                            else "EVALUATION_CASE_FAILED"
+                        )
                         await _safe_end_span(
                             case_span,
-                            {"status": "FAILED", "failure_code": "EVALUATION_CASE_FAILED"},
+                            {"status": "FAILED", "failure_code": failure},
                             status="error",
-                            failure_code="EVALUATION_CASE_FAILED",
+                            failure_code=failure,
                         )
                         raise
                     await _safe_end_span(
@@ -1267,7 +1468,8 @@ class ExperimentRunner:
                         )
                 except Exception as exc:
                     logger.warning(
-                        "evaluation_case_failed", extra={"case_id": str(case.id)}, exc_info=True
+                        "evaluation_case_failed",
+                        extra={"case_id": str(case.id), "error_type": type(exc).__name__},
                     )
                     async with self.session_factory() as session:
                         await self.fail_case(
@@ -1279,14 +1481,20 @@ class ExperimentRunner:
                             failure_code=(getattr(exc, "code", None) or "EVALUATION_CASE_FAILED"),
                             safe_message="The evaluation case failed.",
                         )
+        except asyncio.CancelledError:
+            span_status, span_failure = "interrupted", "EVALUATION_EXECUTION_INTERRUPTED"
+            raise
+        except BaseException:
+            span_status, span_failure = "failed", "EVALUATION_EXECUTION_INTERRUPTED"
+            raise
         finally:
             heartbeat_task.cancel()
             await asyncio.gather(heartbeat_task, return_exceptions=True)
             await _safe_end_span(
                 run_span,
-                {"status": "completed"},
-                status="ok",
-                failure_code=None,
+                {"status": span_status},
+                status="error" if span_failure is not None else "ok",
+                failure_code=span_failure,
             )
 
     async def _prepare_driver(
@@ -1295,9 +1503,14 @@ class ExperimentRunner:
         run: EvaluationExperimentRun,
         variant: EvaluationExperimentVariant,
         item: EvaluationDatasetItem,
+        case_identity: CaseExecutionIdentity | None = None,
     ) -> PreparedCaseExecution:
         prepare = getattr(self.driver, "prepare", None)
         if prepare is not None:
+            if "case_identity" in inspect.signature(prepare).parameters:
+                return await prepare(
+                    run=run, variant=variant, item=item, case_identity=case_identity
+                )
             return await prepare(run=run, variant=variant, item=item)
         execute = self.driver.execute
         parameters = inspect.signature(execute).parameters
@@ -1312,19 +1525,32 @@ class ExperimentRunner:
         )
 
     async def _heartbeat_loop(
-        self, *, run_id: UUID, owner: str, generation: int, settings: Settings
+        self,
+        *,
+        run_id: UUID,
+        owner: str,
+        generation: int,
+        settings: Settings,
+        execution_task: asyncio.Task | None = None,
     ) -> None:
         while True:
             await asyncio.sleep(settings.evaluation_runner_heartbeat_seconds)
-            async with self.session_factory() as session:
-                if not await self.heartbeat(
-                    session,
-                    run_id=run_id,
-                    owner=owner,
-                    generation=generation,
-                    lease_seconds=settings.evaluation_runner_lease_seconds,
-                ):
-                    return
+            try:
+                async with self.session_factory() as session:
+                    owned = await self.heartbeat(
+                        session,
+                        run_id=run_id,
+                        owner=owner,
+                        generation=generation,
+                        lease_seconds=settings.evaluation_runner_lease_seconds,
+                    )
+            except SQLAlchemyError:
+                logger.warning("evaluation_heartbeat_unavailable", extra={"run_id": str(run_id)})
+                owned = False
+            if not owned:
+                if execution_task is not None:
+                    execution_task.cancel()
+                return
 
     async def _validate_execution_plan(self, session: AsyncSession, *, run_id: UUID) -> None:
         run = await session.scalar(
@@ -1557,10 +1783,17 @@ class ExperimentRunner:
         run_id: UUID,
         owner: str,
         generation: int | None = None,
-    ) -> None:
+    ) -> bool:
         predicates = [
             EvaluationExperimentRun.id == run_id,
             EvaluationExperimentRun.lease_owner == owner,
+            EvaluationExperimentRun.lease_expires_at > _now(),
+            EvaluationExperimentRun.status.in_(
+                (
+                    EvaluationExperimentRunStatus.RUNNING,
+                    EvaluationExperimentRunStatus.CANCEL_REQUESTED,
+                )
+            ),
         ]
         if generation is not None:
             predicates.append(EvaluationExperimentRun.lease_generation == generation)
@@ -1568,11 +1801,13 @@ class ExperimentRunner:
             select(EvaluationExperimentRun).where(*predicates).with_for_update()
         )
         if run is None:
-            return
+            return False
         counts = await self.progress(session, run_id=run_id)
-        if counts.running:
+        if counts.running or (
+            counts.pending and run.status != EvaluationExperimentRunStatus.CANCEL_REQUESTED
+        ):
             await session.rollback()
-            return
+            return False
         if run.status == EvaluationExperimentRunStatus.CANCEL_REQUESTED:
             await session.execute(
                 update(EvaluationExperimentCaseResult)
@@ -1592,6 +1827,7 @@ class ExperimentRunner:
         run.lease_expires_at = None
         run.heartbeat_at = None
         await session.commit()
+        return True
 
 
 async def reconcile_experiment_runs(
@@ -1653,6 +1889,41 @@ async def reconcile_experiment_runs(
                         )
                     )
                     for case in inflight:
+                        category = await session.scalar(
+                            select(EvaluationDatasetItem.category).where(
+                                EvaluationDatasetItem.workspace_id == case.workspace_id,
+                                EvaluationDatasetItem.id == case.dataset_item_id,
+                            )
+                        )
+                        if category == "INTERACTIVE":
+                            recovered = await InteractiveLifecycle(session_factory).recover_case(
+                                session, case, cancelled=True
+                            )
+                            envelope = recovered.get("envelope")
+                            case.status = EvaluationCaseResultStatus.CANCELLED
+                            case.failure_code = "EVALUATION_INTERACTIVE_CANCELLED"
+                            case.safe_failure_message = (
+                                "The interactive episode was cancelled; cleanup is independent."
+                            )
+                            if recovered.get("agent_run_id"):
+                                case.agent_run_id = UUID(recovered["agent_run_id"])
+                            case.observed_agent_status = recovered.get("observed_agent_status")
+                            case.observed_agent_failure_code = recovered.get(
+                                "observed_agent_failure_code"
+                            )
+                            if envelope is not None:
+                                case.observation = with_cleanup(
+                                    envelope, recovered["cleanup_status"]
+                                )["observation"]
+                                case.observation = {
+                                    **case.observation,
+                                    "stop_reason": "cancelled",
+                                    "execution_complete": False,
+                                }
+                            else:
+                                case.observation = _interactive_recovery_projection(recovered)
+                            case.completed_at = now
+                            continue
                         if case.agent_run_id is None:
                             case.status = EvaluationCaseResultStatus.CANCELLED
                             case.completed_at = now
@@ -1715,7 +1986,39 @@ async def reconcile_experiment_runs(
             logger.warning(
                 "evaluation_reconciliation_enqueue_failed", extra={"run_id": str(run_id)}
             )
+    await InteractiveLifecycle(session_factory).reconcile_cleanup(
+        limit=settings.evaluation_reconciliation_batch_size
+    )
     return tuple(requeued)
+
+
+def _current_run_fence(run_id: UUID, owner: str | None, generation: int | None):
+    return (
+        select(EvaluationExperimentRun.id)
+        .where(
+            EvaluationExperimentRun.id == run_id,
+            EvaluationExperimentRun.lease_owner == owner,
+            EvaluationExperimentRun.lease_generation == generation,
+            EvaluationExperimentRun.status == EvaluationExperimentRunStatus.RUNNING,
+            EvaluationExperimentRun.lease_expires_at > _now(),
+        )
+        .exists()
+    )
+
+
+def _interactive_recovery_projection(recovered: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "category": "INTERACTIVE",
+        "stop_reason": "recovery_required",
+        "execution_complete": False,
+        "agent_execution_complete": False,
+        "environment_lifecycle_status": recovered.get("cleanup_status", "CLEANUP_BLOCKED"),
+        "turns": recovered.get("turns", []),
+        "interactive_recovery": {
+            "reason": recovered.get("reason", "EVALUATION_INTERACTIVE_RECOVERY_REQUIRED"),
+            "cleanup_status": recovered.get("cleanup_status", "CLEANUP_BLOCKED"),
+        },
+    }
 
 
 __all__ = [

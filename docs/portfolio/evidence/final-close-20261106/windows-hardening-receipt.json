@@ -1,0 +1,62 @@
+{
+  "tested_at_utc": "2026-11-06T07:51:21.7734399Z",
+  "accepted_source": "5077aed plus two reviewed fixes",
+  "acl_tests": [
+    "protected exact DACL, inheritance, bytes preserved and repeated invocation",
+    "junction rejected without modifying target ACL"
+  ],
+  "startup_tests": [
+    "foreign worker pong rejected",
+    "Ops port conflict returns nonzero before spawning",
+    "early worker exit returns nonzero and cleans up",
+    "bounded timeout returns nonzero and cleans up"
+  ],
+  "notes": [
+    "PowerShell 7 preferred; no execution policy change",
+    "Only DACL persisted; no audit/owner privilege required",
+    "No model or business tool execution in readiness"
+  ],
+  "actual_cold_start": {
+    "api": true,
+    "web_proxy": true,
+    "web_page": true,
+    "ops_mcp": true,
+    "worker": true
+  },
+  "acl": [
+    {
+      "inherited_rules": 0,
+      "allowed_principals": [
+        "CURRENT_USER",
+        "SYSTEM",
+        "ADMINISTRATORS"
+      ],
+      "protected": true,
+      "name": "."
+    },
+    {
+      "inherited_rules": 0,
+      "allowed_principals": [
+        "CURRENT_USER",
+        "SYSTEM",
+        "ADMINISTRATORS"
+      ],
+      "protected": true,
+      "name": "private-config.json"
+    },
+    {
+      "inherited_rules": 0,
+      "allowed_principals": [
+        "CURRENT_USER",
+        "SYSTEM",
+        "ADMINISTRATORS"
+      ],
+      "protected": true,
+      "name": "compose.env"
+    }
+  ],
+  "duplicate_secure_state_passed": true,
+  "existing_secret_files_byte_identical": true,
+  "mode": "WINDOWS_LOCAL_DELIVERY_HARDENING",
+  "logs": "E:\\JAVA\\AI+agent\\AgentHub\\.worktrees\\ae1\\.agents\\worktrees\\codex\\final-closeout\\.scratch\\portfolio-closeout\\logs\\20261106-154843-420"
+}

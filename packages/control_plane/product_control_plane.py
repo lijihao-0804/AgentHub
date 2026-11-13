@@ -11,7 +11,6 @@ from copy import deepcopy
 from decimal import Decimal
 from time import perf_counter
 from typing import Any, NoReturn
-from urllib.parse import urlsplit
 from uuid import UUID
 
 from sqlalchemy import delete, func, select
@@ -38,10 +37,10 @@ from packages.knowledge.models import (
     KnowledgeSnapshot,
     KnowledgeSnapshotItem,
 )
-from packages.mcp.security import _normalize_address, is_forbidden_address
 from packages.model_gateway.capabilities import capabilities_from_mapping
 from packages.model_gateway.contracts import ModelGateway
 from packages.model_gateway.credentials import CredentialEncryptionError
+from packages.model_gateway.egress import ProviderEgressError, normalize_provider_base_url
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.tools.validation import validate_executable_tool_spec
 from packages.wiki.models import WikiCompilation
@@ -201,87 +200,22 @@ def _not_found(code: str, message: str) -> NoReturn:
     raise AgentHubError(code, message, 404)
 
 
-def validate_provider_base_url(base_url: str | None, *, allow_private: bool = False) -> str | None:
-    """Validate that a provider base_url is a well-formed http(s) URL and safe from SSRF."""
-    if base_url is None:
-        return None
-    candidate = base_url.strip()
-    if not candidate:
-        return None
-    try:
-        parts = urlsplit(candidate)
-    except Exception as exc:
-        raise AgentHubError(
-            "INVALID_PROVIDER_BASE_URL", "The provider base_url is invalid.", 422
-        ) from exc
-
-    if parts.scheme.lower() not in ("http", "https"):
-        raise AgentHubError(
-            "INVALID_PROVIDER_BASE_URL",
-            "The provider base_url scheme must be http or https.",
-            422,
-        )
-    if parts.username or parts.password:
-        raise AgentHubError(
-            "INVALID_PROVIDER_BASE_URL",
-            "The provider base_url must not contain credentials.",
-            422,
-        )
-    host = parts.hostname
-    if not host:
-        raise AgentHubError(
-            "INVALID_PROVIDER_BASE_URL", "The provider base_url must include a hostname.", 422
-        )
-
-    # Cloud metadata endpoints are unconditionally forbidden
-    if host.lower() in ("metadata.google.internal", "169.254.169.254"):
-        raise AgentHubError(
-            "INVALID_PROVIDER_BASE_URL",
-            "The provider base_url points to a forbidden network address.",
-            422,
-        )
-
-    try:
-        ip = _normalize_address(host)
-        is_ip = True
-    except ValueError:
-        is_ip = False
-
-    if is_ip:
-        if is_forbidden_address(host):
-            if not allow_private:
-                raise AgentHubError(
-                    "INVALID_PROVIDER_BASE_URL",
-                    "The provider base_url points to a forbidden network address.",
-                    422,
-                )
-            if ip.is_link_local or str(ip) == "169.254.169.254":
-                raise AgentHubError(
-                    "INVALID_PROVIDER_BASE_URL",
-                    "The provider base_url points to a forbidden network address.",
-                    422,
-                )
-    else:
-        is_local = (
-            host.lower() == "localhost"
-            or host.lower().endswith(".internal")
-            or host.lower().endswith(".local")
-        )
-        if not allow_private and is_local:
-            raise AgentHubError(
-                "INVALID_PROVIDER_BASE_URL",
-                "The provider base_url points to a forbidden network address.",
-                422,
-            )
-
-    return candidate
-
-
 def _provider_name(value: str) -> str:
     provider = value.strip().lower().replace("_", "-")
     if provider not in _SUPPORTED_LITELLM_PROVIDERS:
         raise AgentHubError("INVALID_PROVIDER", "The model provider is not supported.", 422)
     return provider
+
+
+def _validated_provider_base_url(value: str | None) -> str | None:
+    try:
+        return normalize_provider_base_url(value)
+    except ProviderEgressError as exc:
+        raise AgentHubError(
+            exc.failure_code,
+            "The provider base URL is invalid.",
+            422,
+        ) from None
 
 
 def _catalog_entry(identity: str) -> dict[str, Any]:
@@ -411,7 +345,7 @@ class ProductControlPlaneService:
     ) -> dict[str, Any]:
         workspace_id = _require(context, WORKSPACE_ADMIN)
         provider = _provider_name(provider)
-        base_url = validate_provider_base_url(base_url)
+        base_url = _validated_provider_base_url(base_url)
         credential = ProviderCredential(
             workspace_id=workspace_id,
             provider=provider,
@@ -457,7 +391,10 @@ class ProductControlPlaneService:
         if credential is None:
             _not_found("PROVIDER_CREDENTIAL_NOT_FOUND", "The provider credential was not found.")
         if "base_url" in values:
-            values["base_url"] = validate_provider_base_url(values["base_url"])
+            values = {
+                **values,
+                "base_url": _validated_provider_base_url(values["base_url"]),
+            }
         for key, value in values.items():
             setattr(credential, key, value.strip() if key == "name" else value)
         try:

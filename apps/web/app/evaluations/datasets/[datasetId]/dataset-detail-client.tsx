@@ -82,7 +82,9 @@ function parseItemsJson(text: string): ParsedImport | { error: string } {
 
 export default function DatasetDetailPage({ datasetId }: { datasetId: string }) {
   const { t, formatNumber, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId, permissions } =
+    useFrontendSession();
+  const canManage = permissions?.includes("evaluation_manage") === true;
   const [versions, setVersions] = useState<EvaluationDatasetVersion[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
@@ -150,6 +152,7 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
 
   async function submitVersion(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManage) return;
     setCreateError(null);
     if (!parsed || "error" in parsed) return;
     const requestSessionId = sessionId;
@@ -193,9 +196,11 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
         title={t("evaluation.datasets.versions.title")}
         eyebrow={t("evaluation.datasets.eyebrow")}
         actions={
-          <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
-            {t("evaluation.datasets.versions.create")}
-          </button>
+          canManage ? (
+            <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
+              {t("evaluation.datasets.versions.create")}
+            </button>
+          ) : undefined
         }
       >
         {createdNotice && (
@@ -204,7 +209,7 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
           </p>
         )}
 
-        {showForm && (
+        {canManage && showForm && (
           <form className="eval-form" onSubmit={submitVersion} noValidate>
             <div className="eval-form-title">{t("evaluation.datasets.versions.formTitle")}</div>
             <label>

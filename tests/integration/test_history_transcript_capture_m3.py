@@ -450,7 +450,11 @@ async def test_revoked_membership_stops_the_next_model_dispatch(factory):
     result = await asyncio.wait_for(task, timeout=10)
     async with factory() as session:
         stored = await session.scalar(select(AgentRun).where(AgentRun.id == result.run_id))
-        assert stored.status == "FAILED" and stored.failure_code == "FORBIDDEN"
+        # Revocation has the same operator-visible state with summary enabled
+        # or disabled. It must never become an ordinary model/tool failure.
+        assert stored.status == "NEEDS_ATTENTION"
+        assert stored.failure_code == "RUN_ACTOR_ACCESS_REVOKED"
+        assert stored.final_output is None
     assert len(gateway.requests) == 1
 
 

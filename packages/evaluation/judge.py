@@ -29,11 +29,13 @@ from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.contracts import (
+    PROVIDER_EGRESS_POLICY_VERSION,
     CapabilityRequirements,
     ModelCapabilities,
     ModelGateway,
     ModelMessage,
     ModelRequest,
+    ProviderEgress,
     ResolvedModelExecutionPlan,
     ResolvedModelExecutionProfile,
     RetryPolicy,
@@ -160,6 +162,25 @@ class FrozenJudgeProfile:
     profile_id: str
     credential_ref: str
     rubric: AnswerQualityRubric = DEFAULT_ANSWER_QUALITY_RUBRIC
+    provider_egress: ProviderEgress | Mapping[str, Any] | None = None
+
+    def __post_init__(self) -> None:
+        if self.provider_egress is None:
+            return
+        if isinstance(self.provider_egress, ProviderEgress):
+            return
+        if not isinstance(self.provider_egress, Mapping):
+            raise ValueError("provider_egress must be a mapping or ProviderEgress")
+        if set(self.provider_egress) != {"policy_version", "base_url"}:
+            raise ValueError("provider_egress has invalid fields")
+        try:
+            provider_egress = ProviderEgress(
+                policy_version=str(self.provider_egress["policy_version"]),
+                base_url=self.provider_egress["base_url"],
+            )
+        except (KeyError, TypeError, ValueError):
+            raise ValueError("invalid provider_egress") from None
+        object.__setattr__(self, "provider_egress", provider_egress)
 
     def projection(self) -> dict[str, Any]:
         """Mirror of ``packages.agent_runtime.publish._profile_projection`` plus the rubric.
@@ -167,7 +188,7 @@ class FrozenJudgeProfile:
         The credential reference is an identifier, never a secret: the encrypted
         material stays in ``provider_credentials`` and is only read by the gateway.
         """
-        return {
+        projection = {
             "judge_algorithm_version": JUDGE_VERSION_PREFIX.rstrip("-"),
             "provider": self.provider,
             "model": self.model,
@@ -178,6 +199,12 @@ class FrozenJudgeProfile:
             "credential_ref": self.credential_ref,
             "rubric": self.rubric.projection(),
         }
+        if self.provider_egress is not None:
+            projection["provider_egress"] = {
+                "policy_version": self.provider_egress.policy_version,
+                "base_url": self.provider_egress.base_url,
+            }
+        return projection
 
     @property
     def identity_hash(self) -> str:
@@ -189,11 +216,57 @@ class FrozenJudgeProfile:
         return f"{JUDGE_VERSION_PREFIX}{self.identity_hash[:JUDGE_VERSION_HASH_LENGTH]}"
 
 
+#: Allowed aggregation strategies for a judge ensemble.
+JUDGE_STRATEGIES = frozenset({"SINGLE", "MAJORITY", "MEAN"})
+
+
+@dataclass(frozen=True, slots=True)
+class FrozenJudgeEnsemble:
+    """A frozen group of judges that score one case together.
+
+    The ensemble identity is the hash of every member projection plus the aggregation
+    strategy.  Changing a member, adding one, or switching strategy changes the
+    evaluator version, so the comparison guard refuses to pair the two runs.
+    """
+
+    members: tuple[FrozenJudgeProfile, ...]
+    strategy: str = "MAJORITY"
+
+    def __post_init__(self) -> None:
+        if not self.members:
+            raise ValueError("a judge ensemble requires at least one member")
+        if self.strategy not in JUDGE_STRATEGIES:
+            raise ValueError("unsupported judge strategy")
+        rubrics = {canonical_json_hash(member.rubric.projection()) for member in self.members}
+        if len(rubrics) != 1:
+            raise ValueError("all judges in an ensemble must share one rubric")
+
+    @property
+    def rubric(self) -> AnswerQualityRubric:
+        return self.members[0].rubric
+
+    def projection(self) -> dict[str, Any]:
+        return {
+            "judge_algorithm_version": JUDGE_VERSION_PREFIX.rstrip("-"),
+            "strategy": self.strategy,
+            "members": [member.projection() for member in self.members],
+        }
+
+    @property
+    def identity_hash(self) -> str:
+        return canonical_json_hash(self.projection())
+
+    @property
+    def evaluator_version(self) -> str:
+        return f"{JUDGE_VERSION_PREFIX}{self.identity_hash[:JUDGE_VERSION_HASH_LENGTH]}"
+
+
 def freeze_judge_profile(
     profile: Any,
     *,
     provider: str,
     rubric: AnswerQualityRubric = DEFAULT_ANSWER_QUALITY_RUBRIC,
+    provider_egress: ProviderEgress | Mapping[str, Any] | None = None,
 ) -> FrozenJudgeProfile:
     """Freeze a resolved model profile into a judge identity.
 
@@ -209,6 +282,7 @@ def freeze_judge_profile(
         profile_id=str(profile.id),
         credential_ref=str(profile.provider_credential_id),
         rubric=rubric,
+        provider_egress=provider_egress,
     )
 
 
@@ -231,6 +305,13 @@ def judge_profile_to_plan(
     profile: FrozenJudgeProfile,
     workspace_id: UUID,
 ) -> ResolvedModelExecutionPlan:
+    """Rebuild the frozen judge as an execution plan.
+
+    The plan carries the exact provider/model/temperature/max-tokens/timeout that were
+    frozen.  Passing it to ``gateway.generate_resolved`` means the request cannot silently
+    pick up a later edit to the stored model profile.
+    """
+
     resolved_profile = ResolvedModelExecutionProfile(
         id=UUID(profile.profile_id),
         workspace_id=workspace_id,
@@ -241,6 +322,7 @@ def judge_profile_to_plan(
         max_tokens=profile.max_tokens,
         timeout_seconds=Decimal(str(profile.timeout_seconds)),
         capabilities=ModelCapabilities(),
+        provider_egress=profile.provider_egress,
     )
     return ResolvedModelExecutionPlan(
         primary=resolved_profile,
@@ -254,7 +336,8 @@ class ModelGatewayJudgeClient:
 
     Credentials are never handled here: the gateway resolves the encrypted
     ``provider_credentials`` row for ``model_profile_id`` through the existing
-    ``AGENTHUB_CREDENTIAL_MASTER_KEY`` mechanism.
+    ``AGENTHUB_CREDENTIAL_MASTER_KEY`` mechanism.  When a frozen plan is supplied the
+    call goes through ``generate_resolved`` so the frozen parameters are authoritative.
     """
 
     def __init__(
@@ -399,6 +482,127 @@ class AnswerQualityJudge:
         }
 
 
+class JudgeEnsemble:
+    """Run several frozen judges and aggregate their dimension scores.
+
+    ``MAJORITY`` uses the per-dimension mode for three or more judges; ``MEAN`` uses the
+    rounded mean.  A member that fails or returns unparseable output is dropped, but if
+    fewer than a majority of members scored, the ensemble reports ``FAILED`` rather than
+    inventing a score.  Dimension-level agreement is recorded in the verdict so a later
+    calibration audit can see how unanimous the judges were.
+    """
+
+    def __init__(
+        self, members: Sequence[AnswerQualityJudge], *, strategy: str = "MAJORITY"
+    ) -> None:
+        if not members:
+            raise ValueError("a judge ensemble requires at least one member")
+        if strategy not in JUDGE_STRATEGIES:
+            raise ValueError("unsupported judge strategy")
+        rubrics = {
+            canonical_json_hash(member.rubric.projection()) for member in members
+        }
+        if len(rubrics) != 1:
+            raise ValueError("all judges in an ensemble must share one rubric")
+        self.members = tuple(members)
+        self.strategy = strategy
+        self.rubric = members[0].rubric
+        self.ensemble = FrozenJudgeEnsemble(
+            tuple(member.profile for member in members), strategy=strategy
+        )
+
+    async def judge(self, request: JudgeRequest) -> dict[str, Any]:
+        verdicts = [await member.judge(request) for member in self.members]
+        scored = [
+            verdict
+            for verdict in verdicts
+            if verdict.get("status") == JudgeVerdictStatus.SCORED
+            and isinstance(verdict.get("dimension_scores"), Mapping)
+        ]
+        required = len(self.members) // 2 + 1
+        if len(scored) < required:
+            return self._verdict(
+                JudgeVerdictStatus.FAILED,
+                reason="judge_ensemble_quorum_not_met",
+                member_verdicts=_member_summary(verdicts),
+            )
+
+        dimensions = [dimension.name for dimension in self.rubric.dimensions]
+        chosen: dict[str, int] = {}
+        agreements: list[float] = []
+        for name in dimensions:
+            values = [int(verdict["dimension_scores"][name]) for verdict in scored]
+            value = _dimension_value(values, self.strategy)
+            chosen[name] = value
+            agreements.append(values.count(value) / len(values))
+        agreement = sum(agreements) / len(agreements)
+        if self.strategy == "MAJORITY" and len(scored) >= 3 and agreement < 0.5:
+            return self._verdict(
+                JudgeVerdictStatus.UNPARSEABLE,
+                reason="judge_disagreement",
+                dimension_scores=chosen,
+                agreement=agreement,
+                member_verdicts=_member_summary(verdicts),
+            )
+        return self._verdict(
+            JudgeVerdictStatus.SCORED,
+            dimension_scores=chosen,
+            score=self.rubric.normalize(chosen),
+            agreement=agreement,
+            member_verdicts=_member_summary(verdicts),
+        )
+
+    def _verdict(
+        self,
+        status: str,
+        *,
+        dimension_scores: Mapping[str, int] | None = None,
+        score: float | None = None,
+        reason: str | None = None,
+        agreement: float | None = None,
+        member_verdicts: Sequence[Mapping[str, Any]] = (),
+    ) -> dict[str, Any]:
+        return {
+            "status": status,
+            "reason": reason,
+            "score": score,
+            "dimension_scores": dict(sorted((dimension_scores or {}).items())),
+            "rubric_id": self.rubric.rubric_id,
+            "rubric_version": self.rubric.rubric_version,
+            "judge_identity_hash": self.ensemble.identity_hash,
+            "judge_evaluator_version": self.ensemble.evaluator_version,
+            "judge_strategy": self.strategy,
+            "judge_agreement": agreement,
+            "member_verdicts": list(member_verdicts),
+        }
+
+
+def _dimension_value(values: Sequence[int], strategy: str) -> int:
+    if strategy == "MEAN":
+        return int(round(sum(values) / len(values)))
+    counts: dict[int, int] = {}
+    for value in values:
+        counts[value] = counts.get(value, 0) + 1
+    best = max(counts.values())
+    winners = sorted(value for value, count in counts.items() if count == best)
+    if len(winners) == 1:
+        return winners[0]
+    # Tie: use the median of the tied values so the result stays deterministic.
+    return winners[len(winners) // 2]
+
+
+def _member_summary(verdicts: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "status": verdict.get("status"),
+            "judge_identity_hash": verdict.get("judge_identity_hash"),
+            "score": verdict.get("score"),
+            "reason": verdict.get("reason"),
+        }
+        for verdict in verdicts
+    ]
+
+
 def _parse_json_object(raw: Any) -> Mapping[str, Any] | None:
     if not isinstance(raw, str):
         return None
@@ -421,6 +625,10 @@ def _canonical_float(value: Any) -> float:
 
 def judge_manifest_entry(profile: FrozenJudgeProfile | None) -> str:
     return JUDGE_DISABLED_VERSION if profile is None else profile.evaluator_version
+
+
+def judge_ensemble_manifest_entry(ensemble: FrozenJudgeEnsemble | None) -> str:
+    return JUDGE_DISABLED_VERSION if ensemble is None else ensemble.evaluator_version
 
 
 def judge_version_from_manifest(manifest: Mapping[str, Any] | None) -> str:
@@ -454,6 +662,42 @@ def judge_profile_from_manifest(manifest: Mapping[str, Any] | None) -> FrozenJud
     projection = manifest.get("judge_profile") if isinstance(manifest, Mapping) else None
     if not isinstance(projection, Mapping):
         raise _judge_manifest_invalid()
+    profile = _rebuild_profile(projection)
+    if profile.evaluator_version != version:
+        raise _judge_manifest_invalid()
+    return profile
+
+
+def judge_ensemble_from_manifest(
+    manifest: Mapping[str, Any] | None,
+) -> FrozenJudgeEnsemble | None:
+    """Rebuild a frozen judge ensemble, or ``None`` when the manifest has none."""
+
+    if not isinstance(manifest, Mapping):
+        return None
+    projection = manifest.get("judge_ensemble")
+    if projection is None:
+        return None
+    if not isinstance(projection, Mapping):
+        raise _judge_manifest_invalid()
+    members_projection = projection.get("members")
+    if not isinstance(members_projection, Sequence) or isinstance(
+        members_projection, (str, bytes)
+    ):
+        raise _judge_manifest_invalid()
+    try:
+        members = tuple(_rebuild_profile(item) for item in members_projection)
+        ensemble = FrozenJudgeEnsemble(
+            members, strategy=str(projection.get("strategy", "MAJORITY"))
+        )
+    except (KeyError, TypeError, ValueError):
+        raise _judge_manifest_invalid() from None
+    if ensemble.evaluator_version != judge_version_from_manifest(manifest):
+        raise _judge_manifest_invalid()
+    return ensemble
+
+
+def _rebuild_profile(projection: Mapping[str, Any]) -> FrozenJudgeProfile:
     rubric_projection = projection.get("rubric")
     if not isinstance(rubric_projection, Mapping):
         raise _judge_manifest_invalid()
@@ -471,7 +715,20 @@ def judge_profile_from_manifest(manifest: Mapping[str, Any] | None) -> FrozenJud
                 for item in dimensions
             ),
         )
-        profile = FrozenJudgeProfile(
+        provider_egress = None
+        if "provider_egress" in projection:
+            raw_provider_egress = projection["provider_egress"]
+            if (
+                not isinstance(raw_provider_egress, Mapping)
+                or set(raw_provider_egress) != {"policy_version", "base_url"}
+                or raw_provider_egress.get("policy_version") != PROVIDER_EGRESS_POLICY_VERSION
+            ):
+                raise ValueError
+            provider_egress = ProviderEgress(
+                policy_version=raw_provider_egress["policy_version"],
+                base_url=raw_provider_egress["base_url"],
+            )
+        return FrozenJudgeProfile(
             provider=str(projection["provider"]),
             model=str(projection["model"]),
             temperature=_canonical_float(projection["temperature"]),
@@ -480,12 +737,10 @@ def judge_profile_from_manifest(manifest: Mapping[str, Any] | None) -> FrozenJud
             profile_id=str(projection["profile_id"]),
             credential_ref=str(projection["credential_ref"]),
             rubric=rubric,
+            provider_egress=provider_egress,
         )
     except (KeyError, TypeError, ValueError):
         raise _judge_manifest_invalid() from None
-    if profile.evaluator_version != version:
-        raise _judge_manifest_invalid()
-    return profile
 
 
 def _judge_manifest_invalid() -> AgentHubError:
@@ -511,17 +766,22 @@ __all__ = [
     "JUDGE_VERSION_PREFIX",
     "AnswerQualityJudge",
     "AnswerQualityRubric",
+    "FrozenJudgeEnsemble",
     "FrozenJudgeProfile",
     "JudgeClient",
+    "JudgeEnsemble",
     "JudgeRequest",
     "JudgeVerdictStatus",
+    "JUDGE_STRATEGIES",
     "ModelGatewayJudgeClient",
-    "judge_profile_to_plan",
     "RubricDimension",
     "freeze_judge_profile",
     "is_judge_evaluator_version",
+    "judge_ensemble_from_manifest",
+    "judge_ensemble_manifest_entry",
     "judge_manifest_entry",
     "judge_profile_from_manifest",
+    "judge_profile_to_plan",
     "judge_version_from_manifest",
     "sequence_of_text",
 ]

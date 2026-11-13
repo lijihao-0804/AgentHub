@@ -3,18 +3,9 @@
 import "@/app/styles/wiki.css";
 
 import Link from "next/link";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type SyntheticEvent,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
-import HashValue from "@/components/evaluation/hash-value";
-import { CatalogPageHeader } from "@/components/catalog/catalog-layout";
+import HashValue, { InlineConfirm } from "@/components/evaluation/hash-value";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { Markdown } from "@/components/ui/markdown";
 import Select from "@/components/ui/select";
@@ -26,15 +17,21 @@ import {
   Panel,
   SessionRequired,
 } from "@/components/ui/states";
+import { handleTabListKeyDown } from "@/components/ui/tab-keyboard";
 import StatusBadge from "@/components/ui/status-badge";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { useI18n } from "@/i18n/provider";
-import type { Locale } from "@/i18n/types";
-import { toApiError, type ApiError, type AuthInput } from "@/lib/api/client";
-import { listKnowledgeBases, type KnowledgeBase } from "@/lib/api/knowledge";
+import { ApiError, errorHintKey, type AuthInput } from "@/lib/api/client";
+import {
+  listKnowledgeBases,
+  listSnapshots,
+  type KnowledgeBase,
+  type KnowledgeSnapshot,
+} from "@/lib/api/knowledge";
 import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
 import {
   createCompilation,
+  getCompilation,
   getCompilationLint,
   getCompilationPages,
   listCompilations,
@@ -42,1085 +39,1180 @@ import {
   queryWikiCompilation,
   retryCompilation,
   type WikiCompilation,
-  type WikiLintReport,
+  type WikiCompilationStatus,
+  type WikiEvidence,
+  type WikiLintIssue,
   type WikiPage,
   type WikiQueryResult,
+  type WikiRelation,
 } from "@/lib/api/wiki";
 
-const EN_COPY = {
-  title: "Wiki workbench",
-  lead: "Compile knowledge into reviewable pages, inspect evidence quality, and test answers against a selected compilation.",
-  backToKnowledge: "Knowledge bases",
-  newCompilation: "New compilation",
-  knowledgeBase: "Knowledge base",
-  selectKnowledgeBase: "Select a knowledge base",
-  loadingKnowledgeBases: "Loading knowledge bases",
-  loadKnowledgeBasesFailed: "Knowledge bases could not be loaded.",
-  knowledgeBasesHint: "Check the workspace connection, then try again.",
-  noKnowledgeBases: "No knowledge bases available",
-  noKnowledgeBasesHint: "Create a knowledge base before compiling a Wiki.",
-  createKnowledgeBase: "Go to knowledge bases",
-  compilations: "Compilations",
-  selectKnowledgeBaseHint: "Choose a knowledge base to view its compilation history.",
-  loadingCompilations: "Loading compilations",
-  loadCompilationsFailed: "Compilations could not be loaded.",
-  compilationsHint: "Your selection is still in place. Retry this list without starting a new compilation.",
-  noCompilations: "No compilations yet",
-  noCompilationsHint: "Create a compilation to extract claims and build structured Wiki pages from this knowledge base.",
-  selectCompilation: "Select compilation",
-  compilationId: "Compilation ID",
-  contentHash: "Content hash",
-  compilationError: "Compilation error",
-  selectCompilationTitle: "Choose a compilation",
-  selectCompilationHint: "Select an entry on the left to review its pages, lint report, and query behavior.",
-  compilationDetails: "Compilation details",
-  attempts: "Attempts",
-  publish: "Publish Wiki",
-  publishing: "Publishing",
-  retry: "Retry compilation",
-  retrying: "Retrying",
-  publishFailed: "The Wiki publication could not be completed.",
-  retryFailed: "The compilation could not be retried.",
-  tabsLabel: "Compilation views",
-  pages: "Pages",
-  lint: "Lint",
-  query: "Query",
-  loadingPages: "Loading Wiki pages",
-  loadingLint: "Loading lint report",
-  pagesFailed: "Wiki pages could not be loaded.",
-  lintFailed: "The lint report could not be loaded.",
-  subresourceHint: "Retry the current view. No compilation work will be restarted.",
-  noPages: "No Wiki pages",
-  noPagesHint: "This compilation has not produced any pages.",
-  pageList: "Wiki pages",
-  slug: "Slug",
-  selectPageHint: "Select a page to read it.",
-  totalClaims: "Total claims",
-  conflicts: "Conflicts",
-  ungrounded: "Ungrounded",
-  circularDependencies: "Circular links",
-  issues: "Issues",
-  noLintData: "No lint report",
-  noLintDataHint: "Lint data is not available for this compilation.",
-  lintClean: "No lint issues found. This compilation meets the current consistency checks.",
-  severity: "Severity",
-  kind: "Kind",
-  page: "Page",
-  message: "Message",
-  severityError: "Error",
-  severityWarning: "Warning",
-  queryLabel: "Ask a question about this compilation",
-  queryPlaceholder: "Ask about claims, routes, or evidence in this Wiki...",
-  queryMode: "Query mode",
-  runQuery: "Run query",
-  querying: "Running query",
-  queryFailed: "The Wiki query could not be completed.",
-  route: "Route",
-  citations: "Citations",
-  evidenceConflictCount: "Conflicts",
-  insufficientEvidence: "Evidence is insufficient for a supported answer.",
-  supplementalRequired: "Supplemental evidence is required.",
-  degraded: "Degraded response",
-  answer: "Answer",
-  modeAuto: "Automatic",
-  modeWiki: "Wiki",
-  modeRag: "Raw retrieval",
-  modeHybrid: "Hybrid",
-  createTitle: "Create Wiki compilation",
-  createDescription: "Choose a model profile and how conflicts should be reviewed. This creates an asynchronous compilation job.",
-  closeDialog: "Close dialog",
-  modelProfile: "Model profile",
-  selectModelProfile: "Select a model profile",
-  loadingModels: "Loading model profiles",
-  loadModelsFailed: "Model profiles could not be loaded.",
-  modelsHint: "Configure or enable a model profile, then try again.",
-  noModels: "No model profiles available",
-  noModelsHint: "Add an enabled model profile in settings before creating a compilation.",
-  openModelSettings: "Open settings",
-  conflictReview: "Conflict review",
-  reviewBasic: "Basic — deterministic claim comparison",
-  reviewModel: "Model — secondary model review",
-  cancel: "Cancel",
-  startCompilation: "Start compilation",
-  startingCompilation: "Starting compilation",
-  createFailed: "The compilation could not be started.",
-};
-
-type WikiCopy = { [Key in keyof typeof EN_COPY]: string };
-
-const ZH_COPY: WikiCopy = {
-  title: "Wiki 工作台",
-  lead: "将知识编译为可审阅页面，检查证据质量，并针对选定编译测试回答。",
-  backToKnowledge: "知识库",
-  newCompilation: "新建编译",
-  knowledgeBase: "知识库",
-  selectKnowledgeBase: "选择知识库",
-  loadingKnowledgeBases: "正在加载知识库",
-  loadKnowledgeBasesFailed: "知识库加载失败。",
-  knowledgeBasesHint: "请检查工作区连接后重试。",
-  noKnowledgeBases: "暂无可用知识库",
-  noKnowledgeBasesHint: "请先创建知识库，再编译 Wiki。",
-  createKnowledgeBase: "前往知识库",
-  compilations: "编译记录",
-  selectKnowledgeBaseHint: "选择知识库后可查看其编译历史。",
-  loadingCompilations: "正在加载编译记录",
-  loadCompilationsFailed: "编译记录加载失败。",
-  compilationsHint: "当前选择仍会保留。可以重试列表，不会启动新的编译。",
-  noCompilations: "暂无编译记录",
-  noCompilationsHint: "创建编译后，系统会从该知识库提取主张并生成结构化 Wiki 页面。",
-  selectCompilation: "选择编译",
-  compilationId: "编译 ID",
-  contentHash: "内容哈希",
-  compilationError: "编译错误",
-  selectCompilationTitle: "选择一个编译",
-  selectCompilationHint: "从左侧选择一条记录，查看页面、检查报告和查询表现。",
-  compilationDetails: "编译详情",
-  attempts: "尝试次数",
-  publish: "发布 Wiki",
-  publishing: "正在发布",
-  retry: "重试编译",
-  retrying: "正在重试",
-  publishFailed: "Wiki 发布未能完成。",
-  retryFailed: "编译重试未能完成。",
-  tabsLabel: "编译视图",
-  pages: "页面",
-  lint: "检查",
-  query: "查询",
-  loadingPages: "正在加载 Wiki 页面",
-  loadingLint: "正在加载检查报告",
-  pagesFailed: "Wiki 页面加载失败。",
-  lintFailed: "检查报告加载失败。",
-  subresourceHint: "请重试当前视图，不会重新启动编译任务。",
-  noPages: "暂无 Wiki 页面",
-  noPagesHint: "该编译尚未生成任何页面。",
-  pageList: "Wiki 页面",
-  slug: "路径",
-  selectPageHint: "选择一个页面开始阅读。",
-  totalClaims: "主张总数",
-  conflicts: "冲突",
-  ungrounded: "缺少依据",
-  circularDependencies: "循环链接",
-  issues: "问题",
-  noLintData: "暂无检查报告",
-  noLintDataHint: "当前编译没有可用的检查数据。",
-  lintClean: "未发现检查问题。该编译已通过当前一致性检查。",
-  severity: "级别",
-  kind: "类型",
-  page: "页面",
-  message: "说明",
-  severityError: "错误",
-  severityWarning: "警告",
-  queryLabel: "询问该编译中的内容",
-  queryPlaceholder: "询问 Wiki 中的主张、路由或证据…",
-  queryMode: "查询模式",
-  runQuery: "执行查询",
-  querying: "正在查询",
-  queryFailed: "Wiki 查询未能完成。",
-  route: "路由",
-  citations: "引用",
-  evidenceConflictCount: "冲突",
-  insufficientEvidence: "现有证据不足以支持回答。",
-  supplementalRequired: "还需要补充证据。",
-  degraded: "降级回答",
-  answer: "回答",
-  modeAuto: "自动",
-  modeWiki: "Wiki",
-  modeRag: "原始检索",
-  modeHybrid: "混合",
-  createTitle: "新建 Wiki 编译",
-  createDescription: "选择模型配置与冲突审查方式。提交后将创建一个异步编译任务。",
-  closeDialog: "关闭对话框",
-  modelProfile: "模型配置",
-  selectModelProfile: "选择模型配置",
-  loadingModels: "正在加载模型配置",
-  loadModelsFailed: "模型配置加载失败。",
-  modelsHint: "请配置或启用模型配置后重试。",
-  noModels: "暂无模型配置",
-  noModelsHint: "请先在设置中添加并启用模型配置，再新建编译。",
-  openModelSettings: "打开设置",
-  conflictReview: "冲突审查",
-  reviewBasic: "基础 — 确定性的主张比较",
-  reviewModel: "模型 — 由第二个模型复核",
-  cancel: "取消",
-  startCompilation: "开始编译",
-  startingCompilation: "正在启动编译",
-  createFailed: "编译未能启动。",
-};
-
-const COPY = {
-  "en-US": EN_COPY,
-  "zh-CN": ZH_COPY,
-} satisfies Record<Locale, WikiCopy>;
+import { wikiWorkbenchCopy, type WikiWorkbenchCopy } from "./wiki-copy";
 
 type Tab = "pages" | "lint" | "query";
 type QueryMode = "AUTO" | "WIKI" | "RAG" | "HYBRID";
-type ReviewMode = "BASIC" | "MODEL";
+type QueryIntent = "overview" | "fact" | "synthesis";
 
-const TAB_ORDER: readonly Tab[] = ["pages", "lint", "query"];
-const QUERY_MODES: readonly QueryMode[] = ["AUTO", "WIKI", "RAG", "HYBRID"];
+type QueryDisplay = {
+  query: string;
+  mode: QueryMode;
+  intent: QueryIntent;
+  requireCurrent: boolean;
+  generatedModelId: string;
+  result: WikiQueryResult;
+};
 
-function isQueryMode(value: string): value is QueryMode {
-  return QUERY_MODES.some((mode) => mode === value);
+const ACTIVE_COMPILATION_STATUSES = new Set<WikiCompilationStatus>(["PENDING", "PROCESSING"]);
+const COMPILATION_POLL_MS = 5000;
+
+function statusGuidance(status: WikiCompilationStatus, copy: WikiWorkbenchCopy): string {
+  return copy.statusGuidance[status] ?? status;
 }
 
-function handleTabKeyDown(
-  event: ReactKeyboardEvent<HTMLButtonElement>,
-  current: Tab,
-  onChange: (tab: Tab) => void,
-) {
-  let next: Tab | null = null;
-  if (event.key === "ArrowRight") next = TAB_ORDER[(TAB_ORDER.indexOf(current) + 1) % TAB_ORDER.length];
-  if (event.key === "ArrowLeft") next = TAB_ORDER[(TAB_ORDER.indexOf(current) - 1 + TAB_ORDER.length) % TAB_ORDER.length];
-  if (event.key === "Home") next = TAB_ORDER[0];
-  if (event.key === "End") next = TAB_ORDER[TAB_ORDER.length - 1];
-  if (!next) return;
-
-  event.preventDefault();
-  const tabs = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
-  onChange(next);
-  tabs?.item(TAB_ORDER.indexOf(next))?.focus();
+function relationTarget(relation: WikiRelation): string {
+  if (typeof relation === "string") return relation;
+  return typeof relation.target === "string" ? relation.target : JSON.stringify(relation);
 }
 
-/** Outer gate keeps every workbench query behind the active workspace session. */
-export default function WikiWorkbenchPage() {
-  const { locale } = useI18n();
-  const { connected, workspaceId, sessionId } = useFrontendSession();
-  const copy = COPY[locale];
-
-  if (!connected) {
-    return (
-      <div className="page wiki-page">
-        <CatalogPageHeader title={copy.title} description={copy.lead} />
-        <SessionRequired contextKey="session.context.knowledge" />
-      </div>
-    );
+function displayValue(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "—";
+  if (typeof value === "string") return value;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
   }
-
-  return <WikiWorkbench key={`${workspaceId}:${sessionId}`} locale={locale} />;
 }
 
-function WikiWorkbench({ locale }: { locale: Locale }) {
-  const copy = COPY[locale];
-  const { formatDateTime } = useI18n();
-  const { workspaceId, accessToken, permissions } = useFrontendSession();
-  const canCompile = permissions?.includes("knowledge_edit") === true;
-  const dialogRef = useRef<HTMLDialogElement>(null);
+function shortId(value: string): string {
+  return value.length > 12 ? `${value.slice(0, 8)}…` : value;
+}
+
+function canInspectCompilation(
+  status: WikiCompilationStatus,
+  canRead: boolean,
+  canEdit: boolean,
+): boolean {
+  return status === "PUBLISHED" ? canRead : status === "READY" && canEdit;
+}
+
+export default function WikiWorkbenchPage() {
+  const { sessionId, workspaceId } = useFrontendSession();
+  return <WikiWorkbenchContent key={`${sessionId}:${workspaceId}`} />;
+}
+
+function WikiWorkbenchContent() {
+  const { locale, t, formatDateTime, formatNumber } = useI18n();
+  const copy = wikiWorkbenchCopy(locale);
+  const { connected, workspaceId, permissions, accessToken } = useFrontendSession();
+  const canRead = permissions?.includes("knowledge_run") === true;
+  const canEdit = permissions?.includes("knowledge_edit") === true;
+  const accessTokenRef = useRef(accessToken);
+  const tokenTransition = accessTokenRef.current !== accessToken;
 
   const [selectedKbId, setSelectedKbId] = useState("");
-  const [selectedCompId, setSelectedCompId] = useState<string | null>(null);
-  const [createdCompilation, setCreatedCompilation] = useState<WikiCompilation | null>(null);
-  const [compileModelId, setCompileModelId] = useState("");
-  const [compileReviewMode, setCompileReviewMode] = useState<ReviewMode>("BASIC");
+  const [selectedCompilationId, setSelectedCompilationId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>("pages");
+  const [selectedPageKey, setSelectedPageKey] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [showCompileForm, setShowCompileForm] = useState(false);
+  const compileDialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = compileDialog.current;
+    if (!showCompileForm || !canEdit || !selectedKbId || !dialog) return;
+    dialog.showModal();
+    return () => dialog.close();
+  }, [showCompileForm, canEdit, selectedKbId]);
 
-  const loadKbs = useCallback((auth: AuthInput) => listKnowledgeBases(auth), []);
-  const kbs = useWorkspaceData<KnowledgeBase[]>(loadKbs, `knowledge-bases:${workspaceId}`);
+  const [publishConfirm, setPublishConfirm] = useState(false);
+
+  const [compileModelId, setCompileModelId] = useState("");
+  const [sourceSnapshotId, setSourceSnapshotId] = useState("LATEST");
+  const [reviewMode, setReviewMode] = useState<"BASIC" | "MODEL">("BASIC");
+  const [outputMode, setOutputMode] = useState<"PROMPT_JSON" | "JSON_SCHEMA">("PROMPT_JSON");
+
+  const [queryInput, setQueryInput] = useState("");
+  const [queryMode, setQueryMode] = useState<QueryMode>("AUTO");
+  const [queryIntent, setQueryIntent] = useState<QueryIntent>("overview");
+  const [requireCurrent, setRequireCurrent] = useState(true);
+  const [generateAnswer, setGenerateAnswer] = useState(false);
+  const [queryModelId, setQueryModelId] = useState("");
+  const [queryDisplay, setQueryDisplay] = useState<QueryDisplay | null>(null);
+  const [queryGeneration, setQueryGeneration] = useState(0);
+
+  const loadBases = useCallback((auth: AuthInput) => listKnowledgeBases(auth), []);
+  const bases = useWorkspaceData<KnowledgeBase[]>(
+    loadBases,
+    `wiki-bases:${workspaceId}`,
+    { enabled: connected && canRead },
+  );
 
   const loadModels = useCallback((auth: AuthInput) => listModelProfiles(auth), []);
-  const models = useWorkspaceData<ModelProfile[]>(loadModels, `model-profiles:${workspaceId}`);
+  const models = useWorkspaceData<ModelProfile[]>(
+    loadModels,
+    `wiki-model-profiles:${workspaceId}`,
+    { enabled: connected && canRead },
+  );
+
+  const loadSnapshots = useCallback(
+    (auth: AuthInput) => listSnapshots(auth, selectedKbId),
+    [selectedKbId],
+  );
+  const snapshots = useWorkspaceData<KnowledgeSnapshot[]>(
+    loadSnapshots,
+    `wiki-snapshots:${workspaceId}:${selectedKbId}`,
+    { enabled: connected && canEdit && Boolean(selectedKbId) },
+  );
 
   const loadCompilations = useCallback(
-    (auth: AuthInput) => (selectedKbId ? listCompilations(auth, selectedKbId) : Promise.resolve([])),
+    (auth: AuthInput) => listCompilations(auth, selectedKbId),
     [selectedKbId],
   );
   const compilations = useWorkspaceData<WikiCompilation[]>(
     loadCompilations,
     `wiki-compilations:${workspaceId}:${selectedKbId}`,
-    { enabled: Boolean(selectedKbId) },
+    { enabled: connected && canRead && Boolean(selectedKbId) },
   );
-  const createMutation = useWorkspaceMutation(`wiki-create:${workspaceId}:${selectedKbId}`);
+
+  const compilationList = compilations.data ?? [];
+  const selectedCompilation =
+    compilationList.find((row) => row.id === selectedCompilationId) ?? null;
+  const selectedStatus = selectedCompilation?.status ?? null;
+  const canInspectSelected =
+    selectedStatus !== null && canInspectCompilation(selectedStatus, canRead, canEdit);
+
+  const loadPages = useCallback(
+    (auth: AuthInput) =>
+      selectedKbId && selectedCompilationId
+        ? getCompilationPages(auth, selectedKbId, selectedCompilationId)
+        : Promise.resolve([]),
+    [selectedKbId, selectedCompilationId],
+  );
+  const pages = useWorkspaceData<WikiPage[]>(
+    loadPages,
+    `wiki-pages:${workspaceId}:${selectedKbId}:${selectedCompilationId ?? ""}:${selectedStatus ?? ""}`,
+    { enabled: connected && canInspectSelected && activeTab === "pages" },
+  );
+
+  const loadLint = useCallback(
+    (auth: AuthInput) =>
+      selectedKbId && selectedCompilationId
+        ? getCompilationLint(auth, selectedKbId, selectedCompilationId)
+        : Promise.resolve([]),
+    [selectedKbId, selectedCompilationId],
+  );
+  const lint = useWorkspaceData<WikiLintIssue[]>(
+    loadLint,
+    `wiki-lint:${workspaceId}:${selectedKbId}:${selectedCompilationId ?? ""}:${selectedStatus ?? ""}`,
+    { enabled: connected && canInspectSelected && activeTab === "lint" },
+  );
+
+  const createMutation = useWorkspaceMutation(
+    `wiki-create:${workspaceId}:${selectedKbId}`,
+  );
+  const compilationMutation = useWorkspaceMutation(
+    `wiki-compilation-action:${workspaceId}:${selectedKbId}:${selectedCompilationId ?? ""}`,
+  );
+  const queryMutation = useWorkspaceMutation(
+    `wiki-query:${workspaceId}:${selectedKbId}:${selectedCompilationId ?? ""}:${queryGeneration}`,
+  );
 
   useEffect(() => {
-    if (!kbs.data) return;
-    if (selectedKbId && kbs.data.some((kb) => kb.id === selectedKbId)) return;
-    setSelectedKbId(kbs.data[0]?.id ?? "");
-    setSelectedCompId(null);
-    setCreatedCompilation(null);
-  }, [kbs.data, selectedKbId]);
+    if (!bases.loaded) return;
+    const available = bases.data ?? [];
+    setSelectedKbId((current) =>
+      available.some((base) => base.id === current) ? current : (available[0]?.id ?? ""),
+    );
+  }, [bases.data, bases.loaded]);
 
   useEffect(() => {
-    if (!models.data?.length) {
-      if (compileModelId) setCompileModelId("");
-      return;
-    }
-    if (models.data.some((profile) => profile.id === compileModelId)) return;
-    const preferred = models.data.find((profile) => profile.enabled) ?? models.data[0];
-    setCompileModelId(preferred.id);
-  }, [compileModelId, models.data]);
+    if (!models.loaded) return;
+    const enabled = (models.data ?? []).filter((profile) => profile.enabled);
+    setCompileModelId((current) =>
+      enabled.some((profile) => profile.id === current) ? current : (enabled[0]?.id ?? ""),
+    );
+    setQueryModelId((current) =>
+      enabled.some((profile) => profile.id === current) ? current : (enabled[0]?.id ?? ""),
+    );
+  }, [models.data, models.loaded]);
 
-  function handleKnowledgeBaseChange(next: string) {
-    setSelectedKbId(next);
-    setSelectedCompId(null);
-    setCreatedCompilation(null);
-  }
+  useEffect(() => {
+    setSelectedCompilationId(null);
+    setSelectedPageKey(null);
+    setActiveTab("pages");
+    setNotice(null);
+    setPublishConfirm(false);
+    setShowCompileForm(false);
+    setSourceSnapshotId("LATEST");
+    setQueryDisplay(null);
+    setQueryGeneration((current) => current + 1);
+  }, [selectedKbId]);
 
-  function openCreateDialog() {
-    if (!canCompile) return;
-    const dialog = dialogRef.current;
-    if (!dialog || dialog.open) return;
-    createMutation.clearError();
-    if (models.error) models.reload();
-    dialog.showModal();
-    requestAnimationFrame(() => {
-      dialog.querySelector<HTMLElement>("button.select-control")?.focus();
+  useEffect(() => {
+    if (!compilations.loaded) return;
+    const available = compilations.data ?? [];
+    setSelectedCompilationId((current) =>
+      current && available.some((row) => row.id === current) ? current : (available[0]?.id ?? null),
+    );
+  }, [compilations.data, compilations.loaded]);
+
+  useEffect(() => {
+    if (!snapshots.loaded) return;
+    const available = snapshots.data ?? [];
+    setSourceSnapshotId((current) =>
+      current === "LATEST" || available.some((snapshot) => snapshot.id === current)
+        ? current
+        : "LATEST",
+    );
+  }, [snapshots.data, snapshots.loaded]);
+
+  useEffect(() => {
+    setActiveTab((current) => {
+      if (current === "query" && selectedStatus !== "PUBLISHED") return "pages";
+      return current;
     });
-  }
+    setSelectedPageKey(null);
+    setPublishConfirm(false);
+    setQueryDisplay(null);
+  }, [selectedCompilationId, selectedStatus]);
 
-  function closeCreateDialog() {
-    const dialog = dialogRef.current;
-    if (dialog?.open) dialog.close();
-  }
+  const reloadCompilations = compilations.reload;
+  const compilationInFlight =
+    selectedStatus !== null && ACTIVE_COMPILATION_STATUSES.has(selectedStatus);
+  useEffect(() => {
+    if (!compilationInFlight) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden) reloadCompilations();
+    }, COMPILATION_POLL_MS);
+    return () => window.clearInterval(interval);
+  }, [compilationInFlight, reloadCompilations]);
 
-  function handleDialogCancel(event: SyntheticEvent<HTMLDialogElement>) {
-    event.preventDefault();
-    if (!createMutation.pending) closeCreateDialog();
-  }
-
-  function handleDialogClose() {
+  useEffect(() => {
+    if (!tokenTransition) return;
+    accessTokenRef.current = accessToken;
+    setQueryDisplay(null);
+    setQueryGeneration((current) => current + 1);
+    setNotice(null);
+    setPublishConfirm(false);
     createMutation.clearError();
+    compilationMutation.clearError();
+    queryMutation.clearError();
+  }, [
+    accessToken,
+    tokenTransition,
+    createMutation.clearError,
+    compilationMutation.clearError,
+    queryMutation.clearError,
+  ]);
+
+  const pageList = pages.data ?? [];
+  const selectedPage =
+    pageList.find((page) => page.page_key === selectedPageKey) ?? pageList[0] ?? null;
+  const lintIssues = lint.data ?? [];
+  const queryMatchesInput =
+    queryDisplay !== null &&
+    queryDisplay.query === queryInput.trim() &&
+    queryDisplay.mode === queryMode &&
+    queryDisplay.intent === queryIntent &&
+    queryDisplay.requireCurrent === requireCurrent &&
+    queryDisplay.generatedModelId === (generateAnswer ? queryModelId : "");
+  const visibleQuery = queryMatchesInput ? queryDisplay?.result ?? null : null;
+
+  function invalidateQuery(next: () => void) {
+    next();
+    setQueryDisplay(null);
+    setQueryGeneration((current) => current + 1);
   }
 
-  async function handleCreateCompilation(event: FormEvent<HTMLFormElement>) {
+  async function createWikiCompilation(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!canCompile || !selectedKbId || !compileModelId || createMutation.pending) return;
-
-    const created = await createMutation.run((auth) =>
-      createCompilation(auth, selectedKbId, {
+    if (!canEdit || !selectedKbId || !compileModelId) return;
+    setNotice(null);
+    const result = await createMutation.run(async (auth) => {
+      const created = await createCompilation(auth, selectedKbId, {
         model_profile_id: compileModelId,
-        review_mode: compileReviewMode,
+        source_snapshot_id: sourceSnapshotId,
+        review_mode: reviewMode,
+        output_mode: outputMode,
+      });
+      return getCompilation(auth, selectedKbId, created.id);
+    });
+    if (!result) return;
+    setSelectedCompilationId(result.id);
+    setShowCompileForm(false);
+    setNotice(copy.compilationAccepted(result.status));
+    compilations.reload();
+  }
+
+  async function publishSelectedCompilation() {
+    if (!canEdit || !selectedKbId || !selectedCompilation) return;
+    const knowledgeBaseId = selectedKbId;
+    const compilationId = selectedCompilation.id;
+    setNotice(null);
+    const result = await compilationMutation.run(async (auth) => {
+      await publishCompilation(auth, knowledgeBaseId, compilationId);
+      const confirmed = await getCompilation(auth, knowledgeBaseId, compilationId);
+      if (confirmed.status !== "PUBLISHED") {
+        throw new ApiError(
+          "SERVER_STATE_NOT_CONFIRMED",
+          copy.serverStateMismatch(confirmed.status),
+          409,
+        );
+      }
+      return confirmed;
+    });
+    if (!result) return;
+    setPublishConfirm(false);
+    setNotice(copy.publicationConfirmed);
+    compilations.reload();
+    pages.reload();
+    lint.reload();
+  }
+
+  async function retrySelectedCompilation() {
+    if (!canEdit || !selectedKbId || !selectedCompilation) return;
+    const knowledgeBaseId = selectedKbId;
+    const compilationId = selectedCompilation.id;
+    setNotice(null);
+    const result = await compilationMutation.run(async (auth) => {
+      await retryCompilation(auth, knowledgeBaseId, compilationId);
+      return getCompilation(auth, knowledgeBaseId, compilationId);
+    });
+    if (!result) return;
+    setNotice(copy.retryAccepted(result.status));
+    compilations.reload();
+  }
+
+  async function submitWikiQuery(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const query = queryInput.trim();
+    if (!canRead || !selectedKbId || !selectedCompilation || !query) return;
+    if (selectedCompilation.status !== "PUBLISHED") return;
+    if (generateAnswer && !queryModelId) return;
+
+    const request = {
+      query,
+      mode: queryMode,
+      intent: queryIntent,
+      requireCurrent,
+      generatedModelId: generateAnswer ? queryModelId : "",
+    };
+    setQueryDisplay(null);
+    const result = await queryMutation.run((auth) =>
+      queryWikiCompilation(auth, selectedKbId, selectedCompilation.id, {
+        source_snapshot_id: selectedCompilation.source_snapshot_id,
+        query: request.query,
+        mode: request.mode,
+        intent: request.intent,
+        require_current: request.requireCurrent,
+        model_profile_id: request.generatedModelId || undefined,
       }),
     );
-    if (!created) return;
-
-    setCreatedCompilation(created);
-    setSelectedCompId(created.id);
-    compilations.reload();
-    closeCreateDialog();
+    if (!result) return;
+    setQueryDisplay({ ...request, result });
   }
 
-  function handleCompilationChanged(updated: WikiCompilation) {
-    setCreatedCompilation(updated);
-    compilations.reload();
+  if (!connected) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <h1>{copy.title}</h1>
+        </header>
+        <SessionRequired contextKey="session.context.knowledge" />
+      </div>
+    );
   }
 
-  const kbList = kbs.data ?? [];
-  const compList = compilations.data ?? [];
-  const listedCompilation = compList.find((compilation) => compilation.id === selectedCompId) ?? null;
-  const selectedComp =
-    listedCompilation ??
-    (createdCompilation?.id === selectedCompId ? createdCompilation : null);
-  const modelOptions = (models.data ?? []).map((profile) => ({
+  if (tokenTransition || permissions === null) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <h1>{copy.title}</h1>
+        </header>
+        <LoadingState
+          label={tokenTransition ? copy.refreshingSession : copy.loadingPermissions}
+        />
+      </div>
+    );
+  }
+
+  if (!canRead) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <h1>{copy.title}</h1>
+          <p className="page-lead">
+            {copy.lead}
+          </p>
+        </header>
+        <Panel title={copy.accessRequired}>
+          <EmptyState
+            title={copy.accessTitle}
+            hint={copy.accessHint}
+            actions={
+              <Link className="button button-ghost" href="/knowledge">
+                {t("nav.knowledge")}
+              </Link>
+            }
+          />
+        </Panel>
+      </div>
+    );
+  }
+
+  const modelList = models.data ?? [];
+  const enabledModelOptions = modelList.map((profile) => ({
     value: profile.id,
-    label: profile.model,
+    label: `${profile.model}${profile.enabled ? "" : copy.modelDisabled}`,
+    disabled: !profile.enabled,
   }));
+  const snapshotOptions = [
+    { value: "LATEST", label: copy.latestSnapshot },
+    ...(snapshots.data ?? []).map((snapshot) => ({
+      value: snapshot.id,
+      label: `${shortId(snapshot.id)} · ${copy.snapshotItems(formatNumber(snapshot.item_count))}`,
+    })),
+  ];
 
   return (
-    <div className="page wiki-page">
-      <CatalogPageHeader
-        title={copy.title}
-        description={copy.lead}
-        actions={
-          <>
-            <Link className="button button-ghost" href="/knowledge">
-              {copy.backToKnowledge}
-            </Link>
-            <button
-              type="button"
-              className="button button-primary"
-              disabled={!canCompile || !selectedKbId}
-              title={!canCompile ? (locale === "zh-CN" ? "当前角色不能编译 Wiki 知识" : "Your role cannot compile Wiki knowledge") : undefined}
-              onClick={openCreateDialog}
-            >
-              {copy.newCompilation}
-            </button>
-          </>
-        }
-      />
+    <div className="page">
+      <header className="page-header">
+        <div>
+          <h1>{copy.title}</h1>
+          <p className="page-lead">
+            {copy.lead}
+          </p>
+        </div>
+        <div className="page-actions">
+          <Link className="button button-ghost" href="/knowledge">
+            {t("nav.knowledge")}
+          </Link>
+        </div>
+      </header>
 
-      {kbs.error ? (
+      <div className="page-toolbar">
+        <label>
+          {copy.knowledgeBase}
+          <Select
+            value={selectedKbId}
+            onChange={setSelectedKbId}
+            options={(bases.data ?? []).map((base) => ({ value: base.id, label: base.name }))}
+            placeholder={copy.selectKnowledgeBase}
+            ariaLabel={copy.wikiKnowledgeBaseAria}
+          />
+        </label>
+      </div>
+
+      {notice && <p className="inline-notice">{notice}</p>}
+
+      {bases.error && (
         <ErrorState
-          code={kbs.error.code}
-          message={kbs.error.message || copy.loadKnowledgeBasesFailed}
-          hint={copy.knowledgeBasesHint}
-          onRetry={kbs.reload}
+          code={bases.error.code}
+          message={bases.error.message || copy.loadBases}
+          hint={errorHintKey(bases.error) ? t(errorHintKey(bases.error)!) : undefined}
+          onRetry={bases.reload}
         />
-      ) : kbs.loading && !kbs.data ? (
-        <LoadingState label={copy.loadingKnowledgeBases} />
-      ) : kbs.loaded && kbList.length === 0 ? (
+      )}
+      {bases.loading && !bases.error && <LoadingState />}
+      {bases.loaded && !bases.error && (bases.data ?? []).length === 0 && (
         <EmptyState
-          title={copy.noKnowledgeBases}
-          hint={copy.noKnowledgeBasesHint}
+          title={t("knowledge.noBases")}
+          hint={t("knowledge.noBasesHint")}
           actions={
             <Link className="button button-primary" href="/knowledge">
-              {copy.createKnowledgeBase}
+              {t("knowledge.createBase")}
             </Link>
           }
         />
-      ) : (
-        <>
-          <section className="wiki-context-bar" aria-label={copy.knowledgeBase}>
-            <label className="wiki-context-field">
-              <span>{copy.knowledgeBase}</span>
-              <Select
-                value={selectedKbId}
-                onChange={handleKnowledgeBaseChange}
-                options={kbList.map((kb) => ({ value: kb.id, label: kb.name }))}
-                placeholder={copy.selectKnowledgeBase}
-                ariaLabel={copy.knowledgeBase}
-              />
-            </label>
-          </section>
-
-          <div className="wiki-workbench-grid">
-            <Panel
-              title={copy.compilations}
-              actions={
-                <span className="wiki-count" aria-label={`${copy.compilations}: ${compList.length}`}>
-                  {compList.length}
-                </span>
-              }
-            >
-              {!selectedKbId ? (
-                <EmptyState title={copy.selectKnowledgeBase} hint={copy.selectKnowledgeBaseHint} />
-              ) : compilations.error ? (
-                <ErrorState
-                  code={compilations.error.code}
-                  message={compilations.error.message || copy.loadCompilationsFailed}
-                  hint={copy.compilationsHint}
-                  onRetry={compilations.reload}
-                />
-              ) : compilations.loading ? (
-                <LoadingState label={copy.loadingCompilations} />
-              ) : compList.length === 0 ? (
-                <EmptyState title={copy.noCompilations} hint={copy.noCompilationsHint} />
-              ) : (
-                <ul className="wiki-compilation-list">
-                  {compList.map((compilation) => {
-                    const isSelected = compilation.id === selectedCompId;
-                    return (
-                      <li
-                        key={compilation.id}
-                        className={`wiki-compilation-item${isSelected ? " wiki-compilation-item-selected" : ""}`}
-                      >
-                        <button
-                          type="button"
-                          className="wiki-compilation-select"
-                          aria-pressed={isSelected}
-                          aria-label={`${copy.selectCompilation}: ${compilation.id.slice(0, 8)}`}
-                          onClick={() => setSelectedCompId(compilation.id)}
-                        >
-                          <span className="wiki-compilation-status-row">
-                            <StatusBadge status={compilation.status} />
-                            <span className="wiki-compilation-date">
-                              {formatDateTime(compilation.created_at)}
-                            </span>
-                          </span>
-                          <span className="wiki-compilation-id">
-                            {copy.compilationId} <code>{compilation.id.slice(0, 8)}…</code>
-                          </span>
-                          {compilation.error_code ? (
-                            <span className="wiki-compilation-error">
-                              {copy.compilationError}: <code>{compilation.error_code}</code>
-                            </span>
-                          ) : null}
-                        </button>
-                        {compilation.content_hash ? (
-                          <div className="wiki-compilation-hash">
-                            <span>{copy.contentHash}</span>
-                            <HashValue value={compilation.content_hash} label={copy.contentHash} />
-                          </div>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </Panel>
-
-            {selectedComp ? (
-              <CompilationWorkspace
-                key={`${selectedKbId}:${selectedComp.id}`}
-                knowledgeBaseId={selectedKbId}
-                compilation={selectedComp}
-                copy={copy}
-                onCompilationChanged={handleCompilationChanged}
-              />
-            ) : (
-              <Panel title={copy.selectCompilationTitle}>
-                <EmptyState title={copy.selectCompilation} hint={copy.selectCompilationHint} />
-              </Panel>
-            )}
-          </div>
-        </>
       )}
 
-      <dialog
-        ref={dialogRef}
-        className="wiki-create-dialog"
-        aria-labelledby="wiki-create-title"
-        aria-describedby="wiki-create-description"
-        onCancel={handleDialogCancel}
-        onClose={handleDialogClose}
-      >
-        <div className="wiki-dialog-header">
-          <div>
-            <h2 id="wiki-create-title">{copy.createTitle}</h2>
-            <p id="wiki-create-description" className="wiki-dialog-description">
-              {copy.createDescription}
-            </p>
-          </div>
-          <button
-            type="button"
-            className="button button-ghost wiki-dialog-close"
-            onClick={closeCreateDialog}
-            disabled={createMutation.pending}
-            aria-label={copy.closeDialog}
+      {selectedKbId && (
+        <>
+          <Panel
+            title={copy.compilations}
+            ariaLabel={copy.wikiCompilationsAria}
+            actions={
+              canEdit ? (
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={() => setShowCompileForm((current) => !current)}
+                >
+                  {copy.newCompilation}
+                </button>
+              ) : undefined
+            }
           >
-            {copy.closeDialog}
-          </button>
-        </div>
+            {canEdit && showCompileForm && (
+              <dialog ref={compileDialog} className="wiki-create-dialog" aria-labelledby="wiki-compile-heading"
+                onCancel={(event) => {
+                  event.preventDefault();
+                  if (!createMutation.pending) setShowCompileForm(false);
+                }}
+              >
+              <form className="wiki-dialog-form" onSubmit={createWikiCompilation} noValidate>
+                <h2 id="wiki-compile-heading">{copy.compileSnapshotTitle}</h2>
+                <div className="form-grid">
+                  <label>
+                    {copy.modelProfile}
+                    <Select
+                      value={compileModelId}
+                      onChange={setCompileModelId}
+                      options={enabledModelOptions}
+                      placeholder={
+                        models.loading ? copy.loadingProfiles : copy.configureModel
+                      }
+                      disabled={models.loading}
+                      ariaLabel={copy.compileModelProfileAria}
+                    />
+                  </label>
+                  <label>
+                    {copy.sourceSnapshot}
+                    <Select
+                      value={sourceSnapshotId}
+                      onChange={setSourceSnapshotId}
+                      options={snapshotOptions}
+                      disabled={snapshots.loading}
+                      ariaLabel={copy.wikiSourceSnapshotAria}
+                    />
+                  </label>
+                  <label>
+                    {copy.outputContract}
+                    <Select
+                      value={outputMode}
+                      onChange={(value) =>
+                        setOutputMode(value as "PROMPT_JSON" | "JSON_SCHEMA")
+                      }
+                      options={[
+                        { value: "PROMPT_JSON", label: copy.promptJson },
+                        { value: "JSON_SCHEMA", label: copy.nativeJson },
+                      ]}
+                      ariaLabel={copy.compilationOutputModeAria}
+                    />
+                  </label>
+                  <label>
+                    {copy.conflictReview}
+                    <Select
+                      value={reviewMode}
+                      onChange={(value) => setReviewMode(value as "BASIC" | "MODEL")}
+                      options={[
+                        { value: "BASIC", label: copy.basicReview },
+                        { value: "MODEL", label: copy.modelReview },
+                      ]}
+                      ariaLabel={copy.conflictsReviewModeAria}
+                    />
+                  </label>
+                </div>
+                {models.error && (
+                  <ErrorState
+                    code={models.error.code}
+                    message={models.error.message || copy.loadModels}
+                    hint={errorHintKey(models.error) ? t(errorHintKey(models.error)!) : undefined}
+                    onRetry={models.reload}
+                  />
+                )}
+                {snapshots.error && (
+                  <ErrorState
+                    code={snapshots.error.code}
+                    message={snapshots.error.message || copy.loadSnapshots}
+                    hint={
+                      errorHintKey(snapshots.error) ? t(errorHintKey(snapshots.error)!) : undefined
+                    }
+                    onRetry={snapshots.reload}
+                  />
+                )}
+                <p className="state-hint">
+                  {copy.neverPublishAutomatically}
+                </p>
+                <InlineError
+                  error={createMutation.error}
+                  fallback={t("errors.requestFailed")}
+                />
+                <div className="form-actions">
+                  <button
+                    type="submit"
+                    className="button button-primary"
+                    disabled={
+                      createMutation.pending ||
+                      !compileModelId ||
+                      !selectedKbId ||
+                      models.loading
+                    }
+                  >
+                    {createMutation.pending ? copy.requesting : copy.createCompilation}
+                  </button>
+                  <button
+                    type="button"
+                    className="button button-ghost"
+                    onClick={() => setShowCompileForm(false)}
+                    disabled={createMutation.pending}
+                  >
+                    {t("session.cancel")}
+                  </button>
+                </div>
+              </form>
+              </dialog>
+            )}
 
-        <form className="wiki-dialog-form" onSubmit={handleCreateCompilation}>
-          {models.error ? (
-            <ErrorState
-              code={models.error.code}
-              message={models.error.message || copy.loadModelsFailed}
-              hint={copy.modelsHint}
-              onRetry={models.reload}
-            />
-          ) : models.loading && !models.data ? (
-            <LoadingState label={copy.loadingModels} />
-          ) : modelOptions.length === 0 ? (
-            <EmptyState
-              title={copy.noModels}
-              hint={copy.noModelsHint}
-              actions={
-                <Link className="button button-ghost" href="/settings">
-                  {copy.openModelSettings}
-                </Link>
-              }
-            />
-          ) : (
-            <div className="wiki-dialog-field">
-              <span className="wiki-field-label">{copy.modelProfile}</span>
-              <Select
-                value={compileModelId}
-                onChange={setCompileModelId}
-                options={modelOptions}
-                placeholder={copy.selectModelProfile}
-                ariaLabel={copy.modelProfile}
+            {compilations.error && (
+              <ErrorState
+                code={compilations.error.code}
+                message={compilations.error.message || copy.loadCompilations}
+                hint={
+                  errorHintKey(compilations.error)
+                    ? t(errorHintKey(compilations.error)!)
+                    : undefined
+                }
+                onRetry={compilations.reload}
               />
-            </div>
+            )}
+            {compilations.loading && !compilations.error && <LoadingState />}
+            {compilations.loaded &&
+              !compilations.error &&
+              compilationList.length === 0 && (
+                <EmptyState
+                  title={copy.noCompilations}
+                  hint={
+                    canEdit
+                      ? copy.createCompilationHint
+                      : copy.readOnlyCompilationHint
+                  }
+                />
+              )}
+
+            {compilationList.length > 0 && (
+              <div className="data-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t("common.id")}</th>
+                      <th scope="col">{t("runs.columns.status")}</th>
+                      <th scope="col">{copy.attempts}</th>
+                      <th scope="col">{t("common.created")}</th>
+                      <th scope="col">{t("common.actions")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {compilationList.map((compilation) => (
+                      <tr key={compilation.id}>
+                        <td data-label={t("common.id")}>
+                          <HashValue value={compilation.id} label={t("common.id")} />
+                        </td>
+                        <td data-label={t("runs.columns.status")}>
+                          <StatusBadge status={compilation.status} />
+                        </td>
+                        <td data-label={copy.attempts} className="numeric-cell">
+                          {formatNumber(compilation.attempt_count)}
+                        </td>
+                        <td data-label={t("common.created")}>
+                          {formatDateTime(compilation.created_at)}
+                        </td>
+                        <td data-label={t("common.actions")}>
+                          <button
+                            type="button"
+                            className="button button-ghost"
+                            onClick={() => setSelectedCompilationId(compilation.id)}
+                          >
+                            {selectedCompilationId === compilation.id ? copy.selected : copy.review}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Panel>
+
+          {selectedCompilation ? (
+            <Panel
+              title={copy.compilationReview}
+              eyebrow={`ID ${shortId(selectedCompilation.id)}`}
+              ariaLabel={copy.selectedCompilationAria}
+              actions={
+                canEdit && selectedCompilation.status === "FAILED" ? (
+                  <button
+                    type="button"
+                    className="button button-ghost"
+                    onClick={() => void retrySelectedCompilation()}
+                    disabled={compilationMutation.pending}
+                  >
+                    {compilationMutation.pending ? copy.retrying : copy.retryFailed}
+                  </button>
+                ) : canEdit && selectedCompilation.status === "READY" ? (
+                  <button
+                    type="button"
+                    className="button button-primary"
+                    onClick={() => setPublishConfirm(true)}
+                    disabled={compilationMutation.pending || publishConfirm}
+                  >
+                    {copy.publishOpening}
+                  </button>
+                ) : undefined
+              }
+            >
+              <div className="approval-state-block">
+                <div className="approval-facts">
+                  <div className="key-value-row">
+                    <span>{t("runs.columns.status")}</span>
+                    <StatusBadge status={selectedCompilation.status} />
+                  </div>
+                  <div className="key-value-row">
+                    <span>{copy.sourceSnapshot}</span>
+                    <HashValue
+                      value={selectedCompilation.source_snapshot_id}
+                      label={copy.sourceSnapshot}
+                    />
+                  </div>
+                  <div className="key-value-row">
+                    <span>{copy.sourceHash}</span>
+                    <HashValue
+                      value={selectedCompilation.source_snapshot_hash}
+                      label={copy.sourceHash}
+                    />
+                  </div>
+                  <div className="key-value-row">
+                    <span>{copy.contentHash}</span>
+                    <HashValue
+                      value={selectedCompilation.content_hash}
+                      label={copy.contentHash}
+                    />
+                  </div>
+                  <div className="key-value-row">
+                    <span>{copy.published}</span>
+                    <span>
+                      {selectedCompilation.published_at
+                        ? formatDateTime(selectedCompilation.published_at)
+                        : t("common.none")}
+                    </span>
+                  </div>
+                </div>
+                <p className="approval-state-meta">
+                  {statusGuidance(selectedCompilation.status, copy)}
+                </p>
+                {selectedCompilation.error_code && (
+                  <p className="inline-error" role="alert">
+                    {copy.failureCode} <code className="state-code">{selectedCompilation.error_code}</code>
+                  </p>
+                )}
+              </div>
+
+              {publishConfirm && (
+                <InlineConfirm
+                  title={copy.publishTitle}
+                  text={copy.publishText}
+                  confirmLabel={copy.publishConfirm}
+                  pendingLabel={copy.publishing}
+                  cancelLabel={t("session.cancel")}
+                  onConfirm={() => void publishSelectedCompilation()}
+                  onCancel={() => setPublishConfirm(false)}
+                  pending={compilationMutation.pending}
+                />
+              )}
+              <InlineError
+                error={compilationMutation.error}
+                fallback={t("errors.requestFailed")}
+              />
+
+              {canInspectSelected && (
+                <div
+                  className="tab-strip"
+                  role="tablist"
+                  aria-label={copy.tabsAria}
+                  onKeyDown={handleTabListKeyDown}
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    id="wiki-tab-pages"
+                    aria-controls="wiki-panel-pages"
+                    tabIndex={activeTab === "pages" ? 0 : -1}
+                    aria-selected={activeTab === "pages"}
+                    className={activeTab === "pages" ? "button button-primary" : "button button-ghost"}
+                    onClick={() => setActiveTab("pages")}
+                  >
+                    {copy.pagesTab}
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    id="wiki-tab-lint"
+                    aria-controls="wiki-panel-lint"
+                    tabIndex={activeTab === "lint" ? 0 : -1}
+                    aria-selected={activeTab === "lint"}
+                    className={activeTab === "lint" ? "button button-primary" : "button button-ghost"}
+                    onClick={() => setActiveTab("lint")}
+                  >
+                    {copy.lintTab}
+                  </button>
+                  {selectedCompilation.status === "PUBLISHED" && (
+                    <button
+                      type="button"
+                      role="tab"
+                      id="wiki-tab-query"
+                    aria-controls="wiki-panel-query"
+                    tabIndex={activeTab === "query" ? 0 : -1}
+                    aria-selected={activeTab === "query"}
+                      className={
+                        activeTab === "query" ? "button button-primary" : "button button-ghost"
+                      }
+                      onClick={() => setActiveTab("query")}
+                    >
+                      {copy.queryTab}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "pages" && canInspectSelected && (
+                <section role="tabpanel" tabIndex={0} id="wiki-panel-pages" aria-labelledby="wiki-tab-pages">
+                  {pages.error && (
+                    <ErrorState
+                      code={pages.error.code}
+                      message={pages.error.message || copy.loadPages}
+                      hint={errorHintKey(pages.error) ? t(errorHintKey(pages.error)!) : undefined}
+                      onRetry={pages.reload}
+                    />
+                  )}
+                  {pages.loading && !pages.error && <LoadingState />}
+                  {pages.loaded && !pages.error && pageList.length === 0 && (
+                    <EmptyState
+                      title={copy.noPages}
+                      hint={copy.noPagesHint}
+                    />
+                  )}
+                  {pageList.length > 0 && (
+                    <>
+                      <div className="page-toolbar">
+                        <div className="form-actions">
+                          {pageList.map((page) => (
+                            <button
+                              key={page.page_key}
+                              type="button"
+                              className={
+                                selectedPage?.page_key === page.page_key
+                                  ? "button button-primary"
+                                  : "button button-ghost"
+                              }
+                              onClick={() => setSelectedPageKey(page.page_key)}
+                            >
+                              {page.title}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {selectedPage && (
+                        <div className="playground-stage">
+                          <div className="playground-stage-header">
+                            <div>
+                              <h3>{selectedPage.title}</h3>
+                              <p className="state-hint">
+                                {selectedPage.kind} · {copy.sourceClaims(selectedPage.claims.length)}
+                              </p>
+                            </div>
+                            <HashValue value={selectedPage.page_key} label={copy.pageKey} />
+                          </div>
+                          <Markdown text={selectedPage.markdown} />
+                          {selectedPage.relations.length > 0 && (
+                            <p className="evidence-meta">
+                              <span>{copy.relations}</span>
+                              {selectedPage.relations.map((relation, index) => (
+                                <code key={`${relationTarget(relation)}:${index}`}>
+                                  {shortId(relationTarget(relation))}
+                                </code>
+                              ))}
+                            </p>
+                          )}
+                          <details className="advanced-options">
+                            <summary>{copy.structuredClaims}</summary>
+                            <div className="data-table">
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th scope="col">{copy.quote}</th>
+                                    <th scope="col">{copy.predicateValue}</th>
+                                    <th scope="col">{copy.sourceRevision}</th>
+                                    <th scope="col">{copy.conflict}</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {selectedPage.claims.map((claim, index) => (
+                                    <tr key={`${claim.chunk_id}:${index}`}>
+                                      <td data-label={copy.quote}>{claim.quote}</td>
+                                      <td data-label={copy.predicateValue}>
+                                        <code>{displayValue(claim.predicate)}</code>
+                                        <span className="state-hint">
+                                          {displayValue(claim.value)}
+                                        </span>
+                                      </td>
+                                      <td data-label={copy.sourceRevision}>
+                                        <HashValue
+                                          value={claim.document_revision_id}
+                                          label={copy.sourceRevision}
+                                        />
+                                      </td>
+                                      <td data-label={copy.conflict}>
+                                        {claim.conflict ? copy.needsReview : t("common.none")}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </details>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </section>
+              )}
+
+              {activeTab === "lint" && canInspectSelected && (
+                <section role="tabpanel" tabIndex={0} id="wiki-panel-lint" aria-labelledby="wiki-tab-lint">
+                  {lint.error && (
+                    <ErrorState
+                      code={lint.error.code}
+                      message={lint.error.message || copy.loadLint}
+                      hint={errorHintKey(lint.error) ? t(errorHintKey(lint.error)!) : undefined}
+                      onRetry={lint.reload}
+                    />
+                  )}
+                  {lint.loading && !lint.error && <LoadingState />}
+                  {lint.loaded && !lint.error && lintIssues.length === 0 && (
+                    <p className="inline-notice">
+                      {copy.noLint}
+                    </p>
+                  )}
+                  {lintIssues.length > 0 && (
+                    <div className="data-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th scope="col">{copy.severity}</th>
+                            <th scope="col">{copy.code}</th>
+                            <th scope="col">{copy.pageKeyLabel}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {lintIssues.map((issue, index) => (
+                            <tr key={`${issue.code}:${issue.page_key ?? ""}:${index}`}>
+                              <td data-label={copy.severity}>
+                                <StatusBadge status={issue.severity.toUpperCase()} />
+                              </td>
+                              <td data-label={copy.code}>
+                                <code>{issue.code}</code>
+                              </td>
+                              <td data-label={copy.pageKeyLabel}>
+                                {issue.page_key ? (
+                                  <HashValue value={issue.page_key} label={copy.lintPageKey} />
+                                ) : (
+                                  t("common.none")
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {activeTab === "query" && selectedCompilation.status === "PUBLISHED" && (
+                <section role="tabpanel" tabIndex={0} id="wiki-panel-query" aria-labelledby="wiki-tab-query">
+                  <form className="eval-form" onSubmit={submitWikiQuery} noValidate>
+                    <div className="form-grid">
+                      <label className="query-field">
+                        {copy.queryTab}
+                        <textarea
+                          value={queryInput}
+                          onChange={(event) =>
+                            invalidateQuery(() => setQueryInput(event.target.value))
+                          }
+                          maxLength={4000}
+                          placeholder={copy.queryPlaceholder}
+                        />
+                      </label>
+                      <label>
+                        {copy.routeMode}
+                        <Select
+                          value={queryMode}
+                          onChange={(value) =>
+                            invalidateQuery(() => setQueryMode(value as QueryMode))
+                          }
+                          options={[
+                            { value: "AUTO", label: "AUTO" },
+                            { value: "WIKI", label: "WIKI" },
+                            { value: "RAG", label: "RAG" },
+                            { value: "HYBRID", label: "HYBRID" },
+                          ]}
+                          ariaLabel={copy.queryModeAria}
+                        />
+                      </label>
+                      <label>
+                        {copy.intent}
+                        <Select
+                          value={queryIntent}
+                          onChange={(value) =>
+                            invalidateQuery(() => setQueryIntent(value as QueryIntent))
+                          }
+                          options={[
+                            { value: "overview", label: copy.intents.overview },
+                            { value: "fact", label: copy.intents.fact },
+                            { value: "synthesis", label: copy.intents.synthesis },
+                          ]}
+                          ariaLabel={copy.queryIntentAria}
+                        />
+                      </label>
+                      <label className="rule-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={requireCurrent}
+                          onChange={(event) =>
+                            invalidateQuery(() => setRequireCurrent(event.target.checked))
+                          }
+                        />
+                        {copy.requireCurrent}
+                      </label>
+                      <label className="rule-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={generateAnswer}
+                          onChange={(event) =>
+                            invalidateQuery(() => setGenerateAnswer(event.target.checked))
+                          }
+                        />
+                        {copy.generateAnswer}
+                      </label>
+                      {generateAnswer && (
+                        <label>
+                          {copy.answerModel}
+                          <Select
+                            value={queryModelId}
+                            onChange={(value) =>
+                              invalidateQuery(() => setQueryModelId(value))
+                            }
+                            options={enabledModelOptions}
+                            placeholder={copy.configureAnswerModel}
+                            ariaLabel={copy.answerModelAria}
+                          />
+                        </label>
+                      )}
+                    </div>
+                    <InlineError
+                      error={queryMutation.error}
+                      fallback={t("errors.requestFailed")}
+                    />
+                    <div className="form-actions">
+                      <button
+                        type="submit"
+                        className="button button-primary"
+                        disabled={
+                          queryMutation.pending ||
+                          !queryInput.trim() ||
+                          (generateAnswer && !queryModelId)
+                        }
+                      >
+                        {queryMutation.pending ? copy.querying : copy.runQuery}
+                      </button>
+                    </div>
+                  </form>
+
+                  {visibleQuery && (
+                    <div className="playground-stage">
+                      <div className="playground-overview">
+                        <div>
+                          <span>{copy.route}</span>
+                          <strong>{visibleQuery.route}</strong>
+                        </div>
+                        <div>
+                          <span>{copy.evidence}</span>
+                          <strong>{formatNumber(visibleQuery.evidence.length)}</strong>
+                        </div>
+                        <div>
+                          <span>{copy.conflicts}</span>
+                          <strong>{formatNumber(visibleQuery.conflicts.length)}</strong>
+                        </div>
+                      </div>
+                      {visibleQuery.insufficient_evidence && (
+                        <p className="inline-error">
+                          {copy.insufficientEvidence}
+                        </p>
+                      )}
+                      <h3>{copy.answer}</h3>
+                      <Markdown
+                        text={
+                          visibleQuery.generated_answer?.answer ??
+                          visibleQuery.answer
+                        }
+                      />
+                      {visibleQuery.evidence.length > 0 && (
+                        <div className="data-table">
+                          <table>
+                            <thead>
+                              <tr>
+                                <th scope="col">{copy.evidence}</th>
+                                <th scope="col">{copy.origin}</th>
+                                <th scope="col">{copy.evidenceSourceRevision}</th>
+                                <th scope="col">{copy.conflict}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {visibleQuery.evidence.map((evidence, index) => (
+                                <EvidenceRow
+                                  key={`${evidence.chunk_id}:${index}`}
+                                  evidence={evidence}
+                                  copy={copy}
+                                  noneLabel={t("common.none")}
+                                />
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </section>
+              )}
+            </Panel>
+          ) : (
+            <Panel title={copy.compilationReview}>
+              <EmptyState
+                title={copy.noCompilationTitle}
+                hint={copy.noCompilationHint}
+              />
+            </Panel>
           )}
-
-          <div className="wiki-dialog-field">
-            <span className="wiki-field-label">{copy.conflictReview}</span>
-            <Select
-              value={compileReviewMode}
-              onChange={(value) => setCompileReviewMode(value === "MODEL" ? "MODEL" : "BASIC")}
-              options={[
-                { value: "BASIC", label: copy.reviewBasic },
-                { value: "MODEL", label: copy.reviewModel },
-              ]}
-              ariaLabel={copy.conflictReview}
-            />
-          </div>
-
-          <InlineError error={createMutation.error} fallback={copy.createFailed} />
-
-          <div className="wiki-dialog-actions">
-            <button
-              type="button"
-              className="button button-ghost"
-              onClick={closeCreateDialog}
-              disabled={createMutation.pending}
-            >
-              {copy.cancel}
-            </button>
-            <button
-              type="submit"
-              className="button button-primary"
-              disabled={!canCompile || !compileModelId || createMutation.pending || Boolean(models.error)}
-            >
-              {createMutation.pending ? copy.startingCompilation : copy.startCompilation}
-            </button>
-          </div>
-        </form>
-      </dialog>
+        </>
+      )}
     </div>
   );
 }
 
-function CompilationWorkspace({
-  knowledgeBaseId,
-  compilation,
+function EvidenceRow({
+  evidence,
   copy,
-  onCompilationChanged,
+  noneLabel,
 }: {
-  knowledgeBaseId: string;
-  compilation: WikiCompilation;
-  copy: WikiCopy;
-  onCompilationChanged: (compilation: WikiCompilation) => void;
+  evidence: WikiEvidence;
+  copy: WikiWorkbenchCopy;
+  noneLabel: string;
 }) {
-  const { formatDateTime } = useI18n();
-  const { workspaceId, accessToken } = useFrontendSession();
-  const mutation = useWorkspaceMutation(`wiki-compilation-action:${knowledgeBaseId}:${compilation.id}`);
-  const queryRequestRef = useRef(0);
-
-  const [localMutation, setLocalMutation] = useState<{
-    base: WikiCompilation;
-    updated: WikiCompilation;
-  } | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>("pages");
-  const [pages, setPages] = useState<WikiPage[]>([]);
-  const [selectedPage, setSelectedPage] = useState<WikiPage | null>(null);
-  const [lintReport, setLintReport] = useState<WikiLintReport | null>(null);
-  const [subLoading, setSubLoading] = useState(true);
-  const [subError, setSubError] = useState<ApiError | null>(null);
-  const [subresourceRetry, setSubresourceRetry] = useState(0);
-  const [pendingAction, setPendingAction] = useState<"publish" | "retry" | null>(null);
-  const [actionKind, setActionKind] = useState<"publish" | "retry">("publish");
-
-  const [queryInput, setQueryInput] = useState("");
-  const [queryMode, setQueryMode] = useState<QueryMode>("AUTO");
-  const [queryResult, setQueryResult] = useState<WikiQueryResult | null>(null);
-  const [querying, setQuerying] = useState(false);
-  const [queryError, setQueryError] = useState<ApiError | null>(null);
-
-  const displayCompilation = localMutation?.base === compilation ? localMutation.updated : compilation;
-
-  useEffect(() => {
-    if (activeTab === "query") {
-      setSubLoading(false);
-      setSubError(null);
-      return;
-    }
-
-    let cancelled = false;
-    setSubLoading(true);
-    setSubError(null);
-    const auth = { workspaceId, accessToken };
-
-    void (async () => {
-      try {
-        if (activeTab === "pages") {
-          const items = await getCompilationPages(auth, knowledgeBaseId, compilation.id);
-          if (cancelled) return;
-          setPages(items);
-          setSelectedPage((current) => items.find((page) => page.id === current?.id) ?? items[0] ?? null);
-        } else {
-          const report = await getCompilationLint(auth, knowledgeBaseId, compilation.id);
-          if (cancelled) return;
-          setLintReport(report);
-        }
-      } catch (caught) {
-        if (cancelled) return;
-        setSubError(
-          toApiError(caught, activeTab === "pages" ? copy.pagesFailed : copy.lintFailed),
-        );
-      } finally {
-        if (!cancelled) setSubLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    accessToken,
-    activeTab,
-    compilation.id,
-    copy.lintFailed,
-    copy.pagesFailed,
-    knowledgeBaseId,
-    subresourceRetry,
-    workspaceId,
-  ]);
-
-  useEffect(() => () => {
-    queryRequestRef.current += 1;
-  }, []);
-
-  function changeTab(next: Tab) {
-    setActiveTab(next);
-    if (next === "query") {
-      setSubLoading(false);
-      setSubError(null);
-    } else {
-      setSubLoading(true);
-      setSubError(null);
-    }
-  }
-
-  async function handlePublish() {
-    if (mutation.pending) return;
-    setActionKind("publish");
-    setPendingAction("publish");
-    try {
-      const updated = await mutation.run((auth) =>
-        publishCompilation(auth, knowledgeBaseId, compilation.id),
-      );
-      if (updated) {
-        setLocalMutation({ base: compilation, updated });
-        onCompilationChanged(updated);
-        setActionKind("publish");
-      }
-    } finally {
-      setPendingAction(null);
-    }
-  }
-
-  async function handleRetry() {
-    if (mutation.pending) return;
-    setActionKind("retry");
-    setPendingAction("retry");
-    try {
-      const updated = await mutation.run((auth) =>
-        retryCompilation(auth, knowledgeBaseId, compilation.id),
-      );
-      if (updated) {
-        setLocalMutation({ base: compilation, updated });
-        onCompilationChanged(updated);
-        setActionKind("retry");
-      }
-    } finally {
-      setPendingAction(null);
-    }
-  }
-
-  async function handleRunQuery(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const query = queryInput.trim();
-    if (!query || querying) return;
-
-    const request = ++queryRequestRef.current;
-    setQuerying(true);
-    setQueryError(null);
-    setQueryResult(null);
-    try {
-      const result = await queryWikiCompilation(
-        { workspaceId, accessToken },
-        knowledgeBaseId,
-        compilation.id,
-        {
-          query,
-          source_snapshot_id: displayCompilation.source_snapshot_id || "LATEST",
-          mode: queryMode,
-        },
-      );
-      if (request === queryRequestRef.current) setQueryResult(result);
-    } catch (caught) {
-      if (request === queryRequestRef.current) {
-        setQueryError(toApiError(caught, copy.queryFailed));
-      }
-    } finally {
-      if (request === queryRequestRef.current) setQuerying(false);
-    }
-  }
-
-  const queryModeOptions = QUERY_MODES.map((mode) => ({
-    value: mode,
-    label:
-      mode === "AUTO"
-        ? copy.modeAuto
-        : mode === "WIKI"
-          ? copy.modeWiki
-          : mode === "RAG"
-            ? copy.modeRag
-            : copy.modeHybrid,
-  }));
-  const metrics = lintReport
-    ? [
-        { label: copy.totalClaims, value: lintReport.total_claims },
-        { label: copy.conflicts, value: lintReport.total_conflicts },
-        { label: copy.ungrounded, value: lintReport.ungrounded_claims },
-        { label: copy.circularDependencies, value: lintReport.circular_dependencies },
-      ]
-    : [];
-
   return (
-    <div className="wiki-detail-stack">
-      <Panel title={copy.compilationDetails}>
-        <div className="wiki-detail-summary">
-          <div className="wiki-detail-meta">
-            <StatusBadge status={displayCompilation.status} />
-            <span>{formatDateTime(displayCompilation.created_at)}</span>
-            <span>
-              {copy.attempts}: <strong>{displayCompilation.attempt_count}</strong>
-            </span>
-            {displayCompilation.content_hash ? (
-              <span className="wiki-detail-hash">
-                {copy.contentHash}{" "}
-                <HashValue value={displayCompilation.content_hash} label={copy.contentHash} />
-              </span>
-            ) : null}
-          </div>
-          {displayCompilation.status === "SUCCEEDED" ? (
-            <button
-              type="button"
-              className="button button-primary"
-              disabled={mutation.pending}
-              onClick={handlePublish}
-            >
-              {pendingAction === "publish" ? copy.publishing : copy.publish}
-            </button>
-          ) : displayCompilation.status === "FAILED" ? (
-            <button
-              type="button"
-              className="button button-ghost"
-              disabled={mutation.pending}
-              onClick={handleRetry}
-            >
-              {pendingAction === "retry" ? copy.retrying : copy.retry}
-            </button>
-          ) : null}
-        </div>
-
-        <InlineError
-          error={mutation.error}
-          fallback={actionKind === "retry" ? copy.retryFailed : copy.publishFailed}
+    <tr>
+      <td data-label={copy.evidence}>{evidence.quote}</td>
+      <td data-label={copy.origin}>
+        <code>{evidence.origin ?? evidence.source ?? noneLabel}</code>
+      </td>
+      <td data-label={copy.evidenceSourceRevision}>
+        <HashValue
+          value={evidence.document_revision_id}
+          label={copy.evidenceSourceRevision}
         />
-
-        <div className="wiki-tabs" role="tablist" aria-label={copy.tabsLabel}>
-          <button
-            id="wiki-tab-pages"
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "pages"}
-            aria-controls="wiki-panel-pages"
-            tabIndex={activeTab === "pages" ? 0 : -1}
-            className={`wiki-tab${activeTab === "pages" ? " wiki-tab-active" : ""}`}
-            onClick={() => changeTab("pages")}
-            onKeyDown={(event) => handleTabKeyDown(event, "pages", changeTab)}
-          >
-            {copy.pages} ({pages.length})
-          </button>
-          <button
-            id="wiki-tab-lint"
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "lint"}
-            aria-controls="wiki-panel-lint"
-            tabIndex={activeTab === "lint" ? 0 : -1}
-            className={`wiki-tab${activeTab === "lint" ? " wiki-tab-active" : ""}`}
-            onClick={() => changeTab("lint")}
-            onKeyDown={(event) => handleTabKeyDown(event, "lint", changeTab)}
-          >
-            {copy.lint}
-          </button>
-          <button
-            id="wiki-tab-query"
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "query"}
-            aria-controls="wiki-panel-query"
-            tabIndex={activeTab === "query" ? 0 : -1}
-            className={`wiki-tab${activeTab === "query" ? " wiki-tab-active" : ""}`}
-            onClick={() => changeTab("query")}
-            onKeyDown={(event) => handleTabKeyDown(event, "query", changeTab)}
-          >
-            {copy.query}
-          </button>
-        </div>
-
-        {subLoading && activeTab !== "query" ? (
-          <LoadingState label={activeTab === "pages" ? copy.loadingPages : copy.loadingLint} />
-        ) : subError && activeTab !== "query" ? (
-          <ErrorState
-            code={subError.code}
-            message={subError.message}
-            hint={copy.subresourceHint}
-            onRetry={() => setSubresourceRetry((value) => value + 1)}
-          />
-        ) : null}
-
-        <div
-          id="wiki-panel-pages"
-          role="tabpanel"
-          aria-labelledby="wiki-tab-pages"
-          hidden={activeTab !== "pages"}
-          className="wiki-tab-panel"
-        >
-          {!subLoading && !subError ? (
-            pages.length === 0 ? (
-              <EmptyState title={copy.noPages} hint={copy.noPagesHint} />
-            ) : (
-              <div className="wiki-pages-grid">
-                <nav className="wiki-page-nav" aria-label={copy.pageList}>
-                  <ul className="wiki-page-list">
-                    {pages.map((page) => (
-                      <li key={page.id}>
-                        <button
-                          type="button"
-                          className={`wiki-page-button${selectedPage?.id === page.id ? " wiki-page-button-active" : ""}`}
-                          aria-pressed={selectedPage?.id === page.id}
-                          onClick={() => setSelectedPage(page)}
-                        >
-                          <span>{page.title || page.slug}</span>
-                          <code>{page.slug}</code>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-                <article className="wiki-reader" aria-live="polite">
-                  {selectedPage ? (
-                    <>
-                      <header className="wiki-reader-header">
-                        <h3>{selectedPage.title || selectedPage.slug}</h3>
-                        <p>
-                          {copy.slug}: <code>{selectedPage.slug}</code>
-                        </p>
-                      </header>
-                      <div className="wiki-reader-divider" />
-                      <Markdown text={selectedPage.body} />
-                    </>
-                  ) : (
-                    <p className="state-hint">{copy.selectPageHint}</p>
-                  )}
-                </article>
-              </div>
-            )
-          ) : null}
-        </div>
-
-        <div
-          id="wiki-panel-lint"
-          role="tabpanel"
-          aria-labelledby="wiki-tab-lint"
-          hidden={activeTab !== "lint"}
-          className="wiki-tab-panel"
-        >
-          {!subLoading && !subError ? (
-            lintReport ? (
-              <div className="wiki-lint">
-                <dl className="wiki-lint-metrics">
-                  {metrics.map((metric) => (
-                    <div key={metric.label} className="wiki-lint-metric">
-                      <dt>{metric.label}</dt>
-                      <dd>{metric.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <div className="wiki-lint-issues-heading">
-                  <h3>
-                    {copy.issues} ({lintReport.issues.length})
-                  </h3>
-                </div>
-                {lintReport.issues.length === 0 ? (
-                  <p className="wiki-success-note" role="status">
-                    {copy.lintClean}
-                  </p>
-                ) : (
-                  <div className="wiki-table-scroll" tabIndex={0}>
-                    <table className="wiki-lint-table">
-                      <caption className="sr-only">{copy.issues}</caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">{copy.severity}</th>
-                          <th scope="col">{copy.kind}</th>
-                          <th scope="col">{copy.page}</th>
-                          <th scope="col">{copy.message}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {lintReport.issues.map((issue, index) => (
-                          <tr key={`${issue.kind}:${issue.page_slug ?? ""}:${index}`}>
-                            <td>
-                              <span className={`wiki-severity wiki-severity-${issue.severity}`}>
-                                {issue.severity === "error" ? copy.severityError : copy.severityWarning}
-                              </span>
-                            </td>
-                            <td>{issue.kind}</td>
-                            <td>{issue.page_slug || "—"}</td>
-                            <td>{issue.message}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <EmptyState title={copy.noLintData} hint={copy.noLintDataHint} />
-            )
-          ) : null}
-        </div>
-
-        <div
-          id="wiki-panel-query"
-          role="tabpanel"
-          aria-labelledby="wiki-tab-query"
-          hidden={activeTab !== "query"}
-          className="wiki-tab-panel"
-        >
-          <form className="wiki-query-form" onSubmit={handleRunQuery}>
-            <label className="wiki-field-label" htmlFor="wiki-query-input">
-              {copy.queryLabel}
-            </label>
-            <div className="wiki-query-controls">
-              <input
-                id="wiki-query-input"
-                type="text"
-                value={queryInput}
-                onChange={(event) => setQueryInput(event.target.value)}
-                placeholder={copy.queryPlaceholder}
-                disabled={querying}
-              />
-              <Select
-                value={queryMode}
-                onChange={(value) => {
-                  if (isQueryMode(value)) setQueryMode(value);
-                }}
-                options={queryModeOptions}
-                ariaLabel={copy.queryMode}
-                disabled={querying}
-              />
-              <button
-                type="submit"
-                className="button button-primary"
-                disabled={querying || !queryInput.trim()}
-              >
-                {querying ? copy.querying : copy.runQuery}
-              </button>
-            </div>
-          </form>
-
-          <InlineError error={queryError} fallback={copy.queryFailed} />
-
-          {queryResult ? (
-            <section className="wiki-query-result" aria-live="polite">
-              <dl className="wiki-query-summary">
-                <div>
-                  <dt>{copy.route}</dt>
-                  <dd>{queryResult.route}</dd>
-                </div>
-                <div>
-                  <dt>{copy.citations}</dt>
-                  <dd>{queryResult.evidence_refs?.length ?? 0}</dd>
-                </div>
-                <div>
-                  <dt>{copy.evidenceConflictCount}</dt>
-                  <dd>{queryResult.conflict_count}</dd>
-                </div>
-              </dl>
-              {queryResult.insufficient_evidence ? (
-                <p className="wiki-evidence-warning">{copy.insufficientEvidence}</p>
-              ) : null}
-              {queryResult.supplemental_required ? (
-                <p className="wiki-evidence-warning">{copy.supplementalRequired}</p>
-              ) : null}
-              {queryResult.degraded ? (
-                <p className="wiki-degraded">
-                  {copy.degraded}
-                  {queryResult.degraded_reason ? `: ${queryResult.degraded_reason}` : ""}
-                </p>
-              ) : null}
-              <h3>{copy.answer}</h3>
-              <Markdown text={queryResult.answer} />
-            </section>
-          ) : null}
-        </div>
-      </Panel>
-    </div>
+      </td>
+      <td data-label={copy.conflict}>
+        {evidence.conflict ? copy.needsReview : noneLabel}
+      </td>
+    </tr>
   );
 }

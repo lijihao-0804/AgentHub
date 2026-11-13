@@ -113,13 +113,30 @@ class ToolResult:
     data_trust: str = "UNTRUSTED"
     duration_ms: float = 0.0
     evidence_refs: tuple[dict[str, str], ...] = ()
+    # Framework-only observations. Tool data may contain keys with these names,
+    # but they remain untrusted data and are never copied into these fields.
+    approval_decision: str | None = None
+    approval_execution: str | None = None
+
+    def __post_init__(self) -> None:
+        if (self.approval_decision is None) != (self.approval_execution is None):
+            raise ValueError("approval decision and execution facts must be provided together")
 
     @classmethod
-    def success(cls, data: Any, *, duration_ms: float = 0.0) -> ToolResult:
+    def success(
+        cls,
+        data: Any,
+        *,
+        duration_ms: float = 0.0,
+        approval_decision: str | None = None,
+        approval_execution: str | None = None,
+    ) -> ToolResult:
         return cls(
             status=ToolResultStatus.SUCCESS,
             data=data,
             duration_ms=duration_ms,
+            approval_decision=approval_decision,
+            approval_execution=approval_execution,
         )
 
     @classmethod
@@ -129,12 +146,16 @@ class ToolResult:
         safe_message: str,
         *,
         duration_ms: float = 0.0,
+        approval_decision: str | None = None,
+        approval_execution: str | None = None,
     ) -> ToolResult:
         return cls(
             status=ToolResultStatus.ERROR,
             error_code=error_code,
             safe_message=safe_message,
             duration_ms=duration_ms,
+            approval_decision=approval_decision,
+            approval_execution=approval_execution,
         )
 
 

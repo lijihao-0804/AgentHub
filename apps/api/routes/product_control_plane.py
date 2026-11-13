@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Body, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.dependencies import get_db_session
@@ -397,7 +398,10 @@ async def get_agent_wiki_binding(
 async def replace_agent_wiki_binding(
     workspace_id: UUID,
     agent_id: UUID,
-    payload: WikiBindingRequest | None,
+    # PUT replaces the draft binding. Both an explicit JSON null and an omitted
+    # body therefore mean "clear"; malformed or non-null object shapes still
+    # pass through WikiBindingRequest validation.
+    payload: Annotated[WikiBindingRequest | None, Body()] = None,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
 ) -> WikiBindingResponse | None:

@@ -148,6 +148,8 @@ async def test_primary_connection_failure_does_not_halt_gateway_fallback(
         "TRANSPORT_UNCONFIRMED",
         "RECEIVED",
     ]
+    assert all("client" not in record["request"] for record in client.raw_calls)
+    assert all("api_key" not in record["request"] for record in client.raw_calls)
 
 
 def _configured_route() -> ConfiguredRoute:

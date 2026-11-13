@@ -16,14 +16,15 @@ from packages.control_plane.rbac import EVALUATION_MANAGE, EVALUATION_READ
 
 
 class _Session:
-    def __init__(self, *, version_id, dataset_id) -> None:
+    def __init__(self, *, workspace_id, version_id, dataset_id) -> None:
+        self.workspace_id = workspace_id
         self.version_id = version_id
         self.dataset_id = dataset_id
         self.execute_count = 0
 
     async def execute(self, _statement):
         self.execute_count += 1
-        return [(self.version_id, self.dataset_id)]
+        return [(self.workspace_id, self.version_id, self.dataset_id)]
 
 
 class _ExperimentService:
@@ -94,7 +95,7 @@ async def test_experiment_list_projects_dataset_id_for_evaluation_reader(monkeyp
     version_id = uuid4()
     dataset_id = uuid4()
     experiment = _experiment(workspace_id=workspace_id, version_id=version_id)
-    session = _Session(version_id=version_id, dataset_id=dataset_id)
+    session = _Session(workspace_id=workspace_id, version_id=version_id, dataset_id=dataset_id)
     service = _ExperimentService(experiment)
     context = SimpleNamespace(permissions=frozenset({EVALUATION_READ}))
     monkeypatch.setattr(evaluation_routes, "ExperimentService", lambda: service)
@@ -120,7 +121,7 @@ async def test_create_experiment_response_projects_dataset_id(monkeypatch) -> No
     version_id = uuid4()
     dataset_id = uuid4()
     experiment = _experiment(workspace_id=workspace_id, version_id=version_id)
-    session = _Session(version_id=version_id, dataset_id=dataset_id)
+    session = _Session(workspace_id=workspace_id, version_id=version_id, dataset_id=dataset_id)
     service = _ExperimentService(experiment)
     context = SimpleNamespace(permissions=frozenset({EVALUATION_MANAGE}))
     monkeypatch.setattr(evaluation_routes, "ExperimentService", lambda: service)
@@ -153,7 +154,7 @@ async def test_finalize_experiment_response_projects_dataset_id(monkeypatch) -> 
     version_id = uuid4()
     dataset_id = uuid4()
     experiment = _experiment(workspace_id=workspace_id, version_id=version_id)
-    session = _Session(version_id=version_id, dataset_id=dataset_id)
+    session = _Session(workspace_id=workspace_id, version_id=version_id, dataset_id=dataset_id)
     service = _ExperimentService(experiment)
     context = SimpleNamespace(permissions=frozenset({EVALUATION_MANAGE}))
     monkeypatch.setattr(evaluation_routes, "ExperimentService", lambda: service)

@@ -12,6 +12,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -70,6 +71,7 @@ from packages.memory.contracts import (
     MemorySelector,
     MemoryWriteQueue,
 )
+from packages.memory.models import MemoryExtractionJob
 from packages.model_gateway.contracts import (
     ModelGateway,
 )
@@ -2270,6 +2272,23 @@ class AgentRunService:
                         },
                     )
                 )
+            if (
+                getattr(self, "memory_writer", None) is not None
+                and effective_status == "SUCCEEDED"
+                and run.thread_id is not None
+            ):
+                # Commit a durable dispatch intent with the successful Run.
+                # The unique key makes a repeated completion harmless and
+                # preserves any worker-owned state already attached to it.
+                await session.execute(
+                    pg_insert(MemoryExtractionJob)
+                    .values(
+                        workspace_id=run.workspace_id,
+                        agent_run_id=run.id,
+                        status="PENDING",
+                    )
+                    .on_conflict_do_nothing(index_elements=["workspace_id", "agent_run_id"])
+                )
             run.completed_at = datetime.now(UTC)
             await session.commit()
             await session.refresh(run)
@@ -2298,7 +2317,10 @@ class AgentRunService:
         ``ThreadService.submit_turn`` runs in process, ``/runs/stream`` may hand
         off to a worker, and a resumed approval takes a third route; the only
         thing all of them share is that they end here, after the status is
-        committed. Enqueueing anywhere else would silently skip a path.
+        committed. The successful thread Run and its ``PENDING`` extraction
+        intent were committed together before this method is called. A queue
+        failure or process exit here is therefore recoverable by the
+        reconciler; this method remains best-effort and never fails the Run.
 
         Only successful thread turns are worth extracting from: a Playground
         run has no thread to remember for, and a failed run has no answer. The
@@ -2319,7 +2341,7 @@ class AgentRunService:
                 request_id=context.request_id,
             )
         except Exception:
-            logger.warning("memory_extraction_enqueue_failed", exc_info=True)
+            logger.warning("memory_extraction_enqueue_failed")
 
     @staticmethod
     def _require_permission(context: WorkspaceExecutionContext, permission: str) -> None:

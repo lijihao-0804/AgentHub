@@ -36,6 +36,7 @@ import Link from "next/link";
 
 import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
+import { useFrontendSession } from "@/components/providers/session-provider";
 
 type AuthInput = { workspaceId: string; accessToken: string; sessionId: number };
 
@@ -79,7 +80,9 @@ export default function RunWorkflow({
   variants: EvaluationExperimentVariant[];
   terminal: boolean;
 }) {
-  const { t, formatDateTime } = useI18n();
+  const { t, formatDateTime, locale } = useI18n();
+  const { permissions } = useFrontendSession();
+  const canRun = permissions?.includes("evaluation_run") === true;
   const [metrics, setMetrics] = useState<MetricsState>({ kind: "loading" });
   const [materializing, setMaterializing] = useState(false);
   const [metricsError, setMetricsError] = useState<ApiError | null>(null);
@@ -176,6 +179,7 @@ export default function RunWorkflow({
   }, [terminal, loadMetrics]);
 
   async function materialize() {
+    if (!canRun) return;
     const requestSessionId = input.sessionId;
     setMaterializing(true);
     setMetricsError(null);
@@ -217,6 +221,7 @@ export default function RunWorkflow({
 
   async function createComparison(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canRun) return;
     setComparisonError(null);
     if (!baselineId || !candidateId || baselineId === candidateId) return;
     const requestSessionId = input.sessionId;
@@ -281,6 +286,7 @@ export default function RunWorkflow({
   }, [selectedComparisonId, loadAblation]);
 
   async function createAblation() {
+    if (!canRun) return;
     if (!selectedComparisonId) return;
     const requestSessionId = input.sessionId;
     const requestRunId = run.id;
@@ -361,6 +367,7 @@ export default function RunWorkflow({
   }, [selectedComparisonId, gateEligible, loadDecisions]);
 
   async function runGate() {
+    if (!canRun) return;
     if (!selectedComparisonId || !policyId) return;
     const requestSessionId = input.sessionId;
     const requestRunId = run.id;
@@ -404,9 +411,9 @@ export default function RunWorkflow({
           <div className="state-block state-inline">
             <p className="state-title">{t("evaluation.metrics.notMaterialized")}</p>
             <p className="state-hint">{t("evaluation.metrics.materializeHint")}</p>
-            <button type="button" className="button button-primary" onClick={() => void materialize()} disabled={materializing}>
+            {canRun && <button type="button" className="button button-primary" onClick={() => void materialize()} disabled={materializing}>
               {materializing ? t("evaluation.metrics.materializing") : t("evaluation.metrics.materialize")}
-            </button>
+            </button>}
             <InlineError error={metricsError} fallback={t("errors.requestFailed")} />
           </div>
         )}
@@ -427,7 +434,7 @@ export default function RunWorkflow({
             {comparisonsError && (
               <ErrorState code={comparisonsError.code} message={comparisonsError.message || t("evaluation.comparison.loadError")} onRetry={() => void loadComparisons()} />
             )}
-            {variants.length >= 2 && (
+            {canRun && variants.length >= 2 && (
               <form className="eval-form" onSubmit={createComparison} noValidate>
                 <div className="eval-form-title">{t("evaluation.comparison.createTitle")}</div>
                 <div className="form-grid">
@@ -502,9 +509,9 @@ export default function RunWorkflow({
         {selectedComparison && ablationState === "absent" && (
           <div className="state-block state-inline">
             <p className="state-title">{t("evaluation.ablation.empty")}</p>
-            <button type="button" className="button button-primary" onClick={() => void createAblation()} disabled={creatingAblation}>
+            {canRun && <button type="button" className="button button-primary" onClick={() => void createAblation()} disabled={creatingAblation}>
               {creatingAblation ? t("evaluation.ablation.creating") : t("evaluation.ablation.create")}
-            </button>
+            </button>}
             <InlineError error={ablationError} fallback={t("errors.requestFailed")} />
           </div>
         )}
@@ -515,6 +522,11 @@ export default function RunWorkflow({
       <Panel ariaLabel={t("evaluation.gate.stepTitle")}>
         <StepHeader step={4} title={t("evaluation.gate.stepTitle")} eyebrow={t("evaluation.gate.stepTitle")} />
         <p className="state-hint">{t("evaluation.gate.disclaimer")}</p>
+        <p className="state-hint">
+          {locale === "zh-CN"
+            ? "PASS 为通过，FAIL 为未通过；INCONCLUSIVE 表示证据不足，不能当作通过。请核对后端返回的配对数量、覆盖范围、区间和具体原因。"
+            : "PASS passes and FAIL fails. INCONCLUSIVE means insufficient evidence and does not pass. Check the backend's pair counts, coverage, intervals and reasons."}
+        </p>
         {!gateEligible && <p className="state-hint">{t("evaluation.gate.eligibilityNotice")}</p>}
         {gateEligible && !selectedComparison && <p className="state-hint">{t("evaluation.gate.needsComparison")}</p>}
         {gateEligible && selectedComparison && (
@@ -533,7 +545,7 @@ export default function RunWorkflow({
                 <Link href="/evaluations/release-gates">{t("evaluation.gate.goPolicies")}</Link>
               </p>
             )}
-            {!policiesError && policies && policies.length > 0 && (
+            {canRun && !policiesError && policies && policies.length > 0 && (
               <form
                 className="eval-form"
                 onSubmit={(event) => {
@@ -848,6 +860,18 @@ function AblationView({
   );
 }
 
+function gateReasonExplanation(reason: string | null | undefined, locale: string): string | null {
+  const explanations: Record<string, [string, string]> = {
+    insufficient_pairs: ["可配对样本数不足，无法作出可靠门禁判断。", "Too few paired cases to support a reliable gate decision."],
+    insufficient_complete_cases: ["完整重复覆盖的 case 不足，缺失样本不能按失败或成功补齐。", "Too few cases have complete repetition coverage; missing trials cannot be filled as successes or failures."],
+    degenerate_interval: ["统计区间上下界重合，不能据此宣称稳定或门禁通过。", "The interval bounds coincide; this does not establish stability or a passing gate."],
+    paired_interval_unavailable: ["配对区间不可用，不能把缺失区间当作零差异。", "The paired interval is unavailable; a missing interval is not a zero difference."],
+    comparison_incomplete: ["对比覆盖不完整，缺失配对不能当作已通过。", "Comparison coverage is incomplete; missing pairs do not count as passing evidence."],
+  };
+  const explanation = reason ? explanations[reason] : undefined;
+  return explanation ? explanation[locale === "zh-CN" ? 0 : 1] : null;
+}
+
 function GateDecisionView({
   decision,
   policy,
@@ -860,7 +884,7 @@ function GateDecisionView({
   candidateVersionHref: string | null;
   candidatePlaygroundHref: string | null;
 }) {
-  const { t, statusLabel, formatDateTime } = useI18n();
+  const { t, statusLabel, formatDateTime, locale } = useI18n();
   return (
     <article className="gate-decision">
       <div className="gate-decision-header">
@@ -912,7 +936,10 @@ function GateDecisionView({
                   <StatusBadge status={result.status} />
                 </td>
                 <td data-label={t("evaluation.gate.ruleColumns.reason")} className="muted">
-                  {result.reason ?? "—"}
+                  <code>{result.reason ?? "—"}</code>
+                  {gateReasonExplanation(result.reason, locale) && (
+                    <p className="state-hint">{gateReasonExplanation(result.reason, locale)}</p>
+                  )}
                   {result.status === "PASS" && result.reason === "compensated_tradeoff" && (
                     <span className="inline-notice">{t("evaluation.gate.compensation.passedNotice")}</span>
                   )}
@@ -931,6 +958,9 @@ function GateDecisionView({
       {decision.reasons.length > 0 && (
         <p className="state-hint">
           {t("evaluation.gate.reasons")}: {decision.reasons.join(", ")}
+          {decision.reasons.map((reason) => gateReasonExplanation(reason, locale)).filter(Boolean).map((explanation, index) => (
+            <span className="state-hint" key={index}> · {explanation}</span>
+          ))}
         </p>
       )}
       <TechnicalDetails

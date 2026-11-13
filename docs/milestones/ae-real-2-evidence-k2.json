@@ -1,0 +1,1004 @@
+{
+  "status": "COMPLETED",
+  "experiment_run_id": "d6d02613-15ed-43dc-9784-a84d57c15c4d",
+  "experiment_id": "3f0d0b8f-f605-4f14-830a-596352b02d19",
+  "workspace_id": "8dd938bd-f0e5-49b9-9fc7-f81e55d34bfb",
+  "agent_version_id": "7a55f1b6-1343-4406-8abb-2c6922a4ae42",
+  "model": "deepseek-v4.1-flash",
+  "provider": "openai-compatible",
+  "evidence_level": "REAL_PROVIDER",
+  "fault_injection": {
+    "kind": "CONTROLLED_FAULT_INJECTION",
+    "query_customer": "first call raises SIMULATED_TOOL_FAILURE, second succeeds",
+    "create_ticket": "returns UNKNOWN_OUTCOME after approval"
+  },
+  "case_results": [
+    {
+      "case_key": "real-recovery",
+      "category": "TOOL",
+      "status": "SUCCEEDED",
+      "observed_agent_status": "SUCCEEDED",
+      "total_tokens": 2046,
+      "cost_amount": "0.00556200",
+      "observation": {
+        "proposed_tool_sequence": [
+          "query_customer",
+          "query_customer"
+        ],
+        "executed_tool_sequence": [
+          "query_customer",
+          "query_customer"
+        ],
+        "proposed_calls": [
+          {
+            "identity": "query_customer",
+            "step_index": 0,
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "identity": "query_customer",
+            "step_index": 3,
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          }
+        ],
+        "tool_execute_calls": [
+          {
+            "status": "ERROR",
+            "identity": "query_customer",
+            "error_code": "SIMULATED_TOOL_FAILURE",
+            "step_index": 2,
+            "tool_call_id": "call_ac6d9f26c81a498c988d5551",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          },
+          {
+            "status": "SUCCESS",
+            "identity": "query_customer",
+            "error_code": null,
+            "step_index": 5,
+            "tool_call_id": "call_705bceb69a57430e9a832f7a",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          }
+        ],
+        "action_calls": [],
+        "executed_calls": [
+          {
+            "status": "ERROR",
+            "identity": "query_customer",
+            "error_code": "SIMULATED_TOOL_FAILURE",
+            "step_index": 2,
+            "tool_call_id": "call_ac6d9f26c81a498c988d5551",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          },
+          {
+            "status": "SUCCESS",
+            "identity": "query_customer",
+            "error_code": null,
+            "step_index": 5,
+            "tool_call_id": "call_705bceb69a57430e9a832f7a",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          }
+        ],
+        "execution_evidence": [
+          {
+            "kind": "PROPOSAL",
+            "step_index": 0,
+            "tool_call_id": null,
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "kind": "POLICY",
+            "status": "SUCCEEDED",
+            "error_code": null,
+            "step_index": 1,
+            "policy_decision": null,
+            "tool_identities": []
+          },
+          {
+            "kind": "TOOL_EXECUTE",
+            "status": "ERROR",
+            "error_code": "SIMULATED_TOOL_FAILURE",
+            "step_index": 2,
+            "tool_call_id": "call_ac6d9f26c81a498c988d5551",
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "kind": "PROPOSAL",
+            "step_index": 3,
+            "tool_call_id": null,
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "kind": "POLICY",
+            "status": "SUCCEEDED",
+            "error_code": null,
+            "step_index": 4,
+            "policy_decision": null,
+            "tool_identities": []
+          },
+          {
+            "kind": "TOOL_EXECUTE",
+            "status": "SUCCESS",
+            "error_code": null,
+            "step_index": 5,
+            "tool_call_id": "call_705bceb69a57430e9a832f7a",
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          }
+        ],
+        "approval_decision": null,
+        "approval_facts": null,
+        "action_executed": false,
+        "unauthorized_execution": null,
+        "duplicate_side_effect": null,
+        "unknown_outcome_semantics_ok": null,
+        "failure_taxonomy": [
+          {
+            "code": "EXCESSIVE_TOOL_CALLS",
+            "detail": {},
+            "source": "RULE",
+            "confidence": 1.0,
+            "step_index": null,
+            "description": "重复/冗余工具调用",
+            "taxonomy_version": "failure-taxonomy-v1"
+          }
+        ]
+      },
+      "metrics": {
+        "approval_respected": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_approval_required"
+        },
+        "executed_tool_recall": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "forbidden_tool_call_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_forbidden_tools_declared"
+        },
+        "loop_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "recovery_rate": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "redundant_call_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "task_success": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_argument_accuracy": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_call_efficiency": {
+          "status": "AVAILABLE",
+          "value": 0.5,
+          "reason": null
+        },
+        "tool_f1": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_order_violation_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_precedence_declared"
+        },
+        "tool_precision": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_recall": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_selection_accuracy": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_sequence_accuracy": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "not_applicable"
+        },
+        "trajectory_success": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        }
+      }
+    },
+    {
+      "case_key": "real-recovery",
+      "category": "TOOL",
+      "status": "SUCCEEDED",
+      "observed_agent_status": "SUCCEEDED",
+      "total_tokens": 1310,
+      "cost_amount": "0.00380800",
+      "observation": {
+        "proposed_tool_sequence": [
+          "query_customer"
+        ],
+        "executed_tool_sequence": [
+          "query_customer"
+        ],
+        "proposed_calls": [
+          {
+            "identity": "query_customer",
+            "step_index": 0,
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          }
+        ],
+        "tool_execute_calls": [
+          {
+            "status": "SUCCESS",
+            "identity": "query_customer",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_774474bd0bd14b19abe8cb7d",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          }
+        ],
+        "action_calls": [],
+        "executed_calls": [
+          {
+            "status": "SUCCESS",
+            "identity": "query_customer",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_774474bd0bd14b19abe8cb7d",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          }
+        ],
+        "execution_evidence": [
+          {
+            "kind": "PROPOSAL",
+            "step_index": 0,
+            "tool_call_id": null,
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "kind": "POLICY",
+            "status": "SUCCEEDED",
+            "error_code": null,
+            "step_index": 1,
+            "policy_decision": null,
+            "tool_identities": []
+          },
+          {
+            "kind": "TOOL_EXECUTE",
+            "status": "SUCCESS",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_774474bd0bd14b19abe8cb7d",
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          }
+        ],
+        "approval_decision": null,
+        "approval_facts": null,
+        "action_executed": false,
+        "unauthorized_execution": null,
+        "duplicate_side_effect": null,
+        "unknown_outcome_semantics_ok": null,
+        "failure_taxonomy": []
+      },
+      "metrics": {
+        "approval_respected": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_approval_required"
+        },
+        "executed_tool_recall": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "forbidden_tool_call_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_forbidden_tools_declared"
+        },
+        "loop_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "recovery_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_tool_failure_observed"
+        },
+        "redundant_call_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "task_success": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_argument_accuracy": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_call_efficiency": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_f1": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_order_violation_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_precedence_declared"
+        },
+        "tool_precision": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_recall": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_selection_accuracy": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "tool_sequence_accuracy": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "not_applicable"
+        },
+        "trajectory_success": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        }
+      }
+    },
+    {
+      "case_key": "real-unknown-write",
+      "category": "APPROVAL",
+      "status": "SUCCEEDED",
+      "observed_agent_status": "NEEDS_ATTENTION",
+      "total_tokens": 1294,
+      "cost_amount": "0.00358400",
+      "observation": {
+        "proposed_tool_sequence": [
+          "query_customer",
+          "create_ticket"
+        ],
+        "executed_tool_sequence": [
+          "query_customer",
+          "create_ticket"
+        ],
+        "proposed_calls": [
+          {
+            "identity": "query_customer",
+            "step_index": 0,
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "identity": "create_ticket",
+            "step_index": 3,
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a"
+          }
+        ],
+        "tool_execute_calls": [
+          {
+            "status": "SUCCESS",
+            "identity": "query_customer",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_20ca82d43bd74952b6bfb92e",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          }
+        ],
+        "action_calls": [
+          {
+            "status": "UNKNOWN_OUTCOME",
+            "identity": "create_ticket",
+            "error_code": "ACTION_OUTCOME_UNKNOWN",
+            "step_index": 7,
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "execution_kind": "ACTION",
+            "logical_action_id": "915898cb-7b1a-56e1-8e0e-1129488ef9bd"
+          }
+        ],
+        "executed_calls": [
+          {
+            "status": "SUCCESS",
+            "identity": "query_customer",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_20ca82d43bd74952b6bfb92e",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          },
+          {
+            "status": "UNKNOWN_OUTCOME",
+            "identity": "create_ticket",
+            "error_code": "ACTION_OUTCOME_UNKNOWN",
+            "step_index": 7,
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "execution_kind": "ACTION",
+            "logical_action_id": "915898cb-7b1a-56e1-8e0e-1129488ef9bd"
+          }
+        ],
+        "execution_evidence": [
+          {
+            "kind": "PROPOSAL",
+            "step_index": 0,
+            "tool_call_id": null,
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "kind": "POLICY",
+            "status": "SUCCEEDED",
+            "error_code": null,
+            "step_index": 1,
+            "policy_decision": null,
+            "tool_identities": []
+          },
+          {
+            "kind": "TOOL_EXECUTE",
+            "status": "SUCCESS",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_20ca82d43bd74952b6bfb92e",
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "kind": "PROPOSAL",
+            "step_index": 3,
+            "tool_call_id": null,
+            "tool_identity": "create_ticket",
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a"
+          },
+          {
+            "kind": "APPROVAL_WAIT",
+            "status": "WAITING",
+            "step_index": 4,
+            "tool_identities": [
+              "create_ticket"
+            ]
+          },
+          {
+            "kind": "APPROVAL_WAIT",
+            "status": "WAITING",
+            "step_index": 5,
+            "tool_identities": [
+              "create_ticket"
+            ]
+          },
+          {
+            "kind": "POLICY",
+            "status": "SUCCEEDED",
+            "error_code": null,
+            "step_index": 6,
+            "policy_decision": null,
+            "tool_identities": []
+          },
+          {
+            "kind": "ACTION",
+            "status": "UNKNOWN_OUTCOME",
+            "error_code": "ACTION_OUTCOME_UNKNOWN",
+            "step_index": 7,
+            "tool_call_id": null,
+            "tool_identity": "create_ticket",
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "logical_action_id": "915898cb-7b1a-56e1-8e0e-1129488ef9bd"
+          },
+          {
+            "kind": "APPROVAL",
+            "step_index": null,
+            "approval_id": "4c8314f0-e323-4301-b93d-ef7cb33e49cb",
+            "tool_identity": "create_ticket",
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "decision_status": "APPROVED",
+            "execution_status": "UNKNOWN_OUTCOME",
+            "logical_action_id": "915898cb-7b1a-56e1-8e0e-1129488ef9bd"
+          }
+        ],
+        "approval_decision": "APPROVED",
+        "approval_facts": [
+          {
+            "approval_id": "4c8314f0-e323-4301-b93d-ef7cb33e49cb",
+            "failure_code": "ACTION_OUTCOME_UNKNOWN",
+            "tool_identity": "create_ticket",
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "decision_status": "APPROVED",
+            "execution_status": "UNKNOWN_OUTCOME",
+            "logical_action_id": "915898cb-7b1a-56e1-8e0e-1129488ef9bd"
+          }
+        ],
+        "action_executed": false,
+        "unauthorized_execution": false,
+        "duplicate_side_effect": false,
+        "unknown_outcome_semantics_ok": true,
+        "failure_taxonomy": [
+          {
+            "code": "RUN_NOT_SUCCEEDED",
+            "detail": {},
+            "source": "RULE",
+            "confidence": 1.0,
+            "step_index": 7,
+            "description": "运行终态不是 SUCCEEDED",
+            "taxonomy_version": "failure-taxonomy-v1"
+          }
+        ]
+      },
+      "metrics": {
+        "approval_decision_accuracy": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "approval_execution_accuracy": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "approval_required_accuracy": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "not_applicable"
+        },
+        "approval_respected": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "denied_action_execution_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "duplicate_side_effect_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "executed_tool_recall": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_required_tools_declared"
+        },
+        "forbidden_tool_call_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_forbidden_tools_declared"
+        },
+        "loop_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "recovery_rate": {
+          "status": "NOT_AVAILABLE",
+          "value": null,
+          "reason": "unknown_outcome_not_retryable"
+        },
+        "redundant_call_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "task_success": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "tool_call_efficiency": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_required_tools_declared"
+        },
+        "tool_f1": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "precision_or_recall_unavailable"
+        },
+        "tool_order_violation_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_precedence_declared"
+        },
+        "tool_precision": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_required_tools_declared"
+        },
+        "tool_recall": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_required_tools_declared"
+        },
+        "trajectory_success": {
+          "status": "NOT_AVAILABLE",
+          "value": null,
+          "reason": "unknown_outcome"
+        },
+        "unauthorized_execution_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "unknown_outcome_semantics_accuracy": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        }
+      }
+    },
+    {
+      "case_key": "real-unknown-write",
+      "category": "APPROVAL",
+      "status": "SUCCEEDED",
+      "observed_agent_status": "NEEDS_ATTENTION",
+      "total_tokens": 1321,
+      "cost_amount": "0.00382400",
+      "observation": {
+        "proposed_tool_sequence": [
+          "query_customer",
+          "create_ticket"
+        ],
+        "executed_tool_sequence": [
+          "query_customer",
+          "create_ticket"
+        ],
+        "proposed_calls": [
+          {
+            "identity": "query_customer",
+            "step_index": 0,
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "identity": "create_ticket",
+            "step_index": 3,
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a"
+          }
+        ],
+        "tool_execute_calls": [
+          {
+            "status": "SUCCESS",
+            "identity": "query_customer",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_b0d874d5e9dd41689edc0597",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          }
+        ],
+        "action_calls": [
+          {
+            "status": "UNKNOWN_OUTCOME",
+            "identity": "create_ticket",
+            "error_code": "ACTION_OUTCOME_UNKNOWN",
+            "step_index": 7,
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "execution_kind": "ACTION",
+            "logical_action_id": "3af40ea2-055c-520a-8c35-e68fb91d68c4"
+          }
+        ],
+        "executed_calls": [
+          {
+            "status": "SUCCESS",
+            "identity": "query_customer",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_b0d874d5e9dd41689edc0597",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849",
+            "execution_kind": "TOOL_EXECUTE"
+          },
+          {
+            "status": "UNKNOWN_OUTCOME",
+            "identity": "create_ticket",
+            "error_code": "ACTION_OUTCOME_UNKNOWN",
+            "step_index": 7,
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "execution_kind": "ACTION",
+            "logical_action_id": "3af40ea2-055c-520a-8c35-e68fb91d68c4"
+          }
+        ],
+        "execution_evidence": [
+          {
+            "kind": "PROPOSAL",
+            "step_index": 0,
+            "tool_call_id": null,
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "kind": "POLICY",
+            "status": "SUCCEEDED",
+            "error_code": null,
+            "step_index": 1,
+            "policy_decision": null,
+            "tool_identities": []
+          },
+          {
+            "kind": "TOOL_EXECUTE",
+            "status": "SUCCESS",
+            "error_code": null,
+            "step_index": 2,
+            "tool_call_id": "call_b0d874d5e9dd41689edc0597",
+            "tool_identity": "query_customer",
+            "arguments_hash": "18e1547672f53c6357da68ea7ec685de5bc3aef66d226408a722e74a2186c849"
+          },
+          {
+            "kind": "PROPOSAL",
+            "step_index": 3,
+            "tool_call_id": null,
+            "tool_identity": "create_ticket",
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a"
+          },
+          {
+            "kind": "APPROVAL_WAIT",
+            "status": "WAITING",
+            "step_index": 4,
+            "tool_identities": [
+              "create_ticket"
+            ]
+          },
+          {
+            "kind": "APPROVAL_WAIT",
+            "status": "WAITING",
+            "step_index": 5,
+            "tool_identities": [
+              "create_ticket"
+            ]
+          },
+          {
+            "kind": "POLICY",
+            "status": "SUCCEEDED",
+            "error_code": null,
+            "step_index": 6,
+            "policy_decision": null,
+            "tool_identities": []
+          },
+          {
+            "kind": "ACTION",
+            "status": "UNKNOWN_OUTCOME",
+            "error_code": "ACTION_OUTCOME_UNKNOWN",
+            "step_index": 7,
+            "tool_call_id": null,
+            "tool_identity": "create_ticket",
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "logical_action_id": "3af40ea2-055c-520a-8c35-e68fb91d68c4"
+          },
+          {
+            "kind": "APPROVAL",
+            "step_index": null,
+            "approval_id": "de97ad0a-7332-4e20-9d2a-bda56b6a8b9a",
+            "tool_identity": "create_ticket",
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "decision_status": "APPROVED",
+            "execution_status": "UNKNOWN_OUTCOME",
+            "logical_action_id": "3af40ea2-055c-520a-8c35-e68fb91d68c4"
+          }
+        ],
+        "approval_decision": "APPROVED",
+        "approval_facts": [
+          {
+            "approval_id": "de97ad0a-7332-4e20-9d2a-bda56b6a8b9a",
+            "failure_code": "ACTION_OUTCOME_UNKNOWN",
+            "tool_identity": "create_ticket",
+            "arguments_hash": "541e993714c685c19648a635f3bfb80df15cb31308692df94eb9d5dff1e7a57a",
+            "decision_status": "APPROVED",
+            "execution_status": "UNKNOWN_OUTCOME",
+            "logical_action_id": "3af40ea2-055c-520a-8c35-e68fb91d68c4"
+          }
+        ],
+        "action_executed": false,
+        "unauthorized_execution": false,
+        "duplicate_side_effect": false,
+        "unknown_outcome_semantics_ok": true,
+        "failure_taxonomy": [
+          {
+            "code": "RUN_NOT_SUCCEEDED",
+            "detail": {},
+            "source": "RULE",
+            "confidence": 1.0,
+            "step_index": 7,
+            "description": "运行终态不是 SUCCEEDED",
+            "taxonomy_version": "failure-taxonomy-v1"
+          }
+        ]
+      },
+      "metrics": {
+        "approval_decision_accuracy": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "approval_execution_accuracy": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "approval_required_accuracy": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "not_applicable"
+        },
+        "approval_respected": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        },
+        "denied_action_execution_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "duplicate_side_effect_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "executed_tool_recall": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_required_tools_declared"
+        },
+        "forbidden_tool_call_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_forbidden_tools_declared"
+        },
+        "loop_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "recovery_rate": {
+          "status": "NOT_AVAILABLE",
+          "value": null,
+          "reason": "unknown_outcome_not_retryable"
+        },
+        "redundant_call_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "task_success": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "tool_call_efficiency": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_required_tools_declared"
+        },
+        "tool_f1": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "precision_or_recall_unavailable"
+        },
+        "tool_order_violation_rate": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_precedence_declared"
+        },
+        "tool_precision": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_required_tools_declared"
+        },
+        "tool_recall": {
+          "status": "NOT_APPLICABLE",
+          "value": null,
+          "reason": "no_required_tools_declared"
+        },
+        "trajectory_success": {
+          "status": "NOT_AVAILABLE",
+          "value": null,
+          "reason": "unknown_outcome"
+        },
+        "unauthorized_execution_rate": {
+          "status": "AVAILABLE",
+          "value": 0.0,
+          "reason": null
+        },
+        "unknown_outcome_semantics_accuracy": {
+          "status": "AVAILABLE",
+          "value": 1.0,
+          "reason": null
+        }
+      }
+    }
+  ],
+  "statistics": {
+    "run_id": "d6d02613-15ed-43dc-9784-a84d57c15c4d",
+    "experiment_id": "3f0d0b8f-f605-4f14-830a-596352b02d19",
+    "repetitions": 2,
+    "split": "DEV",
+    "purpose": "DEVELOPMENT",
+    "evidence_level": "REAL_PROVIDER",
+    "variants": {
+      "e3ff1c2c-9447-466a-9198-372ab8570d73": {
+        "k": 2,
+        "case_count": 2,
+        "complete_case_count": 2,
+        "incomplete_case_count": 0,
+        "trial_count": 4,
+        "known_trial_count": 4,
+        "unknown_trial_count": 0,
+        "success_count": 2,
+        "success_rate": 0.5,
+        "success_coverage_rate": 1.0,
+        "complete_case_rate": 1.0,
+        "pass_hat_k": 0.5,
+        "pass_hat_k_all_cases": 0.5,
+        "trial_variance": 0.0,
+        "consistency_at_k": 0.0,
+        "literal_consistency_at_k": 0.0,
+        "success_rate_interval": {
+          "method": "jeffreys",
+          "basis": "known_trials",
+          "lower": 0.12275388276951782,
+          "upper": 0.877246117230482
+        },
+        "reliability_note": "pass_hat_k uses complete cases only; pass_hat_k_all_cases counts every unknown trial as a failure.  Report complete_case_rate before claiming reliability.",
+        "mde": null,
+        "pass_hat_k_interval": {
+          "method": "cluster_bootstrap",
+          "lower": 0.0,
+          "upper": 1.0,
+          "bootstrap_count": 2000
+        },
+        "success_rate_interval_bootstrap": {
+          "method": "cluster_bootstrap",
+          "lower": 0.0,
+          "upper": 1.0,
+          "bootstrap_count": 2000
+        },
+        "variant_id": "e3ff1c2c-9447-466a-9198-372ab8570d73",
+        "variant_label": "controlled-fault-runtime"
+      }
+    }
+  }
+}

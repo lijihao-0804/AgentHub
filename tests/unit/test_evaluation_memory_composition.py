@@ -3,6 +3,7 @@ from types import SimpleNamespace
 import pytest
 
 from apps.worker.tasks import evaluation as evaluation_tasks
+from packages.evaluation.driver_router import EvaluationDriverRouter
 from packages.memory.store import SqlAlchemyMemoryStore
 
 
@@ -24,10 +25,13 @@ async def test_evaluation_runtime_reads_memory_without_learning_from_its_outputs
         database_url="postgresql+asyncpg://localhost/agenthub",
         credential_master_key=None,
         environment="development",
+        evaluation_sandbox_workspace_ids=frozenset(),
     )
 
     driver = await evaluation_tasks._build_driver(settings, factory=object())
 
-    assert isinstance(driver.agent_run_service.memory_selector, SqlAlchemyMemoryStore)
-    assert driver.agent_run_service.memory_writer is None
-    assert driver.agent_run_service.thread_context_provider is None
+    assert isinstance(driver, EvaluationDriverRouter)
+    runtime_driver = driver.runtime_driver
+    assert isinstance(runtime_driver.agent_run_service.memory_selector, SqlAlchemyMemoryStore)
+    assert runtime_driver.agent_run_service.memory_writer is None
+    assert runtime_driver.agent_run_service.thread_context_provider is None

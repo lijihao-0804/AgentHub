@@ -31,6 +31,7 @@ def observed_metrics(
         "APPROVAL": {
             "approval_required_accuracy": ("approval_required",),
             "approval_decision_accuracy": ("approval_decision", "decision"),
+            "approval_execution_accuracy": ("action_executed",),
             "denied_action_execution_rate": ("action_executed",),
             "unauthorized_execution_rate": ("unauthorized_execution",),
             "duplicate_side_effect_rate": ("duplicate_side_effect",),

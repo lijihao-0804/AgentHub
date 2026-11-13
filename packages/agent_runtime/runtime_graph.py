@@ -62,6 +62,7 @@ from packages.agent_runtime.runtime_projection import (
     _TERMINAL_TOOL_ERRORS,
     AgentRunState,
     _append_tool_call_delta,
+    _approval_state_facts,
     _approval_tool_result,
     _bounded_tool_result,
     _categorize_messages,
@@ -93,6 +94,7 @@ from packages.agent_runtime.summary_service import (
 )
 from packages.agent_runtime.summary_state import SummaryJobStatus
 from packages.agent_runtime.summary_worker import SummaryWorker, frozen_summary_model_spec
+from packages.agent_runtime.wiki_history_evidence import validate_wiki_history_evidence
 from packages.agent_runtime.work_layer import (
     HISTORY_SOURCE_MAX_TURNS,
     PLAIN_TEXT_PREFIX_V1,
@@ -120,6 +122,12 @@ from packages.memory.contracts import (
     MemorySnapshotIntegrityError,
     SelectedMemory,
     memory_content_hash,
+)
+from packages.memory.selection_policy import (
+    MEMORY_SELECTION_LIMITATION_CODES,
+    SUPPORTED_MEMORY_SELECTION_POLICIES,
+    InvalidMemorySelectionPolicy,
+    apply_memory_selection_policy,
 )
 from packages.model_gateway.contracts import (
     ModelGateway,
@@ -152,6 +160,26 @@ if TYPE_CHECKING:
     from packages.agent_runtime.runtime_service import AgentRunService
 
 logger = logging.getLogger(__name__)
+
+_NEEDS_ATTENTION_CONTEXT_FAILURES = frozenset(
+    {
+        "RUN_ACTOR_ACCESS_REVOKED",
+        "RUN_EXECUTION_LEASE_LOST",
+        "UNKNOWN_OUTCOME",
+        "ACTION_OUTCOME_UNKNOWN",
+        "ACTION_RECONCILIATION_REQUIRED",
+    }
+)
+
+
+def _context_runtime_failure_fields(error_code: str) -> dict[str, str]:
+    """Map terminal context errors without consulting summary policy."""
+    failure_code = "RUN_ACTOR_ACCESS_REVOKED" if error_code == "FORBIDDEN" else error_code
+    fields = {"failure_code": failure_code}
+    if failure_code in _NEEDS_ATTENTION_CONTEXT_FAILURES:
+        fields["run_status"] = "NEEDS_ATTENTION"
+    return fields
+
 
 SUMMARY_HISTORICAL_CONTEXT_GOAL = (
     "整理给定的已完成历史交流，作为未来未指定任务的背景。"
@@ -318,7 +346,11 @@ class _AgentRunGraph:
             },
             checkpointer=checkpointer,
         )
-        result = await graph.ainvoke(initial, config=config)
+        # Summary admission reads the exact preceding checkpoint through a
+        # separate connection. Commit each boundary before its next node runs.
+        result = await graph.ainvoke(
+            initial, config=config, durability="sync" if checkpointer is not None else None
+        )
         # A new graph instance resumes durable state. Its local counters must
         # also reflect earlier rounds, including paths that finish without
         # another model call.
@@ -407,10 +439,24 @@ class _AgentRunGraph:
         """
 
         selector = self.service.memory_selector
-        if not spec.runtime.get("memory", {}).get("long_term_memory", False):
+        memory_config = spec.runtime.get("memory", {})
+        if not memory_config.get("long_term_memory", False):
             return [], None
         if selector is None:
             return [], None
+        selection_policy = memory_config.get("selection_policy")
+        if (
+            selection_policy is not None
+            and (
+                not isinstance(selection_policy, str)
+                or selection_policy not in SUPPORTED_MEMORY_SELECTION_POLICIES
+            )
+        ):
+            raise AgentHubError(
+                "INVALID_MEMORY_SELECTION_POLICY",
+                "The frozen memory selection policy is unsupported.",
+                422,
+            )
         snapshot = getattr(self.run, "effective_memory_snapshot", None) or {}
         if not isinstance(snapshot, Mapping):
             raise AgentHubError(
@@ -459,18 +505,40 @@ class _AgentRunGraph:
                     422,
                 ) from error
         else:
-            selected = await selector.select(
+            candidates = await selector.select(
                 workspace_id=workspace_id,
                 agent_id=agent_id,
                 query=self.run.input_text,
                 limit=MAX_INJECTED_MEMORIES,
             )
+            try:
+                selected = apply_memory_selection_policy(
+                    candidates,
+                    query=self.run.input_text,
+                    policy=selection_policy,
+                )
+            except InvalidMemorySelectionPolicy as error:
+                raise AgentHubError(
+                    "INVALID_MEMORY_SELECTION_POLICY",
+                    "The frozen memory selection policy is unsupported.",
+                    422,
+                ) from error
             await self._freeze_memory_snapshot(selected, workspace_id=workspace_id)
             memory_ids = tuple(item.id for item in selected)
         metadata = {
             "memory_count": len(selected),
             "replayed_from_snapshot": frozen,
         }
+        if selection_policy is not None:
+            metadata["memory_selection"] = {
+                "policy": selection_policy,
+                "source": "FROZEN_SNAPSHOT" if frozen else "LIVE_SELECTION",
+                "filter_applied": not frozen,
+                "semantic_relevance": False,
+                "limitations": list(MEMORY_SELECTION_LIMITATION_CODES),
+                **({} if frozen else {"candidate_count": len(candidates)}),
+                "selected_count": len(selected),
+            }
         if not selected:
             return [], metadata
         return [_memory_message(selected)], metadata
@@ -647,6 +715,10 @@ class _AgentRunGraph:
         """Reauthorize compact historical evidence against the current Run binding."""
         merged: dict[str, dict[str, Any]] = {}
         current_bindings = getattr(self.run, "effective_knowledge_snapshots", None) or []
+        current_wiki = getattr(self.run, "effective_wiki_publications", None) or []
+        # This cache lives only for this call. Permission and source ACL proof
+        # must be rebuilt whenever history validation is entered.
+        wiki_publication_cache: dict[tuple[UUID, UUID, UUID, str], Any] = {}
         validated_pairs: dict[tuple[str, str], str] = {}
         checks: list[tuple[str, str, str, str]] = []
         for turn in conversation.turns:
@@ -658,24 +730,50 @@ class _AgentRunGraph:
             }
             if rag_calls and "knowledge_run" not in self.context.permissions:
                 raise AgentHubError("FORBIDDEN", "Historical evidence is not authorized.", 403)
-            if "query_wiki" in rag_calls:
-                raise AgentHubError(
-                    "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
-                    "Historical Wiki evidence is unavailable.",
-                    422,
-                )
             registry = turn.evidence_registry or {}
+            has_wiki_evidence = isinstance(registry, Mapping) and any(
+                isinstance(entry, Mapping)
+                and isinstance(entry.get("record"), Mapping)
+                and entry["record"].get("origin") == "WIKI_DERIVED"
+                for entry in registry.values()
+            )
             if rag_calls:
                 try:
-                    registry = validate_history_evidence(
-                        turn.messages,
-                        registry,
-                        turn.source_knowledge_snapshots,
-                        current_bindings,
-                        turn.source_wiki_publications,
-                        getattr(self.run, "effective_wiki_publications", None) or [],
-                        self.context.permissions,
-                    )
+                    if "query_wiki" in rag_calls or has_wiki_evidence:
+                        try:
+                            context_workspace_id = UUID(str(self.context.workspace_id))
+                        except (AttributeError, TypeError, ValueError):
+                            context_workspace_id = None
+                        if context_workspace_id != workspace_id:
+                            raise AgentHubError(
+                                "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
+                                "Historical evidence cannot be verified for the current run.",
+                                422,
+                            )
+                        async with self.service.session_factory() as session:
+                            registry = await validate_wiki_history_evidence(
+                                session,
+                                self.context,
+                                workspace_id=workspace_id,
+                                messages=turn.messages,
+                                registry=registry,
+                                source_knowledge_snapshots=turn.source_knowledge_snapshots,
+                                current_knowledge_snapshots=current_bindings,
+                                source_wiki_publications=turn.source_wiki_publications,
+                                current_wiki_publications=current_wiki,
+                                permissions=self.context.permissions,
+                                publication_cache=wiki_publication_cache,
+                            )
+                    else:
+                        registry = validate_history_evidence(
+                            turn.messages,
+                            registry,
+                            turn.source_knowledge_snapshots,
+                            current_bindings,
+                            turn.source_wiki_publications,
+                            current_wiki,
+                            self.context.permissions,
+                        )
                 except AgentHubError as error:
                     if error.code == "FORBIDDEN":
                         raise
@@ -709,11 +807,13 @@ class _AgentRunGraph:
                         "AGENT_HISTORY_SNAPSHOT_INVALID", "Historical evidence is invalid.", 422
                     )
                 if record.get("origin") == "WIKI_DERIVED":
-                    raise AgentHubError(
-                        "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
-                        "Historical Wiki evidence is unavailable.",
-                        422,
-                    )
+                    if "query_wiki" not in rag_calls:
+                        raise AgentHubError(
+                            "AGENT_HISTORY_CONTEXT_INSUFFICIENT",
+                            "Historical Wiki evidence has no matching tool result.",
+                            422,
+                        )
+                    continue
                 try:
                     kb, snapshot = (
                         str(UUID(str(ref["knowledge_base_id"]))),
@@ -2473,17 +2573,7 @@ class _AgentRunGraph:
             )
             return {
                 "model_round_count": next_round,
-                "failure_code": (
-                    "RUN_ACTOR_ACCESS_REVOKED"
-                    if error.code in {"FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    else error.code
-                ),
-                **(
-                    {"run_status": "NEEDS_ATTENTION"}
-                    if error.code
-                    in {"RUN_EXECUTION_LEASE_LOST", "FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    else {}
-                ),
+                **_context_runtime_failure_fields(error.code),
             }
 
         _retain_admission(state, admission)
@@ -2659,19 +2749,7 @@ class _AgentRunGraph:
             return {
                 **evidence_update,
                 "model_round_count": next_round,
-                "failure_code": (
-                    "RUN_ACTOR_ACCESS_REVOKED"
-                    if state["runtime"].get("summary_policy", {}).get("enabled") is True
-                    and error.code in {"FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    else error.code
-                ),
-                **(
-                    {"run_status": "NEEDS_ATTENTION"}
-                    if error.code
-                    in {"RUN_EXECUTION_LEASE_LOST", "FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    and state["runtime"].get("summary_policy", {}).get("enabled") is True
-                    else {}
-                ),
+                **_context_runtime_failure_fields(error.code),
             }
         except Exception:
             await self.step(
@@ -3033,6 +3111,12 @@ class _AgentRunGraph:
                 "tool_count": len(calls),
                 "tool_identities": [item["name"] for item in calls],
                 "tool_call_ids": [item["tool_call_id"] for item in calls],
+                # Content-free argument identity: the evaluation platform can match
+                # arguments without ever reading the argument text.  The hash is
+                # canonical JSON, so key order cannot change it.
+                "arguments_hashes": [
+                    canonical_json_hash(dict(item["arguments"])) for item in calls
+                ],
             },
         )
         return {
@@ -3211,8 +3295,11 @@ class _AgentRunGraph:
                         }
                     }
                 if current.decision_status != ApprovalDecisionStatus.APPROVED:
+                    approval_facts = _approval_state_facts(current)
                     pre_observations[call_id] = ToolResult.failure(
-                        "TOOL_APPROVAL_DENIED", "The action was not approved."
+                        "TOOL_APPROVAL_DENIED",
+                        "The action was not approved.",
+                        **approval_facts,
                     )
                     continue
                 action_calls.append({"call": call, "approval_id": str(current.id)})
@@ -3240,6 +3327,7 @@ class _AgentRunGraph:
             return {"failure_code": "ACTION_RUNTIME_NOT_CONFIGURED"}
         executed: dict[str, ToolResult] = {}
         logical_action_ids: list[str] = []
+        action_results: list[dict[str, Any]] = []
         for item in state.get("action_calls", []):
             stopped = await self._stop_if_requested()
             if stopped is not None:
@@ -3275,6 +3363,19 @@ class _AgentRunGraph:
                     result = _approval_tool_result(approval)
                     executed[call["tool_call_id"]] = result
                     span_execution_status = str(approval.execution_status)
+                    action_results.append(
+                        {
+                            "tool_call_id": call["tool_call_id"],
+                            "logical_action_id": approval.logical_action_id,
+                            "tool_identity": approval.tool_identity,
+                            "status": (
+                                approval.execution_status.value
+                                if hasattr(approval.execution_status, "value")
+                                else str(approval.execution_status)
+                            ),
+                            "error_code": approval.failure_code,
+                        }
+                    )
                     if approval.execution_status == ApprovalExecutionStatus.UNKNOWN_OUTCOME:
                         span_status = "error"
                         span_failure_code = approval.failure_code or "UNKNOWN_OUTCOME"
@@ -3372,16 +3473,26 @@ class _AgentRunGraph:
                     idempotency_key=claimed.idempotency_key,
                 )
                 if result.status is ActionExecutionStatus.UNKNOWN_OUTCOME:
-                    await self.service.approval_service.complete_execution(
+                    completed = await self.service.approval_service.complete_execution(
                         self.context,
                         approval_id,
                         status=ApprovalExecutionStatus.UNKNOWN_OUTCOME,
                         failure_code=result.failure_code,
                         safe_failure_message=result.safe_message,
                     )
+                    executed[call["tool_call_id"]] = _approval_tool_result(completed)
                     span_execution_status = ApprovalExecutionStatus.UNKNOWN_OUTCOME.value
                     span_status = "error"
                     span_failure_code = result.failure_code or "UNKNOWN_OUTCOME"
+                    action_results.append(
+                        {
+                            "tool_call_id": call["tool_call_id"],
+                            "logical_action_id": approval.logical_action_id,
+                            "tool_identity": approval.tool_identity,
+                            "status": ApprovalExecutionStatus.UNKNOWN_OUTCOME.value,
+                            "error_code": result.failure_code,
+                        }
+                    )
                     return {
                         "executed_observations": executed,
                         "run_status": "NEEDS_ATTENTION",
@@ -3392,7 +3503,7 @@ class _AgentRunGraph:
                     if result.status is ActionExecutionStatus.SUCCEEDED
                     else ApprovalExecutionStatus.FAILED
                 )
-                await self.service.approval_service.complete_execution(
+                completed = await self.service.approval_service.complete_execution(
                     self.context,
                     approval_id,
                     status=execution_status,
@@ -3401,17 +3512,19 @@ class _AgentRunGraph:
                     safe_failure_message=result.safe_message,
                 )
                 span_execution_status = execution_status.value
+                action_results.append(
+                    {
+                        "tool_call_id": call["tool_call_id"],
+                        "logical_action_id": approval.logical_action_id,
+                        "tool_identity": approval.tool_identity,
+                        "status": execution_status.value,
+                        "error_code": result.failure_code,
+                    }
+                )
                 if result.status is ActionExecutionStatus.FAILED:
                     span_status = "error"
                     span_failure_code = result.failure_code or "ACTION_FAILED"
-                executed[call["tool_call_id"]] = (
-                    ToolResult.success(result.data)
-                    if result.status is ActionExecutionStatus.SUCCEEDED
-                    else ToolResult.failure(
-                        result.failure_code or "ACTION_FAILED",
-                        result.safe_message or "The action failed.",
-                    )
-                )
+                executed[call["tool_call_id"]] = _approval_tool_result(completed)
             finally:
                 await _safe_end_span(
                     execution_span,
@@ -3433,11 +3546,12 @@ class _AgentRunGraph:
                 )
         await self.step(
             "ACTION",
-            "SUCCEEDED",
+            "FAILED" if any(item["status"] == "FAILED" for item in action_results) else "SUCCEEDED",
             {
                 "tool_count": len(executed),
                 "tool_identities": [item["call"]["name"] for item in state.get("action_calls", [])],
                 "logical_action_ids": logical_action_ids,
+                "action_results": action_results,
             },
         )
         return {"executed_observations": executed, "action_calls": []}
@@ -3552,7 +3666,29 @@ class _AgentRunGraph:
         await self.step(
             "TOOL_EXECUTE",
             "SUCCEEDED",
-            {"tool_count": len(calls), "tool_identities": [call["name"] for call in calls]},
+            {
+                "tool_count": len(calls),
+                "tool_identities": [call["name"] for call in calls],
+                "tool_call_ids": [call["tool_call_id"] for call in calls],
+                # Per-call outcome: a single failing tool must not be hidden behind the
+                # batch-level SUCCEEDED status.  Only identity/status/error code is kept.
+                "tool_results": [
+                    {
+                        "tool_call_id": call_id,
+                        "tool_identity": next(
+                            (
+                                call["name"]
+                                for call in calls
+                                if call["tool_call_id"] == call_id
+                            ),
+                            None,
+                        ),
+                        "status": result.status.value,
+                        "error_code": result.error_code,
+                    }
+                    for call_id, result in pairs
+                ],
+            },
         )
         observations = dict(pairs)
         await self._record_artifacts(
@@ -3758,6 +3894,12 @@ class _AgentRunGraph:
                 payload = _bounded_tool_result(
                     result, max_tool_result_tokens=budget.max_tool_result_tokens
                 )
+            elif result.approval_decision is not None and result.approval_execution is not None:
+                payload = {
+                    **dict(payload),
+                    "approval_decision": result.approval_decision,
+                    "approval_execution": result.approval_execution,
+                }
             payload_text = (
                 json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
                 if rag_evidence_projected

@@ -12,7 +12,9 @@ import { useI18n } from "@/i18n/provider";
 
 export default function EvaluationDatasetsPage() {
   const { t, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId, permissions } =
+    useFrontendSession();
+  const canManage = permissions?.includes("evaluation_manage") === true;
   const [datasets, setDatasets] = useState<EvaluationDataset[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [extraPages, setExtraPages] = useState<EvaluationDataset[][]>([]);
@@ -97,6 +99,7 @@ export default function EvaluationDatasetsPage() {
 
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManage) return;
     setCreateError(null);
     if (!name.trim()) return;
     const requestSessionId = sessionId;
@@ -144,14 +147,16 @@ export default function EvaluationDatasetsPage() {
       <Panel
         ariaLabel={t("evaluation.datasets.title")}
         actions={
-          <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
-            {t("evaluation.datasets.create")}
-          </button>
+          canManage ? (
+            <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>
+              {t("evaluation.datasets.create")}
+            </button>
+          ) : undefined
         }
       >
         {createdNotice && <p className="inline-notice">{t("evaluation.datasets.createdNotice")}</p>}
 
-        {showForm && (
+        {canManage && showForm && (
           <form className="eval-form" onSubmit={submitCreate} noValidate>
             <label>
               {t("evaluation.datasets.nameLabel")}

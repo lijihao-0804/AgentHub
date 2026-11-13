@@ -10,10 +10,14 @@ from sqlalchemy import select
 from packages.agent_runtime.models import AgentRun
 from packages.agent_runtime.runtime_graph import _AgentRunGraph
 from packages.core.errors.exceptions import AgentHubError
-from tests.integration.test_m4d_streaming_budget import TEST_DATABASE_URL, _seed
+from tests.integration.test_m4d_streaming_budget import (
+    TEST_DATABASE_URL,
+    _seed,
+    db_factory,
+    migrated_database,
+)
 
-pytest_plugins = ("tests.integration.test_m4d_streaming_budget",)
-
+__all__ = ["db_factory", "migrated_database"]
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(

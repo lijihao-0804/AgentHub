@@ -78,8 +78,11 @@ def test_email_normalization_is_stable() -> None:
 
 
 @pytest.mark.parametrize("environment", ["local", "test", "development"])
-def test_default_jwt_secret_is_allowed_only_for_dev_environments(environment: str) -> None:
+def test_default_jwt_secret_is_allowed_only_for_dev_environments(
+    monkeypatch: pytest.MonkeyPatch, environment: str
+) -> None:
     # Hermetic: the developer's .env must not influence secret-default tests.
+    monkeypatch.delenv("AGENTHUB_AUTH_JWT_SECRET", raising=False)
     assert (
         Settings(environment=environment, _env_file=None).auth_jwt_secret
         == DEFAULT_AUTH_JWT_SECRET
@@ -87,7 +90,10 @@ def test_default_jwt_secret_is_allowed_only_for_dev_environments(environment: st
 
 
 @pytest.mark.parametrize("environment", ["docker", "staging", "production"])
-def test_default_jwt_secret_fails_fast_outside_dev_environments(environment: str) -> None:
+def test_default_jwt_secret_fails_fast_outside_dev_environments(
+    monkeypatch: pytest.MonkeyPatch, environment: str
+) -> None:
+    monkeypatch.delenv("AGENTHUB_AUTH_JWT_SECRET", raising=False)
     with pytest.raises(ValueError, match="AUTH_JWT_SECRET"):
         Settings(environment=environment, _env_file=None)
 

@@ -32,6 +32,7 @@ from packages.model_gateway.contracts import (
     ResolvedModelExecutionProfile,
 )
 from packages.model_gateway.credentials import ProviderCredentialCipher
+from packages.model_gateway.egress import ProviderEgressError, normalize_provider_base_url
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.models import ProviderCredential
 from packages.model_gateway.profile_resolution import (
@@ -758,6 +759,20 @@ class ModelGatewayService(ModelGateway):
             or credential.provider != profile.provider
         ):
             raise ModelGatewayError(ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID)
+        if profile.provider_egress is not None:
+            try:
+                current_base_url = normalize_provider_base_url(credential.base_url)
+            except ProviderEgressError:
+                raise ModelGatewayError(
+                    ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID
+                ) from None
+            # For policy v1, two null values bind to the fixed builtin endpoint
+            # selected later by provider. They never authorize SDK or
+            # environment-driven routing.
+            if current_base_url != profile.provider_egress.base_url:
+                raise ModelGatewayError(
+                    ModelGatewayErrorCode.AGENT_VERSION_MODEL_BINDING_INVALID
+                )
         return credential
 
 

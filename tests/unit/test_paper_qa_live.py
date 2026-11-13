@@ -58,8 +58,19 @@ async def test_physical_limit_is_shared_across_separate_run_clients(monkeypatch)
     call = AsyncMock(return_value=SimpleNamespace(model=MODEL))
     monkeypatch.setattr(litellm, "acompletion", call)
     shared = {"dispatched": 0, "limit": 1}
-    args = {"model": "openai/" + MODEL, "max_tokens": 1024, "num_retries": 0}
-    await RecordedClient(StringIO(), {}, shared).acompletion(**args)
+    guarded_client = object()
+    args = {
+        "model": "openai/" + MODEL,
+        "max_tokens": 1024,
+        "num_retries": 0,
+        "client": guarded_client,
+        "api_key": "synthetic-private-key",
+    }
+    events = StringIO()
+    await RecordedClient(events, {}, shared).acompletion(**args)
+    assert call.call_args.kwargs["client"] is guarded_client
+    assert "client" not in json.loads(events.getvalue().splitlines()[0])["request"]
+    assert "synthetic-private-key" not in events.getvalue()
     with pytest.raises(ValueError, match="guard stopped"):
         await RecordedClient(StringIO(), {}, shared).acompletion(**args)
     assert call.await_count == 1

@@ -68,6 +68,14 @@ def _not_found() -> NoReturn:
     raise AgentHubError(NOT_FOUND, NOT_FOUND_MESSAGE, 404)
 
 
+def _thread_id_conflict() -> NoReturn:
+    raise AgentHubError(
+        "THREAD_IDEMPOTENCY_CONFLICT",
+        "The thread ID is associated with a different creation identity.",
+        409,
+    )
+
+
 def _validated_title(value: str) -> str:
     title = value.strip()
     if not title or len(title) > MAX_TITLE_LENGTH:
@@ -131,12 +139,27 @@ class ThreadService:
         agent_id: UUID,
         title: str,
         kind: str = kinds.GENERAL,
+        thread_id: UUID | None = None,
     ) -> AgentThread:
         workspace_id = _require(context, AGENT_RUN)
         created_by = _principal_id(context)
         clean_title = _validated_title(title)
         clean_kind = kinds.validate_kind(kind)
         async with self.session_factory() as session:
+            existing = None
+            if thread_id is not None:
+                existing = await self._thread_by_id(session, workspace_id, thread_id)
+                if existing is not None:
+                    self._require_thread_identity(
+                        existing,
+                        workspace_id=workspace_id,
+                        agent_id=agent_id,
+                        created_by=created_by,
+                        kind=clean_kind,
+                        title=clean_title,
+                    )
+                    session.expunge(existing)
+                    return existing
             agent = await session.scalar(
                 select(Agent).where(Agent.workspace_id == workspace_id, Agent.id == agent_id)
             )
@@ -151,8 +174,28 @@ class ThreadService:
                 kind=clean_kind,
                 created_by=created_by,
             )
+            if thread_id is not None:
+                thread.id = thread_id
             session.add(thread)
-            await session.commit()
+            try:
+                await session.commit()
+            except IntegrityError as error:
+                if thread_id is None or not self._is_thread_identity_conflict(error):
+                    raise
+                await session.rollback()
+                existing = await self._thread_by_id(session, workspace_id, thread_id)
+                if existing is None:
+                    _thread_id_conflict()
+                self._require_thread_identity(
+                    existing,
+                    workspace_id=workspace_id,
+                    agent_id=agent_id,
+                    created_by=created_by,
+                    kind=clean_kind,
+                    title=clean_title,
+                )
+                session.expunge(existing)
+                return existing
             await session.refresh(thread)
             return thread
 
@@ -203,6 +246,7 @@ class ThreadService:
         workspace_id = _require(context, AGENT_RUN)
         async with self.session_factory() as session:
             from packages.agent_runtime.summary_models import ThreadSummaryJob
+            from packages.evaluation.models import InteractiveEpisode
             from packages.handoffs.models import HandoffCase
             from packages.threads.summary_eligibility import ThreadSummaryEligibilityRecord
 
@@ -213,6 +257,18 @@ class ThreadService:
             )
             if thread is None:
                 raise AgentHubError("THREAD_NOT_FOUND", "The thread was not found.", 404)
+            interactive_episode = await session.scalar(
+                select(InteractiveEpisode.case_id).where(
+                    InteractiveEpisode.workspace_id == workspace_id,
+                    InteractiveEpisode.reserved_thread_id == thread_id,
+                )
+            )
+            if interactive_episode is not None:
+                raise AgentHubError(
+                    "EVALUATION_EVIDENCE_RETAINED",
+                    "The thread contains retained interactive evaluation evidence.",
+                    409,
+                )
             retained = await session.scalar(
                 select(HandoffCase.id).where(
                     HandoffCase.workspace_id == workspace_id, HandoffCase.thread_id == thread_id
@@ -227,16 +283,20 @@ class ThreadService:
             # Summary review and dispatch records are immutable evidence.  The
             # thread lock also serializes this check with new scoped records.
             summary_job = await session.scalar(
-                select(ThreadSummaryJob.id).where(
+                select(ThreadSummaryJob.id)
+                .where(
                     ThreadSummaryJob.workspace_id == workspace_id,
                     ThreadSummaryJob.thread_id == thread_id,
-                ).limit(1)
+                )
+                .limit(1)
             )
             summary_review = await session.scalar(
-                select(ThreadSummaryEligibilityRecord.id).where(
+                select(ThreadSummaryEligibilityRecord.id)
+                .where(
                     ThreadSummaryEligibilityRecord.workspace_id == workspace_id,
                     ThreadSummaryEligibilityRecord.thread_id == thread_id,
-                ).limit(1)
+                )
+                .limit(1)
             )
             if summary_job is not None or summary_review is not None:
                 raise AgentHubError(
@@ -764,6 +824,47 @@ class ThreadService:
                 ThreadTurn.thread_id == thread_id,
                 ThreadTurn.client_token == token,
             )
+        )
+
+    async def _thread_by_id(
+        self, session: AsyncSession, workspace_id: UUID, thread_id: UUID
+    ) -> AgentThread | None:
+        return await session.scalar(
+            select(AgentThread).where(
+                AgentThread.workspace_id == workspace_id,
+                AgentThread.id == thread_id,
+            )
+        )
+
+    @staticmethod
+    def _require_thread_identity(
+        thread: AgentThread,
+        *,
+        workspace_id: UUID,
+        agent_id: UUID,
+        created_by: UUID,
+        kind: str,
+        title: str,
+    ) -> None:
+        if (
+            thread.workspace_id != workspace_id
+            or thread.agent_id != agent_id
+            or thread.created_by != created_by
+            or thread.kind != kind
+            or thread.title != title
+        ):
+            _thread_id_conflict()
+
+    @staticmethod
+    def _is_thread_identity_conflict(error: IntegrityError) -> bool:
+        diag = getattr(error.orig, "diag", None)
+        constraint_name = getattr(diag, "constraint_name", None)
+        expected = {"agent_threads_pkey", "uq_agent_threads_workspace_id"}
+        if constraint_name is not None:
+            return constraint_name in expected
+        detail = str(diag or error)
+        return any(
+            f'"{name}"' in detail or f"'{name}'" in detail or detail == name for name in expected
         )
 
     async def _load(

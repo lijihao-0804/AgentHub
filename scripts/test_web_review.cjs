@@ -336,28 +336,50 @@ async function main() {
     assert.notEqual(switched.key, nextRun.key, 'run switch must remount local state');
     console.log(`PASS ${file} identity boundaries remount on workspace and run switch`);
   }
+  let evidenceData = {
+    events: [{ sequence: 1, type: 'tool.requested', payload: { tool_identity: 'legacy-tool' } }],
+    evidence_refs: [{ snapshot_id: 'snapshot-a', knowledge_base_id: 'kb', document_revision_id: 'revision-a', chunk_id: 'chunk-a' }],
+    content_allowed: false,
+    truncated: false,
+  };
   const evidenceHarness = harness({ '@/hooks/use-workspace-data': {
-    useWorkspaceData: () => ({ loaded: true, data: {
-      events: [{ sequence: 1, type: 'tool.requested', payload: { tool_identity: 'legacy-tool' } }],
-      evidence_refs: [{ snapshot_id: 'snapshot-a', knowledge_base_id: 'kb-a', document_revision_id: 'revision-a', chunk_id: 'chunk-a' }],
-      content_allowed: false, truncated: false,
-    } }),
+    useWorkspaceData: () => ({ loaded: true, data: evidenceData }),
   } });
   const Evidence = load('components/runs/tool-evidence-panel.tsx', evidenceHarness.mocks).default;
   const body = evidenceHarness.render(Evidence, { runId: 'run-a' });
-  const tree = evidenceHarness.render(body.type, body.props);
-  assert.ok(JSON.stringify(tree).includes('legacy-tool'));
-  const eventRow = elements(tree, (el) => typeof el.type === 'function' && el.props.event?.sequence === 1)[0];
-  assert.ok(JSON.stringify(eventRow.type(eventRow.props)).includes('runEvidence.events.requested'));
-  const deniedEvidence = elements(tree, (el) => el.type === 'button' && el.props.title === 'runEvidence.permission')[0];
-  assert.equal(deniedEvidence.props.disabled, true);
-  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', knowledge_base_id: 'kb-a', document_revision_id: 'revision-a', chunk_id: 'chunk-a' };
-  const a = evidenceHarness.render(body.type, body.props);
-  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', knowledge_base_id: 'kb-a', document_revision_id: 'revision-a', chunk_id: 'chunk-b' };
-  const b = evidenceHarness.render(body.type, body.props);
-  const excerpt = (node) => elements(node, (el) => typeof el.type === 'function' && el.props.selected)[0];
-  assert.notEqual(excerpt(a).key, excerpt(b).key, 'evidence selection must remount fetched excerpt');
-  console.log('PASS tool event rendering, denied evidence content and selection identity');
+  let evidenceTree = evidenceHarness.render(body.type, body.props);
+  const eventRow = elements(evidenceTree, (el) => typeof el.type === 'function' && el.type.name === 'ToolEventRow')[0];
+  assert.ok(eventRow, 'tool events must render through the compact row');
+  const eventMarkup = JSON.stringify(evidenceHarness.render(eventRow.type, eventRow.props));
+  assert.ok(eventMarkup.includes('legacy-tool'));
+  assert.ok(eventMarkup.includes('runEvidence.events.requested'));
+  assert.ok(!eventMarkup.includes('runEvidence.arguments'));
+  assert.ok(!eventMarkup.includes('runEvidence.summaryUnavailable'));
+  const deniedOpen = elements(evidenceTree, (el) => el.type === 'button' && el.props.children === 'runEvidence.open')[0];
+  assert.ok(deniedOpen);
+  assert.equal(deniedOpen.props.disabled, true);
+  assert.equal(deniedOpen.props.title, 'runEvidence.permission');
+
+  evidenceData = {
+    ...evidenceData,
+    evidence_refs: [
+      ...evidenceData.evidence_refs,
+      { snapshot_id: 'snapshot-a', knowledge_base_id: 'kb', document_revision_id: 'revision-b', chunk_id: 'chunk-b' },
+    ],
+    content_allowed: true,
+  };
+  evidenceTree = evidenceHarness.render(body.type, body.props);
+  const openButtons = elements(evidenceTree, (el) => el.type === 'button' && el.props.children === 'runEvidence.open');
+  openButtons[0].props.onClick();
+  const selectedA = evidenceHarness.render(body.type, body.props);
+  const firstExcerpt = elements(selectedA, (el) => typeof el.type === 'function' && el.type.name === 'EvidenceExcerpt')[0];
+  const switchedButtons = elements(selectedA, (el) => el.type === 'button' && el.props.children === 'runEvidence.open');
+  switchedButtons[1].props.onClick();
+  const selectedB = evidenceHarness.render(body.type, body.props);
+  const secondExcerpt = elements(selectedB, (el) => typeof el.type === 'function' && el.type.name === 'EvidenceExcerpt')[0];
+  assert.ok(firstExcerpt && secondExcerpt);
+  assert.notEqual(firstExcerpt.key, secondExcerpt.key, 'evidence selection must remount fetched excerpt');
+  console.log('PASS historical missing-summary omission, content denial and evidence selection identity');
 
   const lifecycle = { id: 'handoff-a', workspace_id: 'workspace-a', thread_id: 'thread-a', source_artifact_id: 'artifact-a', source_hash: 'abc', status: 'OPEN', version: 1,
     created_by: 'self', assignee_id: null, claimed_by: null, closed_by: null, closure_reason: null, unresolved_items: [], created_at: 'now', updated_at: 'now', claimed_at: null, closed_at: null };

@@ -433,7 +433,9 @@ class RecordedClient:
         self.budget["dispatched"] += 1
         record = {
             **self.labels,
-            "request": {k: v for k, v in kwargs.items() if k not in {"api_key", "api_base"}},
+            "request": {
+                k: v for k, v in kwargs.items() if k not in {"api_key", "api_base", "client"}
+            },
             "status": "DISPATCHED",
         }
         self.raw_calls.append(record)

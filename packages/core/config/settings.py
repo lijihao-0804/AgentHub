@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from ipaddress import ip_network
 from pathlib import Path
 from typing import Literal
+from uuid import UUID
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_AUTH_JWT_SECRET = "local-dev-only-change-me-32-characters"
@@ -35,6 +37,11 @@ class Settings(BaseSettings):
     # Local, digest-pinned DeepSeek V4.1 tokenizer asset. No network download is
     # attempted; absent or invalid assets keep v2 summary dispatch disabled.
     summary_deepseek_v41_tokenizer_path: Path | None = None
+    # Operator-owned provider egress exception list. These CIDRs apply to every
+    # tenant and are never derived from an API key, environment name, or
+    # published AgentVersion spec. Empty means only globally routable DNS
+    # answers are accepted.
+    model_provider_private_cidrs: tuple[str, ...] = ()
     knowledge_qdrant_collection: str = "agenthub_knowledge"
     knowledge_dense_vector_size: int = Field(default=1024, ge=1, le=4096)
     knowledge_embedding_model: str = "BAAI/bge-m3"
@@ -107,6 +114,7 @@ class Settings(BaseSettings):
     evaluation_runner_heartbeat_seconds: int = Field(default=30, ge=1, le=86_400)
     evaluation_enqueue_grace_seconds: int = Field(default=30, ge=0, le=86_400)
     evaluation_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
+    evaluation_sandbox_workspace_ids: frozenset[UUID] = frozenset()
     # Remote MCP egress. The defaults are the safe ones: private targets are
     # refused, and every remote call is bounded in time and in size. Loosening
     # any of these is an explicit operator decision, never an inference from
@@ -141,6 +149,24 @@ class Settings(BaseSettings):
     auth_refresh_cookie_path: str = "/api/v1/auth"
     auth_refresh_cookie_samesite: Literal["lax", "strict"] = "lax"
     auth_cookie_secure: bool | None = None
+
+    @field_validator("model_provider_private_cidrs", mode="before")
+    @classmethod
+    def validate_model_provider_private_cidrs(cls, value: object) -> tuple[str, ...]:
+        if value is None:
+            return ()
+        if isinstance(value, str | bytes) or not isinstance(value, tuple | list):
+            raise ValueError("model provider private CIDRs must be a sequence")
+        normalized: list[str] = []
+        for item in value:
+            if not isinstance(item, str) or "/" not in item or item != item.strip():
+                raise ValueError("model provider private CIDRs must be strict CIDRs")
+            try:
+                network = ip_network(item, strict=True)
+            except ValueError:
+                raise ValueError("model provider private CIDR is invalid") from None
+            normalized.append(str(network))
+        return tuple(normalized)
 
     @model_validator(mode="after")
     def validate_knowledge_ingestion_settings(self) -> Settings:

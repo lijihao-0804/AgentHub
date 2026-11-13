@@ -23,6 +23,7 @@ from urllib.parse import urlsplit
 from cryptography.fernet import Fernet, InvalidToken
 
 from packages.core.config.settings import DEVELOPMENT_ENVIRONMENTS, Settings, get_settings
+from packages.core.network_address import is_strict_global_address
 
 MCP_SECRET_CIPHERTEXT_VERSION = 1
 
@@ -152,40 +153,17 @@ def parse_endpoint_url(raw: str) -> McpEndpoint:
     return McpEndpoint(url=candidate, scheme=scheme, host=host, port=resolved_port)
 
 
-def _normalize_address(value: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
-    # getaddrinfo returns scoped literals such as "fe80::1%eth0" for link-local
-    # results; the zone index is not part of the address.
-    candidate = value.split("%", 1)[0]
-    address = ipaddress.ip_address(candidate)
-    if isinstance(address, ipaddress.IPv6Address):
-        # An attacker who cannot name 169.254.169.254 directly can often still
-        # name ::ffff:169.254.169.254 or its 6to4 form. Judge the address that
-        # packets will actually reach.
-        mapped = address.ipv4_mapped
-        if mapped is not None:
-            return mapped
-        sixtofour = address.sixtofour
-        if sixtofour is not None:
-            return sixtofour
-    return address
-
-
 def is_forbidden_address(value: str) -> bool:
     """True when an address must never be reached on a user's instruction."""
 
     try:
-        address = _normalize_address(value)
-    except ValueError:
+        # getaddrinfo returns scoped literals such as "fe80::1%eth0" for
+        # link-local results; the zone index is not part of the address.
+        address = ipaddress.ip_address(value.split("%", 1)[0])
+    except (AttributeError, TypeError, ValueError):
         # An address we cannot parse is an address we cannot vouch for.
         return True
-    return bool(
-        address.is_loopback
-        or address.is_private
-        or address.is_link_local
-        or address.is_multicast
-        or address.is_reserved
-        or address.is_unspecified
-    )
+    return not is_strict_global_address(address)
 
 
 async def _default_resolver(host: str, port: int) -> tuple[str, ...]:

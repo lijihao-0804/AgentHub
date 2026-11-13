@@ -12,8 +12,10 @@ from packages.model_gateway.context_metadata import (
     ContextMetadata,
     validate_context_metadata,
 )
+from packages.model_gateway.egress import ProviderEgressError, normalize_provider_base_url
 
 MessageRole = Literal["system", "user", "assistant", "tool"]
+PROVIDER_EGRESS_POLICY_VERSION = "provider_egress_v1"
 
 
 @dataclass(frozen=True, slots=True)
@@ -257,6 +259,31 @@ class ModelCapabilities:
 
 
 @dataclass(frozen=True, slots=True)
+class ProviderEgress:
+    """The non-secret provider endpoint policy frozen with a model profile.
+
+    Under ``provider_egress_v1``, ``base_url=None`` selects the fixed builtin
+    endpoint owned by that policy for the profile's provider. It never means
+    "let the SDK or an environment variable choose a route". The provider
+    identity remains a separate binding check, so unknown providers do not gain
+    a transport path from this policy. Changing a builtin endpoint requires a
+    new policy version.
+    """
+
+    policy_version: str
+    base_url: str | None
+
+    def __post_init__(self) -> None:
+        if self.policy_version != PROVIDER_EGRESS_POLICY_VERSION:
+            raise ValueError("unsupported provider egress policy version")
+        try:
+            normalized = normalize_provider_base_url(self.base_url)
+        except ProviderEgressError:
+            raise ValueError("invalid provider egress base URL") from None
+        object.__setattr__(self, "base_url", normalized)
+
+
+@dataclass(frozen=True, slots=True)
 class ResolvedModelExecutionProfile:
     """The non-secret model identity frozen into an immutable AgentVersion."""
 
@@ -269,6 +296,29 @@ class ResolvedModelExecutionProfile:
     max_tokens: int
     timeout_seconds: Decimal
     capabilities: ModelCapabilities
+    # ``None`` is reserved for snapshots published before provider egress was
+    # versioned. A new snapshot with no explicit credential URL carries an
+    # explicit ``ProviderEgress(base_url=None)``, meaning the fixed endpoint
+    # assigned to the frozen provider by that policy version.
+    provider_egress: ProviderEgress | Mapping[str, Any] | None = None
+
+    def __post_init__(self) -> None:
+        if self.provider_egress is None:
+            return
+        if isinstance(self.provider_egress, ProviderEgress):
+            return
+        if not isinstance(self.provider_egress, Mapping):
+            raise ValueError("provider_egress must be a mapping or ProviderEgress")
+        if set(self.provider_egress) != {"policy_version", "base_url"}:
+            raise ValueError("provider_egress has invalid fields")
+        try:
+            provider_egress = ProviderEgress(
+                policy_version=self.provider_egress["policy_version"],
+                base_url=self.provider_egress["base_url"],
+            )
+        except (KeyError, TypeError, ValueError):
+            raise ValueError("invalid provider_egress") from None
+        object.__setattr__(self, "provider_egress", provider_egress)
 
 
 @dataclass(frozen=True, slots=True)
@@ -359,6 +409,8 @@ __all__ = [
     "ModelToolCallDelta",
     "ModelToolDefinition",
     "ModelUsage",
+    "PROVIDER_EGRESS_POLICY_VERSION",
+    "ProviderEgress",
     "RetryPolicy",
     "StructuredOutputSchema",
 ]

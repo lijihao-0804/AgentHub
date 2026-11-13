@@ -19,9 +19,10 @@ from packages.model_gateway.contracts import (
 _STUDY_ASSET_ROOT = Path(
     os.environ.get("AGENTHUB_DEEPSEEK_V41_ASSET_DIR", ".scratch/context-policy-m4-20261027")
 )
-TOKENIZER = _STUDY_ASSET_ROOT / "tokenizer-v41.json"
 FROZEN_INPUTS = _STUDY_ASSET_ROOT / "formal-summary" / "frozen-summary-inputs.json"
 OBSERVATIONS = _STUDY_ASSET_ROOT / "formal-summary" / "summary-observations.json"
+
+pytest_plugins = ("tests.support.deepseek_assets",)
 
 
 class _NeverEncode:
@@ -69,9 +70,10 @@ def test_wrong_tokenizer_file_fails_closed():
         DeepseekV41TextCounter.from_file(Path(__file__))
 
 
-@pytest.mark.skipif(not TOKENIZER.is_file(), reason="Public pinned tokenizer was not downloaded")
-def test_paired_calibration_matches_real_provider_input_usage():
-    counter = DeepseekV41TextCounter.from_file(TOKENIZER)
+def test_paired_calibration_matches_real_provider_input_usage(
+    deepseek_v41_tokenizer_path: Path,
+):
+    counter = DeepseekV41TextCounter.from_file(deepseek_v41_tokenizer_path)
     messages = (
         ModelMessage(
             "user",
@@ -88,11 +90,13 @@ def test_paired_calibration_matches_real_provider_input_usage():
 
 
 @pytest.mark.skipif(
-    not all(path.is_file() for path in (TOKENIZER, FROZEN_INPUTS, OBSERVATIONS)),
-    reason="Pinned tokenizer and frozen local study inputs are unavailable",
+    not all(path.is_file() for path in (FROZEN_INPUTS, OBSERVATIONS)),
+    reason="Frozen local study inputs are unavailable",
 )
-def test_four_frozen_summary_requests_match_recorded_provider_usage():
-    counter = DeepseekV41TextCounter.from_file(TOKENIZER)
+def test_four_frozen_summary_requests_match_recorded_provider_usage(
+    deepseek_v41_tokenizer_path: Path,
+):
+    counter = DeepseekV41TextCounter.from_file(deepseek_v41_tokenizer_path)
     cases = json.loads(FROZEN_INPUTS.read_text(encoding="utf-8"))["cases"]
     observed = json.loads(OBSERVATIONS.read_text(encoding="utf-8"))["observations"]
     expected = {row["question_id"]: row["measurements"]["input_tokens"] for row in observed}

@@ -63,6 +63,11 @@ _CATEGORY_SHAPES: dict[str, tuple[frozenset[str], frozenset[str], frozenset[str]
         frozenset({"status", "failure_code"}),
         frozenset(),
     ),
+    "INTERACTIVE": (
+        frozenset({"task", "environment_ref", "simulator"}),
+        frozenset({"assertions"}),
+        frozenset({"canary", "approval_decisions", "required_tools", "forbidden_tools"}),
+    ),
 }
 
 
@@ -115,7 +120,13 @@ def validate_dataset_item(raw: Mapping[str, Any]) -> dict[str, Any]:
     _reject_secret_keys({"input": input_value, "expected": expected_value, "source": source})
 
     required_input, required_expected, optional_expected = _CATEGORY_SHAPES[category]
-    optional_input = {"scenario"} if category == "MULTI_STEP" else set()
+    optional_input = (
+        {"scenario"}
+        if category == "MULTI_STEP"
+        else {"seed", "max_turns", "max_tokens", "max_cost_cny"}
+        if category == "INTERACTIVE"
+        else set()
+    )
     if (
         not required_input.issubset(input_value)
         or not set(input_value).issubset(required_input | optional_input)
@@ -303,6 +314,31 @@ def _validate_category_types(
         ):
             raise AgentHubError(
                 "EVALUATION_DATASET_INVALID", "Failure expected data is invalid.", 422
+            )
+    if category == "INTERACTIVE":
+        if not isinstance(input_value["task"], str) or not input_value["task"].strip():
+            raise AgentHubError("EVALUATION_DATASET_INVALID", "Interactive task is invalid.", 422)
+        if not isinstance(input_value["environment_ref"], str):
+            raise AgentHubError(
+                "EVALUATION_DATASET_INVALID", "Interactive environment_ref is invalid.", 422
+            )
+        if not isinstance(input_value["simulator"], Mapping):
+            raise AgentHubError(
+                "EVALUATION_DATASET_INVALID", "Interactive simulator is invalid.", 422
+            )
+        if not isinstance(expected_value["assertions"], Mapping):
+            raise AgentHubError(
+                "EVALUATION_DATASET_INVALID", "Interactive assertions are invalid.", 422
+            )
+        if "canary" in expected_value and not isinstance(expected_value["canary"], str):
+            raise AgentHubError("EVALUATION_DATASET_INVALID", "Interactive canary is invalid.", 422)
+        if "approval_decisions" in expected_value and not all(
+            item in {"APPROVED", "DENIED"} for item in expected_value["approval_decisions"]
+        ):
+            raise AgentHubError(
+                "EVALUATION_DATASET_INVALID",
+                "Interactive approval decisions are invalid.",
+                422,
             )
 
 

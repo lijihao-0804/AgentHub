@@ -34,6 +34,8 @@ def validate_history_evidence(
     source_wiki: Sequence[Mapping[str, Any]],
     current_wiki: Sequence[Mapping[str, Any]],
     permissions: Collection[str],
+    *,
+    resolved_wiki_snapshots: Sequence[Mapping[str, Any]] = (),
 ) -> dict[str, dict[str, Any]]:
     """Return only compact historical evidence proven safe for this Run.
 
@@ -47,9 +49,14 @@ def validate_history_evidence(
     Error results remain valid history but contribute no evidence. For every
     visible registry entry, the same knowledge snapshot must be frozen in both
     Runs. A ``WIKI_DERIVED`` record additionally needs the same publication id
-    and hash in both Wiki binding sets. Any missing, ambiguous, malformed, or
-    mismatched input fails closed. The return value is a detached copy of the
-    already visible registry; this function neither repairs nor adds evidence.
+    and hash in both Wiki binding sets. When the caller has resolved that
+    publication's immutable source snapshot from the database, it supplies
+    one ``resolved_wiki_snapshots`` binding. That binding can satisfy the
+    snapshot requirement only for ``WIKI_DERIVED`` records; RAW records still
+    require an ordinary knowledge binding frozen in both Runs. Any missing,
+    ambiguous, malformed, or mismatched input fails closed. The return value is
+    a detached copy of the already visible registry; this function neither
+    repairs nor adds evidence.
     """
 
     _require_permissions(permissions)
@@ -62,12 +69,14 @@ def validate_history_evidence(
         current_snapshot_index = _snapshot_index(current_snapshots)
         source_wiki_index = _wiki_index(source_wiki)
         current_wiki_index = _wiki_index(current_wiki)
+        resolved_wiki_index = _resolved_wiki_index(resolved_wiki_snapshots)
         _validate_bindings(
             visible,
             source_snapshot_index=source_snapshot_index,
             current_snapshot_index=current_snapshot_index,
             source_wiki_index=source_wiki_index,
             current_wiki_index=current_wiki_index,
+            resolved_wiki_index=resolved_wiki_index,
         )
         verified = copy.deepcopy(visible)
         json.dumps(
@@ -159,6 +168,10 @@ def _validate_compact_exchange(
             raise _invalid()
         if not validate_evidence_view(payload):
             raise _invalid()
+        if message.name == "search_knowledge" and any(
+            item.get("origin") == EVIDENCE_ORIGIN_WIKI_DERIVED for item in payload["results"]
+        ):
+            raise _invalid()
 
     if seen_results != set(rag_calls):
         raise _invalid()
@@ -205,6 +218,23 @@ def _wiki_index(values: Sequence[Mapping[str, Any]]) -> dict[tuple[str, str], st
     return result
 
 
+def _resolved_wiki_index(
+    values: Sequence[Mapping[str, Any]],
+) -> dict[tuple[str, str], tuple[str, str, str]]:
+    result: dict[tuple[str, str], tuple[str, str, str]] = {}
+    for binding in _bindings(values):
+        knowledge_base_id = _text(binding.get("knowledge_base_id"))
+        publication_id = _text(binding.get("wiki_publication_id"))
+        publication_hash = _text(binding.get("publication_hash"))
+        snapshot_id = _text(binding.get("snapshot_id"))
+        snapshot_hash = _text(binding.get("snapshot_hash"))
+        key = (knowledge_base_id, publication_id)
+        if key in result:
+            raise _invalid()
+        result[key] = (publication_hash, snapshot_id, snapshot_hash)
+    return result
+
+
 def _bindings(values: Sequence[Mapping[str, Any]]) -> tuple[Mapping[str, Any], ...]:
     if isinstance(values, (str, bytes, bytearray, Mapping)) or not isinstance(values, Sequence):
         raise _invalid()
@@ -234,6 +264,7 @@ def _validate_bindings(
     current_snapshot_index: Mapping[tuple[str, str], str],
     source_wiki_index: Mapping[tuple[str, str], str],
     current_wiki_index: Mapping[tuple[str, str], str],
+    resolved_wiki_index: Mapping[tuple[str, str], tuple[str, str, str]],
 ) -> None:
     for entry in visible.values():
         reference = entry["reference"]
@@ -242,11 +273,13 @@ def _validate_bindings(
             _text(reference.get("knowledge_base_id")),
             _text(reference.get("snapshot_id")),
         )
-        if snapshot_key not in source_snapshot_index or snapshot_key not in current_snapshot_index:
-            raise _invalid()
-        if source_snapshot_index[snapshot_key] != current_snapshot_index[snapshot_key]:
-            raise _invalid()
         if record.get("origin") != EVIDENCE_ORIGIN_WIKI_DERIVED:
+            if (
+                snapshot_key not in source_snapshot_index
+                or snapshot_key not in current_snapshot_index
+                or source_snapshot_index[snapshot_key] != current_snapshot_index[snapshot_key]
+            ):
+                raise _invalid()
             continue
         publication_id = _text(record.get("publication_id"))
         publication_hash = _text(record.get("publication_hash"))
@@ -254,6 +287,26 @@ def _validate_bindings(
         if (
             source_wiki_index.get(wiki_key) != publication_hash
             or current_wiki_index.get(wiki_key) != publication_hash
+        ):
+            raise _invalid()
+        resolved = resolved_wiki_index.get(wiki_key)
+        if resolved is not None:
+            resolved_publication_hash, snapshot_id, snapshot_hash = resolved
+            if snapshot_key[1] != snapshot_id or resolved_publication_hash != publication_hash:
+                raise _invalid()
+            ordinary_source_hash = source_snapshot_index.get(snapshot_key)
+            ordinary_current_hash = current_snapshot_index.get(snapshot_key)
+            if (ordinary_source_hash is None) != (ordinary_current_hash is None):
+                raise _invalid()
+            if ordinary_source_hash is not None and (
+                ordinary_source_hash != snapshot_hash or ordinary_current_hash != snapshot_hash
+            ):
+                raise _invalid()
+            continue
+        if (
+            snapshot_key not in source_snapshot_index
+            or snapshot_key not in current_snapshot_index
+            or source_snapshot_index[snapshot_key] != current_snapshot_index[snapshot_key]
         ):
             raise _invalid()
 

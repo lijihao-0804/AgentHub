@@ -48,7 +48,9 @@ class MemoryConfigRequest(BaseModel):
 
     Both default off, and the whole block is dropped from the published spec
     when neither is on, so an agent that never asks for memory publishes the
-    same bytes it published before this field existed.
+    same bytes it published before this field existed. ``selection_policy`` is
+    an explicit opt-in inside long-term memory; leaving it out preserves the
+    legacy selector output unchanged.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -57,6 +59,7 @@ class MemoryConfigRequest(BaseModel):
     long_term_memory: bool = False
     max_memory_tokens: int | None = Field(default=None, ge=1, strict=True)
     max_memory_tokens_source: Literal["UNSET", "DEFAULT", "CUSTOM"] | None = None
+    selection_policy: Literal["lexical_overlap_v1"] | None = None
 
     @model_validator(mode="after")
     def validate_budget_intent(self) -> MemoryConfigRequest:
@@ -67,6 +70,8 @@ class MemoryConfigRequest(BaseModel):
             raise ValueError("memory source and explicit budget conflict")
         if self.max_memory_tokens is not None and not self.long_term_memory:
             raise ValueError("memory budget requires long_term_memory")
+        if self.selection_policy is not None and not self.long_term_memory:
+            raise ValueError("memory selection policy requires long_term_memory")
         self.max_memory_tokens_source = source
         return self
 

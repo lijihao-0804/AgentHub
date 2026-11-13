@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:regression": "node ../../scripts/test_web_regressions.cjs",
     "lint": "next lint"
   },
   "dependencies": {
