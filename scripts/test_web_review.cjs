@@ -67,6 +67,13 @@ function elements(node, predicate, result = []) {
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
 async function main() {
+  const { autoBreadcrumbs } = load('components/layout/breadcrumbs.tsx');
+  const trialRun = '12345678-1234-4234-8234-123456789abc';
+  assert.deepEqual(autoBreadcrumbs(`/evaluations/runs/${trialRun}`, String), [
+    { label: 'nav.evaluations', href: '/evaluations' }, { label: 'common.detail', href: undefined },
+  ]);
+  assert.equal(autoBreadcrumbs(`/runs/${trialRun}`, String)[0].href, '/runs');
+  console.log('PASS evaluation run loading trail links only to an existing index');
   const { Markdown } = load('components/ui/markdown.tsx');
   const html = renderToStaticMarkup(React.createElement(Markdown, {
     text: '<script>alert(1)</script> & "ok"\n\n[search](https://example.com/?a=1&b=2)\n\n- bullet\n1. numbered\n- last\n\n[bad](javascript:alert(1))',

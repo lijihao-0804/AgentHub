@@ -101,6 +101,8 @@ export function autoBreadcrumbs(pathname: string, t: (key: MessageKey) => string
   let href = "";
   for (const segment of segments) {
     href += `/${segment}`;
+    // Run details live under the owning experiment; there is no /evaluations/runs index.
+    if (href === "/evaluations/runs") continue;
     const labelKey = SEGMENT_LABELS[segment];
     const isLast = segment === segments[segments.length - 1];
     if (labelKey) {
