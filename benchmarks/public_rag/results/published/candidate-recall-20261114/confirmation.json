@@ -1,0 +1,172 @@
+{
+  "phase": "confirmation",
+  "time_utc": "2026-11-13T22:47:02.051496+00:00",
+  "protocol_sha256": "c4c024b0876db23a3fa068c33cd13f2a9f7e3de8f568567d50954bc61b9baef9",
+  "source_sha256": {
+    "candidate_recall_methods.py": "b41edac4a39739a6c64ee28d6f941b746be0d76d966c5e5095cf34bad19d94e8",
+    "candidate_recall_data.py": "269871bf39c91b4622f67cdc9ee2f9e535452e28e482ef551eaf1d2ca12484ef",
+    "candidate_recall_study.py": "1eded2364c5848d39961980d049807f4a0b846fa0e2e815acb102b94dbe1d20c"
+  },
+  "ordered_ids_sha256": "24010c64ddecf485b91797bb9487c955a5132598c78db2a84e6aa38ed7f96825",
+  "n_registered": 553,
+  "n_evaluated": 553,
+  "methods": {
+    "safe_refill4": {
+      "queries": 553,
+      "components": 367,
+      "macro_recall": {
+        "baseline": 0.8645569620253165,
+        "candidate": 0.8690777576853527
+      },
+      "delta_macro_recall": 0.0045207956600361665,
+      "delta_macro_exact": "5/1106",
+      "paired_cluster_interval_97_5": [
+        0.0,
+        0.011545549863150524
+      ],
+      "retention_among_baseline_positive_pairs": 1.0,
+      "raw5_macro_delta_before_rerank": 0.0,
+      "all_cases": {
+        "queries": 553,
+        "positive_pairs": 625,
+        "baseline_pairs": 539,
+        "candidate_pairs": 542,
+        "retained_pairs": 539,
+        "gained_pairs": 3,
+        "lost_pairs": 0,
+        "uncovered_in_both": 83,
+        "gained_pairs_outside_both_old_lanes": 0,
+        "baseline_partial": 15,
+        "candidate_partial": 14,
+        "baseline_any": 485,
+        "candidate_any": 487,
+        "any_retained": 485,
+        "any_gained": 2,
+        "any_lost": 0,
+        "any_missing_both": 66,
+        "all_retained": 470,
+        "all_gained": 3,
+        "all_lost": 0,
+        "all_missing_both": 80,
+        "changed_chunk_sets": 455,
+        "sources_lost_all_documents": 0,
+        "sources_added_all_documents": 1020
+      },
+      "multiple_positive_cases": {
+        "queries": 46,
+        "positive_pairs": 118,
+        "baseline_pairs": 99,
+        "candidate_pairs": 100,
+        "retained_pairs": 99,
+        "gained_pairs": 1,
+        "lost_pairs": 0,
+        "uncovered_in_both": 18,
+        "gained_pairs_outside_both_old_lanes": 0,
+        "baseline_partial": 15,
+        "candidate_partial": 14,
+        "baseline_any": 45,
+        "candidate_any": 45,
+        "any_retained": 45,
+        "any_gained": 0,
+        "any_lost": 0,
+        "any_missing_both": 1,
+        "all_retained": 30,
+        "all_gained": 1,
+        "all_lost": 0,
+        "all_missing_both": 15,
+        "changed_chunk_sets": 39,
+        "sources_lost_all_documents": 0,
+        "sources_added_all_documents": 100
+      }
+    },
+    "lexical_refill4": {
+      "queries": 553,
+      "components": 367,
+      "macro_recall": {
+        "baseline": 0.8645569620253165,
+        "candidate": 0.8772151898734177
+      },
+      "delta_macro_recall": 0.012658227848101266,
+      "delta_macro_exact": "1/79",
+      "paired_cluster_interval_97_5": [
+        0.003590664272890485,
+        0.024299065420560748
+      ],
+      "retention_among_baseline_positive_pairs": 1.0,
+      "raw5_macro_delta_before_rerank": 0.0,
+      "all_cases": {
+        "queries": 553,
+        "positive_pairs": 625,
+        "baseline_pairs": 539,
+        "candidate_pairs": 547,
+        "retained_pairs": 539,
+        "gained_pairs": 8,
+        "lost_pairs": 0,
+        "uncovered_in_both": 78,
+        "gained_pairs_outside_both_old_lanes": 5,
+        "baseline_partial": 15,
+        "candidate_partial": 13,
+        "baseline_any": 485,
+        "candidate_any": 491,
+        "any_retained": 485,
+        "any_gained": 6,
+        "any_lost": 0,
+        "any_missing_both": 62,
+        "all_retained": 470,
+        "all_gained": 8,
+        "all_lost": 0,
+        "all_missing_both": 75,
+        "changed_chunk_sets": 454,
+        "sources_lost_all_documents": 0,
+        "sources_added_all_documents": 983
+      },
+      "multiple_positive_cases": {
+        "queries": 46,
+        "positive_pairs": 118,
+        "baseline_pairs": 99,
+        "candidate_pairs": 101,
+        "retained_pairs": 99,
+        "gained_pairs": 2,
+        "lost_pairs": 0,
+        "uncovered_in_both": 17,
+        "gained_pairs_outside_both_old_lanes": 1,
+        "baseline_partial": 15,
+        "candidate_partial": 13,
+        "baseline_any": 45,
+        "candidate_any": 45,
+        "any_retained": 45,
+        "any_gained": 0,
+        "any_lost": 0,
+        "any_missing_both": 1,
+        "all_retained": 30,
+        "all_gained": 2,
+        "all_lost": 0,
+        "all_missing_both": 14,
+        "changed_chunk_sets": 38,
+        "sources_lost_all_documents": 0,
+        "sources_added_all_documents": 87
+      }
+    }
+  },
+  "rankings_sha256": "8512995afd1bed03263deabb5c2d6ef3612020b929672584cd23036abaa7ce60",
+  "nominees": {
+    "existing_lanes": "safe_refill4",
+    "independent_lexical_index": "lexical_refill4"
+  },
+  "candidate_recall_gates": {
+    "safe_refill4": {
+      "recovered_complete_miss": true,
+      "retained_every_baseline_positive_pair": true,
+      "minimum_macro_recall_gain": false,
+      "positive_multiplicity_adjusted_lower_bound": false,
+      "raw_first_five_margin": true
+    },
+    "lexical_refill4": {
+      "recovered_complete_miss": true,
+      "retained_every_baseline_positive_pair": true,
+      "minimum_macro_recall_gain": true,
+      "positive_multiplicity_adjusted_lower_bound": true,
+      "raw_first_five_margin": true
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "frozen_at_utc": "2026-11-13T22:41:07.780916+00:00",
+  "protocol_sha256": "c4c024b0876db23a3fa068c33cd13f2a9f7e3de8f568567d50954bc61b9baef9",
+  "query_count": 809,
+  "cohorts": {
+    "development": {
+      "queries": 128,
+      "source_components": 120,
+      "ordered_ids_sha256": "d11c025ee834023c7b4da2c3dc3d5fdda0450a62ea4ecd3381dadbd505d7fafe"
+    },
+    "warmup": {
+      "queries": 4,
+      "source_components": 4,
+      "ordered_ids_sha256": "d5d79fcfec5e53590f066a285b6cff41cc4ce747d42ea449008e4f46ea451d35"
+    },
+    "excluded_shared_source": {
+      "queries": 124,
+      "source_components": 77,
+      "ordered_ids_sha256": "d138584e38a70ff129934c31f46fc7bd9fb0f7c6ddec6f2c25e662c13d7dda2f"
+    },
+    "confirmation": {
+      "queries": 553,
+      "source_components": 367,
+      "ordered_ids_sha256": "24010c64ddecf485b91797bb9487c955a5132598c78db2a84e6aa38ed7f96825"
+    }
+  },
+  "total_train_source_components": 490,
+  "development_or_warmup_vs_confirmation_shared_components": 0
+}

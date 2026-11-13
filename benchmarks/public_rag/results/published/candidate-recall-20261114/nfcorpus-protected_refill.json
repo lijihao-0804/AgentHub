@@ -1,0 +1,44 @@
+{
+  "corpus": "NFCorpus official TRAIN (128 ordered IDs)",
+  "method": "protected_refill",
+  "capture": {
+    "corpus_documents": 3633,
+    "chunks": 6818,
+    "queries": 128,
+    "ids_sha256": "068fb580c389bb7d343da7da817b66e53ad111df10b61c058c6610252600b552",
+    "device": "cuda",
+    "trace_sha256": "ca9840ecde9235099be9ad1996bead2f0fe2cb52f809c269fbb7d6b064beac95"
+  },
+  "query_hits": {
+    "retained": 92,
+    "gained": 2,
+    "lost": 0,
+    "missed_both": 34
+  },
+  "changed_positive_pairs": {
+    "new": 10,
+    "lost": 0
+  },
+  "macro_document_recall_at_20": {
+    "baseline": 0.1869798982560597,
+    "candidate": 0.1955290612932129,
+    "delta": 0.008549163037153196
+  },
+  "guardrail_passed": true,
+  "rerank_pairs": 2613,
+  "post_bge_first_five": {
+    "baseline": 0.13709206503772675,
+    "candidate": 0.13711602976165313,
+    "delta": 2.3964723926378495e-05,
+    "changed_positive_pairs": {
+      "new": 2,
+      "lost": 1
+    },
+    "query_hits": {
+      "retained": 84,
+      "gained": 0,
+      "lost": 0,
+      "missed_both": 44
+    }
+  }
+}

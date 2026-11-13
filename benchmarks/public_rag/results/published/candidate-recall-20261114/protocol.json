@@ -1,0 +1,63 @@
+{
+  "protocol": "scifact-candidate-source-recall-v1",
+  "frozen_on": "2026-11-14",
+  "split": "official SciFact TRAIN only",
+  "scope": "Select at most one candidate per deployment family on the previous 128 paired queries. Confirm each nominated family on the complete remaining TRAIN population independent of the previous 132 positive-source components. The entire 809-query population has historical project exposure.",
+  "snapshot_id": "024a6651-8429-422d-b22e-37bdc4567d29",
+  "snapshot_hash": "2453684867babc64462b17543f333d5847956ddb73c474bfd60c349d75c106fe",
+  "inputs": {
+    "data/external/rag-public-20261021/scifact/extracted/scifact/corpus.jsonl": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6",
+    "data/external/rag-public-20261021/scifact/extracted/scifact/queries.jsonl": "8ff84a7c903f722981cd8d595c022660140c51867b27608a6d4910db86080313",
+    "data/external/rag-public-20261021/scifact/extracted/scifact/qrels/train.tsv": "a53f2114831916c096b6c37d9e54da68cef4efdcdbd5ed46533601af972acf1d",
+    "benchmarks/public_rag/results/parent-context-20261022/dev-baseline.jsonl": "cf391506ecdc72dc2d65fd0e8a943b078a1386ae2427603b61b4cd294822a4f9",
+    "benchmarks/public_rag/results/parent-context-20261022/dev-baseline.meta.json": "89d9e8d76bb546d3a68bd85af3848c264ae47efcc72197e4556b9f35c0720d7d",
+    "benchmarks/public_rag/results/parent-context-20261022/pair-token-audit.jsonl": "37c66ed3f50af24f771f0b5cdb2d1f53f5a218d91b208a7d433b5991c952878f",
+    ".scratch/rag-opt-20261021/scifact-state.json": "cf0c3807844384745d1ad4edaf4c54ffa47fa2c64bb1b8ff4bfbff6a05914709"
+  },
+  "split_plan": {
+    "query_count": 809,
+    "old_salt": "agenthub-scifact-reranker-batching-20261114",
+    "development": 128,
+    "warmup_excluded": 4,
+    "confirmation_salt": "agenthub-scifact-source-recall-confirm-v1",
+    "rule": "Use previous salted SHA256(salt + ':' + id) order for development and warmup. A mechanical splitter reads TRAIN qrels only to identify connected components of queries sharing any positive document. Remove every component intersecting the original 132. Sort every remaining ID by SHA256(confirmation_salt + ':' + id), ascending. Store ordered private ID lists and their public digest before inspecting confirmation outcomes. ID digest is SHA256 of compact UTF-8 JSON string array. No sample-size adjustment."
+  },
+  "common": {"dense_k": 30, "sparse_k": 30, "candidates": 20, "baseline_k": 60, "protect_head": 8, "refill_limit": 4, "lexical_k": 20},
+  "families": {
+    "existing_lanes": ["safe_refill4", "group_first", "rrf_head", "dbsf"],
+    "independent_lexical_index": ["lexical_three", "lexical_refill4"]
+  },
+  "mechanisms": {
+    "baseline": "Replay production RRF, equal routes, one-based ranks, k=60; descending sum, ascending best route rank, then chunk ID. Require exact 20 ordered historical selection IDs and scores on every case.",
+    "safe_refill4": "Protect the baseline first eight and first occurrence of every baseline document. Replace up to four redundant tail chunks, starting from the bottom, by the first new source documents in the full baseline RRF union. Keep survivors in original order, append newcomers in RRF order with original RRF scores.",
+    "group_first": "Traverse full RRF rank, one representative per document; defer later chunks and backfill in original order if fewer than 20 distinct parents exist.",
+    "rrf_head": "Equal-weight rank fusion with one-based k=1, equivalent to zero-based unweighted Qdrant k=2. Use production tie breaks.",
+    "dbsf": "Reuse existing pinned Qdrant-based float64 sample-variance normalization and sum adapter with chunk ID tie break.",
+    "lexical_three": "Limit each lane to 20 hits (dense, sparse, independent BM25). RRF k=60 across the three lanes. Same total number of lane hits read as baseline, plus the cost of maintaining and querying the third index.",
+    "lexical_refill4": "Start with original 30+30 RRF top20. Apply safe_refill4 protection, sourcing up to four new documents from the independent top20 BM25 chunks. Append in lexical order with tie-break scores below incumbent RRF (minimum original RRF score divided by 2, 3, ...). This arm reads up to 80 input hits and needs a new index.",
+    "lexical_index": "Use all 9189 original chunks, title + abstract, 1200/200 characters, no label data. NFKC, Unicode casefold, Unicode alphanumeric words excluding underscores, distinct query terms, no stemming or stopword removal. BM25 k1=1.2 b=0.75, IDF=log1p((N-df+0.5)/(df+0.5)), original token counts and mean chunk length. Only positive-scoring chunks; chunk ID ascending on ties. No parameter sweep."
+  },
+  "selection": {
+    "unit": "For each query use distinct positive SciFact source documents and document IDs present in its first 20 raw chunks.",
+    "eligibility": "At least one new positive query/document pair, zero lost positive pairs across all 128 and raw first-five source macro-recall difference >= -0.005 before reranking.",
+    "order": "Per family choose highest query-macro source recall gain, then highest count of complete baseline misses recovered, then earlier frozen family menu position. If no arm passes, no nominee or confirmation for that family. Confirmation validates each nominated family independently; no cross-family retrospective winner.",
+    "raw5_margin": 0.005
+  },
+  "confirmation": {
+    "min_macro_gain": 0.005,
+    "raw5_margin": 0.005,
+    "gates": "For the fixed family nominee require at least one recovered complete miss, zero lost positive pairs, macro source recall gain >=0.005, lower endpoint of its 97.5% percentile interval strictly positive, and raw first-five source recall difference >=-0.005. Any missing or nonmatching case invalidates that arm.",
+    "bootstrap": {"seed": 20261114, "replicates": 10000, "two_sided_confidence": 0.975, "unit": "Resample full-TRAIN shared-positive-document components within the fixed cohort. Use query-weighted macro means. Two families, Bonferroni family-wise 95%. Other intervals and endpoints are descriptive."},
+    "diagnostics": "Publish baseline/candidate macro recall, retained/gained/lost/uncovered query-positive pairs, any-hit transitions, all-positive transitions, partially covered and multi-positive query strata, previously hit positive retention, raw top5 effect and new relevant sources outside both original top30 lists.",
+    "practical_limits": "Zero loss here protects judged source presence; another chunk of the same document can remove important text. A rollout also needs actual BGE/consumer and runtime checks. Cached retrieval cannot measure production DB, online vector retrieval or index maintenance."
+  },
+  "exposure": "The prior SciFact first-round, budget/diversity, parent reranking, Qdrant DBSF, learned sparse and Onyx public development protocols already evaluated all 809 TRAIN. This is conditional confirmation for this decision, never fresh dataset-level generalization. No official test file or platform HOLDOUT used here.",
+  "sources": {
+    "qdrant_rrf": "https://qdrant.tech/documentation/search/hybrid-queries/",
+    "qdrant_dbsf": "https://github.com/qdrant/qdrant/blob/222b2e44ab1c3f17e8246396ead6558e45041df7/lib/segment/src/common/score_fusion.rs",
+    "vespa_groups": "https://docs.vespa.ai/en/querying/grouping.html",
+    "qdrant_groups": "https://api.qdrant.tech/api-reference/search/query-points-groups",
+    "opensearch_rrf": "https://docs.opensearch.org/latest/search-plugins/search-pipelines/score-ranker-processor/",
+    "lucene_bm25": "https://lucene.apache.org/core/7_6_0/core/org/apache/lucene/search/similarities/BM25Similarity.html"
+  }
+}

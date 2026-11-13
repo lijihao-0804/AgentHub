@@ -1,0 +1,36 @@
+{
+  "protocol": "nfcorpus-train-recall-transfer-v1",
+  "frozen_before_scifact_selection": true,
+  "scifact_base": "f02a6fb",
+  "scope": "Cross-corpus guardrail for one SciFact-selected candidate strategy; the NFCorpus score may veto general deployment, never select another strategy using its labels. Official test and dev qrels excluded.",
+  "data_directory": "data/external/rag-learned-20261022/extracted/nfcorpus",
+  "split": "train",
+  "sample_salt": "agenthub-nfcorpus-train-recall-transfer-20261114",
+  "eligible_query_ids": 2590,
+  "sample_size": 128,
+  "sample_algorithm": "First 128 TRAIN query IDs sorted by SHA-256(salt + ':' + ID). Only the query-ID column was read to select. No inspection of positive grades or text during registration.",
+  "ids_sha256": "f5c9c7535203a1fad97947b29dc60a39918078423c8c8ad5aa21daea04359bcd",
+  "input_sha256": {
+    "corpus.jsonl": "10cc83ef1826b1425e6a87090b5140b39b27755d5a27e48215a88611c899991f",
+    "queries.jsonl": "d024e6621b84925d485ae473d316a0c3af31c62c8068a59fb29d22f7613aef2a",
+    "qrels/train.tsv": "6336b80f9bffc4f063f3aa450047ad35c0b7c534efe4a6ba35e16dbace047f6a"
+  },
+  "retrieval": {
+    "dense_model": "BAAI/bge-m3",
+    "dense_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+    "render": "title plus two newlines plus text",
+    "chunk_chars": 1200,
+    "overlap_chars": 200,
+    "dense_depth": 30,
+    "sparse_depth": 30,
+    "candidate_depth": 20,
+    "baseline": "RRF k=60, ties broken by best source rank then chunk ID",
+    "qdrant_version": "1.13.6",
+    "corpus": "entire official NFCorpus corpus; positive means upstream grade > 0"
+  },
+  "guardrail": {
+    "lost_all_previously_hit_queries": 0,
+    "macro_document_recall20_min_delta": 0.0,
+    "note": "Report retained/gained/lost query counts, and gross newly covered/lost positive query-document pairs even when net nonnegative. An improvement on SciFact does not establish improvements outside its measured corpora. Negative transfer prevents a global default switch."
+  }
+}

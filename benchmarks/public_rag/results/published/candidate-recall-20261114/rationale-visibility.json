@@ -1,0 +1,185 @@
+{
+  "kind": "descriptive_complete_sentence_annotation_audit",
+  "implementation_sha256": "881ee53d40bfdc4dc7a96ab7486692be3a1964975c7801bd2a3b7d5fe233a86f",
+  "direct_inference_sha256": "bf21da226ffc7ed5a00108d1c7ec2fe9d2ca41ff8cd5bc6ada88641e4770474e",
+  "official_archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+  "definition": "Restricted to official TRAIN query/source pairs with annotated sentence sets. An alternative set is complete if each entire required sentence fits within a returned chunk of that source; different sentences may be in different chunks. Unannotated source pairs are counted separately.",
+  "cohorts": {
+    "development": {
+      "counts": {
+        "baseline": {
+          "top5_covered_rationale_pairs": 81,
+          "top5_queries_with_any_complete_set": 76,
+          "pool_covered_rationale_pairs": 84,
+          "pool_queries_with_any_complete_set": 77,
+          "registered_queries": 128,
+          "annotated_queries": 83,
+          "annotated_query_document_pairs": 92,
+          "positive_pairs_without_rationale": 52
+        },
+        "safe_refill4": {
+          "top5_covered_rationale_pairs": 76,
+          "top5_queries_with_any_complete_set": 72,
+          "pool_covered_rationale_pairs": 79,
+          "pool_queries_with_any_complete_set": 73,
+          "registered_queries": 128,
+          "annotated_queries": 83,
+          "annotated_query_document_pairs": 92,
+          "positive_pairs_without_rationale": 52
+        },
+        "lexical_refill4": {
+          "top5_covered_rationale_pairs": 76,
+          "top5_queries_with_any_complete_set": 72,
+          "pool_covered_rationale_pairs": 80,
+          "pool_queries_with_any_complete_set": 73,
+          "registered_queries": 128,
+          "annotated_queries": 83,
+          "annotated_query_document_pairs": 92,
+          "positive_pairs_without_rationale": 52
+        }
+      },
+      "paired": {
+        "safe_refill4": {
+          "top5": {
+            "retained": 76,
+            "gained": 0,
+            "lost": 5,
+            "missing_both": 11
+          },
+          "pool": {
+            "retained": 79,
+            "gained": 0,
+            "lost": 5,
+            "missing_both": 8
+          }
+        },
+        "lexical_refill4": {
+          "top5": {
+            "retained": 76,
+            "gained": 0,
+            "lost": 5,
+            "missing_both": 11
+          },
+          "pool": {
+            "retained": 79,
+            "gained": 1,
+            "lost": 5,
+            "missing_both": 7
+          }
+        }
+      },
+      "first_in_frozen_order": {
+        "safe_refill4_pool_loss": {
+          "query_id": "368",
+          "document_id": "27099731"
+        },
+        "safe_refill4_top5_loss": {
+          "query_id": "368",
+          "document_id": "27099731"
+        },
+        "lexical_refill4_pool_loss": {
+          "query_id": "368",
+          "document_id": "27099731"
+        },
+        "lexical_refill4_top5_loss": {
+          "query_id": "368",
+          "document_id": "27099731"
+        },
+        "lexical_refill4_pool_gain": {
+          "query_id": "530",
+          "document_id": "10546779"
+        }
+      }
+    },
+    "confirmation": {
+      "counts": {
+        "baseline": {
+          "top5_covered_rationale_pairs": 342,
+          "top5_queries_with_any_complete_set": 319,
+          "pool_covered_rationale_pairs": 357,
+          "pool_queries_with_any_complete_set": 325,
+          "registered_queries": 553,
+          "annotated_queries": 341,
+          "annotated_query_document_pairs": 379,
+          "positive_pairs_without_rationale": 246
+        },
+        "safe_refill4": {
+          "top5_covered_rationale_pairs": 337,
+          "top5_queries_with_any_complete_set": 314,
+          "pool_covered_rationale_pairs": 346,
+          "pool_queries_with_any_complete_set": 319,
+          "registered_queries": 553,
+          "annotated_queries": 341,
+          "annotated_query_document_pairs": 379,
+          "positive_pairs_without_rationale": 246
+        },
+        "lexical_refill4": {
+          "top5_covered_rationale_pairs": 339,
+          "top5_queries_with_any_complete_set": 316,
+          "pool_covered_rationale_pairs": 348,
+          "pool_queries_with_any_complete_set": 321,
+          "registered_queries": 553,
+          "annotated_queries": 341,
+          "annotated_query_document_pairs": 379,
+          "positive_pairs_without_rationale": 246
+        }
+      },
+      "paired": {
+        "safe_refill4": {
+          "top5": {
+            "retained": 334,
+            "gained": 3,
+            "lost": 8,
+            "missing_both": 34
+          },
+          "pool": {
+            "retained": 346,
+            "gained": 0,
+            "lost": 11,
+            "missing_both": 22
+          }
+        },
+        "lexical_refill4": {
+          "top5": {
+            "retained": 336,
+            "gained": 3,
+            "lost": 6,
+            "missing_both": 34
+          },
+          "pool": {
+            "retained": 348,
+            "gained": 0,
+            "lost": 9,
+            "missing_both": 22
+          }
+        }
+      },
+      "first_in_frozen_order": {
+        "safe_refill4_pool_loss": {
+          "query_id": "1159",
+          "document_id": "12584053"
+        },
+        "safe_refill4_top5_loss": {
+          "query_id": "1159",
+          "document_id": "12584053"
+        },
+        "lexical_refill4_pool_loss": {
+          "query_id": "1159",
+          "document_id": "12584053"
+        },
+        "lexical_refill4_top5_loss": {
+          "query_id": "1159",
+          "document_id": "12584053"
+        },
+        "safe_refill4_top5_gain": {
+          "query_id": "973",
+          "document_id": "28617573"
+        },
+        "lexical_refill4_top5_gain": {
+          "query_id": "973",
+          "document_id": "28617573"
+        }
+      }
+    }
+  }
+}

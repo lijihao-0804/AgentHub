@@ -1,0 +1,30 @@
+{
+  "protocol": "scifact-candidate-source-recall-bge-transfer-v1",
+  "declaration": "Registered after the candidate-pool outcomes and before loading or computing any downstream comparisons for this study. The two family nominees, candidate lists and confirmation membership remain frozen.",
+  "families": ["safe_refill4", "lexical_refill4"],
+  "cohorts": {"development": 128, "confirmation": 553},
+  "candidate_protocol_sha256": "c4c024b0876db23a3fa068c33cd13f2a9f7e3de8f568567d50954bc61b9baef9",
+  "rankings_sha256": {
+    "development": "beaf0e61809b6e3e1af5efd3cf60554ad338a5df20717960b7be92dbdb3d6070",
+    "confirmation": "8512995afd1bed03263deabb5c2d6ef3612020b929672584cd23036abaa7ce60"
+  },
+  "history_sha256": {
+    "parent-context-20261022/dev-baseline.jsonl": "cf391506ecdc72dc2d65fd0e8a943b078a1386ae2427603b61b4cd294822a4f9",
+    "budget-diversity-20261022/screen-superset.jsonl": "c68ea86a0f35f9ae0eb347f9d0f43d465420d978fd652a4dc22ed14c7f4a0047",
+    "budget-diversity-20261022/screen-superset.meta.json": "aec7a65019b1e6be421a4359ee703362d57ebdc9d7724d3060d3a18a9bb3f27a"
+  },
+  "model": "BAAI/bge-reranker-v2-m3, pinned 953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e; FP16 CUDA; original query, original 1200/200 chunks; max_length=8192, batch_size=8; matching file digests in reranker-batching-20261114/protocol.json.",
+  "score_sources": "Take the original baseline20 paired logits for every incumbent query/chunk, cached historical full-union BGE logits for unseen-within-union pairs and the same real BGE model for every remaining pair. Never impute a score. Validate full historical lane identities, full union coverage, fingerprinted evidence and all source mappings. Report cache-vs-cache exact matches, maximum absolute drift and actual newly scored and reused pairs per cohort.",
+  "audit": "Before evaluation select the first 16 development and first 64 confirmation queries in frozen cohort order. Score all 20 incumbent and all 20 lexical-refill candidates separately with the production BGE-v2-m3, original arm order and batch size 8. This supplies exact original-order paired inference on 80 queries and an input/precision control on cache reuse. Reuse scores from this audit for missing query/chunk pairs. For remaining queries send all missing chunks for that query to the real adapter together. Report maximum logit drift, exact equal logits and top5 chunk-set/raw5-gold concordance by arm in the audit.",
+  "metrics": "Rank the 20 blocks by descending BGE logit, descending selector score, chunk ID. Primary downstream guardrail is macro gold coverage in the first five raw reranked chunks. Also document-dedup nDCG@10, Recall@5 and MRR@5. At each stage report gained/lost query-positive pairs, retained baseline pairs, binary full-miss transitions and whether the highest-scoring baseline gold chunk was replaced, even if another chunk of the same source survived. No qrels exist at passage level in BEIR SciFact; do not infer actual passage sufficiency from document IDs.",
+  "guardrails": {
+    "point_minimum": -0.002,
+    "paired_ci_lower_minimum": -0.005,
+    "require_noninferiority_for": ["raw5_source_recall", "document_ndcg10"],
+    "descriptive_metrics": ["document_recall5", "document_mrr5"],
+    "bootstrap": "10,000 paired shared-source-component draws; seed 20261114, 97.5% two-sided percentile intervals on confirmation for family reporting; repeated outcomes and endpoints are reported separately, not a joint test.",
+    "cache_audit": "Require exact top5 chunk set on >=98% of each arm's 80 direct rescored queries, exact raw5 gold sets on all 80 per arm, and maximum cache/direct logit drift <=0.125. If these accuracy checks fail, direct-score every lexical-refill confirmation 20 and use the original baseline20 with same-input drift audit, separately identifying the direct result. Failed direct baseline raw5 gold agreement triggers full direct paired confirmation.",
+    "efficacy_claim": "Claim a delivered raw5 gain only if both point difference and lower bound are strictly positive. A positive pool result alone supports only candidate retrieval."
+  },
+  "exposure": "Only the pre-selected official TRAIN development and confirmation IDs; no official test or platform HOLDOUT."
+}

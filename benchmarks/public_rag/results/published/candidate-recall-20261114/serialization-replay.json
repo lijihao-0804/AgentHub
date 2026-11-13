@@ -1,0 +1,20 @@
+{
+  "protocol_sha256": "c4c024b0876db23a3fa068c33cd13f2a9f7e3de8f568567d50954bc61b9baef9",
+  "original_confirmation_exit_code": 1,
+  "original_error": "Cannot serialize numpy.bool_ produced by comparing a numpy.float64 confidence endpoint. Original partial report retained locally.",
+  "change": "Convert percentile array via ndarray.tolist() instead of list(ndarray); every endpoint remains the same numeric value and becomes a native float. No selection, candidate, metric, interval or gate threshold change.",
+  "original_runner_sha256": "0eba085d113c09a5a22754677142cf7eaa139b29d0cfe61071bfea37cef46883",
+  "corrected_runner_sha256": "1eded2364c5848d39961980d049807f4a0b846fa0e2e815acb102b94dbe1d20c",
+  "original_selection_sha256": "ea697362aae6b919ce75204248e99c86f7fa46643c24b7a2bd9c34cfe3a80e52",
+  "replay_selection_sha256": "593b435ab96c9b916c29a75c0ea3e74e60f05b34ac1d13afd6dcf70c71f3f724",
+  "original_development_report_sha256": "0415f100da9ba57d4368d91409fcb16e43da9f359111da1bad81eeeb8a15d21d",
+  "replay_development_report_sha256": "7e179d1cdf8235393c4591e5eb92d05fd2fd1560072b193f5863ef8512f95b12",
+  "all_development_metrics_identical": true,
+  "both_family_nominations_identical": true,
+  "ordered_cohorts_identical": true,
+  "candidate_rankings_sha256_verified_identical": {
+    "development": "beaf0e61809b6e3e1af5efd3cf60554ad338a5df20717960b7be92dbdb3d6070",
+    "confirmation": "8512995afd1bed03263deabb5c2d6ef3612020b929672584cd23036abaa7ce60"
+  },
+  "replay_confirmation_exit_code": 0
+}

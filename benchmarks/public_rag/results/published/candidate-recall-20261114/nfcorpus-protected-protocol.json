@@ -1,0 +1,16 @@
+{
+  "protocol": "nfcorpus-unseen-query-protected-refill-v1",
+  "declaration": "Registered after the first SciFact and NFCorpus pool study and before obtaining rankings, scoring relevance, or reading answers for this second NFCorpus cohort. The SciFact follow-up may reuse its historical cohorts only as development. This is a separate query sample in an already studied corpus.",
+  "inherits_corpus_and_retrieval": "nfcorpus-protocol.json",
+  "exclude_cohort": "nfcorpus-protocol.json",
+  "sample_salt": "agenthub-nfcorpus-protected-refill-unseen-20261114",
+  "eligible_after_exclusion": 2462,
+  "sample_size": 128,
+  "ids_sha256": "068fb580c389bb7d343da7da817b66e53ad111df10b61c058c6610252600b552",
+  "model": "BAAI/bge-reranker-v2-m3",
+  "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+  "budget": "Score baseline 20 chunks once with BGE in original order, then score up to four new lexical chunks in their selected order. Maximum 24 BGE pairs, return 20 chunks and rerank the final five using those same scores.",
+  "method": "Protect RRF head 8, each incumbent source's first appearance, the baseline BGE top 10 chunks and each incumbent source's highest BGE chunk. Refill at most four remaining duplicate tail slots with new BM25 sources.",
+  "gate": "The candidate macro Recall@20 must improve, with zero lost baseline source pairs. The post-BGE raw first five must have no drops in macro source recall or loss of previously hit questions. Report gross positive-pair gains/losses at both depths. Before shipping, the SciFact follow-up must also avoid losing incumbent first-five question hits and complete rationale sets at five or twenty. No further tuning on either pool.",
+  "labels": "Official TRAIN only. Source qrels in NFCorpus cannot establish passage sufficiency or answer correctness."
+}

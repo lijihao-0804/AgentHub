@@ -1,0 +1,15 @@
+{
+  "exit_code": 0,
+  "elapsed_seconds": 97.141,
+  "started_at": "2026-11-13T22:53:19.791326+00:00",
+  "finished_at": "2026-11-13T22:54:56.931186+00:00",
+  "direct_pairs_by_assignment": {
+    "baseline": 1600,
+    "lexical_refill4": 1600,
+    "out_of_union": 526
+  },
+  "direct_forward_pairs": 3726,
+  "unique_previously_unscored_pairs": 585,
+  "trial_rerank_report_sha256": "93931eaabf802735deb1affabf681bca4d97789db91cc2675df44577498ee29b",
+  "private_inference_sha256": "bf21da226ffc7ed5a00108d1c7ec2fe9d2ca41ff8cd5bc6ada88641e4770474e"
+}

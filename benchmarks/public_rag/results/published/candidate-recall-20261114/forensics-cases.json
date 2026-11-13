@@ -1,0 +1,1276 @@
+[
+  {
+    "query_id": "63",
+    "observed_loss": "rrf_top20",
+    "historical_union_size": 46,
+    "sources": [
+      {
+        "document_id": "40349336",
+        "historical_best": {
+          "dense": 16,
+          "sparse": null,
+          "rrf": 25,
+          "rerank": 30
+        },
+        "document_rrf_on_original_branch_hits": 22,
+        "exact_chunk_best": {
+          "dense": 16,
+          "sparse": 1033,
+          "rrf": 25
+        },
+        "exact_document_first_occurrence": {
+          "dense": 13,
+          "sparse": 914,
+          "rrf": 22
+        },
+        "parent_corpus": {
+          "dense": 11,
+          "sparse": 894,
+          "rrf": 20
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            14,
+            14
+          ],
+          "sparse": [
+            1033,
+            1033
+          ]
+        },
+        "indexed_article_chars": 1227,
+        "article_tokens_no_truncation": 296,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": 16,
+              "sparse": null,
+              "rrf": 25,
+              "rerank": 30
+            },
+            "exact": {
+              "dense": 16,
+              "sparse": 1033,
+              "rrf": 25
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              1227
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 678,
+              "sparse": 9179,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "572",
+    "observed_loss": "rrf_top20",
+    "historical_union_size": 57,
+    "sources": [
+      {
+        "document_id": "4447055",
+        "historical_best": {
+          "dense": 16,
+          "sparse": null,
+          "rrf": 30,
+          "rerank": 24
+        },
+        "document_rrf_on_original_branch_hits": 28,
+        "exact_chunk_best": {
+          "dense": 16,
+          "sparse": 404,
+          "rrf": 30
+        },
+        "exact_document_first_occurrence": {
+          "dense": 15,
+          "sparse": 354,
+          "rrf": 28
+        },
+        "parent_corpus": {
+          "dense": 6,
+          "sparse": 581,
+          "rrf": 12
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            15,
+            15
+          ],
+          "sparse": [
+            391,
+            391
+          ]
+        },
+        "indexed_article_chars": 1343,
+        "article_tokens_no_truncation": 356,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": 16,
+              "sparse": null,
+              "rrf": 30,
+              "rerank": 24
+            },
+            "exact": {
+              "dense": 16,
+              "sparse": 404,
+              "rrf": 30
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              1343
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 37,
+              "sparse": 9016,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "609",
+    "observed_loss": "both_branches_top30",
+    "historical_union_size": 54,
+    "sources": [
+      {
+        "document_id": "40096222",
+        "historical_best": {
+          "dense": null,
+          "sparse": null,
+          "rrf": null,
+          "rerank": null
+        },
+        "document_rrf_on_original_branch_hits": null,
+        "exact_chunk_best": {
+          "dense": 32,
+          "sparse": 152,
+          "rrf": null
+        },
+        "exact_document_first_occurrence": {
+          "dense": 28,
+          "sparse": 143,
+          "rrf": null
+        },
+        "parent_corpus": {
+          "dense": 23,
+          "sparse": 225,
+          "rrf": 43
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            34,
+            34
+          ],
+          "sparse": [
+            139,
+            139
+          ]
+        },
+        "indexed_article_chars": 1273,
+        "article_tokens_no_truncation": 392,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 32,
+              "sparse": 152,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              1273
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 45,
+              "sparse": 2784,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "610",
+    "observed_loss": "rrf_top20",
+    "historical_union_size": 56,
+    "sources": [
+      {
+        "document_id": "40096222",
+        "historical_best": {
+          "dense": 13,
+          "sparse": null,
+          "rrf": 26,
+          "rerank": 11
+        },
+        "document_rrf_on_original_branch_hits": 24,
+        "exact_chunk_best": {
+          "dense": 13,
+          "sparse": 252,
+          "rrf": 26
+        },
+        "exact_document_first_occurrence": {
+          "dense": 11,
+          "sparse": 230,
+          "rrf": 24
+        },
+        "parent_corpus": {
+          "dense": 9,
+          "sparse": 356,
+          "rrf": 20
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            10,
+            10
+          ],
+          "sparse": [
+            232,
+            232
+          ]
+        },
+        "indexed_article_chars": 1273,
+        "article_tokens_no_truncation": 392,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": 13,
+              "sparse": null,
+              "rrf": 26,
+              "rerank": 11
+            },
+            "exact": {
+              "dense": 13,
+              "sparse": 252,
+              "rrf": 26
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              1273
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 36,
+              "sparse": 3120,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "620",
+    "observed_loss": "both_branches_top30",
+    "historical_union_size": 58,
+    "sources": [
+      {
+        "document_id": "2565138",
+        "historical_best": {
+          "dense": null,
+          "sparse": null,
+          "rrf": null,
+          "rerank": null
+        },
+        "document_rrf_on_original_branch_hits": null,
+        "exact_chunk_best": {
+          "dense": 305,
+          "sparse": 171,
+          "rrf": null
+        },
+        "exact_document_first_occurrence": {
+          "dense": 249,
+          "sparse": 144,
+          "rrf": null
+        },
+        "parent_corpus": {
+          "dense": 487,
+          "sparse": 124,
+          "rrf": null
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            1367,
+            1367
+          ],
+          "sparse": [
+            58,
+            58
+          ]
+        },
+        "indexed_article_chars": 1573,
+        "article_tokens_no_truncation": 410,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 1005,
+              "sparse": 171,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              1573
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 305,
+              "sparse": 918,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "753",
+    "observed_loss": "rrf_top20",
+    "historical_union_size": 49,
+    "sources": [
+      {
+        "document_id": "1173667",
+        "historical_best": {
+          "dense": 14,
+          "sparse": 24,
+          "rrf": 25,
+          "rerank": 36
+        },
+        "document_rrf_on_original_branch_hits": 11,
+        "exact_chunk_best": {
+          "dense": 14,
+          "sparse": 24,
+          "rrf": 25
+        },
+        "exact_document_first_occurrence": {
+          "dense": 12,
+          "sparse": 20,
+          "rrf": 22
+        },
+        "parent_corpus": {
+          "dense": 24,
+          "sparse": 26,
+          "rrf": 20
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            40,
+            40
+          ],
+          "sparse": [
+            24,
+            24
+          ]
+        },
+        "indexed_article_chars": 1246,
+        "article_tokens_no_truncation": 266,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": 24,
+              "rrf": 39,
+              "rerank": 36
+            },
+            "exact": {
+              "dense": 41,
+              "sparse": 24,
+              "rrf": 39
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              1246
+            ],
+            "historical": {
+              "dense": 14,
+              "sparse": null,
+              "rrf": 25,
+              "rerank": 45
+            },
+            "exact": {
+              "dense": 14,
+              "sparse": 397,
+              "rrf": 25
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "817",
+    "observed_loss": "both_branches_top30",
+    "historical_union_size": 58,
+    "sources": [
+      {
+        "document_id": "17814815",
+        "historical_best": {
+          "dense": null,
+          "sparse": null,
+          "rrf": null,
+          "rerank": null
+        },
+        "document_rrf_on_original_branch_hits": null,
+        "exact_chunk_best": {
+          "dense": 460,
+          "sparse": 3354,
+          "rrf": null
+        },
+        "exact_document_first_occurrence": {
+          "dense": 386,
+          "sparse": 2739,
+          "rrf": null
+        },
+        "parent_corpus": {
+          "dense": 297,
+          "sparse": 2986,
+          "rrf": null
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            460,
+            460
+          ],
+          "sparse": [
+            3354,
+            3354
+          ]
+        },
+        "indexed_article_chars": 1140,
+        "article_tokens_no_truncation": 287,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1140
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 460,
+              "sparse": 3354,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "818",
+    "observed_loss": "both_branches_top30",
+    "historical_union_size": 55,
+    "sources": [
+      {
+        "document_id": "17814815",
+        "historical_best": {
+          "dense": null,
+          "sparse": null,
+          "rrf": null,
+          "rerank": null
+        },
+        "document_rrf_on_original_branch_hits": null,
+        "exact_chunk_best": {
+          "dense": 3684,
+          "sparse": 842,
+          "rrf": null
+        },
+        "exact_document_first_occurrence": {
+          "dense": 2613,
+          "sparse": 757,
+          "rrf": null
+        },
+        "parent_corpus": {
+          "dense": 2094,
+          "sparse": 990,
+          "rrf": null
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            3684,
+            3684
+          ],
+          "sparse": [
+            842,
+            842
+          ]
+        },
+        "indexed_article_chars": 1140,
+        "article_tokens_no_truncation": 287,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1140
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 3684,
+              "sparse": 842,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": [
+          {
+            "label": "SUPPORT",
+            "sentences_zero_based": [
+              0
+            ],
+            "ranges": [
+              [
+                116,
+                295
+              ]
+            ],
+            "containing_chunks_per_sentence": [
+              [
+                0
+              ]
+            ],
+            "chunks_containing_entire_set": [
+              0
+            ]
+          },
+          {
+            "label": "SUPPORT",
+            "sentences_zero_based": [
+              2
+            ],
+            "ranges": [
+              [
+                533,
+                662
+              ]
+            ],
+            "containing_chunks_per_sentence": [
+              [
+                0
+              ]
+            ],
+            "chunks_containing_entire_set": [
+              0
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "query_id": "828",
+    "observed_loss": "both_branches_top30",
+    "historical_union_size": 54,
+    "sources": [
+      {
+        "document_id": "4678846",
+        "historical_best": {
+          "dense": null,
+          "sparse": null,
+          "rrf": null,
+          "rerank": null
+        },
+        "document_rrf_on_original_branch_hits": null,
+        "exact_chunk_best": {
+          "dense": 39,
+          "sparse": 209,
+          "rrf": null
+        },
+        "exact_document_first_occurrence": {
+          "dense": 30,
+          "sparse": 168,
+          "rrf": null
+        },
+        "parent_corpus": {
+          "dense": 19,
+          "sparse": 75,
+          "rrf": 32
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            30,
+            30
+          ],
+          "sparse": [
+            72,
+            72
+          ]
+        },
+        "indexed_article_chars": 2634,
+        "article_tokens_no_truncation": 707,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 39,
+              "sparse": 209,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              2200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 245,
+              "sparse": 618,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 2,
+            "char_range": [
+              2000,
+              2634
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 107,
+              "sparse": 474,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "900",
+    "observed_loss": "rrf_top20",
+    "historical_union_size": 56,
+    "sources": [
+      {
+        "document_id": "18678095",
+        "historical_best": {
+          "dense": 17,
+          "sparse": null,
+          "rrf": 32,
+          "rerank": 50
+        },
+        "document_rrf_on_original_branch_hits": 29,
+        "exact_chunk_best": {
+          "dense": 17,
+          "sparse": 1141,
+          "rrf": 32
+        },
+        "exact_document_first_occurrence": {
+          "dense": 16,
+          "sparse": 962,
+          "rrf": 31
+        },
+        "parent_corpus": {
+          "dense": 9,
+          "sparse": 1110,
+          "rrf": 17
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            17,
+            17
+          ],
+          "sparse": [
+            1141,
+            1141
+          ]
+        },
+        "indexed_article_chars": 1130,
+        "article_tokens_no_truncation": 272,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1130
+            ],
+            "historical": {
+              "dense": 17,
+              "sparse": null,
+              "rrf": 32,
+              "rerank": 50
+            },
+            "exact": {
+              "dense": 17,
+              "sparse": 1141,
+              "rrf": 32
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "1074",
+    "observed_loss": "rrf_top20",
+    "historical_union_size": 59,
+    "sources": [
+      {
+        "document_id": "14658685",
+        "historical_best": {
+          "dense": null,
+          "sparse": 20,
+          "rrf": 40,
+          "rerank": 7
+        },
+        "document_rrf_on_original_branch_hits": 37,
+        "exact_chunk_best": {
+          "dense": 65,
+          "sparse": 20,
+          "rrf": 40
+        },
+        "exact_document_first_occurrence": {
+          "dense": 63,
+          "sparse": 19,
+          "rrf": 38
+        },
+        "parent_corpus": {
+          "dense": 27,
+          "sparse": 52,
+          "rrf": 53
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            65,
+            65
+          ],
+          "sparse": [
+            20,
+            20
+          ]
+        },
+        "indexed_article_chars": 1069,
+        "article_tokens_no_truncation": 234,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1069
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": 20,
+              "rrf": 40,
+              "rerank": 7
+            },
+            "exact": {
+              "dense": 65,
+              "sparse": 20,
+              "rrf": 40
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  },
+  {
+    "query_id": "1109",
+    "observed_loss": "rrf_top20",
+    "historical_union_size": 53,
+    "sources": [
+      {
+        "document_id": "8582337",
+        "historical_best": {
+          "dense": null,
+          "sparse": null,
+          "rrf": null,
+          "rerank": null
+        },
+        "document_rrf_on_original_branch_hits": null,
+        "exact_chunk_best": {
+          "dense": 45,
+          "sparse": 35,
+          "rrf": null
+        },
+        "exact_document_first_occurrence": {
+          "dense": 32,
+          "sparse": 31,
+          "rrf": null
+        },
+        "parent_corpus": {
+          "dense": 11,
+          "sparse": 8,
+          "rrf": 3
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            19,
+            19
+          ],
+          "sparse": [
+            3,
+            3
+          ]
+        },
+        "indexed_article_chars": 3469,
+        "article_tokens_no_truncation": 828,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 45,
+              "sparse": 35,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              2200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 261,
+              "sparse": 1051,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 2,
+            "char_range": [
+              2000,
+              3200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 121,
+              "sparse": 113,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 3,
+            "char_range": [
+              3000,
+              3469
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 212,
+              "sparse": 1233,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": [
+          {
+            "label": "SUPPORT",
+            "sentences_zero_based": [
+              13
+            ],
+            "ranges": [
+              [
+                2470,
+                2658
+              ]
+            ],
+            "containing_chunks_per_sentence": [
+              [
+                2
+              ]
+            ],
+            "chunks_containing_entire_set": [
+              2
+            ]
+          }
+        ]
+      },
+      {
+        "document_id": "13770184",
+        "historical_best": {
+          "dense": 11,
+          "sparse": null,
+          "rrf": 21,
+          "rerank": 2
+        },
+        "document_rrf_on_original_branch_hits": 15,
+        "exact_chunk_best": {
+          "dense": 11,
+          "sparse": 257,
+          "rrf": 21
+        },
+        "exact_document_first_occurrence": {
+          "dense": 8,
+          "sparse": 223,
+          "rrf": 15
+        },
+        "parent_corpus": {
+          "dense": 78,
+          "sparse": 24,
+          "rrf": 42
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            121,
+            121
+          ],
+          "sparse": [
+            10,
+            10
+          ]
+        },
+        "indexed_article_chars": 4687,
+        "article_tokens_no_truncation": 1141,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 676,
+              "sparse": 995,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              2200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 636,
+              "sparse": 257,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 2,
+            "char_range": [
+              2000,
+              3200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 38,
+              "sparse": 1116,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 3,
+            "char_range": [
+              3000,
+              4200
+            ],
+            "historical": {
+              "dense": 11,
+              "sparse": null,
+              "rrf": 21,
+              "rerank": 2
+            },
+            "exact": {
+              "dense": 11,
+              "sparse": 280,
+              "rrf": 21
+            }
+          },
+          {
+            "ordinal": 4,
+            "char_range": [
+              4000,
+              4687
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 293,
+              "sparse": 5758,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": [
+          {
+            "label": "SUPPORT",
+            "sentences_zero_based": [
+              13
+            ],
+            "ranges": [
+              [
+                2313,
+                3103
+              ]
+            ],
+            "containing_chunks_per_sentence": [
+              [
+                2
+              ]
+            ],
+            "chunks_containing_entire_set": [
+              2
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "query_id": "1387",
+    "observed_loss": "both_branches_top30",
+    "historical_union_size": 50,
+    "sources": [
+      {
+        "document_id": "9669099",
+        "historical_best": {
+          "dense": null,
+          "sparse": null,
+          "rrf": null,
+          "rerank": null
+        },
+        "document_rrf_on_original_branch_hits": null,
+        "exact_chunk_best": {
+          "dense": 60,
+          "sparse": 630,
+          "rrf": null
+        },
+        "exact_document_first_occurrence": {
+          "dense": 48,
+          "sparse": 556,
+          "rrf": null
+        },
+        "parent_corpus": {
+          "dense": 35,
+          "sparse": 657,
+          "rrf": null
+        },
+        "replace_only_this_article_against_other_chunks": {
+          "dense": [
+            60,
+            60
+          ],
+          "sparse": [
+            630,
+            630
+          ]
+        },
+        "indexed_article_chars": 1204,
+        "article_tokens_no_truncation": 289,
+        "chunks": [
+          {
+            "ordinal": 0,
+            "char_range": [
+              0,
+              1200
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 60,
+              "sparse": 630,
+              "rrf": null
+            }
+          },
+          {
+            "ordinal": 1,
+            "char_range": [
+              1000,
+              1204
+            ],
+            "historical": {
+              "dense": null,
+              "sparse": null,
+              "rrf": null,
+              "rerank": null
+            },
+            "exact": {
+              "dense": 78,
+              "sparse": 2495,
+              "rrf": null
+            }
+          }
+        ],
+        "official_rationales": []
+      }
+    ]
+  }
+]

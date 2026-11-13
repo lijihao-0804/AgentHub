@@ -1,0 +1,419 @@
+{
+  "protocol_sha256": "2ab60fc2f5350018f0d64830dcdb52ff4eeaf984867a4610e5d99edd4b45b63d",
+  "implementation_sha256": "c07a6927dbfcdb6efe4dbe1a61915a582e4b27dd5acbaade46da4a58f52b6cfd",
+  "weights_revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+  "python": "3.12.10",
+  "torch": "2.14.0+cu130",
+  "device": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "precision": "torch.float16",
+  "batch_size": 8,
+  "max_length": 8192,
+  "audited_full_queries": 80,
+  "direct_cache_checks": {
+    "baseline": {
+      "queries": 80,
+      "comparable_cached_logits": {
+        "pairs": 1600,
+        "equal": 1600,
+        "max_abs": 0.0
+      },
+      "exact_top5_chunk_sets": 80,
+      "exact_raw5_positive_source_sets": 80,
+      "passed": true
+    },
+    "lexical_refill4": {
+      "queries": 80,
+      "comparable_cached_logits": {
+        "pairs": 1541,
+        "equal": 1517,
+        "max_abs": 0.00390625
+      },
+      "exact_top5_chunk_sets": 80,
+      "exact_raw5_positive_source_sets": 80,
+      "passed": true
+    }
+  },
+  "full_direct_followup_confirmation": [],
+  "inference_file_sha256": "bf21da226ffc7ed5a00108d1c7ec2fe9d2ca41ff8cd5bc6ada88641e4770474e",
+  "cohorts": {
+    "development": {
+      "queries": 128,
+      "source_components": 120,
+      "baseline_scores": 2560,
+      "lexical_nominee_score_sources_before_direct_followup": {
+        "original_baseline": 2328,
+        "full_union": 129,
+        "fresh_gpu_logits": 103
+      },
+      "original_pool_vs_full_union_common_logits": {
+        "pairs": 2560,
+        "equal": 2500,
+        "max_abs": 0.013671875
+      },
+      "results": {
+        "safe_refill4": {
+          "metrics": {
+            "raw5_source_recall": {
+              "baseline": 0.806640625,
+              "candidate": 0.802734375,
+              "delta": -0.00390625,
+              "paired_ci97_5": [
+                -0.02734375,
+                0.011904761904761904
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7682712270433323,
+              "candidate": 0.7707504807789554,
+              "delta": 0.0024792537356232076,
+              "paired_ci97_5": [
+                -0.016765605247111365,
+                0.021894007942398333
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.818359375,
+              "candidate": 0.806640625,
+              "delta": -0.01171875,
+              "paired_ci97_5": [
+                -0.04065457150473144,
+                0.008264462809917356
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.739453125,
+              "candidate": 0.74296875,
+              "delta": 0.0035156249999999997,
+              "paired_ci97_5": [
+                -0.025781405009920634,
+                0.03307086614173228
+              ]
+            }
+          },
+          "counts": {
+            "raw5_baseline_pairs": 113,
+            "raw5_candidate_pairs": 113,
+            "raw5_retained_pairs": 112,
+            "raw5_gained_pairs": 1,
+            "raw5_lost_pairs": 1,
+            "any_baseline": 107,
+            "any_candidate": 107,
+            "any_gained": 1,
+            "any_lost": 1,
+            "unchanged_raw5_chunk_set": 73,
+            "gained_in_pool_and_raw5": 1,
+            "best_baseline_positive_chunk_removed": 4,
+            "top5_positive_pairs_lost_with_best_removed": 1,
+            "top5_positive_pairs_lost_with_best_retained": 0
+          },
+          "examples": {
+            "first_delivered_loss": {
+              "query_id": "891",
+              "positive_document_id": "2097256",
+              "baseline_best_rank": 1,
+              "candidate_best_rank": 9,
+              "baseline_best_score": -0.50146484375,
+              "candidate_best_score": -4.609375,
+              "original_best_gold_chunk_still_in_pool": false
+            },
+            "first_removed_best_gold_block": {
+              "query_id": "891",
+              "positive_document_id": "2097256",
+              "baseline_best_rank": 1,
+              "candidate_best_rank": 9,
+              "baseline_best_score": -0.50146484375,
+              "candidate_best_score": -4.609375,
+              "original_best_gold_chunk_still_in_pool": false
+            },
+            "first_delivered_gain": {
+              "query_id": "1109",
+              "positive_document_id": "13770184",
+              "baseline_best_rank": null,
+              "candidate_best_rank": 1,
+              "baseline_best_score": null,
+              "candidate_best_score": -2.390625,
+              "original_best_gold_chunk_still_in_pool": false
+            }
+          },
+          "registered_downstream_noninferiority": null,
+          "positive_raw5_delivery_evidence": false
+        },
+        "lexical_refill4": {
+          "metrics": {
+            "raw5_source_recall": {
+              "baseline": 0.806640625,
+              "candidate": 0.798828125,
+              "delta": -0.0078125,
+              "paired_ci97_5": [
+                -0.03125,
+                0.0
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7682712270433323,
+              "candidate": 0.7669482890212636,
+              "delta": -0.0013229380220685957,
+              "paired_ci97_5": [
+                -0.018881899320312708,
+                0.0134336951594962
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.818359375,
+              "candidate": 0.802734375,
+              "delta": -0.015625,
+              "paired_ci97_5": [
+                -0.046875,
+                0.0
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.739453125,
+              "candidate": 0.73515625,
+              "delta": -0.004296875,
+              "paired_ci97_5": [
+                -0.02976190476190476,
+                0.01640639575559702
+              ]
+            }
+          },
+          "counts": {
+            "raw5_baseline_pairs": 113,
+            "raw5_candidate_pairs": 112,
+            "raw5_retained_pairs": 112,
+            "raw5_gained_pairs": 0,
+            "raw5_lost_pairs": 1,
+            "any_baseline": 107,
+            "any_candidate": 106,
+            "any_gained": 0,
+            "any_lost": 1,
+            "unchanged_raw5_chunk_set": 69,
+            "gained_in_pool_and_raw5": 0,
+            "best_baseline_positive_chunk_removed": 4,
+            "top5_positive_pairs_lost_with_best_removed": 1,
+            "top5_positive_pairs_lost_with_best_retained": 0
+          },
+          "examples": {
+            "first_delivered_loss": {
+              "query_id": "891",
+              "positive_document_id": "2097256",
+              "baseline_best_rank": 1,
+              "candidate_best_rank": 10,
+              "baseline_best_score": -0.50146484375,
+              "candidate_best_score": -4.609375,
+              "original_best_gold_chunk_still_in_pool": false
+            },
+            "first_removed_best_gold_block": {
+              "query_id": "891",
+              "positive_document_id": "2097256",
+              "baseline_best_rank": 1,
+              "candidate_best_rank": 10,
+              "baseline_best_score": -0.50146484375,
+              "candidate_best_score": -4.609375,
+              "original_best_gold_chunk_still_in_pool": false
+            }
+          },
+          "registered_downstream_noninferiority": null,
+          "positive_raw5_delivery_evidence": false
+        }
+      }
+    },
+    "confirmation": {
+      "queries": 553,
+      "source_components": 367,
+      "baseline_scores": 11060,
+      "lexical_nominee_score_sources_before_direct_followup": {
+        "original_baseline": 10077,
+        "full_union": 501,
+        "fresh_gpu_logits": 482
+      },
+      "original_pool_vs_full_union_common_logits": {
+        "pairs": 11060,
+        "equal": 10767,
+        "max_abs": 0.01171875
+      },
+      "results": {
+        "safe_refill4": {
+          "metrics": {
+            "raw5_source_recall": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.791862567811935,
+              "delta": -0.0027124773960217,
+              "paired_ci97_5": [
+                -0.01953883032660852,
+                0.009963994154238683
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7441342551013078,
+              "candidate": 0.7445821443029568,
+              "delta": 0.0004478892016489531,
+              "paired_ci97_5": [
+                -0.005569667142396299,
+                0.0057976753335560564
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.8031645569620254,
+              "candidate": 0.7995479204339965,
+              "delta": -0.003616636528028933,
+              "paired_ci97_5": [
+                -0.016245487364620937,
+                0.007142857142857143
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.7120554550934297,
+              "candidate": 0.7132610006027728,
+              "delta": 0.0012055455093429777,
+              "paired_ci97_5": [
+                -0.005104049342545816,
+                0.007156136016774131
+              ]
+            }
+          },
+          "counts": {
+            "raw5_baseline_pairs": 482,
+            "raw5_candidate_pairs": 484,
+            "raw5_retained_pairs": 477,
+            "raw5_gained_pairs": 7,
+            "raw5_lost_pairs": 5,
+            "any_baseline": 452,
+            "any_candidate": 449,
+            "any_gained": 2,
+            "any_lost": 5,
+            "unchanged_raw5_chunk_set": 330,
+            "gained_in_pool_and_raw5": 1,
+            "best_baseline_positive_chunk_removed": 19,
+            "top5_positive_pairs_lost_with_best_removed": 5,
+            "top5_positive_pairs_lost_with_best_retained": 0
+          },
+          "examples": {
+            "first_delivered_loss": {
+              "query_id": "254",
+              "positive_document_id": "37424881",
+              "baseline_best_rank": 4,
+              "candidate_best_rank": 6,
+              "baseline_best_score": 1.818359375,
+              "candidate_best_score": -0.15966796875,
+              "original_best_gold_chunk_still_in_pool": false
+            },
+            "first_removed_best_gold_block": {
+              "query_id": "254",
+              "positive_document_id": "37424881",
+              "baseline_best_rank": 4,
+              "candidate_best_rank": 6,
+              "baseline_best_score": 1.818359375,
+              "candidate_best_score": -0.15966796875,
+              "original_best_gold_chunk_still_in_pool": false
+            },
+            "first_delivered_gain": {
+              "query_id": "973",
+              "positive_document_id": "28617573",
+              "baseline_best_rank": 6,
+              "candidate_best_rank": 4,
+              "baseline_best_score": 3.328125,
+              "candidate_best_score": 3.328125,
+              "original_best_gold_chunk_still_in_pool": true
+            }
+          },
+          "registered_downstream_noninferiority": {
+            "raw5_source_recall": false,
+            "document_ndcg10": false
+          },
+          "positive_raw5_delivery_evidence": false
+        },
+        "lexical_refill4": {
+          "metrics": {
+            "raw5_source_recall": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.7968354430379747,
+              "delta": 0.0022603978300180833,
+              "paired_ci97_5": [
+                -0.016294353696056998,
+                0.017086476382664674
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7441342551013078,
+              "candidate": 0.7453986610641615,
+              "delta": 0.001264405962853676,
+              "paired_ci97_5": [
+                -0.008709265328345287,
+                0.011202719567424645
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.8031645569620254,
+              "candidate": 0.8031645569620254,
+              "delta": 0.0,
+              "paired_ci97_5": [
+                -0.018182647644326474,
+                0.0145200498099011
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.7120554550934297,
+              "candidate": 0.715220012055455,
+              "delta": 0.003164556962025316,
+              "paired_ci97_5": [
+                -0.0062887520698804945,
+                0.012787905150405149
+              ]
+            }
+          },
+          "counts": {
+            "raw5_baseline_pairs": 482,
+            "raw5_candidate_pairs": 486,
+            "raw5_retained_pairs": 477,
+            "raw5_gained_pairs": 9,
+            "raw5_lost_pairs": 5,
+            "any_baseline": 452,
+            "any_candidate": 452,
+            "any_gained": 5,
+            "any_lost": 5,
+            "unchanged_raw5_chunk_set": 318,
+            "gained_in_pool_and_raw5": 4,
+            "best_baseline_positive_chunk_removed": 18,
+            "top5_positive_pairs_lost_with_best_removed": 5,
+            "top5_positive_pairs_lost_with_best_retained": 0
+          },
+          "examples": {
+            "first_delivered_loss": {
+              "query_id": "254",
+              "positive_document_id": "37424881",
+              "baseline_best_rank": 4,
+              "candidate_best_rank": 6,
+              "baseline_best_score": 1.818359375,
+              "candidate_best_score": -0.15966796875,
+              "original_best_gold_chunk_still_in_pool": false
+            },
+            "first_removed_best_gold_block": {
+              "query_id": "254",
+              "positive_document_id": "37424881",
+              "baseline_best_rank": 4,
+              "candidate_best_rank": 6,
+              "baseline_best_score": 1.818359375,
+              "candidate_best_score": -0.15966796875,
+              "original_best_gold_chunk_still_in_pool": false
+            },
+            "first_delivered_gain": {
+              "query_id": "733",
+              "positive_document_id": "34469966",
+              "baseline_best_rank": null,
+              "candidate_best_rank": 2,
+              "baseline_best_score": null,
+              "candidate_best_score": -4.51171875,
+              "original_best_gold_chunk_still_in_pool": false
+            }
+          },
+          "registered_downstream_noninferiority": {
+            "raw5_source_recall": false,
+            "document_ndcg10": false
+          },
+          "positive_raw5_delivery_evidence": false
+        }
+      }
+    }
+  }
+}

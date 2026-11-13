@@ -1,0 +1,15 @@
+{
+  "study": "scifact-exposed-bge-protected-refill-v1",
+  "status": "Exploratory fixed follow-up after original 128, 553, BGE and sentence outcomes had been revealed. No new independent SciFact sample. One configuration, no logit threshold trial and no retuning.",
+  "inputs": {
+    "candidate_protocol_sha256": "c4c024b0876db23a3fa068c33cd13f2a9f7e3de8f568567d50954bc61b9baef9",
+    "development_rankings_sha256": "beaf0e61809b6e3e1af5efd3cf60554ad338a5df20717960b7be92dbdb3d6070",
+    "confirmation_rankings_sha256": "8512995afd1bed03263deabb5c2d6ef3612020b929672584cd23036abaa7ce60",
+    "rerank_protocol_sha256": "2ab60fc2f5350018f0d64830dcdb52ff4eeaf984867a4610e5d99edd4b45b63d",
+    "official_archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be"
+  },
+  "policy": "Obtain the original RRF 20 then score all 20 with production BGE. Protect RRF positions 1 through 8, first RRF chunk per source, the top 10 original BGE chunks and the highest-BGE original chunk per source. BGE tie breaks use descending old RRF score then chunk ID. Replace at most four remaining tail chunks in reverse original RRF order using the first distinct unseen source in the same independent WordBM25 top20. Append the new chunks in lexical order; assign fusion tie scores as in original lexical_refill4. Sort all surviving old and freshly scored new chunks by the existing BGE ordering. Never access qrels to select candidates.",
+  "budget": "Output stays 20 chunks, 30 dense + 30 sparse + 20 BM25 lookups; protect-before-replace requires 20 incumbent BGE pairs and one extra call with 0..4 new pairs. This differs from the original selector's 20 BGE pairs. Report total pairs and count of queries needing a second call, without claiming cached wall-clock time as online latency.",
+  "new_scores": "On this fixed evidence, eligible discard positions are a subset of lexical_refill4 discard positions, so every introduced chunk must belong to its measured BM25 additions. Assert the subset and score availability for every query and hash all source files. No additional GPU inference.",
+  "outcomes": "For all previous 128, all 553 and the original thirteen complete candidate misses, report candidate-source macro recall and paired gold counts, BGE raw5 source recall / any hit / pair transitions / document nDCG@10 Recall@5 MRR@5, pool and delivered complete official sentences (one complete approved alternative, all its sentences), baseline positives and best chunk retention, and extra scoring load. Side-by-side with baseline and the originally rejected lexical_refill4. Descriptive paired 97.5% shared-source-component intervals. No post-hoc production qualification; an independent evaluation and deployment-cost check would still be needed."
+}

@@ -1,0 +1,66 @@
+{
+  "measured_train_queries": 128,
+  "complete_pool_misses": 13,
+  "positive_query_source_pairs_among_misses": 14,
+  "observed_loss": {
+    "rrf_top20": 7,
+    "both_branches_top30": 6
+  },
+  "queries_with_official_sentence_evidence": 2,
+  "historical_branch_top30_vs_exhaustive_top30": {
+    "slots_per_branch": 390,
+    "overlap": {
+      "dense": 390,
+      "sparse": 390
+    },
+    "queries_with_identical_order_all_30": {
+      "dense": 13,
+      "sparse": 13
+    },
+    "max_absolute_reconstructed_minus_recorded_score_on_historical_top30": {
+      "dense": 2.144744872811799e-07,
+      "sparse": 7.1484374970509634e-06
+    }
+  },
+  "source_archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+  "source_url": "https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz",
+  "model": {
+    "chunks": 9189,
+    "documents": 5183,
+    "model_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+    "model_files_sha256": {
+      "pytorch_model.bin": "b5e0ce3470abf5ef3831aa1bd5553b486803e83251590ab7ff35a117cf6aad38",
+      "config.json": "26159e7ad065073448460117eb24b7a4572f6f4e78eadff65dc0a11c052449fa",
+      "config_sentence_transformers.json": "1eef72430e7194a1e59680e635aed81ffa083f05668dbc5bb1c56c04c0999c38",
+      "modules.json": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+      "sentence_bert_config.json": "eb9b44b13c0f52a3b3685c3b1cbdea1ba8b04bea123b98f61610048940776eb1",
+      "1_Pooling/config.json": "e54c164a07274f2eb45bb724f54a79d1efcc90c41573887cd9a29aeee0597352",
+      "tokenizer.json": "21106b6d7dab2952c1d496fb21d5dc9db75c28ed361a05f5020bbba27810dd08",
+      "tokenizer_config.json": "a62b2b6784f990259fddef5f16388693a8043be4f69179e6a5257eeb3f9abac4",
+      "special_tokens_map.json": "8c785abebea9ae3257b61681b4e6fd8365ceafde980c21970d001e834cf10835",
+      "sentencepiece.bpe.model": "cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865"
+    },
+    "snapshot_hash": "2453684867babc64462b17543f333d5847956ddb73c474bfd60c349d75c106fe",
+    "state_sha256": "cf0c3807844384745d1ad4edaf4c54ffa47fa2c64bb1b8ff4bfbff6a05914709",
+    "versions": {
+      "torch": "2.14.0+cu130",
+      "transformers": "4.57.6",
+      "sentence_transformers": "5.7.0",
+      "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU"
+    },
+    "sha256": {
+      "manifest.jsonl": "342f99504ee8ed5d517305ea19ddaf704e3b6ddb1d57ea3dd180a40a2e619305",
+      "dense.npy": "683bba44821263f300344aef03220ea314e6c1bc7d936e7a9141ed2e525220f6",
+      "sparse.npz": "4d572c46fb10d8c9d9032dade57d831d43437db766720ba3cc35d0bba7f1d26f"
+    }
+  },
+  "article_and_query_vectors": {
+    "sha256": {
+      "parent-dense.npy": "c6e8987c973aa63dae8f1599af5df8ee656c53fd369e3e43b3bd3f93cd990e2b",
+      "parent-sparse.npz": "6080e73f0748c8527f803c770ea8800419ac2594f2bb14446d80a75f3a7053b4",
+      "document-ids.json": "26ffac90f3a05c09d48c709e8aa31a9134ce256526ae2cf23db23cc1442da040",
+      "train-query-ids.json": "048b17d159eb0252f2212950ae9c91bf97a5d2aad70fe7dcf014b4973cbcaf59",
+      "train-query-dense.npy": "60b81e76321d9e6788ebe8479205399a3e020ec9a90d10130f0c29df51fc7844"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "frozen_at_utc": "2026-11-13T22:45:04.079807+00:00",
+  "nominees": {
+    "existing_lanes": "safe_refill4",
+    "independent_lexical_index": "lexical_refill4"
+  },
+  "protocol_sha256": "c4c024b0876db23a3fa068c33cd13f2a9f7e3de8f568567d50954bc61b9baef9",
+  "source_sha256": {
+    "candidate_recall_methods.py": "b41edac4a39739a6c64ee28d6f941b746be0d76d966c5e5095cf34bad19d94e8",
+    "candidate_recall_data.py": "269871bf39c91b4622f67cdc9ee2f9e535452e28e482ef551eaf1d2ca12484ef",
+    "candidate_recall_study.py": "0eba085d113c09a5a22754677142cf7eaa139b29d0cfe61071bfea37cef46883"
+  },
+  "development_report_sha256": "0415f100da9ba57d4368d91409fcb16e43da9f359111da1bad81eeeb8a15d21d",
+  "confirmation_ids_sha256": "24010c64ddecf485b91797bb9487c955a5132598c78db2a84e6aa38ed7f96825"
+}

@@ -1,0 +1,873 @@
+{
+  "protocol_sha256": "acac26f243d7432f3423491e810110e7f49e3d23c68dda59090a6e7ae4395a7d",
+  "source_sha256": "693a0b726a56a5cfa6bd31551d5e5e71cc70da3e354f861ef8596f70a5330a9e",
+  "inference_sha256": "bf21da226ffc7ed5a00108d1c7ec2fe9d2ca41ff8cd5bc6ada88641e4770474e",
+  "protected_candidates_sha256": "a3f5b448b32cad535521b5a2b4fcaf5e1b993d9dda6ba835f27f17747599d379",
+  "study": "single exploratory configuration on exposed TRAIN; no new model inference",
+  "cohorts": {
+    "development": {
+      "queries": 128,
+      "groups": 120,
+      "by_method": {
+        "baseline": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.890625,
+              "candidate": 0.890625,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.806640625,
+              "candidate": 0.806640625,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7682712270433323,
+              "candidate": 0.7682712270433323,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.818359375,
+              "candidate": 0.818359375,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.739453125,
+              "candidate": 0.739453125,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 127,
+            "pool_positive_sources_candidate": 127,
+            "pool_positive_sources_gained": 0,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 127,
+            "pool_positive_sources_any_baseline": 115,
+            "pool_positive_sources_any_candidate": 115,
+            "pool_positive_sources_any_gained": 0,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 113,
+            "raw5_positive_sources_candidate": 113,
+            "raw5_positive_sources_gained": 0,
+            "raw5_positive_sources_lost": 0,
+            "raw5_positive_sources_retained": 113,
+            "raw5_positive_sources_any_baseline": 107,
+            "raw5_positive_sources_any_candidate": 107,
+            "raw5_positive_sources_any_gained": 0,
+            "raw5_positive_sources_any_lost": 0,
+            "pool_rationales_baseline": 84,
+            "pool_rationales_candidate": 84,
+            "pool_rationales_gained": 0,
+            "pool_rationales_lost": 0,
+            "pool_rationales_retained": 84,
+            "pool_rationales_any_baseline": 77,
+            "pool_rationales_any_candidate": 77,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 0,
+            "raw5_rationales_baseline": 81,
+            "raw5_rationales_candidate": 81,
+            "raw5_rationales_gained": 0,
+            "raw5_rationales_lost": 0,
+            "raw5_rationales_retained": 81,
+            "raw5_rationales_any_baseline": 76,
+            "raw5_rationales_any_candidate": 76,
+            "raw5_rationales_any_gained": 0,
+            "raw5_rationales_any_lost": 0,
+            "positive_pairs": 144,
+            "rationale_pairs": 92,
+            "extra_bge_pairs": 0,
+            "queries_with_extra_bge_call": 0,
+            "chosen_new_chunks": 0,
+            "discarded_baseline_best_gold_chunks": 0
+          },
+          "bge_pairs": 2560
+        },
+        "lexical_refill4": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.890625,
+              "candidate": 0.892578125,
+              "delta": 0.001953125,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0078125
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.806640625,
+              "candidate": 0.798828125,
+              "delta": -0.0078125,
+              "descriptive_ci97_5": [
+                -0.03125,
+                0.0
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7682712270433323,
+              "candidate": 0.7669482890212636,
+              "delta": -0.0013229380220685957,
+              "descriptive_ci97_5": [
+                -0.018881899320312708,
+                0.0134336951594962
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.818359375,
+              "candidate": 0.802734375,
+              "delta": -0.015625,
+              "descriptive_ci97_5": [
+                -0.046875,
+                0.0
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.739453125,
+              "candidate": 0.73515625,
+              "delta": -0.004296875,
+              "descriptive_ci97_5": [
+                -0.02976190476190476,
+                0.01640639575559702
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 127,
+            "pool_positive_sources_candidate": 128,
+            "pool_positive_sources_gained": 1,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 127,
+            "pool_positive_sources_any_baseline": 115,
+            "pool_positive_sources_any_candidate": 115,
+            "pool_positive_sources_any_gained": 0,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 113,
+            "raw5_positive_sources_candidate": 112,
+            "raw5_positive_sources_gained": 0,
+            "raw5_positive_sources_lost": 1,
+            "raw5_positive_sources_retained": 112,
+            "raw5_positive_sources_any_baseline": 107,
+            "raw5_positive_sources_any_candidate": 106,
+            "raw5_positive_sources_any_gained": 0,
+            "raw5_positive_sources_any_lost": 1,
+            "pool_rationales_baseline": 84,
+            "pool_rationales_candidate": 80,
+            "pool_rationales_gained": 1,
+            "pool_rationales_lost": 5,
+            "pool_rationales_retained": 79,
+            "pool_rationales_any_baseline": 77,
+            "pool_rationales_any_candidate": 73,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 4,
+            "raw5_rationales_baseline": 81,
+            "raw5_rationales_candidate": 76,
+            "raw5_rationales_gained": 0,
+            "raw5_rationales_lost": 5,
+            "raw5_rationales_retained": 76,
+            "raw5_rationales_any_baseline": 76,
+            "raw5_rationales_any_candidate": 72,
+            "raw5_rationales_any_gained": 0,
+            "raw5_rationales_any_lost": 4,
+            "positive_pairs": 144,
+            "rationale_pairs": 92,
+            "extra_bge_pairs": 0,
+            "queries_with_extra_bge_call": 0,
+            "chosen_new_chunks": 232,
+            "discarded_baseline_best_gold_chunks": 4
+          },
+          "bge_pairs": 2560
+        },
+        "bge_protected_refill4": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.890625,
+              "candidate": 0.892578125,
+              "delta": 0.001953125,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0078125
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.806640625,
+              "candidate": 0.806640625,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7682712270433323,
+              "candidate": 0.7689913153668387,
+              "delta": 0.0007200883235065304,
+              "descriptive_ci97_5": [
+                -0.0006364079792184724,
+                0.00376197672237619
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.818359375,
+              "candidate": 0.818359375,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.739453125,
+              "candidate": 0.739453125,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 127,
+            "pool_positive_sources_candidate": 128,
+            "pool_positive_sources_gained": 1,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 127,
+            "pool_positive_sources_any_baseline": 115,
+            "pool_positive_sources_any_candidate": 115,
+            "pool_positive_sources_any_gained": 0,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 113,
+            "raw5_positive_sources_candidate": 113,
+            "raw5_positive_sources_gained": 0,
+            "raw5_positive_sources_lost": 0,
+            "raw5_positive_sources_retained": 113,
+            "raw5_positive_sources_any_baseline": 107,
+            "raw5_positive_sources_any_candidate": 107,
+            "raw5_positive_sources_any_gained": 0,
+            "raw5_positive_sources_any_lost": 0,
+            "pool_rationales_baseline": 84,
+            "pool_rationales_candidate": 85,
+            "pool_rationales_gained": 1,
+            "pool_rationales_lost": 0,
+            "pool_rationales_retained": 84,
+            "pool_rationales_any_baseline": 77,
+            "pool_rationales_any_candidate": 77,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 0,
+            "raw5_rationales_baseline": 81,
+            "raw5_rationales_candidate": 81,
+            "raw5_rationales_gained": 0,
+            "raw5_rationales_lost": 0,
+            "raw5_rationales_retained": 81,
+            "raw5_rationales_any_baseline": 76,
+            "raw5_rationales_any_candidate": 76,
+            "raw5_rationales_any_gained": 0,
+            "raw5_rationales_any_lost": 0,
+            "positive_pairs": 144,
+            "rationale_pairs": 92,
+            "extra_bge_pairs": 86,
+            "queries_with_extra_bge_call": 63,
+            "chosen_new_chunks": 86,
+            "discarded_baseline_best_gold_chunks": 0
+          },
+          "bge_pairs": 2646
+        }
+      }
+    },
+    "confirmation_previously_exposed": {
+      "queries": 553,
+      "groups": 367,
+      "by_method": {
+        "baseline": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.8645569620253165,
+              "candidate": 0.8645569620253165,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.7945750452079566,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7441342551013078,
+              "candidate": 0.7441342551013078,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.8031645569620254,
+              "candidate": 0.8031645569620254,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.7120554550934297,
+              "candidate": 0.7120554550934297,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 539,
+            "pool_positive_sources_candidate": 539,
+            "pool_positive_sources_gained": 0,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 539,
+            "pool_positive_sources_any_baseline": 485,
+            "pool_positive_sources_any_candidate": 485,
+            "pool_positive_sources_any_gained": 0,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 482,
+            "raw5_positive_sources_candidate": 482,
+            "raw5_positive_sources_gained": 0,
+            "raw5_positive_sources_lost": 0,
+            "raw5_positive_sources_retained": 482,
+            "raw5_positive_sources_any_baseline": 452,
+            "raw5_positive_sources_any_candidate": 452,
+            "raw5_positive_sources_any_gained": 0,
+            "raw5_positive_sources_any_lost": 0,
+            "pool_rationales_baseline": 357,
+            "pool_rationales_candidate": 357,
+            "pool_rationales_gained": 0,
+            "pool_rationales_lost": 0,
+            "pool_rationales_retained": 357,
+            "pool_rationales_any_baseline": 325,
+            "pool_rationales_any_candidate": 325,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 0,
+            "raw5_rationales_baseline": 342,
+            "raw5_rationales_candidate": 342,
+            "raw5_rationales_gained": 0,
+            "raw5_rationales_lost": 0,
+            "raw5_rationales_retained": 342,
+            "raw5_rationales_any_baseline": 319,
+            "raw5_rationales_any_candidate": 319,
+            "raw5_rationales_any_gained": 0,
+            "raw5_rationales_any_lost": 0,
+            "positive_pairs": 625,
+            "rationale_pairs": 379,
+            "extra_bge_pairs": 0,
+            "queries_with_extra_bge_call": 0,
+            "chosen_new_chunks": 0,
+            "discarded_baseline_best_gold_chunks": 0
+          },
+          "bge_pairs": 11060
+        },
+        "lexical_refill4": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.8645569620253165,
+              "candidate": 0.8772151898734177,
+              "delta": 0.012658227848101266,
+              "descriptive_ci97_5": [
+                0.003590664272890485,
+                0.024299065420560748
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.7968354430379747,
+              "delta": 0.0022603978300180833,
+              "descriptive_ci97_5": [
+                -0.016294353696056998,
+                0.017086476382664674
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7441342551013078,
+              "candidate": 0.7453986610641615,
+              "delta": 0.001264405962853676,
+              "descriptive_ci97_5": [
+                -0.008709265328345287,
+                0.011202719567424645
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.8031645569620254,
+              "candidate": 0.8031645569620254,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                -0.018182647644326474,
+                0.0145200498099011
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.7120554550934297,
+              "candidate": 0.715220012055455,
+              "delta": 0.003164556962025316,
+              "descriptive_ci97_5": [
+                -0.0062887520698804945,
+                0.012787905150405149
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 539,
+            "pool_positive_sources_candidate": 547,
+            "pool_positive_sources_gained": 8,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 539,
+            "pool_positive_sources_any_baseline": 485,
+            "pool_positive_sources_any_candidate": 491,
+            "pool_positive_sources_any_gained": 6,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 482,
+            "raw5_positive_sources_candidate": 486,
+            "raw5_positive_sources_gained": 9,
+            "raw5_positive_sources_lost": 5,
+            "raw5_positive_sources_retained": 477,
+            "raw5_positive_sources_any_baseline": 452,
+            "raw5_positive_sources_any_candidate": 452,
+            "raw5_positive_sources_any_gained": 5,
+            "raw5_positive_sources_any_lost": 5,
+            "pool_rationales_baseline": 357,
+            "pool_rationales_candidate": 348,
+            "pool_rationales_gained": 0,
+            "pool_rationales_lost": 9,
+            "pool_rationales_retained": 348,
+            "pool_rationales_any_baseline": 325,
+            "pool_rationales_any_candidate": 321,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 4,
+            "raw5_rationales_baseline": 342,
+            "raw5_rationales_candidate": 339,
+            "raw5_rationales_gained": 3,
+            "raw5_rationales_lost": 6,
+            "raw5_rationales_retained": 336,
+            "raw5_rationales_any_baseline": 319,
+            "raw5_rationales_any_candidate": 316,
+            "raw5_rationales_any_gained": 1,
+            "raw5_rationales_any_lost": 4,
+            "positive_pairs": 625,
+            "rationale_pairs": 379,
+            "extra_bge_pairs": 0,
+            "queries_with_extra_bge_call": 0,
+            "chosen_new_chunks": 983,
+            "discarded_baseline_best_gold_chunks": 18
+          },
+          "bge_pairs": 11060
+        },
+        "bge_protected_refill4": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.8645569620253165,
+              "candidate": 0.8681735985533454,
+              "delta": 0.003616636528028933,
+              "descriptive_ci97_5": [
+                0.0,
+                0.010714525300281129
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.7945750452079566,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                -0.005586722463103477,
+                0.00558659217877095
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.7441342551013078,
+              "candidate": 0.7440866213130037,
+              "delta": -4.7633788304168385e-05,
+              "descriptive_ci97_5": [
+                -0.0038651044940643223,
+                0.005409718480935898
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.8031645569620254,
+              "candidate": 0.8031645569620254,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                -0.0056179775280898875,
+                0.005576337978442822
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.7120554550934297,
+              "candidate": 0.7125075346594334,
+              "delta": 0.0004520795660036166,
+              "descriptive_ci97_5": [
+                -0.0035519125683060107,
+                0.005909152003910072
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 539,
+            "pool_positive_sources_candidate": 542,
+            "pool_positive_sources_gained": 3,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 539,
+            "pool_positive_sources_any_baseline": 485,
+            "pool_positive_sources_any_candidate": 486,
+            "pool_positive_sources_any_gained": 1,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 482,
+            "raw5_positive_sources_candidate": 482,
+            "raw5_positive_sources_gained": 1,
+            "raw5_positive_sources_lost": 1,
+            "raw5_positive_sources_retained": 481,
+            "raw5_positive_sources_any_baseline": 452,
+            "raw5_positive_sources_any_candidate": 452,
+            "raw5_positive_sources_any_gained": 1,
+            "raw5_positive_sources_any_lost": 1,
+            "pool_rationales_baseline": 357,
+            "pool_rationales_candidate": 356,
+            "pool_rationales_gained": 0,
+            "pool_rationales_lost": 1,
+            "pool_rationales_retained": 356,
+            "pool_rationales_any_baseline": 325,
+            "pool_rationales_any_candidate": 325,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 0,
+            "raw5_rationales_baseline": 342,
+            "raw5_rationales_candidate": 342,
+            "raw5_rationales_gained": 0,
+            "raw5_rationales_lost": 0,
+            "raw5_rationales_retained": 342,
+            "raw5_rationales_any_baseline": 319,
+            "raw5_rationales_any_candidate": 319,
+            "raw5_rationales_any_gained": 0,
+            "raw5_rationales_any_lost": 0,
+            "positive_pairs": 625,
+            "rationale_pairs": 379,
+            "extra_bge_pairs": 383,
+            "queries_with_extra_bge_call": 266,
+            "chosen_new_chunks": 383,
+            "discarded_baseline_best_gold_chunks": 0
+          },
+          "bge_pairs": 11443
+        }
+      }
+    },
+    "thirteen_previous_misses": {
+      "queries": 13,
+      "groups": 11,
+      "by_method": {
+        "baseline": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 0,
+            "pool_positive_sources_candidate": 0,
+            "pool_positive_sources_gained": 0,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 0,
+            "pool_positive_sources_any_baseline": 0,
+            "pool_positive_sources_any_candidate": 0,
+            "pool_positive_sources_any_gained": 0,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 0,
+            "raw5_positive_sources_candidate": 0,
+            "raw5_positive_sources_gained": 0,
+            "raw5_positive_sources_lost": 0,
+            "raw5_positive_sources_retained": 0,
+            "raw5_positive_sources_any_baseline": 0,
+            "raw5_positive_sources_any_candidate": 0,
+            "raw5_positive_sources_any_gained": 0,
+            "raw5_positive_sources_any_lost": 0,
+            "pool_rationales_baseline": 0,
+            "pool_rationales_candidate": 0,
+            "pool_rationales_gained": 0,
+            "pool_rationales_lost": 0,
+            "pool_rationales_retained": 0,
+            "pool_rationales_any_baseline": 0,
+            "pool_rationales_any_candidate": 0,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 0,
+            "raw5_rationales_baseline": 0,
+            "raw5_rationales_candidate": 0,
+            "raw5_rationales_gained": 0,
+            "raw5_rationales_lost": 0,
+            "raw5_rationales_retained": 0,
+            "raw5_rationales_any_baseline": 0,
+            "raw5_rationales_any_candidate": 0,
+            "raw5_rationales_any_gained": 0,
+            "raw5_rationales_any_lost": 0,
+            "positive_pairs": 14,
+            "rationale_pairs": 3,
+            "extra_bge_pairs": 0,
+            "queries_with_extra_bge_call": 0,
+            "chosen_new_chunks": 0,
+            "discarded_baseline_best_gold_chunks": 0
+          },
+          "bge_pairs": 260
+        },
+        "lexical_refill4": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 0,
+            "pool_positive_sources_candidate": 0,
+            "pool_positive_sources_gained": 0,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 0,
+            "pool_positive_sources_any_baseline": 0,
+            "pool_positive_sources_any_candidate": 0,
+            "pool_positive_sources_any_gained": 0,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 0,
+            "raw5_positive_sources_candidate": 0,
+            "raw5_positive_sources_gained": 0,
+            "raw5_positive_sources_lost": 0,
+            "raw5_positive_sources_retained": 0,
+            "raw5_positive_sources_any_baseline": 0,
+            "raw5_positive_sources_any_candidate": 0,
+            "raw5_positive_sources_any_gained": 0,
+            "raw5_positive_sources_any_lost": 0,
+            "pool_rationales_baseline": 0,
+            "pool_rationales_candidate": 0,
+            "pool_rationales_gained": 0,
+            "pool_rationales_lost": 0,
+            "pool_rationales_retained": 0,
+            "pool_rationales_any_baseline": 0,
+            "pool_rationales_any_candidate": 0,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 0,
+            "raw5_rationales_baseline": 0,
+            "raw5_rationales_candidate": 0,
+            "raw5_rationales_gained": 0,
+            "raw5_rationales_lost": 0,
+            "raw5_rationales_retained": 0,
+            "raw5_rationales_any_baseline": 0,
+            "raw5_rationales_any_candidate": 0,
+            "raw5_rationales_any_gained": 0,
+            "raw5_rationales_any_lost": 0,
+            "positive_pairs": 14,
+            "rationale_pairs": 3,
+            "extra_bge_pairs": 0,
+            "queries_with_extra_bge_call": 0,
+            "chosen_new_chunks": 19,
+            "discarded_baseline_best_gold_chunks": 0
+          },
+          "bge_pairs": 260
+        },
+        "bge_protected_refill4": {
+          "metrics": {
+            "pool_recall": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "raw5_recall": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_ndcg10": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_recall5": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            },
+            "document_mrr5": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "counts": {
+            "pool_positive_sources_baseline": 0,
+            "pool_positive_sources_candidate": 0,
+            "pool_positive_sources_gained": 0,
+            "pool_positive_sources_lost": 0,
+            "pool_positive_sources_retained": 0,
+            "pool_positive_sources_any_baseline": 0,
+            "pool_positive_sources_any_candidate": 0,
+            "pool_positive_sources_any_gained": 0,
+            "pool_positive_sources_any_lost": 0,
+            "raw5_positive_sources_baseline": 0,
+            "raw5_positive_sources_candidate": 0,
+            "raw5_positive_sources_gained": 0,
+            "raw5_positive_sources_lost": 0,
+            "raw5_positive_sources_retained": 0,
+            "raw5_positive_sources_any_baseline": 0,
+            "raw5_positive_sources_any_candidate": 0,
+            "raw5_positive_sources_any_gained": 0,
+            "raw5_positive_sources_any_lost": 0,
+            "pool_rationales_baseline": 0,
+            "pool_rationales_candidate": 0,
+            "pool_rationales_gained": 0,
+            "pool_rationales_lost": 0,
+            "pool_rationales_retained": 0,
+            "pool_rationales_any_baseline": 0,
+            "pool_rationales_any_candidate": 0,
+            "pool_rationales_any_gained": 0,
+            "pool_rationales_any_lost": 0,
+            "raw5_rationales_baseline": 0,
+            "raw5_rationales_candidate": 0,
+            "raw5_rationales_gained": 0,
+            "raw5_rationales_lost": 0,
+            "raw5_rationales_retained": 0,
+            "raw5_rationales_any_baseline": 0,
+            "raw5_rationales_any_candidate": 0,
+            "raw5_rationales_any_gained": 0,
+            "raw5_rationales_any_lost": 0,
+            "positive_pairs": 14,
+            "rationale_pairs": 3,
+            "extra_bge_pairs": 6,
+            "queries_with_extra_bge_call": 5,
+            "chosen_new_chunks": 6,
+            "discarded_baseline_best_gold_chunks": 0
+          },
+          "bge_pairs": 266
+        }
+      }
+    }
+  }
+}

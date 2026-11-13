@@ -1,0 +1,28 @@
+{
+  "corpus": "NFCorpus official TRAIN (128 ordered IDs)",
+  "method": "safe_refill4",
+  "capture": {
+    "corpus_documents": 3633,
+    "chunks": 6818,
+    "queries": 128,
+    "ids_sha256": "f5c9c7535203a1fad97947b29dc60a39918078423c8c8ad5aa21daea04359bcd",
+    "device": "cuda",
+    "trace_sha256": "e6a2a9fb53bc1462531de198086bfbb2181bfdee9cb7fec6dcf3e385730698bc"
+  },
+  "query_hits": {
+    "retained": 85,
+    "gained": 0,
+    "lost": 0,
+    "missed_both": 43
+  },
+  "changed_positive_pairs": {
+    "new": 30,
+    "lost": 0
+  },
+  "macro_document_recall_at_20": {
+    "baseline": 0.11353394557112159,
+    "candidate": 0.11875534683676751,
+    "delta": 0.0052214012656459224
+  },
+  "guardrail_passed": true
+}
