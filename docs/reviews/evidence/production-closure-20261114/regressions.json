@@ -1,0 +1,48 @@
+{
+  "scope": "Local isolated PostgreSQL and offline regression jobs. Targeted jobs overlap the combined suite.",
+  "pytest": {
+    "unit_and_25_pg_files": {
+      "passed": 3482,
+      "warnings": 32,
+      "pytest_seconds": 203.71,
+      "exit_code": 0,
+      "started_utc": "2026-11-13T16:54:16.616471+00:00",
+      "finished_utc": "2026-11-13T16:58:00.642258+00:00"
+    },
+    "worker_faults_and_related_pg": {
+      "passed": 45,
+      "warnings": 5,
+      "pytest_seconds": 30.28,
+      "exit_code": 0,
+      "started_utc": "2026-11-13T16:43:41.658546+00:00",
+      "finished_utc": "2026-11-13T16:44:29.933339+00:00"
+    },
+    "memory_handoff_and_related_pg": {
+      "passed": 93,
+      "warnings": 4,
+      "pytest_seconds": 28.22,
+      "exit_code": 0,
+      "started_utc": "2026-11-13T16:45:24.474241+00:00",
+      "finished_utc": "2026-11-13T16:46:10.227833+00:00"
+    },
+    "public_thread_receipts": {
+      "passed": 4,
+      "warnings": 2,
+      "pytest_seconds": 13.5,
+      "exit_code": 0,
+      "started_utc": "2026-11-13T16:46:20.559931+00:00",
+      "finished_utc": "2026-11-13T16:46:51.099368+00:00"
+    },
+    "operator_invoice_import": {
+      "passed": 1,
+      "warnings": 1,
+      "pytest_seconds": 7.71,
+      "exit_code": 0,
+      "started_utc": "2026-11-13T16:55:56.912131+00:00",
+      "finished_utc": "2026-11-13T16:56:21.513373+00:00"
+    }
+  },
+  "local_db": "PostgreSQL 16.15",
+  "migration_head": "0054_memory_provider_handoff",
+  "remote_ci_run": false
+}

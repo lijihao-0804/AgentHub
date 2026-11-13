@@ -241,6 +241,14 @@ Handoff states are OPEN/ASSIGNED/IN_PROGRESS/CLOSED, independent of Run and Appr
 Closing cannot authorize or repeat a tool, clear UNKNOWN_OUTCOME, or delete source evidence. Historical handoff artifacts/threads are retained.
 Detailed contracts: [feedback](reviews/AgentHub-面试增强M-I2契约与设计-20261002.md), [handoff](reviews/AgentHub-人工接管首版契约-20261003.md).
 
+## Support ticket requests in conversation history
+
+`GET /api/v1/workspaces/{workspace_id}/threads/{thread_id}/turns` includes `ticket_requests` on turns in support conversations. Each receipt exposes only the approval ID, decision status and execution status of a recorded `create_ticket` request for that Run. An empty array means no such request was recorded. `null` means the projection does not apply. Workspace viewers can inspect those states while prompt and answer content remains redacted. The UI obtains the receipt from the existing turn-history response.
+
+## Interactive evaluation budgets
+
+Case evidence includes a nullable `budget` projection with exact decimal strings for the CNY limit, reserved amount, provider-bill settlement and available balance. The read permission remains `evaluation_read`. Worker configuration and the operator bill-import command are described in the [case budget deployment guide](deployment/case-budgets.md).
+
 ## Memory quality is narrower than storage guarantees
 
 Memory reads require `agent_run` or `agent_edit`; overrides require `agent_edit`. Workspace metadata permission alone does not grant memory content access.
