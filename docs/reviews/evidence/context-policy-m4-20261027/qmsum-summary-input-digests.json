@@ -1,0 +1,23 @@
+{
+  "format": "qmsum-summary-input-digests-v1",
+  "reconstructed_with_agenthub_commit": "ec54a86c59bf94312b58270f53c6dbb41e8ff9a3",
+  "canonical_messages": "UTF-8 JSON message array, sorted object keys, literal non-ASCII, compact separators",
+  "cases": [
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3005d.json#specific_query_list[0]",
+      "messages_sha256": "7456d4b74d3305b038a6f7eb0cc8b228222a9127d7ddaa6af9cfe0a36fa30590"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3005d.json#specific_query_list[1]",
+      "messages_sha256": "6e461d1908b47809416d44b925c2e1e67de511c6a09636cc0fa6ace4765d599d"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3006d.json#specific_query_list[0]",
+      "messages_sha256": "3771bbfe6bb4a86bdc87a597c7a5609db89a68dc3262e92aa3eadd2499949e6a"
+    },
+    {
+      "question_id": "QMSum@83d7768:ALL/train/TS3006d.json#specific_query_list[1]",
+      "messages_sha256": "dd70a329bf1297f4a95908e864720eef6b5352e3bed35db19e5eee7296ed081f"
+    }
+  ]
+}

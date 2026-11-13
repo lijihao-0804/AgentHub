@@ -164,3 +164,17 @@ Committee 的域级来源来自论文，但独立许可核验未完成：论文�
 为验证该路由是否真的接受关闭思考模式，再登记一次配对诊断：保持相同合成输入、模型、temperature 和 64 token 上限，仅显式设置 `enable_thinking=false`。检查响应是否完成、是否有输出，以及计算结果是否等于本地整数运算；记录用量和费用，未知结果不重试。此诊断不修改正式候选或重跑任何 QMSum 题，不能作为压缩效果评分，也不能证明关闭思考后的长文质量。
 
 **配对诊断结果：**阿里云接受 `enable_thinking=false`，返回 `finish_reason=stop`，输入 21、输出 7 token，回答与本地整数计算完全相同；`reasoning_tokens` 字段缺失，记为未知而非 0。该次忙时全价估算 0.000098 元，累计七次调用估算 **0.306040 元**。同一简短输入的默认模式实测输入为 47，关闭思考模式后为 21，说明输入开销会随模式改变；这进一步说明不能将长摘要观测到的 30 token 差值硬编码到所有请求。诊断表明下一次独立预注册实验可以显式审查思考模式和输出预算，但本轮 QMSum 质量和收益仍未验证。
+
+### 2026-11-14 输入重建与计数回归
+
+10 月 27 日的原始 scratch 输入文件已不可用。用当天的 AgentHub 提交 `ec54a86c59bf94312b58270f53c6dbb41e8ff9a3`、同一 QMSum 提交及预登记的发言序号重新生成了四条完整请求。当前研究代码生成的文件与历史代码重建的文件逐字节相同，共 411,183 字节，SHA-256 为 `7d4e96a434e0d660fac3153dda231e5e60d87ce45b831d14519ddd39aafd5731`。逐题消息摘要记录的是本次重建结果。输入 token 的预期值取自 10 月保存的阿里云响应记录。[发言序号](qmsum-protected-turns-v1.json) · [重建消息摘要](qmsum-summary-input-digests.json) · [供应商观测](qmsum-outcomes.json)
+
+从仓库根目录运行以下命令，可校验固定训练集索引及六个会议文件、执行原研究的预算准入与提示构建，并复核四题各自的输入 token。首次准备从固定的上游提交读取公开文件，随后可使用本地副本离线重跑。上游 Git 文件使用 LF，历史 Windows checkout 使用 CRLF。加载器只接受与预登记 SHA-256 对应的这两种表示。[QMSum 固定版本](https://github.com/Yale-LILY/QMSum/tree/83d7768c1f2b4dfeb091385d3dc7e239b8e5bb7e)
+
+```sh
+python -m tests.support.deepseek_assets --prepare-default
+python -m tests.support.qmsum_counter_assets
+python -m pytest tests/unit/test_memory_deepseek_v41_counter.py
+```
+
+已有上游原始文件的环境可以给第二条命令传 `--source-root <QMSum 根目录>`。已有历史冻结文件的环境可将 `AGENTHUB_DEEPSEEK_V41_ASSET_DIR` 指向包含 `formal-summary/frozen-summary-inputs.json` 的目录，直接运行测试。CI 在默认单测前重建请求，并按题校验消息身份和供应商计数。复核过程中的模型调用次数为 0。

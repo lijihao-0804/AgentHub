@@ -416,9 +416,7 @@ class QMSumSourceBundle:
         if question is None or self._reference_root is None:
             raise QMSumProtocolError(f"offline reference is unavailable: {question_id}")
         path = self._reference_root / "data" / "ALL" / "train" / f"{question.meeting_id}.json"
-        raw = path.read_bytes()
-        if hashlib.sha256(raw).hexdigest() != question.meeting_sha256:
-            raise QMSumProtocolError("offline reference source identity changed")
+        raw = _verified_source_bytes(path, question.meeting_sha256)
         try:
             query = json.loads(raw)["specific_query_list"][question.query_index]
             spans = tuple((int(start), int(end)) for start, end in query["relevant_text_span"])
@@ -904,38 +902,39 @@ def frozen_meetings() -> tuple[QMSumMeeting, ...]:
     )
 
 
-def load_frozen_qmsum(
-    root: Path | str,
-) -> QMSumSourceBundle:
-    """Load exactly six frozen meeting files from the local official checkout.
+def _verified_source_bytes(path: Path, expected_sha256: str) -> bytes:
+    # The historical hashes identify a CRLF checkout. Upstream Git blobs use LF.
+    raw = path.read_bytes()
+    if hashlib.sha256(raw).hexdigest() == expected_sha256:
+        return raw
+    if b"\r" not in raw:
+        historical = raw.replace(b"\n", b"\r\n")
+        if hashlib.sha256(historical).hexdigest() == expected_sha256:
+            return raw
+    raise QMSumProtocolError(f"QMSum source SHA-256 mismatch: {path.name}")
 
-    The repository and file identities are checked before question content is
-    read. The fixed ``train.jsonl`` is also checked; this module does not scan
-    validation/test splits.
-    """
 
+def load_frozen_qmsum(root: Path | str) -> QMSumSourceBundle:
+    """Load the pinned detached checkout used by the research CLI."""
     source_root = Path(root)
-    expected_git = source_root / ".git"
-    if not expected_git.exists():
+    head = source_root / ".git" / "HEAD"
+    if not head.is_file():
         raise QMSumProtocolError("QMSum root must be a local git checkout")
-    head = (expected_git / "HEAD").read_text(encoding="utf-8").strip()
-    if head and head.startswith("ref: "):
-        raise QMSumProtocolError(
-            "QMSum checkout must be pinned by detached commit or provenance fixture"
-        )
-    if head and head != QMSUM_COMMIT:
+    if head.read_text(encoding="utf-8").strip() != QMSUM_COMMIT:
         raise QMSumProtocolError("QMSum checkout HEAD differs from the frozen commit")
+    return load_frozen_qmsum_files(source_root)
+
+
+def load_frozen_qmsum_files(source_root: Path) -> QMSumSourceBundle:
+    """Verify the published train index and six selected files in a checkout or archive."""
     train_jsonl = source_root / "data" / "ALL" / "jsonl" / "train.jsonl"
-    if hashlib.sha256(train_jsonl.read_bytes()).hexdigest() != QMSUM_TRAIN_JSONL_SHA256:
-        raise QMSumProtocolError("QMSum train.jsonl SHA-256 mismatch")
+    _verified_source_bytes(train_jsonl, QMSUM_TRAIN_JSONL_SHA256)
 
     meetings = frozen_meetings()
     questions: list[QMSumFrozenQuestion] = []
     for meeting in meetings:
         path = source_root / "data" / "ALL" / "train" / f"{meeting.meeting_id}.json"
-        raw_bytes = path.read_bytes()
-        if hashlib.sha256(raw_bytes).hexdigest() != meeting.file_sha256:
-            raise QMSumProtocolError(f"meeting file identity mismatch: {meeting.meeting_id}")
+        raw_bytes = _verified_source_bytes(path, meeting.file_sha256)
         try:
             value = json.loads(raw_bytes.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
@@ -1926,6 +1925,7 @@ __all__ = [
     "frozen_meetings",
     "lexical_reference_scores",
     "load_frozen_qmsum",
+    "load_frozen_qmsum_files",
     "online_projection",
     "plan_offline",
     "protocol_manifest",

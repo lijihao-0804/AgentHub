@@ -1,12 +1,13 @@
 """The research counter is restricted and agrees with recorded provider usage."""
 
+import hashlib
 import json
-import os
 from pathlib import Path
 
 import pytest
 
-from benchmarks.evaluation.memory_deepseek_v41_counter import DeepseekV41TextCounter
+from benchmarks.evaluation.memory_deepseek_v41_counter import MODEL, DeepseekV41TextCounter
+from benchmarks.evaluation.memory_qmsum_protocol import QMSUM_COMMIT
 from packages.model_gateway.contracts import (
     AliyunDeepSeekRequestMode,
     ModelMessage,
@@ -15,12 +16,7 @@ from packages.model_gateway.contracts import (
     ModelToolDefinition,
     StructuredOutputSchema,
 )
-
-_STUDY_ASSET_ROOT = Path(
-    os.environ.get("AGENTHUB_DEEPSEEK_V41_ASSET_DIR", ".scratch/context-policy-m4-20261027")
-)
-FROZEN_INPUTS = _STUDY_ASSET_ROOT / "formal-summary" / "frozen-summary-inputs.json"
-OBSERVATIONS = _STUDY_ASSET_ROOT / "formal-summary" / "summary-observations.json"
+from tests.support.qmsum_counter_assets import STUDY_EVIDENCE, resolve_frozen_inputs
 
 pytest_plugins = ("tests.support.deepseek_assets",)
 
@@ -89,18 +85,30 @@ def test_paired_calibration_matches_real_provider_input_usage(
     assert counter.count(non_thinking_request, thinking=False) == 21
 
 
-@pytest.mark.skipif(
-    not all(path.is_file() for path in (FROZEN_INPUTS, OBSERVATIONS)),
-    reason="Frozen local study inputs are unavailable",
-)
 def test_four_frozen_summary_requests_match_recorded_provider_usage(
     deepseek_v41_tokenizer_path: Path,
 ):
+    evidence = json.loads((STUDY_EVIDENCE / "qmsum-outcomes.json").read_bytes())
+    identities = json.loads((STUDY_EVIDENCE / "qmsum-summary-input-digests.json").read_bytes())
+    frozen = json.loads(resolve_frozen_inputs().read_bytes())
+    assert frozen["format"] == "qmsum-frozen-summary-inputs-v1"
+    assert evidence["source_commit"] == QMSUM_COMMIT
+    assert evidence["model"] == frozen["model"] == MODEL
+    assert evidence["price_identity"] == frozen["price_identity"]
+    assert frozen["max_output_tokens"] == 2048
+    observations = [row for row in evidence["cases"] if "summary_measurements" in row]
+    assert len(frozen["cases"]) == len(observations) == len(identities["cases"]) == 4
+    assert len({row["question_id"] for row in observations}) == 4
     counter = DeepseekV41TextCounter.from_file(deepseek_v41_tokenizer_path)
-    cases = json.loads(FROZEN_INPUTS.read_text(encoding="utf-8"))["cases"]
-    observed = json.loads(OBSERVATIONS.read_text(encoding="utf-8"))["observations"]
-    expected = {row["question_id"]: row["measurements"]["input_tokens"] for row in observed}
-    assert len(cases) == len(expected) == 4
-    for case in cases:
+    for case, observed, identity in zip(
+        frozen["cases"], observations, identities["cases"], strict=True
+    ):
+        question_id = case["question_id"]
+        assert question_id == observed["question_id"] == identity["question_id"]
+        canonical = json.dumps(
+            case["messages"], ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        assert hashlib.sha256(canonical).hexdigest() == identity["messages_sha256"], question_id
         messages = tuple(ModelMessage(**message) for message in case["messages"])
-        assert counter.count(ModelRequest(messages), thinking=True) == expected[case["question_id"]]
+        expected = observed["summary_measurements"]["input_tokens"]
+        assert counter.count(ModelRequest(messages), thinking=True) == expected, question_id

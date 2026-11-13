@@ -70,6 +70,10 @@ jobs:
           PY
       - name: Prepare digest-pinned public tokenizer for counter tests
         run: uv run --locked python -m tests.support.deepseek_assets --prepare-default
+      - name: Reconstruct the four historical QMSum summary requests
+        run: >-
+          uv run --locked python -m tests.support.qmsum_counter_assets
+          --output .scratch/context-policy-m4-20261027/formal-summary/frozen-summary-inputs.json
       - name: Wait for Qdrant
         run: |
           uv run --locked python - <<'PY'
