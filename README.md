@@ -210,6 +210,8 @@ Credential 和 Model Profile。在 Agent 草稿中选择模型、发布 AgentVer
 
 知识库的端到端复验覆盖长文入库、大批量失败后的重试、检索时的连接池占用，以及新旧政策同时召回时的引用问答。使用阿里云兼容端点可在独立工作区重跑固定的中英文开发样本。[本机 RAG 实测与限制](docs/reviews/local-rag-20261114.md) · [引用问答复跑入口](benchmarks/evaluation/experiments/citation_lifecycle_dev/README.md)
 
+候选召回评测可以逐题追踪分块、稠密与稀疏排名、融合、BGE 重排、证据句覆盖和实际引文。在 553 道 SciFact 确认题上，BM25 补位增加了 8 个标注来源对，却让前五块中的完整证据对从 342 降到 339。主线保留原检索策略。[13 道漏例及合入判断](docs/reviews/candidate-recall-20261114.md)
+
 ## 仓库结构
 
 ```text

@@ -1,0 +1,183 @@
+{
+  "split": "SciFact TRAIN + synthetic tenant control",
+  "formal_experiment": false,
+  "holdout_read": false,
+  "frozen_commit": "f02a6fbece9d4aea2280fe59408ad0f363aad5ab",
+  "query_route": "POST /api/v1/knowledge/query",
+  "query_output_mode": "PROMPT_JSON",
+  "route_name": "aliyun-rag",
+  "candidate_comparison": "same text, model profile and snapshot; preserve first response, never rerun completed paid cases",
+  "subset_policy": "Union of official linked papers and top eight historical dense, sparse, fused and reranked CHUNKS for each of the three original claims; selected by historical rankings before dispatch.",
+  "subset_documents": [
+    "11369420",
+    "11630388",
+    "11748341",
+    "13770184",
+    "14566771",
+    "15121114",
+    "15551129",
+    "15946643",
+    "15984735",
+    "16562534",
+    "16737163",
+    "17814815",
+    "17930286",
+    "21050357",
+    "23627419",
+    "23785605",
+    "25062868",
+    "2543135",
+    "25946292",
+    "2613775",
+    "28249680",
+    "33740844",
+    "3391547",
+    "34735369",
+    "37065914",
+    "3825472",
+    "38369817",
+    "40349336",
+    "43128141",
+    "4417558",
+    "45487164",
+    "49429882",
+    "5114940",
+    "52072815",
+    "52188256",
+    "5828251",
+    "6270720",
+    "7039855",
+    "7840442",
+    "8529693",
+    "8582337",
+    "8672737"
+  ],
+  "cases": [
+    {
+      "id": "1109",
+      "query": "Suboptimal nutrition is a leading cause of premature death",
+      "type": "fusion_miss",
+      "gold_documents": [
+        "13770184",
+        "8582337"
+      ],
+      "upstream_rationales": {
+        "13770184": [
+          {
+            "sentences": [
+              13
+            ],
+            "label": "SUPPORT"
+          }
+        ],
+        "8582337": [
+          {
+            "sentences": [
+              13
+            ],
+            "label": "SUPPORT"
+          }
+        ]
+      },
+      "source_review_rule": "The answer connects poor diet or childhood undernutrition to premature mortality or burden, with direct source text supporting the corresponding claim. Review burden/DALYs and mortality separately. Count an official-source citation separately from semantically sufficient natural alternatives.",
+      "historical_ranks": {
+        "dense": [
+          11
+        ],
+        "sparse": [],
+        "fusion": [],
+        "rerank": []
+      }
+    },
+    {
+      "id": "818",
+      "query": "Myelin sheaths play a role in action potential propagation.",
+      "type": "both_arms_miss",
+      "gold_documents": [
+        "17814815"
+      ],
+      "upstream_rationales": {
+        "17814815": [
+          {
+            "sentences": [
+              0
+            ],
+            "label": "SUPPORT"
+          },
+          {
+            "sentences": [
+              2
+            ],
+            "label": "SUPPORT"
+          }
+        ]
+      },
+      "source_review_rule": "A grounded answer must explain a role in signal conduction/propagation. The indexed abstract of the labeled SCoRe paper only describes myelin imaging; its retrieval or citation alone cannot pass passage support. An alternative directly supporting abstract is eligible for the grounded answer, measured separately from the original qrel.",
+      "historical_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fusion": [],
+        "rerank": []
+      }
+    },
+    {
+      "id": "791",
+      "query": "Migraine with aura is associated with ischemic stroke.",
+      "type": "already_correct",
+      "gold_documents": [
+        "15984735"
+      ],
+      "upstream_rationales": {
+        "15984735": [
+          {
+            "sentences": [
+              11
+            ],
+            "label": "SUPPORT"
+          },
+          {
+            "sentences": [
+              16
+            ],
+            "label": "SUPPORT"
+          }
+        ]
+      },
+      "source_review_rule": "The answer affirms increased association with ischaemic stroke for migraine with aura and cites the target paper. Check the actual cited excerpt (risk 2.16 or equivalent conclusion).",
+      "historical_ranks": {
+        "dense": [
+          1,
+          2,
+          5
+        ],
+        "sparse": [
+          1,
+          5,
+          20
+        ],
+        "fusion": [
+          1,
+          3,
+          10
+        ],
+        "rerank": [
+          1,
+          2,
+          5
+        ]
+      }
+    },
+    {
+      "id": "missing-tenant-canary",
+      "query": "According to the Lattice Vault memorandum ZR-618, what color code was assigned to the authorization desk?",
+      "type": "missing_evidence",
+      "gold_documents": [],
+      "source_review_rule": "Explicit insufficient_evidence with zero citations. LILAC-726 occurs only in another tenant's synthetic control document."
+    }
+  ],
+  "full_corpus": {
+    "documents": 5183,
+    "chunks": 9189
+  },
+  "source_policy": "Only public SciFact and synthetic fixture content may leave the machine. Never send human review rules, qrels or other-tenant data in any query."
+}

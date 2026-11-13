@@ -1,0 +1,47 @@
+{
+  "command": "python -m benchmarks.public_rag.candidate_recall_live_replay run --cohort product --arms A --retrieval-only --api-url <isolated-loopback-url>/api/v1 --output <new-local-json>",
+  "script_sha256_lf": "1075ba90723a42052878bafd7517857ecb3d5c8113f3640f09cc3f33edd07253",
+  "exit_code": 0,
+  "elapsed_seconds": 114.203,
+  "model_calls": 0,
+  "snapshot_sha256": "0779317c05ba2158901fea888b5da3ba28d6da2c460d8dec53ca6be3c8aedc32",
+  "documents": 18,
+  "chunks": 30,
+  "case": {
+    "arm": "A",
+    "case": "product-code-receipt",
+    "dispatch": "RETURNED",
+    "fused_sources": [
+      "refund-11",
+      "refund-03",
+      "refund-02",
+      "refund-11",
+      "refund-01",
+      "refund-02",
+      "refund-10",
+      "refund-09",
+      "refund-01",
+      "refund-08",
+      "refund-05",
+      "refund-06",
+      "refund-03",
+      "refund-04",
+      "refund-10",
+      "refund-04",
+      "refund-07",
+      "refund-06",
+      "refund-09",
+      "refund-07"
+    ],
+    "evidence_sources": [
+      "refund-02",
+      "refund-06",
+      "refund-08",
+      "refund-01",
+      "refund-07",
+      "refund-09"
+    ],
+    "metadata": null
+  },
+  "state": "COMPLETE"
+}

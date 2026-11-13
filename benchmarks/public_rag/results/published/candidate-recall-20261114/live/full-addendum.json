@@ -1,0 +1,27 @@
+{
+  "status": "FROZEN_BEFORE_GENERATION",
+  "split": "Disclosed SciFact TRAIN confirmation case selected retrospectively from the lexical-only rescued associations, plus a separately authored question. Diagnostic status only.",
+  "source_selection": "Select NR5A2 as the original association and a paired question directly verifiable in its retrieved public abstract. Candidate retrieval results on the historical original query were already known before this registration. Live responses and retrieval for the derivative query had not been inspected.",
+  "frozen_sha256_main": "a91d382cbf6ce522c0ebca31d64a7bb767fdaae8a3c49855e409ec62b27a31c5",
+  "mode": "Full-corpus live A/B, same frozen HTTP payload except candidate_policy=lexical_refill_v1 in B, same reader profile, snapshot, query and strict PROMPT_JSON output. One first HTTP response per arm and case.",
+  "cases": [
+    {
+      "id": "838",
+      "query": "NR5A2 is important in reverse cholesterol transport in humans.",
+      "type": "confirmation_lexical_rescue_association_only",
+      "gold_documents": [
+        "15928989"
+      ],
+      "source_review_rule": "Do not score the newly recovered pregnancy paper as support for reverse cholesterol transport. Require same protein, reverse cholesterol transport and human relevance in actual cited text, otherwise assess explicit abstention separately. Other papers may legitimately support the claim and are scored for passage grounding separately from original doc ID."
+    },
+    {
+      "id": "838-reproductive-functions",
+      "query": "Which reproductive functions does the study identify for NR5A2, also called liver receptor homolog-1?",
+      "type": "source_grounded_diagnostic_derivative",
+      "gold_documents": [
+        "15928989"
+      ],
+      "source_review_rule": "Require at least two of maintenance of the corpus luteum, promotion of decidualization, and placental formation in the answer and direct cited evidence from document 15928989. Report qrel retrieval on this derivative separately from original SciFact."
+    }
+  ]
+}

@@ -13,10 +13,12 @@ from uuid import NAMESPACE_URL, uuid4, uuid5
 
 from qdrant_client import QdrantClient
 
+from benchmarks.public_rag.candidate_recall_data import sha256
 from benchmarks.public_rag.candidate_recall_methods import WordBM25, select_candidates
 from benchmarks.public_rag.candidate_recall_protected import protected_refill
-from benchmarks.public_rag.candidate_recall_rerank import direct, rank
+from benchmarks.public_rag.candidate_recall_rerank import MODEL_PROTOCOL, direct, rank
 from benchmarks.public_rag.data import _load_corpus, _load_qrels, _load_queries
+from benchmarks.public_rag.scifact_recall_index import MODEL_SHA256
 from benchmarks.public_rag.scoring import evaluate_questions
 from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
 from packages.knowledge.adapters.qdrant import QdrantVectorIndex
@@ -69,6 +71,14 @@ def capture(
     measured = selected_ids(cohort, root)
     if reranker_dir is not None and reranker_dir.name != cohort["revision"]:
         raise ValueError("Select the registered reranker snapshot")
+    for filename, digest in MODEL_SHA256.items():
+        if sha256(model / filename) != digest:
+            raise ValueError(f"Embedding model file mismatch: {filename}")
+    if reranker_dir is not None:
+        expected = json.loads(MODEL_PROTOCOL.read_bytes())["model"]["file_sha256"]
+        for filename, digest in expected.items():
+            if sha256(reranker_dir / filename) != digest:
+                raise ValueError(f"Reranker model file mismatch: {filename}")
     chunks = []
     revisions = []
     for doc in corpus.values():
@@ -92,6 +102,8 @@ def capture(
     )
     scope = VectorScope(str(uuid4()), str(uuid4()), tuple(revisions))
     try:
+        if client.info().version != protocol["retrieval"]["qdrant_version"]:
+            raise ValueError("Use the registered Qdrant version")
         index.ensure_collection()
         for offset in range(0, len(chunks), 64):
             batch = chunks[offset : offset + 64]

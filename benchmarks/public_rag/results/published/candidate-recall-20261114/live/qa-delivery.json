@@ -1,0 +1,1804 @@
+{
+  "endpoint": "POST /api/v1/knowledge/query",
+  "baseline_commit": "f02a6fbece9d4aea2280fe59408ad0f363aad5ab",
+  "candidate_policy": "lexical_refill_v1",
+  "model_route": "configured Beijing Aliyun deepseek-v4.1-flash-1017, temperature 0, max_tokens 512, PROMPT_JSON",
+  "baseline_scope": "Frozen commit, default candidate policy; candidate uses current source explicitly opt-in with prepared lexical index; same corpus snapshot, model profile, query and budget in each A/B pair.",
+  "full_corpus": {
+    "public_documents": 5183,
+    "postgres_chunks": 9189,
+    "qdrant_points_exact": 9189,
+    "verified_texts_locators_ordinals_sha": 9189,
+    "snapshot": "af330273-4d37-410e-8afc-ac137db5d87b",
+    "snapshot_hash": "7ce0bb3519fde1afaee55045745187c77ddea9ead55af9774a54d20d0bf09ff6",
+    "model_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+    "cache_sha256": {
+      "manifest.jsonl": "342f99504ee8ed5d517305ea19ddaf704e3b6ddb1d57ea3dd180a40a2e619305",
+      "dense.npy": "683bba44821263f300344aef03220ea314e6c1bc7d936e7a9141ed2e525220f6",
+      "sparse.npz": "4d572c46fb10d8c9d9032dade57d831d43437db766720ba3cc35d0bba7f1d26f"
+    },
+    "index_seconds": 23.74,
+    "scope": "PG and Qdrant seeded as a read-side retrieval fixture; 42-document companion separately exercises actual HTTP upload and Celery lifecycle.",
+    "qdrant_collection": "scifact_recall_full",
+    "filters": "workspace, KB and snapshot revision membership enforced on read; separate full collection preserves corpus IDF"
+  },
+  "source_review_of_eight_gains": {
+    "population": "All eight source associations in the 553-query SciFact TRAIN confirmation set restored by lexical_refill4 relative to the recorded baseline. Review assesses only the available title and indexed abstract of the newly added paper. Full texts and all alternative papers are outside this particular review.",
+    "method": "Read the original claim, newly restored abstract, and public query metadata. Check for the same subject, intervention or comparator, population and measured endpoint as applicable. Do not turn topical association into support, contradiction, or a claim of medical effectiveness. Manual desk review by the evaluating agent.",
+    "official_train_archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+    "official_train_verification": "Verified against data/claims_train.jsonl inside the original AllenAI archive. None of the eight newly restored document IDs has an official evidence-group annotation for the original claim. Seven original rows have empty evidence dictionaries; 246 lists a rationale for a different document.",
+    "all_reviewed": 8,
+    "directly_adjudicates_original_claim": 0,
+    "rows": [
+      {
+        "query_id": "1257",
+        "recovered_doc": "581832",
+        "upstream_rationale_for_recovered_doc": false,
+        "finding": "The abstract reports population DALYs and HALE across development levels. It does not give the claimed twofold prevalence difference for visual difficulty."
+      },
+      {
+        "query_id": "246",
+        "recovered_doc": "8447873",
+        "upstream_rationale_for_recovered_doc": false,
+        "finding": "The newly added review concerns gastric lavage for organophosphorus poisoning. The claim concerns activated charcoal and paraquat. The public rationale is attached instead to 3430789."
+      },
+      {
+        "query_id": "1112",
+        "recovered_doc": "1686881",
+        "upstream_rationale_for_recovered_doc": false,
+        "finding": "The abstract associates sudden death and conduction disturbances with familial amyloid polyneuropathy. It does not establish the orthostatic-hypertension claim in patients without conduction abnormalities."
+      },
+      {
+        "query_id": "733",
+        "recovered_doc": "34469966",
+        "upstream_rationale_for_recovered_doc": false,
+        "finding": "The abstract describes an alternative inflammasome pathway in response to lipopolysaccharide in human monocytes. It does not report the queried stimulus and cell-specific speck result."
+      },
+      {
+        "query_id": "1364",
+        "recovered_doc": "8290953",
+        "upstream_rationale_for_recovered_doc": false,
+        "finding": "The abstract reports arterioles, venules and capillaries forming in a cardiac patch model, with no comparison of their tunica adventitia."
+      },
+      {
+        "query_id": "449",
+        "recovered_doc": "12209494",
+        "upstream_rationale_for_recovered_doc": false,
+        "finding": "The study compares activated charcoal regimens in a mixed self-poisoning population. The claim is about gastric lavage specifically in acute paraquat poisoning."
+      },
+      {
+        "query_id": "838",
+        "recovered_doc": "15928989",
+        "upstream_rationale_for_recovered_doc": false,
+        "finding": "The NR5A2 paper reports reproductive functions and decidualization. The abstract makes no direct assertion about human reverse cholesterol transport."
+      },
+      {
+        "query_id": "364",
+        "recovered_doc": "1550937",
+        "upstream_rationale_for_recovered_doc": false,
+        "finding": "The Egr2 and Egr3 paper explains lymphocyte homeostasis and proliferation. The abstract does not discuss myelination of the peripheral nervous system."
+      }
+    ]
+  },
+  "primary_scores": {
+    "evaluator": "Assistant read of first-response text, returned citation excerpts and direct-source rules frozen before generation; no independent blinded expert or population inference.",
+    "interpretation": "Original SciFact qrels and an upstream rationale label can outstrip what is in the indexed abstract. A scientific claim not supported in the delivered passages remains unproven. Explicit abstentions and successful answering with correct source IDs are separate outcomes. Pre-answer HTTP failure is never scored as correct. Inter-arm reader differences from one model call are not attribution to candidate retrieval.",
+    "full": {
+      "1109": {
+        "A": "HTTP_502_MODEL_BAD_RESPONSE",
+        "B": "ABSTAIN_NO_CITATION",
+        "review": "No eligible linked nutrition paper reached the B pool. The claimed premature mortality assertion was not answered. The abstract of paper 13770184 reports undernutrition among leading contributors to DALYs, which by itself is insufficient to equate its mortality contribution to that rank."
+      },
+      "818": {
+        "A": "ABSTAIN_NO_CITATION",
+        "B": "ABSTAIN_NO_CITATION",
+        "review": "Neither arm retrieves the judged source into the candidates. The actual null answer is defensible given the retrieved papers; no original claim answered. The indexed abstract of the judged paper explains myelin imaging, not propagation."
+      },
+      "791": {
+        "A": "HTTP_502_INVALID_OUTPUT",
+        "B": "CORRECT_TARGET_CITATION",
+        "review": "B reports RR 2.16 (CI 1.53\u20133.03) for migraine with aura and greater ischaemic stroke risk. Returned excerpts from 15984735 name the numbers and conclusion. Actual answer gain cannot be attributed to a retrieved new source because A already included and ranked the same target."
+      },
+      "missing-tenant-canary": {
+        "A": "CORRECT_ABSTENTION",
+        "B": "CORRECT_ABSTENTION",
+        "review": "Both explicitly decline to answer and return zero references, with no content from the other tenant."
+      },
+      "838": {
+        "A": "CORRECT_EVIDENCE_LIMIT",
+        "B": "CORRECT_EVIDENCE_LIMIT_DESPITE_QREL_RESCUE",
+        "review": "B adds 15928989 to position 18 in fused 20 and 2 in reranked raw six. The first response explicitly separates reproductive evidence from reverse cholesterol transport and abstains without using the pregnancy paper as a claim-supporting citation. A also abstained. This is a source-recall rescue, not a correct cited affirmative answer."
+      },
+      "838-reproductive-functions": {
+        "A": "HTTP_502_INVALID_OUTPUT",
+        "B": "CORRECT_TARGET_CITATION",
+        "review": "B gives all three pre-registered reproductive functions: corpus-luteum maintenance, decidualization, and placental formation. The second cited excerpt from 15928989 explicitly states each. Both arms already retrieved this public source in the top of the pool, so the valid-B / invalid-A observation alone establishes no retrieval gain."
+      }
+    },
+    "subset": {
+      "1109": {
+        "A": "HTTP_502_MODEL_BAD_RESPONSE",
+        "B": "HTTP_502_INVALID_OUTPUT",
+        "review": "Neither arm delivered an answer under the local output contract. Their error responses omit retrieval traces. A separate retrieval-only playground request for each arm captured ranking without a second model call."
+      },
+      "818": {
+        "A": "ABSTAIN_NO_CITATION",
+        "B": "ABSTAIN_NO_CITATION",
+        "review": "In the smaller corpus B admits the target at fused rank 20 but it remains absent from the raw reranked six. Both decline the unsupported claim."
+      },
+      "791": {
+        "A": "HTTP_502_INVALID_OUTPUT",
+        "B": "CORRECT_TARGET_CITATION",
+        "review": "B correctly reports the increased stroke association with aura and cites 15984735. The target was available to both arms."
+      },
+      "missing-tenant-canary": {
+        "A": "CORRECT_ABSTENTION",
+        "B": "CORRECT_ABSTENTION",
+        "review": "Both decline without references. The other tenant's memorandum is outside this snapshot."
+      }
+    },
+    "product": {
+      "product-code-receipt": {
+        "A": "MISSED_AVAILABLE_ANSWER_ABSTAIN",
+        "B": "MISSED_AVAILABLE_ANSWER_ABSTAIN",
+        "review": "The correct 17-day contract and date exist in the immutable snapshot. Both dense and sparse place it at rank 25. The full-token lexical policy replaces another repeated chunk but still does not deliver the account receipt. Both answers decline instead of assigning another customer's deadline. The required user-facing answer and target citation were missed by both."
+      }
+    }
+  },
+  "cohorts": {
+    "full": {
+      "A": {
+        "rows": [
+          {
+            "query_id": "1109",
+            "http": 502,
+            "error": "MODEL_BAD_RESPONSE",
+            "answer": null,
+            "insufficient_evidence": null,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "separate matching playground query"
+          },
+          {
+            "query_id": "818",
+            "http": 200,
+            "error": null,
+            "answer": "The provided evidence does not contain information establishing a role for myelin sheaths in action potential propagation. The cited studies discuss action potentials in enteric neurones, leukemia propagation, myelodysplastic syndromes, epithelial adhesion, and remyelination, but none directly addresses how myelin sheaths affect action potential propagation.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "791",
+            "http": 502,
+            "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "answer": null,
+            "insufficient_evidence": null,
+            "candidate_ranks": [
+              1,
+              3,
+              10
+            ],
+            "reranked_raw6_ranks": [
+              1,
+              2,
+              5
+            ],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "separate matching playground query"
+          },
+          {
+            "query_id": "missing-tenant-canary",
+            "http": 200,
+            "error": null,
+            "answer": "The provided evidence does not mention the Lattice Vault memorandum ZR-618 or any color code assigned to an authorization desk, so the question cannot be answered from the supplied content.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "838",
+            "http": 200,
+            "error": null,
+            "answer": "The supplied evidence does not mention NR5A2 (also known as LRH-1) or address its role in reverse cholesterol transport in humans. The retrieved passages discuss other factors and pathways, such as apoE, LXR, ABCA1/ABCG1, PARP-1, and intracellular sterol trafficking, but none provides information about NR5A2. Therefore, the claim cannot be evaluated based on the available evidence.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "838-reproductive-functions",
+            "http": 502,
+            "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "answer": null,
+            "insufficient_evidence": null,
+            "candidate_ranks": [
+              1,
+              7
+            ],
+            "reranked_raw6_ranks": [
+              1,
+              2
+            ],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "separate matching playground query"
+          }
+        ],
+        "tenant_checks": [
+          {
+            "http": 404,
+            "error_code": "RESOURCE_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          },
+          {
+            "http": 404,
+            "error_code": "SNAPSHOT_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          }
+        ],
+        "actual_request_receipt_sha256": "f576550aa4cd47b3c4b52332e27193ac64a5fa147cab6bce3d3dd34d2d2742c2",
+        "snapshot_sha256": "7ce0bb3519fde1afaee55045745187c77ddea9ead55af9774a54d20d0bf09ff6",
+        "profile_id": "3db46979-999f-47cd-9500-f1ac2f206166",
+        "model": "deepseek-v4.1-flash-1017",
+        "chunks": 9189,
+        "explicitly_prepared_index": null,
+        "gateway_spans": [
+          {
+            "status": "error",
+            "failure_code": "MODEL_BAD_RESPONSE",
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          }
+        ],
+        "gateway_attempt_count_sum": 6
+      },
+      "B": {
+        "rows": [
+          {
+            "query_id": "1109",
+            "http": 200,
+            "error": null,
+            "answer": "The supplied evidence does not establish that suboptimal nutrition is a leading cause of premature death.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": 4,
+            "lexical_hits": 20,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "818",
+            "http": 200,
+            "error": null,
+            "answer": "The supplied evidence is insufficient to determine whether myelin sheaths play a role in action potential propagation. The evidence discusses remyelination and demyelinated axons that are electrically active, as well as the recovery of lost function by newly myelinating oligodendrocytes, but it does not directly establish a role for myelin sheaths in action potential propagation.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": 1,
+            "lexical_hits": 20,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "791",
+            "http": 200,
+            "error": null,
+            "answer": "Yes. The evidence supports an association: migraine with aura was linked to a significantly higher risk of ischaemic stroke (pooled relative risk 2.16, 95% CI 1.53 to 3.03), compared with migraine without aura (1.23, 0.90 to 1.69) [1]. The review concluded that migraine is associated with a twofold increased risk of ischaemic stroke that is only apparent among people with migraine with aura [1][2]. Other evidence describes migraine, particularly with aura, as a risk factor for early-onset ischaemic stroke [3], and notes a possible increased stroke risk in men with migraine with aura, as well as in women under 45 [4].",
+            "insufficient_evidence": false,
+            "candidate_ranks": [
+              1,
+              3,
+              10
+            ],
+            "reranked_raw6_ranks": [
+              1,
+              2,
+              5
+            ],
+            "fused_chunk_count": 20,
+            "added_count": 1,
+            "lexical_hits": 20,
+            "cited_sources": [
+              {
+                "source": "15984735",
+                "ordinal": 1,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 2200,
+                  "char_start": 1000
+                },
+                "excerpt_sha256": "7738dce52eb5481464ca9e1b9226cd2df655b0e21aa392921902fa95b7b128cf"
+              },
+              {
+                "source": "15984735",
+                "ordinal": 2,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 2632,
+                  "char_start": 2000
+                },
+                "excerpt_sha256": "76ba19537d1678f1ad3a6a7e35612eecd72fb4af8cdce48b86af3719c29c6123"
+              },
+              {
+                "source": "23785605",
+                "ordinal": 0,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 1200,
+                  "char_start": 0
+                },
+                "excerpt_sha256": "6e6ba61e7aaf10c4b249f7cfbe6faa1e7d5a7f33a46157e01a03e7771bde99b8"
+              },
+              {
+                "source": "14566771",
+                "ordinal": 0,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 620,
+                  "char_start": 0
+                },
+                "excerpt_sha256": "4e5723febcf6b54b1e4320fcbcd6f00867a911b1100b46d47a855d8f19298c85"
+              }
+            ],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "missing-tenant-canary",
+            "http": 200,
+            "error": null,
+            "answer": "The provided evidence does not contain any information about a Lattice Vault memorandum ZR-618 or an authorization desk color code, so the question cannot be answered from the available sources.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": 2,
+            "lexical_hits": 20,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "838",
+            "http": 200,
+            "error": null,
+            "answer": "The supplied evidence is insufficient to support the claim that NR5A2 is important in reverse cholesterol transport in humans. The passages that mention NR5A2 concern pregnancy, luteal function, and endometrial decidualization, whereas the passages discussing reverse cholesterol transport and cholesterol efflux concern apoE, LXR/PARP-1/ABCA1, intracellular sterol trafficking, TMAO and diet, and LXR alpha. None of the evidence connects NR5A2 to reverse cholesterol transport in humans.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [
+              18
+            ],
+            "reranked_raw6_ranks": [
+              2
+            ],
+            "fused_chunk_count": 20,
+            "added_count": 4,
+            "lexical_hits": 20,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "838-reproductive-functions",
+            "http": 200,
+            "error": null,
+            "answer": "The study concludes that NR5A2 (Lrh-1) has multiple, indispensable roles in establishing and sustaining pregnancy [1][2]. Specifically, it reports that depletion of Lrh-1 in the ovarian follicle shows it regulates genes required for both steroid synthesis and ovulation [1], and that disruption in the corpus luteum caused luteal insufficiency, with hormone replacement permitting implantation but followed by gestational failure with impaired endometrial decidualization, compromised placental formation, fetal growth retardation and fetal death [1]. In human endometrial stromal cells, reduction of NR5A2 transcript by RNA interference abrogated decidualization [1][2]. Overall, the findings show Lrh-1 is necessary for maintenance of the corpus luteum, for promotion of decidualization, and for formation of the placenta [2].",
+            "insufficient_evidence": false,
+            "candidate_ranks": [
+              1,
+              7
+            ],
+            "reranked_raw6_ranks": [
+              1,
+              2
+            ],
+            "fused_chunk_count": 20,
+            "added_count": 1,
+            "lexical_hits": 20,
+            "cited_sources": [
+              {
+                "source": "15928989",
+                "ordinal": 0,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 1200,
+                  "char_start": 0
+                },
+                "excerpt_sha256": "4c753d62b57f3346c4558bd72a3207090fba4a6b297883d25635d7f9bc1bc9b3"
+              },
+              {
+                "source": "15928989",
+                "ordinal": 1,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 1447,
+                  "char_start": 1000
+                },
+                "excerpt_sha256": "9de12e0e0b35285c3d4aa2e760dbd7cc019db8ce2ee6bec8f0cb362291888e33"
+              }
+            ],
+            "ranking_source": "same QA response"
+          }
+        ],
+        "tenant_checks": [
+          {
+            "http": 404,
+            "error_code": "RESOURCE_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          },
+          {
+            "http": 404,
+            "error_code": "SNAPSHOT_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          }
+        ],
+        "actual_request_receipt_sha256": "6b5fbabfb544a9131fb66a9104b3eb7e1a7db5f070edb95249b6b727e94b6b13",
+        "snapshot_sha256": "7ce0bb3519fde1afaee55045745187c77ddea9ead55af9774a54d20d0bf09ff6",
+        "profile_id": "3db46979-999f-47cd-9500-f1ac2f206166",
+        "model": "deepseek-v4.1-flash-1017",
+        "chunks": 9189,
+        "explicitly_prepared_index": {
+          "snapshot_id": "af330273-4d37-410e-8afc-ac137db5d87b",
+          "chunk_count": 9189,
+          "status": "READY"
+        },
+        "gateway_spans": [
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          }
+        ],
+        "gateway_attempt_count_sum": 8
+      },
+      "policy_verification": [
+        {
+          "id": "1109",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "retrieval-only replay after model error",
+          "expected_hash": "8422081cdc1cc717798854ac71024469ade6a82b26a6b9d9f842bb337d280764",
+          "actual_hash": "8422081cdc1cc717798854ac71024469ade6a82b26a6b9d9f842bb337d280764",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "4313478",
+            "52188256",
+            "5114940",
+            "52188256",
+            "40349336",
+            "35660758",
+            "2613775",
+            "1456068",
+            "2543135",
+            "21050357",
+            "9063688",
+            "21495419",
+            "40349336",
+            "834336",
+            "21387297",
+            "43128141",
+            "11630388",
+            "22544171",
+            "3716075",
+            "24097933"
+          ],
+          "counterfactual_added_documents": [
+            "4313478",
+            "35660758",
+            "1456068",
+            "9063688"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "818",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "b01eb0c4b489f3c8eca1a51b140e7c237ab8fd6f6efaf99e1cb948c42a03bbec",
+          "actual_hash": "b01eb0c4b489f3c8eca1a51b140e7c237ab8fd6f6efaf99e1cb948c42a03bbec",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "7840442",
+            "35467590",
+            "14767844",
+            "25789730",
+            "11369420",
+            "4767806",
+            "25789730",
+            "13000926",
+            "45449835",
+            "8428837",
+            "6722522",
+            "44935041",
+            "8267678",
+            "6722522",
+            "44562221",
+            "7840442",
+            "18333304",
+            "22428640",
+            "1447990",
+            "23535770"
+          ],
+          "counterfactual_added_documents": [
+            "35467590"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "791",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "retrieval-only replay after model error",
+          "expected_hash": "7c0018207eccada79bd59c73fc2bd484ca88dbf371bf31fa5b0d308b01243449",
+          "actual_hash": "7c0018207eccada79bd59c73fc2bd484ca88dbf371bf31fa5b0d308b01243449",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "15984735",
+            "14566771",
+            "15984735",
+            "23785605",
+            "8672737",
+            "38369817",
+            "38369817",
+            "24148722",
+            "39390206",
+            "23785605",
+            "23627419",
+            "43647194",
+            "23627419",
+            "17930286",
+            "43647194",
+            "37065914",
+            "32328114",
+            "37065914",
+            "39390206",
+            "15984735"
+          ],
+          "counterfactual_added_documents": [
+            "39390206"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "missing-tenant-canary",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "70ae6c316ad1a7a0c0209d4fc38020900b163a0c0d29421a16ef3424f68a4a76",
+          "actual_hash": "70ae6c316ad1a7a0c0209d4fc38020900b163a0c0d29421a16ef3424f68a4a76",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "84784389",
+            "16201748",
+            "5650232",
+            "36749390",
+            "34139429",
+            "70633421",
+            "86211914",
+            "31761981",
+            "23686039",
+            "144555102",
+            "15135001",
+            "13256155",
+            "11244195",
+            "109795294",
+            "13639330",
+            "3437084",
+            "14118484",
+            "15925931",
+            "144555102",
+            "86211914"
+          ],
+          "counterfactual_added_documents": [
+            "84784389",
+            "16201748"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "838",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "c7e7838bd39a838fde86cd7cde81b947b6ac9062f9dfcc115bbcf403742b98ec",
+          "actual_hash": "c7e7838bd39a838fde86cd7cde81b947b6ac9062f9dfcc115bbcf403742b98ec",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "18852643",
+            "45166582",
+            "14803797",
+            "15928989",
+            "23286603",
+            "45166582",
+            "21380348",
+            "15928989",
+            "7150238",
+            "21380348",
+            "46202852",
+            "22420524",
+            "12991445",
+            "11557602",
+            "4347374",
+            "2423940",
+            "14926162",
+            "21274496",
+            "6540064",
+            "4353857"
+          ],
+          "counterfactual_added_documents": [
+            "14803797",
+            "15928989",
+            "21380348",
+            "7150238"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "838-reproductive-functions",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "retrieval-only replay after model error",
+          "expected_hash": "1587b11c305d72d21485afc25d7152599bdf3706c63d21fb2c784f1bd137917e",
+          "actual_hash": "1587b11c305d72d21485afc25d7152599bdf3706c63d21fb2c784f1bd137917e",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "15928989",
+            "27822315",
+            "3153673",
+            "24766509",
+            "11535539",
+            "20960682",
+            "24530130",
+            "15928989",
+            "12737132",
+            "9591368",
+            "19966976",
+            "11238784",
+            "11535539",
+            "56528795",
+            "44265107",
+            "14380875",
+            "21932297",
+            "15548965",
+            "31851367",
+            "22972632"
+          ],
+          "counterfactual_added_documents": [
+            "3153673"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "1109",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "cb5df9fe26c903a2f99ab2d49768e228daeaf5e0b4e41eb993f222b86d0a0ed1",
+          "actual_hash": "cb5df9fe26c903a2f99ab2d49768e228daeaf5e0b4e41eb993f222b86d0a0ed1",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "4313478",
+            "52188256",
+            "5114940",
+            "52188256",
+            "40349336",
+            "35660758",
+            "2613775",
+            "1456068",
+            "2543135",
+            "21050357",
+            "9063688",
+            "21495419",
+            "40349336",
+            "834336",
+            "21387297",
+            "43128141",
+            "11630388",
+            "22544171",
+            "3716075",
+            "24097933"
+          ],
+          "counterfactual_added_documents": [
+            "4313478",
+            "35660758",
+            "1456068",
+            "9063688"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 4
+          }
+        },
+        {
+          "id": "818",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "4b1e8b2df3a4fb8d8babdd20a20740f62cad5e05ea1f8b18c71ac89e18a48d49",
+          "actual_hash": "4b1e8b2df3a4fb8d8babdd20a20740f62cad5e05ea1f8b18c71ac89e18a48d49",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "7840442",
+            "35467590",
+            "14767844",
+            "25789730",
+            "11369420",
+            "4767806",
+            "25789730",
+            "13000926",
+            "45449835",
+            "8428837",
+            "6722522",
+            "44935041",
+            "8267678",
+            "6722522",
+            "44562221",
+            "7840442",
+            "18333304",
+            "22428640",
+            "1447990",
+            "23535770"
+          ],
+          "counterfactual_added_documents": [
+            "35467590"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 1
+          }
+        },
+        {
+          "id": "791",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "f5f4a29cd6707e8ded9374dee286cc108900e077f2641644271c5b9ace5ed2e4",
+          "actual_hash": "f5f4a29cd6707e8ded9374dee286cc108900e077f2641644271c5b9ace5ed2e4",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "15984735",
+            "14566771",
+            "15984735",
+            "23785605",
+            "8672737",
+            "38369817",
+            "38369817",
+            "24148722",
+            "39390206",
+            "23785605",
+            "23627419",
+            "43647194",
+            "23627419",
+            "17930286",
+            "43647194",
+            "37065914",
+            "32328114",
+            "37065914",
+            "39390206",
+            "15984735"
+          ],
+          "counterfactual_added_documents": [
+            "39390206"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 1
+          }
+        },
+        {
+          "id": "missing-tenant-canary",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "c5426461641b53b2aeeac3217155cabab464a886b27fffbf64919baafc8fa534",
+          "actual_hash": "c5426461641b53b2aeeac3217155cabab464a886b27fffbf64919baafc8fa534",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "84784389",
+            "16201748",
+            "5650232",
+            "36749390",
+            "34139429",
+            "70633421",
+            "86211914",
+            "31761981",
+            "23686039",
+            "144555102",
+            "15135001",
+            "13256155",
+            "11244195",
+            "109795294",
+            "13639330",
+            "3437084",
+            "14118484",
+            "15925931",
+            "144555102",
+            "86211914"
+          ],
+          "counterfactual_added_documents": [
+            "84784389",
+            "16201748"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 2
+          }
+        },
+        {
+          "id": "838",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "cd4a4cea3a3b149bc159216f870b0350baacbc0c06f1a096bf9bfe4a7ef4a8b5",
+          "actual_hash": "cd4a4cea3a3b149bc159216f870b0350baacbc0c06f1a096bf9bfe4a7ef4a8b5",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "18852643",
+            "45166582",
+            "14803797",
+            "15928989",
+            "23286603",
+            "45166582",
+            "21380348",
+            "15928989",
+            "7150238",
+            "21380348",
+            "46202852",
+            "22420524",
+            "12991445",
+            "11557602",
+            "4347374",
+            "2423940",
+            "14926162",
+            "21274496",
+            "6540064",
+            "4353857"
+          ],
+          "counterfactual_added_documents": [
+            "14803797",
+            "15928989",
+            "21380348",
+            "7150238"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 4
+          }
+        },
+        {
+          "id": "838-reproductive-functions",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "8e40eea840679d615dca22b9cc6ac95b1747b25bfb1b3ee376c5abe3d778d6d0",
+          "actual_hash": "8e40eea840679d615dca22b9cc6ac95b1747b25bfb1b3ee376c5abe3d778d6d0",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "15928989",
+            "27822315",
+            "3153673",
+            "24766509",
+            "11535539",
+            "20960682",
+            "24530130",
+            "15928989",
+            "12737132",
+            "9591368",
+            "19966976",
+            "11238784",
+            "11535539",
+            "56528795",
+            "44265107",
+            "14380875",
+            "21932297",
+            "15548965",
+            "31851367",
+            "22972632"
+          ],
+          "counterfactual_added_documents": [
+            "3153673"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 1
+          }
+        }
+      ]
+    },
+    "subset": {
+      "A": {
+        "rows": [
+          {
+            "query_id": "1109",
+            "http": 502,
+            "error": "MODEL_BAD_RESPONSE",
+            "answer": null,
+            "insufficient_evidence": null,
+            "candidate_ranks": [
+              13,
+              19
+            ],
+            "reranked_raw6_ranks": [
+              1
+            ],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "separate matching playground query"
+          },
+          {
+            "query_id": "818",
+            "http": 200,
+            "error": null,
+            "answer": "The provided evidence is insufficient to support the statement that myelin sheaths play a role in action potential propagation. Although some evidence discusses remyelination and demyelinated axons, it does not directly establish a role for myelin sheaths in action potential propagation.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "791",
+            "http": 502,
+            "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "answer": null,
+            "insufficient_evidence": null,
+            "candidate_ranks": [
+              1,
+              3,
+              10
+            ],
+            "reranked_raw6_ranks": [
+              1,
+              2,
+              5
+            ],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "separate matching playground query"
+          },
+          {
+            "query_id": "missing-tenant-canary",
+            "http": 200,
+            "error": null,
+            "answer": "The provided evidence does not contain the Lattice Vault memorandum ZR-618 or any information about a color code assigned to an authorization desk, so this question cannot be answered from the available evidence.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          }
+        ],
+        "tenant_checks": [
+          {
+            "http": 404,
+            "error_code": "RESOURCE_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          },
+          {
+            "http": 404,
+            "error_code": "SNAPSHOT_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          }
+        ],
+        "actual_request_receipt_sha256": "1ccae46030cd8242a53ee2fa893abe092602920a9bd54d5958647065c43e1110",
+        "snapshot_sha256": "18b90c3b797c8356552af69229b24e0355b43b73c564120d30d6139ebb291043",
+        "profile_id": "3db46979-999f-47cd-9500-f1ac2f206166",
+        "model": "deepseek-v4.1-flash-1017",
+        "chunks": 88,
+        "explicitly_prepared_index": null,
+        "gateway_spans": [
+          {
+            "status": "error",
+            "failure_code": "MODEL_BAD_RESPONSE",
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          }
+        ],
+        "gateway_attempt_count_sum": 4
+      },
+      "B": {
+        "rows": [
+          {
+            "query_id": "1109",
+            "http": 502,
+            "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "answer": null,
+            "insufficient_evidence": null,
+            "candidate_ranks": [
+              13,
+              19
+            ],
+            "reranked_raw6_ranks": [
+              1,
+              6
+            ],
+            "fused_chunk_count": 20,
+            "added_count": 1,
+            "lexical_hits": 20,
+            "cited_sources": [],
+            "ranking_source": "separate matching playground query"
+          },
+          {
+            "query_id": "818",
+            "http": 200,
+            "error": null,
+            "answer": "The supplied evidence does not establish that myelin sheaths play a role in action potential propagation. While one study discusses remyelination and demyelinated axons being electrically active, it does not directly state that myelin sheaths are involved in action potential propagation.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [
+              20
+            ],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": 4,
+            "lexical_hits": 20,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "791",
+            "http": 200,
+            "error": null,
+            "answer": "Yes. Evidence supports that migraine with aura is associated with ischemic stroke. A meta-analysis found a significantly higher risk of ischemic stroke among people with migraine with aura (pooled relative risk 2.16, 95% CI 1.53 to 3.03) than among those with migraine without aura (1.23, 0.90 to 1.69), and concluded that the roughly twofold increased risk of ischemic stroke was only apparent among people with migraine with aura [1][2]. Another study describes migraine, particularly with aura, as a risk factor for early-onset ischemic stroke [3].",
+            "insufficient_evidence": false,
+            "candidate_ranks": [
+              1,
+              3,
+              10
+            ],
+            "reranked_raw6_ranks": [
+              1,
+              2,
+              5
+            ],
+            "fused_chunk_count": 20,
+            "added_count": 2,
+            "lexical_hits": 20,
+            "cited_sources": [
+              {
+                "source": "15984735",
+                "ordinal": 1,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 2200,
+                  "char_start": 1000
+                },
+                "excerpt_sha256": "7738dce52eb5481464ca9e1b9226cd2df655b0e21aa392921902fa95b7b128cf"
+              },
+              {
+                "source": "15984735",
+                "ordinal": 2,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 2632,
+                  "char_start": 2000
+                },
+                "excerpt_sha256": "76ba19537d1678f1ad3a6a7e35612eecd72fb4af8cdce48b86af3719c29c6123"
+              },
+              {
+                "source": "23785605",
+                "ordinal": 0,
+                "locator": {
+                  "type": "text_range",
+                  "char_end": 1200,
+                  "char_start": 0
+                },
+                "excerpt_sha256": "6e6ba61e7aaf10c4b249f7cfbe6faa1e7d5a7f33a46157e01a03e7771bde99b8"
+              }
+            ],
+            "ranking_source": "same QA response"
+          },
+          {
+            "query_id": "missing-tenant-canary",
+            "http": 200,
+            "error": null,
+            "answer": "The supplied evidence contains no mention of the Lattice Vault memorandum ZR-618 or any color code assigned to an authorization desk, so the question cannot be answered from the available evidence.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": 3,
+            "lexical_hits": 20,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          }
+        ],
+        "tenant_checks": [
+          {
+            "http": 404,
+            "error_code": "RESOURCE_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          },
+          {
+            "http": 404,
+            "error_code": "SNAPSHOT_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          }
+        ],
+        "actual_request_receipt_sha256": "b13bf941d890a12b55620fd515bfca02610e3206d573edb1db319166dbbb4504",
+        "snapshot_sha256": "18b90c3b797c8356552af69229b24e0355b43b73c564120d30d6139ebb291043",
+        "profile_id": "3db46979-999f-47cd-9500-f1ac2f206166",
+        "model": "deepseek-v4.1-flash-1017",
+        "chunks": 88,
+        "explicitly_prepared_index": {
+          "snapshot_id": "761b3e32-7d8d-408c-bf77-559f82139dce",
+          "chunk_count": 88,
+          "status": "READY"
+        },
+        "gateway_spans": [
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          },
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          }
+        ],
+        "gateway_attempt_count_sum": 4
+      },
+      "policy_verification": [
+        {
+          "id": "1109",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "retrieval-only replay after model error",
+          "expected_hash": "5c2e35c4ad250dfaccf015030dc1f748b2cff0a16e0b59b22425281432d68bf6",
+          "actual_hash": "5c2e35c4ad250dfaccf015030dc1f748b2cff0a16e0b59b22425281432d68bf6",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "52188256",
+            "5114940",
+            "40349336",
+            "52188256",
+            "2543135",
+            "40349336",
+            "2613775",
+            "21050357",
+            "11630388",
+            "11630388",
+            "28249680",
+            "8582337",
+            "43128141",
+            "8582337",
+            "11748341",
+            "52072815",
+            "49429882",
+            "49429882",
+            "8582337",
+            "11748341"
+          ],
+          "counterfactual_added_documents": [
+            "28249680"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "818",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "17e0beea240888f26275ef322a8db8279180590d3fc4aede79022c389d78e62e",
+          "actual_hash": "17e0beea240888f26275ef322a8db8279180590d3fc4aede79022c389d78e62e",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "7840442",
+            "7840442",
+            "11369420",
+            "3391547",
+            "25062868",
+            "21050357",
+            "33740844",
+            "15121114",
+            "16737163",
+            "7039855",
+            "17814815",
+            "21050357",
+            "15551129",
+            "5114940",
+            "4417558",
+            "15551129",
+            "2543135",
+            "6270720",
+            "15121114",
+            "45487164"
+          ],
+          "counterfactual_added_documents": [
+            "21050357",
+            "33740844",
+            "15121114",
+            "17814815"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "791",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "retrieval-only replay after model error",
+          "expected_hash": "9bc99d9e06bf5d3b6a7ca332b3cc3e5b69eb4ada7a1a8e9eb8b6836f2185c976",
+          "actual_hash": "9bc99d9e06bf5d3b6a7ca332b3cc3e5b69eb4ada7a1a8e9eb8b6836f2185c976",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "15984735",
+            "15984735",
+            "14566771",
+            "23785605",
+            "23627419",
+            "8672737",
+            "23627419",
+            "37065914",
+            "17930286",
+            "38369817",
+            "37065914",
+            "38369817",
+            "23785605",
+            "15984735",
+            "17930286",
+            "8582337",
+            "8529693",
+            "8529693",
+            "33740844",
+            "5114940"
+          ],
+          "counterfactual_added_documents": [
+            "8529693",
+            "33740844"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "missing-tenant-canary",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "5f2758225a015c412979f1ebae183ce568397e94967a894178d7ab496d045506",
+          "actual_hash": "5f2758225a015c412979f1ebae183ce568397e94967a894178d7ab496d045506",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "11630388",
+            "11748341",
+            "8529693",
+            "17814815",
+            "15984735",
+            "17930286",
+            "23627419",
+            "23627419",
+            "11630388",
+            "25062868",
+            "17930286",
+            "37065914",
+            "38369817",
+            "5114940",
+            "5114940",
+            "7840442",
+            "21050357",
+            "8529693",
+            "6270720",
+            "52072815"
+          ],
+          "counterfactual_added_documents": [
+            "11630388",
+            "8529693",
+            "15984735"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "1109",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "retrieval-only replay after model error",
+          "expected_hash": "b00d55d2c988144fb716a710a2d813edb7ad28701e7440ff26815bfb69fe2cb0",
+          "actual_hash": "b00d55d2c988144fb716a710a2d813edb7ad28701e7440ff26815bfb69fe2cb0",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "52188256",
+            "5114940",
+            "40349336",
+            "52188256",
+            "2543135",
+            "40349336",
+            "2613775",
+            "21050357",
+            "11630388",
+            "11630388",
+            "28249680",
+            "8582337",
+            "43128141",
+            "8582337",
+            "11748341",
+            "52072815",
+            "49429882",
+            "49429882",
+            "8582337",
+            "11748341"
+          ],
+          "counterfactual_added_documents": [
+            "28249680"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 1
+          }
+        },
+        {
+          "id": "818",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "875f68152c94220a53dc2f2c5c6e5ff081de3c5c4edffcb09f6d7dd084b9b1d3",
+          "actual_hash": "875f68152c94220a53dc2f2c5c6e5ff081de3c5c4edffcb09f6d7dd084b9b1d3",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "7840442",
+            "7840442",
+            "11369420",
+            "3391547",
+            "25062868",
+            "21050357",
+            "33740844",
+            "15121114",
+            "16737163",
+            "7039855",
+            "17814815",
+            "21050357",
+            "15551129",
+            "5114940",
+            "4417558",
+            "15551129",
+            "2543135",
+            "6270720",
+            "15121114",
+            "45487164"
+          ],
+          "counterfactual_added_documents": [
+            "21050357",
+            "33740844",
+            "15121114",
+            "17814815"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 4
+          }
+        },
+        {
+          "id": "791",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "c7248bfb7112fc7e1a20ca3392ae9ebc1e0dc1672ea8d1775be93816edc42756",
+          "actual_hash": "c7248bfb7112fc7e1a20ca3392ae9ebc1e0dc1672ea8d1775be93816edc42756",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "15984735",
+            "15984735",
+            "14566771",
+            "23785605",
+            "23627419",
+            "8672737",
+            "23627419",
+            "37065914",
+            "17930286",
+            "38369817",
+            "37065914",
+            "38369817",
+            "23785605",
+            "15984735",
+            "17930286",
+            "8582337",
+            "8529693",
+            "8529693",
+            "33740844",
+            "5114940"
+          ],
+          "counterfactual_added_documents": [
+            "8529693",
+            "33740844"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 2
+          }
+        },
+        {
+          "id": "missing-tenant-canary",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "5ab61caa5d6a645b78e349868d6a8e2673be406e7fa770bdfafe55c593c1ff26",
+          "actual_hash": "5ab61caa5d6a645b78e349868d6a8e2673be406e7fa770bdfafe55c593c1ff26",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "11630388",
+            "11748341",
+            "8529693",
+            "17814815",
+            "15984735",
+            "17930286",
+            "23627419",
+            "23627419",
+            "11630388",
+            "25062868",
+            "17930286",
+            "37065914",
+            "38369817",
+            "5114940",
+            "5114940",
+            "7840442",
+            "21050357",
+            "8529693",
+            "6270720",
+            "52072815"
+          ],
+          "counterfactual_added_documents": [
+            "11630388",
+            "8529693",
+            "15984735"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 3
+          }
+        }
+      ]
+    },
+    "product": {
+      "A": {
+        "rows": [
+          {
+            "query_id": "product-code-receipt",
+            "http": 200,
+            "error": null,
+            "answer": "The supplied evidence does not contain any record for account reference QVR8426. The available records cover other account references (QVR8401, QVR8402, QVR8406, QVR8407, QVR8408, and QVR8409), so the refund window and the dated record for QVR8426 cannot be determined from this evidence.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": null,
+            "lexical_hits": null,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          }
+        ],
+        "tenant_checks": [
+          {
+            "http": 404,
+            "error_code": "RESOURCE_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          },
+          {
+            "http": 404,
+            "error_code": "SNAPSHOT_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          }
+        ],
+        "actual_request_receipt_sha256": "ab33b89a8ef4d881d28681c35b54b4c28df612547d74c9e39f24a5fa9ac01926",
+        "snapshot_sha256": "d96f028e356cb994d3c9a179cc58be12f769d5e032c874d12983c0de1392e728",
+        "profile_id": "3db46979-999f-47cd-9500-f1ac2f206166",
+        "model": "deepseek-v4.1-flash-1017",
+        "chunks": 30,
+        "explicitly_prepared_index": null,
+        "gateway_spans": [
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          }
+        ],
+        "gateway_attempt_count_sum": 1
+      },
+      "B": {
+        "rows": [
+          {
+            "query_id": "product-code-receipt",
+            "http": 200,
+            "error": null,
+            "answer": "The supplied evidence does not contain any record for account reference QVR8426; it only covers accounts QVR8401, QVR8402, QVR8406, QVR8407, QVR8408 and QVR8409. Therefore I cannot determine the refund request window for QVR8426 or which dated record supplies it.",
+            "insufficient_evidence": true,
+            "candidate_ranks": [],
+            "reranked_raw6_ranks": [],
+            "fused_chunk_count": 20,
+            "added_count": 1,
+            "lexical_hits": 20,
+            "cited_sources": [],
+            "ranking_source": "same QA response"
+          }
+        ],
+        "tenant_checks": [
+          {
+            "http": 404,
+            "error_code": "RESOURCE_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          },
+          {
+            "http": 404,
+            "error_code": "SNAPSHOT_NOT_FOUND",
+            "answer_or_citations_returned": false,
+            "canary_leaked": false
+          }
+        ],
+        "actual_request_receipt_sha256": "211ea130e05eaaeb204af523977ba0cc07ead7e7176a9a1ac40da8ee070f86d7",
+        "snapshot_sha256": "d96f028e356cb994d3c9a179cc58be12f769d5e032c874d12983c0de1392e728",
+        "profile_id": "3db46979-999f-47cd-9500-f1ac2f206166",
+        "model": "deepseek-v4.1-flash-1017",
+        "chunks": 30,
+        "explicitly_prepared_index": {
+          "snapshot_id": "05f2fb29-de75-4af7-a09a-687c46488c14",
+          "chunk_count": 30,
+          "status": "READY"
+        },
+        "gateway_spans": [
+          {
+            "status": "ok",
+            "failure_code": null,
+            "attempt_count": 1,
+            "fallback_used": false
+          }
+        ],
+        "gateway_attempt_count_sum": 1
+      },
+      "policy_verification": [
+        {
+          "id": "product-code-receipt",
+          "arm": "A",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "58be9595f0593e9a49e51fa7c63d0f81a1d5b7100cc48faf65080847c496be8e",
+          "actual_hash": "58be9595f0593e9a49e51fa7c63d0f81a1d5b7100cc48faf65080847c496be8e",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "refund-08",
+            "refund-10",
+            "refund-07",
+            "refund-02",
+            "refund-05",
+            "refund-04",
+            "refund-01",
+            "refund-06",
+            "refund-11",
+            "refund-09",
+            "refund-00",
+            "refund-03",
+            "refund-01",
+            "refund-10",
+            "refund-00",
+            "refund-03",
+            "refund-04",
+            "refund-08",
+            "refund-05",
+            "refund-06"
+          ],
+          "counterfactual_added_documents": [
+            "refund-00"
+          ],
+          "observed_policy": null
+        },
+        {
+          "id": "product-code-receipt",
+          "arm": "B",
+          "status": "MATCH",
+          "ranking_source": "QA",
+          "expected_hash": "4614e051ff114134a23c577e465287878bcb569270e4d4c2b8280550dfe4e63e",
+          "actual_hash": "4614e051ff114134a23c577e465287878bcb569270e4d4c2b8280550dfe4e63e",
+          "expected_count": 20,
+          "actual_count": 20,
+          "lexical_top20_docs": [
+            "refund-08",
+            "refund-10",
+            "refund-07",
+            "refund-02",
+            "refund-05",
+            "refund-04",
+            "refund-01",
+            "refund-06",
+            "refund-11",
+            "refund-09",
+            "refund-00",
+            "refund-03",
+            "refund-01",
+            "refund-10",
+            "refund-00",
+            "refund-03",
+            "refund-04",
+            "refund-08",
+            "refund-05",
+            "refund-06"
+          ],
+          "counterfactual_added_documents": [
+            "refund-00"
+          ],
+          "observed_policy": {
+            "candidate_policy": "lexical_refill_v1",
+            "lexical_hits": 20,
+            "replaced_chunks": 1
+          }
+        }
+      ]
+    }
+  }
+}

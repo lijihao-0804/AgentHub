@@ -1,0 +1,58 @@
+{
+  "population": "All eight source associations in the 553-query SciFact TRAIN confirmation set restored by lexical_refill4 relative to the recorded baseline. Review assesses only the available title and indexed abstract of the newly added paper. Full texts and all alternative papers are outside this particular review.",
+  "method": "Read the original claim, newly restored abstract, and public query metadata. Check for the same subject, intervention or comparator, population and measured endpoint as applicable. Do not turn topical association into support, contradiction, or a claim of medical effectiveness. Manual desk review by the evaluating agent.",
+  "official_train_archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+  "official_train_verification": "Verified against data/claims_train.jsonl inside the original AllenAI archive. None of the eight newly restored document IDs has an official evidence-group annotation for the original claim. Seven original rows have empty evidence dictionaries; 246 lists a rationale for a different document.",
+  "all_reviewed": 8,
+  "directly_adjudicates_original_claim": 0,
+  "rows": [
+    {
+      "query_id": "1257",
+      "recovered_doc": "581832",
+      "upstream_rationale_for_recovered_doc": false,
+      "finding": "The abstract reports population DALYs and HALE across development levels. It does not give the claimed twofold prevalence difference for visual difficulty."
+    },
+    {
+      "query_id": "246",
+      "recovered_doc": "8447873",
+      "upstream_rationale_for_recovered_doc": false,
+      "finding": "The newly added review concerns gastric lavage for organophosphorus poisoning. The claim concerns activated charcoal and paraquat. The public rationale is attached instead to 3430789."
+    },
+    {
+      "query_id": "1112",
+      "recovered_doc": "1686881",
+      "upstream_rationale_for_recovered_doc": false,
+      "finding": "The abstract associates sudden death and conduction disturbances with familial amyloid polyneuropathy. It does not establish the orthostatic-hypertension claim in patients without conduction abnormalities."
+    },
+    {
+      "query_id": "733",
+      "recovered_doc": "34469966",
+      "upstream_rationale_for_recovered_doc": false,
+      "finding": "The abstract describes an alternative inflammasome pathway in response to lipopolysaccharide in human monocytes. It does not report the queried stimulus and cell-specific speck result."
+    },
+    {
+      "query_id": "1364",
+      "recovered_doc": "8290953",
+      "upstream_rationale_for_recovered_doc": false,
+      "finding": "The abstract reports arterioles, venules and capillaries forming in a cardiac patch model, with no comparison of their tunica adventitia."
+    },
+    {
+      "query_id": "449",
+      "recovered_doc": "12209494",
+      "upstream_rationale_for_recovered_doc": false,
+      "finding": "The study compares activated charcoal regimens in a mixed self-poisoning population. The claim is about gastric lavage specifically in acute paraquat poisoning."
+    },
+    {
+      "query_id": "838",
+      "recovered_doc": "15928989",
+      "upstream_rationale_for_recovered_doc": false,
+      "finding": "The NR5A2 paper reports reproductive functions and decidualization. The abstract makes no direct assertion about human reverse cholesterol transport."
+    },
+    {
+      "query_id": "364",
+      "recovered_doc": "1550937",
+      "upstream_rationale_for_recovered_doc": false,
+      "finding": "The Egr2 and Egr3 paper explains lymphocyte homeostasis and proliferation. The abstract does not discuss myelination of the peripheral nervous system."
+    }
+  ]
+}

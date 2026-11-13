@@ -1,0 +1,8 @@
+{
+  "provider_credential_disabled": true,
+  "provider_credential_rotated": true,
+  "temporary_login_file_removed": true,
+  "retirement_job_exit_code": 0,
+  "retrieval_only_verification_external_model_calls": 0,
+  "task_api_or_worker_processes_alive_after_retirement": 0
+}

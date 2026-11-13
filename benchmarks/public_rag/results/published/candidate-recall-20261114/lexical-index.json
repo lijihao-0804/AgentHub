@@ -1,0 +1,161 @@
+{
+  "benchmark": "read-only PostgreSQL BM25 parity on the complete live SciFact snapshot",
+  "deployment_scope": "Local experiment branch codex/rag-candidate-recall-lab-20261114 contains migration 0056_snapshot_word_bm25 and packages.knowledge.lexical_index. The published mainline contains the benchmark evidence; the experimental schema and API are not released.",
+  "audit_entrypoint": "benchmarks/public_rag/scifact_lexical_index_audit.py",
+  "snapshot_hash": "7ce0bb3519fde1afaee55045745187c77ddea9ead55af9774a54d20d0bf09ff6",
+  "postgres_version": "16.15",
+  "corpus": {
+    "documents": 5183,
+    "verified_chunks": 9189
+  },
+  "sampling": {
+    "source": "809 official TRAIN IDs",
+    "salt": "agenthub-scifact-postgresql-bm25-parity-20261114",
+    "rule": "SHA256(salt + ':' + ID) ascending, first 32 measured, next 4 for warmup",
+    "measured_query_ids": [
+      "1074",
+      "857",
+      "1065",
+      "80",
+      "357",
+      "479",
+      "1156",
+      "43",
+      "856",
+      "778",
+      "308",
+      "1133",
+      "112",
+      "737",
+      "114",
+      "1181",
+      "505",
+      "45",
+      "640",
+      "1308",
+      "92",
+      "369",
+      "2",
+      "1328",
+      "1157",
+      "1034",
+      "204",
+      "526",
+      "998",
+      "941",
+      "422",
+      "801"
+    ],
+    "warmup_query_ids": [
+      "1289",
+      "601",
+      "1342",
+      "247"
+    ],
+    "actual_warmups": [
+      {
+        "query_id": "1289",
+        "timed_out": false,
+        "ms": 6089.5582
+      },
+      {
+        "query_id": "601",
+        "timed_out": false,
+        "ms": 4947.6591
+      },
+      {
+        "query_id": "1342",
+        "timed_out": false,
+        "ms": 4242.9383
+      },
+      {
+        "query_id": "247",
+        "timed_out": false,
+        "ms": 66.8854
+      }
+    ],
+    "successful_query_ids": [
+      "1074",
+      "857"
+    ],
+    "censored_queries": [
+      {
+        "query_id": "1065",
+        "elapsed_ms": 15033.7377
+      },
+      {
+        "query_id": "80",
+        "elapsed_ms": 15016.6357
+      }
+    ],
+    "unattempted_measured_queries": 28,
+    "bounded_remeasurement": {
+      "initial_attempt": "Supervisor timeout at 360 s, exit 1, no durable ranks",
+      "statement_timeout_ms": 15000,
+      "early_stop_after_measured_timeouts": 2,
+      "stop_warmup_at_first_timeout": true
+    },
+    "successful_query_ms": {
+      "1074": 4393.2789,
+      "857": 5727.3506
+    }
+  },
+  "parity": {
+    "registered_queries": 32,
+    "completed_queries": 2,
+    "depth": 20,
+    "rank_positions": 40,
+    "equal_chunk_at_rank": 40,
+    "equal_document_at_rank": 40,
+    "exactly_equal_score_at_rank": 40,
+    "max_absolute_score_difference_at_rank": 0.0,
+    "separate_longer_single_query_parity": null
+  },
+  "explain_analyze": {
+    "query_id": "1074",
+    "format": "EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)",
+    "planning_ms": 9.285,
+    "execution_ms": 27856.268,
+    "join_type": "Nested Loop",
+    "join_filter_rejected_pairs": 84336652,
+    "authorized_materialized_chunk_rows_estimate": 2,
+    "authorized_materialized_chunk_rows_actual": 9189,
+    "materialization_rereads": 9179,
+    "plan_sha256": "6119b96d738d7da4a27021a0d1658c34566ecf777f6b38bb4a2b74a63abd2a2e"
+  },
+  "live_size": {
+    "scope_postings": 797447,
+    "scope_unique_terms": 37965,
+    "scope_sum_pg_column_size_of_posting_tuples_bytes": 121211944,
+    "all_snapshots_in_db": 3,
+    "all_postings_in_db": 806386,
+    "all_postings_table_bytes": 127107072,
+    "all_postings_indexes_bytes": 195993600,
+    "all_postings_total_bytes": 323100672,
+    "all_metadata_total_bytes": 24576
+  },
+  "warm_query_ms": {
+    "p50": 5060.31475,
+    "p95": 5660.647015,
+    "mean": 5060.31475,
+    "min": 4393.2789,
+    "max": 5727.3506,
+    "protocol": "One caller on one async PostgreSQL connection, up to 4 warm-ups and 32 measured queries. Percentiles use completed measured queries only. Includes tokenization, readiness/authorization lookup, SQL scoring and hits. Excludes reference construction, HTTP, embedding, reranking and answer generation."
+  },
+  "gates": {
+    "all_registered_ranked_ids_sources_and_scores_exact": false
+  },
+  "dedicated_postgresql_tests": {
+    "passed": 3,
+    "job_exit_code": 0,
+    "covers": [
+      "Reference scores/ranks, Unicode, long tokens, repeated terms, ties and limit",
+      "Tenant/KB/snapshot scoping, uncommitted visibility, retired/empty snapshots",
+      "failure after writing, rollback to savepoint, concurrent retries and idempotence"
+    ],
+    "alembic_schema_drift": "none",
+    "migration_roundtrip": "0056 -> 0055 -> 0056",
+    "job_stdout_sha256": "193013c7a49801f8a1d1f85736c8a9e27ed39940db1ce75464faaca01c8d5aa1",
+    "job_stderr_sha256": "012725a285ef998ab74da3d21be8d589aab5063b7aa3606078d9272a931ee0e3"
+  }
+}

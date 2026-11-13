@@ -100,3 +100,12 @@ BM25 使用相同快照全部 5,183 篇论文的 9,189 个块，Unicode NFKC、c
 ```
 
 初次确认完成了 553 道题的候选计算，输出汇总时，NumPy 布尔值无法序列化导致进程退出码 1。在打开该未完成报告之前，修复了置信区间数值向原生 Python 类型的转换。按原协议以新目录重放，开发六臂统计、提名及两次运行全部候选排名逐字节一致，确认退出码 0。[序列化修复与证据指纹](serialization-replay.json)
+
+NFCorpus 的两组捕获都使用全量文档和一个临时 Qdrant 集合。以下 PowerShell 命令从本仓库根目录运行，先将 `$vectorUrl` 设为本机独立测试实例的地址（Qdrant 1.13.6），`$denseDir`、`$rerankerDir` 分别指向协议指定修订号的模型快照目录。每次 capture 使用新的输出目录，score 使用新的输出文件。
+
+```powershell
+& .\.venv\Scripts\python.exe -m benchmarks.public_rag.recall_transfer capture --output .scratch/nfc-first --qdrant-url $vectorUrl --device cuda --model-dir $denseDir
+& .\.venv\Scripts\python.exe -m benchmarks.public_rag.recall_transfer score --capture-dir .scratch/nfc-first --method lexical_refill4 --output .scratch/nfc-first-score.json
+& .\.venv\Scripts\python.exe -m benchmarks.public_rag.recall_transfer capture --output .scratch/nfc-second --qdrant-url $vectorUrl --device cuda --model-dir $denseDir --reranker-dir $rerankerDir
+& .\.venv\Scripts\python.exe -m benchmarks.public_rag.recall_transfer score --capture-dir .scratch/nfc-second --method protected_refill --output .scratch/nfc-second-score.json
+```
