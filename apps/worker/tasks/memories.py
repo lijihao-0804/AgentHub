@@ -28,7 +28,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import asdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import select, update
@@ -359,4 +359,57 @@ async def _extract_run_memories(
         await engine.dispose()
 
 
-__all__ = ["extract_run_memories"]
+async def _reconcile_memories(settings: Settings) -> int:
+    cutoff = datetime.now(UTC) - timedelta(seconds=300)
+    engine, factory = create_database(settings.database_url)
+    try:
+        re_dispatch_targets: list[tuple[UUID, UUID]] = []
+        async with factory() as session:
+            await session.execute(
+                update(MemoryExtractionJob)
+                .where(
+                    MemoryExtractionJob.status == "RUNNING",
+                    MemoryExtractionJob.claimed_at < cutoff,
+                    MemoryExtractionJob.candidate_payload.is_(None),
+                )
+                .values(
+                    status="FAILED",
+                    failure_code="MEMORY_EXTRACTION_OUTCOME_UNKNOWN",
+                    completed_at=datetime.now(UTC),
+                    claimed_at=None,
+                )
+            )
+            stale_with_payload = list(
+                await session.execute(
+                    select(MemoryExtractionJob.workspace_id, MemoryExtractionJob.agent_run_id)
+                    .where(
+                        MemoryExtractionJob.status == "RUNNING",
+                        MemoryExtractionJob.claimed_at < cutoff,
+                        MemoryExtractionJob.candidate_payload.is_not(None),
+                    )
+                    .limit(50)
+                )
+            )
+            re_dispatch_targets = [(row[0], row[1]) for row in stale_with_payload]
+            await session.commit()
+
+        for ws_id, run_id in re_dispatch_targets:
+            try:
+                extract_run_memories.delay(str(ws_id), str(run_id), f"reconcile:{run_id}")
+            except Exception:
+                break
+        return len(re_dispatch_targets)
+    finally:
+        await engine.dispose()
+
+
+@celery_app.task(
+    name="agenthub.reconcile_memories",
+    ignore_result=True,
+    acks_late=True,
+)
+def reconcile_memories() -> None:
+    asyncio.run(_reconcile_memories(get_settings()))
+
+
+__all__ = ["extract_run_memories", "reconcile_memories"]

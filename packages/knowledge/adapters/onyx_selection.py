@@ -373,7 +373,6 @@ class OpenAICompatibleSectionSelector:
             "model": self.model,
             "temperature": 0,
             "max_tokens": 256,
-            "thinking": {"type": "disabled"},
             "response_format": {"type": "json_object"},
             "messages": selection_messages(query, sections),
         }

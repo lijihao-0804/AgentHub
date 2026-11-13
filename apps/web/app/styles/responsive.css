@@ -4,25 +4,83 @@
   .op-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashboard-columns { grid-template-columns: 1fr; }
   .stage-grid, .top-k-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .split-row { grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)) minmax(0, 1.2fr); }
-  .split-row > :nth-child(n+6) { display: none; }
+  .split-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
-  .sidebar {
-    box-shadow: var(--shadow);
-    height: 100vh;
+  body.nav-open {
+    overflow: hidden;
+  }
+  .sidebar,
+  .app-shell[data-sidebar="collapsed"] .sidebar {
+    box-shadow: 20px 0 60px rgba(10, 25, 30, 0.25);
+    flex-basis: min(88vw, 18rem);
+    height: 100dvh;
     left: 0;
+    padding: 1.15rem 0.8rem 1rem;
+    pointer-events: none;
     position: fixed;
     top: 0;
-    transform: translateX(-105%);
-    transition: transform 180ms ease;
-    width: 264px;
+    transform: translateX(-102%);
+    transition: transform 180ms ease, visibility 180ms step-end;
+    visibility: hidden;
+    width: min(88vw, 18rem);
     z-index: var(--z-floating);
   }
-  body.nav-open .sidebar { transform: none; }
+  body.nav-open .sidebar,
+  body.nav-open .app-shell[data-sidebar="collapsed"] .sidebar {
+    pointer-events: auto;
+    transform: none;
+    transition: transform 180ms ease, visibility 0s;
+    visibility: visible;
+  }
+  .app-shell[data-sidebar="collapsed"] .sidebar-brand {
+    margin: 0 0.2rem 1rem;
+    padding: 0.15rem 0.15rem 1rem;
+  }
+  .app-shell[data-sidebar="collapsed"] .brand-link {
+    gap: 0.75rem;
+    justify-content: flex-start;
+  }
+  .app-shell[data-sidebar="collapsed"] .brand-copy {
+    display: grid;
+  }
+  .app-shell[data-sidebar="collapsed"] .nav-group-heading {
+    display: block;
+  }
+  .app-shell[data-sidebar="collapsed"] .sidebar-nav {
+    gap: 1.1rem;
+  }
+  .app-shell[data-sidebar="collapsed"] .nav-group ul {
+    margin-top: 0.35rem;
+  }
+  .app-shell[data-sidebar="collapsed"] .nav-link-text {
+    display: inline;
+  }
+  .app-shell[data-sidebar="collapsed"] .nav-link {
+    justify-content: space-between;
+    padding: 0.48rem 0.6rem;
+  }
+  .app-shell[data-sidebar="collapsed"] .nav-badge {
+    font-size: 0.66rem;
+    line-height: 1.2rem;
+    min-width: 1.2rem;
+    padding: 0 0.3rem;
+    position: static;
+  }
+  .app-shell[data-sidebar="collapsed"] .sidebar-footer {
+    border-top: 1px solid var(--sidebar-border);
+    padding: 0.9rem 0.35rem 0;
+  }
+  .app-shell[data-sidebar="collapsed"] .sidebar-security-dot {
+    display: inline-block;
+  }
+  .app-shell[data-sidebar="collapsed"] .sidebar-footnote {
+    display: block;
+  }
   body.nav-open .sidebar-scrim {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(8, 24, 29, 0.48);
+    backdrop-filter: blur(2px);
     border: 0;
     bottom: 0;
     display: block;
@@ -35,7 +93,7 @@
   .topbar .nav-toggle { display: inline-flex; }
   .sidebar-toggle { display: none; }
   .app-content { padding: var(--space-5) var(--space-4); }
-  .topbar { justify-content: space-between; padding: 0 var(--space-4); }
+  .topbar { padding: 0 var(--space-4); }
 }
 
 @media (max-width: 640px) {
@@ -45,9 +103,10 @@
   .key-value-row { grid-template-columns: minmax(0, 1fr); }
   .research-pane-head, .artifact-card-head, .paper-card-head { flex-wrap: wrap; }
   .topbar { gap: var(--space-2); padding: 0 var(--space-3); }
-  .nav-toggle-label { display: none; }
   .session-control .button { padding: 0.35rem 0.55rem; font-size: 0.8rem; }
-  .lang-option { padding: 0.28rem 0.5rem; }
+  .lang-option { min-width: 2.15rem; padding: 0 0.4rem; }
+  .user-label { display: none; }
+  .user-menu-trigger { padding-right: 0.32rem; }
   .app-content { padding: var(--space-4) var(--space-3) var(--space-5); }
   .panel { padding: var(--space-4); }
   .kpi-grid, .op-grid, .overview-grid, .form-grid, .stage-grid, .top-k-grid,
@@ -62,29 +121,20 @@
   .form-actions .button { width: 100%; justify-content: center; }
   .runs-toolbar { grid-template-columns: 1fr 1fr; }
   .runs-toolbar .runs-toolbar-actions { grid-column: 1 / -1; display: flex; gap: var(--space-2); }
-  .split-row { grid-template-columns: 1fr auto; }
-  .split-row > :nth-child(n+3) { display: none; }
+  .split-row { grid-template-columns: 1fr; }
   .evidence-item { grid-template-columns: 1fr; }
   .session-panel { min-width: min(300px, calc(100vw - 2rem)); }
 }
 
-@media (max-width: 480px) {
-  /* Keep workspace context on its own row instead of squeezing it under
-     the account control. The existing trigger still truncates long names. */
+@media (max-width: 560px) {
+  /* Workspace context gets a second row before any topbar control is removed. */
   .topbar { flex-wrap: wrap; padding-top: var(--space-2); padding-bottom: var(--space-2); }
   .topbar-spacer { display: none; }
-  .topbar .ws-selector { flex-basis: 100%; order: 1; }
+  .topbar .ws-selector { flex: 1 0 100%; min-width: 0; order: 3; }
   .topbar .ws-selector-trigger { max-width: 100%; width: 100%; }
+  .topbar-actions { margin-left: auto; }
+  .ws-selector-trigger .ws-org-prefix { display: none; }
   .session-status { display: none; }
-  /*
-   * Below this the topbar cannot hold every control at full size, so one has
-   * to go, and it is the theme switch. Theme already defaults to the device's
-   * own `prefers-color-scheme`, so a phone is showing the right one without
-   * being asked; "which workspace am I in" has no such default, and in a
-   * control plane where an approval writes to production it is the one piece
-   * of context that must not be squeezed down to a single letter.
-   */
-  .theme-switch { display: none; }
 }
 
 /* Runs table → cards on narrow screens */
@@ -264,7 +314,7 @@
     position: absolute;
     top: 0;
     width: min(82vw, 20rem);
-    z-index: var(--z-floating);
+    z-index: 2;
   }
   .thread-rail .thread-list { max-height: none; }
   .thread-side { display: none; }

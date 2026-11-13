@@ -7,6 +7,7 @@ import { useI18n } from "@/i18n/provider";
 import type { MessageKey } from "@/i18n/messages";
 import type { ApiError } from "@/lib/api/client";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import Icon from "@/components/ui/icon";
 
 /** Quiet, structural placeholder for "nothing here yet". */
 export function EmptyState({
@@ -20,6 +21,7 @@ export function EmptyState({
 }) {
   return (
     <div className="state-block state-empty">
+      <span className="state-illustration" aria-hidden="true"><Icon name="workspace" size={25} /></span>
       <p className="state-title">{title}</p>
       {hint && <p className="state-hint">{hint}</p>}
       {actions && <div className="form-actions">{actions}</div>}
@@ -148,7 +150,7 @@ export function Panel({
   const hasHeading = Boolean(title || eyebrow);
   const label = ariaLabel ?? title;
   return (
-    <section className="panel" aria-label={label} aria-labelledby={title ? undefined : label}>
+    <section className="panel" aria-label={label}>
       {(hasHeading || actions) && (
         <div className="panel-heading">
           {hasHeading && (

@@ -16,6 +16,7 @@ __pycache__/
 # Frontend
 apps/web/node_modules/
 apps/web/.next/
+apps/web/.next-*/
 apps/web/out/
 apps/web/.npm-cache/
 npm-debug.log*
@@ -51,3 +52,6 @@ Desktop.ini
 /.pytest-*/
 /.pythonpath-*
 /pytest-cache-files-*/
+
+# Local frontend QA screenshots and reports may contain workspace content.
+/output/playwright/frontend-product-20261111/

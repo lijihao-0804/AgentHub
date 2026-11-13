@@ -2,20 +2,23 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { useI18n } from "@/i18n/provider";
+import { LocaleProvider, useI18n } from "@/i18n/provider";
 import type { MessageKey } from "@/i18n/messages";
-import { LocaleProvider } from "@/i18n/provider";
-import { FrontendSessionProvider, useFrontendSession } from "@/components/providers/session-provider";
+import {
+  FrontendSessionProvider,
+  useFrontendSession,
+} from "@/components/providers/session-provider";
 import LanguageSwitcher from "@/components/layout/language-switcher";
 import ThemeSwitcher from "@/components/layout/theme-switcher";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import WorkspaceSelector from "@/components/layout/workspace-selector";
 import UserMenu from "@/components/layout/user-menu";
 import { RouteTitle } from "@/components/layout/route-title";
-import Breadcrumbs, { AutoBreadcrumbs } from "@/components/layout/breadcrumbs";
+import { AutoBreadcrumbs } from "@/components/layout/breadcrumbs";
 import Icon, { type IconName } from "@/components/ui/icon";
+import BrandMark from "@/components/ui/brand-mark";
 import { getObservabilitySummary } from "@/lib/api/observability";
 
 type NavItem = {
@@ -23,43 +26,53 @@ type NavItem = {
   labelKey: MessageKey;
   icon: IconName;
   match: (pathname: string) => boolean;
-  /** Rendered indented under the entry above it, for a tool that belongs to it. */
-  nested?: boolean;
   /** Live counter source; hidden while zero or unknown. */
   badge?: keyof NavCounts;
+};
+
+type NavGroup = {
+  headingKey: MessageKey;
+  items: NavItem[];
 };
 
 type NavCounts = { approvalsPending: number | null; running: number | null };
 
 /**
- * Sidebar counters: pending approvals and in-flight runs. One lightweight
- * summary poll every 30 seconds while the tab is visible; a failed poll
- * simply hides the badges instead of shouting.
+ * One lightweight summary poll keeps the two operational counters useful
+ * without making the shell own any page data. Workspace credentials are read
+ * from the existing in-memory session provider.
  */
 function useNavCounts(): NavCounts {
   const { connected, workspaceId, accessToken } = useFrontendSession();
-  const [counts, setCounts] = useState<NavCounts>({ approvalsPending: null, running: null });
+  const [counts, setCounts] = useState<NavCounts>({
+    approvalsPending: null,
+    running: null,
+  });
+
   useEffect(() => {
     if (!connected) {
       setCounts({ approvalsPending: null, running: null });
       return;
     }
+
     let cancelled = false;
     const load = () => {
       if (document.hidden) return;
       getObservabilitySummary({ workspaceId, accessToken })
         .then((summary) => {
-          if (!cancelled) {
-            setCounts({
-              approvalsPending: summary.approvals.pending,
-              running: summary.current.running_count,
-            });
-          }
+          if (cancelled) return;
+          setCounts({
+            approvalsPending: summary.approvals.pending,
+            running: summary.current.running_count,
+          });
         })
         .catch(() => {
-          if (!cancelled) setCounts({ approvalsPending: null, running: null });
+          if (!cancelled) {
+            setCounts({ approvalsPending: null, running: null });
+          }
         });
     };
+
     load();
     const interval = window.setInterval(load, 30_000);
     document.addEventListener("visibilitychange", load);
@@ -68,101 +81,200 @@ function useNavCounts(): NavCounts {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", load);
     };
-  }, [connected, workspaceId, accessToken]);
+  }, [accessToken, connected, workspaceId]);
+
   return counts;
 }
 
-function prefixMatch(prefix: string, ...except: string[]): (pathname: string) => boolean {
-  return (pathname) => {
-    // A nested tool owns its own entry, so the parent must not light up for it.
-    if (except.some((route) => pathname === route || pathname.startsWith(`${route}/`))) return false;
+function prefixMatch(prefix: string) {
+  return (pathname: string) => {
     return pathname === prefix || pathname.startsWith(`${prefix}/`);
   };
 }
 
 /**
- * The sidebar is the whole map of the product. Sub-tools (run comparison,
- * the retrieval playground, provider configuration) and evaluation
- * sub-sections (datasets, experiments, gates, pricing) are reachable from
- * their parent pages — a nav entry for each read as sixteen places to be,
- * which helped no one.
+ * Product navigation follows the work an operator is doing. Build resources,
+ * run governance and settings are first-class destinations; nothing important
+ * hides behind a "More" drawer.
  */
-const PRIMARY_GROUPS: Array<{ headingKey: MessageKey; items: NavItem[] }> = [
+const PRIMARY_GROUPS: NavGroup[] = [
   {
-    headingKey: "nav.conversations",
+    headingKey: "nav.workspaceGroup",
     items: [
-      { href: "/research", labelKey: "nav.research", icon: "research", match: prefixMatch("/research") },
-      { href: "/incidents", labelKey: "nav.incidents", icon: "incidents", match: prefixMatch("/incidents") },
-      { href: "/analytics", labelKey: "nav.analytics", icon: "analytics", match: prefixMatch("/analytics") },
-      { href: "/support", labelKey: "nav.support", icon: "support", match: prefixMatch("/support") },
+      {
+        href: "/",
+        labelKey: "nav.home",
+        icon: "workspace",
+        match: (pathname) => pathname === "/",
+      },
+      {
+        href: "/dashboard",
+        labelKey: "nav.dashboard",
+        icon: "dashboard",
+        match: prefixMatch("/dashboard"),
+      },
     ],
   },
   {
-    headingKey: "nav.overview",
+    headingKey: "nav.applications",
     items: [
-      { href: "/dashboard", labelKey: "nav.dashboard", icon: "dashboard", match: prefixMatch("/dashboard") },
-      { href: "/runs", labelKey: "nav.runs", icon: "runs", match: prefixMatch("/runs", "/runs/compare"), badge: "running" },
-      { href: "/approvals", labelKey: "nav.approvals", icon: "approvals", match: prefixMatch("/approvals"), badge: "approvalsPending" },
+      {
+        href: "/research",
+        labelKey: "nav.research",
+        icon: "research",
+        match: prefixMatch("/research"),
+      },
+      {
+        href: "/incidents",
+        labelKey: "nav.incidents",
+        icon: "incidents",
+        match: prefixMatch("/incidents"),
+      },
+      {
+        href: "/analytics",
+        labelKey: "nav.analytics",
+        icon: "analytics",
+        match: prefixMatch("/analytics"),
+      },
+      {
+        href: "/support",
+        labelKey: "nav.support",
+        icon: "support",
+        match: prefixMatch("/support"),
+      },
     ],
   },
-];
-
-/*
- * Less-used surfaces stay reachable but folded away. The sidebar is a map of
- * what you do daily, not a dump of every route: build, evaluate and settings
- * live behind one "More" disclosure instead of padding the primary list.
- */
-const MORE_ITEMS: NavItem[] = [
-  { href: "/agents", labelKey: "nav.agents", icon: "agents", match: prefixMatch("/agents") },
-  { href: "/knowledge", labelKey: "nav.knowledge", icon: "knowledge", match: prefixMatch("/knowledge") },
-  { href: "/tools", labelKey: "nav.tools", icon: "tools", match: prefixMatch("/tools") },
-  { href: "/evaluations", labelKey: "nav.evaluations", icon: "evaluations", match: prefixMatch("/evaluations") },
-  { href: "/settings", labelKey: "nav.settings", icon: "settings", match: prefixMatch("/settings") },
+  {
+    headingKey: "nav.buildGroup",
+    items: [
+      {
+        href: "/agents",
+        labelKey: "nav.agents",
+        icon: "agents",
+        match: prefixMatch("/agents"),
+      },
+      {
+        href: "/knowledge",
+        labelKey: "nav.knowledge",
+        icon: "knowledge",
+        match: prefixMatch("/knowledge"),
+      },
+      {
+        href: "/tools",
+        labelKey: "nav.tools",
+        icon: "tools",
+        match: prefixMatch("/tools"),
+      },
+    ],
+  },
+  {
+    headingKey: "nav.operateGroup",
+    items: [
+      {
+        href: "/runs",
+        labelKey: "nav.runs",
+        icon: "runs",
+        match: prefixMatch("/runs"),
+        badge: "running",
+      },
+      {
+        href: "/approvals",
+        labelKey: "nav.approvals",
+        icon: "approvals",
+        match: prefixMatch("/approvals"),
+        badge: "approvalsPending",
+      },
+      {
+        href: "/evaluations",
+        labelKey: "nav.evaluations",
+        icon: "evaluations",
+        match: prefixMatch("/evaluations"),
+      },
+    ],
+  },
+  {
+    headingKey: "nav.configureGroup",
+    items: [
+      {
+        href: "/settings",
+        labelKey: "nav.settings",
+        icon: "settings",
+        match: prefixMatch("/settings"),
+      },
+    ],
+  },
 ];
 
 /** Routes rendered without the control-plane chrome. */
 const AUTH_ROUTES = ["/login", "/register"];
 
 function isAuthRoute(pathname: string): boolean {
-  return AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+  return AUTH_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
 }
+
+const SidebarToggleGlyph = (
+  <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
+    <rect
+      height="15.5"
+      rx="2.2"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      width="17"
+      x="3.5"
+      y="4.25"
+    />
+    <path d="M9 4.8v14.4" stroke="currentColor" strokeWidth="1.7" />
+  </svg>
+);
+
+const MenuGlyph = (
+  <svg aria-hidden="true" fill="none" viewBox="0 0 24 24">
+    <path
+      d="M5 7h14M5 12h14M5 17h14"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.8"
+    />
+  </svg>
+);
 
 function NavLink({
   item,
+  label,
+  badge,
+  badgeTitle,
+  active,
   onNavigate,
-  counts,
 }: {
   item: NavItem;
+  label: string;
+  badge: string | null;
+  badgeTitle: string | undefined;
+  active: boolean;
   onNavigate: () => void;
-  counts: NavCounts;
 }) {
-  const { t, formatNumber } = useI18n();
-  const pathname = usePathname() ?? "";
-  const active = item.match(pathname);
-  const badgeCount = item.badge ? counts[item.badge] : null;
-  const showBadge = badgeCount !== null && badgeCount > 0;
   return (
     <li>
       <Link
         href={item.href}
-        className={`nav-link${item.nested ? " nav-link-nested" : ""}${active ? " nav-link-active" : ""}`}
+        className={`nav-link${active ? " nav-link-active" : ""}`}
         aria-current={active ? "page" : undefined}
+        aria-label={label}
+        title={label}
         onClick={onNavigate}
       >
         <span className="nav-link-label">
-          <Icon name={item.icon} size={16} />
-          <span>{t(item.labelKey)}</span>
+          <Icon name={item.icon} size={18} />
+          <span className="nav-link-text">{label}</span>
         </span>
-        {showBadge && (
+        {badge !== null && (
           <span
             className={`nav-badge${item.badge === "approvalsPending" ? " nav-badge-urgent" : ""}`}
-            title={
-              item.badge === "approvalsPending"
-                ? t("nav.badgePending", { count: badgeCount })
-                : t("nav.badgeRunning", { count: badgeCount })
-            }
+            title={badgeTitle}
           >
-            {formatNumber(badgeCount)}
+            {badge}
           </span>
         )}
       </Link>
@@ -174,52 +286,59 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
   const { t, formatNumber } = useI18n();
   const counts = useNavCounts();
   const pathname = usePathname() ?? "";
-  const moreActive = MORE_ITEMS.some((item) => item.match(pathname));
-  const [moreOpen, setMoreOpen] = useState(false);
-  useEffect(() => {
-    // Keep the section containing the current route expanded, so the active
-    // item is never hidden behind a collapsed "More".
-    if (moreActive) setMoreOpen(true);
-  }, [moreActive]);
+
   return (
     <>
       <div className="sidebar-brand">
-        <Link href="/" className="brand-link" onClick={onNavigate}>
-          <span className="brand-name">AgentHub</span>
-          <span className="brand-subtitle">{t("brand.subtitle")}</span>
+        <Link
+          href="/"
+          className="brand-link"
+          aria-label={`AgentHub, ${t("brand.subtitle")}`}
+          title={t("brand.subtitle")}
+          onClick={onNavigate}
+        >
+          <span className="brand-mark"><BrandMark className="brand-mark-glyph" /></span>
+          <span className="brand-copy">
+            <span className="brand-name">AgentHub</span>
+            <span className="brand-subtitle">{t("brand.subtitle")}</span>
+          </span>
         </Link>
       </div>
+
       <nav className="sidebar-nav" aria-label={t("shell.primaryNav")}>
         {PRIMARY_GROUPS.map((group) => (
-          <div className="nav-group" key={group.headingKey}>
-            <p className="nav-group-heading">{t(group.headingKey)}</p>
+          <section className="nav-group" key={group.headingKey}>
+            <h2 className="nav-group-heading">{t(group.headingKey)}</h2>
             <ul>
-              {group.items.map((item) => (
-                <NavLink item={item} onNavigate={onNavigate} counts={counts} key={item.href} />
-              ))}
+              {group.items.map((item) => {
+                const rawCount = item.badge ? counts[item.badge] : null;
+                const showBadge = rawCount !== null && rawCount > 0;
+                const badgeTitle = !showBadge
+                  ? undefined
+                  : item.badge === "approvalsPending"
+                    ? t("nav.badgePending", { count: rawCount })
+                    : t("nav.badgeRunning", { count: rawCount });
+                return (
+                  <NavLink
+                    item={item}
+                    label={t(item.labelKey)}
+                    badge={showBadge ? formatNumber(rawCount) : null}
+                    badgeTitle={badgeTitle}
+                    active={item.match(pathname)}
+                    onNavigate={onNavigate}
+                    key={item.href}
+                  />
+                );
+              })}
             </ul>
-          </div>
+          </section>
         ))}
-        <div className="nav-group">
-          <button
-            type="button"
-            className={`nav-more-toggle${moreActive && !moreOpen ? " nav-more-toggle-active" : ""}`}
-            aria-expanded={moreOpen}
-            onClick={() => setMoreOpen((open) => !open)}
-          >
-            <span>{t("nav.more")}</span>
-            <span className="nav-more-caret" aria-hidden="true">{moreOpen ? "▾" : "▸"}</span>
-          </button>
-          {moreOpen && (
-            <ul>
-              {MORE_ITEMS.map((item) => (
-                <NavLink item={item} onNavigate={onNavigate} counts={counts} key={item.href} />
-              ))}
-            </ul>
-          )}
-        </div>
       </nav>
-      <p className="sidebar-footnote">{t("shell.footnote")}</p>
+
+      <div className="sidebar-footer">
+        <span className="sidebar-security-dot" aria-hidden="true" />
+        <p className="sidebar-footnote">{t("shell.footnote")}</p>
+      </div>
     </>
   );
 }
@@ -238,8 +357,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
 }
 
 /**
- * Routes traffic between the auth pages and the control-plane shell.
- * A missing session is a normal signed-out state, never an error.
+ * Routes traffic between the auth pages and the control-plane shell. The
+ * session provider remains the sole authentication boundary.
  */
 function ShellGate({ children }: { children: ReactNode }) {
   const { status } = useFrontendSession();
@@ -249,13 +368,16 @@ function ShellGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (status === "UNAUTHENTICATED" && !onAuthRoute) router.replace("/login");
-    // Signed-in users land on the conversation-first home, not the dashboard.
     if (status === "AUTHENTICATED" && onAuthRoute) router.replace("/");
-  }, [status, onAuthRoute, router]);
+  }, [onAuthRoute, router, status]);
 
   if (status === "BOOTSTRAPPING") return <BootstrapScreen />;
   if (onAuthRoute) {
-    return status === "AUTHENTICATED" ? <BootstrapScreen /> : <div className="auth-frame">{children}</div>;
+    return status === "AUTHENTICATED" ? (
+      <BootstrapScreen />
+    ) : (
+      <div className="auth-frame">{children}</div>
+    );
   }
   if (status === "UNAUTHENTICATED") return <BootstrapScreen />;
   return <ShellChrome>{children}</ShellChrome>;
@@ -275,8 +397,16 @@ function BootstrapScreen() {
 
 function ShellChrome({ children }: { children: ReactNode }) {
   const { t } = useI18n();
+  const { workspaceId, sessionId } = useFrontendSession();
+  const pathname = usePathname() ?? "";
   const [navOpen, setNavOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    setNavOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     document.body.classList.toggle("nav-open", navOpen);
@@ -284,22 +414,70 @@ function ShellChrome({ children }: { children: ReactNode }) {
   }, [navOpen]);
 
   useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 901px)");
+    const closeOnDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) setNavOpen(false);
+    };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
+
+  useEffect(() => {
     if (!navOpen) return;
+    const previousFocus =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const firstLink = sidebarRef.current?.querySelector<HTMLElement>(
+      ".brand-link, .nav-link, button",
+    );
+    firstLink?.focus();
+
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setNavOpen(false);
+      if (event.key === "Escape") {
+        setNavOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab" || !sidebarRef.current) return;
+      const focusable = [
+        ...sidebarRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ];
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
   }, [navOpen]);
 
   return (
-    <div className="app-shell" data-sidebar={sidebarCollapsed ? "collapsed" : "open"}>
+    <div
+      className="app-shell"
+      data-sidebar={sidebarCollapsed ? "collapsed" : "open"}
+    >
       <a className="skip-link" href="#app-content">
         {t("shell.skipToContent")}
       </a>
-      <aside className="sidebar" id="app-sidebar">
-        <SidebarContent onNavigate={() => setNavOpen(false)} />
+
+      <aside
+        className="sidebar"
+        id="app-sidebar"
+        ref={sidebarRef}
+      >
+        <SidebarContent key={`${sessionId}:${workspaceId}`} onNavigate={() => setNavOpen(false)} />
       </aside>
+
       {navOpen && (
         <button
           type="button"
@@ -308,36 +486,50 @@ function ShellChrome({ children }: { children: ReactNode }) {
           onClick={() => setNavOpen(false)}
         />
       )}
+
       <div className="app-frame">
         <header className="topbar">
           <button
             type="button"
-            className="button button-ghost sidebar-toggle"
-            aria-pressed={sidebarCollapsed}
+            className="shell-control sidebar-toggle"
+            aria-label={t(
+              sidebarCollapsed ? "shell.expandSidebar" : "shell.collapseSidebar",
+            )}
+            aria-controls="app-sidebar"
+            aria-expanded={!sidebarCollapsed}
+            title={t(
+              sidebarCollapsed ? "shell.expandSidebar" : "shell.collapseSidebar",
+            )}
             onClick={() => setSidebarCollapsed((value) => !value)}
-            title={t("shell.toggleSidebar")}
-            aria-label={t("shell.toggleSidebar")}
           >
-            <span aria-hidden="true">☰</span>
+            {SidebarToggleGlyph}
           </button>
+
           <button
             type="button"
-            className="button button-ghost nav-toggle"
+            className="shell-control nav-toggle"
+            ref={menuButtonRef}
+            aria-label={t("shell.menu")}
+            title={t("shell.menu")}
             aria-expanded={navOpen}
             aria-controls="app-sidebar"
             onClick={() => setNavOpen((open) => !open)}
           >
-            <span aria-hidden="true">☰</span> <span className="nav-toggle-label">{t("shell.menu")}</span>
+            {MenuGlyph}
           </button>
-          <div className="topbar-spacer" />
-          <ThemeSwitcher />
-          <LanguageSwitcher />
+
           <WorkspaceSelector />
-          <UserMenu />
+          <span className="topbar-spacer" aria-hidden="true" />
+          <div className="topbar-actions">
+            <ThemeSwitcher />
+            <LanguageSwitcher />
+            <UserMenu />
+          </div>
         </header>
+
         <main className="app-content" id="app-content">
           <AutoBreadcrumbs />
-          {children}
+          <Fragment key={`${sessionId}:${workspaceId}`}>{children}</Fragment>
         </main>
       </div>
     </div>

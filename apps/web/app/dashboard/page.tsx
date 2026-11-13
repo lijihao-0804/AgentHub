@@ -7,6 +7,7 @@ import MetricCard, { windowDelta } from "@/components/ui/metric-card";
 import Select from "@/components/ui/select";
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { CatalogPageHeader } from "@/components/catalog/catalog-layout";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
 import {
   AgentVersionBreakdown,
@@ -82,6 +83,7 @@ function windowFromUrl(): string {
 export default function DashboardPage() {
   const {
     t,
+    locale,
     statusLabel,
     failureCategoryLabel,
     formatNumber,
@@ -108,6 +110,41 @@ export default function DashboardPage() {
   const selectedCategoryRef = useRef<string | null>(null);
   /** True while a full load is on the wire, so polls cannot stack up. */
   const loadingRef = useRef(false);
+  const copy = locale === "zh-CN"
+    ? {
+        eyebrow: "运营仪表板",
+        description: "从所选时间段查看运行是否健康、哪里变慢、成本如何，以及哪些工作最需要你处理。",
+        focusTitle: "需要处理",
+        focusLiveTitle: "运行进行中",
+        focusClearTitle: "工作区空闲",
+        focusEyebrowUrgent: "操作关注",
+        focusEyebrowLive: "实时状态",
+        focusEyebrowClear: "运行状态",
+        focusAttention: (attention: string, waiting: string) => `${attention} 次运行需要关注，${waiting} 次运行正在等待审批。`,
+        focusLive: (running: string) => `${running} 次运行正在执行；当前没有阻塞或未知结果。`,
+        focusClear: "当前没有活动运行或待处理异常，工作区处于空闲状态。",
+        reviewRuns: "查看异常运行",
+        reviewApprovals: "查看审批",
+        liveRuns: "查看活动运行",
+        emptyWorkspace: "设置智能体",
+      }
+    : {
+        eyebrow: "Operations dashboard",
+        description: "See how runs are performing across the selected period, where time or cost is rising, and which work needs you most.",
+        focusTitle: "Needs attention",
+        focusLiveTitle: "Runs in flight",
+        focusClearTitle: "Workspace is quiet",
+        focusEyebrowUrgent: "Action required",
+        focusEyebrowLive: "Live status",
+        focusEyebrowClear: "Operations status",
+        focusAttention: (attention: string, waiting: string) => `${attention} ${attention === "1" ? "run needs" : "runs need"} attention and ${waiting} ${waiting === "1" ? "approval is" : "approvals are"} waiting.`,
+        focusLive: (running: string) => `${running} ${running === "1" ? "run is" : "runs are"} in flight, with no current blocker or unknown outcome.`,
+        focusClear: "No runs are active or waiting for attention. This workspace is quiet.",
+        reviewRuns: "Review attention runs",
+        reviewApprovals: "Review approvals",
+        liveRuns: "View active runs",
+        emptyWorkspace: "Set up an agent",
+      };
 
   const load = useCallback(
     async (dayOverride?: string) => {
@@ -223,21 +260,23 @@ export default function DashboardPage() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1>{t("dashboard.title")}</h1>
-      </header>
-
-      <section className="dashboard-window" aria-label={t("dashboard.window")}>
-        <label>
-          {t("dashboard.window")}
-          <Select
-            value={days ?? "7"}
-            onChange={changeDays}
-            options={WINDOW_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
-          />
-        </label>
-        {/* No refresh button: this view polls every few seconds on its own. */}
-      </section>
+      <CatalogPageHeader
+        eyebrow={copy.eyebrow}
+        title={t("dashboard.title")}
+        description={copy.description}
+        actions={
+          <section className="dashboard-window" aria-label={t("dashboard.window")}>
+            <label>
+              {t("dashboard.window")}
+              <Select
+                value={days ?? "7"}
+                onChange={changeDays}
+                options={WINDOW_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
+              />
+            </label>
+          </section>
+        }
+      />
 
       {error && (
         <ErrorState
@@ -251,6 +290,44 @@ export default function DashboardPage() {
 
       {summary && (
         <>
+          {(() => {
+            const attention = summary.current.needs_attention_count;
+            const waiting = summary.current.waiting_approval_count;
+            const running = summary.current.running_count;
+            const urgent = attention > 0 || waiting > 0;
+            const active = urgent || running > 0;
+            return (
+              <section className={`dashboard-focus${urgent ? " is-urgent" : active ? " is-live" : " is-clear"}`} aria-live="polite">
+                <div className="dashboard-focus-copy">
+                  <p className="catalog-eyebrow">
+                    {urgent ? copy.focusEyebrowUrgent : active ? copy.focusEyebrowLive : copy.focusEyebrowClear}
+                  </p>
+                  <h2>{urgent ? copy.focusTitle : active ? copy.focusLiveTitle : copy.focusClearTitle}</h2>
+                  <p>
+                    {urgent
+                      ? copy.focusAttention(formatCount(attention), formatCount(waiting))
+                      : active
+                        ? copy.focusLive(formatCount(running))
+                        : copy.focusClear}
+                  </p>
+                </div>
+                <div className="dashboard-focus-actions">
+                  {attention > 0 && (
+                    <Link className="button button-primary" href="/runs?status=NEEDS_ATTENTION">{copy.reviewRuns}</Link>
+                  )}
+                  {waiting > 0 && (
+                    <Link className="button button-ghost" href="/approvals">{copy.reviewApprovals}</Link>
+                  )}
+                  {!urgent && running > 0 && (
+                    <Link className="button button-primary" href="/runs?status=RUNNING">{copy.liveRuns}</Link>
+                  )}
+                  {!active && (
+                    <Link className="button button-ghost" href="/agents">{copy.emptyWorkspace}</Link>
+                  )}
+                </div>
+              </section>
+            );
+          })()}
           {summary.success_rate.denominator === 0 && summary.current.running_count === 0 && (
             <Panel title={t("dashboard.onboarding.title")}>
               <p className="state-hint">{t("dashboard.onboarding.lede")}</p>

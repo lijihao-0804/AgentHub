@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import MetricCard from "@/components/ui/metric-card";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { CatalogPageHeader } from "@/components/catalog/catalog-layout";
 import { ApiError, toApiError } from "@/lib/api/client";
 import {
   PricingSnapshot,
@@ -18,7 +19,7 @@ import { useFrontendSession } from "@/components/providers/session-provider";
 import { useI18n } from "@/i18n/provider";
 
 export default function EvaluationOverviewPage() {
-  const { t, formatNumber } = useI18n();
+  const { t, locale, formatNumber } = useI18n();
   const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
   const [datasetTotal, setDatasetTotal] = useState<number | null>(null);
   const [experimentTotal, setExperimentTotal] = useState<number | null>(null);
@@ -29,6 +30,19 @@ export default function EvaluationOverviewPage() {
   const [loaded, setLoaded] = useState(false);
   const activeSessionRef = useRef(sessionId);
   activeSessionRef.current = sessionId;
+  const copy = locale === "zh-CN"
+    ? {
+        eyebrow: "评测与发布",
+        description: "创建数据集、比较智能体版本，并判断新版本是否已经达到发布标准。",
+        openDatasets: "数据集",
+        openExperiments: "正式实验",
+      }
+    : {
+        eyebrow: "Evaluation and release",
+        description: "Create datasets, compare agent versions, and decide when a version is ready to release.",
+        openDatasets: "Datasets",
+        openExperiments: "Formal experiments",
+      };
 
   useEffect(() => {
     setDatasetTotal(null);
@@ -82,9 +96,17 @@ export default function EvaluationOverviewPage() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1>{t("evaluation.overview.title")}</h1>
-      </header>
+      <CatalogPageHeader
+        eyebrow={copy.eyebrow}
+        title={t("evaluation.overview.title")}
+        description={copy.description}
+        actions={
+          <>
+            <Link className="button button-ghost" href="/evaluations/datasets">{copy.openDatasets}</Link>
+            <Link className="button button-primary" href="/evaluations/experiments">{copy.openExperiments}</Link>
+          </>
+        }
+      />
 
       {error && (
         <ErrorState

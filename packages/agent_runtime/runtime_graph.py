@@ -2475,15 +2475,13 @@ class _AgentRunGraph:
                 "model_round_count": next_round,
                 "failure_code": (
                     "RUN_ACTOR_ACCESS_REVOKED"
-                    if state["runtime"].get("summary_policy", {}).get("enabled") is True
-                    and error.code in {"FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
+                    if error.code in {"FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
                     else error.code
                 ),
                 **(
                     {"run_status": "NEEDS_ATTENTION"}
                     if error.code
                     in {"RUN_EXECUTION_LEASE_LOST", "FORBIDDEN", "RUN_ACTOR_ACCESS_REVOKED"}
-                    and state["runtime"].get("summary_policy", {}).get("enabled") is True
                     else {}
                 ),
             }

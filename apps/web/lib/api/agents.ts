@@ -368,3 +368,41 @@ export async function reactivateAgentMemory(
     { method: "POST" },
   );
 }
+
+export type AgentWikiBinding = {
+  workspace_id?: string;
+  agent_id?: string;
+  knowledge_base_id: string;
+  binding_mode: "PINNED" | "LATEST";
+  wiki_publication_id: string | null;
+  publication_hash?: string | null;
+};
+
+export async function getAgentWikiBinding(
+  input: AuthInput,
+  agentId: string,
+): Promise<AgentWikiBinding | null> {
+  return apiRequest<AgentWikiBinding | null>(
+    `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/wiki-binding`,
+    input.accessToken,
+  );
+}
+
+export async function replaceAgentWikiBinding(
+  input: AuthInput,
+  agentId: string,
+  binding: {
+    knowledge_base_id: string;
+    binding_mode: "PINNED" | "LATEST";
+    wiki_publication_id?: string | null;
+  } | null,
+): Promise<AgentWikiBinding | null> {
+  return apiRequest<AgentWikiBinding | null>(
+    `${agentsBase(input.workspaceId)}/${encodeURIComponent(agentId)}/wiki-binding`,
+    input.accessToken,
+    {
+      method: "PUT",
+      body: JSON.stringify(binding),
+    },
+  );
+}

@@ -75,13 +75,27 @@ export default function WorkspaceSelector() {
         className="ws-selector-trigger"
         aria-expanded={panelOpen}
         aria-haspopup="menu"
+        aria-label={`${t("shell.currentWorkspace")}: ${fullLabel}`}
         onClick={() => (panelOpen ? closePanel() : openPanel())}
         title={fullLabel}
       >
         <span className="session-dot" aria-hidden="true" />
-        {orgPrefix && <span className="ws-org-prefix">{orgPrefix} /</span>}
-        <span className="ws-path">{workspaceLabel}</span>
-        <span aria-hidden="true">▾</span>
+        <span className="ws-context">
+          <span className="ws-context-label">{t("shell.currentWorkspace")}</span>
+          <span className="ws-path-line">
+            {orgPrefix && <span className="ws-org-prefix">{orgPrefix} /</span>}
+            <span className="ws-path">{workspaceLabel}</span>
+          </span>
+        </span>
+        <svg className="ws-caret" aria-hidden="true" fill="none" viewBox="0 0 16 16">
+          <path
+            d="m4.5 6 3.5 3.5L11.5 6"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="1.5"
+          />
+        </svg>
       </button>
       {panelOpen && (
         <div className="ws-menu" role="menu" aria-label={t("workspace.selectWorkspace")}>

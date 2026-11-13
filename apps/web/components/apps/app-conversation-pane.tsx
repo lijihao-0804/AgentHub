@@ -62,7 +62,7 @@ export default function AppConversationPane({
   turns: WorkspaceQuery<ThreadTurn[]>;
   onTurnCompleted: () => void;
 }) {
-  const { t, formatDateTime } = useI18n();
+  const { t, locale, formatDateTime } = useI18n();
   const { workspaceId, accessToken, permissions } = useFrontendSession();
   const cannotRun = permissions !== null && !permissions.includes("agent_run");
   const mutation = useWorkspaceMutation(`app-turns:${threadId}`);
@@ -444,9 +444,11 @@ export default function AppConversationPane({
         {(cannotRun || turnList.some((turn) => turn.user_input === null)) && (
           <p className="state-hint" role="note">{t("appThread.conversation.readOnlyHint")}</p>
         )}
-        <label className="visually-hidden">
-          {t("appThread.conversation.composerLabel")}
+        <label className="conversation-input">
+          <span className="sr-only">{t("appThread.conversation.composerLabel")}</span>
           <textarea
+            name="message"
+            autoComplete="off"
             rows={3}
             value={draft}
             onChange={(event) => {
@@ -501,6 +503,7 @@ export default function AppConversationPane({
           </div>
         )}
         <div className="form-actions">
+          <span className="composer-hint">{locale === "zh-CN" ? "Enter 发送，Shift + Enter 换行" : "Enter to send, Shift + Enter for a new line"}</span>
           <button
             type="submit"
             className="button button-primary"

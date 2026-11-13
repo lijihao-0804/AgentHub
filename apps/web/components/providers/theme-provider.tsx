@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -28,7 +29,15 @@ export type Theme = "dark" | "light";
 
 export const THEME_STORAGE_KEY = "agenthub.theme";
 
-const DEFAULT_THEME: Theme = "dark";
+const DEFAULT_THEME: Theme = "light";
+
+/**
+ * The provider is rendered on the server, so use a browser-only layout effect
+ * after hydration. It runs before the next paint and avoids the visible theme
+ * swap that an ordinary effect can produce.
+ */
+const useBrowserLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 type ThemeContextValue = {
   theme: Theme;
@@ -42,12 +51,11 @@ function isTheme(value: string | null): value is Theme {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // The first render always uses the stable default so server and client
-  // markup agree; the stored or system preference is applied after
-  // hydration. A brief flash is accepted, as it is for the locale.
+  // The server and first client render agree on the product default. A saved
+  // preference is applied before the next browser paint.
   const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
 
-  useEffect(() => {
+  useBrowserLayoutEffect(() => {
     let preferred: Theme | null = null;
     try {
       const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -55,17 +63,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       // Storage unavailable (e.g. privacy mode) — fall through.
     }
-    if (!preferred && typeof window.matchMedia === "function") {
-      preferred = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-    }
-    if (preferred) setThemeState(preferred);
+    const resolved = preferred ?? DEFAULT_THEME;
+    document.documentElement.dataset.theme = resolved;
+    setThemeState(resolved);
   }, []);
 
-  useEffect(() => {
+  useBrowserLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
   const setTheme = useCallback((next: Theme) => {
+    document.documentElement.dataset.theme = next;
     setThemeState(next);
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, next);

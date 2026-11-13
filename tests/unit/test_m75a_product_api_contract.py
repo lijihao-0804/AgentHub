@@ -125,3 +125,50 @@ def test_tool_projection_exposes_validated_governance_and_fails_closed() -> None
     assert no_revision.identity is None
     assert no_revision.effect is None
     assert no_revision.execution_kind is None
+
+
+def test_validate_provider_base_url_rejects_ssrf_and_invalid_urls() -> None:
+    from packages.control_plane.product_control_plane import validate_provider_base_url
+
+    assert validate_provider_base_url(None) is None
+    assert validate_provider_base_url("") is None
+    assert validate_provider_base_url("   ") is None
+    assert validate_provider_base_url("https://api.openai.com/v1") == "https://api.openai.com/v1"
+    assert validate_provider_base_url("https://dashscope.aliyuncs.com/compatible-mode/v1") == "https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+    # Forbidden schemes
+    for bad_scheme in ("ftp://example.com", "file:///etc/passwd", "gopher://example.com"):
+        with pytest.raises(AgentHubError) as exc_info:
+            validate_provider_base_url(bad_scheme)
+        assert exc_info.value.code == "INVALID_PROVIDER_BASE_URL"
+
+    # Credentials in URL
+    with pytest.raises(AgentHubError) as exc_info:
+        validate_provider_base_url("https://user:pass@api.openai.com/v1")
+    assert exc_info.value.code == "INVALID_PROVIDER_BASE_URL"
+
+    # Cloud metadata endpoints
+    for metadata_target in (
+        "http://169.254.169.254/latest/meta-data",
+        "http://metadata.google.internal/computeMetadata/v1",
+    ):
+        with pytest.raises(AgentHubError) as exc_info:
+            validate_provider_base_url(metadata_target)
+        assert exc_info.value.code == "INVALID_PROVIDER_BASE_URL"
+
+    # Loopback / private addresses without allow_private
+    for private_target in (
+        "http://127.0.0.1:8000/v1",
+        "http://localhost:8080/v1",
+        "http://10.0.0.1/v1",
+        "http://192.168.1.1/v1",
+    ):
+        with pytest.raises(AgentHubError) as exc_info:
+            validate_provider_base_url(private_target)
+        assert exc_info.value.code == "INVALID_PROVIDER_BASE_URL"
+
+    # allow_private allows local/private IP but still blocks metadata
+    assert validate_provider_base_url("http://127.0.0.1:8000/v1", allow_private=True) == "http://127.0.0.1:8000/v1"
+    with pytest.raises(AgentHubError) as exc_info:
+        validate_provider_base_url("http://169.254.169.254/v1", allow_private=True)
+    assert exc_info.value.code == "INVALID_PROVIDER_BASE_URL"

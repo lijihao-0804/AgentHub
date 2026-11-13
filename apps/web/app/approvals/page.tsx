@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import {
+  CatalogEmptyNotice,
+  CatalogPageHeader,
+  CatalogStatStrip,
+  CatalogToolbar,
+} from "@/components/catalog/catalog-layout";
 import { KeyValues } from "@/components/ui/technical-details";
 import TechnicalDetails from "@/components/ui/technical-details";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
@@ -44,7 +50,7 @@ function argumentEntries(approval: Approval): Array<[string, unknown]> {
 }
 
 export default function ApprovalsPage() {
-  const { t, formatDateTime, formatDurationMs } = useI18n();
+  const { t, locale, statusLabel, formatCount, formatDateTime, formatDurationMs } = useI18n();
   const { workspaceId, accessToken, connected, permissions, sessionId } = useFrontendSession();
   const cannotDecide = permissions !== null && !permissions.includes("approve_action");
   const [approvals, setApprovals] = useState<Approval[]>([]);
@@ -61,6 +67,8 @@ export default function ApprovalsPage() {
   /** Which inbox slice is on display; server-side filter via ?decision=. */
   const [decisionTab, setDecisionTab] = useState<"PENDING" | "ALL">("PENDING");
   const [total, setTotal] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   /** Generation of the list request; a stale workspace's response never lands. */
   const generationRef = useRef(0);
   const activeSessionRef = useRef(sessionId);
@@ -78,6 +86,7 @@ export default function ApprovalsPage() {
     setDenyPromptId(null);
     setDenyReason("");
     setLastDecisionId(null);
+    setSearch("");
   }, [sessionId]);
   /** True once the user paged past the first page; polling then pauses so a
    * refresh never collapses an expanded list back to page one. */
@@ -89,6 +98,37 @@ export default function ApprovalsPage() {
   const hasPendingExpirations = approvals.some(
     (approval) => approval.decision_status === "PENDING" && approval.expires_at,
   );
+  const copy = locale === "zh-CN"
+    ? {
+        eyebrow: "审批队列",
+        description: "审核智能体准备执行的工具操作，处理待审批请求，并及时跟进结果不明确的操作。",
+        searchLabel: "搜索当前列表中的审批",
+        searchPlaceholder: "按工具、运行、动作 ID 或状态搜索",
+        clearSearch: "清空搜索",
+        result: (visible: number, loaded: number) => `显示 ${visible} / ${loaded}`,
+        noMatch: "没有匹配的审批",
+        noMatchHint: "搜索会收窄当前列表。清空搜索即可查看这里的全部审批。",
+        inboxTotal: "队列总数",
+        loadedHere: "当前列表",
+        needsAttention: "结果未知",
+        loading: "加载中",
+        unavailable: "不可用",
+      }
+    : {
+        eyebrow: "Approval queue",
+        description: "Review tool actions agents want to take, clear pending requests, and follow up on any action whose outcome is uncertain.",
+        searchLabel: "Search approvals in this view",
+        searchPlaceholder: "Search tool, run, action ID, or state",
+        clearSearch: "Clear search",
+        result: (visible: number, loaded: number) => `${visible} of ${loaded} shown`,
+        noMatch: "No matching approvals",
+        noMatchHint: "Search narrows this view. Clear it to see every approval shown here.",
+        inboxTotal: "Inbox total",
+        loadedHere: "In this view",
+        needsAttention: "Unknown outcome",
+        loading: "Loading",
+        unavailable: "Unavailable",
+      };
 
   useEffect(() => {
     if (!hasPendingExpirations) return;
@@ -226,12 +266,42 @@ export default function ApprovalsPage() {
 
   const counts = countSummary(approvals);
   const hint = error ? errorHintKey(error) : null;
+  const normalizedSearch = deferredSearch.trim().toLocaleLowerCase(locale);
+  const filteredApprovals = normalizedSearch
+    ? approvals.filter((approval) =>
+        [
+          approval.tool_identity,
+          approval.run_id,
+          approval.logical_action_id,
+          approval.decision_status,
+          approval.execution_status,
+          statusLabel(approval.decision_status),
+          statusLabel(approval.execution_status),
+          approval.failure_code ?? "",
+        ].some((value) => value.toLocaleLowerCase(locale).includes(normalizedSearch)),
+      )
+    : approvals;
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1>{t("approvals.title")}</h1>
-      </header>
+      <CatalogPageHeader
+        eyebrow={copy.eyebrow}
+        title={t("approvals.title")}
+        description={copy.description}
+        actions={
+          <Link className="button button-ghost" href="/runs?status=NEEDS_ATTENTION">
+            {t("dashboard.ops.needsAttention")}
+          </Link>
+        }
+      />
+
+      <CatalogStatStrip
+        items={[
+          { label: copy.inboxTotal, value: total === null ? (loading ? copy.loading : copy.unavailable) : formatCount(total) },
+          { label: copy.loadedHere, value: loading && !loaded ? copy.loading : formatCount(approvals.length) },
+          { label: copy.needsAttention, value: loading && !loaded ? copy.loading : formatCount(counts.needsAttention), tone: counts.needsAttention > 0 ? "attention" : undefined },
+        ]}
+      />
 
       <Panel
         ariaLabel={t("approvals.inboxTitle")}
@@ -280,6 +350,17 @@ export default function ApprovalsPage() {
         </div>
         <p className="state-hint">{t("approvals.countsReflect")}</p>
 
+        {approvals.length > 0 && (
+          <CatalogToolbar
+            searchLabel={copy.searchLabel}
+            searchPlaceholder={copy.searchPlaceholder}
+            searchValue={search}
+            onSearchChange={setSearch}
+            resultLabel={copy.result(filteredApprovals.length, approvals.length)}
+            clearLabel={copy.clearSearch}
+          />
+        )}
+
         {error && (
           <ErrorState
             code={error.code}
@@ -293,8 +374,12 @@ export default function ApprovalsPage() {
           <EmptyState title={t("approvals.empty")} hint={t("approvals.emptyHint")} />
         )}
 
+        {approvals.length > 0 && filteredApprovals.length === 0 && (
+          <CatalogEmptyNotice title={copy.noMatch} hint={copy.noMatchHint} />
+        )}
+
         <div className="approval-list">
-          {approvals.map((approval) => {
+          {filteredApprovals.map((approval) => {
             const deciding = decisionState?.approvalId === approval.id ? decisionState.decision : null;
             const cardError = decisionError?.approvalId === approval.id ? decisionError.error : null;
             const decidedAt = approval.decided_at ? formatDateTime(approval.decided_at) : "—";

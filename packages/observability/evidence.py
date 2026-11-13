@@ -10,7 +10,7 @@ from sqlalchemy import select
 from packages.agent_runtime.events import AgentEvent, AgentEventType
 from packages.agent_runtime.models import AgentRun, AgentRunEvent
 from packages.core.errors.exceptions import AgentHubError
-from packages.knowledge.models import DocumentChunk, KnowledgeSnapshotItem
+from packages.knowledge.models import DocumentChunk, DocumentRevision, KnowledgeSnapshotItem
 from packages.knowledge.snapshots import KnowledgeSnapshotService
 
 TOOL_EVENTS = ("tool.requested", "tool.started", "tool.completed", "tool.failed")
@@ -63,7 +63,7 @@ class RunEvidenceService:
             events.append(event.as_dict())
             if event.type is AgentEventType.TOOL_COMPLETED:
                 references.extend(json.loads(event.payload.get("evidence_refs", "[]")))
-        unique = {tuple(sorted(r.items())): r for r in references}
+        unique = {json.dumps(r, sort_keys=True): r for r in references}
         return {
             "events": events,
             "evidence_refs": list(unique.values()),
@@ -119,12 +119,20 @@ class RunEvidenceService:
                     KnowledgeSnapshotItem.document_revision_id == DocumentChunk.document_revision_id
                 ),
             )
+            .join(
+                DocumentRevision,
+                (DocumentRevision.workspace_id == DocumentChunk.workspace_id)
+                & (DocumentRevision.knowledge_base_id == DocumentChunk.knowledge_base_id)
+                & (DocumentRevision.document_id == DocumentChunk.document_id)
+                & (DocumentRevision.id == DocumentChunk.document_revision_id),
+            )
             .where(
                 DocumentChunk.workspace_id == run.workspace_id,
                 DocumentChunk.knowledge_base_id == UUID(ref["knowledge_base_id"]),
                 DocumentChunk.document_revision_id == UUID(ref["document_revision_id"]),
                 DocumentChunk.chunk_id == chunk_id,
                 KnowledgeSnapshotItem.snapshot_id == snapshot_id,
+                DocumentRevision.lifecycle_status != "DELETED",
             )
         )
         if chunk is None:

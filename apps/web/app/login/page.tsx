@@ -7,6 +7,7 @@ import { useFrontendSession } from "@/components/providers/session-provider";
 import { ApiError, toApiError } from "@/lib/api/client";
 import { InlineError } from "@/components/ui/states";
 import { useI18n } from "@/i18n/provider";
+import AuthLayout from "@/components/auth/auth-layout";
 
 export default function LoginPage() {
   const { t } = useI18n();
@@ -26,12 +27,13 @@ export default function LoginPage() {
     setInvalid(null);
     if (!email.trim() || !password) {
       setInvalid(t("auth.requiredFields"));
+      event.currentTarget.querySelector<HTMLInputElement>(!email.trim() ? '[name="email"]' : '[name="password"]')?.focus();
       return;
     }
     setSubmitting(true);
     try {
       await signIn({ email: email.trim(), password });
-      // The shell redirects to /dashboard once the session is adopted.
+      // The shell returns to the workspace home once the session is adopted.
       setPassword("");
     } catch (caught) {
       const apiError = toApiError(caught, t("auth.loginFailed"));
@@ -43,22 +45,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="auth-card">
-      <div className="auth-brand">
-        <span className="brand-name">AgentHub</span>
-        <span className="brand-subtitle">{t("brand.subtitle")}</span>
-      </div>
-      <h1>{t("auth.loginTitle")}</h1>
-      <form onSubmit={handleSubmit} noValidate>
+    <AuthLayout mode="login">
+      <h1 id="auth-form-title">{t("auth.loginTitle")}</h1>
+      <form onSubmit={handleSubmit} noValidate aria-busy={submitting}>
         <label>
           {t("auth.email")}
           <input
             type="email"
+            name="email"
+            inputMode="email"
             autoComplete="username"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             spellCheck={false}
-            autoFocus
+            required
+            aria-invalid={invalid ? true : undefined}
+            aria-describedby={invalid ? "auth-validation" : undefined}
           />
         </label>
         <label>
@@ -66,6 +68,10 @@ export default function LoginPage() {
           <span className="password-field">
             <input
               type={showPassword ? "text" : "password"}
+              name="password"
+              required
+              aria-invalid={invalid ? true : undefined}
+              aria-describedby={invalid ? "auth-validation" : undefined}
               autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -82,7 +88,7 @@ export default function LoginPage() {
           </span>
         </label>
         {invalid && (
-          <p className="inline-error" role="alert">
+          <p className="inline-error" id="auth-validation" role="alert">
             {invalid}
           </p>
         )}
@@ -94,6 +100,6 @@ export default function LoginPage() {
       <p className="auth-alt">
         {t("auth.noAccount")} <Link href="/register">{t("auth.register")}</Link>
       </p>
-    </div>
+    </AuthLayout>
   );
 }

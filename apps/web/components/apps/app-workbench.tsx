@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 
 import type { AppThreadCopy } from "@/components/apps/app-thread-copy";
 import AppConversationPane from "@/components/apps/app-conversation-pane";
+import Icon, { type IconName } from "@/components/ui/icon";
 import { InlineConfirm } from "@/components/evaluation/hash-value";
 import { EmptyState, ErrorState, InlineError, LoadingState, SessionRequired } from "@/components/ui/states";
 import { useFrontendSession } from "@/components/providers/session-provider";
@@ -63,9 +64,10 @@ export default function AppWorkbench({
   threadId?: string;
   children: (context: AppThreadContext) => ReactNode;
 }) {
-  const { t, formatDateTime, formatRelativeTime, formatCount } = useI18n();
+  const { t, locale, formatDateTime, formatRelativeTime, formatCount } = useI18n();
   const { connected, sessionId, workspaceId, accessToken, permissions } = useFrontendSession();
-  const cannotDelete = permissions !== null && !permissions.includes("agent_run");
+  const cannotDelete = permissions === null || !permissions.includes("agent_run");
+  const cannotCreate = cannotDelete;
   const router = useRouter();
 
   const listScope = `${copy.basePath}:${workspaceId}`;
@@ -137,6 +139,9 @@ export default function AppWorkbench({
   const [renaming, setRenaming] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [threadSearch, setThreadSearch] = useState("");
+  const isChinese = locale === "zh-CN";
+  const appIcon: IconName = copy.kind === "research" ? "research" : copy.kind === "incident" ? "incidents" : copy.kind === "analysis" ? "analytics" : copy.kind === "support" ? "support" : "agents";
 
   useEffect(() => {
     setShowCreate(false);
@@ -146,6 +151,17 @@ export default function AppWorkbench({
     setTitleDraft("");
     setConfirmDelete(false);
   }, [sessionId, threadId, copy.agentId]);
+
+  useEffect(() => { setThreadSearch(""); }, [sessionId, listScope]);
+
+  useEffect(() => {
+    if (!railOpen) return;
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && window.matchMedia("(max-width: 860px)").matches) setRailOpen(false);
+    };
+    document.addEventListener("keydown", dismiss);
+    return () => document.removeEventListener("keydown", dismiss);
+  }, [railOpen]);
 
   // The home composer can hand off a starting task through ?draft=; prefill it.
   useEffect(() => {
@@ -179,9 +195,9 @@ export default function AppWorkbench({
   const [hasMore, setHasMore] = useState(true);
   const activeListRef = useRef({ sessionId, scope: listScope, generation: 0 });
   useEffect(() => {
-    activeListRef.current.generation += 1;
+    activeListRef.current = { sessionId, scope: listScope, generation: activeListRef.current.generation + 1 };
     setExtraPages([]);
-    setHasMore(true);
+    setHasMore((threads.data?.length ?? 0) >= THREAD_PAGE_SIZE);
     setLoadingMore(false);
   }, [threads.data, sessionId, listScope]);
 
@@ -189,7 +205,7 @@ export default function AppWorkbench({
     if (!connected || !accessToken || loadingMore) return;
     const generation = ++activeListRef.current.generation;
     const isCurrent = () =>
-      activeListRef.current.sessionId === sessionId && activeListRef.current.generation === generation;
+      activeListRef.current.sessionId === sessionId && activeListRef.current.scope === listScope && activeListRef.current.generation === generation;
     setLoadingMore(true);
     try {
       const offset = (threads.data?.length ?? 0) + extraPages.flat().length;
@@ -202,7 +218,7 @@ export default function AppWorkbench({
     } finally {
       if (isCurrent()) setLoadingMore(false);
     }
-  }, [connected, accessToken, loadingMore, threads.data, extraPages, loadThreadPage, workspaceId, sessionId]);
+  }, [connected, accessToken, loadingMore, threads.data, extraPages, loadThreadPage, workspaceId, sessionId, listScope]);
 
   const threadList = useMemo(() => {
     const seen = new Set<string>();
@@ -215,6 +231,11 @@ export default function AppWorkbench({
     return items;
   }, [threads.data, extraPages]);
 
+  const visibleThreads = useMemo(() => {
+    const query = threadSearch.trim().toLocaleLowerCase(locale);
+    return query ? threadList.filter(({ thread: item }) => item.title.toLocaleLowerCase(locale).includes(query)) : threadList;
+  }, [threadList, threadSearch, locale]);
+
   const current = thread.data ?? null;
 
   useEffect(() => {
@@ -223,7 +244,7 @@ export default function AppWorkbench({
 
   async function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!title.trim() || (!copy.agentId && !agentId)) return;
+    if (cannotCreate || !title.trim() || (!copy.agentId && !agentId)) return;
     const created = await mutation.run((auth) =>
       createThread(auth, copy.agentId ?? agentId, { title: title.trim(), kind: copy.kind }),
     );
@@ -238,7 +259,7 @@ export default function AppWorkbench({
 
   async function rename() {
     const nextTitle = titleDraft.trim();
-    if (!nextTitle || !threadId) return;
+    if (cannotDelete || !nextTitle || !threadId) return;
     const result = await threadMutation.run((auth) => patchThread(auth, threadId, { title: nextTitle }));
     if (result) {
       setRenaming(false);
@@ -249,7 +270,7 @@ export default function AppWorkbench({
   }
 
   async function removeThread() {
-    if (!threadId) return;
+    if (cannotDelete || !threadId) return;
     const result = await threadMutation.run(async (auth) => {
       await deleteThread(auth, threadId);
       return true;
@@ -289,11 +310,17 @@ export default function AppWorkbench({
           type="button"
           className="button button-ghost"
           aria-pressed={railOpen}
+          aria-expanded={railOpen}
+          aria-controls="conversation-history"
           onClick={() => setRailOpen((open) => !open)}
         >
           {t("appThread.railToggleList")}
         </button>
-        <h1 className="thread-title">{current?.title ?? t(copy.title)}</h1>
+        <span className="thread-app-icon"><Icon name={appIcon} size={20} /></span>
+        <div className="thread-heading">
+          {threadId && <p className="thread-app-name">{t(copy.title)}</p>}
+          <h1 className="thread-title">{current?.title ?? t(copy.title)}</h1>
+        </div>
         <div className="thread-topbar-actions">
           {threadId && (
             <button
@@ -319,14 +346,23 @@ export default function AppWorkbench({
         data-side={threadId && sideOpen ? "open" : "closed"}
       >
         {railOpen && (
-          <nav className="thread-rail" aria-label={t("appThread.threads.paneTitle")}>
+          <nav className="thread-rail" id="conversation-history" aria-label={t("appThread.threads.paneTitle")}>
             <button
               type="button"
               className="button button-primary thread-new"
-              onClick={() => setShowCreate((open) => !open)}
+              disabled={cannotCreate}
+              title={cannotCreate ? t("appThread.createPermissionHint") : undefined}
+              onClick={() => threadId ? router.push(copy.basePath) : setShowCreate(true)}
             >
+              <span aria-hidden="true">+</span>
               {t(copy.newThread)}
             </button>
+            <label className="thread-search">
+              <span className="sr-only">{isChinese ? "筛选已加载对话" : "Filter loaded conversations"}</span>
+              <Icon name="search" size={15} />
+              <input type="search" name="conversation-search" autoComplete="off" value={threadSearch} onChange={(event) => setThreadSearch(event.target.value)} placeholder={isChinese ? "筛选已加载对话…" : "Filter loaded conversations…"} />
+            </label>
+            <div className="thread-list-heading"><span>{t(copy.recent)}</span><span>{formatCount(visibleThreads.length)}</span></div>
             {threads.error && (
               <ErrorState
                 code={threads.error.code}
@@ -338,7 +374,7 @@ export default function AppWorkbench({
             {threads.loading && threadList.length === 0 && !threads.error && <LoadingState />}
 
             <ul className="thread-list">
-              {threadList.map(({ thread: item, values }) => {
+              {visibleThreads.map(({ thread: item, values }) => {
                 const active = item.id === threadId;
                 return (
                   <li key={item.id}>
@@ -365,6 +401,7 @@ export default function AppWorkbench({
                 );
               })}
             </ul>
+            {threadSearch.trim() && visibleThreads.length === 0 && <p className="state-hint" role="status">{isChinese ? "已加载的对话中没有匹配结果。" : "No matches in loaded conversations."}</p>}
             {hasMore && threadList.length > 0 && (
               <button type="button" className="button button-ghost" onClick={() => void loadMore()} disabled={loadingMore}>
                 {loadingMore ? t("common.loading") : t("appThread.loadMore")}
@@ -391,7 +428,7 @@ export default function AppWorkbench({
                         type="button"
                         className="button button-primary"
                         onClick={() => void rename()}
-                        disabled={threadMutation.pending || !titleDraft.trim()}
+                        disabled={cannotDelete || threadMutation.pending || !titleDraft.trim()}
                       >
                         {t("appThread.threads.saveTitle")}
                       </button>
@@ -414,7 +451,7 @@ export default function AppWorkbench({
                         setRenaming(true);
                         setTitleDraft(current?.title ?? "");
                       }}
-                      disabled={!current}
+                      disabled={!current || cannotDelete}
                     >
                       {t("appThread.threads.rename")}
                     </button>
@@ -466,11 +503,16 @@ export default function AppWorkbench({
             {!threadId && (
               showCreateForm ? (
                 <form className="thread-welcome eval-form" onSubmit={submitCreate} noValidate>
+                  <div className="thread-welcome-intro">
+                    <span className="thread-welcome-icon"><Icon name={appIcon} size={29} /></span>
+                    <h2>{t(copy.title)}</h2>
+                    <p>{t(copy.lede)}</p>
+                  </div>
                   <p className="eval-form-title">{t(copy.createTitle)}</p>
                   {!copy.agentId && (
                     <label>
                       {t("appThread.agent")}
-                      <select value={agentId} onChange={(event) => setAgentId(event.target.value)}>
+                      <select name="agent" value={agentId} onChange={(event) => setAgentId(event.target.value)}>
                         <option value="">{t("appThread.selectAgent")}</option>
                         {agentList.map((agent) => (
                           <option value={agent.id} key={agent.id}>
@@ -483,6 +525,8 @@ export default function AppWorkbench({
                   <label>
                     {t("appThread.threadTitle")}
                     <input
+                      name="conversation-title"
+                      autoComplete="off"
                       value={title}
                       onChange={(event) => setTitle(event.target.value)}
                       placeholder={t(copy.threadTitlePlaceholder)}
@@ -490,11 +534,12 @@ export default function AppWorkbench({
                     />
                   </label>
                   <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
+                  {cannotCreate && <p className="state-hint" role="note">{t("appThread.createPermissionHint")}</p>}
                   <div className="form-actions">
                     <button
                       type="submit"
                       className="button button-primary"
-                      disabled={mutation.pending || !title.trim() || (!copy.agentId && !agentId)}
+                      disabled={cannotCreate || mutation.pending || !title.trim() || (!copy.agentId && !agentId)}
                     >
                       {mutation.pending ? t("common.loading") : t(copy.createTitle)}
                     </button>
@@ -517,6 +562,8 @@ export default function AppWorkbench({
             )}
           </div>
         )}
+
+        {railOpen && <button className="thread-rail-scrim" type="button" aria-label={isChinese ? "关闭对话列表" : "Close conversation list"} onClick={() => setRailOpen(false)} />}
 
         {threadId && current && sideOpen && (
           <aside className="thread-side" aria-label={t("appThread.railToggle")}>

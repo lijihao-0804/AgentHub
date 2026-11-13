@@ -178,11 +178,23 @@ async def _execute_agent_run(
                 trace_id=request_id,
                 user_id=str(run.created_by),
             )
-            context = (
-                await TenantService().get_workspace_access(
-                    session, principal=principal, workspace_id=workspace_id
-                )
-            ).context
+            context = None
+            try:
+                context = (
+                    await TenantService().get_workspace_access(
+                        session, principal=principal, workspace_id=workspace_id
+                    )
+                ).context
+            except AgentHubError as error:
+                if error.status_code not in {403, 404}:
+                    raise
+            if context is None or "agent_run" not in context.permissions:
+                run.status = "NEEDS_ATTENTION"
+                run.failure_code = "RUN_ACTOR_ACCESS_REVOKED"
+                run.event_log_complete = False
+                run.completed_at = datetime.now(UTC)
+                await session.commit()
+                return
             # Detach with its attributes already loaded: the run object outlives
             # this session, and a lazy refresh on a closed session would fail.
             session.expunge(run)

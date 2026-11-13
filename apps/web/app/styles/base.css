@@ -6,22 +6,27 @@ html, body { margin: 0; min-height: 100%; }
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--background);
+  scrollbar-gutter: stable;
   text-rendering: optimizeLegibility;
 }
 
 body {
-  background: radial-gradient(900px 480px at 78% -8%, var(--accent-soft), transparent 62%), var(--background);
+  background: var(--background);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: var(--text-base);
+  font-synthesis: none;
+  line-height: 1.55;
+  min-width: 20rem;
+  text-wrap: pretty;
 }
 
 ::selection { background: var(--accent-soft); color: var(--text); }
 
-h1 { font-size: var(--text-2xl); font-weight: 720; letter-spacing: -0.02em; line-height: 1.15; margin: 0.2rem 0 0.55rem; }
-h2 { font-size: var(--text-xl); font-weight: 680; letter-spacing: -0.012em; margin: 0; }
-h3 { font-size: var(--text-lg); font-weight: 640; letter-spacing: -0.008em; margin: 0; }
+h1 { font-size: var(--text-2xl); font-weight: 690; letter-spacing: -0.025em; line-height: 1.16; margin: 0.2rem 0 0.6rem; }
+h2 { font-size: var(--text-xl); font-weight: 660; letter-spacing: -0.015em; line-height: 1.25; margin: 0; }
+h3 { font-size: var(--text-lg); font-weight: 640; letter-spacing: -0.008em; line-height: 1.35; margin: 0; }
 p { margin: 0; }
 
 /* User-authored names and explanations may contain long IDs or URLs. */
@@ -38,7 +43,7 @@ a { color: var(--accent); }
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
 .button-danger:focus-visible {
@@ -52,8 +57,8 @@ a { color: var(--accent); }
  */
 input, select, textarea {
   min-width: 0;
-  background: var(--surface-inset);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   color: var(--text);
   font: inherit;
@@ -63,10 +68,11 @@ input, select, textarea {
 }
 textarea { line-height: 1.5; min-height: 6.5rem; resize: vertical; }
 input:hover:not(:disabled), select:hover:not(:disabled), textarea:hover:not(:disabled) {
-  border-color: var(--border-strong);
+  border-color: var(--text-muted);
 }
 input:focus-visible, select:focus-visible, textarea:focus-visible {
   border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
   outline-offset: 0;
 }
 input::placeholder, textarea::placeholder { color: var(--text-placeholder); }
@@ -130,8 +136,10 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-soft);
 .skip-link {
   background: var(--accent);
   color: var(--accent-ink);
+  border-radius: var(--radius-sm);
+  font-weight: 650;
   left: 1rem;
-  padding: 0.5rem 0.9rem;
+  padding: 0.55rem 0.95rem;
   position: absolute;
   top: -3rem;
   transition: top 120ms ease;

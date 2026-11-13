@@ -7,6 +7,7 @@ import { useFrontendSession } from "@/components/providers/session-provider";
 import { ApiError, toApiError } from "@/lib/api/client";
 import { InlineError } from "@/components/ui/states";
 import { useI18n } from "@/i18n/provider";
+import AuthLayout from "@/components/auth/auth-layout";
 
 /** Backend contract: password is 8–128 characters. */
 const MIN_PASSWORD_LENGTH = 8;
@@ -33,18 +34,22 @@ export default function RegisterPage() {
     setInvalid(null);
     if (!email.trim() || !password) {
       setInvalid(t("auth.requiredFields"));
+      event.currentTarget.querySelector<HTMLInputElement>(!email.trim() ? '[name="email"]' : '[name="password"]')?.focus();
       return;
     }
     if (!EMAIL_PATTERN.test(email.trim())) {
       setInvalid(t("auth.emailInvalid"));
+      event.currentTarget.querySelector<HTMLInputElement>('[name="email"]')?.focus();
       return;
     }
     if (password.length < MIN_PASSWORD_LENGTH) {
       setInvalid(t("auth.passwordTooShort"));
+      event.currentTarget.querySelector<HTMLInputElement>('[name="password"]')?.focus();
       return;
     }
     if (password !== confirmPassword) {
       setInvalid(t("auth.passwordMismatch"));
+      event.currentTarget.querySelector<HTMLInputElement>('[name="confirmPassword"]')?.focus();
       return;
     }
     setSubmitting(true);
@@ -61,22 +66,22 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="auth-card">
-      <div className="auth-brand">
-        <span className="brand-name">AgentHub</span>
-        <span className="brand-subtitle">{t("brand.subtitle")}</span>
-      </div>
-      <h1>{t("auth.registerTitle")}</h1>
-      <form onSubmit={handleSubmit} noValidate>
+    <AuthLayout mode="register">
+      <h1 id="auth-form-title">{t("auth.registerTitle")}</h1>
+      <form onSubmit={handleSubmit} noValidate aria-busy={submitting}>
         <label>
           {t("auth.email")}
           <input
             type="email"
+            name="email"
+            inputMode="email"
             autoComplete="username"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             spellCheck={false}
-            autoFocus
+            required
+            aria-invalid={invalid ? true : undefined}
+            aria-describedby={invalid ? "auth-validation" : undefined}
           />
         </label>
         <label>
@@ -84,6 +89,11 @@ export default function RegisterPage() {
           <span className="password-field">
             <input
               type={showPassword ? "text" : "password"}
+              name="password"
+              required
+              aria-invalid={invalid ? true : undefined}
+              aria-describedby={invalid ? "auth-validation" : undefined}
+              maxLength={128}
               autoComplete="new-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -104,13 +114,18 @@ export default function RegisterPage() {
           {t("auth.confirmPassword")}
           <input
             type={showPassword ? "text" : "password"}
+            name="confirmPassword"
+            required
+            aria-invalid={invalid ? true : undefined}
+            aria-describedby={invalid ? "auth-validation" : undefined}
+            maxLength={128}
             autoComplete="new-password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
           />
         </label>
         {invalid && (
-          <p className="inline-error" role="alert">
+          <p className="inline-error" id="auth-validation" role="alert">
             {invalid}
           </p>
         )}
@@ -122,6 +137,6 @@ export default function RegisterPage() {
       <p className="auth-alt">
         {t("auth.haveAccount")} <Link href="/login">{t("auth.login")}</Link>
       </p>
-    </div>
+    </AuthLayout>
   );
 }

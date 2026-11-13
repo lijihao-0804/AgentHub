@@ -32,6 +32,9 @@ import {
   type AgentKnowledgeBinding,
   type AgentToolBinding,
   type AgentVersion,
+  getAgentWikiBinding,
+  replaceAgentWikiBinding,
+  type AgentWikiBinding,
   type ContextBudget,
   type KnowledgeBindingMode,
   type RuntimeConfig,
@@ -40,6 +43,7 @@ import { listKnowledgeBases, listSnapshots, type KnowledgeBase, type KnowledgeSn
 import { listModelProfiles, type ModelProfile } from "@/lib/api/models";
 import { listToolRevisions, listTools, type Tool, type ToolRevision } from "@/lib/api/tools";
 import Select from "@/components/ui/select";
+import { handleTabListKeyDown } from "@/components/ui/tab-keyboard";
 import { useI18n } from "@/i18n/provider";
 
 type Tab = "general" | "model" | "knowledge" | "tools" | "runtime" | "memories" | "versions";
@@ -133,7 +137,8 @@ function specCount(value: unknown): number | null {
 }
 
 export default function AgentDetailClient({ agentId }: { agentId: string }) {
-  const { t, formatDateTime } = useI18n();
+  const { t, locale, formatDateTime } = useI18n();
+  const localText = (zh: string, en: string) => locale === "zh-CN" ? zh : en;
   const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
   // null = unknown access: fail open (the backend still enforces everything).
   const cannotPublish = permissions !== null && !permissions.includes("agent_edit");
@@ -247,8 +252,36 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
   // Booleans, so they live outside `runtime`: that state is all numeric
   // strings and is validated as such.
   const [memory, setMemory] = useState({ thread_history_search: false, long_term_memory: false });
+  const [contextPolicy, setContextPolicy] = useState<{
+    enabled: boolean;
+    preset: "conservative" | "balanced" | "aggressive";
+    soft_trigger_percent: string;
+    hard_trigger_percent: string;
+    retained_recent_turns: string;
+    workspace_input_limit: string;
+  }>({
+    enabled: false,
+    preset: "balanced",
+    soft_trigger_percent: "75",
+    hard_trigger_percent: "90",
+    retained_recent_turns: "2",
+    workspace_input_limit: "",
+  });
   const [knowledgeDraft, setKnowledgeDraft] = useState<AgentKnowledgeBinding[]>([]);
   const [toolDraft, setToolDraft] = useState<AgentToolBinding[]>([]);
+
+  const loadWikiBinding = useCallback((auth: AuthInput) => getAgentWikiBinding(auth, agentId), [agentId]);
+  const wikiBinding = useWorkspaceData<AgentWikiBinding | null>(
+    loadWikiBinding,
+    `agent-wiki-binding:${scope}`,
+    { enabled: tab === "knowledge" },
+  );
+  const wikiMutation = useWorkspaceMutation(`agent-wiki:${scope}`);
+  const [wikiDraft, setWikiDraft] = useState<{
+    knowledge_base_id: string;
+    binding_mode: "PINNED" | "LATEST";
+    wiki_publication_id: string;
+  }>({ knowledge_base_id: "", binding_mode: "LATEST", wiki_publication_id: "" });
 
   // A session change or a different agent invalidates every local draft.
   useEffect(() => {
@@ -270,6 +303,14 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       max_tool_result_tokens: "",
     });
     setMemory({ thread_history_search: false, long_term_memory: false });
+    setContextPolicy({
+      enabled: false,
+      preset: "balanced",
+      soft_trigger_percent: "75",
+      hard_trigger_percent: "90",
+      retained_recent_turns: "2",
+      workspace_input_limit: "",
+    });
     setKnowledgeDraft([]);
     setToolDraft([]);
     setMemoryStatus("");
@@ -317,7 +358,39 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       thread_history_search: storedMemory.thread_history_search === true,
       long_term_memory: storedMemory.long_term_memory === true,
     });
+    const cp = (runtimeConfig as Record<string, any>).context_policy;
+    if (cp) {
+      setContextPolicy({
+        enabled: true,
+        preset: cp.preset || "balanced",
+        soft_trigger_percent: cp.soft_trigger_percent != null ? String(cp.soft_trigger_percent) : "75",
+        hard_trigger_percent: cp.hard_trigger_percent != null ? String(cp.hard_trigger_percent) : "90",
+        retained_recent_turns: cp.retained_recent_turns != null ? String(cp.retained_recent_turns) : "2",
+        workspace_input_limit: cp.workspace_input_limit != null ? String(cp.workspace_input_limit) : "",
+      });
+    } else {
+      setContextPolicy({
+        enabled: false,
+        preset: "balanced",
+        soft_trigger_percent: "75",
+        hard_trigger_percent: "90",
+        retained_recent_turns: "2",
+        workspace_input_limit: "",
+      });
+    }
   }, [loadedAgent]);
+
+  useEffect(() => {
+    if (wikiBinding.data) {
+      setWikiDraft({
+        knowledge_base_id: wikiBinding.data.knowledge_base_id,
+        binding_mode: wikiBinding.data.binding_mode,
+        wiki_publication_id: wikiBinding.data.wiki_publication_id ?? "",
+      });
+    } else {
+      setWikiDraft({ knowledge_base_id: "", binding_mode: "LATEST", wiki_publication_id: "" });
+    }
+  }, [wikiBinding.data]);
 
   const loadedKnowledgeBindings = knowledgeBindings.data;
   useEffect(() => {
@@ -408,6 +481,38 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     }
   }
 
+  const saveWikiBinding = async () => {
+    setNotice(null);
+    invalidatePreflight();
+    const saved = await wikiMutation.run(async (auth) => {
+      await replaceAgentWikiBinding(auth, agentId, wikiDraft.knowledge_base_id ? {
+          knowledge_base_id: wikiDraft.knowledge_base_id,
+          binding_mode: wikiDraft.binding_mode,
+          wiki_publication_id:
+            wikiDraft.binding_mode === "PINNED" && wikiDraft.wiki_publication_id
+              ? wikiDraft.wiki_publication_id
+              : null,
+        } : null);
+      return true;
+    });
+    if (!saved) return;
+    setNotice(t("agents.bindingsSaved"));
+    wikiBinding.reload();
+  };
+
+  const clearWikiBinding = async () => {
+    setNotice(null);
+    invalidatePreflight();
+    const cleared = await wikiMutation.run(async (auth) => {
+      await replaceAgentWikiBinding(auth, agentId, null);
+      return true;
+    });
+    if (!cleared) return;
+    setNotice(t("agents.bindingsSaved"));
+    setWikiDraft({ knowledge_base_id: "", binding_mode: "LATEST", wiki_publication_id: "" });
+    wikiBinding.reload();
+  };
+
   async function saveRuntime(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice(null);
@@ -439,6 +544,20 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
     // Always sent, never omitted: this form replaces the runtime config
     // wholesale, so omitting the block is how a switch gets turned off.
     runtimeConfig.memory = { ...memory };
+    if (contextPolicy.enabled) {
+      const soft = positiveIntegerOrUndefined(contextPolicy.soft_trigger_percent) ?? 75;
+      const hard = positiveIntegerOrUndefined(contextPolicy.hard_trigger_percent) ?? 90;
+      const retained = positiveIntegerOrUndefined(contextPolicy.retained_recent_turns) ?? 2;
+      const inputLimit = positiveIntegerOrUndefined(contextPolicy.workspace_input_limit);
+      (runtimeConfig as Record<string, any>).context_policy = {
+        policy_version: "adaptive_context_v1",
+        preset: contextPolicy.preset,
+        soft_trigger_percent: soft,
+        hard_trigger_percent: hard,
+        retained_recent_turns: retained,
+        ...(inputLimit ? { workspace_input_limit: inputLimit } : {}),
+      };
+    }
 
     const result = await agentMutation.run((auth) => patchAgent(auth, agentId, { runtime_config: runtimeConfig }));
     if (result) {
@@ -663,13 +782,16 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       )}
       {agent.loading && !agent.error && <LoadingState />}
 
-      <div className="tab-strip" role="tablist" aria-label={t("agents.sections")}>
+      <div className="tab-strip" role="tablist" aria-label={t("agents.sections")} onKeyDown={handleTabListKeyDown}>
         {TABS.map((item) => (
           <button
             key={item}
             type="button"
             role="tab"
+            id={`agent-tab-${item}`}
+            aria-controls="agent-tab-panel"
             aria-selected={tab === item}
+            tabIndex={tab === item ? 0 : -1}
             className={tab === item ? "button button-primary" : "button button-ghost"}
             onClick={() => setTab(item)}
           >
@@ -678,6 +800,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
         ))}
       </div>
 
+      <div id="agent-tab-panel" role="tabpanel" aria-labelledby={`agent-tab-${tab}`} tabIndex={0}>
       <InlineError error={agentMutation.error} fallback={t("errors.requestFailed")} />
 
       {tab === "general" && loadedAgent && (
@@ -771,6 +894,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       )}
 
       {tab === "knowledge" && (
+        <>
         <Panel ariaLabel={t("agents.tab.knowledge")} title={t("agents.tab.knowledge")}>
           <p className="state-hint">{t("agents.knowledgeHint")}</p>
 
@@ -852,6 +976,89 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
             </button>
           </div>
         </Panel>
+
+        <Panel title={localText("Wiki 知识", "Wiki knowledge")}>
+          <p className="state-hint">
+            {localText("选择此智能体可使用的 Wiki 知识版本。可以随新版本更新，或固定使用某个已发布版本。", "Choose the Wiki knowledge this agent can use. Follow new publications or pin a specific published version.")}
+          </p>
+
+          {wikiBinding.loading && <LoadingState />}
+          {wikiBinding.error && (
+            <InlineError error={wikiBinding.error} fallback={localText("无法加载 Wiki 知识配置", "Could not load Wiki knowledge")} />
+          )}
+
+          <div className="form-grid" style={{ marginTop: "1rem" }}>
+            <label>
+              {t("nav.knowledge")}
+              <Select
+                value={wikiDraft.knowledge_base_id}
+                onChange={(val) => setWikiDraft((cur) => ({ ...cur, knowledge_base_id: val }))}
+                options={[
+                  { value: "", label: localText("不使用 Wiki 知识", "Do not use Wiki knowledge") },
+                  ...baseList.map((b) => ({ value: b.id, label: b.name })),
+                ]}
+              />
+            </label>
+
+            {wikiDraft.knowledge_base_id && (
+              <>
+                <label>
+                  {localText("版本选择", "Version selection")}
+                  <Select
+                    value={wikiDraft.binding_mode}
+                    onChange={(val) => setWikiDraft((cur) => ({ ...cur, binding_mode: val as any }))}
+                    options={[
+                      { value: "LATEST", label: localText("发布智能体时选择最新版本", "Use the latest when publishing the agent") },
+                      { value: "PINNED", label: localText("固定已发布版本", "Pin a published version") },
+                    ]}
+                  />
+                </label>
+
+                {wikiDraft.binding_mode === "PINNED" && (
+                  <label>
+                    {localText("Wiki 发布版本 ID", "Wiki publication ID")}
+                    <input
+                      type="text"
+                      placeholder="e.g. 00000000-0000-0000-0000-000000000000"
+                      value={wikiDraft.wiki_publication_id}
+                      onChange={(e) => setWikiDraft((cur) => ({ ...cur, wiki_publication_id: e.target.value.trim() }))}
+                    />
+                  </label>
+                )}
+              </>
+            )}
+          </div>
+
+          {wikiBinding.data?.publication_hash && (
+            <p className="state-hint" style={{ marginTop: "0.5rem" }}>
+              {localText("当前版本指纹：", "Current publication fingerprint: ")}<code>{wikiBinding.data.publication_hash}</code>
+            </p>
+          )}
+
+          <InlineError error={wikiMutation.error} fallback={localText("无法更新 Wiki 知识配置", "Could not update Wiki knowledge")} />
+
+          <div className="form-actions" style={{ marginTop: "1rem" }}>
+            <button
+              type="button"
+              className="button button-primary"
+              disabled={wikiMutation.pending || (!wikiDraft.knowledge_base_id && !wikiBinding.data)}
+              onClick={saveWikiBinding}
+            >
+              {localText("保存 Wiki 配置", "Save Wiki knowledge")}
+            </button>
+            {wikiBinding.data && (
+              <button
+                type="button"
+                className="button button-ghost"
+                disabled={wikiMutation.pending}
+                onClick={clearWikiBinding}
+              >
+                {localText("移除 Wiki 配置", "Remove Wiki knowledge")}
+              </button>
+            )}
+          </div>
+        </Panel>
+        </>
       )}
 
       {tab === "tools" && (
@@ -1033,6 +1240,77 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
               </label>
             </div>
             <p className="state-hint">{t("agents.memoryThreadSearchHint")}</p>
+
+            <h3>{localText("上下文预算与压缩策略", "Context budget and compaction")}</h3>
+            <p className="state-hint">
+              {localText("设置对话历史的保留范围和压缩时机，控制长对话占用的上下文。", "Control how much conversation history is retained and when it is compacted.")}
+            </p>
+            <div className="form-grid">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={contextPolicy.enabled}
+                  onChange={(e) => setContextPolicy((c) => ({ ...c, enabled: e.target.checked }))}
+                />
+                {localText("启用自适应上下文策略", "Enable adaptive context policy")}
+              </label>
+
+              {contextPolicy.enabled && (
+                <>
+                  <label>
+                    {localText("策略预设", "Policy preset")}
+                    <Select
+                      value={contextPolicy.preset}
+                      onChange={(val) => setContextPolicy((c) => ({ ...c, preset: val as any }))}
+                      options={[
+                        { value: "conservative", label: localText("保守：更早整理历史", "Conservative: compact earlier") },
+                        { value: "balanced", label: localText("均衡：平衡历史与空间", "Balanced: balance history and space") },
+                        { value: "aggressive", label: localText("积极：保留更多上下文", "Aggressive: retain more context") },
+                      ]}
+                    />
+                  </label>
+                  <label>
+                    {localText("保留最近对话轮数", "Recent turns to retain")}
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={contextPolicy.retained_recent_turns}
+                      onChange={(e) => setContextPolicy((c) => ({ ...c, retained_recent_turns: e.target.value }))}
+                    />
+                  </label>
+                  <label>
+                    {localText("开始整理的占用比例（%）", "Soft trigger (%)")}
+                    <input
+                      type="number"
+                      min="50"
+                      max="95"
+                      value={contextPolicy.soft_trigger_percent}
+                      onChange={(e) => setContextPolicy((c) => ({ ...c, soft_trigger_percent: e.target.value }))}
+                    />
+                  </label>
+                  <label>
+                    {localText("强制整理的占用比例（%）", "Hard trigger (%)")}
+                    <input
+                      type="number"
+                      min="60"
+                      max="98"
+                      value={contextPolicy.hard_trigger_percent}
+                      onChange={(e) => setContextPolicy((c) => ({ ...c, hard_trigger_percent: e.target.value }))}
+                    />
+                  </label>
+                  <label>
+                    {localText("工作区输入上限（tokens，可选）", "Workspace input limit (tokens, optional)")}
+                    <input
+                      type="number"
+                      placeholder="e.g. 32000"
+                      value={contextPolicy.workspace_input_limit}
+                      onChange={(e) => setContextPolicy((c) => ({ ...c, workspace_input_limit: e.target.value }))}
+                    />
+                  </label>
+                </>
+              )}
+            </div>
             {!runtimeValuesValid && (
               <p className="state-hint">{t("agents.runtimeInvalid")}</p>
             )}
@@ -1305,6 +1583,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
           )}
         </Panel>
       )}
+      </div>
     </div>
   );
 }

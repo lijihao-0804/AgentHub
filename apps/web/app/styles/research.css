@@ -34,7 +34,7 @@
   display: flex;
   flex-direction: column;
   height: calc(100dvh - 8.5rem);
-  min-height: 30rem;
+  min-height: 34rem;
 }
 .thread-topbar {
   align-items: center;
@@ -42,7 +42,7 @@
   display: flex;
   gap: var(--space-3);
   margin-top: var(--space-1);
-  padding-bottom: var(--space-2);
+  padding: 0 0 var(--space-4);
 }
 .thread-back {
   color: var(--text-muted);
@@ -61,25 +61,36 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.thread-heading { flex: 1 1 12rem; min-width: 0; }
+.thread-app-name { color: var(--text-muted); font-size: 0.7rem; margin: 0 0 0.15rem; }
+.thread-app-icon { align-items: center; background: var(--accent-soft); border-radius: 10px; color: var(--accent); display: flex; flex-shrink: 0; height: 38px; justify-content: center; width: 38px; }
 .thread-topbar-actions { display: flex; flex-shrink: 0; gap: var(--space-2); }
 
 .thread-frame {
   display: grid;
   flex: 1 1 auto;
-  gap: var(--space-3);
-  grid-template-columns: 15rem minmax(0, 1fr) minmax(0, 1.05fr);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  gap: 0;
+  grid-template-columns: 15rem minmax(0, 1fr) minmax(0, 0.85fr);
   grid-template-rows: minmax(0, 1fr);
   margin-top: var(--space-3);
   min-height: 0;
 }
 .thread-frame[data-rail="closed"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
 .thread-frame[data-rail="closed"] .thread-rail { display: none; }
-.thread-frame[data-side="closed"] { grid-template-columns: 13rem minmax(0, 1fr); }
+.thread-frame[data-side="closed"] { grid-template-columns: 15rem minmax(0, 1fr); }
 .thread-frame[data-rail="closed"][data-side="closed"] { grid-template-columns: minmax(0, 1fr); }
 .thread-frame[data-side="closed"] .thread-side { display: none; }
 
 /* Welcome / create screen shown in the center when no thread is selected. */
-.thread-welcome { margin: auto; max-width: 30rem; width: 100%; }
+.thread-welcome { margin: auto; max-width: 32rem; padding: 2.5rem 2rem; width: 100%; }
+.thread-welcome-intro { display: grid; gap: 0.65rem; margin-bottom: 1.75rem; }
+.thread-welcome-icon { align-items: center; background: var(--accent-soft); border-radius: 16px; color: var(--accent); display: flex; height: 64px; justify-content: center; margin-bottom: 0.65rem; width: 64px; }
+.thread-welcome-intro h2 { font-size: 1.8rem; font-weight: 650; letter-spacing: -0.04em; margin: 0; }
+.thread-welcome-intro p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.8; margin: 0; }
+.thread-welcome.eval-form { background: transparent; border: 0; border-radius: 0; }
 .thread-welcome-empty {
   align-content: center;
   display: grid;
@@ -91,14 +102,24 @@
 
 /* Left rail: the conversation list, no box around it. */
 .thread-rail {
+  background: var(--row-subtle);
+  border-right: 1px solid var(--border);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   min-height: 0;
+  padding: var(--space-4);
 }
+.thread-search { align-items: center; display: flex; gap: 0.35rem; min-width: 0; position: relative; }
+.thread-search > svg { color: var(--text-muted); left: 0.65rem; pointer-events: none; position: absolute; }
+.thread-search input { background: var(--surface); font-size: 0.75rem; padding-left: 1.9rem; }
+.thread-list-heading { align-items: center; color: var(--text-muted); display: flex; font-size: 0.7rem; justify-content: space-between; padding: 0.6rem 0.4rem 0; }
+.thread-list-heading > span:last-child { background: var(--surface-inset); border-radius: 5px; font-variant-numeric: tabular-nums; padding: 0.1rem 0.35rem; }
+.thread-rail-scrim { display: none; }
 .thread-new { flex-shrink: 0; }
 .thread-rail .thread-list {
-  border-right: 1px solid var(--border);
+  border-right: 0;
   flex: 1 1 auto;
   margin-right: calc(-1 * var(--space-2));
   overflow-y: auto;
@@ -110,7 +131,7 @@
   color: inherit;
   display: grid;
   gap: 0.15rem;
-  padding: 0.5rem 0.7rem;
+  padding: 0.75rem 0.7rem;
   text-decoration: none;
 }
 .thread-list-item:hover { background: var(--row-hover); }
@@ -124,12 +145,12 @@
 .thread-rename label { color: var(--text-muted); display: grid; font-size: 0.75rem; gap: 0.25rem; }
 
 /* Center: the turn stream and the pinned composer. */
-.thread-chat { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.thread-chat { display: flex; flex-direction: column; min-height: 0; min-width: 0; padding: var(--space-4) 0; }
 .thread-turns {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--space-1) var(--space-3) var(--space-3);
+  padding: var(--space-3) var(--space-5) var(--space-5);
   scrollbar-gutter: stable;
 }
 :root { --chat-content-width: 44rem; }
@@ -161,7 +182,7 @@
 }
 .conversation-message-user .conversation-text { line-height: 1.55; }
 .conversation-message-agent { padding-right: 0.2rem; }
-.conversation-role { color: var(--text-muted); font-size: 0.72rem; margin: 0; }
+.conversation-role { color: var(--text-muted); font-size: 0.72rem; font-weight: 600; margin: 0; }
 .conversation-role-line { align-items: center; display: flex; gap: var(--space-2); }
 /* A gradient dot marks the agent turn without shipping an avatar image. */
 .conversation-role-line::before {
@@ -181,35 +202,39 @@
   background: var(--surface-raised);
   border: 1px solid var(--border-strong);
   border-radius: 14px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 3px 15px rgba(20, 46, 53, 0.045);
   display: grid;
   gap: var(--space-1);
   margin: 0 auto var(--space-1);
   max-width: calc(var(--chat-content-width) + 2rem);
-  padding: var(--space-2) var(--space-3) var(--space-3);
+  padding: var(--space-3);
   transition: border-color 140ms ease, box-shadow 140ms ease;
   width: calc(100% - var(--space-6));
 }
 /* The composer is the one place a live glow belongs: it answers focus. */
 .conversation-composer:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .conversation-composer label { color: var(--text-muted); display: grid; font-size: 0.78rem; gap: 0.3rem; }
 .conversation-composer textarea {
   background: transparent;
   border: 0;
   resize: none;
+  min-height: 4.5rem;
+  font-size: 0.9rem;
+  padding: 0.5rem;
 }
 .conversation-composer textarea:focus-visible { outline: none; }
 .conversation-composer .form-actions { justify-content: flex-end; margin: 0; }
 .conversation-composer .form-actions:only-child { grid-column: auto; }
+.composer-hint { color: var(--text-muted); font-size: 0.65rem; line-height: 1.5; margin-right: auto; }
 
 /* Right rail: the application's own panes, scrolling as one column,
    floating over the conversation with its own ground and hairline. */
 .thread-side {
   background: var(--background);
-  border-left: 0.5px solid var(--border-strong);
+  border-left: 1px solid var(--border);
   display: grid;
   align-content: start;
   gap: var(--space-3);
@@ -233,6 +258,30 @@
   .thread-side { border-left: 0; }
   .artifact-toolbar { grid-template-columns: minmax(0, 1fr); }
   .research-pane-body { max-height: none; }
+}
+
+@media (min-width: 861px) and (max-width: 1100px) {
+  .thread-frame[data-side="closed"] { grid-template-columns: 13rem minmax(0, 1fr); }
+  .thread-frame[data-rail="closed"][data-side="closed"] { grid-template-columns: minmax(0, 1fr); }
+  .thread-frame[data-side="open"] { grid-template-columns: 12rem minmax(0, 1fr); }
+  .thread-frame[data-rail="closed"][data-side="open"] { grid-template-columns: minmax(0, 1fr); }
+  .thread-side { grid-column: 1 / -1; max-height: 30rem; }
+  .thread-chat { min-height: 32rem; }
+}
+
+@media (max-width: 860px) {
+  .thread-page { min-height: 65dvh; }
+  .thread-frame { min-height: 30rem; }
+  .thread-rail-scrim { background: rgba(11, 30, 35, 0.28); border: 0; border-radius: var(--radius-lg); cursor: pointer; display: block; inset: 0; padding: 0; position: absolute; z-index: 1; }
+  .thread-rail { border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
+  .thread-topbar { flex-wrap: wrap; }
+  .thread-topbar > .button { font-size: 0.72rem; }
+  .thread-topbar-actions { margin-left: auto; }
+  .thread-welcome { padding: 2rem 1.25rem; }
+  .thread-welcome-intro h2 { font-size: 1.5rem; }
+  .conversation-composer { width: calc(100% - 1.5rem); }
+  .thread-turns { padding: 0.5rem 1rem 1.25rem; }
+  .composer-hint { max-width: 10rem; }
 }
 
 /* ---- Artifacts ---- */

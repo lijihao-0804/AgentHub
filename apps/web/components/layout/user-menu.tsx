@@ -12,6 +12,18 @@ function shortUserId(value: string): string {
   return `${value.slice(0, 6)}…${value.slice(-4)}`;
 }
 
+const UserGlyph = (
+  <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
+    <circle cx="10" cy="7.2" r="3" stroke="currentColor" strokeWidth="1.5" />
+    <path
+      d="M4.8 16.2c.55-2.35 2.5-3.8 5.2-3.8s4.65 1.45 5.2 3.8"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.5"
+    />
+  </svg>
+);
+
 /** Topbar identity menu: who is signed in, and how to sign out. */
 export default function UserMenu() {
   const { t } = useI18n();
@@ -49,12 +61,14 @@ export default function UserMenu() {
     <div className="user-menu" ref={containerRef}>
       <button
         type="button"
-        className="button button-ghost"
+        className="user-menu-trigger"
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-label={`${t("user.account")}: ${shortUserId(userId)}`}
         onClick={() => setOpen((value) => !value)}
       >
-        {t("user.account")}
+        <span className="user-avatar">{UserGlyph}</span>
+        <span className="user-label">{t("user.account")}</span>
       </button>
       {open && (
         <div className="ws-menu" role="menu" aria-label={t("user.account")}>

@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, SessionRequired } from "@/components/ui/states";
+import {
+  CatalogEmptyNotice,
+  CatalogPageHeader,
+  CatalogStatStrip,
+  CatalogToolbar,
+} from "@/components/catalog/catalog-layout";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
 import { Agent, AgentVersion, listAgents, listAgentVersions } from "@/lib/api/agents";
 import { listRuns, RunListItem } from "@/lib/api/runs";
@@ -31,7 +37,7 @@ function shortId(id: string): string {
 }
 
 export default function RunsPage() {
-  const { t, statusLabel, failureCategoryLabel, formatDateTime, formatRelativeTime, formatCount, formatDurationMs, formatCurrencyAmount } =
+  const { t, locale, statusLabel, failureCategoryLabel, formatDateTime, formatRelativeTime, formatCount, formatDurationMs, formatCurrencyAmount } =
     useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
   const [status, setStatus] = useState("");
@@ -48,6 +54,8 @@ export default function RunsPage() {
   const [initialLoaded, setInitialLoaded] = useState(false);
   // null until the URL has been read; the first load waits for it.
   const [urlFilters, setUrlFilters] = useState<{ status: string; agentVersionId: string } | null>(null);
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   /** Generation of the latest list request; stale responses never land. */
   const generationRef = useRef(0);
   /** While the user has paged deeper, a poll must not collapse to page one. */
@@ -157,6 +165,41 @@ export default function RunsPage() {
   // active and the tab is visible. Paging deeper pauses the poll so a refresh
   // cannot collapse the list back to its first page.
   const hasActiveRows = runs.some((run) => ACTIVE_RUN_STATUSES.has(run.status));
+  const copy = locale === "zh-CN"
+    ? {
+        eyebrow: "运行记录",
+        description: "查看最近和正在进行的运行，快速发现成功、失败以及等待处理的下一步。活动运行会自动更新。",
+        searchLabel: "搜索当前列表中的运行",
+        searchPlaceholder: "按运行 ID、状态、版本或失败代码搜索",
+        clearSearch: "清空搜索",
+        result: (visible: number, total: number) => `显示 ${visible} / ${total}`,
+        noMatch: "没有匹配的运行",
+        noMatchHint: "搜索会收窄当前列表；可清空搜索或调整上方筛选。",
+        loadedOnPage: "当前列表",
+        active: "活动运行",
+        needsAttention: "需要处理",
+        loading: "加载中",
+        unavailable: "不可用",
+      }
+    : {
+        eyebrow: "Run history",
+        description: "Follow recent and active runs, spot what succeeded or failed, and find the next item that needs attention. Active runs update automatically.",
+        searchLabel: "Search runs in this view",
+        searchPlaceholder: "Search run ID, status, version, or failure code",
+        clearSearch: "Clear search",
+        result: (visible: number, total: number) => `${visible} of ${total} shown`,
+        noMatch: "No matching runs",
+        noMatchHint: "Search narrows this view. Clear it or adjust the filters above.",
+        loadedOnPage: "In this view",
+        active: "Active",
+        needsAttention: "Needs attention",
+        loading: "Loading",
+        unavailable: "Unavailable",
+      };
+
+  useEffect(() => {
+    setSearch("");
+  }, [workspaceId]);
   useEffect(() => {
     if (!connected || !hasActiveRows || nextCursor !== null) return;
     const interval = window.setInterval(() => {
@@ -209,14 +252,48 @@ export default function RunsPage() {
 
   const hint = error ? errorHintKey(error) : null;
   const hasFilters = Boolean(status || agentVersionId);
+  const normalizedSearch = deferredSearch.trim().toLocaleLowerCase(locale);
+  const filteredRuns = normalizedSearch
+    ? runs.filter((run) =>
+        [
+          run.id,
+          run.trace_id,
+          run.status,
+          statusLabel(run.status),
+          `v${run.agent_version_number}`,
+          run.failure_code ?? "",
+          run.failure_category ? failureCategoryLabel(run.failure_category) : "",
+        ].some((value) => value.toLocaleLowerCase(locale).includes(normalizedSearch)),
+      )
+    : runs;
+  const activeCount = runs.filter((run) => ACTIVE_RUN_STATUSES.has(run.status)).length;
+  const attentionCount = runs.filter((run) => run.status === "NEEDS_ATTENTION").length;
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1>{t("runs.title")}</h1>
-      </header>
+      <CatalogPageHeader
+        eyebrow={copy.eyebrow}
+        title={t("runs.title")}
+        description={copy.description}
+        actions={
+          <>
+            <Link className="button button-ghost" href="/runs/compare">{t("nav.runCompare")}</Link>
+            <button type="button" className="button button-primary" onClick={() => void refresh()} disabled={loading}>
+              {t("common.refresh")}
+            </button>
+          </>
+        }
+      />
 
-      <section className="panel" aria-label={t("runs.filters.status")}>
+      <CatalogStatStrip
+        items={[
+          { label: copy.loadedOnPage, value: loading && runs.length === 0 ? copy.loading : formatCount(runs.length) },
+          { label: copy.active, value: loading && runs.length === 0 ? copy.loading : formatCount(activeCount), tone: activeCount > 0 ? "success" : undefined },
+          { label: copy.needsAttention, value: loading && runs.length === 0 ? copy.loading : formatCount(attentionCount), href: "/runs?status=NEEDS_ATTENTION", tone: attentionCount > 0 ? "attention" : undefined },
+        ]}
+      />
+
+      <section className="panel runs-filter-panel" aria-label={t("runs.filters.status")}>
         <div className="runs-toolbar">
           <label>
             {t("runs.filters.status")}
@@ -277,12 +354,6 @@ export default function RunsPage() {
             />
           </label>
           <div className="runs-toolbar-actions">
-            <Link className="button button-ghost" href="/runs/compare">
-              {t("nav.runCompare")}
-            </Link>
-            <button type="button" className="button button-ghost" onClick={() => void refresh()} disabled={loading}>
-              {t("common.refresh")}
-            </button>
             {hasFilters && (
               <button type="button" className="button button-ghost" onClick={clearFilters} disabled={loading}>
                 {t("runs.filters.clear")}
@@ -291,6 +362,17 @@ export default function RunsPage() {
           </div>
         </div>
       </section>
+
+      {runs.length > 0 && (
+        <CatalogToolbar
+          searchLabel={copy.searchLabel}
+          searchPlaceholder={copy.searchPlaceholder}
+          searchValue={search}
+          onSearchChange={setSearch}
+          resultLabel={copy.result(filteredRuns.length, runs.length)}
+          clearLabel={copy.clearSearch}
+        />
+      )}
 
       {error && (
         <ErrorState
@@ -313,7 +395,11 @@ export default function RunsPage() {
         />
       )}
 
-      {runs.length > 0 && (
+      {runs.length > 0 && filteredRuns.length === 0 && (
+        <CatalogEmptyNotice title={copy.noMatch} hint={copy.noMatchHint} />
+      )}
+
+      {filteredRuns.length > 0 && (
         <section className="panel" aria-label={t("runs.title")}>
           <div className="data-table">
             <table>
@@ -331,7 +417,7 @@ export default function RunsPage() {
                 </tr>
               </thead>
               <tbody>
-                {runs.map((run) => (
+                {filteredRuns.map((run) => (
                   <tr key={run.id}>
                     <td className="tight-cell" data-label={t("runs.columns.run")}>
                       <Link href={`/runs/${encodeURIComponent(run.id)}`} title={run.id}>

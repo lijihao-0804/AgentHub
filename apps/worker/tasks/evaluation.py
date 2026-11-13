@@ -21,6 +21,7 @@ from packages.evaluation.judge import (
     AnswerQualityJudge,
     ModelGatewayJudgeClient,
     judge_profile_from_manifest,
+    judge_profile_to_plan,
 )
 from packages.evaluation.models import EvaluationExperiment, EvaluationExperimentRun
 from packages.evaluation.queue import CeleryExperimentRunQueue
@@ -36,6 +37,7 @@ from packages.knowledge.composition import (
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.mcp.runtime import McpActionExecutor, McpToolExecutor
 from packages.memory.store import SqlAlchemyMemoryStore
+from packages.model_gateway.contracts import ResolvedModelExecutionPlan
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.model_gateway.gateway import SqlAlchemyModelGateway
 from packages.observability import ProductionTraceSink
@@ -85,11 +87,17 @@ class _SessionScopedJudgeClient:
     gateway decrypts the ``provider_credentials`` row itself.
     """
 
-    def __init__(self, factory, settings, context, model_profile_id: UUID) -> None:
+    def __init__(
+        self,
+        factory,
+        settings,
+        context,
+        plan: ResolvedModelExecutionPlan,
+    ) -> None:
         self.factory = factory
         self.settings = settings
         self.context = context
-        self.model_profile_id = model_profile_id
+        self.plan = plan
 
     async def complete(self, *, system_prompt: str, user_prompt: str) -> str:
         async with self.factory() as session:
@@ -98,7 +106,7 @@ class _SessionScopedJudgeClient:
                 credential_cipher=ProviderCredentialCipher.from_settings(self.settings),
                 trace_sink=ProductionTraceSink(),
             )
-            client = ModelGatewayJudgeClient(gateway, self.context, self.model_profile_id)
+            client = ModelGatewayJudgeClient(gateway, self.context, self.plan)
             return await client.complete(system_prompt=system_prompt, user_prompt=user_prompt)
 
 
@@ -138,7 +146,8 @@ async def _build_judge(settings, factory, run_id: UUID) -> AnswerQualityJudge | 
                 session, principal=principal, workspace_id=run.workspace_id
             )
         ).context
-    client = _SessionScopedJudgeClient(factory, settings, context, UUID(profile.profile_id))
+        plan = judge_profile_to_plan(profile, run.workspace_id)
+    client = _SessionScopedJudgeClient(factory, settings, context, plan)
     return AnswerQualityJudge(profile, client)
 
 

@@ -30,9 +30,13 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.model_gateway.contracts import (
     CapabilityRequirements,
+    ModelCapabilities,
     ModelGateway,
     ModelMessage,
     ModelRequest,
+    ResolvedModelExecutionPlan,
+    ResolvedModelExecutionProfile,
+    RetryPolicy,
 )
 
 #: Manifest key under ``evaluator_versions`` that pins the frozen judge identity.
@@ -223,6 +227,28 @@ class JudgeClient(Protocol):
     async def complete(self, *, system_prompt: str, user_prompt: str) -> str: ...
 
 
+def judge_profile_to_plan(
+    profile: FrozenJudgeProfile,
+    workspace_id: UUID,
+) -> ResolvedModelExecutionPlan:
+    resolved_profile = ResolvedModelExecutionProfile(
+        id=UUID(profile.profile_id),
+        workspace_id=workspace_id,
+        provider_credential_id=UUID(profile.credential_ref),
+        provider=profile.provider,
+        model=profile.model,
+        temperature=Decimal(str(profile.temperature)),
+        max_tokens=profile.max_tokens,
+        timeout_seconds=Decimal(str(profile.timeout_seconds)),
+        capabilities=ModelCapabilities(),
+    )
+    return ResolvedModelExecutionPlan(
+        primary=resolved_profile,
+        fallbacks=(),
+        retry_policy=RetryPolicy(),
+    )
+
+
 class ModelGatewayJudgeClient:
     """Judge transport backed by the existing model gateway.
 
@@ -235,24 +261,37 @@ class ModelGatewayJudgeClient:
         self,
         gateway: ModelGateway,
         context: WorkspaceExecutionContext,
-        model_profile_id: UUID,
+        plan_or_profile_id: ResolvedModelExecutionPlan | UUID,
     ) -> None:
         self.gateway = gateway
         self.context = context
-        self.model_profile_id = model_profile_id
+        if isinstance(plan_or_profile_id, ResolvedModelExecutionPlan):
+            self.plan: ResolvedModelExecutionPlan | None = plan_or_profile_id
+            self.model_profile_id = plan_or_profile_id.primary.id
+        else:
+            self.plan = None
+            self.model_profile_id = plan_or_profile_id
 
     async def complete(self, *, system_prompt: str, user_prompt: str) -> str:
-        response = await self.gateway.generate(
-            self.context,
-            self.model_profile_id,
-            ModelRequest(
-                messages=(
-                    ModelMessage(role="system", content=system_prompt),
-                    ModelMessage(role="user", content=user_prompt),
-                ),
-                required_capabilities=CapabilityRequirements(),
+        request = ModelRequest(
+            messages=(
+                ModelMessage(role="system", content=system_prompt),
+                ModelMessage(role="user", content=user_prompt),
             ),
+            required_capabilities=CapabilityRequirements(),
         )
+        if self.plan is not None:
+            response = await self.gateway.generate_resolved(
+                self.context,
+                self.plan,
+                request,
+            )
+        else:
+            response = await self.gateway.generate(
+                self.context,
+                self.model_profile_id,
+                request,
+            )
         return response.content
 
 
@@ -477,6 +516,7 @@ __all__ = [
     "JudgeRequest",
     "JudgeVerdictStatus",
     "ModelGatewayJudgeClient",
+    "judge_profile_to_plan",
     "RubricDimension",
     "freeze_judge_profile",
     "is_judge_evaluator_version",

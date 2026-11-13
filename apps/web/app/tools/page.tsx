@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useDeferredValue, useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import {
+  CatalogEmptyNotice,
+  CatalogPageHeader,
+  CatalogStatStrip,
+  CatalogToolbar,
+} from "@/components/catalog/catalog-layout";
 import StatusBadge from "@/components/ui/status-badge";
 import { riskTone } from "@/components/ui/badge-tones";
 import { useFrontendSession } from "@/components/providers/session-provider";
@@ -44,8 +50,9 @@ const APPROVAL_POLICY_KEYS: Record<string, MessageKey> = {
 };
 
 export default function ToolsPage() {
-  const { t } = useI18n();
-  const { connected, sessionId, workspaceId } = useFrontendSession();
+  const { t, locale, formatCount } = useI18n();
+  const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
+  const canCreate = permissions?.includes("tool_create") === true;
 
   function catalogDescription(identity: string, fallback: string | null): string {
     const key = CATALOG_DESCRIPTION_KEYS[identity];
@@ -73,13 +80,48 @@ export default function ToolsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
 
   useEffect(() => {
     setSelectedIdentity(null);
     setName("");
     setDescription("");
     setNotice(null);
+    setSearch("");
   }, [sessionId]);
+
+  const copy = locale === "zh-CN"
+    ? {
+        eyebrow: "工具治理",
+        description: "看看智能体能够做什么，并决定哪些工具可以投入使用。每项工具都会说明读取或写入范围、风险以及是否需要审批。",
+        searchLabel: "搜索工具",
+        searchPlaceholder: "按名称、标识、效果或风险搜索",
+        clearSearch: "清空搜索",
+        result: (visible: number, total: number) => `显示 ${visible} / ${total}`,
+        noMatch: "没有匹配的工具",
+        noMatchHint: "尝试更短的关键词，或清空搜索查看全部工具。",
+        workspaceLabel: "工作区工具",
+        catalogLabel: "内置目录",
+        approvalGated: "需审批项",
+        loadingValue: "加载中",
+        unavailableValue: "不可用",
+      }
+    : {
+        eyebrow: "Tool governance",
+        description: "See what your agents can do and choose which tools they may use. Each tool shows whether it reads or changes data, its risk, and whether someone must approve it.",
+        searchLabel: "Search tools",
+        searchPlaceholder: "Search by name, identity, effect, or risk",
+        clearSearch: "Clear search",
+        result: (visible: number, total: number) => `${visible} of ${total} shown`,
+        noMatch: "No matching tools",
+        noMatchHint: "Try a shorter term or clear the search to see every tool.",
+        workspaceLabel: "Workspace tools",
+        catalogLabel: "Built-in catalog",
+        approvalGated: "Approval gated",
+        loadingValue: "Loading",
+        unavailableValue: "Unavailable",
+      };
 
   if (!connected) {
     return (
@@ -94,10 +136,37 @@ export default function ToolsPage() {
 
   const toolList = tools.data ?? [];
   const catalogList = catalog.data ?? [];
+  const normalizedSearch = deferredSearch.trim().toLocaleLowerCase(locale);
+  const filteredTools = normalizedSearch
+    ? toolList.filter((tool) =>
+        [
+          tool.name,
+          tool.identity ?? "",
+          tool.effect ?? "",
+          tool.risk_level ?? "",
+          executionKindLabel(tool.execution_kind),
+        ].some((value) => value.toLocaleLowerCase(locale).includes(normalizedSearch)),
+      )
+    : toolList;
+  const filteredCatalog = normalizedSearch
+    ? catalogList.filter((item) =>
+        [
+          item.identity,
+          item.description ?? "",
+          catalogDescription(item.identity, item.description ?? null),
+          item.effect,
+          item.risk_level,
+          executionKindLabel(item.execution_kind),
+        ].some((value) => value.toLocaleLowerCase(locale).includes(normalizedSearch)),
+      )
+    : catalogList;
+  const searchableTotal = toolList.length + catalogList.length;
+  const searchableVisible = filteredTools.length + filteredCatalog.length;
+  const approvalGated = [...toolList, ...catalogList].filter((item) => item.approval_policy === "ALWAYS").length;
 
   async function submitAdd(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selectedIdentity) return;
+    if (!canCreate || !selectedIdentity) return;
     const identity = selectedIdentity;
     setNotice(null);
     const result = await mutation.run((auth) =>
@@ -118,18 +187,63 @@ export default function ToolsPage() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1>{t("tools.title")}</h1>
-      </header>
+      <CatalogPageHeader
+        eyebrow={copy.eyebrow}
+        title={t("tools.title")}
+        description={copy.description}
+        actions={
+          <Link className="button button-ghost" href="/tools/mcp">
+            {t("tools.mcp.entry")}
+          </Link>
+        }
+      />
 
       {notice && <p className="inline-notice">{notice}</p>}
 
-      <div className="page-toolbar">
-        <Link className="button button-ghost" href="/tools/mcp">
-          {t("tools.mcp.entry")}
-        </Link>
-      </div>
+      <CatalogStatStrip
+        items={[
+          {
+            label: copy.workspaceLabel,
+            value: tools.loaded ? formatCount(toolList.length) : tools.loading ? copy.loadingValue : copy.unavailableValue,
+            href: "#workspace-tools",
+          },
+          {
+            label: copy.catalogLabel,
+            value: catalog.loaded ? formatCount(catalogList.length) : catalog.loading ? copy.loadingValue : copy.unavailableValue,
+            href: "#tool-catalog",
+          },
+          {
+            label: copy.approvalGated,
+            value: tools.loaded && catalog.loaded ? formatCount(approvalGated) : copy.unavailableValue,
+            tone: approvalGated > 0 ? "attention" : undefined,
+          },
+        ]}
+      />
 
+      {(tools.loaded || catalog.loaded) && !tools.error && !catalog.error && searchableTotal > 0 && (
+        <CatalogToolbar
+          searchLabel={copy.searchLabel}
+          searchPlaceholder={copy.searchPlaceholder}
+          searchValue={search}
+          onSearchChange={setSearch}
+          resultLabel={copy.result(searchableVisible, searchableTotal)}
+          clearLabel={copy.clearSearch}
+        >
+          <button
+            type="button"
+            className="button button-ghost"
+            onClick={() => {
+              tools.reload();
+              catalog.reload();
+            }}
+            disabled={tools.loading || catalog.loading}
+          >
+            {t("common.refresh")}
+          </button>
+        </CatalogToolbar>
+      )}
+
+      <div id="workspace-tools">
       <Panel ariaLabel={t("tools.workspaceTools")} title={t("tools.workspaceTools")}>
         {tools.error && (
           <ErrorState
@@ -144,7 +258,11 @@ export default function ToolsPage() {
           <EmptyState title={t("tools.noTools")} hint={t("tools.noToolsHint")} />
         )}
 
-        {toolList.length > 0 && (
+        {tools.loaded && !tools.error && toolList.length > 0 && filteredTools.length === 0 && (
+          <CatalogEmptyNotice title={copy.noMatch} hint={copy.noMatchHint} />
+        )}
+
+        {filteredTools.length > 0 && (
           <div className="data-table">
             <table>
               <thead>
@@ -159,7 +277,7 @@ export default function ToolsPage() {
                 </tr>
               </thead>
               <tbody>
-                {toolList.map((tool) => (
+                {filteredTools.map((tool) => (
                   <tr key={tool.id}>
                     <td data-label={t("tools.name")}>
                       <Link href={`/tools/${tool.id}`}>{tool.name}</Link>
@@ -197,7 +315,9 @@ export default function ToolsPage() {
           </div>
         )}
       </Panel>
+      </div>
 
+      <div id="tool-catalog">
       <Panel
         ariaLabel={t("tools.catalog")}
         title={t("tools.catalog")}
@@ -218,7 +338,11 @@ export default function ToolsPage() {
           <EmptyState title={t("tools.noCatalog")} />
         )}
 
-        {catalogList.length > 0 && (
+        {catalog.loaded && !catalog.error && catalogList.length > 0 && filteredCatalog.length === 0 && (
+          <CatalogEmptyNotice title={copy.noMatch} hint={copy.noMatchHint} />
+        )}
+
+        {filteredCatalog.length > 0 && (
           <div className="data-table">
             <table>
               <thead>
@@ -232,7 +356,7 @@ export default function ToolsPage() {
                 </tr>
               </thead>
               <tbody>
-                {catalogList.map((item) => (
+                {filteredCatalog.map((item) => (
                   <tr key={item.identity}>
                     <td data-label={t("tools.identity")}>
                       <code>{item.identity}</code>
@@ -259,6 +383,8 @@ export default function ToolsPage() {
                           setName(item.identity);
                           setDescription(catalogDescription(item.identity, item.description ?? null));
                         }}
+                        disabled={!canCreate}
+                        title={!canCreate ? t("agents.noPermissionHint") : undefined}
                       >
                         {t("tools.addToWorkspace")}
                       </button>
@@ -294,7 +420,7 @@ export default function ToolsPage() {
               <button
                 type="submit"
                 className="button button-primary"
-                disabled={mutation.pending || !name.trim()}
+                disabled={!canCreate || mutation.pending || !name.trim()}
               >
                 {t("tools.addToWorkspace")}
               </button>
@@ -309,6 +435,7 @@ export default function ToolsPage() {
           </form>
         )}
       </Panel>
+      </div>
     </div>
   );
 }

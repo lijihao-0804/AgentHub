@@ -46,7 +46,7 @@ from packages.evaluation.ablation import EvaluationAblationService
 from packages.evaluation.experiments import ExperimentService
 from packages.evaluation.judge import FrozenJudgeProfile, freeze_judge_profile
 from packages.evaluation.metrics_service import EvaluationMetricsService
-from packages.evaluation.models import EvaluationCaseResultStatus
+from packages.evaluation.models import EvaluationCaseResultStatus, EvaluationDatasetVersion
 from packages.evaluation.queue import ExperimentRunQueue
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.service import EvaluationDatasetService
@@ -82,6 +82,43 @@ async def _variant_responses(
         response = EvaluationExperimentVariantResponse.model_validate(item, from_attributes=True)
         agent_id = agent_by_version.get(item.agent_version_id)
         responses.append(response.model_copy(update={"agent_id": agent_id}))
+    return responses
+
+
+async def _experiment_responses(
+    session: AsyncSession,
+    experiments: list,
+    workspace_id: UUID,
+) -> list[EvaluationExperimentResponse]:
+    """Project experiment rows with the dataset id owned by their version."""
+
+    version_ids = {item.dataset_version_id for item in experiments}
+    dataset_by_version: dict[UUID, UUID] = {}
+    if version_ids:
+        rows = await session.execute(
+            select(EvaluationDatasetVersion.id, EvaluationDatasetVersion.dataset_id).where(
+                EvaluationDatasetVersion.workspace_id == workspace_id,
+                EvaluationDatasetVersion.id.in_(version_ids),
+            )
+        )
+        dataset_by_version = {version_id: dataset_id for version_id, dataset_id in rows}
+
+    responses = []
+    for item in experiments:
+        dataset_id = dataset_by_version.get(item.dataset_version_id)
+        if dataset_id is None:
+            raise AgentHubError(
+                "EVALUATION_DATASET_VERSION_NOT_FOUND",
+                "The experiment's dataset version was not found.",
+                404,
+            )
+        values = {
+            name: getattr(item, name)
+            for name in EvaluationExperimentResponse.model_fields
+            if hasattr(item, name)
+        }
+        values["dataset_id"] = dataset_id
+        responses.append(EvaluationExperimentResponse.model_validate(values))
     return responses
 
 
@@ -379,7 +416,6 @@ async def create_experiment(
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationExperimentResponse:
-    del workspace_id
     judge_profile = await _freeze_judge_profile(
         session, context, payload.judge_model_profile_id
     )
@@ -394,7 +430,7 @@ async def create_experiment(
         repetitions=payload.repetitions,
         judge_profile=judge_profile,
     )
-    return EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+    return (await _experiment_responses(session, [experiment], workspace_id))[0]
 
 
 @router.get("/experiments", response_model=EvaluationExperimentListResponse)
@@ -405,15 +441,11 @@ async def list_experiments(
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> EvaluationExperimentListResponse:
-    del workspace_id
     experiments, total = await ExperimentService().list_experiments(
         session, context=context, limit=limit, offset=offset
     )
     return EvaluationExperimentListResponse(
-        items=[
-            EvaluationExperimentResponse.model_validate(item, from_attributes=True)
-            for item in experiments
-        ],
+        items=await _experiment_responses(session, experiments, workspace_id),
         total=total,
     )
 
@@ -428,14 +460,13 @@ async def get_experiment(
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationExperimentDetailResponse:
-    del workspace_id
     service = ExperimentService()
     experiment = await service.get_experiment(session, context=context, experiment_id=experiment_id)
     variants = await service.list_variants(session, context=context, experiment_id=experiment_id)
     count = await service.holdout_exposure_count(
         session, context=context, experiment_id=experiment_id
     )
-    response = EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+    response = (await _experiment_responses(session, [experiment], workspace_id))[0]
     return EvaluationExperimentDetailResponse(
         **response.model_dump(exclude={"holdout_exposure_count"}),
         holdout_exposure_count=count,
@@ -496,7 +527,6 @@ async def finalize_experiment(
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
 ) -> EvaluationExperimentDetailResponse:
-    del workspace_id
     service = ExperimentService()
     experiment = await service.finalize_experiment(
         session, context=context, experiment_id=experiment_id
@@ -505,7 +535,7 @@ async def finalize_experiment(
     count = await service.holdout_exposure_count(
         session, context=context, experiment_id=experiment_id
     )
-    response = EvaluationExperimentResponse.model_validate(experiment, from_attributes=True)
+    response = (await _experiment_responses(session, [experiment], workspace_id))[0]
     return EvaluationExperimentDetailResponse(
         **response.model_dump(exclude={"holdout_exposure_count"}),
         holdout_exposure_count=count,

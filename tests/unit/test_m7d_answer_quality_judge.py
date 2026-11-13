@@ -330,3 +330,46 @@ def test_a_judge_projection_that_no_longer_matches_its_version_is_refused(mutate
 
     with pytest.raises(AgentHubError):
         judge_profile_from_manifest(manifest)
+
+
+@pytest.mark.asyncio
+async def test_judge_client_executes_resolved_plan() -> None:
+    from packages.core.execution_context.models import WorkspaceExecutionContext
+    from packages.evaluation.judge import ModelGatewayJudgeClient, judge_profile_to_plan
+    from packages.model_gateway.contracts import ModelResponse, ModelUsage
+
+    frozen = _frozen()
+    ws_id = uuid4()
+    plan = judge_profile_to_plan(frozen, ws_id)
+    assert plan.primary.provider == frozen.provider
+    assert plan.primary.model == frozen.model
+    assert plan.primary.workspace_id == ws_id
+
+    resolved_calls = []
+
+    class FakeGateway:
+        async def generate_resolved(self, context, p, request):
+            resolved_calls.append((p, request))
+            return ModelResponse(
+                content='{"scores": {"instruction_coverage": 4}, "rationale": "good"}',
+                usage=ModelUsage(input_tokens=10, output_tokens=10, total_tokens=20),
+                provider=frozen.provider,
+                model=frozen.model,
+            )
+
+    from packages.core.execution_context.models import OrganizationContext, PrincipalContext
+    ctx = WorkspaceExecutionContext(
+        organization=OrganizationContext(
+            principal=PrincipalContext(request_id="judge-test", trace_id="judge-test", user_id="u"),
+            organization_id=str(uuid4()),
+            org_role="OWNER",
+        ),
+        workspace_id=str(ws_id),
+        workspace_role="DEVELOPER",
+        permissions=frozenset(),
+    )
+    client = ModelGatewayJudgeClient(FakeGateway(), ctx, plan)
+    result = await client.complete(system_prompt="sys", user_prompt="usr")
+    assert "scores" in result
+    assert len(resolved_calls) == 1
+    assert resolved_calls[0][0] == plan

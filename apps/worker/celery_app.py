@@ -48,6 +48,10 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
                 "task": "agenthub.reconcile_evaluation_runs",
                 "schedule": 60.0,
             },
+            "reconcile-memories": {
+                "task": "agenthub.reconcile_memories",
+                "schedule": 60.0,
+            },
         },
     )
     return app

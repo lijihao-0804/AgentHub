@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { InlineError, Panel } from "@/components/ui/states";
+import { CatalogPageHeader, CatalogStatStrip } from "@/components/catalog/catalog-layout";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { ApiError, toApiError } from "@/lib/api/client";
 import { createOrganization, createWorkspace } from "@/lib/api/tenancy";
@@ -15,7 +16,7 @@ import { useI18n } from "@/i18n/provider";
  * account that has no organization or workspace yet.
  */
 export default function SettingsPage() {
-  const { t } = useI18n();
+  const { t, locale, formatCount } = useI18n();
   const {
     accessToken,
     sessionId,
@@ -57,6 +58,27 @@ export default function SettingsPage() {
 
   const activeWorkspace = workspaces.find((workspace) => workspace.id === workspaceId) ?? null;
   const activeOrganization = organizations.find((organization) => organization.id === organizationId) ?? null;
+  const copy = locale === "zh-CN"
+    ? {
+        eyebrow: "工作区设置",
+        description: "确认当前组织与工作区上下文，管理模型和成员，并为新团队完成组织与工作区初始化。",
+        organizations: "组织",
+        workspaces: "工作区",
+        activeContext: "当前上下文",
+        none: "未选择",
+        loading: "加载中",
+        unavailable: "不可用",
+      }
+    : {
+        eyebrow: "Workspace settings",
+        description: "Confirm the current organization and workspace, manage models and members, and initialize a new team when needed.",
+        organizations: "Organizations",
+        workspaces: "Workspaces",
+        activeContext: "Active context",
+        none: "Not selected",
+        loading: "Loading",
+        unavailable: "Unavailable",
+      };
 
   async function submitOrganization(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -105,10 +127,26 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="page">
-      <header className="page-header">
-        <h1>{t("settings.title")}</h1>
-      </header>
+    <div className="page settings-page">
+      <CatalogPageHeader
+        eyebrow={copy.eyebrow}
+        title={t("settings.title")}
+        description={copy.description}
+        actions={
+          <>
+            <Link className="button button-ghost" href="/settings/models">{t("settings.models.title")}</Link>
+            <Link className="button button-ghost" href="/settings/members">{t("settings.members.title")}</Link>
+          </>
+        }
+      />
+
+      <CatalogStatStrip
+        items={[
+          { label: copy.organizations, value: tenancyLoading ? copy.loading : tenancyError ? copy.unavailable : formatCount(organizations.length) },
+          { label: copy.workspaces, value: tenancyLoading ? copy.loading : tenancyError ? copy.unavailable : formatCount(workspaces.length) },
+          { label: copy.activeContext, value: tenancyLoading ? copy.loading : activeWorkspace?.name ?? copy.none, href: activeWorkspace ? "/dashboard" : undefined },
+        ]}
+      />
 
       <Panel ariaLabel={t("settings.context")} title={t("settings.context")}>
         {tenancyLoading && <p className="state-hint">{t("common.loading")}</p>}

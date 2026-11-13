@@ -2,9 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useDeferredValue, useEffect, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import {
+  CatalogEmptyNotice,
+  CatalogPageHeader,
+  CatalogStatStrip,
+  CatalogToolbar,
+} from "@/components/catalog/catalog-layout";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
@@ -26,9 +32,10 @@ const EMPTY_FORM = {
 };
 
 export default function AgentsPage() {
-  const { t, formatDateTime } = useI18n();
+  const { t, locale, formatCount, formatDateTime } = useI18n();
   const router = useRouter();
-  const { connected, sessionId, workspaceId } = useFrontendSession();
+  const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
+  const canCreate = permissions?.includes("agent_create") === true;
 
   const loadAgents = useCallback((auth: AuthInput) => listAgents(auth), []);
   const loadProfiles = useCallback((auth: AuthInput) => listModelProfiles(auth), []);
@@ -40,6 +47,8 @@ export default function AgentsPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const templates = useWorkspaceData<AgentTemplate[]>(
     (auth: AuthInput) => listAgentTemplates(auth),
     `agent-templates:${workspaceId}`,
@@ -49,7 +58,50 @@ export default function AgentsPage() {
     setForm(EMPTY_FORM);
     setShowForm(false);
     setShowAdvanced(false);
+    setSearch("");
   }, [sessionId]);
+
+  const copy = locale === "zh-CN"
+    ? {
+        eyebrow: "智能体目录",
+        description: "创建并管理工作区里的智能体。可以从模板或空白草稿开始，再为它配置模型、知识和工具。",
+        searchLabel: "搜索智能体",
+        searchPlaceholder: "按名称、说明或模型搜索",
+        clearSearch: "清空搜索",
+        result: (visible: number, total: number) => `显示 ${visible} / ${total}`,
+        noMatch: "没有匹配的智能体",
+        noMatchHint: "尝试更短的关键词，或清空搜索查看全部智能体。",
+        agents: "智能体",
+        profiles: "模型配置",
+        templates: "起始模板",
+        loading: "加载中",
+        unavailable: "不可用",
+      }
+    : {
+        eyebrow: "Agent catalog",
+        description: "Create and manage the agents your team works with. Start from a template or a blank draft, then connect the model, knowledge, and tools each agent needs.",
+        searchLabel: "Search agents",
+        searchPlaceholder: "Search by name, description, or model",
+        clearSearch: "Clear search",
+        result: (visible: number, total: number) => `${visible} of ${total} shown`,
+        noMatch: "No matching agents",
+        noMatchHint: "Try a shorter term or clear the search to see every agent.",
+        agents: "Agents",
+        profiles: "Model profiles",
+        templates: "Start templates",
+        loading: "Loading",
+        unavailable: "Unavailable",
+      };
+
+  const agentList = agents.data ?? [];
+  const profileList = profiles.data ?? [];
+  const normalizedSearch = deferredSearch.trim().toLocaleLowerCase(locale);
+  const filteredAgents = normalizedSearch
+    ? agentList.filter((agent) =>
+        [agent.name, agent.description ?? "", profileLabel(agent.model_profile_id)]
+          .some((value) => value.toLocaleLowerCase(locale).includes(normalizedSearch)),
+      )
+    : agentList;
 
   if (!connected) {
     return (
@@ -62,9 +114,6 @@ export default function AgentsPage() {
     );
   }
 
-  const agentList = agents.data ?? [];
-  const profileList = profiles.data ?? [];
-
   function profileLabel(profileId: string): string {
     const profile = profileList.find((item) => item.id === profileId);
     return profile ? profile.model : t("common.unknown");
@@ -72,6 +121,7 @@ export default function AgentsPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canCreate) return;
     const runtimeConfig = {
       ...(form.max_steps ? { max_steps: Number(form.max_steps) } : {}),
       ...(form.max_tool_calls ? { max_tool_calls: Number(form.max_tool_calls) } : {}),
@@ -100,12 +150,10 @@ export default function AgentsPage() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1>{t("agents.title")}</h1>
-      </header>
-
-      <Panel
-        ariaLabel={t("agents.title")}
+      <CatalogPageHeader
+        eyebrow={copy.eyebrow}
+        title={t("agents.title")}
+        description={copy.description}
         actions={
           <button
             type="button"
@@ -114,11 +162,24 @@ export default function AgentsPage() {
               setShowForm((value) => !value);
               setForm(EMPTY_FORM);
             }}
-            disabled={profileList.length === 0}
+            disabled={!canCreate || profileList.length === 0}
+            title={!canCreate ? t("agents.noPermissionHint") : undefined}
           >
             {t("agents.createAgent")}
           </button>
         }
+      />
+
+      <CatalogStatStrip
+        items={[
+          { label: copy.agents, value: agents.loaded ? formatCount(agentList.length) : agents.loading ? copy.loading : copy.unavailable },
+          { label: copy.profiles, value: profiles.loaded ? formatCount(profileList.length) : profiles.loading ? copy.loading : copy.unavailable },
+          { label: copy.templates, value: templates.loaded ? formatCount((templates.data ?? []).length) : templates.loading ? copy.loading : copy.unavailable },
+        ]}
+      />
+
+      <Panel
+        ariaLabel={t("agents.title")}
       >
         {profiles.error && (
           <ErrorState
@@ -268,7 +329,7 @@ export default function AgentsPage() {
                 type="submit"
                 className="button button-primary"
                 disabled={
-                  mutation.pending ||
+                  !canCreate || mutation.pending ||
                   !form.name.trim() ||
                   !form.model_profile_id ||
                   !form.system_prompt.trim()
@@ -292,11 +353,43 @@ export default function AgentsPage() {
           />
         )}
         {agents.loading && !agents.error && <LoadingState />}
+        {agents.loaded && !agents.error && agentList.length > 0 && (
+          <CatalogToolbar
+            searchLabel={copy.searchLabel}
+            searchPlaceholder={copy.searchPlaceholder}
+            searchValue={search}
+            onSearchChange={setSearch}
+            resultLabel={copy.result(filteredAgents.length, agentList.length)}
+            clearLabel={copy.clearSearch}
+          >
+            <button type="button" className="button button-ghost" onClick={agents.reload} disabled={agents.loading}>
+              {t("common.refresh")}
+            </button>
+          </CatalogToolbar>
+        )}
         {agents.loaded && !agents.error && agentList.length === 0 && (
-          <EmptyState title={t("agents.noAgents")} hint={t("agents.noAgentsHint")} />
+          <EmptyState
+            title={t("agents.noAgents")}
+            hint={t("agents.noAgentsHint")}
+            actions={
+              <button
+                type="button"
+                className="button button-primary"
+                onClick={() => setShowForm(true)}
+                disabled={!canCreate || profileList.length === 0}
+                title={!canCreate ? t("agents.noPermissionHint") : undefined}
+              >
+                {t("agents.createAgent")}
+              </button>
+            }
+          />
         )}
 
-        {agentList.length > 0 && (
+        {agents.loaded && !agents.error && agentList.length > 0 && filteredAgents.length === 0 && (
+          <CatalogEmptyNotice title={copy.noMatch} hint={copy.noMatchHint} />
+        )}
+
+        {filteredAgents.length > 0 && (
           <div className="data-table">
             <table>
               <thead>
@@ -309,7 +402,7 @@ export default function AgentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {agentList.map((agent) => (
+                {filteredAgents.map((agent) => (
                   <tr key={agent.id}>
                     <td data-label={t("agents.name")}>
                       <Link href={`/agents/${agent.id}`}>{agent.name}</Link>

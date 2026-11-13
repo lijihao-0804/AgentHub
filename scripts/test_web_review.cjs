@@ -44,7 +44,7 @@ function harness(api = {}) {
       useEffect: (fn) => effects.push(fn),
     },
     '@/components/providers/session-provider': { useFrontendSession: () => session },
-    '@/i18n/provider': { useI18n: () => ({ t: (key) => key, formatDateTime: String, formatNumber: String, statusLabel: String, purposeLabel: String }) },
+    '@/i18n/provider': { useI18n: () => ({ t: (key) => key, locale: 'en-US', formatDateTime: String, formatNumber: String, formatRelativeTime: String, formatCount: String, statusLabel: String, purposeLabel: String }) },
     '@/lib/api/client': { toApiError: (error) => error, errorHintKey: () => null, ApiError: class extends Error { constructor(code, message, status) { super(message); this.code = code; this.status = status; } } },
     '@/hooks/use-workspace-data': {
       useWorkspaceData: (fn, key) => { queries.push({ fn, key }); return { data: null, loaded: false }; },
@@ -219,20 +219,111 @@ async function main() {
   console.log('PASS org-only 403 during permission loading preserves workspace roster');
 
   const threadCalls = [];
-  const threadHarness = harness({ '@/lib/api/threads': {
+  const threadApi = {
     listThreads: async (_auth, query) => { threadCalls.push(query); return []; },
-  }});
-  const List = load('components/apps/app-threads-page.tsx', threadHarness.mocks).default;
-  threadHarness.render(List, { copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' }, weight: { values: () => ({}) } });
-  await threadHarness.queries[0].fn(threadHarness.session);
-  assert.equal(threadCalls[0].agentId, 'agent-a');
-  console.log('PASS agent conversation list sends server-side agent filter');
-  threadHarness.mocks['@/lib/api/threads'].getThread = async () => ({ agent_id: 'agent-b', kind: 'general' });
-  const shellHarness = harness({ '@/lib/api/threads': threadHarness.mocks['@/lib/api/threads'] });
-  const Shell = load('components/apps/app-thread-shell.tsx', shellHarness.mocks).default;
-  shellHarness.render(Shell, { copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' }, threadId: 'thread-b', children: () => null });
-  await assert.rejects(shellHarness.queries[0].fn(shellHarness.session), /not found/);
-  console.log('PASS mismatched agent deep link cannot mount a conversation');
+    listThreadTurns: async () => [],
+    getThread: async () => ({ agent_id: 'agent-b', kind: 'general' }),
+    createThread: async () => { throw new Error('create was not requested'); },
+    deleteThread: async () => { throw new Error('delete was not requested'); },
+    patchThread: async () => { throw new Error('rename was not requested'); },
+  };
+  const workbenchHarness = harness({
+    '@/lib/api/threads': threadApi,
+    '@/lib/api/artifacts': { listThreadArtifacts: async () => [] },
+    '@/lib/api/agents': { listAgents: async () => [{ id: 'agent-a', name: 'Agent A' }] },
+    '@/components/apps/app-conversation-pane': { __esModule: true, default: () => React.createElement('section', { 'data-testid': 'conversation' }) },
+    '@/components/ui/icon': { __esModule: true, default: () => React.createElement('span', { 'aria-hidden': 'true' }) },
+    '@/components/ui/states': {
+      EmptyState: ({ title }) => React.createElement('div', null, title),
+      ErrorState: ({ message }) => React.createElement('div', { role: 'alert' }, message),
+      InlineError: ({ error, fallback }) => error
+        ? React.createElement('div', { role: 'alert' }, error.message ?? fallback)
+        : null,
+      LoadingState: () => React.createElement('div', { role: 'status' }, 'loading'),
+      SessionRequired: () => React.createElement('div', null, 'session required'),
+    },
+    '@/components/evaluation/hash-value': {
+      InlineConfirm: ({ title }) => React.createElement('div', null, title),
+    },
+  });
+  const Workbench = load('components/apps/app-workbench.tsx', workbenchHarness.mocks).default;
+  workbenchHarness.render(Workbench, {
+    copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' },
+    threadId: 'thread-b',
+    children: () => null,
+  });
+  const listQuery = workbenchHarness.queries.find((query) => query.key.startsWith('app-threads:'));
+  await listQuery.fn(workbenchHarness.session);
+  assert.deepEqual(threadCalls[0], { kind: 'general', agentId: 'agent-a', limit: 20, offset: 0 });
+  console.log('PASS AppWorkbench thread list sends the server-side app and agent filters');
+  const threadQuery = workbenchHarness.queries.find((query) => query.key.startsWith('app-thread:'));
+  await assert.rejects(threadQuery.fn(workbenchHarness.session), (error) =>
+    error.code === 'THREAD_NOT_FOUND' && error.status === 404);
+  console.log('PASS AppWorkbench rejects a mismatched agent or app deep link before mounting the conversation');
+
+  workbenchHarness.session.permissions = [];
+  let viewerTree = workbenchHarness.render(Workbench, {
+    copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' },
+    children: () => null,
+  });
+  const viewerNewButton = elements(viewerTree, (node) => node.type === 'button' && String(node.props.className).includes('thread-new'))[0];
+  const viewerCreateButton = elements(viewerTree, (node) => node.type === 'button' && node.props.type === 'submit')[0];
+  assert.equal(viewerNewButton.props.disabled, true);
+  assert.equal(viewerCreateButton.props.disabled, true);
+
+  workbenchHarness.session.permissions = ['agent_run'];
+  const authorizedTree = workbenchHarness.render(Workbench, {
+    copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' },
+    children: () => null,
+  });
+  const authorizedNewButton = elements(authorizedTree, (node) => node.type === 'button' && String(node.props.className).includes('thread-new'))[0];
+  assert.equal(authorizedNewButton.props.disabled, false);
+
+  const permissionHarness = harness({
+    '@/hooks/use-workspace-data': {
+      useWorkspaceData: (_fn, key) => ({
+        data: key.startsWith('app-thread:')
+          ? { id: 'thread-a', title: 'Thread A', agent_id: 'agent-a', kind: 'general', updated_at: 'now' }
+          : key.startsWith('app-turns:') || key.startsWith('app-artifacts:') || key.startsWith('app-threads:')
+            ? []
+            : null,
+        loaded: true,
+        error: null,
+      }),
+      useWorkspaceMutation: () => ({ run: (fn) => fn(permissionHarness.session) }),
+    },
+    '@/lib/api/threads': threadApi,
+    '@/lib/api/artifacts': { listThreadArtifacts: async () => [] },
+    '@/lib/api/agents': { listAgents: async () => [{ id: 'agent-a', name: 'Agent A' }] },
+    '@/components/apps/app-conversation-pane': { __esModule: true, default: () => React.createElement('section', { 'data-testid': 'conversation' }) },
+    '@/components/ui/icon': { __esModule: true, default: () => React.createElement('span', { 'aria-hidden': 'true' }) },
+    '@/components/ui/states': {
+      EmptyState: ({ title }) => React.createElement('div', null, title),
+      ErrorState: ({ message }) => React.createElement('div', { role: 'alert' }, message),
+      InlineError: ({ error, fallback }) => error ? React.createElement('div', { role: 'alert' }, error.message ?? fallback) : null,
+      LoadingState: () => React.createElement('div', { role: 'status' }, 'loading'),
+      SessionRequired: () => React.createElement('div', null, 'session required'),
+    },
+    '@/components/evaluation/hash-value': { InlineConfirm: ({ title }) => React.createElement('div', null, title) },
+  });
+  const PermissionWorkbench = load('components/apps/app-workbench.tsx', permissionHarness.mocks).default;
+  permissionHarness.session.permissions = [];
+  viewerTree = permissionHarness.render(PermissionWorkbench, {
+    copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' },
+    threadId: 'thread-a',
+    children: () => null,
+  });
+  const viewerDeleteButton = elements(viewerTree, (node) => node.type === 'button' && node.props.children === 'appThread.threads.delete')[0];
+  assert.equal(viewerDeleteButton.props.disabled, true);
+  permissionHarness.session.permissions = ['agent_run'];
+  const deleteAuthorizedTree = permissionHarness.render(PermissionWorkbench, {
+    copy: { agentId: 'agent-a', kind: 'general', basePath: '/agents/agent-a/chat' },
+    threadId: 'thread-a',
+    children: () => null,
+  });
+  const authorizedDeleteButton = elements(deleteAuthorizedTree, (node) => node.type === 'button' && node.props.children === 'appThread.threads.delete')[0];
+  assert.equal(authorizedDeleteButton.props.disabled, false);
+  console.log('PASS AppWorkbench gates create and delete controls on agent_run permission');
 
   for (const file of ['feedback/feedback-panel', 'runs/tool-evidence-panel']) {
     const scoped = harness();
@@ -248,21 +339,25 @@ async function main() {
   const evidenceHarness = harness({ '@/hooks/use-workspace-data': {
     useWorkspaceData: () => ({ loaded: true, data: {
       events: [{ sequence: 1, type: 'tool.requested', payload: { tool_identity: 'legacy-tool' } }],
-      evidence_refs: [], content_allowed: false, truncated: false,
+      evidence_refs: [{ snapshot_id: 'snapshot-a', knowledge_base_id: 'kb-a', document_revision_id: 'revision-a', chunk_id: 'chunk-a' }],
+      content_allowed: false, truncated: false,
     } }),
   } });
   const Evidence = load('components/runs/tool-evidence-panel.tsx', evidenceHarness.mocks).default;
   const body = evidenceHarness.render(Evidence, { runId: 'run-a' });
   const tree = evidenceHarness.render(body.type, body.props);
-  assert.ok(JSON.stringify(tree).includes('runEvidence.summaryUnavailable'));
-  assert.ok(JSON.stringify(tree).includes('runEvidence.permission'));
-  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', chunk_id: 'chunk-a' };
+  assert.ok(JSON.stringify(tree).includes('legacy-tool'));
+  const eventRow = elements(tree, (el) => typeof el.type === 'function' && el.props.event?.sequence === 1)[0];
+  assert.ok(JSON.stringify(eventRow.type(eventRow.props)).includes('runEvidence.events.requested'));
+  const deniedEvidence = elements(tree, (el) => el.type === 'button' && el.props.title === 'runEvidence.permission')[0];
+  assert.equal(deniedEvidence.props.disabled, true);
+  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', knowledge_base_id: 'kb-a', document_revision_id: 'revision-a', chunk_id: 'chunk-a' };
   const a = evidenceHarness.render(body.type, body.props);
-  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', chunk_id: 'chunk-b' };
+  evidenceHarness.states[0] = { snapshot_id: 'snapshot-a', knowledge_base_id: 'kb-a', document_revision_id: 'revision-a', chunk_id: 'chunk-b' };
   const b = evidenceHarness.render(body.type, body.props);
   const excerpt = (node) => elements(node, (el) => typeof el.type === 'function' && el.props.selected)[0];
   assert.notEqual(excerpt(a).key, excerpt(b).key, 'evidence selection must remount fetched excerpt');
-  console.log('PASS historical summary fallback, content denial and evidence selection identity');
+  console.log('PASS tool event rendering, denied evidence content and selection identity');
 
   const lifecycle = { id: 'handoff-a', workspace_id: 'workspace-a', thread_id: 'thread-a', source_artifact_id: 'artifact-a', source_hash: 'abc', status: 'OPEN', version: 1,
     created_by: 'self', assignee_id: null, claimed_by: null, closed_by: null, closure_reason: null, unresolved_items: [], created_at: 'now', updated_at: 'now', claimed_at: null, closed_at: null };

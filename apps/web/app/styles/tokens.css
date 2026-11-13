@@ -1,70 +1,84 @@
-/* Design tokens: the single source of colour, spacing and radius. */
 /*
- * Every colour in this sheet comes from a token, which is what makes the
- * light theme a token override rather than a second stylesheet. The theme
- * is applied as `data-theme` on <html> by ThemeProvider.
+ * AgentHub design tokens.
  *
- * Visual direction: a lively agent console. Deep ink surfaces, and a vivid
- * blue → violet → cyan brand gradient (the same family DeepSeek Harness uses
- * for its onboarding) reserved for interactive state and the agent identity.
- * Status colours stay warm and separate so a running agent never reads like
- * a warning.
+ * Light is the product default. The dark theme overrides colour values only,
+ * so every existing route keeps the same spacing, structure and interaction
+ * semantics. Legacy variable names remain aliases to their modern
+ * counterparts while older route-level styles are migrated.
  */
 :root {
+  color-scheme: light;
+
   --z-topbar: 30;
   --z-floating: 60;
   --z-skip-link: 100;
 
-  --background: #0b0e14;
-  --surface: #121722;
-  --surface-raised: #171d2a;
-  --surface-inset: rgba(255, 255, 255, 0.05);
-  --surface-nav: #0f141e;
-  --surface-topbar: rgba(11, 14, 20, 0.8);
-  --row-hover: rgba(255, 255, 255, 0.055);
-  --row-subtle: rgba(255, 255, 255, 0.028);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  --border-focus: var(--accent);
-  --focus-ring: var(--accent);
+  --background: #f4f7f8;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-inset: #edf2f3;
+  --surface-nav: #142e35;
+  --surface-topbar: rgba(255, 255, 255, 0.92);
+  --surface-popover: #ffffff;
+  --row-hover: rgba(8, 127, 117, 0.065);
+  --row-subtle: rgba(23, 46, 53, 0.035);
+  --border: #dce6e7;
+  --border-strong: #c3d3d5;
+  --border-focus: #087f75;
+  --focus-ring: #087f75;
 
-  --text: #eef1f7;
-  --text-muted: #9aa6bd;
-  --text-placeholder: rgba(238, 241, 247, 0.36);
+  --text: #172e35;
+  --text-muted: #5d7177;
+  --text-placeholder: #63777c;
+  --text-on-accent: #ffffff;
 
-  /* Vivid brand: blue → violet → cyan. */
-  --accent: #5b8cff;
-  --accent-ink: #08122b;
-  --accent-soft: rgba(91, 140, 255, 0.16);
-  --accent-2: #a78bfa;
-  --accent-3: #22d3ee;
-  --gradient-brand: linear-gradient(135deg, #5b8cff 0%, #8b76f6 55%, #22d3ee 100%);
+  --accent: #087f75;
+  --accent-hover: #066d65;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3f3f0;
+  --accent-2: #2b9288;
+  --accent-3: #65b8ae;
+  --gradient-brand: linear-gradient(135deg, #087f75 0%, #2c978b 100%);
 
-  --btn-primary-bg: linear-gradient(135deg, #5b8cff 0%, #7c6cf6 100%);
+  --btn-primary-bg: #087f75;
   --btn-primary-ink: #ffffff;
-  --btn-primary-hover: linear-gradient(135deg, #6f9bff 0%, #8b7bff 100%);
+  --btn-primary-hover: #066d65;
 
-  --success: #34d399;
-  --success-soft: rgba(52, 211, 153, 0.15);
-  --warning: #fbbf24;
-  --warning-soft: rgba(251, 191, 36, 0.15);
-  --danger: #fb7185;
-  --danger-soft: rgba(251, 113, 133, 0.15);
-  --danger-border: rgba(251, 113, 133, 0.45);
-  --attention: #f59e0b;
-  --attention-soft: rgba(245, 158, 11, 0.16);
-  --info: #60a5fa;
-  --info-soft: rgba(96, 165, 250, 0.15);
+  --success: #18794e;
+  --success-soft: #e7f5ed;
+  --warning: #a35b08;
+  --warning-soft: #fff2dd;
+  --danger: #bd3f4b;
+  --danger-soft: #fceaed;
+  --danger-border: #efb4ba;
+  --attention: #8a5c08;
+  --attention-soft: #fbf1d8;
+  --info: #2d6faa;
+  --info-soft: #e9f2fa;
 
+  --sidebar-text: #f4fbfa;
+  --sidebar-muted: #a8c0c1;
+  --sidebar-faint: #7f9b9e;
+  --sidebar-border: rgba(255, 255, 255, 0.11);
+  --sidebar-hover: rgba(255, 255, 255, 0.07);
+  --sidebar-active: rgba(101, 210, 195, 0.15);
+  --sidebar-active-border: #75d8ca;
+  --sidebar-badge: rgba(255, 255, 255, 0.13);
+
+  --radius-xs: 5px;
   --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
+  --radius: 11px;
+  --radius-lg: 15px;
+  --radius-xl: 20px;
   --radius-pill: 999px;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 44px rgba(0, 0, 0, 0.42);
+  --shadow-sm: 0 1px 2px rgba(23, 46, 53, 0.06);
+  --shadow: 0 18px 44px rgba(23, 46, 53, 0.12);
+  --shadow-popover: 0 16px 42px rgba(23, 46, 53, 0.16);
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
-    "Microsoft YaHei", Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+  --font-sans: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont,
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "Cascadia Code", "Cascadia Mono", "SFMono-Regular", Consolas,
+    "Liberation Mono", monospace;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -72,64 +86,92 @@
   --space-4: 1rem;
   --space-5: 1.5rem;
   --space-6: 2rem;
-}
+  --space-7: 2.5rem;
+  --space-8: 3rem;
 
-/*
- * Light theme. Only colour tokens are overridden: spacing, radii and type
- * are shared, so both themes stay structurally identical.
- */
-:root[data-theme="light"] {
-  --background: #f5f7fc;
-  --surface: #ffffff;
-  --surface-raised: #ffffff;
-  --surface-inset: rgba(16, 24, 40, 0.045);
-  --surface-nav: #eef2f9;
-  --surface-topbar: rgba(245, 247, 252, 0.85);
-  --row-hover: rgba(16, 24, 40, 0.05);
-  --row-subtle: rgba(16, 24, 40, 0.022);
-  --border: rgba(16, 24, 40, 0.09);
-  --border-strong: rgba(16, 24, 40, 0.17);
-
-  --text: #0f172a;
-  --text-muted: #5b6b85;
-  --text-placeholder: rgba(15, 23, 42, 0.4);
-
-  --accent: #2563eb;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(37, 99, 235, 0.12);
-  --accent-2: #7c3aed;
-  --accent-3: #0891b2;
-  --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #7c3aed 55%, #06b6d4 100%);
-
-  --btn-primary-bg: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-  --btn-primary-ink: #ffffff;
-  --btn-primary-hover: linear-gradient(135deg, #2f74ef 0%, #5758e6 100%);
-
-  --success: #15803d;
-  --success-soft: rgba(21, 128, 61, 0.12);
-  --warning: #a16207;
-  --warning-soft: rgba(161, 98, 7, 0.13);
-  --danger: #be123c;
-  --danger-soft: rgba(190, 18, 60, 0.1);
-  --danger-border: rgba(190, 18, 60, 0.35);
-  --attention: #b45309;
-  --attention-soft: rgba(180, 83, 9, 0.13);
-  --info: #1d4ed8;
-  --info-soft: rgba(29, 78, 216, 0.12);
-
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 18px 44px rgba(16, 24, 40, 0.12);
-
-  color-scheme: light;
-}
-
-:root { color-scheme: dark; }
-
-/* Type scale: the steps the product uses. New UI should pick from this scale. */
-:root {
-  --text-xs: 0.72rem;
+  --text-xs: 0.7rem;
   --text-sm: 0.8rem;
   --text-base: 0.875rem;
   --text-lg: 1.0625rem;
   --text-xl: 1.375rem;
   --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+
+  --sidebar-width: 17rem;
+  --sidebar-width-collapsed: 4.75rem;
+  --topbar-height: 4rem;
+
+  /* Compatibility aliases used by route-level and in-progress surfaces. */
+  --color-bg: var(--background);
+  --color-bg-subtle: var(--surface-inset);
+  --color-border: var(--border);
+  --color-danger: var(--danger);
+  --color-primary: var(--accent);
+  --color-text-muted: var(--text-muted);
+  --color-warning: var(--warning);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #0b1519;
+  --surface: #122127;
+  --surface-raised: #172a30;
+  --surface-inset: #0e1b20;
+  --surface-nav: #142e35;
+  --surface-topbar: rgba(14, 28, 33, 0.92);
+  --surface-popover: #172a30;
+  --row-hover: rgba(122, 216, 202, 0.075);
+  --row-subtle: rgba(255, 255, 255, 0.028);
+  --border: #243a40;
+  --border-strong: #365159;
+  --border-focus: #59cbbb;
+  --focus-ring: #59cbbb;
+
+  --text: #e8f1f1;
+  --text-muted: #9eb1b3;
+  --text-placeholder: #7c9296;
+  --text-on-accent: #062522;
+
+  --accent: #59cbbb;
+  --accent-hover: #76d9cb;
+  --accent-ink: #062522;
+  --accent-soft: rgba(89, 203, 187, 0.13);
+  --accent-2: #4fa99f;
+  --accent-3: #83d5cb;
+  --gradient-brand: linear-gradient(135deg, #3eb7a8 0%, #69cec1 100%);
+
+  --btn-primary-bg: #59cbbb;
+  --btn-primary-ink: #062522;
+  --btn-primary-hover: #76d9cb;
+
+  --success: #61d39a;
+  --success-soft: rgba(97, 211, 154, 0.12);
+  --warning: #f0b454;
+  --warning-soft: rgba(240, 180, 84, 0.13);
+  --danger: #f07886;
+  --danger-soft: rgba(240, 120, 134, 0.13);
+  --danger-border: rgba(240, 120, 134, 0.42);
+  --attention: #e7ad4a;
+  --attention-soft: rgba(231, 173, 74, 0.13);
+  --info: #77aee0;
+  --info-soft: rgba(119, 174, 224, 0.12);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow: 0 20px 52px rgba(0, 0, 0, 0.32);
+  --shadow-popover: 0 18px 48px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border: #b8c8ca;
+    --border-strong: #8ea5a8;
+    --text-muted: #40575d;
+  }
+
+  :root[data-theme="dark"] {
+    --border: #526b71;
+    --border-strong: #718b91;
+    --text-muted: #c3d0d1;
+  }
 }
