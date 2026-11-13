@@ -131,6 +131,18 @@ class RunBudgetAttemptAdapter:
                             "RUN_BUDGET_UPPER_BOUND_INVALID",
                             "The trusted cost source returned an invalid upper bound.",
                         )
+                    evidence = await self._reservation_evidence(
+                        session,
+                        context=context,
+                        quote=quote,
+                        profile=profile,
+                        request=request,
+                        provider=provider,
+                        operation=operation,
+                        profile_index=profile_index,
+                        attempt_index=attempt_index,
+                        attempt_kind=attempt_kind,
+                    )
                     reservation = await self._ledger.reserve(
                         session,
                         workspace_id=self._workspace_id,
@@ -140,6 +152,7 @@ class RunBudgetAttemptAdapter:
                         amount=quote.amount,
                         currency=quote.currency,
                         reservation_basis=(RunBudgetReservationBasis.CONSERVATIVE_MAXIMUM),
+                        **evidence,
                     )
                     if reservation.created is not True:
                         raise ModelAttemptBudgetError(
@@ -164,6 +177,14 @@ class RunBudgetAttemptAdapter:
             attempt_kind=attempt_kind,
             cost_upper_bound=quote,
         )
+
+    async def _reservation_evidence(self, session, **kwargs) -> dict[str, str]:
+        """Allow application adapters to validate and persist additional bindings.
+
+        The default preserves legacy Run reservations. Overrides run in the same
+        transaction as the hold and must perform no external side effect.
+        """
+        return {}
 
     async def mark_unknown_outcome(
         self,

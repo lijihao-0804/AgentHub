@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
-from typing import Any
+from typing import Any, Protocol
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
@@ -44,6 +44,57 @@ AMOUNT_SCALE = 8
 MAX_AMOUNT = Decimal("999999999999.99999999")
 MAX_ATTEMPT_IDENTITY_LENGTH = 128
 MAX_EVIDENCE_IDENTITY_LENGTH = 256
+MAX_DISPATCH_OWNER_LENGTH = 128
+
+
+class CaseBudgetParentAccount(Protocol):
+    """Read surface required from an evaluation-owned parent account."""
+
+    case_id: UUID
+    currency: str
+    limit_amount: Decimal
+    reserved_amount: Decimal
+    settled_amount: Decimal
+
+
+class CaseBudgetParentPort(Protocol):
+    """Narrow bridge from the generic Run ledger to evaluation case budgets."""
+
+    async def lock_for_run(
+        self, session: AsyncSession, *, workspace_id: UUID, run_id: UUID
+    ) -> CaseBudgetParentAccount | None: ...
+
+    async def lock_account(
+        self, session: AsyncSession, *, workspace_id: UUID, case_id: UUID
+    ) -> CaseBudgetParentAccount: ...
+
+    async def validate_attempt_binding(
+        self,
+        session: AsyncSession,
+        *,
+        workspace_id: UUID,
+        run_id: UUID,
+        case_id: UUID,
+        case_attempt_identity: str,
+        basis_identity: str,
+    ) -> None: ...
+
+    async def add_reservation(
+        self,
+        session: AsyncSession,
+        *,
+        account: CaseBudgetParentAccount,
+        amount: Decimal,
+    ) -> None: ...
+
+    async def settle(
+        self,
+        session: AsyncSession,
+        *,
+        account: CaseBudgetParentAccount,
+        reservation_amount: Decimal,
+        bill_amount: Decimal,
+    ) -> None: ...
 
 
 class RunBudgetAttemptKind(StrEnum):
@@ -112,6 +163,12 @@ class RunBudgetAccount(Base):
             name="fk_run_budget_accounts_run_workspace",
             ondelete="RESTRICT",
         ),
+        ForeignKeyConstraint(
+            ["workspace_id", "case_id"],
+            ["case_budget_accounts.workspace_id", "case_budget_accounts.case_id"],
+            name="fk_run_budget_accounts_case_workspace",
+            ondelete="RESTRICT",
+        ),
         CheckConstraint(
             "currency ~ '^[A-Z]{3}$'",
             name="ck_run_budget_accounts_currency",
@@ -140,6 +197,7 @@ class RunBudgetAccount(Base):
 
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    case_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
     limit_amount: Mapped[Decimal] = mapped_column(Numeric(20, 8), nullable=False)
     reserved_amount: Mapped[Decimal] = mapped_column(
@@ -176,16 +234,46 @@ class RunBudgetAttempt(Base):
             name="fk_run_budget_attempts_run_workspace",
             ondelete="RESTRICT",
         ),
+        ForeignKeyConstraint(
+            ["workspace_id", "case_id"],
+            ["case_budget_accounts.workspace_id", "case_budget_accounts.case_id"],
+            name="fk_run_budget_attempts_case_workspace",
+            ondelete="RESTRICT",
+        ),
         UniqueConstraint(
             "workspace_id",
             "run_id",
             "attempt_identity",
             name="uq_run_budget_attempts_identity",
         ),
+        UniqueConstraint(
+            "workspace_id",
+            "case_id",
+            "case_attempt_identity",
+            name="uq_run_budget_attempts_case_identity",
+        ),
         CheckConstraint(
             "attempt_identity = btrim(attempt_identity) AND "
             "length(attempt_identity) BETWEEN 1 AND 128",
             name="ck_run_budget_attempts_identity",
+        ),
+        CheckConstraint(
+            "(case_id IS NULL AND case_attempt_identity IS NULL AND basis_identity IS NULL) OR "
+            "(case_id IS NOT NULL AND case_attempt_identity IS NOT NULL AND "
+            "basis_identity IS NOT NULL)",
+            name="ck_run_budget_attempts_case_fields_shape",
+        ),
+        CheckConstraint(
+            "case_attempt_identity IS NULL OR ("
+            "case_attempt_identity = btrim(case_attempt_identity) AND "
+            "length(case_attempt_identity) BETWEEN 1 AND 128)",
+            name="ck_run_budget_attempts_case_identity",
+        ),
+        CheckConstraint(
+            "basis_identity IS NULL OR ("
+            "basis_identity = btrim(basis_identity) AND "
+            "length(basis_identity) BETWEEN 1 AND 256)",
+            name="ck_run_budget_attempts_basis_identity",
         ),
         CheckConstraint(
             "attempt_kind IN ('MAIN_MODEL', 'RETRY', 'FALLBACK', 'SUMMARY', 'AUXILIARY')",
@@ -275,7 +363,10 @@ class RunBudgetAttempt(Base):
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False, default=uuid4)
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
+    case_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     attempt_identity: Mapped[str] = mapped_column(String(128), nullable=False)
+    case_attempt_identity: Mapped[str | None] = mapped_column(String(128))
+    basis_identity: Mapped[str | None] = mapped_column(String(256))
     attempt_kind: Mapped[str] = mapped_column(String(32), nullable=False)
     reserved_amount: Mapped[Decimal] = mapped_column(Numeric(20, 8), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
@@ -306,6 +397,7 @@ class RunBudgetAccountSnapshot:
 
     workspace_id: UUID
     run_id: UUID
+    case_id: UUID | None
     currency: str
     limit_amount: Decimal
     reserved_amount: Decimal
@@ -338,7 +430,10 @@ class RunBudgetAttemptSnapshot:
     id: UUID
     workspace_id: UUID
     run_id: UUID
+    case_id: UUID | None
     attempt_identity: str
+    case_attempt_identity: str | None
+    basis_identity: str | None
     attempt_kind: RunBudgetAttemptKind
     reserved_amount: Decimal
     currency: str
@@ -351,6 +446,80 @@ class RunBudgetAttemptSnapshot:
     settlement_is_estimate: bool | None
     settled_at: datetime | None
     created_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class CaseBudgetAccountSnapshot:
+    """A point-in-time view of the parent case account."""
+
+    workspace_id: UUID
+    case_id: UUID
+    experiment_variant_id: UUID
+    currency: str
+    limit_amount: Decimal
+    reserved_amount: Decimal
+    settled_amount: Decimal
+    pricing_snapshot_id: UUID
+    pricing_snapshot_hash: str
+    provider: str
+    model: str
+    provider_egress_policy_version: str
+    provider_base_url: str | None
+    budget_policy_version: str
+    created_at: datetime
+
+    @property
+    def available_amount(self) -> Decimal:
+        return max(self.limit_amount - self.reserved_amount - self.settled_amount, Decimal("0"))
+
+    @property
+    def committed_amount(self) -> Decimal:
+        return self.reserved_amount + self.settled_amount
+
+    @property
+    def overage_amount(self) -> Decimal:
+        return max(self.committed_amount - self.limit_amount, Decimal("0"))
+
+    @property
+    def is_over_limit(self) -> bool:
+        return self.overage_amount > 0
+
+
+@dataclass(frozen=True, slots=True)
+class CaseBudgetRunBindingSnapshot:
+    """An immutable Interactive turn to AgentRun budget binding."""
+
+    workspace_id: UUID
+    case_id: UUID
+    turn_index: int
+    evaluation_run_id: UUID
+    agent_run_id: UUID
+    dispatch_owner: str
+    dispatch_generation: int
+    created_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
+class CaseBudgetResponseObservationSnapshot:
+    """Append-only response evidence that does not change account totals."""
+
+    id: UUID
+    workspace_id: UUID
+    case_id: UUID
+    run_id: UUID
+    attempt_identity: str
+    observation_identity: str
+    provider: str
+    model: str
+    provider_egress_policy_version: str
+    provider_base_url: str | None
+    input_tokens: int | None
+    output_tokens: int | None
+    total_tokens: int | None
+    cached_tokens: int | None
+    cost_amount: Decimal | None
+    cost_currency: str | None
+    observed_at: datetime
 
 
 @dataclass(frozen=True, slots=True)
@@ -382,6 +551,10 @@ class RunBudgetLedger:
     transaction refreshes identity-map objects from PostgreSQL.
     """
 
+    def __init__(self, *, case_parent: CaseBudgetParentPort | None = None) -> None:
+        self._case_parent = case_parent
+
+
     async def create_account(
         self,
         session: AsyncSession,
@@ -390,6 +563,7 @@ class RunBudgetLedger:
         run_id: UUID,
         currency: str,
         limit_amount: Decimal,
+        case_id: UUID | None = None,
     ) -> tuple[RunBudgetAccountSnapshot, bool]:
         """Create one fixed-currency Run account.
 
@@ -404,6 +578,8 @@ class RunBudgetLedger:
 
         _validate_uuid(workspace_id, "workspace_id")
         _validate_uuid(run_id, "run_id")
+        if case_id is not None:
+            _validate_uuid(case_id, "case_id")
         _validate_currency(currency)
         normalized_limit = _validate_amount(
             limit_amount,
@@ -422,12 +598,29 @@ class RunBudgetLedger:
                 "RUN_BUDGET_RUN_NOT_FOUND",
                 "The Run does not exist inside the supplied Workspace.",
             )
+        if case_id is not None:
+            if self._case_parent is None:
+                raise RunBudgetLedgerError(
+                    "CASE_BUDGET_BRIDGE_UNAVAILABLE",
+                    "A case-linked account requires the case budget bridge.",
+                )
+            case_account = await self._case_parent.lock_account(
+                session,
+                workspace_id=workspace_id,
+                case_id=case_id,
+            )
+            if case_account.currency != currency:
+                raise RunBudgetLedgerError(
+                    "RUN_BUDGET_CURRENCY_MISMATCH",
+                    "The Run currency differs from its case account currency.",
+                )
 
         statement = (
             postgresql_insert(RunBudgetAccount.__table__)
             .values(
                 workspace_id=workspace_id,
                 run_id=run_id,
+                case_id=case_id,
                 currency=currency,
                 limit_amount=normalized_limit,
                 reserved_amount=Decimal("0"),
@@ -455,12 +648,17 @@ class RunBudgetLedger:
                 "RUN_BUDGET_ACCOUNT_UNAVAILABLE",
                 "The Run budget account could not be observed after creation.",
             )
-        if account.currency != currency or account.limit_amount != normalized_limit:
+        if (
+            account.case_id != case_id
+            or account.currency != currency
+            or account.limit_amount != normalized_limit
+        ):
             raise RunBudgetLedgerError(
                 "RUN_BUDGET_ACCOUNT_CONFLICT",
                 "The Run already has a different fixed budget account.",
             )
         return _account_snapshot(account), inserted
+
 
     async def reserve(
         self,
@@ -473,6 +671,8 @@ class RunBudgetLedger:
         amount: Decimal,
         currency: str,
         reservation_basis: RunBudgetReservationBasis,
+        case_attempt_identity: str | None = None,
+        basis_identity: str | None = None,
     ) -> RunBudgetReservation:
         """Hold the worst-case amount before one provider attempt.
 
@@ -507,13 +707,65 @@ class RunBudgetLedger:
                 "RUN_BUDGET_CONSERVATIVE_MAXIMUM_REQUIRED",
                 "A dispatch reservation requires a conservative maximum basis.",
             )
-
+        account_case_id = await session.scalar(
+            select(RunBudgetAccount.case_id).where(
+                RunBudgetAccount.workspace_id == workspace_id,
+                RunBudgetAccount.run_id == run_id,
+            )
+        )
+        case_account = None
+        if account_case_id is not None:
+            case_account = await self._lock_case_account(
+                session, workspace_id, account_case_id
+            )
+            _validate_attempt_identity(case_attempt_identity, field="case_attempt_identity")
+            _validate_evidence_identity(basis_identity)
+        elif case_attempt_identity is not None or basis_identity is not None:
+            raise RunBudgetLedgerError(
+                "RUN_BUDGET_CASE_FIELDS_NOT_ALLOWED",
+                "Legacy Run accounts cannot carry case attempt fields.",
+            )
         account = await self._lock_account(session, workspace_id, run_id)
+        if account.case_id != account_case_id:
+            raise RunBudgetLedgerError(
+                "RUN_BUDGET_ACCOUNT_INVARIANT",
+                "The Run account case binding changed during reservation.",
+            )
         if account.currency != currency:
             raise RunBudgetLedgerError(
                 "RUN_BUDGET_CURRENCY_MISMATCH",
                 "The reservation currency differs from the Run account currency.",
             )
+
+        if account_case_id is not None:
+            if self._case_parent is None:
+                raise RunBudgetLedgerError(
+                    "CASE_BUDGET_BRIDGE_UNAVAILABLE",
+                    "A case-linked reservation requires the case budget bridge.",
+                )
+            await self._case_parent.validate_attempt_binding(
+                session,
+                workspace_id=workspace_id,
+                run_id=run_id,
+                case_id=account_case_id,
+                case_attempt_identity=case_attempt_identity,
+                basis_identity=basis_identity,
+            )
+            existing_case_attempt = await session.scalar(
+                select(RunBudgetAttempt)
+                .where(
+                    RunBudgetAttempt.workspace_id == workspace_id,
+                    RunBudgetAttempt.case_id == account_case_id,
+                    RunBudgetAttempt.case_attempt_identity == case_attempt_identity,
+                )
+                .execution_options(populate_existing=True)
+                .with_for_update()
+            )
+            if existing_case_attempt is not None and existing_case_attempt.run_id != run_id:
+                raise RunBudgetLedgerError(
+                    "RUN_BUDGET_CASE_ATTEMPT_REPLAYED",
+                    "This case attempt identity already belongs to another Run.",
+                )
 
         existing = await session.scalar(
             select(RunBudgetAttempt)
@@ -532,6 +784,9 @@ class RunBudgetLedger:
                 currency=currency,
                 attempt_kind=attempt_kind,
                 reservation_basis=reservation_basis,
+                case_id=account_case_id,
+                case_attempt_identity=case_attempt_identity,
+                basis_identity=basis_identity,
             )
             return RunBudgetReservation(
                 account=_account_snapshot(account),
@@ -545,12 +800,22 @@ class RunBudgetLedger:
                 "RUN_BUDGET_INSUFFICIENT_FUNDS",
                 "The Run account cannot fund the full requested reservation.",
             )
+        if case_account is not None:
+            assert self._case_parent is not None
+            await self._case_parent.add_reservation(
+                session,
+                account=case_account,
+                amount=normalized_amount,
+            )
 
         attempt = RunBudgetAttempt(
             id=uuid4(),
             workspace_id=workspace_id,
             run_id=run_id,
+            case_id=account_case_id,
             attempt_identity=attempt_identity,
+            case_attempt_identity=case_attempt_identity,
+            basis_identity=basis_identity,
             attempt_kind=attempt_kind.value,
             reserved_amount=normalized_amount,
             currency=currency,
@@ -562,6 +827,9 @@ class RunBudgetLedger:
         # The account guard compares its totals with retained attempt rows.
         await session.flush([attempt])
         await session.flush([account])
+        if case_account is not None:
+            await session.flush([case_account])
+            await session.refresh(case_account)
         await session.refresh(attempt)
         return RunBudgetReservation(
             account=_account_snapshot(account),
@@ -591,13 +859,26 @@ class RunBudgetLedger:
 
         _validate_budget_key(workspace_id, run_id)
         _validate_attempt_identity(attempt_identity)
+        case_account = await self._lock_case_account_for_run(
+            session, workspace_id, run_id
+        )
         account = await self._lock_account(session, workspace_id, run_id)
+        if (case_account.case_id if case_account is not None else None) != account.case_id:
+            raise RunBudgetLedgerError(
+                "RUN_BUDGET_ACCOUNT_INVARIANT",
+                "The Run account case binding changed during unknown marking.",
+            )
         attempt = await self._lock_attempt(
             session,
             workspace_id=workspace_id,
             run_id=run_id,
             attempt_identity=attempt_identity,
         )
+        if attempt.case_id != account.case_id:
+            raise RunBudgetLedgerError(
+                "RUN_BUDGET_ACCOUNT_INVARIANT",
+                "The attempt case binding differs from its Run account.",
+            )
         if attempt.status == RunBudgetAttemptStatus.SETTLED.value:
             raise RunBudgetLedgerError(
                 "RUN_BUDGET_ATTEMPT_STATE_CONFLICT",
@@ -679,13 +960,26 @@ class RunBudgetLedger:
         _validate_evidence_identity(evidence_identity)
         is_estimate = False
 
+        case_account = await self._lock_case_account_for_run(
+            session, workspace_id, run_id
+        )
         account = await self._lock_account(session, workspace_id, run_id)
+        if (case_account.case_id if case_account is not None else None) != account.case_id:
+            raise RunBudgetLedgerError(
+                "RUN_BUDGET_ACCOUNT_INVARIANT",
+                "The Run account case binding changed during settlement.",
+            )
         attempt = await self._lock_attempt(
             session,
             workspace_id=workspace_id,
             run_id=run_id,
             attempt_identity=attempt_identity,
         )
+        if attempt.case_id != account.case_id:
+            raise RunBudgetLedgerError(
+                "RUN_BUDGET_ACCOUNT_INVARIANT",
+                "The attempt case binding differs from its Run account.",
+            )
         if account.currency != currency or attempt.currency != currency:
             raise RunBudgetLedgerError(
                 "RUN_BUDGET_CURRENCY_MISMATCH",
@@ -728,6 +1022,18 @@ class RunBudgetLedger:
 
         account.reserved_amount = new_reserved
         account.settled_amount = new_settled
+        if case_account is not None:
+            if self._case_parent is None:
+                raise RunBudgetLedgerError(
+                    "CASE_BUDGET_BRIDGE_UNAVAILABLE",
+                    "A case settlement requires the case budget bridge.",
+                )
+            await self._case_parent.settle(
+                session,
+                account=case_account,
+                reservation_amount=attempt.reserved_amount,
+                bill_amount=normalized_amount,
+            )
         attempt.status = RunBudgetAttemptStatus.SETTLED.value
         attempt.settlement_amount = normalized_amount
         attempt.settlement_currency = currency
@@ -739,6 +1045,9 @@ class RunBudgetLedger:
         # aggregate still exactly explains its mutable totals.
         await session.flush([attempt])
         await session.flush([account])
+        if case_account is not None:
+            await session.flush([case_account])
+            await session.refresh(case_account)
         await session.refresh(account)
         await session.refresh(attempt)
         return RunBudgetSettlement(
@@ -746,6 +1055,9 @@ class RunBudgetLedger:
             attempt=_attempt_snapshot(attempt),
             created=True,
         )
+
+
+
 
     async def get_account(
         self,
@@ -807,6 +1119,44 @@ class RunBudgetLedger:
                 "The Run budget attempt was not found.",
             )
         return _attempt_snapshot(attempt)
+
+    async def _lock_case_account_for_run(
+        self,
+        session: AsyncSession,
+        workspace_id: UUID,
+        run_id: UUID,
+    ) -> CaseBudgetParentAccount | None:
+        case_id = await session.scalar(
+            select(RunBudgetAccount.case_id).where(
+                RunBudgetAccount.workspace_id == workspace_id,
+                RunBudgetAccount.run_id == run_id,
+            )
+        )
+        if case_id is None:
+            return None
+        if self._case_parent is None:
+            raise RunBudgetLedgerError(
+                "CASE_BUDGET_BRIDGE_UNAVAILABLE",
+                "A case-linked Run requires the evaluation case budget bridge.",
+            )
+        return await self._case_parent.lock_for_run(
+            session, workspace_id=workspace_id, run_id=run_id
+        )
+
+    async def _lock_case_account(
+        self,
+        session: AsyncSession,
+        workspace_id: UUID,
+        case_id: UUID,
+    ) -> CaseBudgetParentAccount:
+        if self._case_parent is None:
+            raise RunBudgetLedgerError(
+                "CASE_BUDGET_BRIDGE_UNAVAILABLE",
+                "The evaluation case budget bridge is not configured.",
+            )
+        return await self._case_parent.lock_account(
+            session, workspace_id=workspace_id, case_id=case_id
+        )
 
     async def _lock_account(
         self,
@@ -940,20 +1290,24 @@ def _validate_amount(value: Any, *, field: str, allow_zero: bool) -> Decimal:
     return value
 
 
-def _validate_attempt_identity(value: Any) -> None:
+def _validate_attempt_identity(
+    value: Any, *, field: str = "attempt_identity"
+) -> str:
     _validate_bounded_text(
         value,
-        field="attempt_identity",
+        field=field,
         maximum=MAX_ATTEMPT_IDENTITY_LENGTH,
     )
+    return value
 
 
-def _validate_evidence_identity(value: Any) -> None:
+def _validate_evidence_identity(value: Any) -> str:
     _validate_bounded_text(
         value,
         field="evidence_identity",
         maximum=MAX_EVIDENCE_IDENTITY_LENGTH,
     )
+    return value
 
 
 def _validate_bounded_text(value: Any, *, field: str, maximum: int) -> None:
@@ -965,6 +1319,29 @@ def _validate_bounded_text(value: Any, *, field: str, maximum: int) -> None:
         raise ValueError(f"{field} exceeds {maximum} characters")
     if "\x00" in value:
         raise ValueError(f"{field} cannot contain NUL")
+
+
+def _validate_required_text(value: Any, *, field: str, maximum: int) -> str:
+    _validate_bounded_text(value, field=field, maximum=maximum)
+    return value
+
+
+def _validate_optional_text(value: Any, *, field: str, maximum: int) -> str | None:
+    if value is None:
+        return None
+    return _validate_required_text(value, field=field, maximum=maximum)
+
+
+def _validate_non_negative_int(value: Any, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise TypeError(f"{field} must be a non-negative integer")
+    return value
+
+
+def _validate_optional_non_negative_int(value: Any, field: str) -> int | None:
+    if value is None:
+        return None
+    return _validate_non_negative_int(value, field)
 
 
 def _validate_attempt_kind(value: Any) -> None:
@@ -989,17 +1366,25 @@ def _assert_matching_reservation(
     currency: str,
     attempt_kind: RunBudgetAttemptKind,
     reservation_basis: RunBudgetReservationBasis,
+    case_id: UUID | None,
+    case_attempt_identity: str | None,
+    basis_identity: str | None,
 ) -> None:
     if (
         attempt.reserved_amount != amount
         or attempt.currency != currency
         or attempt.attempt_kind != attempt_kind.value
         or attempt.reservation_basis != reservation_basis.value
+        or attempt.case_id != case_id
+        or attempt.case_attempt_identity != case_attempt_identity
+        or attempt.basis_identity != basis_identity
     ):
         raise RunBudgetLedgerError(
             "RUN_BUDGET_ATTEMPT_CONFLICT",
             "The attempt identity was reused with different reservation content.",
         )
+
+
 
 
 def _assert_matching_settlement(
@@ -1028,6 +1413,7 @@ def _account_snapshot(account: RunBudgetAccount) -> RunBudgetAccountSnapshot:
     return RunBudgetAccountSnapshot(
         workspace_id=account.workspace_id,
         run_id=account.run_id,
+        case_id=account.case_id,
         currency=account.currency,
         limit_amount=account.limit_amount,
         reserved_amount=account.reserved_amount,
@@ -1054,7 +1440,10 @@ def _attempt_snapshot(attempt: RunBudgetAttempt) -> RunBudgetAttemptSnapshot:
         id=attempt.id,
         workspace_id=attempt.workspace_id,
         run_id=attempt.run_id,
+        case_id=attempt.case_id,
         attempt_identity=attempt.attempt_identity,
+        case_attempt_identity=attempt.case_attempt_identity,
+        basis_identity=attempt.basis_identity,
         attempt_kind=attempt_kind,
         reserved_amount=attempt.reserved_amount,
         currency=attempt.currency,
@@ -1070,10 +1459,19 @@ def _attempt_snapshot(attempt: RunBudgetAttempt) -> RunBudgetAttemptSnapshot:
     )
 
 
+
+
+
+
+
+
 __all__ = [
     "MAX_AMOUNT",
     "MAX_ATTEMPT_IDENTITY_LENGTH",
     "MAX_EVIDENCE_IDENTITY_LENGTH",
+    "CaseBudgetAccountSnapshot",
+    "CaseBudgetResponseObservationSnapshot",
+    "CaseBudgetRunBindingSnapshot",
     "RunBudgetAccount",
     "RunBudgetAccountSnapshot",
     "RunBudgetAttempt",

@@ -1,5 +1,7 @@
 # AgentHub 当前状态
 
+2026-11-13 本地整合已纳入[交互评测预算基础设施](reviews/interactive-case-budget-foundation-20261105.md)和[客服质量实验](reviews/T04-customer-quality-20261105.md)。代码迁移头为 `0053_interactive_case_budget`，正式交互执行器对缺少计费证明的运行仍拒绝派发。客服实验的 DEV 增益未达预登记门槛，HOLDOUT 未曝光。以下为 11 月 6 日交付记录。
+
 2026-11-06：FINAL-CLOSE-1 已完成本地交付收口，停止施工，转入简历与讲述准备。
 
 | 项目 | 当前事实 |
