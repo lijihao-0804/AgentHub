@@ -65,12 +65,26 @@ BUILTIN_TOOL_CATALOG: dict[str, dict[str, Any]] = {
         "execution_kind": "builtin",
     },
     "query_customer": {
-        "description": "Read a customer and optionally its open tickets.",
+        "description": (
+            "Read a customer and optionally its open tickets. A ticket lookup returns up to "
+            "20 matches. open_ticket_scope identifies the subject filter and current statuses, "
+            "and open_tickets_complete applies only to that scope. This lookup covers "
+            "current records only."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {
                 "customer_ref": {"type": "string"},
                 "include_open_tickets": {"type": "boolean"},
+                "open_ticket_subject": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500,
+                    "description": (
+                        "Look up open tickets with this exact, case-sensitive subject before "
+                        "applying the result limit. Supplying it requests tickets."
+                    ),
+                },
             },
             "required": ["customer_ref"],
             "additionalProperties": False,

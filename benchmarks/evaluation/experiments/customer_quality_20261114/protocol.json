@@ -1,0 +1,64 @@
+{
+  "study": "T04-open-ticket-lookup-DEV-20261114",
+  "base_commit": "e88eae037330bdf69da4e5d4939241d44fedccc5",
+  "split": "DEV",
+  "scope": "Paired mechanism diagnostic on new synthetic requests. Native AgentRunService, tool publication, PostgreSQL, approval decision and resume. No historical dataset, formal Experiment, judge labels or HOLDOUT access.",
+  "model": "deepseek-v4.1-flash-1017",
+  "provider": "aliyun-rag",
+  "temperature": 0,
+  "max_output_tokens": 2048,
+  "max_calls_per_trial": 6,
+  "repetitions": 2,
+  "cap_estimated_cny": "6",
+  "peak_cny_per_million_input_output": ["2", "8"],
+  "cost_basis": "Reused T04 conservative research prices; not a supplier invoice. Full-envelope reservation before every physical attempt, unknown usage halts all dispatch.",
+  "baseline": "The historical T04 candidate prompt and query_customer/create_ticket tool revisions from the T04 publication helper, freshly published on the current runtime.",
+  "candidate": "Actual support application template and both server catalog revisions, freshly published on the same runtime, model and customer fixture design.",
+  "order": "Fixed listed order, indexed from zero; reverse arm order when (case index + repetition index) is odd. Each trial uses a fresh customer. Case prompts exclude the database oracle and labels.",
+  "primary": "Both repetitions pass all objective checks for the group. Six lookup groups plus two unconditional creation controls (approved and denied) per arm. All missing or unknown outcomes stay in the denominator. Differences describe these fixed mechanisms only.",
+  "pass_checks": "For conditional tasks a prior provider-visible successful lookup for this customer must prove a matching open ticket or a complete, coherent absence for the requested subject. The two unconditional creation controls require only the provided account, authorized subject and action/receipt checks. Compare persisted approval counts/statuses and arguments, ticket delta, and the user's exact receipt. Created requires the actual resulting ticket reference; denied requires DENIED/NOT_STARTED. Wrong proposals are recorded, denied by the fixture approver, and fail. A truncated list cannot establish absence even if the fixture contains no match.",
+  "stop": "Stop paid dispatch on unconfirmed provider or action, model drift, incomplete usage, unreconciled write, or a candidate receipt claiming a completed creation inconsistent with persisted evidence. Ordinary incorrect/missing receipts and policy-blocked proposals count as non-pass. No automatic retry, fallback, paid replacement, post-hoc threshold or promotion. This receipt checks only the requested structured language, not unrestricted prose.",
+  "answer_instruction": "请只回复一行回执。若查询到指定未结工单，写 EXISTING <现有工单号>；若工单已经获批且创建成功，写 CREATED <新工单号>；若审批被拒且未执行，写 DENIED NOT_STARTED；若无法核实这个查询条件，写 UNVERIFIED；若已核实没有匹配且未要求创建，写 NONE。尖括号表示填实际编号。",
+  "cases": [
+    {
+      "id": "parcel-duplicate",
+      "request": "客户编号 {customer}。我上周报过“冷链包裹温控记录缺失”，请先查主题完全相同的未结工单，有的话给我原工单号，只有确认没有才帮我按这个主题开单。",
+      "subject": "冷链包裹温控记录缺失", "other_open": 0, "matching_status": "PENDING", "expected": "EXISTING"
+    },
+    {
+      "id": "station-overflow",
+      "request": "请核实客户 {customer} 在全部未结记录中有没有主题恰为“换乘站扣费复查”的工单。有就告诉我原单号，没有才提议建一张这个主题的单，不要重复建。",
+      "subject": "换乘站扣费复查", "other_open": 23, "matching_status": "IN_PROGRESS", "expected": "EXISTING"
+    },
+    {
+      "id": "meter-approved",
+      "request": "户号 {customer}。想建一张“水表抄表照片补传”的工单，但请先查主题完全相同的未结记录。仅在查实没有时替我用原主题提交创建，等审批和执行都结束再告诉我结果。",
+      "subject": "水表抄表照片补传", "other_open": 2, "matching_status": null, "expected": "CREATED"
+    },
+    {
+      "id": "archive-closed",
+      "request": "我们上次的档案回执可能已经结案。客户 {customer}，麻烦查“档案收件回执补送”这个准确主题的未结工单。有未结单就沿用，没有未结单就按相同主题新建。",
+      "subject": "档案收件回执补送", "other_open": 1, "matching_status": "CLOSED", "expected": "CREATED"
+    },
+    {
+      "id": "badge-denied",
+      "request": "客户 {customer} 的访客证刷卡异常。请先检查未结工单中是否已有主题“访客证读卡复核”，若没有，按此原主题提请建单；请根据实际审批与执行结果回复。",
+      "subject": "访客证读卡复核", "other_open": 0, "matching_status": null, "expected": "DENIED"
+    },
+    {
+      "id": "cabinet-read-only",
+      "request": "只查询，不要提交操作。帮客户 {customer} 查是否有主题准确为“寄存柜凭证遗失”的未结工单，查询结论即可。",
+      "subject": "寄存柜凭证遗失", "other_open": 22, "matching_status": null, "expected": "NONE"
+    },
+    {
+      "id": "warranty-direct-control",
+      "request": "客户 {customer} 已确认要单独开一张题为“保修贴补寄确认”的新工单；无需查重。这是直接建单请求，请按原主题提交并按实际审批和执行结果给我回执。",
+      "subject": "保修贴补寄确认", "other_open": 0, "matching_status": null, "expected": "CREATED", "requires_lookup": false
+    },
+    {
+      "id": "transcript-direct-control",
+      "request": "客户 {customer}，我明确要求新建“讲座文字稿寄送”这个主题的工单。不用检查已有工单，请提交并把审批和执行的真实结果按指定格式告诉我。",
+      "subject": "讲座文字稿寄送", "other_open": 0, "matching_status": null, "expected": "DENIED", "requires_lookup": false
+    }
+  ]
+}

@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import Agent, AgentVersion, Tool, ToolRevision
 from packages.control_plane.models import AuditLog, Organization, User, Workspace
+from packages.control_plane.product_control_plane import BuiltinToolCatalog
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.database import create_database
 from packages.core.errors.exceptions import AgentHubError
@@ -482,6 +483,123 @@ async def test_query_customer_does_not_disclose_other_workspace(db_factory) -> N
     )
     assert result.error_code == "CUSTOMER_NOT_FOUND"
     assert "Other" not in str(result)
+
+
+@pytest.mark.asyncio
+async def test_open_ticket_lookup_filters_before_limiting_and_reports_completeness(db_factory):
+    async with db_factory() as session:
+        base = await _seed_base(
+            session, label=uuid4().hex, tool_spec=BuiltinToolCatalog.spec("query_customer")
+        )
+        customer = Customer(workspace_id=base["workspace_id"], customer_ref="C-A", name="Case A")
+        other = Customer(workspace_id=base["workspace_id"], customer_ref="C-B", name="Case B")
+        session.add_all([customer, other])
+        await session.flush()
+        for i in range(20):
+            session.add(
+                Ticket(
+                    workspace_id=base["workspace_id"],
+                    customer_id=customer.id,
+                    ticket_ref=f"T-{i:02}",
+                    subject="Routine",
+                    status="PENDING",
+                )
+            )
+        for ref, owner, subject, status in (
+            ("T-20", customer, "Escalation", "IN_PROGRESS"),
+            ("T-21", customer, "Escalation", "CLOSED"),
+            ("T-22", other, "Escalation", "OPEN"),
+            ("T-23", customer, "Retired issue", "CLOSED"),
+        ):
+            session.add(
+                Ticket(
+                    workspace_id=base["workspace_id"],
+                    customer_id=owner.id,
+                    ticket_ref=ref,
+                    subject=subject,
+                    status=status,
+                )
+            )
+        await session.commit()
+    runtime = ToolRuntime(session_factory=db_factory)
+
+    async def lookup(**filters):
+        result = await runtime.execute(
+            context=base["context"],
+            agent_version_id=base["version"].id,
+            tool_identity="query_customer",
+            arguments={"customer_ref": "C-A", **filters},
+            tool_call_id="call-" + uuid4().hex,
+        )
+        assert result.status == "SUCCESS"
+        return result.data
+
+    profile = await lookup()
+    assert set(profile) == {"customer_ref", "name", "email"}
+    page = await lookup(include_open_tickets=True)
+    assert [t["ticket_ref"] for t in page["open_tickets"]] == [f"T-{i:02}" for i in range(20)]
+    assert page["open_tickets_complete"] is False
+    assert page["open_ticket_scope"] == {
+        "subject_filter": "ALL",
+        "subject": None,
+        "statuses": ["OPEN", "PENDING", "IN_PROGRESS"],
+        "includes_history": False,
+    }
+    boundary = await lookup(open_ticket_subject="Routine")
+    assert len(boundary["open_tickets"]) == 20 and boundary["open_tickets_complete"] is True
+    exact = await lookup(open_ticket_subject="Escalation")
+    assert [t["ticket_ref"] for t in exact["open_tickets"]] == ["T-20"]
+    assert exact["open_tickets_complete"] is True
+    assert exact["open_ticket_scope"] == {
+        "subject_filter": "EXACT",
+        "subject": "Escalation",
+        "statuses": ["OPEN", "PENDING", "IN_PROGRESS"],
+        "includes_history": False,
+    }
+    empty = await lookup(open_ticket_subject="Retired issue")
+    assert empty["open_tickets"] == [] and empty["open_tickets_complete"] is True
+    assert empty["open_ticket_scope"] == {**exact["open_ticket_scope"], "subject": "Retired issue"}
+    assert (await lookup(open_ticket_subject="escalation"))["open_tickets"] == []
+
+    all_for_other = await runtime.execute(
+        context=base["context"],
+        agent_version_id=base["version"].id,
+        tool_identity="query_customer",
+        arguments={"customer_ref": "C-B", "include_open_tickets": True},
+        tool_call_id="call-other-scope",
+    )
+    assert all_for_other.status == "SUCCESS"
+    assert all_for_other.data["open_tickets_complete"] is True
+    assert all_for_other.data["open_ticket_scope"] == page["open_ticket_scope"]
+    assert [t["ticket_ref"] for t in all_for_other.data["open_tickets"]] == ["T-22"]
+
+
+@pytest.mark.asyncio
+async def test_old_profile_only_revision_keeps_its_published_query_contract(db_factory):
+    spec = BuiltinToolCatalog.spec("query_customer")
+    spec["input_schema"]["properties"] = {"customer_ref": {"type": "string"}}
+    async with db_factory() as session:
+        base = await _seed_base(session, label=uuid4().hex, tool_spec=spec)
+        session.add(Customer(workspace_id=base["workspace_id"], customer_ref="C-OLD", name="Old"))
+        await session.commit()
+
+    runtime = ToolRuntime(session_factory=db_factory)
+    options = {
+        "context": base["context"],
+        "agent_version_id": base["version"].id,
+        "tool_identity": "query_customer",
+    }
+    lookup = await runtime.execute(
+        **options, tool_call_id="old-read", arguments={"customer_ref": "C-OLD"}
+    )
+    assert lookup.status == "SUCCESS"
+    assert set(lookup.data) == {"customer_ref", "name", "email"}
+    filtered = await runtime.execute(
+        **options,
+        tool_call_id="old-filter",
+        arguments={"customer_ref": "C-OLD", "open_ticket_subject": "Exact subject"},
+    )
+    assert filtered.status == "ERROR" and filtered.error_code == "TOOL_ARGUMENT_INVALID"
 
 
 @pytest.mark.asyncio

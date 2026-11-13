@@ -1,0 +1,899 @@
+{
+  "study": "T04-open-ticket-lookup-DEV-20261114",
+  "scope": "Paired mechanism diagnostic on new synthetic requests. Native AgentRunService, tool publication, PostgreSQL, approval decision and resume. No historical dataset, formal Experiment, judge labels or HOLDOUT access.",
+  "model": "deepseek-v4.1-flash-1017",
+  "split": "DEV",
+  "freeze": {
+    "frozen_at": "2026-11-13T16:36:33.906297+00:00",
+    "provider_calls_at_freeze": 0,
+    "source_base_head": "e88eae037330bdf69da4e5d4939241d44fedccc5",
+    "protocol_hash": "0cae2cf7a3a02b6e820d30c7a14ceb2df2fadac569ebc578fa57b97330cd11f9",
+    "files_sha256": {
+      "benchmarks/evaluation/experiments/customer_quality_20261114/protocol.json": "5dc8a55e3bbcf4508084880f82b73eaab24857711dec659f5b4ba8a16e290a8c",
+      "benchmarks/evaluation/experiments/customer_quality_20261114/runner.py": "cff747abda43016a2c12acae2bf07e3e8c5e86ad005384de50aaf07b0060a7f9",
+      "benchmarks/evaluation/experiments/customer_quality_20261114/score.py": "5fd0491176b5115f826e84f982f04e7a5f8296894a61e75a849a4d095cb14043",
+      "benchmarks/evaluation/experiments/customer_quality_20261105/protocol.json": "746808fabf7e55685091839010e1e1b7fe883728edf313ea6cbc073cb36471cf",
+      "packages/agent_templates/support.py": "2caa07324f6b0f4a597250f7cd69f3b4838cba494d69f0ad20cdccb35c9041ea",
+      "packages/tools/builtins/query_customer.py": "6155dafec80c86ffe4662a06e1a21cedb444c83c31a53727fe68fb9b389be664",
+      "packages/control_plane/product_control_plane.py": "a8c51297a5fe98918248178af0642c9e08ccea343465409111b32efcd742cc35"
+    },
+    "versions": {
+      "baseline": {
+        "id": "25f1e568-2d45-4182-9a27-cda120eb18ae",
+        "resolved_spec_hash": "5f5a97d12be09f9225ce0c2e7a2d56fc4600eacf070c9cf9200db07f60c50877"
+      },
+      "candidate": {
+        "id": "2d263b96-be66-421c-8a8c-23f44c961e0c",
+        "resolved_spec_hash": "2ddf2314415ee9f825d27005e6aacfc4235f0c3732ce389ae65518b9c293dd8e"
+      }
+    }
+  },
+  "started_at": "2026-11-13T16:36:54.822377+00:00",
+  "finished_at": "2026-11-13T16:39:30.465035+00:00",
+  "process_exit_code": 0,
+  "expected_trials": 32,
+  "completed_trials": 32,
+  "primary": {
+    "baseline": {
+      "completed_trials": 16,
+      "passing_trials": 4,
+      "passing_groups": 2,
+      "groups": {
+        "parcel-duplicate": false,
+        "station-overflow": false,
+        "meter-approved": false,
+        "archive-closed": false,
+        "badge-denied": false,
+        "cabinet-read-only": false,
+        "warranty-direct-control": true,
+        "transcript-direct-control": true
+      }
+    },
+    "candidate": {
+      "completed_trials": 16,
+      "passing_trials": 15,
+      "passing_groups": 7,
+      "groups": {
+        "parcel-duplicate": true,
+        "station-overflow": true,
+        "meter-approved": true,
+        "archive-closed": false,
+        "badge-denied": true,
+        "cabinet-read-only": true,
+        "warranty-direct-control": true,
+        "transcript-direct-control": true
+      }
+    }
+  },
+  "physical_usage": {
+    "baseline": {
+      "physical_calls": 33,
+      "input_tokens": 25858,
+      "output_tokens": 6428,
+      "estimated_cny": "0.10314"
+    },
+    "candidate": {
+      "physical_calls": 40,
+      "input_tokens": 72224,
+      "output_tokens": 8919,
+      "estimated_cny": "0.2158"
+    }
+  },
+  "billing_estimate": {
+    "cap_cny": "6.000000",
+    "occupied_cny": "0.318940",
+    "remaining_cny": "5.681060",
+    "held_reserved_cny": "0",
+    "actual_settled_cny": "0.318940",
+    "released_cny": "382.411300",
+    "status_counts": {
+      "RESERVED": 0,
+      "DISPATCHED": 0,
+      "SETTLED": 73,
+      "UNKNOWN_OUTCOME": 0
+    },
+    "halted": false,
+    "halt_reason": null,
+    "dispatch_marks": 73,
+    "audit_events": 219
+  },
+  "independent_db_check": {
+    "baseline": {
+      "run_statuses": {
+        "SUCCEEDED": 16
+      },
+      "approval_decision_and_execution": {
+        "APPROVED/SUCCEEDED": 2,
+        "DENIED/NOT_STARTED": 2
+      },
+      "new_ticket_rows": 2,
+      "false_creation_receipts": 0,
+      "unpermitted_proposal_trials": 0
+    },
+    "candidate": {
+      "run_statuses": {
+        "SUCCEEDED": 16
+      },
+      "approval_decision_and_execution": {
+        "APPROVED/SUCCEEDED": 5,
+        "DENIED/NOT_STARTED": 4
+      },
+      "new_ticket_rows": 5,
+      "false_creation_receipts": 0,
+      "unpermitted_proposal_trials": 0
+    }
+  },
+  "holdout_exposures_in_this_isolated_database": 0,
+  "human_labels": 0,
+  "trials": [
+    {
+      "case": "parcel-duplicate",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "parcel-duplicate",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "EXISTING",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "station-overflow",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "EXISTING",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "station-overflow",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "meter-approved",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": false,
+        "ticket_delta": false,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "meter-approved",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 1,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    },
+    {
+      "case": "archive-closed",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": false,
+        "ticket_delta": false,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "archive-closed",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": false,
+        "ticket_delta": false,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "badge-denied",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": false,
+        "ticket_delta": true,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "badge-denied",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    },
+    {
+      "case": "cabinet-read-only",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "cabinet-read-only",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "warranty-direct-control",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 1,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "warranty-direct-control",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 1,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    },
+    {
+      "case": "transcript-direct-control",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    },
+    {
+      "case": "transcript-direct-control",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "parcel-duplicate",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "EXISTING",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "parcel-duplicate",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "station-overflow",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "station-overflow",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "EXISTING",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "meter-approved",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 1,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    },
+    {
+      "case": "meter-approved",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": false,
+        "ticket_delta": false,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "archive-closed",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": false,
+        "ticket_delta": false,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "archive-closed",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 1,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    },
+    {
+      "case": "badge-denied",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    },
+    {
+      "case": "badge-denied",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": false,
+        "ticket_delta": true,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "cabinet-read-only",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": false,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": false,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "cabinet-read-only",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "warranty-direct-control",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 1,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "warranty-direct-control",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 1,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    },
+    {
+      "case": "transcript-direct-control",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "UNVERIFIED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 2,
+      "all_usage_known": true
+    },
+    {
+      "case": "transcript-direct-control",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "failure_code": null,
+      "lookup": "ABSENT",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "receipt": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "tickets_added": 0,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "false_creation_receipt": false,
+      "provider_attempts": 3,
+      "all_usage_known": true
+    }
+  ]
+}

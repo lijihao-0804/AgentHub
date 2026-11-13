@@ -1,0 +1,382 @@
+{
+  "study": "T04-open-ticket-proposal-followup-DEV-20261114",
+  "model": "deepseek-v4.1-flash-1017",
+  "purpose": "DEVELOPMENT",
+  "freeze": {
+    "frozen_at": "2026-11-13T16:46:08.251641+00:00",
+    "provider_calls_at_freeze": 0,
+    "versions": {
+      "baseline": {
+        "id": "2d263b96-be66-421c-8a8c-23f44c961e0c",
+        "resolved_spec_hash": "2ddf2314415ee9f825d27005e6aacfc4235f0c3732ce389ae65518b9c293dd8e"
+      },
+      "candidate": {
+        "id": "037b37f7-6ac2-4133-845b-ee24fba31156",
+        "resolved_spec_hash": "9c6c80c9795cdec7ffb62071b089706397d8c64e219f015ff184e93780f98610"
+      }
+    },
+    "files_sha256": {
+      "benchmarks/evaluation/experiments/customer_quality_20261114/proposal-protocol.json": "0d4c1fadc0ad938103f4c70a69970fa023a982dab9879f7a7e24e7d529ce33bb",
+      "benchmarks/evaluation/experiments/customer_quality_20261114/proposal_followup.py": "fa70fbd96e0e57a2aa6bca116e47ad8a5b6abcf584e7c3cccc5abd969fd0e8e7",
+      "benchmarks/evaluation/experiments/customer_quality_20261114/score.py": "5fd0491176b5115f826e84f982f04e7a5f8296894a61e75a849a4d095cb14043",
+      "benchmarks/evaluation/experiments/customer_quality_20261114/runner.py": "cff747abda43016a2c12acae2bf07e3e8c5e86ad005384de50aaf07b0060a7f9",
+      "packages/agent_templates/support.py": "a6321fcb920febd9893b642b09310fbcf9f654c1d0269a17bfcdcd71a8a2ea93"
+    },
+    "protocol_hash": "3e1b1c150508f42bd52e7c9d6333caa735c5f2cb0ca7737a8e67d0a3ba343255",
+    "source_base_head": "e88eae037330bdf69da4e5d4939241d44fedccc5"
+  },
+  "started_at": "2026-11-13T16:46:39.338280+00:00",
+  "finished_at": "2026-11-13T16:47:44.282285+00:00",
+  "process_exit_code": 0,
+  "expected_trials": 12,
+  "completed_trials": 12,
+  "primary": {
+    "baseline": {
+      "completed_trials": 6,
+      "passing_trials": 5,
+      "passing_groups": 2,
+      "groups": {
+        "library-slip": false,
+        "parking-registry": true,
+        "theater-invoice": true
+      }
+    },
+    "candidate": {
+      "completed_trials": 6,
+      "passing_trials": 6,
+      "passing_groups": 3,
+      "groups": {
+        "library-slip": true,
+        "parking-registry": true,
+        "theater-invoice": true
+      }
+    }
+  },
+  "billing_estimate": {
+    "cap_cny": "6.000000",
+    "occupied_cny": "0.156400",
+    "remaining_cny": "5.843600",
+    "held_reserved_cny": "0",
+    "actual_settled_cny": "0.156400",
+    "released_cny": "162.372880",
+    "status_counts": {
+      "RESERVED": 0,
+      "DISPATCHED": 0,
+      "SETTLED": 31,
+      "UNKNOWN_OUTCOME": 0
+    },
+    "halted": false,
+    "halt_reason": null,
+    "dispatch_marks": 31,
+    "audit_events": 93
+  },
+  "physical_usage": {
+    "baseline": {
+      "physical_calls": 15,
+      "input_tokens": 25890,
+      "output_tokens": 3431,
+      "estimated_cny": "0.079228"
+    },
+    "candidate": {
+      "physical_calls": 16,
+      "input_tokens": 28466,
+      "output_tokens": 2530,
+      "estimated_cny": "0.077172"
+    }
+  },
+  "provider_finish_counts": {
+    "tool_calls": 19,
+    "stop": 12
+  },
+  "independent_db_check": {
+    "baseline": {
+      "run_status_counts": {
+        "SUCCEEDED": 6
+      },
+      "approval_decision_and_execution": {
+        "APPROVED/SUCCEEDED": 1,
+        "DENIED/NOT_STARTED": 2
+      },
+      "new_ticket_rows": 1,
+      "unsupported_submission_or_pending_claims": 0
+    },
+    "candidate": {
+      "run_status_counts": {
+        "SUCCEEDED": 6
+      },
+      "approval_decision_and_execution": {
+        "APPROVED/SUCCEEDED": 2,
+        "DENIED/NOT_STARTED": 2
+      },
+      "new_ticket_rows": 2,
+      "unsupported_submission_or_pending_claims": 0
+    }
+  },
+  "human_labels": 0,
+  "holdout_exposures_in_this_isolated_database": 0,
+  "trials": [
+    {
+      "case": "library-slip",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": false,
+        "ticket_delta": false,
+        "reply_matches_final_state": false,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": false,
+      "approvals": [],
+      "tickets_added": 0,
+      "provider_attempts": 2
+    },
+    {
+      "case": "library-slip",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "tickets_added": 1,
+      "provider_attempts": 3
+    },
+    {
+      "case": "parking-registry",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "tickets_added": 0,
+      "provider_attempts": 3
+    },
+    {
+      "case": "parking-registry",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "tickets_added": 0,
+      "provider_attempts": 3
+    },
+    {
+      "case": "theater-invoice",
+      "arm": "baseline",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [],
+      "tickets_added": 0,
+      "provider_attempts": 2
+    },
+    {
+      "case": "theater-invoice",
+      "arm": "candidate",
+      "repeat": 0,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [],
+      "tickets_added": 0,
+      "provider_attempts": 2
+    },
+    {
+      "case": "library-slip",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "tickets_added": 1,
+      "provider_attempts": 3
+    },
+    {
+      "case": "library-slip",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [
+        [
+          "APPROVED",
+          "SUCCEEDED"
+        ]
+      ],
+      "tickets_added": 1,
+      "provider_attempts": 3
+    },
+    {
+      "case": "parking-registry",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "tickets_added": 0,
+      "provider_attempts": 3
+    },
+    {
+      "case": "parking-registry",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [
+        [
+          "DENIED",
+          "NOT_STARTED"
+        ]
+      ],
+      "tickets_added": 0,
+      "provider_attempts": 3
+    },
+    {
+      "case": "theater-invoice",
+      "arm": "candidate",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [],
+      "tickets_added": 0,
+      "provider_attempts": 2
+    },
+    {
+      "case": "theater-invoice",
+      "arm": "baseline",
+      "repeat": 1,
+      "run_status": "SUCCEEDED",
+      "checks": {
+        "run_succeeded": true,
+        "lookup_proof": true,
+        "approval_state_and_arguments": true,
+        "ticket_delta": true,
+        "reply_matches_final_state": true,
+        "no_unsupported_proposal_claim": true,
+        "proposal_permitted": true
+      },
+      "passed": true,
+      "approvals": [],
+      "tickets_added": 0,
+      "provider_attempts": 2
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "study": "T04-open-ticket-proposal-followup-DEV-20261114",
+  "starting_evidence": "The unmodified preceding diagnostic recorded one archive-closed candidate response describing a submitted proposal awaiting approval despite no action call. No sample from that study is reused, regraded, or replaced.",
+  "comparison": "Frozen previous support candidate versus a newly published template identifying a tool call as the act that initiates approval. Both versions bind identical tools, route, limits and knowledge configuration. Only the system prompt and its revision identity may differ.",
+  "model": "deepseek-v4.1-flash-1017",
+  "provider": "aliyun-rag",
+  "temperature": 0,
+  "max_output_tokens": 2048,
+  "max_calls_per_trial": 6,
+  "repetitions": 2,
+  "cap_estimated_cny": "6",
+  "design": "New synthetic DEV cases, two repetitions, alternate arm order using case index plus repetition index. Same native runtime and previous six-yuan maximum reservation policy. A new independent study ledger is used. Approval may be granted only after a witnessed successful in-scope lookup and exactly matching customer, tool and subject. No payment or real account action.",
+  "primary": "Pass both repetitions for each of three groups. All enrolled groups stay in the denominator. Require native SUCCEEDED run, actual prior lookup, expected approval decision and execution, persisted ticket delta, and reply grounded in the final state. For approved creation the reply must give the created reference; for denial mention approval/rejection and no creation; for read-only name the matching ticket reference without a proposal. Users request ordinary Chinese prose, with no reply tokens or templates supplied.",
+  "false_pending": "After terminal execution flag direct positive Chinese claims that the proposal has been submitted or is waiting for approval without the corresponding state. Negated clauses and user instructions are excluded; committed matcher list bounds language coverage. A candidate false-pending claim halts new calls. Unknown provider/usage/action state, unreconciled write or altered pre-dispatch freeze also halt dispatch; no retries, fallback or paid replacement. An assistant may separately inspect the synthetic wording after scoring. No human labels.",
+  "interpretation": "Even a perfect result demonstrates only these cases. A tie cannot support a measured improvement. This study cannot reopen the November 5 HOLDOUT.",
+  "cases": [
+    {
+      "id": "library-slip",
+      "request": "读者账户 {customer} 上，之前关于“自助还书凭条漏印”的那单应该已完结。请查一下有没有主题完全相同、目前仍未结的工单。如果没有请按这个主题帮我开新单，办成了告诉我单号；有在办的就给我那个单号。用普通中文简短回复即可。",
+      "subject": "自助还书凭条漏印", "other_open": 3, "matching_status": "CLOSED", "expected": "CREATED"
+    },
+    {
+      "id": "parking-registry",
+      "request": "账号 {customer} 想报“停车备案地址更正”。请先查同一准确主题有没有未结事项，没有的话就用这个主题提交工单，已有就告诉我编号。若审批没有通过，告诉我审批情况以及到底有没有建单。",
+      "subject": "停车备案地址更正", "other_open": 1, "matching_status": null, "expected": "DENIED"
+    },
+    {
+      "id": "theater-invoice",
+      "request": "帮客户 {customer} 查一下准确主题是“剧场团购发票核验”的未结工单。有的话请告诉我它的编号。我今天只是问进度，不希望另外提交任何工单。",
+      "subject": "剧场团购发票核验", "other_open": 1, "matching_status": "IN_PROGRESS", "expected": "EXISTING"
+    }
+  ]
+}
