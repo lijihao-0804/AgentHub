@@ -1,8 +1,4 @@
-"""Case-linked attempt reservations; deliberately not enabled by composition.
-
-The caller must first pass support admission and create immutable account/turn
-bindings. No default billing attestation or production enablement is provided.
-"""
+"""Fenced, case-linked reservations for attested interactive evaluation."""
 
 from __future__ import annotations
 
@@ -65,6 +61,7 @@ class CaseBudgetAttemptAdapter(RunBudgetAttemptAdapter):
         self._model_round = model_round
         self._execution_owner = execution_owner
         self._attestation = attestation
+        self._registry = registry
         self._held_reservation: ModelAttemptBudgetReservation | None = None
         super().__init__(
             session_factory,
@@ -79,9 +76,11 @@ class CaseBudgetAttemptAdapter(RunBudgetAttemptAdapter):
             ledger=CaseBudgetLedger(),
         )
 
-    async def reserve_attempt(self, *args, **kwargs) -> ModelAttemptBudgetReservation:
+    async def reserve_attempt(
+        self, context, profile, request, **kwargs
+    ) -> ModelAttemptBudgetReservation:
         try:
-            reservation = await super().reserve_attempt(*args, **kwargs)
+            reservation = await super().reserve_attempt(context, profile, request, **kwargs)
         except ModelAttemptBudgetError as error:
             if error.code in {"RUN_BUDGET_ATTEMPT_REPLAYED", "RUN_BUDGET_CASE_ATTEMPT_REPLAYED"}:
                 # A committed hold alone cannot prove whether the remote call
@@ -91,6 +90,33 @@ class CaseBudgetAttemptAdapter(RunBudgetAttemptAdapter):
                     "The retained case attempt requires reconciliation before recovery.",
                 ) from None
             raise
+        # Commit the hold before opening the last fence. Revocation during the
+        # first commit must prevent the network call; its hold stays on the books.
+        try:
+            async with self._session_factory() as session, session.begin():
+                await lock_case_budget_dispatch(
+                    session,
+                    identity=self._identity,
+                    turn_index=self._turn_index,
+                    agent_run_id=self._run_id,
+                    execution_owner=self._execution_owner,
+                )
+                proof = self._attestation
+                route_matches = await InteractiveCaseAttemptPriceSource.current_binding_matches(
+                    session, profile, proof, kwargs["provider"]
+                )
+                if not route_matches or self._registry.get(proof.identity) != proof:
+                    raise ModelAttemptBudgetError(
+                        "CASE_BUDGET_ATTEMPT_RECONCILIATION_REQUIRED",
+                        "The committed hold no longer has its verified billing route.",
+                    )
+        except ModelAttemptBudgetError:
+            raise
+        except Exception:
+            raise ModelAttemptBudgetError(
+                "CASE_BUDGET_ATTEMPT_RECONCILIATION_REQUIRED",
+                "The committed case reservation could not be revalidated.",
+            ) from None
         self._held_reservation = reservation
         return reservation
 
@@ -190,12 +216,30 @@ class CaseBudgetAttemptAdapter(RunBudgetAttemptAdapter):
             "basis_identity": quote.basis_identity,
         }
 
+    async def mark_unknown_outcome(self, reservation: ModelAttemptBudgetReservation) -> None:
+        try:
+            await super().mark_unknown_outcome(reservation)
+        except ModelAttemptBudgetError:
+            raise ModelAttemptBudgetError(
+                "CASE_BUDGET_ATTEMPT_RECONCILIATION_REQUIRED",
+                "The provider outcome could not be durably confirmed.",
+            ) from None
+
     async def record_response(self, response: ModelResponse) -> None:
         """Append usage only; success never releases or settles the hold.
 
         A late response may still add evidence after lease loss. Its immutable
         attempt must already exist; this path never creates a dispatch or bill.
         """
+        try:
+            await self._append_observation(response)
+        except Exception:
+            raise ModelAttemptBudgetError(
+                "CASE_BUDGET_ATTEMPT_RECONCILIATION_REQUIRED",
+                "The case response could not be recorded against its committed hold.",
+            ) from None
+
+    async def _append_observation(self, response: ModelResponse) -> None:
         reservation = self._held_reservation
         if reservation is None or not isinstance(response, ModelResponse):
             raise ModelAttemptBudgetError(

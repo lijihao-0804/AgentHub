@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
 from types import MappingProxyType
-from typing import Literal, Protocol, Self
+from typing import Literal, NamedTuple, Protocol, Self
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,6 +35,7 @@ from packages.model_gateway.contracts import (
     CapabilityRequirements,
     ModelRequest,
     ProviderEgress,
+    ResolvedModelExecutionProfile,
 )
 from packages.model_gateway.egress import (
     ProviderEgressError,
@@ -319,6 +320,13 @@ class BillingInputUpperBoundValidator(Protocol):
     ) -> bool: ...
 
 
+class BillingProofMatch(NamedTuple):
+    """Exact immutable proof or a content-free operator diagnostic."""
+
+    proof: BillingAttestation | None
+    refusal: str | None
+
+
 class BillingAttestationRegistry:
     """An immutable registry populated only by trusted server composition."""
 
@@ -381,17 +389,46 @@ class BillingAttestationRegistry:
         pricing_snapshot_id: UUID,
         pricing_snapshot_hash: str,
     ) -> BillingAttestation | None:
-        matches = [
-            proof
-            for proof in self._attestations.values()
-            if proof.workspace_id == workspace_id
-            and proof.route == route
-            and proof.pricing_snapshot_id == pricing_snapshot_id
-            and proof.pricing_snapshot_hash == pricing_snapshot_hash
-            and self.get(proof.identity) is not None
-            and self.get_validator(proof) is not None
+        return self.match_binding(
+            workspace_id=workspace_id,
+            route=route,
+            pricing_snapshot_id=pricing_snapshot_id,
+            pricing_snapshot_hash=pricing_snapshot_hash,
+        ).proof
+
+    def match_binding(
+        self,
+        *,
+        workspace_id: UUID,
+        route: FrozenProviderRoute,
+        pricing_snapshot_id: UUID,
+        pricing_snapshot_hash: str,
+    ) -> BillingProofMatch:
+        """Describe the first unmatched binding without revealing any operator data."""
+        workspace_proofs = [
+            p for p in self._attestations.values() if p.workspace_id == workspace_id
         ]
-        return matches[0] if len(matches) == 1 else None
+        if not workspace_proofs:
+            return BillingProofMatch(None, "BILLING_PROOF_MISSING")
+        route_proofs = [p for p in workspace_proofs if p.route == route]
+        if not route_proofs:
+            return BillingProofMatch(None, "BILLING_ROUTE_MISMATCH")
+        matching_prices = [
+            proof
+            for proof in route_proofs
+            if proof.pricing_snapshot_id == pricing_snapshot_id
+            and proof.pricing_snapshot_hash == pricing_snapshot_hash
+        ]
+        if not matching_prices:
+            return BillingProofMatch(None, "BILLING_PRICE_MISMATCH")
+        valid = [p for p in matching_prices if self.get(p.identity) is not None]
+        if not valid:
+            return BillingProofMatch(None, "BILLING_PROOF_EXPIRED")
+        if len(valid) != 1:
+            return BillingProofMatch(None, "BILLING_PROOF_AMBIGUOUS")
+        if self.get_validator(valid[0]) is None:
+            return BillingProofMatch(None, "BILLING_VALIDATOR_UNAVAILABLE")
+        return BillingProofMatch(valid[0], None)
 
     def get_validator(
         self,
@@ -517,9 +554,9 @@ class InteractiveCaseAttemptPriceSource:
                 is not True
             ):
                 return None
-            if not await self._current_binding_matches(session, profile, attestation, provider):
+            if not await self.current_binding_matches(session, profile, attestation, provider):
                 return None
-            amount = _cost_upper_bound(attestation)
+            amount = conservative_case_attempt_maximum(attestation)
             if amount is None:
                 return None
             return AttemptCostUpperBound(
@@ -568,9 +605,9 @@ class InteractiveCaseAttemptPriceSource:
         return evidence.fee_coverage == SUPPORTED_FEE_COVERAGE
 
     @staticmethod
-    async def _current_binding_matches(
+    async def current_binding_matches(
         session: AsyncSession,
-        profile: ResolvedModelProfile,
+        profile: ResolvedModelProfile | ResolvedModelExecutionProfile,
         attestation: BillingAttestation,
         provider: str,
     ) -> bool:
@@ -640,7 +677,7 @@ class InteractiveCaseAttemptPriceSource:
         return True
 
 
-def _cost_upper_bound(attestation: BillingAttestation) -> Decimal | None:
+def conservative_case_attempt_maximum(attestation: BillingAttestation) -> Decimal | None:
     """Ceil exact token/rate arithmetic to the ledger's 8-place precision."""
 
     evidence = attestation.request_evidence
@@ -730,4 +767,5 @@ __all__ = [
     "InteractiveCaseAttemptPriceSource",
     "RequestAdmissibilityEvidence",
     "SUPPORTED_FEE_COVERAGE",
+    "conservative_case_attempt_maximum",
 ]

@@ -36,6 +36,7 @@ from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings
 from packages.core.errors.exceptions import AgentHubError
 from packages.evaluation.business import inspect_support_outcome, support_condition_from_expected
+from packages.evaluation.case_budget_execution import reservation_unavailable
 from packages.evaluation.interactive_lifecycle import CaseExecutionIdentity, InteractiveLifecycle
 from packages.evaluation.interactive_observation import observation_from_envelope, with_cleanup
 from packages.evaluation.judge import (
@@ -1289,6 +1290,11 @@ class ExperimentRunner:
             async with self.session_factory() as session:
                 await self._validate_execution_plan(session, run_id=run_id)
         except AgentHubError as error:
+            message = (
+                error.message
+                if error.code == "INTERACTIVE_COST_RESERVATION_UNAVAILABLE"
+                else "The frozen evaluation plan failed reproducibility validation."
+            )
             async with self.session_factory() as session:
                 await self._fail_run(
                     session,
@@ -1296,7 +1302,7 @@ class ExperimentRunner:
                     owner=owner,
                     generation=generation,
                     failure_code=error.code,
-                    safe_message="The frozen evaluation plan failed reproducibility validation.",
+                    safe_message=message,
                 )
             return
         run_span = await _safe_start_span(
@@ -1603,8 +1609,29 @@ class ExperimentRunner:
                 )
             )
         )
+        capped_items = list(
+            await session.scalars(
+                select(EvaluationDatasetItem).where(
+                    EvaluationDatasetItem.workspace_id == run.workspace_id,
+                    EvaluationDatasetItem.dataset_version_id == run.dataset_version_id,
+                    EvaluationDatasetItem.split == run.split,
+                    EvaluationDatasetItem.category == "INTERACTIVE",
+                    EvaluationDatasetItem.input.has_key("max_cost_cny"),
+                )
+            )
+        )
+        preflight = getattr(self.driver, "preflight_case_budget", None)
+        if capped_items and preflight is None:
+            raise reservation_unavailable()
         for variant in variants:
             await self._validate_variant(session, run.workspace_id, variant)
+            for item in capped_items:
+                await preflight(
+                    session,
+                    variant=variant,
+                    item=item,
+                    evaluator_manifest=experiment.evaluator_manifest,
+                )
 
     async def _validate_variant(
         self,
@@ -1712,7 +1739,7 @@ class ExperimentRunner:
         failure_code: str,
         safe_message: str,
     ) -> None:
-        await session.execute(
+        result = await session.execute(
             update(EvaluationExperimentRun)
             .where(
                 EvaluationExperimentRun.id == run_id,
@@ -1730,6 +1757,22 @@ class ExperimentRunner:
                 heartbeat_at=None,
             )
         )
+        if result.rowcount == 1:
+            # A plan-wide rejection dispatched none of the pending cases. Give
+            # each a terminal, inspectable outcome along with its parent.
+            await session.execute(
+                update(EvaluationExperimentCaseResult)
+                .where(
+                    EvaluationExperimentCaseResult.experiment_run_id == run_id,
+                    EvaluationExperimentCaseResult.status == EvaluationCaseResultStatus.PENDING,
+                )
+                .values(
+                    status=EvaluationCaseResultStatus.FAILED,
+                    failure_code=failure_code,
+                    safe_failure_message=safe_message,
+                    completed_at=_now(),
+                )
+            )
         await session.commit()
 
     async def cancel(self, session: AsyncSession, *, run_id: UUID) -> bool:

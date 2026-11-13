@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 import json
 import logging
 import time
@@ -43,6 +44,7 @@ from packages.agent_runtime.runtime_projection import (
     AgentRunExecutionOverrides,
     AgentRunResult,
     AgentRunState,
+    CaseRunBudget,
     _aggregate_usage,
     _approval_interrupt_payload,
     _assert_wiki_publication_not_revoked,
@@ -204,7 +206,11 @@ class AgentRunService:
         )
 
     async def execute_prepared_run(
-        self, context: WorkspaceExecutionContext, *, run_id: UUID
+        self,
+        context: WorkspaceExecutionContext,
+        *,
+        run_id: UUID,
+        case_budget: CaseRunBudget | None = None,
     ) -> AgentRunResult:
         self._require_permission(context, "agent_run")
         async with run_execution_lease(
@@ -212,10 +218,18 @@ class AgentRunService:
             UUID(context.workspace_id),
             run_id,
             allowed_statuses={"RUNNING", "CANCEL_REQUESTED"},
+            case_id=case_budget.case_id if case_budget is not None else None,
         ) as owner:
             if owner is None:
                 return _run_result(await self.get_run(context, run_id))
-            return await self._execute_prepared_run_owned(
+            executor = self
+            if case_budget is not None:
+                # Bind this lease token without changing the service shared by other cases.
+                executor = copy.copy(self)
+                executor.model_attempt_budget_factory = lambda run, model_round: (
+                    case_budget.attempt_budget(run, model_round, owner)
+                )
+            return await executor._execute_prepared_run_owned(
                 context, run_id=run_id, execution_owner_token=owner
             )
 
@@ -1662,6 +1676,9 @@ class AgentRunService:
             turn_agent_run_id = turn.agent_run_id if turn is not None else None
             session.add(run)
             try:
+                if execution_overrides is not None and execution_overrides.case_budget is not None:
+                    await session.flush()
+                    await execution_overrides.case_budget.create_run_account(session, run)
                 await session.commit()
             except IntegrityError as error:
                 if turn is None or not self._is_thread_turn_unique_violation(error):

@@ -348,6 +348,28 @@ class ThreadService:
         workspace_id = _require(context, AGENT_RUN)
         async with self.session_factory() as session:
             thread = await self._load(session, workspace_id, thread_id)
+            if thread.kind == kinds.SUPPORT:
+                from packages.evaluation.case_budget_models import CaseBudgetAccount
+                from packages.evaluation.models import InteractiveEpisode
+
+                capped_episode = await session.scalar(
+                    select(InteractiveEpisode.case_id)
+                    .join(
+                        CaseBudgetAccount,
+                        (CaseBudgetAccount.workspace_id == InteractiveEpisode.workspace_id)
+                        & (CaseBudgetAccount.case_id == InteractiveEpisode.case_id),
+                    )
+                    .where(
+                        InteractiveEpisode.workspace_id == workspace_id,
+                        InteractiveEpisode.reserved_thread_id == thread_id,
+                    )
+                )
+                if capped_episode is not None:
+                    raise AgentHubError(
+                        "INTERACTIVE_CASE_EXECUTOR_REQUIRED",
+                        "Only the evaluation executor can submit turns to this budgeted episode.",
+                        409,
+                    )
             version_id = await session.scalar(
                 select(AgentVersion.id)
                 .where(

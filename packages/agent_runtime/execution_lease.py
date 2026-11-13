@@ -10,6 +10,7 @@ from uuid import uuid4
 from sqlalchemy import case, func, select, update
 
 from packages.agent_runtime.models import AgentRun
+from packages.agent_runtime.run_budget_ledger import RunBudgetAccount
 from packages.core.errors.exceptions import AgentHubError
 
 LEASE_SECONDS = 180
@@ -21,7 +22,7 @@ def _live(expiry, now):
 
 
 @asynccontextmanager
-async def run_execution_lease(factory, workspace_id, run_id, *, allowed_statuses):
+async def run_execution_lease(factory, workspace_id, run_id, *, allowed_statuses, case_id=None):
     token = uuid4().hex
     claimed = False
     async with factory() as session:
@@ -34,6 +35,19 @@ async def run_execution_lease(factory, workspace_id, run_id, *, allowed_statuses
             raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
         now = datetime.now(UTC)
         if run.status in allowed_statuses:
+            if run.thread_id is not None or case_id is not None:
+                linked_case = await session.scalar(
+                    select(RunBudgetAccount.case_id).where(
+                        RunBudgetAccount.workspace_id == workspace_id,
+                        RunBudgetAccount.run_id == run_id,
+                    )
+                )
+                if linked_case != case_id:
+                    raise AgentHubError(
+                        "RUN_BUDGET_BINDING_UNAVAILABLE",
+                        "This Run requires its bound case budget executor.",
+                        409,
+                    )
             if run.execution_owner:
                 if not _live(run.execution_lease_expires_at, now):
                     run.status = "NEEDS_ATTENTION"

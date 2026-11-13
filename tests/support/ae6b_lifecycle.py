@@ -113,6 +113,7 @@ async def create_interactive_driver_experiment(
     session_factory: async_sessionmaker[AsyncSession],
     *,
     assertions: Mapping[str, object] | None = None,
+    items: list[dict[str, object]] | None = None,
 ) -> InteractiveExperimentSetup:
     """Create one frozen interactive dataset and an unclaimed queued run."""
 
@@ -121,7 +122,9 @@ async def create_interactive_driver_experiment(
         _, dataset_version = await _published_version(
             session,
             base,
-            items=[
+            items=items
+            if items is not None
+            else [
                 interactive_item(
                     f"interactive-driver-{uuid4().hex}",
                     assertions=assertions,

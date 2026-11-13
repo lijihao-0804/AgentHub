@@ -13,13 +13,14 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid5
 
 from sqlalchemy import delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
+from packages.agent_runtime.run_budget_ledger import RunBudgetAttempt
 from packages.approvals.contracts import (
     ApprovalDecisionStatus,
     ApprovalExecutionStatus,
@@ -27,6 +28,8 @@ from packages.approvals.contracts import (
 from packages.approvals.models import Approval
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
+from packages.evaluation.case_budget_ledger import CaseBudgetLedger
+from packages.evaluation.case_budget_models import CaseBudgetResponseObservation
 from packages.evaluation.models import (
     EvaluationDatasetItem,
     EvaluationExperimentCaseResult,
@@ -37,6 +40,9 @@ from packages.evaluation.models import (
 )
 from packages.threads.models import AgentThread, ThreadTurn
 from packages.tools.models import Customer, Ticket
+
+if TYPE_CHECKING:
+    from packages.evaluation.case_budget_execution import AttestedCaseBudget
 
 INTERACTIVE_DRIVER_VERSION = "interactive-driver-v2"
 INTERACTIVE_ENVIRONMENT_VERSION = "environment-v2"
@@ -270,6 +276,7 @@ class InteractiveLifecycle:
         fixture_ref: str,
         input_hash: str,
         policy_hash: str,
+        budget: AttestedCaseBudget | None = None,
     ) -> InteractiveEpisode:
         if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
             raise ValueError("seed must be a non-negative integer")
@@ -317,9 +324,6 @@ class InteractiveLifecycle:
                         "INTERACTIVE_EPISODE_ALREADY_STARTED",
                         "A started interactive episode cannot be reserved again.",
                     )
-                await session.commit()
-                await session.refresh(episode)
-                return episode
             else:
                 episode = InteractiveEpisode(
                     case_id=identity.case_id,
@@ -348,6 +352,9 @@ class InteractiveLifecycle:
                     cleanup_attempts=0,
                 )
                 session.add(episode)
+            if budget is not None:
+                await session.flush()
+                await budget.create_account(session, identity)
             assert case.workspace_id == identity.workspace_id
             await session.commit()
             await session.refresh(episode)
@@ -665,6 +672,7 @@ class InteractiveLifecycle:
         identity: CaseExecutionIdentity,
         *,
         turn_index: int,
+        budget: AttestedCaseBudget | None = None,
     ) -> None:
         async with self.session_factory() as session:
             parent_run, case, episode = await self._lock_current_episode(session, identity)
@@ -730,6 +738,30 @@ class InteractiveLifecycle:
                 raise _error(
                     "INTERACTIVE_DISPATCH_BINDING_INVALID",
                     "The bound ThreadTurn or AgentRun no longer matches the frozen case.",
+                )
+            if budget is not None:
+                ledger = CaseBudgetLedger()
+                child = await ledger.get_account(
+                    session, workspace_id=identity.workspace_id, run_id=agent_run.id
+                )
+                if (
+                    child.case_id != identity.case_id
+                    or child.currency != budget.proof.currency
+                    or child.limit_amount != budget.limit
+                ):
+                    raise _error(
+                        "INTERACTIVE_COST_RESERVATION_UNAVAILABLE",
+                        "The turn does not have its admitted case budget.",
+                    )
+                await ledger.create_case_run_binding(
+                    session,
+                    workspace_id=identity.workspace_id,
+                    case_id=identity.case_id,
+                    turn_index=turn_index,
+                    evaluation_run_id=identity.run_id,
+                    agent_run_id=agent_run.id,
+                    dispatch_owner=identity.owner,
+                    dispatch_generation=identity.generation,
                 )
             now = _now()
             turn.dispatch_status = "DISPATCH_INTENT"
@@ -1567,7 +1599,27 @@ class InteractiveLifecycle:
             )
             or 0
         )
-        return bool(approvals or pending_actions)
+        if approvals or pending_actions:
+            return True
+        observation_exists = select(CaseBudgetResponseObservation.id).where(
+            CaseBudgetResponseObservation.workspace_id == RunBudgetAttempt.workspace_id,
+            CaseBudgetResponseObservation.run_id == RunBudgetAttempt.run_id,
+            CaseBudgetResponseObservation.attempt_identity == RunBudgetAttempt.attempt_identity,
+        ).exists()
+        unobserved_attempt = await session.scalar(
+            select(RunBudgetAttempt.id)
+            .where(
+                RunBudgetAttempt.workspace_id == workspace_id,
+                RunBudgetAttempt.run_id == run_id,
+                RunBudgetAttempt.case_id.is_not(None),
+                or_(
+                    RunBudgetAttempt.status == "UNKNOWN_OUTCOME",
+                    (RunBudgetAttempt.status == "RESERVED") & ~observation_exists,
+                ),
+            )
+            .limit(1)
+        )
+        return unobserved_attempt is not None
 
     async def _cleanup_episode_in_session(
         self,

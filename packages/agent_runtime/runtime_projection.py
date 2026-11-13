@@ -8,7 +8,7 @@ import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any, TypedDict
+from typing import Any, Protocol, TypedDict
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,6 +38,7 @@ from packages.model_gateway.contracts import (
     ModelResponse,
     ModelToolCallDelta,
 )
+from packages.model_gateway.run_budget_adapter import ModelAttemptBudget
 from packages.observability.contracts import TraceSink, TraceSpan
 from packages.observability.timing import timed_span
 from packages.tools.contracts import (
@@ -158,6 +159,18 @@ class AgentRunResult:
     cost_currency: str | None = None
 
 
+class CaseRunBudget(Protocol):
+    """Internal evaluation port for one case turn. Never populated by transport input."""
+
+    case_id: UUID
+
+    async def create_run_account(self, session: AsyncSession, run: AgentRun) -> None: ...
+
+    def attempt_budget(
+        self, run: AgentRun, model_round: int, execution_owner: str
+    ) -> ModelAttemptBudget: ...
+
+
 @dataclass(frozen=True, slots=True)
 class AgentRunExecutionOverrides:
     """Trusted runtime-only inputs used by reproducible internal evaluation workers.
@@ -169,6 +182,7 @@ class AgentRunExecutionOverrides:
 
     effective_knowledge_snapshots: tuple[dict[str, str], ...]
     effective_wiki_publications: tuple[dict[str, str], ...] = ()
+    case_budget: CaseRunBudget | None = None
 
     @classmethod
     def for_evaluation(
@@ -176,10 +190,12 @@ class AgentRunExecutionOverrides:
         snapshots: list[dict[str, str]] | tuple[dict[str, str], ...],
         *,
         wiki_publications: list[dict[str, str]] | tuple[dict[str, str], ...] = (),
+        case_budget: CaseRunBudget | None = None,
     ) -> AgentRunExecutionOverrides:
         return cls(
             effective_knowledge_snapshots=tuple(dict(item) for item in snapshots),
             effective_wiki_publications=tuple(dict(item) for item in wiki_publications),
+            case_budget=case_budget,
         )
 
 

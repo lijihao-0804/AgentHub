@@ -11,6 +11,7 @@ from sqlalchemy import select
 
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
 from packages.agent_runtime.runtime import AgentRunExecutionOverrides, AgentRunService
+from packages.agent_runtime.runtime_projection import CaseRunBudget
 from packages.approvals.contracts import ApprovalDecisionStatus
 from packages.approvals.models import Approval
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -57,6 +58,7 @@ class ScriptedScenarioDriver:
         wiki_publications: Sequence[dict[str, str]] = (),
         instance_id: str | None = None,
         thread_id: UUID | None = None,
+        case_budget: CaseRunBudget | None = None,
     ) -> PreparedScenario:
         if (instance_id is None) != (thread_id is None):
             raise ValueError("SCENARIO_STABLE_IDENTITY_INCOMPLETE")
@@ -98,6 +100,7 @@ class ScriptedScenarioDriver:
             execution_overrides=AgentRunExecutionOverrides.for_evaluation(
                 list(knowledge_snapshots),
                 wiki_publications=list(wiki_publications),
+                case_budget=case_budget,
             ),
         )
         await self.threads.attach_run(context, turn_id=turn.id, run_id=run.id)

@@ -1,4 +1,4 @@
-"""Authoritative dispatch fences for a future case-budget attempt adapter.
+"""Authoritative dispatch fences for case-budget model attempts.
 
 Call inside the reservation transaction, before taking the case/Run budget locks.
 This module grants no dispatch permission by itself and performs no model call.

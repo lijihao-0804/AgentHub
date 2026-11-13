@@ -261,6 +261,7 @@ async def test_build_driver_shares_runtime_services_and_guards_environment_facto
     factory = object()
     settings = SimpleNamespace(
         knowledge_rrf_k=60,
+        evaluation_case_budget_attestations_path=None,
         knowledge_min_rerank_score=None,
         knowledge_superseded_rank_penalty=0.0,
         approval_ttl_seconds=3600,
@@ -312,11 +313,13 @@ async def test_build_driver_shares_runtime_services_and_guards_environment_facto
             context_factory,
             environment_factory,
             approval_context_factory,
+            budget_registry,
         ):
             self.scenarios = scenarios
             self.context_factory = context_factory
             self.environment_factory = environment_factory
             self.approval_context_factory = approval_context_factory
+            self.budget_registry = budget_registry
 
     class RuntimeDriverStub:
         def __init__(

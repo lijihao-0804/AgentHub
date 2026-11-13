@@ -68,6 +68,16 @@ class EvaluationDriverRouter:
         self.runtime_driver = runtime_driver
         self.sandbox_workspace_ids = frozenset(sandbox_workspace_ids)
 
+    async def preflight_case_budget(self, session, *, variant, item, evaluator_manifest):
+        require_interactive_sandbox(
+            workspace_id=variant.workspace_id,
+            environment_ref=item.input.get("environment_ref"),
+            sandbox_workspace_ids=self.sandbox_workspace_ids,
+        )
+        return await self.interactive_driver.preflight_case_budget(
+            session, variant=variant, item=item, evaluator_manifest=evaluator_manifest
+        )
+
     async def prepare(
         self,
         *,

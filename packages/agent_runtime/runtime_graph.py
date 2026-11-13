@@ -2723,6 +2723,8 @@ class _AgentRunGraph:
             if callable(getattr(experiment_attempt_budget, "record_response", None)):
                 try:
                     await experiment_attempt_budget.record_response(response)
+                except ModelAttemptBudgetError:
+                    raise
                 except Exception:
                     # The research ledger already holds the conservative maximum.
                     # A failed response note cannot be mistaken for a new dispatch.

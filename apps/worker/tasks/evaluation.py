@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import secrets
 from uuid import UUID
 
@@ -17,6 +18,11 @@ from packages.core.config.settings import get_settings
 from packages.core.database import create_database
 from packages.core.execution_context.models import PrincipalContext
 from packages.evaluation.approval import EvaluationApprovalActorProvider
+from packages.evaluation.case_budget_config import load_case_budget_registry
+from packages.evaluation.case_budget_pricing import (
+    BillingAttestationRegistry,
+    CaseBudgetPricingError,
+)
 from packages.evaluation.driver_router import (
     EvaluationDriverRouter,
     require_interactive_sandbox,
@@ -265,10 +271,20 @@ async def _build_driver(
         judge=judge,
     )
     scenarios = ScriptedScenarioDriver(service, driver_kind="controlled")
+    try:
+        budget_registry = load_case_budget_registry(
+            settings.evaluation_case_budget_attestations_path
+        )
+    except CaseBudgetPricingError:
+        # Invalid operator evidence must give capped plans a durable refusal,
+        # without preventing unrelated jobs from using this worker.
+        logging.getLogger(__name__).error("evaluation_case_budget_configuration_invalid")
+        budget_registry = BillingAttestationRegistry.empty()
     interactive_driver = InteractiveScenarioDriver(
         scenarios,
         context_factory=context_factory,
         environment_factory=environment_factory,
+        budget_registry=budget_registry,
         approval_context_factory=approval_actor_provider.context_for,
     )
     return EvaluationDriverRouter(

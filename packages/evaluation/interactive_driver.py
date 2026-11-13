@@ -28,6 +28,13 @@ from packages.approvals.models import Approval
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.evaluation.case_budget_execution import (
+    AttestedCaseBudget,
+    InteractiveTurnBudget,
+    attest_interactive_case,
+    reservation_unavailable,
+)
+from packages.evaluation.case_budget_pricing import BillingAttestationRegistry
 from packages.evaluation.environment import StateAssertion, TaskEnvironment
 from packages.evaluation.interactive_lifecycle import (
     INTERACTIVE_DRIVER_VERSION,
@@ -109,11 +116,27 @@ class InteractiveScenarioDriver:
             [EvaluationExperimentRun], Awaitable[WorkspaceExecutionContext]
         ]
         | None = None,
+        budget_registry: BillingAttestationRegistry | None = None,
     ) -> None:
         self.scenarios = scenarios
         self.context_factory = context_factory
         self.environment_factory = environment_factory
         self.approval_context_factory = approval_context_factory
+        self.budget_registry = budget_registry
+
+    async def preflight_case_budget(
+        self, session, *, variant, item, evaluator_manifest
+    ) -> AttestedCaseBudget:
+        if not self.budget_registry:
+            raise reservation_unavailable("BILLING_PROOF_MISSING")
+        return await attest_interactive_case(
+            session,
+            registry=self.budget_registry,
+            variant=variant,
+            item=item,
+            evaluator_manifest=evaluator_manifest,
+            memory_writer=self.scenarios.runtime.memory_writer,
+        )
 
     async def prepare(
         self, *, run, variant, item, case_identity: CaseExecutionIdentity | None = None
@@ -137,6 +160,10 @@ class InteractiveScenarioDriver:
         ):
             raise RuntimeError("EVALUATION_CASE_IDENTITY_MISMATCH")
         max_turns, max_tokens = _execution_limits(item.input)
+        capped = "max_cost_cny" in item.input
+        if capped and not self.budget_registry:
+            raise reservation_unavailable("BILLING_PROOF_MISSING")
+        budget = None
         async with self.scenarios.runtime.session_factory() as session:
             evaluator_manifest = await session.scalar(
                 select(EvaluationExperiment.evaluator_manifest).where(
@@ -144,6 +171,10 @@ class InteractiveScenarioDriver:
                     EvaluationExperiment.id == run.experiment_id,
                 )
             )
+            if capped:
+                budget = await self.preflight_case_budget(
+                    session, variant=variant, item=item, evaluator_manifest=evaluator_manifest
+                )
         require_interactive_protocol(evaluator_manifest)
         assertions = item.expected.get("assertions")
         if not isinstance(assertions, Mapping):
@@ -154,6 +185,14 @@ class InteractiveScenarioDriver:
             raise RuntimeError("EVALUATION_ENVIRONMENT_DURABILITY_REQUIRED")
         environment = environment.for_case(case_identity)
         lifecycle = InteractiveLifecycle(self.scenarios.runtime.session_factory)
+
+        def turn_budget(index: int) -> InteractiveTurnBudget | None:
+            if budget is None:
+                return None
+            return InteractiveTurnBudget(
+                self.scenarios.runtime.session_factory, case_identity, index, budget
+            )
+
         try:
             episode = await lifecycle.reserve(
                 case_identity,
@@ -161,6 +200,7 @@ class InteractiveScenarioDriver:
                 fixture_ref=str(item.input.get("environment_ref", "support_customer")),
                 input_hash=canonical_json_hash(item.input),
                 policy_hash=canonical_json_hash(dict(item.input["simulator"]["triggers"])),
+                budget=budget,
             )
             handle = await environment.reset(
                 seed=int(item.input.get("seed", 0)),
@@ -186,6 +226,7 @@ class InteractiveScenarioDriver:
                 wiki_publications=variant.effective_wiki_publications,
                 instance_id=episode.instance_id.hex,
                 thread_id=episode.reserved_thread_id,
+                case_budget=turn_budget(0),
             )
             await lifecycle.bind_thread(case_identity, thread_id=prepared.thread_id)
             await lifecycle.bind_turn(
@@ -258,10 +299,16 @@ class InteractiveScenarioDriver:
                         or "evaluation_run" not in context.permissions
                     ):
                         raise AgentHubError("FORBIDDEN", "Evaluation access was revoked.", 403)
-                    await lifecycle.dispatch(case_identity, turn_index=turn_index)
-                    result = await self.scenarios.runtime.execute_prepared_run(
-                        context, run_id=prepared_run.run_id
-                    )
+                    await lifecycle.dispatch(case_identity, turn_index=turn_index, budget=budget)
+                    current_budget = turn_budget(turn_index)
+                    if current_budget is None:
+                        result = await self.scenarios.runtime.execute_prepared_run(
+                            context, run_id=prepared_run.run_id
+                        )
+                    else:
+                        result = await self.scenarios.runtime.execute_prepared_run(
+                            context, run_id=prepared_run.run_id, case_budget=current_budget
+                        )
                     while result.status == "WAITING_APPROVAL":
                         await lifecycle.ensure_current(case_identity)
                         if decision_index >= len(approval_decisions):
@@ -456,7 +503,12 @@ class InteractiveScenarioDriver:
                         await retain_turn()
                         break
                     if result.status in {"FAILED", "CANCELLED", "NEEDS_ATTENTION"}:
-                        stop_reason = stop_reason or f"agent_{result.status.lower()}"
+                        stop_reason = (
+                            "budget_exhausted"
+                            if result.failure_code
+                            in {"RUN_BUDGET_INSUFFICIENT_FUNDS", "CASE_BUDGET_INSUFFICIENT_FUNDS"}
+                            else stop_reason or f"agent_{result.status.lower()}"
+                        )
                         await retain_turn()
                         if result.status == "NEEDS_ATTENTION":
                             raise AgentHubError(
@@ -516,6 +568,7 @@ class InteractiveScenarioDriver:
                         execution_overrides=AgentRunExecutionOverrides.for_evaluation(
                             list(variant.effective_knowledge_snapshots),
                             wiki_publications=list(variant.effective_wiki_publications),
+                            case_budget=turn_budget(turn_index + 1),
                         ),
                     )
                     await self.scenarios.threads.attach_run(
@@ -690,13 +743,6 @@ def _execution_limits(value: Mapping[str, Any]) -> tuple[int, int | None]:
             raise ValueError("INTERACTIVE_COST_LIMIT_INVALID") from None
         if not cost.is_finite() or cost < 0:
             raise ValueError("INTERACTIVE_COST_LIMIT_INVALID")
-        # There is currently no episode-wide reservation covering auxiliary
-        # calls. Never turn a finite declared limit into an unenforced estimate.
-        raise AgentHubError(
-            "INTERACTIVE_COST_RESERVATION_UNAVAILABLE",
-            "A finite interactive cost limit requires complete dispatch reservations.",
-            409,
-        )
     return min(declared), tokens
 
 
