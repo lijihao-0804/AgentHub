@@ -128,7 +128,9 @@ class ScriptedGateway:
     async def prepare_resolved(self, context, plan, request, **kwargs):
         return self
 
-    async def generate_resolved(self, context, plan, request):
+    async def generate_resolved(self, context, plan, request, *, before_provider_attempt=None):
+        if before_provider_attempt is not None:
+            await before_provider_attempt()
         if request.messages[0].content == EXTRACTION_SYSTEM_PROMPT:
             self.extraction_requests.append(request)
             user = json.loads(request.messages[1].content)["user"]
