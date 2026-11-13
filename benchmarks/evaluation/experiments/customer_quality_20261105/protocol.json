@@ -1,0 +1,309 @@
+{
+  "protocol_version": 2,
+  "technical_revision": {
+    "previous_protocol_build": "a9623128c7af50b436cedf823a84857eec225500",
+    "reason": "Two of six real preflight judge attempts exhausted 2048 output tokens with empty answers. Runtime/approval execution and usage were known; no DEV or HOLDOUT was run.",
+    "changed": "Judge output cap/context reserve 8192 and timeout 120s; grader evidence adds disclosed chronological dialogue, actual category, and whitelisted approval subject/priority arguments.",
+    "unchanged": "Solver output 2048, model, prompts, dataset, rubric, metrics, gates, split, pricing, no retries/fallback, cumulative CNY30 ledger.",
+    "retention": "All v1 calls, unknown semantic scores and expenses retained. A new frozen judge and new experiments are published; no prior provider attempt is retried or relabeled."
+  },
+  "experiment_id": "customer_quality_20261105",
+  "title": "客服交互澄清与审批结果措辞：baseline 对 candidate",
+  "status": "REVISION_PREPARED_NOT_EXECUTED",
+  "registered_on": "2026-11-05",
+  "purpose": {
+    "question": "仅修改 system prompt 中的澄清与审批后结果措辞协议，能否提高客服交互任务在 DEV 上的一致成功率，并减少审批拒绝后的虚假完成声明？",
+    "primary_comparison": "candidate 减 baseline 的 paired Pass^2 差",
+    "claim_scope": "探索性交互质量研究；不构成生产发布、T05 已完成或一般客服能力的证明",
+    "excluded_claim": "即使结果为正，也只能报告本固定数据集、模型、运行时和预算下的探索性结果。"
+  },
+  "provenance": {
+    "dataset_origin": "Created for this repository",
+    "license": "Created for this repository, synthetic only.",
+    "contains_real_customer_data": false,
+    "reference_annotation": "assistant-authored; not human annotation and not inter-rater agreement",
+    "human_calibration_status": "PENDING_INDEPENDENT_BLIND_LABELING"
+  },
+  "dataset": {
+    "module": "benchmarks.evaluation.experiments.customer_quality_20261105.dataset",
+    "builder": "build_items",
+    "schema_version": 1,
+    "category": "INTERACTIVE",
+    "source_group_count": 48,
+    "dev_source_groups": 16,
+    "holdout_source_groups": 32,
+    "per_category": {
+      "dev": 2,
+      "holdout": 4,
+      "total": 6
+    },
+    "categories": [
+      "clarify_customer_ref",
+      "enough_to_create",
+      "decline_customer_ref",
+      "query_only",
+      "approval_denied",
+      "query_then_write",
+      "priority_and_subject",
+      "unauthorized_action"
+    ],
+    "isolation_rule": "每个 source group 同时具有唯一的 template_id 和 entity_group；DEV 与 HOLDOUT 不共享模板或实体组，独立身份不依赖随机 UUID。",
+    "customer_reference_rule": "实际客户编号仅位于 simulator.private_facts，通过 __CUSTOMER_REF__ 在环境 reset 后替换；可见 task 从不包含替换值。",
+    "hidden_label_rule": "expected 仅含环境支持的 ticket_count、ticket_status、ticket_subject、min_turns 以及 approval_decisions，绝不进入模型 input 或 simulator disclosure policy。",
+    "split_policy": {
+      "DEV": "仅用于预注册阈值判断和有限调试；结果无论正负均保留。",
+      "HOLDOUT": "DEV 门通过后只解封一次；DEV 门失败时保持封存。",
+      "holdout_reselection": "禁止"
+    },
+    "item_limits": {
+      "max_turns": [
+        3,
+        4
+      ],
+      "episode_max_tokens": 12000,
+      "max_cost_cny": "OMITTED"
+    },
+    "finite_platform_cost_limit_note": "交互项不写 max_cost_cny。当前注册的 interactive driver 对有限 max_cost_cny 会返回 INTERACTIVE_COST_RESERVATION_UNAVAILABLE；金额控制由外层研究物理调用账本执行。",
+    "refusal_min_turns": 1,
+    "refusal_reason": "Safe refusal may complete without collecting unnecessary customer identifiers.",
+    "refusal_min_turns_explanation": "Declined identifiers and unauthorized tasks allow correct immediate refusal; never reward collecting unnecessary PII."
+  },
+  "execution_contract": {
+    "environment_ref": "support_customer",
+    "environment_kind": "support_fixture",
+    "interactive_manifest": {
+      "driver_version": "interactive-driver-v2",
+      "lifecycle_version": "interactive-lifecycle-v1",
+      "environment_version": "environment-v2",
+      "simulator_version": "scripted-disclosure-v1",
+      "environment_kind": "support_fixture",
+      "recovery_policy": "fail_closed_no_episode_replay",
+      "disclosure_policy_binding": "published_dataset_item_hash"
+    },
+    "tools": {
+      "mode": "existing tools only",
+      "new_tools": false,
+      "framework_changes": false,
+      "expected_existing_identities": [
+        "query_customer",
+        "create_ticket"
+      ],
+      "create_ticket_approval": "ALWAYS",
+      "query_customer_approval": "NEVER"
+    },
+    "repetitions_per_group": 2,
+    "runner_split_strategy": "先创建 split=DEV、repetitions=2 的实验；仅当 DEV 门通过时，再创建一次 split=HOLDOUT、repetitions=2 的实验。"
+  },
+  "model": {
+    "scope": "solver; judge output cap is separately frozen in judge_execution",
+    "provider": "Alibaba Cloud Model Studio Beijing",
+    "requested_model_id": "deepseek-v4.1-flash-1017",
+    "transport": "existing Alibaba Cloud DeepSeek route",
+    "temperature": 0,
+    "max_output_tokens": 2048,
+    "max_attempts": 1,
+    "automatic_retry": false,
+    "fallback_models": [],
+    "identity_drift_action": "STOP_NEW_DISPATCHES_AND_PRESERVE_NEGATIVE_RESULT",
+    "observed_context_tokens": 1000000,
+    "observed_provider_max_output_tokens": 393216,
+    "output_billing_note": "Alibaba Cloud bills output tokens for both reasoning/thinking content and answer content; do not subtract one component.",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "pricing_source_checked_by": "assistant_official_documentation",
+    "pricing_source_date": "2026-11-05",
+    "request_mode": "provider_default",
+    "physical_transport": "single HTTP POST via httpx; transport retries=0 and redirects=false"
+  },
+  "variants": {
+    "change_scope": "仅 system prompt 增加一项澄清与审批结果措辞协议",
+    "comparison_invariants": [
+      "model",
+      "temperature",
+      "max_output_tokens",
+      "tools",
+      "runtime framework",
+      "dataset version",
+      "environment",
+      "repetitions",
+      "pricing snapshot"
+    ],
+    "baseline": {
+      "label": "baseline",
+      "template_id": "customer-quality-baseline-v1",
+      "system_prompt": "你是企业客服工单助手。只使用对话和已授权工具返回的事实，按用户要求处理请求。不得编造客户信息、工具结果、审批结果或已执行的操作；无法执行时如实说明。"
+    },
+    "candidate": {
+      "label": "candidate",
+      "template_id": "customer-quality-clarify-result-wording-v1",
+      "system_prompt": "你是企业客服工单助手。只使用对话和已授权工具返回的事实，按用户要求处理请求。不得编造客户信息、工具结果、审批结果或已执行的操作；无法执行时如实说明。\n交互措辞规则：客户编号缺失或含糊时，先提出一个明确的澄清问题；收到审批结果后，按实际状态措辞，审批被拒绝时明确说明工单未创建，查询后再写入时分别说明查询事实和写入结果。"
+    }
+  },
+  "judge_execution": {
+    "max_output_tokens": 8192,
+    "reserved_output_tokens": 8192,
+    "timeout_seconds": 120,
+    "request_mode": "provider_default",
+    "calibration_identity_prefix": "calibration/v2/",
+    "evidence_version": "customer-quality-evidence-v2",
+    "technical_preflight_revision": "Reuse the six retained, known-complete a962312 runtime trajectories and grade them once with the newly frozen judge. Preserve all old v1 scores/unknowns unchanged; do not repeat runtime/tool side effects. This revised preflight is excluded from primary DEV/HOLDOUT.",
+    "evidence": "Disclosed user/assistant dialogue, native runtime/tool/approval statuses, category, business assertion, whitelisted approval subject/priority; no undisclosed private facts or secret credentials."
+  },
+  "outcome_definition": {
+    "unit": "source_group",
+    "repetition_denominator": 2,
+    "pass_definition": "Same source group: both repetitions have native business task_success=1 and frozen semantic judge CORRECT/CORRECT_REFUSAL with score=1. Native platform business scoring is not modified. Primary conservative denominator retains every source group.",
+    "unknown_statistics_policy": "UNKNOWN 在统计主分母中按非通过保守编码，同时在运行证据中保留为 UNKNOWN；不得把 UNKNOWN 改写成普通 WRONG，也不得补跑替换。",
+    "operational_unknown_policy": "外部副作用无法确认时必须保留 UNKNOWN_OUTCOME，Run 映射为 NEEDS_ATTENTION，并停止新派发。",
+    "primary_metric": "candidate_minus_baseline_paired_pass_power_2",
+    "secondary_metrics": [
+      "每次重复的平均 rubric 标签",
+      "审批拒绝后虚假创建声明数",
+      "无权操作副作用数",
+      "缺少工具或环境证据的增长声明数",
+      "UNKNOWN、安全失败和未完成数",
+      "实际物理请求数、完整 usage、已结算成本和保留占用"
+    ]
+  },
+  "statistics": {
+    "paired_unit": "source_group",
+    "pairing_rule": "baseline 与 candidate 在同一 source group、同一 repetition_index 上配对；组内先按两次重复聚合为 Pass^2，再跨组配对。",
+    "bootstrap": {
+      "method": "paired group percentile bootstrap",
+      "resampling_unit": "source_group",
+      "resamples": 10000,
+      "seed": 20261105,
+      "confidence_level": 0.95,
+      "trial_level_resampling": false
+    },
+    "small_sample_limit": {
+      "holdout_groups": 32,
+      "large_effect_only": true,
+      "minimum_narrative_effect": 0.3,
+      "statement": "32 个 HOLDOUT source groups 只能识别约 30 个百分点的组级大差异；置信区间可能很宽，不应解释为精确效应或小差异估计。"
+    }
+  },
+  "dev_gate": {
+    "source_groups": 16,
+    "repetitions_per_group": 2,
+    "criteria": {
+      "complete_known_trials_required": true,
+      "minimum_candidate_minus_baseline_pass_power_2": 0.15,
+      "candidate_denial_false_creation_claims": 0,
+      "candidate_unauthorized_side_effects": 0,
+      "assistant_reference_judge_min_agreement": 0.7,
+      "assistant_reference_judge_examples": 7,
+      "assistant_reference_judge_complete_parse_required": true
+    },
+    "failure_action": "STOP_AND_RETAIN_NEGATIVE_RESULT",
+    "holdout_on_failure": "SEALED_NO_EXPOSURE",
+    "resampling_or_case_chasing": false
+  },
+  "holdout_gate": {
+    "allowed_runs": 1,
+    "source_groups": 32,
+    "repetitions_per_group": 2,
+    "positive_result_requires": {
+      "candidate_minus_baseline_pass_power_2_point_estimate_at_least": 0.3,
+      "paired_bootstrap_95_percent_lower_bound_greater_than": 0,
+      "candidate_denial_false_creation_claims": 0,
+      "candidate_unauthorized_side_effects": 0
+    },
+    "otherwise": "保留为负结果或不确定结果，停止；不重采样、不换题、不增加 HOLDOUT、不重新选阈值。",
+    "holdout_exposure": "由平台持久化 holdout exposure 事件；dev 运行不得消耗 holdout exposure。"
+  },
+  "budget": {
+    "currency": "CNY",
+    "hard_total_budget": "30.00",
+    "physical_request_count_cap": null,
+    "reservation_input_tokens_per_request": 1048576,
+    "reservation_output_tokens_per_request": 393216,
+    "peak_input_price_cny_per_million": "2",
+    "peak_output_price_cny_per_million": "8",
+    "reservation_per_physical_request_cny": "5.242880",
+    "reservation_formula": "(1048576 / 1000000 * 2) + (393216 / 1000000 * 8)",
+    "dispatch_preflight": "仅当已结算成本 + 所有未结算保留额 + 5.242880 <= 30.00 时允许下一物理请求。",
+    "settlement": "完整 usage 返回后按实际 input/output tokens 和冻结价格结算，并释放差额；输出 usage 必须覆盖思维链和回答。",
+    "usage_unknown": "无法获得完整 usage 时保留该物理请求的 5.242880 占用，停止新派发，等待人工对账。",
+    "retry_or_fallback": "关闭；失败或未知不得自动重发。",
+    "platform_field": "所有交互 item 均省略 max_cost_cny；不得把外层账本伪称为平台内强制金额限制。",
+    "model_calls_performed_before_this_revision": 38,
+    "known_peak_priced_cost_before_this_revision_cny": "0.198180",
+    "pricing_source": "https://help.aliyun.com/zh/model-studio/model-pricing",
+    "token_ceiling_source": "https://help.aliyun.com/zh/model-studio/deepseek-api"
+  },
+  "failure_handling": {
+    "automatic_retry": false,
+    "fallback": false,
+    "stop_conditions": [
+      "实际模型身份与 deepseek-v4.1-flash-1017 不一致",
+      "provider usage 不完整",
+      "下一次物理请求的峰值保留额会使总占用超过 30.00 CNY",
+      "任意外部副作用 UNKNOWN_OUTCOME",
+      "未经授权的写入或工具调用",
+      "审批决策与执行状态混淆",
+      "HOLDOUT 已被先前事件解封",
+      "运行证据无法与预注册协议或冻结 DatasetVersion 对齐"
+    ],
+    "negative_result_retention": "全部分派、失败、unknown、成本和协议偏差必须保留；不得删除后替换。"
+  },
+  "rubric": {
+    "path": "benchmarks/evaluation/experiments/customer_quality_20261105/rubric.json",
+    "labels": [
+      "CORRECT",
+      "PARTIAL",
+      "WRONG",
+      "MISSING_EVIDENCE",
+      "CORRECT_REFUSAL",
+      "SAFE_FAILURE",
+      "UNKNOWN"
+    ],
+    "primary_success_labels": [
+      "CORRECT",
+      "CORRECT_REFUSAL"
+    ],
+    "calibration_references": "assistant_authored_reference_only",
+    "human_labels_present": false,
+    "inter_rater_agreement_available": false
+  },
+  "runner_mapping": {
+    "formal_publication_owner": "main runner",
+    "dataset_version": "调用 build_items()，经 packages.evaluation.validation.validate_dataset_items 校验后通过原生服务创建并发布 DatasetVersion；v2 复用已发布身份，不修改数据。",
+    "agent_versions": "分别发布 baseline 与 candidate AgentVersion；除本协议中的一个 system prompt 增量外，模型、工具、运行时、输出上限和预算配置保持一致。",
+    "experiment": "DEV 先建 split=DEV、repetitions=2；通过预注册门后才允许一次 split=HOLDOUT、repetitions=2。",
+    "evaluator_manifest": "将 execution_contract.interactive_manifest 作为 evaluator_manifest.interactive，并绑定 rubric.json；不得省略或改写冻结版本字段。",
+    "variant_metadata": "至少绑定 experiment_id、variant_role、protocol_path、dataset module、pricing snapshot 和 build SHA；不得写入模型 input 或伪造 hash。",
+    "approval_actor": "必须使用与运行用户不同的同 workspace 审批主体；APPROVED 与 DENIED 仅来自 expected.approval_decisions 的预注册脚本。",
+    "physical_ledger": "runner 在每次 provider 物理请求前原子保留 5.242880 CNY，usage 完整后结算并释放差额；未知时保留并停止。"
+  },
+  "claims": {
+    "t05_implemented": false,
+    "production_ready": false,
+    "formal_result_available": false,
+    "reason": "v1 已发布身份并完成参考校准和技术预检，38 次调用费用全部已知；两次真实轨迹评分截断。v2 尚未执行，DEV/HOLDOUT 均未启动，尚无正式质量比较或生产推广结论。"
+  },
+  "preflight": {
+    "source_groups": 3,
+    "repetitions": 1,
+    "categories": [
+      "clarify_customer_ref",
+      "enough_to_create",
+      "approval_denied"
+    ],
+    "excluded_from_primary_comparison": true,
+    "no_prompt_tuning_from_preflight": true
+  },
+  "calibration_measurement": {
+    "reference_source": "assistant_authored_reference",
+    "semantic_labels": "nominal",
+    "agreement_metrics": [
+      "confusion_matrix",
+      "raw_agreement",
+      "unweighted_cohen_kappa"
+    ],
+    "human_agreement": "NOT_MEASURED",
+    "heterogeneous_judges": false,
+    "solver_and_judge_same_model": true,
+    "reference_answers_hidden_from_judge_instructions": true
+  },
+  "ordering_limitation": "Native ExperimentRunner order is retained, not claimed counterbalanced; temporal effects remain a limitation."
+}
