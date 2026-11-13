@@ -108,7 +108,7 @@ async def _seed_evidence_case(db_factory):
             workspace_id=base["workspace_id"],
             agent_id=base["version"].agent_id,
             title=_PRIVATE_SENTINEL,
-            kind="evaluation",
+            kind="support",
             created_by=base["user"].id,
         )
         session.add(thread)
@@ -444,6 +444,8 @@ async def _seed_evidence_case(db_factory):
             "base": base,
             "run_id": run.id,
             "rich_case_id": rich_case.id,
+            "thread_id": thread.id,
+            "ticket_approval_id": action_succeeded.id,
             "old_case_id": old_case.id,
             "viewer_id": viewer.id,
             "other_base": other,
@@ -472,6 +474,22 @@ async def test_evidence_route_returns_safe_real_pg_projection(db_factory) -> Non
     viewer_client = _client(app, seeded["viewer_id"], settings)
     other_client = _client(app, seeded["other_user_id"], settings)
     try:
+        turns_path = (
+            f"/api/v1/workspaces/{base['workspace_id']}/threads/{seeded['thread_id']}/turns"
+        )
+        support_turns = await viewer_client.get(turns_path)
+        assert support_turns.status_code == 200
+        [support_turn] = support_turns.json()
+        assert support_turn["user_input"] is None and support_turn["final_output"] is None
+        assert support_turn["ticket_requests"] == [
+            {
+                "approval_id": str(seeded["ticket_approval_id"]),
+                "decision_status": "APPROVED",
+                "execution_status": "SUCCEEDED",
+            }
+        ]
+        assert _PRIVATE_SENTINEL not in support_turns.text
+        assert (await other_client.get(turns_path)).status_code in {403, 404}
         rich_response = await owner_client.get(
             prefix
             + f"/experiment-runs/{seeded['run_id']}"

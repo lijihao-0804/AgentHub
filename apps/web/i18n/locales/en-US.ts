@@ -2123,6 +2123,10 @@ export const enUS = {
     updated: "Updated {time}",
     turns: "{count} turns",
     conversation: {
+      ticketRequests: "Ticket requests recorded by AgentHub",
+      noTicketRequest: "No ticket creation request was recorded for this turn.",
+      ticketDecision: "Decision",
+      ticketExecution: "Execution",
       backToBottom: "Back to latest",
       paneTitle: "Conversation",
       empty: "No turns yet",

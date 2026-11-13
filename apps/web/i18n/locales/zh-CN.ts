@@ -2106,6 +2106,10 @@ export const zhCN: MessageSchema = {
     updated: "更新于 {time}",
     turns: "{count} 轮对话",
     conversation: {
+      ticketRequests: "系统记录的建单申请",
+      noTicketRequest: "本轮没有建单申请记录。",
+      ticketDecision: "审批",
+      ticketExecution: "执行",
       backToBottom: "回到底部",
       paneTitle: "对话",
       empty: "还没有对话",

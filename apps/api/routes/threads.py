@@ -150,8 +150,9 @@ async def list_turns(
             status=run.status if run is not None else None,
             final_output=run.final_output if run is not None and may_read_content else None,
             failure_code=run.failure_code if run is not None else None,
+            ticket_requests=receipts,
         )
-        for turn, run in rows
+        for turn, run, receipts in rows
     ]
 
 

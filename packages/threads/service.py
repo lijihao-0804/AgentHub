@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from packages.agent_runtime.models import Agent, AgentRun, AgentVersion
 from packages.agent_runtime.runtime import AgentRunService
+from packages.approvals.models import Approval
 from packages.control_plane.rbac import WORKSPACE_READ
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
@@ -881,26 +882,63 @@ class ThreadService:
 
     async def turn_summaries(
         self, context: WorkspaceExecutionContext, thread_id: UUID
-    ) -> list[tuple[ThreadTurn, AgentRun | None]]:
+    ) -> list[tuple[ThreadTurn, AgentRun | None, list[dict[str, str]] | None]]:
         """Turns with the run that answered each, for the conversation view."""
 
         workspace_id = _require(context, WORKSPACE_READ)
         async with self.session_factory() as session:
-            await self._load(session, workspace_id, thread_id)
-            rows = await session.execute(
-                select(ThreadTurn, AgentRun)
-                .outerjoin(
+            thread = await self._load(session, workspace_id, thread_id)
+            rows = (
+                await session.execute(
+                    select(ThreadTurn, AgentRun)
+                    .outerjoin(
+                        AgentRun,
+                        (AgentRun.workspace_id == ThreadTurn.workspace_id)
+                        & (AgentRun.thread_turn_id == ThreadTurn.id),
+                    )
+                    .where(
+                        ThreadTurn.workspace_id == workspace_id,
+                        ThreadTurn.thread_id == thread_id,
+                    )
+                    .order_by(ThreadTurn.sequence)
+                )
+            ).all()
+            if thread.kind != kinds.SUPPORT or not rows:
+                return [(turn, run, None) for turn, run in rows]
+
+            # Show only the persisted decision/execution pair. An assistant message cannot
+            # create a receipt. Scope the query by thread rather than a growing list of UUIDs.
+            receipts = await session.execute(
+                select(
+                    Approval.run_id,
+                    Approval.id,
+                    Approval.decision_status,
+                    Approval.execution_status,
+                )
+                .join(
                     AgentRun,
-                    (AgentRun.workspace_id == ThreadTurn.workspace_id)
-                    & (AgentRun.thread_turn_id == ThreadTurn.id),
+                    (AgentRun.workspace_id == Approval.workspace_id)
+                    & (AgentRun.id == Approval.run_id),
                 )
                 .where(
-                    ThreadTurn.workspace_id == workspace_id,
-                    ThreadTurn.thread_id == thread_id,
+                    Approval.workspace_id == workspace_id,
+                    AgentRun.thread_id == thread_id,
+                    Approval.tool_identity == "create_ticket",
                 )
-                .order_by(ThreadTurn.sequence)
+                .order_by(Approval.created_at, Approval.id)
             )
-            return [(turn, run) for turn, run in rows.all()]
-
+            by_run: dict[UUID, list[dict[str, str]]] = {}
+            for run_id, approval_id, decision, execution in receipts:
+                by_run.setdefault(run_id, []).append(
+                    {
+                        "approval_id": str(approval_id),
+                        "decision_status": decision,
+                        "execution_status": execution,
+                    }
+                )
+            return [
+                (turn, run, by_run.get(run.id, []) if run is not None else None)
+                for turn, run in rows
+            ]
 
 __all__ = ["NOT_FOUND", "PreparedTurnRun", "SubmittedTurn", "ThreadService"]

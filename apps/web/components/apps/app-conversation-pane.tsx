@@ -338,6 +338,23 @@ export default function AppConversationPane({
                     </div>
                   )}
 
+                  {turn.ticket_requests && (turn.ticket_requests.length > 0 || !pending) && (
+                    <div className="conversation-meta" aria-label={t("appThread.conversation.ticketRequests")}>
+                      {turn.ticket_requests.length === 0 ? t("appThread.conversation.noTicketRequest") : (
+                        <>
+                          <strong>{t("appThread.conversation.ticketRequests")}</strong>
+                          <ul>
+                            {turn.ticket_requests.map((receipt) => (
+                              <li key={receipt.approval_id}>
+                                {t("appThread.conversation.ticketDecision")} <StatusBadge status={receipt.decision_status} />
+                                {" · "}{t("appThread.conversation.ticketExecution")} <StatusBadge status={receipt.execution_status} />
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </div>
+                  )}
                   {turn.status === "WAITING_APPROVAL" && (
                     <div className="state-block state-inline">
                       <p className="state-title">{t("appThread.conversation.waitingApproval")}</p>

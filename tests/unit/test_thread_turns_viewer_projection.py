@@ -13,7 +13,19 @@ from apps.api.routes import threads as thread_routes
 
 class _TurnService:
     def __init__(self, *, turn: object, run: object) -> None:
-        self._rows = [(turn, run)]
+        self._rows = [
+            (
+                turn,
+                run,
+                [
+                    {
+                        "approval_id": uuid4(),
+                        "decision_status": "DENIED",
+                        "execution_status": "NOT_STARTED",
+                    }
+                ],
+            )
+        ]
 
     async def turn_summaries(self, context: object, thread_id: object):
         del context, thread_id
@@ -58,6 +70,9 @@ def test_viewer_gets_redacted_turn_metadata_instead_of_internal_error(monkeypatc
     assert item["status"] == "SUCCEEDED"
     assert item["user_input"] is None
     assert item["final_output"] is None
+    [receipt] = item["ticket_requests"]
+    assert receipt["decision_status"] == "DENIED" and receipt["execution_status"] == "NOT_STARTED"
+    assert set(receipt) == {"approval_id", "decision_status", "execution_status"}
     assert "sensitive" not in response.text
 
 

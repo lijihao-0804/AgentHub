@@ -7,6 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from packages.approvals.contracts import ApprovalDecisionStatus, ApprovalExecutionStatus
 from packages.threads.kinds import GENERAL
 
 MAX_TITLE_LENGTH = 200
@@ -71,6 +72,14 @@ class ThreadTurnResponse(BaseModel):
     created_at: datetime
 
 
+class TicketRequestReceipt(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    approval_id: UUID
+    decision_status: ApprovalDecisionStatus
+    execution_status: ApprovalExecutionStatus
+
+
 class ThreadTurnDetailResponse(ThreadTurnResponse):
     """A turn together with the answer its run produced."""
 
@@ -81,6 +90,7 @@ class ThreadTurnDetailResponse(ThreadTurnResponse):
     status: str | None = None
     final_output: str | None = None
     failure_code: str | None = None
+    ticket_requests: list[TicketRequestReceipt] | None = None
 
 
 class ThreadTurnSubmitResponse(BaseModel):

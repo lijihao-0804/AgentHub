@@ -46,10 +46,11 @@ export type ThreadTurn = {
   status: string | null;
   final_output: string | null;
   failure_code: string | null;
+  ticket_requests?: { approval_id: string; decision_status: string; execution_status: string }[] | null;
 };
 
 export type ThreadTurnSubmitResult = {
-  turn: Omit<ThreadTurn, "status" | "final_output" | "failure_code">;
+  turn: Omit<ThreadTurn, "status" | "final_output" | "failure_code" | "ticket_requests">;
   run_id: string;
   agent_version_id: string;
   /** True when a repeated client_token returned the existing turn. */
