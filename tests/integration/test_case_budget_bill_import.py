@@ -1,4 +1,7 @@
 import asyncio
+import json
+import subprocess
+import sys
 from decimal import Decimal
 
 import pytest
@@ -18,7 +21,7 @@ __all__ = ["db_resources", "migrated_database", "pytestmark"]
 
 @pytest.mark.asyncio
 async def test_one_invoice_cannot_release_two_holds_even_on_concurrent_import(
-    db_resources, monkeypatch
+    db_resources, monkeypatch, tmp_path
 ):
     _, factory = db_resources
     case = await _create_budget_case(factory, monkeypatch, limit=Decimal("2"))
@@ -54,7 +57,19 @@ async def test_one_invoice_cannot_release_two_holds_even_on_concurrent_import(
     assert results[success]["posted"]
     error = results[1 - success]
     assert isinstance(error, RunBudgetLedgerError) and error.code == "BILL_LINE_ALREADY_ALLOCATED"
-    replay = await post(lines[success])
+    invoice = tmp_path / "synthetic-invoice.json"
+    invoice.write_text(lines[success].model_dump_json(), encoding="utf-8")
+    command = await asyncio.to_thread(
+        subprocess.run,
+        [sys.executable, "-m", "scripts.reconcile_case_budget", str(invoice)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert command.returncode == 0, command.stdout
+    assert lines[success].bill_line_reference not in command.stdout + command.stderr
+    replay = json.loads(command.stdout)
     assert replay["posted"] is False
     assert Decimal(replay["reserved_amount"]) == 1
     assert Decimal(replay["settled_amount"]) == Decimal("0.25")

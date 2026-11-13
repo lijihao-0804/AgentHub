@@ -1,8 +1,7 @@
-from types import SimpleNamespace
-
 import pytest
 
 from apps.worker.tasks import evaluation as evaluation_tasks
+from packages.core.config.settings import Settings
 from packages.evaluation.driver_router import EvaluationDriverRouter
 from packages.memory.store import SqlAlchemyMemoryStore
 
@@ -17,16 +16,7 @@ async def test_evaluation_runtime_reads_memory_without_learning_from_its_outputs
     monkeypatch.setattr(
         evaluation_tasks, "LangGraphCheckpointAdapter", lambda _database_url: object()
     )
-    settings = SimpleNamespace(
-        knowledge_rrf_k=60,
-        knowledge_min_rerank_score=None,
-        knowledge_superseded_rank_penalty=0.0,
-        approval_ttl_seconds=900,
-        database_url="postgresql+asyncpg://localhost/agenthub",
-        credential_master_key=None,
-        environment="development",
-        evaluation_sandbox_workspace_ids=frozenset(),
-    )
+    settings = Settings(environment="test", process_role="worker", _env_file=None)
 
     driver = await evaluation_tasks._build_driver(settings, factory=object())
 
