@@ -1,0 +1,32 @@
+{
+  "scope": "Ordinary local startup on Windows with a fresh isolated PostgreSQL database.",
+  "database_smoke": {
+    "completed_at_utc": "2026-11-13T17:32:47.641068Z",
+    "exit_code": 0,
+    "postgresql": "16.15",
+    "prepare_command": "python -m scripts.local_setup prepare",
+    "prepare_exit_codes": [0, 0],
+    "alembic_head": "0055_support_records",
+    "alembic_check_exit_code": 0,
+    "checkpoint_schema": "langgraph_checkpoint",
+    "checkpoint_tables": ["checkpoint_blobs", "checkpoint_migrations", "checkpoint_writes", "checkpoints"],
+    "checkpoint_write_read": true,
+    "fastapi_testclient": {
+      "GET /api/v1/ready": 200,
+      "POST /api/v1/auth/register": 201,
+      "POST /api/v1/auth/refresh": 200,
+      "POST /api/v1/organizations": 201,
+      "POST /api/v1/workspaces": 201
+    },
+    "disposable_server_stopped": true
+  },
+  "regression_command": "python -m pytest -q tests/unit/test_local_startup.py tests/unit/test_auth_security.py tests/unit/test_api_system.py",
+  "regression_result": {"passed": 31, "failed": 0, "skipped": 0, "exit_code": 0},
+  "checks": [
+    "Fresh and concurrent initializations generate stable independent keys. Existing dotenv content is preserved byte-for-byte, including when the previous master key entry is absent.",
+    "The Docker Compose CLI resolves the generated configuration. API, worker and beat all require successful database preparation.",
+    "cmd.exe executes both batch launchers with isolated dependencies. Simulated migration failure returns nonzero before application startup.",
+    "Readiness fault injection covers storage, web login, API proxy and the named worker. Windows shutdown stops the launched process tree while an unrelated test process remains alive."
+  ],
+  "limits": "Docker Desktop's Linux engine was unavailable. This check did not run a complete container stack, real Web/Redis/Qdrant/worker integration or a model call."
+}

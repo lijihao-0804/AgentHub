@@ -10,6 +10,7 @@ from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEFAULT_AUTH_JWT_SECRET = "local-dev-only-change-me-32-characters"
+EXAMPLE_AUTH_JWT_SECRET = "replace-with-your-own-generated-local-secret"
 DEVELOPMENT_ENVIRONMENTS = frozenset({"local", "test", "testing", "development", "dev"})
 
 
@@ -199,7 +200,7 @@ class Settings(BaseSettings):
         if (
             self.environment.lower() not in DEVELOPMENT_ENVIRONMENTS
             and self.process_role == "api"
-            and self.auth_jwt_secret == DEFAULT_AUTH_JWT_SECRET
+            and self.auth_jwt_secret in {DEFAULT_AUTH_JWT_SECRET, EXAMPLE_AUTH_JWT_SECRET}
         ):
             raise ValueError(
                 "AGENTHUB_AUTH_JWT_SECRET must be explicitly configured outside "

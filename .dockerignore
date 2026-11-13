@@ -1,4 +1,8 @@
 .git
+.scratch
+.worktrees
+output
+.playwright-cli
 .env
 .env.*
 !.env.example
@@ -7,12 +11,12 @@
 .uv-python
 .pytest_cache
 .ruff_cache
-apps/web/node_modules
-apps/web/.next
-apps/web/.npm-cache
+# The root Compose image runs only Python applications.
+apps/web
 infra/data
 data/
 blobs/
 runtime/
 secrets/
 *.pyc
+**/__pycache__

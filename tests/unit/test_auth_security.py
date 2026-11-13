@@ -14,7 +14,7 @@ from packages.core.auth.security import (
     new_refresh_token,
     normalize_email,
 )
-from packages.core.config.settings import DEFAULT_AUTH_JWT_SECRET, Settings
+from packages.core.config.settings import DEFAULT_AUTH_JWT_SECRET, EXAMPLE_AUTH_JWT_SECRET, Settings
 
 
 def test_passwords_use_argon2id_and_verify() -> None:
@@ -101,3 +101,8 @@ def test_default_jwt_secret_fails_fast_outside_dev_environments(
 def test_custom_production_jwt_secret_is_accepted() -> None:
     settings = Settings(environment="production", auth_jwt_secret="x" * 32)
     assert settings.auth_jwt_secret == "x" * 32
+
+
+def test_previous_sample_jwt_secret_is_rejected_for_container_api() -> None:
+    with pytest.raises(ValueError, match="AUTH_JWT_SECRET"):
+        Settings(environment="docker", auth_jwt_secret=EXAMPLE_AUTH_JWT_SECRET, _env_file=None)
