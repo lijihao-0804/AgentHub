@@ -1,0 +1,84 @@
+{
+  "command": "python -m scripts.support_api_smoke --api-url http://127.0.0.1:52385/api/v1",
+  "started_at_utc": "2026-11-13T17:27:41.133933Z",
+  "completed_at_utc": "2026-11-13T17:28:21.826116Z",
+  "exit_code": 0,
+  "scope": "One newly registered customer in a fresh workspace, three synthetic Chinese support requests, one operator and a different approver. Setup and readback used public HTTP. Each user request was a separate support thread.",
+  "database": "PostgreSQL 16.15, Alembic 0055_support_records, explicitly initialized LangGraph checkpoint schema",
+  "preconfigured_provider_route": "aliyun-rag, Beijing",
+  "replay_checks": [
+    "Registering the same customer again returned HTTP 200 and the original record; conflicting fields returned HTTP 409.",
+    "Every repeated client token returned the same turn and run. Replaying the completed approval or denial preserved the recorded decision and execution attempt count.",
+    "Each repeated ticket status change returned the existing version. A conflicting stale update returned HTTP 409."
+  ],
+  "usage": {
+    "successful_model_steps": 8,
+    "input_tokens": 15143,
+    "output_tokens": 1375,
+    "total_tokens": 16518
+  },
+  "separate_browser_case": {
+    "scope": "A fourth synthetic request in a different workspace prepared an approved OPEN ticket for the browser. This usage is separate from the three CLI cases above.",
+    "preparation_exit_code": 0,
+    "workspace_id": "8793f88d-e094-4c4a-a2f8-54eb2db05613",
+    "run_id": "3091a7fd-1ff4-47a9-872f-f2a7060a07b4",
+    "approval_id": "deaf8b72-f4ff-4f85-962d-849f8919ab44",
+    "ticket_id": "6a521ad5-0f24-467c-adfd-6bd74ac0f7af",
+    "ticket_ref": "T-C559E865FC404953",
+    "model_steps": 3,
+    "input_tokens": 5619,
+    "output_tokens": 686,
+    "total_tokens": 6305,
+    "after_api_restart": {"same_bearer_readback": true, "status": "OPEN", "version": 1, "thread_turn_count": 1},
+    "after_browser_changes": {"new_login_readback": true, "status": "CLOSED", "version": 4}
+  },
+  "receipt": {
+    "passed": true,
+    "model": "deepseek-v4.1-flash-1017",
+    "runs": [
+      {
+        "case": "approved",
+        "thread_id": "53617c06-ef44-48d1-8505-525441c25b15",
+        "run_id": "796c7ce3-01c2-4888-90ef-afacb755fac8",
+        "status": "SUCCEEDED",
+        "model_steps": 3,
+        "tokens": 6374,
+        "input_tokens": 5805,
+        "output_tokens": 569,
+        "decision": "APPROVED",
+        "execution": "SUCCEEDED"
+      },
+      {
+        "case": "existing",
+        "thread_id": "36df1dff-01d2-4b77-9f4a-d980a7452770",
+        "run_id": "40745437-2363-411f-96b7-e648d3c3f2f5",
+        "status": "SUCCEEDED",
+        "model_steps": 2,
+        "tokens": 4053,
+        "input_tokens": 3673,
+        "output_tokens": 380
+      },
+      {
+        "case": "denied",
+        "thread_id": "b11842bf-a45f-4c67-941e-e9c5870064e1",
+        "run_id": "d8fd7d2a-02fc-4c30-ab50-fc9adfd9de0f",
+        "status": "SUCCEEDED",
+        "model_steps": 3,
+        "tokens": 6091,
+        "input_tokens": 5665,
+        "output_tokens": 426,
+        "decision": "DENIED",
+        "execution": "NOT_STARTED"
+      }
+    ],
+    "workspace_id": "5c8f6b06-0ebb-4432-ac99-fb296e10810d",
+    "version_id": "8928cfcc-d0f5-4a10-a3ed-b7ce12ec8441",
+    "spec_sha256": "c8b0184ec854c3cca63bf1dda3c900491b119ae8b208f1c07a802f4f29effc70",
+    "ticket_id": "acae1b26-7127-4137-b77a-1ccfafcacbba",
+    "ticket_ref": "T-9C8B3413208B4FA7",
+    "fresh_login_readback": true,
+    "final_status": "CLOSED",
+    "final_version": 3,
+    "customer_ticket_count": 1
+  }
+}

@@ -63,7 +63,7 @@ def check_url(value: str, *, provider: bool = False) -> None:
         )
 
 
-def request(client: httpx.Client, method: str, path: str, data: dict | None = None):
+def request(client: httpx.Client, method: str, path: str, data: dict | list[dict] | None = None):
     response = client.request(method, path, json=data)
     if not response.is_success:
         # Never print remote response bodies, which may contain submitted secrets or content.
@@ -74,6 +74,51 @@ def request(client: httpx.Client, method: str, path: str, data: dict | None = No
 
 def identifier(value: str) -> str:
     return str(UUID(value))
+
+
+def aliyun_route() -> Endpoint:
+    routes = load_route(ROUTE, env_file=ROUTE.parents[2] / ".env")
+    route = next((item for item in routes.fallbacks if item.name == "aliyun-rag"), None)
+    require(
+        route is not None and route.model == MODEL and route.provider == "openai-compatible",
+        "configured aliyun-rag model missing",
+    )
+    check_url(route.base_url, provider=True)
+    return route
+
+
+def create_provider_credential(client: httpx.Client, workspace: str, route: Endpoint) -> str:
+    credential = request(
+        client,
+        "POST",
+        workspace + "/provider-credentials",
+        {
+            "name": "Smoke",
+            "provider": route.provider,
+            "base_url": route.base_url,
+            "secret": route.api_key,
+        },
+    )
+    return identifier(credential["id"])
+
+
+def create_model_profile(
+    client: httpx.Client, workspace: str, route: Endpoint, credential_id: str
+) -> str:
+    profile = request(
+        client,
+        "POST",
+        workspace + "/model-profiles",
+        {
+            "provider_credential_id": credential_id,
+            "model": route.model,
+            "temperature": "0",
+            "max_tokens": min(512, route.max_tokens),
+            "timeout_seconds": str(route.timeout_seconds),
+            "capabilities": route.capabilities,
+        },
+    )
+    return identifier(profile["id"])
 
 
 def publish(client: httpx.Client, route: Endpoint) -> tuple[str, str, str, str]:
@@ -97,37 +142,15 @@ def publish(client: httpx.Client, route: Endpoint) -> tuple[str, str, str, str]:
         {"name": "Synthetic smoke", "organization_id": identifier(org["id"])},
     )
     workspace = "workspaces/" + identifier(ws["id"])
-    credential = request(
-        client,
-        "POST",
-        workspace + "/provider-credentials",
-        {
-            "name": "Smoke",
-            "provider": route.provider,
-            "base_url": route.base_url,
-            "secret": route.api_key,
-        },
-    )
-    profile = request(
-        client,
-        "POST",
-        workspace + "/model-profiles",
-        {
-            "provider_credential_id": identifier(credential["id"]),
-            "model": route.model,
-            "temperature": "0",
-            "max_tokens": min(512, route.max_tokens),
-            "timeout_seconds": str(route.timeout_seconds),
-            "capabilities": route.capabilities,
-        },
-    )
+    credential_id = create_provider_credential(client, workspace, route)
+    profile_id = create_model_profile(client, workspace, route, credential_id)
     agent = request(
         client,
         "POST",
         workspace + "/agents",
         {
             "name": "Synthetic marker assistant",
-            "model_profile_id": identifier(profile["id"]),
+            "model_profile_id": profile_id,
             "system_prompt": (
                 "Return exactly the marker from the latest user's request. Do not add other text."
             ),
@@ -167,13 +190,7 @@ def stream_turn(client: httpx.Client, turns: str, data: dict, expected: str) -> 
 
 def run(api_url: str) -> dict:
     check_url(api_url)
-    routes = load_route(ROUTE, env_file=ROUTE.parents[2] / ".env")
-    route = next((item for item in routes.fallbacks if item.name == "aliyun-rag"), None)
-    require(
-        route is not None and route.model == MODEL and route.provider == "openai-compatible",
-        "configured aliyun-rag model missing",
-    )
-    check_url(route.base_url, provider=True)
+    route = aliyun_route()
     prompts = [
         {"input_text": f"Return exactly the marker {marker}.", "client_token": uuid4().hex}
         for marker in MARKERS

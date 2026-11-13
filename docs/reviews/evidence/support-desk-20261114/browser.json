@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "four app pickers require a deliberate published choice; support and research load counts without downloading histories",
+    "support template link prefills the actual draft",
+    "customer creation, identical retry and conflicting reference through the browser",
+    "directory search, both real pagination directions and selected customer ticket rows",
+    "receipt opens persisted ticket; two operators see conflict, reselect, close and verify v4 after reload; mobile without overflow",
+    "viewer cannot browse customer records or follow a receipt, and can still read the decision and execution states",
+    "new workspace with no agents can register its first customer and see the empty ticket list",
+    "actual unpublished draft excluded from all four pickers; published agent remains available",
+    "390px mobile screenshot after the navigation drawer finishes closing"
+  ],
+  "fixture": "isolated synthetic workspace; true API, PostgreSQL, confirmed model-issued ticket"
+}
