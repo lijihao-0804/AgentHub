@@ -1,0 +1,49 @@
+{
+  "purpose": "Fresh isolated database: two CLI freezes only. No solver, judge, tool execution or HOLDOUT.",
+  "started_at": "2026-11-13T16:59:51.911535+00:00",
+  "finished_at": "2026-11-13T17:00:03.479820+00:00",
+  "commands": [
+    {
+      "module": "benchmarks.evaluation.experiments.customer_quality_20261114.runner",
+      "phase": "freeze",
+      "exit_code": 0
+    },
+    {
+      "module": "benchmarks.evaluation.experiments.customer_quality_20261114.proposal_followup",
+      "phase": "freeze",
+      "exit_code": 0
+    }
+  ],
+  "original_published_prompt_utf8_sha256": {
+    "lookup_candidate": "ebda7dda7b582f6862a49937f062968ae61fa280abe093fcfbe89b97cff56ec1",
+    "proposal_candidate": "55def7c7dd8d592493facde910a50164a4f51a6fbaaa86422f7021e52e347b8c"
+  },
+  "replay_followup_prompt_sha256": {
+    "baseline": "ebda7dda7b582f6862a49937f062968ae61fa280abe093fcfbe89b97cff56ec1",
+    "candidate": "55def7c7dd8d592493facde910a50164a4f51a6fbaaa86422f7021e52e347b8c"
+  },
+  "original_20261105_candidate_prompt_verified_in_lookup_baseline": true,
+  "first_candidate_is_followup_baseline": true,
+  "followup_non_prompt_fields_identical": true,
+  "shared_followup_non_prompt_sha256": "aa7f9b47b585e476765be0010634bd8658b3e53f23b5cd13999d6fda6e0c43c2",
+  "empty_database_counts": {
+    "agent_versions": 0,
+    "agent_runs": 0,
+    "approvals": 0,
+    "tickets": 0,
+    "customers": 0
+  },
+  "final_database_counts": {
+    "agent_versions": 5,
+    "agent_runs": 0,
+    "approvals": 0,
+    "tickets": 0,
+    "customers": 0
+  },
+  "provider_dispatches": 0,
+  "physical_call_ledger_or_files_created": false,
+  "historical_result_file_sha256": {
+    "result.json": "7d753f6e635a7775052437400bff0769e50835a507511e967fa9bf96f5fea713",
+    "proposal-result.json": "fce6a39ca6857e7edc44d13316efafb0d8872d64d97eb47b2a943fddba1d3e4e"
+  }
+}

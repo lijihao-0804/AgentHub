@@ -28,7 +28,6 @@ from packages.agent_runtime.adapters.langgraph import (
 from packages.agent_runtime.models import Agent, AgentVersion
 from packages.agent_runtime.publish import AgentPublishService
 from packages.agent_runtime.runtime import AgentRunService
-from packages.agent_templates import get_template
 from packages.approvals import ApprovalDecisionStatus, ApprovalService
 from packages.control_plane.product_control_plane import ProductControlPlaneService
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -52,14 +51,28 @@ from .score import permitted_proposal, score
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[3]
-PRIVATE = REPO / ".scratch/customer-quality-20261114/study"
+STUDY_ROOT = Path(
+    os.environ.get(
+        "AGENTHUB_CUSTOMER_QUALITY_STUDY_DIR", REPO / ".scratch/customer-quality-20261114"
+    )
+)
+PRIVATE = STUDY_ROOT / "study"
 PROTOCOL = HERE / "protocol.json"
 LEGACY = HERE.with_name("customer_quality_20261105") / "protocol.json"
+PUBLISHED_PROMPTS = HERE / "published-prompts.json"
 ARMS = ("baseline", "candidate")
 
 
 def timestamp():
     return datetime.now(UTC).isoformat()
+
+
+def published_prompt(name):
+    snapshot = read(PUBLISHED_PROMPTS)[name]
+    prompt = snapshot["system_prompt"]
+    if hashlib.sha256(prompt.encode("utf-8")).hexdigest() != snapshot["prompt_sha256"]:
+        raise RuntimeError("PUBLISHED_PROMPT_DIGEST_MISMATCH")
+    return prompt
 
 
 def identities():
@@ -68,7 +81,7 @@ def identities():
         HERE / "runner.py",
         HERE / "score.py",
         LEGACY,
-        REPO / "packages/agent_templates/support.py",
+        PUBLISHED_PROMPTS,
         REPO / "packages/tools/builtins/query_customer.py",
         REPO / "packages/control_plane/product_control_plane.py",
     ]
@@ -117,7 +130,7 @@ async def publish(factory, settings, endpoint, protocol):
                         {"tool_id": tool["id"], "tool_revision_id": tool["current_revision_id"]}
                     )
                 await control.replace_tool_bindings(session, owner, agent.id, bindings)
-                agent.system_prompt = get_template("support").system_prompt
+                agent.system_prompt = published_prompt("lookup_candidate")
             agent.prompt_version += 1
             await session.commit()
             version = await AgentPublishService().publish(session, owner, agent.id)

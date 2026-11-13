@@ -22,7 +22,6 @@ from packages.agent_runtime.adapters.langgraph import LangGraphCheckpointAdapter
 from packages.agent_runtime.models import Agent, AgentVersion
 from packages.agent_runtime.publish import AgentPublishService
 from packages.agent_runtime.runtime import AgentRunService
-from packages.agent_templates import get_template
 from packages.approvals import ApprovalDecisionStatus, ApprovalService
 from packages.core.config.settings import get_settings
 from packages.core.database import create_database
@@ -81,7 +80,7 @@ def hashes():
         study.HERE / "proposal_followup.py",
         study.HERE / "score.py",
         study.HERE / "runner.py",
-        study.REPO / "packages/agent_templates/support.py",
+        study.PUBLISHED_PROMPTS,
     )
     return {
         p.relative_to(study.REPO).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -97,11 +96,17 @@ async def freeze(factory, previous, protocol):
     old_binding = previous["versions"]["candidate"]
     async with factory() as session:
         old = await session.get(AgentVersion, UUID(old_binding["id"]))
-        if old.resolved_spec_hash != old_binding["resolved_spec_hash"]:
+        if (
+            old is None
+            or old.resolved_spec_hash != old_binding["resolved_spec_hash"]
+            or old.resolved_spec["prompt"]["system_prompt"]
+            != study.published_prompt("lookup_candidate")
+        ):
             raise RuntimeError("PREVIOUS_VERSION_MISMATCH")
         agent = await session.get(Agent, old.agent_id)
-        if agent.system_prompt != get_template("support").system_prompt:
-            agent.system_prompt = get_template("support").system_prompt
+        revised_prompt = study.published_prompt("proposal_candidate")
+        if agent.system_prompt != revised_prompt:
+            agent.system_prompt = revised_prompt
             agent.prompt_version += 1
             await session.commit()
         latest = await session.scalar(

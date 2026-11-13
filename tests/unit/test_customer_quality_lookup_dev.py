@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from types import SimpleNamespace
 
@@ -8,11 +9,39 @@ import pytest
 from benchmarks.evaluation.experiments.customer_quality_20261114.proposal_followup import (
     final_claim_checks,
 )
+from benchmarks.evaluation.experiments.customer_quality_20261114.runner import (
+    HERE,
+    PUBLISHED_PROMPTS,
+    published_prompt,
+)
 from benchmarks.evaluation.experiments.customer_quality_20261114.score import (
     observed_lookup,
     permitted_proposal,
     score,
 )
+
+
+@pytest.mark.parametrize(
+    "key,report,digest",
+    [
+        (
+            "lookup_candidate",
+            "result.json",
+            "ebda7dda7b582f6862a49937f062968ae61fa280abe093fcfbe89b97cff56ec1",
+        ),
+        (
+            "proposal_candidate",
+            "proposal-result.json",
+            "55def7c7dd8d592493facde910a50164a4f51a6fbaaa86422f7021e52e347b8c",
+        ),
+    ],
+)
+def test_frozen_prompts_match_original_publication(key, report, digest):
+    entry = json.loads(PUBLISHED_PROMPTS.read_text("utf-8"))[key]
+    original = json.loads((HERE / report).read_text("utf-8"))["freeze"]["versions"]["candidate"]
+    assert entry["source_agent_version_id"] == original["id"]
+    assert entry["source_resolved_spec_hash"] == original["resolved_spec_hash"]
+    assert hashlib.sha256(published_prompt(key).encode("utf-8")).hexdigest() == digest
 
 
 def messages(*, tickets=None, complete=True, customer="C-1", scope="Meter"):

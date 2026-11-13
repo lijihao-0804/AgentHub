@@ -50,12 +50,24 @@
 
 自然语言检查器只比对预登记的审批/执行事实和有限的措辞。复核自由文本时还看到，新版一次把“当前没有这个主题的未结单”解释为上一次工单确已结案。工具只返回了本次未结单结果，无法确认历史单本身。另一条只读回答把精确主题查询的完整性说成了整个账户列表完整。两处是本轮评分范围外的证据归因问题，保留原评分，不作通用语义正确率或生产验收结论。
 
-下列命令使用第一阶段已发布的候选作为基准。实际复核发布的是后续修订版，复现已记录的历史比较须使用公开清单中的代码和提示词身份。
+下列命令使用第一阶段已发布的候选作为基准。两条冻结入口从历史已发布版本导出的模板工件读取对应的提示词，产品当前默认文案可以独立演进。工件包含两份完整的项目模板、原 AgentVersion ID、原 resolved spec hash 和提示词 UTF-8 SHA-256。同一工作目录下的两次冻结会共享第一阶段候选身份。[历史发布提示词](published-prompts.json)
 
 ```powershell
 .\.venv\Scripts\python.exe -m benchmarks.evaluation.experiments.customer_quality_20261114.proposal_followup freeze
 .\.venv\Scripts\python.exe -m benchmarks.evaluation.experiments.customer_quality_20261114.proposal_followup run
 ```
+
+### 只复核发布流程
+
+在上述全新隔离库准备好后，将两阶段的材料放到新的空目录，只运行以下两个子命令即可验证发布流程。结果保存在该目录的 `study` 和 `proposal-study` 子目录中。生产模板和供应商都不参与内容生成。
+
+```powershell
+$env:AGENTHUB_CUSTOMER_QUALITY_STUDY_DIR = Join-Path (Get-Location) '.scratch/customer-quality-freeze-replay'
+.\.venv\Scripts\python.exe -m benchmarks.evaluation.experiments.customer_quality_20261114.runner freeze
+.\.venv\Scripts\python.exe -m benchmarks.evaluation.experiments.customer_quality_20261114.proposal_followup freeze
+```
+
+已在空库实际执行这两条命令，退出码均为 0。第一阶段候选与第二阶段基准引用同一个新发布版本。复核两份快照的提示词分别匹配原始发布文本的 `ebda7dda…`、`55def7c7…`，其余字段逐项相等。最后数据库中保留 5 个版本、0 个 AgentRun、0 个审批、0 个工单、0 个客户，物理账本与调用文件均未创建。回执保留原两份付费结果文件的 SHA-256。重新发布会分配新的版本和资源 ID，工具实现来自重放时的检出版本，包含下文的查询范围改动。[空库复核回执](freeze-replay.json)
 
 ## 查询范围的后续修正
 
