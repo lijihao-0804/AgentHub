@@ -1,0 +1,29 @@
+{
+  "scope": "All tests/unit and 11 impacted PostgreSQL/Qdrant/knowledge integration files, using local Docker infrastructure on Windows.",
+  "started_at_utc": "2026-11-13T18:30:39.110231+00:00",
+  "finished_at_utc": "2026-11-13T18:33:41.531278+00:00",
+  "exit_code": 0,
+  "pytest_counts": {
+    "tests": 3384,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "units": 3333,
+  "integrations": 51,
+  "paths": [
+    "tests/unit",
+    "tests/integration/test_m3c_indexing.py",
+    "tests/integration/test_m3c_retrieval.py",
+    "tests/integration/test_m3e_citation_qa.py",
+    "tests/integration/test_m3f_snapshot.py",
+    "tests/integration/test_wiki_rag_integration.py",
+    "tests/integration/test_hidden_rag_contracts.py",
+    "tests/integration/test_public_rag_snapshot_chunk_loading.py",
+    "tests/integration/test_history_rag_pipeline_m3.py",
+    "tests/integration/test_history_evidence_membership_m3.py",
+    "tests/integration/test_m4b_tool_runtime.py",
+    "tests/integration/test_m7a_evaluation_datasets.py"
+  ],
+  "migration_check": "No new upgrade operations detected."
+}

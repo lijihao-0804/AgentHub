@@ -1,0 +1,163 @@
+{
+  "scope": "Independent normal product API replay in a newly registered workspace. Same registered 10 synthetic DEV questions, fresh snapshot and documents. B only. No test overrides or external business data.",
+  "exit_code": 0,
+  "documents_ready": 20,
+  "model": "deepseek-v4.1-flash-1017",
+  "snapshot_id": "ee3978cc-adea-42a6-8400-13e1b51404a3",
+  "snapshot_sha256": "a9791169bb30fad5b2fc5f60c5e2d8549cbbe0b09715b9b3d05f2eec01abd7f9",
+  "fixture_sha256_lf": "f42ed539784ff44fef4686ca0c1527c81a4ba78658079c417660ae589b43dc8f",
+  "status": "PASS",
+  "cases": [
+    {
+      "case": 1,
+      "target": "current",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 11574.514,
+      "playground_ms": 19537.187,
+      "answer": "For the currently applicable release, the DORU account verification code expires after 17 hours [1]. (A superseded DORU document lists 43 hours, but it is marked as superseded [2].)",
+      "citation_count": 2,
+      "cites_current": true,
+      "cites_archived": true,
+      "insufficient_evidence": false,
+      "pass": true
+    },
+    {
+      "case": 2,
+      "target": "current",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 4454.425,
+      "playground_ms": 3336.767,
+      "answer": "Under the current (non-superseded) VEMA operational reference, receipts are kept for 36 days [2]. The 12-day figure appears only in a superseded revision [1].",
+      "citation_count": 2,
+      "cites_current": true,
+      "cites_archived": true,
+      "insufficient_evidence": false,
+      "pass": true
+    },
+    {
+      "case": 3,
+      "target": "current",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 5028.705,
+      "playground_ms": 3626.271,
+      "answer": "按现行发布规则，诺岚寄存柜提取码的有效期是72小时。[1]",
+      "citation_count": 1,
+      "cites_current": true,
+      "cites_archived": false,
+      "insufficient_evidence": false,
+      "pass": true
+    },
+    {
+      "case": 4,
+      "target": "current",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 4172.857,
+      "playground_ms": 3016.913,
+      "answer": "菲榕当前的资料补交窗口为11天[1]。",
+      "citation_count": 1,
+      "cites_current": true,
+      "cites_archived": false,
+      "insufficient_evidence": false,
+      "pass": true
+    },
+    {
+      "case": 5,
+      "target": "current",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 4924.197,
+      "playground_ms": 3104.154,
+      "answer": "The current PAKO callback interval is 83 minutes [1].",
+      "citation_count": 1,
+      "cites_current": true,
+      "cites_archived": false,
+      "insufficient_evidence": false,
+      "pass": true
+    },
+    {
+      "case": 6,
+      "target": "current",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 4651.166,
+      "playground_ms": 3659.477,
+      "answer": "按目前适用的云麓服务规程，保修登记审核时间为15个工作日[1]。",
+      "citation_count": 1,
+      "cites_current": true,
+      "cites_archived": false,
+      "insufficient_evidence": false,
+      "pass": true
+    },
+    {
+      "case": 7,
+      "target": "archive",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 4643.179,
+      "playground_ms": 3689.885,
+      "answer": "For the superseded HELI release, label retention lasts 19 days [2].",
+      "citation_count": 1,
+      "cites_current": false,
+      "cites_archived": true,
+      "insufficient_evidence": false,
+      "pass": true
+    },
+    {
+      "case": 8,
+      "target": "archive",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 5086.564,
+      "playground_ms": 3439.089,
+      "answer": "青榛已被替代的历史版本中，换货确认窗口为16小时[2]。",
+      "citation_count": 1,
+      "cites_current": false,
+      "cites_archived": true,
+      "insufficient_evidence": false,
+      "pass": true
+    },
+    {
+      "case": 9,
+      "target": "abstain",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 5144.475,
+      "playground_ms": 3832.507,
+      "answer": "The provided evidence does not contain any information about NETA's percentage fee. The NETA documents only state processing times (13 days and 5 days), with no mention of fees, so the current percentage fee cannot be determined from the supplied evidence.",
+      "citation_count": 0,
+      "cites_current": false,
+      "cites_archived": false,
+      "insufficient_evidence": true,
+      "pass": true
+    },
+    {
+      "case": 10,
+      "target": "abstain",
+      "state": "COMPLETED",
+      "both_versions_with_flags": true,
+      "qa_http_ms": 6087.853,
+      "playground_ms": 3407.368,
+      "answer": "资料中仅列出西隅服务规程的复核处理时间，未提及复核收费金额，因此无法回答复核收费多少元。",
+      "citation_count": 0,
+      "cites_current": false,
+      "cites_archived": false,
+      "insufficient_evidence": true,
+      "pass": true
+    }
+  ],
+  "credential_cleanup": {
+    "disable": {
+      "confirmed": true,
+      "failures": []
+    },
+    "rotate": {
+      "confirmed": true,
+      "failures": []
+    }
+  },
+  "cost_scope": "HTTP response omits token usage and count of physical generations, so these are not attributed to the public replay."
+}

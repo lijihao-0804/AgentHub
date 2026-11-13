@@ -208,6 +208,8 @@ Credential 和 Model Profile。在 Agent 草稿中选择模型、发布 AgentVer
 开发 Web 默认代理到 `http://127.0.0.1:8000`；生产构建需在 build 前配置
 `AGENTHUB_API_PROXY_TARGET`。[Provider 出站合同](docs/security/provider-egress.md)
 
+知识库的端到端复验覆盖长文入库、大批量失败后的重试、检索时的连接池占用，以及新旧政策同时召回时的引用问答。使用阿里云兼容端点可在独立工作区重跑固定的中英文开发样本。[本机 RAG 实测与限制](docs/reviews/local-rag-20261114.md) · [引用问答复跑入口](benchmarks/evaluation/experiments/citation_lifecycle_dev/README.md)
+
 ## 仓库结构
 
 ```text

@@ -1,5 +1,7 @@
 # AgentHub 当前状态
 
+2026-11-14 本机 RAG 已修复大文档写入失败及外部推理期间占用数据库连接的问题。引用问答支持根据文档替代关系区分现行与历史政策，并可显式选择本地校验的 JSON 提示模式。RTX 3060 的重排批处理对照、逐题引文和可复跑的公开 API 入口均已归档。[本机 RAG 实测](reviews/local-rag-20261114.md)
+
 2026-11-14 客服工作区已接入客户录入、审批后工单直达、带版本的状态变更和结案回读，数据库迁移头为 `0055_support_records`。三次真实阿里云 Run 覆盖批准、查重、拒绝，最终保留一张已关闭的工单。[客服交付与复跑](reviews/support-operator-closure-20261114.md) · [公开 HTTP 验收回执](reviews/evidence/support-desk-20261114/public-http.json)
 
 2026-11-14 本地版本已接入正式交互评测预算、账单行幂等结算、客服建单回执、QMSum 历史用量复现和 Memory 派发前故障恢复。数据库迁移头为 `0054_memory_provider_handoff`。部署条件、真实阿里云 DEV 结果和故障复验见[运行与质量验收](reviews/production-closure-20261114.md)。以下保留各日期的验收记录。
