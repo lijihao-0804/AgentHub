@@ -55,3 +55,11 @@ $pool = '.scratch/rag-product-confirmation/pools-restored.json'
 ```
 
 客服 DEV 的旧证据组已经重算。50 题同一旧上下文下，必要支持组覆盖从 42/50 改判为 47/50，可答子集从 34/41 改判为 39/41。修正依据是同义表述、替代条件和版本范围。十月仅 1/50 题取得真实答复且语义部分通过；旧回答漏了“客户签收单”，并把单次查询未返退款记录扩写成全称断言。新收费验收必须同时判断这两项和持久业务事实。[客服方法、逐案回放与命令](../../benchmarks/evaluation/experiments/support_refund_rag/product-acceptance.md)
+
+## 客服产品验收记录
+
+执行版本 `f22258182cd807a046575399446ec3b585426152`。在独立数据库、集合和工作区，按真实 HTTP 路由上传政策、建快照、发布版本、发起会话并读回 52 个 AgentRun。50/50 个 DEV 案例、2/2 个新政策案例通过流程合同。DEV 的完整预期证据组在前 20 为 50/50，最终可见为 47/50（94%）。残余三题为 S0-031、037、046，保留逐题结果。[索引、Run ID、执行源码与快照](../../benchmarks/evaluation/experiments/support_refund_rag/product-results/index.json)
+
+S0-003 的脚本化答复保留两种可替代凭证，并将 `refund:null` 限定在本次订单查询。新批准案的审批为 APPROVED、执行为 SUCCEEDED，读回 1 张工单；新拒绝案为 DENIED、NOT_STARTED，读回 0 张。早期运行曾误读缺省的拒绝回执字段，并将脚本复述政策中的交叉引用误作答案引文；诊断运行和修复后的回执分别归档。工具步骤由本地脚本驱动，订单和退款使用案件范围内的合成只读工具，客户、审批、执行、工单和会话均做实际持久化读回。52 题语义首答质量仍为 NOT_MEASURED。[完整合成记录](../../benchmarks/evaluation/experiments/support_refund_rag/product-results/contract-final.zip)
+
+最终 106 轮实际准入消息均已重组为相同 SDK 请求载荷并通过共享计量器本地预检，含供应商工具模板余量的最大估计为 10,986 token。工具模板采用摘要固定的 tokenizer 对完整序列化请求计数，外加 2048 token 余量。技术纯文本使用固定的非思考模板和 256 token 余量。账本按全额上限预留，实际返回的用量另记，模板余量不是对外部供应商计量的保证。[逐案计量预检](../../benchmarks/evaluation/experiments/support_refund_rag/product-results/wire-preflight.json)
