@@ -123,14 +123,37 @@ def check_code(commit, *, tracked_only=False):
         raise ValueError("Unexpected untracked implementation or fixture")
 
 
-def freeze(commit):
-    if git("rev-parse", commit) != commit or git("merge-base", BASE, commit) != BASE:
+def manifest(commit, evaluator):
+    if (
+        git("rev-parse", commit) != commit
+        or git("merge-base", BASE, commit) != BASE
+        or git("rev-parse", evaluator) != evaluator
+        or git("merge-base", commit, evaluator) != commit
+    ):
         raise ValueError("Candidate must descend from the reviewed base")
-    check_code(commit)
+    # Independent samples were authored after the product and dispatcher froze.
+    # Only the read-only report/export and its manifest checker may differ.
+    allowed = {
+        "benchmarks/public_rag/answer_pair_score.py",
+        "benchmarks/public_rag/answer_pair_freeze.py",
+    }
+    changed = git(
+        "diff",
+        "--name-only",
+        commit,
+        evaluator,
+        "--",
+        *CODE,
+        ":(exclude)benchmarks/public_rag/results",
+    ).splitlines()
+    if set(changed) - allowed:
+        raise ValueError("Product, dispatch or other study inputs changed after candidate freeze")
+    check_code(evaluator)
     schedule = [f"{chain}/{c['case_id']}/{arm}" for chain, c, arm in cases()]
-    record = {
+    return {
         "baseline_commit": BASE,
         "candidate_commit": commit,
+        "reporting_commit": evaluator,
         "environment": runtime(),
         "files": {name: file_sha(OUT / name) for name in DATA},
         "schedule": schedule,
@@ -145,20 +168,14 @@ def freeze(commit):
         "support_thinking": "frozen provider tool mode",
         "case_request_caps": {k: v[1] for k, v in LIMITS.items()},
     }
-    save(OUT / "freeze.json", record)
+
+
+def freeze(commit):
+    save(OUT / "freeze.json", manifest(commit, git("rev-parse", "HEAD")))
 
 
 def verify():
     f = load(OUT / "freeze.json")
-    if (
-        f["files"] != {n: file_sha(OUT / n) for n in DATA}
-        or f["environment"] != runtime()
-        or f["schedule"] != [f"{chain}/{c['case_id']}/{arm}" for chain, c, arm in cases()]
-        or f["baseline_commit"] != BASE
-        or f["model"] != MODEL
-        or f["cap_microcny"] != CAP
-        or f["max_requests"] != 160
-    ):
+    if f != manifest(f["candidate_commit"], f["reporting_commit"]):
         raise ValueError("Study manifest or environment drift")
-    check_code(f["candidate_commit"])
     return f

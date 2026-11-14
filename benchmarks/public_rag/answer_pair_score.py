@@ -1,6 +1,8 @@
 """Anonymous first-answer review and paired reporting, including failures and incomplete plans."""
 
 import argparse
+import json
+import re
 import secrets
 import sqlite3
 from collections import Counter
@@ -52,8 +54,19 @@ def observed(root):
             if r["task"] != key or r["physical_receipts"] != [w for w in wires if w["task"] == key]:
                 raise ValueError("Run and wire receipts disagree")
             rows[key] = r
+        elif a:
+            partial = {}
+            if path.is_file():
+                partial = load(path)
+                if partial.get("task") != key:
+                    raise ValueError("Unknown attempt and first-answer record disagree")
+            elif chain == "support" and (root / key / "run.json").is_file():
+                partial = load(root / key / "run.json")
+                if partial.get("case_id") != c["case_id"] or partial.get("arm") != arm:
+                    raise ValueError("Unknown attempt and run checkpoint disagree")
+            rows[key] = {**partial, "status": "unknown", "terminal_known": False}
         else:
-            rows[key] = {"status": "unknown" if a else "not_dispatched"}
+            rows[key] = {"status": "not_dispatched"}
     if not attempts.keys() <= rows.keys() or any(w["task"] not in attempts for w in wires):
         raise ValueError("Orphan task or model invocation")
     return rows, wires
@@ -63,13 +76,16 @@ def case_card(chain, c, r):
     support = chain == "support"
     if support:
         turn = r.get("turn", {})
-        answer = turn.get("final_output")
+        answer = None if r.get("status") == "unknown" else turn.get("final_output")
         audits = r.get("request_audit", [])
         visible = audits[-1]["evidence"] if audits else []
-        ids = {
-            v["id"]: v["visible"] for v in citation_identity_audit(answer, visible)["identities"]
-        }
         calls = r.get("calls", [])
+        last_response = calls[-1].get("response") if calls and not answer else None
+        review_text = turn.get("final_output") or (last_response or {}).get("content")
+        ids = {
+            v["id"]: v["visible"]
+            for v in citation_identity_audit(review_text, visible)["identities"]
+        }
         tool_messages = (
             [m for m in calls[-1]["request"]["messages"] if m["role"] == "tool"] if calls else []
         )
@@ -80,7 +96,7 @@ def case_card(chain, c, r):
             if t.get("status") == "SUCCESS"
         }
         decisions = [
-            (v["decision_status"], v["execution_status"]) for v in r.get("approvals_after", [])
+            [v["decision_status"], v["execution_status"]] for v in r.get("approvals_after", [])
         ]
         before = r.get("tickets_before", {}).get("total")
         after = r.get("tickets_after", {}).get("total")
@@ -89,8 +105,8 @@ def case_card(chain, c, r):
             t["id"] for t in r.get("tickets_before", {}).get("items", [])
         }
         expected = {
-            "approve": [("APPROVED", "SUCCEEDED")],
-            "deny": [("DENIED", "NOT_STARTED")],
+            "approve": [["APPROVED", "SUCCEEDED"]],
+            "deny": [["DENIED", "NOT_STARTED"]],
             None: [],
         }
         write_ok = (
@@ -112,7 +128,9 @@ def case_card(chain, c, r):
         else:
             write_ok = write_ok and not diff
         machine = {
-            "run_status": r.get("run", {}).get("status", r.get("status")),
+            "run_status": "unknown"
+            if r.get("status") == "unknown"
+            else r.get("run", {}).get("status", r.get("status")),
             "required_reads_met": set(c["required_reads"]) <= reads,
             "write_ok": bool(write_ok),
         }
@@ -124,20 +142,54 @@ def case_card(chain, c, r):
             "ticket_after": after,
             "ticket_details": r.get("ticket_details", []),
             "tool_schemas": calls[-1]["request"]["tools"] if calls else [],
-            "last_response": calls[-1].get("response") if calls and not answer else None,
+            "last_response": last_response,
         }
+        if not answer and turn.get("final_output"):
+            state["unconfirmed_turn_output"] = turn["final_output"]
+        if not answer and len(calls) > 1:
+            state["earlier_responses"] = [
+                {"round": i + 1, "response": call["response"]}
+                for i, call in enumerate(calls[:-1])
+                if call.get("response") is not None
+            ]
     else:
         visible = r.get("evidence", [])
-        answer = r.get("answer")
-        ids = {str(i): i in {v["number"] for v in visible} for i in r.get("citations", [])}
+        answer = None if r.get("status") == "unknown" else r.get("answer")
+        message = (r.get("model_events") or [{}])[-1].get("raw_message") or {}
+        raw = message.get("content")
+        numbers = set(r.get("citations", []))
+        if not answer and isinstance(raw, str):
+            try:
+                payload = json.loads(raw)
+            except ValueError:
+                payload = None
+            prose = raw
+            if isinstance(payload, dict):
+                prose = payload.get("answer")
+                declared = payload.get("citation_ids")
+                if isinstance(declared, list):
+                    numbers.update(i for i in declared if type(i) is int)
+            else:
+                # A complete numeric citation_ids array can survive invalid outer JSON.
+                pattern = r'"citation_ids"\s*:\s*\[\s*(-?\d+(?:\s*,\s*-?\d+)*)\s*\]'
+                for match in re.finditer(pattern, raw):
+                    numbers.update(int(i) for i in match[1].split(","))
+                prose = re.sub(pattern, "", raw)
+            if isinstance(prose, str):
+                numbers.update(int(i) for i in re.findall(r"\[(-?\d+)\]", prose))
+        visible_numbers = {v["number"] for v in visible}
+        ids = {str(i): i in visible_numbers for i in sorted(numbers)}
         machine = {"run_status": r.get("status")}
         state = {
             "visible": visible,
             "insufficient_evidence": r.get("insufficient_evidence"),
-            "raw_generation": (r.get("model_events") or [{}])[-1]
-            .get("raw_message", {})
-            .get("content"),
+            "raw_generation": raw,
         }
+        if not answer and raw:
+            state["citation_review_note"] = (
+                "Check each listed ID against the claim in the raw generation. "
+                "Describe unnumbered, ambiguous or unparsed references in the review reason."
+            )
     return {
         "input": c["input"],
         "stratum": c["stratum"],
@@ -243,6 +295,8 @@ def report(root, dest, votes_path, output):
     ):
         raise ValueError("Incomplete review or changed blind packet")
     tokens = {k: t for t, k in private["tasks"].items()}
+    if set(tokens) != {k for k, r in rows.items() if r.get("status") != "not_dispatched"}:
+        raise ValueError("Review packet differs from the current set of dispatched tasks")
     result = {}
     for chain in ("citation", "support"):
         pairs = {}
@@ -275,7 +329,10 @@ def report(root, dest, votes_path, output):
                 g["contract_failures"] += int(not v["contract_consistent"])
                 g["source_citations"] += len(v["citation_support"])
                 g["located"] += sum(card["cited_id_locatable"].values())
-                g["supported"] += sum(v["citation_support"].values())
+                g["supported"] += sum(
+                    supported and card["cited_id_locatable"][key]
+                    for key, supported in v["citation_support"].items()
+                )
                 for k in (
                     "unsupported_fact",
                     "unsupported_capability",
@@ -289,6 +346,9 @@ def report(root, dest, votes_path, output):
                     g["correct_withholding"] += int(
                         v["judgment_appropriate"] and v["withheld"] and bool(card["answer"])
                     )
+                else:
+                    g["should_answer"] += 1
+                    g["unwarranted_on_answerable"] += v["unwarranted_refusal"]
                 if "required_reads_met" in card["machine"]:
                     for k in ("required_reads_met", "write_ok"):
                         g[k] += card["machine"][k]
@@ -321,8 +381,32 @@ def report(root, dest, votes_path, output):
                     ),
                 }
             )
+        fractions = {
+            "complete_first_answer": ("correct", "dispatched"),
+            "appropriate_withholding": ("correct_withholding", "should_withhold"),
+            "wrong_withholding_on_answerable": ("unwarranted_on_answerable", "should_answer"),
+            "citation_location": ("located", "source_citations"),
+            "citation_claim_support": ("supported", "source_citations"),
+        }
         result[chain] = {
             "arms": groups,
+            "percentages": {
+                arm: {
+                    name: {
+                        "numerator": g[n],
+                        "denominator": g[d],
+                        "percent": round(100 * g[n] / g[d], 4) if g[d] else None,
+                    }
+                    for name, (n, d) in fractions.items()
+                }
+                for arm, g in groups.items()
+            },
+            "regressed_cases": [
+                row["id"]
+                for row in pairs.values()
+                if row["arms"]["baseline"]["quality"] == 1
+                and row["arms"]["candidate"]["quality"] == 0
+            ],
             "p50_p95_seconds": {
                 a: [percentile(d, 0.5), percentile(d, 0.95)] for a, d in durations.items()
             },

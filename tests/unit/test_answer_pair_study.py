@@ -80,6 +80,103 @@ def test_case_scoring_distinguishes_failures_and_writes():
     )
 
 
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ('{"answer":"Check [1].","citation_ids":[2,9],', {"1": True, "2": True, "9": False}),
+        ('{"answer":"Check [1].","citation_ids":[2,9]}', {"1": True, "2": True, "9": False}),
+        ("A source with an ambiguous reference.", {}),
+    ],
+)
+def test_raw_failed_citations_remain_reviewable(raw, expected):
+    case = dict(input="Q", stratum="S", rubric=[], documents=[])
+    record = dict(
+        status="schema_failure",
+        evidence=[{"number": 1}, {"number": 2}],
+        model_events=[{"raw_message": {"content": raw}}],
+    )
+    card = score.case_card("citation", case, record)
+    assert card["answer"] is None and card["raw_generation"] == raw
+    assert card["cited_id_locatable"] == expected and card["citation_review_note"]
+    assert score.win("citation", card, {}) == 0
+
+
+def test_empty_choices_and_unknown_checkpoint_export_and_report(tmp_path, monkeypatch):
+    root = tmp_path / "study"
+    blind = tmp_path / "blind"
+    save(tmp_path / "freeze.json", {"synthetic": True})
+    monkeypatch.setattr(score, "OUT", tmp_path)
+    monkeypatch.setattr(score, "verify", lambda: {})
+    monkeypatch.setattr(runner, "verify", lambda: {})
+    monkeypatch.setattr(runner, "identity", lambda: score.file_sha(tmp_path / "freeze.json"))
+    case = dict(
+        case_id="q",
+        input="Q",
+        stratum="S",
+        rubric=[],
+        documents=[],
+        should_withhold=False,
+        required_reads=[],
+        decision="deny",
+    )
+    monkeypatch.setattr(
+        score,
+        "cases",
+        lambda: [(typ, case, arm) for typ in ("citation", "support") for arm in score.ARMS],
+    )
+    runner.initialize(root, "synthetic")
+    citation = "citation/q/baseline"
+    support = "support/q/baseline"
+    for key in (citation, support):
+        (root / key).mkdir(parents=True)
+    first = root / citation / "first.json"
+    save(
+        first,
+        dict(
+            task=citation,
+            model_events=[{"raw_message": None}],
+            status="gateway_error",
+            terminal_known=True,
+            physical_receipts=[],
+        ),
+    )
+    save(
+        root / support / "run.json",
+        dict(
+            case_id="q",
+            arm="baseline",
+            turn={"final_output": "POL-Q"},
+            run={"status": "SUCCEEDED"},
+            approvals_after=[dict(decision_status="DENIED", execution_status="NOT_STARTED")],
+        ),
+    )
+    with closing(sqlite3.connect(root / "ledger.sqlite")) as db, db:
+        db.execute(
+            "INSERT INTO attempts VALUES (?, 'complete', ?)", (citation, score.file_sha(first))
+        )
+        db.execute("INSERT INTO attempts VALUES (?, 'active', NULL)", (support,))
+    score.export(root, blind)
+    private = score.load(blind / "private.json")["tasks"]
+    cards = {private[row["token"]]: row for row in score.load(blind / "cards.json")}
+    assert cards[citation]["raw_generation"] is None
+    assert cards[support]["unconfirmed_turn_output"] == "POL-Q"
+    assert cards[support]["answer"] is None and cards[support]["machine"]["run_status"] == "unknown"
+    votes = {
+        row["token"]: dict.fromkeys(score.AXES, True)
+        | dict(reason="synthetic", citation_support=dict.fromkeys(row["cited_id_locatable"], False))
+        for row in cards.values()
+    }
+    save(tmp_path / "votes.json", votes)
+    score.report(root, blind, tmp_path / "votes.json", tmp_path / "report.json")
+    result = score.load(tmp_path / "report.json")
+    for chain in ("citation", "support"):
+        group = result[chain]["arms"]["baseline"]
+        assert group["dispatched"] == group["missing_answer"] == 1 and group["correct"] == 0
+        assert result[chain]["pairs"][0]["arms"]["baseline"]["quality"] == 0
+        assert result[chain]["pairs"][0]["arms"]["candidate"]["quality"] is None
+    assert result["support"]["arms"]["baseline"]["completed"] == 0
+
+
 @pytest.mark.asyncio
 async def test_model_option_drift_before_dispatch(tmp_path, monkeypatch):
     root = tmp_path / "study"
