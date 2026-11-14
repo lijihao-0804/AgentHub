@@ -287,6 +287,173 @@ def require_settled_run(record):
     raise ValueError("incomplete run or missing dispatch evidence; stop the study")
 
 
+async def refresh_roles(owner, operator, users):
+    for client, expected in zip((owner, operator), users, strict=True):
+        result = await api(client, "POST", "auth/refresh")
+        if result["user_id"] != str(expected):
+            raise ValueError("Authentication refresh changed principal")
+        client.headers["Authorization"] = "Bearer " + result["access_token"]
+
+
+async def assemble(settings):
+    engine, factory = create_database(settings.database_url)
+    app = create_app(settings)
+    app.state.db_session_factory = factory
+    queue = app.state.ingestion_queue = _RecordedQueue()
+    components = production_retrieval_components(settings)
+    components.index.ensure_collection()
+    for component in (components.dense, components.sparse, components.reranker):
+        await asyncio.to_thread(component.warm)
+    runtime = build_agent_run_service(settings, factory, memory_writer=None)
+    app.state.agent_run_service = runtime
+    store = read_order_store(ROOT / "data/orders.json")
+    retriever = RecordingRetriever(
+        SessionScopedKnowledgeRetriever(
+            session_factory=factory,
+            components=components,
+            rrf_k=settings.knowledge_rrf_k,
+            min_rerank_score=None,
+            superseded_rank_penalty=0,
+        )
+    )
+    retriever.components = components
+    registry = FixtureToolRegistry(store=store, retriever=retriever)
+    registry._handlers["query_customer"] = query_customer
+    runtime.tool_runtime.registry = registry
+    return engine, factory, app, queue, components, runtime, store, retriever
+
+
+async def group_chunks(factory, kb, uploaded):
+    revisions = {u["revision"]["id"]: sid for sid, u in uploaded.items()}
+    async with factory() as db:
+        chunks = {
+            c.chunk_id: {
+                "text": c.text,
+                "revision": str(c.document_revision_id),
+                "source_id": revisions[str(c.document_revision_id)],
+            }
+            for c in await db.scalars(
+                select(DocumentChunk).where(DocumentChunk.knowledge_base_id == kb)
+            )
+        }
+    return chunks
+
+
+async def exercise_cases(
+    cases,
+    stage,
+    meter,
+    args,
+    owner,
+    operator,
+    users,
+    scope,
+    agent,
+    store,
+    runtime,
+    retriever,
+    settings,
+    chunks,
+    out,
+    report,
+):
+    paid = meter is not None
+    for case in cases:
+        await refresh_roles(owner, operator, users)
+        key = case["case_id"]
+        record = {
+            "case_id": key,
+            "stage": stage,
+            "expected": case,
+            "answerability": case.get("answerability", "answerable"),
+            "semantic_verdict": "PENDING_REVIEW" if paid else "NOT_MEASURED",
+        }
+        calls = []
+        retriever.records = []
+        with ExitStack() as stack:
+            if stage == "refund_dev":
+                order = store.get(case["order_fixture"]["order_id"])
+                ref = order["customer_id"]
+                stack.enter_context(case_scope(FixtureCaseScope(key, order["order_id"], ref)))
+            else:
+                ref = case["customer_ref"]
+            customer = await api(
+                operator,
+                "POST",
+                scope + "/support/customers",
+                {"customer_ref": ref, "name": "合成客户"},
+            )
+            if paid:
+                meter.task_id = key
+                runtime.model_gateway_factory = lambda db, meter=meter, calls=calls: (
+                    RecordingGateway(
+                        SqlAlchemyModelGateway(
+                            db,
+                            adapter=LiteLLMProviderAdapter(client=meter),
+                            credential_cipher=ProviderCredentialCipher.from_settings(settings),
+                        ),
+                        calls,
+                    )
+                )
+            else:
+                runtime.model_gateway_factory = lambda _, calls=calls: RecordingPrepared(
+                    ContractGateway(), calls
+                )
+            started = time.perf_counter()
+            try:
+                await exercise(
+                    operator,
+                    owner,
+                    scope,
+                    agent,
+                    case,
+                    customer,
+                    calls,
+                    retriever.records,
+                    chunks,
+                    record,
+                )
+            finally:
+                if paid and record.get("run", {}).get("status") != "SUCCEEDED":
+                    record["semantic_verdict"] = "RUN_ERROR"
+                record["end_to_end_seconds"] = round(time.perf_counter() - started, 3)
+                if paid:
+                    with closing(sqlite3.connect(args.ledger)) as db:
+                        db.row_factory = sqlite3.Row
+                        record["physical_attempts"] = [
+                            dict(row)
+                            for row in db.execute(
+                                "SELECT * FROM wires WHERE stage=? AND task=? ORDER BY id",
+                                (stage, key),
+                            )
+                        ]
+                else:
+                    record["physical_attempts"] = []
+                record["calls"] = wire(calls)
+                record["retrieval"] = retriever.records
+                save(out / (key + ".json"), record)
+                report["rows"].append(
+                    {
+                        k: record.get(k)
+                        for k in (
+                            "case_id",
+                            "stage",
+                            "answerability",
+                            "uncited_missing_fact_review",
+                            "run_id",
+                            "thread_id",
+                            "contract_pass",
+                            "contract_checks",
+                            "coverage",
+                            "semantic_verdict",
+                        )
+                    }
+                )
+                save(out / "report.json", report)
+            if paid:
+                require_settled_run(record)
+
+
 async def run(args):
     roots = [
         "apps",
@@ -316,34 +483,11 @@ async def run(args):
     out = args.output
     out.mkdir(parents=True, exist_ok=False)
     settings = await isolated_settings(out)
-    engine, factory = create_database(settings.database_url)
-    app = create_app(settings)
-    app.state.db_session_factory = factory
-    queue = app.state.ingestion_queue = _RecordedQueue()
-    components = production_retrieval_components(settings)
-    components.index.ensure_collection()
-    for component in (components.dense, components.sparse, components.reranker):
-        await asyncio.to_thread(component.warm)
-    runtime = build_agent_run_service(settings, factory, memory_writer=None)
-    app.state.agent_run_service = runtime
-    store = read_order_store(ROOT / "data/orders.json")
-    retriever = RecordingRetriever(
-        SessionScopedKnowledgeRetriever(
-            session_factory=factory,
-            components=components,
-            rrf_k=settings.knowledge_rrf_k,
-            min_rerank_score=None,
-            superseded_rank_penalty=0,
-        )
-    )
-    retriever.components = components
-    registry = FixtureToolRegistry(store=store, retriever=retriever)
-    registry._handlers["query_customer"] = query_customer
-    runtime.tool_runtime.registry = registry
+    engine, factory, app, queue, components, runtime, store, retriever = await assemble(settings)
     dev, new = reviewed_cases(), read(ROOT / "new_ticket_cases.json")["cases"]
     docs = read(ROOT / "data/manifest.json")["documents"]
     transport = httpx.ASGITransport(app=app)
-    options = {"transport": transport, "base_url": "http://product.local/api/v1/"}
+    options = {"transport": transport, "base_url": "https://product.local/api/v1/"}
     scheduled = {
         q["case_id"]: stage
         for stage, questions in [("refund_dev", dev), ("refund_new", new)]
@@ -414,18 +558,7 @@ async def run(args):
                     "version": version,
                     "documents": uploaded,
                 }
-                revisions = {u["revision"]["id"]: sid for sid, u in uploaded.items()}
-                async with factory() as db:
-                    chunks = {
-                        c.chunk_id: {
-                            "text": c.text,
-                            "revision": str(c.document_revision_id),
-                            "source_id": revisions[str(c.document_revision_id)],
-                        }
-                        for c in await db.scalars(
-                            select(DocumentChunk).where(DocumentChunk.knowledge_base_id == kb)
-                        )
-                    }
+                chunks = await group_chunks(factory, kb, uploaded)
                 meter = None
                 if paid:
                     from benchmarks.public_rag.confirmation_meter import AliyunMeter
@@ -434,104 +567,24 @@ async def run(args):
                     if stage == "refund_dev":
                         save(out / "report.json", report)
                         open_paid_schedule(args.ledger)
-                for case in cases:
-                    key = case["case_id"]
-                    record = {
-                        "case_id": key,
-                        "stage": stage,
-                        "expected": case,
-                        "answerability": case.get("answerability", "answerable"),
-                        "semantic_verdict": "PENDING_REVIEW" if paid else "NOT_MEASURED",
-                    }
-                    calls = []
-                    retriever.records = []
-                    with ExitStack() as stack:
-                        if stage == "refund_dev":
-                            order = store.get(case["order_fixture"]["order_id"])
-                            ref = order["customer_id"]
-                            stack.enter_context(
-                                case_scope(FixtureCaseScope(key, order["order_id"], ref))
-                            )
-                        else:
-                            ref = case["customer_ref"]
-                        customer = await api(
-                            operator,
-                            "POST",
-                            scope + "/support/customers",
-                            {"customer_ref": ref, "name": "合成客户"},
-                        )
-                        if paid:
-                            meter.task_id = key
-                            runtime.model_gateway_factory = lambda db, meter=meter, calls=calls: (
-                                RecordingGateway(
-                                    SqlAlchemyModelGateway(
-                                        db,
-                                        adapter=LiteLLMProviderAdapter(client=meter),
-                                        credential_cipher=ProviderCredentialCipher.from_settings(
-                                            settings
-                                        ),
-                                    ),
-                                    calls,
-                                )
-                            )
-                        else:
-                            runtime.model_gateway_factory = lambda _, calls=calls: (
-                                RecordingPrepared(ContractGateway(), calls)
-                            )
-                        started = time.perf_counter()
-                        try:
-                            await exercise(
-                                operator,
-                                owner,
-                                scope,
-                                agent,
-                                case,
-                                customer,
-                                calls,
-                                retriever.records,
-                                chunks,
-                                record,
-                            )
-                        finally:
-                            if paid and record.get("run", {}).get("status") != "SUCCEEDED":
-                                record["semantic_verdict"] = "RUN_ERROR"
-                            record["end_to_end_seconds"] = round(time.perf_counter() - started, 3)
-                            if paid:
-                                with closing(sqlite3.connect(args.ledger)) as db:
-                                    db.row_factory = sqlite3.Row
-                                    record["physical_attempts"] = [
-                                        dict(row)
-                                        for row in db.execute(
-                                            "SELECT * FROM wires WHERE stage=? AND task=? "
-                                            "ORDER BY id",
-                                            (stage, key),
-                                        )
-                                    ]
-                            else:
-                                record["physical_attempts"] = []
-                            record["calls"] = wire(calls)
-                            record["retrieval"] = retriever.records
-                            save(out / (key + ".json"), record)
-                            report["rows"].append(
-                                {
-                                    k: record.get(k)
-                                    for k in (
-                                        "case_id",
-                                        "stage",
-                                        "answerability",
-                                        "uncited_missing_fact_review",
-                                        "run_id",
-                                        "thread_id",
-                                        "contract_pass",
-                                        "contract_checks",
-                                        "coverage",
-                                        "semantic_verdict",
-                                    )
-                                }
-                            )
-                            save(out / "report.json", report)
-                        if paid:
-                            require_settled_run(record)
+                await exercise_cases(
+                    cases,
+                    stage,
+                    meter,
+                    args,
+                    owner,
+                    operator,
+                    users,
+                    scope,
+                    agent,
+                    store,
+                    runtime,
+                    retriever,
+                    settings,
+                    chunks,
+                    out,
+                    report,
+                )
         finally:
             await api(owner, "PATCH", credpath, {"enabled": False})
             await api(
