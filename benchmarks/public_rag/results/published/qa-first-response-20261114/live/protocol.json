@@ -1,0 +1,375 @@
+{
+  "baseline": "f8e7878d72471a778b238ee0ff1fbefb0e80c18f",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "order": "baseline then candidate, independent then historical QASPER then full SciFact; identical snapshots within each cohort",
+  "selection": "TRAIN only, deterministic salted SHA256 of qid, one paper per question, exclude paper and question IDs found in prior published machine-readable results; single annotation; 8 extractive answerable, 4 official unanswerables",
+  "train_sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+  "cases": [
+    {
+      "id": "1d739bb8e5d887fdfd1f4b6e39c57695c042fa25",
+      "scope": "independent",
+      "query": "In the paper “Detecting Online Hate Speech Using Context Aware Models”, What architecture has the neural network?",
+      "gold_documents": [
+        "1710.07395"
+      ],
+      "negative": false,
+      "answers": [
+        "three parallel LSTM BIBREF21 layers"
+      ],
+      "evidence": [
+        "Our neural network model mainly consists of three parallel LSTM BIBREF21 layers. It has three different inputs, including the target comment, its news title and its username. Comment and news title are encoded into a sequence of word embeddings. We use pre-trained word embeddings in word2vec. Username is encoded into a sequence of characters. We use one-hot encoding of characters."
+      ]
+    },
+    {
+      "id": "e930f153c89dfe9cff75b7b15e45cd3d700f4c72",
+      "scope": "independent",
+      "query": "In the paper “Zero-Shot Cross-lingual Classification Using Multilingual Neural Machine Translation”, How big is the impact of training data size on the performance of the multilingual encoder?",
+      "gold_documents": [
+        "1809.04686"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": []
+    },
+    {
+      "id": "689d1d0c4653a8fa87fd0e01fa7e12f75405cd38",
+      "scope": "independent",
+      "query": "In the paper “Recognizing Musical Entities in User-generated Content”, Which machine learning algorithms did the explore?",
+      "gold_documents": [
+        "1904.00648"
+      ],
+      "negative": false,
+      "answers": [
+        "biLSTM-networks"
+      ],
+      "evidence": [
+        "However, recent advances in Deep Learning techniques have shown that the NER task can benefit from the use of neural architectures, such as biLSTM-networks BIBREF3 , BIBREF4 . We use the implementation proposed in BIBREF24 for conducting three different experiments. In the first, we train the model using only the word embeddings as feature. In the second, together with the word embeddings we use the POS and chunk tag. In the third, all the features previously defined are included, in addition to the word embeddings. For every experiment, we use both the pre-trained embeddings and the ones that we created with our Twitter corpora. In section 4, results obtained from the several experiments are reported."
+      ]
+    },
+    {
+      "id": "4e4d377b140c149338446ba69737ea191c4328d9",
+      "scope": "independent",
+      "query": "In the paper “Sentiment Analysis of Citations Using Word2vec”, What dataset is used?",
+      "gold_documents": [
+        "1704.00177"
+      ],
+      "negative": false,
+      "answers": [
+        "ACL Anthology Reference Corpus"
+      ],
+      "evidence": [
+        "The ACL-Embeddings (300 and 100 dimensions) from ACL collection were trained . ACL Anthology Reference Corpus contains the canonical 10,921 computational linguistics papers, from which I have generated 622,144 sentences after filtering out sentences with lower quality."
+      ]
+    },
+    {
+      "id": "7dce1b64c0040500951c864fce93d1ad7a1809bc",
+      "scope": "independent",
+      "query": "In the paper “Phonetic Feedback for Speech Enhancement With and Without Parallel Speech Data”, Which frozen acoustic model do they use?",
+      "gold_documents": [
+        "2003.01769"
+      ],
+      "negative": false,
+      "answers": [
+        "a masking speech enhancement model BIBREF11, BIBREF12, BIBREF13"
+      ],
+      "evidence": [
+        "Several recent works have investigated jointly training the acoustic model with a masking speech enhancement model BIBREF11, BIBREF12, BIBREF13, but these works did not evaluate their system on speech enhancement metrics. Indeed, our internal experiments show that without access to the clean data, joint training severely harms performance on these metrics."
+      ]
+    },
+    {
+      "id": "5c059a13d59947f30877bed7d0180cca20a83284",
+      "scope": "independent",
+      "query": "In the paper “Detecting Potential Topics In News Using BERT, CRF and Wikipedia”, Which news corpus is used?",
+      "gold_documents": [
+        "2002.11402"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": []
+    },
+    {
+      "id": "38854255dbdf2f36eebefc0d9826aa76df9637c6",
+      "scope": "independent",
+      "query": "In the paper “Improving Information Retrieval Results for Persian Documents using FarsNet”, What is the WordNet counterpart for Persian?",
+      "gold_documents": [
+        "1811.00854"
+      ],
+      "negative": false,
+      "answers": [
+        "FarsNet"
+      ],
+      "evidence": [
+        "FarsNet [20] [21] is the first WordNet for Persian, developed by the NLP Lab at Shahid Beheshti University and it follows the same structure as the original WordNet. The first version of FarsNet contained more than 10,000 synsets while version 2.0 and 2.5 contained 20,000 synsets. Currently, FarsNet version 3 is under release and contains more than 40,000 synsets [7]."
+      ]
+    },
+    {
+      "id": "09f0dce416a1e40cc6a24a8b42a802747d2c9363",
+      "scope": "independent",
+      "query": "In the paper “Is there Gender bias and stereotype in Portuguese Word Embeddings?”, Which word embeddings are analysed?",
+      "gold_documents": [
+        "1810.04528"
+      ],
+      "negative": false,
+      "answers": [
+        "Continuous Bag-of-Words (CBOW)"
+      ],
+      "evidence": [
+        "In BIBREF14 , several word embedding models trained in a large Portuguese corpus are evaluated. Within the Word2Vec model, two training strategies were used. In the first, namely Skip-Gram, the model is given the word and attempts to predict its neighboring words. The second, Continuous Bag-of-Words (CBOW), the model is given the sequence of words without the middle one and attempts to predict this omitted word. The latter was chosen for application in the present proposal."
+      ]
+    },
+    {
+      "id": "5450f27ccc0406d3bffd08772d8b59004c2716da",
+      "scope": "independent",
+      "query": "In the paper “Rethinking Exposure Bias In Language Modeling”, What is the road exam metric?",
+      "gold_documents": [
+        "1910.11235"
+      ],
+      "negative": false,
+      "answers": [
+        "a new metric to reveal a model's robustness against exposure bias"
+      ],
+      "evidence": [
+        "In this paper, we adopt two simple strategies, multi-range reinforcing and multi-entropy sampling to overcome the reward sparseness during training. With the tricks applied, our model demonstrates a significant improvement over competing models. In addition, we propose road exam as a new metric to reveal a model's robustness against exposure bias."
+      ]
+    },
+    {
+      "id": "694dd76a37ad9e8083c546e9bd083c5c3b65695c",
+      "scope": "independent",
+      "query": "In the paper “MedDialog: A Large-scale Medical Dialogue Dataset”, What language are the conversations in?",
+      "gold_documents": [
+        "2004.03329"
+      ],
+      "negative": false,
+      "answers": [
+        "The language is Chinese, which is not easy for non-Chinese-speaking researchers to work on."
+      ],
+      "evidence": [
+        "The language is Chinese, which is not easy for non-Chinese-speaking researchers to work on."
+      ]
+    },
+    {
+      "id": "974868e4e22f14766bcc76dc4927a7f2795dcd5e",
+      "scope": "independent",
+      "query": "In the paper “A Novel Embedding Model for Knowledge Base Completion Based on Convolutional Neural Network”, How does the number of parameters compare to other knowledge base completion models?",
+      "gold_documents": [
+        "1712.02121"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": []
+    },
+    {
+      "id": "5112bbf13c7cf644bf401daecb5e3265889a4bfc",
+      "scope": "independent",
+      "query": "In the paper “Duality Regularization for Unsupervised Bilingual Lexicon Induction”, How big is data used in experiments?",
+      "gold_documents": [
+        "1909.01013"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": []
+    },
+    {
+      "id": "e67d2266476abd157fc8c396b3dfb70cb343471e",
+      "query": "In the paper “Empirical Gaussian priors for cross-lingual transfer learning”, What languages did they experiment with?",
+      "negative": true,
+      "answers": [],
+      "gold_documents": [
+        "1601.02166"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [],
+      "evidence": []
+    },
+    {
+      "id": "6b8a3100895f2192e08973006474428319dc298e",
+      "query": "In the paper “Cross-Lingual Induction and Transfer of Verb Classes Based on Word Vector Space Specialisation”, What clustering algorithm is used on top of the VerbNet-specialized representations?",
+      "negative": false,
+      "answers": [
+        "MNCut spectral clustering algorithm BIBREF58"
+      ],
+      "gold_documents": [
+        "1707.06945"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "dbf4af98236c6791f87f6f08b795690fa930b1d207d3ef7e5a269dd8ba79bf2a"
+      ],
+      "evidence": [
+        "Given the initial distributional or specialised collection of target language vectors INLINEFORM0 , we apply an off-the-shelf clustering algorithm on top of these vectors in order to group verbs into classes. Following prior work BIBREF56 , BIBREF57 , BIBREF17 , we employ the MNCut spectral clustering algorithm BIBREF58 , which has wide applicability in similar NLP tasks which involve high-dimensional feature spaces BIBREF59 , BIBREF60 , BIBREF18 . Again, following prior work BIBREF17 , BIBREF61 , we estimate the number of clusters INLINEFORM1 using the self-tuning method of Zelnik:2004nips. This algorithm finds the optimal number by minimising a cost function based on the eigenvector structure of the word similarity matrix. We refer the reader to the relevant literature for further details."
+      ]
+    },
+    {
+      "id": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "query": "In the paper “Visual Natural Language Query Auto-Completion for Estimating Instance Probabilities”, How big is data provided by this research?",
+      "negative": false,
+      "answers": [
+        "16k images and 740k corresponding region descriptions"
+      ],
+      "gold_documents": [
+        "1910.04887"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "506916369ced9a4e33ed75d2e9618d4d406db977cf7613576545b5d1ddf1032c"
+      ],
+      "evidence": [
+        "For training, we aggregated (query, image) pairs using the region descriptions from the VG dataset and referring expressions from the ReferIt dataset. Our VG training set consists of 85% of the data: 16k images and 740k corresponding region descriptions. The Referit training data consists of 9k images and 54k referring expressions."
+      ]
+    },
+    {
+      "id": "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+      "query": "In the paper “Video Highlight Prediction Using Audience Chat Reactions”, How big was the dataset presented?",
+      "negative": false,
+      "answers": [
+        "321 videos"
+      ],
+      "gold_documents": [
+        "1707.08559"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "5534c69a9213def06f7c9e0fd634ed2d44dd2022514af722449b30c42960dadb"
+      ],
+      "evidence": [
+        "Our dataset covers 218 videos from NALCS and 103 from LMS for a total of 321 videos from week 1 to week 9 in 2017 spring series from each tournament. Each week there are 10 matches for NALCS and 6 matches for LMS. Matches are best of 3, so consist of two games or three games. The first and third games are used for training. The second games in the first 4 weeks are used as validation and the remainder of second games are used as test. Table TABREF3 lists the numbers of videos in train, validation, and test subsets."
+      ]
+    },
+    {
+      "id": "77db56fee07b01015a74413ca31f19bea7203f0b",
+      "query": "In the paper “Rapid Adaptation of BERT for Information Extraction on Domain-Specific Business Documents”, What evaluation metric were used for presenting results? ",
+      "negative": false,
+      "answers": [
+        "F$_1$, precision, and recall"
+      ],
+      "gold_documents": [
+        "2002.01861"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "782d7afa93b7efa85a1967ca5d36ee05a43471320de924aa84cf3b18249f680d"
+      ],
+      "evidence": [
+        "Our main results are presented in Table TABREF6 on the test set of the regulatory filings and in Table TABREF7 on the test set of the property lease agreements; F$_1$, precision, and recall are computed in the manner described above. We show metrics across all content elements (micro-averaged) as well as broken down by types. For the property lease agreements, we show results on all documents (left) and only over those with unseen templates (right). Examining these results, we see that although there is some degradation in effectiveness between all documents and only unseen templates, it appears that BERT is able to generalize to previously-unseen expressions of the content elements. Specifically, it is not the case that the model is simply memorizing fixed patterns or key phrases—otherwise, we could just craft a bunch of regular expression patterns for this task. This is a nice result that shows off the power of modern neural NLP models."
+      ]
+    },
+    {
+      "id": "5efa19058f815494b72c44d746c157e9403f726e",
+      "query": "In the paper “Improving Slot Filling by Utilizing Contextual Information”, What metris are used for evaluation?",
+      "negative": false,
+      "answers": [
+        "micro-averaged F1 score"
+      ],
+      "gold_documents": [
+        "1911.01680"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "0bd16dea1a4d80af2b44d427a61a024cbb4bbaf76646eb86eb6e389ff165c520"
+      ],
+      "evidence": [
+        "In our experiments, we use Onsei Intent Slot dataset. Table TABREF21 shows the statics of this dataset. We use the following hyper parameters in our model: We set the word embedding and POS embedding to 768 and 30 respectively; The pre-trained BERT BIBREF17 embedding are used to initialize word embeddings; The hidden dimension of the Bi-LSTM, GCN and feed forward networks are 200; the hyper parameters $\\alpha $, $\\beta $ and $\\gamma $ are all set to 0.1; We use Adam optimizer with learning rate 0.003 to train the model. We use micro-averaged F1 score on all labels as the evaluation metric."
+      ]
+    },
+    {
+      "id": "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854",
+      "query": "In the paper “A Lightweight Front-end Tool for Interactive Entity Population”, What programming language is the tool written in?",
+      "negative": false,
+      "answers": [
+        "JavaScript"
+      ],
+      "gold_documents": [
+        "1708.00481"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "3bd1832305a8d68640a5539cb76a48f55c7b7add7ece180acef7dd791e1605f8"
+      ],
+      "evidence": [
+        "LUWAK is implemented in pure JavaScript code, and it uses the LocalStorage of a web browser. A user does not have to install any packages except for a web browser. The only thing the user must do is to download the LUWAK software and put it in a local directory. We believe the cost of installing the tool will keep away a good amount of potential users. This philosophy follows our empirical feeling of the curse of installing required packages/libraries. Moreover, LUWAK does not need users to consider the usage and maintenance of these additional packages. That is why we are deeply committed to making LUWAK a pure client-side tool in the off-the-shelf style."
+      ]
+    },
+    {
+      "id": "620",
+      "query": "Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.",
+      "gold_documents": [
+        "2565138"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim"
+    },
+    {
+      "id": "791",
+      "query": "Migraine with aura is associated with ischemic stroke.",
+      "type": "already_correct",
+      "gold_documents": [
+        "15984735"
+      ],
+      "upstream_rationales": {
+        "15984735": [
+          {
+            "sentences": [
+              11
+            ],
+            "label": "SUPPORT"
+          },
+          {
+            "sentences": [
+              16
+            ],
+            "label": "SUPPORT"
+          }
+        ]
+      },
+      "source_review_rule": "The answer affirms increased association with ischaemic stroke for migraine with aura and cites the target paper. Check the actual cited excerpt (risk 2.16 or equivalent conclusion).",
+      "historical_ranks": {
+        "dense": [
+          1,
+          2,
+          5
+        ],
+        "sparse": [
+          1,
+          5,
+          20
+        ],
+        "fusion": [
+          1,
+          3,
+          10
+        ],
+        "rerank": [
+          1,
+          2,
+          5
+        ]
+      },
+      "scope": "full"
+    },
+    {
+      "id": "missing-tenant-canary",
+      "query": "According to the Lattice Vault memorandum ZR-618, what color code was assigned to the authorization desk?",
+      "type": "missing_evidence",
+      "gold_documents": [],
+      "source_review_rule": "Explicit insufficient_evidence with zero citations. LILAC-726 occurs only in another tenant's synthetic control document.",
+      "scope": "full"
+    },
+    {
+      "id": "838-reproductive-functions",
+      "query": "Which reproductive functions does the study identify for NR5A2, also called liver receptor homolog-1?",
+      "type": "source_grounded_diagnostic_derivative",
+      "gold_documents": [
+        "15928989"
+      ],
+      "source_review_rule": "Require at least two of maintenance of the corpus luteum, promotion of decidualization, and placental formation in the answer and direct cited evidence from document 15928989. Report qrel retrieval on this derivative separately from original SciFact.",
+      "scope": "full"
+    }
+  ]
+}
