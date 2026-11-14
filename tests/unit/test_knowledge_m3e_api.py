@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from contextlib import nullcontext
 from uuid import uuid4
 
@@ -16,7 +17,9 @@ from apps.api.knowledge_dependencies import (
 from packages.core.config.settings import Settings
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.citation_qa import CitationQaService
+from packages.model_gateway.contracts import AliyunDeepSeekRequestMode, ModelResponse
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
+from packages.model_gateway.gateway import _validate_usable_response
 from tests.unit.test_knowledge_m3e_citation_qa import (
     _context,
     _FakeModelGateway,
@@ -102,6 +105,7 @@ async def test_query_returns_citations_and_safe_trace_projection() -> None:
     assert "internal-point" not in response.text
     assert "credential" not in response.text.lower()
     assert "provider" not in response.text.lower()
+    assert gateway.requests[0].request_mode is AliyunDeepSeekRequestMode.PROVIDER_DEFAULT
 
 
 @pytest.mark.asyncio
@@ -114,9 +118,11 @@ async def test_explicit_prompt_json_uses_strict_local_validation(valid: bool) ->
         else '{"answer":"not valid enough"}'
     )
     response = await _post(
-        _app(session, gateway), _payload(session) | {"output_mode": "PROMPT_JSON"}
+        _app(session, gateway),
+        _payload(session) | {"output_mode": "PROMPT_JSON", "request_mode": "non_thinking"},
     )
     [sent] = gateway.requests
+    assert sent.request_mode is AliyunDeepSeekRequestMode.NON_THINKING
     assert sent.response_schema is None
     assert "structured_output" not in sent.required_capabilities.required
     assert '"insufficient_evidence"' in sent.messages[0].content
@@ -125,6 +131,7 @@ async def test_explicit_prompt_json_uses_strict_local_validation(valid: bool) ->
     else:
         assert response.status_code == 502
         assert response.json()["error"]["code"] == "CITATION_QA_INVALID_MODEL_OUTPUT"
+        assert "schema validation" in response.json()["error"]["message"]
 
 
 @pytest.mark.asyncio
@@ -141,10 +148,12 @@ async def test_query_requires_concrete_snapshot_and_forbids_extra_fields() -> No
     latest_response = await _post(app, latest)
     extra_response = await _post(app, extra)
     unknown_mode = await _post(app, _payload(session) | {"output_mode": "AUTO"})
+    unknown_request_mode = await _post(app, _payload(session) | {"request_mode": "AUTO"})
 
     assert latest_response.status_code == 422
     assert extra_response.status_code == 422
     assert unknown_mode.status_code == 422
+    assert unknown_request_mode.status_code == 422
     assert gateway.requests == []
 
 
@@ -169,7 +178,99 @@ async def test_repeated_json_fields_are_ambiguous(mode, duplicate):
     response = await _post(_app(session, gateway), _payload(session) | {"output_mode": mode})
     assert response.status_code == 502
     assert response.json()["error"]["code"] == "CITATION_QA_INVALID_MODEL_OUTPUT"
+    assert "strict JSON parsing" in response.json()["error"]["message"]
     assert len(gateway.requests) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("content", "finish_reason", "code", "diagnostic", "failure_code"),
+    [
+        (
+            "",
+            "length",
+            "MODEL_BAD_RESPONSE",
+            "output limit without visible content",
+            "gateway_empty_output",
+        ),
+        ("", "stop", "MODEL_BAD_RESPONSE", "no visible content", "gateway_empty_output"),
+        (
+            '{"private":',
+            "length",
+            "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "model output limit",
+            "json_parse",
+        ),
+        (
+            '{"private":1}',
+            "stop",
+            "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "schema validation",
+            "schema_validation",
+        ),
+        (
+            '{"answer":"Private","citation_ids":[1],"insufficient_evidence":false}',
+            "stop",
+            "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "citation IDs must exist and agree",
+            "citation_mismatch",
+        ),
+    ],
+)
+async def test_query_reports_safe_failure_stage_without_retry(
+    caplog, content, finish_reason, code, diagnostic, failure_code
+):
+    class Gateway(_FakeModelGateway):
+        async def generate_resolved(self, context, plan, request):
+            self.requests.append(request)
+            result = ModelResponse(
+                content, provider="fake", model="fake", finish_reason=finish_reason
+            )
+            _validate_usable_response(result)
+            return result
+
+    session = _FakeSession()
+    gateway = Gateway()
+    with caplog.at_level(logging.INFO, logger="agenthub.observability"):
+        response = await _post(_app(session, gateway), _payload(session))
+    assert response.status_code == 502
+    assert response.json()["error"]["code"] == code
+    assert diagnostic in response.json()["error"]["message"]
+    assert "private" not in response.text.lower()
+    assert len(gateway.requests) == 1
+    [trace] = [
+        rec.trace_span
+        for rec in caplog.records
+        if getattr(rec, "trace_span", {}).get("span") == "knowledge.qa.output_failure"
+    ]
+    assert trace["failure_code"] == failure_code
+    assert trace["attempt"] == 1
+    assert trace["output_limit_reached"] is (finish_reason == "length")
+    assert "private" not in str(trace).lower()
+
+
+@pytest.mark.asyncio
+async def test_oversized_citation_id_is_rejected_after_single_correction(caplog):
+    session = _FakeSession()
+    marker = "9" * 4600
+    gateway = _FakeModelGateway(
+        f'{{"answer":"Private [{marker}]","citation_ids":[1],"insufficient_evidence":false}}'
+    )
+    with caplog.at_level(logging.INFO, logger="agenthub.observability"):
+        response = await _post(_app(session, gateway), _payload(session))
+    assert response.status_code == 502
+    assert response.json()["error"]["code"] == "CITATION_QA_INVALID_MODEL_OUTPUT"
+    assert len(gateway.requests) == 2
+    traces = [
+        rec.trace_span
+        for rec in caplog.records
+        if getattr(rec, "trace_span", {}).get("span") == "knowledge.qa.output_failure"
+    ]
+    assert [(row["failure_code"], row["attempt"]) for row in traces] == [
+        ("citation_out_of_range", 1),
+        ("citation_out_of_range", 2),
+    ]
+    assert "private" not in str(traces).lower()
 
 
 @pytest.mark.asyncio

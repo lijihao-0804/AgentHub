@@ -7,6 +7,7 @@ import re
 from collections.abc import Awaitable, Callable, Mapping
 from contextlib import nullcontext
 from dataclasses import asdict, dataclass
+from enum import StrEnum
 from functools import partial
 from typing import Any
 from uuid import UUID
@@ -36,6 +37,7 @@ from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.model_gateway.contracts import (
     PROVIDER_EGRESS_POLICY_VERSION,
+    AliyunDeepSeekRequestMode,
     CapabilityRequirements,
     ModelMessage,
     ModelRequest,
@@ -45,7 +47,11 @@ from packages.model_gateway.contracts import (
     ResolvedModelGenerator,
     StructuredOutputSchema,
 )
-from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
+from packages.model_gateway.errors import (
+    EmptyModelResponseError,
+    ModelGatewayError,
+    ModelGatewayErrorCode,
+)
 from packages.model_gateway.profile_resolution import ModelProfileResolver
 from packages.model_gateway.repositories import SqlAlchemyModelGatewayRepository
 from packages.observability.contracts import TraceSink
@@ -348,21 +354,36 @@ def _output_requirements(mode: CitationOutputMode) -> CapabilityRequirements:
 
 
 def _request(
-    messages: tuple[ModelMessage, ...], mode: CitationOutputMode = "JSON_SCHEMA"
+    messages: tuple[ModelMessage, ...],
+    mode: CitationOutputMode,
+    request_mode: AliyunDeepSeekRequestMode,
 ) -> ModelRequest:
     return ModelRequest(
         messages=messages,
+        request_mode=request_mode,
         response_schema=_OUTPUT_SCHEMA if mode == "JSON_SCHEMA" else None,
         required_capabilities=_output_requirements(mode),
     )
 
 
-def _invalid_model_output() -> AgentHubError:
-    return AgentHubError(
-        "CITATION_QA_INVALID_MODEL_OUTPUT",
-        "The model returned an invalid citation answer.",
-        502,
-    )
+class _QaFailure(StrEnum):
+    GATEWAY_BAD_RESPONSE = "gateway_bad_response"
+    GATEWAY_EMPTY_OUTPUT = "gateway_empty_output"
+    JSON_PARSE = "json_parse"
+    SCHEMA_VALIDATION = "schema_validation"
+    CITATION_OUT_OF_RANGE = "citation_out_of_range"
+    CITATIONS_ON_REFUSAL = "citations_on_refusal"
+    CITATION_MISMATCH = "citation_mismatch"
+
+
+class _InvalidCitationAnswer(AgentHubError):
+    def __init__(self, reason: _QaFailure, message: str) -> None:
+        super().__init__(
+            "CITATION_QA_INVALID_MODEL_OUTPUT",
+            f"The model returned an invalid citation answer. {message}",
+            502,
+        )
+        self.reason = reason
 
 
 def _validate_model_output(
@@ -371,17 +392,30 @@ def _validate_model_output(
     evidence_count: int,
     visible_ids: frozenset[int] | None = None,
 ) -> tuple[int, ...]:
-    marker_ids = tuple(int(match.group(1)) for match in _CITATION_MARKER.finditer(output.answer))
     allowed = visible_ids if visible_ids is not None else frozenset(range(1, evidence_count + 1))
-    if any(identifier not in allowed for identifier in marker_ids):
-        raise _invalid_model_output()
-    marker_set = set(marker_ids)
+    max_digits = len(str(max(allowed, default=0)))
+    marker_set = set()
+    for marker in _CITATION_MARKER.findall(output.answer):
+        # Bound conversion even for an adversarial digit string in an otherwise valid answer.
+        digits = marker.lstrip("0") or "0"
+        if len(digits) > max_digits or (identifier := int(digits)) not in allowed:
+            raise _InvalidCitationAnswer(
+                _QaFailure.CITATION_OUT_OF_RANGE,
+                "A citation marker references evidence outside the selection.",
+            )
+        marker_set.add(identifier)
     if output.insufficient_evidence:
         if output.citation_ids or marker_set:
-            raise _invalid_model_output()
+            raise _InvalidCitationAnswer(
+                _QaFailure.CITATIONS_ON_REFUSAL,
+                "An insufficient-evidence answer includes citations.",
+            )
         return ()
     if not marker_set or not output.citation_ids or set(output.citation_ids) != marker_set:
-        raise _invalid_model_output()
+        raise _InvalidCitationAnswer(
+            _QaFailure.CITATION_MISMATCH,
+            "Answer markers and listed citation IDs must exist and agree.",
+        )
     return tuple(sorted(marker_set))
 
 
@@ -396,6 +430,13 @@ def _model_gateway_error(error: ModelGatewayError) -> AgentHubError:
             422,
         )
     if error.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE:
+        if isinstance(error, EmptyModelResponseError):
+            reason = (
+                "The model reached its output limit without visible content."
+                if error.output_limit_reached
+                else "The model returned no visible content."
+            )
+            return AgentHubError(error.code.value, reason, 502)
         return AgentHubError(error.code.value, "The model returned an invalid response.", 502)
     return AgentHubError(error.code.value, "The model provider is unavailable.", 503)
 
@@ -414,6 +455,7 @@ class CitationQaService:
         superseded_rank_penalty: float = 0.0,
         evidence_projection: str | None = None,
         output_mode: CitationOutputMode = "JSON_SCHEMA",
+        request_mode: AliyunDeepSeekRequestMode = AliyunDeepSeekRequestMode.PROVIDER_DEFAULT,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -445,9 +487,35 @@ class CitationQaService:
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             raise ValueError("invalid citation output mode")
         self.output_mode = output_mode
+        self.request_mode = request_mode
         self.model_plan_resolver = model_plan_resolver or partial(
             _resolve_model_plan, output_mode=output_mode
         )
+
+    async def _trace_failure(
+        self,
+        context: WorkspaceExecutionContext,
+        attempt: int,
+        reason: _QaFailure,
+        output_limit_reached: bool | None,
+    ) -> None:
+        if self.trace_sink is None:
+            return
+        try:
+            span = await self.trace_sink.start_span(
+                "knowledge.qa.output_failure",
+                {
+                    "request_id": context.request_id,
+                    "attempt": attempt + 1,
+                    "request_mode": self.request_mode.value,
+                    "output_mode": self.output_mode,
+                    "output_limit_reached": output_limit_reached,
+                },
+            )
+            await span.end(status="error", failure_code=reason.value)
+        except Exception:
+            # Telemetry is best effort and never controls the QA response or corrective attempt.
+            return
 
     async def answer(
         self,
@@ -563,7 +631,7 @@ class CitationQaService:
         )
         allowed_ids = frozenset(item.id for item in selected)
         for attempt in range(2):
-            model_request = _request(request_messages, self.output_mode)
+            model_request = _request(request_messages, self.output_mode, self.request_mode)
             _deny_oversized(
                 plan,
                 request_messages,
@@ -573,27 +641,55 @@ class CitationQaService:
             try:
                 response = await self.model_gateway.generate_resolved(context, plan, model_request)
             except ModelGatewayError as exc:
+                if exc.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE:
+                    empty = isinstance(exc, EmptyModelResponseError)
+                    await self._trace_failure(
+                        context,
+                        attempt,
+                        _QaFailure.GATEWAY_EMPTY_OUTPUT
+                        if empty
+                        else _QaFailure.GATEWAY_BAD_RESPONSE,
+                        exc.output_limit_reached if empty else None,
+                    )
                 raise _model_gateway_error(exc) from None
             except Exception:
                 raise AgentHubError(
                     "MODEL_PROVIDER_UNAVAILABLE", "The model provider is unavailable.", 503
                 ) from None
             try:
-                output = _CitationQaModelOutput.model_validate(
-                    load_unique_json(response.content), strict=True
+                parsed = load_unique_json(response.content)
+            except (ValueError, TypeError, RecursionError):
+                reason = (
+                    "JSON parsing failed at the model output limit."
+                    if response.finish_reason == "length"
+                    else "The response failed strict JSON parsing."
                 )
+                await self._trace_failure(
+                    context, attempt, _QaFailure.JSON_PARSE, response.finish_reason == "length"
+                )
+                raise _InvalidCitationAnswer(_QaFailure.JSON_PARSE, reason) from None
+            try:
+                output = _CitationQaModelOutput.model_validate(parsed, strict=True)
             except (ValueError, TypeError):
-                raise _invalid_model_output() from None
+                await self._trace_failure(
+                    context,
+                    attempt,
+                    _QaFailure.SCHEMA_VALIDATION,
+                    response.finish_reason == "length",
+                )
+                raise _InvalidCitationAnswer(
+                    _QaFailure.SCHEMA_VALIDATION, "The JSON failed citation schema validation."
+                ) from None
             try:
                 citation_ids = _validate_model_output(
                     output, evidence_count=len(selected), visible_ids=allowed_ids
                 )
                 break
-            except AgentHubError:
-                out_of_range = any(
-                    int(marker) not in allowed_ids
-                    for marker in _CITATION_MARKER.findall(output.answer)
+            except _InvalidCitationAnswer as exc:
+                await self._trace_failure(
+                    context, attempt, exc.reason, response.finish_reason == "length"
                 )
+                out_of_range = exc.reason == _QaFailure.CITATION_OUT_OF_RANGE
                 if attempt or (not out_of_range and self.output_mode != "PROMPT_JSON"):
                     raise
                 correction = _CITATION_CORRECTION if out_of_range else _PROMPT_CITATION_CORRECTION

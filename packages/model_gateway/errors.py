@@ -50,4 +50,12 @@ class ModelGatewayError(Exception):
         super().__init__(self.message)
 
 
-__all__ = ["ModelGatewayError", "ModelGatewayErrorCode"]
+class EmptyModelResponseError(ModelGatewayError):
+    """A completed call with neither visible text nor tool calls."""
+
+    def __init__(self, *, output_limit_reached: bool) -> None:
+        super().__init__(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
+        self.output_limit_reached = output_limit_reached
+
+
+__all__ = ["EmptyModelResponseError", "ModelGatewayError", "ModelGatewayErrorCode"]

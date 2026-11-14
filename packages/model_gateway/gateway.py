@@ -33,7 +33,11 @@ from packages.model_gateway.contracts import (
 )
 from packages.model_gateway.credentials import ProviderCredentialCipher
 from packages.model_gateway.egress import ProviderEgressError, normalize_provider_base_url
-from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
+from packages.model_gateway.errors import (
+    EmptyModelResponseError,
+    ModelGatewayError,
+    ModelGatewayErrorCode,
+)
 from packages.model_gateway.models import ProviderCredential
 from packages.model_gateway.profile_resolution import (
     ModelProfileResolver,
@@ -837,7 +841,7 @@ def _validate_usable_response(response: ModelResponse) -> None:
         # around the provider's safety decision.
         if response.finish_reason in {"content_filter", "refusal"}:
             return
-        raise ModelGatewayError(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
+        raise EmptyModelResponseError(output_limit_reached=response.finish_reason == "length")
 
 
 def _initial_trace_attributes(
