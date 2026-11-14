@@ -81,14 +81,23 @@ def test_case_scoring_distinguishes_failures_and_writes():
 
 
 @pytest.mark.asyncio
-async def test_model_option_drift_before_dispatch(tmp_path):
-    p = tmp_path / "ledger"
-    p.touch()
+async def test_model_option_drift_before_dispatch(tmp_path, monkeypatch):
+    root = tmp_path / "study"
+    monkeypatch.setattr(runner, "verify", lambda: {})
+    monkeypatch.setattr(runner, "identity", lambda: "frozen")
+    runner.initialize(root, "local test")
+    p = root / "ledger.sqlite"
     meter = runner.StudyMeter(p, "support")
+    meter.task_id = "support/x/baseline"
+    runner.claim(p, meter.task_id)
     with pytest.raises(ValueError, match="Provider options"):
         await meter.acompletion(
             extra_body={"enable_thinking": False}, temperature=0, max_tokens=2048
         )
+    with pytest.raises(RuntimeError, match="stopped"):
+        runner.claim(p, "citation/next/candidate")
+    with closing(sqlite3.connect(p)) as db:
+        assert db.execute("SELECT count(*) FROM wires").fetchone() == (0,)
 
 
 @pytest.mark.asyncio

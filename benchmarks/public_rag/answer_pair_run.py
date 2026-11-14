@@ -43,13 +43,30 @@ class StudyMeter(AliyunMeter):
         # Tool-capable Agent calls inherit PR19's provider thinking mode. Both
         # arms must submit identical provider options; QA explicitly disables it.
         thinking = {"enable_thinking": False} if self.stage == "citation" else None
-        if (
-            kwargs.get("extra_body") != thinking
-            or kwargs.get("temperature") != 0
-            or kwargs.get("max_tokens") != 2048
-        ):
-            raise ValueError("Provider options differ from the frozen arm")
-        return await super().acompletion(**kwargs)
+        try:
+            if (
+                kwargs.get("extra_body") != thinking
+                or kwargs.get("temperature") != 0
+                or kwargs.get("max_tokens") != 2048
+            ):
+                raise ValueError("Provider options differ from the frozen arm")
+            verify()
+            with closing(sqlite3.connect(self.path)) as db:
+                active = db.execute(
+                    "SELECT state FROM attempts WHERE task=?", (self.task_id,)
+                ).fetchone()
+                if active != ("active",) or db.execute("SELECT 1 FROM stops").fetchone():
+                    raise RuntimeError("Study stopped or task unclaimed")
+            return await super().acompletion(**kwargs)
+        except Exception as exc:
+            # The Agent may turn an adapter exception into a terminal FAILED Run.
+            # Persist the stop independently of that business outcome.
+            with closing(sqlite3.connect(self.path)) as db, db:
+                db.execute(
+                    "INSERT INTO stops(task,reason) VALUES (?,?)",
+                    (self.task_id, type(exc).__name__),
+                )
+            raise
 
 
 def identity():
@@ -65,6 +82,7 @@ def initialize(root, approval):
         db.executescript("""
             CREATE TABLE study (manifest TEXT PRIMARY KEY);
             CREATE TABLE attempts (task TEXT PRIMARY KEY, state TEXT NOT NULL, receipt TEXT);
+            CREATE TABLE stops(task TEXT, reason TEXT NOT NULL);
         """)
         db.execute("INSERT INTO study VALUES (?)", (identity(),))
 
@@ -80,6 +98,8 @@ def claim(path, key):
         db.execute("BEGIN IMMEDIATE")
         if db.execute("SELECT manifest FROM study").fetchone() != (identity(),):
             raise ValueError("This is not the authorized ledger for this freeze")
+        if db.execute("SELECT 1 FROM stops").fetchone():
+            raise RuntimeError("A dispatch or admission stopped the study")
         if db.execute("SELECT 1 FROM wires WHERE status!='returned' LIMIT 1").fetchone():
             raise RuntimeError("Unknown dispatch or usage: stop")
         if db.execute("SELECT 1 FROM attempts WHERE state!='complete' LIMIT 1").fetchone():
