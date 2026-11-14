@@ -1,7 +1,22 @@
 {
-  "clean_replay": "Recomputed all 681 candidate rows from pinned title index and original corpus vectors, identical SHA-256. Used measured frozen scores to regenerate all three assessment JSONs byte-for-byte. GPU inference executed once; not a second independent inference.",
-  "tests": "5 passed; ruff check passed",
-  "sha256": {
+  "format": "article-parent-fingerprints-v2",
+  "measured_commit": "958368e246eb0588bb9ad12a62af4c44ed0473a4",
+  "source_sha256_lf": {
+    "benchmarks/public_rag/article_parent_index.py": "db270190d4b0a67d367e169e2fcbbe75df0e67764c79f79af9164293e733cc9a",
+    "benchmarks/public_rag/article_parent_methods.py": "1abb70096ef47f20cbe422a9be1b31b10bddd75d26d191bffc07a9b9302846e5",
+    "benchmarks/public_rag/article_parent_report.py": "ebee07132d21e7e5b7b840bfab03f80cff17e8c55eaa268a57ef9f245493a772",
+    "benchmarks/public_rag/article_parent_run.py": "33af93aa5a9728c0cefa2e480967e2181c988ff5c8cafb0c0ce6bf43608775f6",
+    "tests/unit/test_article_parent_methods.py": "2a1f8ae8f76e3d3a6808088bb160692dd43e22cca84e57b95fded0bb71c80b64",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/protocol.json": "d8d8f92b165d75f0d309b9a0f84e680f08ed33fc075291523e93335d1a880b1f",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/README.md": "803a30e4f519d2d1e9b3b103732249da85e4003afaad086f6ccb4a2292a0607b",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/standalone-addendum.json": "4b923780bc62a2d1769e1b7df05910b8a5d810bf487c4c3e85562e926b4ed2cc"
+  },
+  "artifact_sha256_raw": {
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/cases.json": "834b401ee197750d3d69d9e098bd650780d102af8b77eb07d1dc7b11b520cf28",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/report.json": "f6fac8e97ed74f9fd9b90f504a4fe4c26aab43c7eb095df48f73b491c5cc0434",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/six.json": "a995c1073b5b7ca603bbfeca710df568a09369adf8c4d661a7b1d7a70f71f1a2"
+  },
+  "original_measured_sha256_raw": {
     "benchmarks/public_rag/article_parent_index.py": "db270190d4b0a67d367e169e2fcbbe75df0e67764c79f79af9164293e733cc9a",
     "benchmarks/public_rag/article_parent_methods.py": "1abb70096ef47f20cbe422a9be1b31b10bddd75d26d191bffc07a9b9302846e5",
     "benchmarks/public_rag/article_parent_report.py": "cc50cc6484a38adfbbfec1119578cd04a4c3bdad3a57834e271d20de3a432484",
@@ -13,5 +28,7 @@
     "benchmarks/public_rag/results/published/article-recall-20261114/parent/report.json": "d3e21983c0ab907a3866b171756ab690cef9e27b3b3b70afcea1e464149e601d",
     "benchmarks/public_rag/results/published/article-recall-20261114/parent/six.json": "a995c1073b5b7ca603bbfeca710df568a09369adf8c4d661a7b1d7a70f71f1a2",
     "benchmarks/public_rag/results/published/article-recall-20261114/parent/standalone-addendum.json": "9376d6042a71a4543dec9418bd05fc4ac10b93b4770d774aebb13981a73d3109"
-  }
+  },
+  "original_measured_manifest_sha256_raw": "2a11c60f18ee43874ea4eefae8d4cbf97a3dfce6d548545f4d387212f4f06b96",
+  "verification": "Source SHA-256 converts CRLF to LF only. Artifacts hash raw file bytes. Original measured hashes reproduce the historical manifest; that manifest preserves the Windows measurement bytes. Candidate/score/vector inputs in report.json use raw digests."
 }

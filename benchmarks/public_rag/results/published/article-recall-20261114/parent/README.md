@@ -51,3 +51,5 @@ $env:OPENBLAS_NUM_THREADS='1'
 .venv/Scripts/python.exe -m benchmarks.public_rag.article_parent_run score --work $replay
 .venv/Scripts/python.exe -m benchmarks.public_rag.article_parent_report --work $replay --output "$replay/report"
 ```
+
+[文件指纹](manifest.json)分列归档文本的 LF 规范化 SHA-256、结果文件的原始字节 SHA-256，以及首次测量工作树的原始字节指纹。规范化只将 CRLF 转为 LF。重放报告中的两项协议指纹使用同一规则；向量、候选、分数及逐题结果均按原始字节核验。

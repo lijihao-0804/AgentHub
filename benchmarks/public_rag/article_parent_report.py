@@ -1,6 +1,7 @@
 """Score labeled source and sentence visibility only after hypothesis-blind pool selection."""
 
 import argparse
+import hashlib
 import json
 from collections import Counter
 from pathlib import Path
@@ -23,6 +24,11 @@ from benchmarks.public_rag.scifact_recall_index import frozen_source
 from benchmarks.public_rag.scoring import evaluate_questions
 
 STAGES = ("source20", "source5", "evidence20", "evidence5")
+
+
+def source_sha256_lf(path):
+    """Hash text source with Git LF line endings; measured inference files use raw bytes."""
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def measures(pool, reranked, chunks, gold, evidence, spans):
@@ -200,9 +206,9 @@ def run(work, output):
     data.save(
         output / "report.json",
         {
-            "protocol_sha256": data.sha256(PUBLIC / "protocol.json"),
+            "protocol_sha256_lf": source_sha256_lf(PUBLIC / "protocol.json"),
             "case_sha256": data.sha256(output / "cases.json"),
-            "standalone_protocol_sha256": data.sha256(PUBLIC / "standalone-addendum.json"),
+            "standalone_protocol_sha256_lf": source_sha256_lf(PUBLIC / "standalone-addendum.json"),
             "six_sha256": data.sha256(output / "six.json"),
             "input_vector_manifests": {
                 f: data.sha256(CACHE / f) for f in ("chunks-ready.json", "complete.json")

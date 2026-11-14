@@ -1,7 +1,7 @@
 {
-  "protocol_sha256": "f4392fea11554d55a492bcbec7551383e12539d49a33b1420b4fa8459f5f22d9",
+  "protocol_sha256_lf": "d8d8f92b165d75f0d309b9a0f84e680f08ed33fc075291523e93335d1a880b1f",
   "case_sha256": "834b401ee197750d3d69d9e098bd650780d102af8b77eb07d1dc7b11b520cf28",
-  "standalone_protocol_sha256": "9376d6042a71a4543dec9418bd05fc4ac10b93b4770d774aebb13981a73d3109",
+  "standalone_protocol_sha256_lf": "4b923780bc62a2d1769e1b7df05910b8a5d810bf487c4c3e85562e926b4ed2cc",
   "six_sha256": "a995c1073b5b7ca603bbfeca710df568a09369adf8c4d661a7b1d7a70f71f1a2",
   "input_vector_manifests": {
     "chunks-ready.json": "74745a48f3505769c07adc74f624867cfd530ccbab51f440a2f8527d12e2612e",
