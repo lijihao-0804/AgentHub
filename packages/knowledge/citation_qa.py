@@ -34,6 +34,7 @@ from packages.knowledge.contracts import (
 )
 from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
+from packages.knowledge.refusal_consistency import explicit_abstention
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.model_gateway.contracts import (
     PROVIDER_EGRESS_POLICY_VERSION,
@@ -383,6 +384,24 @@ class _InvalidCitationAnswer(AgentHubError):
         self.reason = reason
 
 
+def _parse_model_output(content: str, *, output_limit_reached: bool) -> _CitationQaModelOutput:
+    try:
+        parsed = load_unique_json(content)
+    except (ValueError, TypeError, RecursionError):
+        reason = (
+            "JSON parsing failed at the model output limit."
+            if output_limit_reached
+            else "The response failed strict JSON parsing."
+        )
+        raise _InvalidCitationAnswer(_QaFailure.JSON_PARSE, reason) from None
+    try:
+        return _CitationQaModelOutput.model_validate(parsed, strict=True)
+    except (ValueError, TypeError):
+        raise _InvalidCitationAnswer(
+            _QaFailure.SCHEMA_VALIDATION, "The JSON failed citation schema validation."
+        ) from None
+
+
 def _validate_model_output(
     output: _CitationQaModelOutput,
     *,
@@ -438,6 +457,20 @@ def _model_gateway_error(error: ModelGatewayError) -> AgentHubError:
     return AgentHubError(error.code.value, "The model provider is unavailable.", 503)
 
 
+def _normalize_validated_answer(
+    query: str,
+    output: _CitationQaModelOutput,
+    citation_ids: tuple[int, ...],
+    *,
+    contextual: bool,
+) -> tuple[str, bool, tuple[int, ...]]:
+    if citation_ids:
+        refusal = explicit_abstention(query, output.answer, contextual=contextual)
+        if refusal is not None:
+            return refusal, True, ()
+    return output.answer, output.insufficient_evidence, citation_ids
+
+
 class CitationQaService:
     def __init__(
         self,
@@ -452,6 +485,7 @@ class CitationQaService:
         superseded_rank_penalty: float = 0.0,
         evidence_projection: str | None = None,
         output_mode: CitationOutputMode = "JSON_SCHEMA",
+        verify_refusal_consistency: bool = False,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -483,6 +517,7 @@ class CitationQaService:
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             raise ValueError("invalid citation output mode")
         self.output_mode = output_mode
+        self.verify_refusal_consistency = verify_refusal_consistency
         self.model_plan_resolver = model_plan_resolver or partial(
             _resolve_model_plan, output_mode=output_mode
         )
@@ -651,29 +686,14 @@ class CitationQaService:
                     "MODEL_PROVIDER_UNAVAILABLE", "The model provider is unavailable.", 503
                 ) from None
             try:
-                parsed = load_unique_json(response.content)
-            except (ValueError, TypeError, RecursionError):
-                reason = (
-                    "JSON parsing failed at the model output limit."
-                    if response.finish_reason == "length"
-                    else "The response failed strict JSON parsing."
+                output = _parse_model_output(
+                    response.content, output_limit_reached=response.finish_reason == "length"
                 )
+            except _InvalidCitationAnswer as exc:
                 await self._trace_failure(
-                    context, attempt, _QaFailure.JSON_PARSE, response.finish_reason == "length"
+                    context, attempt, exc.reason, response.finish_reason == "length"
                 )
-                raise _InvalidCitationAnswer(_QaFailure.JSON_PARSE, reason) from None
-            try:
-                output = _CitationQaModelOutput.model_validate(parsed, strict=True)
-            except (ValueError, TypeError):
-                await self._trace_failure(
-                    context,
-                    attempt,
-                    _QaFailure.SCHEMA_VALIDATION,
-                    response.finish_reason == "length",
-                )
-                raise _InvalidCitationAnswer(
-                    _QaFailure.SCHEMA_VALIDATION, "The JSON failed citation schema validation."
-                ) from None
+                raise
             try:
                 citation_ids = _validate_model_output(
                     output, evidence_count=len(selected), visible_ids=allowed_ids
@@ -696,6 +716,10 @@ class CitationQaService:
                     ContextCategory.CURRENT_USER_TASK,
                 )
 
+        answer, insufficient, citation_ids = _normalize_validated_answer(
+            query, output, citation_ids, contextual=self.verify_refusal_consistency
+        )
+
         by_id = {item.id: item for item in selected}
         citations = tuple(
             CitationQaCitation(
@@ -712,8 +736,8 @@ class CitationQaService:
             for identifier in citation_ids
         )
         return CitationQaResult(
-            answer=output.answer,
-            insufficient_evidence=output.insufficient_evidence,
+            answer=answer,
+            insufficient_evidence=insufficient,
             citations=citations,
             retrieval_trace=retrieval.trace,
         )
