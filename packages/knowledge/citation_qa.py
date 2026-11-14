@@ -34,6 +34,7 @@ from packages.knowledge.contracts import (
 )
 from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
+from packages.knowledge.refusal_consistency import explicit_abstention
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.model_gateway.contracts import (
     PROVIDER_EGRESS_POLICY_VERSION,
@@ -452,6 +453,7 @@ class CitationQaService:
         superseded_rank_penalty: float = 0.0,
         evidence_projection: str | None = None,
         output_mode: CitationOutputMode = "JSON_SCHEMA",
+        verify_refusal_consistency: bool = False,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -483,6 +485,7 @@ class CitationQaService:
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             raise ValueError("invalid citation output mode")
         self.output_mode = output_mode
+        self.verify_refusal_consistency = verify_refusal_consistency
         self.model_plan_resolver = model_plan_resolver or partial(
             _resolve_model_plan, output_mode=output_mode
         )
@@ -695,6 +698,11 @@ class CitationQaService:
                     ContextCategory.CONVERSATION,
                     ContextCategory.CURRENT_USER_TASK,
                 )
+
+        if citation_ids and self.verify_refusal_consistency:
+            abstention = explicit_abstention(query, output.answer)
+            if abstention is not None:
+                return CitationQaResult(abstention, True, (), retrieval.trace)
 
         by_id = {item.id: item for item in selected}
         citations = tuple(

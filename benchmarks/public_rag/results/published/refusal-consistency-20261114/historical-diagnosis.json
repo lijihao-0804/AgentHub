@@ -1,0 +1,801 @@
+{
+  "scope": "Previously exposed development data from evidence-retention-20261114 only. A uses whole-chunk retrieval. B adds evidence-sentence retrieval. Both used the old reader.",
+  "interpretation": "The HTTP answer, flag, cited excerpts, input digest, physical request count and finish reason were recorded. Original provider response bodies and first-attempt JSON are absent. Each of the eight B responses followed one provider POST. In the old terminal code the public flag is copied from the parsed flag and matching numbered citations are required. That reconstruction does not recover provider bytes or hidden reasoning. The deterministic rewrite field is a counterfactual computed from the public fields and returns the replacement refusal text or null for an unchanged reply.",
+  "source_sha256_lf": {
+    "protocol.json": "a99676109f90544c99cc3b69395ef4a0f49be2d4769a9a023c46448ad39ffaea",
+    "review.json": "ace6921a252f77a2d7a2cc618d58bd84106ea128c2670c712deaedfe55de46cb",
+    "live/A-independent.json": "96a98beabb9c5cefff01f2d26b102170748d854a839c4f1b26d86247ab801863",
+    "live/B-independent.json": "f82fd5722f0430adf96f576d3587f0b4b99ec7e2509bc39ab736b9549b905b77",
+    "live/A-historical.json": "88d662ab5d55b9f4518c011e7c7c8906e3e603e57a32e018b8c840e95a4906cc",
+    "live/B-historical.json": "884a8358d029a07c479ecbb323d2dc7b539b1a4259dec92a7e62317d0815fb01"
+  },
+  "original_official_negatives": 18,
+  "original_B_official_negatives_answered": 8,
+  "original_B_correct_official_refusals": 10,
+  "official_negatives_answered_by_B": {
+    "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc": {
+      "query": "In the paper “Text-based inference of moral sentiment change”, Which dataset sources to they use to demonstrate moral sentiment through history?",
+      "official_unanswerable": true,
+      "diagnostic_category": "supported_bounded_answer_official_negative",
+      "diagnosis": "Google N-grams is a named corpus for the historical applications. Restricting the answer to that documented source answers the request at the level the text supports.",
+      "short_witnesses_from_B": [
+        {
+          "citation": 5,
+          "text": "we use the diachronic embeddings trained on the Google N-grams corpus"
+        }
+      ],
+      "A": {
+        "http": 200,
+        "answer": "The evidence explicitly names the Google N-grams corpus: diachronic embeddings trained on Google N-grams were used in the remaining applications because they performed best [2]. The analysis covers a 200-year period (1800–2000) for concepts such as slavery, democracy, and gay [5], and the 10,000 nouns were selected by frequency in 1800–1999 using data from BIBREF30 [6]. The provided evidence does not identify BIBREF30 or name any additional dataset sources [6].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 2,
+            "source": "2001.07209",
+            "ordinal": 14,
+            "chunk_id": "ae6065a83f703a2d6ed64d698b1faa2c2230142f1ea09dd50e13290b34084730",
+            "excerpt_sha256": "0ca642771591cec982096b0d583a8fb3cd5e164e3b6e15b84603671a49e3d5eb"
+          },
+          {
+            "number": 5,
+            "source": "2001.07209",
+            "ordinal": 3,
+            "chunk_id": "fea70fa72b75f9deae305e6a1f43e6bf5ab2f665ae3aff6db81df4c337a2d55f",
+            "excerpt_sha256": "f8c2db6e74631859a83e374a63aa0b8c941e514f5a17dde5f230a323af998277"
+          },
+          {
+            "number": 6,
+            "source": "2001.07209",
+            "ordinal": 17,
+            "chunk_id": "5f13e2f386dde4f9bc2de111451890d35882484ef13b6069f4e178fc88c146d5",
+            "excerpt_sha256": "7d9b5eb298fe681596c715ac0d0e6f727ea19a83eb0decb4b255451f038297c0"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          2,
+          5,
+          6
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "cd954b1d5027dda8fd49d4246b260375f6295e06d9f9e9fc9f957a41befdf121",
+        "public_response_sha256": "0602650a49ca024cf235167213e69bc6990e4e87c4c25688cc27bacc60664cb4",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "The evidence identifies the Google N-grams corpus as the dataset used for the remaining applications, with diachronic embeddings trained on it because it enabled superior model performance [5]. The provided evidence does not name any other specific dataset sources used to demonstrate moral sentiment through history.",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 5,
+            "source": "2001.07209",
+            "ordinal": 14,
+            "chunk_id": "ae6065a83f703a2d6ed64d698b1faa2c2230142f1ea09dd50e13290b34084730",
+            "excerpt_sha256": "0ca642771591cec982096b0d583a8fb3cd5e164e3b6e15b84603671a49e3d5eb"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          5
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "c81da98d291a33794834f9a7a6b519743aab46cd48d3416752b3d8f39bb9cab3",
+        "public_response_sha256": "65f98d8e0b479c0f67ee9743034416364373e3afb1cc60a27dd7cce953cab3a4",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    },
+    "6adde6bc3e27a32eac5daa57d30ab373f77690be": {
+      "query": "In the paper “Context-Aware Learning for Neural Machine Translation”, Is the proposed model more sensitive than previous context-aware models too?",
+      "official_unanswerable": true,
+      "diagnostic_category": "supported_bounded_answer_official_negative",
+      "diagnosis": "Unlike the opening of A, B limits the comparative claim to some prior studies. The authors explicitly make that comparison. Its qualification preserves a grounded answer.",
+      "short_witnesses_from_B": [
+        {
+          "citation": 3,
+          "text": "sensitive to the context, contrarily to some previous works"
+        }
+      ],
+      "A": {
+        "http": 200,
+        "answer": "Yes. The paper reports that the model trained with the proposed learning algorithm is more sensitive to additional context than previous context-aware models. Comparing performance with actual versus random contexts shows that the proposed training makes the model more sensitive to the additional context [1], and the authors state that the model is \"indeed sensitive to the context, contrarily to some previous works\" [3]. In contrast, a larger-context model trained only to maximize log-likelihood largely ignores the previous sentence, with translation quality degrading only marginally (ΔBLEU = 0.40) when an incorrectly paired previous sentence is supplied [5]. The conclusion likewise states that a larger-context model trained with the proposed approach becomes more sensitive to the additional context and outperforms a context-less baseline [2].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1903.04715",
+            "ordinal": 0,
+            "chunk_id": "6a910db54521e66fb3035fe93a261e94c789228327cead4cb24aa681456cef56",
+            "excerpt_sha256": "137b91d2f30c605bd5064c477ed720bcf711bd1f2db7a4a9f9e5914a27705068"
+          },
+          {
+            "number": 2,
+            "source": "1903.04715",
+            "ordinal": 12,
+            "chunk_id": "a89bbe2d263e17d5028b5b06fc22e04c4b0318e5db981dfa4a1a7dc1889761e2",
+            "excerpt_sha256": "8b39c11cc75d06034ed526f776364bf767df2c9e792d8c3aeee3bd30539f4a09"
+          },
+          {
+            "number": 3,
+            "source": "1903.04715",
+            "ordinal": 1,
+            "chunk_id": "6eabf331f39a64a1e7f66f54b83a0491be7f6a0a577723327f8a64ff563a835a",
+            "excerpt_sha256": "98b19d349e76fda53f9e34bb1b102cd6b7761be804d30dd59e63e0156eff4bce"
+          },
+          {
+            "number": 5,
+            "source": "1903.04715",
+            "ordinal": 11,
+            "chunk_id": "581cfc8802d0be7beffaf44d4351b89c3f0ee319715a2b18ab6ce4786ad603ed",
+            "excerpt_sha256": "9234aef7440390c121de6e1c311fc859b526a00319fca3ea3e063151b32adf98"
+          }
+        ],
+        "old_blinded_verdict": "wrong",
+        "old_supporting_citations": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "703ccc97773ff57e1e535c477f5eee104af7d4b183f95ddd1b9fc0638f436447",
+        "public_response_sha256": "4e3b54f8ec0753e30e8fe51263b9f7298c807c61217c72868cc05971a349f961",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "Yes, but the evidence supports this specifically against “some previous works”: the paper states that the model trained with the proposed algorithm “is indeed sensitive to the context, contrarily to some previous works” [3][4], and the conclusion says the larger-context model trained by the proposed approach “becomes more sensitive to the additional context” [1]. The evidence does not provide a broad quantitative comparison showing it is more sensitive than all previous context-aware models.",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1903.04715",
+            "ordinal": 12,
+            "chunk_id": "a89bbe2d263e17d5028b5b06fc22e04c4b0318e5db981dfa4a1a7dc1889761e2",
+            "excerpt_sha256": "8b39c11cc75d06034ed526f776364bf767df2c9e792d8c3aeee3bd30539f4a09"
+          },
+          {
+            "number": 3,
+            "source": "1903.04715",
+            "ordinal": 1,
+            "chunk_id": "6eabf331f39a64a1e7f66f54b83a0491be7f6a0a577723327f8a64ff563a835a",
+            "excerpt_sha256": "98b19d349e76fda53f9e34bb1b102cd6b7761be804d30dd59e63e0156eff4bce"
+          },
+          {
+            "number": 4,
+            "source": "1903.04715",
+            "ordinal": 2,
+            "chunk_id": "4fbf4f5d1521e8f8d4db89500767f1d0308129dbaa9c8537bc3d8aeab8ab8798",
+            "excerpt_sha256": "160c94221e56ebd627cc5908c34f4d0e6322ba4c9785167d32a7c114ce604b60"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          1,
+          3,
+          4
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "4a3c36d4a799f49107ce72c16b5576944a41b6188d53052826b66b97e3867bd0",
+        "public_response_sha256": "c82e1ee18ba2114ecb2da9e10e041fd60fad5966463e27af0f2ee3a4e68f939a",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    },
+    "7a70fb11cb3449749f0c2c06101965bf5d02c54a": {
+      "query": "In the paper “INFODENS: An Open-source Framework for Learning Text Representations”, What kind of representation exploration does INFODENS provide?",
+      "official_unanswerable": true,
+      "diagnostic_category": "supported_answer_official_negative",
+      "diagnosis": "The paper explicitly identifies engineered and learned text representations and how the framework combines and evaluates them.",
+      "short_witnesses_from_B": [
+        {
+          "citation": 1,
+          "text": "a framework for studying learned and engineered representations of text"
+        }
+      ],
+      "A": {
+        "http": 200,
+        "answer": "INFODENS provides exploration of both learned and engineered (hand-crafted) representations of text for text classification tasks. It is designed to simplify feature engineering and provide the groundwork for extracting learned features and combining both approaches [1]. The paper describes it as a framework aimed at studying hand-crafted and learned representations [3], and it enables rapid evaluation of different text representations on different tasks [2]. It also shows that combining hand-crafted and learned representations can be beneficial [2].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1810.07091",
+            "ordinal": 0,
+            "chunk_id": "ef56cb2b56ec6f4d67a9904465d185daf520aadc5853e54329561a3efcb4a6b1",
+            "excerpt_sha256": "3fa2dafd966ed6988096e4123e34f5339ed4b55fbff48042adbe0a6c05eed4c2"
+          },
+          {
+            "number": 2,
+            "source": "1810.07091",
+            "ordinal": 13,
+            "chunk_id": "fea08b1bee9256f8fac5fdd29cc94bb1166d6735b57c45bdac7daa0fb7236f2f",
+            "excerpt_sha256": "7201c87d3222cb92f09a8b34f14d7159832e5044bdac687973340264e9c68705"
+          },
+          {
+            "number": 3,
+            "source": "1810.07091",
+            "ordinal": 2,
+            "chunk_id": "3137712e3603688c57034ace7cbebcb22f176fddf552659ab6dc51cf602deea2",
+            "excerpt_sha256": "5dd2872e04bbf8a90efcc6bf26c3a7953072069aaaefc81b1de2dfbe9664caf7"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "52b19da437cdfa4d846c8784874ab6718d257e9c666a672f97d4c2d833becf53",
+        "public_response_sha256": "34e3516c70c0be72923cacb8d528a0bb5036684eef602a66e817889cd9999faa",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "INFODENS is a framework for studying learned and engineered representations of text in the context of text classification tasks [1]. It is designed to simplify feature engineering, provide the groundwork for extracting learned features, and support combining both approaches [1]. The paper presents it as a framework aimed at studying hand-crafted and learned representations, simplifying feature engineering, feature learning, and evaluation [3], and it shows how combining hand-crafted and learned representations can be beneficial while enabling rapid evaluation of different text representations on different tasks [2].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1810.07091",
+            "ordinal": 0,
+            "chunk_id": "ef56cb2b56ec6f4d67a9904465d185daf520aadc5853e54329561a3efcb4a6b1",
+            "excerpt_sha256": "3fa2dafd966ed6988096e4123e34f5339ed4b55fbff48042adbe0a6c05eed4c2"
+          },
+          {
+            "number": 2,
+            "source": "1810.07091",
+            "ordinal": 13,
+            "chunk_id": "fea08b1bee9256f8fac5fdd29cc94bb1166d6735b57c45bdac7daa0fb7236f2f",
+            "excerpt_sha256": "7201c87d3222cb92f09a8b34f14d7159832e5044bdac687973340264e9c68705"
+          },
+          {
+            "number": 3,
+            "source": "1810.07091",
+            "ordinal": 2,
+            "chunk_id": "3137712e3603688c57034ace7cbebcb22f176fddf552659ab6dc51cf602deea2",
+            "excerpt_sha256": "5dd2872e04bbf8a90efcc6bf26c3a7953072069aaaefc81b1de2dfbe9664caf7"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "52b19da437cdfa4d846c8784874ab6718d257e9c666a672f97d4c2d833becf53",
+        "public_response_sha256": "adc0f7f544e1620134599bf4ac8208771ffa671c8daa55636eb69d0a932f0017",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    },
+    "81686454f215e28987c7ad00ddce5ffe84b37195": {
+      "query": "In the paper “Identifying Products in Online Cybercrime Marketplaces: A Dataset for Fine-grained Domain Adaptation”, What supervised models are experimented with?",
+      "official_unanswerable": true,
+      "diagnostic_category": "supported_answer_official_negative",
+      "diagnosis": "Binary and CRF token classification are explicitly identified as the supervised models.",
+      "short_witnesses_from_B": [
+        {
+          "citation": 2,
+          "text": "Binary or CRF classification of tokens as products is effective"
+        }
+      ],
+      "A": {
+        "http": 200,
+        "answer": "The paper experiments with supervised token classification approaches: binary classification and conditional random field (CRF) classification of tokens as products [4].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 4,
+            "source": "1708.09609",
+            "ordinal": 3,
+            "chunk_id": "c07d306c9900361d1bb8daf1fd1d3b368fe39fe6f9e16d8527b0b1f8046b3d5b",
+            "excerpt_sha256": "4aca4f767f191ae6dbfbab5f96184085b89d999305938c371badbedb0c6df44c"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          4
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "61aebc5436c1f27450e73e2758c9258cd5ac87fc9d4dc815f8c78d8700a3cfdc",
+        "public_response_sha256": "d042cb87433f1beeafd9bb3fb097677e15ddd6aff3ff1eb1a217301026065fb2",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "The paper reports experimenting with supervised **binary classification** and **CRF (conditional random field) classification** of tokens as products [2].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 2,
+            "source": "1708.09609",
+            "ordinal": 3,
+            "chunk_id": "c07d306c9900361d1bb8daf1fd1d3b368fe39fe6f9e16d8527b0b1f8046b3d5b",
+            "excerpt_sha256": "4aca4f767f191ae6dbfbab5f96184085b89d999305938c371badbedb0c6df44c"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          2
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "3312540ad120d03504084d03fa9e12b9e9dd026d4510beb975d6dc4cbda34ff3",
+        "public_response_sha256": "6c7a52bb8bece69e7f802de86960ea157a2f41d773e7cbebfe1a03249a236b6d",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    },
+    "891c4af5bb77d6b8635ec4109572de3401b60631": {
+      "query": "In the paper “Hate Speech Detection on Vietnamese Social Media Text using the Bidirectional-LSTM Model”, What social media platform does the data come from?",
+      "official_unanswerable": true,
+      "diagnostic_category": "explicit_abstention_with_background",
+      "diagnosis": "Both answers explicitly leave the requested platform unidentified. The cited records attribute the data to shared-task organizers and describe the comments/posts. Neither names the originating platform. Mentions of Twitter in other visible passages refer to other research or a different paper. The old B flag made the background a formal answer.",
+      "short_witnesses_from_B": [
+        {
+          "citation": 3,
+          "text": "unlabeled dataset for social media comments or posts"
+        },
+        {
+          "citation": 5,
+          "text": "providing the dataset"
+        }
+      ],
+      "A": {
+        "http": 200,
+        "answer": "The supplied evidence does not identify a specific social media platform. It only states that the data comes from social networks/social media comments or posts as part of the VLSP 2019 shared task.",
+        "insufficient_evidence": true,
+        "citations": [],
+        "old_blinded_verdict": "refusal",
+        "old_supporting_citations": [],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "91e2c2bde98b9d3440eeedefdf88ede0a6416de51d0ede4d28b0a81a828fab97",
+        "public_response_sha256": "c1886826789217b64278c92ac18b651396c2927eac2fbf84f91743f6b3f4a7e4",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "The provided evidence does not name a specific social media platform. It only states that the dataset comes from the VLSP 2019 shared task on Hate Speech Detection on Social Networks, which provided pre-labeled and unlabeled datasets of social media comments or posts [3], and the acknowledgment thanks the VLSP Shared Task 2019 organizers for providing the dataset of Vietnamese Hate Speech Detection on social networks [5]. No platform such as Facebook or Twitter is identified.",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 3,
+            "source": "1911.03648",
+            "ordinal": 0,
+            "chunk_id": "4cdb40120cf529c1b3403d18c0bd439e25639cec031c9fcdf9b7e810c71886a5",
+            "excerpt_sha256": "74302ba357bcb5e55a01dabee3c110904e6775ed3a0fd7b9af6cd6cad1497c1e"
+          },
+          {
+            "number": 5,
+            "source": "1911.03648",
+            "ordinal": 12,
+            "chunk_id": "96aefe8e0b168fdc61e343a0a75051b2bbab829d45ef0bed446391352d16ef20",
+            "excerpt_sha256": "1e67f2f621490bee3e34ca08bbf87ba87d9cee41cabbcf33e4d80ef3bde26b2c"
+          }
+        ],
+        "old_blinded_verdict": "partial",
+        "old_supporting_citations": [
+          3,
+          5
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "1f64e8c61cc3a0d89013abad7f75a6914e9d95ce0365d1f9fe5fc6f9ad396622",
+        "public_response_sha256": "b4054e501ead90b17ef36f5d9f51bb7f6229c73a43b04ce4c39bac9bcaa8eebc",
+        "deterministic_rewrite_on_identical_public_fields": "The provided evidence does not name a specific social media platform."
+      }
+    },
+    "9e2e5918608a2911b341d4887f58a4595d7d1429": {
+      "query": "In the paper “Multilingual Graphemic Hybrid ASR with Massive Data Augmentation”, How much training data is required for each low-resource language?",
+      "official_unanswerable": true,
+      "diagnostic_category": "incomplete_observed_amount_in_place_of_requirement",
+      "diagnosis": "Approximately 160 hours is documented per language in the experiment. The cited passages do not establish how much is required. A and B report the observed amount and do not expressly decline the original question.",
+      "short_witnesses_from_B": [
+        {
+          "citation": 1,
+          "text": "each language has around 160 hours training data"
+        }
+      ],
+      "A": {
+        "http": 200,
+        "answer": "The paper evaluates multilingual modeling in a low-resource setting where each language has around 160 hours of training data [1][2]. Consistent with this, the 7-language combined model was trained on 1059 hours in total [3][4].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1909.06522",
+            "ordinal": 3,
+            "chunk_id": "54378501d9d1b8113320ef4d6e36d9b8d194233e905423b85025fa4e92c5a547",
+            "excerpt_sha256": "ebfa033027173f393cddef8767f1ec88ab7741af73e157bf5982406aa08bcbdd"
+          },
+          {
+            "number": 2,
+            "source": "1909.06522",
+            "ordinal": 4,
+            "chunk_id": "a8a4d3736a27bc57f8da2905f03a290054993c86464070098140b213b8dba945",
+            "excerpt_sha256": "700f2e890c54f3177e94d6e811b62c85985a309a4948c7e97dc4568bf7ee1fc6"
+          },
+          {
+            "number": 3,
+            "source": "1909.06522",
+            "ordinal": 13,
+            "chunk_id": "f6f62aaa93aa314cdd7b6439ee7fd856c7b58be17b278355adc70929b5d600f4",
+            "excerpt_sha256": "04a7e3511ab76de0f3571aa7d9f6dc6255a189f2224a5158a6b5853d9d999783"
+          },
+          {
+            "number": 4,
+            "source": "1909.06522",
+            "ordinal": 14,
+            "chunk_id": "426123dab5f250e2e2cb91d79c8cd7cc29c7a76b85bbc4f8590ddec7a37a57b2",
+            "excerpt_sha256": "18d23bc466eb112c83378b1a074c86005d7c3e9fbe4149a5313d70a9ba10bda3"
+          }
+        ],
+        "old_blinded_verdict": "partial",
+        "old_supporting_citations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "34cd982f2c913a0179cc4f050a9838b721faa160645a661e1da9277d44406672",
+        "public_response_sha256": "54614d9e03ea1fd62e0d3a0f30b3f61a41f577e1b01f84e41b209dda08d26165",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "In the paper, the low-resource setting uses approximately 160 hours of training data per language [1][2].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1909.06522",
+            "ordinal": 3,
+            "chunk_id": "54378501d9d1b8113320ef4d6e36d9b8d194233e905423b85025fa4e92c5a547",
+            "excerpt_sha256": "ebfa033027173f393cddef8767f1ec88ab7741af73e157bf5982406aa08bcbdd"
+          },
+          {
+            "number": 2,
+            "source": "1909.06522",
+            "ordinal": 4,
+            "chunk_id": "a8a4d3736a27bc57f8da2905f03a290054993c86464070098140b213b8dba945",
+            "excerpt_sha256": "700f2e890c54f3177e94d6e811b62c85985a309a4948c7e97dc4568bf7ee1fc6"
+          }
+        ],
+        "old_blinded_verdict": "partial",
+        "old_supporting_citations": [
+          1,
+          2
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "8d3c056cf34fe7f3380f9ebfb3a085b6eb33a0e105f9e38a0d5d52fd45952446",
+        "public_response_sha256": "1ac0bc973fb32c3301edd16ce69257e53a141579d93f0ca996ac65f9c401d962",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    },
+    "a8f1029f6766bffee38a627477f61457b2d6ed5c": {
+      "query": "In the paper “Diversity, Density, and Homogeneity: Quantitative Characteristic Metrics for Text Collections”, How did they obtain human intuitions?",
+      "official_unanswerable": true,
+      "diagnostic_category": "explicit_abstention_with_related_procedure",
+      "diagnosis": "B says the origin of human intuitions is missing and then correctly describes checking metrics against them. Simulations do not explain how human judgments were elicited. A also calls the simulation a way of obtaining the intuitions. The deterministic rule leaves both texts intact because the following substantive explanation cannot be resolved by its narrow grammatical checks.",
+      "short_witnesses_from_B": [
+        {
+          "citation": 1,
+          "text": "We conduct a series of simulations"
+        },
+        {
+          "citation": 2,
+          "text": "corresponds well with human intuition"
+        }
+      ],
+      "A": {
+        "http": 200,
+        "answer": "The evidence does not describe collecting judgments from human participants. Instead, the authors obtained/validated “human intuitions” through a series of simulation experiments covering various scenarios in two-dimensional and high-dimensional vector spaces, designed to verify that the metrics have desired properties and “resonate with human intuitions” [1][5][6]. They then checked whether the simulation results behaved in intuitive ways—for example, that diversity grows with increasing dispersion and that density trends correspond with human intuition [4].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "2003.08529",
+            "ordinal": 0,
+            "chunk_id": "cf8fdfb81817698f8adcd246d148cf635dffc40a54c3cacaa5eca03e8ab4ee9b",
+            "excerpt_sha256": "6ead432cd96321d11f5ba4acbd9bf5324b01dbdcec99358ab427913c20c774f2"
+          },
+          {
+            "number": 4,
+            "source": "2003.08529",
+            "ordinal": 15,
+            "chunk_id": "97048b605d98d05756040190906ebc2516dd7083b64f9949bc890b29904238eb",
+            "excerpt_sha256": "262b7ed61797d7bffd0f9b81fd5a1fbd9bf51750870a32dd784103498810e39c"
+          },
+          {
+            "number": 5,
+            "source": "2003.08529",
+            "ordinal": 2,
+            "chunk_id": "472381808cd2ed5ca1e43bd6d9942269c3d4d6f2c76fad5e45d387cfea45f29f",
+            "excerpt_sha256": "26659883a919a1819ec508133126f76439e3bb3e4d5dae1fc12efdf6e736ef51"
+          },
+          {
+            "number": 6,
+            "source": "2003.08529",
+            "ordinal": 3,
+            "chunk_id": "b32b599c908fdf19dae0fe97b31d7023373e822d5acd523c4ab8288d78b0b7ff",
+            "excerpt_sha256": "5e368eba97dd3bcbc5bbe3f500f3f6075cf836d77f628ea143d9ce3858034905"
+          }
+        ],
+        "old_blinded_verdict": "wrong",
+        "old_supporting_citations": [
+          1,
+          4,
+          5,
+          6
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "210b8ec2c208b6783e9527df48f020bb95678a7d835f7b17a07c57e69893c3c1",
+        "public_response_sha256": "655c3037d66d6f4703a0a00c5764cc050fc737805a84c0b3396e8833363b5ee0",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "The provided evidence does not describe a procedure for collecting human intuitions from people. Instead, the authors conducted a series of simulations to verify that each metric holds desired properties and “resonates with human intuitions” [1]. The simulation results were interpreted as corresponding with intuitive expectations—for example, diversity behaving robustly under down-sampling and increasing with spread, and density/homogeneity trends under outliers or sub-clusters matching intuition [2][4][5].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "2003.08529",
+            "ordinal": 0,
+            "chunk_id": "cf8fdfb81817698f8adcd246d148cf635dffc40a54c3cacaa5eca03e8ab4ee9b",
+            "excerpt_sha256": "6ead432cd96321d11f5ba4acbd9bf5324b01dbdcec99358ab427913c20c774f2"
+          },
+          {
+            "number": 2,
+            "source": "2003.08529",
+            "ordinal": 15,
+            "chunk_id": "97048b605d98d05756040190906ebc2516dd7083b64f9949bc890b29904238eb",
+            "excerpt_sha256": "262b7ed61797d7bffd0f9b81fd5a1fbd9bf51750870a32dd784103498810e39c"
+          },
+          {
+            "number": 4,
+            "source": "2003.08529",
+            "ordinal": 17,
+            "chunk_id": "23118d9b3e18b2d32fdae4ff7ca3751d71d5f53286dee48197ad7483932db45e",
+            "excerpt_sha256": "a0249a7e0303d5f29dc4e2109184eb5644515b7c386b3bee1197a0546b5ec150"
+          },
+          {
+            "number": 5,
+            "source": "2003.08529",
+            "ordinal": 16,
+            "chunk_id": "684e46fc55398c8f4f5b3fa3098cae63e408a6c7006aeb349eb167191060ab13",
+            "excerpt_sha256": "18587a11c0083b95f733584aa4611aa76b70f72c3a5d9af09f5ba41c3b413f1a"
+          }
+        ],
+        "old_blinded_verdict": "partial",
+        "old_supporting_citations": [
+          1,
+          2,
+          4,
+          5
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "4186385924861a83a4856c76eb3e54ab178820dfbbecf83d639471eb6cefd1c2",
+        "public_response_sha256": "7ed50bbff767d14fe974ca4fd03e37f33cc1604d15e82b35e56ef042e74fa9ae",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    },
+    "e78a47aec37d9a3bec5a18706b0a462c148c118b": {
+      "query": "In the paper “Grounding the Semantics of Part-of-Day Nouns Worldwide using Twitter”, How many languages are included in the tweets?",
+      "official_unanswerable": true,
+      "diagnostic_category": "unsupported_substitution_of_population",
+      "diagnosis": "The requested population is the languages observed in collected tweets. The only count in either answer is the number of languages and variants used to translate the query terms. The count is sourced, but using it for the requested population is unsupported; the evidence does not show the reader invented a number.",
+      "short_witnesses_from_B": [
+        {
+          "citation": 1,
+          "text": "We translated them to 53 languages and variants using Bing translator"
+        }
+      ],
+      "A": {
+        "http": 200,
+        "answer": "The paper states that the five seed terms were translated into 53 languages and variants using Bing translator [1].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1805.09055",
+            "ordinal": 3,
+            "chunk_id": "2e5d31305e9ee9f56d301f1aeca87519f4d5288653a889b318173e65ffaf5579",
+            "excerpt_sha256": "8e4ac1257d816c1ac279862d0c4dae2ed85cf047ea83b00693c495f0c14bf315"
+          }
+        ],
+        "old_blinded_verdict": "wrong",
+        "old_supporting_citations": [
+          1
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "c82b3bf28fd9503e6c8b378ac9e06cedf14a99434c55a942d1885de887a682f7",
+        "public_response_sha256": "3ee106f44680f9856490334aff7ca374b1f9cecaded3c1b04e09e4c477621aae",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "The paper reports that the seed terms were translated into 53 languages and variants using Bing translator [1].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1805.09055",
+            "ordinal": 3,
+            "chunk_id": "2e5d31305e9ee9f56d301f1aeca87519f4d5288653a889b318173e65ffaf5579",
+            "excerpt_sha256": "8e4ac1257d816c1ac279862d0c4dae2ed85cf047ea83b00693c495f0c14bf315"
+          }
+        ],
+        "old_blinded_verdict": "wrong",
+        "old_supporting_citations": [
+          1
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "8f01f80fdf7ed7c3514308b4605929344000fdd224637156440d119725c20336",
+        "public_response_sha256": "f61ea2174d4db40727408eb884fbcc883b129591216a7c46c87e08949eaf8658",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    }
+  },
+  "other_exposed_controls": {
+    "c78f18606524539e4c573481e5bf1e0a242cc33c": {
+      "query": "In the paper “Autocompletion interfaces make crowd workers slower, but their use promotes response diversity”, How many responses did they obtain?",
+      "A": {
+        "http": 200,
+        "answer": "The provided evidence is insufficient to determine how many responses the study obtained.",
+        "insufficient_evidence": true,
+        "citations": [],
+        "old_blinded_verdict": "refusal",
+        "old_supporting_citations": [],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "fbd9442921c9a22f7fa158b61cbe80c15e66f723ceea1f8a646b508782fd4978",
+        "public_response_sha256": "b97e9c734ffb43b0edc82783fbdb80f4808f8f61304a0598341779cd29a35375",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "They obtained 1,001 responses (tasks): 496 in the Control group and 505 in the AUI group [3].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 3,
+            "source": "1707.06939",
+            "ordinal": 7,
+            "chunk_id": "14a3c9eca94b157ce8c16039da685076873ce4943c552f59ce2fe4f673aab8db",
+            "excerpt_sha256": "204bbacf22d4d4b491a0484d15c91a323c6d721854becf0480c5647d872b9f63"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          3
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "79db7eb1770b6dfe168c082b278b347e72b898d655ed8ccdcf33843f9a0b2484",
+        "public_response_sha256": "ca95052ef1baf53e16c5dd4c3c645882c8531c5675002227878b808dc4beba6f",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    },
+    "891cab2e41d6ba962778bda297592c916b432226": {
+      "query": "In the paper “Machine Translation from Natural Language to Code using Long-Short Term Memory”, What programming language is target language?",
+      "A": {
+        "http": 200,
+        "answer": "The target programming language is Python [1][2].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1910.11471",
+            "ordinal": 8,
+            "chunk_id": "bb5722608f84b66fc4d7ef9266702eab5cb9012daf68725b8fc89c80ee68bb62",
+            "excerpt_sha256": "18e739310733fb8e26a7d776553bdca8479f7ee301728fa543a61443a4dc48d0"
+          },
+          {
+            "number": 2,
+            "source": "1910.11471",
+            "ordinal": 12,
+            "chunk_id": "3c5e0bc58e725c495d55aae86924e71becb0cdc2c984561c2f92bd321441e8e6",
+            "excerpt_sha256": "b04ce3b1a06fdddd4fcfdd510050313a144eeba56952710f588b2f4aaa6dc769"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          1,
+          2
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "d8083e2b863a19b411f4fa70bd94257385f937660f746db03eadbe7f235f383e",
+        "public_response_sha256": "85fdabf808ea55d713ea644f1bc9d844748bb46094f04de26b08650e8f2bdfb3",
+        "deterministic_rewrite_on_identical_public_fields": null
+      },
+      "B": {
+        "http": 200,
+        "answer": "The target language is Python. The parallel corpus contains target data written in the Python programming language [1], and the paper states its aim was to make the text-to-code framework work for a general-purpose programming language, primarily Python [3].",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "number": 1,
+            "source": "1910.11471",
+            "ordinal": 8,
+            "chunk_id": "bb5722608f84b66fc4d7ef9266702eab5cb9012daf68725b8fc89c80ee68bb62",
+            "excerpt_sha256": "18e739310733fb8e26a7d776553bdca8479f7ee301728fa543a61443a4dc48d0"
+          },
+          {
+            "number": 3,
+            "source": "1910.11471",
+            "ordinal": 12,
+            "chunk_id": "3c5e0bc58e725c495d55aae86924e71becb0cdc2c984561c2f92bd321441e8e6",
+            "excerpt_sha256": "b04ce3b1a06fdddd4fcfdd510050313a144eeba56952710f588b2f4aaa6dc769"
+          }
+        ],
+        "old_blinded_verdict": "full",
+        "old_supporting_citations": [
+          1,
+          3
+        ],
+        "physical_model_requests": 1,
+        "provider_finish_reasons": [
+          "stop"
+        ],
+        "reader_prompt_sha256": "c28080271ae2d8ec7213b0715f836390f311760bbca421100c96ce452e1a40a0",
+        "public_response_sha256": "b016a9b077eb9ecb76a62085140691fef6b09668eba19be1103b3069e07938a7",
+        "deterministic_rewrite_on_identical_public_fields": null
+      }
+    }
+  }
+}

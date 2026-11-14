@@ -129,7 +129,11 @@ def representable_in_a_single_chunk(case, docs):
     return False
 
 
-def check_receipt(receipt, cases, arm, protocol_sha, docs, retrieval_only, snapshot):
+def check_receipt(
+    receipt, cases, arm, protocol_sha, docs, retrieval_only, snapshot, *, reranker_arm=None
+):
+    # A refusal-only comparison holds retrieval at the prior sentence-reranker arm on both sides.
+    reranker_arm = arm if reranker_arm is None else reranker_arm
     rows = index(receipt["rows"])
     endpoint = (
         "POST /api/v1/workspaces/{workspace_id}/knowledge-bases/{kb_id}/retrieval/playground"
@@ -162,7 +166,7 @@ def check_receipt(receipt, cases, arm, protocol_sha, docs, retrieval_only, snaps
             len(ids) == len(retrieval["candidate"]) == 20
             and len(ranked_event["input_scores"]) == 20
             and ids == scores.keys()
-            and ranked_event["arm"] == arm
+            and ranked_event["arm"] == reranker_arm
             and reader["chunks"] == retrieval["reranked"]
             and len({r["chunk_id"] for r in reader["chunks"]}) == 6
             and all(r["chunk_id"] in ids for r in reader["chunks"]),
@@ -175,7 +179,7 @@ def check_receipt(receipt, cases, arm, protocol_sha, docs, retrieval_only, snaps
             text = window(docs[ref["source"]], ref["ordinal"])[0]
             evidence = scores[ref["chunk_id"]]
             score = evidence["whole_score"]
-            if arm == "B":
+            if reranker_arm == "B":
                 spans = evidence["windows"]
                 require(
                     all(0 <= s["start"] < s["end"] <= len(text) for s in spans),
