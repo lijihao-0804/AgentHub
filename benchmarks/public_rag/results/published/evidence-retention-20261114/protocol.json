@@ -1,0 +1,968 @@
+{
+  "frozen_at_utc": "2026-11-14T05:32:04.203569+00:00",
+  "source_baseline_commit": "8f385b5ca105a252da9408369e9b77731d33a3c7",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "dataset": "QASPER v0.3 official TRAIN only; development evaluation",
+  "train_sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+  "exposure_sha256": "f541a8bf3f4b0bc5c74bd727c12ca749cc8d0d42dcee85701127a0a2bfbe2056",
+  "acceptance_sha256_lf": "80c92540f143a0958dae56bda04e127c52d527308ae29b0ad0cacae74db875fc",
+  "exclusion": "Explicit paper/QA historical exposure or reservations; see exposure.json",
+  "sample": "Ascending SHA256(sample salt + question ID), one question per unseen paper, one official annotation, rendered paper <=30,000 characters. Positives require one answer span of 2–100 characters in one verbatim paper evidence paragraph <=1,200 characters. Negatives require official unanswerable=true. Select until 30 positives and 18 negatives; retain every selected question in its denominator.",
+  "sample_salt": "qasper-evidence-retention-20261114/sample-v1|",
+  "historical": "Two exposed diagnostics reconstructed in the previous 16-paper library. The 1,001-response question previously lost its evidence at reader cutoff. The Python-language question previously received full supported answers in all three arms. Controls are separate from every independent denominator.",
+  "historical_protocol_sha256_lf": "d7e18814f84bab06090551bb39d0bc5dc285d52504aa656278dce753e2194766",
+  "order_salt": "qasper-evidence-retention-20261114/order-v1|",
+  "schedule": "One first HTTP dispatch per arm in listed case order; arm_order alternates after sorting by SHA256(order salt + id) within scope for 24/24 and 1/1 first. Same retrieval/reader budget and generative settings. Keep failures and every internal provider call. Exact source/snapshot/wire metadata belong to execution receipts.",
+  "primary_evidence": "At least one complete annotated evidence passage occurs case-insensitively in a single original target-paper chunk, at candidate@20 and actually sent reader@6. Denominator 30 for both; also report reader hits among candidate hits. Official negatives have no evidence target. Secondary metrics are original target-paper presence and exact official answer-span presence (no semantic expansion).",
+  "answer_scoring": "Arm-blind semantic rubric in qa-first-response-20261114/rubric.md: full, partial, wrong, structured refusal or failure, plus citation-level support. Preserve all official negative labels and describe source conflicts. Numerators: fully supported positive/30, correct structured negative refusal/18, sum/48, individual supporting citations/all citations. Report paired gains, losses, and retained previously correct cases, absolute percentage-point changes, and error rows.",
+  "corpora": {
+    "independent": [
+      "2002.02427",
+      "1903.04715",
+      "2001.06354",
+      "1704.08960",
+      "1911.12569",
+      "1708.09609",
+      "1910.07181",
+      "1709.10217",
+      "1702.00500",
+      "1909.00997",
+      "1905.10810",
+      "2003.08529",
+      "2001.10179",
+      "1808.02113",
+      "2001.07209",
+      "1905.10238",
+      "1804.02233",
+      "1603.07044",
+      "1911.03648",
+      "1706.01450",
+      "1911.00473",
+      "1910.08418",
+      "1909.06522",
+      "1611.04361",
+      "1811.02076",
+      "1811.00625",
+      "1909.09986",
+      "1910.12129",
+      "1911.03243",
+      "1908.10322",
+      "1810.07091",
+      "1910.10869",
+      "1604.00117",
+      "2004.02393",
+      "2002.06675",
+      "1805.09055",
+      "1910.10324",
+      "1908.06606",
+      "1708.00077",
+      "1705.01991",
+      "1901.02534",
+      "1909.05358",
+      "1909.00430",
+      "2004.04315",
+      "1810.10797",
+      "2003.05377",
+      "1909.00279",
+      "1903.00058"
+    ],
+    "historical": [
+      "1707.06939",
+      "1812.07023",
+      "2002.00750",
+      "1905.01715",
+      "1910.11471",
+      "2004.02451",
+      "1904.02357",
+      "1911.13066",
+      "1707.00995",
+      "2003.06044",
+      "1810.01570",
+      "1612.09113",
+      "1909.07512",
+      "1910.01363",
+      "1910.04601",
+      "1606.04631"
+    ]
+  },
+  "cases": [
+    {
+      "id": "0c29d08f766b06ceb2421aa402e71a2d65a5a381",
+      "scope": "independent",
+      "query": "In the paper “Irony Detection in a Multilingual Context”, What neural architectures are used?",
+      "gold_documents": [
+        "2002.02427"
+      ],
+      "negative": false,
+      "answers": [
+        "Convolutional Neural Network (CNN)"
+      ],
+      "evidence": [
+        "Feature-based models. We used state-of-the-art features that have shown to be useful in ID: some of them are language-independent (e.g., punctuation marks, positive and negative emoticons, quotations, personal pronouns, tweet's length, named entities) while others are language-dependent relying on dedicated lexicons (e.g., negation, opinion lexicons, opposition words). Several classical machine learning classifiers were tested with several feature combinations, among them Random Forest (RF) achieved the best result with all features. Neural model with monolingual embeddings. We used Convolutional Neural Network (CNN) network whose structure is similar to the one proposed by BIBREF29. For the embeddings, we relied on $AraVec$ BIBREF30 for Arabic, FastText BIBREF31 for French, and Word2vec Google News BIBREF32 for English . For the three languages, the size of the embeddings is 300 and the embeddings were fine-tuned during the training process. The CNN network was tuned with 20% of the training corpus using the $Hyperopt$ library."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "6adde6bc3e27a32eac5daa57d30ab373f77690be",
+      "scope": "independent",
+      "query": "In the paper “Context-Aware Learning for Neural Machine Translation”, Is the proposed model more sensitive than previous context-aware models too?",
+      "gold_documents": [
+        "1903.04715"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "cee29acec4da1b247795daa4e2e82ef8a7b25a64",
+      "scope": "independent",
+      "query": "In the paper “Modality-Balanced Models for Visual Dialogue”, What model was winner of the Visual Dialog challenge 2018?",
+      "gold_documents": [
+        "2001.06354"
+      ],
+      "negative": false,
+      "answers": [
+        "DL-61"
+      ],
+      "evidence": [
+        "For the evaluation on the test-standard dataset of VisDial v1.0, we try 6 image-only model ensemble and 6 consensus dropout fusion model ensemble. As shown in Table TABREF48, our two models show competitive results compared to the state-of-the-art on the Visual Dialog challenge 2018 (DL-61 was the winner of the Visual Dialog challenge 2018). Specifically, our image-only model shows much higher NDCG score (60.16). On the other hand, our consensus dropout fusion model shows more balanced results over all metrics while still outperforming on most evaluation metrics (NDCG, MRR, R@1, and R@5). Compared to results of the Visual Dialog challenge 2019, our models also show strong results. Although ReDAN+ BIBREF26 and MReaL–BDAI show higher NDCG scores, our consensus dropout fusion model shows more balanced results over metrics while still having a competitive NDCG score compared to DAN BIBREF25, with rank 3 based on NDCG metric and high balance rank based on metric average."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "62048ea0aab61abe21fb30d70c4a1bc5fb946137",
+      "scope": "independent",
+      "query": "In the paper “Neural Word Segmentation with Rich Pretraining”, What is the size of the model?",
+      "gold_documents": [
+        "1704.08960"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "3d99bc8ab2f36d4742e408f211bec154bc6696f7",
+      "scope": "independent",
+      "query": "In the paper “Emotion helps Sentiment: A Multi-task Model for Sentiment and Emotion Analysis”, How many parameters does the model have?",
+      "gold_documents": [
+        "1911.12569"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "81686454f215e28987c7ad00ddce5ffe84b37195",
+      "scope": "independent",
+      "query": "In the paper “Identifying Products in Online Cybercrime Marketplaces: A Dataset for Fine-grained Domain Adaptation”, What supervised models are experimented with?",
+      "gold_documents": [
+        "1708.09609"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "537b2d7799124d633892a1ef1a485b3b071b303d",
+      "scope": "independent",
+      "query": "In the paper “BERTRAM: Improved Word Embeddings Have Big Impact on Contextualized Model Performance”, What is dataset for word probing task?",
+      "gold_documents": [
+        "1910.07181"
+      ],
+      "negative": false,
+      "answers": [
+        "WNLaMPro dataset"
+      ],
+      "evidence": [
+        "We evalute Bertram on the WNLaMPro dataset of BIBREF0. This dataset consists of cloze-style phrases like"
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "0460019eb2186aef835f7852fc445b037bd43bb7",
+      "scope": "independent",
+      "query": "In the paper “The First Evaluation of Chinese Human-Computer Dialogue Technology”, How many intents were classified?",
+      "gold_documents": [
+        "1709.10217"
+      ],
+      "negative": false,
+      "answers": [
+        "two"
+      ],
+      "evidence": [
+        "In task 1, there are two top categories, namely, chit-chat and task-oriented dialogue. The task-oriented dialogue also includes 30 sub categories. In this evaluation, we only consider to classify the user intent in single utterance."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "e79a5e435fcf5587535f06c9215d19a66caadaff",
+      "scope": "independent",
+      "query": "In the paper “AMR-to-text Generation with Synchronous Node Replacement Grammar”, What is the SemEval-2016 task 8?",
+      "gold_documents": [
+        "1702.00500"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "6959e87cf2668a03854da3f042c87e6fdb2ade8a",
+      "scope": "independent",
+      "query": "In the paper “Data Interpretation over Plots”, How big are FigureQA and DVQA datasets?",
+      "gold_documents": [
+        "1909.00997"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "6a31bd676054222faf46229fc1d283322478a020",
+      "scope": "independent",
+      "query": "In the paper “Evaluation of basic modules for isolated spelling error correction in Polish texts”, How is PIEWi annotated?",
+      "gold_documents": [
+        "1905.10810"
+      ],
+      "negative": false,
+      "answers": [
+        "[error, correction] pairs"
+      ],
+      "evidence": [
+        "PlEWi BIBREF20 is an early version of WikEd BIBREF21 error corpus, containing error type annotations allowing us to select only non-word errors for evaluation. Specifically, PlEWi supplied 550,755 [error, correction] pairs, from which 298,715 were unique. The corpus contains data extracted from histories of page versions of Polish Wikipedia. An algorithm designed by the corpus author determined where the changes were correcting spelling errors, as opposed to expanding content and disagreements among Wikipedia editors."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "a8f1029f6766bffee38a627477f61457b2d6ed5c",
+      "scope": "independent",
+      "query": "In the paper “Diversity, Density, and Homogeneity: Quantitative Characteristic Metrics for Text Collections”, How did they obtain human intuitions?",
+      "gold_documents": [
+        "2003.08529"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "38e2f07ba965b676a99be06e8872dade7c04722a",
+      "scope": "independent",
+      "query": "In the paper “Multi-modal Sentiment Analysis using Super Characters Method on Low-power CNN Accelerator Device”, Does this implementation on CNN-DSA lead to diminishing of performance?",
+      "gold_documents": [
+        "2001.10179"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "61aac406b648865f007a400dcd69f28e44efc636",
+      "scope": "independent",
+      "query": "In the paper “Paying Attention to Attention: Highlighting Influential Samples in Sequential Analysis”, Can their method of creating more informative visuals be applied to tasks other than turn taking in conversations?",
+      "gold_documents": [
+        "1808.02113"
+      ],
+      "negative": false,
+      "answers": [
+        "computationally inexpensive means to understand what happened at the stopping point"
+      ],
+      "evidence": [
+        "Although attention in deep neural networks was not initially introduced to inform observers, but to help a model make predictions, it can also be used to inform. In the instances where a model thinks all historical samples should be considered equally important in a sequential analysis task, we must look elsewhere for a computationally inexpensive means to understand what happened at the stopping point. In this paper, we have introduced such a means by monitoring attention changes over the sequential analysis to inform observers. This method introduces negligible overhead, an important consideration in real-time systems, and is not tied to the implementation details or task of the model, other than the prerequisite of an attention layer."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc",
+      "scope": "independent",
+      "query": "In the paper “Text-based inference of moral sentiment change”, Which dataset sources to they use to demonstrate moral sentiment through history?",
+      "gold_documents": [
+        "2001.07209"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "4146e1d8f79902c0bc034695998b724515b6ac81",
+      "scope": "independent",
+      "query": "In the paper “Incorporating Context and External Knowledge for Pronoun Coreference Resolution”, What dataset do they evaluate their model on?",
+      "gold_documents": [
+        "1905.10238"
+      ],
+      "negative": false,
+      "answers": [
+        "CoNLL-2012 shared task BIBREF21 corpus"
+      ],
+      "evidence": [
+        "The CoNLL-2012 shared task BIBREF21 corpus is used as the evaluation dataset, which is selected from the Ontonotes 5.0. Following conventional approaches BIBREF9 , BIBREF11 , for each pronoun in the document, we consider candidate $n$ from the previous two sentences and the current sentence. For pronouns, we consider two types of them following BIBREF9 , i.e., third personal pronoun (she, her, he, him, them, they, it) and possessive pronoun (his, hers, its, their, theirs). Table 1 reports the number of the two type pronouns and the overall statistics for the experimental dataset. According to our selection range of candidate $n$ , on average, each pronoun has 4.6 candidates and 1.3 correct references."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "dc28ac845602904c2522f5349374153f378c42d3",
+      "scope": "independent",
+      "query": "In the paper “Forex trading and Twitter: Spam, bots, and reputation manipulation”, How many tweets were manually labelled? ",
+      "gold_documents": [
+        "1804.02233"
+      ],
+      "negative": false,
+      "answers": [
+        "44,000 tweets"
+      ],
+      "evidence": [
+        "Tweets related to Forex, specifically to EUR and USD, were acquired through the Twitter search API with the following query: “EURUSD”, “USDEUR”, “EUR”, or “USD”. In the period of three years (January 2014 to December 2016) almost 15 million tweets were collected. A subset of them (44,000 tweets) was manually labeled by knowledgeable students of finance. The label captures the leaning or stance of the Twitter user with respect to the anticipated move of one currency w.r.t. the other. The stance is represented by three values: buy (EUR vs. USD), hold, or sell. The tweets were collected, labeled and provided to us by the Sowa Labs company (http://www.sowalabs.com)."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1",
+      "scope": "independent",
+      "query": "In the paper “Recurrent Neural Network Encoder with Attention for Community Question Answering”, What is a strong feature-based method?",
+      "gold_documents": [
+        "1603.07044"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "891c4af5bb77d6b8635ec4109572de3401b60631",
+      "scope": "independent",
+      "query": "In the paper “Hate Speech Detection on Vietnamese Social Media Text using the Bidirectional-LSTM Model”, What social media platform does the data come from?",
+      "gold_documents": [
+        "1911.03648"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "0fa81adf00662694e1dc74475ae2b9283c50748c",
+      "scope": "independent",
+      "query": "In the paper “A Joint Model for Question Answering and Question Generation”, Which components of QA and QG models are shared during training?",
+      "gold_documents": [
+        "1706.01450"
+      ],
+      "negative": false,
+      "answers": [
+        "parameter sharing"
+      ],
+      "evidence": [
+        "We proposed a neural machine comprehension model that can jointly ask and answer questions given a document. We hypothesized that question answering can benefit from synergistic interaction between the two tasks through parameter sharing and joint training under this multitask setting. Our proposed model adopts an attention-based sequence-to-sequence architecture that learns to dynamically switch between copying words from the document and generating words from a vocabulary. Experiments with the model confirm our hypothesis: the joint model outperforms its QA-only counterpart by a significant margin on the SQuAD dataset."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "504a069ccda21580ccbf18c34f5eefc0088fa105",
+      "scope": "independent",
+      "query": "In the paper “BERT Goes to Law School: Quantifying the Competitive Advantage of Access to Large Legal Corpora in Contract Understanding”, How big is dataset used for fine-tuning BERT?",
+      "gold_documents": [
+        "1911.00473"
+      ],
+      "negative": false,
+      "answers": [
+        "hundreds of thousands of legal agreements"
+      ],
+      "evidence": [
+        "To fine-tune BERT, we used a proprietary corpus that consists of hundreds of thousands of legal agreements. We extracted text from the agreements, tokenized it into sentences, and removed sentences without alphanumeric text. We selected the BERT-Base uncased pre-trained model for fine-tuning. To avoid including repetitive content found at the beginning of each agreement we selected the 31st to 50th sentence of each agreement. We ran unsupervised fine-tuning of BERT using sequence lengths of 128, 256 and 512. The loss function over epochs is shown in Figure FIGREF3."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "557d1874f736d9d487eb823fe8f6dab4b17c3c42",
+      "scope": "independent",
+      "query": "In the paper “Controlling Utterance Length in NMT-based Word Segmentation with Attention”, Which language family does Mboshi belong to?",
+      "gold_documents": [
+        "1910.08418"
+      ],
+      "negative": false,
+      "answers": [
+        "Bantu"
+      ],
+      "evidence": [
+        "Our experiments are performed on an actual endangered language, Mboshi (Bantu C25), a language spoken in Congo-Brazzaville, using the bilingual French-Mboshi 5K corpus of BIBREF17. On the Mboshi side, we consider alphabetic representation with no tonal information. On the French side,we simply consider the default segmentation into words."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "9e2e5918608a2911b341d4887f58a4595d7d1429",
+      "scope": "independent",
+      "query": "In the paper “Multilingual Graphemic Hybrid ASR with Massive Data Augmentation”, How much training data is required for each low-resource language?",
+      "gold_documents": [
+        "1909.06522"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "51d03f0741b72ae242c380266acd2321baf43444",
+      "scope": "independent",
+      "query": "In the paper “Attending to Characters in Neural Sequence Labeling Models”, How does this compare to simple interpolation between a word-level and a character-level language model?",
+      "gold_documents": [
+        "1611.04361"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "21656039994cab07f79e89553cbecc31ba9853d4",
+      "scope": "independent",
+      "query": "In the paper “Improving Span-based Question Answering Systems with Coarsely Labeled Data”, What datasets have this method been evaluated on?",
+      "gold_documents": [
+        "1811.02076"
+      ],
+      "negative": false,
+      "answers": [
+        "document-level variants of the SQuAD dataset "
+      ],
+      "evidence": [
+        "We evaluate a multi-task approach and three algorithms that explicitly model the task dependencies. We perform experiments on document-level variants of the SQuAD dataset BIBREF1 . The contributions for our papers are:"
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "d8cecea477dfc5163dca6e2078a2fe6bc94ce09f",
+      "scope": "independent",
+      "query": "In the paper “Incorporating Structured Commonsense Knowledge in Story Completion”, Which metrics are they evaluating with?",
+      "gold_documents": [
+        "1811.00625"
+      ],
+      "negative": false,
+      "answers": [
+        "accuracy"
+      ],
+      "evidence": [
+        "We evaluated baselines and our model using accuracy as the metric on the ROCStories dataset, and summarized these results in Table 2 . The linear classifier with language model, Msap, achieved an accuracy of 75.2%. When adding additional features, such as sentiment trajectories and topic words to traditional machine learning methods, HCM achieved an accuracy of 77.6%. Recently, more neural network-based models are used. DSSM simply used a deep structured semantic model to learn representations for both bodies and endings only achieved an accuracy of 58.5%. Utilizing Cai improved neural model performance to 74.7% by applying attention mechanisms on a BiLSTM RNN structure. SeqMANN further improved the performance to 84.7%, when combining more information from embedding layers, like character features, part-of-speech (POS) tagging features, sentiment polarity, negation information and some external knowledge of semantic sequence. Researchers also improved model performance by pre-training word embeddings on external large corpus. FTLM pre-trained a language model on a large unlabeled corpus and fine-tuned on the ROCStories dataset, and achieved an accuracy of 86.5%."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "73cd785d474bae7af974802715ef7ba5468d9139",
+      "scope": "independent",
+      "query": "In the paper “Improving Quality and Efficiency in Plan-based Neural Data-to-Text Generation”, How is faithfulness of the resulting text evaluated?",
+      "gold_documents": [
+        "1909.09986"
+      ],
+      "negative": false,
+      "answers": [
+        "manually inspect"
+      ],
+      "evidence": [
+        "The addition of output verification resulted in negligible changes in BLEU, reinforcing that automatic metrics are not sensitive enough to output accuracy. We thus performed manual analysis, following the procedure in BIBREF0. We manually inspect 148 samples from the seen part of the test set, containing 440 relations, counting expressed, omitted, wrong and over-generated (hallucinated) facts. We compare to the StrongNeural and BestPlan systems from BIBREF0. Results in Table indicate that the effectiveness of the verification process in ensuring correct output, reducing the already small number of ommited and overgenerated facts to 0 (with the exhaustive planner) and keeping it small (with the fast neural planner)."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "e93b4a15b54d139b768d5913fb5fd1aed8ab25da",
+      "scope": "independent",
+      "query": "In the paper “ViGGO: A Video Game Corpus for Data-To-Text Generation in Open-Domain Conversation”, How the authors made sure that corpus is clean despite being crowdsourced?",
+      "gold_documents": [
+        "1910.12129"
+      ],
+      "negative": false,
+      "answers": [
+        "manually cleaned human-produced utterances"
+      ],
+      "evidence": [
+        "The main contribution of our work is thus a new parallel data-to-text NLG corpus that (1) is more conversational, rather than information seeking or question answering, and thus more suitable for an open-domain dialogue system, (2) represents a new, unexplored domain which, however, has excellent potential for application in conversational agents, and (3) has high-quality, manually cleaned human-produced utterances."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "f74eaee72cbd727a6dffa1600cdf1208672d713e",
+      "scope": "independent",
+      "query": "In the paper “Crowdsourcing a High-Quality Gold Standard for QA-SRL”, How was coverage measured?",
+      "gold_documents": [
+        "1911.03243"
+      ],
+      "negative": false,
+      "answers": [
+        "QA pairs per predicate"
+      ],
+      "evidence": [
+        "The original 2015 QA-SRL dataset BIBREF4 was annotated by non-expert workers after completing a brief training procedure. They annotated 7.8K verbs, reporting an average of 2.4 QA pairs per predicate. Even though multiple annotators were shown to produce greater coverage, their released dataset was produced using only a single annotator per verb. In subsequent work, BIBREF5 constructed a large-scale corpus and used it to train a parser. They crowdsourced 133K verbs with 2.0 QA pairs per verb on average. Since crowd-workers had no prior training, quality was established using an additional validation step, where workers had to ascertain the validity of the question, but not of its answers. Instead, the validator provided additional answers, independent of the other annotators. Each verb in the corpus was annotated by a single QA-generating worker and validated by two others."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52",
+      "scope": "independent",
+      "query": "In the paper “Bridging the Gap for Tokenizer-Free Language Models”, How many parameters does the model have?",
+      "gold_documents": [
+        "1908.10322"
+      ],
+      "negative": false,
+      "answers": [
+        "model has around 836M parameters"
+      ],
+      "evidence": [
+        "Instead of reading in the tokenized input text, our model reads raw utf-8 bytes. For English text in the ASCII range, this is equivalent to processing characters as individual tokens. Non-ASCII characters (e.g. accented characters, or non-Latin scripts) are typically two or three utf-8 bytes. We use a standard “transformer decoder” (a stack of transformer layers with a causal attention mask) to process the sequence $x_{0:i-1}$ and predict the following byte $x_i$. The model's prediction is an estimate of the probability distribution over all possible 256 byte values. Our input byte embedding matrix has dimensionality 256. Our byte-level transformer model has 40 standard transformer layers with hidden size 1024, filter size 8192, and 16 heads. The model has around 836M parameters, of which only 66K are byte embeddings."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "7a70fb11cb3449749f0c2c06101965bf5d02c54a",
+      "scope": "independent",
+      "query": "In the paper “INFODENS: An Open-source Framework for Learning Text Representations”, What kind of representation exploration does INFODENS provide?",
+      "gold_documents": [
+        "1810.07091"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "fdd9dea06550a2fd0df7a1e6a5109facf3601d76",
+      "scope": "independent",
+      "query": "In the paper “Combining Acoustics, Content and Interaction Features to Find Hot Spots in Meetings”, How big is ICSI meeting corpus?",
+      "gold_documents": [
+        "1910.10869"
+      ],
+      "negative": false,
+      "answers": [
+        " 75 meetings and about 70 hours of real-time audio duration"
+      ],
+      "evidence": [
+        "The ICSI Meeting Corpus BIBREF11 is a collection of meeting recordings that has been thoroughly annotated, including annotations for involvement hot spots BIBREF12, linguistic utterance units, and word time boundaries based on forced alignment. The dataset is comprised of 75 meetings and about 70 hours of real-time audio duration, with 6 speakers per meeting on average. Most of the participants are well-acquainted and friendly with each other. Hot spots were originally annotated with 8 levels and degrees, ranging from `not hot' to `luke warm' to `hot +'. Every utterance was labeled with one of these discrete labels by a single annotator. Hightened involvement is rare, being marked on only 1% of utterances."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0",
+      "scope": "independent",
+      "query": "In the paper “Domain Adaptation of Recurrent Neural Networks for Natural Language Understanding”, What is the size of the open vocabulary?",
+      "gold_documents": [
+        "1604.00117"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "2a950ede24b26a45613169348d5db9176fda4f82",
+      "scope": "independent",
+      "query": "In the paper “Learning to Recover Reasoning Chains for Multi-Hop Question Answering via Cooperative Games”, How many hand-labeled reasoning chains have been created?",
+      "gold_documents": [
+        "2004.02393"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "526ae24fa861d52536b66bcc2d2ddfce483511d6",
+      "scope": "independent",
+      "query": "In the paper “Speech Corpus of Ainu Folklore and End-to-end Speech Recognition for Ainu Language”, How big are improvements with multilingual ASR training vs single language training?",
+      "gold_documents": [
+        "2002.06675"
+      ],
+      "negative": false,
+      "answers": [
+        "relative WER improvement of 10%."
+      ],
+      "evidence": [
+        "The results of multilingual training in which the modeling unit is syllables are presented in Table 5. All error rates are the weighted averages of all evaluated speakers. Here, `+ both' represents the result of training with both JNAS and WSJ corpora. The multilingual training is effective in the speaker-open setting, providing a relative WER improvement of 10%. The JNAS corpus was more helpful than the WSJ corpus because of the similarities between Ainu and Japanese language."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "e78a47aec37d9a3bec5a18706b0a462c148c118b",
+      "scope": "independent",
+      "query": "In the paper “Grounding the Semantics of Part-of-Day Nouns Worldwide using Twitter”, How many languages are included in the tweets?",
+      "gold_documents": [
+        "1805.09055"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "55c840a2f1f663ab2bff984ae71501b17429d0c0",
+      "scope": "independent",
+      "query": "In the paper “Deja-vu: Double Feature Presentation and Iterated Loss in Deep Transformer Networks”, Do they normalize the calculated intermediate output hypotheses to compensate for the incompleteness?",
+      "gold_documents": [
+        "1910.10324"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "326e08a0f5753b90622902bd4a9c94849a24b773",
+      "scope": "independent",
+      "query": "In the paper “Question Answering based Clinical Text Structuring Using Pre-trained Language Model”, How big is dataset of pathology reports collected from Ruijing Hospital?",
+      "gold_documents": [
+        "1908.06606"
+      ],
+      "negative": false,
+      "answers": [
+        "17,833 sentences, 826,987 characters and 2,714 question-answer pairs"
+      ],
+      "evidence": [
+        "Our dataset is annotated based on Chinese pathology reports provided by the Department of Gastrointestinal Surgery, Ruijin Hospital. It contains 17,833 sentences, 826,987 characters and 2,714 question-answer pairs. All question-answer pairs are annotated and reviewed by four clinicians with three types of questions, namely tumor size, proximal resection margin and distal resection margin. These annotated instances have been partitioned into 1,899 training instances (12,412 sentences) and 815 test instances (5,421 sentences). Each instance has one or several sentences. Detailed statistics of different types of entities are listed in Table TABREF20."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "dee7383a92c78ea49859a2d5ff2a9d0a794c1f0f",
+      "scope": "independent",
+      "query": "In the paper “Bayesian Sparsification of Recurrent Neural Networks”, What is binary variational dropout?",
+      "gold_documents": [
+        "1708.00077"
+      ],
+      "negative": false,
+      "answers": [
+        "the dropout technique of Gal & Ghahramani gal"
+      ],
+      "evidence": [
+        "We use the dropout technique of Gal & Ghahramani gal as a baseline because it is the most similar dropout technique to our approach and denote it VBD (variational binary dropout)."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "69ca609e86888c7e4e2e3d33435a0a36f77601b5",
+      "scope": "independent",
+      "query": "In the paper “Sharp Models on Dull Hardware: Fast and Accurate Neural Machine Translation Decoding on the CPU”, What baseline decoder do they use?",
+      "gold_documents": [
+        "1705.01991"
+      ],
+      "negative": false,
+      "answers": [
+        "a standard beam search decoder BIBREF5 with several straightforward performance optimizations"
+      ],
+      "evidence": [
+        "Our baseline decoder is a standard beam search decoder BIBREF5 with several straightforward performance optimizations:"
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "4ecb6674bcb4162bf71aea8d8b82759255875df3",
+      "scope": "independent",
+      "query": "In the paper “Team Papelo: Transformer Networks at FEVER”, Which pre-trained transformer do they use?",
+      "gold_documents": [
+        "1901.02534"
+      ],
+      "negative": false,
+      "answers": [
+        "BIBREF5"
+      ],
+      "evidence": [
+        "Our approach to FEVER is to fix the most obvious shortcomings of the baseline approaches to retrieval and entailment, and to train a sharp entailment classifier that can be used to filter a broad set of retrieved potential evidence. For the entailment classifier we compare Decomposable Attention BIBREF2 , BIBREF3 as implemented in the official baseline, ESIM BIBREF4 , and a transformer network with pre-trained weights BIBREF5 . The transformer network naturally supports out-of-vocabulary words and gives substantially higher performance than the other methods."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "221e9189a9d2431902d8ea833f486a38a76cbd8e",
+      "scope": "independent",
+      "query": "In the paper “Taskmaster-1: Toward a Realistic and Diverse Dialog Dataset”, What is the average number of turns per dialog?",
+      "gold_documents": [
+        "1909.05358"
+      ],
+      "negative": false,
+      "answers": [
+        "The average number of utterances per dialog is about 23 "
+      ],
+      "evidence": [
+        "Multiple turns: The average number of utterances per dialog is about 23 which ensures context-rich language behaviors."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "e574f0f733fb98ecef3c64044004aa7a320439be",
+      "scope": "independent",
+      "query": "In the paper “Transfer Learning Between Related Tasks Using Expected Label Proportions”, How is the expectation regularization loss defined?",
+      "gold_documents": [
+        "1909.00430"
+      ],
+      "negative": false,
+      "answers": [
+        "DISPLAYFORM0"
+      ],
+      "evidence": [
+        "Since INLINEFORM0 is constant, we only need to minimize INLINEFORM1 , therefore the loss function becomes: DISPLAYFORM0"
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "19cdce39e8265e7806212eeee2fd55f8ef2f3d47",
+      "scope": "independent",
+      "query": "In the paper “Large Arabic Twitter Dataset on COVID-19”, How big is the dataset?",
+      "gold_documents": [
+        "2004.04315"
+      ],
+      "negative": false,
+      "answers": [
+        "more than 3,934,610 million tweets"
+      ],
+      "evidence": [
+        "We collected COVID-19 related Arabic tweets from January 1, 2020 until April 15, 2020, using Twitter streaming API and the Tweepy Python library. We have collected more than 3,934,610 million tweets so far. In our dataset, we store the full tweet object including the id of the tweet, username, hashtags, and geolocation of the tweet. We created a list of the most common Arabic keywords associated with COVID-19. Using Twitter’s streaming API, we searched for any tweet containing the keyword(s) in the text of the tweet. Table TABREF1 shows the list of keywords used along with the starting date of tracking each keyword. Furthermore, Table TABREF2 shows the list of hashtags we have been tracking along with the number of tweets collected from each hashtag. Indeed, some tweets were irrelevant, and we kept only those that were relevant to the pandemic."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "b974523a6cbd3cdc1fa924243ccc9711bbc7070d",
+      "scope": "independent",
+      "query": "In the paper “The Logoscope: a Semi-Automatic Tool for Detecting and Documenting French New Words”, How often are the newspaper websites crawled daily?",
+      "gold_documents": [
+        "1810.10797"
+      ],
+      "negative": false,
+      "answers": [
+        "RSS feeds in French on a daily basis"
+      ],
+      "evidence": [
+        "The Logoscope retrieves newspaper articles from several RSS feeds in French on a daily basis. The newspaper articles are preprocessed such that only the journalistic content is kept. The articles are then segmented into paragraphs and word forms. The resulting forms are filtered based on an exclusion list (French words found in several lexicons and corpora). They are then reordered in such a way that those words which are the most likely new word candidates appear on top, using a supervised classification method which will be described more in detail in Section SECREF71 ."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "163a21c0701d5cda15be2d0eb4981a686e54a842",
+      "scope": "independent",
+      "query": "In the paper “Brazilian Lyrics-Based Music Genre Classification Using a BLSTM Network”, what genre was the most difficult to classify?",
+      "gold_documents": [
+        "2003.05377"
+      ],
+      "negative": false,
+      "answers": [
+        " bossa-nova and jovem-guarda genres"
+      ],
+      "evidence": [
+        "The bossa-nova and jovem-guarda genres, which have few instances in the dataset, are among the most difficult ones to classify using the model. The pop genre, by contrast, has a small distribution between the number of songs and the number of artists, and could not be well classified by our model. This may indicate that our model was unable to identify a pattern due to the low number of songs per artist, or that the song lyrics of this genre cover several subjects that are confused with other genres."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "5787ac3e80840fe4cf7bfae7e8983fa6644d6220",
+      "scope": "independent",
+      "query": "In the paper “Generating Classical Chinese Poems from Vernacular Chinese”, What dataset is used for training?",
+      "gold_documents": [
+        "1909.00279"
+      ],
+      "negative": false,
+      "answers": [
+        "We collected a corpus of poems and a corpus of vernacular literature from online resources"
+      ],
+      "evidence": [
+        "Training and Validation Sets We collected a corpus of poems and a corpus of vernacular literature from online resources. The poem corpus contains 163K quatrain poems from Tang Poems and Song Poems, the vernacular literature corpus contains 337K short paragraphs from 281 famous books, the corpus covers various literary forms including prose, fiction and essay. Note that our poem corpus and a vernacular corpus are not aligned. We further split the two corpora into a training set and a validation set."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "24d06808fa3b903140659ee5a471fdfa86279980",
+      "scope": "independent",
+      "query": "In the paper “Non-Parametric Adaptation for Neural Machine Translation”, To which systems do they compare their results against?",
+      "gold_documents": [
+        "1903.00058"
+      ],
+      "negative": false,
+      "answers": [
+        "standard Transformer Base model"
+      ],
+      "evidence": [
+        "We compare the performance of a standard Transformer Base model and our semi-parametric NMT approach on an English-French translation task. We create a new heterogeneous dataset, constructed from a combination of the WMT training set (36M pairs), the IWSLT bilingual corpus (237k pairs), JRC-Acquis (797k pairs) and OpenSubtitles (33M pairs). For WMT, we use newstest 13 for validation and newstest 14 for test. For IWSLT, we use a combination of the test corpora from 2012-14 for validation and test 2015 for eval. For OpenSubtitles and JRC-Acquis, we create our own splits for validation and test, since no benchmark split is publicly available. After deduping, the JRC-Acquis test and validation set contain 6574 and 5121 sentence pairs respectively. The OpenSubtitles test and validation sets contain 3975 and 3488 pairs. For multi-domain training, the validation set is a concatenation of the four individual validation sets."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "c78f18606524539e4c573481e5bf1e0a242cc33c",
+      "scope": "historical",
+      "query": "In the paper “Autocompletion interfaces make crowd workers slower, but their use promotes response diversity”, How many responses did they obtain?",
+      "gold_documents": [
+        "1707.06939"
+      ],
+      "negative": false,
+      "answers": [
+        "1001"
+      ],
+      "evidence": [
+        "We recruited 176 AMT workers to participate in our conceptualization task. Of these workers, 90 were randomly assigned to the Control group and 86 to the AUI group. These workers completed 1001 tasks: 496 tasks in the control and 505 in the AUI. All responses were gathered within a single 24-hour period during April, 2017."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "891cab2e41d6ba962778bda297592c916b432226",
+      "scope": "historical",
+      "query": "In the paper “Machine Translation from Natural Language to Code using Long-Short Term Memory”, What programming language is target language?",
+      "gold_documents": [
+        "1910.11471"
+      ],
+      "negative": false,
+      "answers": [
+        "Python"
+      ],
+      "evidence": [
+        "SMT techniques require a parallel corpus in thr source and thr target language. A text-code parallel corpus similar to Fig. FIGREF12 is used in training. This parallel corpus has 18805 aligned data in it . In source data, the expression of each line code is written in the English language. In target data, the code is written in Python programming language."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    }
+  ]
+}
