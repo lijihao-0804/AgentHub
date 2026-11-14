@@ -151,7 +151,9 @@ def checked_reviews(path, tokens, events):
         if not all(type(vote.get(k)) is bool for k in FIELDS):
             raise ValueError("Missing boolean judgment")
         declared = {str(i) for i in events[task]["citations"]}
-        supports = vote.get("citation_support", {})
+        supports = vote.get("citation_support")
+        if not isinstance(supports, dict):
+            raise ValueError("Missing citation support map")
         if set(supports) != declared or any(type(v) is not bool for v in supports.values()):
             raise ValueError("Each cited ID requires one support judgment")
         if not isinstance(row.get("reason"), str) or not row["reason"].strip():
@@ -175,10 +177,12 @@ def quality(event, label, vote):
         return int(
             label == "unanswerable"
             and vote["refusal_justified"]
+            and not vote["visible_sufficient"]
             and not vote["unsupported_assertion"]
         )
     return int(
         label == "answerable"
+        and vote["visible_sufficient"]
         and all(vote[k] for k in FIELDS[:3])
         and not vote["unsupported_assertion"]
         and not vote["condition_omission"]
@@ -412,6 +416,31 @@ def report(args):
             for a, b in combinations(ARMS, 2)
             for axis in ("official", "source")
         },
+    }
+    # The source audit is the pre-output adjudication. Keep the official analysis visible.
+    baseline = result["paired"]["D-B/source"]
+    strong = result["paired"]["D-C/source"]
+    complete = all(
+        v["status"] not in {"not_run", "unknown_outcome", "stopped"}
+        for r in rows
+        for v in r["arms"].values()
+    ) and not any(group.get("unknown_dispatch_or_response") for group in result["ledger"].values())
+    eligible = bool(
+        complete
+        and baseline["n"]
+        and baseline["delta"] >= 0.05
+        and baseline["paired_source_ci95"][0] > 0
+    )
+    result["inference"] = {
+        "complete": complete,
+        "primary_axis": "source",
+        "D_vs_B": "REQUIRES_FAILURE_REVIEW" if eligible else "INCONCLUSIVE",
+        "D_vs_C_positive_interval": bool(
+            complete and strong["n"] and strong["paired_source_ci95"][0] > 0
+        ),
+        "D_new_failures_vs_B": [
+            r["id"] for r in rows if (r["arms"]["B"]["source"], r["arms"]["D"]["source"]) == (1, 0)
+        ],
     }
     write(args.out / "report.json", result)
     return result

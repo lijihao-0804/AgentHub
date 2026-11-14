@@ -100,7 +100,7 @@ class AliyunMeter:
             and sdk.max_retries == kwargs.get("num_retries", 0) == 0
             and not kwargs.get("stream")
             and type(kwargs.get("max_tokens")) is int
-            and 0 < kwargs["max_tokens"] <= OUTPUT
+            and 0 < kwargs["max_tokens"] <= (256 if self.stage == "selector" else OUTPUT)
         ):
             raise ValueError("Route, model, stream, retry or output limit differs from protocol")
         fields = ("messages", "tools", "response_format", "max_tokens", "temperature", "extra_body")

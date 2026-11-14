@@ -19,7 +19,10 @@ from packages.agent_runtime.context_budget import ContextCategory
 from packages.knowledge import citation_qa as qa
 from packages.knowledge.contracts import RetrievedEvidence
 from packages.knowledge.evidence_set import EvidenceSetSelector
-from packages.model_gateway.adapters.litellm.adapter import _normalize_response
+from packages.model_gateway.adapters.litellm.adapter import (
+    _is_verified_aliyun_beijing_openai_endpoint,
+    _normalize_response,
+)
 from packages.model_gateway.adapters.litellm.provider_http import guarded_sdk_client
 from packages.model_gateway.contracts import ModelCapabilities, ModelMessage, ModelRequest
 from packages.model_gateway.egress import ProviderEgressPolicy
@@ -81,9 +84,16 @@ async def evaluate(case, arm, gateway):
     candidates.sort(key=lambda r: (-r.rerank_score, -r.retrieval_score, r.chunk_id))
     ranked = candidates
     if arm == "C":
-        result = await EvidenceSetSelector(gateway("selector"), plan(256)).select(
-            CONTEXT, case["query"], tuple(candidates), max_items=6
-        )
+        selector = gateway("selector")
+        try:
+            result = await EvidenceSetSelector(selector, plan(256)).select(
+                CONTEXT, case["query"], tuple(candidates), max_items=6
+            )
+        except (ValueError, qa.ModelGatewayError) as exc:
+            # Only a confirmed provider response can be counted as a selector output failure.
+            if not selector.events or not selector.events[-1].get("id"):
+                raise
+            return dict(status="selector_invalid_output", reason=type(exc).__name__)
         ranked = result.rank_order
     evidence = qa._select_evidence(tuple(ranked[:6]), max_chars=6000)
     visible = [dict(number=r.id, **asdict(r.evidence)) for r in evidence]
@@ -154,6 +164,9 @@ def verify_inputs(pools):
 
 async def run(pools, ledger, directory):
     cases = verify_inputs(pools)
+    endpoint, _ = _credentials()
+    if not _is_verified_aliyun_beijing_openai_endpoint(endpoint.removesuffix("/chat/completions")):
+        raise ValueError("Study requires the verified Aliyun Beijing endpoint")
     directory.mkdir(parents=True, exist_ok=False)
     with closing(sqlite3.connect(f"{ledger.resolve().as_uri()}?mode=rw", uri=True)) as db:
         if db.execute("SELECT count(*) FROM wires WHERE stage IN ('answer','selector')").fetchone()[
@@ -169,7 +182,7 @@ async def run(pools, ledger, directory):
             "head": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip(),
-            "pools_sha256": digest(pools.read_bytes()),
+            "pools_sha256": digest(pools.read_bytes().replace(b"\r\n", b"\n")),
             "model": MODEL,
             "endpoint": "Beijing /compatible-mode/v1/chat/completions",
         },
@@ -197,9 +210,6 @@ async def run(pools, ledger, directory):
                             ),
                         )
                     )
-                except (ValueError, qa.ModelGatewayError) as exc:
-                    # Already settled selector malformed JSON or selection contract violations.
-                    record.update(status="selection_or_admission_error", reason=type(exc).__name__)
                 except Exception as exc:
                     record.update(status="stopped", reason=type(exc).__name__)
                     raise

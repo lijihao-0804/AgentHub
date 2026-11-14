@@ -134,3 +134,18 @@ def test_paired_cluster_and_degenerate_ci():
     assert (result["n"], result["sources"], result["loss"], result["win"]) == (3, 2, 2, 1)
     assert result["delta"] == pytest.approx(-1 / 3)
     assert result["paired_source_ci95"] == [-1, 1]
+
+
+def test_success_and_refusal_require_consistent_visible_support():
+    event = {"status": "ok", "insufficient": False}
+    vote = dict.fromkeys(score.FIELDS, True)
+    vote.update(
+        unsupported_assertion=False,
+        condition_omission=False,
+        visible_sufficient=False,
+        citation_support={"1": True},
+    )
+    assert score.quality(event, "answerable", vote) == 0
+    event["insufficient"] = True
+    vote["visible_sufficient"] = True
+    assert score.quality(event, "unanswerable", vote) == 0
