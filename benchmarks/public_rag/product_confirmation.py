@@ -18,6 +18,7 @@ from benchmarks.public_rag.fiqa_confirmation import _credentials
 from packages.agent_runtime.context_budget import ContextCategory
 from packages.knowledge import citation_qa as qa
 from packages.knowledge.contracts import RetrievedEvidence
+from packages.knowledge.evidence_records import drop_overlapping_evidence
 from packages.knowledge.evidence_set import EvidenceSetSelector
 from packages.model_gateway.adapters.litellm.adapter import (
     _is_verified_aliyun_beijing_openai_endpoint,
@@ -82,12 +83,14 @@ async def evaluate(case, arm, gateway):
             for r, s in zip(candidates, case["sentence_scores"], strict=True)
         ]
     candidates.sort(key=lambda r: (-r.rerank_score, -r.retrieval_score, r.chunk_id))
-    ranked = candidates
+    # Match HybridKnowledgeRetriever's post-ranking, pre-count containment check.
+    # A new record can fill the released slot; the source comparison still shares one RRF pool.
+    ranked = drop_overlapping_evidence(candidates)
     if arm == "C":
         selector = gateway("selector")
         try:
             result = await EvidenceSetSelector(selector, plan(256)).select(
-                CONTEXT, case["query"], tuple(candidates), max_items=6
+                CONTEXT, case["query"], ranked, max_items=6
             )
         except (ValueError, qa.ModelGatewayError) as exc:
             # Only a confirmed provider response can be counted as a selector output failure.
