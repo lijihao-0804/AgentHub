@@ -1,0 +1,562 @@
+{
+  "771b373d09e6eb50a74fffbf72d059ad44e73ab0": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "The two annotation rounds are in the delivered evidence; the answer says the procedure is unavailable."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "The two annotation rounds are in the delivered evidence; the answer says the procedure is unavailable."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "The two annotation rounds are in the delivered evidence; the answer says the procedure is unavailable."
+    }
+  },
+  "cb4727cd5643dabc3f5c95e851d5313f5d979bdc": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "No numeric improvement over prior Chinese CoNLL-2009 state of the art in the evidence delivered."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "No numeric improvement over prior Chinese CoNLL-2009 state of the art in the evidence delivered."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "No numeric improvement over prior Chinese CoNLL-2009 state of the art in the evidence delivered."
+    }
+  },
+  "4d30c2223939b31216f2e90ef33fe0db97e962ac": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "11,248 German headwords are explicitly paired with dialect pronunciations; 9,000 is an annotation subset."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "11,248 German headwords are explicitly paired with dialect pronunciations; 9,000 is an annotation subset."
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper states that 11'248 standard German written words are paired with phonetic representations in six Swiss dialects [4]"
+    }
+  },
+  "0747cecb3c72594c5d15ba18490566be1ffdbfad": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "三臂均列相关工作，却没有把任何系统确认为实际比较对象；C、D 原始 other_accepted 分组与正文判断不同。"
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "三臂均列相关工作，却没有把任何系统确认为实际比较对象；C、D 原始 other_accepted 分组与正文判断不同。"
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "三臂均列相关工作，却没有把任何系统确认为实际比较对象；C、D 原始 other_accepted 分组与正文判断不同。"
+    }
+  },
+  "5bb96b255dab3e47a8a68b1ffd7142d0e21ebe2a": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 Tweet subjectivity is measured using two sources: TextBlob and the Opinion Finder tool"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 Tweet subjectivity is measured using two sources: TextBlob and the Opinion Finder tool"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 Tweet subjectivity is measured using a subjectivity level/score between 0 and 1"
+    }
+  },
+  "1ccfd288f746c35006f5847297ab52020729f523": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The dataset comes from five categories (domains) of Reddit communities: abuse, social, anxiety, PTSD, and financial [1][5]"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The dataset comes from ten subreddits grouped into five domains: abuse, social, anxiety, PTSD, and financial [1][2]"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The dataset comes from five different categories of Reddit communities [1]"
+    }
+  },
+  "c2da598346b74541c78ecff5c9586b3857dd01b5": {
+    "B": {
+      "shape": "partial_answer",
+      "basis": "给出有条件的定性优劣或实证比较，缺少定量差值。保留已有比较和条件。"
+    },
+    "C": {
+      "shape": "partial_answer",
+      "basis": "给出有条件的定性优劣或实证比较，缺少定量差值。保留已有比较和条件。"
+    },
+    "D": {
+      "shape": "partial_answer",
+      "basis": "给出有条件的定性优劣或实证比较，缺少定量差值。保留已有比较和条件。"
+    }
+  },
+  "5b99f74bb25bc88677621443bf065d96d84895ab": {
+    "B": {
+      "shape": "partial_answer",
+      "basis": "回答说明共享量预先固定，并提供适用范围或其他性质，正式定义不全。"
+    },
+    "C": {
+      "shape": "partial_answer",
+      "basis": "回答说明共享量预先固定，并提供适用范围或其他性质，正式定义不全。"
+    },
+    "D": {
+      "shape": "partial_answer",
+      "basis": "回答说明共享量预先固定，并提供适用范围或其他性质，正式定义不全。"
+    }
+  },
+  "d803b782023553bbf9b36551fbc888ad189b1f29": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 Human evaluation was conducted on Amazon Mechanical Turk using master-level workers with good prior approval rates"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 Human evaluation was conducted via Amazon Mechanical Turk with master-level workers (who have good prior approval rates), who performed a human compar"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The human evaluation was conducted using Amazon Mechanical Turk with master-level workers (who have good prior approval rates)"
+    }
+  },
+  "c20bb0847ced490a793657fbaf6afb5ef54dad81": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "The correlation analysis uses 503 songs; no rationale for limiting the sample to 503 is given."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "The correlation analysis uses 503 songs; no rationale for limiting the sample to 503 is given."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "The correlation analysis uses 503 songs; no rationale for limiting the sample to 503 is given."
+    }
+  },
+  "e86d381322c8db2b74a13a8e23082ddb010c1e40": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "No end-to-end mapping performance comparison can be established; for D even the target paper is absent."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "No end-to-end mapping performance comparison can be established; for D even the target paper is absent."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "No end-to-end mapping performance comparison can be established; for D even the target paper is absent."
+    }
+  },
+  "28e7711f94e093137eb8828f0b1eff1b05e4fa38": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "The target paper explains same-speaker concatenation, but the failed B/D packets give clustering and adjacency without the construction rule."
+    },
+    "C": {
+      "shape": "partial_answer",
+      "basis": "提供一部分实际分段证据，保留细化方法的限制。"
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "The target paper explains same-speaker concatenation, but the failed B/D packets give clustering and adjacency without the construction rule."
+    }
+  },
+  "db62d5d83ec187063b57425affe73fef8733dd28": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper introduces a Markov random field with an optional neural parameterization that infers how a sentence must change when altering the grammatic"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper uses a Markov random field (with an optional neural parameterization) to infer how the remaining morpho-syntactic tags must be updated to pr"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper introduces a Markov random field with an optional neural parameterization that infers how a sentence must change to preserve morpho-syntacti"
+    }
+  },
+  "6e2899c444baaeb0469599f65722780894f90f29": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "The BLI task is identified; the MAP/single-translation MRR passage is absent from B."
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 BLI is cast as a ranking task: after a shared cross-lingual embedding space has been induced, the task is to retrieve target-language translations for"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 BLI (bilingual lexicon induction) is the paper's evaluation task: after a shared cross-lingual embedding space has been induced, the task is to retrie"
+    }
+  },
+  "f91835f17c0086baec65ebd99d12326ae1ae87d2": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 They use an off-the-shelf parser, specifically Stanford CoreNLP, to create binary constituency parses of the source sentences, which are then lineariz"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 They use an off-the-shelf parser, Stanford CoreNLP, to create binary constituency parses of the source sentences [1]"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 They use an off-the-shelf parser, Stanford CoreNLP, to create binary constituency parses of the source sentences [5]"
+    }
+  },
+  "b3238158392684a5a6b62a7eabaa2a10fbecf3e6": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper states that KGR10 was created by extending the KGR7 1G corpus to become KGR10 with 4 billion words [5]"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The KGR10 corpus (also called plWordNet Corpus 10.0) was created as an extension of the KGR7 corpus using the CorpoGrabber toolchain, which automatica"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The KGR10 corpus (plWordNet Corpus 10.0) was created using CorpoGrabber, a toolchain for automatic acquisition and extraction of website content that "
+    }
+  },
+  "3996438cef34eb7bedaa6745b190c69553cf246b": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "Dependency parsing LAS values and point improvements are reported, without a definition of LAS."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "Dependency parsing LAS values and point improvements are reported, without a definition of LAS."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "Dependency parsing LAS values and point improvements are reported, without a definition of LAS."
+    }
+  },
+  "fbabde18ebec5852e3d46b1f8ce0afb42350ce62": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "The user study is described; the claim that it was the only assessment and the rationale for exclusivity are not established."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "The user study is described; the claim that it was the only assessment and the rationale for exclusivity are not established."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "The user study is described; the claim that it was the only assessment and the rationale for exclusivity are not established."
+    }
+  },
+  "4904ef32a8f84cf2f53b1532ccf7aa77273b3d19": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "No comparative BLEU margin is available; rerun variation is a different quantity."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "No comparative BLEU margin is available; rerun variation is a different quantity."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "No comparative BLEU margin is available; rerun variation is a different quantity."
+    }
+  },
+  "601f96770726a0063faf9bacd5db01c4af5add1f": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper states that the system is based on limited knowledge and uses rule-based and dictionary-based methods combined, which the authors prefer to "
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper describes a system that uses rule-based and dictionary-based methods combined, which the authors prefer to call \"resource-based\" [2]"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper describes a system developed for the PharmaCoNER shared task that uses rule-based and dictionary-based methods combined, an approach the aut"
+    }
+  },
+  "a60030cfd95d0c10b1f5116c594d50cb96c87ae6": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "3,400 hours refers to the speech data; elapsed training time and epoch count are missing."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "3,400 hours refers to the speech data; elapsed training time and epoch count are missing."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "3,400 hours refers to the speech data; elapsed training time and epoch count are missing."
+    }
+  },
+  "70797f66d96aa163a3bee2be30a328ba61c40a18": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper evaluates knowledge extraction performance by conducting a series of experiments on a dataset of 14 textual documents (TDs) covering subject"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper evaluates knowledge extraction performance by conducting a series of experiments on a dataset of 14 textual documents (TDs) whose content co"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper evaluates knowledge extraction performance by conducting a series of experiments on a dataset of 14 textual documents (TDs) covering subject"
+    }
+  },
+  "071bcb4b054215054f17db64bfd21f17fd9e1a80": {
+    "B": {
+      "shape": "partial_answer",
+      "basis": "根据片段说明会话层的组件和作用，保留实现机制的已知边界。"
+    },
+    "C": {
+      "shape": "partial_answer",
+      "basis": "根据片段说明会话层的组件和作用，保留实现机制的已知边界。"
+    },
+    "D": {
+      "shape": "partial_answer",
+      "basis": "根据片段说明会话层的组件和作用，保留实现机制的已知边界。"
+    }
+  },
+  "736c74d2f61ac8d3ac31c45c6510a36c767a5d6d": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 In the paper, multi-instance learning (MIL) is used as a content selection mechanism that automatically discovers correspondences, namely alignments, "
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 In the paper, multi-instance learning (MIL) is used as the basis for a specific content selection mechanism that automatically discovers correspondenc"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 In the paper, multi-instance learning (MIL) is used as a content selection mechanism that automatically discovers correspondences, namely alignments, "
+    }
+  },
+  "892c346617a3391c7dafc9da1b65e5ea3890294d": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The evidence describes SIM as a slot-independent neural model with a single global neural structure that does not depend on slots [2]"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 SIM uses a single global neural architecture that is independent of slots, rather than slot-specific network components [1]"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 SIM is a slot-independent neural model that uses a single global neural structure independent of slots, relying on semantic similarity between the use"
+    }
+  },
+  "df9d16a2c4983a0ff46081e3ff4d6e7ef3338264": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The approach uses label propagation over an undirected graph in which each node holds a probability distribution over labels (possibly empty for unlab"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The approach uses label propagation over an undirected graph in which each node holds a probability distribution over labels (possibly empty for unlab"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper describes label propagation as a semi-supervised technique for domains naturally described by an undirected graph, where each node holds a p"
+    }
+  },
+  "045dbdbda5d96a672e5c69442e30dbf21917a1ee": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "NetAb architecture is explained, but no comparison to GANs is available."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "NetAb architecture is explained, but no comparison to GANs is available."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "NetAb architecture is explained, but no comparison to GANs is available."
+    }
+  },
+  "b653f55d1dad5cd262a99502f63bf44c58ccc8cf": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The embeddings are learned on the Fisher Corpus English Part 1 (LDC2004S13), with testing on the Suicide Risk Assessment corpus along with Fisher [3]"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The embeddings are learned (trained) on the Fisher Corpus English Part 1 (LDC2004S13), with training using a subset of 80% of all Fisher sessions and "
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "The D packet describes training on conversations but does not identify the Fisher corpus."
+    }
+  },
+  "d4a6f5034345036dbc2d4e634a8504f79d42ca69": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The experiments use the WMT'14 English-French (En-Fr) and English-German (En-De) datasets [1]"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The experiments use the WMT'14 English-French (En-Fr) and English-German (En-De) datasets [1]"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper uses the WMT'14 English-French (En-Fr) and English-German (En-De) datasets [1]"
+    }
+  },
+  "4c88441f8a1b5fce0ca55a6fced34f97260206ae": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 In the paper, the biaffine scorer is described as a biaffine attentional scorer that unifiedly predicts the semantic role for an argument and the sens"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 In the paper, the biaffine scorer is the model's \"Biaffine Attentional Role Scorer,\" which adopts biaffine attention to enhance the role scorer [3]"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The biaffine scorer is the model's role scorer, built on biaffine attention, that directly predicts all semantic role labels for all given word pairs "
+    }
+  },
+  "052d19b456f1795acbb8463312251869cc5b38da": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "B and D refer to evaluation elsewhere; the B-Cubed and generalized quartet distance definitions are absent."
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper evaluates cognate detection using the B-Cubed algorithm, which is based on clusters and reports precision, recall, and F1-score [4]"
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "B and D refer to evaluation elsewhere; the B-Cubed and generalized quartet distance definitions are absent."
+    }
+  },
+  "57fdb0f6cd91b64a000630ecb711550941283091": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "Question scope is ambiguous; implementation obstacles need not constitute risks of NLP. No complete, explicit risk account in these excerpts."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "Question scope is ambiguous; implementation obstacles need not constitute risks of NLP. No complete, explicit risk account in these excerpts."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "Question scope is ambiguous; implementation obstacles need not constitute risks of NLP. No complete, explicit risk account in these excerpts."
+    }
+  },
+  "ee279ace5bc69d15e640da967bd4214fe264aa1a": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "The target-paper chunks do not enumerate MR, MRR and Hits@1/3/10 together."
+    },
+    "C": {
+      "shape": "partial_answer",
+      "basis": "明确给出 Hits@10、Hits@1 与具体比较，同时承认列举不完整。"
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "The target-paper chunks do not enumerate MR, MRR and Hits@1/3/10 together."
+    }
+  },
+  "7ce7edd06925a943e32b59f3e7b5159ccb7acaf6": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The evidence indicates that when the amount of training data was varied from 25% to 100%, using less than 50% of the available data caused the model t"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper reports that when the amount of training data was varied from 25% to 100%, using less than 50% of the available data caused the model to ten"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper reports that when the amount of training data was varied from 25% to 100%, using less than 50% of the available data caused the model to ten"
+    }
+  },
+  "537a786794604ecc473fb3ef6222e0c3cb81f772": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The work used the How2 dataset, which provides 300h of instructional videos, English subtitles and their Portuguese translations [2]"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The work used the How2 dataset, which provides 300h of instructional videos, English subtitles and their Portuguese translations [2]"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The work used the How2 dataset, which provides 300h of instructional videos with English subtitles and Portuguese translations [3]"
+    }
+  },
+  "5f4e6ce4a811c4b3ab07335d89db2fd2a8d8d8b2": {
+    "B": {
+      "shape": "partial_answer",
+      "basis": "多子问中提到参与评估的英语文学专家或评分程序，同时声明评价标准不全。程序信息和出处必须保留。"
+    },
+    "C": {
+      "shape": "partial_answer",
+      "basis": "多子问中提到参与评估的英语文学专家或评分程序，同时声明评价标准不全。程序信息和出处必须保留。"
+    },
+    "D": {
+      "shape": "partial_answer",
+      "basis": "多子问中提到参与评估的英语文学专家或评分程序，同时声明评价标准不全。程序信息和出处必须保留。"
+    }
+  },
+  "7ccf2392422b44ede35a3fbd85bbb1da25adf795": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "Human language / word-association evidence is empirical; no competing model is named as an experimental comparator."
+    },
+    "C": {
+      "shape": "no_generation",
+      "basis": "选择阶段失败，没有生成可判定正文。"
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "Human language / word-association evidence is empirical; no competing model is named as an experimental comparator."
+    }
+  },
+  "e9d882775a132e172eea68ab6ab4621a924bb6b8": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "The variants and benefits of OT are described, without the direct GANE-AP/GANE-OT ranking."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "The variants and benefits of OT are described, without the direct GANE-AP/GANE-OT ranking."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "The variants and benefits of OT are described, without the direct GANE-AP/GANE-OT ranking."
+    }
+  },
+  "83f22814aaed9b5f882168e22a3eac8f5fda3882": {
+    "B": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper measures the correlation between human (manual) groundings and model-generated attention using a rank-correlation metric"
+    },
+    "C": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper measures the correlation between human (manual) groundings and model-generated attention by comparing their rank-correlation, using the VQA-"
+    },
+    "D": {
+      "shape": "substantive_answer",
+      "basis": "正文直接提供与问题有关的内容。开头为 The paper measures the correlation between manual groundings and model-generated groundings using rank-correlation, comparing human attention maps wit"
+    }
+  },
+  "2f4acd34eb2d09db9b5ad9b1eb82cb4a88c13f5b": {
+    "B": {
+      "shape": "whole_refusal",
+      "basis": "The passages describe the stock-prediction task but omit Reuters/Bloomberg identification of the news dataset."
+    },
+    "C": {
+      "shape": "whole_refusal",
+      "basis": "The passages describe the stock-prediction task but omit Reuters/Bloomberg identification of the news dataset."
+    },
+    "D": {
+      "shape": "whole_refusal",
+      "basis": "The passages describe the stock-prediction task but omit Reuters/Bloomberg identification of the news dataset."
+    }
+  }
+}

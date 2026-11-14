@@ -42,8 +42,8 @@ def plan(max_tokens):
 
 
 class Gateway:
-    def __init__(self, ledger, stage, identity, events):
-        self.meter = AliyunMeter(ledger, stage)
+    def __init__(self, ledger, stage, identity, events, *, meter=None):
+        self.meter = meter if meter is not None else AliyunMeter(ledger, stage)
         self.meter.task_id = identity
         self.events = events
 

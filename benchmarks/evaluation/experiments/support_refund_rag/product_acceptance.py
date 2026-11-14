@@ -295,12 +295,13 @@ async def refresh_roles(owner, operator, users):
         client.headers["Authorization"] = "Bearer " + result["access_token"]
 
 
-async def assemble(settings):
+async def assemble(settings, *, components=None):
     engine, factory = create_database(settings.database_url)
     app = create_app(settings)
     app.state.db_session_factory = factory
     queue = app.state.ingestion_queue = _RecordedQueue()
-    components = production_retrieval_components(settings)
+    if components is None:
+        components = production_retrieval_components(settings)
     components.index.ensure_collection()
     for component in (components.dense, components.sparse, components.reranker):
         await asyncio.to_thread(component.warm)
@@ -374,7 +375,16 @@ async def exercise_cases(
             if stage == "refund_dev":
                 order = store.get(case["order_fixture"]["order_id"])
                 ref = order["customer_id"]
-                stack.enter_context(case_scope(FixtureCaseScope(key, order["order_id"], ref)))
+                stack.enter_context(
+                    case_scope(
+                        FixtureCaseScope(
+                            key,
+                            order["order_id"],
+                            ref,
+                            support_answer_policy=getattr(args, "support_answer_policy", None),
+                        )
+                    )
+                )
             else:
                 ref = case["customer_ref"]
             customer = await api(
@@ -552,7 +562,15 @@ async def run(args):
                 kb, snap, uploaded = await policy_snapshot(
                     owner, scope, policies, components, settings, queue
                 )
-                agent, version = await publish(owner, scope, users[0], factory, snap, profile["id"])
+                agent, version = await publish(
+                    owner,
+                    scope,
+                    users[0],
+                    factory,
+                    snap,
+                    profile["id"],
+                    support_answer_policy=getattr(args, "support_answer_policy", None),
+                )
                 report["groups"][stage] = {
                     "snapshot": snap,
                     "version": version,
@@ -600,7 +618,10 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--ledger", type=Path)
     parser.add_argument("--stage", choices=("all", "refund_dev", "refund_new"), default="all")
+    parser.add_argument("--support-answer-policy", choices=("support_facts_v1",))
     args = parser.parse_args()
+    if args.mode == "paid" and args.support_answer_policy:
+        parser.error("the historical paid schedule uses its original published policy")
     if args.mode == "paid" and args.stage != "all":
         parser.error("paid execution must follow the complete frozen schedule")
     if args.mode == "paid" and not (args.ledger and args.ledger.is_file()):

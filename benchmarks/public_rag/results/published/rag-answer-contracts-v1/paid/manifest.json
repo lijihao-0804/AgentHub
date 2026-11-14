@@ -1,0 +1,20 @@
+{
+  "freeze_sha256_lf": "59240a735539c2291ce41e671dd6a7dc3edf7d0dd47a7772026b1d41add4533f",
+  "base_commit": "de45ac6cb3618333b39c1939803c984292477f56",
+  "product_commit": "460533a2f935cacd3f261af219213d092545c2e2",
+  "reporting_commit": "1e53a9b59559103ca6e6cae4ad9b0ea1c60cc127",
+  "pre_run_pr_head": "0548648e3b85faac2eaaeb58bb5bf37264db59f7",
+  "artifacts_sha256_lf_or_binary": {
+    "billing.json": "d0ba82dd81d8dc3fd64b750eb24fea14e46140e857ab4977b137160a0c306654",
+    "delivery-summary.json": "395dc567165e9c3e396fd996de9320c146fb73f846e4dc1371b5dd4c5faa732e",
+    "first-dispatch-evidence.zip": "75115b47e0d27eef84b7b2b4370b5ffecfdfc86dc60294a1bbfc85b07c0e5987",
+    "independent-check.json": "07e4c1499d433681be10a7ff3b0e417e6028f135977acc15881ce17011c99b92",
+    "paired-report.json": "1a9854cebb13b24b96f9cffce1abb7f1ea4fd59750faebf74047eee4d9099665",
+    "README.md": "8f322d8f3bb0caa3ec4fae51a561bdf012f162622cfed7b375a6b990e112fc7b",
+    "receipt-continuation.py.txt": "09605aa329d0a25fceb2e13c748e93f639c6cc6eb4d720d90630a51819876818",
+    "receipt-reconciliation.json": "8cd5c76aec31e6d9811f8ad6016831357fa3e6360d940aa7e4f0bc48dbd65187",
+    "reviews.zip": "a56a0e6d2c2710a78d589f0438eff43a7a907c8dc3c5c726c3c4b71d1d263f33",
+    "wire-delivery.json": "1f1531c10414a6251f06eff85728f3cfc2acb6d34d104ef79f461991f7a4199d",
+    "wire-delivery.md": "fa90bec2e4fc7f1550966bf4285a62e7d50b380939b7bada01342f2af859d8ef"
+  }
+}

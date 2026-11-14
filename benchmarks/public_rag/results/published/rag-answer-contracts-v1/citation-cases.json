@@ -1,0 +1,643 @@
+{
+  "provenance": {
+    "type": "Internally authored synthetic confirmation inputs",
+    "candidate_freeze": "460533a2f935cacd3f261af219213d092545c2e2",
+    "authorship": "Created after freeze by an author independent of implementation, using the protocol alone for task design. No external source, development dataset, output from either arm, or evaluated-model generation was used.",
+    "citation_convention": "Rubric IDs refer to source documents. For source_only cases the required reference belongs solely to the original-source task."
+  },
+  "cases": [
+    {
+      "case_id": "QA01",
+      "input": "青禾馆的普通借书证能预约录音间吗？请说明依据。",
+      "stratum": "complete",
+      "availability": "visible",
+      "should_withhold": false,
+      "documents": [
+        {
+          "source_id": "QA01-A",
+          "source": "证件细则：青禾馆只接受带有声场资格的借书证预约录音间。普通借书证不含声场资格。"
+        },
+        {
+          "source_id": "QA01-B",
+          "source": "阅览规则：普通借书证可以在一层阅览室登记自习。"
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA01-A",
+          "source": "证件细则：青禾馆只接受带有声场资格的借书证预约录音间。普通借书证不含声场资格。"
+        },
+        {
+          "source_id": "QA01-B",
+          "source": "阅览规则：普通借书证可以在一层阅览室登记自习。"
+        }
+      ],
+      "rubric": {
+        "requested": "青禾馆的普通借书证能预约录音间吗？请说明依据。",
+        "known_points": [
+          "普通借书证不能预约录音间"
+        ],
+        "unknown_points": [],
+        "necessary_citations": [
+          "QA01-A"
+        ],
+        "relationships": "预约要求声场资格且普通证无该资格",
+        "full_task_credit": "Supply all requested points and conditions with claim-level support from the indicated visible source(s).",
+        "deductions": [
+          "把阅览权当预约权，或仅说无法确认",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA02",
+      "input": "At Bell Studio, which session should a first-time weaver book if they can attend only after 5 pm?",
+      "stratum": "complete",
+      "availability": "visible",
+      "should_withhold": false,
+      "documents": [
+        {
+          "source_id": "QA02-A",
+          "source": "Bell Studio schedule: Loom Basics starts at 6 pm. Pattern Lab starts at 7 pm. The daytime sampler starts at noon."
+        },
+        {
+          "source_id": "QA02-B",
+          "source": "Bell Studio enrolment: Loom Basics and the daytime sampler admit first-time weavers. Pattern Lab requires completion of Loom Basics."
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA02-A",
+          "source": "Bell Studio schedule: Loom Basics starts at 6 pm. Pattern Lab starts at 7 pm. The daytime sampler starts at noon."
+        },
+        {
+          "source_id": "QA02-B",
+          "source": "Bell Studio enrolment: Loom Basics and the daytime sampler admit first-time weavers. Pattern Lab requires completion of Loom Basics."
+        }
+      ],
+      "rubric": {
+        "requested": "At Bell Studio, which session should a first-time weaver book if they can attend only after 5 pm?",
+        "known_points": [
+          "Book Loom Basics at 6 pm"
+        ],
+        "unknown_points": [],
+        "necessary_citations": [
+          "QA02-A",
+          "QA02-B"
+        ],
+        "relationships": "Intersect time and eligibility; Pattern Lab requires prior completion and the sampler starts too early",
+        "full_task_credit": "Supply all requested points and conditions with claim-level support from the indicated visible source(s).",
+        "deductions": [
+          "Choose Pattern Lab based only on time, or omit the basis for eligibility",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA03",
+      "input": "榆湾菜园把同日采下的香草和番茄交给哪个台位？请分别说明。",
+      "stratum": "complete",
+      "availability": "visible",
+      "should_withhold": false,
+      "documents": [
+        {
+          "source_id": "QA03-A",
+          "source": "榆湾分拣单：当日采摘的叶菜与香草交清洗台，果菜交称量台。"
+        },
+        {
+          "source_id": "QA03-B",
+          "source": "榆湾品类表：番茄归果菜，罗勒归香草。"
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA03-A",
+          "source": "榆湾分拣单：当日采摘的叶菜与香草交清洗台，果菜交称量台。"
+        },
+        {
+          "source_id": "QA03-B",
+          "source": "榆湾品类表：番茄归果菜，罗勒归香草。"
+        }
+      ],
+      "rubric": {
+        "requested": "榆湾菜园把同日采下的香草和番茄交给哪个台位？请分别说明。",
+        "known_points": [
+          "香草交清洗台，番茄交称量台"
+        ],
+        "unknown_points": [],
+        "necessary_citations": [
+          "QA03-A",
+          "QA03-B"
+        ],
+        "relationships": "将品类表的番茄归类与分拣规则联用",
+        "full_task_credit": "Supply all requested points and conditions with claim-level support from the indicated visible source(s).",
+        "deductions": [
+          "错配一个台位或仅给一个去向",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA04",
+      "input": "When may the Willow Club move its monthly reading circle online if the hall is unavailable?",
+      "stratum": "complete",
+      "availability": "visible",
+      "should_withhold": false,
+      "documents": [
+        {
+          "source_id": "QA04-A",
+          "source": "Willow Club procedure: If the hall is unavailable, the coordinator may move the monthly reading circle online only after both hosts consent. No vote of the members is required."
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA04-A",
+          "source": "Willow Club procedure: If the hall is unavailable, the coordinator may move the monthly reading circle online only after both hosts consent. No vote of the members is required."
+        }
+      ],
+      "rubric": {
+        "requested": "When may the Willow Club move its monthly reading circle online if the hall is unavailable?",
+        "known_points": [
+          "After both hosts consent, the coordinator may move it online"
+        ],
+        "unknown_points": [],
+        "necessary_citations": [
+          "QA04-A"
+        ],
+        "relationships": "Hall unavailability triggers the rule but does not itself authorize the move",
+        "full_task_credit": "Supply all requested points and conditions with claim-level support from the indicated visible source(s).",
+        "deductions": [
+          "Require a member vote, give unconditional permission, or withhold the stated condition",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA05",
+      "input": "请按先后顺序写出锦桥展室闭展后，值班员交接留言册的两个动作。",
+      "stratum": "complete",
+      "availability": "visible",
+      "should_withhold": false,
+      "documents": [
+        {
+          "source_id": "QA05-A",
+          "source": "锦桥闭展卡：值班员先在留言册末页记下当日最后一条留言编号，再将留言册装入灰色交接袋。灰袋由次日开馆员开启。"
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA05-A",
+          "source": "锦桥闭展卡：值班员先在留言册末页记下当日最后一条留言编号，再将留言册装入灰色交接袋。灰袋由次日开馆员开启。"
+        }
+      ],
+      "rubric": {
+        "requested": "请按先后顺序写出锦桥展室闭展后，值班员交接留言册的两个动作。",
+        "known_points": [
+          "先在末页记录当天最后一条留言编号，再将册子装入灰色交接袋"
+        ],
+        "unknown_points": [],
+        "necessary_citations": [
+          "QA05-A"
+        ],
+        "relationships": "动作顺序、记录位置和编号对象均有意义",
+        "full_task_credit": "Supply all requested points and conditions with claim-level support from the indicated visible source(s).",
+        "deductions": [
+          "换序、只记留言总数或把开袋写成值班员动作",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA06",
+      "input": "How many spare name cards will Harbor Forum have after setting one at every reserved seat?",
+      "stratum": "complete",
+      "availability": "visible",
+      "should_withhold": false,
+      "documents": [
+        {
+          "source_id": "QA06-A",
+          "source": "Harbor Forum packing slip: The delivery contains 40 blank name cards; none have been used."
+        },
+        {
+          "source_id": "QA06-B",
+          "source": "Harbor Forum seating sheet: There are 33 reserved seats. The remaining seats are for walk-ins and do not receive name cards."
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA06-A",
+          "source": "Harbor Forum packing slip: The delivery contains 40 blank name cards; none have been used."
+        },
+        {
+          "source_id": "QA06-B",
+          "source": "Harbor Forum seating sheet: There are 33 reserved seats. The remaining seats are for walk-ins and do not receive name cards."
+        }
+      ],
+      "rubric": {
+        "requested": "How many spare name cards will Harbor Forum have after setting one at every reserved seat?",
+        "known_points": [
+          "7 spare cards"
+        ],
+        "unknown_points": [],
+        "necessary_citations": [
+          "QA06-A",
+          "QA06-B"
+        ],
+        "relationships": "40 delivered minus one per each of 33 reserved seats",
+        "full_task_credit": "Supply all requested points and conditions with claim-level support from the indicated visible source(s).",
+        "deductions": [
+          "Count walk-ins, use a wrong quantity, or omit support for one operand",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA07",
+      "input": "栖石画会今年把年度合影的摄影任务交给了谁？",
+      "stratum": "insufficient",
+      "availability": "unanswerable",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA07-A",
+          "source": "栖石画会备忘：年度合影定在秋展撤场前进行。委员杜遥负责把成片放进会员相册。"
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA07-A",
+          "source": "栖石画会备忘：年度合影定在秋展撤场前进行。委员杜遥负责把成片放进会员相册。"
+        }
+      ],
+      "rubric": {
+        "requested": "栖石画会今年把年度合影的摄影任务交给了谁？",
+        "known_points": [],
+        "unknown_points": [
+          "摄影执行者身份未知；归档职责不能推出拍摄职责"
+        ],
+        "necessary_citations": [],
+        "relationships": "摄影执行者身份未知；归档职责不能推出拍摄职责",
+        "full_task_credit": "Explicitly withhold the requested fact on the available records. A strict refusal needs no citation. Cite any additional factual claims.",
+        "deductions": [
+          "把杜遥指为摄影者，或称无人负责",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA08",
+      "input": "What is the length of the break between the two acts at Quill Theatre?",
+      "stratum": "insufficient",
+      "availability": "unanswerable",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA08-A",
+          "source": "Quill Theatre programme: The play has two acts with a break in between. The doors open twenty minutes before the first act."
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA08-A",
+          "source": "Quill Theatre programme: The play has two acts with a break in between. The doors open twenty minutes before the first act."
+        }
+      ],
+      "rubric": {
+        "requested": "What is the length of the break between the two acts at Quill Theatre?",
+        "known_points": [],
+        "unknown_points": [
+          "Duration of the inter-act break is unspecified; door-opening lead time measures a different interval"
+        ],
+        "necessary_citations": [],
+        "relationships": "Duration of the inter-act break is unspecified; door-opening lead time measures a different interval",
+        "full_task_credit": "Explicitly withhold the requested fact on the available records. A strict refusal needs no citation. Cite any additional factual claims.",
+        "deductions": [
+          "Give twenty minutes or infer a customary duration",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA09",
+      "input": "松贝合唱团这次用什么方式打破曲目投票的平局？",
+      "stratum": "insufficient",
+      "availability": "unanswerable",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA09-A",
+          "source": "松贝合唱团会议摘要：两首候选曲各获九票。会议结束时记录员收存了投票纸。"
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA09-A",
+          "source": "松贝合唱团会议摘要：两首候选曲各获九票。会议结束时记录员收存了投票纸。"
+        }
+      ],
+      "rubric": {
+        "requested": "松贝合唱团这次用什么方式打破曲目投票的平局？",
+        "known_points": [],
+        "unknown_points": [
+          "平局后的处理方式未知；票数仅证明平局"
+        ],
+        "necessary_citations": [],
+        "relationships": "平局后的处理方式未知；票数仅证明平局",
+        "full_task_credit": "Explicitly withhold the requested fact on the available records. A strict refusal needs no citation. Cite any additional factual claims.",
+        "deductions": [
+          "推断抽签、重新投票、已经取消或决定不再处理",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA10",
+      "input": "Where does the North Arcade stallholder collect the blue tablecloth?",
+      "stratum": "insufficient",
+      "availability": "source_only",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA10-A",
+          "source": "North Arcade setup note: Every stallholder uses one blue tablecloth. Fold used cloths onto the cart beside the exit."
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA10-A",
+          "source": "North Arcade setup note: Every stallholder uses one blue tablecloth. Fold used cloths onto the cart beside the exit."
+        },
+        {
+          "source_id": "QA10-B",
+          "source": "North Arcade issue slip: Collect the clean blue tablecloth from the linen desk on the mezzanine."
+        }
+      ],
+      "rubric": {
+        "requested": "Where does the North Arcade stallholder collect the blue tablecloth?",
+        "known_points": [
+          "At the linen desk on the mezzanine"
+        ],
+        "unknown_points": [
+          "The requested fact is unknown in the visible snapshot."
+        ],
+        "necessary_citations": [
+          "QA10-B"
+        ],
+        "relationships": "Collection point is absent from visible note; used-cloth return point differs",
+        "full_task_credit": "The original-source task requires the stated answer supported by the extra reference. A justified refusal earns visible-evidence withholding credit only. The unseen reference cannot be cited as visible evidence.",
+        "deductions": [
+          "Give the exit cart as collection point or claim visible evidence confirms the mezzanine",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA11",
+      "input": "弦叶乐社的节拍器借出后，最迟须在什么时候归还？",
+      "stratum": "insufficient",
+      "availability": "source_only",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA11-A",
+          "source": "弦叶乐社借用单：领取节拍器时请核对编号，并由领用人在借用单上签字。"
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA11-A",
+          "source": "弦叶乐社借用单：领取节拍器时请核对编号，并由领用人在借用单上签字。"
+        },
+        {
+          "source_id": "QA11-B",
+          "source": "弦叶乐社归还条款：借出的节拍器须在下一次合奏开始前归还。"
+        }
+      ],
+      "rubric": {
+        "requested": "弦叶乐社的节拍器借出后，最迟须在什么时候归还？",
+        "known_points": [
+          "下一次合奏开始前"
+        ],
+        "unknown_points": [
+          "The requested fact is unknown in the visible snapshot."
+        ],
+        "necessary_citations": [
+          "QA11-B"
+        ],
+        "relationships": "领用手续未涉及归还期限；期限只在归还条款中",
+        "full_task_credit": "The original-source task requires the stated answer supported by the extra reference. A justified refusal earns visible-evidence withholding credit only. The unseen reference cannot be cited as visible evidence.",
+        "deductions": [
+          "将签字时点当期限或编造具体日期",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA12",
+      "input": "Which symbol does Reed Walk use on its printed map to mark a quiet rest point?",
+      "stratum": "insufficient",
+      "availability": "source_only",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA12-A",
+          "source": "Reed Walk field note: Quiet rest points have benches. A crescent is painted on the benches to help staff identify them for maintenance."
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA12-A",
+          "source": "Reed Walk field note: Quiet rest points have benches. A crescent is painted on the benches to help staff identify them for maintenance."
+        },
+        {
+          "source_id": "QA12-B",
+          "source": "Reed Walk print legend: On the printed map, a hollow diamond denotes a quiet rest point."
+        }
+      ],
+      "rubric": {
+        "requested": "Which symbol does Reed Walk use on its printed map to mark a quiet rest point?",
+        "known_points": [
+          "A hollow diamond"
+        ],
+        "unknown_points": [
+          "The requested fact is unknown in the visible snapshot."
+        ],
+        "necessary_citations": [
+          "QA12-B"
+        ],
+        "relationships": "Bench maintenance markings do not determine the printed legend",
+        "full_task_credit": "The original-source task requires the stated answer supported by the extra reference. A justified refusal earns visible-evidence withholding credit only. The unseen reference cannot be cited as visible evidence.",
+        "deductions": [
+          "Give the crescent or cite the field note as proof of the map symbol",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA13",
+      "input": "请分别回答叠影放映会的入场凭证、散场出口和映后讨论的主持人；资料没有指明的项目请标明未知。",
+      "stratum": "partial",
+      "availability": "partial",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA13-A",
+          "source": "叠影放映会入场单：凭当晚的纸质票根入场，票根在入口处查验。"
+        },
+        {
+          "source_id": "QA13-B",
+          "source": "叠影观众须知：散场时统一走西廊出口。映后讨论在小厅举行。"
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA13-A",
+          "source": "叠影放映会入场单：凭当晚的纸质票根入场，票根在入口处查验。"
+        },
+        {
+          "source_id": "QA13-B",
+          "source": "叠影观众须知：散场时统一走西廊出口。映后讨论在小厅举行。"
+        }
+      ],
+      "rubric": {
+        "requested": "请分别回答叠影放映会的入场凭证、散场出口和映后讨论的主持人；资料没有指明的项目请标明未知。",
+        "known_points": [
+          "当晚的纸质票根；西廊出口"
+        ],
+        "unknown_points": [
+          "讨论主持人未知；小厅是地点"
+        ],
+        "necessary_citations": [
+          "QA13-A",
+          "QA13-B"
+        ],
+        "relationships": "讨论主持人未知；小厅是地点",
+        "full_task_credit": "Supply every known point with its supporting visible citation(s) and explicitly identify each unknown.",
+        "deductions": [
+          "遗漏任何一项、猜测主持人或用小厅代替人名",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA14",
+      "input": "For a Fern Exchange swap, tell me what label a packet needs and the maximum number of packets one visitor may bring. Mark any unknown part.",
+      "stratum": "partial",
+      "availability": "partial",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA14-A",
+          "source": "Fern Exchange packet guide: Write the plant name and harvest month on each packet. A tray on the welcome table holds twelve packets."
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA14-A",
+          "source": "Fern Exchange packet guide: Write the plant name and harvest month on each packet. A tray on the welcome table holds twelve packets."
+        }
+      ],
+      "rubric": {
+        "requested": "For a Fern Exchange swap, tell me what label a packet needs and the maximum number of packets one visitor may bring. Mark any unknown part.",
+        "known_points": [
+          "Plant name and harvest month on each packet"
+        ],
+        "unknown_points": [
+          "Per-visitor maximum unknown; tray capacity is a different quantity"
+        ],
+        "necessary_citations": [
+          "QA14-A"
+        ],
+        "relationships": "Per-visitor maximum unknown; tray capacity is a different quantity",
+        "full_task_credit": "Supply every known point with its supporting visible citation(s) and explicitly identify each unknown.",
+        "deductions": [
+          "Treat twelve as an individual cap, claim unlimited packets, or omit a label field",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA15",
+      "input": "岚岸工坊这批陶杯的交接记录能说明谁签收、是否缺件吗？请逐项答复，把无法判断的项目标为未知。",
+      "stratum": "partial",
+      "availability": "partial",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA15-A",
+          "source": "岚岸工坊交接记录：周榕签收了陶杯外箱。交接时外箱封条完整，签收表的箱内件数栏为空。"
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA15-A",
+          "source": "岚岸工坊交接记录：周榕签收了陶杯外箱。交接时外箱封条完整，签收表的箱内件数栏为空。"
+        }
+      ],
+      "rubric": {
+        "requested": "岚岸工坊这批陶杯的交接记录能说明谁签收、是否缺件吗？请逐项答复，把无法判断的项目标为未知。",
+        "known_points": [
+          "周榕签收"
+        ],
+        "unknown_points": [
+          "是否缺件未知；外箱封条和空白数量栏均不能证明数量齐全"
+        ],
+        "necessary_citations": [
+          "QA15-A"
+        ],
+        "relationships": "是否缺件未知；外箱封条和空白数量栏均不能证明数量齐全",
+        "full_task_credit": "Supply every known point with its supporting visible citation(s) and explicitly identify each unknown.",
+        "deductions": [
+          "据封条完整回答无缺件、据空栏回答有缺件、或略过签收者",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    },
+    {
+      "case_id": "QA16",
+      "input": "For the Kite Archive's audio tour, give the download format, whether playback requires a connection after download, and the recording language. Mark any unknown item.",
+      "stratum": "partial",
+      "availability": "partial",
+      "should_withhold": true,
+      "documents": [
+        {
+          "source_id": "QA16-A",
+          "source": "Kite Archive media sheet: The audio tour downloads as an MP3 file. The printed guide is available in French."
+        },
+        {
+          "source_id": "QA16-B",
+          "source": "Kite Archive playback guide: A fully downloaded audio tour can be played offline."
+        }
+      ],
+      "full_source": [
+        {
+          "source_id": "QA16-A",
+          "source": "Kite Archive media sheet: The audio tour downloads as an MP3 file. The printed guide is available in French."
+        },
+        {
+          "source_id": "QA16-B",
+          "source": "Kite Archive playback guide: A fully downloaded audio tour can be played offline."
+        }
+      ],
+      "rubric": {
+        "requested": "For the Kite Archive's audio tour, give the download format, whether playback requires a connection after download, and the recording language. Mark any unknown item.",
+        "known_points": [
+          "MP3; a fully downloaded tour plays without a connection"
+        ],
+        "unknown_points": [
+          "Recording language unknown; French is specified for the printed guide"
+        ],
+        "necessary_citations": [
+          "QA16-A",
+          "QA16-B"
+        ],
+        "relationships": "Recording language unknown; French is specified for the printed guide",
+        "full_task_credit": "Supply every known point with its supporting visible citation(s) and explicitly identify each unknown.",
+        "deductions": [
+          "Infer French audio, omit the completed-download condition, or withhold a supported item",
+          "Any additional unsupported factual claim or mismatched citation fails strict full-task credit."
+        ]
+      }
+    }
+  ]
+}

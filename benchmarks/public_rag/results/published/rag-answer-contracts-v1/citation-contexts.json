@@ -1,0 +1,516 @@
+{
+  "QA01": {
+    "candidate_ids": [
+      "45c882e1e2cab9c14e1a1e55efa8ada281d99df45829e21c54ecddc821007b25",
+      "f0906019fe6dcc16c053a7107a35694b6bc9e75681c966f7e4701b0455388034"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA01-A",
+        "document_revision_id": "bf0ad86d-2f25-5d55-bb18-e635c2680db6",
+        "chunk_id": "45c882e1e2cab9c14e1a1e55efa8ada281d99df45829e21c54ecddc821007b25",
+        "source": "QA01-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 39
+        },
+        "text": "证件细则：青禾馆只接受带有声场资格的借书证预约录音间。普通借书证不含声场资格。",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 7.0390625,
+        "metadata": {
+          "document_name": "QA01-A"
+        }
+      },
+      {
+        "number": 2,
+        "document_id": "QA01-B",
+        "document_revision_id": "f2ce6f26-c3d1-5c09-9cec-4521507a590a",
+        "chunk_id": "f0906019fe6dcc16c053a7107a35694b6bc9e75681c966f7e4701b0455388034",
+        "source": "QA01-B",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 23
+        },
+        "text": "阅览规则：普通借书证可以在一层阅览室登记自习。",
+        "retrieval_score": 0.03225806451612903,
+        "rerank_score": 0.994140625,
+        "metadata": {
+          "document_name": "QA01-B"
+        }
+      }
+    ]
+  },
+  "QA02": {
+    "candidate_ids": [
+      "17a2443ebd5ddee5b1b134cee70b14ef01aa47e2f46d8a36e91e98ca579a46f2",
+      "4857535ee62686b13e94c8ddbad223c41d2e1e9812cb20e2c39432339f0839c3"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA02-B",
+        "document_revision_id": "878cfb49-8434-5485-8076-441f6173321a",
+        "chunk_id": "17a2443ebd5ddee5b1b134cee70b14ef01aa47e2f46d8a36e91e98ca579a46f2",
+        "source": "QA02-B",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 132
+        },
+        "text": "Bell Studio enrolment: Loom Basics and the daytime sampler admit first-time weavers. Pattern Lab requires completion of Loom Basics.",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 0.2415771484375,
+        "metadata": {
+          "document_name": "QA02-B"
+        }
+      },
+      {
+        "number": 2,
+        "document_id": "QA02-A",
+        "document_revision_id": "4dd6a22b-f7ca-5d91-9c65-43d65e162d9e",
+        "chunk_id": "4857535ee62686b13e94c8ddbad223c41d2e1e9812cb20e2c39432339f0839c3",
+        "source": "QA02-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 113
+        },
+        "text": "Bell Studio schedule: Loom Basics starts at 6 pm. Pattern Lab starts at 7 pm. The daytime sampler starts at noon.",
+        "retrieval_score": 0.03225806451612903,
+        "rerank_score": -2.044921875,
+        "metadata": {
+          "document_name": "QA02-A"
+        }
+      }
+    ]
+  },
+  "QA03": {
+    "candidate_ids": [
+      "fd182f2afc7ce777946a3fd15182d42cb0b8e845d483dbfad825aee58f33a149",
+      "11fd30650ab7b3036d9778c5f47caa140d6299c81c1d580ff60b2815329cc151"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA03-A",
+        "document_revision_id": "0d0ba40f-d0af-5d4f-9694-ab6e33c6244e",
+        "chunk_id": "fd182f2afc7ce777946a3fd15182d42cb0b8e845d483dbfad825aee58f33a149",
+        "source": "QA03-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 28
+        },
+        "text": "榆湾分拣单：当日采摘的叶菜与香草交清洗台，果菜交称量台。",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 4.6875,
+        "metadata": {
+          "document_name": "QA03-A"
+        }
+      },
+      {
+        "number": 2,
+        "document_id": "QA03-B",
+        "document_revision_id": "9e1db767-b338-570e-8688-fce9d921d516",
+        "chunk_id": "11fd30650ab7b3036d9778c5f47caa140d6299c81c1d580ff60b2815329cc151",
+        "source": "QA03-B",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 18
+        },
+        "text": "榆湾品类表：番茄归果菜，罗勒归香草。",
+        "retrieval_score": 0.03225806451612903,
+        "rerank_score": -2.330078125,
+        "metadata": {
+          "document_name": "QA03-B"
+        }
+      }
+    ]
+  },
+  "QA04": {
+    "candidate_ids": [
+      "a956bdae1484733b3edca0d2565384dd86cf00d861f86cdfd53d525edf6a6839"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA04-A",
+        "document_revision_id": "c285716c-db95-511b-ab79-d380797a636c",
+        "chunk_id": "a956bdae1484733b3edca0d2565384dd86cf00d861f86cdfd53d525edf6a6839",
+        "source": "QA04-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 176
+        },
+        "text": "Willow Club procedure: If the hall is unavailable, the coordinator may move the monthly reading circle online only after both hosts consent. No vote of the members is required.",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 5.66796875,
+        "metadata": {
+          "document_name": "QA04-A"
+        }
+      }
+    ]
+  },
+  "QA05": {
+    "candidate_ids": [
+      "adf9b247c2f0c01aace694976c2e51a424159a2852e10b62f7ac8fc40a83b074"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA05-A",
+        "document_revision_id": "fba89830-3ed9-5793-9c9e-2cfe54819dfd",
+        "chunk_id": "adf9b247c2f0c01aace694976c2e51a424159a2852e10b62f7ac8fc40a83b074",
+        "source": "QA05-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 53
+        },
+        "text": "锦桥闭展卡：值班员先在留言册末页记下当日最后一条留言编号，再将留言册装入灰色交接袋。灰袋由次日开馆员开启。",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 4.41015625,
+        "metadata": {
+          "document_name": "QA05-A"
+        }
+      }
+    ]
+  },
+  "QA06": {
+    "candidate_ids": [
+      "3fe1acc4efc2d594c52f9470bb3c113fcc5470636761a44f30a6f13ac9a0d0fb",
+      "13b80c98d5a3e4ce710840dcc2e1272b0b63f815e9129c0a7cc0dd85cc9db391"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA06-B",
+        "document_revision_id": "fdd5b39d-9278-50d7-a62c-bb98159bd0a0",
+        "chunk_id": "3fe1acc4efc2d594c52f9470bb3c113fcc5470636761a44f30a6f13ac9a0d0fb",
+        "source": "QA06-B",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 124
+        },
+        "text": "Harbor Forum seating sheet: There are 33 reserved seats. The remaining seats are for walk-ins and do not receive name cards.",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 1.55859375,
+        "metadata": {
+          "document_name": "QA06-B"
+        }
+      },
+      {
+        "number": 2,
+        "document_id": "QA06-A",
+        "document_revision_id": "19e52339-43b2-516f-9da5-c8a214c4b180",
+        "chunk_id": "13b80c98d5a3e4ce710840dcc2e1272b0b63f815e9129c0a7cc0dd85cc9db391",
+        "source": "QA06-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 90
+        },
+        "text": "Harbor Forum packing slip: The delivery contains 40 blank name cards; none have been used.",
+        "retrieval_score": 0.03225806451612903,
+        "rerank_score": 0.912109375,
+        "metadata": {
+          "document_name": "QA06-A"
+        }
+      }
+    ]
+  },
+  "QA07": {
+    "candidate_ids": [
+      "4d555dc46641c13f39f3244a14703ee9270aa243899cb781ba93d1966dfab3f0"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA07-A",
+        "document_revision_id": "f2149c81-de40-5846-afe8-93a3a24ca5af",
+        "chunk_id": "4d555dc46641c13f39f3244a14703ee9270aa243899cb781ba93d1966dfab3f0",
+        "source": "QA07-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 37
+        },
+        "text": "栖石画会备忘：年度合影定在秋展撤场前进行。委员杜遥负责把成片放进会员相册。",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 4.32421875,
+        "metadata": {
+          "document_name": "QA07-A"
+        }
+      }
+    ]
+  },
+  "QA08": {
+    "candidate_ids": [
+      "71bc873d137b90455214e9fd54ca1d1ef847a3fb91c40296fa23defd8461db47"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA08-A",
+        "document_revision_id": "dd98700d-1d74-5174-bb8c-4aa2c429f20d",
+        "chunk_id": "71bc873d137b90455214e9fd54ca1d1ef847a3fb91c40296fa23defd8461db47",
+        "source": "QA08-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 123
+        },
+        "text": "Quill Theatre programme: The play has two acts with a break in between. The doors open twenty minutes before the first act.",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 5.1875,
+        "metadata": {
+          "document_name": "QA08-A"
+        }
+      }
+    ]
+  },
+  "QA09": {
+    "candidate_ids": [
+      "ec6b2ac595fb752d7699d8b239acfbaee6f64a6a500805680cc4d63a400a13d8"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA09-A",
+        "document_revision_id": "0657f6e2-f83b-56e5-a3ac-246bb3bfc5e3",
+        "chunk_id": "ec6b2ac595fb752d7699d8b239acfbaee6f64a6a500805680cc4d63a400a13d8",
+        "source": "QA09-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 35
+        },
+        "text": "松贝合唱团会议摘要：两首候选曲各获九票。会议结束时记录员收存了投票纸。",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": -0.30517578125,
+        "metadata": {
+          "document_name": "QA09-A"
+        }
+      }
+    ]
+  },
+  "QA10": {
+    "candidate_ids": [
+      "fbbfa407383b5de9a273811147d7785c05d0793aee86daa1d56f54569a0e537d"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA10-A",
+        "document_revision_id": "b45ef05e-69f4-5fc5-9fb7-eb6a9ae8f24c",
+        "chunk_id": "fbbfa407383b5de9a273811147d7785c05d0793aee86daa1d56f54569a0e537d",
+        "source": "QA10-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 116
+        },
+        "text": "North Arcade setup note: Every stallholder uses one blue tablecloth. Fold used cloths onto the cart beside the exit.",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 2.580078125,
+        "metadata": {
+          "document_name": "QA10-A"
+        }
+      }
+    ]
+  },
+  "QA11": {
+    "candidate_ids": [
+      "bbe5cc62afb23212adc9e826b7f02429fa144d47433e80c8bea1321eba7495d3"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA11-A",
+        "document_revision_id": "eb99fc3b-322f-5892-85b3-296b5c610961",
+        "chunk_id": "bbe5cc62afb23212adc9e826b7f02429fa144d47433e80c8bea1321eba7495d3",
+        "source": "QA11-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 33
+        },
+        "text": "弦叶乐社借用单：领取节拍器时请核对编号，并由领用人在借用单上签字。",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": -2.99609375,
+        "metadata": {
+          "document_name": "QA11-A"
+        }
+      }
+    ]
+  },
+  "QA12": {
+    "candidate_ids": [
+      "814c2977adf60e2020670a0d76b96ff0eee44a78d441d9d1df3cdb1e18523cd3"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA12-A",
+        "document_revision_id": "e04daab2-81ea-5a65-b8e3-fb90f9f05952",
+        "chunk_id": "814c2977adf60e2020670a0d76b96ff0eee44a78d441d9d1df3cdb1e18523cd3",
+        "source": "QA12-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 135
+        },
+        "text": "Reed Walk field note: Quiet rest points have benches. A crescent is painted on the benches to help staff identify them for maintenance.",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 1.5771484375,
+        "metadata": {
+          "document_name": "QA12-A"
+        }
+      }
+    ]
+  },
+  "QA13": {
+    "candidate_ids": [
+      "05676a5f9f5f181ff8aeef93adb6728f33ec0e904d08e6d7329e94ee6eeec157",
+      "b4652c0b558df3ebd593ee35df5791b0e2494f3d81c51a946dd26916688d4686"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA13-B",
+        "document_revision_id": "08a0841b-4f88-55db-9216-426e4ea4f40b",
+        "chunk_id": "05676a5f9f5f181ff8aeef93adb6728f33ec0e904d08e6d7329e94ee6eeec157",
+        "source": "QA13-B",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 28
+        },
+        "text": "叠影观众须知：散场时统一走西廊出口。映后讨论在小厅举行。",
+        "retrieval_score": 0.03252247488101534,
+        "rerank_score": 1.55859375,
+        "metadata": {
+          "document_name": "QA13-B"
+        }
+      },
+      {
+        "number": 2,
+        "document_id": "QA13-A",
+        "document_revision_id": "82bcbb48-06ad-581e-8419-21f87fe1a113",
+        "chunk_id": "b4652c0b558df3ebd593ee35df5791b0e2494f3d81c51a946dd26916688d4686",
+        "source": "QA13-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 29
+        },
+        "text": "叠影放映会入场单：凭当晚的纸质票根入场，票根在入口处查验。",
+        "retrieval_score": 0.03252247488101534,
+        "rerank_score": 0.1845703125,
+        "metadata": {
+          "document_name": "QA13-A"
+        }
+      }
+    ]
+  },
+  "QA14": {
+    "candidate_ids": [
+      "256966390d3dc755250725d011b3cf3805a3b230e3b9fe5d82837454eebec11e"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA14-A",
+        "document_revision_id": "cdb4522b-c40a-5fc1-919a-3bdbf64a44d1",
+        "chunk_id": "256966390d3dc755250725d011b3cf3805a3b230e3b9fe5d82837454eebec11e",
+        "source": "QA14-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 132
+        },
+        "text": "Fern Exchange packet guide: Write the plant name and harvest month on each packet. A tray on the welcome table holds twelve packets.",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": -0.1380615234375,
+        "metadata": {
+          "document_name": "QA14-A"
+        }
+      }
+    ]
+  },
+  "QA15": {
+    "candidate_ids": [
+      "26fd856e77f85f5a5873da10243fc1b77d56147dabbd08390a95f0755cb02185"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA15-A",
+        "document_revision_id": "6d35f2fe-31f7-5f2f-88fd-9f15362a6e87",
+        "chunk_id": "26fd856e77f85f5a5873da10243fc1b77d56147dabbd08390a95f0755cb02185",
+        "source": "QA15-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 41
+        },
+        "text": "岚岸工坊交接记录：周榕签收了陶杯外箱。交接时外箱封条完整，签收表的箱内件数栏为空。",
+        "retrieval_score": 0.03278688524590164,
+        "rerank_score": 5.97265625,
+        "metadata": {
+          "document_name": "QA15-A"
+        }
+      }
+    ]
+  },
+  "QA16": {
+    "candidate_ids": [
+      "08c2bbf8f9ce08978709ca9165b8880409ae5aa4628223dfdb88c37f6f6fa47b",
+      "b4bcf4a08d043cbefde386b5e89c8abd9df56f1226e4691b985bcb6a4d1acf16"
+    ],
+    "visible": [
+      {
+        "number": 1,
+        "document_id": "QA16-A",
+        "document_revision_id": "12ba8165-c01f-5ded-9170-9f61eacabff6",
+        "chunk_id": "08c2bbf8f9ce08978709ca9165b8880409ae5aa4628223dfdb88c37f6f6fa47b",
+        "source": "QA16-A",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 108
+        },
+        "text": "Kite Archive media sheet: The audio tour downloads as an MP3 file. The printed guide is available in French.",
+        "retrieval_score": 0.03252247488101534,
+        "rerank_score": 0.95947265625,
+        "metadata": {
+          "document_name": "QA16-A"
+        }
+      },
+      {
+        "number": 2,
+        "document_id": "QA16-B",
+        "document_revision_id": "4792478b-e637-5d9d-97c9-ab4f9467e9e2",
+        "chunk_id": "b4bcf4a08d043cbefde386b5e89c8abd9df56f1226e4691b985bcb6a4d1acf16",
+        "source": "QA16-B",
+        "locator": {
+          "type": "text_range",
+          "char_start": 0,
+          "char_end": 81
+        },
+        "text": "Kite Archive playback guide: A fully downloaded audio tour can be played offline.",
+        "retrieval_score": 0.03252247488101534,
+        "rerank_score": -3.390625,
+        "metadata": {
+          "document_name": "QA16-B"
+        }
+      }
+    ]
+  }
+}

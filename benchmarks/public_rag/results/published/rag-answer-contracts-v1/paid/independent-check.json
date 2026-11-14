@@ -1,0 +1,83 @@
+{
+  "physical_reservations": 122,
+  "settled": 122,
+  "confirmed_input": 258059,
+  "confirmed_output": 37737,
+  "confirmed_microcny": 818014,
+  "unknown_reserve_microcny": 0,
+  "stops": [],
+  "separate_withholding": {
+    "citation": {
+      "baseline": {
+        "all_withholding_opportunities": {
+          "numerator": 6,
+          "denominator": 10,
+          "percent": 60.0
+        },
+        "fully_insufficient_qa": {
+          "numerator": 2,
+          "denominator": 6,
+          "percent": 33.3333
+        },
+        "partial_qa": {
+          "numerator": 4,
+          "denominator": 4,
+          "percent": 100.0
+        }
+      },
+      "candidate": {
+        "all_withholding_opportunities": {
+          "numerator": 9,
+          "denominator": 10,
+          "percent": 90.0
+        },
+        "fully_insufficient_qa": {
+          "numerator": 6,
+          "denominator": 6,
+          "percent": 100.0
+        },
+        "partial_qa": {
+          "numerator": 3,
+          "denominator": 4,
+          "percent": 75.0
+        }
+      }
+    },
+    "support": {
+      "baseline": {
+        "all_withholding_opportunities": {
+          "numerator": 6,
+          "denominator": 6,
+          "percent": 100.0
+        },
+        "fully_insufficient_qa": {
+          "numerator": 0,
+          "denominator": 0,
+          "percent": null
+        },
+        "partial_qa": {
+          "numerator": 0,
+          "denominator": 0,
+          "percent": null
+        }
+      },
+      "candidate": {
+        "all_withholding_opportunities": {
+          "numerator": 6,
+          "denominator": 6,
+          "percent": 100.0
+        },
+        "fully_insufficient_qa": {
+          "numerator": 0,
+          "denominator": 0,
+          "percent": null
+        },
+        "partial_qa": {
+          "numerator": 0,
+          "denominator": 0,
+          "percent": null
+        }
+      }
+    }
+  }
+}

@@ -94,6 +94,7 @@ from packages.agent_runtime.summary_service import (
 )
 from packages.agent_runtime.summary_state import SummaryJobStatus
 from packages.agent_runtime.summary_worker import SummaryWorker, frozen_summary_model_spec
+from packages.agent_runtime.support_facts import support_observation, support_system_prompt
 from packages.agent_runtime.wiki_history_evidence import validate_wiki_history_evidence
 from packages.agent_runtime.work_layer import (
     HISTORY_SOURCE_MAX_TURNS,
@@ -1066,6 +1067,9 @@ class _AgentRunGraph:
                 runtime_policy = "\n\n".join(
                     (_RUNTIME_POLICY, history_hint(turns_dropped_by_window=dropped))
                 )
+            system_prompt = support_system_prompt(
+                spec.system_prompt, spec.runtime, tool_definitions.values()
+            )
             history_plan_metadata = None
             history_checkpoint_binding_value = None
             history_exchange_ids = None
@@ -1088,7 +1092,7 @@ class _AgentRunGraph:
                     conversation=history_conversation,
                     mandatory_messages=(
                         ModelMessage(role="system", content=runtime_policy),
-                        ModelMessage(role="system", content=spec.system_prompt),
+                        ModelMessage(role="system", content=system_prompt),
                         ModelMessage(role="user", content=self.run.input_text),
                     ),
                     memory_messages=memory_messages,
@@ -1175,7 +1179,7 @@ class _AgentRunGraph:
             # unevictable or displace the question being asked.
             messages = [
                 ModelMessage(role="system", content=runtime_policy),
-                ModelMessage(role="system", content=spec.system_prompt),
+                ModelMessage(role="system", content=system_prompt),
                 *memory_messages,
                 *history,
                 ModelMessage(role="user", content=self.run.input_text),
@@ -1687,7 +1691,12 @@ class _AgentRunGraph:
             conversation=conversation,
             mandatory_messages=(
                 ModelMessage("system", _RUNTIME_POLICY),
-                ModelMessage("system", frozen_spec.system_prompt),
+                ModelMessage(
+                    "system",
+                    support_system_prompt(
+                        frozen_spec.system_prompt, frozen_spec.runtime, definitions
+                    ),
+                ),
                 ModelMessage("user", persisted.input_text),
             ),
             memory_messages=(),
@@ -3949,6 +3958,11 @@ class _AgentRunGraph:
                     "approval_decision": result.approval_decision,
                     "approval_execution": result.approval_execution,
                 }
+            if (
+                state["runtime"].get("support_answer_policy") == "support_facts_v1"
+                and definition is not None
+            ):
+                payload = support_observation(payload, definition, budget.max_tool_result_tokens)
             payload_text = (
                 json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
                 if rag_evidence_projected
