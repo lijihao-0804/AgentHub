@@ -1,0 +1,2991 @@
+{
+  "scope": "Supplementary semantic diagnosis only. Frozen source score and final votes come from report.json. Failed events had no blind vote; their semantics are an independent post-unblinding reading of returned text and delivered material. Accepted false-flag overrefusals require a rejection of the main requested information despite sufficient evidence; supported substantive answers with caveats are excluded.",
+  "inputs_sha256": {
+    ".scratch\\rag-confirmation-paid\\events.jsonl": "fc03c16e678318de78aebee2c83a843a6e950679befa33ac81d6ccd5bb072a06",
+    ".scratch\\rag-confirmation-blind\\report.json": "e562e611be858ef826007236813b3a7f189396a834465a4edc8c1321892c6f2d"
+  },
+  "summary": {
+    "accepted_flag_false_justified": {
+      "n": 24,
+      "arms": {
+        "B": 5,
+        "C": 10,
+        "D": 9
+      },
+      "source_labels": {
+        "ambiguous": 3,
+        "answerable": 9,
+        "unanswerable": 12
+      },
+      "source_labels_by_arm": {
+        "B": {
+          "ambiguous": 1,
+          "answerable": 1,
+          "unanswerable": 3
+        },
+        "C": {
+          "ambiguous": 1,
+          "answerable": 4,
+          "unanswerable": 5
+        },
+        "D": {
+          "ambiguous": 1,
+          "answerable": 4,
+          "unanswerable": 4
+        }
+      }
+    },
+    "accepted_flag_false_unjustified": {
+      "n": 7,
+      "arms": {
+        "B": 3,
+        "C": 2,
+        "D": 2
+      },
+      "source_labels": {
+        "answerable": 7
+      },
+      "source_labels_by_arm": {
+        "B": {
+          "answerable": 3
+        },
+        "C": {
+          "answerable": 2
+        },
+        "D": {
+          "answerable": 2
+        }
+      }
+    },
+    "accepted_flag_true_justified": {
+      "n": 1,
+      "arms": {
+        "D": 1
+      },
+      "source_labels": {
+        "unanswerable": 1
+      },
+      "source_labels_by_arm": {
+        "B": {},
+        "C": {},
+        "D": {
+          "unanswerable": 1
+        }
+      }
+    },
+    "other_accepted": {
+      "n": 61,
+      "arms": {
+        "B": 18,
+        "C": 23,
+        "D": 20
+      },
+      "source_labels": {
+        "answerable": 61
+      },
+      "source_labels_by_arm": {
+        "B": {
+          "answerable": 18
+        },
+        "C": {
+          "answerable": 23
+        },
+        "D": {
+          "answerable": 20
+        }
+      }
+    },
+    "rejected_cited_refusal": {
+      "n": 26,
+      "arms": {
+        "B": 14,
+        "C": 4,
+        "D": 8
+      },
+      "source_labels": {
+        "ambiguous": 6,
+        "answerable": 13,
+        "unanswerable": 7
+      },
+      "source_labels_by_arm": {
+        "B": {
+          "ambiguous": 2,
+          "answerable": 8,
+          "unanswerable": 4
+        },
+        "C": {
+          "ambiguous": 2,
+          "answerable": 1,
+          "unanswerable": 1
+        },
+        "D": {
+          "ambiguous": 2,
+          "answerable": 4,
+          "unanswerable": 2
+        }
+      },
+      "form_counts": {
+        "both": 20,
+        "body_only": 6,
+        "ids_only": 0,
+        "neither": 0
+      },
+      "flags": {
+        "true": 26,
+        "false": 0
+      },
+      "semantic_diagnosis": {
+        "ambiguous_scope": 6,
+        "insufficient_visible_evidence": 12,
+        "source_unanswerable": 7,
+        "visible_answer_missed": 1
+      }
+    },
+    "selector_failure": {
+      "n": 1,
+      "arms": {
+        "C": 1
+      },
+      "source_labels": {
+        "unanswerable": 1
+      },
+      "source_labels_by_arm": {
+        "B": {},
+        "C": {
+          "unanswerable": 1
+        },
+        "D": {}
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "045dbdbda5d96a672e5c69442e30dbf21917a1ee",
+      "arm": "B",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        5,
+        1
+      ],
+      "citation_ids": [
+        5,
+        1
+      ],
+      "question": "In the paper “Learning with Noisy Labels for Sentence-level Sentiment Classification”, How does the model differ from Generative Adversarial Networks?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "NetAb architecture is explained, but no comparison to GANs is available.",
+      "raw_answer": "The evidence does not describe how the model differs from Generative Adversarial Networks. It only states that NetAb consists of two convolutional neural networks—one with a noise transition layer for the input noisy labels and the other for predicting 'clean' labels—trained with their respective loss functions in a mutual reinforcement manner [5], and that the two networks are trained alternately [1]. No comparison with Generative Adversarial Networks is provided in the supplied evidence."
+    },
+    {
+      "id": "045dbdbda5d96a672e5c69442e30dbf21917a1ee",
+      "arm": "C",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        6
+      ],
+      "citation_ids": [
+        3,
+        6
+      ],
+      "question": "In the paper “Learning with Noisy Labels for Sentence-level Sentiment Classification”, How does the model differ from Generative Adversarial Networks?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "NetAb architecture is explained, but no comparison to GANs is available.",
+      "raw_answer": "The evidence does not describe how NetAb differs from Generative Adversarial Networks. It only states that NetAb consists of two CNNs—one with a noise transition layer for handling input noisy labels and the other for predicting 'clean' labels—trained with their respective loss functions in a mutual reinforcement manner [3], and that the two CNNs are trained alternately, one for addressing input noisy labels and the other for predicting 'clean' labels [6]. No comparison to GANs is provided."
+    },
+    {
+      "id": "045dbdbda5d96a672e5c69442e30dbf21917a1ee",
+      "arm": "D",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        3
+      ],
+      "citation_ids": [
+        2,
+        3
+      ],
+      "question": "In the paper “Learning with Noisy Labels for Sentence-level Sentiment Classification”, How does the model differ from Generative Adversarial Networks?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "NetAb architecture is explained, but no comparison to GANs is available.",
+      "raw_answer": "The evidence does not describe how NetAb differs from Generative Adversarial Networks. It only states that NetAb consists of two convolutional neural networks—one with a noise transition layer for handling input noisy labels and the other for predicting 'clean' labels—trained with their respective loss functions in a mutual reinforcement manner [2], and that the two CNNs are called A-network and Ab-network, with training done by pre-training A-network in early epochs and then training Ab-network and A-network with their own loss functions in an alternating manner [3]. No comparison to Generative Adversarial Networks is provided."
+    },
+    {
+      "id": "052d19b456f1795acbb8463312251869cc5b38da",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        4
+      ],
+      "citation_ids": [
+        4
+      ],
+      "question": "In the paper “Markov Chain Monte-Carlo Phylogenetic Inference Construction in Computational Historical Linguistics”, What metrics are used to evaluate results?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "B and D refer to evaluation elsewhere; the B-Cubed and generalized quartet distance definitions are absent.",
+      "raw_answer": "The provided evidence does not specify which metrics are used to evaluate the results. The paper mentions that results are shown and evaluated in section 4 [4], but the evidence excerpts do not include that section or name any evaluation metrics."
+    },
+    {
+      "id": "052d19b456f1795acbb8463312251869cc5b38da",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        2
+      ],
+      "citation_ids": [
+        4,
+        2
+      ],
+      "question": "In the paper “Markov Chain Monte-Carlo Phylogenetic Inference Construction in Computational Historical Linguistics”, What metrics are used to evaluate results?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "052d19b456f1795acbb8463312251869cc5b38da",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        5,
+        6
+      ],
+      "citation_ids": [
+        5,
+        6
+      ],
+      "question": "In the paper “Markov Chain Monte-Carlo Phylogenetic Inference Construction in Computational Historical Linguistics”, What metrics are used to evaluate results?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "B and D refer to evaluation elsewhere; the B-Cubed and generalized quartet distance definitions are absent.",
+      "raw_answer": "The provided evidence does not specify which metrics are used to evaluate the results in that paper. The relevant excerpts only mention that results are presented and evaluated in section 4 [5], and describe the MCMC/MC3 methodology [6], but they do not name any evaluation metrics."
+    },
+    {
+      "id": "071bcb4b054215054f17db64bfd21f17fd9e1a80",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        1,
+        2,
+        2,
+        4,
+        2,
+        5
+      ],
+      "citation_ids": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "question": "In the paper “QnAMaker: Data to Bot in 2 Minutes”, How does the conversation layer work?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": false,
+      "group": "other_accepted"
+    },
+    {
+      "id": "071bcb4b054215054f17db64bfd21f17fd9e1a80",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2,
+        3,
+        3,
+        5,
+        6
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        5,
+        6
+      ],
+      "question": "In the paper “QnAMaker: Data to Bot in 2 Minutes”, How does the conversation layer work?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": false,
+      "group": "other_accepted"
+    },
+    {
+      "id": "071bcb4b054215054f17db64bfd21f17fd9e1a80",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        1,
+        2,
+        2,
+        6,
+        5,
+        5,
+        2,
+        4
+      ],
+      "citation_ids": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "question": "In the paper “QnAMaker: Data to Bot in 2 Minutes”, How does the conversation layer work?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": false,
+      "group": "other_accepted"
+    },
+    {
+      "id": "0747cecb3c72594c5d15ba18490566be1ffdbfad",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        6,
+        1
+      ],
+      "citation_ids": [
+        1,
+        4,
+        6
+      ],
+      "question": "In the paper “Smarnet: Teaching Machines to Read and Comprehend Like Human”, What other solutions do they compare to?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "accepted_flag_false_unjustified",
+      "semantics": "visible_answer_missed",
+      "note": "B asks for named baselines while omitting the available comparator class on SQuAD and TriviaQA.",
+      "raw_answer": "The evidence does not provide a clear list of specific alternative solutions that Smarnet directly compares against. It mentions that many previous approaches adopt attention mechanisms with deep neural networks and pointer networks [4], and that prior work includes Chen et al. using a bilinear attention term, Kadlec et al. summing attention over candidate answer words, and Dhingra et al. iteratively interacting between query and document [6]. It also states that Smarnet outperforms \"most state-of-the-art solutions at the time of submission\" [1], but the specific compared solutions are not identified in the supplied evidence."
+    },
+    {
+      "id": "0747cecb3c72594c5d15ba18490566be1ffdbfad",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        4,
+        4,
+        4,
+        2,
+        3,
+        4,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "question": "In the paper “Smarnet: Teaching Machines to Read and Comprehend Like Human”, What other solutions do they compare to?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "0747cecb3c72594c5d15ba18490566be1ffdbfad",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        3,
+        4,
+        6
+      ],
+      "citation_ids": [
+        1,
+        3,
+        4,
+        6
+      ],
+      "question": "In the paper “Smarnet: Teaching Machines to Read and Comprehend Like Human”, What other solutions do they compare to?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "1ccfd288f746c35006f5847297ab52020729f523",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        5,
+        1,
+        5,
+        5
+      ],
+      "citation_ids": [
+        1,
+        5
+      ],
+      "question": "In the paper “Dreaddit: A Reddit Dataset for Stress Analysis in Social Media”, What categories does the dataset come from?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "1ccfd288f746c35006f5847297ab52020729f523",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2,
+        1,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Dreaddit: A Reddit Dataset for Stress Analysis in Social Media”, What categories does the dataset come from?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "1ccfd288f746c35006f5847297ab52020729f523",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        4
+      ],
+      "citation_ids": [
+        1,
+        4
+      ],
+      "question": "In the paper “Dreaddit: A Reddit Dataset for Stress Analysis in Social Media”, What categories does the dataset come from?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "28e7711f94e093137eb8828f0b1eff1b05e4fa38",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        2,
+        3,
+        5
+      ],
+      "citation_ids": [],
+      "question": "In the paper “Finding Dominant User Utterances And System Responses in Conversations”, How do they divide text into utterances?",
+      "group": "rejected_cited_refusal",
+      "form": "body_only",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The target paper explains same-speaker concatenation, but the failed B/D packets give clustering and adjacency without the construction rule.",
+      "raw_answer": "The provided evidence does not describe how the paper divides text into utterances. It discusses clustering utterances and using adjacency information between user and agent utterances [2][3][5], but it does not specify the utterance segmentation method."
+    },
+    {
+      "id": "28e7711f94e093137eb8828f0b1eff1b05e4fa38",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        6,
+        6
+      ],
+      "citation_ids": [
+        6
+      ],
+      "question": "In the paper “Finding Dominant User Utterances And System Responses in Conversations”, How do they divide text into utterances?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "28e7711f94e093137eb8828f0b1eff1b05e4fa38",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        4,
+        6
+      ],
+      "citation_ids": [],
+      "question": "In the paper “Finding Dominant User Utterances And System Responses in Conversations”, How do they divide text into utterances?",
+      "group": "rejected_cited_refusal",
+      "form": "body_only",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The target paper explains same-speaker concatenation, but the failed B/D packets give clustering and adjacency without the construction rule.",
+      "raw_answer": "The provided evidence does not describe how the paper divides text into utterances. It mentions clustering utterances and using vector representations of utterances [4][6], but gives no details on the utterance segmentation procedure."
+    },
+    {
+      "id": "2f4acd34eb2d09db9b5ad9b1eb82cb4a88c13f5b",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        5,
+        4
+      ],
+      "citation_ids": [
+        5,
+        4
+      ],
+      "question": "In the paper “News-Driven Stock Prediction With Attention-Based Noisy Recurrent State Transition”, What is dataset used for news-driven stock movement prediction?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The passages describe the stock-prediction task but omit Reuters/Bloomberg identification of the news dataset.",
+      "raw_answer": "The provided evidence does not identify the specific dataset used for news-driven stock movement prediction. It only states that the task is formalized as a binary classification task for each trading day, given a history news set about a targeted stock or index [5], and that the method was evaluated on \"a standard benchmark\" [4], but the dataset itself is not named."
+    },
+    {
+      "id": "2f4acd34eb2d09db9b5ad9b1eb82cb4a88c13f5b",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        6
+      ],
+      "citation_ids": [
+        6
+      ],
+      "question": "In the paper “News-Driven Stock Prediction With Attention-Based Noisy Recurrent State Transition”, What is dataset used for news-driven stock movement prediction?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The passages describe the stock-prediction task but omit Reuters/Bloomberg identification of the news dataset.",
+      "raw_answer": "The evidence indicates that the experiments predict the S&P 500 index using financial news [6], but it does not explicitly name the dataset used for news-driven stock movement prediction. Therefore, the specific dataset is not identified in the provided evidence."
+    },
+    {
+      "id": "2f4acd34eb2d09db9b5ad9b1eb82cb4a88c13f5b",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        6,
+        4
+      ],
+      "citation_ids": [
+        6,
+        4
+      ],
+      "question": "In the paper “News-Driven Stock Prediction With Attention-Based Noisy Recurrent State Transition”, What is dataset used for news-driven stock movement prediction?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The passages describe the stock-prediction task but omit Reuters/Bloomberg identification of the news dataset.",
+      "raw_answer": "The evidence does not identify the specific dataset used for news-driven stock movement prediction. It only describes the task as a binary classification for each trading day, given a history news set about a targeted stock or index [6], and mentions that the method achieved the best performance on \"a standard benchmark\" [4], but the dataset itself is not named."
+    },
+    {
+      "id": "3996438cef34eb7bedaa6745b190c69553cf246b",
+      "arm": "B",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        2,
+        2,
+        4,
+        6
+      ],
+      "citation_ids": [
+        2,
+        4,
+        6
+      ],
+      "question": "In the paper “Universal Dependency Parsing for Hindi-English Code-switching”, What is LAS metric?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "source_unanswerable",
+      "note": "Dependency parsing LAS values and point improvements are reported, without a definition of LAS.",
+      "raw_answer": "The evidence does not define what the LAS metric is. It only reports LAS values and improvements—for example, that neural stacking gives a 1.5% LAS improvement over data augmentation [2], that the average improvements are around ~5% LAS [2], and that the decoding process improves results by 3.8% LAS points [4]—and mentions a 92.65% LAS inter-annotator agreement for dependency parsing [6]. No definition or expansion of the LAS metric is provided in the supplied evidence."
+    },
+    {
+      "id": "3996438cef34eb7bedaa6745b190c69553cf246b",
+      "arm": "C",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        4,
+        3
+      ],
+      "citation_ids": [
+        1,
+        3,
+        4
+      ],
+      "question": "In the paper “Universal Dependency Parsing for Hindi-English Code-switching”, What is LAS metric?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "Dependency parsing LAS values and point improvements are reported, without a definition of LAS.",
+      "raw_answer": "The evidence does not define what the LAS metric is. It only reports LAS values and comparisons—for example, that neural stacking gives a 1.5% LAS improvement over data augmentation [1], that the neural stacking parser is 1.5% LAS points better than the augmented parsing model and 3.8% LAS points better than one using first-best normalizations [4], and that the decoding process improves results by 3.8% LAS points over first-best normalization and/or back-transliteration [3]. No definition or expansion of the LAS metric is provided in the supplied evidence."
+    },
+    {
+      "id": "3996438cef34eb7bedaa6745b190c69553cf246b",
+      "arm": "D",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        4,
+        2,
+        5
+      ],
+      "citation_ids": [
+        2,
+        4,
+        5
+      ],
+      "question": "In the paper “Universal Dependency Parsing for Hindi-English Code-switching”, What is LAS metric?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "source_unanswerable",
+      "note": "Dependency parsing LAS values and point improvements are reported, without a definition of LAS.",
+      "raw_answer": "The evidence does not define what the LAS metric is. It only reports LAS values and improvements—for example, that the neural stacking parser is 1.5% LAS points better than the augmented parsing model and 3.8% LAS points better than the one using first-best normalizations [4], and that the average improvements of around ~5% LAS show the complementary nature of the datasets [2]. The paper also reports inter-annotator agreement of 92.65% LAS for dependency parsing [5], but never explains the metric itself."
+    },
+    {
+      "id": "4904ef32a8f84cf2f53b1532ccf7aa77273b3d19",
+      "arm": "B",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        3,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3
+      ],
+      "question": "In the paper “Style Transfer for Texts: to Err is Human, but Error Margins Matter”, By how much do proposed architectures autperform state-of-the-art?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "No comparative BLEU margin is available; rerun variation is a different quantity.",
+      "raw_answer": "The evidence states that the proposed architectures outperform the state of the art in terms of BLEU between output and human-written reformulations [2][3], but it does not specify a numerical margin by which they outperform the state of the art. The paper notes that accuracy can change up to 5 percentage points and BLEU up to 8 points across reruns, and that results for state-of-the-art models sometimes fall within error margins of one another [1], but no exact improvement figure for the proposed architectures is provided in the supplied evidence."
+    },
+    {
+      "id": "4904ef32a8f84cf2f53b1532ccf7aa77273b3d19",
+      "arm": "C",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2,
+        3
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3
+      ],
+      "question": "In the paper “Style Transfer for Texts: to Err is Human, but Error Margins Matter”, By how much do proposed architectures autperform state-of-the-art?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "No comparative BLEU margin is available; rerun variation is a different quantity.",
+      "raw_answer": "The evidence states that the proposed architectures outperform the state of the art in terms of BLEU between output and human-written reformulations [1][2], but it does not give a specific numerical margin of improvement. The paper notes that a figure compares the new architectures with other state-of-the-art approaches on this metric [3], yet the provided evidence contains no quantitative value for how much they outperform the state of the art."
+    },
+    {
+      "id": "4904ef32a8f84cf2f53b1532ccf7aa77273b3d19",
+      "arm": "D",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        3,
+        5
+      ],
+      "citation_ids": [
+        1,
+        3,
+        5
+      ],
+      "question": "In the paper “Style Transfer for Texts: to Err is Human, but Error Margins Matter”, By how much do proposed architectures autperform state-of-the-art?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "No comparative BLEU margin is available; rerun variation is a different quantity.",
+      "raw_answer": "The evidence does not specify a numerical margin by which the proposed architectures outperform the state of the art. It states only that three new architectures outperform state of the art in terms of BLEU between output and human-written reformulations [1][3], and that a figure compares the new architectures with other state-of-the-art approaches on that metric [5]."
+    },
+    {
+      "id": "4c88441f8a1b5fce0ca55a6fced34f97260206ae",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        1,
+        5,
+        3,
+        3
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "question": "In the paper “A Full End-to-End Semantic Role Labeler, Syntax-agnostic Over Syntax-aware?”, What is the biaffine scorer?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "4c88441f8a1b5fce0ca55a6fced34f97260206ae",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        1,
+        1,
+        2,
+        6,
+        6,
+        3,
+        5,
+        4
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "question": "In the paper “A Full End-to-End Semantic Role Labeler, Syntax-agnostic Over Syntax-aware?”, What is the biaffine scorer?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "4c88441f8a1b5fce0ca55a6fced34f97260206ae",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        3,
+        2,
+        6,
+        6,
+        6
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "question": "In the paper “A Full End-to-End Semantic Role Labeler, Syntax-agnostic Over Syntax-aware?”, What is the biaffine scorer?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "4d30c2223939b31216f2e90ef33fe0db97e962ac",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        2,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “A Swiss German Dictionary: Variation in Speech and Writing”, How many words are coded in the dictionary?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "visible_answer_missed",
+      "note": "11,248 German headwords are explicitly paired with dialect pronunciations; 9,000 is an annotation subset.",
+      "raw_answer": "The evidence does not explicitly state a total number of words coded in the dictionary. It says that 11'248 standard German written words are paired with phonetic representations in six Swiss dialects [2], and that for a subset of 9000 of these 11'248 standard German words, GSWs were manually annotated for Visp and Zurich [1]. However, no overall count of coded dictionary words is given."
+    },
+    {
+      "id": "4d30c2223939b31216f2e90ef33fe0db97e962ac",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “A Swiss German Dictionary: Variation in Speech and Writing”, How many words are coded in the dictionary?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "accepted_flag_false_unjustified",
+      "semantics": "visible_answer_missed",
+      "note": "11,248 German headwords are explicitly paired with dialect pronunciations; 9,000 is an annotation subset.",
+      "raw_answer": "The evidence does not state a single total number of words coded in the dictionary. It says that 11'248 standard German written words are paired with phonetic representations in six Swiss dialects [2], and that for a subset of 9000 of these 11'248 words, GSWs were manually annotated for Visp and Zurich, with a subsubset of 600 words annotated for four other dialects [1]."
+    },
+    {
+      "id": "4d30c2223939b31216f2e90ef33fe0db97e962ac",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        1,
+        1,
+        4
+      ],
+      "citation_ids": [
+        1,
+        4
+      ],
+      "question": "In the paper “A Swiss German Dictionary: Variation in Speech and Writing”, How many words are coded in the dictionary?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "537a786794604ecc473fb3ef6222e0c3cb81f772",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        1,
+        4
+      ],
+      "citation_ids": [
+        1,
+        2,
+        4
+      ],
+      "question": "In the paper “Transformer-based Cascaded Multimodal Speech Translation”, What dataset was used in this work?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "537a786794604ecc473fb3ef6222e0c3cb81f772",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        1,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Transformer-based Cascaded Multimodal Speech Translation”, What dataset was used in this work?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "537a786794604ecc473fb3ef6222e0c3cb81f772",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        1,
+        5
+      ],
+      "citation_ids": [
+        1,
+        3,
+        5
+      ],
+      "question": "In the paper “Transformer-based Cascaded Multimodal Speech Translation”, What dataset was used in this work?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "57fdb0f6cd91b64a000630ecb711550941283091",
+      "arm": "B",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": null,
+      "raw_flag": true,
+      "body_numbers": [
+        2,
+        6,
+        3
+      ],
+      "citation_ids": [],
+      "question": "In the paper “Data Innovation for International Development: An overview of natural language processing for qualitative data analysis”, What are the potentials risks of this approach?",
+      "group": "rejected_cited_refusal",
+      "form": "body_only",
+      "semantics": "ambiguous_scope",
+      "note": "Question scope is ambiguous; implementation obstacles need not constitute risks of NLP. No complete, explicit risk account in these excerpts.",
+      "raw_answer": "The supplied evidence does not identify explicit potential risks of the NLP approach. It mentions challenges and obstacles—such as high costs, time, or expertise required to analyze qualitative data systematically [2], and the plethora of languages with subtle but meaningful differences that practitioners must consider [6]—but it does not frame these as risks of the approach itself. The paper's discussion in the provided excerpts is largely positive, stating that NLP has the potential to unlock large quantities of untapped knowledge and enable better context-tailored decisions [3]. Therefore, the evidence is insufficient to answer what the potential risks are."
+    },
+    {
+      "id": "57fdb0f6cd91b64a000630ecb711550941283091",
+      "arm": "C",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": null,
+      "raw_flag": true,
+      "body_numbers": [
+        2,
+        5
+      ],
+      "citation_ids": [],
+      "question": "In the paper “Data Innovation for International Development: An overview of natural language processing for qualitative data analysis”, What are the potentials risks of this approach?",
+      "group": "rejected_cited_refusal",
+      "form": "body_only",
+      "semantics": "ambiguous_scope",
+      "note": "Question scope is ambiguous; implementation obstacles need not constitute risks of NLP. No complete, explicit risk account in these excerpts.",
+      "raw_answer": "The provided evidence does not identify or discuss potential risks of the NLP approach. It describes the motivation for using NLP and ML to enable speedy, large-scale analysis of qualitative data [2], and outlines an application involving machine translation, preprocessing, and structural topic modeling in the UNDP Fragments of Impact initiative [5], but it contains no statement of potential risks. Therefore, the evidence is insufficient to answer the question."
+    },
+    {
+      "id": "57fdb0f6cd91b64a000630ecb711550941283091",
+      "arm": "D",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": null,
+      "raw_flag": true,
+      "body_numbers": [
+        2,
+        6,
+        6
+      ],
+      "citation_ids": [
+        2,
+        6
+      ],
+      "question": "In the paper “Data Innovation for International Development: An overview of natural language processing for qualitative data analysis”, What are the potentials risks of this approach?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "ambiguous_scope",
+      "note": "Question scope is ambiguous; implementation obstacles need not constitute risks of NLP. No complete, explicit risk account in these excerpts.",
+      "raw_answer": "The supplied evidence does not identify specific potential risks of the NLP approach. It describes challenges in analyzing qualitative data systematically—high costs, time, or expertise required [2]—and notes that working with multiple languages is a common obstacle, since languages have subtle but meaningful differences [6]. It also mentions that human coders receive small specific tasks to reduce individual biases [6]. However, it does not state potential risks of applying NLP to qualitative data analysis, so the evidence is insufficient to answer that part of the question."
+    },
+    {
+      "id": "5b99f74bb25bc88677621443bf065d96d84895ab",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        3,
+        2
+      ],
+      "citation_ids": [
+        2,
+        3,
+        4
+      ],
+      "question": "In the paper “Latent Multi-task Architecture Learning”, What is hard parameter sharing?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "accepted_flag_false_unjustified",
+      "semantics": "visible_answer_missed",
+      "note": "Fixed sharing and a common CRF with task-specific projections permit a definition; B/D decline.",
+      "raw_answer": "The evidence does not provide an explicit definition of hard parameter sharing. It only states that hard parameter sharing is easy to implement, reduces overfitting, but is only guaranteed to work for (certain types of) closely related tasks [4]. It also notes that in hard parameter sharing the amount of sharing between networks is fixed in advance [3], and that findings for hard parameter sharing are confirmed by label entropy being predictive of gains in sluice networks [2]."
+    },
+    {
+      "id": "5b99f74bb25bc88677621443bf065d96d84895ab",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        2
+      ],
+      "citation_ids": [
+        2,
+        3
+      ],
+      "question": "In the paper “Latent Multi-task Architecture Learning”, What is hard parameter sharing?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "5b99f74bb25bc88677621443bf065d96d84895ab",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Latent Multi-task Architecture Learning”, What is hard parameter sharing?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "accepted_flag_false_unjustified",
+      "semantics": "visible_answer_missed",
+      "note": "Fixed sharing and a common CRF with task-specific projections permit a definition; B/D decline.",
+      "raw_answer": "The evidence does not provide a definition of hard parameter sharing. It only mentions hard parameter sharing in passing: it is described as easy to implement and as reducing overfitting, but as only guaranteed to work for (certain types of) closely related tasks [2]; the paper also notes that in several prior works using hard parameter sharing, the amount of sharing between the networks is fixed in advance [1]. A formal definition is not given in the supplied evidence."
+    },
+    {
+      "id": "5bb96b255dab3e47a8a68b1ffd7142d0e21ebe2a",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        2,
+        5
+      ],
+      "citation_ids": [
+        2,
+        5
+      ],
+      "question": "In the paper “Efficient Twitter Sentiment Classification using Subjective Distant Supervision”, How is tweet subjectivity measured?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "5bb96b255dab3e47a8a68b1ffd7142d0e21ebe2a",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        3,
+        1,
+        3
+      ],
+      "citation_ids": [
+        1,
+        3
+      ],
+      "question": "In the paper “Efficient Twitter Sentiment Classification using Subjective Distant Supervision”, How is tweet subjectivity measured?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "5bb96b255dab3e47a8a68b1ffd7142d0e21ebe2a",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        4,
+        2
+      ],
+      "citation_ids": [
+        2,
+        4
+      ],
+      "question": "In the paper “Efficient Twitter Sentiment Classification using Subjective Distant Supervision”, How is tweet subjectivity measured?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "5f4e6ce4a811c4b3ab07335d89db2fd2a8d8d8b2",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        4,
+        2,
+        3
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "question": "In the paper “Low-Level Linguistic Controls for Style Transfer and Content Preservation”, How they perform manual evaluation, what is criteria?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "Some aspects of expert evaluation are visible, but the human style-classification accuracy criterion is missing.",
+      "raw_answer": "The provided evidence does not describe the specific procedure or criteria used in the manual (human) evaluation. It only states that the authors performed both automatic and manual evaluations on style transfer [1][4], that they conducted a human evaluation with English literature experts including recommendations for dealing with the entanglement of content with style [2], and that in human evaluations they encountered the 'vampires in space' problem where content and style are equally discriminative but people focus more on content [3]. No details of the manual evaluation's criteria are given in the evidence."
+    },
+    {
+      "id": "5f4e6ce4a811c4b3ab07335d89db2fd2a8d8d8b2",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        5,
+        5,
+        3
+      ],
+      "citation_ids": [
+        5,
+        3
+      ],
+      "question": "In the paper “Low-Level Linguistic Controls for Style Transfer and Content Preservation”, How they perform manual evaluation, what is criteria?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "Some aspects of expert evaluation are visible, but the human style-classification accuracy criterion is missing.",
+      "raw_answer": "The evidence describes the human evaluation setup but does not fully specify the criteria. Three English Literature PhD candidates, all of whom had passed qualifying exams involving determining genre and era of literary texts, were recruited to classify the transferred sentences [5]. The evaluation included a fluency evaluation in which annotators scored reference sentences and reconstructions [5]. The paper also reports that in human evaluations they encountered the “vampires in space” problem, where content and style are equally discriminative but people focus more on content [3]. However, the evidence provided does not state the complete scoring criteria or rubric used for the manual evaluation."
+    },
+    {
+      "id": "5f4e6ce4a811c4b3ab07335d89db2fd2a8d8d8b2",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        1,
+        2,
+        4,
+        3
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "question": "In the paper “Low-Level Linguistic Controls for Style Transfer and Content Preservation”, How they perform manual evaluation, what is criteria?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "Some aspects of expert evaluation are visible, but the human style-classification accuracy criterion is missing.",
+      "raw_answer": "The provided evidence does not describe the specific manual evaluation procedure or its criteria. It only states that the authors performed both automatic and manual evaluations on style transfer [1][2], that they conducted a human evaluation with English literature experts including recommendations for dealing with the entanglement of content with style [4], and that in human evaluations they encountered the “vampires in space” problem in which content and style are equally discriminative but people focus more on the content [3]. No details are given about the annotation setup, questions asked, rating scales, or explicit evaluation criteria."
+    },
+    {
+      "id": "601f96770726a0063faf9bacd5db01c4af5add1f",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        3,
+        5
+      ],
+      "citation_ids": [
+        2,
+        3,
+        5
+      ],
+      "question": "In the paper “Annotating and normalizing biomedical NEs with limited knowledge”, What does their system consist of?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "601f96770726a0063faf9bacd5db01c4af5add1f",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        3,
+        1,
+        5,
+        6,
+        6,
+        6
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        5,
+        6
+      ],
+      "question": "In the paper “Annotating and normalizing biomedical NEs with limited knowledge”, What does their system consist of?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "601f96770726a0063faf9bacd5db01c4af5add1f",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        1,
+        2,
+        5
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "question": "In the paper “Annotating and normalizing biomedical NEs with limited knowledge”, What does their system consist of?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "6e2899c444baaeb0469599f65722780894f90f29",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        3,
+        5,
+        4
+      ],
+      "citation_ids": [
+        3,
+        4,
+        5
+      ],
+      "question": "In the paper “Do We Really Need Fully Unsupervised Cross-Lingual Embeddings?”, How does BLI measure alignment quality?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The BLI task is identified; the MAP/single-translation MRR passage is absent from B.",
+      "raw_answer": "The evidence does not specify the metric or procedure used to measure alignment quality in BLI. It only states that bilingual lexicon induction (BLI) is the evaluation task and has become the de facto standard evaluation for projection-based CLWEs [3], that BLI evaluations are run for all language pairs in both directions (210 setups) [5], and that BLI test sets are standard MUSE BLI test sets in the domain-difference experiment [4]. No details on how BLI alignment quality is measured (e.g., accuracy@k or similarity metric) are provided."
+    },
+    {
+      "id": "6e2899c444baaeb0469599f65722780894f90f29",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        3
+      ],
+      "citation_ids": [
+        3
+      ],
+      "question": "In the paper “Do We Really Need Fully Unsupervised Cross-Lingual Embeddings?”, How does BLI measure alignment quality?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "6e2899c444baaeb0469599f65722780894f90f29",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        2
+      ],
+      "citation_ids": [
+        2
+      ],
+      "question": "In the paper “Do We Really Need Fully Unsupervised Cross-Lingual Embeddings?”, How does BLI measure alignment quality?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "70797f66d96aa163a3bee2be30a328ba61c40a18",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        5,
+        5,
+        2,
+        2
+      ],
+      "citation_ids": [
+        2,
+        5
+      ],
+      "question": "In the paper “A Measure of Similarity in Textual Data Using Spearman's Rank Correlation Coefficient”, How do they evaluate knowledge extraction performance?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "70797f66d96aa163a3bee2be30a328ba61c40a18",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        4,
+        4,
+        2
+      ],
+      "citation_ids": [
+        2,
+        4
+      ],
+      "question": "In the paper “A Measure of Similarity in Textual Data Using Spearman's Rank Correlation Coefficient”, How do they evaluate knowledge extraction performance?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "70797f66d96aa163a3bee2be30a328ba61c40a18",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        4,
+        2,
+        2
+      ],
+      "citation_ids": [
+        2,
+        4
+      ],
+      "question": "In the paper “A Measure of Similarity in Textual Data Using Spearman's Rank Correlation Coefficient”, How do they evaluate knowledge extraction performance?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "736c74d2f61ac8d3ac31c45c6510a36c767a5d6d",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        1,
+        2,
+        4
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "question": "In the paper “Bootstrapping Generators from Noisy Data”, What is the multi-instance learning?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": false,
+      "group": "other_accepted"
+    },
+    {
+      "id": "736c74d2f61ac8d3ac31c45c6510a36c767a5d6d",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        1,
+        3
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3
+      ],
+      "question": "In the paper “Bootstrapping Generators from Noisy Data”, What is the multi-instance learning?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": false,
+      "group": "other_accepted"
+    },
+    {
+      "id": "736c74d2f61ac8d3ac31c45c6510a36c767a5d6d",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        4,
+        3
+      ],
+      "citation_ids": [
+        2,
+        4,
+        3
+      ],
+      "question": "In the paper “Bootstrapping Generators from Noisy Data”, What is the multi-instance learning?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": false,
+      "group": "other_accepted"
+    },
+    {
+      "id": "771b373d09e6eb50a74fffbf72d059ad44e73ab0",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1
+      ],
+      "citation_ids": [
+        1
+      ],
+      "question": "In the paper “COSTRA 1.0: A Dataset of Complex Sentence Transformations”, How do they introduce language variation?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "accepted_flag_false_unjustified",
+      "semantics": "visible_answer_missed",
+      "note": "The two annotation rounds are in the delivered evidence; the answer says the procedure is unavailable.",
+      "raw_answer": "The evidence does not describe a specific method for introducing language variation. It only lists \"formal and informal language variation\" as one of the 15 types of modifications illustrated in the dataset [1]. No further details on how this variation is introduced are provided in the supplied evidence."
+    },
+    {
+      "id": "771b373d09e6eb50a74fffbf72d059ad44e73ab0",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        3
+      ],
+      "citation_ids": [
+        1,
+        3
+      ],
+      "question": "In the paper “COSTRA 1.0: A Dataset of Complex Sentence Transformations”, How do they introduce language variation?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "accepted_flag_false_unjustified",
+      "semantics": "visible_answer_missed",
+      "note": "The two annotation rounds are in the delivered evidence; the answer says the procedure is unavailable.",
+      "raw_answer": "The evidence does not fully explain the specific method used to introduce language variation. It states that the dataset illustrates 15 types of modifications, including “formal and informal language variation” [1], and that 15 modification types were selected for COSTRA 1.0 [3]. However, the supplied evidence does not describe the concrete procedure or criteria by which language variation was introduced."
+    },
+    {
+      "id": "771b373d09e6eb50a74fffbf72d059ad44e73ab0",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “COSTRA 1.0: A Dataset of Complex Sentence Transformations”, How do they introduce language variation?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "accepted_flag_false_unjustified",
+      "semantics": "visible_answer_missed",
+      "note": "The two annotation rounds are in the delivered evidence; the answer says the procedure is unavailable.",
+      "raw_answer": "The evidence does not describe a specific method for introducing language variation. It only states that the dataset illustrates 15 types of modifications, including “formal and informal language variation” [1], and that the authors plan to extend the corpus to other language variants [2]. No further details on how language variation is introduced are provided."
+    },
+    {
+      "id": "7ccf2392422b44ede35a3fbd85bbb1da25adf795",
+      "arm": "B",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “On the emergence of syntactic structures: quantifying and modelling duality of patterning”, What other models are compared to the Blending Game?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "Human language / word-association evidence is empirical; no competing model is named as an experimental comparator.",
+      "raw_answer": "The evidence does not identify any other models compared to the Blending Game. It only describes the Blending Game itself and compares its predictions with empirical data from human languages and a web-based word association experiment [1][2]."
+    },
+    {
+      "id": "7ccf2392422b44ede35a3fbd85bbb1da25adf795",
+      "arm": "C",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "selector_invalid_output",
+      "frozen_source_score": 0,
+      "group": "selector_failure",
+      "note": "No answer stage; no refusal can be diagnosed."
+    },
+    {
+      "id": "7ccf2392422b44ede35a3fbd85bbb1da25adf795",
+      "arm": "D",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2
+      ],
+      "citation_ids": [
+        2
+      ],
+      "question": "In the paper “On the emergence of syntactic structures: quantifying and modelling duality of patterning”, What other models are compared to the Blending Game?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "Human language / word-association evidence is empirical; no competing model is named as an experimental comparator.",
+      "raw_answer": "The evidence does not identify any other models compared to the Blending Game. It only describes the Blending Game itself and mentions a web-based word association experiment used for empirical data, but no alternative models are named [2]."
+    },
+    {
+      "id": "7ce7edd06925a943e32b59f3e7b5159ccb7acaf6",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        1,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3
+      ],
+      "question": "In the paper “Learning Word Embeddings from the Portuguese Twitter Stream: A Study of some Practical Aspects”, What experimental results suggest that using less than 50% of the available training examples might result in overfitting?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "7ce7edd06925a943e32b59f3e7b5159ccb7acaf6",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        2
+      ],
+      "citation_ids": [
+        2
+      ],
+      "question": "In the paper “Learning Word Embeddings from the Portuguese Twitter Stream: A Study of some Practical Aspects”, What experimental results suggest that using less than 50% of the available training examples might result in overfitting?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "7ce7edd06925a943e32b59f3e7b5159ccb7acaf6",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        3,
+        2,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3
+      ],
+      "question": "In the paper “Learning Word Embeddings from the Portuguese Twitter Stream: A Study of some Practical Aspects”, What experimental results suggest that using less than 50% of the available training examples might result in overfitting?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "83f22814aaed9b5f882168e22a3eac8f5fda3882",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        2,
+        4
+      ],
+      "citation_ids": [
+        2,
+        4
+      ],
+      "question": "In the paper “Interpretable Visual Question Answering by Visual Grounding from Attention Supervision Mining”, How do they measure the correlation between manual groundings and model generated ones?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "83f22814aaed9b5f882168e22a3eac8f5fda3882",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Interpretable Visual Question Answering by Visual Grounding from Attention Supervision Mining”, How do they measure the correlation between manual groundings and model generated ones?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "83f22814aaed9b5f882168e22a3eac8f5fda3882",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        4,
+        4,
+        2,
+        4,
+        2
+      ],
+      "citation_ids": [
+        2,
+        4
+      ],
+      "question": "In the paper “Interpretable Visual Question Answering by Visual Grounding from Attention Supervision Mining”, How do they measure the correlation between manual groundings and model generated ones?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "892c346617a3391c7dafc9da1b65e5ea3890294d",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        2,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “SIM: A Slot-Independent Neural Model for Dialogue State Tracking”, What network architecture do they use for SIM?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "892c346617a3391c7dafc9da1b65e5ea3890294d",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        1,
+        5,
+        5,
+        6,
+        6,
+        4
+      ],
+      "citation_ids": [
+        1,
+        4,
+        5,
+        6
+      ],
+      "question": "In the paper “SIM: A Slot-Independent Neural Model for Dialogue State Tracking”, What network architecture do they use for SIM?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "892c346617a3391c7dafc9da1b65e5ea3890294d",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        5,
+        5,
+        4,
+        6
+      ],
+      "citation_ids": [
+        2,
+        4,
+        5,
+        6
+      ],
+      "question": "In the paper “SIM: A Slot-Independent Neural Model for Dialogue State Tracking”, What network architecture do they use for SIM?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "a60030cfd95d0c10b1f5116c594d50cb96c87ae6",
+      "arm": "B",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "question": "In the paper “Domain Adaptation via Teacher-Student Learning for End-to-End Speech Recognition”, How long is new model trained on 3400 hours of data?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "source_unanswerable",
+      "note": "3,400 hours refers to the speech data; elapsed training time and epoch count are missing.",
+      "raw_answer": "The evidence does not specify how long the new model is trained on the 3400 hours of data. It only states that 3400 hours of close-talk and 3400 hours of far-field Microsoft Cortana data are used for domain adaptation [1][2][3][4][5], and that an AED baseline is trained with 3400 hours of close-talk training data [6], but no training duration is given."
+    },
+    {
+      "id": "a60030cfd95d0c10b1f5116c594d50cb96c87ae6",
+      "arm": "C",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        2
+      ],
+      "citation_ids": [
+        2,
+        3
+      ],
+      "question": "In the paper “Domain Adaptation via Teacher-Student Learning for End-to-End Speech Recognition”, How long is new model trained on 3400 hours of data?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "3,400 hours refers to the speech data; elapsed training time and epoch count are missing.",
+      "raw_answer": "The evidence does not specify a training duration in hours for the new model. It states that a far-field AED is trained with 3400 hours of far-field data [3], and that the close-talk baseline AED is trained with 3400 hours of close-talk training data [2], but no wall-clock or epoch-based training time is reported."
+    },
+    {
+      "id": "a60030cfd95d0c10b1f5116c594d50cb96c87ae6",
+      "arm": "D",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        5
+      ],
+      "citation_ids": [
+        5
+      ],
+      "question": "In the paper “Domain Adaptation via Teacher-Student Learning for End-to-End Speech Recognition”, How long is new model trained on 3400 hours of data?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "3,400 hours refers to the speech data; elapsed training time and epoch count are missing.",
+      "raw_answer": "The evidence does not specify a training duration in hours for the new model on 3400 hours of data. It states that a far-field AED is trained with 3400 hours of far-field data and its ground-truth labels, but no training time is given [5]."
+    },
+    {
+      "id": "b3238158392684a5a6b62a7eabaa2a10fbecf3e6",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        5,
+        3,
+        3,
+        2,
+        3,
+        2
+      ],
+      "citation_ids": [
+        2,
+        3,
+        5
+      ],
+      "question": "In the paper “Evaluating KGR10 Polish word embeddings in the recognition of temporal expressions using BiLSTM-CRF”, How was the KGR10 corpus created?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "b3238158392684a5a6b62a7eabaa2a10fbecf3e6",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        2,
+        4,
+        2,
+        2
+      ],
+      "citation_ids": [
+        2,
+        4
+      ],
+      "question": "In the paper “Evaluating KGR10 Polish word embeddings in the recognition of temporal expressions using BiLSTM-CRF”, How was the KGR10 corpus created?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "b3238158392684a5a6b62a7eabaa2a10fbecf3e6",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        3,
+        3,
+        3,
+        5
+      ],
+      "citation_ids": [
+        2,
+        3,
+        5
+      ],
+      "question": "In the paper “Evaluating KGR10 Polish word embeddings in the recognition of temporal expressions using BiLSTM-CRF”, How was the KGR10 corpus created?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "b653f55d1dad5cd262a99502f63bf44c58ccc8cf",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        1
+      ],
+      "citation_ids": [
+        3,
+        1
+      ],
+      "question": "In the paper “Towards an Unsupervised Entrainment Distance in Conversational Speech using Deep Neural Networks”, Which dataset do they use to learn embeddings?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "b653f55d1dad5cd262a99502f63bf44c58ccc8cf",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        3
+      ],
+      "citation_ids": [
+        2,
+        3
+      ],
+      "question": "In the paper “Towards an Unsupervised Entrainment Distance in Conversational Speech using Deep Neural Networks”, Which dataset do they use to learn embeddings?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "b653f55d1dad5cd262a99502f63bf44c58ccc8cf",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        4
+      ],
+      "citation_ids": [
+        1,
+        4
+      ],
+      "question": "In the paper “Towards an Unsupervised Entrainment Distance in Conversational Speech using Deep Neural Networks”, Which dataset do they use to learn embeddings?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The D packet describes training on conversations but does not identify the Fisher corpus.",
+      "raw_answer": "The evidence does not identify a specific named dataset used to learn the embeddings. It states that the framework learns an embedding from the population-wide entrainment in an unlabeled training corpus [1], and that because no dataset of 'perfect' or highly entrained turns is available, the model is learned from consecutive turns in real data where entrainment is present to some extent [4]. The specific corpus/dataset is not named in the provided evidence."
+    },
+    {
+      "id": "c20bb0847ced490a793657fbaf6afb5ef54dad81",
+      "arm": "B",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        1,
+        3
+      ],
+      "citation_ids": [
+        1,
+        3
+      ],
+      "question": "In the paper “'Warriors of the Word' -- Deciphering Lyrical Topics in Music and Their Connection to Audio Feature Dimensions Based on a Corpus of Over 100,000 Metal Songs”, Why are the scores for predicting perceived musical hardness and darkness extracted only for subsample of 503 songs?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "source_unanswerable",
+      "note": "The correlation analysis uses 503 songs; no rationale for limiting the sample to 503 is given.",
+      "raw_answer": "The provided evidence does not explain why the hardness and darkness scores were extracted for only a subsample of 503 songs. It states that such scores were extracted for a subsample of 503 songs [1] and that audio features were extracted for a subset of songs using models for high-level music dimensions [3], but it gives no reason for restricting this to a subsample or for the specific size of 503."
+    },
+    {
+      "id": "c20bb0847ced490a793657fbaf6afb5ef54dad81",
+      "arm": "C",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        1
+      ],
+      "citation_ids": [
+        1,
+        3
+      ],
+      "question": "In the paper “'Warriors of the Word' -- Deciphering Lyrical Topics in Music and Their Connection to Audio Feature Dimensions Based on a Corpus of Over 100,000 Metal Songs”, Why are the scores for predicting perceived musical hardness and darkness extracted only for subsample of 503 songs?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "source_unanswerable",
+      "note": "The correlation analysis uses 503 songs; no rationale for limiting the sample to 503 is given.",
+      "raw_answer": "The evidence does not explain why the hardness and darkness scores were extracted only for a subsample of 503 songs. It states that a random sample of 503 songs was drawn and that Spearman's ρ was used to identify correlations between the retrieved topics and the audio dimensions from the high-level audio feature models [3], and that scores for predicting perceived hardness/heaviness and darkness/gloominess were extracted for this subsample [1]. However, no reason for restricting the audio-feature analysis to this subsample is given in the provided evidence."
+    },
+    {
+      "id": "c20bb0847ced490a793657fbaf6afb5ef54dad81",
+      "arm": "D",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        4,
+        3
+      ],
+      "citation_ids": [
+        3,
+        4
+      ],
+      "question": "In the paper “'Warriors of the Word' -- Deciphering Lyrical Topics in Music and Their Connection to Audio Feature Dimensions Based on a Corpus of Over 100,000 Metal Songs”, Why are the scores for predicting perceived musical hardness and darkness extracted only for subsample of 503 songs?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "source_unanswerable",
+      "note": "The correlation analysis uses 503 songs; no rationale for limiting the sample to 503 is given.",
+      "raw_answer": "The evidence does not explain why the hardness and darkness scores were extracted only for a subsample of 503 songs. It states that a random sample of 503 songs was drawn and used with Spearman's ρ to identify correlations between the retrieved topics and the audio dimensions [4], and that audio features were extracted for a subset of songs [3], but it gives no stated reason for limiting the audio analysis to that subsample."
+    },
+    {
+      "id": "c2da598346b74541c78ecff5c9586b3857dd01b5",
+      "arm": "B",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": null,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        3,
+        3,
+        5
+      ],
+      "citation_ids": [
+        1,
+        3,
+        5
+      ],
+      "question": "In the paper “Hybrid Tiled Convolutional Neural Networks for Text Sentiment Classification”, How better does the hybrid tiled CNN model perform than its counterparts?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "ambiguous_magnitude",
+      "note": "Qualitative TCNN/CNN comparisons are present; no numerical advantage is recoverable. Source ruling is ambiguous.",
+      "raw_answer": "The paper reports that the hybrid tiled CNN (HTCNN) performs better than both CNN and tiled CNN on the IMDB movie reviews and SemEval 2017 datasets [1]. On SemEval, the results confirm the performance of HTCNN over simple CNN [3]. The conclusions state that, if the tile size is chosen properly, the model could achieve competitive performance with the TCNN and better results than the reference CNN model [3]. The paper also notes that the HTCNN achieves the best performance without the drawbacks of the other two models: the inflexible filter structure of the TCNN and the SHTCNN's lack of n-grams [5]. However, the evidence does not provide specific quantitative margins of improvement over the counterparts."
+    },
+    {
+      "id": "c2da598346b74541c78ecff5c9586b3857dd01b5",
+      "arm": "C",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": null,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2,
+        3
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3
+      ],
+      "question": "In the paper “Hybrid Tiled Convolutional Neural Networks for Text Sentiment Classification”, How better does the hybrid tiled CNN model perform than its counterparts?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "ambiguous_magnitude",
+      "note": "Qualitative TCNN/CNN comparisons are present; no numerical advantage is recoverable. Source ruling is ambiguous.",
+      "raw_answer": "The evidence states that experiments on the IMDB movie reviews and SemEval 2017 datasets demonstrate the efficiency of the hybrid tiled CNN, which \"performs better than both CNN and tiled CNN\" [1]. It also says experimental results prove the effectiveness of the introduced model over the simple architecture of the CNN [2], and that the HTCNN achieves the best performance without the drawbacks of the other two models—the inflexible filter structure of the TCNN and the SHTCNN's lack of n-grams [3]. However, the supplied evidence does not provide specific quantitative margins (e.g., accuracy or F1 differences) showing how much better the hybrid tiled CNN performs than its counterparts."
+    },
+    {
+      "id": "c2da598346b74541c78ecff5c9586b3857dd01b5",
+      "arm": "D",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": null,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2,
+        2,
+        3
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3
+      ],
+      "question": "In the paper “Hybrid Tiled Convolutional Neural Networks for Text Sentiment Classification”, How better does the hybrid tiled CNN model perform than its counterparts?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "ambiguous_magnitude",
+      "note": "Qualitative TCNN/CNN comparisons are present; no numerical advantage is recoverable. Source ruling is ambiguous.",
+      "raw_answer": "The evidence states that experiments on the IMDB movie reviews and SemEval 2017 datasets demonstrate that the hybrid tiled CNN performs better than both CNN and tiled CNN [1]. On the SemEval dataset, the results confirm the performance of HTCNN over simple CNN [2]. The conclusions state that, if the tile size is chosen properly, the model could achieve competitive performance with the TCNN and better results than the reference CNN model [2], and that the HTCNN is a good substitute for CNN in the NLP field [3]. However, the evidence does not provide specific quantitative margins (e.g., accuracy or recall differences) showing how much better the hybrid tiled CNN performs than its counterparts."
+    },
+    {
+      "id": "cb4727cd5643dabc3f5c95e851d5313f5d979bdc",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        3,
+        2
+      ],
+      "citation_ids": [
+        3,
+        2
+      ],
+      "question": "In the paper “Syntax-Enhanced Self-Attention-Based Semantic Role Labeling”, How big is improvement over the old  state-of-the-art performance on CoNLL-2009 dataset?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "No numeric improvement over prior Chinese CoNLL-2009 state of the art in the evidence delivered.",
+      "raw_answer": "The provided evidence does not state the size of the improvement over the old state-of-the-art performance on the CoNLL-2009 dataset for the paper “Syntax-Enhanced Self-Attention-Based Semantic Role Labeling.” The paper's abstract says only that the model achieves “a new state-of-the-art performance for the Chinese SRL task on the CoNLL-2009 dataset” [3], and another passage notes that the improvement over reproduced methods is “not as large as the Chinese counterparts” without giving a numerical margin [2]. Therefore, the evidence is insufficient to quantify the improvement."
+    },
+    {
+      "id": "cb4727cd5643dabc3f5c95e851d5313f5d979bdc",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        1
+      ],
+      "citation_ids": [
+        1
+      ],
+      "question": "In the paper “Syntax-Enhanced Self-Attention-Based Semantic Role Labeling”, How big is improvement over the old  state-of-the-art performance on CoNLL-2009 dataset?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "No numeric improvement over prior Chinese CoNLL-2009 state of the art in the evidence delivered.",
+      "raw_answer": "The provided evidence does not state the size of the improvement over the previous state-of-the-art on CoNLL-2009. It only says that the model achieves a new state-of-the-art performance for Chinese SRL on the CoNLL-2009 dataset [1], without giving a numerical margin."
+    },
+    {
+      "id": "cb4727cd5643dabc3f5c95e851d5313f5d979bdc",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        2,
+        1
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Syntax-Enhanced Self-Attention-Based Semantic Role Labeling”, How big is improvement over the old  state-of-the-art performance on CoNLL-2009 dataset?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "No numeric improvement over prior Chinese CoNLL-2009 state of the art in the evidence delivered.",
+      "raw_answer": "The provided evidence does not state the size of the improvement over the previous state-of-the-art on CoNLL-2009. It only says the model achieves a new state-of-the-art performance for Chinese SRL on CoNLL-2009 [2], and that improvements over baselines are smaller for languages other than Chinese [1]. No numerical gain is given, so the magnitude of the improvement cannot be determined from the evidence."
+    },
+    {
+      "id": "d4a6f5034345036dbc2d4e634a8504f79d42ca69",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        1,
+        3
+      ],
+      "citation_ids": [
+        1,
+        3
+      ],
+      "question": "In the paper “Adaptive Scheduling for Multi-Task Learning”, What datasets are used for experiments?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "d4a6f5034345036dbc2d4e634a8504f79d42ca69",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        1,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Adaptive Scheduling for Multi-Task Learning”, What datasets are used for experiments?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "d4a6f5034345036dbc2d4e634a8504f79d42ca69",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        3
+      ],
+      "citation_ids": [
+        1,
+        3
+      ],
+      "question": "In the paper “Adaptive Scheduling for Multi-Task Learning”, What datasets are used for experiments?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "d803b782023553bbf9b36551fbc888ad189b1f29",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        2
+      ],
+      "citation_ids": [
+        2
+      ],
+      "question": "In the paper “Few-shot Natural Language Generation for Task-Oriented Dialog”, What was the criteria for human evaluation?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "d803b782023553bbf9b36551fbc888ad189b1f29",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Few-shot Natural Language Generation for Task-Oriented Dialog”, What was the criteria for human evaluation?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "d803b782023553bbf9b36551fbc888ad189b1f29",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1
+      ],
+      "citation_ids": [
+        1
+      ],
+      "question": "In the paper “Few-shot Natural Language Generation for Task-Oriented Dialog”, What was the criteria for human evaluation?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "db62d5d83ec187063b57425affe73fef8733dd28",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Counterfactual Data Augmentation for Mitigating Gender Stereotypes in Languages with Rich Morphology”, Which model do they use to convert between masculine-inflected and feminine-inflected sentences?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "db62d5d83ec187063b57425affe73fef8733dd28",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        4,
+        5,
+        3
+      ],
+      "citation_ids": [
+        1,
+        3,
+        4,
+        5
+      ],
+      "question": "In the paper “Counterfactual Data Augmentation for Mitigating Gender Stereotypes in Languages with Rich Morphology”, Which model do they use to convert between masculine-inflected and feminine-inflected sentences?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "db62d5d83ec187063b57425affe73fef8733dd28",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        3,
+        4
+      ],
+      "citation_ids": [
+        1,
+        3,
+        4
+      ],
+      "question": "In the paper “Counterfactual Data Augmentation for Mitigating Gender Stereotypes in Languages with Rich Morphology”, Which model do they use to convert between masculine-inflected and feminine-inflected sentences?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "df9d16a2c4983a0ff46081e3ff4d6e7ef3338264",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        5,
+        4,
+        4,
+        2,
+        4
+      ],
+      "citation_ids": [
+        2,
+        4,
+        5
+      ],
+      "question": "In the paper “Discriminating between similar languages in Twitter using label propagation”, How are labels propagated using this approach?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "df9d16a2c4983a0ff46081e3ff4d6e7ef3338264",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        5,
+        4,
+        4,
+        2,
+        4
+      ],
+      "citation_ids": [
+        2,
+        4,
+        5
+      ],
+      "question": "In the paper “Discriminating between similar languages in Twitter using label propagation”, How are labels propagated using this approach?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "df9d16a2c4983a0ff46081e3ff4d6e7ef3338264",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        4,
+        4,
+        4,
+        2,
+        4
+      ],
+      "citation_ids": [
+        2,
+        3,
+        4
+      ],
+      "question": "In the paper “Discriminating between similar languages in Twitter using label propagation”, How are labels propagated using this approach?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "e86d381322c8db2b74a13a8e23082ddb010c1e40",
+      "arm": "B",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        1,
+        5
+      ],
+      "citation_ids": [],
+      "question": "In the paper “Crowd Sourced Data Analysis: Mapping of Programming Concepts to Syntactical Patterns”, how well this method is compared to other method?",
+      "group": "rejected_cited_refusal",
+      "form": "body_only",
+      "semantics": "source_unanswerable",
+      "note": "No end-to-end mapping performance comparison can be established; for D even the target paper is absent.",
+      "raw_answer": "The provided evidence does not contain any evaluation or comparison of the crowd-sourced method against other methods. The paper excerpt describes the approach (using StackOverflow Q&A to map programming concepts to natural language keywords and tag code lines for keyword-based searching) [1][5], but it reports no comparative results or performance figures versus alternative methods. Therefore, the evidence is insufficient to answer how well this method compares to other methods."
+    },
+    {
+      "id": "e86d381322c8db2b74a13a8e23082ddb010c1e40",
+      "arm": "C",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        1,
+        2,
+        2
+      ],
+      "citation_ids": [],
+      "question": "In the paper “Crowd Sourced Data Analysis: Mapping of Programming Concepts to Syntactical Patterns”, how well this method is compared to other method?",
+      "group": "rejected_cited_refusal",
+      "form": "body_only",
+      "semantics": "source_unanswerable",
+      "note": "No end-to-end mapping performance comparison can be established; for D even the target paper is absent.",
+      "raw_answer": "The provided evidence does not contain any comparison of this method with other methods. It describes the approach itself—using Stack Overflow question and answer data to map programming concepts to natural language keywords and syntactical patterns, via entity discovery, mapping creation, and entity linking [1][2]—and mentions related literature such as Word2Vec, Doc2Vec, and topic modelling [2], but it does not report any comparative evaluation or performance results against other methods. Therefore, the evidence is insufficient to answer how well this method compares to other methods."
+    },
+    {
+      "id": "e86d381322c8db2b74a13a8e23082ddb010c1e40",
+      "arm": "D",
+      "source_label": "unanswerable",
+      "official_label": "unanswerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": true,
+      "body_numbers": [],
+      "citation_ids": [],
+      "question": "In the paper “Crowd Sourced Data Analysis: Mapping of Programming Concepts to Syntactical Patterns”, how well this method is compared to other method?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_true_justified",
+      "semantics": "source_unanswerable",
+      "note": "No end-to-end mapping performance comparison can be established; for D even the target paper is absent.",
+      "raw_answer": "The provided evidence does not contain the paper “Crowd Sourced Data Analysis: Mapping of Programming Concepts to Syntactical Patterns,” so it is not possible to determine how well that method compares to other methods."
+    },
+    {
+      "id": "e9d882775a132e172eea68ab6ab4621a924bb6b8",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        1,
+        2,
+        3
+      ],
+      "citation_ids": [
+        1,
+        2,
+        3
+      ],
+      "question": "In the paper “Improving Textual Network Embedding with Global Attention via Optimal Transport”, Which of their proposed attention methods works better overall?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The variants and benefits of OT are described, without the direct GANE-AP/GANE-OT ranking.",
+      "raw_answer": "The provided evidence does not contain a direct comparison stating which of the two proposed attention methods works better overall. The paper describes two strategies—a content-aware sparse attention module based on optimal transport and a high-level attention parsing module [1]—and reports that the OT-based attention produces sparse attention matrices and that the model consistently outperforms competing methods [2][3]. However, no evidence ranks the two attention methods against each other overall."
+    },
+    {
+      "id": "e9d882775a132e172eea68ab6ab4621a924bb6b8",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        3,
+        1
+      ],
+      "citation_ids": [
+        3,
+        1
+      ],
+      "question": "In the paper “Improving Textual Network Embedding with Global Attention via Optimal Transport”, Which of their proposed attention methods works better overall?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The variants and benefits of OT are described, without the direct GANE-AP/GANE-OT ranking.",
+      "raw_answer": "The evidence does not directly state which of the two proposed attention methods (GANE-OT or GANE-AP) works better overall. It describes GANE-OT as using the most basic OT-based attention model (global word-by-word alignment) and GANE-AP as additionally using a one-layer convolutional neural network for attention parsing, and reports that both GANE variants consistently outperform competing solutions [3]. The paper also states that its OT-based attention mechanism produces sparse attention scores and that this underscores the effectiveness of OT-based attention for noise suppression [1], but no comparison ranking GANE-OT against GANE-AP is provided in the supplied evidence."
+    },
+    {
+      "id": "e9d882775a132e172eea68ab6ab4621a924bb6b8",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        4,
+        1,
+        1
+      ],
+      "citation_ids": [
+        1,
+        4
+      ],
+      "question": "In the paper “Improving Textual Network Embedding with Global Attention via Optimal Transport”, Which of their proposed attention methods works better overall?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The variants and benefits of OT are described, without the direct GANE-AP/GANE-OT ranking.",
+      "raw_answer": "The evidence does not directly compare the two proposed attention methods in terms of which works better overall. The paper presents two strategies: (i) a content-aware sparse attention module based on optimal transport, and (ii) a high-level attention parsing module [4]. The OT-based attention is described as naturally sparse and self-normalized [1], and its sparse attention matrix is said to underscore its effectiveness in noise suppression compared with dense dot-product-based attention [1]. However, no evidence states an overall ranking between the two proposed attention methods."
+    },
+    {
+      "id": "ee279ace5bc69d15e640da967bd4214fe264aa1a",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        6
+      ],
+      "citation_ids": [
+        6
+      ],
+      "question": "In the paper “An Open-World Extension to Knowledge Graph Completion Models”, what was the evaluation metrics studied in this work?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The target-paper chunks do not enumerate MR, MRR and Hits@1/3/10 together.",
+      "raw_answer": "The evidence does not specify which evaluation metrics were used in this work. It mentions evaluation settings such as target filtering and comparisons with state-of-the-art open-world link prediction models [6], but it does not name or describe the metrics themselves. Therefore, the evaluation metrics studied cannot be determined from the supplied evidence."
+    },
+    {
+      "id": "ee279ace5bc69d15e640da967bd4214fe264aa1a",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 0,
+      "raw_flag": false,
+      "body_numbers": [
+        6,
+        6,
+        4,
+        6
+      ],
+      "citation_ids": [
+        4,
+        6
+      ],
+      "question": "In the paper “An Open-World Extension to Knowledge Graph Completion Models”, what was the evaluation metrics studied in this work?",
+      "final_refusal_justified": true,
+      "final_visible_sufficient": false,
+      "group": "accepted_flag_false_justified",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The target-paper chunks do not enumerate MR, MRR and Hits@1/3/10 together.",
+      "raw_answer": "The evidence mentions evaluation metrics only indirectly: it refers to Hits@10 and Hits@1 when comparing ComplEx-OWE with ConMask and other models [6], and states that on DBPedia50k the model performs best on all metrics except Hits@10 [6]. It also notes that results were evaluated using target filtering [4][6]. However, the supplied evidence does not provide a complete list of the evaluation metrics studied in the paper."
+    },
+    {
+      "id": "ee279ace5bc69d15e640da967bd4214fe264aa1a",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": 0,
+      "raw_flag": true,
+      "body_numbers": [
+        5,
+        1,
+        2,
+        3,
+        4,
+        6
+      ],
+      "citation_ids": [
+        5,
+        1,
+        2,
+        3,
+        4,
+        6
+      ],
+      "question": "In the paper “An Open-World Extension to Knowledge Graph Completion Models”, what was the evaluation metrics studied in this work?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "insufficient_visible_evidence",
+      "note": "The target-paper chunks do not enumerate MR, MRR and Hits@1/3/10 together.",
+      "raw_answer": "The provided evidence does not specify which evaluation metrics were studied in “An Open-World Extension to Knowledge Graph Completion Models.” The only passage from that paper discusses its conclusion and future work, not its evaluation metrics [5]. Other evidence concerns evaluation metrics for word embeddings or style transfer and is unrelated to that paper [1][2][3][4][6]. Therefore, the evidence is insufficient to answer the question."
+    },
+    {
+      "id": "f91835f17c0086baec65ebd99d12326ae1ae87d2",
+      "arm": "B",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        3
+      ],
+      "citation_ids": [
+        3
+      ],
+      "question": "In the paper “Multi-Source Syntactic Neural Machine Translation”, How do they obtain parsed source sentences?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "f91835f17c0086baec65ebd99d12326ae1ae87d2",
+      "arm": "C",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "citation_ids": [
+        1,
+        2
+      ],
+      "question": "In the paper “Multi-Source Syntactic Neural Machine Translation”, How do they obtain parsed source sentences?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "f91835f17c0086baec65ebd99d12326ae1ae87d2",
+      "arm": "D",
+      "source_label": "answerable",
+      "official_label": "answerable",
+      "status": "ok",
+      "frozen_source_score": 1,
+      "raw_flag": false,
+      "body_numbers": [
+        5,
+        5,
+        6,
+        5,
+        6
+      ],
+      "citation_ids": [
+        5,
+        6
+      ],
+      "question": "In the paper “Multi-Source Syntactic Neural Machine Translation”, How do they obtain parsed source sentences?",
+      "final_refusal_justified": false,
+      "final_visible_sufficient": true,
+      "group": "other_accepted"
+    },
+    {
+      "id": "fbabde18ebec5852e3d46b1f8ce0afb42350ce62",
+      "arm": "B",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": null,
+      "raw_flag": true,
+      "body_numbers": [
+        1
+      ],
+      "citation_ids": [
+        1
+      ],
+      "question": "In the paper “A Semi-automatic Method for Efficient Detection of Stories on Social Media”, Why there is only user study to evaluate the model?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "ambiguous_scope",
+      "note": "The user study is described; the claim that it was the only assessment and the rationale for exclusivity are not established.",
+      "raw_answer": "The provided evidence does not explain why only a user study was used to evaluate the model. It states that the authors ran a user study with 25 participants showing that, compared with more conventional methods, their tool increased the speed and accuracy with which users could track stories about real-world events [1], but it gives no rationale for relying solely on a user study or for not using other evaluation methods."
+    },
+    {
+      "id": "fbabde18ebec5852e3d46b1f8ce0afb42350ce62",
+      "arm": "C",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": null,
+      "raw_flag": true,
+      "body_numbers": [
+        1
+      ],
+      "citation_ids": [
+        1
+      ],
+      "question": "In the paper “A Semi-automatic Method for Efficient Detection of Stories on Social Media”, Why there is only user study to evaluate the model?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "ambiguous_scope",
+      "note": "The user study is described; the claim that it was the only assessment and the rationale for exclusivity are not established.",
+      "raw_answer": "The provided evidence does not explain why only a user study was used to evaluate the model. It states that the authors ran a user study with 25 participants showing that, compared to more conventional methods, their tool can increase the speed and accuracy with which users can track stories about real-world events [1], but it gives no rationale for relying solely on a user study or for not using other evaluation methods."
+    },
+    {
+      "id": "fbabde18ebec5852e3d46b1f8ce0afb42350ce62",
+      "arm": "D",
+      "source_label": "ambiguous",
+      "official_label": "unanswerable",
+      "status": "citations_on_refusal",
+      "frozen_source_score": null,
+      "raw_flag": true,
+      "body_numbers": [
+        1
+      ],
+      "citation_ids": [
+        1
+      ],
+      "question": "In the paper “A Semi-automatic Method for Efficient Detection of Stories on Social Media”, Why there is only user study to evaluate the model?",
+      "group": "rejected_cited_refusal",
+      "form": "both",
+      "semantics": "ambiguous_scope",
+      "note": "The user study is described; the claim that it was the only assessment and the rationale for exclusivity are not established.",
+      "raw_answer": "The provided evidence does not explain why only a user study was used to evaluate the model. It states that the authors ran a user study with 25 participants showing that their tool increased the speed and accuracy with which users could track stories about real-world events [1], but it gives no rationale for relying solely on a user study or for omitting other evaluation methods."
+    }
+  ]
+}

@@ -21,11 +21,11 @@ from packages.knowledge.contracts import RetrievedEvidence
 from packages.knowledge.evidence_plan import model_evidence_locator
 from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 from packages.model_gateway.contracts import (
-    ModelGateway,
     ModelMessage,
     ModelRequest,
     ModelResponse,
     ResolvedModelExecutionPlan,
+    ResolvedModelGenerator,
 )
 
 SELECTION_PROMPT = """Select a complementary set of original passages for the question.
@@ -129,7 +129,7 @@ class EvidenceSetSelector:
     Callers own the observed failure policy and accounting.
     """
 
-    def __init__(self, gateway: ModelGateway, plan: ResolvedModelExecutionPlan) -> None:
+    def __init__(self, gateway: ResolvedModelGenerator, plan: ResolvedModelExecutionPlan) -> None:
         if plan.fallbacks or plan.retry_policy.max_attempts != 1:
             raise ValueError("experimental selector requires a single-attempt model plan")
         self.gateway, self.plan = gateway, plan

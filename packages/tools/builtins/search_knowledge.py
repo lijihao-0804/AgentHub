@@ -19,10 +19,11 @@ from packages.knowledge.contracts import (
     SectionSelector,
 )
 from packages.knowledge.evidence_records import (
-    drop_overlapping_evidence,
+    drop_overlapping_records,
     evidence_record,
     evidence_reference,
 )
+from packages.knowledge.evidence_set_retriever import EvidenceSetKnowledgeRetriever
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.knowledge.onyx_retriever import OnyxSelectionKnowledgeRetriever
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
@@ -112,6 +113,7 @@ async def _snapshot_queries(
                     config.get("max_chunks_per_document")
                 ),
                 context_budget_bytes=config.get("context_budget_bytes"),
+                rerank_method=config.get("rerank_method"),
                 evidence_projection=config.get("evidence_projection"),
             )
         )
@@ -153,16 +155,27 @@ async def search_knowledge(
         # to an error the agent would read as "nothing found".
         retriever = OnyxSelectionKnowledgeRetriever(retriever, section_selector)
 
+    complementary = definition.retrieval_config.get("evidence_set_selector") == "complementary_v1"
+    if complementary:
+        retriever = EvidenceSetKnowledgeRetriever.for_product(
+            retriever, context.selector_binding, context.workspace_context
+        )
     async with session_factory() as session:
         queries = await _snapshot_queries(session, context, definition, text=text, limit=limit)
 
     evidence = []
+    selection_status = []
     for query in queries:
         result = await retriever.retrieve_with_trace(_retrieval_context(context), query)
         if not isinstance(result, RetrievalResult):
             raise ToolHandlerError(
                 "TOOL_EXECUTION_FAILED", "The knowledge search returned an invalid result."
             )
+        if complementary:
+            stage = result.trace.evidence_set
+            if stage is None or stage.metadata is None:
+                raise ToolHandlerError("TOOL_EXECUTION_FAILED", "Missing selection receipt.")
+            selection_status.append({"snapshot_id": query.knowledge_snapshot_id, **stage.metadata})
         for item in result.evidence:
             reference = evidence_reference(
                 item,
@@ -186,20 +199,21 @@ async def search_knowledge(
     # a higher-ranked record already delivers; dropping them here frees result
     # slots for complementary passages. chunk_id hashes the revision id and
     # content, so one chunk_id always identifies the same passage.
-    kept = drop_overlapping_evidence([item for item, _ in evidence])
-    keep_ids = {item.chunk_id for item in kept}
-    evidence = [pair for pair in evidence if pair[0].chunk_id in keep_ids]
     retrieval_config = getattr(definition, "retrieval_config", None) or {}
     include_snapshot_ids = retrieval_config.get("evidence_projection") == "compact_v1"
-    return {
-        "evidence_refs": [reference for _, reference in evidence[:limit]],
-        "results": [
-            evidence_record(
-                item,
-                snapshot_id=reference["snapshot_id"] if include_snapshot_ids else None,
-            )
-            for item, reference in evidence[:limit]
+    # A shared revision can occur in two pinned snapshots. Keep the winning
+    # reference with the record; reselecting by a set of chunk IDs restores both.
+    records, references = drop_overlapping_records(
+        [
+            evidence_record(item, snapshot_id=ref["snapshot_id"] if include_snapshot_ids else None)
+            for item, ref in evidence
         ],
+        [ref for _, ref in evidence],
+    )
+    return {
+        "evidence_refs": references[:limit],
+        "results": records[:limit],
+        **({"evidence_selection": selection_status} if complementary else {}),
     }
 
 

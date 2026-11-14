@@ -1,5 +1,7 @@
 # AgentHub 当前状态
 
+2026-11-14 的收费确认在同一批 40 篇论文上比较了整块重排、互补选集和句级重排。按原文可评分的 37 题分别答对 15、21、19 题，句级方法未过默认推广门槛。真实客服 Agent 的回归、逐案语义与审批写入另行记录。[付费对照与客服验收](../benchmarks/public_rag/results/published/rag-product-evidence-20261114/paid/README.md)
+
 2026-11-14 引用问答已能区分模型没有可见输出、JSON 或字段校验失败、以及引文校验失败。真实入口用三批公开独立题验证了首答和答案质量；历史第 620 题与 Visual Genome 数据规模题单列复测。公开 HTTP 错误码保持稳定。[逐题首答、原文引文与回归](../benchmarks/public_rag/results/published/qa-first-response-20261114/README.md)
 
 2026-11-14 已验证按文章融合后回选原段、索引标题和完整摘要两条路线。可直接复核第 753 题、原 6 道双路漏题、独立语料的前五来源变化及真实问答引文。[文章级召回验收与复跑](../benchmarks/public_rag/results/published/article-recall-20261114/README.md)

@@ -1,0 +1,47 @@
+{
+  "local_raw_file_sha256": {
+    "rag-confirmation-paid/events.jsonl": "fc03c16e678318de78aebee2c83a843a6e950679befa33ac81d6ccd5bb072a06",
+    "rag-confirmation-blind/private.json": "b59ad71c396b1bc40b5dda6c2c725ff5e236806077b1d489cdfc03c0c6baee3b",
+    "rag-confirmation-blind/first.json": "27617c025246c76a2eb9e8d2afbfe296b1ab79e63ca865d157404c587573dcde",
+    "rag-confirmation-blind/second.json": "e8ef6b0d91aa8dc84855e1f860c923a7dafd10a3325508c8c6688dd3aa0ee40a",
+    "rag-confirmation-blind/disagreements.json": "1735b788e8ebc99b3674c171d97337e790d877b32c3aff6b75b128b3f76f05f1",
+    "rag-product-confirmation/restored.json": "4c9cc20bd4067e57f2a5ca40c5d954beb8c84ce40035b97a003c408a8904a2f3"
+  },
+  "execution": {
+    "public": {
+      "state": "completed",
+      "started_at": "2026-11-14T12:48:35.686081+00:00",
+      "finished_at": "2026-11-14T12:53:56.370280+00:00",
+      "elapsed_seconds": 320.672,
+      "exit_code": 0
+    },
+    "refund_initial": {
+      "state": "failed",
+      "started_at": "2026-11-14T12:55:53.426734+00:00",
+      "finished_at": "2026-11-14T13:11:51.303812+00:00",
+      "elapsed_seconds": 957.875,
+      "exit_code": 1
+    },
+    "refund_tail": {
+      "state": "failed",
+      "started_at": "2026-11-14T13:21:18.420715+00:00",
+      "finished_at": "2026-11-14T13:27:31.185706+00:00",
+      "elapsed_seconds": 372.765,
+      "exit_code": 1
+    }
+  },
+  "public_execution_commit": "1f956ac88eda24ae89226e792fd4763751d28fc7",
+  "refund_execution_commit": "70fe4b12fd2f68ef76fe6360b11f3b502b56c884 / 179617f60a4d9ec5dac036c9049b6ad31f8650f4",
+  "artifact_sha256": {
+    "billing.json": "46e1c65403806b2626b6b1e356f6d34f105756761a342830dd0468411cadbd3a",
+    "public-comparisons.json": "28a81f979b3002a4fc6554302aba81350a102127c2299351106a7efd4076c250",
+    "public-first-answers.json": "cc486fe577c45fee8d9c1028dee3d8a88f89feef0717e323c7d4164ed26d3b00",
+    "public-refusal-audit.json": "18ebf72dc7847a212ae4cda45b4c9aae2af68fb3ffd73de79c30f0b7d3d0ce53",
+    "public-reviews.zip": "4fef7cf0a91ebd493393478f45b2341a9bbfb9ff7ab8bf2800c2fd5ea47113a0",
+    "public-scores.json": "4c68a38bee82f5f198dc16e6080204cbd5553fe657d06ee5a8977595bd377159",
+    "refund-first-runs.zip": "8e5ccce1e6167ee72835ba55c63a611d844b6a9c52a8110cca4113e38c95496f",
+    "refund-interruption.zip": "a6224a6d8355370def982b0d5a31e46b47fbe6a4225d9aa2ca94c35d689c3a72",
+    "refund-reviews.zip": "fca01e459fa579e174de0c603f7741e43b429a94778c023c69f8cf830e0b8d44",
+    "refund-scores.json": "3388bf8e976f6e84635998e75ed7480f814388899b7cdf721e6ab8ef52a2cadd"
+  }
+}

@@ -1,0 +1,785 @@
+{
+  "data_sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+  "prior_exposure_commit": "e0fe09bbe0c7ff5b674a204606f038524b63065f",
+  "excluded_papers": 443,
+  "excluded_question_ids_after_wording_filter": 861,
+  "unit": "one question per distinct paper; QASPER TRAIN, never official TEST",
+  "cases": [
+    {
+      "id": "771b373d09e6eb50a74fffbf72d059ad44e73ab0",
+      "scope": "independent",
+      "query": "In the paper “COSTRA 1.0: A Dataset of Complex Sentence Transformations”, How do they introduce language variation?",
+      "gold_documents": [
+        "1912.01673"
+      ],
+      "negative": false,
+      "answers": [
+        " we were looking for original and uncommon sentence change suggestions"
+      ],
+      "evidence": [
+        "We acquired the data in two rounds of annotation. In the first one, we were looking for original and uncommon sentence change suggestions. In the second one, we collected sentence alternations using ideas from the first round. The first and second rounds of annotation could be broadly called as collecting ideas and collecting data, respectively."
+      ],
+      "schedule": [
+        "B",
+        "C",
+        "D"
+      ],
+      "source_sha256": "3eb54f7599126aa5552a0705a134b759b41509eda8b58480a77af425af879d20"
+    },
+    {
+      "id": "cb4727cd5643dabc3f5c95e851d5313f5d979bdc",
+      "scope": "independent",
+      "query": "In the paper “Syntax-Enhanced Self-Attention-Based Semantic Role Labeling”, How big is improvement over the old  state-of-the-art performance on CoNLL-2009 dataset?",
+      "gold_documents": [
+        "1910.11204"
+      ],
+      "negative": false,
+      "answers": [
+        "our Open model achieves more than 3 points of f1-score than the state-of-the-art result"
+      ],
+      "evidence": [
+        "Table TABREF46 shows that our Open model achieves more than 3 points of f1-score than the state-of-the-art result, and RelAwe with DepPath&RelPath achieves the best in both Closed and Open settings. Notice that our best Closed model can almost perform as well as the state-of-the-art model while the latter utilizes pre-trained word embeddings. Besides, performance gap between three models under Open setting is very small. It indicates that the representation ability of BERT is so powerful and may contains rich syntactic information. At last, the Gold result is much higher than the other models, indicating that there is still large space for improvement for this task."
+      ],
+      "schedule": [
+        "B",
+        "D",
+        "C"
+      ],
+      "source_sha256": "1b856d4511c0e39c3856cd2da34025d922c1743562f962d5c699127b489d0ddf"
+    },
+    {
+      "id": "4d30c2223939b31216f2e90ef33fe0db97e962ac",
+      "scope": "independent",
+      "query": "In the paper “A Swiss German Dictionary: Variation in Speech and Writing”, How many words are coded in the dictionary?",
+      "gold_documents": [
+        "2004.00139"
+      ],
+      "negative": false,
+      "answers": [
+        "11'248"
+      ],
+      "evidence": [
+        "We pair 11'248 standard German written words with their phonetical representations in six different Swiss dialects: Zürich, St. Gallen, Basel, Bern, Visp, and Stans (Figure FIGREF1). The phonetic words were written in a modified version of the Speech Assessment Methods Phonetic Alphabet (SAMPA). The Swiss German phonetic words are also paired with Swiss German writings in the latin alphabet. (From here onwards, a phonetic representation of a Swiss German word will be called a SAMPA and a written Swiss German word will be called a GSW.)"
+      ],
+      "schedule": [
+        "C",
+        "B",
+        "D"
+      ],
+      "source_sha256": "086315ee690f7d23a03cd9ceb23fa0a9e3686cd18ecd7ba8560745cb21ad9d1b"
+    },
+    {
+      "id": "0747cecb3c72594c5d15ba18490566be1ffdbfad",
+      "scope": "independent",
+      "query": "In the paper “Smarnet: Teaching Machines to Read and Comprehend Like Human”, What other solutions do they compare to?",
+      "gold_documents": [
+        "1710.02772"
+      ],
+      "negative": false,
+      "answers": [
+        " strong competitive methods on the SQuAD leaderboard and TriviaQA leaderboard"
+      ],
+      "evidence": [
+        "We evaluate the performance of our proposed method based on two evaluation criteria EM and F1 for the MC tasks. We compare our model with other strong competitive methods on the SQuAD leaderboard and TriviaQA leaderboard."
+      ],
+      "schedule": [
+        "C",
+        "D",
+        "B"
+      ],
+      "source_sha256": "d40e49883840dbff6387dff867cf04152254bacb63dfbfdef5c7391b72384f02"
+    },
+    {
+      "id": "5bb96b255dab3e47a8a68b1ffd7142d0e21ebe2a",
+      "scope": "independent",
+      "query": "In the paper “Efficient Twitter Sentiment Classification using Subjective Distant Supervision”, How is tweet subjectivity measured?",
+      "gold_documents": [
+        "1701.03051"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "B",
+        "C",
+        "D"
+      ],
+      "source_sha256": "c9ef3ce4ba66e1a034752ed99ded58a120a95ccc5cc672fcc27b932856b48d15"
+    },
+    {
+      "id": "1ccfd288f746c35006f5847297ab52020729f523",
+      "scope": "independent",
+      "query": "In the paper “Dreaddit: A Reddit Dataset for Stress Analysis in Social Media”, What categories does the dataset come from?",
+      "gold_documents": [
+        "1911.00133"
+      ],
+      "negative": false,
+      "answers": [
+        "abuse, social, anxiety, PTSD, and financial"
+      ],
+      "evidence": [
+        "We include ten subreddits in the five domains of abuse, social, anxiety, PTSD, and financial, as detailed in tab:data-spread, and our analysis focuses on the domain level. Using the PRAW API, we scrape all available posts on these subreddits between January 1, 2017 and November 19, 2018; in total, 187,444 posts. As we will describe in sec:annotation, we assign binary stress labels to 3,553 segments of these posts to form a supervised and semi-supervised training set. An example segment is shown in fig:stress-example. Highlighted phrases are indicators that the writer is stressed: the writer mentions common physical symptoms (nausea), explicitly names fear and dread, and uses language indicating helplessness and help-seeking behavior."
+      ],
+      "schedule": [
+        "D",
+        "B",
+        "C"
+      ],
+      "source_sha256": "a82a2c73a7a82e35edb9ca9f7174af1e2402d0b315e080def79087a93829675b"
+    },
+    {
+      "id": "c2da598346b74541c78ecff5c9586b3857dd01b5",
+      "scope": "independent",
+      "query": "In the paper “Hybrid Tiled Convolutional Neural Networks for Text Sentiment Classification”, How better does the hybrid tiled CNN model perform than its counterparts?",
+      "gold_documents": [
+        "2001.11857"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "B",
+        "D",
+        "C"
+      ],
+      "source_sha256": "8055e55cab5c19078da480ed3b2e479d4f796852ccb7f748b40829cca98bd268"
+    },
+    {
+      "id": "5b99f74bb25bc88677621443bf065d96d84895ab",
+      "scope": "independent",
+      "query": "In the paper “Latent Multi-task Architecture Learning”, What is hard parameter sharing?",
+      "gold_documents": [
+        "1705.08142"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "C",
+        "B",
+        "D"
+      ],
+      "source_sha256": "b9d708dda783ec8b0b03809d597949bb495a1788ecb26ad5fc0a2319d2119f87"
+    },
+    {
+      "id": "d803b782023553bbf9b36551fbc888ad189b1f29",
+      "scope": "independent",
+      "query": "In the paper “Few-shot Natural Language Generation for Task-Oriented Dialog”, What was the criteria for human evaluation?",
+      "gold_documents": [
+        "2002.12328"
+      ],
+      "negative": false,
+      "answers": [
+        "to judge each utterance from 1 (bad) to 3 (good) in terms of informativeness and naturalness"
+      ],
+      "evidence": [
+        "We conducted the human evaluation using Amazon Mechanical Turk to assess subjective quality. We recruit master level workers (who have good prior approval rates) to perform a human comparison between generated responses from two systems (which are randomly sampled from comparison systems). The workers are required to judge each utterance from 1 (bad) to 3 (good) in terms of informativeness and naturalness. Informativeness indicates the extent to which generated utterance contains all the information specified in the dialog act. Naturalness denotes whether the utterance is as natural as a human does. To reduce judgement bias, we distribute each question to three different workers. Finally, we collected in total of 5800 judges."
+      ],
+      "schedule": [
+        "D",
+        "C",
+        "B"
+      ],
+      "source_sha256": "3f6a77f76f2577ec10c02f59b05343f6dc4d55547b99509995fd777e46e8db02"
+    },
+    {
+      "id": "c20bb0847ced490a793657fbaf6afb5ef54dad81",
+      "scope": "independent",
+      "query": "In the paper “'Warriors of the Word' -- Deciphering Lyrical Topics in Music and Their Connection to Audio Feature Dimensions Based on a Corpus of Over 100,000 Metal Songs”, Why are the scores for predicting perceived musical hardness and darkness extracted only for subsample of 503 songs?",
+      "gold_documents": [
+        "1911.04952"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "C",
+        "D",
+        "B"
+      ],
+      "source_sha256": "8811260a226e84c4c40d1dc324cdb8bc2f073a00f81b1922562871f12bfcffb5"
+    },
+    {
+      "id": "e86d381322c8db2b74a13a8e23082ddb010c1e40",
+      "scope": "independent",
+      "query": "In the paper “Crowd Sourced Data Analysis: Mapping of Programming Concepts to Syntactical Patterns”, how well this method is compared to other method?",
+      "gold_documents": [
+        "1903.12495"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "D",
+        "B",
+        "C"
+      ],
+      "source_sha256": "5e189262586c63a98fa59a8bb228d9732843e62c5a817ebf99c596465ee647f1"
+    },
+    {
+      "id": "28e7711f94e093137eb8828f0b1eff1b05e4fa38",
+      "scope": "independent",
+      "query": "In the paper “Finding Dominant User Utterances And System Responses in Conversations”, How do they divide text into utterances?",
+      "gold_documents": [
+        "1710.10609"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "D",
+        "C",
+        "B"
+      ],
+      "source_sha256": "c43cd29352987c4c1d3a7664f1c946b7fbf4ad30a0d6a9a2e3f6b50d3559b11e"
+    },
+    {
+      "id": "db62d5d83ec187063b57425affe73fef8733dd28",
+      "scope": "independent",
+      "query": "In the paper “Counterfactual Data Augmentation for Mitigating Gender Stereotypes in Languages with Rich Morphology”, Which model do they use to convert between masculine-inflected and feminine-inflected sentences?",
+      "gold_documents": [
+        "1906.04571"
+      ],
+      "negative": false,
+      "answers": [
+        "Markov random field with an optional neural parameterization"
+      ],
+      "evidence": [
+        "We presented a new approach for converting between masculine-inflected and feminine-inflected noun phrases in morphologically rich languages. To do this, we introduced a Markov random field with an optional neural parameterization that infers the manner in which a sentence must change to preserve morpho-syntactic agreement when altering the grammatical gender of particular nouns. To the best of our knowledge, this task has not been studied previously. As a result, there is no existing annotated corpus of paired sentences that can be used as “ground truth.” Despite this limitation, we evaluated our approach both intrinsically and extrinsically, achieving promising results. For example, we demonstrated that our approach reduces gender stereotyping in neural language models. Finally, we also identified avenues for future work, such as the inclusion of co-reference information."
+      ],
+      "schedule": [
+        "B",
+        "C",
+        "D"
+      ],
+      "source_sha256": "f60c0945a616ca7f159e979b5e1d96e34f6eb8157a62d22e46ae6ef7ec329066"
+    },
+    {
+      "id": "6e2899c444baaeb0469599f65722780894f90f29",
+      "scope": "independent",
+      "query": "In the paper “Do We Really Need Fully Unsupervised Cross-Lingual Embeddings?”, How does BLI measure alignment quality?",
+      "gold_documents": [
+        "1909.01638"
+      ],
+      "negative": false,
+      "answers": [
+        "we use mean average precision (MAP) as the main evaluation metric"
+      ],
+      "evidence": [
+        "Evaluation Task. Our task is bilingual lexicon induction (BLI). It has become the de facto standard evaluation for projection-based CLWEs BIBREF16 , BIBREF17 . In short, after a shared CLWE space has been induced, the task is to retrieve target language translations for a test set of source language words. Its lightweight nature allows us to conduct a comprehensive evaluation across a large number of language pairs. Since BLI is cast as a ranking task, following glavas2019howto we use mean average precision (MAP) as the main evaluation metric: in our BLI setup with only one correct translation for each “query” word, MAP is equal to mean reciprocal rank (MRR)."
+      ],
+      "schedule": [
+        "B",
+        "D",
+        "C"
+      ],
+      "source_sha256": "696b9ce9bbb72e98f4c65438b447c7feab4f4b6b61e6cd7494b737988a834536"
+    },
+    {
+      "id": "f91835f17c0086baec65ebd99d12326ae1ae87d2",
+      "scope": "independent",
+      "query": "In the paper “Multi-Source Syntactic Neural Machine Translation”, How do they obtain parsed source sentences?",
+      "gold_documents": [
+        "1808.10267"
+      ],
+      "negative": false,
+      "answers": [
+        "Stanford CoreNLP BIBREF11 "
+      ],
+      "evidence": [
+        "We use an off-the-shelf parser, in this case Stanford CoreNLP BIBREF11 , to create binary constituency parses. These parses are linearized as shown in Table TABREF6 . We tokenize the opening parentheses with the node label (so each node label begins with a parenthesis) but keep the closing parentheses separate from the words they follow. For our task, the parser failed on one training sentence of 5.9 million, which we discarded, and succeeded on all test sentences. It took roughly 16 hours to parse the 5.9 million training sentences."
+      ],
+      "schedule": [
+        "C",
+        "B",
+        "D"
+      ],
+      "source_sha256": "ea31794d1a72458193803bf1becc566ad07dc66ac1c3dd07d88f8cc3c57ec448"
+    },
+    {
+      "id": "b3238158392684a5a6b62a7eabaa2a10fbecf3e6",
+      "scope": "independent",
+      "query": "In the paper “Evaluating KGR10 Polish word embeddings in the recognition of temporal expressions using BiLSTM-CRF”, How was the KGR10 corpus created?",
+      "gold_documents": [
+        "1904.04055"
+      ],
+      "negative": false,
+      "answers": [
+        "most relevant content of the website, including all subsites"
+      ],
+      "evidence": [
+        "KGR10, also known as plWordNet Corpus 10.0 (PLWNC 10.0), is the result of the work on the toolchain to automatic acquisition and extraction of the website content, called CorpoGrabber BIBREF19 . It is a pipeline of tools to get the most relevant content of the website, including all subsites (up to the user-defined depth). The proposed toolchain can be used to build a big Web corpus of text documents. It requires the list of the root websites as the input. Tools composing CorpoGrabber are adapted to Polish, but most subtasks are language independent. The whole process can be run in parallel on a single machine and includes the following tasks: download of the HTML subpages of each input page URL with HTTrack, extraction of plain text from each subpage by removing boilerplate content (such as navigation links, headers, footers, advertisements from HTML pages) BIBREF20 , deduplication of plain text BIBREF20 , bad quality documents removal utilising Morphological Analysis Converter and Aggregator (MACA) BIBREF21 , documents tagging using Wrocław CRF Tagger (WCRFT) BIBREF22 . Last two steps are available only for Polish."
+      ],
+      "schedule": [
+        "C",
+        "D",
+        "B"
+      ],
+      "source_sha256": "264803a0015e6bf806d421eb7e5b230e6fe1c7b7c2a32867eb8148f35013ddac"
+    },
+    {
+      "id": "3996438cef34eb7bedaa6745b190c69553cf246b",
+      "scope": "independent",
+      "query": "In the paper “Universal Dependency Parsing for Hindi-English Code-switching”, What is LAS metric?",
+      "gold_documents": [
+        "1804.05868"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "B",
+        "C",
+        "D"
+      ],
+      "source_sha256": "e1fc946c4c4d72b15ffc646a8ccde9d8449ffc859d1ed8ac152f990e9d23cf6c"
+    },
+    {
+      "id": "fbabde18ebec5852e3d46b1f8ce0afb42350ce62",
+      "scope": "independent",
+      "query": "In the paper “A Semi-automatic Method for Efficient Detection of Stories on Social Media”, Why there is only user study to evaluate the model?",
+      "gold_documents": [
+        "1605.05134"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "B",
+        "D",
+        "C"
+      ],
+      "source_sha256": "d391d0d1c88f61c8c85f0191c79878bc7d5c4fd666d43a6480f0d4c4f3b6d0f7"
+    },
+    {
+      "id": "4904ef32a8f84cf2f53b1532ccf7aa77273b3d19",
+      "scope": "independent",
+      "query": "In the paper “Style Transfer for Texts: to Err is Human, but Error Margins Matter”, By how much do proposed architectures autperform state-of-the-art?",
+      "gold_documents": [
+        "1908.06809"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "C",
+        "B",
+        "D"
+      ],
+      "source_sha256": "9d304df6bf884868cc5d0c4ed1f06e9c3b1b940475140dedb23dfb80af4db8cf"
+    },
+    {
+      "id": "601f96770726a0063faf9bacd5db01c4af5add1f",
+      "scope": "independent",
+      "query": "In the paper “Annotating and normalizing biomedical NEs with limited knowledge”, What does their system consist of?",
+      "gold_documents": [
+        "1912.09152"
+      ],
+      "negative": false,
+      "answers": [
+        "rule-based and dictionary-based methods "
+      ],
+      "evidence": [
+        "In this paper, in spite of previous statements, we present a system that uses rule-based and dictionary-based methods combined (in a way we prefer to call resource-based). Our final goals in the paper are two-fold: on the one hand, to describe our system, developed for the PharmaCoNER shared task, dealing with the annotation of some of the nes in health records (namely, pharmacological, chemical and biomedical entities) using a revisited version of rule- and dictionary-based approaches; and, on the other hand, to give pause for thought about the quality of datasets (and, thus, the fairness) with which systems of this type are evaluated, and to highlight the key role of resource-based systems in the validation and consolidation of both the annotation guidelines and the human annotation practices."
+      ],
+      "schedule": [
+        "D",
+        "B",
+        "C"
+      ],
+      "source_sha256": "1956f90983802f454fa8890015617dd5c0a085fa61d5011545de2d492eafafed"
+    },
+    {
+      "id": "a60030cfd95d0c10b1f5116c594d50cb96c87ae6",
+      "scope": "independent",
+      "query": "In the paper “Domain Adaptation via Teacher-Student Learning for End-to-End Speech Recognition”, How long is new model trained on 3400 hours of data?",
+      "gold_documents": [
+        "2001.01798"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "C",
+        "D",
+        "B"
+      ],
+      "source_sha256": "9fda1972a092cd7dfaad6bdf5c1cc184800bca7933d41314f1984e72c692665d"
+    },
+    {
+      "id": "70797f66d96aa163a3bee2be30a328ba61c40a18",
+      "scope": "independent",
+      "query": "In the paper “A Measure of Similarity in Textual Data Using Spearman's Rank Correlation Coefficient”, How do they evaluate knowledge extraction performance?",
+      "gold_documents": [
+        "1911.11750"
+      ],
+      "negative": false,
+      "answers": [
+        "SRCC"
+      ],
+      "evidence": [
+        "The results in Table TABREF7 show that SRCC performs much better in knowledge extraction. The two documents' contents contain the same idea expressed by terms in a different order that John had asked Mary to marry him before she left. It is obvious that cosine similarity cannot recognize this association, but SRCC has successfully recognized it and produced a similarity value of -0.285714."
+      ],
+      "schedule": [
+        "D",
+        "C",
+        "B"
+      ],
+      "source_sha256": "1048aafc89fd0c879156b2c07578247ac23877b76e0d51efd9fdc3564052ed13"
+    },
+    {
+      "id": "071bcb4b054215054f17db64bfd21f17fd9e1a80",
+      "scope": "independent",
+      "query": "In the paper “QnAMaker: Data to Bot in 2 Minutes”, How does the conversation layer work?",
+      "gold_documents": [
+        "2003.08553"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "D",
+        "B",
+        "C"
+      ],
+      "source_sha256": "8a358bc31865df0cd020a800661f41f07e5d8921735fd98dddfd5b902649db8e"
+    },
+    {
+      "id": "736c74d2f61ac8d3ac31c45c6510a36c767a5d6d",
+      "scope": "independent",
+      "query": "In the paper “Bootstrapping Generators from Noisy Data”, What is the multi-instance learning?",
+      "gold_documents": [
+        "1804.06385"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "D",
+        "C",
+        "B"
+      ],
+      "source_sha256": "b9e5a56cbad99776624d983d689f88652dd1695df0b9847989b379de19fb8005"
+    },
+    {
+      "id": "892c346617a3391c7dafc9da1b65e5ea3890294d",
+      "scope": "independent",
+      "query": "In the paper “SIM: A Slot-Independent Neural Model for Dialogue State Tracking”, What network architecture do they use for SIM?",
+      "gold_documents": [
+        "1909.11833"
+      ],
+      "negative": false,
+      "answers": [
+        "convolutional neural networks (CNN)"
+      ],
+      "evidence": [
+        "To solve this problem, we need a state tracking model independent of dialogue slots. In other words, the network should depend on the semantic similarity between slots and utterance instead of slot-specific modules. To this end, we propose the Slot-Independent Model (SIM). Our model complexity does not increase when the number of slots in dialogue tasks go up. Thus, SIM has many fewer parameters than existing dialogue state tracking models. To compensate for the exclusion of slot-specific parameters, we incorporate better feature representation of user utterance and dialogue states using syntactic information and convolutional neural networks (CNN). The refined representation, in addition to cross and self-attention mechanisms, make our model achieve even better performance than slot-specific models. For instance, on Wizard-of-Oz (WOZ) 2.0 dataset BIBREF8, the SIM model obtains a joint-accuracy score of 89.5%, 1.4% higher than the previously best model GLAD, with only 22% of the number of parameters. On DSTC2 dataset, SIM achieves comparable performance with previous best models with only 19% of the model size."
+      ],
+      "schedule": [
+        "B",
+        "C",
+        "D"
+      ],
+      "source_sha256": "658ef9e6607f0c227fae7428d074de5ae9b22fcca507a39ffb0a818a5888ac68"
+    },
+    {
+      "id": "df9d16a2c4983a0ff46081e3ff4d6e7ef3338264",
+      "scope": "independent",
+      "query": "In the paper “Discriminating between similar languages in Twitter using label propagation”, How are labels propagated using this approach?",
+      "gold_documents": [
+        "1607.05408"
+      ],
+      "negative": false,
+      "answers": [
+        "We use Junto (mad) BIBREF5 to propagate labels from labelled to unlabelled nodes. "
+      ],
+      "evidence": [
+        "We create the graph using all data, and training set tweets have an initial language label distribution. A naïve approach to building the tweet-tweet subgraph requires O( INLINEFORM0 ) comparisons, measuring the similarity of each tweet with all others. Instead, we performed INLINEFORM1 -nearest-neighbour classification on all tweets, represented as a bag of unigrams, and compared each tweet and the top- INLINEFORM2 neighbours. We use Junto (mad) BIBREF5 to propagate labels from labelled to unlabelled nodes. Upon convergence, we renormalise label scores for initially unlabelled nodes to find the value of INLINEFORM4 ."
+      ],
+      "schedule": [
+        "B",
+        "D",
+        "C"
+      ],
+      "source_sha256": "c1d0b0700213bfcebb0f82cecf6d888a0be955738fda735fff7082c54a8e0a69"
+    },
+    {
+      "id": "045dbdbda5d96a672e5c69442e30dbf21917a1ee",
+      "scope": "independent",
+      "query": "In the paper “Learning with Noisy Labels for Sentence-level Sentiment Classification”, How does the model differ from Generative Adversarial Networks?",
+      "gold_documents": [
+        "1909.00124"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "B",
+        "C",
+        "D"
+      ],
+      "source_sha256": "ddab1b8afe9be5ff0e6c0ed432d2282e068a9c71164adabd49d09792b8d708df"
+    },
+    {
+      "id": "b653f55d1dad5cd262a99502f63bf44c58ccc8cf",
+      "scope": "independent",
+      "query": "In the paper “Towards an Unsupervised Entrainment Distance in Conversational Speech using Deep Neural Networks”, Which dataset do they use to learn embeddings?",
+      "gold_documents": [
+        "1804.08782"
+      ],
+      "negative": false,
+      "answers": [
+        "Fisher Corpus English Part 1"
+      ],
+      "evidence": [
+        "We use two datasets in this work: the training is done on the Fisher Corpus English Part 1 (LDC2004S13) BIBREF15 and testing on the Suicide Risk Assessment corpus BIBREF16 , along with Fisher."
+      ],
+      "schedule": [
+        "C",
+        "B",
+        "D"
+      ],
+      "source_sha256": "fdba4734f616939d2788a38c13e1f8f6197dbb0ba33b81749637beaa60146fb5"
+    },
+    {
+      "id": "d4a6f5034345036dbc2d4e634a8504f79d42ca69",
+      "scope": "independent",
+      "query": "In the paper “Adaptive Scheduling for Multi-Task Learning”, What datasets are used for experiments?",
+      "gold_documents": [
+        "1909.06434"
+      ],
+      "negative": false,
+      "answers": [
+        "the WMT'14 English-French (En-Fr) and English-German (En-De) datasets."
+      ],
+      "evidence": [
+        "We extract data from the WMT'14 English-French (En-Fr) and English-German (En-De) datasets. To create a larger discrepancy between the tasks, so that there is a clear dataset size imbalance, the En-De data is artificially restricted to only 1 million parallel sentences, while the full En-Fr dataset, comprising almost 40 million parallel sentences, is used entirely. Words are split into subwords units with a joint vocabulary of 32K tokens. BLEU scores are computed on the tokenized output with multi-bleu.perl from Moses BIBREF10."
+      ],
+      "schedule": [
+        "C",
+        "D",
+        "B"
+      ],
+      "source_sha256": "bece3d35c90b089ec3e8084c8499620503fe3f146a96e36907e92b9d19268a8a"
+    },
+    {
+      "id": "4c88441f8a1b5fce0ca55a6fced34f97260206ae",
+      "scope": "independent",
+      "query": "In the paper “A Full End-to-End Semantic Role Labeler, Syntax-agnostic Over Syntax-aware?”, What is the biaffine scorer?",
+      "gold_documents": [
+        "1808.03815"
+      ],
+      "negative": false,
+      "answers": [
+        "biaffine attention BIBREF14"
+      ],
+      "evidence": [
+        "Typically, to predict and label arguments for a given predicate, a role classifier is employed on top of the BiLSTM encoder. Some work like BIBREF17 shows that incorporating the predicate's hidden state in their role classifier enhances the model performance, while we argue that a more natural way to incorporate the syntactic information carried by the predicate is to employ the attentional mechanism. Our model adopts the recently introduced biaffine attention BIBREF14 to enhance our role scorer. Biaffine attention is a natural extension of bilinear attention BIBREF18 which is widely used in neural machine translation (NMT)."
+      ],
+      "schedule": [
+        "D",
+        "B",
+        "C"
+      ],
+      "source_sha256": "996e0dec201ede5f79764301653e7551aa56f78afbe17681dde8d4c16bcfebaf"
+    },
+    {
+      "id": "052d19b456f1795acbb8463312251869cc5b38da",
+      "scope": "independent",
+      "query": "In the paper “Markov Chain Monte-Carlo Phylogenetic Inference Construction in Computational Historical Linguistics”, What metrics are used to evaluate results?",
+      "gold_documents": [
+        "2002.09637"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "B",
+        "D",
+        "C"
+      ],
+      "source_sha256": "280cda9be3a7dfd5302847d66d924682db29d875102e236974216008d2b815fb"
+    },
+    {
+      "id": "57fdb0f6cd91b64a000630ecb711550941283091",
+      "scope": "independent",
+      "query": "In the paper “Data Innovation for International Development: An overview of natural language processing for qualitative data analysis”, What are the potentials risks of this approach?",
+      "gold_documents": [
+        "1709.05563"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "C",
+        "B",
+        "D"
+      ],
+      "source_sha256": "52bc27bcc808008a0360a26091d7a32ab4967a45c4b48dba621496b6abaa1ccf"
+    },
+    {
+      "id": "ee279ace5bc69d15e640da967bd4214fe264aa1a",
+      "scope": "independent",
+      "query": "In the paper “An Open-World Extension to Knowledge Graph Completion Models”, what was the evaluation metrics studied in this work?",
+      "gold_documents": [
+        "1906.08382"
+      ],
+      "negative": false,
+      "answers": [
+        "mean rank (MR), mean reciprocal rank (MRR), as well as Hits@1, Hits@3, and Hits@10"
+      ],
+      "evidence": [
+        "Performance figures are computed using tail prediction on the test sets: For each test triple $(h,r,t)$ with open-world head $h \\notin E$ , we rank all known entities $t^{\\prime } \\in E$ by their score $\\phi (h,r,t^{\\prime })$ . We then evaluate the ranks of the target entities $t$ with the commonly used mean rank (MR), mean reciprocal rank (MRR), as well as Hits@1, Hits@3, and Hits@10."
+      ],
+      "schedule": [
+        "D",
+        "C",
+        "B"
+      ],
+      "source_sha256": "715fbedc0e1135d7b6280e6c34b903b8ac82c8cc28fe52c269e1c81e49fb08b5"
+    },
+    {
+      "id": "7ce7edd06925a943e32b59f3e7b5159ccb7acaf6",
+      "scope": "independent",
+      "query": "In the paper “Learning Word Embeddings from the Portuguese Twitter Stream: A Study of some Practical Aspects”, What experimental results suggest that using less than 50% of the available training examples might result in overfitting?",
+      "gold_documents": [
+        "1709.00947"
+      ],
+      "negative": false,
+      "answers": [
+        "consistent increase in the validation loss after about 15 epochs"
+      ],
+      "evidence": [
+        "On the right side of Figure FIGREF28 we show how the number of training (and validation) examples affects the loss. For a fixed INLINEFORM0 = 32768 we varied the amount of data used for training from 25% to 100%. Three trends are apparent. As we train with more data, we obtain better validation losses. This was expected. The second trend is that by using less than 50% of the data available the model tends to overfit the data, as indicated by the consistent increase in the validation loss after about 15 epochs (check dashed lines in right side of Figure FIGREF28 ). This suggests that for the future we should not try any drastic reduction of the training data to save training time. Finally, when not overfitting, the validation loss seems to stabilize after around 20 epochs. We observed no phase-transition effects (the model seems simple enough for not showing that type of behavior). This indicates we have a practical way of safely deciding when to stop training the model."
+      ],
+      "schedule": [
+        "B",
+        "C",
+        "D"
+      ],
+      "source_sha256": "70ac67acb61332d145dd0117fade75f645517b22a738a57a918c57ea2b61fe59"
+    },
+    {
+      "id": "537a786794604ecc473fb3ef6222e0c3cb81f772",
+      "scope": "independent",
+      "query": "In the paper “Transformer-based Cascaded Multimodal Speech Translation”, What dataset was used in this work?",
+      "gold_documents": [
+        "1910.13215"
+      ],
+      "negative": false,
+      "answers": [
+        "How2"
+      ],
+      "evidence": [
+        "The recently introduced How2 dataset BIBREF2 has stimulated research around multimodal language understanding through the availability of 300h instructional videos, English subtitles and their Portuguese translations. For example, BIBREF3 successfully demonstrates that semantically rich action-based visual features are helpful in the context of machine translation (MT), especially in the presence of input noise that manifests itself as missing source words. Therefore, we hypothesize that a speech-to-text translation (STT) system may also benefit from the visual context, especially in the traditional cascaded framework BIBREF4, BIBREF5 where noisy automatic transcripts are obtained from an automatic speech recognition system (ASR) and further translated into the target language using a machine translation (MT) component. The dataset enables the design of such multimodal STT systems, since we have access to a bilingual corpora as well as the corresponding audio-visual stream. Hence, in this paper, we propose a cascaded multimodal STT with two components: (i) an English ASR system trained on the How2 dataset and (ii) a transformer-based BIBREF0 visually grounded MMT system."
+      ],
+      "schedule": [
+        "B",
+        "D",
+        "C"
+      ],
+      "source_sha256": "8cc59b91fb752726f3744d649b3c919185fd28ad1cd884703353e4d0052003ee"
+    },
+    {
+      "id": "5f4e6ce4a811c4b3ab07335d89db2fd2a8d8d8b2",
+      "scope": "independent",
+      "query": "In the paper “Low-Level Linguistic Controls for Style Transfer and Content Preservation”, How they perform manual evaluation, what is criteria?",
+      "gold_documents": [
+        "1911.03385"
+      ],
+      "negative": false,
+      "answers": [
+        "accuracy"
+      ],
+      "evidence": [
+        "Each annotator annotated 90 reference sentences (i.e. from the training corpus) with which style they thought the sentence was from. The accuracy on this baseline task for annotators A1, A2, and A3 was 80%, 88%, and 80% respectively, giving us an upper expected bound on the human evaluation."
+      ],
+      "schedule": [
+        "C",
+        "B",
+        "D"
+      ],
+      "source_sha256": "dcc079c1125f3d07978a9f4c13bddd7fc76580369c50e246314226f051c7091a"
+    },
+    {
+      "id": "7ccf2392422b44ede35a3fbd85bbb1da25adf795",
+      "scope": "independent",
+      "query": "In the paper “On the emergence of syntactic structures: quantifying and modelling duality of patterning”, What other models are compared to the Blending Game?",
+      "gold_documents": [
+        "1602.03661"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "schedule": [
+        "C",
+        "D",
+        "B"
+      ],
+      "source_sha256": "d62feae506050e9a9f388d10e00cce55eddbde8913b2abebca86d50d871722db"
+    },
+    {
+      "id": "e9d882775a132e172eea68ab6ab4621a924bb6b8",
+      "scope": "independent",
+      "query": "In the paper “Improving Textual Network Embedding with Global Attention via Optimal Transport”, Which of their proposed attention methods works better overall?",
+      "gold_documents": [
+        "1906.01840"
+      ],
+      "negative": false,
+      "answers": [
+        "attention parsing"
+      ],
+      "evidence": [
+        "Tables and summarize the results from the link-prediction experiments on all three datasets, where a different ratio of edges are used for training. Results from models other than GANE are collected from BIBREF9 , BIBREF10 and BIBREF34 . We have also repeated these experiments on our own, and the results are consistent with the ones reported. Note that BIBREF34 did not report results on DMTE. Both GANE variants consistently outperform competing solutions. In the low-training-sample regime our solutions lead by a large margin, and the performance gap closes as the number of training samples increases. This indicates that our OT-based mutual attention framework can yield more informative textual representations than other methods. Note that GANE-AP delivers better results compared with GANE-OT, suggesting the attention parsing mechanism can further improve the low-level mutual attention matrix. More results on Cora and Hepth are provided in the SM."
+      ],
+      "schedule": [
+        "C",
+        "D",
+        "B"
+      ],
+      "source_sha256": "a8679ee3b8b34e7ff6cdcf84deb9557250f013ff673ef54864fc42f8b473fde4"
+    },
+    {
+      "id": "83f22814aaed9b5f882168e22a3eac8f5fda3882",
+      "scope": "independent",
+      "query": "In the paper “Interpretable Visual Question Answering by Visual Grounding from Attention Supervision Mining”, How do they measure the correlation between manual groundings and model generated ones?",
+      "gold_documents": [
+        "1808.00265"
+      ],
+      "negative": false,
+      "answers": [
+        "rank-correlation BIBREF25"
+      ],
+      "evidence": [
+        "We evaluate the performance of our proposed method using two criteria: i) rank-correlation BIBREF25 to evaluate visual grounding and ii) accuracy to evaluate question answering. Intuitively, rank-correlation measures the similarity between human and model attention maps under a rank-based metric. A high rank-correlation means that the model is `looking at' image areas that agree to the visual information used by a human to answer the same question. In terms of accuracy of a predicted answer INLINEFORM0 is evaluated by: DISPLAYFORM0"
+      ],
+      "schedule": [
+        "D",
+        "B",
+        "C"
+      ],
+      "source_sha256": "9aa66fec12672e6fa935c3a7babc11c273dcc5545c6b95dc589d799f10d9b30a"
+    },
+    {
+      "id": "2f4acd34eb2d09db9b5ad9b1eb82cb4a88c13f5b",
+      "scope": "independent",
+      "query": "In the paper “News-Driven Stock Prediction With Attention-Based Noisy Recurrent State Transition”, What is dataset used for news-driven stock movement prediction?",
+      "gold_documents": [
+        "2004.01878"
+      ],
+      "negative": false,
+      "answers": [
+        "the public financial news dataset released by BIBREF4"
+      ],
+      "evidence": [
+        "We use the public financial news dataset released by BIBREF4, which is crawled from Reuters and Bloomberg over the period from October 2006 to November 2013. We conduct our experiments on predicting the Standard & Poor’s 500 stock (S&P 500) index and its selected individual stocks, obtaining indices and prices from Yahoo Finance. Detailed statistics of the training, development and test sets are shown in Table TABREF8. We report the final results on test set after using development set to tune some hyper-parameters."
+      ],
+      "schedule": [
+        "D",
+        "C",
+        "B"
+      ],
+      "source_sha256": "d0a12825d32ff9c387c6e9739eb6a6cdfa949c511b4fa2131135dadefcf9a0fc"
+    }
+  ]
+}

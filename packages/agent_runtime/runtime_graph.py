@@ -140,7 +140,7 @@ from packages.model_gateway.contracts import (
     ModelToolDefinition,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
-from packages.model_gateway.gateway import ModelGatewayService
+from packages.model_gateway.gateway import ModelGatewayService, SessionScopedModelGenerator
 from packages.model_gateway.run_budget_adapter import ModelAttemptBudgetError
 from packages.observability.timing import mark_visible_text
 from packages.threads.models import AgentThread, ThreadTurn
@@ -3601,8 +3601,24 @@ class _AgentRunGraph:
                             workspace_id=UUID(self.context.workspace_id),
                         )
                     else:
+                        selection = {}
+                        definition = state.get("tool_definitions", {}).get(call["name"])
+                        if (
+                            call["name"] == "search_knowledge"
+                            and definition is not None
+                            and definition.retrieval_config.get("evidence_set_selector")
+                            == "complementary_v1"
+                            and definition.source_kind.value == "BUILTIN"
+                        ):
+                            selection["selector_binding"] = (
+                                SessionScopedModelGenerator(
+                                    self.service.session_factory, self.service.model_gateway_factory
+                                ),
+                                state["spec"].model_plan,
+                            )
                         result = await self.service.tool_runtime.execute(
                             context=self.context,
+                            **selection,
                             agent_version_id=self.run.agent_version_id,
                             tool_identity=call["name"],
                             arguments=call["arguments"],
@@ -3659,6 +3675,30 @@ class _AgentRunGraph:
                 raise
             finally:
                 self.usage_records = [*state.get("usage_records", []), *auxiliary.records]
+        definitions = state.get("tool_definitions", {})
+        for call, (_, result) in zip(calls, pairs, strict=True):
+            definition = definitions.get(call["name"])
+            # Never copy untrusted MCP result metadata into a business trace.
+            if (
+                call["name"] == "search_knowledge"
+                and definition is not None
+                and definition.retrieval_config.get("evidence_set_selector") == "complementary_v1"
+                and definition.source_kind.value == "BUILTIN"
+                and isinstance(result.data, Mapping)
+            ):
+                for receipt in result.data.get("evidence_selection", []):
+                    await self.step(
+                        "EVIDENCE_SELECTION",
+                        "SUCCEEDED",
+                        {
+                            key: receipt[key]
+                            for key in (
+                                "snapshot_id", "selector", "status", "reason",
+                                "candidate_count", "selected_count", "admitted_count",
+                            )
+                            if key in receipt
+                        },
+                    )
         for attempt in auxiliary.records:
             await self.step(
                 "AUXILIARY_MODEL",
@@ -3668,7 +3708,7 @@ class _AgentRunGraph:
                     "model": attempt["model"],
                     "usage_source": attempt["source"],
                     "attempt_status": attempt["attempt_status"],
-                    "cost_status": "UNKNOWN",
+                    "cost_status": "REPORTED" if attempt.get("cost") is not None else "UNKNOWN",
                     **(attempt["usage"] or {}),
                 },
             )

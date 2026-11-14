@@ -13,3 +13,4 @@ benchmarks/public_rag/results/published/qa-first-response-20261114/**/*.json tex
 benchmarks/public_rag/results/published/qa-first-response-20261114/**/*.jsonl text eol=lf
 # An empty unified-diff context line is a literal space; preserve the measured patch bytes.
 benchmarks/public_rag/results/published/qa-first-response-20261114/reader/prompt.patch text eol=lf -whitespace
+benchmarks/public_rag/results/published/rag-product-evidence-20261114/paid/*.json text eol=lf

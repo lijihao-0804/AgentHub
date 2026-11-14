@@ -9,6 +9,9 @@ from typing import Any, Protocol
 from uuid import UUID
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.model_gateway.contracts import ResolvedModelExecutionPlan, ResolvedModelGenerator
+
+SelectorBinding = tuple[ResolvedModelGenerator, ResolvedModelExecutionPlan]
 
 
 class ToolSessionFactory(Protocol):
@@ -86,6 +89,7 @@ class ToolExecutionContext:
     workspace_context: WorkspaceExecutionContext
     agent_version_id: UUID
     tool_call_id: str
+    selector_binding: SelectorBinding | None = None
 
     @property
     def workspace_id(self) -> str:

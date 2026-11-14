@@ -1,0 +1,83 @@
+[
+  {
+    "id": "5bb96b255dab3e47a8a68b1ffd7142d0e21ebe2a",
+    "ruling": "answerable",
+    "expected": "TextBlob returns a subjectivity score from 0 to 1 for each tweet. Tweets below a specified threshold are removed.",
+    "quotes": [
+      "We use TextBlob to classify each tweet as subjective or objective.",
+      "We then remove all tweets which have a subjectivity level/score (score lies between 0 and 1) below a specified threshold."
+    ],
+    "reason": "The authors give the instrument, unit of analysis, scale and filtering procedure."
+  },
+  {
+    "id": "c2da598346b74541c78ecff5c9586b3857dd01b5",
+    "ruling": "ambiguous",
+    "expected": "With a suitable tile size, HTCNN is competitive with TCNN and outperforms the reference CNN. There is no recoverable numerical difference in the supplied paper text.",
+    "quotes": [
+      "The new architecture combines the benefits of word embeddings clustering with the idea of tiling and if the tile size is chosen properly, the model could achieve competitive performance with the TCNN and better results than the reference CNN model.",
+      "The results of our comparison between the baseline network and our models are listed in Table TABREF15."
+    ],
+    "reason": "The wording permits either a qualitative comparison or the size of the advantage. Only the former is supported; the rendered text references the table without numerical cells."
+  },
+  {
+    "id": "5b99f74bb25bc88677621443bf065d96d84895ab",
+    "ruling": "answerable",
+    "expected": "Hard sharing uses common parameters for designated parts of the task networks. Which parts are shared is specified by the architecture; other components can remain task-specific.",
+    "quotes": [
+      "Multi-task learning (MTL) in deep neural networks is typically a result of parameter sharing between two networks (of usually the same dimensions)",
+      "a variation of hard parameter sharing to multi-domain multi-task sequence tagging with a shared CRF layer and domain-specific projection layers.",
+      "In contrast, we do not limit ourselves to a predefined way of sharing, but let the model learn which parts of the network to share using latent variables"
+    ],
+    "reason": "An explicit example and the authors' contrast with learned sharing support a bounded explanation, without claiming that all models share every hidden layer."
+  },
+  {
+    "id": "c20bb0847ced490a793657fbaf6afb5ef54dad81",
+    "ruling": "unanswerable",
+    "expected": "The 503 songs were drawn randomly for a correlation analysis. The paper does not explain limiting the sample to 503.",
+    "quotes": [
+      "Finally, we drew a random sample of 503 songs",
+      "to identify correlations between the topics retrieved and the audio dimensions obtained by the high-level audio feature models."
+    ],
+    "reason": "Selection method and analytical purpose are documented. Neither gives a rationale for the size or limits on audio access."
+  },
+  {
+    "id": "e86d381322c8db2b74a13a8e23082ddb010c1e40",
+    "ruling": "unanswerable",
+    "expected": "The authors tested several classifiers for the post classification stage; the supplied text gives no comparative performance for the end-to-end mapping method against another method.",
+    "quotes": [
+      "We applied classifiers such as Naive Bayes, Logistic Regression and LSTM to predict the result.",
+      "tableAccuracy of Classifiers Used",
+      "Our objective is to automatically tag each line of a given source code"
+    ],
+    "reason": "The table caption is for classifiers, without numerical cells. No named alternative or score comparison for the complete mapping method appears."
+  },
+  {
+    "id": "28e7711f94e093137eb8828f0b1eff1b05e4fa38",
+    "ruling": "answerable",
+    "expected": "For two-speaker Twitter conversations, the authors concatenate consecutive utterances by the same speaker into one turn. They extract customer turns followed by Amazon Help turns. No finer sentence splitter is specified.",
+    "quotes": [
+      "Consecutive utterances by the same speaker were concatenated and considered as a single utterance.",
+      "From these we extracted adjacency pairs of the form of a customer utterance followed by an agent (Amazon Help) utterance."
+    ],
+    "reason": "The operational rule defining an utterance on the real dataset is explicit. The text presupposes speaker-tagged messages."
+  },
+  {
+    "id": "3996438cef34eb7bedaa6745b190c69553cf246b",
+    "ruling": "unanswerable",
+    "expected": "The authors report LAS to evaluate dependency parsing but do not expand or define the metric in this paper text.",
+    "quotes": [
+      "The inter-annotator agreement has a 96.20% accuracy for POS tagging and a 95.94% UAS and a 92.65% LAS for dependency parsing."
+    ],
+    "reason": "LAS scores establish its use. A definition involving heads and dependency labels would require external knowledge."
+  },
+  {
+    "id": "fbabde18ebec5852e3d46b1f8ce0afb42350ce62",
+    "ruling": "ambiguous",
+    "expected": "A 25-person user study measured tracking speed and accuracy. The assertion classifier also had a 20-fold cross-validation; the paper does not state why evaluation of the full tool used only a user study.",
+    "quotes": [
+      "We ran a user study with 25 participants, demonstrating that compared to more conventional methods, our tool can increase the speed and the accuracy with which users can track stories about real-world events.",
+      "We evaluated the classifier using 20-fold cross validation"
+    ],
+    "reason": "If 'model' includes the classifier, the only-user-study premise is false. If restricted to the full interactive tool, the study purpose is clear but the reason for exclusivity is missing."
+  }
+]
