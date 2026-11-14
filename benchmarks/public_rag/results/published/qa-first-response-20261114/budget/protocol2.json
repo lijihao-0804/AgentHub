@@ -1,0 +1,248 @@
+{
+  "frozen_at": "2026-11-14T02:16:10.950775+00:00",
+  "reserve_sha256": "5e29bbee1ba30d79d31271b48b00c6d45fef6cfe06e48ead4a3f4e7c24ee799c",
+  "baseline_commit": "273f683",
+  "method": "Identical provider_default PROMPT_JSON, fixed timeout 60s, temperature 0, zero SDK retries, first HTTP response only; compare 512 vs configured 2048. Consecutive paired calls on one warm app per cohort. Balance first arm 7:7 using sorted SHA256('qa-budget-order|'+ID). Historical diagnoses separate. Isolate new snapshot and Qdrant collection so round-one IDF never changes.",
+  "exclusions": "All historical exposures and reservations, and all first-round paper/question IDs",
+  "train_sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+  "cases": [
+    {
+      "id": "94c5f5b1eb8414ad924c3568cedd81dc35f29c48",
+      "scope": "reserve14",
+      "query": "In the paper “A Sketch-Based System for Semantic Parsing”, What is the difference between the full test set and the hard test set?",
+      "gold_documents": [
+        "1909.00574"
+      ],
+      "negative": false,
+      "answers": [
+        "3000 hard samples are selected from the test set"
+      ],
+      "evidence": [
+        "The dataset MSParS is published by NLPCC 2019 evaluation task. The whole dataset consists of 81,826 samples annotated by native English speakers. 80% of them are used as training set. 10% of them are used as validation set while the rest is used as test set. 3000 hard samples are selected from the test set. Metric for this dataset is the exactly matching accuracy on both full test set and hard test subset. Each sample is composed of the question, the logical form, the parameters(entity/value/type) and question type as the Table TABREF3 demonstrates."
+      ],
+      "first_arm": "2048"
+    },
+    {
+      "id": "1d1ab5d8a24dfd15d95a5a7506ac0456d1192209",
+      "scope": "reserve14",
+      "query": "In the paper “Improved Semantic-Aware Network Embedding with Fine-Grained Word Alignment”, How long does it take for the model to run?",
+      "gold_documents": [
+        "1808.09633"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "first_arm": "512"
+    },
+    {
+      "id": "3de27c81af3030eb2d9de1df5ec9bfacdef281a9",
+      "scope": "reserve14",
+      "query": "In the paper “An Analysis of Word2Vec for the Italian Language”, How big is dataset used to train Word2Vec for the Italian Language?",
+      "gold_documents": [
+        "2001.09332"
+      ],
+      "negative": false,
+      "answers": [
+        "$421\\,829\\,960$ words divided into $17\\,305\\,401$ sentences"
+      ],
+      "evidence": [
+        "The dataset needed to train the W2V was obtained using the information extracted from a dump of the Italian Wikipedia (dated 2019.04.01), from the main categories of Italian Google News (WORLD, NATION, BUSINESS, TECHNOLOGY, ENTERTAINMENT, SPORTS, SCIENCE, HEALTH) and from some anonymized chats between users and a customer care chatbot (Laila). The dataset (composed of 2.6 GB of raw text) includes $421\\,829\\,960$ words divided into $17\\,305\\,401$ sentences."
+      ],
+      "first_arm": "2048"
+    },
+    {
+      "id": "fb56743e942883d7e74a73c70bd11016acddc348",
+      "scope": "reserve14",
+      "query": "In the paper “Multilingual sequence-to-sequence speech recognition: architecture, transfer learning, and language modeling”, What data do they train the language models on?",
+      "gold_documents": [
+        "1810.03459"
+      ],
+      "negative": false,
+      "answers": [
+        " BABEL speech corpus "
+      ],
+      "evidence": [
+        "In this work, the experiments are conducted using the BABEL speech corpus collected from the IARPA babel program. The corpus is mainly composed of conversational telephone speech (CTS) but some scripted recordings and far field recordings are presented as well. Table TABREF14 presents the details of the languages used in this work for training and evaluation."
+      ],
+      "first_arm": "512"
+    },
+    {
+      "id": "63337fd803f6fdd060ebd0f53f9de79d451810cd",
+      "scope": "reserve14",
+      "query": "In the paper “Collecting Indicators of Compromise from Unstructured Text of Cybersecurity Articles using Neural-Based Sequence Labelling”, What type of hand-crafted features are used in state of the art IOC detection systems?",
+      "gold_documents": [
+        "1907.02636"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "first_arm": "2048"
+    },
+    {
+      "id": "29983f4bc8a5513a198755e474361deee93d4ab6",
+      "scope": "reserve14",
+      "query": "In the paper “What Do You Mean I'm Funny? Personalizing the Joke Skill of a Voice-Controlled Virtual Assistant”, What feedback labels are used?",
+      "gold_documents": [
+        "1912.03234"
+      ],
+      "negative": false,
+      "answers": [
+        "five-minute reuse and one-day return"
+      ],
+      "evidence": [
+        "The proposed models use binary classifiers to perform point-wise ranking, and therefore require a labelled dataset. To generate it, we explore two implicit user-feedback labelling strategies: five-minute reuse and one-day return. Online A/B testing is used to determine if these labelling strategies are suited to optimize the desired user-satisfaction metrics, and offline data to evaluated and compared the system's performance."
+      ],
+      "first_arm": "2048"
+    },
+    {
+      "id": "89e1e0dc5d15a05f8740f471e1cb3ddd296b8942",
+      "scope": "reserve14",
+      "query": "In the paper “Humor Detection: A Transformer Gets the Last Laugh”, Which part of the joke is more important in humor?",
+      "gold_documents": [
+        "1909.00252"
+      ],
+      "negative": false,
+      "answers": [
+        "the punchline of the joke "
+      ],
+      "evidence": [
+        "In order to understand what may be happening in the model, we used the body and punchline only datasets to see what part of the joke was most important for humor. We found that all of the models, including humans, relied more on the punchline of the joke in their predictions (Table 2). Thus, it seems that although both parts of the joke are needed for it to be humorous, the punchline carries higher weight than the body. We hypothesize that this is due to the variations found in the different joke bodies: some take paragraphs to set up the joke, while others are less than a sentence."
+      ],
+      "first_arm": "2048"
+    },
+    {
+      "id": "b2b0321b0aaf58c3aa9050906ade6ef35874c5c1",
+      "scope": "reserve14",
+      "query": "In the paper “Exploring Hate Speech Detection in Multimodal Publications”, How large is the dataset?",
+      "gold_documents": [
+        "1910.03814"
+      ],
+      "negative": false,
+      "answers": [
+        " $150,000$ tweets"
+      ],
+      "evidence": [
+        "Existing hate speech datasets contain only textual data. Moreover, a reference benchmark does not exists. Most of the published datasets are crawled from Twitter and distributed as tweet IDs but, since Twitter removes reported user accounts, an important amount of their hate tweets is no longer accessible. We create a new manually annotated multimodal hate speech dataset formed by $150,000$ tweets, each one of them containing text and an image. We call the dataset MMHS150K, and made it available online . In this section, we explain the dataset creation steps."
+      ],
+      "first_arm": "512"
+    },
+    {
+      "id": "86a93a2d1c19cd0cd21ad1608f2a336240725700",
+      "scope": "reserve14",
+      "query": "In the paper “Semantic Holism and Word Representations in Artificial Neural Networks”, How does Frege's holistic and functional approach to meaning relates to general distributional hypothesis?",
+      "gold_documents": [
+        "2003.05522"
+      ],
+      "negative": false,
+      "answers": [
+        "interpretation of Frege's work are examples of holistic approaches to meaning"
+      ],
+      "evidence": [
+        "Both the distributional hypothesis itself and Tugendhat's interpretation of Frege's work are examples of holistic approaches to meaning, where the meaning of the whole determines the meaning of parts. As we demonstrated on the opposition between Skip-gram and CBOW models, the distinction between semantic holism and atomism may play an essential role in semantic properties of neural language representations models."
+      ],
+      "first_arm": "512"
+    },
+    {
+      "id": "dc57ae854d78aa5d5e8c979826d3e2524d4e9165",
+      "scope": "reserve14",
+      "query": "In the paper “Multi-Task Bidirectional Transformer Representations for Irony Detection”, Why is being feature-engineering free an advantage?",
+      "gold_documents": [
+        "1909.03526"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "first_arm": "2048"
+    },
+    {
+      "id": "b3ec918827cd22b16212265fcdd5b3eadee654ae",
+      "scope": "reserve14",
+      "query": "In the paper “A Computational Approach to Automatic Prediction of Drunk Texting”, What hashtags are used for distant supervision?",
+      "gold_documents": [
+        "1610.00879"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "first_arm": "512"
+    },
+    {
+      "id": "281cb27cfa0eea12180fd82ae33035945476609e",
+      "scope": "reserve14",
+      "query": "In the paper “Learning Relational Dependency Networks for Relation Extraction”, What do they learn jointly?",
+      "gold_documents": [
+        "1607.00424"
+      ],
+      "negative": false,
+      "answers": [
+        "relations"
+      ],
+      "evidence": [
+        "To address our next question, we assessed our pipeline when learning relations independently (i.e., individually) versus learning relations jointly within the RDN, displayed in Table TABREF22 . Recall and F1 are omitted for conciseness – the conclusions are the same across all metrics. Joint learning appears to help in about half of the relations (8/14). Particularly, in person category, joint learning with gold standard outperforms their individual learning counterparts. This is due to the fact that some relations such as parents, spouse, siblings etc. are inter-related and learning them jointly indeed improves performance. Hence Q2 can be answered affirmatively for half the relations."
+      ],
+      "first_arm": "2048"
+    },
+    {
+      "id": "30db81df46474363d5749d7f6a94b7ef95cd3e01",
+      "scope": "reserve14",
+      "query": "In the paper “Domain Agnostic Real-Valued Specificity Prediction”, What domains do they experiment with?",
+      "gold_documents": [
+        "1811.05085"
+      ],
+      "negative": false,
+      "answers": [
+        "Twitter, Yelp reviews and movie reviews"
+      ],
+      "evidence": [
+        "With unsupervised domain adaptation, one has access to labeled sentence specificity in one source domain, and unlabeled sentences in all target domains. The goal is to predict the specificity of target domain data. Our source domain is news, the only domain with publicly available labeled data for training BIBREF1 . We crowdsource sentence specificity for evaluation for three target domains: Twitter, Yelp reviews and movie reviews. The data is described in Section SECREF4 ."
+      ],
+      "first_arm": "512"
+    },
+    {
+      "id": "f52ec4d68de91dba66668f0affc198706949ff90",
+      "scope": "reserve14",
+      "query": "In the paper “Yoga-Veganism: Correlation Mining of Twitter Health Data”, What other interesting correlations are observed?",
+      "gold_documents": [
+        "1906.07668"
+      ],
+      "negative": false,
+      "answers": [
+        "Women-Yoga"
+      ],
+      "evidence": [
+        "We observe interesting hidden correlation in data. Fig. FIGREF24 has Topic 2 as selected topic. Topic 2 contains top-4 co-occurring keywords \"vegan\", \"yoga\", \"job\", \"every_woman\" having the highest term frequency. We can infer different things from the topic that \"women usually practice yoga more than men\", \"women teach yoga and take it as a job\", \"Yogi follow vegan diet\". We would say there are noticeable correlation in data i.e. `Yoga-Veganism', `Women-Yoga'."
+      ],
+      "first_arm": "512"
+    },
+    {
+      "id": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "query": "In the paper “Visual Natural Language Query Auto-Completion for Estimating Instance Probabilities”, How big is data provided by this research?",
+      "negative": false,
+      "answers": [
+        "16k images and 740k corresponding region descriptions"
+      ],
+      "gold_documents": [
+        "1910.04887"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "506916369ced9a4e33ed75d2e9618d4d406db977cf7613576545b5d1ddf1032c"
+      ],
+      "evidence": [
+        "For training, we aggregated (query, image) pairs using the region descriptions from the VG dataset and referring expressions from the ReferIt dataset. Our VG training set consists of 85% of the data: 16k images and 740k corresponding region descriptions. The Referit training data consists of 9k images and 54k referring expressions."
+      ],
+      "first_arm": "2048"
+    },
+    {
+      "id": "620",
+      "query": "Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.",
+      "gold_documents": [
+        "2565138"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim",
+      "first_arm": "512"
+    }
+  ]
+}
