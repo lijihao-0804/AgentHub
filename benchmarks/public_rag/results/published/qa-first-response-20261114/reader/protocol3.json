@@ -1,0 +1,379 @@
+{
+  "frozen_at": "2026-11-14T02:43:59.481435+00:00",
+  "reserve3_sha256": "beae2b767d37ce51bcd9d753068a6b8772d1aa8d2f97a097c582329b02e560ad",
+  "scope": "16 disjoint train QA/16 papers, 10 positive/6 official unanswerable; 4 exposed regression controls in original snapshots",
+  "schedule": "Cases sorted by salted SHA256 for assignment only; assign cyclic six permutations, execute each case in listed protocol order; only first HTTP reply per arm, all provider_default/60 s/temperature 0. A original prompt and 512, B original prompt and 2048, C new prompt and 2048; unchanged user evidence.",
+  "train_sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+  "cases": [
+    {
+      "id": "c78f18606524539e4c573481e5bf1e0a242cc33c",
+      "scope": "reserve16",
+      "query": "In the paper “Autocompletion interfaces make crowd workers slower, but their use promotes response diversity”, How many responses did they obtain?",
+      "gold_documents": [
+        "1707.06939"
+      ],
+      "negative": false,
+      "answers": [
+        "1001"
+      ],
+      "evidence": [
+        "We recruited 176 AMT workers to participate in our conceptualization task. Of these workers, 90 were randomly assigned to the Control group and 86 to the AUI group. These workers completed 1001 tasks: 496 tasks in the control and 505 in the AUI. All responses were gathered within a single 24-hour period during April, 2017."
+      ],
+      "arm_order": [
+        "A",
+        "C",
+        "B"
+      ]
+    },
+    {
+      "id": "05e3b831e4c02bbd64a6e35f6c52f0922a41539a",
+      "scope": "reserve16",
+      "query": "In the paper “From FiLM to Video: Multi-turn Question Answering with Multi-modal Context”, At which interval do they extract video and audio frames?",
+      "gold_documents": [
+        "1812.07023"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "C",
+        "A",
+        "B"
+      ]
+    },
+    {
+      "id": "e06e1b103483e1e58201075c03e610202968c877",
+      "scope": "reserve16",
+      "query": "In the paper “Joint Contextual Modeling for ASR Correction and Language Understanding”, How many parameters does their proposed joint model have?",
+      "gold_documents": [
+        "2002.00750"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "ebb7313eee2ea447abc83cb08b658b57c7eaa600",
+      "scope": "reserve16",
+      "query": "In the paper “A Parallel Corpus of Theses and Dissertations Abstracts”, What SMT models did they look at?",
+      "gold_documents": [
+        "1905.01715"
+      ],
+      "negative": false,
+      "answers": [
+        "automatic translator with Moses"
+      ],
+      "evidence": [
+        "To evaluate the usefulness of our corpus for SMT purposes, we used it to train an automatic translator with Moses BIBREF8 . We also trained an NMT model using the OpenNMT system BIBREF9 , and used the Google Translate Toolkit to produce state-of-the-art comparison results. The produced translations were evaluated according to the BLEU score BIBREF10 ."
+      ],
+      "arm_order": [
+        "B",
+        "A",
+        "C"
+      ]
+    },
+    {
+      "id": "891cab2e41d6ba962778bda297592c916b432226",
+      "scope": "reserve16",
+      "query": "In the paper “Machine Translation from Natural Language to Code using Long-Short Term Memory”, What programming language is target language?",
+      "gold_documents": [
+        "1910.11471"
+      ],
+      "negative": false,
+      "answers": [
+        "Python"
+      ],
+      "evidence": [
+        "SMT techniques require a parallel corpus in thr source and thr target language. A text-code parallel corpus similar to Fig. FIGREF12 is used in training. This parallel corpus has 18805 aligned data in it . In source data, the expression of each line code is written in the English language. In target data, the code is written in Python programming language."
+      ],
+      "arm_order": [
+        "A",
+        "C",
+        "B"
+      ]
+    },
+    {
+      "id": "87159024d4b6dac8c456bb74a91044df292f6b99",
+      "scope": "reserve16",
+      "query": "In the paper “An analysis of the utility of explicit negative examples to improve the syntactic abilities of neural language models”, What proportion of negative-examples do they use?",
+      "gold_documents": [
+        "2004.02451"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "C",
+        "B",
+        "A"
+      ]
+    },
+    {
+      "id": "f27502c3ece9ade265389d5ace90ca9ca42b46f3",
+      "scope": "reserve16",
+      "query": "In the paper “Plan, Write, and Revise: an Interactive System for Open-Domain Story Generation”, How do they evaluate generated stories?",
+      "gold_documents": [
+        "1904.02357"
+      ],
+      "negative": false,
+      "answers": [
+        "separate set of Turkers to rate the stories for overall quality and the three improvement areas"
+      ],
+      "evidence": [
+        "We then ask a separate set of Turkers to rate the stories for overall quality and the three improvement areas. All ratings are on a five-point scale. We collect two ratings per story, and throw out ratings that disagree by more than 2 points. A total of 11% of ratings were thrown out, leaving four metrics across 241 stories for analysis."
+      ],
+      "arm_order": [
+        "A",
+        "C",
+        "B"
+      ]
+    },
+    {
+      "id": "6ff240d985bbe96b9d5042c9b372b4e8f498f264",
+      "scope": "reserve16",
+      "query": "In the paper “A Multi-cascaded Deep Model for Bilingual SMS Classification”, What is the size of the dataset?",
+      "gold_documents": [
+        "1911.13066"
+      ],
+      "negative": false,
+      "answers": [
+        "$0.3$ million records"
+      ],
+      "evidence": [
+        "The English language is well studied under the umbrella of NLP, hence many resources and datasets for the different problems are available. However, research on English-Roman Urdu bilingual text lags behind because of non-availability of gold standard datasets. Our second contribution is that we present a large scale annotated dataset in Roman Urdu and English language with code-switching, for multi-class classification. The dataset consists of more than $0.3$ million records and has been made available for future research."
+      ],
+      "arm_order": [
+        "B",
+        "C",
+        "A"
+      ]
+    },
+    {
+      "id": "ec91b87c3f45df050e4e16018d2bf5b62e4ca298",
+      "scope": "reserve16",
+      "query": "In the paper “An empirical study on the effectiveness of images in Multimodal Neural Machine Translation”, What is the baseline used?",
+      "gold_documents": [
+        "1707.00995"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "B",
+        "A",
+        "C"
+      ]
+    },
+    {
+      "id": "37103369e5792ece49a71666489016c4cea94cda",
+      "scope": "reserve16",
+      "query": "In the paper “Local Contextual Attention with Hierarchical Structure for Dialogue Act Recognition”, Which natural language(s) are studied?",
+      "gold_documents": [
+        "2003.06044"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "B",
+        "C",
+        "A"
+      ]
+    },
+    {
+      "id": "d469c7de5c9e6dd8a901190e95688c446f12118f",
+      "scope": "reserve16",
+      "query": "In the paper “A Deep Learning Architecture for De-identification of Patient Notes: Implementation and Evaluation”, What performance is achieved?",
+      "gold_documents": [
+        "1810.01570"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "B",
+        "C",
+        "A"
+      ]
+    },
+    {
+      "id": "f4e1d2276d3fc781b686d2bb44eead73e06fbf3f",
+      "scope": "reserve16",
+      "query": "In the paper “Deep Semi-Supervised Learning with Linguistically Motivated Sequence Labeling Task Hierarchies”, What is the unsupervised task in the final layer?",
+      "gold_documents": [
+        "1612.09113"
+      ],
+      "negative": false,
+      "answers": [
+        "Language Modeling"
+      ],
+      "evidence": [
+        "In our model we represent linguistically motivated hierarchies in a multi-task Bi-Directional Recurrent Neural Network where junior tasks in the hierarchy are supervised at lower layers.This architecture builds upon sogaard2016deep, but is adapted in two ways: first, we add an unsupervised sequence labeling task (Language Modeling), second, we add a low-dimensional embedding layer between tasks in the hierarchy to learn dense representations of label tags. In addition to sogaard2016deep."
+      ],
+      "arm_order": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "2e3265d83d2a595293ed458152d3ee76ad19e244",
+      "scope": "reserve16",
+      "query": "In the paper “Short-Text Classification Using Unsupervised Keyword Expansion”, What news dataset was used?",
+      "gold_documents": [
+        "1909.07512"
+      ],
+      "negative": false,
+      "answers": [
+        "collection of headlines published by HuffPost BIBREF12 between 2012 and 2018"
+      ],
+      "evidence": [
+        "The News Category Dataset BIBREF11 is a collection of headlines published by HuffPost BIBREF12 between 2012 and 2018, and was obtained online from Kaggle BIBREF13. The full dataset contains 200k news headlines with category labels, publication dates, and short text descriptions. For this analysis, a sample of roughly 33k headlines spanning 23 categories was used. Further analysis can be found in table SECREF12 in the appendix."
+      ],
+      "arm_order": [
+        "C",
+        "A",
+        "B"
+      ]
+    },
+    {
+      "id": "f0e8f045e2e33a2129e67fb32f356242db1dc280",
+      "scope": "reserve16",
+      "query": "In the paper “Mapping (Dis-)Information Flow about the MH17 Plane Crash”, What recommendations are made to improve the performance in future?",
+      "gold_documents": [
+        "1910.01363"
+      ],
+      "negative": false,
+      "answers": [
+        "applying reasoning BIBREF36 or irony detection methods BIBREF37"
+      ],
+      "evidence": [
+        "From the error analysis, we conclude that category I errors need further investigation, as here the model makes mistakes on seemingly easy instances. This might be due to the model not being able to correctly represent Twitter specific language or unknown words, such as Eukraine in example e). Category II and III errors are harder to avoid and could be improved by applying reasoning BIBREF36 or irony detection methods BIBREF37."
+      ],
+      "arm_order": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "7aba5e4483293f5847caad144ee0791c77164917",
+      "scope": "reserve16",
+      "query": "In the paper “RC-QED: Evaluating Natural Language Derivations in Multi-Hop Reading Comprehension”, What dataset was used in the experiment?",
+      "gold_documents": [
+        "1910.04601"
+      ],
+      "negative": false,
+      "answers": [
+        "WikiHop"
+      ],
+      "evidence": [
+        "Our study uses WikiHop BIBREF0, as it is an entity-based multi-hop QA dataset and has been actively used. We randomly sampled 10,000 instances from 43,738 training instances and 2,000 instances from 5,129 validation instances (i.e. 36,000 annotation tasks were published on AMT). We manually converted structured WikiHop question-answer pairs (e.g. locatedIn(Macchu Picchu, Peru)) into natural language statements (Macchu Picchu is located in Peru) using a simple conversion dictionary."
+      ],
+      "arm_order": [
+        "B",
+        "A",
+        "C"
+      ]
+    },
+    {
+      "id": "7c792cda220916df40edb3107e405c86455822ed",
+      "scope": "reserve16",
+      "query": "In the paper “Bidirectional Long-Short Term Memory for Video Description”, what metrics were used for evaluation?",
+      "gold_documents": [
+        "1606.04631"
+      ],
+      "negative": false,
+      "answers": [
+        "METEOR"
+      ],
+      "evidence": [
+        "BLEU BIBREF28 , METEOR BIBREF29 , ROUGE-L BIBREF30 and CIDEr BIBREF31 are common evaluation metrics in image and video description, the first three were originally proposed to evaluate machine translation at the earliest and CIDEr was proposed to evaluate image description with sufficient reference sentences. To quantitatively evaluate the performance of our bidirectional recurrent based approach, we adopt METEOR metric because of its robust performance. Contrasting to the other three metrics, METEOR could capture semantic aspect since it identifies all possible matches by extracting exact matcher, stem matcher, paraphrase matcher and synonym matcher using WordNet database, and compute sentence level similarity scores according to matcher weights. The authors of CIDEr also argued for that METEOR outperforms CIDEr when the reference set is small BIBREF31 ."
+      ],
+      "arm_order": [
+        "C",
+        "B",
+        "A"
+      ]
+    },
+    {
+      "id": "3de27c81af3030eb2d9de1df5ec9bfacdef281a9",
+      "scope": "reserve14",
+      "query": "In the paper “An Analysis of Word2Vec for the Italian Language”, How big is dataset used to train Word2Vec for the Italian Language?",
+      "gold_documents": [
+        "2001.09332"
+      ],
+      "negative": false,
+      "answers": [
+        "$421\\,829\\,960$ words divided into $17\\,305\\,401$ sentences"
+      ],
+      "evidence": [
+        "The dataset needed to train the W2V was obtained using the information extracted from a dump of the Italian Wikipedia (dated 2019.04.01), from the main categories of Italian Google News (WORLD, NATION, BUSINESS, TECHNOLOGY, ENTERTAINMENT, SPORTS, SCIENCE, HEALTH) and from some anonymized chats between users and a customer care chatbot (Laila). The dataset (composed of 2.6 GB of raw text) includes $421\\,829\\,960$ words divided into $17\\,305\\,401$ sentences."
+      ],
+      "arm_order": [
+        "B",
+        "A",
+        "C"
+      ]
+    },
+    {
+      "id": "b3ec918827cd22b16212265fcdd5b3eadee654ae",
+      "scope": "reserve14",
+      "query": "In the paper “A Computational Approach to Automatic Prediction of Drunk Texting”, What hashtags are used for distant supervision?",
+      "gold_documents": [
+        "1610.00879"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "A",
+        "C",
+        "B"
+      ]
+    },
+    {
+      "id": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "query": "In the paper “Visual Natural Language Query Auto-Completion for Estimating Instance Probabilities”, How big is data provided by this research?",
+      "negative": false,
+      "answers": [
+        "16k images and 740k corresponding region descriptions"
+      ],
+      "gold_documents": [
+        "1910.04887"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "506916369ced9a4e33ed75d2e9618d4d406db977cf7613576545b5d1ddf1032c"
+      ],
+      "evidence": [
+        "For training, we aggregated (query, image) pairs using the region descriptions from the VG dataset and referring expressions from the ReferIt dataset. Our VG training set consists of 85% of the data: 16k images and 740k corresponding region descriptions. The Referit training data consists of 9k images and 54k referring expressions."
+      ],
+      "arm_order": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "620",
+      "query": "Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.",
+      "gold_documents": [
+        "2565138"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim",
+      "arm_order": [
+        "B",
+        "C",
+        "A"
+      ]
+    }
+  ]
+}

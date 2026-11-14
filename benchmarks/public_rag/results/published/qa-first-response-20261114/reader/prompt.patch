@@ -1,0 +1,17 @@
+--- a/packages/knowledge/citation_qa.py
++++ b/packages/knowledge/citation_qa.py
+@@ -116,7 +116,13 @@
+ 
+ _PROMPT_JSON_SYSTEM = (
+     _SYSTEM_PROMPT
+-    + "\nThe citation_ids array must exactly match the unique [n] markers in answer. "
++    + "\nAnswer only the facts requested. Omit unasked background, sources and numbers. "
++    "Each factual detail and qualifier must be directly supported by the excerpt cited for it. "
++    "If the requested quantity, comparison or full list cannot be established, do not answer "
++    "with a related statistic or a lone example. Return a brief insufficient-evidence answer "
++    "with insufficient_evidence=true and no citations. Use false only when the requested "
++    "answer is supported. "
++    "The citation_ids array must exactly match the unique [n] markers in answer. "
+     "For insufficient evidence, set insufficient_evidence to true, use no [n] markers "
+     "and leave citation_ids empty. Use plain JSON without a Markdown code fence.\nOutput schema:\n"
+     + json.dumps(_OUTPUT_SCHEMA.json_schema, separators=(",", ":"), ensure_ascii=False)
