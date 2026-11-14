@@ -1,0 +1,422 @@
+{
+  "scope": "Historical fixed S1 request, reviewed DEV labels only; no generation",
+  "model_calls": 0,
+  "rows": [
+    {
+      "case_id": "S0-001",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-002",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-003",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-004",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-005",
+      "answerability": "answerable",
+      "original_complete": false,
+      "reviewed_complete": true,
+      "approved_alternatives": [
+        {
+          "label": "source_reviewed_equivalent",
+          "all_of": [
+            {
+              "source_id": "POL-RETURN-CONDITIONS-01",
+              "quote": "官网普通小件的拆除外包装不当然导致资格消灭，关键仍是本体、随机安全配件和防拆标识完整"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "S0-006",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-007",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-008",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-009",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-010",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-011",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-012",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-013",
+      "answerability": "answerable",
+      "original_complete": false,
+      "reviewed_complete": true,
+      "approved_alternatives": [
+        {
+          "label": "source_reviewed_equivalent",
+          "all_of": [
+            {
+              "source_id": "POL-RETURN-CONDITIONS-01",
+              "quote": "基础申请先核对订单号、申请原因和可接收通知的手机号"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "S0-014",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-015",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-016",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-017",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-018",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-019",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-020",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-021",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-022",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-023",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-024",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-025",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-026",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-027",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-028",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-029",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-030",
+      "answerability": "insufficient_evidence",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-031",
+      "answerability": "answerable",
+      "original_complete": false,
+      "reviewed_complete": false,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-032",
+      "answerability": "answerable",
+      "original_complete": false,
+      "reviewed_complete": true,
+      "approved_alternatives": [
+        {
+          "label": "source_reviewed_equivalent",
+          "all_of": [
+            {
+              "source_id": "POL-CONTRACT-PHONE-RETURN-NEW",
+              "quote": "合约签订日在 2026-05-31 23:59:59 之前时，签订时有效的旧版 30 日窗口继续适用于该合约"
+            },
+            {
+              "source_id": "POL-CONTRACT-PHONE-RETURN-NEW",
+              "quote": "自 2026-06-01 起签订的合约手机，自签收日次日起 60 个自然日内可以申请无理由退货；旧版 30 日不再适用于新合约。"
+            },
+            {
+              "source_id": "POL-CONTRACT-PHONE-RETURN-NEW",
+              "quote": "两个版本都从实际签收日次日起算"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "S0-033",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-034",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-035",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-036",
+      "answerability": "answerable",
+      "original_complete": false,
+      "reviewed_complete": true,
+      "approved_alternatives": [
+        {
+          "label": "source_reviewed_equivalent",
+          "all_of": [
+            {
+              "source_id": "POL-REFUND-WINDOW-OLD",
+              "quote": "官网渠道消费者自签收日次日起 15 个自然日内可以申请普通退款"
+            },
+            {
+              "source_id": "POL-REFUND-WINDOW-OLD",
+              "quote": "这是 2025 年历史版本。2026-01-01 起由 POL-REFUND-WINDOW-01 替代"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "S0-037",
+      "answerability": "answerable",
+      "original_complete": false,
+      "reviewed_complete": false,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-038",
+      "answerability": "answerable",
+      "original_complete": false,
+      "reviewed_complete": true,
+      "approved_alternatives": [
+        {
+          "label": "source_reviewed_equivalent",
+          "all_of": [
+            {
+              "source_id": "POL-CHANNEL-MARKETPLACE-LONG-01",
+              "quote": "支付工具只说明款项如何退回，不会把官网订单变成商城订单，也不会让普通小件自动套用大件窗口"
+            },
+            {
+              "source_id": "POL-CHANNEL-MARKETPLACE-LONG-01",
+              "quote": "本政策仅适用于第三方商城渠道中，由平台自营门店标记为大件的冰箱、洗衣机、家具和大屏电视"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "S0-039",
+      "answerability": "insufficient_evidence",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-040",
+      "answerability": "insufficient_evidence",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-041",
+      "answerability": "insufficient_evidence",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-042",
+      "answerability": "insufficient_evidence",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-043",
+      "answerability": "conflicting_evidence",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-044",
+      "answerability": "insufficient_evidence",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-045",
+      "answerability": "conflicting_evidence",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-046",
+      "answerability": "insufficient_evidence",
+      "original_complete": false,
+      "reviewed_complete": false,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-047",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-048",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-049",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    },
+    {
+      "case_id": "S0-050",
+      "answerability": "answerable",
+      "original_complete": true,
+      "reviewed_complete": true,
+      "approved_alternatives": []
+    }
+  ]
+}
