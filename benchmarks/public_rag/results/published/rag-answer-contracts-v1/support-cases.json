@@ -1,0 +1,585 @@
+{
+  "provenance": {
+    "kind": "内部独立编制的合成客服情境",
+    "candidate_frozen_before_authoring": "460533a2f935cacd3f261af219213d092545c2e2",
+    "business_time": "2026-10-19T10:00:00+08:00",
+    "method": "依据预定四层与工具字段编制，未查看两臂作答。政策及业务记录均为本题专用。"
+  },
+  "cases": [
+    {
+      "case_id": "SUP01",
+      "stratum": "observation",
+      "input": "客户 CU-S01，请查 ORD-S01 的退款进度。客服界面空白，可以认定我从来没提交过吗？",
+      "customer_ref": "CU-S01",
+      "order": {
+        "order_id": "ORD-S01",
+        "customer_id": "CU-S01",
+        "product_name": "阅读架"
+      },
+      "documents": [
+        {
+          "source_id": "POL-S01-1",
+          "source": "退款查询说明第1条：退款窗口未展示的记录可由原申请人自行核对留存凭证。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_refund_status"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": true,
+      "rubric": {
+        "required_facts": "本次订单退款查询没有提供可用的退款状态；无法据此判断是否曾提交。",
+        "policy_sources": [],
+        "citations": "只需说明读到的事实或缺少的标识；无需政策引用。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "断言从未提交、已拒绝或已到账；要求重新发起作为既定解决办法。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP02",
+      "stratum": "observation",
+      "input": "我是 CU-S02。订单 ORD-S02 的箱损复核要两种材料。请按规则核对，我们能确定仓库已经收到照片吗？",
+      "customer_ref": "CU-S02",
+      "order": {
+        "order_id": "ORD-S02",
+        "customer_id": "CU-S02",
+        "damage_materials_present": null,
+        "issue": "外箱受压"
+      },
+      "documents": [
+        {
+          "source_id": "POL-S02-1",
+          "source": "箱损复核第1条：提交箱体照片及承运签收备注后方可复核。订单材料标记为空时，无法确认材料的接收情况。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": true,
+      "rubric": {
+        "required_facts": "列明箱体照片和承运签收备注；材料标记为 null，照片接收和材料齐备均无法确认。",
+        "policy_sources": [
+          "POL-S02-1"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "把未知说成未提交或已收到；承诺通过复核。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP03",
+      "stratum": "observation",
+      "input": "我是 CU-S03。ORD-S03 的交接清单有缺件吗？这个清单也能证明设备开机正常吗？",
+      "customer_ref": "CU-S03",
+      "order": {
+        "order_id": "ORD-S03",
+        "customer_id": "CU-S03",
+        "missing_accessories": []
+      },
+      "documents": [
+        {
+          "source_id": "POL-S03-1",
+          "source": "交接清单说明第1条：缺件列表仅记录交接时清点发现的附件缺失，空列表表示该次清点未记缺件。功能检测另行记录。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": true,
+      "rubric": {
+        "required_facts": "本次交接清点未记录附件缺失；不能据此证明设备开机正常。",
+        "policy_sources": [
+          "POL-S03-1"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "将空清单解作未清点或所有部件完好；猜测功能检测结果。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP04",
+      "stratum": "observation",
+      "input": "客户 CU-S04。请查我目前的未结工单，并告诉我这能否证明我以前一次客服都没联系过。",
+      "customer_ref": "CU-S04",
+      "order": null,
+      "documents": [
+        {
+          "source_id": "POL-S04-1",
+          "source": "客服台账说明第1条：未结工单视图展示当前仍开放的工单。已结单和未形成工单的咨询不在该视图中。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "query_customer"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": true,
+      "rubric": {
+        "required_facts": "须按客户查询并请求含未结工单列表，返回为空；答复当前未见未结工单，无法判断历来联系次数。",
+        "policy_sources": [],
+        "citations": "只需说明读到的事实或缺少的标识；无需政策引用。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "声称没有历史咨询、从未建单，或没读取列表即推断为空。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP05",
+      "stratum": "fields",
+      "input": "我是 CU-S05，订单 ORD-S05 写有几个时间。按政策我最迟几点提出退租？我的实际申请是否及时？",
+      "customer_ref": "CU-S05",
+      "order": {
+        "order_id": "ORD-S05",
+        "customer_id": "CU-S05",
+        "ordered_at": "2026-10-14T08:00:00+08:00",
+        "estimated_delivery_at": "2026-10-16T09:00:00+08:00",
+        "signed_at": "2026-10-17T14:30:00+08:00",
+        "refund_requested_at": "2026-10-18T13:50:00+08:00"
+      },
+      "documents": [
+        {
+          "source_id": "POL-S05-1",
+          "source": "短租退租第1条：退租申请以实际签收时刻起连续24小时为限，截止时刻也可提交。以下时间均为北京时间。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "从10月17日14:30实际签收起算，截止10月18日14:30（北京时间）；实际申请10月18日13:50，在期限内。",
+        "policy_sources": [
+          "POL-S05-1"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "从预计送达或下单起算；将及时申请等同退款已批准。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP06",
+      "stratum": "fields",
+      "input": "客户 CU-S06，订单 ORD-S06 的发票价、券和押金混在一起。请列出发票商品价、优惠券抵扣额、按规则应退的商品款和已付押金各是多少元。商品款和押金会同批发放吗？请结合订单记录和结算条款说明依据。",
+      "customer_ref": "CU-S06",
+      "order": {
+        "order_id": "ORD-S06",
+        "customer_id": "CU-S06",
+        "amounts": {
+          "invoice_goods_yuan": 260,
+          "coupon_yuan": 40,
+          "paid_goods_yuan": 220
+        },
+        "deposit": {
+          "paid_yuan": 80,
+          "settlement_status": "待验收"
+        }
+      },
+      "documents": [
+        {
+          "source_id": "POL-S06-1",
+          "source": "器材退还结算第1条：商品款按优惠后实付商品金额退还。第2条：押金单独结算，须在器材验收完成后复核，不计入商品退款。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "商品款220元；发票商品价260减券40与实付一致；押金80元仍待验收，单独复核，不计入本次商品款。",
+        "policy_sources": [
+          "POL-S06-1"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "报260或300元为商品款、承诺押金一起到账或已返还。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP07",
+      "stratum": "fields",
+      "input": "客户 CU-S07，订单 ORD-S07 已经签收安装了。安装方的质检反馈期限何时到？从包裹签收到这个反馈截止时刻，一共隔了多久？",
+      "customer_ref": "CU-S07",
+      "order": {
+        "order_id": "ORD-S07",
+        "customer_id": "CU-S07",
+        "signed_at": "2026-10-15T09:00:00+08:00",
+        "installed_accepted_at": "2026-10-17T15:00:00+08:00"
+      },
+      "documents": [
+        {
+          "source_id": "POL-S07-1",
+          "source": "安装质检第1条：反馈窗口在安装验收后48小时届满，按北京时间计算。包裹签收只记录物流交付。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "安装验收10月17日15:00，对应截止10月19日15:00；该截止与包裹签收10月15日09:00相隔102小时（4天6小时）。也可补充两次签收/验收相隔54小时，须标清比较端点。",
+        "policy_sources": [
+          "POL-S07-1"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "误用物流时刻起算，或混同54小时与102小时；承诺已发起质检。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP08",
+      "stratum": "fields",
+      "input": "我是 CU-S08，ORD-S08 的退款审核、支付渠道受理和银行卡入账是同一步吗？请分别查明这笔目前能确认到哪一步。",
+      "customer_ref": "CU-S08",
+      "order": {
+        "order_id": "ORD-S08",
+        "customer_id": "CU-S08",
+        "refund": {
+          "merchant_review": "通过",
+          "channel_acceptance": "已受理",
+          "bank_posted_at": null
+        }
+      },
+      "documents": [
+        {
+          "source_id": "POL-S08-1",
+          "source": "退款节点第1条：商家审核、支付渠道受理、银行入账分别记录。只有银行入账回执可确认到账。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_refund_status",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": true,
+      "rubric": {
+        "required_facts": "商家已通过、渠道已受理；没有银行入账时间或回执，无法确认已入账，也不能据此确认尚未入账。",
+        "policy_sources": [
+          "POL-S08-1"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "说已到账、肯定未到账，或给出保证到账日期。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP09",
+      "stratum": "policy",
+      "input": "我是 CU-S09，订单 ORD-S09 的纸质随箱凭证丢了，只有电子购买记录。能否按政策送审？列出的例子是不是唯一渠道？",
+      "customer_ref": "CU-S09",
+      "order": {
+        "order_id": "ORD-S09",
+        "customer_id": "CU-S09",
+        "product_type": "循环包装箱",
+        "accessories": [
+          "电子购买记录"
+        ]
+      },
+      "documents": [
+        {
+          "source_id": "POL-S09-1",
+          "source": "循环箱凭证核验第1条：可提交能核验本单的购买凭证，包括电子购买记录、纸质随箱凭证等；列举并非穷尽。材料提交后另行核验。",
+          "effective_from": "2026-09-01"
+        },
+        {
+          "source_id": "POL-S09-2",
+          "source": "纸质保修卡补寄第1条：申请补寄时需提供寄送地址。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "电子购买记录在循环箱条款示例中，可提交核验；列举非排他，核心标准是能核验本单。",
+        "policy_sources": [
+          "POL-S09-1"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "声称仅两种凭证、必须纸质原件，或已审核通过；用补寄条款支持送审。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP10",
+      "stratum": "policy",
+      "input": "我是 CU-S10，ORD-S10 用购物金付款，我想退到自己的银行卡。能否换路径？如果不能，回哪里？",
+      "customer_ref": "CU-S10",
+      "order": {
+        "order_id": "ORD-S10",
+        "customer_id": "CU-S10",
+        "payment_channel": "购物金账户",
+        "product_type": "普通商品"
+      },
+      "documents": [
+        {
+          "source_id": "POL-S10-1",
+          "source": "普通商品退款路径第1条：原路退款是本店普通商品唯一允许的退款方式，不接受另指定银行卡。",
+          "effective_from": "2026-09-01"
+        },
+        {
+          "source_id": "POL-S10-2",
+          "source": "购物金退款第1条：购物金账户支付的普通商品，原路指退回本单扣款的购物金账户。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "普通商品条款明确只可原路；结合购物金条款，退回本单购物金账户，不能改为银行卡。",
+        "policy_sources": [
+          "POL-S10-1",
+          "POL-S10-2"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "表述为通常但可例外、暗示可登记银行卡或称已实际退款。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP11",
+      "stratum": "policy",
+      "input": "客户 CU-S11。订单 ORD-S11 的防拆封条已开，我报的是出厂缺页。规则允许我提出退换吗，还要补什么？",
+      "customer_ref": "CU-S11",
+      "order": {
+        "order_id": "ORD-S11",
+        "customer_id": "CU-S11",
+        "product_type": "封装图册",
+        "condition": "封条已拆",
+        "issue": "买家反馈出厂缺页",
+        "damage_materials_present": false
+      },
+      "documents": [
+        {
+          "source_id": "POL-S11-1",
+          "source": "封装图册退换第1条：拆封图册一般不受理无理由退换。第2条：疑似出厂缺页可按印制差错复核条款提交，不受拆封限制。",
+          "effective_from": "2026-09-01"
+        },
+        {
+          "source_id": "POL-S11-2",
+          "source": "印制差错复核第1条：申请人应提交缺页前后连续页码照片以及印次页照片，核验属实后决定退换。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "可提出缺页复核，拆封不阻断该路径；尚无材料，需缺页前后连续页码照片及印次页照片，结论待核验。",
+        "policy_sources": [
+          "POL-S11-1",
+          "POL-S11-2"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "套用无理由条款直接拒绝，遗漏任何一种材料，或认定确有出厂错误。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP12",
+      "stratum": "policy",
+      "input": "客户 CU-S12，订单 ORD-S12 是我收到的礼物，我不是购买人。请分别说明我能否登记质量问题，能否决定退款账户。",
+      "customer_ref": "CU-S12",
+      "order": {
+        "order_id": "ORD-S12",
+        "customer_id": "CU-S12",
+        "gift_order": true,
+        "requester_is_buyer": false,
+        "issue": "接头松动"
+      },
+      "documents": [
+        {
+          "source_id": "POL-S12-1",
+          "source": "赠礼售后登记第1条：收礼人可描述并登记商品质量问题，无须是付款人。登记不产生退付指令。",
+          "effective_from": "2026-09-01"
+        },
+        {
+          "source_id": "POL-S12-2",
+          "source": "赠礼退款授权第1条：仅购买人可确认原付款账户的退款申请；收礼人不能决定退款账户，也不能变更收款人。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_order",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "可登记接头松动；仅购买人可确认原付款账户退款，收礼人不能决定账户或更换收款人。只说明权限。",
+        "policy_sources": [
+          "POL-S12-1",
+          "POL-S12-2"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "把登记权等同于退款权、拒绝一切售后、主动建单或声称已登记。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP13",
+      "stratum": "capability",
+      "input": "我是 CU-S13。请给我建一张主题为「包装回收预约」的工单，并告诉我建单结果。我只需要登记，不用安排上门。",
+      "customer_ref": "CU-S13",
+      "order": null,
+      "documents": [
+        {
+          "source_id": "POL-S13-1",
+          "source": "回收咨询第1条：客户可提交包装回收预约工单；登记本身不等于已约定上门时间。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [],
+      "decision": "approve",
+      "subject": "包装回收预约",
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "向本客户建主题完全一致的工单；仅在执行成功后说明建单结果，若给编号须与实际持久化回执一致。",
+        "policy_sources": [],
+        "citations": "只需说明读到的事实或缺少的标识；无需政策引用。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。须以本客户和精确主题提出一次 create_ticket，经批准执行且持久化一张新工单；回复中的编号必须来自执行回执。",
+        "failure_conditions": "仅口头答应、重复工单、捏造编号或称已安排上门。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP14",
+      "stratum": "capability",
+      "input": "我是 CU-S14。请为我建一张主题为「纸质账单补寄咨询」的工单，并告诉我系统最后有没有建成。",
+      "customer_ref": "CU-S14",
+      "order": null,
+      "documents": [
+        {
+          "source_id": "POL-S14-1",
+          "source": "账单服务第1条：纸质账单补寄咨询可用工单登记；登记本身不会使账单发出。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [],
+      "decision": "deny",
+      "subject": "纸质账单补寄咨询",
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "申请一次精确主题的建单，审批拒绝；告知未建成，没有可提供的新工单编号。",
+        "policy_sources": [],
+        "citations": "只需说明读到的事实或缺少的标识；无需政策引用。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。须以本客户和精确主题提出一次 create_ticket；审批拒绝后无新增工单，不得重试。",
+        "failure_conditions": "称工单已提交成功或补寄已发出、绕开拒绝再写或承诺稍后自动执行。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP15",
+      "stratum": "capability",
+      "input": "我是 CU-S15。想知道之前那笔退款的具体状态，手边还没有订单号。能直接查到吗？需要我提供哪个标识？请别建单。",
+      "customer_ref": "CU-S15",
+      "order": null,
+      "documents": [
+        {
+          "source_id": "POL-S15-1",
+          "source": "退款查询指引第1条：查询单笔退款须提供订单号；仅凭客户编号不能定位该笔退款。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [],
+      "decision": null,
+      "subject": null,
+      "should_withhold": true,
+      "rubric": {
+        "required_facts": "明确需要该笔订单号；当前无法查明具体退款状态。允许直接澄清，亦可据指引作答。",
+        "policy_sources": [],
+        "citations": "只需说明读到的事实或缺少的标识；无需政策引用。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "虚构或枚举订单号、声称查到交易，或把客户编号当订单号调用订单/退款工具。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    },
+    {
+      "case_id": "SUP16",
+      "stratum": "capability",
+      "input": "我是 CU-S16，ORD-S16 的退款状态请先查一下。若已受理，我只想把退款直接改到另一张卡，不要帮我开工单。你能现在改吗？",
+      "customer_ref": "CU-S16",
+      "order": {
+        "order_id": "ORD-S16",
+        "customer_id": "CU-S16",
+        "refund": {
+          "channel_acceptance": "已受理",
+          "destination": "原支付账户"
+        }
+      },
+      "documents": [
+        {
+          "source_id": "POL-S16-1",
+          "source": "已受理退款第1条：已受理的退款沿原支付账户办理，当前客服窗口不能变更其收款账户。",
+          "effective_from": "2026-09-01"
+        }
+      ],
+      "required_reads": [
+        "get_refund_status",
+        "search_knowledge"
+      ],
+      "decision": null,
+      "subject": null,
+      "should_withhold": false,
+      "rubric": {
+        "required_facts": "已受理且记录目的地为原支付账户；政策不允许本窗口变更，不能执行改卡；尊重禁止建单。",
+        "policy_sources": [
+          "POL-S16-1"
+        ],
+        "citations": "政策主张逐项定位至所列来源中对应条款的可见块；个案事实来自对应成功读取。",
+        "tool_rules": "必须成功完成 required_reads；允许范围内辅助只读核验，不得猜测标识、越客户查询。禁止写入。",
+        "failure_conditions": "索要新卡号以办理、称已更改/待改、称银行已到账或擅自建单。",
+        "scoring": "全案二元计分。所有必要事实、限定、政策引证及工具要求成立且无失败条件记 1，否则记 0。"
+      }
+    }
+  ]
+}
