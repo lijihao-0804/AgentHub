@@ -137,3 +137,148 @@ def explicit_abstention(query: str, answer: str, *, contextual: bool = True) -> 
     ):
         return None
     return sentences[0]
+
+
+# Omitting a document-navigation aside is safe only for a single information
+# request when the aside merely locates a section and repeats the same gap.
+_WH_REQUEST = re.compile(r"(?:what|which|how|why|when|where|who)\b[^?;:]+\?", re.I)
+_SCOPE_DENIAL = re.compile(
+    r"The (?:(?:provided|available|supplied) )?evidence does not "
+    r"(?:specify|describe|state|explain|identify) (?P<requested>[^.!?;:]+)\.",
+    re.I,
+)
+_NAVIGATION_ASIDE = re.compile(
+    r"The (?:paper|article|report) (?:mentions|states|notes) that "
+    r"(?:the )?(?:results|findings|details) are (?:shown|presented|reported)"
+    r"(?: and evaluated)? in (?:section|chapter|appendix) [A-Z0-9]+(?:\.\d+)*"
+    r"(?: \[\d+\])+, but the (?:evidence )?(?:excerpts|passages) "
+    r"do not include that (?:section|chapter|appendix) or (?:name|describe|give) "
+    r"any (?P<missing>[a-z]+(?: [a-z]+){0,3})\.",
+    re.I,
+)
+
+
+def recover_whole_refusal(query: str, answer: str) -> tuple[str, str] | None:
+    """Return only a pure refusal or an omission containing just a source pointer."""
+    pure = explicit_abstention(query, answer, contextual=False)
+    if pure:
+        return pure, "pure_whole_refusal"
+    question = _SOURCE_PREFIX.sub("", query.strip()).casefold()
+    if not _WH_REQUEST.fullmatch(question) or re.search(
+        r"\b(?:and|or|besides|except|additional|other|also|section|chapter|appendix|where)\b|[,/]",
+        question,
+    ):
+        return None
+    sentences = _SENTENCES.split(answer.strip())
+    if len(sentences) != 2:
+        return None
+    denial = next((m for part in sentences if (m := _SCOPE_DENIAL.fullmatch(part))), None)
+    aside = next((m for part in sentences if (m := _NAVIGATION_ASIDE.fullmatch(part))), None)
+    if not denial or not aside:
+        return None
+    head = aside["missing"].split()[-1].casefold()
+    if not all(
+        re.search(rf"\b{re.escape(head)}\b", s, re.I) for s in (question, denial["requested"])
+    ):
+        return None
+    if re.search(r"\b(?:except|but|only|other|additional|besides|although)\b", denial[0], re.I):
+        return None
+    return denial[0], "omitted_document_navigation_only"
+
+
+def refuses_requested_comparison(query: str, answer: str) -> bool:
+    """Recognize an explicit denial of the requested two-sided comparison.
+
+    Do not erase the cited single-sided explanation. The public refusal shape
+    cannot carry its attribution. A new first response must resolve the conflict.
+    """
+    question = _SOURCE_PREFIX.sub("", query.strip())
+    questions = (
+        r"how (?:does|did|do) [\w -]+ differ from (?P<t>[\w -]+)",
+        r"(?:what|which) (?:is|are|were) the differences? between [\w -]+? and (?P<t>[\w -]+)",
+        r"(?:compare [\w -]+? (?:with|to)|how (?:does|did) [\w -]+? compare (?:with|to)) "
+        r"(?P<t>[\w -]+)",
+    )
+    chinese = re.fullmatch(
+        r"(?:请比较|比较)([^和与，。？！；]+)[和与]([^，。？！；]+?)(?:的差异|的区别)?[？?。]?",
+        question,
+    )
+    if chinese:
+        target = chinese[2]
+        parts = [s.strip() for s in re.split("[。！？]", answer) if s.strip()]
+        denials = [
+            s
+            for s in parts
+            if re.fullmatch(
+                rf"(?:现有|所给|提供的)?(?:证据|资料|材料)(?:没有|未)(?:提供|给出|说明)"
+                rf"(?:二者的比较|二者的区别|两者的差异|与{re.escape(target)}的比较)",
+                s,
+            )
+        ]
+        facts = [s for s in parts if s not in denials]
+        return bool(
+            denials
+            and facts
+            and all(
+                re.match(r"(?:材料|资料|证据|文中)(?:只|仅)(?:说明|指出|提到|描述)", s)
+                and not any(
+                    token in s
+                    for token in (
+                        target,
+                        "相比",
+                        "差异",
+                        "区别",
+                        "不同",
+                        "相同",
+                        "均",
+                        "更",
+                        "而",
+                        "但是",
+                    )
+                )
+                for s in facts
+            )
+        )
+    query_text = question.rstrip("?.").strip()
+    match = next(
+        (m for pattern in questions if (m := re.fullmatch(pattern, query_text, re.I))), None
+    )
+    if not match or re.search(r"\b(?:also|except|additional|besides|or)\b", query_text, re.I):
+        return False
+    if re.search(r"\band\b", query_text, re.I) and (
+        "between " not in query_text.casefold()
+        or len(re.findall(r"\band\b", query_text, re.I)) != 1
+    ):
+        return False
+    target = match["t"].strip().casefold()
+    initials = "".join(w[0] for w in target.split())
+    names = {target}
+    if len(initials) > 1:
+        names.update((initials, initials + "s"))
+    targets = "|".join(re.escape(n) for n in names)
+    denial = re.compile(
+        rf"(?:the (?:(?:supplied|provided|available) )?(?:evidence|material|text) does not "
+        rf"(?:describe how [\w -]+ differs from|compare [\w -]+ (?:with|to)) (?:{targets})"
+        rf"|no (?:direct )?comparison (?:to|with) (?:{targets}) is "
+        rf"(?:given|provided|available)(?: in the supplied evidence)?)",
+        re.I,
+    )
+    sentences = [part.removesuffix(".") for part in _SENTENCES.split(answer.strip())]
+    facts = [part for part in sentences if not denial.fullmatch(part)]
+    if not facts or len(facts) == len(sentences):
+        return False
+    contrast = re.compile(
+        rf"\b(?:{targets}|unlike|whereas|than|but|however|both|contrast|different|difference|"
+        rf"compared|except|instead|only one|neither|former|latter|respectively)\b",
+        re.I,
+    )
+    return all(
+        re.match(
+            r"(?:it|the (?:paper|report|evidence|text)) only "
+            r"(?:states|reports|describes|mentions) ",
+            part,
+            re.I,
+        )
+        and not contrast.search(part)
+        for part in facts
+    )

@@ -1,0 +1,79 @@
+{
+  "old": {
+    "opportunities": 120,
+    "generated": 119,
+    "contract_valid": [
+      93,
+      120
+    ],
+    "contract_valid_given_generation": [
+      93,
+      119
+    ],
+    "returned_state_body_consistent": [
+      68,
+      93
+    ],
+    "consistent_valid_per_opportunity": [
+      68,
+      120
+    ],
+    "returned_refusals": 1,
+    "reasonable_returned_refusals": 1,
+    "wrong_returned_refusals": 0,
+    "source_task_correct": [
+      55,
+      111
+    ]
+  },
+  "candidate": {
+    "opportunities": 120,
+    "generated": 119,
+    "contract_valid": [
+      91,
+      120
+    ],
+    "contract_valid_given_generation": [
+      91,
+      119
+    ],
+    "returned_state_body_consistent": [
+      69,
+      91
+    ],
+    "consistent_valid_per_opportunity": [
+      69,
+      120
+    ],
+    "returned_refusals": 2,
+    "reasonable_returned_refusals": 2,
+    "wrong_returned_refusals": 0,
+    "source_task_correct": [
+      55,
+      111
+    ]
+  },
+  "historical_semantic_refusals": 58,
+  "legacy_recognition_on_historical_refusals": [
+    0,
+    0
+  ],
+  "raw_body_whole_refusals": 51,
+  "raw_reasonable_whole_refusals": 43,
+  "raw_unjustified_whole_refusals": 8,
+  "raw_state_body_consistent": [
+    93,
+    119
+  ],
+  "recovered": [
+    "052d19b456f1795acbb8463312251869cc5b38da/B"
+  ],
+  "new_failures": [
+    "045dbdbda5d96a672e5c69442e30dbf21917a1ee/B",
+    "045dbdbda5d96a672e5c69442e30dbf21917a1ee/C",
+    "045dbdbda5d96a672e5c69442e30dbf21917a1ee/D"
+  ],
+  "previously_correct_converted_to_wrong_refusal": 0,
+  "task_source_exclusions": 9,
+  "paid_requests": 0
+}
