@@ -73,8 +73,10 @@ def init_ledger(path: Path, *, approval_id: str, cap_microcny: int):
 class AliyunMeter:
     """Use the already egress-guarded SDK client, with zero redirects/retries."""
 
+    limits = LIMITS
+
     def __init__(self, path: Path, stage: str):
-        if stage not in LIMITS or not path.is_file():
+        if stage not in self.limits or not path.is_file():
             raise ValueError("Unknown stage or missing study authorization")
         self.path, self.stage, self.task_id = path, stage, ""
 
@@ -91,7 +93,7 @@ class AliyunMeter:
                 "SELECT count(*),count(CASE WHEN task=? THEN 1 END) FROM wires WHERE stage=?",
                 (self.task_id, self.stage),
             ).fetchone()
-            limit, per_task = LIMITS[self.stage]
+            limit, per_task = self.limits[self.stage]
             if stage_n >= limit or task_n >= per_task or all_cost + PER_REQUEST > cap:
                 raise RuntimeError("Study budget or task dispatch limit reached")
             return db.execute(
