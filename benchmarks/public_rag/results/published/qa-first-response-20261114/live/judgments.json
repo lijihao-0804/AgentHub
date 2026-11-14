@@ -1,0 +1,342 @@
+{
+  "013448266ff7b7b83c71": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      6
+    ],
+    "reason": "[6] gives the three parallel LSTMs, their three inputs and attention on the bidirectional comment encoder. [2] identifies the best neural model as a bidirectional LSTM with attention."
+  },
+  "fc066b5053a486f9c3b5": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      6
+    ],
+    "reason": "[6] gives the three parallel LSTMs, their three inputs and attention on the bidirectional comment encoder. [2] identifies the best neural model as a bidirectional LSTM with attention."
+  },
+  "0b3e181f00cdee3d4681": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Explicit insufficient-evidence outcome without citations. The question asks for a measured magnitude and has an official unanswerable label."
+  },
+  "93c89a15137c5e43c062": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Explicit insufficient-evidence outcome without citations. The question asks for a measured magnitude and has an official unanswerable label."
+  },
+  "15f15b151d2c13798296": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      4
+    ],
+    "reason": "[2] identifies a public pre-trained Portuguese word2vec model. [4] distinguishes Skip-Gram and CBOW and says the latter was chosen."
+  },
+  "5ecf09a7b7230050e5a7": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      4
+    ],
+    "reason": "[2] identifies a public pre-trained Portuguese word2vec model. [4] distinguishes Skip-Gram and CBOW and says the latter was chosen."
+  },
+  "1acc3e086824ae30cc29": {
+    "verdict": "full",
+    "supporting_citations": [
+      3,
+      4
+    ],
+    "reason": "[3] states several algorithms were instantiated to combine task-specific and corpus features. [4] explicitly compares biLSTM-CRF and SVM; the answer covers the annotated biLSTM and justifiably names SVM without claiming an exhaustive list."
+  },
+  "7d93e280d3b5d4a4d70e": {
+    "verdict": "full",
+    "supporting_citations": [
+      3,
+      4
+    ],
+    "reason": "[3] states several algorithms were instantiated to combine task-specific and corpus features. [4] explicitly compares biLSTM-CRF and SVM; the answer covers the annotated biLSTM and justifiably names SVM without claiming an exhaustive list."
+  },
+  "25736c87e5b7a1dba537": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "First HTTP response was 502; there is no answer or citation to assess."
+  },
+  "3f7d3c108f94bf921360": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      6
+    ],
+    "reason": "[1] defines seen/unseen prefix completion; [6] gives the 0.5 threshold, forward BLEU, length variation and predicted degradation. [2] and [3] both state that the test measures robustness against exposure bias."
+  },
+  "c08b378414e2bf68a813": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      6
+    ],
+    "reason": "[1] defines the prefix-completion task. [6] gives the threshold, forward BLEU comparison and expected unfamiliar-prefix degradation. [2] defines the metric’s purpose."
+  },
+  "4a66e6c493cf29829c95": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Despite the official unanswerable label, [1] identifies a private English news corpus and directly lists the other data and architecture; [2] confirms the parallel corpus for around three million articles. No proper corpus name is asserted."
+  },
+  "899d99accc31e97e802e": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "Despite the official unanswerable label, [1] explicitly identifies the corpus as private English news and confirms the Wikipedia-title data and BERT mention. No proper corpus name is asserted."
+  },
+  "6616ac3209164f7dbf28": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      6
+    ],
+    "reason": "[2] identifies the frozen clean-speech ASR acoustic model; [6] confirms clean magnitudes, hard senone targets, cross-entropy and frozen weights. The annotation mentions a masking enhancer in a related-work passage, a different component."
+  },
+  "6803e0b7f7d7748784a6": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "The answer correctly distinguishes the general CNN versus fully connected comparison in [2], but supplies no requested ConvKB versus KB-model comparison. It signals insufficiency in prose while returning a substantive cited answer and a false insufficiency flag, so it misses the official refusal target."
+  },
+  "71502c3189c230feeb39": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] supports six language pairs and [2] supports MUSE and Vecmap. Neither supplies dataset cardinality. The prose says evidence is insufficient but the structured outcome returns a cited answer, missing the official refusal target."
+  },
+  "7f6116b98f134441e7b9": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      5
+    ],
+    "reason": "[1] supports the ACL training corpus, sentence/paper counts, polarity embeddings, Brown comparison and basic evaluation set. [5] supplies the complete implicit and pn evaluation counts, including the reported 200,222 excluded sentences."
+  },
+  "ab47ab54d9a8466ba98e": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      5
+    ],
+    "reason": "[1] supports the ACL training corpus, sentence/paper counts, polarity embeddings, Brown comparison and basic evaluation set. [5] supplies the complete implicit and pn evaluation counts, including the reported 200,222 excluded sentences."
+  },
+  "81d29f2e8cf5fc6308d7": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Explicit insufficient-evidence outcome with no citations. The distinction between a general CNN comparison and a ConvKB comparison is consistent with the official negative."
+  },
+  "9abccb36665ea247dfe7": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "The limitations passage in [1] explicitly names Chinese as the language and describes the difficulty for researchers who do not speak it."
+  },
+  "9ddd136aef9a2fd54bba": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "The limitations passage in [1] explicitly names Chinese as the language and describes the difficulty for researchers who do not speak it."
+  },
+  "a477625932396041f169": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] identifies FarsNet as the first WordNet for Persian and [2] calls it Persian WordNet."
+  },
+  "e7cbf83a5c59be83a83d": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] names FarsNet, the Shahid Beheshti NLP Lab, and its shared structure with WordNet. [2] independently identifies FarsNet as Persian WordNet."
+  },
+  "cfad16a539eb9678aad2": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Explicit insufficient-evidence outcome with no citations. Naming the datasets does not answer their size. This agrees with the official unanswerable label."
+  },
+  "191798eb1700a54ee0b4": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] directly supports ovarian steroid synthesis and ovulation, luteal insufficiency and the pregnancy defects. [2] completes the human stromal-cell decidualization finding and explicitly states corpus luteum maintenance, decidualization, placental formation and pregnancy roles."
+  },
+  "243d31b28fb96bb8277d": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] directly supports ovarian steroid synthesis and ovulation, luteal insufficiency and the pregnancy defects. [2] completes the human stromal-cell decidualization finding and explicitly states corpus luteum maintenance, decidualization, placental formation and pregnancy roles."
+  },
+  "1ce0e1610f4527c10835": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response declares insufficient evidence and returns no citations. Its limited discussion does not supply a cited answer to the positive claim, so this is an abstention on a positive question."
+  },
+  "cd9920d352c1b414e156": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] supports a mouse PDA study with stromal depletion, transient vascular density and gemcitabine concentration increases, and transient stabilization. The answer expressly leaves fibrosis reduction unestablished and limits the support, so it does not fully substantiate the compound claim."
+  },
+  "46336ea579faaf45368c": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both excerpts explicitly identify LUWAK as pure JavaScript using LocalStorage; [2] identifies the web browser."
+  },
+  "c202b41d861397e3b9eb": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both excerpts explicitly identify LUWAK as pure JavaScript using LocalStorage; [2] identifies the web browser."
+  },
+  "51b0941e3ab9ed10384d": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] states clustering over VerbNet-specialised vectors; [2] names MNCut spectral clustering; [3] confirms estimation of the cluster count by self-tuning."
+  },
+  "e5daf4525d841936b1ff": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "[2] names MNCut spectral clustering over the specialised vectors following prior work. [3] directly supports the self-tuning cluster-count method."
+  },
+  "5483e728c42f552edc12": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] states 218 NALCS plus 103 LMS videos, 321 total, and 30–50 minutes per game video."
+  },
+  "7d10f3090b6041e46e0e": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] directly gives the tournament breakdown, 321-video total, weeks 1–9 in spring 2017 and the 30–50-minute duration."
+  },
+  "5e2a5abf60617de77e01": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] supports document-wide deduplicated entity sets, precision/recall/F1 and exact matching. [2] gives micro-averaged and per-type results. [3] explicitly says only F1 is plotted for data efficiency and other metrics show similar trends."
+  },
+  "9e17bc3b55abca1871c0": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] supports document-wide deduplicated entity sets, precision/recall/F1 and exact matching. [2] gives micro-averaged and per-type results. [3] explicitly says only F1 is plotted for data efficiency and other metrics show similar trends."
+  },
+  "6233519a28610cb81277": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response declares insufficient evidence without citations for the predeclared unanswerable question; no target-paper language list is asserted."
+  },
+  "e31dd7d8b1590214bc87": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response declares insufficient evidence without citations for the predeclared unanswerable question; no target-paper language list is asserted."
+  },
+  "8fded2e74346c1e93b4a": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Explicit insufficient-evidence response without citations for the absent memorandum negative control."
+  },
+  "ae7313db7d3c4043071f": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Explicit insufficient-evidence response without citations for the absent memorandum negative control."
+  },
+  "937c3aff4fa28ef27c7c": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      4,
+      6
+    ],
+    "reason": "[6] gives VG 85%, 16k images, 740k descriptions and ReferIt 9k/54k. [4] gives 1.73M instance-selection training samples and 300K validation/testing samples. [1] states 2,909 instance classes."
+  },
+  "a626f08f117e970f514e": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      4,
+      6
+    ],
+    "reason": "[6] supports both dataset sizes. [4] confirms VG description/object-set pairs, 1.73M training and 300K validation/testing samples. [1] directly supports the added 0.7618 F1 over 2,909 classes."
+  },
+  "a5d84c593f286ef6f62c": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] explicitly defines micro-averaged F1 over all labels and reports both F1 improvement and error-rate reduction against baselines."
+  },
+  "d8ff8191926479f8564b": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] explicitly states micro-averaged F1 on all labels as the evaluation metric."
+  },
+  "ce34636bbafa5f5b0faa": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "reason": "[1] supports the aura and non-aura pooled risks and confidence intervals, and [2] repeats the aura-specific conclusion. [3] explicitly describes early-onset ischemic stroke risk; [4] supports the qualified age/sex statement."
+  },
+  "e2b522ebe09a7fa26eef": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      4
+    ],
+    "reason": "[1] gives the pooled risks and confidence intervals. [1] and [2] state the roughly twofold ischemic-stroke association with aura. [4] supports the qualified statement concerning women under 45 and possibly men with aura."
+  }
+}

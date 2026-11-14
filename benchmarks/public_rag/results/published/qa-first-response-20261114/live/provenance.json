@@ -1,0 +1,93 @@
+{
+  "baseline": "f8e7878d72471a778b238ee0ff1fbefb0e80c18f",
+  "model": "deepseek-v4.1-flash-1017",
+  "provider": "Alibaba Cloud Beijing, openai-compatible",
+  "model_profile": "a532d618-fb70-4471-87c1-b833c3b0c949",
+  "snapshots": {
+    "independent": {
+      "snapshot": "af8c3a00-7191-43f0-b70d-bdf00f748e95",
+      "snapshot_sha256": "655946d200e3573d7f7e4eae2cc46831aef81f058675d238bf75c0acf89a2b3b",
+      "count": 12
+    },
+    "qasper": {
+      "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+      "snapshot_sha256": "043b5bac347b6e658c3f13aa09c99bc078f8adb85c95c8bc7eefaa96c8285bf5",
+      "count": 7
+    },
+    "full": {
+      "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+      "snapshot_sha256": "e972dfef136f6f067c8f12a81554433b5b6ca4b84c9b34fd1e3d8919c94cfb2b",
+      "count": 5183
+    }
+  },
+  "order": "All baseline first, followed by all candidate; each cohort has an independently started loopback API; CPU models cold at cohort start. Same frozen DB and Qdrant index within pairs.",
+  "qa_output_mode": "PROMPT_JSON",
+  "temperature": 0,
+  "max_output_tokens": 512,
+  "sdk_retry_limit": 0,
+  "baseline_request_mode": "omitted (provider_default)",
+  "candidate_request_mode": "non_thinking",
+  "rerank_budget": {
+    "dense": 30,
+    "sparse": 30,
+    "rerank_input": 20,
+    "reader_max": 6
+  },
+  "projection": "Default full numbered evidence",
+  "corpus_sha256": {
+    "QASPER train": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+    "SciFact BEIR": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6"
+  },
+  "articles": {
+    "QASPER": "Official TRAIN paper title, abstract, section headings and full main text; exact sources re-uploaded as text; excludes captions. Both QASPER cohorts in a shared Qdrant collection; reads filter to the chosen snapshot.",
+    "SciFact": "All 5,183 publicly released titles and abstracts with exact BGE vectors; precomputed supervised-independent document encodings restored into a dedicated Qdrant collection. Verified all 9,189 chunks, locators and content digests against deterministic rechunking."
+  },
+  "scifact_vector_sha256": {
+    "manifest.jsonl": "342f99504ee8ed5d517305ea19ddaf704e3b6ddb1d57ea3dd180a40a2e619305",
+    "dense.npy": "683bba44821263f300344aef03220ea314e6c1bc7d936e7a9141ed2e525220f6",
+    "sparse.npz": "4d572c46fb10d8c9d9032dade57d831d43437db766720ba3cc35d0bba7f1d26f"
+  },
+  "embedding_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+  "reranker_revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+  "qdrant_image": "qdrant/qdrant:v1.13.6",
+  "postgres_image": "postgres:16-alpine",
+  "redis_image": "redis:7-alpine",
+  "python": "3.12.10",
+  "packages": {
+    "litellm": "1.101.0",
+    "uvicorn": "0.53.0",
+    "qdrant-client": "1.13.3",
+    "torch": "2.14.0+cu130",
+    "sentence-transformers": "5.7.0",
+    "transformers": "4.57.6",
+    "fastapi": "0.141.1",
+    "httpx": "0.28.1"
+  },
+  "recording": "Each receipt binds production file bytes and protocol SHA-256 (LF); telemetry attaches on the local API solely to observe unmodified retrieval results and model adapter I/O; no response reasoning or credentials.",
+  "limitations": "QASPER sample favours short extractive answers with one annotated paragraph. One official answer annotation per QASPER case; SciFact qrels refer to documents, not validated entailment. Sequential arm order and nondeterministic provider prevent a causal claim.",
+  "candidate_commit": "273f68383254735657a323748cc2a3c1d34bc37d",
+  "git_blob_sha256_lf": {
+    "f8e7878d72471a778b238ee0ff1fbefb0e80c18f": {
+      "packages/knowledge/citation_qa.py": "61f57d54d8894966ff68097756b6ad1c456b05d83fe04e06e89e8454f4348b91",
+      "apps/api/routes/citation_qa.py": "0c04319536d5372eeab15eec3da3082cbe89da157a965973d75600cb4b614320",
+      "apps/api/schemas/citation_qa.py": "6ed6e0ada117e4b7dd6b0640fd21acabfed51426b46b8fc807f672fe25a16a66",
+      "packages/model_gateway/adapters/litellm/adapter.py": "713416fe7c7552043844fb21d297dd765e2f5d8c96cd2ae0759c3afa7243d13f",
+      "packages/model_gateway/gateway.py": "fea91f8ee94630eb52b4cfcf0641c0341f54600ff4fe9f2b2d12463d33b55229",
+      "packages/model_gateway/contracts.py": "4115783734ebf776892af996a720205fbced5ddc51086d74fd1fb40c7b72f362",
+      "packages/model_gateway/errors.py": "05cc679b566836d9f33d676a392f9ee2800f2cde8d30f9c21873d795c2f6bfe3",
+      "packages/knowledge/retrieval.py": "14b58e01121dc46f328b11c6139f2c8a097ffd9fd57bfdcbef76864cbaa6f756"
+    },
+    "273f68383254735657a323748cc2a3c1d34bc37d": {
+      "packages/knowledge/citation_qa.py": "257588fa4bf0b83b47c6a5ad75a6cab9e3e9084f17c771a4971382b66dad0b53",
+      "apps/api/routes/citation_qa.py": "a5e055a69ac2581288e97415d74b75f9bb4b746d13861892f1b2864b88821a58",
+      "apps/api/schemas/citation_qa.py": "97947c9ff7adfa09101e5e2d7671f4f7c10f679f49fb7c7e945f1360a2a0f170",
+      "packages/model_gateway/adapters/litellm/adapter.py": "713416fe7c7552043844fb21d297dd765e2f5d8c96cd2ae0759c3afa7243d13f",
+      "packages/model_gateway/gateway.py": "08363e1e19f052dc964908937e658d722b25f37f95758f206d32174f161acb16",
+      "packages/model_gateway/contracts.py": "4115783734ebf776892af996a720205fbced5ddc51086d74fd1fb40c7b72f362",
+      "packages/model_gateway/errors.py": "a67f6259efb1f7be312489db73a717543fceb7feda98c8039825d06a958b1c60",
+      "packages/knowledge/retrieval.py": "14b58e01121dc46f328b11c6139f2c8a097ffd9fd57bfdcbef76864cbaa6f756"
+    }
+  },
+  "configured_aliyun_rag_max_tokens": 2048,
+  "budget_scope": "Historical benchmark helper create_model_profile sets min(512, configured max_tokens). Both measured arms use 512; production route configuration permits 2048. These observations do not estimate the error rate at 2048."
+}

@@ -423,7 +423,7 @@ async def test_citation_qa_rejects_cross_workspace_model_profile_before_adapter(
 @pytest.mark.parametrize("path", ["playground", "citation"])
 async def test_sql_connection_available_while_rag_provider_waits(db_factory, monkeypatch, path):
     """One connection is enough for unrelated reads while an external stage is in flight."""
-    from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
+    from packages.model_gateway.adapters.litellm import adapter as litellm_adapter
 
     user_id, workspace, kb, snapshot, chunk = await _seed(db_factory)
     profile_id = await _seed_model_profile(db_factory, workspace_id=workspace)
@@ -459,7 +459,10 @@ async def test_sql_connection_available_while_rag_provider_waits(db_factory, mon
             model="exact-model",
         )
 
-    monkeypatch.setattr(LiteLLMProviderAdapter, "complete", complete)
+    # This test blocks at the adapter boundary. Loading the unused SDK (and its
+    # pricing catalog) would make the seven-second barrier depend on cold startup.
+    monkeypatch.setattr(litellm_adapter, "_default_client", object)
+    monkeypatch.setattr(litellm_adapter.LiteLLMProviderAdapter, "complete", complete)
     app.dependency_overrides[get_retrieval_components] = lambda: RetrievalComponents(
         DeterministicFakeDenseEmbedder(dimension=16),
         DeterministicFakeSparseEncoder(),
@@ -484,12 +487,24 @@ async def test_sql_connection_available_while_rag_provider_waits(db_factory, mon
                     headers={"Authorization": "Bearer " + issue_access_token(user_id, settings)},
                 )
             )
+            entered_task = asyncio.create_task(entered.wait())
             try:
-                await asyncio.wait_for(entered.wait(), timeout=7)
+                done, _ = await asyncio.wait(
+                    (entered_task, task), timeout=7, return_when=asyncio.FIRST_COMPLETED
+                )
+                if task in done:
+                    early = task.result()
+                    code = early.json().get("error", {}).get("code")
+                    pytest.fail(
+                        f"Request ended before provider wait: HTTP {early.status_code} {code}"
+                    )
+                assert entered_task in done, "Provider wait was not reached within 7 seconds"
                 async with factory() as session:
                     assert await session.scalar(text("SELECT 1")) == 1
             finally:
                 release.set()
+                entered_task.cancel()
+                await asyncio.gather(entered_task, return_exceptions=True)
                 response = await task
             assert response.status_code == 200, response.text
     finally:

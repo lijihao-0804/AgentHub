@@ -1,0 +1,999 @@
+{
+  "arm": "candidate",
+  "source": {
+    "packages/knowledge/citation_qa.py": "1968f8581b9954c4565ba3361b7a52965c8f048d8d092cb9e0ada42a6ec5daf8",
+    "apps/api/routes/citation_qa.py": "f818f3a8928bd7213317d4b21913824755f2276a32f64223926fecd0ba54cfdc",
+    "apps/api/schemas/citation_qa.py": "b9bfa5fcea10c45be4a33cf408a2546114f2e7800ff7d93c371cf51a048453c8",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "a532d618-fb70-4471-87c1-b833c3b0c949",
+  "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+  "snapshot_hash": "e972dfef136f6f067c8f12a81554433b5b6ca4b84c9b34fd1e3d8919c94cfb2b",
+  "documents": 5183,
+  "chunks": 9189,
+  "protocol_sha256": "a08065e574ffddf32d5a76a81008631243289ed414873f984cb97f41e677273b",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "620",
+      "state": "returned",
+      "utc": "2026-11-14T02:33:16.332218+00:00",
+      "http": 200,
+      "elapsed_s": 59.498,
+      "answer": "The evidence is insufficient to establish that increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments. One study reports that Hedgehog inhibition with IPI-926, which depletes tumor-associated stromal tissue, produced a transient increase in intratumoral vascular density and intratumoral gemcitabine concentration, leading to transient disease stabilization in a mouse model of pancreatic cancer. However, this does not explicitly describe a reduction in fibrosis as the mechanism, nor does it establish the general causal claim stated. The remaining evidence concerns unrelated topics and does not support the claim.",
+      "insufficient": true,
+      "citations": [],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+          "candidate": [
+            {
+              "source": "7986878",
+              "ordinal": 1,
+              "chunk_id": "4bce0ede90ef6e481fa36d715e272c469cb113882742ee5ddd92bbeed7b6ba9a"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            },
+            {
+              "source": "4460880",
+              "ordinal": 1,
+              "chunk_id": "7cb52fd2d01fd529a5a27915d67bb43464b55f3dc7892f3822c3a2bf6de2aebb"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "34338075",
+              "ordinal": 1,
+              "chunk_id": "ab4382000719d8fe953b13503e5ae45840673d1c6add275150091d8a3514d0b9"
+            },
+            {
+              "source": "5500086",
+              "ordinal": 0,
+              "chunk_id": "47cb8fcddad39d78041f73903cc6f445ca3468cefd8bd7cc53b4f663940ffbe5"
+            },
+            {
+              "source": "13464392",
+              "ordinal": 1,
+              "chunk_id": "92c9aa80c961666c599823dbc29dd396505a3b1de64a7e250831935ddc14c6ab"
+            },
+            {
+              "source": "2522977",
+              "ordinal": 1,
+              "chunk_id": "ab90c6c92f64b24774f6519dbdb35baccd3799338365cd4103030dca1c667175"
+            },
+            {
+              "source": "24974080",
+              "ordinal": 1,
+              "chunk_id": "0821200a087a269333d8efb22c7edae3ed29c829f80bf80a3b636c18da78921d"
+            },
+            {
+              "source": "19510470",
+              "ordinal": 0,
+              "chunk_id": "7175d3ae99ee7a791def309ed67eb11de28331bf8b91a6c5d093e372ffdf8a3f"
+            },
+            {
+              "source": "6374918",
+              "ordinal": 1,
+              "chunk_id": "a9cde9253086526e66e344d5ff15d2a86f2bf7049f0267af210335a81df23a97"
+            },
+            {
+              "source": "7821634",
+              "ordinal": 0,
+              "chunk_id": "b07b3ca638912b677fdf78798389f97d1ad47be680c4c64e17f65367275dd99c"
+            },
+            {
+              "source": "23036207",
+              "ordinal": 1,
+              "chunk_id": "43849513b8fd053ea19352770330a03b117a2d4a332cafcbf506124d9b4b83e9"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "601033",
+              "ordinal": 1,
+              "chunk_id": "2992a7a5e5452338d642c419976f2f51ea4020e978c1b93ba402ca477bda32ce"
+            },
+            {
+              "source": "9588931",
+              "ordinal": 0,
+              "chunk_id": "3eae0fab05d71c9410ebb541843a3e0cb8c9e4db3f8943b8eeb949baf24d6e89"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "6421792",
+              "ordinal": 0,
+              "chunk_id": "734c7d0c1ce25776698021c996f7b0553b7ef44fc19225b1b3ff928841c3530d"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            }
+          ],
+          "times_ms": {
+            "dense": 13875.716,
+            "sparse": 1540.355,
+            "fusion": 0.284,
+            "rerank": 28582.013
+          },
+          "total_ms": 44088.229
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "ca06a529a7b78d4df2a0d18b5f59f07ec14725fe12d639fa1578a14ca0613e4a",
+          "chunks": [
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "ca06a529a7b78d4df2a0d18b5f59f07ec14725fe12d639fa1578a14ca0613e4a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 6609,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2082,
+            "output_tokens": 195,
+            "total_tokens": 2277
+          }
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "ca06a529a7b78d4df2a0d18b5f59f07ec14725fe12d639fa1578a14ca0613e4a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1512,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2335,
+            "output_tokens": 134,
+            "total_tokens": 2469
+          }
+        }
+      ]
+    },
+    {
+      "id": "791",
+      "state": "returned",
+      "utc": "2026-11-14T02:34:15.832373+00:00",
+      "http": 200,
+      "elapsed_s": 26.544,
+      "answer": "The evidence supports the statement. A meta-analysis found that migraine with aura was associated with a significantly higher risk of ischaemic stroke (pooled relative risk 2.16, 95% CI 1.53 to 3.03), compared with migraine without aura (1.23, 0.90 to 1.69), and the conclusion states that the roughly twofold increased risk of ischaemic stroke is only apparent among people who have migraine with aura [1][2]. Another source likewise describes migraine, particularly with aura, as a risk factor for early-onset ischemic stroke [3], and a further review notes that migraine may confer an increased risk of stroke in women under 45 and possibly in men who have migraine with aura [4].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "15984735",
+          "ordinal": 1,
+          "chunk_id": "8ef2b5691cf52253905246712f96efc6269002888e01396760c20dbe8e143b24",
+          "revision": "90e92c8d-dd02-5587-bf7c-3804f4bdf15d",
+          "excerpt": "r participant characteristics and definition of cardiovascular disease. Nine studies investigated the association between any migraine and ischaemic stroke (pooled relative risk 1.73, 95% confidence interval 1.31 to 2.29). Additional analyses indicated a significantly higher risk among people who had migraine with aura (2.16, 1.53 to 3.03) compared with people who had migraine without aura (1.23, 0.90 to 1.69; meta-regression for aura status P=0.02). Furthermore, results suggested a greater risk among women (2.08, 1.13 to 3.84) compared with men (1.37, 0.89 to 2.11). Age less than 45 years, smoking, and oral contraceptive use further increased the risk. Eight studies investigated the association between migraine and myocardial infarction (1.12, 0.95 to 1.32) and five between migraine and death due to cardiovascular disease (1.03, 0.79 to 1.34). Only one study investigated the association between women who had migraine with aura and myocardial infarction and death due to cardiovascular disease, showing a twofold increased risk. CONCLUSION Migraine is associated with a twofold increased risk of ischaemic stroke, which is only apparent among people who have migraine with aura. Our res",
+          "chunk_text_sha256": "7738dce52eb5481464ca9e1b9226cd2df655b0e21aa392921902fa95b7b128cf",
+          "excerpt_sha256": "7738dce52eb5481464ca9e1b9226cd2df655b0e21aa392921902fa95b7b128cf",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 2200,
+            "char_start": 1000
+          }
+        },
+        {
+          "number": 2,
+          "source": "15984735",
+          "ordinal": 2,
+          "chunk_id": "be387a6b5d57ddcac36946a6d7a8c4cdf88d37bc5c7647c44ef87e3b2f4d5f94",
+          "revision": "90e92c8d-dd02-5587-bf7c-3804f4bdf15d",
+          "excerpt": "disease, showing a twofold increased risk. CONCLUSION Migraine is associated with a twofold increased risk of ischaemic stroke, which is only apparent among people who have migraine with aura. Our results also suggest a higher risk among women and risk was further magnified for people with migraine who were aged less than 45, smokers, and women who used oral contraceptives. We did not find an overall association between any migraine and myocardial infarction or death due to cardiovascular disease. Too few studies are available to reliably evaluate the impact of modifying factors, such as migraine aura, on these associations.",
+          "chunk_text_sha256": "76ba19537d1678f1ad3a6a7e35612eecd72fb4af8cdce48b86af3719c29c6123",
+          "excerpt_sha256": "76ba19537d1678f1ad3a6a7e35612eecd72fb4af8cdce48b86af3719c29c6123",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 632,
+          "locator": {
+            "type": "text_range",
+            "char_end": 2632,
+            "char_start": 2000
+          }
+        },
+        {
+          "number": 3,
+          "source": "23785605",
+          "ordinal": 0,
+          "chunk_id": "aa98c0a01cae067cefc0904bf850c3a0133f8414dee2a4b48ca5e4fb0a2cf8ae",
+          "revision": "7dbe883f-9a38-5da2-9a54-688699067d51",
+          "excerpt": "Cardiovascular risk factors and migraine: the GEM population-based study.\n\nBACKGROUND Migraine, particularly with aura, is a risk factor for early-onset ischemic stroke. The underlying mechanisms are unknown, but may in part be due to migraineurs having an increased risk profile for cardiovascular disease. In this study, the authors compare the cardiovascular risk profile of adult migraineurs to that of nonmigraineurs. METHODS Participants (n = 5,755, 48% men, age 20 to 65 years) are from the Genetic Epidemiology of Migraine (GEM) study, a population-based study in the Netherlands. A total of 620 current migraineurs were identified: 31% with aura (MA), 64% without aura (MO), and 5% unclassified. Controls were 5,135 individuals without lifetime migraine. Measured cardiovascular risk factors included blood pressure (BP), serum total and high-density lipoprotein cholesterol (TC, HDL), smoking, oral contraceptive use, and the Framingham risk score for myocardial infarction or coronary heart disease (CHD) death. RESULTS Compared to controls, migraineurs were more likely to smoke (OR = 1.43 [1.1 to 1.8]), less likely to consume alcohol (OR = 0.58 [0.5 to 0.7]), and more likely to report",
+          "chunk_text_sha256": "6e6ba61e7aaf10c4b249f7cfbe6faa1e7d5a7f33a46157e01a03e7771bde99b8",
+          "excerpt_sha256": "6e6ba61e7aaf10c4b249f7cfbe6faa1e7d5a7f33a46157e01a03e7771bde99b8",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 4,
+          "source": "14566771",
+          "ordinal": 0,
+          "chunk_id": "0a6bec1857d64a9f8c5c7a2e6f13b1e85e68007e1d5c38eb271802aaea9d0959",
+          "revision": "33a8f7d9-78b8-52ad-849c-f689f873115b",
+          "excerpt": "Stroke and migraine--the spectrum of cause and effect.\n\nThe relationship of migraine and stroke is complex. Stroke may be coincidental with migraine but migraine may confer an increased risk of stroke in women under 45 years of age and possibly in men who have migraine with aura. Stroke may mimic migraine but migraine syndromes may be symptomatic of underlying cerebrovascular disorders. True migraine-induced stroke is rare. The mechanisms of stroke induced during a migraine attack remain to be determined but probably involve an interaction between the dynamic shifts in cerebral blood flow and stroke risk factors.",
+          "chunk_text_sha256": "4e5723febcf6b54b1e4320fcbcd6f00867a911b1100b46d47a855d8f19298c85",
+          "excerpt_sha256": "4e5723febcf6b54b1e4320fcbcd6f00867a911b1100b46d47a855d8f19298c85",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 620,
+          "locator": {
+            "type": "text_range",
+            "char_end": 620,
+            "char_start": 0
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+          "candidate": [
+            {
+              "source": "15984735",
+              "ordinal": 1,
+              "chunk_id": "8ef2b5691cf52253905246712f96efc6269002888e01396760c20dbe8e143b24"
+            },
+            {
+              "source": "23785605",
+              "ordinal": 0,
+              "chunk_id": "aa98c0a01cae067cefc0904bf850c3a0133f8414dee2a4b48ca5e4fb0a2cf8ae"
+            },
+            {
+              "source": "15984735",
+              "ordinal": 2,
+              "chunk_id": "be387a6b5d57ddcac36946a6d7a8c4cdf88d37bc5c7647c44ef87e3b2f4d5f94"
+            },
+            {
+              "source": "8672737",
+              "ordinal": 0,
+              "chunk_id": "a7c3f33538220749e75c121da8941dc59d9504cc95992835bc8b4a8600c7bb12"
+            },
+            {
+              "source": "23785605",
+              "ordinal": 1,
+              "chunk_id": "a70e1e7bfcfdff094f2bcf4fa4588775f41114853388065c5f71c206263aacb7"
+            },
+            {
+              "source": "17930286",
+              "ordinal": 1,
+              "chunk_id": "b5465b920a159bae4ae216d305b476de521ad0f8840d5c24abfd1426fba30539"
+            },
+            {
+              "source": "14566771",
+              "ordinal": 0,
+              "chunk_id": "0a6bec1857d64a9f8c5c7a2e6f13b1e85e68007e1d5c38eb271802aaea9d0959"
+            },
+            {
+              "source": "23627419",
+              "ordinal": 0,
+              "chunk_id": "2f4cef80ddf7a3203c9731a0548565eaad4dc7dfb5b5f1223f9c1727980b6e3e"
+            },
+            {
+              "source": "37065914",
+              "ordinal": 0,
+              "chunk_id": "e9e1d43c2538fa25452145fa412e89294c93b9cb59ba9ad23f4c4f3656eca7e6"
+            },
+            {
+              "source": "15984735",
+              "ordinal": 0,
+              "chunk_id": "eed641c299d3fb69f18d4d09f08f4a34e99a7552fe78235b514eb8dc00e943e7"
+            },
+            {
+              "source": "23627419",
+              "ordinal": 1,
+              "chunk_id": "46500561e1f91774e0d859a9e62c0d9a48870d3ec60c11d1d31e12af52aab4d6"
+            },
+            {
+              "source": "43647194",
+              "ordinal": 1,
+              "chunk_id": "c446024120cd41f6a38cd538fe225e88b44ecaa954fa6f81fb9ed6a8edb4e4f7"
+            },
+            {
+              "source": "38369817",
+              "ordinal": 0,
+              "chunk_id": "fd5b1b56ef4fee8528742222e835b66468926b586765043243c846307a60b098"
+            },
+            {
+              "source": "43647194",
+              "ordinal": 0,
+              "chunk_id": "661dd40933f8d19885aeec74b9674a19261a876a861dfff86deb1f30d3660434"
+            },
+            {
+              "source": "37065914",
+              "ordinal": 1,
+              "chunk_id": "ce9784c6649cfe742293ef7e365a18cb1d5e508a2d831faad337750a1d0dbb0d"
+            },
+            {
+              "source": "32328114",
+              "ordinal": 0,
+              "chunk_id": "7b42826579e79dfb76d12fb2f1133d8ba284a8c1a2517683049304ee56df83a2"
+            },
+            {
+              "source": "24148722",
+              "ordinal": 0,
+              "chunk_id": "61d4da4e49e44cc6786bd710786449dbd450d46d4a54f86e3d8d9f0d36f01679"
+            },
+            {
+              "source": "3761017",
+              "ordinal": 0,
+              "chunk_id": "437d33b5df3e79eced2c9e71fd0562a85b097ce502edfeecc5e08856c518973d"
+            },
+            {
+              "source": "38369817",
+              "ordinal": 1,
+              "chunk_id": "89605ffac0197637549ef2868267d9e815f182e8128298f247f4a4f6b783553d"
+            },
+            {
+              "source": "2352142",
+              "ordinal": 0,
+              "chunk_id": "0e00d32c146f9e17c019276c4e9227885226d36c9596b5b6df45d3ca011c44c3"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "15984735",
+              "ordinal": 1,
+              "chunk_id": "8ef2b5691cf52253905246712f96efc6269002888e01396760c20dbe8e143b24"
+            },
+            {
+              "source": "15984735",
+              "ordinal": 2,
+              "chunk_id": "be387a6b5d57ddcac36946a6d7a8c4cdf88d37bc5c7647c44ef87e3b2f4d5f94"
+            },
+            {
+              "source": "23785605",
+              "ordinal": 0,
+              "chunk_id": "aa98c0a01cae067cefc0904bf850c3a0133f8414dee2a4b48ca5e4fb0a2cf8ae"
+            },
+            {
+              "source": "14566771",
+              "ordinal": 0,
+              "chunk_id": "0a6bec1857d64a9f8c5c7a2e6f13b1e85e68007e1d5c38eb271802aaea9d0959"
+            },
+            {
+              "source": "15984735",
+              "ordinal": 0,
+              "chunk_id": "eed641c299d3fb69f18d4d09f08f4a34e99a7552fe78235b514eb8dc00e943e7"
+            },
+            {
+              "source": "8672737",
+              "ordinal": 0,
+              "chunk_id": "a7c3f33538220749e75c121da8941dc59d9504cc95992835bc8b4a8600c7bb12"
+            }
+          ],
+          "times_ms": {
+            "dense": 342.596,
+            "sparse": 27.156,
+            "fusion": 0.185,
+            "rerank": 24153.503
+          },
+          "total_ms": 24568.105
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "346c0c1fb2b7f98ae0861059152ab7e329a78042b4f57fec942c086f6feae726",
+          "chunks": [
+            {
+              "source": "15984735",
+              "ordinal": 1,
+              "chunk_id": "8ef2b5691cf52253905246712f96efc6269002888e01396760c20dbe8e143b24"
+            },
+            {
+              "source": "15984735",
+              "ordinal": 2,
+              "chunk_id": "be387a6b5d57ddcac36946a6d7a8c4cdf88d37bc5c7647c44ef87e3b2f4d5f94"
+            },
+            {
+              "source": "23785605",
+              "ordinal": 0,
+              "chunk_id": "aa98c0a01cae067cefc0904bf850c3a0133f8414dee2a4b48ca5e4fb0a2cf8ae"
+            },
+            {
+              "source": "14566771",
+              "ordinal": 0,
+              "chunk_id": "0a6bec1857d64a9f8c5c7a2e6f13b1e85e68007e1d5c38eb271802aaea9d0959"
+            },
+            {
+              "source": "15984735",
+              "ordinal": 0,
+              "chunk_id": "eed641c299d3fb69f18d4d09f08f4a34e99a7552fe78235b514eb8dc00e943e7"
+            },
+            {
+              "source": "8672737",
+              "ordinal": 0,
+              "chunk_id": "a7c3f33538220749e75c121da8941dc59d9504cc95992835bc8b4a8600c7bb12"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "346c0c1fb2b7f98ae0861059152ab7e329a78042b4f57fec942c086f6feae726"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1916,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2025,
+            "output_tokens": 176,
+            "total_tokens": 2201
+          }
+        }
+      ]
+    },
+    {
+      "id": "missing-tenant-canary",
+      "state": "returned",
+      "utc": "2026-11-14T02:34:42.380073+00:00",
+      "http": 200,
+      "elapsed_s": 36.228,
+      "answer": "The provided evidence does not contain any information about the Lattice Vault memorandum ZR-618 or a color code assigned to an authorization desk.",
+      "insufficient": true,
+      "citations": [],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+          "candidate": [
+            {
+              "source": "45770026",
+              "ordinal": 0,
+              "chunk_id": "43b107067073fa47a3cea4114f8aed05926c876fa168b708196151b8f08274c2"
+            },
+            {
+              "source": "23763738",
+              "ordinal": 0,
+              "chunk_id": "b0d50850d7cca6f26026d17969a950593022ea987c7bf8606774f03b3fe51657"
+            },
+            {
+              "source": "34016944",
+              "ordinal": 1,
+              "chunk_id": "7291167305fc3755aaaf37a90f1447ce2237529e960339f57e83d54801f299ba"
+            },
+            {
+              "source": "23763738",
+              "ordinal": 1,
+              "chunk_id": "92e2d4fb441061073fb01085992c7ef8d11cbdef217e96e4ea8a8055f0df16a1"
+            },
+            {
+              "source": "36816310",
+              "ordinal": 0,
+              "chunk_id": "3e19fcfc6ee4a3a9a1e998246fe9b5a21b97844c53a275980e0535378379798a"
+            },
+            {
+              "source": "980196",
+              "ordinal": 1,
+              "chunk_id": "e41d5b6001820b03c1336420bfc56155e4d0b3dff7189db9976d6058d7345efd"
+            },
+            {
+              "source": "739734",
+              "ordinal": 0,
+              "chunk_id": "170801aab9f0aaad3efa7e235730899984f742381f2add16c6d77c11bc8f882a"
+            },
+            {
+              "source": "15521377",
+              "ordinal": 4,
+              "chunk_id": "e51dd512fa11e9e9198cc7f8fff615888e6b69b36c78cccf3e219eb4f88706c5"
+            },
+            {
+              "source": "44614949",
+              "ordinal": 0,
+              "chunk_id": "1b14414ca9aa172dc7c9852db6ff0ec183f502da0e384b931c1ae5014ff73971"
+            },
+            {
+              "source": "4421547",
+              "ordinal": 0,
+              "chunk_id": "fde774b9d7757f4d41fcd31be51c69500e209e303a9072936fd0b2996a94985e"
+            },
+            {
+              "source": "33920995",
+              "ordinal": 0,
+              "chunk_id": "09e0693dcaa9b77a5f9a46b2bd773b88649cd6bd1697e8c29caa6c6b72526bf3"
+            },
+            {
+              "source": "23126677",
+              "ordinal": 1,
+              "chunk_id": "5f843d299c5587f838d75db36f6f281a6985ba88c99df37a249fec1cbf93d29f"
+            },
+            {
+              "source": "34753204",
+              "ordinal": 0,
+              "chunk_id": "2167587b1154ef562b9b268add84588c7b9151a0249be38de5ae8d5222d1004b"
+            },
+            {
+              "source": "17017465",
+              "ordinal": 0,
+              "chunk_id": "ee8522c7caabcba2caa2ea3f2eb64d2fcad3743e9f263dd3ba3efb35a49e88e7"
+            },
+            {
+              "source": "980196",
+              "ordinal": 0,
+              "chunk_id": "18a0eb225507a8bd9e0f979faa46a310cc1aad7646a0e2b07aec80beb1147a10"
+            },
+            {
+              "source": "86211914",
+              "ordinal": 1,
+              "chunk_id": "4c2f31e501d7842e750217b8b932d35be1fa32aad333f8d3f0df768254d46698"
+            },
+            {
+              "source": "1791637",
+              "ordinal": 0,
+              "chunk_id": "b8f3a216091f4deb146506a843fa22cbc7eca37f372d833023392f561fc98e9f"
+            },
+            {
+              "source": "34016944",
+              "ordinal": 0,
+              "chunk_id": "d654e85b370c1cd02baf6c1314a665b1da1ad80afd0dd848c1f26f7ab08f0bb9"
+            },
+            {
+              "source": "41329220",
+              "ordinal": 0,
+              "chunk_id": "6c569959375605ab9c65a6e91f4f3554d79a63e4591efa5d1f4fedf3779cda39"
+            },
+            {
+              "source": "144555102",
+              "ordinal": 0,
+              "chunk_id": "a7110bb899aae11585a44074f99c6962eb7a03766ba646bffa71d46129b286f8"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "86211914",
+              "ordinal": 1,
+              "chunk_id": "4c2f31e501d7842e750217b8b932d35be1fa32aad333f8d3f0df768254d46698"
+            },
+            {
+              "source": "23763738",
+              "ordinal": 1,
+              "chunk_id": "92e2d4fb441061073fb01085992c7ef8d11cbdef217e96e4ea8a8055f0df16a1"
+            },
+            {
+              "source": "23126677",
+              "ordinal": 1,
+              "chunk_id": "5f843d299c5587f838d75db36f6f281a6985ba88c99df37a249fec1cbf93d29f"
+            },
+            {
+              "source": "739734",
+              "ordinal": 0,
+              "chunk_id": "170801aab9f0aaad3efa7e235730899984f742381f2add16c6d77c11bc8f882a"
+            },
+            {
+              "source": "144555102",
+              "ordinal": 0,
+              "chunk_id": "a7110bb899aae11585a44074f99c6962eb7a03766ba646bffa71d46129b286f8"
+            },
+            {
+              "source": "45770026",
+              "ordinal": 0,
+              "chunk_id": "43b107067073fa47a3cea4114f8aed05926c876fa168b708196151b8f08274c2"
+            }
+          ],
+          "times_ms": {
+            "dense": 412.416,
+            "sparse": 63.748,
+            "fusion": 0.177,
+            "rerank": 34278.075
+          },
+          "total_ms": 34834.236
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "cf102b03f308928789da35a9b0d8fb45d5e446603d9d0c58a906246eea082f0f",
+          "chunks": [
+            {
+              "source": "86211914",
+              "ordinal": 1,
+              "chunk_id": "4c2f31e501d7842e750217b8b932d35be1fa32aad333f8d3f0df768254d46698"
+            },
+            {
+              "source": "23763738",
+              "ordinal": 1,
+              "chunk_id": "92e2d4fb441061073fb01085992c7ef8d11cbdef217e96e4ea8a8055f0df16a1"
+            },
+            {
+              "source": "23126677",
+              "ordinal": 1,
+              "chunk_id": "5f843d299c5587f838d75db36f6f281a6985ba88c99df37a249fec1cbf93d29f"
+            },
+            {
+              "source": "739734",
+              "ordinal": 0,
+              "chunk_id": "170801aab9f0aaad3efa7e235730899984f742381f2add16c6d77c11bc8f882a"
+            },
+            {
+              "source": "144555102",
+              "ordinal": 0,
+              "chunk_id": "a7110bb899aae11585a44074f99c6962eb7a03766ba646bffa71d46129b286f8"
+            },
+            {
+              "source": "45770026",
+              "ordinal": 0,
+              "chunk_id": "43b107067073fa47a3cea4114f8aed05926c876fa168b708196151b8f08274c2"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "cf102b03f308928789da35a9b0d8fb45d5e446603d9d0c58a906246eea082f0f"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1351,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2380,
+            "output_tokens": 46,
+            "total_tokens": 2426
+          }
+        }
+      ]
+    },
+    {
+      "id": "838-reproductive-functions",
+      "state": "returned",
+      "utc": "2026-11-14T02:35:18.613663+00:00",
+      "http": 200,
+      "elapsed_s": 32.965,
+      "answer": "The study identifies several reproductive functions for NR5A2 (liver receptor homolog-1, Lrh-1). In the ovarian follicle, depletion of Lrh-1 shows that it regulates genes required for both steroid synthesis and ovulation [1]. Disruption of Lrh-1 expression in the corpus luteum results in luteal insufficiency [1]. The findings show that Lrh-1 is necessary for maintenance of the corpus luteum, for promotion of decidualization, and for formation of the placenta [2]. In a primary culture of human endometrial stromal cells, reduction of NR5A2 transcript abundance by RNA interference abrogated decidualization [1][2]. Overall, it has multiple indispensable roles in establishing and sustaining pregnancy [2].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "15928989",
+          "ordinal": 0,
+          "chunk_id": "db1d9de69b3c63c6a6078f334983bc5156fdc6e127a8d98ca750d5dcbfd0de0e",
+          "revision": "69fd1b46-bdef-5898-80f3-b7d2518a4f47",
+          "excerpt": "Liver receptor homolog-1 is essential for pregnancy\n\nSuccessful pregnancy requires coordination of an array of signals and factors from multiple tissues. One such element, liver receptor homolog-1 (Lrh-1), is an orphan nuclear receptor that regulates metabolism and hormone synthesis. It is strongly expressed in granulosa cells of ovarian follicles and in the corpus luteum of rodents and humans. Germline ablation of Nr5a2 (also called Lrh-1), the gene coding for Lrh-1, in mice is embryonically lethal at gastrulation. Depletion of Lrh-1 in the ovarian follicle shows that it regulates genes required for both steroid synthesis and ovulation. To study the effects of Lrh-1 on mouse gestation, we genetically disrupted its expression in the corpus luteum, resulting in luteal insufficiency. Hormone replacement permitted embryo implantation but was followed by gestational failure with impaired endometrial decidualization, compromised placental formation, fetal growth retardation and fetal death. Lrh-1 is also expressed in the mouse and human endometrium, and in a primary culture of human endometrial stromal cells, reduction of NR5A2 transcript abundance by RNA interference abrogated decidual",
+          "chunk_text_sha256": "4c753d62b57f3346c4558bd72a3207090fba4a6b297883d25635d7f9bc1bc9b3",
+          "excerpt_sha256": "4c753d62b57f3346c4558bd72a3207090fba4a6b297883d25635d7f9bc1bc9b3",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 2,
+          "source": "15928989",
+          "ordinal": 1,
+          "chunk_id": "3cdb16f62fe732b883ddaa9d7deaaf8768db8f626f53984e8164fb63657c0190",
+          "revision": "69fd1b46-bdef-5898-80f3-b7d2518a4f47",
+          "excerpt": "Lrh-1 is also expressed in the mouse and human endometrium, and in a primary culture of human endometrial stromal cells, reduction of NR5A2 transcript abundance by RNA interference abrogated decidualization. These findings show that Lrh-1 is necessary for maintenance of the corpus luteum, for promotion of decidualization and for formation of the placenta. It therefore has multiple, indispensible roles in establishing and sustaining pregnancy.",
+          "chunk_text_sha256": "9de12e0e0b35285c3d4aa2e760dbd7cc019db8ce2ee6bec8f0cb362291888e33",
+          "excerpt_sha256": "9de12e0e0b35285c3d4aa2e760dbd7cc019db8ce2ee6bec8f0cb362291888e33",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 446,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1447,
+            "char_start": 1000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+          "candidate": [
+            {
+              "source": "15928989",
+              "ordinal": 0,
+              "chunk_id": "db1d9de69b3c63c6a6078f334983bc5156fdc6e127a8d98ca750d5dcbfd0de0e"
+            },
+            {
+              "source": "27822315",
+              "ordinal": 0,
+              "chunk_id": "1c754618a6db683f25f056c5c2dcdb4f2f55a3382bc3cc85073c195be46ed54c"
+            },
+            {
+              "source": "22521091",
+              "ordinal": 0,
+              "chunk_id": "1c37544e6cbe502d1b35ab213c42dfb8f46413e0c0c4b37eac0113097ef1bec9"
+            },
+            {
+              "source": "515489",
+              "ordinal": 1,
+              "chunk_id": "0657a98680913581c02817c8a6e9ca9323b305b8bf77bbedb8c139011b14e583"
+            },
+            {
+              "source": "17338543",
+              "ordinal": 0,
+              "chunk_id": "8d35729d3c57a0e876f51114ddafa1166121ede0f70cf92130d10211e68b08b7"
+            },
+            {
+              "source": "15928989",
+              "ordinal": 1,
+              "chunk_id": "3cdb16f62fe732b883ddaa9d7deaaf8768db8f626f53984e8164fb63657c0190"
+            },
+            {
+              "source": "24766509",
+              "ordinal": 0,
+              "chunk_id": "da365f38d4f41e1622327eae0e472be70262b31433930f86be442b3b0c9348aa"
+            },
+            {
+              "source": "17338543",
+              "ordinal": 1,
+              "chunk_id": "1e1280ed9523ad795d92e67f3ce83b3b3ad836b733a1c56bfd18eed7a78aff52"
+            },
+            {
+              "source": "515489",
+              "ordinal": 0,
+              "chunk_id": "739b92e6783af0ef168ea3800ec904cdc9913d859f608e2ed277f866aefc0762"
+            },
+            {
+              "source": "40090058",
+              "ordinal": 1,
+              "chunk_id": "c7cd36e486742f216e1844c982d994dc4a4b5ad64484972712d84d25a4859be4"
+            },
+            {
+              "source": "15548965",
+              "ordinal": 0,
+              "chunk_id": "ef7d90eb65ea012e71c361439e91ea0e5457e57c682da0f06c2096d2ce7efe99"
+            },
+            {
+              "source": "22478394",
+              "ordinal": 0,
+              "chunk_id": "e6beea6465be7b8089a3b83a55c55c6ee55a001e053871eb1f963d8b099d325e"
+            },
+            {
+              "source": "56528795",
+              "ordinal": 0,
+              "chunk_id": "960ef67a7f25425167dc3362e1fc9a84624bb0167e759cc918e69331091bd01b"
+            },
+            {
+              "source": "10627801",
+              "ordinal": 0,
+              "chunk_id": "a75f9d5a4958c555990ad1233622870e27eae8f180f57e41008643fa947aac93"
+            },
+            {
+              "source": "29366489",
+              "ordinal": 0,
+              "chunk_id": "aeac23d3e418fb9d79f5147ed3152a39950e7a3bc38fd940dc80066fe5067a7f"
+            },
+            {
+              "source": "23076291",
+              "ordinal": 0,
+              "chunk_id": "d09fef95ea8e6234e33779403e607c73c7fa23d52d65779dbeb2ba836354c93e"
+            },
+            {
+              "source": "885056",
+              "ordinal": 0,
+              "chunk_id": "6b29147f3e3f270c73aab49ac4448a2507aed91dbf6082fedf0186ac2a7bb6b0"
+            },
+            {
+              "source": "21754541",
+              "ordinal": 1,
+              "chunk_id": "fcd1f5ac415ae44b8e1561bb86dabf1c660c331c401a480602c209e4455b21b8"
+            },
+            {
+              "source": "23938319",
+              "ordinal": 0,
+              "chunk_id": "528fdb8f41ded8a3d5893919816dfbf7624b6e36af1873fd422ab2f24d15aabd"
+            },
+            {
+              "source": "11255504",
+              "ordinal": 0,
+              "chunk_id": "69265627143ae4ddd99d83d1ea12d39765894b3e5d92b360f3d9d6b03ce7688e"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "15928989",
+              "ordinal": 0,
+              "chunk_id": "db1d9de69b3c63c6a6078f334983bc5156fdc6e127a8d98ca750d5dcbfd0de0e"
+            },
+            {
+              "source": "15928989",
+              "ordinal": 1,
+              "chunk_id": "3cdb16f62fe732b883ddaa9d7deaaf8768db8f626f53984e8164fb63657c0190"
+            },
+            {
+              "source": "27822315",
+              "ordinal": 0,
+              "chunk_id": "1c754618a6db683f25f056c5c2dcdb4f2f55a3382bc3cc85073c195be46ed54c"
+            },
+            {
+              "source": "24766509",
+              "ordinal": 0,
+              "chunk_id": "da365f38d4f41e1622327eae0e472be70262b31433930f86be442b3b0c9348aa"
+            },
+            {
+              "source": "29366489",
+              "ordinal": 0,
+              "chunk_id": "aeac23d3e418fb9d79f5147ed3152a39950e7a3bc38fd940dc80066fe5067a7f"
+            },
+            {
+              "source": "40090058",
+              "ordinal": 1,
+              "chunk_id": "c7cd36e486742f216e1844c982d994dc4a4b5ad64484972712d84d25a4859be4"
+            }
+          ],
+          "times_ms": {
+            "dense": 580.672,
+            "sparse": 57.815,
+            "fusion": 0.175,
+            "rerank": 30229.553
+          },
+          "total_ms": 30944.722
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "5b12f40a6f7c9af28b848512a2902c0865fbc52c469854ea292e3ec71db268b0",
+          "chunks": [
+            {
+              "source": "15928989",
+              "ordinal": 0,
+              "chunk_id": "db1d9de69b3c63c6a6078f334983bc5156fdc6e127a8d98ca750d5dcbfd0de0e"
+            },
+            {
+              "source": "15928989",
+              "ordinal": 1,
+              "chunk_id": "3cdb16f62fe732b883ddaa9d7deaaf8768db8f626f53984e8164fb63657c0190"
+            },
+            {
+              "source": "27822315",
+              "ordinal": 0,
+              "chunk_id": "1c754618a6db683f25f056c5c2dcdb4f2f55a3382bc3cc85073c195be46ed54c"
+            },
+            {
+              "source": "24766509",
+              "ordinal": 0,
+              "chunk_id": "da365f38d4f41e1622327eae0e472be70262b31433930f86be442b3b0c9348aa"
+            },
+            {
+              "source": "29366489",
+              "ordinal": 0,
+              "chunk_id": "aeac23d3e418fb9d79f5147ed3152a39950e7a3bc38fd940dc80066fe5067a7f"
+            },
+            {
+              "source": "40090058",
+              "ordinal": 1,
+              "chunk_id": "c7cd36e486742f216e1844c982d994dc4a4b5ad64484972712d84d25a4859be4"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "5b12f40a6f7c9af28b848512a2902c0865fbc52c469854ea292e3ec71db268b0"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1968,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 1939,
+            "output_tokens": 171,
+            "total_tokens": 2110
+          }
+        }
+      ]
+    }
+  ]
+}

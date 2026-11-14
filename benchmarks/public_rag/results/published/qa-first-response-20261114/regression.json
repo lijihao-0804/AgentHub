@@ -1,0 +1,157 @@
+{
+  "unit": {
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "143",
+        "failures": "1",
+        "skipped": "3",
+        "tests": "3364",
+        "time": "143.991",
+        "timestamp": "2026-11-14T10:05:49.985252+08:00",
+        "hostname": "DESKTOP-PVA3D0V"
+      }
+    ],
+    "sha256": "af6ad5343c65235b3448132ffe39306f46f92ba936ddefa47e78a11dee4dab72",
+    "source": ".scratch\\qa-first-regression-20261114\\unit.xml"
+  },
+  "retry": {
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "144",
+        "time": "76.862",
+        "timestamp": "2026-11-14T10:19:12.139127+08:00",
+        "hostname": "DESKTOP-PVA3D0V"
+      }
+    ],
+    "sha256": "d321b8cd068fe5a1761a9e00b8628d09468d922ab46631e6e63ceb246e7d4bf2",
+    "source": ".scratch\\qa-first-regression-20261114\\retry.xml"
+  },
+  "db": {
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "1",
+        "skipped": "0",
+        "tests": "26",
+        "time": "53.499",
+        "timestamp": "2026-11-14T10:20:35.070935+08:00",
+        "hostname": "DESKTOP-PVA3D0V"
+      }
+    ],
+    "sha256": "b6c4ea6882a05f25ae638e52c87e6304dba24680f8fe3272e6d31c0fc319a507",
+    "source": ".scratch\\qa-first-regression-20261114\\db.xml"
+  },
+  "db-retry": {
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "1",
+        "skipped": "0",
+        "tests": "1",
+        "time": "25.228",
+        "timestamp": "2026-11-14T10:25:56.371439+08:00",
+        "hostname": "DESKTOP-PVA3D0V"
+      }
+    ],
+    "sha256": "a42075b89aff84301ff1c9541fd79473671e656f889eb5b5982df70e2293ea3b",
+    "source": ".scratch\\qa-first-regression-20261114\\db-retry.xml"
+  },
+  "db-cold-sdk-fix": {
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "4",
+        "time": "23.403",
+        "timestamp": "2026-11-14T10:30:13.354332+08:00",
+        "hostname": "DESKTOP-PVA3D0V"
+      }
+    ],
+    "sha256": "5a2e0389c5854c98387a7688961cdcb726817a586bb980417f4cd4e4ac97bdc1",
+    "source": ".scratch\\qa-first-regression-20261114\\db-cold-sdk-fix.xml"
+  },
+  "latest_status_by_distinct_node": {
+    "passed": 3377
+  },
+  "distinct_nodes": 3377,
+  "scope": "All collected unit tests, plus real PostgreSQL/Qdrant citation QA and the two model-budget integration modules; reruns cover original Windows temporary directory and process permissions and optional DB-backed unit fixtures. The only persistent timeout was SDK cold import in a mocked client fixture, corrected while keeping the 7s connection-release gate.",
+  "supervisor_records": {
+    "unit-job": {
+      "state": "failed",
+      "started_at": "2026-11-14T02:05:48.031014+00:00",
+      "cwd": "E:\\JAVA\\AI+agent\\AgentHub",
+      "executable": "E:\\JAVA\\AI+agent\\AgentHub\\.venv\\Scripts\\python.exe",
+      "argument_count": 8,
+      "supervisor_pid": 18320,
+      "pid": 15312,
+      "exit_code": 1,
+      "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\qa-first-regression-20261114\\unit-job\\stdout.log",
+      "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\qa-first-regression-20261114\\unit-job\\stderr.log",
+      "progress_query_interval_seconds": 600,
+      "finished_at": "2026-11-14T02:08:22.597405+00:00",
+      "elapsed_seconds": 154.562
+    },
+    "host-temp-and-process-job": {
+      "state": "completed",
+      "started_at": "2026-11-14T02:19:08.134196+00:00",
+      "cwd": "E:\\JAVA\\AI+agent\\AgentHub",
+      "executable": "E:\\JAVA\\AI+agent\\AgentHub\\.venv\\Scripts\\python.exe",
+      "argument_count": 150,
+      "supervisor_pid": 46368,
+      "pid": 1632,
+      "exit_code": 0,
+      "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\qa-first-regression-20261114\\host-temp-and-process-job\\stdout.log",
+      "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\qa-first-regression-20261114\\host-temp-and-process-job\\stderr.log",
+      "progress_query_interval_seconds": 600,
+      "finished_at": "2026-11-14T02:20:34.016960+00:00",
+      "elapsed_seconds": 85.891
+    },
+    "db-job": {
+      "state": "failed",
+      "started_at": "2026-11-14T02:20:30.828909+00:00",
+      "cwd": "E:\\JAVA\\AI+agent\\AgentHub",
+      "executable": "E:\\JAVA\\AI+agent\\AgentHub\\.venv\\Scripts\\python.exe",
+      "argument_count": 11,
+      "supervisor_pid": 59656,
+      "pid": 16120,
+      "exit_code": 1,
+      "stdout": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\qa-first-regression-20261114\\db-job\\stdout.log",
+      "stderr": "E:\\JAVA\\AI+agent\\AgentHub\\.scratch\\qa-first-regression-20261114\\db-job\\stderr.log",
+      "progress_query_interval_seconds": 600,
+      "finished_at": "2026-11-14T02:21:33.740995+00:00",
+      "elapsed_seconds": 62.906
+    }
+  },
+  "command_exits": {
+    "unit": 1,
+    "retry": 0,
+    "db": 1,
+    "db-retry": 1,
+    "db-cold-sdk-fix": 0
+  },
+  "new_test_fixture_sha256_lf": "48f553ae8d28a0cf03a8534a632a8a50af683c761ce72e7d73fbcaf5000c187a",
+  "manual_benchmark_checks": {
+    "historical_qasper_citations_reconstructed": 32,
+    "historical_scifact_citations_reconstructed": 16,
+    "configured_profile_payloads_verified": [
+      2048,
+      512
+    ],
+    "invalid_caps_rejected_without_send": [
+      0,
+      true,
+      2049
+    ],
+    "first_error_not_scored_as_refusal": true,
+    "historical_7_qasper_scoring_reproduced": true
+  }
+}

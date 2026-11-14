@@ -1,0 +1,1761 @@
+{
+  "arm": "candidate",
+  "source": {
+    "packages/knowledge/citation_qa.py": "1968f8581b9954c4565ba3361b7a52965c8f048d8d092cb9e0ada42a6ec5daf8",
+    "apps/api/routes/citation_qa.py": "f818f3a8928bd7213317d4b21913824755f2276a32f64223926fecd0ba54cfdc",
+    "apps/api/schemas/citation_qa.py": "b9bfa5fcea10c45be4a33cf408a2546114f2e7800ff7d93c371cf51a048453c8",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "a532d618-fb70-4471-87c1-b833c3b0c949",
+  "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+  "snapshot_hash": "043b5bac347b6e658c3f13aa09c99bc078f8adb85c95c8bc7eefaa96c8285bf5",
+  "documents": 7,
+  "chunks": 99,
+  "protocol_sha256": "a08065e574ffddf32d5a76a81008631243289ed414873f984cb97f41e677273b",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "e67d2266476abd157fc8c396b3dfb70cb343471e",
+      "state": "returned",
+      "utc": "2026-11-14T02:28:36.895718+00:00",
+      "http": 200,
+      "elapsed_s": 69.315,
+      "answer": "The evidence does not specify the languages used in the paper “Empirical Gaussian priors for cross-lingual transfer learning.” The passages from that paper discuss cross-lingual POS tagging and source language models but do not name the languages. The languages mentioned elsewhere (Italian, Croatian, Polish, Finnish, French, Brazilian Portuguese) come from a different document about verb classification, not from the named paper. Therefore, the question cannot be answered from the supplied evidence.",
+      "insufficient": true,
+      "citations": [],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "1601.02166",
+              "ordinal": 0,
+              "chunk_id": "cc78212d23127d0c5950ce946028f573e7a2807a9960a52e6a3a6b7a1ecc8863"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 6,
+              "chunk_id": "09222c99b889b3cfe9875f12dcc67ef90c0e7607bd59cbcefafea19f674b9bea"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 3,
+              "chunk_id": "33b526efedd15ef5ff6ec1db44d543228f74d2183441cfcc4ce3bdd8f8316df0"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 5,
+              "chunk_id": "04157f9a176142410590f5927d07f0f7d707e3ea61542a40911266731aed3013"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 2,
+              "chunk_id": "77f4fa0850e58bfc19044c46005beb52bfd7c05ea7a9f8413a3b205f0819f064"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 0,
+              "chunk_id": "3c9ed197ab839e3133f73cc5fa624cb4b41a42a5da90a2299cdba0c8d58eaa89"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 7,
+              "chunk_id": "8caccd068b144ffcae30d54f91a58bdc71a5833b8e784318bde2cc92c949839c"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 1,
+              "chunk_id": "a6fc5d5bbd6172511b6878a1d85fc0ce64e6538cb4aa4fedfb33b824b251d9dc"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 7,
+              "chunk_id": "3deb37964e6e89d0fb6bd914b687f5f486170af8fe25249c762420e6f8484fbd"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 11,
+              "chunk_id": "924f17b08f9d6af5f206c04878756f20d3abfa51db75c7c482f2e6a0cce27595"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 15,
+              "chunk_id": "3b31aea9f85c79984fa8a1fc98cbfbaa59e109eaa65870f48f97d127fe297cb0"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 16,
+              "chunk_id": "5d3787f823bb5c180d9714d457b45f09dcb8a764288bdb408a5a9155c3de8e29"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 14,
+              "chunk_id": "d74680694a0aa121ac7d3a1f58641b3627a53cd97cd415cb0ca64fc4b1ece95c"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 17,
+              "chunk_id": "52d0543954e748523af7618fc41e8f54e8280f0ce170f8b78bbee7268ac70f9b"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 9,
+              "chunk_id": "25a95f3a69178bdf2f2efcf8767743634a9af3d16d83804ac65f94c712de8e00"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 3,
+              "chunk_id": "6b42cf5c794f9eae249f3a6c0ea6ff01119b24704911ae40b20b895f2383796d"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 13,
+              "chunk_id": "4d7c9e91dc54bc666cf8e8dcd7f083afc19a8a5248585758e2c0b8e0b1564fb6"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 8,
+              "chunk_id": "3b3d6fa2c405e5b07a4ee127023d31eff8d0f9932c71a1c57fe6977422270d5c"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 4,
+              "chunk_id": "904905af28cdf99292f9b91b9394e1b7a5766d5d59f8218dc59c114887789be7"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1707.06945",
+              "ordinal": 7,
+              "chunk_id": "3deb37964e6e89d0fb6bd914b687f5f486170af8fe25249c762420e6f8484fbd"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 13,
+              "chunk_id": "4d7c9e91dc54bc666cf8e8dcd7f083afc19a8a5248585758e2c0b8e0b1564fb6"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 8,
+              "chunk_id": "3b3d6fa2c405e5b07a4ee127023d31eff8d0f9932c71a1c57fe6977422270d5c"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 5,
+              "chunk_id": "04157f9a176142410590f5927d07f0f7d707e3ea61542a40911266731aed3013"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 0,
+              "chunk_id": "cc78212d23127d0c5950ce946028f573e7a2807a9960a52e6a3a6b7a1ecc8863"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 15,
+              "chunk_id": "3b31aea9f85c79984fa8a1fc98cbfbaa59e109eaa65870f48f97d127fe297cb0"
+            }
+          ],
+          "times_ms": {
+            "dense": 15704.366,
+            "sparse": 2159.972,
+            "fusion": 0.177,
+            "rerank": 36767.223
+          },
+          "total_ms": 54698.466
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "36ff3951343dec740265e7322846dd1f16c3dda70709980e911c6f201a8c820b",
+          "chunks": [
+            {
+              "source": "1707.06945",
+              "ordinal": 7,
+              "chunk_id": "3deb37964e6e89d0fb6bd914b687f5f486170af8fe25249c762420e6f8484fbd"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 13,
+              "chunk_id": "4d7c9e91dc54bc666cf8e8dcd7f083afc19a8a5248585758e2c0b8e0b1564fb6"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 8,
+              "chunk_id": "3b3d6fa2c405e5b07a4ee127023d31eff8d0f9932c71a1c57fe6977422270d5c"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 5,
+              "chunk_id": "04157f9a176142410590f5927d07f0f7d707e3ea61542a40911266731aed3013"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 0,
+              "chunk_id": "cc78212d23127d0c5950ce946028f573e7a2807a9960a52e6a3a6b7a1ecc8863"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 15,
+              "chunk_id": "3b31aea9f85c79984fa8a1fc98cbfbaa59e109eaa65870f48f97d127fe297cb0"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "36ff3951343dec740265e7322846dd1f16c3dda70709980e911c6f201a8c820b"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 3374,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2317,
+            "output_tokens": 125,
+            "total_tokens": 2442
+          }
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "36ff3951343dec740265e7322846dd1f16c3dda70709980e911c6f201a8c820b"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1330,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2500,
+            "output_tokens": 110,
+            "total_tokens": 2610
+          }
+        }
+      ]
+    },
+    {
+      "id": "6b8a3100895f2192e08973006474428319dc298e",
+      "state": "returned",
+      "utc": "2026-11-14T02:29:46.220117+00:00",
+      "http": 200,
+      "elapsed_s": 35.503,
+      "answer": "The paper states that a standard clustering algorithm is run on top of the VerbNet-specialised representations [1], and specifically that they employ the MNCut spectral clustering algorithm [2]. The number of clusters is estimated using the self-tuning method [3].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1707.06945",
+          "ordinal": 0,
+          "chunk_id": "3c9ed197ab839e3133f73cc5fa624cb4b41a42a5da90a2299cdba0c8d58eaa89",
+          "revision": "cd40bd45-67bd-40f4-b5a6-b049b3d9fd31",
+          "excerpt": "Cross-Lingual Induction and Transfer of Verb Classes Based on Word Vector Space Specialisation\n\nExisting approaches to automatic VerbNet-style verb classification are heavily dependent on feature engineering and therefore limited to languages with mature NLP pipelines. In this work, we propose a novel cross-lingual transfer method for inducing VerbNets for multiple languages. To the best of our knowledge, this is the first study which demonstrates how the architectures for learning word embeddings can be applied to this challenging syntactic-semantic task. Our method uses cross-lingual translation pairs to tie each of the six target languages into a bilingual vector space with English, jointly specialising the representations to encode the relational information from English VerbNet. A standard clustering algorithm is then run on top of the VerbNet-specialised representations, using vector dimensions as features for learning verb classes. Our results show that the proposed cross-lingual transfer approach sets new state-of-the-art verb classification performance across all six target languages explored in this work.\n\nIntroduction\n\nPlaying a key role in conveying the meaning of a sen",
+          "chunk_text_sha256": "854bd2c127ef7779dab73260a69a497f77346bde23ca596ad66648cc52d113b6",
+          "excerpt_sha256": "854bd2c127ef7779dab73260a69a497f77346bde23ca596ad66648cc52d113b6",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 2,
+          "source": "1707.06945",
+          "ordinal": 12,
+          "chunk_id": "789e7463f92382a6bb1b98d4f05f3de86c95f02fa0c4b5f9012d6ae6ca0630bf",
+          "revision": "cd40bd45-67bd-40f4-b5a6-b049b3d9fd31",
+          "excerpt": "ettings.\n\nVerbNet constraints are extracted from the English VerbNet class structure in a straightforward manner. For each class INLINEFORM0 from the 273 VerbNet classes, we simply take the set of all INLINEFORM1 verbs INLINEFORM2 associated with that class, including its subclasses, and generate all unique pairs INLINEFORM3 so that INLINEFORM4 and INLINEFORM5 . Example VerbNet pairwise constraints are shown in Tab. TABREF15 . Note that VerbNet classes in practice contain verb instances standing in a variety of lexical relations, including synonyms, antonyms, troponyms, hypernyms, and the class membership is determined on the basis of connections between the syntactic patterns and the underlying semantic relations BIBREF54 , BIBREF55 .\n\nClustering Algorithm\n\nGiven the initial distributional or specialised collection of target language vectors INLINEFORM0 , we apply an off-the-shelf clustering algorithm on top of these vectors in order to group verbs into classes. Following prior work BIBREF56 , BIBREF57 , BIBREF17 , we employ the MNCut spectral clustering algorithm BIBREF58 , which has wide applicability in similar NLP tasks which involve high-dimensional feature spaces BIBREF59 ,",
+          "chunk_text_sha256": "e19c05bbf170b65605f807c96ccf6adbaf7d6e86ee47cce28b1dd8fece12b11a",
+          "excerpt_sha256": "e19c05bbf170b65605f807c96ccf6adbaf7d6e86ee47cce28b1dd8fece12b11a",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 13200,
+            "char_start": 12000
+          }
+        },
+        {
+          "number": 3,
+          "source": "1707.06945",
+          "ordinal": 13,
+          "chunk_id": "4d7c9e91dc54bc666cf8e8dcd7f083afc19a8a5248585758e2c0b8e0b1564fb6",
+          "revision": "cd40bd45-67bd-40f4-b5a6-b049b3d9fd31",
+          "excerpt": "IBREF56 , BIBREF57 , BIBREF17 , we employ the MNCut spectral clustering algorithm BIBREF58 , which has wide applicability in similar NLP tasks which involve high-dimensional feature spaces BIBREF59 , BIBREF60 , BIBREF18 . Again, following prior work BIBREF17 , BIBREF61 , we estimate the number of clusters INLINEFORM1 using the self-tuning method of Zelnik:2004nips. This algorithm finds the optimal number by minimising a cost function based on the eigenvector structure of the word similarity matrix. We refer the reader to the relevant literature for further details.\n\nResults and Discussion\n\nCross-Lingual Transfer Model F-1 verb classification scores for the six target languages with different sets of constraints are summarised in Fig. FIGREF29 . We can draw several interesting conclusions. First, the strongest results on average are obtained with the model which transfers the VerbNet knowledge from English (as a resource-rich language) to the resource-lean target language (providing an answer to question Q3, Sect. SECREF1 ). These improvements are visible across all target languages, empirically demonstrating the cross-lingual nature of VerbNet-style classifications. Second, using c",
+          "chunk_text_sha256": "d00bca413060699ec505c5a899a2d3f4113286a2b60e53d64f7ec185150992aa",
+          "excerpt_sha256": "d00bca413060699ec505c5a899a2d3f4113286a2b60e53d64f7ec185150992aa",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 14200,
+            "char_start": 13000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "1707.06945",
+              "ordinal": 0,
+              "chunk_id": "3c9ed197ab839e3133f73cc5fa624cb4b41a42a5da90a2299cdba0c8d58eaa89"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 17,
+              "chunk_id": "52d0543954e748523af7618fc41e8f54e8280f0ce170f8b78bbee7268ac70f9b"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 3,
+              "chunk_id": "6b42cf5c794f9eae249f3a6c0ea6ff01119b24704911ae40b20b895f2383796d"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 12,
+              "chunk_id": "789e7463f92382a6bb1b98d4f05f3de86c95f02fa0c4b5f9012d6ae6ca0630bf"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 7,
+              "chunk_id": "3deb37964e6e89d0fb6bd914b687f5f486170af8fe25249c762420e6f8484fbd"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 13,
+              "chunk_id": "4d7c9e91dc54bc666cf8e8dcd7f083afc19a8a5248585758e2c0b8e0b1564fb6"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 6,
+              "chunk_id": "2592bc07b5327d19f9c53e0f30912b0050a404ccbcd4e9add5d7e431a709c3c8"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 8,
+              "chunk_id": "3b3d6fa2c405e5b07a4ee127023d31eff8d0f9932c71a1c57fe6977422270d5c"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 1,
+              "chunk_id": "3cc8b32e7d51281519b22c25fbeec12bc2e1931ecd6460ba4d14e11cca416b6f"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 16,
+              "chunk_id": "5d3787f823bb5c180d9714d457b45f09dcb8a764288bdb408a5a9155c3de8e29"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 4,
+              "chunk_id": "904905af28cdf99292f9b91b9394e1b7a5766d5d59f8218dc59c114887789be7"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 11,
+              "chunk_id": "924f17b08f9d6af5f206c04878756f20d3abfa51db75c7c482f2e6a0cce27595"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 2,
+              "chunk_id": "06d09b583085b69da949f4823e0393427f73fc4fb4bd99a2ba5c219a8032b6fe"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 14,
+              "chunk_id": "d74680694a0aa121ac7d3a1f58641b3627a53cd97cd415cb0ca64fc4b1ece95c"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 10,
+              "chunk_id": "ead8b4f0a01d414a0ce9edc6d3bec441a3f12febcea545ba810332400bf427b4"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 14,
+              "chunk_id": "e9c4e58e97e99ff3c267866880ce422159df3cf1852542c1984a6411d5788c25"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 4,
+              "chunk_id": "36053fe9dde7b3e834a17b4018e1880816dd5795998d651e8c8c76fd756cf1fc"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 15,
+              "chunk_id": "8cc1f63fc9dbcd53be832f680f9d11f5e05c5ff25c8e6a4dd1d2d7faff019028"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 5,
+              "chunk_id": "ece6e2d6560f1316e2a1acb7afff0a5bbbe58f010c7d5458b7661b0bb8bea5bc"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1707.06945",
+              "ordinal": 0,
+              "chunk_id": "3c9ed197ab839e3133f73cc5fa624cb4b41a42a5da90a2299cdba0c8d58eaa89"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 12,
+              "chunk_id": "789e7463f92382a6bb1b98d4f05f3de86c95f02fa0c4b5f9012d6ae6ca0630bf"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 13,
+              "chunk_id": "4d7c9e91dc54bc666cf8e8dcd7f083afc19a8a5248585758e2c0b8e0b1564fb6"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 16,
+              "chunk_id": "5d3787f823bb5c180d9714d457b45f09dcb8a764288bdb408a5a9155c3de8e29"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 17,
+              "chunk_id": "52d0543954e748523af7618fc41e8f54e8280f0ce170f8b78bbee7268ac70f9b"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 2,
+              "chunk_id": "06d09b583085b69da949f4823e0393427f73fc4fb4bd99a2ba5c219a8032b6fe"
+            }
+          ],
+          "times_ms": {
+            "dense": 612.142,
+            "sparse": 79.413,
+            "fusion": 0.203,
+            "rerank": 33032.627
+          },
+          "total_ms": 33762.591
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "cf2e49466b7033517fc3aff249322774a50e94416739dbfeef5eb46e316743db",
+          "chunks": [
+            {
+              "source": "1707.06945",
+              "ordinal": 0,
+              "chunk_id": "3c9ed197ab839e3133f73cc5fa624cb4b41a42a5da90a2299cdba0c8d58eaa89"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 12,
+              "chunk_id": "789e7463f92382a6bb1b98d4f05f3de86c95f02fa0c4b5f9012d6ae6ca0630bf"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 13,
+              "chunk_id": "4d7c9e91dc54bc666cf8e8dcd7f083afc19a8a5248585758e2c0b8e0b1564fb6"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 16,
+              "chunk_id": "5d3787f823bb5c180d9714d457b45f09dcb8a764288bdb408a5a9155c3de8e29"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 17,
+              "chunk_id": "52d0543954e748523af7618fc41e8f54e8280f0ce170f8b78bbee7268ac70f9b"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 2,
+              "chunk_id": "06d09b583085b69da949f4823e0393427f73fc4fb4bd99a2ba5c219a8032b6fe"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "cf2e49466b7033517fc3aff249322774a50e94416739dbfeef5eb46e316743db"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1671,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2260,
+            "output_tokens": 73,
+            "total_tokens": 2333
+          }
+        }
+      ]
+    },
+    {
+      "id": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "state": "returned",
+      "utc": "2026-11-14T02:30:21.726782+00:00",
+      "http": 200,
+      "elapsed_s": 42.944,
+      "answer": "The paper reports the following data sizes: the VG training set consists of 85% of the data, with 16k images and 740k corresponding region descriptions, while the ReferIt training data consists of 9k images and 54k referring expressions [6]. For the instance selection model, training uses (region description, object set) pairs from the VG dataset, resulting in a training set of approximately 1.73M samples, with the remaining 300K samples split into validation and testing [4]. The instance selection achieves an F1-score of 0.7618 over all 2,909 instance classes [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1910.04887",
+          "ordinal": 8,
+          "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977",
+          "revision": "f3469bcc-ab9f-4f8b-9f0f-018a732456a3",
+          "excerpt": "s context. Table TABREF11 shows perplexity on the VG and ReferIt test queries with both corresponding images and random noise. The VG and ReferIt datasets have character vocabulary sizes of 89 and 77 respectively.\n\nGiven the matching index $t$ of the true query in the top 10 completions we compute the MRR as $\\sum _{n}{\\frac{1}{t}}$ where we replace the reciprocal rank with 0 if the true query does not appear in the top ten completions. We evaluate the VG and ReferIt test queries with varying prefix sizes and compare performance with the corresponding image and random noise as context. MRR is influenced by the length of the query, as longer queries are more difficult to match. Therefore, as expected we observe better performance on the ReferIt dataset for all prefix lengths. Finally, our instance selection achieves an F1-score of 0.7618 over all 2,909 instance classes.\n\nResults ::: Conclusions\n\nOur results demonstrate that auto-completion based on both language and vision performs better than by using only language, and that fine tuning a BERT embedding allows to efficiently rank instances in the image. In future work we would like to extract referring expressions using simple gram",
+          "chunk_text_sha256": "5d9f89fb525943f867b7dee97fc10afcef4161ac1f1939f77d37cd3dc07a9015",
+          "excerpt_sha256": "5d9f89fb525943f867b7dee97fc10afcef4161ac1f1939f77d37cd3dc07a9015",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 9200,
+            "char_start": 8000
+          }
+        },
+        {
+          "number": 4,
+          "source": "1910.04887",
+          "ordinal": 7,
+          "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe",
+          "revision": "f3469bcc-ab9f-4f8b-9f0f-018a732456a3",
+          "excerpt": "embeddings, 512 dimensional LSTM hidden units, and a max length of 50 characters per query, with Adam at a 5e-4 learning rate, and a batch size of 32 for 80K iterations. The instance selection model is trained using (region description, object set) pairs from the VG dataset resulting in a training set of approximately 1.73M samples. The remaining 300K samples are split into validation and testing. Our training procedure for the instance selection model fine tunes all 12 layers of BERT with 32 sample batch sizes for 250K iterations, using Adam and performing learning rate warm-up for the first 10% of iterations with a target 5e-5 learning rate. The entire training processes takes around a day on an NVIDIA Tesla P100 GPU.\n\nResults\n\nFigure 3 shows example results. We evaluate query completion by language perplexity and mean reciprocal rank (MRR) and evaluate instance selection by F1-score. We compare the perplexity on both sets of test queries using corresponding images vs. random noise as context. Table TABREF11 shows perplexity on the VG and ReferIt test queries with both corresponding images and random noise. The VG and ReferIt datasets have character vocabulary sizes of 89 and 77",
+          "chunk_text_sha256": "b8921d9fcdbd655731df3b78075db8625a7d29afed7c9ac8719863e8155930ec",
+          "excerpt_sha256": "b8921d9fcdbd655731df3b78075db8625a7d29afed7c9ac8719863e8155930ec",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 8200,
+            "char_start": 7000
+          }
+        },
+        {
+          "number": 6,
+          "source": "1910.04887",
+          "ordinal": 6,
+          "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09",
+          "revision": "f3469bcc-ab9f-4f8b-9f0f-018a732456a3",
+          "excerpt": "e a replacement for queries since they mention various objects in different regions of each image. However, while some region descriptions are referring phrases, some are more similar to descriptions (see examples in Table TABREF10). The large number of examples makes the Visual Genome dataset particularly useful for our task. The smaller ReferIt dataset consists of referring expressions attached to images which more closely resemble potential user queries of images. We train separate models using both datasets.\n\nFor training, we aggregated (query, image) pairs using the region descriptions from the VG dataset and referring expressions from the ReferIt dataset. Our VG training set consists of 85% of the data: 16k images and 740k corresponding region descriptions. The Referit training data consists of 9k images and 54k referring expressions.\n\nThe query completion models are trained using a 128 dimensional image representation, a rank $r=64$ personalized matrix, 24 dimensional character embeddings, 512 dimensional LSTM hidden units, and a max length of 50 characters per query, with Adam at a 5e-4 learning rate, and a batch size of 32 for 80K iterations. The instance selection model i",
+          "chunk_text_sha256": "2ab3260a896f307000d00c6e1d3b086b052b20ba6850751703b2fd4d781043a8",
+          "excerpt_sha256": "2ab3260a896f307000d00c6e1d3b086b052b20ba6850751703b2fd4d781043a8",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 5,
+              "chunk_id": "ece6e2d6560f1316e2a1acb7afff0a5bbbe58f010c7d5458b7661b0bb8bea5bc"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 3,
+              "chunk_id": "33b526efedd15ef5ff6ec1db44d543228f74d2183441cfcc4ce3bdd8f8316df0"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 6,
+              "chunk_id": "19a8ae5700d0ce68fbefdea2f001dab2fbb46c9e1c34dfebb43840aa1be1db2d"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 4,
+              "chunk_id": "fddc00338b9c968585cd24d292c4c8df5a5ae43e6d9eedf23d174b30850b7f9a"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 13,
+              "chunk_id": "1fed724e26090008085ef9d93e80a38c2623b05060cf2ad944fd294463500214"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 8,
+              "chunk_id": "0db3784f697c448fd38703b082b6a199f94475061a73af9b4ad80cb9631d1e1b"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 1,
+              "chunk_id": "368c75d5d0afa4fd7177b95140287c59e91399ee3d4f0eb1ca52aa85e0b0ab83"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 7,
+              "chunk_id": "8caccd068b144ffcae30d54f91a58bdc71a5833b8e784318bde2cc92c949839c"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 2,
+              "chunk_id": "73479e02dba02d46847bc243043afb69f18560ee718dce6787b3b6be9bb5be9d"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 8,
+              "chunk_id": "b9c8e5d87ccd6f3326d81298df9e30743583c99f3030e410f4a80b45200f5fa3"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 3,
+              "chunk_id": "5425b5a0bbfd2c9de50565d0dec05e3530047ba32971bb6fe779276abaa9101c"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 0,
+              "chunk_id": "c0c7580de7704d7d83c65620b6764f0d9ca4a614c932d8ce15ab2fdbabf2eca4"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            }
+          ],
+          "times_ms": {
+            "dense": 411.125,
+            "sparse": 37.076,
+            "fusion": 0.245,
+            "rerank": 40420.898
+          },
+          "total_ms": 40896.264
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "0a54d0d80b0f1a2a60a7fa278e8037e1e98920f3601eb3e1c6c5ff33d4cd788a",
+          "chunks": [
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "0a54d0d80b0f1a2a60a7fa278e8037e1e98920f3601eb3e1c6c5ff33d4cd788a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2008,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2325,
+            "output_tokens": 153,
+            "total_tokens": 2478
+          }
+        }
+      ]
+    },
+    {
+      "id": "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+      "state": "returned",
+      "utc": "2026-11-14T02:31:04.671233+00:00",
+      "http": 200,
+      "elapsed_s": 33.569,
+      "answer": "The dataset covered 218 videos from NALCS and 103 from LMS, for a total of 321 videos, taken from week 1 to week 9 in the 2017 spring series of each tournament [1]. Each game's video ranges from 30 to 50 minutes in length [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1707.08559",
+          "ordinal": 6,
+          "chunk_id": "19a8ae5700d0ce68fbefdea2f001dab2fbb46c9e1c34dfebb43840aa1be1db2d",
+          "revision": "8e59a9d3-9e0e-4f1d-8d3d-be347fc08c93",
+          "excerpt": "n the other hand, has a similar scale of data, but we use existing highlights, and we also employ textual audience chat commentary, thus providing a new resource and task for Language and Vision research. In summary, we present the first language-vision dataset for video highlighting that contains audience reactions in chat format, in multiple languages. The community produced ground truth provides labels for each frame and can be used for supervised learning. The language side of this new dataset presents interesting challenges related to real-world Internet-style slang.\n\nData Collection\n\nOur dataset covers 218 videos from NALCS and 103 from LMS for a total of 321 videos from week 1 to week 9 in 2017 spring series from each tournament. Each week there are 10 matches for NALCS and 6 matches for LMS. Matches are best of 3, so consist of two games or three games. The first and third games are used for training. The second games in the first 4 weeks are used as validation and the remainder of second games are used as test. Table TABREF3 lists the numbers of videos in train, validation, and test subsets.\n\nEach game's video ranges from 30 to 50 minutes in length which contains image and",
+          "chunk_text_sha256": "be562331d5d6fc3f269872baf090f60d405ecf5d3e46eea0eb5e4856ff19dfe9",
+          "excerpt_sha256": "be562331d5d6fc3f269872baf090f60d405ecf5d3e46eea0eb5e4856ff19dfe9",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "1707.08559",
+              "ordinal": 0,
+              "chunk_id": "b2f546d1c018551ba024724988da02ecb8379b31971de6e4566af8f58fcde806"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 1,
+              "chunk_id": "f8e7396a6e40b76d7b752b695997ebb15ad620128cf75343791227db26fc6447"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 2,
+              "chunk_id": "9038cf2c1ae0ff179c97b603d650b28d420a65a5d70b46f70e8acbf663b47f43"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 8,
+              "chunk_id": "b9c8e5d87ccd6f3326d81298df9e30743583c99f3030e410f4a80b45200f5fa3"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 13,
+              "chunk_id": "1fed724e26090008085ef9d93e80a38c2623b05060cf2ad944fd294463500214"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 3,
+              "chunk_id": "33b526efedd15ef5ff6ec1db44d543228f74d2183441cfcc4ce3bdd8f8316df0"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 8,
+              "chunk_id": "8de551c897e5408cf6ced7f32ed18dd1c874360a428c65db0adf7859ec67dc7e"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 5,
+              "chunk_id": "82893d12809aca17f6009e7412a6678c1a324d918b11302a3c606034cbb4f1a9"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 10,
+              "chunk_id": "d7665dbd80c41a833b6d8ff3856666c9a37ab9d6f6c96562690c30af04475ff6"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 6,
+              "chunk_id": "19a8ae5700d0ce68fbefdea2f001dab2fbb46c9e1c34dfebb43840aa1be1db2d"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 14,
+              "chunk_id": "e9c4e58e97e99ff3c267866880ce422159df3cf1852542c1984a6411d5788c25"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 12,
+              "chunk_id": "3c71561785c9d2e876881432d04479efa66090145bcf050e55771a5479a5ab76"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 3,
+              "chunk_id": "6fed1524a4756fde27146520adf6c8441350a981bbaf955338da9e719c076906"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 4,
+              "chunk_id": "55f86598bd8f269541a2861793dd0e40faba60b838f45dc3e63631af14cf6a2d"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 15,
+              "chunk_id": "e168775830cede3ab88349b80155214180a19a8aefe7e5af6240a2f29c563678"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 5,
+              "chunk_id": "5c9c54b3054bf1b8815a07e8dc8c5b820a5d56871bc8ba0521b8a01a426e229f"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 1,
+              "chunk_id": "6c0ce2a2a4497c227e53a7e868e4f3665f207318d8c32bf45217bcd720b1ce75"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1707.08559",
+              "ordinal": 6,
+              "chunk_id": "19a8ae5700d0ce68fbefdea2f001dab2fbb46c9e1c34dfebb43840aa1be1db2d"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 0,
+              "chunk_id": "b2f546d1c018551ba024724988da02ecb8379b31971de6e4566af8f58fcde806"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 5,
+              "chunk_id": "5c9c54b3054bf1b8815a07e8dc8c5b820a5d56871bc8ba0521b8a01a426e229f"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 1,
+              "chunk_id": "f8e7396a6e40b76d7b752b695997ebb15ad620128cf75343791227db26fc6447"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 8,
+              "chunk_id": "b9c8e5d87ccd6f3326d81298df9e30743583c99f3030e410f4a80b45200f5fa3"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 4,
+              "chunk_id": "55f86598bd8f269541a2861793dd0e40faba60b838f45dc3e63631af14cf6a2d"
+            }
+          ],
+          "times_ms": {
+            "dense": 375.462,
+            "sparse": 28.866,
+            "fusion": 0.234,
+            "rerank": 31706.61
+          },
+          "total_ms": 32139.085
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "5adb70c19b6daddbd433dcef90fffec22d1a16d86a99099f18d976d1aef5eb15",
+          "chunks": [
+            {
+              "source": "1707.08559",
+              "ordinal": 6,
+              "chunk_id": "19a8ae5700d0ce68fbefdea2f001dab2fbb46c9e1c34dfebb43840aa1be1db2d"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 0,
+              "chunk_id": "b2f546d1c018551ba024724988da02ecb8379b31971de6e4566af8f58fcde806"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 5,
+              "chunk_id": "5c9c54b3054bf1b8815a07e8dc8c5b820a5d56871bc8ba0521b8a01a426e229f"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 1,
+              "chunk_id": "f8e7396a6e40b76d7b752b695997ebb15ad620128cf75343791227db26fc6447"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 8,
+              "chunk_id": "b9c8e5d87ccd6f3326d81298df9e30743583c99f3030e410f4a80b45200f5fa3"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 4,
+              "chunk_id": "55f86598bd8f269541a2861793dd0e40faba60b838f45dc3e63631af14cf6a2d"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "5adb70c19b6daddbd433dcef90fffec22d1a16d86a99099f18d976d1aef5eb15"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1385,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2174,
+            "output_tokens": 80,
+            "total_tokens": 2254
+          }
+        }
+      ]
+    },
+    {
+      "id": "77db56fee07b01015a74413ca31f19bea7203f0b",
+      "state": "returned",
+      "utc": "2026-11-14T02:31:38.248375+00:00",
+      "http": 200,
+      "elapsed_s": 31.386,
+      "answer": "The paper reports precision, recall, and F$_1$ at the entity level, computed by extracting all tagged spans per content element type, deduplicating them, and comparing the resulting set against the ground truth using exact matches [1]. Results are presented with F$_1$, precision, and recall computed in this manner, both micro-averaged across all content elements and broken down by type [2]. For the data-efficiency experiments, only F$_1$ scores are shown, though similar trends are observed for the other metrics [3].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "2002.01861",
+          "ordinal": 9,
+          "chunk_id": "dc7cf0a5b5ebd2896899938c053832985f4c01210fc4f7cbab484dbb76994549",
+          "revision": "b79c0765-b157-4b79-997f-c28c1e09d66c",
+          "excerpt": "h ::: Inference and Evaluation\n\nAt inference time, documents from the test set are segmented into paragraphs and fed into the fine-tuned BERT model one at a time. Typically, sequence labeling tasks are evaluated in terms of precision, recall, and F$_1$ at the entity level, per sentence. However, such an evaluation is inappropriate for our task because the content elements represent properties of the entire document as a whole, not individual sentences.\n\nInstead, we adopted the following evaluation procedure: For each content element type (e.g., “tenant”), we extract all tagged spans from the document, and after deduplication, treat the entities as a set that we then measure against the ground truth in terms of precision, recall, and F$_1$. We do this because there may be multiple ground truth entities and BERT may mark multiple spans in a document with a particular entity type. Note that the metrics are based on exact matches—this means that, for example, if the extracted entity has an extraneous token compared to a ground truth entity, the system receives no credit.\n\nResults\n\nOur main results are presented in Table TABREF6 on the test set of the regulatory filings and in Table TAB",
+          "chunk_text_sha256": "3a894fa800d58ec5ba98aa4ab529fe5857cf4ae4b9cd543eaea656ea790348d8",
+          "excerpt_sha256": "3a894fa800d58ec5ba98aa4ab529fe5857cf4ae4b9cd543eaea656ea790348d8",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 10200,
+            "char_start": 9000
+          }
+        },
+        {
+          "number": 2,
+          "source": "2002.01861",
+          "ordinal": 10,
+          "chunk_id": "d7665dbd80c41a833b6d8ff3856666c9a37ab9d6f6c96562690c30af04475ff6",
+          "revision": "b79c0765-b157-4b79-997f-c28c1e09d66c",
+          "excerpt": "extraneous token compared to a ground truth entity, the system receives no credit.\n\nResults\n\nOur main results are presented in Table TABREF6 on the test set of the regulatory filings and in Table TABREF7 on the test set of the property lease agreements; F$_1$, precision, and recall are computed in the manner described above. We show metrics across all content elements (micro-averaged) as well as broken down by types. For the property lease agreements, we show results on all documents (left) and only over those with unseen templates (right). Examining these results, we see that although there is some degradation in effectiveness between all documents and only unseen templates, it appears that BERT is able to generalize to previously-unseen expressions of the content elements. Specifically, it is not the case that the model is simply memorizing fixed patterns or key phrases—otherwise, we could just craft a bunch of regular expression patterns for this task. This is a nice result that shows off the power of modern neural NLP models.\n\nOverall, we would characterize our models as achieving reasonable accuracy, comparable to extraction tasks in more “traditional” domains, with modest am",
+          "chunk_text_sha256": "f79023dff71040da8024cb1ac6c029f175abbf261601ede36a87d9bf74805de6",
+          "excerpt_sha256": "f79023dff71040da8024cb1ac6c029f175abbf261601ede36a87d9bf74805de6",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 11200,
+            "char_start": 10000
+          }
+        },
+        {
+          "number": 3,
+          "source": "2002.01861",
+          "ordinal": 12,
+          "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d",
+          "revision": "b79c0765-b157-4b79-997f-c28c1e09d66c",
+          "excerpt": "ings” in our training data, and thus accuracy is very low despite the fact that percentages are straightforward to identify. It seems that “easy” entities often have more fixed forms and are quite close to entities that the model may have encountered during pre-training (e.g., names and dates). In contrast, “difficult” elements are often domain-specific and widely vary in their forms.\n\nHow data efficient is BERT when fine tuning on annotated data? We can answer this question by varying the amount of training data used to fine tune the BERT models, holding everything else constant. These results are shown in Figure FIGREF10 for the regulatory filings (30, 60, 90 randomly-selected documents) and in Figure FIGREF11 for the property lease agreements (30, 60, 90, 120 randomly-selected documents); in all cases, the development set is fixed. For brevity, we only show F$_1$ scores, but we observe similar trends for the other metrics. For both document types, it seems like 60–90 documents are sufficient to achieve F$_1$ on par with using all available training data. Beyond this point, we hit rapidly diminishing returns. For a number of “easy” content elements (e.g., dates in the property le",
+          "chunk_text_sha256": "cb353c92c83562f1be523d17926e8c415b73da4e4f56ec352f46d51936b22a91",
+          "excerpt_sha256": "cb353c92c83562f1be523d17926e8c415b73da4e4f56ec352f46d51936b22a91",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 13200,
+            "char_start": 12000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "2002.01861",
+              "ordinal": 0,
+              "chunk_id": "0aeb747637bd9379fecd25335a639c8951b7870f394901707f707be6c534d126"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 2,
+              "chunk_id": "73479e02dba02d46847bc243043afb69f18560ee718dce6787b3b6be9bb5be9d"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 15,
+              "chunk_id": "e168775830cede3ab88349b80155214180a19a8aefe7e5af6240a2f29c563678"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 9,
+              "chunk_id": "dc7cf0a5b5ebd2896899938c053832985f4c01210fc4f7cbab484dbb76994549"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 11,
+              "chunk_id": "46bd840e87a6c6fed0a6b8e36734e15754ff09768fa717c86ffd8297353ac042"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 3,
+              "chunk_id": "4ae7b8b30a101ecc7ef9783becf6db63e46805633f65e0f6adc5b5d35b68c183"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 14,
+              "chunk_id": "61bbaacfec70fbc9585861b97eafa8094cae8984f4dc46291972fdab4f7fb695"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 10,
+              "chunk_id": "d7665dbd80c41a833b6d8ff3856666c9a37ab9d6f6c96562690c30af04475ff6"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 4,
+              "chunk_id": "2ffd5e02ffcbea0e97e0d60b37ec25f9e38cdfe672b9c8b772b20a36d70250fb"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 7,
+              "chunk_id": "89226209eeb2eeffee64ee77d365e444947a436cbe08d6f4a8ab56c05bd897e6"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 8,
+              "chunk_id": "8de551c897e5408cf6ced7f32ed18dd1c874360a428c65db0adf7859ec67dc7e"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 5,
+              "chunk_id": "ece6e2d6560f1316e2a1acb7afff0a5bbbe58f010c7d5458b7661b0bb8bea5bc"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 5,
+              "chunk_id": "82893d12809aca17f6009e7412a6678c1a324d918b11302a3c606034cbb4f1a9"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 17,
+              "chunk_id": "2cda499fc9feed9dee11b99e97ed1c6ef3d23243615f84cbc23f6fa233e5b4f1"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 0,
+              "chunk_id": "c0c7580de7704d7d83c65620b6764f0d9ca4a614c932d8ce15ab2fdbabf2eca4"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 1,
+              "chunk_id": "a6fc5d5bbd6172511b6878a1d85fc0ce64e6538cb4aa4fedfb33b824b251d9dc"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 1,
+              "chunk_id": "6c0ce2a2a4497c227e53a7e868e4f3665f207318d8c32bf45217bcd720b1ce75"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "2002.01861",
+              "ordinal": 9,
+              "chunk_id": "dc7cf0a5b5ebd2896899938c053832985f4c01210fc4f7cbab484dbb76994549"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 10,
+              "chunk_id": "d7665dbd80c41a833b6d8ff3856666c9a37ab9d6f6c96562690c30af04475ff6"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 4,
+              "chunk_id": "2ffd5e02ffcbea0e97e0d60b37ec25f9e38cdfe672b9c8b772b20a36d70250fb"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 0,
+              "chunk_id": "0aeb747637bd9379fecd25335a639c8951b7870f394901707f707be6c534d126"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 17,
+              "chunk_id": "2cda499fc9feed9dee11b99e97ed1c6ef3d23243615f84cbc23f6fa233e5b4f1"
+            }
+          ],
+          "times_ms": {
+            "dense": 456.149,
+            "sparse": 60.041,
+            "fusion": 0.174,
+            "rerank": 28975.047
+          },
+          "total_ms": 29516.477
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "bfd77cc68357e2ff48d2465b3163c9aab2c95d6c0f2dc90c00d83cadd8fae941",
+          "chunks": [
+            {
+              "source": "2002.01861",
+              "ordinal": 9,
+              "chunk_id": "dc7cf0a5b5ebd2896899938c053832985f4c01210fc4f7cbab484dbb76994549"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 10,
+              "chunk_id": "d7665dbd80c41a833b6d8ff3856666c9a37ab9d6f6c96562690c30af04475ff6"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 4,
+              "chunk_id": "2ffd5e02ffcbea0e97e0d60b37ec25f9e38cdfe672b9c8b772b20a36d70250fb"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 0,
+              "chunk_id": "0aeb747637bd9379fecd25335a639c8951b7870f394901707f707be6c534d126"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 17,
+              "chunk_id": "2cda499fc9feed9dee11b99e97ed1c6ef3d23243615f84cbc23f6fa233e5b4f1"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "bfd77cc68357e2ff48d2465b3163c9aab2c95d6c0f2dc90c00d83cadd8fae941"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1827,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2247,
+            "output_tokens": 132,
+            "total_tokens": 2379
+          }
+        }
+      ]
+    },
+    {
+      "id": "5efa19058f815494b72c44d746c157e9403f726e",
+      "state": "returned",
+      "utc": "2026-11-14T02:32:09.641627+00:00",
+      "http": 200,
+      "elapsed_s": 28.85,
+      "answer": "The paper states that it uses the micro-averaged F1 score on all labels as the evaluation metric [1]. It also reports F1 score improvements and error rate reduction relative to baselines [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1911.01680",
+          "ordinal": 17,
+          "chunk_id": "2cda499fc9feed9dee11b99e97ed1c6ef3d23243615f84cbc23f6fa233e5b4f1",
+          "revision": "4af414cb-cf1e-45e6-add8-143f3b571645",
+          "excerpt": "7 embedding are used to initialize word embeddings; The hidden dimension of the Bi-LSTM, GCN and feed forward networks are 200; the hyper parameters $\\alpha $, $\\beta $ and $\\gamma $ are all set to 0.1; We use Adam optimizer with learning rate 0.003 to train the model. We use micro-averaged F1 score on all labels as the evaluation metric.\n\nWe compare our method with the models trained using Adobe internal NLU tool, Pytext BIBREF18 and Rasa BIBREF19 NLU tools. Table TABREF22 shows the results on Test set. Our model improves the F1 score by almost 2%, which corresponds to a 12.3% error rate reduction. This improvements proves the effectiveness of using contextual information for the task of slot filling.\n\nIn order to analyze the contribution of the proposed sub-tasks we also evaluate the model when we remove one of the sub-task and retrain the model. The results are reported in Table TABREF23. This table shows that all sub-tasks are required for the model to have its best performance. Among all sub-tasks the word level prediction using the contextual information has the major contribution to the model performance. This fact shows that contextual information trained to be informative",
+          "chunk_text_sha256": "f896ab898ae50983bf1488aa4d26db4fa5e0411d93f3dbbccee44795ed2ef210",
+          "excerpt_sha256": "f896ab898ae50983bf1488aa4d26db4fa5e0411d93f3dbbccee44795ed2ef210",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 18200,
+            "char_start": 17000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "1911.01680",
+              "ordinal": 0,
+              "chunk_id": "c0c7580de7704d7d83c65620b6764f0d9ca4a614c932d8ce15ab2fdbabf2eca4"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 13,
+              "chunk_id": "1fed724e26090008085ef9d93e80a38c2623b05060cf2ad944fd294463500214"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 1,
+              "chunk_id": "6c0ce2a2a4497c227e53a7e868e4f3665f207318d8c32bf45217bcd720b1ce75"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 18,
+              "chunk_id": "85610a3adb6e93e5bf0a7073202aee2e931a935519b0c2a514ad96bc74c08cee"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 17,
+              "chunk_id": "2cda499fc9feed9dee11b99e97ed1c6ef3d23243615f84cbc23f6fa233e5b4f1"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 14,
+              "chunk_id": "e9c4e58e97e99ff3c267866880ce422159df3cf1852542c1984a6411d5788c25"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 6,
+              "chunk_id": "2da694de7939fe566fe08186286c7e54cb9d4ddf1728fc51783311a62a93324c"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 3,
+              "chunk_id": "5425b5a0bbfd2c9de50565d0dec05e3530047ba32971bb6fe779276abaa9101c"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 9,
+              "chunk_id": "4627a3b1f8896998a9b6b13f134b8b6a299b016cfb6d02656c05fcda60f861dc"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 8,
+              "chunk_id": "4b053b39c6550de5beb1967454c35c445fd76c4442f78b88e9c88252ea642b27"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 4,
+              "chunk_id": "36053fe9dde7b3e834a17b4018e1880816dd5795998d651e8c8c76fd756cf1fc"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 9,
+              "chunk_id": "dc7cf0a5b5ebd2896899938c053832985f4c01210fc4f7cbab484dbb76994549"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 5,
+              "chunk_id": "8332478c79b4b68fcfc4e5bec318eccabb30aae06acd7830eba5188e51b5bcbe"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 16,
+              "chunk_id": "4996da3a045d1a9da787e002816816dfe805d26c0413b5d235a608d78175da1d"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 12,
+              "chunk_id": "3c71561785c9d2e876881432d04479efa66090145bcf050e55771a5479a5ab76"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 1,
+              "chunk_id": "a6fc5d5bbd6172511b6878a1d85fc0ce64e6538cb4aa4fedfb33b824b251d9dc"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 2,
+              "chunk_id": "a1a4b917d0406fabbcae495cf7b764acd85ab81f087b748303d52bbf2784340c"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 15,
+              "chunk_id": "e168775830cede3ab88349b80155214180a19a8aefe7e5af6240a2f29c563678"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1911.01680",
+              "ordinal": 17,
+              "chunk_id": "2cda499fc9feed9dee11b99e97ed1c6ef3d23243615f84cbc23f6fa233e5b4f1"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 1,
+              "chunk_id": "6c0ce2a2a4497c227e53a7e868e4f3665f207318d8c32bf45217bcd720b1ce75"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 0,
+              "chunk_id": "c0c7580de7704d7d83c65620b6764f0d9ca4a614c932d8ce15ab2fdbabf2eca4"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 6,
+              "chunk_id": "2da694de7939fe566fe08186286c7e54cb9d4ddf1728fc51783311a62a93324c"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 18,
+              "chunk_id": "85610a3adb6e93e5bf0a7073202aee2e931a935519b0c2a514ad96bc74c08cee"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 5,
+              "chunk_id": "8332478c79b4b68fcfc4e5bec318eccabb30aae06acd7830eba5188e51b5bcbe"
+            }
+          ],
+          "times_ms": {
+            "dense": 378.706,
+            "sparse": 39.02,
+            "fusion": 0.193,
+            "rerank": 27009.603
+          },
+          "total_ms": 27458.838
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "dc8d43ac2b74ae1fee2bc127a544e49ee560a73fe9aa12927dbf629516953231",
+          "chunks": [
+            {
+              "source": "1911.01680",
+              "ordinal": 17,
+              "chunk_id": "2cda499fc9feed9dee11b99e97ed1c6ef3d23243615f84cbc23f6fa233e5b4f1"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 1,
+              "chunk_id": "6c0ce2a2a4497c227e53a7e868e4f3665f207318d8c32bf45217bcd720b1ce75"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 0,
+              "chunk_id": "c0c7580de7704d7d83c65620b6764f0d9ca4a614c932d8ce15ab2fdbabf2eca4"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 6,
+              "chunk_id": "2da694de7939fe566fe08186286c7e54cb9d4ddf1728fc51783311a62a93324c"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 18,
+              "chunk_id": "85610a3adb6e93e5bf0a7073202aee2e931a935519b0c2a514ad96bc74c08cee"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 5,
+              "chunk_id": "8332478c79b4b68fcfc4e5bec318eccabb30aae06acd7830eba5188e51b5bcbe"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "dc8d43ac2b74ae1fee2bc127a544e49ee560a73fe9aa12927dbf629516953231"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1352,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2120,
+            "output_tokens": 59,
+            "total_tokens": 2179
+          }
+        }
+      ]
+    },
+    {
+      "id": "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854",
+      "state": "returned",
+      "utc": "2026-11-14T02:32:38.496807+00:00",
+      "http": 200,
+      "elapsed_s": 28.804,
+      "answer": "The tool (LUWAK) is implemented in pure JavaScript, using the LocalStorage of a web browser [1][2].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1708.00481",
+          "ordinal": 14,
+          "chunk_id": "956ae7001182980de07e9c5782b3de38f637b998450ada6202cb3973d13c92d8",
+          "revision": "db20cfb6-0aa7-4b7f-b0d3-0a540dd45875",
+          "excerpt": "s features, such as the multiple entity expansion model choices, that are not implemented in IKE. Moreover, LUWAK is a corpus-free tool that does not require a document collection for entity population. Thus, we differentiate LUWAK from IKE, considering it a more lightweight entity population tool.\n\nSummary\n\nThis paper has presented LUWAK, a lightweight front-end tool for interactive entity population. LUWAK provides a set of basic functions such as entity expansion and user feedback assignment. We have implemented LUWAK in pure JavaScript with LocalStorage to make it an installation-free tool. We believe that LUWAK plays an important role in delivering the values of existing entity expansion techniques to potential users including nontechnical people without supposing a large amount of human cost. Moreover, we believe that this design makes it easy to compare performances between interactive entity population pipelines and develop more sophisticated ones.",
+          "chunk_text_sha256": "8d5d93d5a806306c396de5d954b41acdb6a3c543ce03c0da994b7ddc02379c2b",
+          "excerpt_sha256": "8d5d93d5a806306c396de5d954b41acdb6a3c543ce03c0da994b7ddc02379c2b",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 970,
+          "locator": {
+            "type": "text_range",
+            "char_end": 14970,
+            "char_start": 14000
+          }
+        },
+        {
+          "number": 2,
+          "source": "1708.00481",
+          "ordinal": 5,
+          "chunk_id": "2a56a7563836472fbd2dae880c82e1117b79442e09cf79ea24c5b434642c4743",
+          "revision": "db20cfb6-0aa7-4b7f-b0d3-0a540dd45875",
+          "excerpt": "he Entity table. After submitting the judgments, LUWAK shows the Entity table again. The user can directly add, edit, or delete entities in the table at any time. (Step 4) the user can also easily see how these entities stored in the Entity table appear in a document. (Step 5) After repeating the same procedure (Steps 2–4) for a sufficient time, the user can publish the Entity table as an output.\n\nImplementation\n\nLUWAK is implemented in pure JavaScript code, and it uses the LocalStorage of a web browser. A user does not have to install any packages except for a web browser. The only thing the user must do is to download the LUWAK software and put it in a local directory. We believe the cost of installing the tool will keep away a good amount of potential users. This philosophy follows our empirical feeling of the curse of installing required packages/libraries. Moreover, LUWAK does not need users to consider the usage and maintenance of these additional packages. That is why we are deeply committed to making LUWAK a pure client-side tool in the off-the-shelf style.\n\nLUWAK Dashboard\n\nLUWAK has a dashboard for quickly viewing an entity dictionary in progress. The dashboard consists o",
+          "chunk_text_sha256": "85d28d9a06a15dbcd306cc5632d6122bdb98a23810acb2491921444fb549442d",
+          "excerpt_sha256": "85d28d9a06a15dbcd306cc5632d6122bdb98a23810acb2491921444fb549442d",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 6200,
+            "char_start": 5000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "1708.00481",
+              "ordinal": 0,
+              "chunk_id": "77348d081679216875d442f0e2b5a9ab855bffda8c27b3d656521f97df3fd1c1"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 14,
+              "chunk_id": "956ae7001182980de07e9c5782b3de38f637b998450ada6202cb3973d13c92d8"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 4,
+              "chunk_id": "2ec4fda3d2aff592330f47cc73e1a6fef9fcc0d73063486f70fae5f39e39ee91"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 13,
+              "chunk_id": "2ef56748aa370d8c320bc28a67bfdb6e12f94edbe39637ca1153ebce8c1cf55c"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 3,
+              "chunk_id": "869efea240948449f83d82e42dd923724454cfd13dab4175b7c6039bb11d074c"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 1,
+              "chunk_id": "a6fc5d5bbd6172511b6878a1d85fc0ce64e6538cb4aa4fedfb33b824b251d9dc"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 5,
+              "chunk_id": "2a56a7563836472fbd2dae880c82e1117b79442e09cf79ea24c5b434642c4743"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 6,
+              "chunk_id": "69770dfbdc295b144812f1980fb11b123b139411e87ca73aa5635cca9c8a0a6b"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 2,
+              "chunk_id": "bfabec5faa30ae1d6936634daf92ebcf22daa7e5aa7f632ad9b96c9dfac1fae6"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 9,
+              "chunk_id": "066217df80d0e277cc6afe8aa1b9fd697c354650640b5fb7bec3511f6d8d6f50"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 1,
+              "chunk_id": "36b3c66f5023b0388de7f3698afba2e8b688bff76bbc6d0fec1c45d56fce7948"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 7,
+              "chunk_id": "fad994cbc35d4300feb5682aeba8d01ef7da7fd6ed1f395c2c0422c5013e4611"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 3,
+              "chunk_id": "4ae7b8b30a101ecc7ef9783becf6db63e46805633f65e0f6adc5b5d35b68c183"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 2,
+              "chunk_id": "06d09b583085b69da949f4823e0393427f73fc4fb4bd99a2ba5c219a8032b6fe"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 14,
+              "chunk_id": "61bbaacfec70fbc9585861b97eafa8094cae8984f4dc46291972fdab4f7fb695"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 12,
+              "chunk_id": "bcb364357066d2b62e2f4e426884fef105a1260ca7dd8aca74678ef30ae2979b"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 15,
+              "chunk_id": "e168775830cede3ab88349b80155214180a19a8aefe7e5af6240a2f29c563678"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 1,
+              "chunk_id": "6c0ce2a2a4497c227e53a7e868e4f3665f207318d8c32bf45217bcd720b1ce75"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1708.00481",
+              "ordinal": 14,
+              "chunk_id": "956ae7001182980de07e9c5782b3de38f637b998450ada6202cb3973d13c92d8"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 5,
+              "chunk_id": "2a56a7563836472fbd2dae880c82e1117b79442e09cf79ea24c5b434642c4743"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 2,
+              "chunk_id": "bfabec5faa30ae1d6936634daf92ebcf22daa7e5aa7f632ad9b96c9dfac1fae6"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 1,
+              "chunk_id": "36b3c66f5023b0388de7f3698afba2e8b688bff76bbc6d0fec1c45d56fce7948"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 3,
+              "chunk_id": "869efea240948449f83d82e42dd923724454cfd13dab4175b7c6039bb11d074c"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 0,
+              "chunk_id": "77348d081679216875d442f0e2b5a9ab855bffda8c27b3d656521f97df3fd1c1"
+            }
+          ],
+          "times_ms": {
+            "dense": 385.472,
+            "sparse": 38.182,
+            "fusion": 0.329,
+            "rerank": 27255.289
+          },
+          "total_ms": 27705.01
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "945dfc58c1d413cf32c8b204f352213e20f478531c88b1fbc970cdc00cff9d22",
+          "chunks": [
+            {
+              "source": "1708.00481",
+              "ordinal": 14,
+              "chunk_id": "956ae7001182980de07e9c5782b3de38f637b998450ada6202cb3973d13c92d8"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 5,
+              "chunk_id": "2a56a7563836472fbd2dae880c82e1117b79442e09cf79ea24c5b434642c4743"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 2,
+              "chunk_id": "bfabec5faa30ae1d6936634daf92ebcf22daa7e5aa7f632ad9b96c9dfac1fae6"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 1,
+              "chunk_id": "36b3c66f5023b0388de7f3698afba2e8b688bff76bbc6d0fec1c45d56fce7948"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 3,
+              "chunk_id": "869efea240948449f83d82e42dd923724454cfd13dab4175b7c6039bb11d074c"
+            },
+            {
+              "source": "1708.00481",
+              "ordinal": 0,
+              "chunk_id": "77348d081679216875d442f0e2b5a9ab855bffda8c27b3d656521f97df3fd1c1"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": false,
+          "prompt_sha256": "945dfc58c1d413cf32c8b204f352213e20f478531c88b1fbc970cdc00cff9d22"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1053,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2164,
+            "output_tokens": 45,
+            "total_tokens": 2209
+          }
+        }
+      ]
+    }
+  ]
+}

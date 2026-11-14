@@ -1,0 +1,18 @@
+{
+  "first_response_job": {
+    "state": "completed",
+    "started_at": "2026-11-14T02:04:14.040259+00:00",
+    "finished_at": "2026-11-14T02:35:52.156293+00:00",
+    "elapsed_seconds": 1898.11,
+    "exit_code": 0
+  },
+  "receipts": {
+    "baseline-full.json": "41bebae7d2d837d7d8e3c3d704531d2d8279af7b5bd8615bc17ce55e55303b6e",
+    "baseline-independent.json": "cd01288a47dfe8b1b42a13b8895cf11abd901a1a42d5898b43dd19f8c8138317",
+    "baseline-qasper.json": "c30ecd3a7ba9e2f7b281e29a6bbe4daa6b80752c1a6c79dc8a0bc1c1b1818742",
+    "candidate-full.json": "1eaab40948f6920eeefec0cb82166808e12c22717baa26d6f339905bb98a3685",
+    "candidate-independent.json": "ffdc41a4c37ac536e87ec5ebd079e790f3b0bc534d135e283715468458de6a83",
+    "candidate-qasper.json": "b8bf1e0defce6d5847fc5867d77a82174fcfbf056315d667a19083e1fac35ad0"
+  },
+  "digest_method": "SHA-256 of UTF-8 text with CRLF normalized to LF; independent of the working-tree checkout."
+}

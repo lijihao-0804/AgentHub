@@ -1,0 +1,935 @@
+{
+  "summary": {
+    "full": {
+      "metrics": {
+        "baseline": {
+          "n": 4,
+          "http200": 4,
+          "answerable": 3,
+          "unanswerable": 1,
+          "positive_outcomes": {
+            "partial": 1,
+            "full": 2
+          },
+          "negative_outcomes": {
+            "refusal": 1
+          },
+          "supporting_citations": 6,
+          "returned_citations": 6
+        },
+        "candidate": {
+          "n": 4,
+          "http200": 4,
+          "answerable": 3,
+          "unanswerable": 1,
+          "positive_outcomes": {
+            "refusal": 1,
+            "full": 2
+          },
+          "negative_outcomes": {
+            "refusal": 1
+          },
+          "supporting_citations": 6,
+          "returned_citations": 6
+        }
+      },
+      "http200": {
+        "retained": [
+          "620",
+          "791",
+          "838-reproductive-functions",
+          "missing-tenant-canary"
+        ],
+        "lost": [],
+        "gained": []
+      },
+      "supported_answer": {
+        "retained": [
+          "791",
+          "838-reproductive-functions"
+        ],
+        "lost": [],
+        "gained": []
+      },
+      "correct_refusal": {
+        "retained": [
+          "missing-tenant-canary"
+        ],
+        "lost": [],
+        "gained": []
+      },
+      "wrong_positive": {
+        "retained": [],
+        "lost": [],
+        "gained": []
+      }
+    },
+    "independent": {
+      "metrics": {
+        "baseline": {
+          "n": 12,
+          "http200": 11,
+          "answerable": 8,
+          "unanswerable": 4,
+          "positive_outcomes": {
+            "full": 7,
+            "failure": 1
+          },
+          "negative_outcomes": {
+            "refusal": 3,
+            "full": 1
+          },
+          "supporting_citations": 16,
+          "returned_citations": 16
+        },
+        "candidate": {
+          "n": 12,
+          "http200": 12,
+          "answerable": 8,
+          "unanswerable": 4,
+          "positive_outcomes": {
+            "full": 8
+          },
+          "negative_outcomes": {
+            "refusal": 1,
+            "full": 1,
+            "wrong": 2
+          },
+          "supporting_citations": 21,
+          "returned_citations": 21
+        }
+      },
+      "http200": {
+        "retained": [
+          "09f0dce416a1e40cc6a24a8b42a802747d2c9363",
+          "1d739bb8e5d887fdfd1f4b6e39c57695c042fa25",
+          "38854255dbdf2f36eebefc0d9826aa76df9637c6",
+          "4e4d377b140c149338446ba69737ea191c4328d9",
+          "5112bbf13c7cf644bf401daecb5e3265889a4bfc",
+          "5450f27ccc0406d3bffd08772d8b59004c2716da",
+          "5c059a13d59947f30877bed7d0180cca20a83284",
+          "689d1d0c4653a8fa87fd0e01fa7e12f75405cd38",
+          "694dd76a37ad9e8083c546e9bd083c5c3b65695c",
+          "974868e4e22f14766bcc76dc4927a7f2795dcd5e",
+          "e930f153c89dfe9cff75b7b15e45cd3d700f4c72"
+        ],
+        "lost": [],
+        "gained": [
+          "7dce1b64c0040500951c864fce93d1ad7a1809bc"
+        ]
+      },
+      "supported_answer": {
+        "retained": [
+          "09f0dce416a1e40cc6a24a8b42a802747d2c9363",
+          "1d739bb8e5d887fdfd1f4b6e39c57695c042fa25",
+          "38854255dbdf2f36eebefc0d9826aa76df9637c6",
+          "4e4d377b140c149338446ba69737ea191c4328d9",
+          "5450f27ccc0406d3bffd08772d8b59004c2716da",
+          "689d1d0c4653a8fa87fd0e01fa7e12f75405cd38",
+          "694dd76a37ad9e8083c546e9bd083c5c3b65695c"
+        ],
+        "lost": [],
+        "gained": [
+          "7dce1b64c0040500951c864fce93d1ad7a1809bc"
+        ]
+      },
+      "correct_refusal": {
+        "retained": [
+          "e930f153c89dfe9cff75b7b15e45cd3d700f4c72"
+        ],
+        "lost": [
+          "5112bbf13c7cf644bf401daecb5e3265889a4bfc",
+          "974868e4e22f14766bcc76dc4927a7f2795dcd5e"
+        ],
+        "gained": []
+      },
+      "wrong_positive": {
+        "retained": [
+          "5c059a13d59947f30877bed7d0180cca20a83284"
+        ],
+        "lost": [],
+        "gained": [
+          "5112bbf13c7cf644bf401daecb5e3265889a4bfc",
+          "974868e4e22f14766bcc76dc4927a7f2795dcd5e"
+        ]
+      }
+    },
+    "qasper": {
+      "metrics": {
+        "baseline": {
+          "n": 7,
+          "http200": 7,
+          "answerable": 6,
+          "unanswerable": 1,
+          "positive_outcomes": {
+            "full": 6
+          },
+          "negative_outcomes": {
+            "refusal": 1
+          },
+          "supporting_citations": 12,
+          "returned_citations": 12
+        },
+        "candidate": {
+          "n": 7,
+          "http200": 7,
+          "answerable": 6,
+          "unanswerable": 1,
+          "positive_outcomes": {
+            "full": 6
+          },
+          "negative_outcomes": {
+            "refusal": 1
+          },
+          "supporting_citations": 13,
+          "returned_citations": 13
+        }
+      },
+      "http200": {
+        "retained": [
+          "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+          "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854",
+          "5efa19058f815494b72c44d746c157e9403f726e",
+          "6b8a3100895f2192e08973006474428319dc298e",
+          "77db56fee07b01015a74413ca31f19bea7203f0b",
+          "a130aa735de3b65c71f27018f20d3c068bafb826",
+          "e67d2266476abd157fc8c396b3dfb70cb343471e"
+        ],
+        "lost": [],
+        "gained": []
+      },
+      "supported_answer": {
+        "retained": [
+          "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+          "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854",
+          "5efa19058f815494b72c44d746c157e9403f726e",
+          "6b8a3100895f2192e08973006474428319dc298e",
+          "77db56fee07b01015a74413ca31f19bea7203f0b",
+          "a130aa735de3b65c71f27018f20d3c068bafb826"
+        ],
+        "lost": [],
+        "gained": []
+      },
+      "correct_refusal": {
+        "retained": [
+          "e67d2266476abd157fc8c396b3dfb70cb343471e"
+        ],
+        "lost": [],
+        "gained": []
+      },
+      "wrong_positive": {
+        "retained": [],
+        "lost": [],
+        "gained": []
+      }
+    }
+  },
+  "assessment": {
+    "independent_checks": {
+      "http_200_improved": true,
+      "previously_correct_preserved": true,
+      "previously_correct_refusals_preserved": false,
+      "no_new_wrong_positive": false,
+      "semantic_citation_precision_preserved": true
+    },
+    "historical_preservation": {
+      "full": {
+        "lost_supported": [],
+        "lost_correct_refusals": [],
+        "new_wrong_positives": []
+      },
+      "qasper": {
+        "lost_supported": [],
+        "lost_correct_refusals": [],
+        "new_wrong_positives": []
+      }
+    },
+    "http_discordant_gain_loss": [
+      1,
+      0
+    ],
+    "two_sided_exact_p_http": 1,
+    "note": "Source integrity, retrieval parity and historical controls are checked separately."
+  },
+  "rows": {
+    "1d739bb8e5d887fdfd1f4b6e39c57695c042fa25": {
+      "baseline": {
+        "masked_id": "fc066b5053a486f9c3b5",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          6
+        ],
+        "reason": "[6] gives the three parallel LSTMs, their three inputs and attention on the bidirectional comment encoder. [2] identifies the best neural model as a bidirectional LSTM with attention.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "013448266ff7b7b83c71",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          6
+        ],
+        "reason": "[6] gives the three parallel LSTMs, their three inputs and attention on the bidirectional comment encoder. [2] identifies the best neural model as a bidirectional LSTM with attention.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "e930f153c89dfe9cff75b7b15e45cd3d700f4c72": {
+      "baseline": {
+        "masked_id": "0b3e181f00cdee3d4681",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficient-evidence outcome without citations. The question asks for a measured magnitude and has an official unanswerable label.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "93c89a15137c5e43c062",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficient-evidence outcome without citations. The question asks for a measured magnitude and has an official unanswerable label.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "689d1d0c4653a8fa87fd0e01fa7e12f75405cd38": {
+      "baseline": {
+        "masked_id": "7d93e280d3b5d4a4d70e",
+        "verdict": "full",
+        "supporting_citations": [
+          3,
+          4
+        ],
+        "reason": "[3] states several algorithms were instantiated to combine task-specific and corpus features. [4] explicitly compares biLSTM-CRF and SVM; the answer covers the annotated biLSTM and justifiably names SVM without claiming an exhaustive list.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "1acc3e086824ae30cc29",
+        "verdict": "full",
+        "supporting_citations": [
+          3,
+          4
+        ],
+        "reason": "[3] states several algorithms were instantiated to combine task-specific and corpus features. [4] explicitly compares biLSTM-CRF and SVM; the answer covers the annotated biLSTM and justifiably names SVM without claiming an exhaustive list.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "4e4d377b140c149338446ba69737ea191c4328d9": {
+      "baseline": {
+        "masked_id": "ab47ab54d9a8466ba98e",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          5
+        ],
+        "reason": "[1] supports the ACL training corpus, sentence/paper counts, polarity embeddings, Brown comparison and basic evaluation set. [5] supplies the complete implicit and pn evaluation counts, including the reported 200,222 excluded sentences.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "7f6116b98f134441e7b9",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          5
+        ],
+        "reason": "[1] supports the ACL training corpus, sentence/paper counts, polarity embeddings, Brown comparison and basic evaluation set. [5] supplies the complete implicit and pn evaluation counts, including the reported 200,222 excluded sentences.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "7dce1b64c0040500951c864fce93d1ad7a1809bc": {
+      "baseline": {
+        "masked_id": "25736c87e5b7a1dba537",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "First HTTP response was 502; there is no answer or citation to assess.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "6616ac3209164f7dbf28",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          6
+        ],
+        "reason": "[2] identifies the frozen clean-speech ASR acoustic model; [6] confirms clean magnitudes, hard senone targets, cross-entropy and frozen weights. The annotation mentions a masking enhancer in a related-work passage, a different component.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "5c059a13d59947f30877bed7d0180cca20a83284": {
+      "baseline": {
+        "masked_id": "899d99accc31e97e802e",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "Despite the official unanswerable label, [1] explicitly identifies the corpus as private English news and confirms the Wikipedia-title data and BERT mention. No proper corpus name is asserted.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "4a66e6c493cf29829c95",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Despite the official unanswerable label, [1] identifies a private English news corpus and directly lists the other data and architecture; [2] confirms the parallel corpus for around three million articles. No proper corpus name is asserted.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "38854255dbdf2f36eebefc0d9826aa76df9637c6": {
+      "baseline": {
+        "masked_id": "e7cbf83a5c59be83a83d",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] names FarsNet, the Shahid Beheshti NLP Lab, and its shared structure with WordNet. [2] independently identifies FarsNet as Persian WordNet.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "a477625932396041f169",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] identifies FarsNet as the first WordNet for Persian and [2] calls it Persian WordNet.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "09f0dce416a1e40cc6a24a8b42a802747d2c9363": {
+      "baseline": {
+        "masked_id": "5ecf09a7b7230050e5a7",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          4
+        ],
+        "reason": "[2] identifies a public pre-trained Portuguese word2vec model. [4] distinguishes Skip-Gram and CBOW and says the latter was chosen.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "15f15b151d2c13798296",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          4
+        ],
+        "reason": "[2] identifies a public pre-trained Portuguese word2vec model. [4] distinguishes Skip-Gram and CBOW and says the latter was chosen.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "5450f27ccc0406d3bffd08772d8b59004c2716da": {
+      "baseline": {
+        "masked_id": "3f7d3c108f94bf921360",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          6
+        ],
+        "reason": "[1] defines seen/unseen prefix completion; [6] gives the 0.5 threshold, forward BLEU, length variation and predicted degradation. [2] and [3] both state that the test measures robustness against exposure bias.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "c08b378414e2bf68a813",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          6
+        ],
+        "reason": "[1] defines the prefix-completion task. [6] gives the threshold, forward BLEU comparison and expected unfamiliar-prefix degradation. [2] defines the metric’s purpose.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "694dd76a37ad9e8083c546e9bd083c5c3b65695c": {
+      "baseline": {
+        "masked_id": "9abccb36665ea247dfe7",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "The limitations passage in [1] explicitly names Chinese as the language and describes the difficulty for researchers who do not speak it.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "9ddd136aef9a2fd54bba",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "The limitations passage in [1] explicitly names Chinese as the language and describes the difficulty for researchers who do not speak it.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "974868e4e22f14766bcc76dc4927a7f2795dcd5e": {
+      "baseline": {
+        "masked_id": "81d29f2e8cf5fc6308d7",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficient-evidence outcome with no citations. The distinction between a general CNN comparison and a ConvKB comparison is consistent with the official negative.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "6803e0b7f7d7748784a6",
+        "verdict": "wrong",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "The answer correctly distinguishes the general CNN versus fully connected comparison in [2], but supplies no requested ConvKB versus KB-model comparison. It signals insufficiency in prose while returning a substantive cited answer and a false insufficiency flag, so it misses the official refusal target.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "5112bbf13c7cf644bf401daecb5e3265889a4bfc": {
+      "baseline": {
+        "masked_id": "cfad16a539eb9678aad2",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficient-evidence outcome with no citations. Naming the datasets does not answer their size. This agrees with the official unanswerable label.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "71502c3189c230feeb39",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] supports six language pairs and [2] supports MUSE and Vecmap. Neither supplies dataset cardinality. The prose says evidence is insufficient but the structured outcome returns a cited answer, missing the official refusal target.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "e67d2266476abd157fc8c396b3dfb70cb343471e": {
+      "baseline": {
+        "masked_id": "6233519a28610cb81277",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response declares insufficient evidence without citations for the predeclared unanswerable question; no target-paper language list is asserted.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "e31dd7d8b1590214bc87",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response declares insufficient evidence without citations for the predeclared unanswerable question; no target-paper language list is asserted.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "6b8a3100895f2192e08973006474428319dc298e": {
+      "baseline": {
+        "masked_id": "e5daf4525d841936b1ff",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "[2] names MNCut spectral clustering over the specialised vectors following prior work. [3] directly supports the self-tuning cluster-count method.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "51b0941e3ab9ed10384d",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] states clustering over VerbNet-specialised vectors; [2] names MNCut spectral clustering; [3] confirms estimation of the cluster count by self-tuning.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "a130aa735de3b65c71f27018f20d3c068bafb826": {
+      "baseline": {
+        "masked_id": "937c3aff4fa28ef27c7c",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4,
+          6
+        ],
+        "reason": "[6] gives VG 85%, 16k images, 740k descriptions and ReferIt 9k/54k. [4] gives 1.73M instance-selection training samples and 300K validation/testing samples. [1] states 2,909 instance classes.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "a626f08f117e970f514e",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4,
+          6
+        ],
+        "reason": "[6] supports both dataset sizes. [4] confirms VG description/object-set pairs, 1.73M training and 300K validation/testing samples. [1] directly supports the added 0.7618 F1 over 2,909 classes.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c": {
+      "baseline": {
+        "masked_id": "5483e728c42f552edc12",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] states 218 NALCS plus 103 LMS videos, 321 total, and 30–50 minutes per game video.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "7d10f3090b6041e46e0e",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] directly gives the tournament breakdown, 321-video total, weeks 1–9 in spring 2017 and the 30–50-minute duration.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "77db56fee07b01015a74413ca31f19bea7203f0b": {
+      "baseline": {
+        "masked_id": "5e2a5abf60617de77e01",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] supports document-wide deduplicated entity sets, precision/recall/F1 and exact matching. [2] gives micro-averaged and per-type results. [3] explicitly says only F1 is plotted for data efficiency and other metrics show similar trends.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "9e17bc3b55abca1871c0",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] supports document-wide deduplicated entity sets, precision/recall/F1 and exact matching. [2] gives micro-averaged and per-type results. [3] explicitly says only F1 is plotted for data efficiency and other metrics show similar trends.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "5efa19058f815494b72c44d746c157e9403f726e": {
+      "baseline": {
+        "masked_id": "d8ff8191926479f8564b",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] explicitly states micro-averaged F1 on all labels as the evaluation metric.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "a5d84c593f286ef6f62c",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] explicitly defines micro-averaged F1 over all labels and reports both F1 improvement and error-rate reduction against baselines.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854": {
+      "baseline": {
+        "masked_id": "c202b41d861397e3b9eb",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both excerpts explicitly identify LUWAK as pure JavaScript using LocalStorage; [2] identifies the web browser.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "46336ea579faaf45368c",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both excerpts explicitly identify LUWAK as pure JavaScript using LocalStorage; [2] identifies the web browser.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "620": {
+      "baseline": {
+        "masked_id": "cd9920d352c1b414e156",
+        "verdict": "partial",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] supports a mouse PDA study with stromal depletion, transient vascular density and gemcitabine concentration increases, and transient stabilization. The answer expressly leaves fibrosis reduction unestablished and limits the support, so it does not fully substantiate the compound claim.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "1ce0e1610f4527c10835",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response declares insufficient evidence and returns no citations. Its limited discussion does not supply a cited answer to the positive claim, so this is an abstention on a positive question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "791": {
+      "baseline": {
+        "masked_id": "e2b522ebe09a7fa26eef",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          4
+        ],
+        "reason": "[1] gives the pooled risks and confidence intervals. [1] and [2] state the roughly twofold ischemic-stroke association with aura. [4] supports the qualified statement concerning women under 45 and possibly men with aura.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "ce34636bbafa5f5b0faa",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "[1] supports the aura and non-aura pooled risks and confidence intervals, and [2] repeats the aura-specific conclusion. [3] explicitly describes early-onset ischemic stroke risk; [4] supports the qualified age/sex statement.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "missing-tenant-canary": {
+      "baseline": {
+        "masked_id": "8fded2e74346c1e93b4a",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficient-evidence response without citations for the absent memorandum negative control.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "ae7313db7d3c4043071f",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficient-evidence response without citations for the absent memorandum negative control.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "838-reproductive-functions": {
+      "baseline": {
+        "masked_id": "243d31b28fb96bb8277d",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] directly supports ovarian steroid synthesis and ovulation, luteal insufficiency and the pregnancy defects. [2] completes the human stromal-cell decidualization finding and explicitly states corpus luteum maintenance, decidualization, placental formation and pregnancy roles.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "191798eb1700a54ee0b4",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] directly supports ovarian steroid synthesis and ovulation, luteal insufficiency and the pregnancy defects. [2] completes the human stromal-cell decidualization finding and explicitly states corpus luteum maintenance, decidualization, placental formation and pregnancy roles.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    }
+  },
+  "excluding_previously_reserved": {
+    "excluded": "09f0dce416a1e40cc6a24a8b42a802747d2c9363",
+    "summary": {
+      "independent": {
+        "metrics": {
+          "baseline": {
+            "n": 11,
+            "http200": 10,
+            "answerable": 7,
+            "unanswerable": 4,
+            "positive_outcomes": {
+              "full": 6,
+              "failure": 1
+            },
+            "negative_outcomes": {
+              "refusal": 3,
+              "full": 1
+            },
+            "supporting_citations": 14,
+            "returned_citations": 14
+          },
+          "candidate": {
+            "n": 11,
+            "http200": 11,
+            "answerable": 7,
+            "unanswerable": 4,
+            "positive_outcomes": {
+              "full": 7
+            },
+            "negative_outcomes": {
+              "refusal": 1,
+              "full": 1,
+              "wrong": 2
+            },
+            "supporting_citations": 19,
+            "returned_citations": 19
+          }
+        },
+        "http200": {
+          "retained": [
+            "1d739bb8e5d887fdfd1f4b6e39c57695c042fa25",
+            "38854255dbdf2f36eebefc0d9826aa76df9637c6",
+            "4e4d377b140c149338446ba69737ea191c4328d9",
+            "5112bbf13c7cf644bf401daecb5e3265889a4bfc",
+            "5450f27ccc0406d3bffd08772d8b59004c2716da",
+            "5c059a13d59947f30877bed7d0180cca20a83284",
+            "689d1d0c4653a8fa87fd0e01fa7e12f75405cd38",
+            "694dd76a37ad9e8083c546e9bd083c5c3b65695c",
+            "974868e4e22f14766bcc76dc4927a7f2795dcd5e",
+            "e930f153c89dfe9cff75b7b15e45cd3d700f4c72"
+          ],
+          "lost": [],
+          "gained": [
+            "7dce1b64c0040500951c864fce93d1ad7a1809bc"
+          ]
+        },
+        "supported_answer": {
+          "retained": [
+            "1d739bb8e5d887fdfd1f4b6e39c57695c042fa25",
+            "38854255dbdf2f36eebefc0d9826aa76df9637c6",
+            "4e4d377b140c149338446ba69737ea191c4328d9",
+            "5450f27ccc0406d3bffd08772d8b59004c2716da",
+            "689d1d0c4653a8fa87fd0e01fa7e12f75405cd38",
+            "694dd76a37ad9e8083c546e9bd083c5c3b65695c"
+          ],
+          "lost": [],
+          "gained": [
+            "7dce1b64c0040500951c864fce93d1ad7a1809bc"
+          ]
+        },
+        "correct_refusal": {
+          "retained": [
+            "e930f153c89dfe9cff75b7b15e45cd3d700f4c72"
+          ],
+          "lost": [
+            "5112bbf13c7cf644bf401daecb5e3265889a4bfc",
+            "974868e4e22f14766bcc76dc4927a7f2795dcd5e"
+          ],
+          "gained": []
+        },
+        "wrong_positive": {
+          "retained": [
+            "5c059a13d59947f30877bed7d0180cca20a83284"
+          ],
+          "lost": [],
+          "gained": [
+            "5112bbf13c7cf644bf401daecb5e3265889a4bfc",
+            "974868e4e22f14766bcc76dc4927a7f2795dcd5e"
+          ]
+        }
+      }
+    },
+    "assessment": {
+      "independent_checks": {
+        "http_200_improved": true,
+        "previously_correct_preserved": true,
+        "previously_correct_refusals_preserved": false,
+        "no_new_wrong_positive": false,
+        "semantic_citation_precision_preserved": true
+      },
+      "historical_preservation": {},
+      "http_discordant_gain_loss": [
+        1,
+        0
+      ],
+      "two_sided_exact_p_http": 1,
+      "note": "Source integrity, retrieval parity and historical controls are checked separately."
+    }
+  }
+}

@@ -5,7 +5,6 @@ import json
 from collections import Counter
 from pathlib import Path
 
-
 HERE = Path(__file__).resolve().parent
 ROOT = next(p for p in HERE.parents if (p / "benchmarks/public_rag").is_dir())
 RAW = ROOT / ".scratch/article-live-20261114"
@@ -61,7 +60,9 @@ def build():
                 if r["http"] != 502:
                     continue
                 assert [s["span"] for _, s in spans] == [
-                    "knowledge.rerank", "knowledge.retrieve", "model.generate"
+                    "knowledge.rerank",
+                    "knowledge.retrieve",
+                    "model.generate",
                 ]
                 (rerank_line, rerank), (retrieve_line, retrieval), (model_line, model) = spans
                 assert rerank["status"] == retrieval["status"] == "ok"
@@ -74,23 +75,42 @@ def build():
                     assert r["error"] == "CITATION_QA_INVALID_MODEL_OUTPUT"
                     assert model["status"] == "ok" and model["failure_code"] is None
                     stage = "qa_unique_json_or_strict_output_schema"
-                failures.append({
-                    "scope": corpus, "arm": arm, "case_id": r["id"], "row_1_based": index,
-                    "http": r["http"], "elapsed_s": r["elapsed_s"], "code": r["error"],
-                    "api_log": log.name, "rerank_line": rerank_line, "retrieve_line": retrieve_line,
-                    "model_line": model_line, "retrieval_status": retrieval["status"],
-                    "rerank_output_count": rerank["final_count"], "model_status": model["status"],
-                    "model_attempt_count": model["attempt_count"], "fallback_used": model["fallback_used"],
-                    "stage": stage, "stage_confidence": "high (serial order join)",
-                    "exact_subreason": None,
-                })
+                failures.append(
+                    {
+                        "scope": corpus,
+                        "arm": arm,
+                        "case_id": r["id"],
+                        "row_1_based": index,
+                        "http": r["http"],
+                        "elapsed_s": r["elapsed_s"],
+                        "code": r["error"],
+                        "api_log": log.name,
+                        "rerank_line": rerank_line,
+                        "retrieve_line": retrieve_line,
+                        "model_line": model_line,
+                        "retrieval_status": retrieval["status"],
+                        "rerank_output_count": rerank["final_count"],
+                        "model_status": model["status"],
+                        "model_attempt_count": model["attempt_count"],
+                        "fallback_used": model["fallback_used"],
+                        "stage": stage,
+                        "stage_confidence": "high (serial order join)",
+                        "exact_subreason": None,
+                    }
+                )
     assert counts == {200: 42, 502: 9}
     return {
         "source_run": "article-recall-20261114/live",
         "scope": "51 predeclared first HTTP outcomes; separate title diagnostic was HTTP 200.",
-        "join": "Each arm used a dedicated API process and serial client. Match request groups in log order to frozen case order. No request ID in the client capture. Six group counts match six full captures exactly.",
+        "join": (
+            "Each arm used a dedicated API process and serial client. "
+            "Match request groups in log order to frozen case order. "
+            "No request ID in the client capture. Six group counts match six full captures exactly."
+        ),
         "baseline_commit": read(LIVE / "provenance.json")["baseline_commit"],
-        "http_counts": dict(counts), "sha256": sources, "failures": failures,
+        "http_counts": dict(counts),
+        "sha256": sources,
+        "failures": failures,
     }
 
 
