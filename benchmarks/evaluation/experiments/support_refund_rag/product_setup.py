@@ -143,7 +143,9 @@ async def policy_snapshot(owner, scope, documents, components, settings, queue):
     return kb["id"], snapshot, uploaded
 
 
-async def publish(owner, scope, principal, factory, snapshot, profile_id):
+async def publish(
+    owner, scope, principal, factory, snapshot, profile_id, *, support_answer_policy=None
+):
     bindings = []
     for identity in ("search_knowledge", "query_customer", "create_ticket"):
         tool = await api(
@@ -187,6 +189,11 @@ async def publish(owner, scope, principal, factory, snapshot, profile_id):
             "model_retry_policy": {"max_attempts": 1},
             "retrieval_config": {"final_top_k": 6, "candidate_top_k": 20},
             "runtime_config": {
+                **(
+                    {"support_answer_policy": support_answer_policy}
+                    if support_answer_policy
+                    else {}
+                ),
                 "max_steps": 4,
                 "max_tool_calls": 12,
                 "max_parallel_reads": 3,

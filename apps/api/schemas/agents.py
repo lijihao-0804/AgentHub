@@ -164,6 +164,7 @@ class RuntimeConfigRequest(BaseModel):
     context_policy: ContextPolicyRequest | None = None
     history_policy: Literal["deterministic_history_v1"] | None = None
     summary_policy: SummaryPolicyRequest | None = None
+    support_answer_policy: Literal["support_facts_v1"] | None = None
 
     @model_validator(mode="after")
     def validate_summary_prerequisites(self) -> RuntimeConfigRequest:

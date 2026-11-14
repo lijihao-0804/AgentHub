@@ -146,6 +146,7 @@ export type RuntimeConfig = {
   context_budget_sources?: ContextBudgetSources | null;
   memory?: MemoryConfig | null;
   context_policy?: ContextPolicyRequest | null;
+  support_answer_policy?: "support_facts_v1" | null;
   history_policy?: "deterministic_history_v1" | null;
   summary_policy?: SummaryPolicy | null;
   [key: string]: unknown;

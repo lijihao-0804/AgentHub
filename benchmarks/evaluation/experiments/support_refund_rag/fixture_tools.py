@@ -87,6 +87,7 @@ class FixtureCaseScope:
     order_id: str
     customer_id: str
     business_time: str = FIXED_BUSINESS_TIME
+    support_answer_policy: str | None = None
 
     def __post_init__(self) -> None:
         if self.business_time != FIXED_BUSINESS_TIME:
@@ -226,7 +227,11 @@ def get_refund_status_handler(*, store: FixtureOrderStore):
             raise ToolHandlerError("ORDER_NOT_FOUND", "The order was not found.")
         return {
             "order_id": row["order_id"],
-            "refund": row.get("refund"),
+            **(
+                {key: row[key] for key in ("refund", "refund_requested_at") if key in row}
+                if scope.support_answer_policy == "support_facts_v1"
+                else {"refund": row.get("refund")}
+            ),
             "business_time": scope.business_time,
             "fixture": "fictional",
         }
