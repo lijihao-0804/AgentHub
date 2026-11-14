@@ -44,6 +44,7 @@ from packages.knowledge.evidence_records import (
     evidence_record,
     evidence_reference,
 )
+from packages.knowledge.evidence_sentence import SentenceEvidenceReranker
 from packages.knowledge.models import (
     Document,
     DocumentChunk,
@@ -398,6 +399,12 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             raise AgentHubError(
                 "INVALID_RETRIEVAL_QUERY", "The retrieval strategy is invalid.", 400
             ) from None
+        if query.rerank_method is not None and (
+            query.rerank_method != "sentence_evidence_v1"
+            or strategy != RetrievalStrategy.HYBRID_RERANK
+        ):
+            raise AgentHubError("INVALID_RETRIEVAL_QUERY", "The reranking method is invalid.", 400)
+        sentence_metadata = {}
         rerank_top_k, max_chunks_per_document = _candidate_budgets(query)
         _validate_context_budget_bytes(query.context_budget_bytes)
         if query.evidence_projection is not None and (
@@ -568,6 +575,25 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         "INVALID_RERANK_RESULT",
                         "The reranker returned an invalid result.",
                     )
+                if query.rerank_method == "sentence_evidence_v1":
+                    sentence_metadata["rerank_method"] = query.rerank_method
+                    try:
+                        rows = await asyncio.to_thread(
+                            SentenceEvidenceReranker(self.reranker).inspect_with_whole,
+                            query.text,
+                            candidates,
+                            rerank_scores,
+                        )
+                        rerank_scores = tuple(row.score for row in rows)
+                        sentence_metadata["sentence_windows"] = sum(
+                            len(row.windows) for row in rows
+                        )
+                    except (KnowledgeProviderError, ValueError) as exc:
+                        # Only the additional local scoring stage falls back. Invalid
+                        # baseline scores and all retrieval/auth errors still propagate.
+                        sentence_metadata["rerank_fallback"] = getattr(
+                            exc, "code", "INVALID_RERANK_RESULT"
+                        )
                 rerank_latency_ms = (time.perf_counter() - rerank_started) * 1000
                 # The supersession penalty is applied before the final count
                 # ceiling: the point is to change which chunks win the slots,
@@ -797,7 +823,8 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                     rerank=RetrievalTraceStage(
                         latency_ms=round(rerank_latency_ms, 3),
                         results=rerank_trace_results,
-                        metadata=context_selection_metadata,
+                        metadata={**(context_selection_metadata or {}), **sentence_metadata}
+                        or None,
                     ),
                     total_latency_ms=round(total_latency_ms, 3),
                     dropped_below_floor=dropped_below_floor,

@@ -345,9 +345,7 @@ def test_evidence_pool_allocates_newest_search_first() -> None:
     admitted = _admit_two_rounds(policy, old_payload, new_payload)
 
     contents = [
-        json.loads(message.content)
-        for message in admitted.messages
-        if message.role == "tool"
+        json.loads(message.content) for message in admitted.messages if message.role == "tool"
     ]
     assert len(contents) == 2
     newest = contents[1]
@@ -367,9 +365,7 @@ def test_evidence_pool_prefers_newest_even_when_only_one_fits() -> None:
     admitted = _admit_two_rounds(policy, old_payload, new_payload)
 
     tool_contents = [
-        json.loads(message.content)
-        for message in admitted.messages
-        if message.role == "tool"
+        json.loads(message.content) for message in admitted.messages if message.role == "tool"
     ]
     newest = tool_contents[1]
     assert newest["data"]["results"], "the newest search must not be starved to a marker"
@@ -442,8 +438,7 @@ async def test_default_path_backfills_the_slot_freed_by_dedup(
     class _Index:
         def dense_search(self, _query, *, scope, limit: int):
             return tuple(
-                VectorSearchHit(f"p{i}", 1.0 - i * 0.01, {"chunk_id": f"c{i}"})
-                for i in range(1, 7)
+                VectorSearchHit(f"p{i}", 1.0 - i * 0.01, {"chunk_id": f"c{i}"}) for i in range(1, 7)
             )[:limit]
 
         sparse_search = dense_search
@@ -512,3 +507,17 @@ async def test_default_path_backfills_the_slot_freed_by_dedup(
     # c2 was dropped as a re-delivery and rank6 backfilled its slot: five
     # distinct windows reach the caller.
     assert [item.chunk_id for item in result.evidence] == ["c1", "c3", "c4", "c5", "c6"]
+
+
+@pytest.mark.parametrize("scope", ["page", "paragraph_ordinal"])
+def test_equal_local_offsets_in_different_source_blocks_are_distinct(scope):
+    revision = str(uuid4())
+    items = [
+        _evidence(
+            chunk_id=str(i),
+            revision_id=revision,
+            locator={scope: i, "char_start": 0, "char_end": 50},
+        )
+        for i in (1, 2)
+    ]
+    assert drop_overlapping_evidence(items) == tuple(items)
