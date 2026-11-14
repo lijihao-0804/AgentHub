@@ -1,0 +1,342 @@
+{
+  "scope": "Separate no-generation retrieval-only replay on each original snapshot using identical retrieval settings/final_top_k=6. All six whole records fit QA evidence budget. Actual 502 responses omit prompt, so reconstructed availability is distinct from an observed input for failed turns. Supporting chunks are the union of original-source citations justifying accepted responses; exact annotated paragraph inclusion is separately measured.",
+  "cases": {
+    "e67d2266476abd157fc8c396b3dfb70cb343471e": {
+      "case": "e67d2266476abd157fc8c396b3dfb70cb343471e",
+      "verdicts": {
+        "baseline": "safe_refusal",
+        "article_local_passage": "http_failure",
+        "full_parent4": "http_failure"
+      },
+      "arms": {
+        "baseline": {
+          "http": 200,
+          "verdict": "safe_refusal",
+          "supporting_citation_chunks": {
+            "dense": [],
+            "sparse": [],
+            "fused": [],
+            "rerank": [],
+            "selection": [],
+            "reader_visible_replay": []
+          },
+          "visible_own_paper_ordinals": [
+            5,
+            0
+          ],
+          "complete_gold_paragraph_visible": false,
+          "raw_reference_span_visible": false
+        },
+        "article_local_passage": {
+          "http": 502,
+          "verdict": "http_failure",
+          "supporting_citation_chunks": {
+            "dense": [],
+            "sparse": [],
+            "fused": [],
+            "rerank": [],
+            "selection": [],
+            "reader_visible_replay": []
+          },
+          "visible_own_paper_ordinals": [
+            5,
+            0,
+            3
+          ],
+          "complete_gold_paragraph_visible": false,
+          "raw_reference_span_visible": false
+        },
+        "full_parent4": {
+          "http": 502,
+          "verdict": "http_failure",
+          "supporting_citation_chunks": {
+            "dense": [],
+            "sparse": [],
+            "fused": [],
+            "rerank": [],
+            "selection": [],
+            "reader_visible_replay": []
+          },
+          "visible_own_paper_ordinals": [
+            5,
+            0,
+            3
+          ],
+          "complete_gold_paragraph_visible": false,
+          "raw_reference_span_visible": false
+        }
+      }
+    },
+    "a130aa735de3b65c71f27018f20d3c068bafb826": {
+      "case": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "verdicts": {
+        "baseline": "http_failure",
+        "article_local_passage": "supported",
+        "full_parent4": "supported"
+      },
+      "arms": {
+        "baseline": {
+          "http": 502,
+          "verdict": "http_failure",
+          "supporting_citation_chunks": {
+            "dense": [
+              {
+                "rank": 2,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 6
+              },
+              {
+                "rank": 5,
+                "ordinal": 7
+              }
+            ],
+            "sparse": [],
+            "fused": [
+              {
+                "rank": 9,
+                "ordinal": 8
+              },
+              {
+                "rank": 11,
+                "ordinal": 6
+              },
+              {
+                "rank": 13,
+                "ordinal": 7
+              }
+            ],
+            "rerank": [
+              {
+                "rank": 1,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 7
+              },
+              {
+                "rank": 6,
+                "ordinal": 6
+              }
+            ],
+            "selection": [
+              {
+                "rank": 9,
+                "ordinal": 8
+              },
+              {
+                "rank": 11,
+                "ordinal": 6
+              },
+              {
+                "rank": 13,
+                "ordinal": 7
+              }
+            ],
+            "reader_visible_replay": [
+              {
+                "rank": 1,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 7
+              },
+              {
+                "rank": 6,
+                "ordinal": 6
+              }
+            ]
+          },
+          "visible_own_paper_ordinals": [
+            8,
+            0,
+            2,
+            7,
+            3,
+            6
+          ],
+          "complete_gold_paragraph_visible": true,
+          "raw_reference_span_visible": true
+        },
+        "article_local_passage": {
+          "http": 200,
+          "verdict": "supported",
+          "supporting_citation_chunks": {
+            "dense": [
+              {
+                "rank": 2,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 6
+              },
+              {
+                "rank": 5,
+                "ordinal": 7
+              }
+            ],
+            "sparse": [],
+            "fused": [
+              {
+                "rank": 11,
+                "ordinal": 8
+              },
+              {
+                "rank": 13,
+                "ordinal": 6
+              },
+              {
+                "rank": 15,
+                "ordinal": 7
+              }
+            ],
+            "rerank": [
+              {
+                "rank": 1,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 7
+              },
+              {
+                "rank": 6,
+                "ordinal": 6
+              }
+            ],
+            "selection": [
+              {
+                "rank": 11,
+                "ordinal": 8
+              },
+              {
+                "rank": 13,
+                "ordinal": 6
+              },
+              {
+                "rank": 15,
+                "ordinal": 7
+              }
+            ],
+            "reader_visible_replay": [
+              {
+                "rank": 1,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 7
+              },
+              {
+                "rank": 6,
+                "ordinal": 6
+              }
+            ]
+          },
+          "visible_own_paper_ordinals": [
+            8,
+            0,
+            2,
+            7,
+            3,
+            6
+          ],
+          "complete_gold_paragraph_visible": true,
+          "raw_reference_span_visible": true
+        },
+        "full_parent4": {
+          "http": 200,
+          "verdict": "supported",
+          "supporting_citation_chunks": {
+            "dense": [
+              {
+                "rank": 2,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 6
+              },
+              {
+                "rank": 5,
+                "ordinal": 7
+              }
+            ],
+            "sparse": [],
+            "fused": [
+              {
+                "rank": 9,
+                "ordinal": 8
+              },
+              {
+                "rank": 11,
+                "ordinal": 6
+              },
+              {
+                "rank": 13,
+                "ordinal": 7
+              }
+            ],
+            "rerank": [
+              {
+                "rank": 1,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 7
+              },
+              {
+                "rank": 6,
+                "ordinal": 6
+              }
+            ],
+            "selection": [
+              {
+                "rank": 9,
+                "ordinal": 8
+              },
+              {
+                "rank": 11,
+                "ordinal": 6
+              },
+              {
+                "rank": 13,
+                "ordinal": 7
+              }
+            ],
+            "reader_visible_replay": [
+              {
+                "rank": 1,
+                "ordinal": 8
+              },
+              {
+                "rank": 4,
+                "ordinal": 7
+              },
+              {
+                "rank": 6,
+                "ordinal": 6
+              }
+            ]
+          },
+          "visible_own_paper_ordinals": [
+            8,
+            0,
+            2,
+            7,
+            3,
+            6
+          ],
+          "complete_gold_paragraph_visible": true,
+          "raw_reference_span_visible": true
+        }
+      }
+    }
+  }
+}

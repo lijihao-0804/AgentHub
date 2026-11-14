@@ -1,0 +1,19 @@
+{
+  "scope": "QASPER replay --prepare-only with actual local HTTP/API/Celery plus installed candidate server readiness check (no paid generation).",
+  "job_exit": 0,
+  "documents": 7,
+  "chunks": 99,
+  "cpu_parent_dense_shape": [
+    7,
+    1024
+  ],
+  "source_chunk_dense_shape": [
+    99,
+    1024
+  ],
+  "ready": {
+    "baseline": 200,
+    "article_local_passage": 200,
+    "full_parent4": 200
+  }
+}

@@ -1,0 +1,250 @@
+{
+  "cases": [
+    {
+      "id": "e67d2266476abd157fc8c396b3dfb70cb343471e",
+      "query": "In the paper “Empirical Gaussian priors for cross-lingual transfer learning”, What languages did they experiment with?",
+      "negative": true,
+      "answers": [],
+      "gold_documents": [
+        "1601.02166"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": []
+    },
+    {
+      "id": "6b8a3100895f2192e08973006474428319dc298e",
+      "query": "In the paper “Cross-Lingual Induction and Transfer of Verb Classes Based on Word Vector Space Specialisation”, What clustering algorithm is used on top of the VerbNet-specialized representations?",
+      "negative": false,
+      "answers": [
+        "MNCut spectral clustering algorithm BIBREF58"
+      ],
+      "gold_documents": [
+        "1707.06945"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "dbf4af98236c6791f87f6f08b795690fa930b1d207d3ef7e5a269dd8ba79bf2a"
+      ]
+    },
+    {
+      "id": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "query": "In the paper “Visual Natural Language Query Auto-Completion for Estimating Instance Probabilities”, How big is data provided by this research?",
+      "negative": false,
+      "answers": [
+        "16k images and 740k corresponding region descriptions"
+      ],
+      "gold_documents": [
+        "1910.04887"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "506916369ced9a4e33ed75d2e9618d4d406db977cf7613576545b5d1ddf1032c"
+      ]
+    },
+    {
+      "id": "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+      "query": "In the paper “Video Highlight Prediction Using Audience Chat Reactions”, How big was the dataset presented?",
+      "negative": false,
+      "answers": [
+        "321 videos"
+      ],
+      "gold_documents": [
+        "1707.08559"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "5534c69a9213def06f7c9e0fd634ed2d44dd2022514af722449b30c42960dadb"
+      ]
+    },
+    {
+      "id": "77db56fee07b01015a74413ca31f19bea7203f0b",
+      "query": "In the paper “Rapid Adaptation of BERT for Information Extraction on Domain-Specific Business Documents”, What evaluation metric were used for presenting results? ",
+      "negative": false,
+      "answers": [
+        "F$_1$, precision, and recall"
+      ],
+      "gold_documents": [
+        "2002.01861"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "782d7afa93b7efa85a1967ca5d36ee05a43471320de924aa84cf3b18249f680d"
+      ]
+    },
+    {
+      "id": "5efa19058f815494b72c44d746c157e9403f726e",
+      "query": "In the paper “Improving Slot Filling by Utilizing Contextual Information”, What metris are used for evaluation?",
+      "negative": false,
+      "answers": [
+        "micro-averaged F1 score"
+      ],
+      "gold_documents": [
+        "1911.01680"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "0bd16dea1a4d80af2b44d427a61a024cbb4bbaf76646eb86eb6e389ff165c520"
+      ]
+    },
+    {
+      "id": "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854",
+      "query": "In the paper “A Lightweight Front-end Tool for Interactive Entity Population”, What programming language is the tool written in?",
+      "negative": false,
+      "answers": [
+        "JavaScript"
+      ],
+      "gold_documents": [
+        "1708.00481"
+      ],
+      "scope": "qasper",
+      "type": "public_QASPER_TRAIN",
+      "evidence_sha256": [
+        "3bd1832305a8d68640a5539cb76a48f55c7b7add7ece180acef7dd791e1605f8"
+      ]
+    },
+    {
+      "id": "609",
+      "query": "Increased flux of microbial products provokes immune responses.",
+      "gold_documents": [
+        "40096222"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim"
+    },
+    {
+      "id": "620",
+      "query": "Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.",
+      "gold_documents": [
+        "2565138"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim"
+    },
+    {
+      "id": "753",
+      "query": "Malaria has a high vectorial capacity.",
+      "gold_documents": [
+        "1173667"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim"
+    },
+    {
+      "id": "817",
+      "query": "Myelin sheaths are lipid-rich cellular structures.",
+      "gold_documents": [
+        "17814815"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim"
+    },
+    {
+      "id": "818",
+      "query": "Myelin sheaths play a role in action potential propagation.",
+      "gold_documents": [
+        "17814815"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim"
+    },
+    {
+      "id": "828",
+      "query": "NAC inhibits the generation of angiotensin-converting enzyme.",
+      "gold_documents": [
+        "4678846"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim"
+    },
+    {
+      "id": "1387",
+      "query": "eRNAs influence is linked to senescence, aging, and carcinogenesis.",
+      "gold_documents": [
+        "9669099"
+      ],
+      "scope": "full",
+      "type": "original_exposed_BEIR_claim"
+    },
+    {
+      "id": "791",
+      "query": "Migraine with aura is associated with ischemic stroke.",
+      "type": "already_correct",
+      "gold_documents": [
+        "15984735"
+      ],
+      "upstream_rationales": {
+        "15984735": [
+          {
+            "sentences": [
+              11
+            ],
+            "label": "SUPPORT"
+          },
+          {
+            "sentences": [
+              16
+            ],
+            "label": "SUPPORT"
+          }
+        ]
+      },
+      "source_review_rule": "The answer affirms increased association with ischaemic stroke for migraine with aura and cites the target paper. Check the actual cited excerpt (risk 2.16 or equivalent conclusion).",
+      "historical_ranks": {
+        "dense": [
+          1,
+          2,
+          5
+        ],
+        "sparse": [
+          1,
+          5,
+          20
+        ],
+        "fusion": [
+          1,
+          3,
+          10
+        ],
+        "rerank": [
+          1,
+          2,
+          5
+        ]
+      },
+      "scope": "full"
+    },
+    {
+      "id": "missing-tenant-canary",
+      "query": "According to the Lattice Vault memorandum ZR-618, what color code was assigned to the authorization desk?",
+      "type": "missing_evidence",
+      "gold_documents": [],
+      "source_review_rule": "Explicit insufficient_evidence with zero citations. LILAC-726 occurs only in another tenant's synthetic control document.",
+      "scope": "full"
+    },
+    {
+      "id": "838-reproductive-functions",
+      "query": "Which reproductive functions does the study identify for NR5A2, also called liver receptor homolog-1?",
+      "type": "source_grounded_diagnostic_derivative",
+      "gold_documents": [
+        "15928989"
+      ],
+      "source_review_rule": "Require at least two of maintenance of the corpus luteum, promotion of decidualization, and placental formation in the answer and direct cited evidence from document 15928989. Report qrel retrieval on this derivative separately from original SciFact.",
+      "scope": "full"
+    }
+  ],
+  "arms": [
+    "baseline",
+    "article_local_passage",
+    "full_parent4"
+  ],
+  "split": "TRAIN and synthetic absent control",
+  "selection": "QASPER ordered by salted SHA256(QID), distinct papers <=22000 characters; single annotator, one extractive span <=60 characters, one matching source paragraph <=1000 characters, or unanswerable. Add paper title to disambiguate in shared KB. First six positive and first negative. Full body with section headings, excluding figure/table captions. No test/dev split.",
+  "grading": "Score the first HTTP response. HTTP errors, abstention on answerable fact, incorrect or unsupported material assertions fail. A correct cited answer must give the required result and its own returned excerpts must directly support every material assertion. Evaluate source identity and official evidence overlap separately. Absent controls require explicit abstention and no citations. SciFact qrels alone cannot establish the claim. Report historical and current baseline supported answer preservation separately. No outcome-driven replacements. Published evidence SHA-256 identifies the complete original answer annotation string; replay restores all six from the official TRAIN file.",
+  "original_freeze_sha256": "1bb4252eed35303688f652e270f94a3df57c6c7799956cf6f787d413407ef75d"
+}

@@ -1,0 +1,190 @@
+{
+  "case": "620",
+  "scope": "Exact same snapshot and public retrieval-playground defaults, final_top_k six. Separate retrieval-only calls, no repeat generations. Original 502 envelopes contain no actual input trace. Identical QAs own trace is available for full_parent4. Six <=1200-char chunks fit the 16000-unit QA bound; no score floor.",
+  "source": "20888849",
+  "arms": {
+    "baseline": {
+      "target_ranks": {
+        "dense": [],
+        "sparse": [
+          {
+            "rank": 3,
+            "ordinal": 0
+          }
+        ],
+        "fused": [
+          {
+            "rank": 7,
+            "ordinal": 0
+          }
+        ],
+        "rerank": [
+          {
+            "rank": 1,
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "rank": 7,
+            "ordinal": 0
+          }
+        ],
+        "reader_visible_replay": [
+          {
+            "rank": 1,
+            "ordinal": 0
+          }
+        ]
+      },
+      "reader_visible_replay": [
+        [
+          "20888849",
+          0
+        ],
+        [
+          "9929089",
+          0
+        ],
+        [
+          "15946643",
+          0
+        ],
+        [
+          "14973286",
+          1
+        ],
+        [
+          "195680777",
+          0
+        ],
+        [
+          "25175997",
+          0
+        ]
+      ]
+    },
+    "article_local_passage": {
+      "target_ranks": {
+        "dense": [],
+        "sparse": [
+          {
+            "rank": 3,
+            "ordinal": 0
+          }
+        ],
+        "fused": [
+          {
+            "rank": 9,
+            "ordinal": 0
+          }
+        ],
+        "rerank": [
+          {
+            "rank": 1,
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "rank": 9,
+            "ordinal": 0
+          }
+        ],
+        "reader_visible_replay": [
+          {
+            "rank": 1,
+            "ordinal": 0
+          }
+        ]
+      },
+      "reader_visible_replay": [
+        [
+          "20888849",
+          0
+        ],
+        [
+          "9929089",
+          0
+        ],
+        [
+          "15946643",
+          0
+        ],
+        [
+          "195680777",
+          0
+        ],
+        [
+          "25175997",
+          0
+        ],
+        [
+          "13464392",
+          1
+        ]
+      ]
+    },
+    "full_parent4": {
+      "target_ranks": {
+        "dense": [],
+        "sparse": [
+          {
+            "rank": 3,
+            "ordinal": 0
+          }
+        ],
+        "fused": [
+          {
+            "rank": 7,
+            "ordinal": 0
+          }
+        ],
+        "rerank": [
+          {
+            "rank": 1,
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "rank": 7,
+            "ordinal": 0
+          }
+        ],
+        "reader_visible_replay": [
+          {
+            "rank": 1,
+            "ordinal": 0
+          }
+        ]
+      },
+      "reader_visible_replay": [
+        [
+          "20888849",
+          0
+        ],
+        [
+          "9929089",
+          0
+        ],
+        [
+          "15946643",
+          0
+        ],
+        [
+          "14973286",
+          1
+        ],
+        [
+          "195680777",
+          0
+        ],
+        [
+          "25175997",
+          0
+        ]
+      ]
+    }
+  }
+}

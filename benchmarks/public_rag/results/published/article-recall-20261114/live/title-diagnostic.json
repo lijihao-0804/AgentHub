@@ -1,0 +1,465 @@
+{
+  "arm": "title_standalone",
+  "model": "deepseek-v4.1-flash-1017",
+  "snapshot": "11bef8fe-38c8-4b03-88ce-d8c63ff20c01",
+  "snapshot_hash": "66844606e6374b6420f72a0598b354731916b2fb93729727ae6fed40d1b25e42",
+  "documents": 5183,
+  "chunks": 9189,
+  "protocol_sha256": "e9d6f9a12ca6f7b1c2b7a60ef03081fc64690c515bd0295b3bf88913b562b38f",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "1387",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 69.474,
+      "answer": "The evidence provided does not establish that eRNAs are linked to senescence, aging, and carcinogenesis as a whole. Only one supplied source concerns eRNAs, and it addresses their production from p53-bound enhancer regions and their requirement for efficient p53-dependent transcriptional enhancement and cell-cycle arrest; it does not discuss senescence or aging. The sources that do address aging and senescence concern microRNAs (including miR-71, age-associated blood microRNAs, and miR-29 in aging muscle) and epigenetic/chromatin changes, not eRNAs. Because no evidence directly connects eRNAs to senescence or aging, the stated claim cannot be verified from the supplied material.",
+      "insufficient": true,
+      "citations": [],
+      "stages": {
+        "dense": [
+          {
+            "source": "663464",
+            "ordinal": 0
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "22264117",
+            "ordinal": 0
+          },
+          {
+            "source": "9291668",
+            "ordinal": 1
+          },
+          {
+            "source": "6040392",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 3
+          },
+          {
+            "source": "663464",
+            "ordinal": 1
+          },
+          {
+            "source": "10012166",
+            "ordinal": 0
+          },
+          {
+            "source": "3230557",
+            "ordinal": 0
+          },
+          {
+            "source": "6896063",
+            "ordinal": 0
+          },
+          {
+            "source": "9559146",
+            "ordinal": 0
+          },
+          {
+            "source": "9291668",
+            "ordinal": 0
+          },
+          {
+            "source": "4434951",
+            "ordinal": 0
+          },
+          {
+            "source": "24524403",
+            "ordinal": 1
+          },
+          {
+            "source": "4434951",
+            "ordinal": 1
+          },
+          {
+            "source": "1848452",
+            "ordinal": 0
+          },
+          {
+            "source": "14475235",
+            "ordinal": 0
+          },
+          {
+            "source": "35543846",
+            "ordinal": 0
+          },
+          {
+            "source": "16233471",
+            "ordinal": 1
+          },
+          {
+            "source": "4653837",
+            "ordinal": 0
+          },
+          {
+            "source": "5035827",
+            "ordinal": 0
+          },
+          {
+            "source": "21232018",
+            "ordinal": 1
+          },
+          {
+            "source": "15521377",
+            "ordinal": 1
+          },
+          {
+            "source": "31293581",
+            "ordinal": 1
+          },
+          {
+            "source": "16233471",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 0
+          },
+          {
+            "source": "31293581",
+            "ordinal": 0
+          },
+          {
+            "source": "4920376",
+            "ordinal": 0
+          },
+          {
+            "source": "2466614",
+            "ordinal": 1
+          }
+        ],
+        "sparse": [
+          {
+            "source": "15521377",
+            "ordinal": 3
+          },
+          {
+            "source": "35543846",
+            "ordinal": 0
+          },
+          {
+            "source": "6896063",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 0
+          },
+          {
+            "source": "17412260",
+            "ordinal": 0
+          },
+          {
+            "source": "25419778",
+            "ordinal": 0
+          },
+          {
+            "source": "42279414",
+            "ordinal": 0
+          },
+          {
+            "source": "19736671",
+            "ordinal": 0
+          },
+          {
+            "source": "4653837",
+            "ordinal": 0
+          },
+          {
+            "source": "42836872",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 2
+          },
+          {
+            "source": "31293581",
+            "ordinal": 0
+          },
+          {
+            "source": "3230557",
+            "ordinal": 0
+          },
+          {
+            "source": "15832146",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "9211173",
+            "ordinal": 0
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "35543846",
+            "ordinal": 1
+          },
+          {
+            "source": "1996292",
+            "ordinal": 0
+          },
+          {
+            "source": "41710132",
+            "ordinal": 0
+          },
+          {
+            "source": "19343151",
+            "ordinal": 0
+          },
+          {
+            "source": "7451018",
+            "ordinal": 1
+          },
+          {
+            "source": "31933981",
+            "ordinal": 0
+          },
+          {
+            "source": "1522336",
+            "ordinal": 0
+          },
+          {
+            "source": "15491308",
+            "ordinal": 0
+          },
+          {
+            "source": "23471400",
+            "ordinal": 0
+          },
+          {
+            "source": "9291668",
+            "ordinal": 0
+          },
+          {
+            "source": "22059387",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 5
+          },
+          {
+            "source": "4489217",
+            "ordinal": 0
+          }
+        ],
+        "fused": [
+          {
+            "source": "4653837",
+            "ordinal": 0
+          },
+          {
+            "source": "31293581",
+            "ordinal": 1
+          },
+          {
+            "source": "6040392",
+            "ordinal": 0
+          },
+          {
+            "source": "18218379",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "10012166",
+            "ordinal": 0
+          },
+          {
+            "source": "5774746",
+            "ordinal": 0
+          },
+          {
+            "source": "5271210",
+            "ordinal": 0
+          },
+          {
+            "source": "663464",
+            "ordinal": 0
+          },
+          {
+            "source": "22264117",
+            "ordinal": 0
+          },
+          {
+            "source": "24190159",
+            "ordinal": 1
+          },
+          {
+            "source": "29214508",
+            "ordinal": 0
+          },
+          {
+            "source": "9669099",
+            "ordinal": 0
+          },
+          {
+            "source": "1754001",
+            "ordinal": 0
+          },
+          {
+            "source": "22059387",
+            "ordinal": 1
+          },
+          {
+            "source": "23269537",
+            "ordinal": 0
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "16086778",
+            "ordinal": 0
+          },
+          {
+            "source": "40349336",
+            "ordinal": 1
+          },
+          {
+            "source": "14475235",
+            "ordinal": 0
+          }
+        ],
+        "rerank": [
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "9669099",
+            "ordinal": 0
+          },
+          {
+            "source": "663464",
+            "ordinal": 0
+          },
+          {
+            "source": "22264117",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "4653837",
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "source": "4653837",
+            "ordinal": 0
+          },
+          {
+            "source": "31293581",
+            "ordinal": 1
+          },
+          {
+            "source": "6040392",
+            "ordinal": 0
+          },
+          {
+            "source": "18218379",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "10012166",
+            "ordinal": 0
+          },
+          {
+            "source": "5774746",
+            "ordinal": 0
+          },
+          {
+            "source": "5271210",
+            "ordinal": 0
+          },
+          {
+            "source": "663464",
+            "ordinal": 0
+          },
+          {
+            "source": "22264117",
+            "ordinal": 0
+          },
+          {
+            "source": "24190159",
+            "ordinal": 1
+          },
+          {
+            "source": "29214508",
+            "ordinal": 0
+          },
+          {
+            "source": "9669099",
+            "ordinal": 0
+          },
+          {
+            "source": "1754001",
+            "ordinal": 0
+          },
+          {
+            "source": "22059387",
+            "ordinal": 1
+          },
+          {
+            "source": "23269537",
+            "ordinal": 0
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "16086778",
+            "ordinal": 0
+          },
+          {
+            "source": "40349336",
+            "ordinal": 1
+          },
+          {
+            "source": "14475235",
+            "ordinal": 0
+          }
+        ]
+      }
+    }
+  ],
+  "diagnostic": {
+    "target": "9669099",
+    "title_dense_rank": 6,
+    "title_sparse_top30_rank": null,
+    "title_fused_rank": 13,
+    "passage_rerank_rank": 2,
+    "assessment": "Correct evidence limitation. Recovered source concerns p53-dependent transcription and cell-cycle arrest; the answer declined to establish the original broad claim and returned zero citations. Not a supported answer."
+  }
+}

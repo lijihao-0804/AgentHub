@@ -1,0 +1,3213 @@
+{
+  "arm": "article_local_passage",
+  "model": "deepseek-v4.1-flash-1017",
+  "snapshot": "11bef8fe-38c8-4b03-88ce-d8c63ff20c01",
+  "snapshot_hash": "66844606e6374b6420f72a0598b354731916b2fb93729727ae6fed40d1b25e42",
+  "documents": 5183,
+  "chunks": 9189,
+  "protocol_sha256": "1bb4252eed35303688f652e270f94a3df57c6c7799956cf6f787d413407ef75d",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "609",
+      "state": "returned",
+      "http": 502,
+      "elapsed_s": 55.085,
+      "error": "CITATION_QA_INVALID_MODEL_OUTPUT"
+    },
+    {
+      "id": "620",
+      "state": "returned",
+      "http": 502,
+      "elapsed_s": 35.65,
+      "error": "MODEL_BAD_RESPONSE"
+    },
+    {
+      "id": "753",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 33.754,
+      "answer": "The supplied evidence does not contain any statement or data quantifying or asserting malaria's vectorial capacity, nor any discussion of the concept. The passages address topics such as larval control and intervention avoidance, insecticide resistance and bednet durability, resistance surveillance, transmission modeling of interventions, parasite multiplication rates, and travellers' risk perception. None of these supports the claim, so it cannot be verified from the provided evidence.",
+      "insufficient": true,
+      "citations": [],
+      "stages": {
+        "dense": [
+          {
+            "source": "1349033",
+            "ordinal": 1
+          },
+          {
+            "source": "18074797",
+            "ordinal": 2
+          },
+          {
+            "source": "30741007",
+            "ordinal": 1
+          },
+          {
+            "source": "1349033",
+            "ordinal": 0
+          },
+          {
+            "source": "40900567",
+            "ordinal": 0
+          },
+          {
+            "source": "17168045",
+            "ordinal": 1
+          },
+          {
+            "source": "2264455",
+            "ordinal": 0
+          },
+          {
+            "source": "6503185",
+            "ordinal": 0
+          },
+          {
+            "source": "18344910",
+            "ordinal": 0
+          },
+          {
+            "source": "26474812",
+            "ordinal": 0
+          },
+          {
+            "source": "5289038",
+            "ordinal": 0
+          },
+          {
+            "source": "25499612",
+            "ordinal": 0
+          },
+          {
+            "source": "30741007",
+            "ordinal": 0
+          },
+          {
+            "source": "1173667",
+            "ordinal": 1
+          },
+          {
+            "source": "2264455",
+            "ordinal": 1
+          },
+          {
+            "source": "15617866",
+            "ordinal": 0
+          },
+          {
+            "source": "20931483",
+            "ordinal": 0
+          },
+          {
+            "source": "37248570",
+            "ordinal": 3
+          },
+          {
+            "source": "24721347",
+            "ordinal": 1
+          },
+          {
+            "source": "25938221",
+            "ordinal": 1
+          },
+          {
+            "source": "4336849",
+            "ordinal": 0
+          },
+          {
+            "source": "18074797",
+            "ordinal": 0
+          },
+          {
+            "source": "25938221",
+            "ordinal": 0
+          },
+          {
+            "source": "17168045",
+            "ordinal": 0
+          },
+          {
+            "source": "2460304",
+            "ordinal": 1
+          },
+          {
+            "source": "32390525",
+            "ordinal": 2
+          },
+          {
+            "source": "3001685",
+            "ordinal": 0
+          },
+          {
+            "source": "5710820",
+            "ordinal": 2
+          },
+          {
+            "source": "8593263",
+            "ordinal": 0
+          },
+          {
+            "source": "20999249",
+            "ordinal": 1
+          }
+        ],
+        "sparse": [
+          {
+            "source": "17433284",
+            "ordinal": 0
+          },
+          {
+            "source": "37248570",
+            "ordinal": 0
+          },
+          {
+            "source": "37248570",
+            "ordinal": 2
+          },
+          {
+            "source": "20999249",
+            "ordinal": 0
+          },
+          {
+            "source": "25069745",
+            "ordinal": 0
+          },
+          {
+            "source": "1349033",
+            "ordinal": 1
+          },
+          {
+            "source": "3929361",
+            "ordinal": 0
+          },
+          {
+            "source": "1349033",
+            "ordinal": 0
+          },
+          {
+            "source": "15237660",
+            "ordinal": 0
+          },
+          {
+            "source": "5710820",
+            "ordinal": 1
+          },
+          {
+            "source": "2264455",
+            "ordinal": 0
+          },
+          {
+            "source": "8593263",
+            "ordinal": 0
+          },
+          {
+            "source": "6503185",
+            "ordinal": 0
+          },
+          {
+            "source": "27580223",
+            "ordinal": 0
+          },
+          {
+            "source": "3770726",
+            "ordinal": 1
+          },
+          {
+            "source": "42373943",
+            "ordinal": 0
+          },
+          {
+            "source": "30741007",
+            "ordinal": 0
+          },
+          {
+            "source": "5710820",
+            "ordinal": 0
+          },
+          {
+            "source": "18344910",
+            "ordinal": 0
+          },
+          {
+            "source": "26474812",
+            "ordinal": 0
+          },
+          {
+            "source": "14337960",
+            "ordinal": 0
+          },
+          {
+            "source": "15617866",
+            "ordinal": 0
+          },
+          {
+            "source": "37248570",
+            "ordinal": 1
+          },
+          {
+            "source": "1173667",
+            "ordinal": 0
+          },
+          {
+            "source": "25938221",
+            "ordinal": 0
+          },
+          {
+            "source": "18750453",
+            "ordinal": 0
+          },
+          {
+            "source": "1805641",
+            "ordinal": 0
+          },
+          {
+            "source": "13959707",
+            "ordinal": 0
+          },
+          {
+            "source": "18074797",
+            "ordinal": 2
+          },
+          {
+            "source": "14337960",
+            "ordinal": 1
+          }
+        ],
+        "fused": [
+          {
+            "source": "1349033",
+            "ordinal": 0
+          },
+          {
+            "source": "2264455",
+            "ordinal": 0
+          },
+          {
+            "source": "37248570",
+            "ordinal": 2
+          },
+          {
+            "source": "30741007",
+            "ordinal": 0
+          },
+          {
+            "source": "6503185",
+            "ordinal": 0
+          },
+          {
+            "source": "18074797",
+            "ordinal": 0
+          },
+          {
+            "source": "18344910",
+            "ordinal": 0
+          },
+          {
+            "source": "20999249",
+            "ordinal": 0
+          },
+          {
+            "source": "26474812",
+            "ordinal": 0
+          },
+          {
+            "source": "5710820",
+            "ordinal": 0
+          },
+          {
+            "source": "1173667",
+            "ordinal": 0
+          },
+          {
+            "source": "15617866",
+            "ordinal": 0
+          },
+          {
+            "source": "8593263",
+            "ordinal": 0
+          },
+          {
+            "source": "25938221",
+            "ordinal": 0
+          },
+          {
+            "source": "17433284",
+            "ordinal": 0
+          },
+          {
+            "source": "25069745",
+            "ordinal": 0
+          },
+          {
+            "source": "40900567",
+            "ordinal": 0
+          },
+          {
+            "source": "17168045",
+            "ordinal": 1
+          },
+          {
+            "source": "3929361",
+            "ordinal": 0
+          },
+          {
+            "source": "15237660",
+            "ordinal": 1
+          }
+        ],
+        "rerank": [
+          {
+            "source": "1349033",
+            "ordinal": 0
+          },
+          {
+            "source": "15237660",
+            "ordinal": 1
+          },
+          {
+            "source": "30741007",
+            "ordinal": 0
+          },
+          {
+            "source": "18074797",
+            "ordinal": 0
+          },
+          {
+            "source": "40900567",
+            "ordinal": 0
+          },
+          {
+            "source": "8593263",
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "source": "1349033",
+            "ordinal": 0
+          },
+          {
+            "source": "2264455",
+            "ordinal": 0
+          },
+          {
+            "source": "37248570",
+            "ordinal": 2
+          },
+          {
+            "source": "30741007",
+            "ordinal": 0
+          },
+          {
+            "source": "6503185",
+            "ordinal": 0
+          },
+          {
+            "source": "18074797",
+            "ordinal": 0
+          },
+          {
+            "source": "18344910",
+            "ordinal": 0
+          },
+          {
+            "source": "20999249",
+            "ordinal": 0
+          },
+          {
+            "source": "26474812",
+            "ordinal": 0
+          },
+          {
+            "source": "5710820",
+            "ordinal": 0
+          },
+          {
+            "source": "1173667",
+            "ordinal": 0
+          },
+          {
+            "source": "15617866",
+            "ordinal": 0
+          },
+          {
+            "source": "8593263",
+            "ordinal": 0
+          },
+          {
+            "source": "25938221",
+            "ordinal": 0
+          },
+          {
+            "source": "17433284",
+            "ordinal": 0
+          },
+          {
+            "source": "25069745",
+            "ordinal": 0
+          },
+          {
+            "source": "40900567",
+            "ordinal": 0
+          },
+          {
+            "source": "17168045",
+            "ordinal": 1
+          },
+          {
+            "source": "3929361",
+            "ordinal": 0
+          },
+          {
+            "source": "15237660",
+            "ordinal": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "817",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 34.2,
+      "answer": "The supplied evidence does not contain any information about myelin sheaths or their lipid composition, so the statement cannot be verified from the provided material.",
+      "insufficient": true,
+      "citations": [],
+      "stages": {
+        "dense": [
+          {
+            "source": "3391547",
+            "ordinal": 0
+          },
+          {
+            "source": "16562534",
+            "ordinal": 1
+          },
+          {
+            "source": "10937190",
+            "ordinal": 1
+          },
+          {
+            "source": "927561",
+            "ordinal": 0
+          },
+          {
+            "source": "8396189",
+            "ordinal": 0
+          },
+          {
+            "source": "34735369",
+            "ordinal": 0
+          },
+          {
+            "source": "17934082",
+            "ordinal": 0
+          },
+          {
+            "source": "38844612",
+            "ordinal": 0
+          },
+          {
+            "source": "3720107",
+            "ordinal": 1
+          },
+          {
+            "source": "43385013",
+            "ordinal": 0
+          },
+          {
+            "source": "2194320",
+            "ordinal": 1
+          },
+          {
+            "source": "21746539",
+            "ordinal": 0
+          },
+          {
+            "source": "5567223",
+            "ordinal": 0
+          },
+          {
+            "source": "25419778",
+            "ordinal": 2
+          },
+          {
+            "source": "29638116",
+            "ordinal": 0
+          },
+          {
+            "source": "323030",
+            "ordinal": 0
+          },
+          {
+            "source": "1991105",
+            "ordinal": 1
+          },
+          {
+            "source": "18953920",
+            "ordinal": 0
+          },
+          {
+            "source": "23586085",
+            "ordinal": 1
+          },
+          {
+            "source": "25946292",
+            "ordinal": 0
+          },
+          {
+            "source": "4340509",
+            "ordinal": 0
+          },
+          {
+            "source": "13992047",
+            "ordinal": 0
+          },
+          {
+            "source": "40367499",
+            "ordinal": 0
+          },
+          {
+            "source": "12324049",
+            "ordinal": 1
+          },
+          {
+            "source": "29509926",
+            "ordinal": 0
+          },
+          {
+            "source": "43752562",
+            "ordinal": 1
+          },
+          {
+            "source": "25419778",
+            "ordinal": 0
+          },
+          {
+            "source": "45199834",
+            "ordinal": 1
+          },
+          {
+            "source": "34615397",
+            "ordinal": 1
+          },
+          {
+            "source": "3680979",
+            "ordinal": 0
+          }
+        ],
+        "sparse": [
+          {
+            "source": "15551129",
+            "ordinal": 0
+          },
+          {
+            "source": "45487164",
+            "ordinal": 0
+          },
+          {
+            "source": "7039855",
+            "ordinal": 0
+          },
+          {
+            "source": "9580772",
+            "ordinal": 0
+          },
+          {
+            "source": "25488034",
+            "ordinal": 1
+          },
+          {
+            "source": "25488034",
+            "ordinal": 0
+          },
+          {
+            "source": "16737163",
+            "ordinal": 0
+          },
+          {
+            "source": "2260571",
+            "ordinal": 0
+          },
+          {
+            "source": "17934082",
+            "ordinal": 0
+          },
+          {
+            "source": "45143088",
+            "ordinal": 0
+          },
+          {
+            "source": "13936152",
+            "ordinal": 0
+          },
+          {
+            "source": "18987782",
+            "ordinal": 0
+          },
+          {
+            "source": "7373453",
+            "ordinal": 0
+          },
+          {
+            "source": "11557602",
+            "ordinal": 1
+          },
+          {
+            "source": "36654066",
+            "ordinal": 0
+          },
+          {
+            "source": "27731651",
+            "ordinal": 0
+          },
+          {
+            "source": "6863070",
+            "ordinal": 0
+          },
+          {
+            "source": "8396189",
+            "ordinal": 0
+          },
+          {
+            "source": "34439544",
+            "ordinal": 1
+          },
+          {
+            "source": "9159125",
+            "ordinal": 0
+          },
+          {
+            "source": "15491404",
+            "ordinal": 0
+          },
+          {
+            "source": "30543439",
+            "ordinal": 0
+          },
+          {
+            "source": "15121114",
+            "ordinal": 0
+          },
+          {
+            "source": "16562534",
+            "ordinal": 0
+          },
+          {
+            "source": "6386930",
+            "ordinal": 0
+          },
+          {
+            "source": "47240151",
+            "ordinal": 0
+          },
+          {
+            "source": "22544171",
+            "ordinal": 0
+          },
+          {
+            "source": "13244602",
+            "ordinal": 0
+          },
+          {
+            "source": "7468449",
+            "ordinal": 0
+          },
+          {
+            "source": "21380348",
+            "ordinal": 0
+          }
+        ],
+        "fused": [
+          {
+            "source": "17934082",
+            "ordinal": 0
+          },
+          {
+            "source": "8396189",
+            "ordinal": 0
+          },
+          {
+            "source": "16562534",
+            "ordinal": 1
+          },
+          {
+            "source": "15551129",
+            "ordinal": 0
+          },
+          {
+            "source": "3391547",
+            "ordinal": 0
+          },
+          {
+            "source": "45487164",
+            "ordinal": 0
+          },
+          {
+            "source": "10937190",
+            "ordinal": 0
+          },
+          {
+            "source": "7039855",
+            "ordinal": 0
+          },
+          {
+            "source": "927561",
+            "ordinal": 0
+          },
+          {
+            "source": "9580772",
+            "ordinal": 0
+          },
+          {
+            "source": "25488034",
+            "ordinal": 1
+          },
+          {
+            "source": "16737163",
+            "ordinal": 0
+          },
+          {
+            "source": "34735369",
+            "ordinal": 0
+          },
+          {
+            "source": "2260571",
+            "ordinal": 0
+          },
+          {
+            "source": "38844612",
+            "ordinal": 0
+          },
+          {
+            "source": "3720107",
+            "ordinal": 1
+          },
+          {
+            "source": "45143088",
+            "ordinal": 0
+          },
+          {
+            "source": "13936152",
+            "ordinal": 0
+          },
+          {
+            "source": "43385013",
+            "ordinal": 1
+          },
+          {
+            "source": "18987782",
+            "ordinal": 0
+          }
+        ],
+        "rerank": [
+          {
+            "source": "17934082",
+            "ordinal": 0
+          },
+          {
+            "source": "43385013",
+            "ordinal": 1
+          },
+          {
+            "source": "927561",
+            "ordinal": 0
+          },
+          {
+            "source": "9580772",
+            "ordinal": 0
+          },
+          {
+            "source": "16562534",
+            "ordinal": 1
+          },
+          {
+            "source": "25488034",
+            "ordinal": 1
+          }
+        ],
+        "selection": [
+          {
+            "source": "17934082",
+            "ordinal": 0
+          },
+          {
+            "source": "8396189",
+            "ordinal": 0
+          },
+          {
+            "source": "16562534",
+            "ordinal": 1
+          },
+          {
+            "source": "15551129",
+            "ordinal": 0
+          },
+          {
+            "source": "3391547",
+            "ordinal": 0
+          },
+          {
+            "source": "45487164",
+            "ordinal": 0
+          },
+          {
+            "source": "10937190",
+            "ordinal": 0
+          },
+          {
+            "source": "7039855",
+            "ordinal": 0
+          },
+          {
+            "source": "927561",
+            "ordinal": 0
+          },
+          {
+            "source": "9580772",
+            "ordinal": 0
+          },
+          {
+            "source": "25488034",
+            "ordinal": 1
+          },
+          {
+            "source": "16737163",
+            "ordinal": 0
+          },
+          {
+            "source": "34735369",
+            "ordinal": 0
+          },
+          {
+            "source": "2260571",
+            "ordinal": 0
+          },
+          {
+            "source": "38844612",
+            "ordinal": 0
+          },
+          {
+            "source": "3720107",
+            "ordinal": 1
+          },
+          {
+            "source": "45143088",
+            "ordinal": 0
+          },
+          {
+            "source": "13936152",
+            "ordinal": 0
+          },
+          {
+            "source": "43385013",
+            "ordinal": 1
+          },
+          {
+            "source": "18987782",
+            "ordinal": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "818",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 40.036,
+      "answer": "The supplied evidence is insufficient to support the claim that myelin sheaths play a role in action potential propagation. The passages discuss action potential recording and propagation in enteric neurons, remyelination and oligodendrocyte progenitor differentiation, MOG antibodies in demyelination phenotypes, and unrelated topics, but none describes a role for myelin sheaths in action potential propagation.",
+      "insufficient": true,
+      "citations": [],
+      "stages": {
+        "dense": [
+          {
+            "source": "16562534",
+            "ordinal": 1
+          },
+          {
+            "source": "7039855",
+            "ordinal": 0
+          },
+          {
+            "source": "3825472",
+            "ordinal": 0
+          },
+          {
+            "source": "6270720",
+            "ordinal": 0
+          },
+          {
+            "source": "15946643",
+            "ordinal": 1
+          },
+          {
+            "source": "34735369",
+            "ordinal": 0
+          },
+          {
+            "source": "4417558",
+            "ordinal": 0
+          },
+          {
+            "source": "25946292",
+            "ordinal": 0
+          },
+          {
+            "source": "7840442",
+            "ordinal": 1
+          },
+          {
+            "source": "3391547",
+            "ordinal": 0
+          },
+          {
+            "source": "2194320",
+            "ordinal": 1
+          },
+          {
+            "source": "6308416",
+            "ordinal": 1
+          },
+          {
+            "source": "17708753",
+            "ordinal": 0
+          },
+          {
+            "source": "3720107",
+            "ordinal": 1
+          },
+          {
+            "source": "5828251",
+            "ordinal": 0
+          },
+          {
+            "source": "18909530",
+            "ordinal": 0
+          },
+          {
+            "source": "4417558",
+            "ordinal": 1
+          },
+          {
+            "source": "38380061",
+            "ordinal": 1
+          },
+          {
+            "source": "8246090",
+            "ordinal": 1
+          },
+          {
+            "source": "6609935",
+            "ordinal": 1
+          },
+          {
+            "source": "2603304",
+            "ordinal": 1
+          },
+          {
+            "source": "2060137",
+            "ordinal": 1
+          },
+          {
+            "source": "16712164",
+            "ordinal": 0
+          },
+          {
+            "source": "7370282",
+            "ordinal": 0
+          },
+          {
+            "source": "4928282",
+            "ordinal": 0
+          },
+          {
+            "source": "20155713",
+            "ordinal": 0
+          },
+          {
+            "source": "40367499",
+            "ordinal": 0
+          },
+          {
+            "source": "9278263",
+            "ordinal": 0
+          },
+          {
+            "source": "45487164",
+            "ordinal": 0
+          },
+          {
+            "source": "927561",
+            "ordinal": 0
+          }
+        ],
+        "sparse": [
+          {
+            "source": "11369420",
+            "ordinal": 0
+          },
+          {
+            "source": "7840442",
+            "ordinal": 0
+          },
+          {
+            "source": "7039855",
+            "ordinal": 0
+          },
+          {
+            "source": "15551129",
+            "ordinal": 0
+          },
+          {
+            "source": "45487164",
+            "ordinal": 0
+          },
+          {
+            "source": "16737163",
+            "ordinal": 0
+          },
+          {
+            "source": "25062868",
+            "ordinal": 0
+          },
+          {
+            "source": "15121114",
+            "ordinal": 0
+          },
+          {
+            "source": "18747744",
+            "ordinal": 0
+          },
+          {
+            "source": "5828251",
+            "ordinal": 0
+          },
+          {
+            "source": "3391547",
+            "ordinal": 0
+          },
+          {
+            "source": "6722522",
+            "ordinal": 0
+          },
+          {
+            "source": "6270720",
+            "ordinal": 0
+          },
+          {
+            "source": "45449835",
+            "ordinal": 0
+          },
+          {
+            "source": "44562221",
+            "ordinal": 0
+          },
+          {
+            "source": "35079452",
+            "ordinal": 0
+          },
+          {
+            "source": "23535770",
+            "ordinal": 1
+          },
+          {
+            "source": "25488034",
+            "ordinal": 0
+          },
+          {
+            "source": "5289038",
+            "ordinal": 0
+          },
+          {
+            "source": "2601324",
+            "ordinal": 0
+          },
+          {
+            "source": "13910150",
+            "ordinal": 0
+          },
+          {
+            "source": "25300426",
+            "ordinal": 0
+          },
+          {
+            "source": "9159125",
+            "ordinal": 0
+          },
+          {
+            "source": "14767844",
+            "ordinal": 0
+          },
+          {
+            "source": "36025357",
+            "ordinal": 0
+          },
+          {
+            "source": "18987782",
+            "ordinal": 0
+          },
+          {
+            "source": "17333231",
+            "ordinal": 0
+          },
+          {
+            "source": "4767806",
+            "ordinal": 0
+          },
+          {
+            "source": "17209919",
+            "ordinal": 0
+          },
+          {
+            "source": "16669757",
+            "ordinal": 0
+          }
+        ],
+        "fused": [
+          {
+            "source": "7039855",
+            "ordinal": 0
+          },
+          {
+            "source": "7840442",
+            "ordinal": 0
+          },
+          {
+            "source": "6270720",
+            "ordinal": 1
+          },
+          {
+            "source": "3391547",
+            "ordinal": 0
+          },
+          {
+            "source": "5828251",
+            "ordinal": 0
+          },
+          {
+            "source": "45487164",
+            "ordinal": 0
+          },
+          {
+            "source": "11369420",
+            "ordinal": 0
+          },
+          {
+            "source": "16562534",
+            "ordinal": 0
+          },
+          {
+            "source": "3825472",
+            "ordinal": 0
+          },
+          {
+            "source": "15551129",
+            "ordinal": 1
+          },
+          {
+            "source": "15946643",
+            "ordinal": 0
+          },
+          {
+            "source": "16737163",
+            "ordinal": 0
+          },
+          {
+            "source": "34735369",
+            "ordinal": 0
+          },
+          {
+            "source": "25062868",
+            "ordinal": 0
+          },
+          {
+            "source": "4417558",
+            "ordinal": 1
+          },
+          {
+            "source": "15121114",
+            "ordinal": 0
+          },
+          {
+            "source": "25946292",
+            "ordinal": 0
+          },
+          {
+            "source": "18747744",
+            "ordinal": 0
+          },
+          {
+            "source": "2194320",
+            "ordinal": 1
+          },
+          {
+            "source": "6308416",
+            "ordinal": 0
+          }
+        ],
+        "rerank": [
+          {
+            "source": "7840442",
+            "ordinal": 0
+          },
+          {
+            "source": "11369420",
+            "ordinal": 0
+          },
+          {
+            "source": "3391547",
+            "ordinal": 0
+          },
+          {
+            "source": "34735369",
+            "ordinal": 0
+          },
+          {
+            "source": "7039855",
+            "ordinal": 0
+          },
+          {
+            "source": "16737163",
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "source": "7039855",
+            "ordinal": 0
+          },
+          {
+            "source": "7840442",
+            "ordinal": 0
+          },
+          {
+            "source": "6270720",
+            "ordinal": 1
+          },
+          {
+            "source": "3391547",
+            "ordinal": 0
+          },
+          {
+            "source": "5828251",
+            "ordinal": 0
+          },
+          {
+            "source": "45487164",
+            "ordinal": 0
+          },
+          {
+            "source": "11369420",
+            "ordinal": 0
+          },
+          {
+            "source": "16562534",
+            "ordinal": 0
+          },
+          {
+            "source": "3825472",
+            "ordinal": 0
+          },
+          {
+            "source": "15551129",
+            "ordinal": 1
+          },
+          {
+            "source": "15946643",
+            "ordinal": 0
+          },
+          {
+            "source": "16737163",
+            "ordinal": 0
+          },
+          {
+            "source": "34735369",
+            "ordinal": 0
+          },
+          {
+            "source": "25062868",
+            "ordinal": 0
+          },
+          {
+            "source": "4417558",
+            "ordinal": 1
+          },
+          {
+            "source": "15121114",
+            "ordinal": 0
+          },
+          {
+            "source": "25946292",
+            "ordinal": 0
+          },
+          {
+            "source": "18747744",
+            "ordinal": 0
+          },
+          {
+            "source": "2194320",
+            "ordinal": 1
+          },
+          {
+            "source": "6308416",
+            "ordinal": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "828",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 36.265,
+      "answer": "The supplied evidence does not address whether N-acetylcysteine (NAC) inhibits the generation of angiotensin-converting enzyme. NAC is mentioned only in the context of thiol-containing antioxidants and Treg-mediated suppression, while the other documents discuss angiotensin-converting enzyme inhibitors, angiotensin receptor blockers, aliskiren, and antihypertensive effects without any reference to NAC's effect on ACE generation. Therefore, the statement cannot be evaluated from the provided evidence.",
+      "insufficient": true,
+      "citations": [],
+      "stages": {
+        "dense": [
+          {
+            "source": "26025370",
+            "ordinal": 1
+          },
+          {
+            "source": "4700428",
+            "ordinal": 1
+          },
+          {
+            "source": "4700428",
+            "ordinal": 0
+          },
+          {
+            "source": "7116734",
+            "ordinal": 0
+          },
+          {
+            "source": "26025370",
+            "ordinal": 0
+          },
+          {
+            "source": "6157837",
+            "ordinal": 0
+          },
+          {
+            "source": "35345807",
+            "ordinal": 0
+          },
+          {
+            "source": "18348376",
+            "ordinal": 1
+          },
+          {
+            "source": "35345807",
+            "ordinal": 1
+          },
+          {
+            "source": "43048059",
+            "ordinal": 1
+          },
+          {
+            "source": "10852047",
+            "ordinal": 1
+          },
+          {
+            "source": "14584755",
+            "ordinal": 0
+          },
+          {
+            "source": "18956141",
+            "ordinal": 0
+          },
+          {
+            "source": "2139357",
+            "ordinal": 1
+          },
+          {
+            "source": "24005548",
+            "ordinal": 0
+          },
+          {
+            "source": "13172737",
+            "ordinal": 0
+          },
+          {
+            "source": "26658659",
+            "ordinal": 0
+          },
+          {
+            "source": "7735859",
+            "ordinal": 1
+          },
+          {
+            "source": "7116734",
+            "ordinal": 1
+          },
+          {
+            "source": "719812",
+            "ordinal": 0
+          },
+          {
+            "source": "44408494",
+            "ordinal": 0
+          },
+          {
+            "source": "5785219",
+            "ordinal": 0
+          },
+          {
+            "source": "3113630",
+            "ordinal": 0
+          },
+          {
+            "source": "4740447",
+            "ordinal": 0
+          },
+          {
+            "source": "17231273",
+            "ordinal": 0
+          },
+          {
+            "source": "719812",
+            "ordinal": 1
+          },
+          {
+            "source": "26658659",
+            "ordinal": 1
+          },
+          {
+            "source": "44408494",
+            "ordinal": 1
+          },
+          {
+            "source": "27428509",
+            "ordinal": 1
+          },
+          {
+            "source": "23100962",
+            "ordinal": 1
+          }
+        ],
+        "sparse": [
+          {
+            "source": "26199970",
+            "ordinal": 0
+          },
+          {
+            "source": "14584755",
+            "ordinal": 0
+          },
+          {
+            "source": "1759213",
+            "ordinal": 1
+          },
+          {
+            "source": "1759213",
+            "ordinal": 0
+          },
+          {
+            "source": "43417006",
+            "ordinal": 0
+          },
+          {
+            "source": "35724562",
+            "ordinal": 0
+          },
+          {
+            "source": "35724562",
+            "ordinal": 1
+          },
+          {
+            "source": "26199970",
+            "ordinal": 1
+          },
+          {
+            "source": "32463364",
+            "ordinal": 1
+          },
+          {
+            "source": "6157837",
+            "ordinal": 0
+          },
+          {
+            "source": "17546486",
+            "ordinal": 0
+          },
+          {
+            "source": "14121786",
+            "ordinal": 0
+          },
+          {
+            "source": "25816994",
+            "ordinal": 0
+          },
+          {
+            "source": "26025370",
+            "ordinal": 0
+          },
+          {
+            "source": "5573975",
+            "ordinal": 1
+          },
+          {
+            "source": "38944245",
+            "ordinal": 0
+          },
+          {
+            "source": "38944245",
+            "ordinal": 1
+          },
+          {
+            "source": "2522977",
+            "ordinal": 0
+          },
+          {
+            "source": "4700428",
+            "ordinal": 1
+          },
+          {
+            "source": "27428509",
+            "ordinal": 0
+          },
+          {
+            "source": "44030361",
+            "ordinal": 0
+          },
+          {
+            "source": "27428509",
+            "ordinal": 1
+          },
+          {
+            "source": "6397191",
+            "ordinal": 0
+          },
+          {
+            "source": "9288638",
+            "ordinal": 1
+          },
+          {
+            "source": "9600826",
+            "ordinal": 0
+          },
+          {
+            "source": "17844478",
+            "ordinal": 0
+          },
+          {
+            "source": "1686997",
+            "ordinal": 0
+          },
+          {
+            "source": "9288638",
+            "ordinal": 0
+          },
+          {
+            "source": "2266471",
+            "ordinal": 0
+          },
+          {
+            "source": "26025370",
+            "ordinal": 1
+          }
+        ],
+        "fused": [
+          {
+            "source": "14584755",
+            "ordinal": 0
+          },
+          {
+            "source": "6157837",
+            "ordinal": 0
+          },
+          {
+            "source": "26025370",
+            "ordinal": 0
+          },
+          {
+            "source": "4700428",
+            "ordinal": 1
+          },
+          {
+            "source": "27428509",
+            "ordinal": 1
+          },
+          {
+            "source": "26199970",
+            "ordinal": 0
+          },
+          {
+            "source": "1759213",
+            "ordinal": 1
+          },
+          {
+            "source": "7116734",
+            "ordinal": 1
+          },
+          {
+            "source": "43417006",
+            "ordinal": 0
+          },
+          {
+            "source": "35345807",
+            "ordinal": 0
+          },
+          {
+            "source": "35724562",
+            "ordinal": 1
+          },
+          {
+            "source": "18348376",
+            "ordinal": 1
+          },
+          {
+            "source": "32463364",
+            "ordinal": 1
+          },
+          {
+            "source": "43048059",
+            "ordinal": 1
+          },
+          {
+            "source": "10852047",
+            "ordinal": 1
+          },
+          {
+            "source": "17546486",
+            "ordinal": 0
+          },
+          {
+            "source": "14121786",
+            "ordinal": 0
+          },
+          {
+            "source": "18956141",
+            "ordinal": 0
+          },
+          {
+            "source": "25816994",
+            "ordinal": 0
+          },
+          {
+            "source": "2139357",
+            "ordinal": 0
+          }
+        ],
+        "rerank": [
+          {
+            "source": "26199970",
+            "ordinal": 0
+          },
+          {
+            "source": "1759213",
+            "ordinal": 1
+          },
+          {
+            "source": "43417006",
+            "ordinal": 0
+          },
+          {
+            "source": "14121786",
+            "ordinal": 0
+          },
+          {
+            "source": "32463364",
+            "ordinal": 1
+          },
+          {
+            "source": "18348376",
+            "ordinal": 1
+          }
+        ],
+        "selection": [
+          {
+            "source": "14584755",
+            "ordinal": 0
+          },
+          {
+            "source": "6157837",
+            "ordinal": 0
+          },
+          {
+            "source": "26025370",
+            "ordinal": 0
+          },
+          {
+            "source": "4700428",
+            "ordinal": 1
+          },
+          {
+            "source": "27428509",
+            "ordinal": 1
+          },
+          {
+            "source": "26199970",
+            "ordinal": 0
+          },
+          {
+            "source": "1759213",
+            "ordinal": 1
+          },
+          {
+            "source": "7116734",
+            "ordinal": 1
+          },
+          {
+            "source": "43417006",
+            "ordinal": 0
+          },
+          {
+            "source": "35345807",
+            "ordinal": 0
+          },
+          {
+            "source": "35724562",
+            "ordinal": 1
+          },
+          {
+            "source": "18348376",
+            "ordinal": 1
+          },
+          {
+            "source": "32463364",
+            "ordinal": 1
+          },
+          {
+            "source": "43048059",
+            "ordinal": 1
+          },
+          {
+            "source": "10852047",
+            "ordinal": 1
+          },
+          {
+            "source": "17546486",
+            "ordinal": 0
+          },
+          {
+            "source": "14121786",
+            "ordinal": 0
+          },
+          {
+            "source": "18956141",
+            "ordinal": 0
+          },
+          {
+            "source": "25816994",
+            "ordinal": 0
+          },
+          {
+            "source": "2139357",
+            "ordinal": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "1387",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 42.716,
+      "answer": "The provided evidence does not discuss eRNAs or their influence on senescence, aging, or carcinogenesis. It contains information about microRNAs, p53, cellular senescence, aging, and cancer, but it is insufficient to support the claim about eRNAs.",
+      "insufficient": true,
+      "citations": [],
+      "stages": {
+        "dense": [
+          {
+            "source": "663464",
+            "ordinal": 0
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "22264117",
+            "ordinal": 0
+          },
+          {
+            "source": "9291668",
+            "ordinal": 1
+          },
+          {
+            "source": "6040392",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 3
+          },
+          {
+            "source": "663464",
+            "ordinal": 1
+          },
+          {
+            "source": "10012166",
+            "ordinal": 0
+          },
+          {
+            "source": "3230557",
+            "ordinal": 0
+          },
+          {
+            "source": "6896063",
+            "ordinal": 0
+          },
+          {
+            "source": "9559146",
+            "ordinal": 0
+          },
+          {
+            "source": "9291668",
+            "ordinal": 0
+          },
+          {
+            "source": "4434951",
+            "ordinal": 0
+          },
+          {
+            "source": "24524403",
+            "ordinal": 1
+          },
+          {
+            "source": "4434951",
+            "ordinal": 1
+          },
+          {
+            "source": "1848452",
+            "ordinal": 0
+          },
+          {
+            "source": "14475235",
+            "ordinal": 0
+          },
+          {
+            "source": "35543846",
+            "ordinal": 0
+          },
+          {
+            "source": "16233471",
+            "ordinal": 1
+          },
+          {
+            "source": "4653837",
+            "ordinal": 0
+          },
+          {
+            "source": "5035827",
+            "ordinal": 0
+          },
+          {
+            "source": "21232018",
+            "ordinal": 1
+          },
+          {
+            "source": "15521377",
+            "ordinal": 1
+          },
+          {
+            "source": "31293581",
+            "ordinal": 1
+          },
+          {
+            "source": "16233471",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 0
+          },
+          {
+            "source": "31293581",
+            "ordinal": 0
+          },
+          {
+            "source": "4920376",
+            "ordinal": 0
+          },
+          {
+            "source": "2466614",
+            "ordinal": 1
+          }
+        ],
+        "sparse": [
+          {
+            "source": "15521377",
+            "ordinal": 3
+          },
+          {
+            "source": "35543846",
+            "ordinal": 0
+          },
+          {
+            "source": "6896063",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 0
+          },
+          {
+            "source": "17412260",
+            "ordinal": 0
+          },
+          {
+            "source": "25419778",
+            "ordinal": 0
+          },
+          {
+            "source": "42279414",
+            "ordinal": 0
+          },
+          {
+            "source": "19736671",
+            "ordinal": 0
+          },
+          {
+            "source": "4653837",
+            "ordinal": 0
+          },
+          {
+            "source": "42836872",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 2
+          },
+          {
+            "source": "31293581",
+            "ordinal": 0
+          },
+          {
+            "source": "3230557",
+            "ordinal": 0
+          },
+          {
+            "source": "15832146",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "9211173",
+            "ordinal": 0
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "35543846",
+            "ordinal": 1
+          },
+          {
+            "source": "1996292",
+            "ordinal": 0
+          },
+          {
+            "source": "41710132",
+            "ordinal": 0
+          },
+          {
+            "source": "19343151",
+            "ordinal": 0
+          },
+          {
+            "source": "7451018",
+            "ordinal": 1
+          },
+          {
+            "source": "31933981",
+            "ordinal": 0
+          },
+          {
+            "source": "1522336",
+            "ordinal": 0
+          },
+          {
+            "source": "15491308",
+            "ordinal": 0
+          },
+          {
+            "source": "23471400",
+            "ordinal": 0
+          },
+          {
+            "source": "9291668",
+            "ordinal": 0
+          },
+          {
+            "source": "22059387",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 5
+          },
+          {
+            "source": "4489217",
+            "ordinal": 0
+          }
+        ],
+        "fused": [
+          {
+            "source": "15521377",
+            "ordinal": 3
+          },
+          {
+            "source": "6896063",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "35543846",
+            "ordinal": 1
+          },
+          {
+            "source": "3230557",
+            "ordinal": 0
+          },
+          {
+            "source": "4653837",
+            "ordinal": 1
+          },
+          {
+            "source": "9291668",
+            "ordinal": 0
+          },
+          {
+            "source": "31293581",
+            "ordinal": 0
+          },
+          {
+            "source": "663464",
+            "ordinal": 0
+          },
+          {
+            "source": "17412260",
+            "ordinal": 0
+          },
+          {
+            "source": "22264117",
+            "ordinal": 0
+          },
+          {
+            "source": "25419778",
+            "ordinal": 0
+          },
+          {
+            "source": "42279414",
+            "ordinal": 0
+          },
+          {
+            "source": "6040392",
+            "ordinal": 0
+          },
+          {
+            "source": "19736671",
+            "ordinal": 0
+          },
+          {
+            "source": "10012166",
+            "ordinal": 0
+          },
+          {
+            "source": "42836872",
+            "ordinal": 1
+          },
+          {
+            "source": "9559146",
+            "ordinal": 0
+          },
+          {
+            "source": "15832146",
+            "ordinal": 0
+          }
+        ],
+        "rerank": [
+          {
+            "source": "15521377",
+            "ordinal": 3
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "6896063",
+            "ordinal": 0
+          },
+          {
+            "source": "663464",
+            "ordinal": 0
+          },
+          {
+            "source": "9559146",
+            "ordinal": 0
+          },
+          {
+            "source": "3230557",
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "source": "15521377",
+            "ordinal": 3
+          },
+          {
+            "source": "6896063",
+            "ordinal": 0
+          },
+          {
+            "source": "26230669",
+            "ordinal": 0
+          },
+          {
+            "source": "9159495",
+            "ordinal": 0
+          },
+          {
+            "source": "35543846",
+            "ordinal": 1
+          },
+          {
+            "source": "3230557",
+            "ordinal": 0
+          },
+          {
+            "source": "4653837",
+            "ordinal": 1
+          },
+          {
+            "source": "9291668",
+            "ordinal": 0
+          },
+          {
+            "source": "31293581",
+            "ordinal": 0
+          },
+          {
+            "source": "663464",
+            "ordinal": 0
+          },
+          {
+            "source": "17412260",
+            "ordinal": 0
+          },
+          {
+            "source": "22264117",
+            "ordinal": 0
+          },
+          {
+            "source": "25419778",
+            "ordinal": 0
+          },
+          {
+            "source": "42279414",
+            "ordinal": 0
+          },
+          {
+            "source": "6040392",
+            "ordinal": 0
+          },
+          {
+            "source": "19736671",
+            "ordinal": 0
+          },
+          {
+            "source": "10012166",
+            "ordinal": 0
+          },
+          {
+            "source": "42836872",
+            "ordinal": 1
+          },
+          {
+            "source": "9559146",
+            "ordinal": 0
+          },
+          {
+            "source": "15832146",
+            "ordinal": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "791",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 41.629,
+      "answer": "The evidence supports the statement: migraine is associated with a twofold increased risk of ischaemic stroke, and this association is apparent among people who have migraine with aura [1]. Migraine, particularly with aura, is described as a risk factor for early-onset ischemic stroke [2]. Migraine may confer an increased risk of stroke in women under 45 years of age and possibly in men who have migraine with aura [3]. In a population-based study, migraine with aura was the only headache type strongly associated with brain infarcts [5].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "15984735",
+          "ordinal": 2,
+          "chunk_id": "d7c42cee8ad3bfa8429e8d59ae0b65e3076600f104e32308383da38ac7b23689",
+          "locator": {
+            "type": "text_range",
+            "char_end": 2632,
+            "char_start": 2000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 632,
+          "excerpt_sha256": "76ba19537d1678f1ad3a6a7e35612eecd72fb4af8cdce48b86af3719c29c6123",
+          "chunk_text_sha256": "76ba19537d1678f1ad3a6a7e35612eecd72fb4af8cdce48b86af3719c29c6123",
+          "excerpt_preview": "disease, showing a twofold increased risk. CONCLUSION Migraine is associated with a twofold increase"
+        },
+        {
+          "number": 2,
+          "source": "23785605",
+          "ordinal": 0,
+          "chunk_id": "b471b1ebfaf1acc61ff858e2fc3d6ce555f35d28e815e9968cbf3b655bb6ac10",
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "excerpt_sha256": "6e6ba61e7aaf10c4b249f7cfbe6faa1e7d5a7f33a46157e01a03e7771bde99b8",
+          "chunk_text_sha256": "6e6ba61e7aaf10c4b249f7cfbe6faa1e7d5a7f33a46157e01a03e7771bde99b8",
+          "excerpt_preview": "Cardiovascular risk factors and migraine: the GEM population-based study.\n\nBACKGROUND Migraine, part"
+        },
+        {
+          "number": 3,
+          "source": "14566771",
+          "ordinal": 0,
+          "chunk_id": "6faccd7ba8dc3186f0c168125c6e86f53bf24317cf5c7d0576db80046503fb28",
+          "locator": {
+            "type": "text_range",
+            "char_end": 620,
+            "char_start": 0
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 620,
+          "excerpt_sha256": "4e5723febcf6b54b1e4320fcbcd6f00867a911b1100b46d47a855d8f19298c85",
+          "chunk_text_sha256": "4e5723febcf6b54b1e4320fcbcd6f00867a911b1100b46d47a855d8f19298c85",
+          "excerpt_preview": "Stroke and migraine--the spectrum of cause and effect.\n\nThe relationship of migraine and stroke is c"
+        },
+        {
+          "number": 5,
+          "source": "17930286",
+          "ordinal": 1,
+          "chunk_id": "3cab2f66aeefe62317cfbe4783f6f565f870c374e7ad744580f12e7e8f128706",
+          "locator": {
+            "type": "text_range",
+            "char_end": 2185,
+            "char_start": 1000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1185,
+          "excerpt_sha256": "ba2e4e5ab337db39c6d0858bfe44f5d9ce3197e2a308609c32d5cd9eb920e1c9",
+          "chunk_text_sha256": "ba2e4e5ab337db39c6d0858bfe44f5d9ce3197e2a308609c32d5cd9eb920e1c9",
+          "excerpt_preview": "nd increasing volume of white matter hyperintensities. The adjusted odds ratio of being in the highe"
+        }
+      ],
+      "stages": {
+        "dense": [
+          {
+            "source": "15984735",
+            "ordinal": 1
+          },
+          {
+            "source": "15984735",
+            "ordinal": 2
+          },
+          {
+            "source": "14566771",
+            "ordinal": 0
+          },
+          {
+            "source": "23785605",
+            "ordinal": 0
+          },
+          {
+            "source": "15984735",
+            "ordinal": 0
+          },
+          {
+            "source": "23785605",
+            "ordinal": 1
+          },
+          {
+            "source": "17930286",
+            "ordinal": 1
+          },
+          {
+            "source": "38369817",
+            "ordinal": 1
+          },
+          {
+            "source": "8672737",
+            "ordinal": 0
+          },
+          {
+            "source": "2352142",
+            "ordinal": 0
+          },
+          {
+            "source": "38369817",
+            "ordinal": 0
+          },
+          {
+            "source": "37065914",
+            "ordinal": 0
+          },
+          {
+            "source": "23627419",
+            "ordinal": 1
+          },
+          {
+            "source": "23627419",
+            "ordinal": 0
+          },
+          {
+            "source": "26132041",
+            "ordinal": 0
+          },
+          {
+            "source": "24148722",
+            "ordinal": 0
+          },
+          {
+            "source": "14726759",
+            "ordinal": 1
+          },
+          {
+            "source": "43647194",
+            "ordinal": 1
+          },
+          {
+            "source": "44830890",
+            "ordinal": 1
+          },
+          {
+            "source": "17930286",
+            "ordinal": 0
+          },
+          {
+            "source": "39390206",
+            "ordinal": 1
+          },
+          {
+            "source": "6153754",
+            "ordinal": 2
+          },
+          {
+            "source": "5107861",
+            "ordinal": 1
+          },
+          {
+            "source": "37065914",
+            "ordinal": 1
+          },
+          {
+            "source": "3761017",
+            "ordinal": 0
+          },
+          {
+            "source": "19332616",
+            "ordinal": 0
+          },
+          {
+            "source": "32328114",
+            "ordinal": 0
+          },
+          {
+            "source": "20544428",
+            "ordinal": 0
+          },
+          {
+            "source": "24510595",
+            "ordinal": 1
+          },
+          {
+            "source": "43647194",
+            "ordinal": 0
+          }
+        ],
+        "sparse": [
+          {
+            "source": "15984735",
+            "ordinal": 1
+          },
+          {
+            "source": "23785605",
+            "ordinal": 0
+          },
+          {
+            "source": "8672737",
+            "ordinal": 0
+          },
+          {
+            "source": "23627419",
+            "ordinal": 0
+          },
+          {
+            "source": "15984735",
+            "ordinal": 2
+          },
+          {
+            "source": "23785605",
+            "ordinal": 1
+          },
+          {
+            "source": "17930286",
+            "ordinal": 1
+          },
+          {
+            "source": "37065914",
+            "ordinal": 0
+          },
+          {
+            "source": "43647194",
+            "ordinal": 0
+          },
+          {
+            "source": "43647194",
+            "ordinal": 1
+          },
+          {
+            "source": "32328114",
+            "ordinal": 0
+          },
+          {
+            "source": "14566771",
+            "ordinal": 0
+          },
+          {
+            "source": "37065914",
+            "ordinal": 1
+          },
+          {
+            "source": "23627419",
+            "ordinal": 1
+          },
+          {
+            "source": "18256197",
+            "ordinal": 0
+          },
+          {
+            "source": "16760369",
+            "ordinal": 1
+          },
+          {
+            "source": "18256197",
+            "ordinal": 1
+          },
+          {
+            "source": "38369817",
+            "ordinal": 0
+          },
+          {
+            "source": "3761017",
+            "ordinal": 0
+          },
+          {
+            "source": "15984735",
+            "ordinal": 0
+          },
+          {
+            "source": "14726759",
+            "ordinal": 0
+          },
+          {
+            "source": "21571708",
+            "ordinal": 0
+          },
+          {
+            "source": "24148722",
+            "ordinal": 0
+          },
+          {
+            "source": "21868715",
+            "ordinal": 0
+          },
+          {
+            "source": "22281684",
+            "ordinal": 0
+          },
+          {
+            "source": "9813098",
+            "ordinal": 0
+          },
+          {
+            "source": "6580081",
+            "ordinal": 0
+          },
+          {
+            "source": "33884866",
+            "ordinal": 1
+          },
+          {
+            "source": "43700577",
+            "ordinal": 0
+          },
+          {
+            "source": "21571708",
+            "ordinal": 1
+          }
+        ],
+        "fused": [
+          {
+            "source": "15984735",
+            "ordinal": 2
+          },
+          {
+            "source": "23785605",
+            "ordinal": 0
+          },
+          {
+            "source": "8672737",
+            "ordinal": 0
+          },
+          {
+            "source": "17930286",
+            "ordinal": 1
+          },
+          {
+            "source": "14566771",
+            "ordinal": 0
+          },
+          {
+            "source": "23627419",
+            "ordinal": 0
+          },
+          {
+            "source": "37065914",
+            "ordinal": 0
+          },
+          {
+            "source": "38369817",
+            "ordinal": 1
+          },
+          {
+            "source": "43647194",
+            "ordinal": 1
+          },
+          {
+            "source": "14726759",
+            "ordinal": 0
+          },
+          {
+            "source": "24148722",
+            "ordinal": 0
+          },
+          {
+            "source": "32328114",
+            "ordinal": 0
+          },
+          {
+            "source": "3761017",
+            "ordinal": 0
+          },
+          {
+            "source": "2352142",
+            "ordinal": 0
+          },
+          {
+            "source": "18256197",
+            "ordinal": 0
+          },
+          {
+            "source": "26132041",
+            "ordinal": 0
+          },
+          {
+            "source": "16760369",
+            "ordinal": 2
+          },
+          {
+            "source": "44830890",
+            "ordinal": 0
+          },
+          {
+            "source": "21571708",
+            "ordinal": 0
+          },
+          {
+            "source": "39390206",
+            "ordinal": 1
+          }
+        ],
+        "rerank": [
+          {
+            "source": "15984735",
+            "ordinal": 2
+          },
+          {
+            "source": "23785605",
+            "ordinal": 0
+          },
+          {
+            "source": "14566771",
+            "ordinal": 0
+          },
+          {
+            "source": "8672737",
+            "ordinal": 0
+          },
+          {
+            "source": "17930286",
+            "ordinal": 1
+          },
+          {
+            "source": "14726759",
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "source": "15984735",
+            "ordinal": 2
+          },
+          {
+            "source": "23785605",
+            "ordinal": 0
+          },
+          {
+            "source": "8672737",
+            "ordinal": 0
+          },
+          {
+            "source": "17930286",
+            "ordinal": 1
+          },
+          {
+            "source": "14566771",
+            "ordinal": 0
+          },
+          {
+            "source": "23627419",
+            "ordinal": 0
+          },
+          {
+            "source": "37065914",
+            "ordinal": 0
+          },
+          {
+            "source": "38369817",
+            "ordinal": 1
+          },
+          {
+            "source": "43647194",
+            "ordinal": 1
+          },
+          {
+            "source": "14726759",
+            "ordinal": 0
+          },
+          {
+            "source": "24148722",
+            "ordinal": 0
+          },
+          {
+            "source": "32328114",
+            "ordinal": 0
+          },
+          {
+            "source": "3761017",
+            "ordinal": 0
+          },
+          {
+            "source": "2352142",
+            "ordinal": 0
+          },
+          {
+            "source": "18256197",
+            "ordinal": 0
+          },
+          {
+            "source": "26132041",
+            "ordinal": 0
+          },
+          {
+            "source": "16760369",
+            "ordinal": 2
+          },
+          {
+            "source": "44830890",
+            "ordinal": 0
+          },
+          {
+            "source": "21571708",
+            "ordinal": 0
+          },
+          {
+            "source": "39390206",
+            "ordinal": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "missing-tenant-canary",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 41.732,
+      "answer": "The supplied evidence does not contain any document identified as the Lattice Vault memorandum ZR-618, nor does it mention an authorization desk or any color code assigned to one. Therefore, the question cannot be answered from the available evidence.",
+      "insufficient": true,
+      "citations": [],
+      "stages": {
+        "dense": [
+          {
+            "source": "23763738",
+            "ordinal": 0
+          },
+          {
+            "source": "23763738",
+            "ordinal": 1
+          },
+          {
+            "source": "36816310",
+            "ordinal": 0
+          },
+          {
+            "source": "739734",
+            "ordinal": 0
+          },
+          {
+            "source": "4421547",
+            "ordinal": 0
+          },
+          {
+            "source": "33920995",
+            "ordinal": 0
+          },
+          {
+            "source": "17017465",
+            "ordinal": 0
+          },
+          {
+            "source": "86211914",
+            "ordinal": 1
+          },
+          {
+            "source": "1791637",
+            "ordinal": 0
+          },
+          {
+            "source": "41329220",
+            "ordinal": 0
+          },
+          {
+            "source": "16962732",
+            "ordinal": 0
+          },
+          {
+            "source": "45336190",
+            "ordinal": 1
+          },
+          {
+            "source": "24512417",
+            "ordinal": 0
+          },
+          {
+            "source": "2587396",
+            "ordinal": 0
+          },
+          {
+            "source": "60515890",
+            "ordinal": 1
+          },
+          {
+            "source": "46248894",
+            "ordinal": 0
+          },
+          {
+            "source": "140874",
+            "ordinal": 0
+          },
+          {
+            "source": "5373138",
+            "ordinal": 0
+          },
+          {
+            "source": "3868322",
+            "ordinal": 1
+          },
+          {
+            "source": "19966976",
+            "ordinal": 0
+          },
+          {
+            "source": "2613813",
+            "ordinal": 0
+          },
+          {
+            "source": "56486733",
+            "ordinal": 0
+          },
+          {
+            "source": "5145974",
+            "ordinal": 4
+          },
+          {
+            "source": "12462961",
+            "ordinal": 1
+          },
+          {
+            "source": "32001951",
+            "ordinal": 0
+          },
+          {
+            "source": "1346695",
+            "ordinal": 1
+          },
+          {
+            "source": "56486733",
+            "ordinal": 1
+          },
+          {
+            "source": "4421547",
+            "ordinal": 1
+          },
+          {
+            "source": "15721252",
+            "ordinal": 1
+          },
+          {
+            "source": "6517267",
+            "ordinal": 1
+          }
+        ],
+        "sparse": [
+          {
+            "source": "45770026",
+            "ordinal": 0
+          },
+          {
+            "source": "34016944",
+            "ordinal": 1
+          },
+          {
+            "source": "980196",
+            "ordinal": 1
+          },
+          {
+            "source": "15521377",
+            "ordinal": 4
+          },
+          {
+            "source": "44614949",
+            "ordinal": 0
+          },
+          {
+            "source": "23126677",
+            "ordinal": 1
+          },
+          {
+            "source": "34753204",
+            "ordinal": 0
+          },
+          {
+            "source": "980196",
+            "ordinal": 0
+          },
+          {
+            "source": "34016944",
+            "ordinal": 0
+          },
+          {
+            "source": "144555102",
+            "ordinal": 0
+          },
+          {
+            "source": "6407356",
+            "ordinal": 0
+          },
+          {
+            "source": "24042363",
+            "ordinal": 0
+          },
+          {
+            "source": "15135001",
+            "ordinal": 0
+          },
+          {
+            "source": "7898952",
+            "ordinal": 0
+          },
+          {
+            "source": "8596357",
+            "ordinal": 0
+          },
+          {
+            "source": "11880289",
+            "ordinal": 1
+          },
+          {
+            "source": "24384587",
+            "ordinal": 0
+          },
+          {
+            "source": "16208091",
+            "ordinal": 0
+          },
+          {
+            "source": "17236106",
+            "ordinal": 1
+          },
+          {
+            "source": "3285059",
+            "ordinal": 0
+          },
+          {
+            "source": "13025574",
+            "ordinal": 0
+          },
+          {
+            "source": "32852283",
+            "ordinal": 1
+          },
+          {
+            "source": "18473550",
+            "ordinal": 0
+          },
+          {
+            "source": "3973445",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 3
+          },
+          {
+            "source": "22674621",
+            "ordinal": 0
+          },
+          {
+            "source": "14362780",
+            "ordinal": 0
+          },
+          {
+            "source": "7547329",
+            "ordinal": 0
+          },
+          {
+            "source": "34034749",
+            "ordinal": 0
+          },
+          {
+            "source": "14672919",
+            "ordinal": 1
+          }
+        ],
+        "fused": [
+          {
+            "source": "23763738",
+            "ordinal": 1
+          },
+          {
+            "source": "45770026",
+            "ordinal": 0
+          },
+          {
+            "source": "34016944",
+            "ordinal": 0
+          },
+          {
+            "source": "36816310",
+            "ordinal": 0
+          },
+          {
+            "source": "739734",
+            "ordinal": 0
+          },
+          {
+            "source": "980196",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 0
+          },
+          {
+            "source": "4421547",
+            "ordinal": 0
+          },
+          {
+            "source": "33920995",
+            "ordinal": 0
+          },
+          {
+            "source": "44614949",
+            "ordinal": 0
+          },
+          {
+            "source": "17017465",
+            "ordinal": 0
+          },
+          {
+            "source": "23126677",
+            "ordinal": 0
+          },
+          {
+            "source": "34753204",
+            "ordinal": 1
+          },
+          {
+            "source": "86211914",
+            "ordinal": 1
+          },
+          {
+            "source": "144555102",
+            "ordinal": 0
+          },
+          {
+            "source": "1791637",
+            "ordinal": 1
+          },
+          {
+            "source": "41329220",
+            "ordinal": 1
+          },
+          {
+            "source": "6407356",
+            "ordinal": 0
+          },
+          {
+            "source": "16962732",
+            "ordinal": 0
+          },
+          {
+            "source": "24042363",
+            "ordinal": 1
+          }
+        ],
+        "rerank": [
+          {
+            "source": "86211914",
+            "ordinal": 1
+          },
+          {
+            "source": "23763738",
+            "ordinal": 1
+          },
+          {
+            "source": "739734",
+            "ordinal": 0
+          },
+          {
+            "source": "144555102",
+            "ordinal": 0
+          },
+          {
+            "source": "24042363",
+            "ordinal": 1
+          },
+          {
+            "source": "23126677",
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "source": "23763738",
+            "ordinal": 1
+          },
+          {
+            "source": "45770026",
+            "ordinal": 0
+          },
+          {
+            "source": "34016944",
+            "ordinal": 0
+          },
+          {
+            "source": "36816310",
+            "ordinal": 0
+          },
+          {
+            "source": "739734",
+            "ordinal": 0
+          },
+          {
+            "source": "980196",
+            "ordinal": 0
+          },
+          {
+            "source": "15521377",
+            "ordinal": 0
+          },
+          {
+            "source": "4421547",
+            "ordinal": 0
+          },
+          {
+            "source": "33920995",
+            "ordinal": 0
+          },
+          {
+            "source": "44614949",
+            "ordinal": 0
+          },
+          {
+            "source": "17017465",
+            "ordinal": 0
+          },
+          {
+            "source": "23126677",
+            "ordinal": 0
+          },
+          {
+            "source": "34753204",
+            "ordinal": 1
+          },
+          {
+            "source": "86211914",
+            "ordinal": 1
+          },
+          {
+            "source": "144555102",
+            "ordinal": 0
+          },
+          {
+            "source": "1791637",
+            "ordinal": 1
+          },
+          {
+            "source": "41329220",
+            "ordinal": 1
+          },
+          {
+            "source": "6407356",
+            "ordinal": 0
+          },
+          {
+            "source": "16962732",
+            "ordinal": 0
+          },
+          {
+            "source": "24042363",
+            "ordinal": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "838-reproductive-functions",
+      "state": "returned",
+      "http": 502,
+      "elapsed_s": 41.567,
+      "error": "MODEL_BAD_RESPONSE"
+    }
+  ]
+}

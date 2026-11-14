@@ -1,0 +1,33 @@
+{
+  "verified_original_corpus_reconstructions": {
+    "qasper-article_local_passage.json": {
+      "first_responses": 7,
+      "verified_returned_citations": 10
+    },
+    "qasper-baseline.json": {
+      "first_responses": 7,
+      "verified_returned_citations": 9
+    },
+    "qasper-full_parent4.json": {
+      "first_responses": 7,
+      "verified_returned_citations": 13
+    },
+    "full-article_local_passage.json": {
+      "first_responses": 10,
+      "verified_returned_citations": 4
+    },
+    "full-baseline.json": {
+      "first_responses": 10,
+      "verified_returned_citations": 6
+    },
+    "full-full_parent4.json": {
+      "first_responses": 10,
+      "verified_returned_citations": 6
+    },
+    "title-diagnostic.json": {
+      "first_responses": 1,
+      "verified_returned_citations": 0
+    }
+  },
+  "total_returned_citations": 48
+}

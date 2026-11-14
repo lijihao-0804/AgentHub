@@ -1,0 +1,51 @@
+{
+  "e67d2266476abd157fc8c396b3dfb70cb343471e": {
+    "source": "1601.02166",
+    "chunks": 11,
+    "annotated_evidence_sets": 0,
+    "any_one_chunk_contains_entire_annotated_paragraph": false,
+    "answer_string_visible_in_any_raw_chunk": false
+  },
+  "6b8a3100895f2192e08973006474428319dc298e": {
+    "source": "1707.06945",
+    "chunks": 18,
+    "annotated_evidence_sets": 1,
+    "any_one_chunk_contains_entire_annotated_paragraph": false,
+    "answer_string_visible_in_any_raw_chunk": true
+  },
+  "a130aa735de3b65c71f27018f20d3c068bafb826": {
+    "source": "1910.04887",
+    "chunks": 10,
+    "annotated_evidence_sets": 1,
+    "any_one_chunk_contains_entire_annotated_paragraph": true,
+    "answer_string_visible_in_any_raw_chunk": true
+  },
+  "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c": {
+    "source": "1707.08559",
+    "chunks": 9,
+    "annotated_evidence_sets": 1,
+    "any_one_chunk_contains_entire_annotated_paragraph": true,
+    "answer_string_visible_in_any_raw_chunk": true
+  },
+  "77db56fee07b01015a74413ca31f19bea7203f0b": {
+    "source": "2002.01861",
+    "chunks": 17,
+    "annotated_evidence_sets": 1,
+    "any_one_chunk_contains_entire_annotated_paragraph": true,
+    "answer_string_visible_in_any_raw_chunk": true
+  },
+  "5efa19058f815494b72c44d746c157e9403f726e": {
+    "source": "1911.01680",
+    "chunks": 19,
+    "annotated_evidence_sets": 1,
+    "any_one_chunk_contains_entire_annotated_paragraph": false,
+    "answer_string_visible_in_any_raw_chunk": true
+  },
+  "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854": {
+    "source": "1708.00481",
+    "chunks": 15,
+    "annotated_evidence_sets": 1,
+    "any_one_chunk_contains_entire_annotated_paragraph": true,
+    "answer_string_visible_in_any_raw_chunk": true
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "609": {
+    "baseline": {
+      "http": 502,
+      "qrel_stage_ranks": {},
+      "cites_original_article": false,
+      "same_snapshot_retrieval_only_replay": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": [],
+        "delivered": []
+      }
+    },
+    "article_local_passage": {
+      "http": 502,
+      "qrel_stage_ranks": {},
+      "cites_original_article": false,
+      "same_snapshot_retrieval_only_replay": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": [],
+        "delivered": []
+      }
+    },
+    "full_parent4": {
+      "http": 502,
+      "qrel_stage_ranks": {},
+      "cites_original_article": false,
+      "same_snapshot_retrieval_only_replay": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": [],
+        "delivered": []
+      }
+    }
+  },
+  "620": {
+    "baseline": {
+      "http": 502,
+      "qrel_stage_ranks": {},
+      "cites_original_article": false,
+      "same_snapshot_retrieval_only_replay": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": [],
+        "delivered": []
+      }
+    },
+    "article_local_passage": {
+      "http": 502,
+      "qrel_stage_ranks": {},
+      "cites_original_article": false,
+      "same_snapshot_retrieval_only_replay": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": [],
+        "delivered": []
+      }
+    },
+    "full_parent4": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false,
+      "same_snapshot_retrieval_only_replay": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": [],
+        "delivered": []
+      }
+    }
+  },
+  "753": {
+    "baseline": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [
+          14
+        ],
+        "sparse": [
+          24
+        ],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "article_local_passage": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [
+          14
+        ],
+        "sparse": [
+          24
+        ],
+        "fused": [
+          11
+        ],
+        "rerank": [],
+        "selection": [
+          11
+        ]
+      },
+      "cites_original_article": false
+    },
+    "full_parent4": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [
+          14
+        ],
+        "sparse": [
+          24
+        ],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    }
+  },
+  "817": {
+    "baseline": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "article_local_passage": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "full_parent4": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    }
+  },
+  "818": {
+    "baseline": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "article_local_passage": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "full_parent4": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    }
+  },
+  "828": {
+    "baseline": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "article_local_passage": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "full_parent4": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    }
+  },
+  "1387": {
+    "baseline": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "article_local_passage": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    },
+    "full_parent4": {
+      "http": 200,
+      "qrel_stage_ranks": {
+        "dense": [],
+        "sparse": [],
+        "fused": [],
+        "rerank": [],
+        "selection": []
+      },
+      "cites_original_article": false
+    }
+  }
+}

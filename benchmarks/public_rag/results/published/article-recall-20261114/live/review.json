@@ -1,0 +1,721 @@
+{
+  "method": "Single assistant review of arm-blinded answers and actual output citations. Exact repeats share one judgment. Provider errors counted.",
+  "results": {
+    "609": {
+      "scope": "full",
+      "query": "Increased flux of microbial products provokes immune responses.",
+      "type": "original_exposed_BEIR_claim",
+      "baseline": {
+        "verdict": "http_failure",
+        "reason": "The first HTTP response contained no answer or citations.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "9b0084de77aa",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "http_failure",
+        "reason": "The first HTTP response contained no answer or citations.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "9b0084de77aa",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "http_failure",
+        "reason": "The first HTTP response contained no answer or citations.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "9b0084de77aa",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "620": {
+      "scope": "full",
+      "query": "Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.",
+      "type": "original_exposed_BEIR_claim",
+      "baseline": {
+        "verdict": "http_failure",
+        "reason": "The first HTTP response contained no answer or citations.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "9578a7eb1760",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "http_failure",
+        "reason": "The first HTTP response contained no answer or citations.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "9578a7eb1760",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "A qualified, directly supported partial answer: alternative source 20888849 supports stromal depletion, increased vascular density/drug concentration and transient stabilization in mice; answer explicitly withholds the stronger fibrosis interpretation. Does not confirm the entire original claim.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "87cca9072517",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "753": {
+      "scope": "full",
+      "query": "Malaria has a high vectorial capacity.",
+      "type": "original_exposed_BEIR_claim",
+      "baseline": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "0a66cc6510f5",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "127540d612be",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "84dee1afc24c",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "817": {
+      "scope": "full",
+      "query": "Myelin sheaths are lipid-rich cellular structures.",
+      "type": "original_exposed_BEIR_claim",
+      "baseline": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "75950e0ec8ca",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "90a26fc09fe8",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "13f2ce287252",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "818": {
+      "scope": "full",
+      "query": "Myelin sheaths play a role in action potential propagation.",
+      "type": "original_exposed_BEIR_claim",
+      "baseline": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "c7e497e7383b",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "4cbbb233516a",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "7d1687735cf7",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "828": {
+      "scope": "full",
+      "query": "NAC inhibits the generation of angiotensin-converting enzyme.",
+      "type": "original_exposed_BEIR_claim",
+      "baseline": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "c46c05f45ca3",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "240292f548f6",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "f32b2c16c32f",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "1387": {
+      "scope": "full",
+      "query": "eRNAs influence is linked to senescence, aging, and carcinogenesis.",
+      "type": "original_exposed_BEIR_claim",
+      "baseline": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "a39b1df3b8d4",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "ff2ffa60fd11",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "abstained",
+        "reason": "No substantive cited answer delivered. The first reply explicitly withholds the claim and supplies no citations.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "ecc99344fb7c",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "791": {
+      "scope": "full",
+      "query": "Migraine with aura is associated with ischemic stroke.",
+      "type": "already_correct",
+      "baseline": {
+        "verdict": "supported",
+        "reason": "Paper 15984735 directly supports elevated ischaemic stroke risk with aura. Supporting citations cover all quantitative and subgroup details actually stated in this reply.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "f77e1926d426",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "supported",
+        "reason": "Paper 15984735 directly supports elevated ischaemic stroke risk with aura. Supporting citations cover all quantitative and subgroup details actually stated in this reply.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "d082a65f319c",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "Paper 15984735 directly supports elevated ischaemic stroke risk with aura. Supporting citations cover all quantitative and subgroup details actually stated in this reply.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "a928a3bc6df9",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "missing-tenant-canary": {
+      "scope": "full",
+      "query": "According to the Lattice Vault memorandum ZR-618, what color code was assigned to the authorization desk?",
+      "type": "missing_evidence",
+      "baseline": {
+        "verdict": "safe_refusal",
+        "reason": "Explicit abstention with no citations on the absent synthetic memorandum.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "dc9c26190769",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "safe_refusal",
+        "reason": "Explicit abstention with no citations on the absent synthetic memorandum.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "c0ee8d52914a",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "safe_refusal",
+        "reason": "Explicit abstention with no citations on the absent synthetic memorandum.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "5c9f4bbab123",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "838-reproductive-functions": {
+      "scope": "full",
+      "query": "Which reproductive functions does the study identify for NR5A2, also called liver receptor homolog-1?",
+      "type": "source_grounded_diagnostic_derivative",
+      "baseline": {
+        "verdict": "supported",
+        "reason": "The two cited passages from 15928989 directly support the ovarian findings, luteal maintenance, decidualization, placental formation and pregnancy consequences described.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "36ce7aa6a2c8",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "http_failure",
+        "reason": "The first HTTP response contained no answer or citations.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "90ce53db9769",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "The two cited passages from 15928989 directly support the ovarian findings, luteal maintenance, decidualization, placental formation and pregnancy consequences described.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "bafe079d3d75",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "e67d2266476abd157fc8c396b3dfb70cb343471e": {
+      "scope": "qasper",
+      "query": "In the paper “Empirical Gaussian priors for cross-lingual transfer learning”, What languages did they experiment with?",
+      "type": "public_QASPER_TRAIN",
+      "baseline": {
+        "verdict": "safe_refusal",
+        "reason": "Explicit refusal with zero citations matches the unanswerable source annotation; paper omits the specific language list.",
+        "http": 200,
+        "cited_gold": false,
+        "audit_key": "d2d0ca48dfc3",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "article_local_passage": {
+        "verdict": "http_failure",
+        "reason": "No answer or citations in the first HTTP response.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "3fda6e48bf40",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      },
+      "full_parent4": {
+        "verdict": "http_failure",
+        "reason": "No answer or citations in the first HTTP response.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "3fda6e48bf40",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": null
+      }
+    },
+    "6b8a3100895f2192e08973006474428319dc298e": {
+      "scope": "qasper",
+      "query": "In the paper “Cross-Lingual Induction and Transfer of Verb Classes Based on Word Vector Space Specialisation”, What clustering algorithm is used on top of the VerbNet-specialized representations?",
+      "type": "public_QASPER_TRAIN",
+      "baseline": {
+        "verdict": "supported",
+        "reason": "The cited excerpt states MNCut spectral clustering; a second source excerpt supports self-tuning of cluster count wherever claimed.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "ca9f6fd06023",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": false
+      },
+      "article_local_passage": {
+        "verdict": "supported",
+        "reason": "The cited excerpt states MNCut spectral clustering; a second source excerpt supports self-tuning of cluster count wherever claimed.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "2c40ed7280df",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": false
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "The cited excerpt states MNCut spectral clustering; a second source excerpt supports self-tuning of cluster count wherever claimed.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "de0d993a6fd8",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": false
+      }
+    },
+    "a130aa735de3b65c71f27018f20d3c068bafb826": {
+      "scope": "qasper",
+      "query": "In the paper “Visual Natural Language Query Auto-Completion for Estimating Instance Probabilities”, How big is data provided by this research?",
+      "type": "public_QASPER_TRAIN",
+      "baseline": {
+        "verdict": "http_failure",
+        "reason": "No answer or citations in the first HTTP response.",
+        "http": 502,
+        "cited_gold": false,
+        "audit_key": "b63377fea8e7",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": false
+      },
+      "article_local_passage": {
+        "verdict": "supported",
+        "reason": "Citation 6 supplies the annotated 16k images and 740k descriptions and ReferIt sizes. Citation 4 supports the 1.73M/300K split; where stated, citation 1 supports 2,909 classes.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "5f2309cda27e",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "Citation 6 supplies the annotated 16k images and 740k descriptions and ReferIt sizes. Citation 4 supports the 1.73M/300K split; where stated, citation 1 supports 2,909 classes.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "0a03ccb6371b",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      }
+    },
+    "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c": {
+      "scope": "qasper",
+      "query": "In the paper “Video Highlight Prediction Using Audience Chat Reactions”, How big was the dataset presented?",
+      "type": "public_QASPER_TRAIN",
+      "baseline": {
+        "verdict": "supported",
+        "reason": "The cited collection paragraph states 218 plus 103, total 321, and reports dates and video duration. The bilingual additional detail is cited where stated.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "b3177c7b0141",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      },
+      "article_local_passage": {
+        "verdict": "supported",
+        "reason": "The cited collection paragraph states 218 plus 103, total 321, and reports dates and video duration. The bilingual additional detail is cited where stated.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "b97b3e2c4cdd",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "The cited collection paragraph states 218 plus 103, total 321, and reports dates and video duration. The bilingual additional detail is cited where stated.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "950c2c663fda",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      }
+    },
+    "77db56fee07b01015a74413ca31f19bea7203f0b": {
+      "scope": "qasper",
+      "query": "In the paper “Rapid Adaptation of BERT for Information Extraction on Domain-Specific Business Documents”, What evaluation metric were used for presenting results? ",
+      "type": "public_QASPER_TRAIN",
+      "baseline": {
+        "verdict": "supported",
+        "reason": "Citations 1–3 support F1, precision, recall, exact deduplicated span scoring, micro/type reporting and the data-efficiency qualification.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "c116d5b11a66",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      },
+      "article_local_passage": {
+        "verdict": "supported",
+        "reason": "Citations 1–3 support F1, precision, recall, exact deduplicated span scoring, micro/type reporting and the data-efficiency qualification.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "2857687c8033",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "Citations 1–3 support F1, precision, recall, exact deduplicated span scoring, micro/type reporting and the data-efficiency qualification.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "2eb569cf5aee",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      }
+    },
+    "5efa19058f815494b72c44d746c157e9403f726e": {
+      "scope": "qasper",
+      "query": "In the paper “Improving Slot Filling by Utilizing Contextual Information”, What metris are used for evaluation?",
+      "type": "public_QASPER_TRAIN",
+      "baseline": {
+        "verdict": "supported",
+        "reason": "The cited source explicitly specifies micro-averaged F1 on all labels and reports improved F1.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "c71f6bba2db1",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": false
+      },
+      "article_local_passage": {
+        "verdict": "supported",
+        "reason": "The cited source explicitly specifies micro-averaged F1 on all labels and reports improved F1.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "097018998294",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": false
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "The cited source explicitly specifies micro-averaged F1 on all labels and reports improved F1.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "0ab6623ac692",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": false
+      }
+    },
+    "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854": {
+      "scope": "qasper",
+      "query": "In the paper “A Lightweight Front-end Tool for Interactive Entity Population”, What programming language is the tool written in?",
+      "type": "public_QASPER_TRAIN",
+      "baseline": {
+        "verdict": "supported",
+        "reason": "The original paper excerpts identify pure JavaScript and browser LocalStorage explicitly.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "d06be71d4aec",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      },
+      "article_local_passage": {
+        "verdict": "supported",
+        "reason": "The original paper excerpts identify pure JavaScript and browser LocalStorage explicitly.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "d5fd40f2e0f0",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      },
+      "full_parent4": {
+        "verdict": "supported",
+        "reason": "The original paper excerpts identify pure JavaScript and browser LocalStorage explicitly.",
+        "http": 200,
+        "cited_gold": true,
+        "audit_key": "57e794d4bebc",
+        "any_annotated_paragraph_contained_in_one_returned_excerpt": true
+      }
+    }
+  },
+  "summary": {
+    "all": {
+      "count": 17,
+      "baseline_supported_ids": [
+        "791",
+        "838-reproductive-functions",
+        "6b8a3100895f2192e08973006474428319dc298e",
+        "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+        "77db56fee07b01015a74413ca31f19bea7203f0b",
+        "5efa19058f815494b72c44d746c157e9403f726e",
+        "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854"
+      ],
+      "arms": {
+        "baseline": {
+          "outcomes": {
+            "http_failure": 3,
+            "abstained": 5,
+            "supported": 7,
+            "safe_refusal": 2
+          },
+          "preserved": [
+            "791",
+            "838-reproductive-functions",
+            "6b8a3100895f2192e08973006474428319dc298e",
+            "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+            "77db56fee07b01015a74413ca31f19bea7203f0b",
+            "5efa19058f815494b72c44d746c157e9403f726e",
+            "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "article_local_passage": {
+          "outcomes": {
+            "http_failure": 4,
+            "abstained": 5,
+            "supported": 7,
+            "safe_refusal": 1
+          },
+          "preserved": [
+            "791",
+            "6b8a3100895f2192e08973006474428319dc298e",
+            "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+            "77db56fee07b01015a74413ca31f19bea7203f0b",
+            "5efa19058f815494b72c44d746c157e9403f726e",
+            "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854"
+          ],
+          "lost": [
+            "838-reproductive-functions"
+          ],
+          "gained": [
+            "a130aa735de3b65c71f27018f20d3c068bafb826"
+          ]
+        },
+        "full_parent4": {
+          "outcomes": {
+            "http_failure": 2,
+            "supported": 9,
+            "abstained": 5,
+            "safe_refusal": 1
+          },
+          "preserved": [
+            "791",
+            "838-reproductive-functions",
+            "6b8a3100895f2192e08973006474428319dc298e",
+            "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+            "77db56fee07b01015a74413ca31f19bea7203f0b",
+            "5efa19058f815494b72c44d746c157e9403f726e",
+            "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854"
+          ],
+          "lost": [],
+          "gained": [
+            "620",
+            "a130aa735de3b65c71f27018f20d3c068bafb826"
+          ]
+        }
+      }
+    },
+    "full": {
+      "count": 10,
+      "baseline_supported_ids": [
+        "791",
+        "838-reproductive-functions"
+      ],
+      "arms": {
+        "baseline": {
+          "outcomes": {
+            "http_failure": 2,
+            "abstained": 5,
+            "supported": 2,
+            "safe_refusal": 1
+          },
+          "preserved": [
+            "791",
+            "838-reproductive-functions"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "article_local_passage": {
+          "outcomes": {
+            "http_failure": 3,
+            "abstained": 5,
+            "supported": 1,
+            "safe_refusal": 1
+          },
+          "preserved": [
+            "791"
+          ],
+          "lost": [
+            "838-reproductive-functions"
+          ],
+          "gained": []
+        },
+        "full_parent4": {
+          "outcomes": {
+            "http_failure": 1,
+            "supported": 3,
+            "abstained": 5,
+            "safe_refusal": 1
+          },
+          "preserved": [
+            "791",
+            "838-reproductive-functions"
+          ],
+          "lost": [],
+          "gained": [
+            "620"
+          ]
+        }
+      }
+    },
+    "qasper": {
+      "count": 7,
+      "baseline_supported_ids": [
+        "6b8a3100895f2192e08973006474428319dc298e",
+        "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+        "77db56fee07b01015a74413ca31f19bea7203f0b",
+        "5efa19058f815494b72c44d746c157e9403f726e",
+        "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854"
+      ],
+      "arms": {
+        "baseline": {
+          "outcomes": {
+            "safe_refusal": 1,
+            "supported": 5,
+            "http_failure": 1
+          },
+          "preserved": [
+            "6b8a3100895f2192e08973006474428319dc298e",
+            "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+            "77db56fee07b01015a74413ca31f19bea7203f0b",
+            "5efa19058f815494b72c44d746c157e9403f726e",
+            "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "article_local_passage": {
+          "outcomes": {
+            "http_failure": 1,
+            "supported": 6
+          },
+          "preserved": [
+            "6b8a3100895f2192e08973006474428319dc298e",
+            "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+            "77db56fee07b01015a74413ca31f19bea7203f0b",
+            "5efa19058f815494b72c44d746c157e9403f726e",
+            "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854"
+          ],
+          "lost": [],
+          "gained": [
+            "a130aa735de3b65c71f27018f20d3c068bafb826"
+          ]
+        },
+        "full_parent4": {
+          "outcomes": {
+            "http_failure": 1,
+            "supported": 6
+          },
+          "preserved": [
+            "6b8a3100895f2192e08973006474428319dc298e",
+            "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+            "77db56fee07b01015a74413ca31f19bea7203f0b",
+            "5efa19058f815494b72c44d746c157e9403f726e",
+            "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854"
+          ],
+          "lost": [],
+          "gained": [
+            "a130aa735de3b65c71f27018f20d3c068bafb826"
+          ]
+        }
+      }
+    },
+    "historically_supported": {
+      "baseline": {
+        "791": "supported",
+        "838-reproductive-functions": "supported"
+      },
+      "article_local_passage": {
+        "791": "supported",
+        "838-reproductive-functions": "http_failure"
+      },
+      "full_parent4": {
+        "791": "supported",
+        "838-reproductive-functions": "supported"
+      }
+    },
+    "annotated_or_synthetic_negative": {
+      "baseline": {
+        "e67d2266476abd157fc8c396b3dfb70cb343471e": "safe_refusal",
+        "missing-tenant-canary": "safe_refusal"
+      },
+      "article_local_passage": {
+        "e67d2266476abd157fc8c396b3dfb70cb343471e": "http_failure",
+        "missing-tenant-canary": "safe_refusal"
+      },
+      "full_parent4": {
+        "e67d2266476abd157fc8c396b3dfb70cb343471e": "http_failure",
+        "missing-tenant-canary": "safe_refusal"
+      }
+    }
+  }
+}

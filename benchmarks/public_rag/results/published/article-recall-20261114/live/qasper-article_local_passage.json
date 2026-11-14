@@ -1,0 +1,2870 @@
+{
+  "arm": "article_local_passage",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_profile": "190fa2f3-824d-424a-9993-f376c0c695e6",
+  "workspace": "c7200284-9ff7-490f-a6c5-a51290e50fff",
+  "knowledge_base": "d0904033-283d-4e62-8e9a-cd9b2beab3e0",
+  "snapshot": "42458b44-a5fd-41e9-806c-e476a92066b8",
+  "snapshot_hash": "509fcd8f0612a96dec8c9a84ed0afbefef946200cb28a3ffedf773d28667082f",
+  "documents": 7,
+  "chunks": 99,
+  "protocol_sha256": "1bb4252eed35303688f652e270f94a3df57c6c7799956cf6f787d413407ef75d",
+  "source_mapping_sha256": "6d134a494917aa41c8d709e95a972c986c8d8897bb8c8a8fda4fd4ec015bf2ed",
+  "ordered_cases_sha256": "4a253aeacb56b23873be39061abd2dc9ac745cf627229e6f9531cf6524c9835b",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "e67d2266476abd157fc8c396b3dfb70cb343471e",
+      "state": "returned",
+      "http": 502,
+      "elapsed_s": 64.437,
+      "error": "MODEL_BAD_RESPONSE"
+    },
+    {
+      "id": "6b8a3100895f2192e08973006474428319dc298e",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 38.345,
+      "answer": "The paper uses the MNCut spectral clustering algorithm on top of the VerbNet-specialised representations [2].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 2,
+          "source": "1707.06945",
+          "ordinal": 12,
+          "chunk_id": "1cf1e251102dfa47a02a1e071d5273bbcb605ff65f33d1bdbcef302dd82f4a96",
+          "revision": "9024fbc2-980f-48f2-ba26-9e37855894d6",
+          "locator": {
+            "type": "text_range",
+            "char_end": 13200,
+            "char_start": 12000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "excerpt_sha256": "e19c05bbf170b65605f807c96ccf6adbaf7d6e86ee47cce28b1dd8fece12b11a",
+          "chunk_text_sha256": "e19c05bbf170b65605f807c96ccf6adbaf7d6e86ee47cce28b1dd8fece12b11a",
+          "excerpt_preview": "ettings.\n\nVerbNet constraints are extracted from the English VerbNet class structure in a straightfo"
+        }
+      ],
+      "stages": {
+        "dense": [
+          {
+            "source": "1707.06945",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 17
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 12
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 7
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 8
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 14
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 2
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 10
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 16
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 9
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 1
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 4
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 15
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          }
+        ],
+        "sparse": [
+          {
+            "source": "1707.06945",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 17
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 12
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 7
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 2
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 10
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 14
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 7
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 7
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 4
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 15
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 10
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 2
+          }
+        ],
+        "fused": [
+          {
+            "source": "1707.06945",
+            "ordinal": 0
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 7
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 17
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 12
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 7
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 10
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 15
+          }
+        ],
+        "rerank": [
+          {
+            "source": "1707.06945",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 12
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 17
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 3
+          }
+        ],
+        "selection": [
+          {
+            "source": "1707.06945",
+            "ordinal": 0
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 7
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 17
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 12
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 7
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 10
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 38.561,
+      "answer": "The paper describes the data used as follows: the Visual Genome (VG) training set consists of 85% of the data — 16k images and 740k corresponding region descriptions — while the ReferIt training data consists of 9k images and 54k referring expressions [6]. In addition, the instance selection model is trained using (region description, object set) pairs from the VG dataset, resulting in a training set of approximately 1.73M samples, with the remaining 300K samples split into validation and testing [4].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 4,
+          "source": "1910.04887",
+          "ordinal": 7,
+          "chunk_id": "80301d1f4ca4590f5fa17abfe4f8c212be41d04a9d35b5e83cea3ce6f0a5fbe4",
+          "revision": "53d8450b-ff1c-4719-becd-6dd66f1fc6ca",
+          "locator": {
+            "type": "text_range",
+            "char_end": 8200,
+            "char_start": 7000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "excerpt_sha256": "b8921d9fcdbd655731df3b78075db8625a7d29afed7c9ac8719863e8155930ec",
+          "chunk_text_sha256": "b8921d9fcdbd655731df3b78075db8625a7d29afed7c9ac8719863e8155930ec",
+          "excerpt_preview": "embeddings, 512 dimensional LSTM hidden units, and a max length of 50 characters per query, with Ada"
+        },
+        {
+          "number": 6,
+          "source": "1910.04887",
+          "ordinal": 6,
+          "chunk_id": "3784d247e13cf23b1e2e600c4505b271e2cd97a4beeb65b1d416e0f5ca6ea82e",
+          "revision": "53d8450b-ff1c-4719-becd-6dd66f1fc6ca",
+          "locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "excerpt_sha256": "2ab3260a896f307000d00c6e1d3b086b052b20ba6850751703b2fd4d781043a8",
+          "chunk_text_sha256": "2ab3260a896f307000d00c6e1d3b086b052b20ba6850751703b2fd4d781043a8",
+          "excerpt_preview": "e a replacement for queries since they mention various objects in different regions of each image. H"
+        }
+      ],
+      "stages": {
+        "dense": [
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 8
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 6
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 7
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 6
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 7
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 9
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 5
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 10
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 9
+          }
+        ],
+        "sparse": [
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 8
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 15
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 7
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 16
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 6
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 8
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 15
+          }
+        ],
+        "fused": [
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 10
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 8
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 7
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          }
+        ],
+        "rerank": [
+          {
+            "source": "1910.04887",
+            "ordinal": 8
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 7
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 6
+          }
+        ],
+        "selection": [
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 10
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 8
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 7
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "2e73006e5d007aa08c62030a4d5a7e2e7e0eaf6c",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 27.634,
+      "answer": "The dataset presented covers 218 videos from NALCS and 103 from LMS, for a total of 321 videos, taken from week 1 to week 9 in the 2017 spring series of each tournament [1]. Each game's video ranges from 30 to 50 minutes in length [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1707.08559",
+          "ordinal": 6,
+          "chunk_id": "3dfe13bf503135345957c7e476cfaab9df0ca696faca8b37c8e1e664f215908c",
+          "revision": "0c910644-b5cd-4524-997f-3752519fd557",
+          "locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "excerpt_sha256": "be562331d5d6fc3f269872baf090f60d405ecf5d3e46eea0eb5e4856ff19dfe9",
+          "chunk_text_sha256": "be562331d5d6fc3f269872baf090f60d405ecf5d3e46eea0eb5e4856ff19dfe9",
+          "excerpt_preview": "n the other hand, has a similar scale of data, but we use existing highlights, and we also employ te"
+        }
+      ],
+      "stages": {
+        "dense": [
+          {
+            "source": "1707.08559",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 2
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 7
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 7
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 7
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 8
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 9
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 10
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 16
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          }
+        ],
+        "sparse": [
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 15
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 12
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 10
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 6
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 8
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 9
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 9
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 15
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 6
+          }
+        ],
+        "fused": [
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 11
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 14
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 10
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 4
+          }
+        ],
+        "rerank": [
+          {
+            "source": "1707.08559",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 4
+          }
+        ],
+        "selection": [
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 11
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 14
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 10
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "77db56fee07b01015a74413ca31f19bea7203f0b",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 28.728,
+      "answer": "The paper presents results using precision, recall, and F$_1$. These are computed at the entity/content-element level by extracting all tagged spans for each content element type, deduplicating them, and comparing the resulting set against the ground truth using exact matches [1]. The results report F$_1$, precision, and recall, including metrics across all content elements (micro-averaged) and broken down by type [2]. For the data-efficiency analysis, the paper shows only F$_1$ scores, noting similar trends for the other metrics [3].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "2002.01861",
+          "ordinal": 9,
+          "chunk_id": "048f63b118638f5b9a2a95738647cdc9e6a9bae80b61e25fa3c7214eb55919f3",
+          "revision": "30b09467-a268-4282-8b81-1a41dfbf18c5",
+          "locator": {
+            "type": "text_range",
+            "char_end": 10200,
+            "char_start": 9000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "excerpt_sha256": "3a894fa800d58ec5ba98aa4ab529fe5857cf4ae4b9cd543eaea656ea790348d8",
+          "chunk_text_sha256": "3a894fa800d58ec5ba98aa4ab529fe5857cf4ae4b9cd543eaea656ea790348d8",
+          "excerpt_preview": "h ::: Inference and Evaluation\n\nAt inference time, documents from the test set are segmented into pa"
+        },
+        {
+          "number": 2,
+          "source": "2002.01861",
+          "ordinal": 10,
+          "chunk_id": "38eaa9721ffa9d41e505546435ddb4fa221bc2de04e2505b63bdf4b19704a8be",
+          "revision": "30b09467-a268-4282-8b81-1a41dfbf18c5",
+          "locator": {
+            "type": "text_range",
+            "char_end": 11200,
+            "char_start": 10000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "excerpt_sha256": "f79023dff71040da8024cb1ac6c029f175abbf261601ede36a87d9bf74805de6",
+          "chunk_text_sha256": "f79023dff71040da8024cb1ac6c029f175abbf261601ede36a87d9bf74805de6",
+          "excerpt_preview": "extraneous token compared to a ground truth entity, the system receives no credit.\n\nResults\n\nOur mai"
+        },
+        {
+          "number": 3,
+          "source": "2002.01861",
+          "ordinal": 12,
+          "chunk_id": "506c91972241481337bf3156e57412efef1d90df8af90d4e3672505c238c47fb",
+          "revision": "30b09467-a268-4282-8b81-1a41dfbf18c5",
+          "locator": {
+            "type": "text_range",
+            "char_end": 13200,
+            "char_start": 12000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "excerpt_sha256": "cb353c92c83562f1be523d17926e8c415b73da4e4f56ec352f46d51936b22a91",
+          "chunk_text_sha256": "cb353c92c83562f1be523d17926e8c415b73da4e4f56ec352f46d51936b22a91",
+          "excerpt_preview": "ings” in our training data, and thus accuracy is very low despite the fact that percentages are stra"
+        }
+      ],
+      "stages": {
+        "dense": [
+          {
+            "source": "2002.01861",
+            "ordinal": 0
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 15
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 4
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 7
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 9
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 8
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 8
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 5
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 7
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 1
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 11
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 0
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 2
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 2
+          }
+        ],
+        "sparse": [
+          {
+            "source": "2002.01861",
+            "ordinal": 0
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 15
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 12
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 7
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 6
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 13
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 4
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 7
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 3
+          }
+        ],
+        "fused": [
+          {
+            "source": "2002.01861",
+            "ordinal": 0
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 7
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 4
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 15
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          }
+        ],
+        "rerank": [
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 4
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          }
+        ],
+        "selection": [
+          {
+            "source": "2002.01861",
+            "ordinal": 0
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 16
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 7
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 4
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 15
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          }
+        ]
+      }
+    },
+    {
+      "id": "5efa19058f815494b72c44d746c157e9403f726e",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 26.319,
+      "answer": "The paper uses the micro-averaged F1 score on all labels as its evaluation metric [1]. It also reports improvements in F1 score [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1911.01680",
+          "ordinal": 17,
+          "chunk_id": "2f57716c41b5c17a106d5b27baa32d085828e50b0ac8146c5503397b357eb6cb",
+          "revision": "ec501298-80d7-4a66-a201-740f93e53212",
+          "locator": {
+            "type": "text_range",
+            "char_end": 18200,
+            "char_start": 17000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "excerpt_sha256": "f896ab898ae50983bf1488aa4d26db4fa5e0411d93f3dbbccee44795ed2ef210",
+          "chunk_text_sha256": "f896ab898ae50983bf1488aa4d26db4fa5e0411d93f3dbbccee44795ed2ef210",
+          "excerpt_preview": "7 embedding are used to initialize word embeddings; The hidden dimension of the Bi-LSTM, GCN and fee"
+        }
+      ],
+      "stages": {
+        "dense": [
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 6
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 9
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 16
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 8
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 4
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 12
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 8
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 6
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 9
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 7
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 6
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 15
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 14
+          }
+        ],
+        "sparse": [
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 6
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 15
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 4
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 10
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 11
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 9
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 7
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 16
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 12
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 6
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 12
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 7
+          }
+        ],
+        "fused": [
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 0
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 10
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 6
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 4
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 16
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 11
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 2
+          }
+        ],
+        "rerank": [
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 6
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 5
+          }
+        ],
+        "selection": [
+          {
+            "source": "1911.01680",
+            "ordinal": 0
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 0
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 10
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 3
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 18
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 6
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 4
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 16
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 13
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 8
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 11
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 14
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "4c1847f0f3e6f9cc6ac3dfbac9e135d34641a854",
+      "state": "returned",
+      "http": 200,
+      "elapsed_s": 28.085,
+      "answer": "The tool (LUWAK) is written in pure JavaScript. The paper states that LUWAK is implemented in pure JavaScript with LocalStorage to make it an installation-free tool [1], and that it is implemented in pure JavaScript code using the LocalStorage of a web browser [2].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1708.00481",
+          "ordinal": 14,
+          "chunk_id": "5fd9d6c7e1370d9dd52d74892c3193bb020c54bd778a9ea5dd0b644049bff131",
+          "revision": "ed359b7b-d3fb-4b3a-b7f7-74d6bc708a20",
+          "locator": {
+            "type": "text_range",
+            "char_end": 14970,
+            "char_start": 14000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 970,
+          "excerpt_sha256": "8d5d93d5a806306c396de5d954b41acdb6a3c543ce03c0da994b7ddc02379c2b",
+          "chunk_text_sha256": "8d5d93d5a806306c396de5d954b41acdb6a3c543ce03c0da994b7ddc02379c2b",
+          "excerpt_preview": "s features, such as the multiple entity expansion model choices, that are not implemented in IKE. Mo"
+        },
+        {
+          "number": 2,
+          "source": "1708.00481",
+          "ordinal": 5,
+          "chunk_id": "8058065022d16187b45906d4543565f51054bc5eeb0651f6ab4b80ee81fe8e9a",
+          "revision": "ed359b7b-d3fb-4b3a-b7f7-74d6bc708a20",
+          "locator": {
+            "type": "text_range",
+            "char_end": 6200,
+            "char_start": 5000
+          },
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "excerpt_sha256": "85d28d9a06a15dbcd306cc5632d6122bdb98a23810acb2491921444fb549442d",
+          "chunk_text_sha256": "85d28d9a06a15dbcd306cc5632d6122bdb98a23810acb2491921444fb549442d",
+          "excerpt_preview": "he Entity table. After submitting the judgments, LUWAK shows the Entity table again. The user can di"
+        }
+      ],
+      "stages": {
+        "dense": [
+          {
+            "source": "1708.00481",
+            "ordinal": 0
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 14
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 4
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 3
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 2
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 12
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 13
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 6
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 7
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 5
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 8
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 11
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 9
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 2
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 8
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 3
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 7
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 2
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 10
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 13
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 2
+          }
+        ],
+        "sparse": [
+          {
+            "source": "1708.00481",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 13
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 4
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 14
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 15
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 5
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 3
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 2
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 9
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 3
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 12
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 2
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 4
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 7
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 2
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 1
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 6
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 0
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 14
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 11
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 0
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 0
+          }
+        ],
+        "fused": [
+          {
+            "source": "1708.00481",
+            "ordinal": 14
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 0
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 3
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 8
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 2
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 4
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 13
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 7
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 5
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 12
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          }
+        ],
+        "rerank": [
+          {
+            "source": "1708.00481",
+            "ordinal": 14
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 5
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 2
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 3
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 0
+          }
+        ],
+        "selection": [
+          {
+            "source": "1708.00481",
+            "ordinal": 14
+          },
+          {
+            "source": "1601.02166",
+            "ordinal": 3
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 5
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 9
+          },
+          {
+            "source": "1911.01680",
+            "ordinal": 17
+          },
+          {
+            "source": "1910.04887",
+            "ordinal": 5
+          },
+          {
+            "source": "1707.08559",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 0
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 3
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 8
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 2
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 4
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 13
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 7
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 1
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 5
+          },
+          {
+            "source": "1708.00481",
+            "ordinal": 12
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 6
+          },
+          {
+            "source": "2002.01861",
+            "ordinal": 13
+          },
+          {
+            "source": "1707.06945",
+            "ordinal": 4
+          }
+        ]
+      }
+    }
+  ]
+}

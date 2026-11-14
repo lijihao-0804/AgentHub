@@ -1,0 +1,85 @@
+{
+  "baseline_commit": "4da1a9eb0c43050530630b03d3a5b11101eab31f",
+  "cohort_protocol_sha256": "1bb4252eed35303688f652e270f94a3df57c6c7799956cf6f787d413407ef75d",
+  "git_blob_sha256_at_baseline": {
+    "packages/knowledge/retrieval.py": "0d0cb3cc9cafe52de3f0a7ea61d079afd636e11b2a01754a3e166bfd8e013d79",
+    "packages/knowledge/citation_qa.py": "61f57d54d8894966ff68097756b6ad1c456b05d83fe04e06e89e8454f4348b91",
+    "apps/api/routes/citation_qa.py": "0c04319536d5372eeab15eec3da3082cbe89da157a965973d75600cb4b614320",
+    "apps/api/schemas/citation_qa.py": "6ed6e0ada117e4b7dd6b0640fd21acabfed51426b46b8fc807f672fe25a16a66",
+    "packages/knowledge/adapters/reranker.py": "25be0de9fc75f91b9335763a2aa0e73d493ab80e0600a88be21cca686d3ce98d"
+  },
+  "corpus_sha256": {
+    "QASPER train": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+    "SciFact BEIR": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6"
+  },
+  "scifact_index_receipt": {
+    "public_documents": 5183,
+    "postgres_chunks": 9189,
+    "qdrant_points_exact": 9189,
+    "verified_texts_locators_ordinals_sha": 9189,
+    "snapshot": "11bef8fe-38c8-4b03-88ce-d8c63ff20c01",
+    "snapshot_hash": "66844606e6374b6420f72a0598b354731916b2fb93729727ae6fed40d1b25e42",
+    "model_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+    "cache_sha256": {
+      "manifest.jsonl": "342f99504ee8ed5d517305ea19ddaf704e3b6ddb1d57ea3dd180a40a2e619305",
+      "dense.npy": "683bba44821263f300344aef03220ea314e6c1bc7d936e7a9141ed2e525220f6",
+      "sparse.npz": "4d572c46fb10d8c9d9032dade57d831d43437db766720ba3cc35d0bba7f1d26f"
+    },
+    "index_seconds": 30.23,
+    "scope": "PG and Qdrant are rehydrated as a read-side benchmark fixture from pinned text/vector files. QASPER papers exercised the HTTP upload and Celery worker in this run.",
+    "qdrant_collection": "scifact_recall_full",
+    "filters": "workspace, KB and snapshot revision membership enforced on read; separate full collection preserves corpus IDF"
+  },
+  "snapshots": {
+    "full": {
+      "snapshot": "11bef8fe-38c8-4b03-88ce-d8c63ff20c01",
+      "snapshot_sha256": "66844606e6374b6420f72a0598b354731916b2fb93729727ae6fed40d1b25e42",
+      "count": 5183
+    },
+    "qasper": {
+      "snapshot": "42458b44-a5fd-41e9-806c-e476a92066b8",
+      "snapshot_sha256": "509fcd8f0612a96dec8c9a84ed0afbefef946200cb28a3ffedf773d28667082f",
+      "count": 7
+    }
+  },
+  "qasper_frozen_projected_papers": {
+    "1601.02166": "8a5bfeb3b5762d0a645ad792f10aef24a6f2ca443b5b221a4df3a57ab480f96f",
+    "1707.06945": "9bdf07cf213f53e0533b8aa320b67b5acee59e5d3b39188aa7de48f9fafb792d",
+    "1910.04887": "c1064b925af5e2612149311307c8d1f637bda80a6d63b648e602d754cf4ae5b5",
+    "1707.08559": "e9178c05e5ba2190ea77638eab4091db1aaad3abb46481ebbe724c5cd8a12279",
+    "2002.01861": "5ad882a322734a4dc445421c5c08e9e89e017d0b01cc655228856d847379489b",
+    "1911.01680": "783e9a53af0446069687e0a430a029076162fc3ccd277377b837956d445abd16",
+    "1708.00481": "9455b54ae78b4d6603bb64e7abf44b091f46528405563eb478cf4e5f8eef20a6"
+  },
+  "scope_description": "Fresh immutable snapshots shared exactly by all arms within each corpus. SciFact original public title+abstract corpus and pinned existing vectors fully rehydrated in scoped PG/Qdrant. QASPER seven papers uploaded by the public document route; Celery ingested full body (captions excluded); separate title+abstract vectors are used only for parent retrieval.",
+  "baseline_equivalence": {
+    "base": "4da1a9eb0c43050530630b03d3a5b11101eab31f",
+    "check": "AST of retrieve_with_trace after inlining the new default hook is identical to frozen baseline; default hook returns the exact original fuse_reciprocal_rank call, with identical argument AST.",
+    "other_files": {
+      "packages/knowledge/citation_qa.py": true,
+      "apps/api/routes/citation_qa.py": true,
+      "apps/api/schemas/citation_qa.py": true,
+      "packages/knowledge/adapters/reranker.py": true
+    }
+  },
+  "reader": {
+    "route": "aliyun-rag",
+    "region": "Beijing",
+    "model": "deepseek-v4.1-flash-1017",
+    "temperature": 0,
+    "response_mode": "PROMPT_JSON",
+    "max_attempts": 1
+  },
+  "execution_order": [
+    "full/baseline",
+    "full/article_local_passage",
+    "full/full_parent4",
+    "qasper/baseline",
+    "qasper/article_local_passage",
+    "qasper/full_parent4"
+  ],
+  "controls": "The synthetic memorandum is absent from this run\u2019s two knowledge snapshots. Unlike the previous trial, this run did not upload it to another tenant or retest access-control boundaries.",
+  "capture_semantics": "Every planned dispatch first saved a pending marker, then the HTTP result; no model retries. Subsequent changes strengthen the reusable capture driver with ordered cohort, scope and source hashes. Historical first responses have the original recorded fields.",
+  "cost": "The 51 prespecified requests plus one post-hoc title diagnostic are the only authorized model requests in this benchmark. HTTP readiness, replay preparation and citation verification invoke no model generation.",
+  "execution_notes": "Initial job completed all 30 SciFact responses, then stopped before the first QASPER dispatch due to a local Qdrant-client context-manager incompatibility. Corrected lifecycle, then ran all 21 untouched QASPER requests once; prior SciFact results persisted. No paid requests repeated."
+}

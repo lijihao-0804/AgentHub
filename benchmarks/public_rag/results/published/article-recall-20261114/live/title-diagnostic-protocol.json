@@ -1,0 +1,23 @@
+{
+  "scope": "Post-hoc standalone title only diagnostic, selected on prior retrieval outcomes; exclude from the 17-case paired totals.",
+  "case": {
+    "id": "1387",
+    "query": "eRNAs influence is linked to senescence, aging, and carcinogenesis.",
+    "gold_documents": [
+      "9669099"
+    ],
+    "scope": "full",
+    "type": "original_exposed_BEIR_claim"
+  },
+  "arm": "title_standalone",
+  "policy": "Full corpus title dense and lexical top30 each; document RRF60 to 20; best original passage by dense cosine in each document; unchanged BGE reranker, reader and first HTTP response. For support all three claimed consequences must be directly substantiated in the returned excerpts; distinguish enhancer effects and cell-cycle arrest.",
+  "sha256_index": {
+    "documents": 5183,
+    "seconds": 39.816193800012115,
+    "ordered_ids_sha256": "910fa704be1169078067c56977e2444b34c7db4dbe19a12df254d5946fa9fbba",
+    "sha256": {
+      "title-dense.npy": "17528fcb61cddf6eb3890ad83a83addab3da405cb378b4737a90dec9e29d97a8",
+      "title-sparse.npz": "0dab37e26a3f1ac74b4ee5e6ff6d086deb56983ae768bca34a718af5d3157189"
+    }
+  }
+}

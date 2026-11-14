@@ -1,0 +1,19 @@
+{
+  "project": "agenthubrecallbb106244df",
+  "removed_containers": 3,
+  "removed_mounted_volumes": 2,
+  "removed_networks": 1,
+  "remaining_containers": 0,
+  "remaining_mounted_volumes": 0,
+  "remaining_labeled_volumes": 0,
+  "remaining_networks": 0,
+  "unchanged_nonproject_container_ids": 19,
+  "other_running_containers_after_project_cleanup": 0,
+  "private_env_file_and_ports_removed": true,
+  "credential_disabled": true,
+  "credential_rotated": true,
+  "docker_desktop_stopped": true,
+  "desktop_stop_exit": 0,
+  "desktop_cli_status": "not running; status not available",
+  "desktop_ui_and_backend_process_count": 0
+}
