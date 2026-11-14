@@ -9,6 +9,31 @@ from benchmarks.public_rag.confirmation_cases import read, save
 from benchmarks.public_rag.confirmation_receipts import reconcile
 
 
+def candidate_coverage(record):
+    if "evidence_groups" not in record["expected"]:
+        return None
+    traces = record.get("retrieval", [])
+    measured = [t["candidate_group_complete"] for t in traces if "candidate_group_complete" in t]
+    if any(measured):
+        return True
+    if len(measured) == len(traces):
+        return False
+    # A 401 interrupted the original diagnostics for S0-038. A complete visible
+    # support group proves candidate coverage if every delivered ID is in one pool.
+    visible = {s["chunk_id"] for s in record.get("visible", [])}
+    if (
+        visible
+        and record.get("coverage")
+        and any(
+            visible <= {s["chunk_id"] for s in t["result"]["trace"]["selection"]["results"]}
+            for t in traces
+            if t["result"]["trace"].get("selection")
+        )
+    ):
+        return True
+    return None
+
+
 def summarize(directory, reviews_path, ledger):
     capture = read(directory / "report.json")
     reviews = read(reviews_path)
@@ -49,11 +74,7 @@ def summarize(directory, reviews_path, ledger):
             or (r.get("run") or {}).get("final_output"),
             contract_checks=r.get("contract_checks"),
             coverage=r.get("coverage"),
-            candidate_group_complete=any(
-                trace.get("candidate_group_complete") for trace in r.get("retrieval", [])
-            )
-            if "evidence_groups" in r["expected"]
-            else None,
+            candidate_group_complete=candidate_coverage(r),
             citations=citations,
             review=review,
             approval=(r.get("decision") or {}).get("approval"),
