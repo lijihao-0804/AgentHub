@@ -6,9 +6,15 @@ import itertools
 import json
 import re
 import subprocess
-from pathlib import Path
 
-from benchmarks.public_rag.qa_first_response_cases import PUBLIC, ROOT, TRAIN, paper_text, read, select
+from benchmarks.public_rag.qa_first_response_cases import (
+    PUBLIC,
+    ROOT,
+    TRAIN,
+    paper_text,
+    read,
+    select,
+)
 
 OUT = PUBLIC / "rag-product-evidence-20261114"
 PREVIOUS = "e0fe09bbe0c7ff5b674a204606f038524b63065f"

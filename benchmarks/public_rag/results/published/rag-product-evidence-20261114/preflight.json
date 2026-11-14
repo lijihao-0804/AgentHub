@@ -1,0 +1,40 @@
+{
+  "pools_sha256": "4c9cc20bd4067e57f2a5ca40c5d954beb8c84ce40035b97a003c408a8904a2f3",
+  "publication_sha256": {
+    "cohort.json": "c1426f3b7c05874d9e039e1c79352de9124d41a785dd3fe5f67ebb4661b9565a",
+    "source-review-a.json": "4352596c12c970cc5076764c88656bcd7e580dc5603ee0e7dc10847f80321e5f",
+    "source-review-b.json": "402e0eb4c8bf7778e7e174803dde8bbfc08174670207c88391e0946aef00d391",
+    "protocol.md": "5d1e8ddf93b349f2c8858e342dc46aa560261aa870d5c3d593676bfdc26808b2",
+    "pool-receipt.json": "915ff663bc83233d4515c5a62f2e3302fc185d95b9d6f6dd86e6550c69f14a01",
+    "scoring.md": "211f790506ea1261f8459d0f1c248d1c73f9c8ce2f63712bb7b2ed32b9696c02"
+  },
+  "source_review_counts": {
+    "answerable": 6,
+    "ambiguous": 3,
+    "unanswerable": 7
+  },
+  "rrf_historical_functions_ast": {
+    "_payload_chunk_id": "38ac6fe85d7f62135bfab2450dfc32fd71688b562dd1b03c3bcbbcea750c9fac",
+    "_ranked_hits": "557da2a55892bf2f367e7272a207d3e473dfc42309379093e3628ea2711379f4",
+    "fuse_reciprocal_rank": "8a6941ec04638e14a96b1c7eb28b610b37c15d2b2f329e7c7c7f44affeca1001",
+    "select_rerank_candidates": "88c72e867fc4b12917622124609b9aef7a1994d15bdaddea031002d33018c15c"
+  },
+  "rrf_matched_shared_pools": 40,
+  "snapshot_papers": 40,
+  "snapshot_chunks": 838,
+  "offline_contract_calls": {
+    "answer": 120,
+    "selector": 40
+  },
+  "largest_technical_input_token_bound": 7121,
+  "physical_provider_requests": 0,
+  "paid_quality": "NOT_RUN",
+  "candidate_decision": "D_OPTIONAL",
+  "paid_request_limits": {
+    "answer": 120,
+    "selector": 40,
+    "refund_dev": 200,
+    "refund_new": 8
+  },
+  "peak_microcny_cap": 30146560
+}
