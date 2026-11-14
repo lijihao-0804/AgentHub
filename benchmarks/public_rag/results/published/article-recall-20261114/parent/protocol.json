@@ -1,0 +1,8 @@
+{
+  "scope": "Exploratory exposed TRAIN 128 + previously exposed 553; no new SciFact confirmation. Six predetermined original double-branch misses: 609, 620, 817, 818, 828, 1387.",
+  "methods": ["baseline", "title_parent4", "full_parent4"],
+  "nominated_before_outcomes": "full_parent4",
+  "parents": "One record per each of 5183 articles. title_parent4 indexes normalized title alone; full_parent4 indexes normalized title + blank line + complete abstract. Each ranks all parents by BGE dense cosine and by repository tokenizer-based sparse score with corpus-of-parent IDF, retaining 30 per lane and project RRF(k=60) top20.",
+  "selector": "Preserve original top8 plus first occurrence of every original source. Scan remaining baseline tail backwards for at most four duplicates. For each novel document in parent top20 select one original chunk with maximal dense cosine to question, chunk ID breaks ties. Replace only as many as novel parents exist. Append additions in parent order with original last score/(2+i), i starting at zero. BGE ranks 20 original chunks.",
+  "measures": "Parent dense/sparse ranks and RRF truncation, admission, source and complete alternative official sentence evidence across raw20 and reranked5, paired gains/losses; baseline retrieval, index size and new pairs. Include full eligible inventory; calculate labels only after selection. Keep all methods and every failure; original six tested as fixed cohort. No holdout."
+}

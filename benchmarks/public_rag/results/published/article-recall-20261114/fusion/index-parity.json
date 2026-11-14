@@ -1,0 +1,23 @@
+{
+  "queries": 681,
+  "slots_per_branch": 20430,
+  "route_source_for_all_arms": "recorded historical lists including actual ties",
+  "reconstruction": {
+    "dense": {
+      "exact_order": 680,
+      "same_set": 681,
+      "overlap_slots": 20430,
+      "max_abs_score_diff": 5.384223937809907e-07,
+      "mismatched_ids": [
+        "1186"
+      ]
+    },
+    "sparse": {
+      "exact_order": 681,
+      "same_set": 681,
+      "overlap_slots": 20430,
+      "max_abs_score_diff": 4.957519530535137e-05,
+      "mismatched_ids": []
+    }
+  }
+}

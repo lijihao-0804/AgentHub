@@ -1,0 +1,886 @@
+{
+  "protocol_sha256": "f4392fea11554d55a492bcbec7551383e12539d49a33b1420b4fa8459f5f22d9",
+  "case_sha256": "834b401ee197750d3d69d9e098bd650780d102af8b77eb07d1dc7b11b520cf28",
+  "standalone_protocol_sha256": "9376d6042a71a4543dec9418bd05fc4ac10b93b4770d774aebb13981a73d3109",
+  "six_sha256": "a995c1073b5b7ca603bbfeca710df568a09369adf8c4d661a7b1d7a70f71f1a2",
+  "input_vector_manifests": {
+    "chunks-ready.json": "74745a48f3505769c07adc74f624867cfd530ccbab51f440a2f8527d12e2612e",
+    "complete.json": "e48e72e97ae2212cc6dd3fcf7865e2024d51152bdc4193bb44705f63ab46e0a8"
+  },
+  "index_bytes": {
+    "parent-dense.npy": 21229696,
+    "parent-sparse.npz": 2122058,
+    "title-dense.npy": 21229696,
+    "title-sparse.npz": 245678
+  },
+  "title_index": {
+    "documents": 5183,
+    "seconds": 39.816193800012115,
+    "ordered_ids_sha256": "910fa704be1169078067c56977e2444b34c7db4dbe19a12df254d5946fa9fbba",
+    "sha256": {
+      "title-dense.npy": "17528fcb61cddf6eb3890ad83a83addab3da405cb378b4737a90dec9e29d97a8",
+      "title-sparse.npz": "0dab37e26a3f1ac74b4ee5e6ff6d086deb56983ae768bca34a718af5d3157189"
+    }
+  },
+  "measured_inference": {
+    "new_query_chunk_pairs": 1215,
+    "seconds": 43.757154299994,
+    "candidate_sha256": "2d1fc62fb0e564b0e44d2d2a794fd2cbe01c890834f9f7650291ae7576b77292",
+    "standalone_sha256": "a271ffd631004cea750bfca98e311086defb9a795055cb4490556c5361564ac8",
+    "score_sha256": "ddf40e69968ca06819c302e5b1e153153ad6b9d0a40e69da7bc73c7bbf880394"
+  },
+  "cohorts": {
+    "original_six": {
+      "queries": 6,
+      "methods": {
+        "baseline": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 6,
+              "eligible_queries": 6,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 6,
+              "eligible_queries": 6,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence20": {
+              "eligible_pairs": 1,
+              "eligible_queries": 1,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence5": {
+              "eligible_pairs": 1,
+              "eligible_queries": 1,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            }
+          },
+          "cost": {
+            "added_chunks": 0,
+            "added_from_outside_historical_union": 0,
+            "queries_changed": 0,
+            "bge_pairs_if_served": 120
+          },
+          "macro": {
+            "source20": 0.0,
+            "source5": 0.0,
+            "nDCG@10": 0.0,
+            "Recall@5": 0.0,
+            "MRR@5": 0.0,
+            "evidence20": 0.0,
+            "evidence5": 0.0
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "source5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "title_parent4": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 6,
+              "eligible_queries": 6,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 6,
+              "eligible_queries": 6,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence20": {
+              "eligible_pairs": 1,
+              "eligible_queries": 1,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence5": {
+              "eligible_pairs": 1,
+              "eligible_queries": 1,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            }
+          },
+          "cost": {
+            "added_chunks": 8,
+            "added_from_outside_historical_union": 7,
+            "queries_changed": 4,
+            "bge_pairs_if_served": 120
+          },
+          "macro": {
+            "source20": 0.0,
+            "source5": 0.0,
+            "nDCG@10": 0.0,
+            "Recall@5": 0.0,
+            "MRR@5": 0.0,
+            "evidence20": 0.0,
+            "evidence5": 0.0
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "source5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "full_parent4": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 6,
+              "eligible_queries": 6,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 6,
+              "eligible_queries": 6,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence20": {
+              "eligible_pairs": 1,
+              "eligible_queries": 1,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence5": {
+              "eligible_pairs": 1,
+              "eligible_queries": 1,
+              "visible_pairs": 0,
+              "retained": 0,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 0,
+              "any_gained": 0,
+              "any_lost": 0
+            }
+          },
+          "cost": {
+            "added_chunks": 8,
+            "added_from_outside_historical_union": 4,
+            "queries_changed": 4,
+            "bge_pairs_if_served": 120
+          },
+          "macro": {
+            "source20": 0.0,
+            "source5": 0.0,
+            "nDCG@10": 0.0,
+            "Recall@5": 0.0,
+            "MRR@5": 0.0,
+            "evidence20": 0.0,
+            "evidence5": 0.0
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "source5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            }
+          }
+        }
+      }
+    },
+    "development": {
+      "queries": 128,
+      "methods": {
+        "baseline": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 144,
+              "eligible_queries": 128,
+              "visible_pairs": 127,
+              "retained": 127,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 115,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 144,
+              "eligible_queries": 128,
+              "visible_pairs": 113,
+              "retained": 113,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 107,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence20": {
+              "eligible_pairs": 92,
+              "eligible_queries": 83,
+              "visible_pairs": 84,
+              "retained": 84,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 77,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence5": {
+              "eligible_pairs": 92,
+              "eligible_queries": 83,
+              "visible_pairs": 81,
+              "retained": 81,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 76,
+              "any_gained": 0,
+              "any_lost": 0
+            }
+          },
+          "cost": {
+            "added_chunks": 0,
+            "added_from_outside_historical_union": 0,
+            "queries_changed": 0,
+            "bge_pairs_if_served": 2560
+          },
+          "macro": {
+            "source20": 0.890625,
+            "source5": 0.806640625,
+            "evidence20": 0.9236947791164658,
+            "evidence5": 0.9016064257028114,
+            "nDCG@10": 0.7682712270433318,
+            "Recall@5": 0.818359375,
+            "MRR@5": 0.739453125
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "source5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "title_parent4": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 144,
+              "eligible_queries": 128,
+              "visible_pairs": 128,
+              "retained": 127,
+              "gained": 1,
+              "lost": 0,
+              "any_visible": 115,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 144,
+              "eligible_queries": 128,
+              "visible_pairs": 112,
+              "retained": 112,
+              "gained": 0,
+              "lost": 1,
+              "any_visible": 106,
+              "any_gained": 0,
+              "any_lost": 1
+            },
+            "evidence20": {
+              "eligible_pairs": 92,
+              "eligible_queries": 83,
+              "visible_pairs": 79,
+              "retained": 79,
+              "gained": 0,
+              "lost": 5,
+              "any_visible": 73,
+              "any_gained": 0,
+              "any_lost": 4
+            },
+            "evidence5": {
+              "eligible_pairs": 92,
+              "eligible_queries": 83,
+              "visible_pairs": 76,
+              "retained": 76,
+              "gained": 0,
+              "lost": 5,
+              "any_visible": 72,
+              "any_gained": 0,
+              "any_lost": 4
+            }
+          },
+          "cost": {
+            "added_chunks": 242,
+            "added_from_outside_historical_union": 146,
+            "queries_changed": 110,
+            "bge_pairs_if_served": 2560
+          },
+          "macro": {
+            "source20": 0.89453125,
+            "source5": 0.798828125,
+            "evidence20": 0.8714859437751005,
+            "evidence5": 0.8493975903614458,
+            "nDCG@10": 0.7661920237317938,
+            "Recall@5": 0.802734375,
+            "MRR@5": 0.73515625
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.00390625,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.012096774193548387
+              ]
+            },
+            "source5": {
+              "delta": -0.0078125,
+              "descriptive_group_bootstrap_95": [
+                -0.024193548387096774,
+                0.0
+              ]
+            },
+            "evidence20": {
+              "delta": -0.05220883534136546,
+              "descriptive_group_bootstrap_95": [
+                -0.11522633744855966,
+                -0.004016064257028112
+              ]
+            },
+            "evidence5": {
+              "delta": -0.05220883534136546,
+              "descriptive_group_bootstrap_95": [
+                -0.11522633744855966,
+                -0.004016064257028112
+              ]
+            }
+          }
+        },
+        "full_parent4": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 144,
+              "eligible_queries": 128,
+              "visible_pairs": 128,
+              "retained": 127,
+              "gained": 1,
+              "lost": 0,
+              "any_visible": 116,
+              "any_gained": 1,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 144,
+              "eligible_queries": 128,
+              "visible_pairs": 113,
+              "retained": 112,
+              "gained": 1,
+              "lost": 1,
+              "any_visible": 107,
+              "any_gained": 1,
+              "any_lost": 1
+            },
+            "evidence20": {
+              "eligible_pairs": 92,
+              "eligible_queries": 83,
+              "visible_pairs": 79,
+              "retained": 79,
+              "gained": 0,
+              "lost": 5,
+              "any_visible": 73,
+              "any_gained": 0,
+              "any_lost": 4
+            },
+            "evidence5": {
+              "eligible_pairs": 92,
+              "eligible_queries": 83,
+              "visible_pairs": 76,
+              "retained": 76,
+              "gained": 0,
+              "lost": 5,
+              "any_visible": 72,
+              "any_gained": 0,
+              "any_lost": 4
+            }
+          },
+          "cost": {
+            "added_chunks": 242,
+            "added_from_outside_historical_union": 66,
+            "queries_changed": 110,
+            "bge_pairs_if_served": 2560
+          },
+          "macro": {
+            "source20": 0.89453125,
+            "source5": 0.802734375,
+            "evidence20": 0.8714859437751005,
+            "evidence5": 0.8493975903614458,
+            "nDCG@10": 0.7681318255459877,
+            "Recall@5": 0.806640625,
+            "MRR@5": 0.737109375
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.00390625,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.012096774193548387
+              ]
+            },
+            "source5": {
+              "delta": -0.00390625,
+              "descriptive_group_bootstrap_95": [
+                -0.023809523809523808,
+                0.011538461538461539
+              ]
+            },
+            "evidence20": {
+              "delta": -0.05220883534136546,
+              "descriptive_group_bootstrap_95": [
+                -0.11522633744855966,
+                -0.004016064257028112
+              ]
+            },
+            "evidence5": {
+              "delta": -0.05220883534136546,
+              "descriptive_group_bootstrap_95": [
+                -0.11522633744855966,
+                -0.004016064257028112
+              ]
+            }
+          }
+        }
+      }
+    },
+    "previously_exposed_553": {
+      "queries": 553,
+      "methods": {
+        "baseline": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 625,
+              "eligible_queries": 553,
+              "visible_pairs": 539,
+              "retained": 539,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 485,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 625,
+              "eligible_queries": 553,
+              "visible_pairs": 482,
+              "retained": 482,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 452,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence20": {
+              "eligible_pairs": 379,
+              "eligible_queries": 341,
+              "visible_pairs": 357,
+              "retained": 357,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 325,
+              "any_gained": 0,
+              "any_lost": 0
+            },
+            "evidence5": {
+              "eligible_pairs": 379,
+              "eligible_queries": 341,
+              "visible_pairs": 342,
+              "retained": 342,
+              "gained": 0,
+              "lost": 0,
+              "any_visible": 319,
+              "any_gained": 0,
+              "any_lost": 0
+            }
+          },
+          "cost": {
+            "added_chunks": 0,
+            "added_from_outside_historical_union": 0,
+            "queries_changed": 0,
+            "bge_pairs_if_served": 11060
+          },
+          "macro": {
+            "source20": 0.8645569620253166,
+            "source5": 0.7945750452079565,
+            "nDCG@10": 0.7441342551013083,
+            "Recall@5": 0.8031645569620253,
+            "MRR@5": 0.7120554550934293,
+            "evidence20": 0.9469696969696969,
+            "evidence5": 0.9213098729227762
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "source5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence20": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            },
+            "evidence5": {
+              "delta": 0.0,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.0
+              ]
+            }
+          }
+        },
+        "title_parent4": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 625,
+              "eligible_queries": 553,
+              "visible_pairs": 543,
+              "retained": 539,
+              "gained": 4,
+              "lost": 0,
+              "any_visible": 487,
+              "any_gained": 2,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 625,
+              "eligible_queries": 553,
+              "visible_pairs": 485,
+              "retained": 477,
+              "gained": 8,
+              "lost": 5,
+              "any_visible": 450,
+              "any_gained": 3,
+              "any_lost": 5
+            },
+            "evidence20": {
+              "eligible_pairs": 379,
+              "eligible_queries": 341,
+              "visible_pairs": 346,
+              "retained": 346,
+              "gained": 0,
+              "lost": 11,
+              "any_visible": 319,
+              "any_gained": 0,
+              "any_lost": 6
+            },
+            "evidence5": {
+              "eligible_pairs": 379,
+              "eligible_queries": 341,
+              "visible_pairs": 337,
+              "retained": 334,
+              "gained": 3,
+              "lost": 8,
+              "any_visible": 314,
+              "any_gained": 1,
+              "any_lost": 6
+            }
+          },
+          "cost": {
+            "added_chunks": 1020,
+            "added_from_outside_historical_union": 680,
+            "queries_changed": 455,
+            "bge_pairs_if_served": 11060
+          },
+          "macro": {
+            "source20": 0.86998191681736,
+            "source5": 0.7936708860759494,
+            "nDCG@10": 0.7442974529609507,
+            "Recall@5": 0.8013562386980108,
+            "MRR@5": 0.7132610006027722,
+            "evidence20": 0.924731182795699,
+            "evidence5": 0.9078690127077225
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.0054249547920434,
+              "descriptive_group_bootstrap_95": [
+                0.0,
+                0.012589928057553957
+              ]
+            },
+            "source5": {
+              "delta": -0.0009041591320072332,
+              "descriptive_group_bootstrap_95": [
+                -0.015845598893532722,
+                0.011050233430511093
+              ]
+            },
+            "evidence20": {
+              "delta": -0.022238514173998043,
+              "descriptive_group_bootstrap_95": [
+                -0.04081768057541488,
+                -0.007716049382716049
+              ]
+            },
+            "evidence5": {
+              "delta": -0.013440860215053762,
+              "descriptive_group_bootstrap_95": [
+                -0.03134562566506571,
+                0.0014005602240896359
+              ]
+            }
+          }
+        },
+        "full_parent4": {
+          "stages": {
+            "source20": {
+              "eligible_pairs": 625,
+              "eligible_queries": 553,
+              "visible_pairs": 544,
+              "retained": 539,
+              "gained": 5,
+              "lost": 0,
+              "any_visible": 489,
+              "any_gained": 4,
+              "any_lost": 0
+            },
+            "source5": {
+              "eligible_pairs": 625,
+              "eligible_queries": 553,
+              "visible_pairs": 481,
+              "retained": 475,
+              "gained": 6,
+              "lost": 7,
+              "any_visible": 447,
+              "any_gained": 1,
+              "any_lost": 6
+            },
+            "evidence20": {
+              "eligible_pairs": 379,
+              "eligible_queries": 341,
+              "visible_pairs": 346,
+              "retained": 346,
+              "gained": 0,
+              "lost": 11,
+              "any_visible": 319,
+              "any_gained": 0,
+              "any_lost": 6
+            },
+            "evidence5": {
+              "eligible_pairs": 379,
+              "eligible_queries": 341,
+              "visible_pairs": 336,
+              "retained": 333,
+              "gained": 3,
+              "lost": 9,
+              "any_visible": 313,
+              "any_gained": 1,
+              "any_lost": 7
+            }
+          },
+          "cost": {
+            "added_chunks": 1020,
+            "added_from_outside_historical_union": 267,
+            "queries_changed": 455,
+            "bge_pairs_if_served": 11060
+          },
+          "macro": {
+            "source20": 0.8726943942133817,
+            "source5": 0.7877938517179023,
+            "nDCG@10": 0.7419335535406556,
+            "Recall@5": 0.7977396021699819,
+            "MRR@5": 0.7120855937311628,
+            "evidence20": 0.924731182795699,
+            "evidence5": 0.9049364613880744
+          },
+          "paired_macro": {
+            "source20": {
+              "delta": 0.0081374321880651,
+              "descriptive_group_bootstrap_95": [
+                0.0009090909090909091,
+                0.018293241311533984
+              ]
+            },
+            "source5": {
+              "delta": -0.006781193490054249,
+              "descriptive_group_bootstrap_95": [
+                -0.021363932071645823,
+                0.00412863009309228
+              ]
+            },
+            "evidence20": {
+              "delta": -0.022238514173998043,
+              "descriptive_group_bootstrap_95": [
+                -0.04081768057541488,
+                -0.007716049382716049
+              ]
+            },
+            "evidence5": {
+              "delta": -0.016373411534701857,
+              "descriptive_group_bootstrap_95": [
+                -0.03518532095144998,
+                -0.00025176233635448115
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

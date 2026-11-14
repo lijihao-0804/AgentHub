@@ -1,0 +1,878 @@
+{
+  "protocol_sha256": "b23d84f4ee914bc5e1b735fe4b19a0fdd10e9d718149318226d24a9d606b67f3",
+  "per_query_sha256": "c31668baeb9c95f81ddbecad3244fa1a0a1780ce2611f873a4d7a44260925a4f",
+  "fresh_bge_scores_sha256": "15ad53a07f267b671cafd4618c9c5060c4b2554ecf9750139429afe0292c79ac",
+  "fresh_bge_pairs": 1558,
+  "baseline_portable_four_layer_exact": 681,
+  "plans_sha256": "f9b7e6e81f42fcf235f4c40ff3a145b6a8567663e1ecb33556b3bd11a3591819",
+  "code_sha256": {
+    "article_fusion_study.py": "13d00060c80e597160fc798390e59485e93d4d1f810d9d975dafb7adb93db8ac",
+    "article_fusion_candidates.py": "33cc4bc3cea376c84d9540a39a563b8dfd79d20e3e3e3b5caa2d6071e78cdb68"
+  },
+  "cohorts": {
+    "development": {
+      "questions": 128,
+      "groups": 120,
+      "gold_pairs": 144,
+      "annotated_pairs": 92,
+      "arms": {
+        "baseline": {
+          "sources20": {
+            "baseline": 127,
+            "candidate": 127,
+            "gained": 0,
+            "lost": 0,
+            "retained": 127,
+            "any_old": 115,
+            "any_new": 115,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.890625,
+            "paired": {
+              "baseline": 0.890625,
+              "candidate": 0.890625,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 113,
+            "candidate": 113,
+            "gained": 0,
+            "lost": 0,
+            "retained": 113,
+            "any_old": 107,
+            "any_new": 107,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.806640625,
+            "paired": {
+              "baseline": 0.806640625,
+              "candidate": 0.806640625,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 84,
+            "candidate": 84,
+            "gained": 0,
+            "lost": 0,
+            "retained": 84,
+            "any_old": 77,
+            "any_new": 77,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.9236947791164659
+          },
+          "rationales5": {
+            "baseline": 81,
+            "candidate": 81,
+            "gained": 0,
+            "lost": 0,
+            "retained": 81,
+            "any_old": 76,
+            "any_new": 76,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.9016064257028112
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 0
+        },
+        "article_refill4": {
+          "sources20": {
+            "baseline": 127,
+            "candidate": 129,
+            "gained": 2,
+            "lost": 0,
+            "retained": 127,
+            "any_old": 115,
+            "any_new": 117,
+            "any_gained": 2,
+            "any_lost": 0,
+            "macro_recall": 0.90234375,
+            "paired": {
+              "baseline": 0.890625,
+              "candidate": 0.90234375,
+              "delta": 0.01171875,
+              "descriptive_ci97_5": [
+                0.0,
+                0.03571428571428571
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 113,
+            "candidate": 113,
+            "gained": 1,
+            "lost": 1,
+            "retained": 112,
+            "any_old": 107,
+            "any_new": 107,
+            "any_gained": 1,
+            "any_lost": 1,
+            "macro_recall": 0.802734375,
+            "paired": {
+              "baseline": 0.806640625,
+              "candidate": 0.802734375,
+              "delta": -0.00390625,
+              "descriptive_ci97_5": [
+                -0.02734375,
+                0.011904761904761904
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 84,
+            "candidate": 79,
+            "gained": 0,
+            "lost": 5,
+            "retained": 79,
+            "any_old": 77,
+            "any_new": 73,
+            "any_gained": 0,
+            "any_lost": 4,
+            "macro_recall": 0.8714859437751004
+          },
+          "rationales5": {
+            "baseline": 81,
+            "candidate": 76,
+            "gained": 0,
+            "lost": 5,
+            "retained": 76,
+            "any_old": 76,
+            "any_new": 72,
+            "any_gained": 0,
+            "any_lost": 4,
+            "macro_recall": 0.8493975903614458
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 4
+        },
+        "article_first": {
+          "sources20": {
+            "baseline": 127,
+            "candidate": 129,
+            "gained": 2,
+            "lost": 0,
+            "retained": 127,
+            "any_old": 115,
+            "any_new": 117,
+            "any_gained": 2,
+            "any_lost": 0,
+            "macro_recall": 0.90234375,
+            "paired": {
+              "baseline": 0.890625,
+              "candidate": 0.90234375,
+              "delta": 0.01171875,
+              "descriptive_ci97_5": [
+                0.0,
+                0.03571428571428571
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 113,
+            "candidate": 114,
+            "gained": 2,
+            "lost": 1,
+            "retained": 112,
+            "any_old": 107,
+            "any_new": 107,
+            "any_gained": 1,
+            "any_lost": 1,
+            "macro_recall": 0.806640625,
+            "paired": {
+              "baseline": 0.806640625,
+              "candidate": 0.806640625,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                -0.024,
+                0.01953125
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 84,
+            "candidate": 66,
+            "gained": 0,
+            "lost": 18,
+            "retained": 66,
+            "any_old": 77,
+            "any_new": 61,
+            "any_gained": 0,
+            "any_lost": 16,
+            "macro_recall": 0.7208835341365463
+          },
+          "rationales5": {
+            "baseline": 81,
+            "candidate": 63,
+            "gained": 0,
+            "lost": 18,
+            "retained": 63,
+            "any_old": 76,
+            "any_new": 60,
+            "any_gained": 0,
+            "any_lost": 16,
+            "macro_recall": 0.6987951807228916
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 23
+        },
+        "article_local_passage": {
+          "sources20": {
+            "baseline": 127,
+            "candidate": 129,
+            "gained": 2,
+            "lost": 0,
+            "retained": 127,
+            "any_old": 115,
+            "any_new": 117,
+            "any_gained": 2,
+            "any_lost": 0,
+            "macro_recall": 0.90234375,
+            "paired": {
+              "baseline": 0.890625,
+              "candidate": 0.90234375,
+              "delta": 0.01171875,
+              "descriptive_ci97_5": [
+                0.0,
+                0.03571428571428571
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 113,
+            "candidate": 113,
+            "gained": 1,
+            "lost": 1,
+            "retained": 112,
+            "any_old": 107,
+            "any_new": 106,
+            "any_gained": 0,
+            "any_lost": 1,
+            "macro_recall": 0.802734375,
+            "paired": {
+              "baseline": 0.806640625,
+              "candidate": 0.802734375,
+              "delta": -0.00390625,
+              "descriptive_ci97_5": [
+                -0.027346441313976375,
+                0.011904761904761904
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 84,
+            "candidate": 62,
+            "gained": 0,
+            "lost": 22,
+            "retained": 62,
+            "any_old": 77,
+            "any_new": 58,
+            "any_gained": 0,
+            "any_lost": 19,
+            "macro_recall": 0.678714859437751
+          },
+          "rationales5": {
+            "baseline": 81,
+            "candidate": 59,
+            "gained": 0,
+            "lost": 22,
+            "retained": 59,
+            "any_old": 76,
+            "any_new": 57,
+            "any_gained": 0,
+            "any_lost": 19,
+            "macro_recall": 0.6566265060240963
+          },
+          "outside_both_lanes": 294,
+          "old_best_source_block_dropped": 20
+        }
+      }
+    },
+    "historical_external_by_group": {
+      "questions": 553,
+      "groups": 367,
+      "gold_pairs": 625,
+      "annotated_pairs": 379,
+      "arms": {
+        "baseline": {
+          "sources20": {
+            "baseline": 539,
+            "candidate": 539,
+            "gained": 0,
+            "lost": 0,
+            "retained": 539,
+            "any_old": 485,
+            "any_new": 485,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.8645569620253165,
+            "paired": {
+              "baseline": 0.8645569620253165,
+              "candidate": 0.8645569620253165,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 482,
+            "candidate": 482,
+            "gained": 0,
+            "lost": 0,
+            "retained": 482,
+            "any_old": 452,
+            "any_new": 452,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.7945750452079565,
+            "paired": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.7945750452079566,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 357,
+            "candidate": 357,
+            "gained": 0,
+            "lost": 0,
+            "retained": 357,
+            "any_old": 325,
+            "any_new": 325,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.946969696969697
+          },
+          "rationales5": {
+            "baseline": 342,
+            "candidate": 342,
+            "gained": 0,
+            "lost": 0,
+            "retained": 342,
+            "any_old": 319,
+            "any_new": 319,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.9213098729227762
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 0
+        },
+        "article_refill4": {
+          "sources20": {
+            "baseline": 539,
+            "candidate": 543,
+            "gained": 4,
+            "lost": 0,
+            "retained": 539,
+            "any_old": 485,
+            "any_new": 487,
+            "any_gained": 2,
+            "any_lost": 0,
+            "macro_recall": 0.8695298372513562,
+            "paired": {
+              "baseline": 0.8645569620253165,
+              "candidate": 0.8695298372513562,
+              "delta": 0.004972875226039783,
+              "descriptive_ci97_5": [
+                0.0,
+                0.012104460664841254
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 482,
+            "candidate": 482,
+            "gained": 7,
+            "lost": 7,
+            "retained": 475,
+            "any_old": 452,
+            "any_new": 448,
+            "any_gained": 2,
+            "any_lost": 6,
+            "macro_recall": 0.7896021699819168,
+            "paired": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.7896021699819169,
+              "delta": -0.004972875226039783,
+              "descriptive_ci97_5": [
+                -0.022518942284720747,
+                0.00803607430875578
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 357,
+            "candidate": 346,
+            "gained": 0,
+            "lost": 11,
+            "retained": 346,
+            "any_old": 325,
+            "any_new": 319,
+            "any_gained": 0,
+            "any_lost": 6,
+            "macro_recall": 0.9247311827956989
+          },
+          "rationales5": {
+            "baseline": 342,
+            "candidate": 336,
+            "gained": 3,
+            "lost": 9,
+            "retained": 333,
+            "any_old": 319,
+            "any_new": 313,
+            "any_gained": 1,
+            "any_lost": 7,
+            "macro_recall": 0.9049364613880743
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 19
+        },
+        "article_first": {
+          "sources20": {
+            "baseline": 539,
+            "candidate": 545,
+            "gained": 6,
+            "lost": 0,
+            "retained": 539,
+            "any_old": 485,
+            "any_new": 488,
+            "any_gained": 3,
+            "any_lost": 0,
+            "macro_recall": 0.8717902350813743,
+            "paired": {
+              "baseline": 0.8645569620253165,
+              "candidate": 0.8717902350813743,
+              "delta": 0.007233273056057866,
+              "descriptive_ci97_5": [
+                0.0009157509157509158,
+                0.01590141186403579
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 482,
+            "candidate": 487,
+            "gained": 10,
+            "lost": 5,
+            "retained": 477,
+            "any_old": 452,
+            "any_new": 451,
+            "any_gained": 4,
+            "any_lost": 5,
+            "macro_recall": 0.7959312839059675,
+            "paired": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.7959312839059675,
+              "delta": 0.00135623869801085,
+              "descriptive_ci97_5": [
+                -0.016608745346380238,
+                0.01590919731018046
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 357,
+            "candidate": 276,
+            "gained": 0,
+            "lost": 81,
+            "retained": 276,
+            "any_old": 325,
+            "any_new": 251,
+            "any_gained": 0,
+            "any_lost": 74,
+            "macro_recall": 0.7231182795698925
+          },
+          "rationales5": {
+            "baseline": 342,
+            "candidate": 269,
+            "gained": 3,
+            "lost": 76,
+            "retained": 266,
+            "any_old": 319,
+            "any_new": 248,
+            "any_gained": 1,
+            "any_lost": 72,
+            "macro_recall": 0.7121212121212122
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 81
+        },
+        "article_local_passage": {
+          "sources20": {
+            "baseline": 539,
+            "candidate": 545,
+            "gained": 6,
+            "lost": 0,
+            "retained": 539,
+            "any_old": 485,
+            "any_new": 488,
+            "any_gained": 3,
+            "any_lost": 0,
+            "macro_recall": 0.8717902350813743,
+            "paired": {
+              "baseline": 0.8645569620253165,
+              "candidate": 0.8717902350813743,
+              "delta": 0.007233273056057866,
+              "descriptive_ci97_5": [
+                0.0009157509157509158,
+                0.01590141186403579
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 482,
+            "candidate": 479,
+            "gained": 7,
+            "lost": 10,
+            "retained": 472,
+            "any_old": 452,
+            "any_new": 448,
+            "any_gained": 4,
+            "any_lost": 8,
+            "macro_recall": 0.7893007836045811,
+            "paired": {
+              "baseline": 0.7945750452079566,
+              "candidate": 0.7893007836045811,
+              "delta": -0.005274261603375526,
+              "descriptive_ci97_5": [
+                -0.02114009919846317,
+                0.009054676448608112
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 357,
+            "candidate": 281,
+            "gained": 1,
+            "lost": 77,
+            "retained": 280,
+            "any_old": 325,
+            "any_new": 257,
+            "any_gained": 1,
+            "any_lost": 69,
+            "macro_recall": 0.740713587487781
+          },
+          "rationales5": {
+            "baseline": 342,
+            "candidate": 271,
+            "gained": 2,
+            "lost": 73,
+            "retained": 269,
+            "any_old": 319,
+            "any_new": 252,
+            "any_gained": 1,
+            "any_lost": 68,
+            "macro_recall": 0.7228739002932552
+          },
+          "outside_both_lanes": 1270,
+          "old_best_source_block_dropped": 105
+        }
+      }
+    },
+    "prior_misses": {
+      "questions": 13,
+      "groups": 11,
+      "gold_pairs": 14,
+      "annotated_pairs": 3,
+      "arms": {
+        "baseline": {
+          "sources20": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0,
+            "paired": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0,
+            "paired": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0
+          },
+          "rationales5": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 0
+        },
+        "article_refill4": {
+          "sources20": {
+            "baseline": 0,
+            "candidate": 2,
+            "gained": 2,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 2,
+            "any_gained": 2,
+            "any_lost": 0,
+            "macro_recall": 0.11538461538461539,
+            "paired": {
+              "baseline": 0.0,
+              "candidate": 0.11538461538461539,
+              "delta": 0.11538461538461539,
+              "descriptive_ci97_5": [
+                0.0,
+                0.3333333333333333
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 0,
+            "candidate": 1,
+            "gained": 1,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 1,
+            "any_gained": 1,
+            "any_lost": 0,
+            "macro_recall": 0.038461538461538464,
+            "paired": {
+              "baseline": 0.0,
+              "candidate": 0.038461538461538464,
+              "delta": 0.038461538461538464,
+              "descriptive_ci97_5": [
+                0.0,
+                0.14285714285714285
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0
+          },
+          "rationales5": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 0
+        },
+        "article_first": {
+          "sources20": {
+            "baseline": 0,
+            "candidate": 2,
+            "gained": 2,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 2,
+            "any_gained": 2,
+            "any_lost": 0,
+            "macro_recall": 0.11538461538461539,
+            "paired": {
+              "baseline": 0.0,
+              "candidate": 0.11538461538461539,
+              "delta": 0.11538461538461539,
+              "descriptive_ci97_5": [
+                0.0,
+                0.3333333333333333
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 0,
+            "candidate": 1,
+            "gained": 1,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 1,
+            "any_gained": 1,
+            "any_lost": 0,
+            "macro_recall": 0.038461538461538464,
+            "paired": {
+              "baseline": 0.0,
+              "candidate": 0.038461538461538464,
+              "delta": 0.038461538461538464,
+              "descriptive_ci97_5": [
+                0.0,
+                0.14285714285714285
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0
+          },
+          "rationales5": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0
+          },
+          "outside_both_lanes": 0,
+          "old_best_source_block_dropped": 0
+        },
+        "article_local_passage": {
+          "sources20": {
+            "baseline": 0,
+            "candidate": 2,
+            "gained": 2,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 2,
+            "any_gained": 2,
+            "any_lost": 0,
+            "macro_recall": 0.11538461538461539,
+            "paired": {
+              "baseline": 0.0,
+              "candidate": 0.11538461538461539,
+              "delta": 0.11538461538461539,
+              "descriptive_ci97_5": [
+                0.0,
+                0.3333333333333333
+              ]
+            }
+          },
+          "sources5": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0,
+            "paired": {
+              "baseline": 0.0,
+              "candidate": 0.0,
+              "delta": 0.0,
+              "descriptive_ci97_5": [
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "rationales20": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0
+          },
+          "rationales5": {
+            "baseline": 0,
+            "candidate": 0,
+            "gained": 0,
+            "lost": 0,
+            "retained": 0,
+            "any_old": 0,
+            "any_new": 0,
+            "any_gained": 0,
+            "any_lost": 0,
+            "macro_recall": 0.0
+          },
+          "outside_both_lanes": 41,
+          "old_best_source_block_dropped": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "clean_replay": "Recomputed all 681 candidate rows from pinned title index and original corpus vectors, identical SHA-256. Used measured frozen scores to regenerate all three assessment JSONs byte-for-byte. GPU inference executed once; not a second independent inference.",
+  "tests": "5 passed; ruff check passed",
+  "sha256": {
+    "benchmarks/public_rag/article_parent_index.py": "db270190d4b0a67d367e169e2fcbbe75df0e67764c79f79af9164293e733cc9a",
+    "benchmarks/public_rag/article_parent_methods.py": "1abb70096ef47f20cbe422a9be1b31b10bddd75d26d191bffc07a9b9302846e5",
+    "benchmarks/public_rag/article_parent_report.py": "cc50cc6484a38adfbbfec1119578cd04a4c3bdad3a57834e271d20de3a432484",
+    "benchmarks/public_rag/article_parent_run.py": "c9f99aa6cc4172ef1bbbc54d5bebf5d5438378b60f5e6204bc5882245c81749e",
+    "tests/unit/test_article_parent_methods.py": "2a1f8ae8f76e3d3a6808088bb160692dd43e22cca84e57b95fded0bb71c80b64",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/cases.json": "834b401ee197750d3d69d9e098bd650780d102af8b77eb07d1dc7b11b520cf28",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/protocol.json": "f4392fea11554d55a492bcbec7551383e12539d49a33b1420b4fa8459f5f22d9",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/README.md": "eff3a51a09265799b98408209e655593125a1180f8f5766e2f2631e177fb2705",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/report.json": "d3e21983c0ab907a3866b171756ab690cef9e27b3b3b70afcea1e464149e601d",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/six.json": "a995c1073b5b7ca603bbfeca710df568a09369adf8c4d661a7b1d7a70f71f1a2",
+    "benchmarks/public_rag/results/published/article-recall-20261114/parent/standalone-addendum.json": "9376d6042a71a4543dec9418bd05fc4ac10b93b4770d774aebb13981a73d3109"
+  }
+}

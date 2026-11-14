@@ -33,6 +33,7 @@ from packages.knowledge.contracts import (
     RetrievalTraceStage,
     RetrievedEvidence,
     SparseEncoder,
+    SparseEncoding,
     VectorIndex,
     VectorScope,
     VectorSearchHit,
@@ -356,6 +357,20 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         )
         return {chunk.chunk_id: (chunk, document, revision) for chunk, document, revision in result}
 
+    def _fuse_candidates(
+        self,
+        query: RetrievalQuery,
+        scope: VectorScope,
+        dense_query: tuple[float, ...],
+        sparse_query: SparseEncoding,
+        dense_hits: tuple[VectorSearchHit, ...],
+        sparse_hits: tuple[VectorSearchHit, ...],
+    ) -> tuple[_FusedCandidate, ...]:
+        """Select the passage pool before scoped hydration and reranking."""
+        return fuse_reciprocal_rank(
+            dense_hits, sparse_hits, rrf_k=self.rrf_k, candidate_top_k=query.candidate_top_k
+        )
+
     async def retrieve_with_trace(
         self,
         context: WorkspaceExecutionContext,
@@ -477,11 +492,8 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             else:
                 stage = "fusion"
                 fusion_started = time.perf_counter()
-                fused = fuse_reciprocal_rank(
-                    dense_hits,
-                    sparse_hits,
-                    rrf_k=self.rrf_k,
-                    candidate_top_k=query.candidate_top_k,
+                fused = self._fuse_candidates(
+                    query, scope, dense_query, sparse_query, dense_hits, sparse_hits
                 )
                 fusion_latency_ms = (time.perf_counter() - fusion_started) * 1000
                 fusion_trace_results = tuple(

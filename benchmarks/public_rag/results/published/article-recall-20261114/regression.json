@@ -1,0 +1,28 @@
+{
+  "regress-job": {
+    "exit_code": 0,
+    "elapsed_seconds": 317.203,
+    "started_at": "2026-11-14T01:08:20.190524+00:00",
+    "finished_at": "2026-11-14T01:13:37.395520+00:00",
+    "tests": 3382,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "junit_sha256": "7e8bbd8ab06bd97b827cc7473c0ffbfa07f02038033e8dec097ee96b7cadf52c"
+  },
+  "focused-job": {
+    "exit_code": 0,
+    "elapsed_seconds": 17.656,
+    "started_at": "2026-11-14T01:18:36.272386+00:00",
+    "finished_at": "2026-11-14T01:18:53.921557+00:00",
+    "tests": 32,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "junit_sha256": "a23ccb83255759eae370f43eec6e499f932a3eb627444205795a43cdfcb24bba"
+  },
+  "scope": {
+    "regress-job": "All tests/unit collected at launch and six integration modules on a dedicated migrated PostgreSQL and local Qdrant (indexing, retrieval, citation QA, snapshots, public snapshot loading and hidden RAG contracts). New tests added after collection are checked separately.",
+    "focused-job": "Article transfer, fusion, parent indexing selector tests, existing RRF and candidate selection. Counts overlap the first run."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "study": "article-fusion-parent-search-cross-corpus-v1",
+  "base": "4da1a9e",
+  "scope": "Freeze before reading results for these two nominees. Primary source recall on separate NFCorpus TRAIN questions, plus paired first-response QA in a separate live protocol. Neither supplies evidence for the other endpoint.",
+  "sample_salt": "agenthub-article-recall-transfer-20261114",
+  "dataset_inputs": "../../candidate-recall-20261114/nfcorpus-protocol.json",
+  "excluded_prior_cohorts": ["nfcorpus-protocol.json", "nfcorpus-protected-protocol.json"],
+  "eligible_after_exclusion": 2334,
+  "sample_size": 128,
+  "ids_sha256": "4020d5518320ebc64faffdb4a7bf0e3bc0b7efd5b7cee5be786cb65959731ad5",
+  "sample": "Use only official TRAIN query-ID column at registration. Exclude both previous 128-query cohorts, then order by SHA-256(salt + ':' + query ID). This provides new queries in a known corpus; it does not enforce disjoint positive documents, and never consumes official test or platform holdout.",
+  "arms": ["baseline", "article_local_passage", "full_parent4"],
+  "corpus": "All 3633 documents, original title+abstract; immutable children 1200 characters, 200 overlap. For every query, exact normalized BGE-M3 chunk cosine and tokenizer log-TF times IDF over all chunks. Select first 30 per lane. Compare with exact document-space dense and sparse scores (IDF fitted on documents) over all titles+abstracts. No oracle or restricted positive-only pool. Float32 scores break ties by logical ID.",
+  "article_local_passage": "Deduplicate each retrieved lane by article before document RRF60, then project article slots into passages by local BM25 on all original passages, including passages absent from the retrieved lists. Selector implementation is shared with diagnostic arm.",
+  "full_parent4": "Admit up to 4 novel top20 parent-RRF articles from the complete-article index into duplicate tail slots of baseline. For each new article choose an original passage by query cosine among all its children. Keep original top8 and first passage per incumbent article. No titles-only arm selection on these labels.",
+  "rerank": "20 chunks per arm, true pinned BGE-v2-m3, FP16 CUDA, max_length 8192, batch 8. Score the original 20 once and all novel query/chunk pairs, using one common logit per pair to isolate passage selection. First five RAW passages before source de-duplication. Original-arm direct rerank on each query; tie break by selector score then chunk ID.",
+  "gate": "For each nominee, candidate macro source recall@20 must strictly improve with no formerly hit question becoming a complete miss. In the reranked raw five require nonnegative macro recall delta and no previously hit question becoming a complete miss. Report lost/gained positive pairs at both stages as well as any-hit counts. Regressions on original annotated SciFact evidence, lost independently correct cited answers, or absent incremental adequately supported live answers veto routine deployment. Do not select another configuration using these data.",
+  "budgets": "Report counts of new parent hits, reselected passages outside both chunk lanes, out-of-corpus failures, corpus and query fingerprints. Retrieval projection is offline exact; use separate real endpoint trials for application behavior. Do not infer online timing from offline replay."
+}

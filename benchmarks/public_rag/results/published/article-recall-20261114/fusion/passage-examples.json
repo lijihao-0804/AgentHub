@@ -1,0 +1,174 @@
+[
+  {
+    "query": "1210",
+    "claim": "The density of cytokine receptor bearing cells affects the distance over which cytokines act.",
+    "article": "4928282",
+    "title": "A Tunable Diffusion‐Consumption Mechanism of Cytokine Propagation Enables Plasticity in Cell‐to‐Cell Communication in the Immune System",
+    "layer": "rationales20",
+    "change": "gained",
+    "official_alternatives": [
+      {
+        "label": "SUPPORT",
+        "sentences": [
+          {
+            "index": 9,
+            "text": "HighlightsCytokine penetration in tissues is governed by a diffusion‐consumption mechanismSpherical cytokine niches are generated around cytokine‐producing cellsThe characteristic niche size depends on the density of cytokine consumersCytokine niches are a source of variability in otherwise identical cells &NA; Cytokine‐mediated communication allows immune cells to achieve a context‐appropriate response, but the distance over which this communication happens is unclear.",
+            "span": [
+              1259,
+              1733
+            ]
+          }
+        ]
+      }
+    ],
+    "selected_source_blocks": {
+      "article_first": [
+        {
+          "chunk_id": "b32a07299f1c8e68b60117a800a306395bc7be7523f8056a352c531e8cf54f15",
+          "ordinal": 0,
+          "char_start": 0,
+          "char_end": 1200,
+          "text_sha256": "9e773f95893eb863b023268a0ec1d4deb452137a3ba7de42492edaa1ccc3f3db"
+        }
+      ],
+      "article_local_passage": [
+        {
+          "chunk_id": "0cc19e66be13b146576223a9ee7d73a1e4e9f6f620a25bbaf99076a5b7c3322f",
+          "ordinal": 1,
+          "char_start": 1000,
+          "char_end": 1984,
+          "text_sha256": "d16174d31d58d5256c1369c1c0075f4225ae0d2dd473953fa2b24478d3489c47"
+        }
+      ]
+    }
+  },
+  {
+    "query": "109",
+    "claim": "An M2-like phenotype in brown adipose tissue macrophages is quickly induced by cold exposure.",
+    "article": "4319174",
+    "title": "Alternatively activated macrophages produce catecholamines to sustain adaptive thermogenesis",
+    "layer": "rationales20",
+    "change": "lost",
+    "official_alternatives": [
+      {
+        "label": "SUPPORT",
+        "sentences": [
+          {
+            "index": 5,
+            "text": "Exposure to cold temperature rapidly promoted alternative activation of adipose tissue macrophages, which secrete catecholamines to induce thermogenic gene expression in brown adipose tissue and lipolysis in white adipose tissue.",
+            "span": [
+              1053,
+              1282
+            ]
+          }
+        ]
+      }
+    ],
+    "selected_source_blocks": {
+      "article_first": [
+        {
+          "chunk_id": "b1dc138edc97213d0bb94c5fd0532c522c6abc5ee9dc38efa036da0be66b7f78",
+          "ordinal": 1,
+          "char_start": 1000,
+          "char_end": 1683,
+          "text_sha256": "68e1766e1c288f562429ed3cff829fab555be499c38cd30f3a803546b8ff5762"
+        }
+      ],
+      "article_local_passage": [
+        {
+          "chunk_id": "53dc84e7a63cdbd2d3601dc5f7b8f0c0184a69111876a04c9cdd39a8da434223",
+          "ordinal": 0,
+          "char_start": 0,
+          "char_end": 1200,
+          "text_sha256": "e41ed497de58aef54a40eb720e70b92b2b5e0cf1f03a5aae5868f6f7acc63639"
+        }
+      ]
+    }
+  },
+  {
+    "query": "1210",
+    "claim": "The density of cytokine receptor bearing cells affects the distance over which cytokines act.",
+    "article": "4928282",
+    "title": "A Tunable Diffusion‐Consumption Mechanism of Cytokine Propagation Enables Plasticity in Cell‐to‐Cell Communication in the Immune System",
+    "layer": "rationales5",
+    "change": "gained",
+    "official_alternatives": [
+      {
+        "label": "SUPPORT",
+        "sentences": [
+          {
+            "index": 9,
+            "text": "HighlightsCytokine penetration in tissues is governed by a diffusion‐consumption mechanismSpherical cytokine niches are generated around cytokine‐producing cellsThe characteristic niche size depends on the density of cytokine consumersCytokine niches are a source of variability in otherwise identical cells &NA; Cytokine‐mediated communication allows immune cells to achieve a context‐appropriate response, but the distance over which this communication happens is unclear.",
+            "span": [
+              1259,
+              1733
+            ]
+          }
+        ]
+      }
+    ],
+    "selected_source_blocks": {
+      "article_first": [
+        {
+          "chunk_id": "b32a07299f1c8e68b60117a800a306395bc7be7523f8056a352c531e8cf54f15",
+          "ordinal": 0,
+          "char_start": 0,
+          "char_end": 1200,
+          "text_sha256": "9e773f95893eb863b023268a0ec1d4deb452137a3ba7de42492edaa1ccc3f3db"
+        }
+      ],
+      "article_local_passage": [
+        {
+          "chunk_id": "0cc19e66be13b146576223a9ee7d73a1e4e9f6f620a25bbaf99076a5b7c3322f",
+          "ordinal": 1,
+          "char_start": 1000,
+          "char_end": 1984,
+          "text_sha256": "d16174d31d58d5256c1369c1c0075f4225ae0d2dd473953fa2b24478d3489c47"
+        }
+      ]
+    }
+  },
+  {
+    "query": "109",
+    "claim": "An M2-like phenotype in brown adipose tissue macrophages is quickly induced by cold exposure.",
+    "article": "4319174",
+    "title": "Alternatively activated macrophages produce catecholamines to sustain adaptive thermogenesis",
+    "layer": "rationales5",
+    "change": "lost",
+    "official_alternatives": [
+      {
+        "label": "SUPPORT",
+        "sentences": [
+          {
+            "index": 5,
+            "text": "Exposure to cold temperature rapidly promoted alternative activation of adipose tissue macrophages, which secrete catecholamines to induce thermogenic gene expression in brown adipose tissue and lipolysis in white adipose tissue.",
+            "span": [
+              1053,
+              1282
+            ]
+          }
+        ]
+      }
+    ],
+    "selected_source_blocks": {
+      "article_first": [
+        {
+          "chunk_id": "b1dc138edc97213d0bb94c5fd0532c522c6abc5ee9dc38efa036da0be66b7f78",
+          "ordinal": 1,
+          "char_start": 1000,
+          "char_end": 1683,
+          "text_sha256": "68e1766e1c288f562429ed3cff829fab555be499c38cd30f3a803546b8ff5762"
+        }
+      ],
+      "article_local_passage": [
+        {
+          "chunk_id": "53dc84e7a63cdbd2d3601dc5f7b8f0c0184a69111876a04c9cdd39a8da434223",
+          "ordinal": 0,
+          "char_start": 0,
+          "char_end": 1200,
+          "text_sha256": "e41ed497de58aef54a40eb720e70b92b2b5e0cf1f03a5aae5868f6f7acc63639"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,800 @@
+[
+  {
+    "claim": "ATM and Rad3 related protein are critical for sensing DNA damage.",
+    "query_id": "63",
+    "gold": [
+      "40349336"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 2,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "40349336": "Deletion of the developmentally essential gene ATR in adult mice leads to age-related phenotypes and stem cell loss."
+    }
+  },
+  {
+    "claim": "In chronic viral infections or tumors, peptides that selectively inhibit PTPRS can be utilized to boost insufficient activity of pDCs.",
+    "query_id": "572",
+    "gold": [
+      "4447055"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 4,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "4447055": "Modulation of the proteoglycan receptor PTPσ promotes recovery after spinal cord injury"
+    }
+  },
+  {
+    "claim": "Increased flux of microbial products provokes immune responses.",
+    "query_id": "609",
+    "gold": [
+      "40096222"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 4,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "40096222": "Compromised intestinal epithelial barrier induces adaptive immune compensation that protects from colitis."
+    }
+  },
+  {
+    "claim": "Increased flux of microbial products suppresses immune responses.",
+    "query_id": "610",
+    "gold": [
+      "40096222"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 2,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "40096222": "Compromised intestinal epithelial barrier induces adaptive immune compensation that protects from colitis."
+    }
+  },
+  {
+    "claim": "Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.",
+    "query_id": "620",
+    "gold": [
+      "2565138"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 7,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "2565138": "Hyaluronan impairs vascular function and drug delivery in a mouse model of pancreatic cancer"
+    }
+  },
+  {
+    "claim": "Malaria has a high vectorial capacity.",
+    "query_id": "753",
+    "gold": [
+      "1173667"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [
+          "1173667"
+        ],
+        [],
+        [],
+        []
+      ],
+      "best": {
+        "1173667": {
+          "chunk_id": "3006f886b6f66c31a9b7ee46cffae364c317d974acad47421c75f6d711d1f18e",
+          "ordinal": 1,
+          "start": 1000,
+          "end": 1246,
+          "logit": -5.84375,
+          "rerank_rank": 20,
+          "pool_rank": 20
+        }
+      },
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [
+          "1173667"
+        ],
+        [],
+        [],
+        []
+      ],
+      "best": {
+        "1173667": {
+          "chunk_id": "3006f886b6f66c31a9b7ee46cffae364c317d974acad47421c75f6d711d1f18e",
+          "ordinal": 1,
+          "start": 1000,
+          "end": 1246,
+          "logit": -5.84375,
+          "rerank_rank": 20,
+          "pool_rank": 11
+        }
+      },
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [
+          "1173667"
+        ],
+        [],
+        [],
+        []
+      ],
+      "best": {
+        "1173667": {
+          "chunk_id": "2491a96fcb5c0ee91fe103bd5b9f004b0d18ce8dc5b89b608e94b615b7753804",
+          "ordinal": 0,
+          "start": 0,
+          "end": 1200,
+          "logit": -5.28125,
+          "rerank_rank": 19,
+          "pool_rank": 11
+        }
+      },
+      "outside_lanes": 1,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "1173667": "Ranking of elimination feasibility between malaria-endemic countries"
+    }
+  },
+  {
+    "claim": "Myelin sheaths are lipid-rich cellular structures.",
+    "query_id": "817",
+    "gold": [
+      "17814815"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 2,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "17814815": "Label-free in vivo imaging of myelinated axons in health and disease with spectral confocal reflectance microscopy"
+    }
+  },
+  {
+    "claim": "Myelin sheaths play a role in action potential propagation.",
+    "query_id": "818",
+    "gold": [
+      "17814815"
+    ],
+    "annotated": [
+      "17814815"
+    ],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 5,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "17814815": "Label-free in vivo imaging of myelinated axons in health and disease with spectral confocal reflectance microscopy"
+    }
+  },
+  {
+    "claim": "NAC inhibits the generation of angiotensin-converting enzyme.",
+    "query_id": "828",
+    "gold": [
+      "4678846"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 1,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "4678846": "Acetylcysteine for prevention of acute deterioration of renal function following elective coronary angiography and intervention: a randomized controlled trial."
+    }
+  },
+  {
+    "claim": "Oxidative phosphorylation is one of the primary glycometabolic pathways in cells.",
+    "query_id": "900",
+    "gold": [
+      "18678095"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 4,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "18678095": "Vesicular Glycolysis Provides On-Board Energy for Fast Axonal Transport"
+    }
+  },
+  {
+    "claim": "Sequence conservation in gene regulatory regions between species is a high-accuracy predictor of conserved functionality.",
+    "query_id": "1074",
+    "gold": [
+      "14658685"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 4,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "14658685": "Enhancer Evolution across 20 Mammalian Species"
+    }
+  },
+  {
+    "claim": "Suboptimal nutrition is a leading cause of premature death",
+    "query_id": "1109",
+    "gold": [
+      "13770184",
+      "8582337"
+    ],
+    "annotated": [
+      "13770184",
+      "8582337"
+    ],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [
+          "13770184"
+        ],
+        [
+          "13770184"
+        ],
+        [],
+        []
+      ],
+      "best": {
+        "13770184": {
+          "chunk_id": "6f503e1727055b1e1553fd094920bf12b09d35243b936e193e88053fc0dfe704",
+          "ordinal": 3,
+          "start": 3000,
+          "end": 4200,
+          "logit": -2.390625,
+          "rerank_rank": 1,
+          "pool_rank": 17
+        }
+      },
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [
+          "13770184"
+        ],
+        [
+          "13770184"
+        ],
+        [],
+        []
+      ],
+      "best": {
+        "13770184": {
+          "chunk_id": "6f503e1727055b1e1553fd094920bf12b09d35243b936e193e88053fc0dfe704",
+          "ordinal": 3,
+          "start": 3000,
+          "end": 4200,
+          "logit": -2.390625,
+          "rerank_rank": 1,
+          "pool_rank": 15
+        }
+      },
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [
+          "13770184"
+        ],
+        [],
+        [],
+        []
+      ],
+      "best": {
+        "13770184": {
+          "chunk_id": "0176edbbc513ccadd0b70bac567ca5bf60f7ecf0b539c5e1e77ab815dd164c58",
+          "ordinal": 1,
+          "start": 1000,
+          "end": 2200,
+          "logit": -4.75390625,
+          "rerank_rank": 10,
+          "pool_rank": 15
+        }
+      },
+      "outside_lanes": 3,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "13770184": "Global, regional, and national comparative risk assessment of 79 behavioural, environmental and occupational, and metabolic risks or clusters of risks, 1990–2015: a systematic analysis for the Global Burden of Disease Study 2015",
+      "8582337": "The state of US health, 1990-2010: burden of diseases, injuries, and risk factors."
+    }
+  },
+  {
+    "claim": "eRNAs influence is linked to senescence, aging, and carcinogenesis.",
+    "query_id": "1387",
+    "gold": [
+      "9669099"
+    ],
+    "annotated": [],
+    "baseline": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_refill4": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_first": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 0,
+      "old_best_source_block_dropped": 0
+    },
+    "article_local_passage": {
+      "layers": [
+        [],
+        [],
+        [],
+        []
+      ],
+      "best": {},
+      "outside_lanes": 2,
+      "old_best_source_block_dropped": 0
+    },
+    "source_titles": {
+      "9669099": "eRNAs are required for p53-dependent enhancer activity and gene transcription."
+    }
+  }
+]

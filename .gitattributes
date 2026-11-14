@@ -4,3 +4,7 @@
 benchmarks/public_rag/candidate_recall_*.py text eol=lf
 benchmarks/public_rag/results/published/candidate-recall-20261114/**/*.json text eol=lf
 benchmarks/public_rag/results/published/reranker-batching-20261114/protocol.json text eol=lf
+benchmarks/public_rag/article_*.py text eol=lf
+benchmarks/public_rag/results/published/article-recall-20261114/**/*.json text eol=lf
+benchmarks/public_rag/results/published/article-recall-20261114/**/*.jsonl text eol=lf
+tests/unit/test_article_*.py text eol=lf

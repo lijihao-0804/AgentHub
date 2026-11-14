@@ -1,0 +1,12 @@
+{
+  "status": "locked before either arm was scored",
+  "primary": "article_refill4",
+  "secondary": "article_first",
+  "explicitly_requested_third_arm_before_outcomes": "article_local_passage reuses article_first's exact source slots. Reopen every authorized immutable original chunk of each selected article, without a chunk-count cap. Per article independently score unique Unicode query words using within-article Okapi BM25 (k1=1.2,b=.75); ties by original chunk RRF then chunk ID. Consume next distinct best chunk each time that article has a slot. Use original RRF or 0 for previously unreturned chunks as reranker tie-break. No gold information. Offline BM25 does not reuse parent text as evidence.",
+  "common": "Read the fixed historical dense and IDF-sparse top30 chunk lanes. Deduplicate each lane by document, compact ranks; k=60 RRF with best rank then ID tie break. For every article choose its best original chunk-RRF block; use its original RRF score for cross-encoder logit ties. No parent-index scoring, new texts, labels or model scores in selection.",
+  "article_refill4": "Preserve first 8 baseline chunks and first chunk of every original document. Replace up to 4 last lower duplicate chunks by article-ranked first representatives of novel docs.",
+  "article_first": "Return first representatives in document RRF order. If fewer than budget, append remaining original chunks in chunk RRF order.",
+  "budget": {"dense":30, "sparse":30, "rerank":20, "raw_delivery":5},
+  "evaluation": "Compare cached real BGE logits; original pool score preferred over superset for common pairs. Require replication of historical top20 IDs and original portable baseline all four metrics per query. Report macro pair recall, old hits, gained/lost source and official rationale pairs at raw20/5, first block IDs and ranks for prior 13. Descriptive historical analyses only; no downstream answer claim.",
+  "splits": "Fixed historical 128 exposed dev; 553 previously exposed but document-component disjoint from dev/warmup; no test labels."
+}

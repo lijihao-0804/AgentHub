@@ -1,0 +1,6 @@
+{
+  "scope": "Post-outcome diagnostic frozen after seeing the six parent ranks and mixed pools, before any standalone reranked results. No nomination or independent transfer.",
+  "cohort": ["609", "620", "817", "818", "828", "1387"],
+  "arms": "For title-only and title+abstract separately use the first 20 article IDs in their existing RRF order. Deliver exactly one original chunk for each, highest dense cosine (logical chunk ID tie), and apply same real BGE. BGE ties fall back to original parent RRF order. Audit raw20 and top5 source and annotated sentence-set visibility.",
+  "denominators": "Six queries with one positive each; one officially annotated query/source, 818. Full inventory 5183 articles in each arm."
+}

@@ -1,0 +1,1951 @@
+{
+  "queries": 128,
+  "corpus_documents": 3633,
+  "chunks": 6818,
+  "capture_sha256": "0c2dc45c3ab23cd20a6006ff1827fe89790036a0704e7bf45c4373b0f67a79b6",
+  "protocol_sha256": "61928a851f88101e7eee8a06630e96e97ea0f2490c817d2adb5b7902714aa634",
+  "bge_pairs_scored": 3425,
+  "arms": {
+    "article_local_passage": {
+      "pool": {
+        "query_hits": {
+          "retained": 100,
+          "gained": 2,
+          "lost": 0,
+          "missed_both": 26
+        },
+        "source_pairs_changed": {
+          "new": 76,
+          "lost": 0
+        },
+        "macro_recall": {
+          "baseline": 0.18033888004827162,
+          "candidate": 0.19438496902853425,
+          "delta": 0.014046088980262633
+        },
+        "changes_by_query": {
+          "PLAIN-3406": {
+            "retained": [],
+            "gained": [
+              "MED-5092"
+            ],
+            "lost": []
+          },
+          "PLAIN-2603": {
+            "retained": [
+              "MED-2391",
+              "MED-2396",
+              "MED-3024"
+            ],
+            "gained": [
+              "MED-2389"
+            ],
+            "lost": []
+          },
+          "PLAIN-2755": {
+            "retained": [
+              "MED-3722",
+              "MED-3723",
+              "MED-3728",
+              "MED-3730",
+              "MED-3731",
+              "MED-4480"
+            ],
+            "gained": [
+              "MED-3720",
+              "MED-3744",
+              "MED-4479"
+            ],
+            "lost": []
+          },
+          "PLAIN-2521": {
+            "retained": [
+              "MED-1753",
+              "MED-3127",
+              "MED-3139",
+              "MED-4440",
+              "MED-4785"
+            ],
+            "gained": [
+              "MED-1733",
+              "MED-3130",
+              "MED-3142"
+            ],
+            "lost": []
+          },
+          "PLAIN-2625": {
+            "retained": [
+              "MED-2599",
+              "MED-2604",
+              "MED-2605",
+              "MED-2783",
+              "MED-2794",
+              "MED-2801",
+              "MED-2810",
+              "MED-2813",
+              "MED-2814",
+              "MED-2815",
+              "MED-2817",
+              "MED-2818",
+              "MED-2820",
+              "MED-2823",
+              "MED-2824",
+              "MED-2825"
+            ],
+            "gained": [
+              "MED-2808",
+              "MED-2812"
+            ],
+            "lost": []
+          },
+          "PLAIN-1152": {
+            "retained": [
+              "MED-5110"
+            ],
+            "gained": [
+              "MED-4976"
+            ],
+            "lost": []
+          },
+          "PLAIN-1346": {
+            "retained": [
+              "MED-2045",
+              "MED-2052",
+              "MED-2156",
+              "MED-4363",
+              "MED-4364",
+              "MED-4812",
+              "MED-4814",
+              "MED-4816",
+              "MED-4817"
+            ],
+            "gained": [
+              "MED-2051",
+              "MED-2157",
+              "MED-4815"
+            ],
+            "lost": []
+          },
+          "PLAIN-927": {
+            "retained": [
+              "MED-5039",
+              "MED-5040",
+              "MED-5148",
+              "MED-5149",
+              "MED-5152"
+            ],
+            "gained": [
+              "MED-5146",
+              "MED-5150"
+            ],
+            "lost": []
+          },
+          "PLAIN-865": {
+            "retained": [
+              "MED-2239",
+              "MED-3558",
+              "MED-3560",
+              "MED-3561",
+              "MED-3562",
+              "MED-3563",
+              "MED-4329",
+              "MED-4330",
+              "MED-4433",
+              "MED-4463"
+            ],
+            "gained": [
+              "MED-4328"
+            ],
+            "lost": []
+          },
+          "PLAIN-1082": {
+            "retained": [
+              "MED-3643",
+              "MED-3648",
+              "MED-3649",
+              "MED-3653",
+              "MED-3891",
+              "MED-4806",
+              "MED-4807",
+              "MED-4808",
+              "MED-4809",
+              "MED-5171"
+            ],
+            "gained": [
+              "MED-3646",
+              "MED-3652",
+              "MED-3889"
+            ],
+            "lost": []
+          },
+          "PLAIN-1596": {
+            "retained": [
+              "MED-1363",
+              "MED-1374",
+              "MED-1383",
+              "MED-1394",
+              "MED-1398",
+              "MED-1400",
+              "MED-1402",
+              "MED-1404",
+              "MED-1407",
+              "MED-1408",
+              "MED-1411",
+              "MED-1699",
+              "MED-3422",
+              "MED-3423",
+              "MED-3432",
+              "MED-3434",
+              "MED-5271"
+            ],
+            "gained": [
+              "MED-1380"
+            ],
+            "lost": []
+          },
+          "PLAIN-109": {
+            "retained": [
+              "MED-3369",
+              "MED-3370",
+              "MED-3372",
+              "MED-3377"
+            ],
+            "gained": [
+              "MED-3371"
+            ],
+            "lost": []
+          },
+          "PLAIN-2474": {
+            "retained": [
+              "MED-1376",
+              "MED-1527",
+              "MED-1541",
+              "MED-2505"
+            ],
+            "gained": [
+              "MED-1375"
+            ],
+            "lost": []
+          },
+          "PLAIN-759": {
+            "retained": [
+              "MED-1825",
+              "MED-2437",
+              "MED-3697",
+              "MED-3800",
+              "MED-4374",
+              "MED-4450",
+              "MED-4787"
+            ],
+            "gained": [
+              "MED-3551",
+              "MED-3791"
+            ],
+            "lost": []
+          },
+          "PLAIN-1465": {
+            "retained": [
+              "MED-1133",
+              "MED-1137",
+              "MED-2352",
+              "MED-2777",
+              "MED-3229",
+              "MED-3237",
+              "MED-335",
+              "MED-4502",
+              "MED-5017"
+            ],
+            "gained": [
+              "MED-3091",
+              "MED-3092",
+              "MED-3093"
+            ],
+            "lost": []
+          },
+          "PLAIN-2316": {
+            "retained": [
+              "MED-1162",
+              "MED-1500",
+              "MED-2098",
+              "MED-2201",
+              "MED-3245",
+              "MED-3369",
+              "MED-3371",
+              "MED-3541",
+              "MED-4309",
+              "MED-4496"
+            ],
+            "gained": [
+              "MED-2066",
+              "MED-2085",
+              "MED-2200",
+              "MED-3370",
+              "MED-4384"
+            ],
+            "lost": []
+          },
+          "PLAIN-3474": {
+            "retained": [
+              "MED-2756",
+              "MED-2907",
+              "MED-3028",
+              "MED-3029",
+              "MED-5364",
+              "MED-5368",
+              "MED-5369",
+              "MED-5370"
+            ],
+            "gained": [
+              "MED-2750"
+            ],
+            "lost": []
+          },
+          "PLAIN-2644": {
+            "retained": [
+              "MED-2757",
+              "MED-2758",
+              "MED-2759",
+              "MED-2760",
+              "MED-2761",
+              "MED-4647",
+              "MED-4925",
+              "MED-950",
+              "MED-951"
+            ],
+            "gained": [
+              "MED-2762",
+              "MED-4645"
+            ],
+            "lost": []
+          },
+          "PLAIN-2013": {
+            "retained": [
+              "MED-1318",
+              "MED-1320",
+              "MED-1321",
+              "MED-1322",
+              "MED-1329",
+              "MED-1335",
+              "MED-1655",
+              "MED-2140",
+              "MED-2490",
+              "MED-4906",
+              "MED-4912"
+            ],
+            "gained": [
+              "MED-3584",
+              "MED-4540",
+              "MED-4609",
+              "MED-4905"
+            ],
+            "lost": []
+          },
+          "PLAIN-1436": {
+            "retained": [
+              "MED-3832",
+              "MED-3876",
+              "MED-4216",
+              "MED-4440",
+              "MED-4785",
+              "MED-4786",
+              "MED-5116",
+              "MED-5117",
+              "MED-5183"
+            ],
+            "gained": [
+              "MED-5114"
+            ],
+            "lost": []
+          },
+          "PLAIN-2330": {
+            "retained": [
+              "MED-4701",
+              "MED-4702",
+              "MED-4703"
+            ],
+            "gained": [
+              "MED-4032"
+            ],
+            "lost": []
+          },
+          "PLAIN-1226": {
+            "retained": [
+              "MED-1262",
+              "MED-1500",
+              "MED-1790",
+              "MED-1795",
+              "MED-2453",
+              "MED-3474",
+              "MED-3744",
+              "MED-3900",
+              "MED-4414",
+              "MED-5010",
+              "MED-5021"
+            ],
+            "gained": [
+              "MED-2308",
+              "MED-3208",
+              "MED-3372",
+              "MED-4583",
+              "MED-4585"
+            ],
+            "lost": []
+          },
+          "PLAIN-2095": {
+            "retained": [
+              "MED-3353",
+              "MED-3359",
+              "MED-3863",
+              "MED-3864",
+              "MED-3865",
+              "MED-4154",
+              "MED-4398",
+              "MED-4658",
+              "MED-4659",
+              "MED-4981"
+            ],
+            "gained": [
+              "MED-1313",
+              "MED-1314",
+              "MED-2117",
+              "MED-2124"
+            ],
+            "lost": []
+          },
+          "PLAIN-875": {
+            "retained": [],
+            "gained": [
+              "MED-3542"
+            ],
+            "lost": []
+          },
+          "PLAIN-1174": {
+            "retained": [
+              "MED-1587",
+              "MED-1588",
+              "MED-3588",
+              "MED-3589",
+              "MED-3595",
+              "MED-3596",
+              "MED-3633",
+              "MED-4951"
+            ],
+            "gained": [
+              "MED-4954"
+            ],
+            "lost": []
+          },
+          "PLAIN-2075": {
+            "retained": [
+              "MED-1198",
+              "MED-2724",
+              "MED-3407",
+              "MED-3421",
+              "MED-3422",
+              "MED-3423",
+              "MED-3429",
+              "MED-3430",
+              "MED-3561",
+              "MED-3590",
+              "MED-3715",
+              "MED-3958",
+              "MED-4185",
+              "MED-4425"
+            ],
+            "gained": [
+              "MED-3427",
+              "MED-4230",
+              "MED-4422"
+            ],
+            "lost": []
+          },
+          "PLAIN-1722": {
+            "retained": [
+              "MED-1601",
+              "MED-1602",
+              "MED-4468",
+              "MED-4506",
+              "MED-4507",
+              "MED-4508"
+            ],
+            "gained": [
+              "MED-1600",
+              "MED-4476"
+            ],
+            "lost": []
+          },
+          "PLAIN-1829": {
+            "retained": [
+              "MED-1241",
+              "MED-1244",
+              "MED-1246",
+              "MED-1519",
+              "MED-1520",
+              "MED-1522",
+              "MED-1523",
+              "MED-1525",
+              "MED-1526"
+            ],
+            "gained": [
+              "MED-1521"
+            ],
+            "lost": []
+          },
+          "PLAIN-3182": {
+            "retained": [
+              "MED-3897",
+              "MED-3906",
+              "MED-3907",
+              "MED-4716"
+            ],
+            "gained": [
+              "MED-4715"
+            ],
+            "lost": []
+          },
+          "PLAIN-1434": {
+            "retained": [
+              "MED-1401",
+              "MED-1403",
+              "MED-2844",
+              "MED-2845",
+              "MED-2851",
+              "MED-4316",
+              "MED-4317",
+              "MED-4318",
+              "MED-4320",
+              "MED-4772",
+              "MED-4773",
+              "MED-4926"
+            ],
+            "gained": [
+              "MED-1844",
+              "MED-2901",
+              "MED-3918"
+            ],
+            "lost": []
+          },
+          "PLAIN-810": {
+            "retained": [
+              "MED-2736",
+              "MED-3086",
+              "MED-3095",
+              "MED-3651",
+              "MED-4142",
+              "MED-4426",
+              "MED-4428",
+              "MED-4429"
+            ],
+            "gained": [
+              "MED-4131",
+              "MED-4430"
+            ],
+            "lost": []
+          },
+          "PLAIN-795": {
+            "retained": [
+              "MED-2250",
+              "MED-2251",
+              "MED-2252",
+              "MED-2255",
+              "MED-2257",
+              "MED-2258",
+              "MED-2259",
+              "MED-2260",
+              "MED-2261",
+              "MED-2263",
+              "MED-2264",
+              "MED-3595"
+            ],
+            "gained": [
+              "MED-1140",
+              "MED-1147",
+              "MED-2249",
+              "MED-2254",
+              "MED-2256",
+              "MED-2262"
+            ],
+            "lost": []
+          },
+          "PLAIN-2851": {
+            "retained": [
+              "MED-4167"
+            ],
+            "gained": [
+              "MED-4168"
+            ],
+            "lost": []
+          },
+          "PLAIN-1769": {
+            "retained": [
+              "MED-1140",
+              "MED-1144",
+              "MED-1148",
+              "MED-1149",
+              "MED-1150",
+              "MED-1151",
+              "MED-1164",
+              "MED-1169",
+              "MED-1173",
+              "MED-1174",
+              "MED-1178",
+              "MED-1179",
+              "MED-1181",
+              "MED-1182",
+              "MED-2490"
+            ],
+            "gained": [
+              "MED-1143",
+              "MED-1147",
+              "MED-3889"
+            ],
+            "lost": []
+          },
+          "PLAIN-2158": {
+            "retained": [
+              "MED-3699",
+              "MED-4484",
+              "MED-5035"
+            ],
+            "gained": [
+              "MED-2702"
+            ],
+            "lost": []
+          }
+        }
+      },
+      "five": {
+        "query_hits": {
+          "retained": 86,
+          "gained": 3,
+          "lost": 4,
+          "missed_both": 35
+        },
+        "source_pairs_changed": {
+          "new": 52,
+          "lost": 21
+        },
+        "macro_recall": {
+          "baseline": 0.11626904630367078,
+          "candidate": 0.11481017443722265,
+          "delta": -0.001458871866448136
+        },
+        "changes_by_query": {
+          "PLAIN-2603": {
+            "retained": [
+              "MED-2396"
+            ],
+            "gained": [],
+            "lost": [
+              "MED-2391"
+            ]
+          },
+          "PLAIN-2755": {
+            "retained": [
+              "MED-3728",
+              "MED-3730"
+            ],
+            "gained": [
+              "MED-3720"
+            ],
+            "lost": []
+          },
+          "PLAIN-2753": {
+            "retained": [],
+            "gained": [
+              "MED-4346"
+            ],
+            "lost": []
+          },
+          "PLAIN-2521": {
+            "retained": [
+              "MED-3139"
+            ],
+            "gained": [
+              "MED-3127",
+              "MED-3142",
+              "MED-4785"
+            ],
+            "lost": []
+          },
+          "PLAIN-2502": {
+            "retained": [
+              "MED-1570",
+              "MED-1572",
+              "MED-1573"
+            ],
+            "gained": [
+              "MED-1571"
+            ],
+            "lost": []
+          },
+          "PLAIN-2358": {
+            "retained": [
+              "MED-1596",
+              "MED-1597",
+              "MED-4262"
+            ],
+            "gained": [
+              "MED-3972"
+            ],
+            "lost": []
+          },
+          "PLAIN-1205": {
+            "retained": [
+              "MED-2618",
+              "MED-3380"
+            ],
+            "gained": [
+              "MED-2616"
+            ],
+            "lost": []
+          },
+          "PLAIN-2684": {
+            "retained": [
+              "MED-3130",
+              "MED-3142"
+            ],
+            "gained": [
+              "MED-3139",
+              "MED-4440"
+            ],
+            "lost": []
+          },
+          "PLAIN-1346": {
+            "retained": [
+              "MED-2052",
+              "MED-4817"
+            ],
+            "gained": [
+              "MED-2156"
+            ],
+            "lost": [
+              "MED-2045"
+            ]
+          },
+          "PLAIN-927": {
+            "retained": [],
+            "gained": [
+              "MED-5146",
+              "MED-5149"
+            ],
+            "lost": [
+              "MED-5152"
+            ]
+          },
+          "PLAIN-1082": {
+            "retained": [
+              "MED-3891",
+              "MED-4808",
+              "MED-5171"
+            ],
+            "gained": [
+              "MED-3649"
+            ],
+            "lost": []
+          },
+          "PLAIN-1596": {
+            "retained": [
+              "MED-1363",
+              "MED-1374",
+              "MED-3432"
+            ],
+            "gained": [
+              "MED-1394"
+            ],
+            "lost": [
+              "MED-1402"
+            ]
+          },
+          "PLAIN-109": {
+            "retained": [
+              "MED-3369",
+              "MED-3372",
+              "MED-3377"
+            ],
+            "gained": [
+              "MED-3370"
+            ],
+            "lost": []
+          },
+          "PLAIN-2592": {
+            "retained": [],
+            "gained": [],
+            "lost": [
+              "MED-2304"
+            ]
+          },
+          "PLAIN-2668": {
+            "retained": [
+              "MED-2985",
+              "MED-2987"
+            ],
+            "gained": [
+              "MED-2989"
+            ],
+            "lost": []
+          },
+          "PLAIN-759": {
+            "retained": [
+              "MED-1825",
+              "MED-3697"
+            ],
+            "gained": [
+              "MED-3551"
+            ],
+            "lost": []
+          },
+          "PLAIN-2466": {
+            "retained": [
+              "MED-1299",
+              "MED-1300",
+              "MED-3151"
+            ],
+            "gained": [
+              "MED-1294"
+            ],
+            "lost": []
+          },
+          "PLAIN-1465": {
+            "retained": [
+              "MED-1133",
+              "MED-2777",
+              "MED-335",
+              "MED-4502"
+            ],
+            "gained": [
+              "MED-5017"
+            ],
+            "lost": []
+          },
+          "PLAIN-124": {
+            "retained": [],
+            "gained": [],
+            "lost": [
+              "MED-3486"
+            ]
+          },
+          "PLAIN-2316": {
+            "retained": [
+              "MED-1500",
+              "MED-4309",
+              "MED-4496"
+            ],
+            "gained": [
+              "MED-3245"
+            ],
+            "lost": [
+              "MED-3371"
+            ]
+          },
+          "PLAIN-3474": {
+            "retained": [
+              "MED-2756",
+              "MED-5364",
+              "MED-5368"
+            ],
+            "gained": [
+              "MED-5369"
+            ],
+            "lost": []
+          },
+          "PLAIN-2644": {
+            "retained": [
+              "MED-2760",
+              "MED-2761",
+              "MED-4925"
+            ],
+            "gained": [
+              "MED-2757",
+              "MED-2762"
+            ],
+            "lost": [
+              "MED-951"
+            ]
+          },
+          "PLAIN-2588": {
+            "retained": [
+              "MED-2272",
+              "MED-2274",
+              "MED-2276"
+            ],
+            "gained": [
+              "MED-2273",
+              "MED-2777"
+            ],
+            "lost": []
+          },
+          "PLAIN-2013": {
+            "retained": [
+              "MED-1318",
+              "MED-1335"
+            ],
+            "gained": [
+              "MED-4540",
+              "MED-4905"
+            ],
+            "lost": [
+              "MED-2140"
+            ]
+          },
+          "PLAIN-3266": {
+            "retained": [
+              "MED-1630",
+              "MED-4126",
+              "MED-4127"
+            ],
+            "gained": [
+              "MED-1626"
+            ],
+            "lost": [
+              "MED-1624"
+            ]
+          },
+          "PLAIN-2330": {
+            "retained": [
+              "MED-4701",
+              "MED-4703"
+            ],
+            "gained": [
+              "MED-4702"
+            ],
+            "lost": []
+          },
+          "PLAIN-1226": {
+            "retained": [
+              "MED-1262",
+              "MED-1500"
+            ],
+            "gained": [
+              "MED-3208",
+              "MED-3474",
+              "MED-4414"
+            ],
+            "lost": []
+          },
+          "PLAIN-2095": {
+            "retained": [
+              "MED-3353",
+              "MED-3864",
+              "MED-3865",
+              "MED-4659"
+            ],
+            "gained": [
+              "MED-1314"
+            ],
+            "lost": []
+          },
+          "PLAIN-2706": {
+            "retained": [],
+            "gained": [],
+            "lost": [
+              "MED-3352",
+              "MED-3358"
+            ]
+          },
+          "PLAIN-1266": {
+            "retained": [],
+            "gained": [
+              "MED-3580"
+            ],
+            "lost": []
+          },
+          "PLAIN-2075": {
+            "retained": [
+              "MED-1198",
+              "MED-3407",
+              "MED-3430"
+            ],
+            "gained": [],
+            "lost": [
+              "MED-4425"
+            ]
+          },
+          "PLAIN-1722": {
+            "retained": [
+              "MED-1602",
+              "MED-4507",
+              "MED-4508"
+            ],
+            "gained": [
+              "MED-4506"
+            ],
+            "lost": []
+          },
+          "PLAIN-2751": {
+            "retained": [
+              "MED-3688",
+              "MED-3690",
+              "MED-3695"
+            ],
+            "gained": [
+              "MED-3691",
+              "MED-3692"
+            ],
+            "lost": []
+          },
+          "PLAIN-3182": {
+            "retained": [
+              "MED-3897",
+              "MED-3906",
+              "MED-4716"
+            ],
+            "gained": [
+              "MED-3907",
+              "MED-4715"
+            ],
+            "lost": []
+          },
+          "PLAIN-409": {
+            "retained": [],
+            "gained": [],
+            "lost": [
+              "MED-962"
+            ]
+          },
+          "PLAIN-1434": {
+            "retained": [
+              "MED-2844",
+              "MED-4320",
+              "MED-4926"
+            ],
+            "gained": [
+              "MED-2845"
+            ],
+            "lost": [
+              "MED-1401",
+              "MED-2851"
+            ]
+          },
+          "PLAIN-810": {
+            "retained": [
+              "MED-3086"
+            ],
+            "gained": [
+              "MED-2736",
+              "MED-3651"
+            ],
+            "lost": [
+              "MED-3095"
+            ]
+          },
+          "PLAIN-1414": {
+            "retained": [
+              "MED-3465",
+              "MED-3705",
+              "MED-4346"
+            ],
+            "gained": [
+              "MED-4696"
+            ],
+            "lost": [
+              "MED-4459"
+            ]
+          },
+          "PLAIN-795": {
+            "retained": [
+              "MED-2257",
+              "MED-2264"
+            ],
+            "gained": [
+              "MED-1147",
+              "MED-2260",
+              "MED-2263"
+            ],
+            "lost": [
+              "MED-2251",
+              "MED-2255",
+              "MED-2259"
+            ]
+          },
+          "PLAIN-2851": {
+            "retained": [
+              "MED-4167"
+            ],
+            "gained": [
+              "MED-4168"
+            ],
+            "lost": []
+          },
+          "PLAIN-1769": {
+            "retained": [
+              "MED-1151",
+              "MED-1169",
+              "MED-1173",
+              "MED-1178"
+            ],
+            "gained": [
+              "MED-1150"
+            ],
+            "lost": []
+          },
+          "PLAIN-2802": {
+            "retained": [
+              "MED-4050"
+            ],
+            "gained": [
+              "MED-4330"
+            ],
+            "lost": []
+          },
+          "PLAIN-3390": {
+            "retained": [],
+            "gained": [
+              "MED-3744"
+            ],
+            "lost": []
+          },
+          "PLAIN-3350": {
+            "retained": [
+              "MED-2046",
+              "MED-2048",
+              "MED-2049"
+            ],
+            "gained": [
+              "MED-5024"
+            ],
+            "lost": []
+          }
+        }
+      },
+      "gate_passed": false,
+      "outside_original_lanes": 191,
+      "new_sources": 426
+    },
+    "full_parent4": {
+      "pool": {
+        "query_hits": {
+          "retained": 100,
+          "gained": 1,
+          "lost": 0,
+          "missed_both": 27
+        },
+        "source_pairs_changed": {
+          "new": 60,
+          "lost": 0
+        },
+        "macro_recall": {
+          "baseline": 0.18033888004827162,
+          "candidate": 0.19457745456918832,
+          "delta": 0.014238574520916703
+        },
+        "changes_by_query": {
+          "PLAIN-3406": {
+            "retained": [],
+            "gained": [
+              "MED-5091",
+              "MED-5093"
+            ],
+            "lost": []
+          },
+          "PLAIN-2755": {
+            "retained": [
+              "MED-3722",
+              "MED-3723",
+              "MED-3728",
+              "MED-3730",
+              "MED-3731",
+              "MED-4480"
+            ],
+            "gained": [
+              "MED-3720",
+              "MED-4481"
+            ],
+            "lost": []
+          },
+          "PLAIN-2521": {
+            "retained": [
+              "MED-1753",
+              "MED-3127",
+              "MED-3139",
+              "MED-4440",
+              "MED-4785"
+            ],
+            "gained": [
+              "MED-3130",
+              "MED-3142"
+            ],
+            "lost": []
+          },
+          "PLAIN-2358": {
+            "retained": [
+              "MED-1596",
+              "MED-1597",
+              "MED-3771",
+              "MED-3772",
+              "MED-3774",
+              "MED-3775",
+              "MED-3776",
+              "MED-3972",
+              "MED-4262",
+              "MED-4608",
+              "MED-5077"
+            ],
+            "gained": [
+              "MED-4331"
+            ],
+            "lost": []
+          },
+          "PLAIN-2625": {
+            "retained": [
+              "MED-2599",
+              "MED-2604",
+              "MED-2605",
+              "MED-2783",
+              "MED-2794",
+              "MED-2801",
+              "MED-2810",
+              "MED-2813",
+              "MED-2814",
+              "MED-2815",
+              "MED-2817",
+              "MED-2818",
+              "MED-2820",
+              "MED-2823",
+              "MED-2824",
+              "MED-2825"
+            ],
+            "gained": [
+              "MED-2808"
+            ],
+            "lost": []
+          },
+          "PLAIN-266": {
+            "retained": [
+              "MED-4566",
+              "MED-4682"
+            ],
+            "gained": [
+              "MED-4318"
+            ],
+            "lost": []
+          },
+          "PLAIN-1346": {
+            "retained": [
+              "MED-2045",
+              "MED-2052",
+              "MED-2156",
+              "MED-4363",
+              "MED-4364",
+              "MED-4812",
+              "MED-4814",
+              "MED-4816",
+              "MED-4817"
+            ],
+            "gained": [
+              "MED-2051"
+            ],
+            "lost": []
+          },
+          "PLAIN-927": {
+            "retained": [
+              "MED-5039",
+              "MED-5040",
+              "MED-5148",
+              "MED-5149",
+              "MED-5152"
+            ],
+            "gained": [
+              "MED-5146"
+            ],
+            "lost": []
+          },
+          "PLAIN-865": {
+            "retained": [
+              "MED-2239",
+              "MED-3558",
+              "MED-3560",
+              "MED-3561",
+              "MED-3562",
+              "MED-3563",
+              "MED-4329",
+              "MED-4330",
+              "MED-4433",
+              "MED-4463"
+            ],
+            "gained": [
+              "MED-4328"
+            ],
+            "lost": []
+          },
+          "PLAIN-1208": {
+            "retained": [
+              "MED-2032",
+              "MED-2036"
+            ],
+            "gained": [
+              "MED-2033",
+              "MED-2034"
+            ],
+            "lost": []
+          },
+          "PLAIN-2668": {
+            "retained": [
+              "MED-2985",
+              "MED-2987",
+              "MED-2988",
+              "MED-2989"
+            ],
+            "gained": [
+              "MED-2980"
+            ],
+            "lost": []
+          },
+          "PLAIN-759": {
+            "retained": [
+              "MED-1825",
+              "MED-2437",
+              "MED-3697",
+              "MED-3800",
+              "MED-4374",
+              "MED-4450",
+              "MED-4787"
+            ],
+            "gained": [
+              "MED-4050"
+            ],
+            "lost": []
+          },
+          "PLAIN-49": {
+            "retained": [
+              "MED-2822",
+              "MED-4103",
+              "MED-4844",
+              "MED-4845",
+              "MED-4849",
+              "MED-4850",
+              "MED-4851"
+            ],
+            "gained": [
+              "MED-4843"
+            ],
+            "lost": []
+          },
+          "PLAIN-2316": {
+            "retained": [
+              "MED-1162",
+              "MED-1500",
+              "MED-2098",
+              "MED-2201",
+              "MED-3245",
+              "MED-3369",
+              "MED-3371",
+              "MED-3541",
+              "MED-4309",
+              "MED-4496"
+            ],
+            "gained": [
+              "MED-3370",
+              "MED-3620",
+              "MED-4714"
+            ],
+            "lost": []
+          },
+          "PLAIN-2644": {
+            "retained": [
+              "MED-2757",
+              "MED-2758",
+              "MED-2759",
+              "MED-2760",
+              "MED-2761",
+              "MED-4647",
+              "MED-4925",
+              "MED-950",
+              "MED-951"
+            ],
+            "gained": [
+              "MED-2762",
+              "MED-4645"
+            ],
+            "lost": []
+          },
+          "PLAIN-2013": {
+            "retained": [
+              "MED-1318",
+              "MED-1320",
+              "MED-1321",
+              "MED-1322",
+              "MED-1329",
+              "MED-1335",
+              "MED-1655",
+              "MED-2140",
+              "MED-2490",
+              "MED-4906",
+              "MED-4912"
+            ],
+            "gained": [
+              "MED-3584",
+              "MED-4540",
+              "MED-4905"
+            ],
+            "lost": []
+          },
+          "PLAIN-2330": {
+            "retained": [
+              "MED-4701",
+              "MED-4702",
+              "MED-4703"
+            ],
+            "gained": [
+              "MED-4029"
+            ],
+            "lost": []
+          },
+          "PLAIN-1226": {
+            "retained": [
+              "MED-1262",
+              "MED-1500",
+              "MED-1790",
+              "MED-1795",
+              "MED-2453",
+              "MED-3474",
+              "MED-3744",
+              "MED-3900",
+              "MED-4414",
+              "MED-5010",
+              "MED-5021"
+            ],
+            "gained": [
+              "MED-1686",
+              "MED-2451",
+              "MED-3208",
+              "MED-3620"
+            ],
+            "lost": []
+          },
+          "PLAIN-1993": {
+            "retained": [
+              "MED-1802",
+              "MED-2584"
+            ],
+            "gained": [
+              "MED-3782"
+            ],
+            "lost": []
+          },
+          "PLAIN-2706": {
+            "retained": [
+              "MED-3352",
+              "MED-3358"
+            ],
+            "gained": [
+              "MED-3355"
+            ],
+            "lost": []
+          },
+          "PLAIN-1174": {
+            "retained": [
+              "MED-1587",
+              "MED-1588",
+              "MED-3588",
+              "MED-3589",
+              "MED-3595",
+              "MED-3596",
+              "MED-3633",
+              "MED-4951"
+            ],
+            "gained": [
+              "MED-4953",
+              "MED-4954"
+            ],
+            "lost": []
+          },
+          "PLAIN-2075": {
+            "retained": [
+              "MED-1198",
+              "MED-2724",
+              "MED-3407",
+              "MED-3421",
+              "MED-3422",
+              "MED-3423",
+              "MED-3429",
+              "MED-3430",
+              "MED-3561",
+              "MED-3590",
+              "MED-3715",
+              "MED-3958",
+              "MED-4185",
+              "MED-4425"
+            ],
+            "gained": [
+              "MED-1781",
+              "MED-3589",
+              "MED-4230"
+            ],
+            "lost": []
+          },
+          "PLAIN-1722": {
+            "retained": [
+              "MED-1601",
+              "MED-1602",
+              "MED-4468",
+              "MED-4506",
+              "MED-4507",
+              "MED-4508"
+            ],
+            "gained": [
+              "MED-1600",
+              "MED-4476"
+            ],
+            "lost": []
+          },
+          "PLAIN-2751": {
+            "retained": [
+              "MED-3679",
+              "MED-3680",
+              "MED-3683",
+              "MED-3688",
+              "MED-3690",
+              "MED-3691",
+              "MED-3692",
+              "MED-3695"
+            ],
+            "gained": [
+              "MED-3693"
+            ],
+            "lost": []
+          },
+          "PLAIN-1829": {
+            "retained": [
+              "MED-1241",
+              "MED-1244",
+              "MED-1246",
+              "MED-1519",
+              "MED-1520",
+              "MED-1522",
+              "MED-1523",
+              "MED-1525",
+              "MED-1526"
+            ],
+            "gained": [
+              "MED-1521",
+              "MED-1524"
+            ],
+            "lost": []
+          },
+          "PLAIN-3182": {
+            "retained": [
+              "MED-3897",
+              "MED-3906",
+              "MED-3907",
+              "MED-4716"
+            ],
+            "gained": [
+              "MED-4715"
+            ],
+            "lost": []
+          },
+          "PLAIN-1434": {
+            "retained": [
+              "MED-1401",
+              "MED-1403",
+              "MED-2844",
+              "MED-2845",
+              "MED-2851",
+              "MED-4316",
+              "MED-4317",
+              "MED-4318",
+              "MED-4320",
+              "MED-4772",
+              "MED-4773",
+              "MED-4926"
+            ],
+            "gained": [
+              "MED-1844",
+              "MED-2901",
+              "MED-3918"
+            ],
+            "lost": []
+          },
+          "PLAIN-810": {
+            "retained": [
+              "MED-2736",
+              "MED-3086",
+              "MED-3095",
+              "MED-3651",
+              "MED-4142",
+              "MED-4426",
+              "MED-4428",
+              "MED-4429"
+            ],
+            "gained": [
+              "MED-4131"
+            ],
+            "lost": []
+          },
+          "PLAIN-1414": {
+            "retained": [
+              "MED-1207",
+              "MED-2269",
+              "MED-2799",
+              "MED-2805",
+              "MED-3461",
+              "MED-3465",
+              "MED-3507",
+              "MED-3705",
+              "MED-3709",
+              "MED-4202",
+              "MED-4346",
+              "MED-4349",
+              "MED-4459",
+              "MED-4627",
+              "MED-4696"
+            ],
+            "gained": [
+              "MED-2357",
+              "MED-4269"
+            ],
+            "lost": []
+          },
+          "PLAIN-621": {
+            "retained": [
+              "MED-1520",
+              "MED-1526",
+              "MED-1936",
+              "MED-3454",
+              "MED-3459",
+              "MED-3467",
+              "MED-3894",
+              "MED-4505",
+              "MED-4506"
+            ],
+            "gained": [
+              "MED-3153",
+              "MED-3893"
+            ],
+            "lost": []
+          },
+          "PLAIN-795": {
+            "retained": [
+              "MED-2250",
+              "MED-2251",
+              "MED-2252",
+              "MED-2255",
+              "MED-2257",
+              "MED-2258",
+              "MED-2259",
+              "MED-2260",
+              "MED-2261",
+              "MED-2263",
+              "MED-2264",
+              "MED-3595"
+            ],
+            "gained": [
+              "MED-1147",
+              "MED-2249",
+              "MED-2254",
+              "MED-2262"
+            ],
+            "lost": []
+          },
+          "PLAIN-2851": {
+            "retained": [
+              "MED-4167"
+            ],
+            "gained": [
+              "MED-4168"
+            ],
+            "lost": []
+          },
+          "PLAIN-1769": {
+            "retained": [
+              "MED-1140",
+              "MED-1144",
+              "MED-1148",
+              "MED-1149",
+              "MED-1150",
+              "MED-1151",
+              "MED-1164",
+              "MED-1169",
+              "MED-1173",
+              "MED-1174",
+              "MED-1178",
+              "MED-1179",
+              "MED-1181",
+              "MED-1182",
+              "MED-2490"
+            ],
+            "gained": [
+              "MED-1143",
+              "MED-1162",
+              "MED-1172"
+            ],
+            "lost": []
+          },
+          "PLAIN-191": {
+            "retained": [
+              "MED-3925",
+              "MED-3926",
+              "MED-3929",
+              "MED-3930",
+              "MED-3931",
+              "MED-3932",
+              "MED-3933",
+              "MED-5335"
+            ],
+            "gained": [
+              "MED-3927"
+            ],
+            "lost": []
+          }
+        }
+      },
+      "five": {
+        "query_hits": {
+          "retained": 90,
+          "gained": 1,
+          "lost": 0,
+          "missed_both": 37
+        },
+        "source_pairs_changed": {
+          "new": 22,
+          "lost": 9
+        },
+        "macro_recall": {
+          "baseline": 0.11626904630367078,
+          "candidate": 0.117772703074783,
+          "delta": 0.0015036567711122217
+        },
+        "changes_by_query": {
+          "PLAIN-2755": {
+            "retained": [
+              "MED-3728",
+              "MED-3730"
+            ],
+            "gained": [
+              "MED-3720"
+            ],
+            "lost": []
+          },
+          "PLAIN-2521": {
+            "retained": [
+              "MED-3139"
+            ],
+            "gained": [
+              "MED-3127",
+              "MED-4785"
+            ],
+            "lost": []
+          },
+          "PLAIN-2358": {
+            "retained": [
+              "MED-1596",
+              "MED-1597",
+              "MED-4262"
+            ],
+            "gained": [
+              "MED-3972"
+            ],
+            "lost": []
+          },
+          "PLAIN-2684": {
+            "retained": [
+              "MED-3130",
+              "MED-3142"
+            ],
+            "gained": [
+              "MED-3139"
+            ],
+            "lost": []
+          },
+          "PLAIN-1346": {
+            "retained": [
+              "MED-2052",
+              "MED-4817"
+            ],
+            "gained": [],
+            "lost": [
+              "MED-2045"
+            ]
+          },
+          "PLAIN-1596": {
+            "retained": [
+              "MED-1363",
+              "MED-1374",
+              "MED-3432"
+            ],
+            "gained": [
+              "MED-1394"
+            ],
+            "lost": [
+              "MED-1402"
+            ]
+          },
+          "PLAIN-2668": {
+            "retained": [
+              "MED-2985",
+              "MED-2987"
+            ],
+            "gained": [
+              "MED-2989"
+            ],
+            "lost": []
+          },
+          "PLAIN-2644": {
+            "retained": [
+              "MED-2761",
+              "MED-4925",
+              "MED-951"
+            ],
+            "gained": [
+              "MED-2762"
+            ],
+            "lost": [
+              "MED-2760"
+            ]
+          },
+          "PLAIN-2588": {
+            "retained": [
+              "MED-2272",
+              "MED-2274",
+              "MED-2276"
+            ],
+            "gained": [
+              "MED-2273"
+            ],
+            "lost": []
+          },
+          "PLAIN-2013": {
+            "retained": [
+              "MED-1318",
+              "MED-1335",
+              "MED-2140"
+            ],
+            "gained": [
+              "MED-4540",
+              "MED-4905"
+            ],
+            "lost": []
+          },
+          "PLAIN-2330": {
+            "retained": [
+              "MED-4701",
+              "MED-4703"
+            ],
+            "gained": [
+              "MED-4702"
+            ],
+            "lost": []
+          },
+          "PLAIN-1226": {
+            "retained": [
+              "MED-1262",
+              "MED-1500"
+            ],
+            "gained": [
+              "MED-3208",
+              "MED-3620",
+              "MED-4414"
+            ],
+            "lost": []
+          },
+          "PLAIN-1993": {
+            "retained": [],
+            "gained": [
+              "MED-3782"
+            ],
+            "lost": []
+          },
+          "PLAIN-2706": {
+            "retained": [
+              "MED-3352"
+            ],
+            "gained": [
+              "MED-3355"
+            ],
+            "lost": [
+              "MED-3358"
+            ]
+          },
+          "PLAIN-3182": {
+            "retained": [
+              "MED-3906",
+              "MED-4716"
+            ],
+            "gained": [
+              "MED-3907"
+            ],
+            "lost": [
+              "MED-3897"
+            ]
+          },
+          "PLAIN-1434": {
+            "retained": [
+              "MED-1401",
+              "MED-2844",
+              "MED-4320",
+              "MED-4926"
+            ],
+            "gained": [],
+            "lost": [
+              "MED-2851"
+            ]
+          },
+          "PLAIN-1414": {
+            "retained": [
+              "MED-3465",
+              "MED-3705",
+              "MED-4346"
+            ],
+            "gained": [
+              "MED-4269"
+            ],
+            "lost": [
+              "MED-4459"
+            ]
+          },
+          "PLAIN-621": {
+            "retained": [
+              "MED-1520",
+              "MED-1526",
+              "MED-1936",
+              "MED-3467"
+            ],
+            "gained": [
+              "MED-3153"
+            ],
+            "lost": [
+              "MED-3459"
+            ]
+          },
+          "PLAIN-795": {
+            "retained": [
+              "MED-2251",
+              "MED-2257",
+              "MED-2259",
+              "MED-2264"
+            ],
+            "gained": [],
+            "lost": [
+              "MED-2255"
+            ]
+          },
+          "PLAIN-2851": {
+            "retained": [
+              "MED-4167"
+            ],
+            "gained": [
+              "MED-4168"
+            ],
+            "lost": []
+          },
+          "PLAIN-1769": {
+            "retained": [
+              "MED-1151",
+              "MED-1169",
+              "MED-1173",
+              "MED-1178"
+            ],
+            "gained": [
+              "MED-1150"
+            ],
+            "lost": []
+          }
+        }
+      },
+      "gate_passed": true,
+      "outside_original_lanes": 64,
+      "new_sources": 268
+    }
+  }
+}
